@@ -1,0 +1,52 @@
+environment:
+  # Python version used
+  MICROPY_CPYTHON3: c:/python34/python.exe
+
+init:
+  # Set build version number to commit to be travis-like
+- ps: Update-AppveyorBuild -Version $env:appveyor_repo_commit.substring(0,8)
+
+configuration:
+- Debug
+- Release
+
+platform:
+- x86
+- x64
+
+build:
+  project: ports/windows/micropython.vcxproj
+  verbosity: normal
+
+test_script:
+- cmd: >-
+    cd tests
+
+    %MICROPY_CPYTHON3% run-tests
+
+# After the build/test phase for the MSVC build completes,
+# build and test with mingw-w64, release versions only.
+after_test:
+- ps: |
+    if ($env:configuration -eq 'Debug') {
+      return
+    }
+    $env:MSYSTEM = if ($platform -eq 'x86') {'MINGW32'} else {'MINGW64'}
+    $env:CHERE_INVOKING = 'enabled_from_arguments'
+    cd (Join-Path $env:APPVEYOR_BUILD_FOLDER 'ports/windows')
+    C:\msys64\usr\bin\bash.exe -l -c "make -B -j4 V=1"
+    if ($LASTEXITCODE -ne 0) {
+      throw "$env:MSYSTEM build exited with code $LASTEXITCODE"
+    }
+    cd (Join-Path $env:APPVEYOR_BUILD_FOLDER 'tests')
+    & $env:MICROPY_CPYTHON3 run-tests -e math_fun -e float2int_double -e float_parse -e math_domain_special
+    if ($LASTEXITCODE -ne 0) {
+      throw "$env:MSYSTEM tests exited with code $LASTEXITCODE"
+    }
+
+skip_tags: true
+
+deploy: off
+
+nuget:
+  disable_publish_on_pr: true

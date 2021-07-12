@@ -1,0 +1,33 @@
+
+
+config COMPONENT_DRIVERS_ENABLE
+	bool "Enable drivers component"
+	default n
+	select COMPONENT_KENDRYTE_SDK_ENABLE
+
+menu "Drivers configuration"
+	depends on COMPONENT_DRIVERS_ENABLE
+
+	menu "SD card"
+		config SPI_SD_CARD_FORCE_HIGH_SPEED
+			bool "Force SPI SD card high speed mode"
+			default y
+	endmenu
+
+	menu "WS2812"
+		config WS2812_ENABLE
+			bool "Enable ws2812 over i2s component"
+			default n
+	endmenu
+	menu "HTPA thermal sensor"
+		config HTPA_ENABLE
+			bool "Enable HTPA thermal sensor"
+			default n
+	endmenu
+	menu "AMG88XX thermal sensor"
+		config AMG88XX_ENABLE
+			bool "Enable AMG88XX thermal sensor"
+			default n
+	endmenu
+endmenu
+

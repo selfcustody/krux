@@ -1,0 +1,72 @@
+#######################################
+# Syntax Coloring Map
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+secp256k1_context	KEYWORD1
+secp256k1_scratch_space	KEYWORD1
+secp256k1_pubkey	KEYWORD1
+secp256k1_ecdsa_signature	KEYWORD1
+secp256k1_context_no_precomp	KEYWORD1
+secp256k1_ecdsa_recoverable_signature	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+secp256k1_context_create	KEYWORD2
+secp256k1_context_clone	KEYWORD2
+secp256k1_context_destroy	KEYWORD2
+secp256k1_context_set_illegal_callback	KEYWORD2
+secp256k1_context_set_error_callback	KEYWORD2
+secp256k1_scratch_space_create	KEYWORD2
+secp256k1_scratch_space_destroy	KEYWORD2
+secp256k1_ec_pubkey_parse	KEYWORD2
+secp256k1_ec_pubkey_serialize	KEYWORD2
+secp256k1_ecdsa_signature_parse_compact	KEYWORD2
+secp256k1_ecdsa_signature_parse_der	KEYWORD2
+secp256k1_ecdsa_signature_serialize_der	KEYWORD2
+secp256k1_ecdsa_signature_serialize_compact	KEYWORD2
+secp256k1_ecdsa_verify	KEYWORD2
+secp256k1_ecdsa_signature_normalize	KEYWORD2
+secp256k1_ecdsa_sign	KEYWORD2
+secp256k1_ec_seckey_verify	KEYWORD2
+secp256k1_ec_pubkey_create	KEYWORD2
+secp256k1_ec_privkey_negate	KEYWORD2
+secp256k1_ec_pubkey_negate	KEYWORD2
+secp256k1_ec_privkey_tweak_add	KEYWORD2
+secp256k1_ec_pubkey_tweak_add	KEYWORD2
+secp256k1_ec_privkey_tweak_mul	KEYWORD2
+secp256k1_ec_pubkey_tweak_mul	KEYWORD2
+secp256k1_context_randomize	KEYWORD2
+secp256k1_ec_pubkey_combine	KEYWORD2
+
+secp256k1_context_preallocated_size	KEYWORD2
+secp256k1_context_preallocated_create	KEYWORD2
+secp256k1_context_preallocated_clone_size	KEYWORD2
+secp256k1_context_preallocated_clone	KEYWORD2
+secp256k1_context_preallocated_destroy	KEYWORD2
+secp256k1_ecdh	KEYWORD2
+secp256k1_ecdsa_recoverable_signature_parse_compact	KEYWORD2
+secp256k1_ecdsa_recoverable_signature_convert	KEYWORD2
+secp256k1_ecdsa_recoverable_signature_serialize_compact	KEYWORD2
+secp256k1_ecdsa_sign_recoverable	KEYWORD2
+secp256k1_ecdsa_recover	KEYWORD2
+
+secp256k1_nonce_function	KEYWORD2
+secp256k1_nonce_function_rfc6979	KEYWORD2
+secp256k1_nonce_function_default	KEYWORD2
+
+secp256k1_ecdh_hash_function_sha256	KEYWORD2
+secp256k1_ecdh_hash_function_default	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+SECP256K1_CONTEXT_VERIFY	LITERAL1
+SECP256K1_CONTEXT_SIGN	LITERAL1
+SECP256K1_CONTEXT_NONE	LITERAL1

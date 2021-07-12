@@ -1,0 +1,11 @@
+*.o
+_stage
+.depend
+.config*
+config/config.h
+config/scripts/config/conf
+config/scripts/config/lex.zconf.c
+config/scripts/config/lkc_defs.h
+config/scripts/config/zconf.tab.c
+config/scripts/config/zconf.tab.h
+ssl/version.h

@@ -1,0 +1,35 @@
+
+menu "Board config"
+
+	choice BOARD
+		bool "Select board"
+		default BOARD_MAIX
+		config BOARD_MAIX
+			bool "Select board Maix"
+
+		config BOARD_M5STICK
+			bool "Select board m5stick"
+		config BOARD_TWATCH
+			bool "Select board TWatch"
+	endchoice
+
+	config LCD_DEFAULT_WIDTH
+		int "LCD default width"
+		default 320
+	
+	config LCD_DEFAULT_HEIGHT
+		int "LCD default height"
+		default 240
+
+	config LCD_DEFAULT_FREQ
+		int "LCD default driver clock frequency"
+		default 15000000
+
+	config SENSOR_FREQ
+		int "Sensor clock(xclk) frequency"
+		default 24000000
+	config CPU_DEFAULT_FREQ
+		int "CPU clock default frequency, can be overwrite by config file in file system"
+		default 400000000
+endmenu
+

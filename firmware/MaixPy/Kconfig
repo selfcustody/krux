@@ -1,0 +1,26 @@
+
+mainmenu "C/CPP CMake project framework Kconfig configuration"
+
+menu "Toolchain configuration"
+	config TOOLCHAIN_PATH
+		string "toolchain path"
+		default "/opt/kendryte-toolchain/bin"
+	
+	config TOOLCHAIN_PREFIX
+		string "toolchain prefix"
+		default "riscv64-unknown-elf-"
+endmenu
+
+menu "Components configuration"
+	osource "${SDK_PATH}/components/*/Kconfig"
+	osource "${PROJECT_PATH}/*/Kconfig"
+endmenu
+
+menu "Others"
+	config LIB_NNCASE_SOURCE_CODE_ENABLE
+		bool "compile nncase source code"
+		default n
+endmenu
+
+
+

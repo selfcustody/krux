@@ -1,0 +1,7 @@
+{
+    "description": "kflash, A Python-based Kendryte K210 UART ISP Utility",
+    "name": "tool-kflash-kendryte210",
+    "system": "*",
+    "url": "https://github.com/kendryte/kflash.py",
+    "version": "1.0.0"
+}
