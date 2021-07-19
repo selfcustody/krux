@@ -1,4 +1,4 @@
-# Krux
+# Krux Wallet
 
 ---
 ## Disclaimer
