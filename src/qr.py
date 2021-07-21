@@ -19,44 +19,46 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import math
+try:
+	import uio as io
+except ImportError:
+	import io
 import qrcode
 
-QR_FORMAT_NONE  = const(0)
-QR_FORMAT_PMOFN = const(1)
+def get_size(qr_code):
+	size = 0
+	while qr_code[size] != '\n':
+		size += 1
+	return size
 
-PMOFN_MIN_PART_SIZE = const(80)
-
-def to_pmofn_qr_codes(data, min_part_size=PMOFN_MIN_PART_SIZE):
-	""" Breaks data up into many 'pMofN part' chunks """
-	codes = []
-	if len(data) > min_part_size:
-		num_parts = round(len(data) / min_part_size)
-		mod_part_size = len(data) % min_part_size
-		add_part_size = math.ceil(mod_part_size / num_parts) if mod_part_size < (min_part_size / 2) else math.floor((mod_part_size - min_part_size) / num_parts)
-		part_size = min_part_size + add_part_size
-		last_index = 0
-		for index in range(1, num_parts):
-			part = 'p' + str(index) + 'of' + str(num_parts) + ' ' + data[(index - 1) * part_size:index * part_size]
-			codes.append(qrcode.encode_to_string(part))
-			last_index = index * part_size
-		part = 'p' + str(num_parts) + 'of' + str(num_parts) + ' ' + data[last_index:]
-		codes.append(qrcode.encode_to_string(part))
-	else:
-		codes.append(qrcode.encode_to_string(data))
-	return codes
-
-def to_qr_codes(data, format=QR_FORMAT_PMOFN):
-	if format == QR_FORMAT_PMOFN:
-		return to_pmofn_qr_codes(data)
-	return [qrcode.encode_to_string(data)]
+def to_qr_codes(data, max_width):
+	num_parts = 1
+	part_size = len(data) // num_parts
+	while True:
+		part_number = ('p1of%d ' % num_parts) if num_parts > 1 else ''
+		part = part_number + data[0: part_size]
+		code = qrcode.encode_to_string(part)
+  		if get_size(code) <= max_width:
+			break
+		num_parts += 1
+		part_size = len(data) // num_parts
+  
+	for i in range(num_parts):
+		part_number = ('p%dof%d ' % (i + 1, num_parts)) if num_parts > 1 else ''
+		part = None
+		if i == num_parts - 1:
+			part = part_number + data[i * part_size:]
+		else:
+			part = part_number + data[i * part_size: i * part_size + part_size]
+		code = qrcode.encode_to_string(part)
+		yield (code, num_parts)
 
 def parse_pmofn_qr_part(data):
-	of_split = data.split('of', 1)
-	part_index = int(of_split[0][1:])
-	part_total = int(of_split[1][:of_split[1].index(' ')])
-	part = data[data.index(' ') + 1:]
-	return part, part_index, part_total
+	of_index = data.index('of')
+	space_index = data.index(' ')
+	part_index = int(data[1:of_index])
+	part_total = int(data[of_index+2:space_index])
+	return data[space_index + 1:], part_index, part_total
 
 def parse_qr_part(data):
 	if data.startswith('p') and data.index('of') <= 5:
@@ -64,10 +66,12 @@ def parse_qr_part(data):
 	return data, 1, 1
 
 def join_pmofn_qr_parts(parts):
-	code = ''
+	code_buf = io.StringIO('')
 	for part in parts:
 		code_part, _, _ = parse_pmofn_qr_part(part)
-		code += code_part
+		code_buf.write(code_part)
+	code = code_buf.getvalue()
+	code_buf.close()
 	return code
 	
 def join_qr_parts(parts):

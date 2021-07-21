@@ -3,8 +3,6 @@ from fpioa_manager import fm
 from machine import UART
 from thermal import Adafruit_Thermal
 
-MAX_PRINT_WIDTH = const(384)
-
 class Printer:
 	def __init__(self):
 		self.thermal_printer = None
@@ -17,6 +15,17 @@ class Printer:
 		except:
 			pass
 
+	def paper_width(self):
+		return 384
+
+	def qr_data_width(self):
+		""" This method returns a smaller width for the QR to be generated
+     		within, which we will then scale up to fit the display's width.
+			We do this because the QR would be too dense to be readable
+			by most devices otherwise.
+       	"""
+		return self.paper_width() // 6
+
 	def clear(self):
 		if not self.is_connected():
 			return
@@ -26,7 +35,7 @@ class Printer:
 	def is_connected(self):
 		return self.thermal_printer is not None
 
-	def print_qr_code(self, qr_code, padding=0):
+	def print_qr_code(self, qr_code):
 		""" Prints a QR code, scaling it up as large as possible"""
 		if not self.is_connected():
 			raise ValueError('No printer found')
@@ -36,7 +45,7 @@ class Printer:
 		width = len(lines)
 		height = len(lines)
   
-		scale = (MAX_PRINT_WIDTH - padding * 2) // width
+		scale = self.paper_width() // width
 		for y in range(height):
 			# Scale the line (width) by scaling factor
 			line_y = ''.join([char * scale for char in lines[y]])

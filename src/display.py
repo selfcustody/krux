@@ -65,6 +65,14 @@ class Display:
 			return lcd.width()
 		return lcd.height()
 
+	def qr_data_width(self):
+		""" This method returns a smaller width for the QR to be generated
+     		within, which we will then scale up to fit the display's width.
+			We do this because the QR would be too dense to be readable
+			by most devices otherwise.
+       	"""
+		return self.width() // 4
+
 	def rotation(self, rot):
 		lcd.rotation(rot)
 		self.rot = rot

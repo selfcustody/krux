@@ -23,14 +23,16 @@ try:
 	import ujson as json
 except ImportError:
 	import json
+from binascii import a2b_base64, b2a_base64
 import time
 import gc
+from display import DEFAULT_PADDING
+from embit import psbt
 from embit.networks import NETWORKS
 import lcd
 from embit.psbt import PSBT
 from multisig import MultisigPolicy
-from printer import MAX_PRINT_WIDTH
-from qr import QR_FORMAT_NONE, to_pmofn_qr_codes, to_qr_codes
+from qr import to_qr_codes
 from wallet import get_tx_output_amount_messages, get_tx_policy, is_multisig
 from page import Page
 from menu import Menu, MENU_CONTINUE, MENU_EXIT
@@ -65,12 +67,12 @@ class Home(Page):
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
 				self.ctx.display.flash_text('Printing recovery phrase QR..')
-				qr_code = to_qr_codes(self.ctx.wallet.mnemonic, format=QR_FORMAT_NONE)[0]
-				self.ctx.printer.print_qr_code(qr_code, padding=32)
+				qr_code, _ = to_qr_codes(self.ctx.wallet.mnemonic, max_width=self.ctx.printer.qr_data_width()).__next__()
+				self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
 
 	def public_key(self):  
-		self.display_qr_codes(to_qr_codes(self.ctx.wallet.xpub_btc_core()), title=self.ctx.wallet.xpub())
+		self.display_qr_codes(self.ctx.wallet.xpub_btc_core(), self.ctx.display.qr_data_width(), title=self.ctx.wallet.xpub())
 		if self.ctx.printer.is_connected():
 			lcd.clear()
 			time.sleep_ms(1000)
@@ -78,8 +80,8 @@ class Home(Page):
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
 				self.ctx.display.flash_text('Printing xpub QR..')
-				qr_code = to_qr_codes(self.ctx.wallet.xpub_btc_core(), format=QR_FORMAT_NONE)[0]
-				self.ctx.printer.print_qr_code(qr_code, padding=32)
+				qr_code, _ = to_qr_codes(self.ctx.wallet.xpub_btc_core(), max_width=self.ctx.printer.qr_data_width()).__next__()
+				self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
 	
  	def multisig_policy(self):
@@ -98,8 +100,9 @@ class Home(Page):
 				btn = self.ctx.input.wait_for_button()
 				if btn == BUTTON_ENTER:   
 					self.ctx.display.flash_text('Printing multisig policy QR..')
-					for qr_code in to_pmofn_qr_codes(json.dumps(self.ctx.multisig_policy.policy), min_part_size=MAX_PRINT_WIDTH // 2 - 10):
-						self.ctx.printer.print_qr_code(qr_code, padding=32)
+					payload = json.dumps(self.ctx.multisig_policy.policy)
+					for qr_code, _ in to_qr_codes(payload, max_width=self.ctx.printer.qr_data_width()):
+						self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
 
 	def load_multisig(self):		
@@ -113,8 +116,8 @@ class Home(Page):
 			if self.ctx.wallet.xpub() not in multisig_policy.cosigners:
 				raise ValueError('xpub not a cosigner')
 
-			self.display_multisig(multisig_policy, include_label=False)
-			self.ctx.display.draw_hcentered_text('Load?', offset_y=220)
+			self.display_multisig(multisig_policy, include_qr=False)
+			self.ctx.display.draw_hcentered_text('Load?', offset_y=200)
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
 				self.ctx.multisig_policy = multisig_policy
@@ -186,8 +189,14 @@ class Home(Page):
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
 			tx.sign_with(self.ctx.wallet.root)
-			signed_psbt = tx.to_base64()
-			self.display_qr_codes(to_qr_codes(signed_psbt), None, manual=True)
+			trimmed_psbt = psbt.PSBT(tx.tx)
+			for i, inp in enumerate(tx.inputs):
+				trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
+			signed_psbt = trimmed_psbt.to_base64()
+			trimmed_psbt = None
+			tx = None
+			gc.collect()
+			self.display_qr_codes(signed_psbt, self.ctx.display.qr_data_width(), title=None, manual=True)
 			if self.ctx.printer.is_connected():
 				lcd.clear()
 				time.sleep_ms(1000)
@@ -195,8 +204,8 @@ class Home(Page):
 				btn = self.ctx.input.wait_for_button()
 				if btn == BUTTON_ENTER:
 					self.ctx.display.flash_text('Printing signed PSBT QRs..')
-					for qr_code in to_pmofn_qr_codes(signed_psbt, min_part_size=MAX_PRINT_WIDTH // 2 - 10):
-						self.ctx.printer.print_qr_code(qr_code, padding=32)
+					for qr_code, _ in to_qr_codes(signed_psbt, max_width=self.ctx.printer.qr_data_width()):
+						self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
 
 	def close_wallet(self):
@@ -206,10 +215,13 @@ class Home(Page):
 		gc.collect()
 		return MENU_EXIT
 
-	def display_multisig(self, multisig_policy, include_label=True):
-		about = (multisig_policy.label + '\n') if include_label else ''
+	def display_multisig(self, multisig_policy, include_qr=True):
+		about = multisig_policy.label + '\n'
 		xpubs = []
 		for i, xpub in enumerate(multisig_policy.cosigners):
 			xpubs.append(str(i+1) + '. ' + xpub[4:8] + '...' + xpub[len(xpub)-4:len(xpub)])
 		about += '\n'.join(xpubs)
-		self.display_qr_codes(to_qr_codes(json.dumps(multisig_policy.policy)), about)
+		if include_qr:
+			self.display_qr_codes(json.dumps(multisig_policy.policy), self.ctx.display.qr_data_width(), title=about)
+		else:
+	  		self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)

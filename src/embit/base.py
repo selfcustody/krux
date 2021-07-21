@@ -4,7 +4,7 @@ try:
 except ImportError:
     import io
 from binascii import hexlify, unhexlify
-
+import gc
 
 class EmbitError(Exception):
     """Generic Embit error"""
@@ -40,7 +40,11 @@ class EmbitBase:
     def serialize(self, *args, **kwargs):
         stream = io.BytesIO()
         self.write_to(stream, *args, **kwargs)
-        return stream.getvalue()
+        v = stream.getvalue()
+        stream.close()
+        stream = None
+        gc.collect()
+        return v
 
     def to_string(self, *args, **kwargs):
         """Default string representation is hex of serialized instance or base58 if available"""

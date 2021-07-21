@@ -24,6 +24,7 @@ import lcd
 from embit.wordlists.ubip39 import WORDLIST
 from input import BUTTON_ENTER, BUTTON_PAGE
 from display import DEFAULT_PADDING, MAX_BACKLIGHT, MIN_BACKLIGHT
+from qr import to_qr_codes
 
 QR_ANIMATION_INTERVAL_MS = const(500)
 
@@ -119,19 +120,29 @@ class Page:
 		self.ctx.display.to_portrait()
 		return code
 	
-	def display_qr_codes(self, qr_codes, title=None, manual=False):
+	def display_qr_codes(self, data, max_width, title=None, manual=False):
 		self.ctx.display.set_backlight(MIN_BACKLIGHT)
 		done = False
 		i = 0
+		code_generator = to_qr_codes(data, max_width)
 		while not done:
 			lcd.clear()
-			self.ctx.display.draw_qr_code(DEFAULT_PADDING, qr_codes[i])
+			
+			code = None
+			num_parts = 0
+			try:
+				code, num_parts = code_generator.__next__()
+			except:
+				code_generator = to_qr_codes(data, max_width)
+				code, num_parts = code_generator.__next__()
+
+			self.ctx.display.draw_qr_code(5, code)
 			if title is not None:
 				self.ctx.display.draw_hcentered_text(title, offset_y=140)
 			else:
-				self.ctx.display.draw_hcentered_text('Part ' + str(i+1) + ' / ' + str(len(qr_codes)), offset_y=175)
-			i = (i + 1) % len(qr_codes)
-			btn = self.ctx.input.wait_for_button(block=manual)
+				self.ctx.display.draw_hcentered_text('Part ' + str(i+1) + ' / ' + str(num_parts), offset_y=175)
+			i = (i + 1) % num_parts
+			btn = self.ctx.input.wait_for_button(block=manual or num_parts == 1)
 			done = btn == BUTTON_ENTER
 			if not done:
 				time.sleep_ms(QR_ANIMATION_INTERVAL_MS)
