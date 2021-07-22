@@ -1,6 +1,6 @@
 # Krux Wallet
 
-<img src="https://user-images.githubusercontent.com/87289655/126558216-a4037fa6-d3d3-4a76-8001-4ecab6b81034.png" width="259" height="431">
+<img src="https://user-images.githubusercontent.com/87289655/126581267-42566a74-26ad-45e6-98d3-82eec20cb4f1.png" width="259" height="431">
 
 ---
 ## Disclaimer
