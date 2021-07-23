@@ -1,14 +1,16 @@
 # Krux Wallet
+## *Focus on your keys*
+Krux is an open-source, airgapped bitcoin hardware wallet built with off-the-shelf parts that never stores your keys to disk and solely functions as a signer in a multisig setup.
 
-<img src="https://user-images.githubusercontent.com/87289655/126581267-42566a74-26ad-45e6-98d3-82eec20cb4f1.png" width="259" height="431">
+<p align="center">
+<img src="https://user-images.githubusercontent.com/87289655/126738716-518cb99c-ca3e-405d-b7ba-55b6edd34ac3.png" width="195">
+</p>
 
 ---
 ## Disclaimer
-**WARNING**: *While functional, this is alpha-quality software and could have bugs or other issues that might cause you to lose your coins. Use at your own risk!*
+**WARNING**: *While functional, this is currently alpha-quality software and could have bugs or other issues that might cause you to lose your coins. Use at your own risk!*
 
 ---
-
-Krux is an open-source, airgapped bitcoin hardware wallet built with off-the-shelf parts that never stores your keys to disk and only works as a signer in a multisig setup.
 
 To use Krux, you will need to buy an [M5StickV](https://shop.m5stack.com/products/stickv). The M5StickV was chosen because it has a processor, battery, buttons, screen, camera, and SD card slot all in one small unit, has no WiFi or Bluetooth functionality, and is cheap (< $50).
 
@@ -69,7 +71,10 @@ Just be careful what you do with the codes, since most smartphones can now quick
 - https://github.com/SeedSigner/seedsigner for Raspberry Pi (Zero)
 - https://github.com/diybitcoinhardware/f469-disco for the F469-Discovery board
 
+# Contributing
+Issues and pull requests welcome! Let's make this as good as it can be.
+
 # Support the Project
-If you would like to help support the project, BTC is kindly accepted!
+If you would like to support the project, BTC is kindly accepted!
 
 `19f8HVt8LZKzBv8CuBYnxCqn5sd75V658J`
