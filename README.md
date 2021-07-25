@@ -22,11 +22,11 @@ Krux is built to work with [Specter Desktop](https://github.com/cryptoadvance/sp
 
 # Getting Started
 ## Requirements
-Docker
-Python 3
+- Docker
+- Python 3
 
 ## Build and flash the firmware
-Connect the M5StickV to your computer via its USB-C port, then locate it on your machine with:
+Connect the M5StickV to your computer via USB, then locate it on your machine with:
 ```bash
 ls -lha /dev/tty* | grep usb
 ```
