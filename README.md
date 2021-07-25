@@ -22,21 +22,37 @@ Krux is built to work with [Specter Desktop](https://github.com/cryptoadvance/sp
 
 # Getting Started
 ## Requirements
-Python 3 (?)
+Docker
+Python 3
 
-## Load the firmware
-First, head over to the `firmware` directory and follow the README there to build and install the firmware on your M5StickV's internal flash memory.
-
-## Load the software
-Then, plug a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test) into your computer and run the following:
-
+## Build and flash the firmware
+Connect the M5StickV to your computer via its USB-C port, then locate it on your machine with:
+```bash
+ls -lha /dev/tty* | grep usb
 ```
-python3 flash_sd.py path/to/sd/card
+
+You should see a path like `/dev/tty.usbserial-123`.
+
+Now, build and install the firmware by running the following, substituting `/dev/tty.usbserial-123` with your device path from the previous step:
+```bash
+./firmware.sh build
+./firmware.sh flash /dev/tty.usbserial-123
+```
+
+## Build and flash the software
+Plug a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test) into your computer and take note of its path (after mounting), for example `/Volumes/SD`.
+
+Install the software on the card by running the following, substituting `/Volumes/SD` with your SD card's path from the previous step:
+```bash
+python3 flash_sd.py /Volumes/SD
 ```
 
 This is a simple script that effectively copies the contents of the `src` directory onto the root of the card to be run by the firmware.
 
-Finally, put the microSD card in your device and long-press its power button (left side) to boot it up! You should soon see the Krux logo appear on the screen. If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
+## Boot it up
+Unmount and remove the SD card from your machine, insert it into the M5StickV, and long-press its power button (left side) to boot it up! You should soon see the Krux logo appear on the screen. If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
+
+Congrats, you're now running Krux!
 
 # Using
 ## Opening Wallets
