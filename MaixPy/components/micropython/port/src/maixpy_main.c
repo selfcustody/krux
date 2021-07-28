@@ -529,7 +529,6 @@ void mp_task(void *pvParameter)
 #endif
 
 soft_reset:
-  sipeed_reset_sys_mem();
   // initialise the stack pointer for the main thread
   mp_stack_set_top((void *)sp);
 #if MICROPY_PY_THREAD
@@ -658,7 +657,8 @@ soft_reset:
 #endif
   mp_hal_stdout_tx_strn("[MaixPy]: soft reboot\r\n", 23);
   mp_deinit();
-  sipeed_reset_sys_mem();
+  // Zero out the GC/heap
+  gc_wipe();
   msleep(10);
   goto soft_reset;
   // sysctl->soft_reset.soft_reset = 1;

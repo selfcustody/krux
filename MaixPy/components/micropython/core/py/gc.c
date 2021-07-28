@@ -105,6 +105,19 @@
 #define GC_EXIT()
 #endif
 
+void gc_wipe(void) {
+    // clear ATBs
+    memset(MP_STATE_MEM(gc_alloc_table_start), 0, MP_STATE_MEM(gc_alloc_table_byte_len));
+
+#if MICROPY_ENABLE_FINALISER
+    // clear FTBs
+    memset(MP_STATE_MEM(gc_finaliser_table_start), 0, (MP_STATE_MEM(gc_alloc_table_byte_len) * BLOCKS_PER_ATB + BLOCKS_PER_FTB - 1) / BLOCKS_PER_FTB);
+#endif
+
+    // clear pool
+    memset(MP_STATE_MEM(gc_pool_start), 0, MP_STATE_MEM(gc_pool_end) - MP_STATE_MEM(gc_pool_start));
+}
+
 // TODO waste less memory; currently requires that all entries in alloc_table have a corresponding block in pool
 void gc_init(void *start, void *end) {
     // align end pointer on block boundary
@@ -138,13 +151,7 @@ void gc_init(void *start, void *end) {
     assert(MP_STATE_MEM(gc_pool_start) >= MP_STATE_MEM(gc_finaliser_table_start) + gc_finaliser_table_byte_len);
 #endif
 
-    // clear ATBs
-    memset(MP_STATE_MEM(gc_alloc_table_start), 0, MP_STATE_MEM(gc_alloc_table_byte_len));
-
-#if MICROPY_ENABLE_FINALISER
-    // clear FTBs
-    memset(MP_STATE_MEM(gc_finaliser_table_start), 0, gc_finaliser_table_byte_len);
-#endif
+    gc_wipe();
 
     // set last free ATB index to start of heap
     MP_STATE_MEM(gc_last_free_atb_index) = 0;
