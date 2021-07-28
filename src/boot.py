@@ -34,8 +34,14 @@ pmu.enablePMICSleepMode(True)
 
 ctx = Context()
 
-ctx.display.flash_text('Krux')
+ctx.display.flash_text(""" 
+++-+-+-++
 
+ K r u x 
+
+++-+-+-++
+""")
+       
 pages = [Login, Home]
 page_index = 0
 while True:
