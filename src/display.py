@@ -33,7 +33,7 @@ class Display:
 		self.font_size = font_size
 		self.initialize_lcd()
   		self.i2c = I2C(I2C.I2C0, freq=400000, scl=28, sda=29)
- 		self.set_backlight(MAX_BACKLIGHT)
+ 		self.set_backlight(MIN_BACKLIGHT)
 
 	def initialize_lcd(self):
 		lcd.init(type=3)
