@@ -41,8 +41,7 @@ vagrant ssh -c 'cd /vagrant; ./krux build-firmware'
 ## Flash the firmware onto an M5StickV
 Connect the M5StickV to your computer via USB, power it on (left-side button), and run the following:
 ```bash
-vagrant reload
-vagrant ssh -c 'cd /vagrant; ./krux flash-firmware'
+vagrant reload && vagrant ssh -c 'cd /vagrant; ./krux flash-firmware'
 ```
 Note: `vagrant reload` is necessary in order for the newly-inserted USB device to be detected and passed through to the Vagrant VM on startup.
 
