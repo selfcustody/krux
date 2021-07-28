@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import gc
 import machine
 from pmu import axp192
 from context import Context
@@ -35,13 +36,20 @@ ctx = Context()
 
 ctx.display.flash_text('Krux')
 
+pages = [Login, Home]
+page_index = 0
 while True:
-	shutdown = Login(ctx).run()
+	page = pages[page_index](ctx)
+	shutdown = page.run()
 	if shutdown:
 		break
-	Home(ctx).run()
+	page = None
+	gc.collect()
+	page_index = (page_index + 1) % len(pages)
 	
 ctx.display.flash_text('Shutting down..')
 
+ctx.clear()
+  
 pmu.setEnterSleepMode()
 machine.reset()

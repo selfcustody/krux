@@ -23,7 +23,6 @@ try:
 	import ujson as json
 except ImportError:
 	import json
-from binascii import a2b_base64, b2a_base64
 import time
 import gc
 from display import DEFAULT_PADDING
@@ -35,7 +34,7 @@ from multisig import MultisigPolicy
 from qr import to_qr_codes
 from wallet import get_tx_output_amount_messages, get_tx_policy, is_multisig
 from page import Page
-from menu import Menu, MENU_CONTINUE, MENU_EXIT
+from menu import Menu, MENU_CONTINUE
 from input import BUTTON_ENTER
 
 MAX_ADDRESS_DEPTH = const(200)
@@ -49,12 +48,8 @@ class Home(Page):
 			('Multisig\nPolicy', self.multisig_policy),
 			('Check\nAddress', self.check_address),
 			('Sign PSBT', self.sign_psbt),
-			('Close Wallet', self.close_wallet)
+			('Shutdown', self.shutdown)
 		])
-	 
-	def run(self):
-		self.menu.run_loop()
-		return False
 	
 	def recovery_phrase(self):  
 		words = self.ctx.wallet.mnemonic.split(' ')
@@ -207,13 +202,6 @@ class Home(Page):
 					for qr_code, _ in to_qr_codes(signed_psbt, max_width=self.ctx.printer.qr_data_width()):
 						self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
-
-	def close_wallet(self):
-		self.ctx.wallet = None
-		self.ctx.multisig_policy = None
-		self.ctx.printer.clear()
-		gc.collect()
-		return MENU_EXIT
 
 	def display_multisig(self, multisig_policy, include_qr=True):
 		about = multisig_policy.label + '\n'

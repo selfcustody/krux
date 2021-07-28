@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import gc
 from display import Display
 from input import Input
 from camera import Camera
@@ -36,3 +37,9 @@ class Context:
 		self.printer = Printer()
 		self.wallet = None
 		self.multisig_policy = None
+  
+	def clear(self):
+		self.wallet = None
+		self.multisig_policy = None
+		self.printer.clear()
+		gc.collect()

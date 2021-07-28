@@ -23,7 +23,8 @@ import time
 import lcd
 from embit.wordlists.ubip39 import WORDLIST
 from input import BUTTON_ENTER, BUTTON_PAGE
-from display import DEFAULT_PADDING, MAX_BACKLIGHT, MIN_BACKLIGHT
+from display import DEFAULT_PADDING
+from menu import MENU_SHUTDOWN
 from qr import to_qr_codes
 
 QR_ANIMATION_INTERVAL_MS = const(500)
@@ -121,7 +122,6 @@ class Page:
 		return code
 	
 	def display_qr_codes(self, data, max_width, title=None, manual=False):
-		self.ctx.display.set_backlight(MIN_BACKLIGHT)
 		done = False
 		i = 0
 		code_generator = to_qr_codes(data, max_width)
@@ -146,7 +146,6 @@ class Page:
 			done = btn == BUTTON_ENTER
 			if not done:
 				time.sleep_ms(QR_ANIMATION_INTERVAL_MS)
-		self.ctx.display.set_backlight(MAX_BACKLIGHT)
   
 	def display_recovery_phrase(self, words):
 		lcd.clear()
@@ -155,5 +154,9 @@ class Page:
 		for i, word in enumerate(word_list):
 			lcd.draw_string(DEFAULT_PADDING, 35 + (i * self.ctx.display.line_height()), word, lcd.WHITE, lcd.BLACK)
 
+	def shutdown(self): 
+		return MENU_SHUTDOWN
+
 	def run(self):
-		raise ValueError('Not implemented')
+		status = self.menu.run_loop()
+		return True if status == MENU_SHUTDOWN else False

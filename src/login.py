@@ -23,7 +23,7 @@ import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.ubip39 import WORDLIST
 from page import Page
-from menu import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
+from menu import Menu, MENU_CONTINUE, MENU_EXIT
 from input import BUTTON_ENTER, BUTTON_PAGE
 from wallet import Wallet, pick_final_word
 
@@ -37,10 +37,6 @@ class Login(Page):
 			('About', self.about),
 			('Shutdown', self.shutdown),
 		])
-	 
-	def run(self):
-		status = self.menu.run_loop()
-		return True if status == MENU_SHUTDOWN else False
 
 	def open_wallet_with_words(self, words):
 		self.display_recovery_phrase(words)
@@ -155,6 +151,3 @@ class Login(Page):
 			elif btn == BUTTON_ENTER:
 				break
 		return MENU_CONTINUE
-	
-	def shutdown(self): 
-		return MENU_SHUTDOWN
