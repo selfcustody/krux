@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+
+# From https://unix.stackexchange.com/a/634849
+getdevice() {
+    idV=${1%:*}
+    idP=${1#*:}
+    for path in `find /sys/ -name idVendor | rev | cut -d/ -f 2- | rev`; do
+        if grep -q $idV $path/idVendor; then
+            if grep -q $idP $path/idProduct; then
+                find $path -name 'device' | rev | cut -d / -f 2 | rev
+            fi
+        fi
+    done
+}
+
+panic() {
+    printf "%s\n" "$1" >&2
+    exit 1
+}
+
+if [ "$1" == "build-firmware" ]; then
+    # mkdir -p MaixPy/projects/maixpy_m5stickv/build
+    docker build . -t krux-firmware
+    # docker cp $(docker create krux-firmware):/src/MaixPy/projects/maixpy_m5stickv/build/maixpy.bin MaixPy/projects/maixpy_m5stickv/build/maixpy.bin
+fi
+
+if [ "$1" == "flash-firmware" ]; then
+    usb_device_name="$(getdevice 0403:6001)"
+    if [ -z "$usb_device_name" ]; then
+        panic "Failed to find device via USB. Is it connected and powered on?"
+    fi
+    wd="/src/MaixPy/projects/maixpy_m5stickv"
+    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$wd" -it krux-firmware python3 project.py -B goE -p /dev/ttyUSB0 -b 1500000 -S flash
+fi
+
+if [ "$1" == "flash-software" ]; then
+    if [ -z "$2" ]; then
+        panic "microSD card path must be provided"
+    fi
+    if [ ! -d "$2" ]; then
+        panic "Path is invalid or not a directory"
+    fi
+
+    rm -rf $2/*
+    cp -r src/ $2
+    cp LICENSE.md $2/LICENSE.md
+fi

@@ -24,32 +24,35 @@ Krux is built to work with [Specter Desktop](https://github.com/cryptoadvance/sp
 
 # Getting Started
 ## Requirements
-- Docker
-- Python 3
+Vagrant
 
-## Build and flash the firmware
-Connect the M5StickV to your computer via USB, then locate it on your machine with:
+## Initialize Vagrant
+After you have installed Vagrant, run the following in this directory to spin up a new VM:
 ```bash
-ls -lha /dev/tty* | grep usb
+vagrant up
 ```
 
-You should see a path like `/dev/tty.usbserial-123`.
-
-Now, build and install the firmware by running the following, substituting `/dev/tty.usbserial-123` with your device path from the previous step:
+## Build the firmware
+Run the following:
 ```bash
-./firmware.sh build
-./firmware.sh flash /dev/tty.usbserial-123
+vagrant ssh -c 'cd /vagrant; ./krux build-firmware'
 ```
 
-## Build and flash the software
-Plug a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test) into your computer and take note of its path (after mounting), for example `/Volumes/SD`.
-
-Install the software on the card by running the following, substituting `/Volumes/SD` with your SD card's path from the previous step:
+## Flash the firmware onto an M5StickV
+Connect the M5StickV to your computer via USB, power it on (left-side button), and run the following:
 ```bash
-python3 flash_sd.py /Volumes/SD
+vagrant reload
+vagrant ssh -c 'cd /vagrant; ./krux flash-firmware'
 ```
+Note: `vagrant reload` is necessary in order for the newly-inserted USB device to be detected and passed through to the Vagrant VM on startup.
 
-This is a simple script that effectively copies the contents of the `src` directory onto the root of the card to be run by the firmware.
+## Flash the software onto a microSD card
+Plug a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test) into your computer and make sure to format it as FAT-32. Take note of its path (after mounting), for example `/Volumes/SD`.
+
+To install, simply copy over the contents of the `src` directory onto the root of the card, or run:
+```bash
+./krux flash-software /Volumes/SD
+```
 
 ## Boot it up
 Unmount and remove the SD card from your machine, insert it into the M5StickV, and long-press its power button (left side) to boot it up! You should soon see the Krux logo appear on the screen. If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
