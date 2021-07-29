@@ -105,7 +105,7 @@ class Page:
 			if new_part:
 				self.ctx.display.to_portrait()
 				self.ctx.display.draw_centered_text(str(num_parts_captured) + ' / ' + str(part_total))
-				time.sleep_ms(1000)
+				time.sleep_ms(100)
 				self.ctx.display.to_landscape()
 	
 			return False
@@ -159,4 +159,4 @@ class Page:
 
 	def run(self):
 		status = self.menu.run_loop()
-		return True if status == MENU_SHUTDOWN else False
+		return False if status == MENU_SHUTDOWN else True

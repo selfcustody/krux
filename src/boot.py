@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import gc
 import machine
 from pmu import axp192
 from context import Context
@@ -36,16 +35,12 @@ ctx = Context()
 
 ctx.display.flash_text(open('/sd/splash.txt').read())
 
-pages = [Login, Home]
-page_index = 0
 while True:
-	page = pages[page_index](ctx)
-	shutdown = page.run()
-	if shutdown:
+	if not Login(ctx).run():
 		break
-	page = None
-	gc.collect()
-	page_index = (page_index + 1) % len(pages)
+
+	if not Home(ctx).run():
+		break
 	
 ctx.display.flash_text('Shutting down..')
 
