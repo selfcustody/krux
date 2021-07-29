@@ -34,14 +34,8 @@ pmu.enablePMICSleepMode(True)
 
 ctx = Context()
 
-ctx.display.flash_text(""" 
-++-+-+-++
+ctx.display.flash_text(open('/sd/splash.txt').read())
 
- K r u x 
-
-++-+-+-++
-""")
-       
 pages = [Login, Home]
 page_index = 0
 while True:

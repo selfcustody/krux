@@ -106,7 +106,7 @@ class Display:
 		screen_width = self.width() - padding * 2
 		lines = self.to_lines(text, padding)
 		for i, line in enumerate(lines):
-			offset_x = max(0, (screen_width - (self.font_size * len(line))) // 2)
+			offset_x = max(0, (screen_width - (self.font_size * len(line))) // 2) + 1
 			lcd.draw_string(offset_x, offset_y + (i * self.line_height()), line, color, lcd.BLACK)
   
 	def draw_centered_text(self, text, color=lcd.WHITE, padding=DEFAULT_PADDING):
