@@ -79,7 +79,7 @@ class Display:
   
 	def to_landscape(self):
 		lcd.clear()
-  		self.rotation(3)
+  		self.rotation(2)
 
 	def to_portrait(self):
 		lcd.clear()
