@@ -108,7 +108,7 @@ extern const struct _mp_print_t mp_debug_print;
 #define MICROPY_GC_ALLOC_THRESHOLD                (1)
 #define MICROPY_PY_GC_COLLECT_RETVAL              (0)
 
-#define MICROPY_MEM_STATS                         (0)
+#define MICROPY_MEM_STATS                         (1)
 #define MICROPY_DEBUG_PRINTERS                    (0)
 #define MICROPY_REPL_EVENT_DRIVEN                 (0)
 #define MICROPY_MALLOC_USES_ALLOCATED_SIZE        (1)
@@ -159,7 +159,7 @@ extern const struct _mp_print_t mp_debug_print;
 #define MICROPY_PY_BUILTINS_INPUT           (1)
 #define MICROPY_PY_BUILTINS_POW3            (1)
 #define MICROPY_PY___FILE__                 (1)
-#define MICROPY_PY_MICROPYTHON_MEM_INFO     (0)
+#define MICROPY_PY_MICROPYTHON_MEM_INFO     (1)
 #define MICROPY_PY_ARRAY                    (1)
 #define MICROPY_PY_ARRAY_SLICE_ASSIGN       (1)
 #define MICROPY_PY_MATH                     (1)

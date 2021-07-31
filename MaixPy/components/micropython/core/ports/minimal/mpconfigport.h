@@ -18,7 +18,7 @@
 #define MICROPY_COMP_CONST          (0)
 #define MICROPY_COMP_DOUBLE_TUPLE_ASSIGN (0)
 #define MICROPY_COMP_TRIPLE_TUPLE_ASSIGN (0)
-#define MICROPY_MEM_STATS           (0)
+#define MICROPY_MEM_STATS           (1)
 #define MICROPY_DEBUG_PRINTERS      (0)
 #define MICROPY_ENABLE_GC           (1)
 #define MICROPY_GC_ALLOC_THRESHOLD  (0)

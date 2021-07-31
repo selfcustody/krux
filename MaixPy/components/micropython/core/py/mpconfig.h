@@ -221,7 +221,7 @@
 // Whether realloc/free should be passed allocated memory region size
 // You must enable this if MICROPY_MEM_STATS is enabled
 #ifndef MICROPY_MALLOC_USES_ALLOCATED_SIZE
-#define MICROPY_MALLOC_USES_ALLOCATED_SIZE (0)
+#define MICROPY_MALLOC_USES_ALLOCATED_SIZE (1)
 #endif
 
 // Number of bytes used to store qstr length
@@ -239,14 +239,14 @@
 // Avoid using C stack when making Python function calls. C stack still
 // may be used if there's no free heap.
 #ifndef MICROPY_STACKLESS
-#define MICROPY_STACKLESS (0)
+#define MICROPY_STACKLESS (1)
 #endif
 
 // Never use C stack when making Python function calls. This may break
 // testsuite as will subtly change which exception is thrown in case
 // of too deep recursion and other similar cases.
 #ifndef MICROPY_STACKLESS_STRICT
-#define MICROPY_STACKLESS_STRICT (0)
+#define MICROPY_STACKLESS_STRICT (1)
 #endif
 
 // Don't use alloca calls. As alloca() is not part of ANSI C, this
@@ -395,7 +395,7 @@
 
 // Whether to collect memory allocation stats
 #ifndef MICROPY_MEM_STATS
-#define MICROPY_MEM_STATS (0)
+#define MICROPY_MEM_STATS (1)
 #endif
 
 // The mp_print_t printer used for debugging output
@@ -1014,7 +1014,7 @@ typedef double mp_float_t;
 
 // Whether to provide mem-info related functions in micropython module
 #ifndef MICROPY_PY_MICROPYTHON_MEM_INFO
-#define MICROPY_PY_MICROPYTHON_MEM_INFO (0)
+#define MICROPY_PY_MICROPYTHON_MEM_INFO (1)
 #endif
 
 // Whether to provide "micropython.stack_use" function
