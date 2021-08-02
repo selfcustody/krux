@@ -24,6 +24,7 @@ from pmu import axp192
 from context import Context
 from login import Login
 from home import Home
+import settings
 
 pmu = axp192()
 
@@ -33,7 +34,7 @@ pmu.enablePMICSleepMode(True)
 
 ctx = Context()
 
-ctx.display.flash_text(open('/sd/splash.txt').read())
+ctx.display.flash_text(settings.load('splash', 'Krux', strip=False))
 
 while True:
 	if not Login(ctx).run():

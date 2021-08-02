@@ -25,16 +25,20 @@ from input import Input
 from camera import Camera
 from light import Light
 from printer import Printer
+import settings
 
 class Context:
 	def __init__(self):
 		self.version = open('/sd/VERSION').read().strip()
-		self.net = 'main'
+		self.net = settings.load('network', 'main')
 		self.display = Display()
 		self.input = Input()
 		self.camera = Camera()
 		self.light = Light()
-		self.printer = Printer()
+		self.printer = Printer(
+	  		int(settings.load('printer.baudrate', '9600')),
+			int(settings.load('printer.paper_width', '384'))
+		)
 		self.wallet = None
 		self.multisig_policy = None
   
