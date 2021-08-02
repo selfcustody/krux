@@ -35,9 +35,7 @@ from qr import to_qr_codes
 from wallet import get_tx_output_amount_messages, get_tx_policy, is_multisig
 from page import Page
 from menu import Menu, MENU_CONTINUE
-from input import BUTTON_ENTER
-
-MAX_ADDRESS_DEPTH = const(200)
+from input import BUTTON_ENTER, BUTTON_PAGE
 
 class Home(Page):
 	def __init__(self, ctx):
@@ -123,7 +121,7 @@ class Home(Page):
 			self.ctx.display.flash_text('Invalid multisig policy - ' + str(e), lcd.RED)
 			return MENU_CONTINUE
 	
-	def check_address(self, max_depth=MAX_ADDRESS_DEPTH):
+	def check_address(self):
 		if not self.ctx.multisig_policy:
 			self.ctx.display.flash_text('Multisig policy not found', lcd.RED)
 			return MENU_CONTINUE
@@ -138,12 +136,23 @@ class Home(Page):
 		gc.collect()
   
 		found = False
-		for i in range(max_depth):
+		i = 0
+		while True:
+			if (i + 1) % 100 == 0:
+				lcd.clear()
+				self.ctx.display.draw_centered_text('Checked\n%d receive\naddresses with\nno matches.' % (i + 1))
+				self.ctx.display.draw_hcentered_text('Try more?', offset_y=200)
+				btn = self.ctx.input.wait_for_button()
+				if btn != BUTTON_ENTER:
+					break
+ 
 			lcd.clear()
 			self.ctx.display.draw_centered_text('Checking\nreceive address\n' + str(i + 1) + '\nfor match...')
+   
 			if data == self.ctx.multisig_policy.descriptor.derive(i, branch_index=0).address(network=NETWORKS[self.ctx.net]):
 				found = True
 				break
+			i += 1
 
 		gc.collect()
   
@@ -151,7 +160,7 @@ class Home(Page):
 		if found:
 			self.ctx.display.draw_centered_text(data + '\n\nis a valid\nreceive address', lcd.GREEN)
 		else:
-			self.ctx.display.draw_centered_text(data + '\n\nWAS NOT found\nin the first\n' + str(max_depth) + '\nreceive addresses', lcd.RED)
+			self.ctx.display.draw_centered_text(data + '\n\nwas\nNOT FOUND\nin the first\n' + str(i + 1) + ' receive\naddresses', lcd.RED)
 									   
 		self.ctx.input.wait_for_button()
 
