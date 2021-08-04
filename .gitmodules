@@ -1,0 +1,6 @@
+[submodule "embit"]
+	path = embit
+	url = git@github.com:diybitcoinhardware/embit
+[submodule "MaixPy/components/micropython/port/src/secp256k1-embedded"]
+	path = MaixPy/components/micropython/port/src/secp256k1-embedded
+	url = git@github.com:diybitcoinhardware/secp256k1-embedded
