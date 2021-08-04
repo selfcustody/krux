@@ -361,9 +361,9 @@ if(CONFIG_COMPONENT_MICROPYTHON_ENABLE)
                                 "${mpy_port_dir}/src/secp256k1-embedded/secp256k1/src"
                                 "${mpy_port_dir}/src/secp256k1-embedded/mpy/config"
                                 )
-        append_srcs_dir(ADD_SRCS "port/src/secp256k1-embedded/secp256k1/src")
-        append_srcs_dir(ADD_SRCS "port/src/secp256k1-embedded/mpy/config")
-        append_srcs_dir(ADD_SRCS "port/src/secp256k1-embedded/mpy")  
+        list(APPEND ADD_SRCS "port/src/secp256k1-embedded/secp256k1/src/secp256k1.c")
+        list(APPEND ADD_SRCS "port/src/secp256k1-embedded/mpy/config/ext_callbacks.c")
+        list(APPEND ADD_SRCS "port/src/secp256k1-embedded/mpy/libsecp256k1.c")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHAVE_CONFIG_H")
     endif()
     if(CONFIG_MICROPYTHON_HASHLIB_ENABLE)

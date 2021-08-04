@@ -21,7 +21,25 @@ We don't want users to rely on Krux for anything except being a safe way to sign
 
 Krux is built to work with [Specter Desktop](https://github.com/cryptoadvance/specter-desktop), a desktop application where you can create and manage your multisig wallet, generate receive addresses, and send funds by creating partially signed bitcoin transactions (PSBTs) that you can sign with your hardware wallets. 
 
+# Cloning and updating the repo
+This repo has some external dependencies that it manages as [submodules](https://www.git-scm.com/book/en/v2/Git-Tools-Submodules). By default, performing a `git clone` of a repo like this will not pull down the submodule code. Therefore, make sure to run the following the first time you clone this repo:
+```bash
+git clone --recurse-submodules https://github.com/jreesun/krux
+```
+This will pull down this repo's code as well as the code for all submodules.
+
+If you already cloned the repo and don't have the submodule code, or if you wish to update the submodules, run:
+```bash
+git submodule update --init --recursive
+```
+
+When pulling down updates to this repo, run:
+```bash
+git pull --recurse-submodules
+```
+
 # Getting Started
+
 ## Requirements
 Vagrant
 
