@@ -1,3 +1,0 @@
-include_HEADERS += include/secp256k1_ecdsa_s2c.h
-noinst_HEADERS += src/modules/ecdsa_s2c/main_impl.h
-noinst_HEADERS += src/modules/ecdsa_s2c/tests_impl.h
