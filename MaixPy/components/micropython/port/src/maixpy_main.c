@@ -337,6 +337,8 @@ void load_config_from_spiffs(config_data_t *config)
     }
   }
   SPIFFS_close(&spiffs_user_mount_handle.fs, fd);
+  // override file
+  config->gc_heap_size = CONFIG_MAIXPY_GC_HEAP_SIZE;
 }
 
 #if MICROPY_ENABLE_COMPILER
