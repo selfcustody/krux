@@ -175,6 +175,9 @@ class Home(Page):
 		if not data:
 			return MENU_CONTINUE
 	
+		lcd.clear()
+		self.ctx.display.draw_centered_text('Loading..')
+  
 		tx = PSBT.from_base64(data)
 		policy = get_tx_policy(tx)
 
@@ -187,7 +190,8 @@ class Home(Page):
 			return MENU_CONTINUE
 	
 		outputs = get_tx_output_amount_messages(tx, network=self.ctx.net)
-		self.ctx.display.draw_hcentered_text('\n\n'.join(outputs))
+		lcd.clear()
+  		self.ctx.display.draw_hcentered_text('\n\n'.join(outputs))
 		self.ctx.display.draw_hcentered_text('Sign?', offset_y=200)
 	
 		btn = self.ctx.input.wait_for_button()
