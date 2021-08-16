@@ -1,5 +1,5 @@
 # Krux
-Krux is an open-source, airgapped bitcoin hardware wallet built with off-the-shelf parts that never stores your keys to disk and functions solely as a signer in a multisignature setup. 
+Krux is an open-source, airgapped bitcoin hardware signer built with off-the-shelf parts that never stores your keys to disk and functions solely as a cosigner in a multisignature setup. 
 
 Krux is like a hardware wallet with amnesia. Every time you use it, you need to tell it your key to proceed. When you shut it down, it forgets. This means that with one Krux, you can act on behalf of every cosigner in a multisig.
 
