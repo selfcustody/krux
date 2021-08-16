@@ -19,14 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-try:
-	import uio as io
-except ImportError:
-	import io
+import io
 import random
 from binascii import hexlify
-from embit.wordlists.ubip39 import WORDLIST
 from embit import bip32, bip39, ec, script
+from embit.wordlists.bip39 import WORDLIST
+from embit.psbt import DerivationPath
 from embit.networks import NETWORKS
 
 SATS_PER_BTC = const(100000000)
@@ -35,8 +33,7 @@ class Wallet:
 	def __init__(self, mnemonic, network=NETWORKS['test']):
 		self.mnemonic = mnemonic
 		self.network = network
-		seed = bip39.mnemonic_to_seed(mnemonic)
-		self.root = bip32.HDKey.from_seed(seed, version=network['xprv'])
+		self.root = bip32.HDKey.from_seed(bip39.mnemonic_to_seed(mnemonic), version=network['xprv'])
 		self.fingerprint = self.root.child(0).fingerprint
 		self.derivation = 'm/48h/%dh/0h/2h' % network['bip32'] # contains coin type - 0 for main, 1 for test
 		self.account = self.root.derive(self.derivation).to_public()
@@ -110,14 +107,18 @@ def get_cosigners(pubkeys, derivations, xpubs):
 						break
 	return sorted(cosigners)
 
-def get_tx_policy(tx):
+def get_tx_policy(tx, wallet):
+	xpubs = {}
+	for descriptor_key in wallet.descriptor.keys:
+		xpubs[descriptor_key.key] = DerivationPath(descriptor_key.origin.fingerprint, descriptor_key.origin.derivation)
+  
 	# Check inputs of the transaction and check that they use the same script type
 	# For multisig parsed policy will look like this:
 	# { script_type: p2wsh, cosigners: [xpubs strings], m: 2, n: 3}
 	policy = None
 	for inp in tx.inputs:
 		# get policy of the input
-		inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, tx.xpubs)
+		inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, tx.xpubs if tx.xpubs else xpubs)
 		# if policy is None - assign current
 		if policy is None:
 			policy = inp_policy
@@ -137,9 +138,9 @@ def get_tx_input_amount(tx):
 def get_tx_input_amount_message(tx):
 	return 'Input:\n%.8f BTC' % round(get_tx_input_amount(tx) / SATS_PER_BTC, 8)
 
-def get_tx_output_amount_messages(tx, network='main'):
+def get_tx_output_amount_messages(tx, wallet, network='main'):
 	messages = []
-	policy = get_tx_policy(tx)
+	policy = get_tx_policy(tx, wallet)
 	inp_amount = get_tx_input_amount(tx)
 	spending = 0
 	change = 0
@@ -203,4 +204,4 @@ def get_policy(scope, scriptpubkey, xpubs):
 	return policy
 
 def is_multisig(policy):
-	return 'm' in policy and 'n' in policy and 'cosigners' in policy
+	return 'type' in policy and 'p2wsh' in policy['type'] and 'm' in policy and 'n' in policy and 'cosigners' in policy

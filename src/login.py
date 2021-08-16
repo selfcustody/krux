@@ -21,11 +21,13 @@
 # THE SOFTWARE.
 import lcd
 from embit.networks import NETWORKS
-from embit.wordlists.ubip39 import WORDLIST
+from embit.wordlists.bip39 import WORDLIST
 from page import Page
 from menu import Menu, MENU_CONTINUE, MENU_EXIT
 from input import BUTTON_ENTER, BUTTON_PAGE
+from qr import FORMAT_UR
 from wallet import Wallet, pick_final_word
+import urtypes
 
 class Login(Page):
 	def __init__(self, ctx):
@@ -49,20 +51,28 @@ class Login(Page):
 		return MENU_CONTINUE
 
 	def open_wallet_with_qr_code(self):
-		mnemonic = self.capture_qr_code()
-		if not mnemonic:
+		data, qr_format = self.capture_qr_code()
+		if not data:
 			self.ctx.display.flash_text('Invalid wallet', lcd.RED)
 			return MENU_CONTINUE
 
-		words = mnemonic.split(' ')
+		words = []
+		if qr_format == FORMAT_UR:
+			try:
+				words = urtypes.crypto.BIP39.from_cbor(data.cbor).words
+			except:
+				data = urtypes.Bytes.from_cbor(data.cbor).data.decode()
+		if not words:
+			words = data.split(' ')
+
 		if not words or len(words) != 12:
-			self.ctx.display.flash_text('Invalid wallet', lcd.RED)
+			self.ctx.display.flash_text('Invalid wallet:\nnot a\n12-word phrase', lcd.RED)
 			return MENU_CONTINUE
 		return self.open_wallet_with_words(words)
 
 	def open_wallet_with_text(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each word of your 12-word BIP-39 recovery phrase.')
+		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nrecovery phrase.')
 		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
@@ -98,7 +108,7 @@ class Login(Page):
 	
 	def open_wallet_with_digits(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each word of your 12-word BIP-39 recovery phrase as a number from 1 to 2048.')
+		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nrecovery phrase\nas a number from\n1 to 2048.')
 		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:

@@ -40,10 +40,10 @@ class Context:
 			int(settings.load('printer.paper_width', '384'))
 		)
 		self.wallet = None
-		self.multisig_policy = None
+		self.multisig_wallet = None
   
 	def clear(self):
 		self.wallet = None
-		self.multisig_policy = None
+		self.multisig_wallet = None
 		self.printer.clear()
 		gc.collect()
