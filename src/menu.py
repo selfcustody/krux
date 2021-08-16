@@ -47,6 +47,9 @@ class Menu:
 				except Exception as e:
 					print(e)
 					self.ctx.display.flash_text('Something went wrong', lcd.RED)
+					lcd.clear()
+					self.ctx.display.draw_centered_text(repr(e), lcd.RED)
+					self.ctx.input.wait_for_button()
 			elif btn == BUTTON_PAGE:
 				selected_item_index = (selected_item_index + 1) % len(self.menu)
  

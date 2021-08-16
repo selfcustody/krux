@@ -21,11 +21,11 @@
 # THE SOFTWARE.
 import time
 import lcd
-from embit.wordlists.ubip39 import WORDLIST
+from embit.wordlists.bip39 import WORDLIST
 from input import BUTTON_ENTER, BUTTON_PAGE
 from display import DEFAULT_PADDING
 from menu import MENU_SHUTDOWN
-from qr import to_qr_codes
+from qr import FORMAT_UR, to_qr_codes
 
 QR_ANIMATION_INTERVAL_MS = const(500)
 
@@ -112,19 +112,23 @@ class Page:
 	
 		self.ctx.display.to_landscape()
 		code = None
+		qr_format = None
 		try:
-			code = self.ctx.camera.capture_qr_code_loop(callback)
+			code, qr_format = self.ctx.camera.capture_qr_code_loop(callback)
 		except Exception as e:
 			print(e)
 			pass
 		self.ctx.light.turn_off()
 		self.ctx.display.to_portrait()
-		return code
+		return (code, qr_format)
 	
-	def display_qr_codes(self, data, max_width, title=None, manual=False):
+	def display_qr_codes(self, data, max_width, format, title=None, manual=False):
+		if manual and format == FORMAT_UR:
+			manual = False
+   
 		done = False
 		i = 0
-		code_generator = to_qr_codes(data, max_width)
+		code_generator = to_qr_codes(data, max_width, format)
 		while not done:
 			lcd.clear()
 			
@@ -133,7 +137,7 @@ class Page:
 			try:
 				code, num_parts = code_generator.__next__()
 			except:
-				code_generator = to_qr_codes(data, max_width)
+				code_generator = to_qr_codes(data, max_width, format)
 				code, num_parts = code_generator.__next__()
 
 			self.ctx.display.draw_qr_code(5, code)

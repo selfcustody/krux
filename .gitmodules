@@ -4,3 +4,9 @@
 [submodule "MaixPy/components/micropython/port/src/secp256k1-embedded"]
 	path = MaixPy/components/micropython/port/src/secp256k1-embedded
 	url = git@github.com:diybitcoinhardware/secp256k1-embedded
+[submodule "urtypes"]
+	path = urtypes
+	url = git@github.com:jreesun/urtypes
+[submodule "foundation-ur-py"]
+	path = foundation-ur-py
+	url = git@github.com:Foundation-Devices/foundation-ur-py

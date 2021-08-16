@@ -22,7 +22,7 @@
 import gc
 import sensor
 import lcd
-from qr import join_qr_parts, parse_qr_part
+from qr import QRPartParser
 
 class Camera:
 	def __init__(self):
@@ -37,20 +37,18 @@ class Camera:
 	def capture_qr_code_loop(self, callback):
 		""" QR codes can become too large to display and must be animated as
 			several codes in sequence.
-			This function parses the code contents and looks for part numbers,
-			adding them to a dict by their part number until all parts are loaded.
+			This function parses the code contents until all parts are loaded.
 			The part data are then assembled into one and returned.
    		"""
 		self.initialize_sensor()
 		sensor.run(1)
 		
-		qr_parts_dict = {}
-		qr_part_total = -1
-		qr_part_index_sum = -1
-		
+		parser = QRPartParser()
+  
+		prev_parsed_count = 0
 		new_part = False
 		while True:
-			stop = callback(qr_part_total, len(qr_parts_dict), new_part)
+			stop = callback(parser.total_count(), parser.parsed_count(), new_part)
 			if stop:
 				sensor.run(0)
 				return None
@@ -71,19 +69,16 @@ class Camera:
  			res = img.find_qrcodes()
 			if len(res) > 0:
 				data = res[0].payload()
-				_, part_index, part_total = parse_qr_part(data)
-				if qr_part_total == -1:
-					qr_part_total = part_total
-					qr_part_index_sum = sum(range(1, part_total+1))
-					
-				prev_qr_parts_len = len(qr_parts_dict)
-				qr_parts_dict[part_index] = data
-				if prev_qr_parts_len < len(qr_parts_dict):
+	
+				parser.parse(data)
+	
+				if parser.parsed_count() > prev_parsed_count:
+					prev_parsed_count = parser.parsed_count()
 					new_part = True
 					
-			if len(qr_parts_dict) == qr_part_total and sum(qr_parts_dict.keys()) == qr_part_index_sum:
+			if parser.is_complete():
 				break
 			
 		sensor.run(0)
-		return join_qr_parts([part for _, part in sorted(qr_parts_dict.items())])
+		return (parser.result(), parser.format)
 	
