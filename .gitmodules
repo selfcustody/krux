@@ -7,3 +7,6 @@
 [submodule "urtypes"]
 	path = urtypes
 	url = git@github.com:jreesun/urtypes
+[submodule "foundation-ur-py"]
+	path = foundation-ur-py
+	url = git@github.com:Foundation-Devices/foundation-ur-py
