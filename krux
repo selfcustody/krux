@@ -61,5 +61,6 @@ elif [ "$1" == "flash-software" ]; then
     rm -rf $2/*
     cp -r src/ $2
     cp -r embit/src/embit $2
+    cp -r urtypes/src/urtypes $2
     cp LICENSE.md $2/LICENSE.md
 fi
