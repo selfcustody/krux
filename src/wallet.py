@@ -48,6 +48,16 @@ class Wallet:
 			self.account.to_base58()
 		)
 	
+	def zpub(self):
+		return self.account.to_base58(self.network['Zpub'])
+
+	def zpub_btc_core(self):
+		return '[%s%s]%s' % (
+			hexlify(self.fingerprint).decode('utf-8'),
+			self.derivation[1:], # remove leading m
+			self.account.to_base58(self.network['Zpub'])
+		)
+  
 def pick_final_word(words):
 	if len(words) != 11:
 		return None
@@ -107,18 +117,21 @@ def get_cosigners(pubkeys, derivations, xpubs):
 						break
 	return sorted(cosigners)
 
-def get_tx_policy(tx, wallet):
+def wallet_xpubs(wallet):
 	xpubs = {}
-	for descriptor_key in wallet.descriptor.keys:
-		xpubs[descriptor_key.key] = DerivationPath(descriptor_key.origin.fingerprint, descriptor_key.origin.derivation)
-  
+	if wallet:
+		for descriptor_key in wallet.descriptor.keys:
+			xpubs[descriptor_key.key] = DerivationPath(descriptor_key.origin.fingerprint, descriptor_key.origin.derivation)
+	return xpubs
+
+def get_tx_policy(tx, wallet):
 	# Check inputs of the transaction and check that they use the same script type
 	# For multisig parsed policy will look like this:
 	# { script_type: p2wsh, cosigners: [xpubs strings], m: 2, n: 3}
 	policy = None
 	for inp in tx.inputs:
 		# get policy of the input
-		inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, tx.xpubs if tx.xpubs else xpubs)
+		inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, tx.xpubs if tx.xpubs else wallet_xpubs(wallet))
 		# if policy is None - assign current
 		if policy is None:
 			policy = inp_policy
@@ -145,7 +158,7 @@ def get_tx_output_amount_messages(tx, wallet, network='main'):
 	spending = 0
 	change = 0
 	for i, out in enumerate(tx.outputs):
-		out_policy = get_policy(out, tx.tx.vout[i].script_pubkey, tx.xpubs)
+		out_policy = get_policy(out, tx.tx.vout[i].script_pubkey, tx.xpubs if tx.xpubs else wallet_xpubs(wallet))
 		is_change = False
 		# if policy is the same - probably change
 		if out_policy == policy:
@@ -177,7 +190,7 @@ def get_tx_output_amount_messages(tx, wallet, network='main'):
 			)
 	fee = inp_amount - change - spending
 	messages.append('Fee:\n%.8f BTC' % round(fee / SATS_PER_BTC, 8))
- 	messages.sort(reverse=True)
+	messages.sort(reverse=True)
 	return messages
 
 def get_policy(scope, scriptpubkey, xpubs):

@@ -33,27 +33,38 @@ class Login(Page):
 	def __init__(self, ctx):
 		Page.__init__(self, ctx)
 		self.menu = Menu(ctx, [
-			('Open Wallet\n(QR)', self.open_wallet_with_qr_code),
-			('Open Wallet\n(Text)', self.open_wallet_with_text),
-			('Open Wallet\n(Numeric)', self.open_wallet_with_digits),
+			('Load Mnemonic', self.open_wallet),
 			('About', self.about),
 			('Shutdown', self.shutdown),
 		])
 
+	def open_wallet(self):
+		submenu = Menu(self.ctx, [
+			('Via QR Code', self.open_wallet_with_qr_code),
+			('Via Text', self.open_wallet_with_text),
+			('Via Numbers', self.open_wallet_with_digits),
+			('Via Bits', self.open_wallet_with_bits),
+			('Cancel', lambda: MENU_EXIT)
+		])
+		index, status = submenu.run_loop()
+		if index == len(submenu.menu)-1:
+			return MENU_CONTINUE
+		return status
+  
 	def open_wallet_with_words(self, words):
-		self.display_recovery_phrase(words)
-		self.ctx.display.draw_hcentered_text('Open?', offset_y=220)
+		self.display_mnemonic(words)
+		self.ctx.display.draw_hcentered_text('Continue?', offset_y=220)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
-			self.ctx.display.flash_text('Opening wallet..')
+			self.ctx.display.flash_text('Loading..')
 			self.ctx.wallet = Wallet(' '.join(words), network=NETWORKS[self.ctx.net])
 			return MENU_EXIT
 		return MENU_CONTINUE
 
 	def open_wallet_with_qr_code(self):
 		data, qr_format = self.capture_qr_code()
-		if not data:
-			self.ctx.display.flash_text('Invalid wallet', lcd.RED)
+		if data is None:
+			self.ctx.display.flash_text('Failed to load mnemonic', lcd.RED)
 			return MENU_CONTINUE
 
 		words = []
@@ -66,13 +77,13 @@ class Login(Page):
 			words = data.split(' ')
 
 		if not words or len(words) != 12:
-			self.ctx.display.flash_text('Invalid wallet:\nnot a\n12-word phrase', lcd.RED)
+			self.ctx.display.flash_text('Invalid mnemonic:\nnot a\n12-word phrase', lcd.RED)
 			return MENU_CONTINUE
 		return self.open_wallet_with_words(words)
 
 	def open_wallet_with_text(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nrecovery phrase.')
+		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nmnemonic.')
 		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
@@ -108,7 +119,7 @@ class Login(Page):
 	
 	def open_wallet_with_digits(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nrecovery phrase\nas a number from\n1 to 2048.')
+		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nmnemonic as\na number from\n1 to 2048.')
 		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
@@ -134,6 +145,31 @@ class Login(Page):
 					word = pick_final_word(words)
 				else:
 					word = WORDLIST[int(digits)-1]
+	
+				lcd.clear()
+				self.ctx.display.draw_centered_text(word)
+				self.ctx.input.wait_for_button()
+	
+				words.append(word)
+	
+			return self.open_wallet_with_words(words)
+		
+		return MENU_CONTINUE
+
+	def open_wallet_with_bits(self):
+		words = []
+		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nmnemonic as\na series of\nbinary digits.')
+		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
+		btn = self.ctx.input.wait_for_button()
+		if btn == BUTTON_ENTER:
+			for i in range(12):
+				bits = ''
+				while True:
+					bits = self.capture_bits_from_numpad('Word ' + str(i+1))
+					if len(bits) == 11:
+						break
+ 
+				word = WORDLIST[int('0b' + bits, 0)]
 	
 				lcd.clear()
 				self.ctx.display.draw_centered_text(word)
