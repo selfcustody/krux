@@ -76,7 +76,7 @@ class Home(Page):
 			self.ctx.display.draw_centered_text('Print to QR?')
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
-				self.ctx.display.flash_text('Printing\nzpub\nQR..')
+				self.ctx.display.flash_text('Printing\nZpub\nQR..')
 				qr_code, _ = to_qr_codes(self.ctx.wallet.zpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE).__next__()
 				self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
