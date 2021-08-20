@@ -26,9 +26,11 @@ from camera import Camera
 from light import Light
 from printer import Printer
 import settings
+import logging
 
 class Context:
 	def __init__(self):
+		self.log = logging.getLogger()
 		self.version = open('/sd/VERSION').read().strip()
 		self.net = settings.load('network', 'main')
 		self.display = Display()

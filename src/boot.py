@@ -25,12 +25,18 @@ from context import Context
 from login import Login
 from home import Home
 import settings
+import logging
 
 pmu = axp192()
 
 # Enable power management so that if power button is held down 6 secs, 
 # it shuts off as expected
 pmu.enablePMICSleepMode(True)
+
+logging.basicConfig(
+	level=int(settings.load('log.level', logging.CRITICAL)),
+	filename='/sd/.krux.log'
+)
 
 ctx = Context()
 

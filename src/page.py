@@ -26,8 +26,9 @@ from input import BUTTON_ENTER, BUTTON_PAGE
 from display import DEFAULT_PADDING
 from menu import MENU_SHUTDOWN
 from qr import FORMAT_UR, to_qr_codes
+from ur.ur import UR
 
-QR_ANIMATION_INTERVAL_MS = const(500)
+QR_ANIMATION_INTERVAL_MS = const(100)
 
 class Page:
 	def __init__(self, ctx):
@@ -55,6 +56,30 @@ class Page:
 				selected_key = (selected_key + 1) % 12
 		return digits
   
+	def capture_bits_from_numpad(self, title):
+		bits = ''
+		selected_key = 0
+		while True:
+			lcd.clear()
+			self.ctx.display.draw_hcentered_text(title)
+			self.ctx.display.draw_hcentered_text(bits, offset_y=50)
+			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 0 else '') + '0', offset_y=90)
+			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 1 else '') + '1', offset_y=110)
+			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 2 else '') + 'Del', offset_y=130)
+			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 3 else '') + 'Go', offset_y=150)
+   
+			btn = self.ctx.input.wait_for_button()
+			if btn == BUTTON_ENTER:
+				if selected_key == 3: # Enter
+					break
+				elif selected_key == 2: # Del
+					bits = bits[:len(bits)-1]
+				else:
+					bits += str(selected_key)
+			elif btn == BUTTON_PAGE:
+				selected_key = (selected_key + 1) % 4
+		return bits
+
 	def capture_letters_from_keypad(self, title):
 		letters = ''
 		selected_key = 0
@@ -104,7 +129,7 @@ class Page:
 			# Indicate progress to the user that a new part was captured
 			if new_part:
 				self.ctx.display.to_portrait()
-				self.ctx.display.draw_centered_text(str(num_parts_captured) + ' / ' + str(part_total))
+				self.ctx.display.draw_centered_text('%.0f%%' % (100 * float(num_parts_captured) / float(part_total)))
 				time.sleep_ms(100)
 				self.ctx.display.to_landscape()
 	
@@ -115,17 +140,16 @@ class Page:
 		qr_format = None
 		try:
 			code, qr_format = self.ctx.camera.capture_qr_code_loop(callback)
-		except Exception as e:
-			print(e)
+		except Exception:
+			self.ctx.log.exception('Exception occurred capturing QR code')
 			pass
 		self.ctx.light.turn_off()
 		self.ctx.display.to_portrait()
+		if code is not None:
+			self.ctx.log.debug('Captured QR Code in format "%d": %s', qr_format, code.cbor if isinstance(code, UR) else code)
 		return (code, qr_format)
 	
-	def display_qr_codes(self, data, max_width, format, title=None, manual=False):
-		if manual and format == FORMAT_UR:
-			manual = False
-   
+	def display_qr_codes(self, data, max_width, format, title=None, manual=False):   
 		done = False
 		i = 0
 		code_generator = to_qr_codes(data, max_width, format)
@@ -151,16 +175,16 @@ class Page:
 			if not done:
 				time.sleep_ms(QR_ANIMATION_INTERVAL_MS)
   
-	def display_recovery_phrase(self, words):
+	def display_mnemonic(self, words):
 		lcd.clear()
-		self.ctx.display.draw_hcentered_text('Recovery Phrase')
+		self.ctx.display.draw_hcentered_text('BIP39 Mnemonic')
 		word_list = [str(i+1) + '.' + ('  ' if i + 1 < 10 else ' ') + word for i, word in enumerate(words)]
 		for i, word in enumerate(word_list):
 			lcd.draw_string(DEFAULT_PADDING, 35 + (i * self.ctx.display.line_height()), word, lcd.WHITE, lcd.BLACK)
 
-	def shutdown(self): 
+	def shutdown(self):
 		return MENU_SHUTDOWN
 
 	def run(self):
-		status = self.menu.run_loop()
+		_, status = self.menu.run_loop()
 		return False if status == MENU_SHUTDOWN else True
