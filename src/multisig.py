@@ -137,16 +137,6 @@ class MultisigWallet:
 	def matches_tx_policy(self, tx_policy):
 		return tx_policy['cosigners'] == self.cosigners and tx_policy['m'] == self.m and tx_policy['n'] == self.n
 
-def psbt_qr(signed_psbt, qr_format):
-	trimmed_psbt = psbt.PSBT(signed_psbt.tx)
-	for i, inp in enumerate(signed_psbt.inputs):
-		trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
-
-	if qr_format == FORMAT_UR:
-		return (UR(CRYPTO_PSBT.type, urtypes.crypto.PSBT(trimmed_psbt.serialize()).to_cbor()), FORMAT_UR)
-
-	return (trimmed_psbt.to_base64(), FORMAT_PMOFN)
-
 class PSBTSigner:
 	def __init__(self, psbt_data, qr_format):
 		self.qr_format = qr_format
