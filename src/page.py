@@ -176,12 +176,18 @@ class Page:
 				time.sleep_ms(QR_ANIMATION_INTERVAL_MS)
   
 	def display_mnemonic(self, words):
+		word_list = [str(i+1) + '.' + ('  ' if i + 1 < 10 else ' ') + word for i, word in enumerate(words)]
 		lcd.clear()
 		self.ctx.display.draw_hcentered_text('BIP39 Mnemonic')
-		word_list = [str(i+1) + '.' + ('  ' if i + 1 < 10 else ' ') + word for i, word in enumerate(words)]
-		for i, word in enumerate(word_list):
+		for i, word in enumerate(word_list[:12]):
 			lcd.draw_string(DEFAULT_PADDING, 35 + (i * self.ctx.display.line_height()), word, lcd.WHITE, lcd.BLACK)
-
+		if len(word_list) > 12:
+			self.ctx.input.wait_for_button()
+			lcd.clear()
+			self.ctx.display.draw_hcentered_text('BIP39 Mnemonic')
+			for i, word in enumerate(word_list[12:]):
+				lcd.draw_string(DEFAULT_PADDING, 35 + (i * self.ctx.display.line_height()), word, lcd.WHITE, lcd.BLACK)
+    
 	def shutdown(self):
 		return MENU_SHUTDOWN
 

@@ -76,18 +76,25 @@ class Login(Page):
 		if not words:
 			words = data.split(' ')
 
-		if not words or len(words) != 12:
-			self.ctx.display.flash_text('Invalid mnemonic:\nnot a\n12-word phrase', lcd.RED)
+		if not words or (len(words) != 12 and len(words) != 24):
+			self.ctx.display.flash_text('Invalid mnemonic\nlength', lcd.RED)
 			return MENU_CONTINUE
 		return self.open_wallet_with_words(words)
 
 	def open_wallet_with_text(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nmnemonic.')
+		self.ctx.display.draw_hcentered_text('Enter each\nword of your\nBIP-39 mnemonic.')
 		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
-			for i in range(12):
+			for i in range(24):
+				if i == 12:
+					lcd.clear()
+					self.ctx.display.draw_centered_text('Done?')
+					btn = self.ctx.input.wait_for_button()
+					if btn == BUTTON_ENTER:
+						break
+  
 				word = ''
 				while True:
 					word = self.capture_letters_from_keypad('Word ' + str(i+1))
@@ -97,7 +104,7 @@ class Login(Page):
 					if i == 0 and word == 'a' * 11:
 						break
 					# If the last 'word' is xyz, pick a random final word that is a valid checksum
-					if i == 11 and word == 'xyz':
+					if (i == 11 or i == 23) and word == 'xyz':
 						break
   
 				if word == 'a' * 11:
@@ -119,11 +126,18 @@ class Login(Page):
 	
 	def open_wallet_with_digits(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nmnemonic as\na number from\n1 to 2048.')
+		self.ctx.display.draw_hcentered_text('Enter each\nword of your\nBIP-39 mnemonic\nas a number from\n1 to 2048.')
 		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
-			for i in range(12):
+			for i in range(24):
+				if i == 12:
+					lcd.clear()
+					self.ctx.display.draw_centered_text('Done?')
+					btn = self.ctx.input.wait_for_button()
+					if btn == BUTTON_ENTER:
+						break
+  
 				digits = ''
 				while True:
 					digits = self.capture_digits_from_numpad('Word ' + str(i+1))
@@ -133,7 +147,7 @@ class Login(Page):
 					if i == 0 and digits == '1' * 11:
 						break
 					# If the last 'word' is 11 9's in a row, pick a random final word that is a valid checksum
-					if i == 11 and digits == '9' * 11:
+					if (i == 11 or i == 23) and digits == '9' * 11:
 						break
   
 				if digits == '1' * 11:
@@ -158,11 +172,18 @@ class Login(Page):
 
 	def open_wallet_with_bits(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each\nword of your\n12-word BIP-39\nmnemonic as\na series of\nbinary digits.')
+		self.ctx.display.draw_hcentered_text('Enter each\nword of your\nBIP-39 mnemonic\nas a series of\nbinary digits.')
 		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
-			for i in range(12):
+			for i in range(24):
+				if i == 12:
+					lcd.clear()
+					self.ctx.display.draw_centered_text('Done?')
+					btn = self.ctx.input.wait_for_button()
+					if btn == BUTTON_ENTER:
+						break
+  
 				bits = ''
 				while True:
 					bits = self.capture_bits_from_numpad('Word ' + str(i+1))

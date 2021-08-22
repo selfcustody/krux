@@ -59,7 +59,7 @@ class Wallet:
 		)
   
 def pick_final_word(words):
-	if len(words) != 11:
+	if (len(words) != 11 and len(words) != 23):
 		return None
 	
 	while True:
