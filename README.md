@@ -115,6 +115,9 @@ Krux will only sign transactions for multisig wallets, so make sure you have fir
 ### Instructions for Specter Desktop
 Signing is straightforward, you just need to create a transaction to send funds somewhere in Specter via the `Send` section, then select to sign off on it with your Krux. Specter will display a QR code for the unsigned PSBT that you can read in with your Krux at which point you will see details about the transaction to confirm they match. It will then ask you for confirmation to sign the PSBT and will then generate its own QR code that you can either display directly back to Specter or print for use at a later time. Once all necessary cosigners have signed the PSBT, you can choose to broadcast it from Specter to the Bitcoin network.
 
+## Checking Addresses
+Once you have imported a multisig wallet, you can use Krux's QR code reader to check that a receive address belongs to the multisig wallet. Normally, you would just copy a receive address shown by your coordinator software and send coins to that address; this option exists as a way to independently verify that your multisig coordinator is giving you a valid address before you move coins.
+
 ## Printing QRs
 Krux has the ability to print all QR codes it generates, including mnemonic, xpub, multisig policy, and signed PSBT, via a locally-connected thermal printer over its serial port. Any of [these printers from Adafruit](https://www.adafruit.com/?q=thermal+printer) should do, but [this starter pack](https://www.adafruit.com/product/600) would be the quickest way to get started. You'll also need a conversion cable with a 4-pin female Grove connector on one end (to connect to the Krux) and 4-pin male jumpers on the other end (to connect to the printer).
 
