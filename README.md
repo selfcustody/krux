@@ -1,4 +1,4 @@
-# Krux
+# Krux ✝
 Krux is an open-source, airgapped bitcoin hardware signer built with off-the-shelf parts that never stores your keys to disk and functions solely as a cosigner in a multisignature setup. 
 
 Every time you use Krux, you need to tell it your key to proceed. When you shut it down, it fully wipes its memory. This means that it's possible to act on behalf of every cosigner in a multisig with one device.
