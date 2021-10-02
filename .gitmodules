@@ -1,12 +1,12 @@
 [submodule "embit"]
 	path = embit
-	url = git@github.com:diybitcoinhardware/embit
+	url = ../../diybitcoinhardware/embit
 [submodule "MaixPy/components/micropython/port/src/secp256k1-embedded"]
 	path = MaixPy/components/micropython/port/src/secp256k1-embedded
-	url = git@github.com:diybitcoinhardware/secp256k1-embedded
+	url = ../../diybitcoinhardware/secp256k1-embedded
 [submodule "urtypes"]
 	path = urtypes
-	url = git@github.com:jreesun/urtypes
+	url = ../urtypes
 [submodule "foundation-ur-py"]
 	path = foundation-ur-py
-	url = git@github.com:Foundation-Devices/foundation-ur-py
+	url = ../../Foundation-Devices/foundation-ur-py
