@@ -2,6 +2,7 @@
 ###################
 *.o
 *.a
+!libmaix_asr.a
 *.elf
 *.bin
 *.map
