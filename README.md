@@ -49,6 +49,12 @@ git pull --recurse-submodules
 ## Requirements
 Vagrant
 
+Make sure that the user who needs to access the M5StickV via USB needs to be added to the group vboxusers. Either use the OS user management tools or run the following command as root:
+
+```
+sudo usermod -a -G vboxusers username
+```
+
 ## Initialize Vagrant
 After you have installed Vagrant, run the following in this directory to spin up a new VM:
 ```bash
