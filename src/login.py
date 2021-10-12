@@ -72,9 +72,13 @@ class Login(Page):
 			try:
 				words = urtypes.crypto.BIP39.from_cbor(data.cbor).words
 			except:
-				data = urtypes.Bytes.from_cbor(data.cbor).data.decode()
-		if not words:
-			words = data.split(' ')
+				words = urtypes.Bytes.from_cbor(data.cbor).data.decode().split(' ')
+		else:
+			if ' ' in data:
+				words = data.split(' ')
+			elif len(data) == 48 or len(data) == 96:
+				for i in range(0, len(data), 4):
+					words.append(WORDLIST[int(data[i:i+4])])
 
 		if not words or (len(words) != 12 and len(words) != 24):
 			self.ctx.display.flash_text('Invalid mnemonic\nlength', lcd.RED)
