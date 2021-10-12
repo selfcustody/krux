@@ -68,6 +68,13 @@ vagrant reload && vagrant ssh -c 'cd /vagrant; ./krux flash-firmware'
 ```
 Note: `vagrant reload` is necessary in order for the newly-inserted USB device to be detected and passed through to the Vagrant VM on startup.
 
+Make sure that the user who needs to access the M5StickV via USB has been added to the group vboxusers. Either use the OS user management tools or run the following command as root:
+
+```
+sudo usermod -a -G vboxusers username
+```
+
+
 ## Flash the software onto a microSD card
 Plug a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test) into your computer and make sure to format it as FAT-32. Take note of its path (after mounting), for example `/Volumes/SD`.
 
