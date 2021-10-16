@@ -22,20 +22,20 @@
 from board import board_info
 from fpioa_manager import fm
 from machine import UART
-from thermal import Adafruit_Thermal
+from thermal import AdafruitThermalPrinter
 
 class Printer:
 	def __init__(self, baudrate, paper_width):
 		self.paper_width = paper_width
-		self.thermal_printer = None
+
 		try:
 			fm.register(board_info.CONNEXT_A, fm.fpioa.UART2_TX, force=False)
 			fm.register(board_info.CONNEXT_B, fm.fpioa.UART2_RX, force=False)
-			thermal_printer = Adafruit_Thermal(UART.UART2, baudrate, heattime=255)
-			if thermal_printer.hasPaper():
-				self.thermal_printer = thermal_printer
+			self.thermal_printer = AdafruitThermalPrinter(UART.UART2, baudrate)
+			if not self.thermal_printer.has_paper():
+				raise ValueError('missing paper')
 		except:
-			pass
+			self.thermal_printer = None
 
 	def qr_data_width(self):
 		""" This method returns a smaller width for the QR to be generated
@@ -49,15 +49,15 @@ class Printer:
 		if not self.is_connected():
 			return
 		# A full reset zeroes all memory buffers
-		self.thermal_printer.fullReset()
-   
+		self.thermal_printer.full_reset()
+
 	def is_connected(self):
 		return self.thermal_printer is not None
 
 	def print_qr_code(self, qr_code):
 		""" Prints a QR code, scaling it up as large as possible"""
 		if not self.is_connected():
-			raise ValueError('No printer found')
+			raise ValueError('no printer found')
 
 		lines = qr_code.strip().split('\n')
   
@@ -71,10 +71,9 @@ class Printer:
 			line_bytes = bitstring_to_bytes(line_y)
 			# Print height * scale lines out to scale by 
 			for _ in range(scale):
-				self.thermal_printer.writeBytes(18, 42, 1, len(line_bytes))
-				self.thermal_printer.uart.write(line_bytes)
-				self.thermal_printer.timeoutSet(self.thermal_printer.dotPrintTime)
-		self.thermal_printer.prevByte = '\n'
+				self.thermal_printer.write_bytes(18, 42, 1, len(line_bytes))
+				self.thermal_printer.write_bytes(line_bytes)
+				self.thermal_printer.timeout_set(self.thermal_printer.dot_print_time)
 		self.thermal_printer.feed(3)
    
 def bitstring_to_bytes(s):
