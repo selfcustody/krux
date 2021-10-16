@@ -384,9 +384,6 @@ extern const struct _mp_obj_module_t mp_module_touchscreen;
 #if CONFIG_MICROPYTHON_QRCODE_ENABLE
     #define MODULE_QRCODE_ENABLED (1)
 #endif
-#if CONFIG_MICROPYTHON_UEMBIT_ENABLE
-    #define MODULE_UEMBIT_ENABLED (1)
-#endif
 /////////////////////////////////////////////////////////////////////////////////
 
 #define MICROPY_PORT_BUILTIN_MODULES \
