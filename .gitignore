@@ -49,3 +49,9 @@ genrst/
 .DS_Store
 
 .vagrant
+
+# Krux User Settings
+src/settings/log.level.txt
+src/settings/network.txt
+src/settings/printer.baudrate.txt
+src/settings/printer.paper_width.txt
