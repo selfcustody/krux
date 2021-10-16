@@ -380,13 +380,6 @@ if(CONFIG_COMPONENT_MICROPYTHON_ENABLE)
         append_srcs_dir(ADD_SRCS "port/src/qrcode/qrcodegen")
         append_srcs_dir(ADD_SRCS "port/src/qrcode")
     endif()
-    if(CONFIG_MICROPYTHON_UEMBIT_ENABLE)
-        list(APPEND ADD_INCLUDE "${mpy_port_dir}/src/uembit/include"
-                                "${mpy_port_dir}/src/uembit"
-                                )
-        append_srcs_dir(ADD_SRCS "port/src/uembit/src")
-        append_srcs_dir(ADD_SRCS "port/src/uembit")
-    endif()
     if(CONFIG_MICROPY_SSL_ENABLE)
         list(APPEND ADD_INCLUDE "${mpy_core_dir}/lib/mbedtls/include")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE='\"${mpy_port_dir}/src/mbedtls/include/mbedtls_config.h\"'")
