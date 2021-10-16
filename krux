@@ -72,6 +72,7 @@ elif [ "$1" == "flash-software" ]; then
         panic "Path is invalid or not a directory"
     fi
 
+    rm -rf "$2"/*
     cp -r build/. "$2"
 elif [ "$1" == "clean" ]; then
     rm -rf build
