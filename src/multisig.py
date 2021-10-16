@@ -23,7 +23,6 @@ from baseconv import base_encode, try_decode
 from embit import psbt
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
-from qr import FORMAT_PMOFN, FORMAT_UR
 from ur.ur import UR
 import urtypes
 from urtypes import BYTES
@@ -33,7 +32,7 @@ try:
 	import ujson as json
 except ImportError:
 	import json
- 
+
 class MultisigWallet:
 	def __init__(self, wallet_data, qr_format):
 		self.wallet_data = wallet_data
@@ -44,7 +43,7 @@ class MultisigWallet:
 		self.load(wallet_data)
 
 		if not self.descriptor or not self.descriptor.is_basic_multisig:
-			raise ValueError('Not multisig')
+			raise ValueError('not multisig')
 
 		# If child derivation info is missing to generate receive addresses, 
   		# use the default scheme
@@ -61,7 +60,7 @@ class MultisigWallet:
 			self.cosigners = sorted(self.cosigners)
 
 		if not self.label:
-			self.label = '%d of %d multisig' % (self.m, self.n)
+			self.label = ( '%d of %d multisig' ) % (self.m, self.n)
 
 	def load(self, wallet_data):
 		if isinstance(wallet_data, UR):
@@ -102,7 +101,7 @@ class MultisigWallet:
 			if len(key_vals) > 0:
 				script = key_vals[key_vals.index('Format') + 1].lower()
 				if script != 'p2wsh':
-					raise ValueError('Invalid script type: ' + script)
+					raise ValueError('invalid script type: %s' % script)
 					
 				policy = key_vals[key_vals.index('Policy') + 1]
 				m = int(policy[:policy.index('of')].strip())
@@ -116,7 +115,7 @@ class MultisigWallet:
 						keys.append((xpub, fingerprint))
 		
 				if len(keys) != n:
-					raise ValueError('Expected %d keys, found %d' % (n, len(keys)))
+					raise ValueError('expected %d keys, found %d' % (n, len(keys)))
  
 				derivation = key_vals[key_vals.index('Derivation') + 1]
 
@@ -129,7 +128,7 @@ class MultisigWallet:
 				return
 		except: pass
 
-		raise ValueError('Invalid wallet format')
+		raise ValueError('invalid wallet format')
 
 	def wallet_qr(self):
 		return (self.wallet_data, self.wallet_qr_format)

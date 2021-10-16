@@ -47,7 +47,7 @@ class Menu:
 				except Exception as e:
 					self.ctx.log.exception('Exception occurred in menu item "%s"', self.menu[selected_item_index][0])
 					lcd.clear()
-					self.ctx.display.draw_centered_text('Error:\n%s' % repr(e), lcd.RED)
+					self.ctx.display.draw_centered_text(( 'Error:\n%s' ) % repr(e), lcd.RED)
 					self.ctx.input.wait_for_button()
 			elif btn == BUTTON_PAGE:
 				selected_item_index = (selected_item_index + 1) % len(self.menu)

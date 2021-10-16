@@ -75,13 +75,13 @@ def parse_multisig(sc):
 	# OP_m <len:pubkey> ... <len:pubkey> OP_n OP_CHECKMULTISIG
 	# check min size
 	if len(sc.data) < 37 or sc.data[-1] != 0xAE:
-		raise ValueError('Not a multisig script')
+		raise ValueError('not a multisig script')
 	m = sc.data[0] - 0x50
 	if m < 1 or m > 16:
-		raise ValueError('Invalid multisig script')
+		raise ValueError('invalid multisig script')
 	n = sc.data[-2] - 0x50
 	if n < m or n > 16:
-		raise ValueError('Invalid multisig script')
+		raise ValueError('invalid multisig script')
 	s = io.BytesIO(sc.data)
 	# drop first byte
 	s.read(1)
@@ -90,11 +90,11 @@ def parse_multisig(sc):
 	for i in range(n):
 		char = s.read(1)
 		if char != b'\x21':
-			raise ValueError('Invalid pubkey')
+			raise ValueError('invalid pubkey')
 		pubkeys.append(ec.PublicKey.parse(s.read(33)))
 	# check that nothing left
 	if s.read() != sc.data[-2:]:
-		raise ValueError('Invalid multisig script')
+		raise ValueError('invalid multisig script')
 	return m, n, pubkeys
 
 def get_cosigners(pubkeys, derivations, xpubs):
@@ -102,7 +102,7 @@ def get_cosigners(pubkeys, derivations, xpubs):
 	cosigners = []
 	for i, pubkey in enumerate(pubkeys):
 		if pubkey not in derivations:
-			raise ValueError('Missing derivation')
+			raise ValueError('missing derivation')
 		der = derivations[pubkey]
 		for xpub in xpubs:
 			origin_der = xpubs[xpub]
@@ -139,7 +139,7 @@ def get_tx_policy(tx, wallet):
 		else:
 			# check policy is the same
 			if policy != inp_policy:
-				raise RuntimeError('Mixed inputs in the transaction')
+				raise RuntimeError('mixed inputs in the transaction')
 	return policy
 
 def get_tx_input_amount(tx):
@@ -149,7 +149,7 @@ def get_tx_input_amount(tx):
 	return inp_amount
 
 def get_tx_input_amount_message(tx):
-	return 'Input:\n%.8f BTC' % round(get_tx_input_amount(tx) / SATS_PER_BTC, 8)
+	return ( 'Input:\n%.8f BTC' ) % round(get_tx_input_amount(tx) / SATS_PER_BTC, 8)
 
 def get_tx_output_amount_messages(tx, wallet, network='main'):
 	messages = []
@@ -177,7 +177,7 @@ def get_tx_output_amount_messages(tx, wallet, network='main'):
 			elif policy['type'] == 'p2sh-p2wsh':
 				sc = script.p2sh(script.p2wsh(out.witness_script))
 			else:
-				raise RuntimeError('Unexpected single sig')
+				raise RuntimeError('unexpected single sig')
 			if sc.data == tx.tx.vout[i].script_pubkey.data:
 				is_change = True
 		if is_change:
@@ -185,12 +185,11 @@ def get_tx_output_amount_messages(tx, wallet, network='main'):
 		else:
 			spending += tx.tx.vout[i].value
 			messages.append(
-				'Sending:\n%.8f BTC\n\nTo:\n%s'
+				( 'Sending:\n%.8f BTC\n\nTo:\n%s' )
 				% (round(tx.tx.vout[i].value / SATS_PER_BTC, 8), tx.tx.vout[i].script_pubkey.address(network=NETWORKS[network]))
 			)
 	fee = inp_amount - change - spending
-	messages.append('Fee:\n%.8f BTC' % round(fee / SATS_PER_BTC, 8))
-	messages.sort(reverse=True)
+	messages.append(( 'Fee:\n%.8f BTC' ) % round(fee / SATS_PER_BTC, 8))
 	return messages
 
 def get_policy(scope, scriptpubkey, xpubs):

@@ -23,7 +23,7 @@ import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from page import Page
-from menu import Menu, MENU_CONTINUE, MENU_EXIT
+from menu import MENU_SHUTDOWN, Menu, MENU_CONTINUE, MENU_EXIT
 from input import BUTTON_ENTER, BUTTON_PAGE
 from qr import FORMAT_UR
 from wallet import Wallet, pick_final_word
@@ -33,18 +33,18 @@ class Login(Page):
 	def __init__(self, ctx):
 		Page.__init__(self, ctx)
 		self.menu = Menu(ctx, [
-			('Load Mnemonic', self.open_wallet),
-			('About', self.about),
-			('Shutdown', self.shutdown),
+			(( 'Load Mnemonic' ), self.open_wallet),
+			(( 'About' ), self.about),
+			(( 'Shutdown' ), self.shutdown),
 		])
 
 	def open_wallet(self):
 		submenu = Menu(self.ctx, [
-			('Via QR Code', self.open_wallet_with_qr_code),
-			('Via Text', self.open_wallet_with_text),
-			('Via Numbers', self.open_wallet_with_digits),
-			('Via Bits', self.open_wallet_with_bits),
-			('Cancel', lambda: MENU_EXIT)
+			(( 'Via QR Code' ), self.open_wallet_with_qr_code),
+			(( 'Via Text' ), self.open_wallet_with_text),
+			(( 'Via Numbers' ), self.open_wallet_with_digits),
+			(( 'Via Bits' ), self.open_wallet_with_bits),
+			(( 'Back' ), lambda: MENU_EXIT)
 		])
 		index, status = submenu.run_loop()
 		if index == len(submenu.menu)-1:
@@ -53,10 +53,10 @@ class Login(Page):
   
 	def open_wallet_with_words(self, words):
 		self.display_mnemonic(words)
-		self.ctx.display.draw_hcentered_text('Continue?', offset_y=220)
+		self.ctx.display.draw_hcentered_text(( 'Continue?' ), offset_y=220)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
-			self.ctx.display.flash_text('Loading..')
+			self.ctx.display.flash_text(( 'Loading..' ))
 			self.ctx.wallet = Wallet(' '.join(words), network=NETWORKS[self.ctx.net])
 			return MENU_EXIT
 		return MENU_CONTINUE
@@ -64,7 +64,7 @@ class Login(Page):
 	def open_wallet_with_qr_code(self):
 		data, qr_format = self.capture_qr_code()
 		if data is None:
-			self.ctx.display.flash_text('Failed to load mnemonic', lcd.RED)
+			self.ctx.display.flash_text(( 'Failed to load\nmnemonic' ), lcd.RED)
 			return MENU_CONTINUE
 
 		words = []
@@ -81,27 +81,27 @@ class Login(Page):
 					words.append(WORDLIST[int(data[i:i+4])])
 
 		if not words or (len(words) != 12 and len(words) != 24):
-			self.ctx.display.flash_text('Invalid mnemonic\nlength', lcd.RED)
+			self.ctx.display.flash_text(( 'Invalid mnemonic\nlength' ), lcd.RED)
 			return MENU_CONTINUE
 		return self.open_wallet_with_words(words)
 
 	def open_wallet_with_text(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each\nword of your\nBIP-39 mnemonic.')
-		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
+		self.ctx.display.draw_hcentered_text(( 'Enter each\nword of your\nBIP-39 mnemonic.' ))
+		self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
 			for i in range(24):
 				if i == 12:
 					lcd.clear()
-					self.ctx.display.draw_centered_text('Done?')
+					self.ctx.display.draw_centered_text(( 'Done?' ))
 					btn = self.ctx.input.wait_for_button()
 					if btn == BUTTON_ENTER:
 						break
   
 				word = ''
 				while True:
-					word = self.capture_letters_from_keypad('Word ' + str(i+1))
+					word = self.capture_letters_from_keypad(( 'Word %d' ) % (i+1))
 					if word in WORDLIST:
 						break
 					# If the first 'word' is 11 a's in a row, we're testing and just want the test words
@@ -130,21 +130,21 @@ class Login(Page):
 	
 	def open_wallet_with_digits(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each\nword of your\nBIP-39 mnemonic\nas a number from\n1 to 2048.')
-		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
+		self.ctx.display.draw_hcentered_text(( 'Enter each\nword of your\nBIP-39 mnemonic\nas a number from\n1 to 2048.' ))
+		self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
 			for i in range(24):
 				if i == 12:
 					lcd.clear()
-					self.ctx.display.draw_centered_text('Done?')
+					self.ctx.display.draw_centered_text(( 'Done?' ))
 					btn = self.ctx.input.wait_for_button()
 					if btn == BUTTON_ENTER:
 						break
   
 				digits = ''
 				while True:
-					digits = self.capture_digits_from_numpad('Word ' + str(i+1))
+					digits = self.capture_digits_from_numpad(( 'Word %d' ) % (i+1))
 					if int(digits) >= 1 and int(digits) <= 2048:
 						break
 					# If the first 'word' is 11 1's in a row, we're testing and just want the test words
@@ -176,21 +176,21 @@ class Login(Page):
 
 	def open_wallet_with_bits(self):
 		words = []
-		self.ctx.display.draw_hcentered_text('Enter each\nword of your\nBIP-39 mnemonic\nas a series of\nbinary digits.')
-		self.ctx.display.draw_hcentered_text('Proceed?', offset_y=200)
+		self.ctx.display.draw_hcentered_text(( 'Enter each\nword of your\nBIP-39 mnemonic\nas a series of\nbinary digits.' ))
+		self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
 			for i in range(24):
 				if i == 12:
 					lcd.clear()
-					self.ctx.display.draw_centered_text('Done?')
+					self.ctx.display.draw_centered_text(( 'Done?' ))
 					btn = self.ctx.input.wait_for_button()
 					if btn == BUTTON_ENTER:
 						break
   
 				bits = ''
 				while True:
-					bits = self.capture_bits_from_numpad('Word ' + str(i+1))
+					bits = self.capture_bits_from_numpad(( 'Word %d' ) % (i+1))
 					if len(bits) == 11:
 						break
  
@@ -207,11 +207,11 @@ class Login(Page):
 		return MENU_CONTINUE
 
 	def about(self):
-		networks = list(NETWORKS.keys())
+		networks = ['main', 'test']
 
 		while True:
 			lcd.clear()
-			self.ctx.display.draw_centered_text('Krux\n\n\nVersion\n%s\n\nNetwork\n%snet' % (self.ctx.version, self.ctx.net))
+			self.ctx.display.draw_centered_text(( 'Krux\n\n\nVersion\n%s\n\nNetwork\n%snet' ) % (self.ctx.version, self.ctx.net))
 
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_PAGE:

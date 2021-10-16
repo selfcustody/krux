@@ -42,14 +42,28 @@ panic() {
 }
 
 if [ "$1" == "build-firmware" ]; then
-    docker build . -t krux-firmware
+    docker build . -t krux-builder
 elif [ "$1" == "flash-firmware" ]; then
     usb_device_name="$(getdevice 0403:6001)"
     if [ -z "$usb_device_name" ]; then
         panic "Failed to find device via USB. Is it connected and powered on?"
     fi
     wd="/src/MaixPy/projects/maixpy_m5stickv"
-    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$wd" -it krux-firmware python3 project.py -B goE -p /dev/ttyUSB0 -b 1500000 -S flash
+    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$wd" -it krux-builder python3 project.py -B goE -p /dev/ttyUSB0 -b 1500000 -S flash
+elif [ "$1" == "build-software" ]; then
+    locale="en-US"
+    if [ ! -z "$2" ]; then
+        locale="$2"
+    fi
+
+    mkdir -p /vagrant/build
+    docker run -v /vagrant/build:/krux --rm -w "/src" -it krux-builder /bin/bash -c "rm -rf /krux/* && \
+        cp -r src/. /krux && \
+        cp -r embit/src/embit /krux && \
+        cp -r urtypes/src/urtypes /krux && \
+        cp -r foundation-ur-py/ur /krux && \
+        cp LICENSE.md /krux/LICENSE.md && \
+        cd i18n && python3 i18n.py translate "$locale" /krux"
 elif [ "$1" == "flash-software" ]; then
     if [ -z "$2" ]; then
         panic "microSD card path must be provided"
@@ -58,10 +72,7 @@ elif [ "$1" == "flash-software" ]; then
         panic "Path is invalid or not a directory"
     fi
 
-    rm -rf "$2"/*
-    cp -r src/. "$2"
-    cp -r embit/src/embit "$2"
-    cp -r urtypes/src/urtypes "$2"
-    cp -r foundation-ur-py/ur "$2"
-    cp LICENSE.md "$2"/LICENSE.md
+    cp -r build/. "$2"
+elif [ "$1" == "clean" ]; then
+    rm -rf build
 fi

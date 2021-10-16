@@ -68,17 +68,30 @@ vagrant reload && vagrant ssh -c 'cd /vagrant; ./krux flash-firmware'
 ```
 Note: `vagrant reload` is necessary in order for the newly-inserted USB device to be detected and passed through to the Vagrant VM on startup.
 
-Make sure that the user who needs to access the M5StickV via USB has been added to the group vboxusers. Either use the OS user management tools or run the following command as root:
+If this command fails with the error `Failed to find device via USB. Is it connected and powered on?`, make sure that the user who needs to access the M5StickV via USB has been added to the group `vboxusers`. Either use the OS user management tools or run the following command:
 
 ```
 sudo usermod -a -G vboxusers username
 ```
 
+## Build the software
+To build the software, run the following:
+```
+vagrant ssh -c 'cd /vagrant; ./krux build-software en-US'
+```
+
+Prefer a different language? You can replace `en-US` in the command above with one of the following supported locales:
+
+- en-US (English)
+- de-DE (German)
+- Are we missing one? Make a PR!
+
+Note that due to memory constraints of the device, the translations for the language you wish to use must be baked into the software at this step and can't be changed at runtime.
 
 ## Flash the software onto a microSD card
 Plug a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test) into your computer and make sure to format it as FAT-32. Take note of its path (after mounting), for example `/Volumes/SD`.
 
-To install, simply copy over the contents of the `src` directory onto the root of the card, or run:
+To install, simply copy over the *contents* of the `build` directory onto the root of the card, or run:
 ```bash
 ./krux flash-software /Volumes/SD
 ```

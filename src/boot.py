@@ -40,7 +40,7 @@ logging.basicConfig(
 
 ctx = Context()
 
-ctx.display.flash_text(settings.load('splash', 'Krux', strip=False))
+ctx.display.flash_text(settings.load('splash', ( 'Krux' ), strip=False))
 
 while True:
 	if not Login(ctx).run():
@@ -49,7 +49,7 @@ while True:
 	if not Home(ctx).run():
 		break
 	
-ctx.display.flash_text('Shutting down..')
+ctx.display.flash_text(( 'Shutting down..' ))
 
 ctx.clear()
   
