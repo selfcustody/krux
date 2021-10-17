@@ -130,9 +130,9 @@ class Display:
 				key = x + y * 3
 				key_label = str(key)
 				if key == 10:
-					key_label = 'Del'
+					key_label = ( 'Del' )
 				elif key == 11:
-					key_label = 'Go'
+					key_label = ( 'Go' )
 				lcd.draw_string(DEFAULT_PADDING + 10 + x * self.font_size * 6, offset_y + 40 + y * self.font_size * 4, key_label, color, lcd.BLACK)
 				if key == selected_key:
 					lcd.draw_string(DEFAULT_PADDING + x * self.font_size * 6, offset_y + 40 + y * self.font_size * 4, '>', color, lcd.BLACK)
@@ -145,9 +145,9 @@ class Display:
 				key = x + y * 5
 				key_label = chr(ord('a') + key)
 				if key == 26:
-					key_label = 'Del'
+					key_label = ( 'Del' )
 				elif key == 27:
-					key_label = 'Go'
+					key_label = ( 'Go' )
 				elif key > 27:
 					continue
 				lcd.draw_string(DEFAULT_PADDING - 5 + 10 + x * self.font_size * 4, offset_y + 40 + y * self.font_size * 3, key_label, color, lcd.BLACK)

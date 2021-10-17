@@ -25,7 +25,7 @@ from embit.wordlists.bip39 import WORDLIST
 from input import BUTTON_ENTER, BUTTON_PAGE
 from display import DEFAULT_PADDING
 from menu import MENU_SHUTDOWN
-from qr import FORMAT_UR, to_qr_codes
+from qr import to_qr_codes
 from ur.ur import UR
 
 QR_ANIMATION_INTERVAL_MS = const(100)
@@ -65,8 +65,8 @@ class Page:
 			self.ctx.display.draw_hcentered_text(bits, offset_y=50)
 			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 0 else '') + '0', offset_y=90)
 			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 1 else '') + '1', offset_y=110)
-			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 2 else '') + 'Del', offset_y=130)
-			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 3 else '') + 'Go', offset_y=150)
+			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 2 else '') + ( 'Del' ), offset_y=130)
+			self.ctx.display.draw_hcentered_text(('> ' if selected_key == 3 else '') + ( 'Go' ), offset_y=150)
    
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
@@ -168,7 +168,7 @@ class Page:
 			if title is not None:
 				self.ctx.display.draw_hcentered_text(title, offset_y=140)
 			else:
-				self.ctx.display.draw_hcentered_text('Part ' + str(i+1) + ' / ' + str(num_parts), offset_y=175)
+				self.ctx.display.draw_hcentered_text(( 'Part %d / %d' ) % (i+1, num_parts), offset_y=175)
 			i = (i + 1) % num_parts
 			btn = self.ctx.input.wait_for_button(block=manual or num_parts == 1)
 			done = btn == BUTTON_ENTER
@@ -178,13 +178,13 @@ class Page:
 	def display_mnemonic(self, words):
 		word_list = [str(i+1) + '.' + ('  ' if i + 1 < 10 else ' ') + word for i, word in enumerate(words)]
 		lcd.clear()
-		self.ctx.display.draw_hcentered_text('BIP39 Mnemonic')
+		self.ctx.display.draw_hcentered_text(( 'BIP39 Mnemonic' ))
 		for i, word in enumerate(word_list[:12]):
 			lcd.draw_string(DEFAULT_PADDING, 35 + (i * self.ctx.display.line_height()), word, lcd.WHITE, lcd.BLACK)
 		if len(word_list) > 12:
 			self.ctx.input.wait_for_button()
 			lcd.clear()
-			self.ctx.display.draw_hcentered_text('BIP39 Mnemonic')
+			self.ctx.display.draw_hcentered_text(( 'BIP39 Mnemonic' ))
 			for i, word in enumerate(word_list[12:]):
 				lcd.draw_string(DEFAULT_PADDING, 35 + (i * self.ctx.display.line_height()), word, lcd.WHITE, lcd.BLACK)
     
