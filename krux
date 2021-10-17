@@ -57,13 +57,13 @@ elif [ "$1" == "build-software" ]; then
     fi
 
     mkdir -p /vagrant/build
-    docker run -v /vagrant/build:/krux --rm -w "/src" -it krux-builder /bin/bash -c "rm -rf /krux/* && \
-        cp -r src/. /krux && \
-        cp -r embit/src/embit /krux && \
-        cp -r urtypes/src/urtypes /krux && \
-        cp -r foundation-ur-py/ur /krux && \
-        cp LICENSE.md /krux/LICENSE.md && \
-        cd i18n && python3 i18n.py translate "$locale" /krux"
+    docker run -v /vagrant:/krux --rm -w "/krux" -it krux-builder /bin/bash -c "rm -rf build/* && \
+        cp -r src/. build && \
+        cp -r embit/src/embit build && \
+        cp -r urtypes/src/urtypes build && \
+        cp -r foundation-ur-py/ur build && \
+        cp LICENSE.md build/LICENSE.md && \
+        cd i18n && python3 i18n.py translate "$locale" /krux/build"
 elif [ "$1" == "flash-software" ]; then
     if [ -z "$2" ]; then
         panic "microSD card path must be provided"
