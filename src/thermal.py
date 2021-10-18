@@ -13,7 +13,6 @@
 # Python port by Phil Burgess for Adafruit Industries.
 # MIT license, all text above must be included in any redistribution.
 #*************************************************************************
-
 import time
 from machine import UART
 
