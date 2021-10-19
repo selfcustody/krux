@@ -1,5 +1,5 @@
 # Krux ✝
-Krux is an open-source, airgapped bitcoin hardware signer built with off-the-shelf parts that never stores your keys to disk and functions solely as a cosigner in a multisignature setup. 
+Krux is an open-source, airgapped bitcoin hardware signer built with off-the-shelf parts that never stores your keys to disk and functions solely as a signer for multisignature and single-key wallets. 
 
 Every time you use Krux, you need to tell it your key to proceed. When you shut it down, it fully wipes its memory. This means that it's possible to act on behalf of every cosigner in a multisig with one device.
 
@@ -15,17 +15,17 @@ Every time you use Krux, you need to tell it your key to proceed. When you shut 
 
 To use Krux, you will need to buy an [M5StickV](https://shop.m5stack.com/products/stickv). The M5StickV was chosen because it has everything you would need for a hardware wallet in one small device (processor, battery, buttons, screen, camera, and SD card slot), has no WiFi or Bluetooth functionality (for security), and is cheap (< $50).
 
-All operations in Krux are done via QR code. It loads your BIP-39 mnemonic, imports a multisig wallet descriptor, and signs transactions all via QR code. It reads QR codes in with its camera and writes QR codes out to its screen or [to paper via an optional thermal printer attachment](#printing-qrs).
+All operations in Krux are done via QR code. It loads your BIP-39 mnemonic, imports a wallet descriptor, and signs transactions all via QR code. It reads QR codes in with its camera and writes QR codes out to its screen or [to paper via an optional thermal printer attachment](#printing-qrs).
 
-We don't want users to rely on Krux for anything except being a safe way to sign off on a multisig transaction when supplied a key. To this end, Krux will not generate new keys for you. Good random number generation is frought with peril, so we're sidestepping the issue by expecting you to [generate your own offline](https://vault12.rebelmouse.com/seed-phrase-generation-2650084084.html).
+We don't want users to rely on Krux for anything except being a safe way to sign off on a transaction when supplied a key. To this end, Krux will not generate new keys for you. Good random number generation is frought with peril, so we're sidestepping the issue by expecting you to [generate your own offline](https://vault12.rebelmouse.com/seed-phrase-generation-2650084084.html).
 
-Krux is built to work with both desktop and mobile multisignature coordinator software and currently has support for:
+Krux is built to work with both desktop and mobile coordinator software and currently has support for:
 - [Specter Desktop](https://specter.solutions/)
 - [Sparrow Wallet](https://www.sparrowwallet.com/)
 - [BlueWallet](https://bluewallet.io/)
 - [Electrum](https://electrum.org/)
 
-These applications let you create and manage your multisig wallet, generate receive addresses, and send funds by creating partially signed bitcoin transactions (PSBTs) that you can sign with your hardware wallets and signers, such as Krux.
+These applications let you create and manage your multisig or single-key wallets, generate receive addresses, and send funds by creating partially signed bitcoin transactions (PSBTs) that you can sign with your hardware wallets and signers, such as Krux.
 
 # Cloning and updating the repo
 This repo has some external dependencies that it manages as [submodules](https://www.git-scm.com/book/en/v2/Git-Tools-Submodules). By default, performing a `git clone` of a repo like this will not pull down the submodule code. Therefore, make sure to run the following the first time you clone this repo:
@@ -123,29 +123,31 @@ Enter each word of your BIP-39 mnemonic as an [11-bit bitstring](https://github.
 ### Method: QR
 It's unpleasant having to manually enter 12 or 24 words each time you want to use Krux. To remedy this you can instead use the device's camera to read a QR code containing the words (encoded as a single space-separated text string). You can either use an offline QR code generator for this (ideally on an airgapped device), or you can attach a thermal printer to your Krux and print out the mnemonic after opening your wallet via one of the manual methods first. Check out the [Printing QRs section](#printing-qrs) below for more information.
 
-## Importing a Multisig Wallet
+## Importing a Wallet
 ### Instructions for Specter Desktop
-To setup a new multisig wallet, you will need to first add Krux as a new device in Specter by exporting your Extended Master Public Key (xpub) to it. When adding to Specter, choose the `Other` device type and click `Scan QR Code`. Go to your Krux, select `Public Key (xpub)`, and scan the QR code. It should import as a `#0 Multisig Sig (Segwit)` key. Repeat this process for as many keys / hardware wallets as you want to be in the multisig setup.
+To setup a new wallet, you will need to first add Krux as a new device in Specter by exporting your Extended Master Public Key (xpub) to it. When adding to Specter, choose the `Other` device type and click `Scan QR Code`. On your Krux, once you enter your mnemonic you will be asked if you want to proceed with a `Single-key` or `Multisig` key. Once you have selected which you want, on the following menu select `Public Key (xpub)`, and scan the QR code that appears. It should import as either a `#0 Single Sig (Segwit)` or `#0 Multisig Sig (Segwit)` key based on what you chose in Krux earlier. Repeat this process for as many keys / devices as you want to be in the wallet.
 
-Once you've added all your devices to Specter, add a new wallet and select the devices you want to be in the multisig. A new wallet will then be created, which you will want to import into your Krux via `Multisig Wallet`. In Specter, navigate to the `Advanced` section and find `Export to Wallet` to display a QR code that Krux can read. Once loaded, you can then print this QR code to have as a backup.
+Once you've added all your devices to Specter, add a new wallet and select the devices you want to be in it. A new wallet will then be created, which you will want to load into your Krux via the `Wallet` menu item. In Specter, navigate to the `Advanced` section and find `Export to Wallet` to display a QR code that Krux can read. Once loaded, you can then print this QR code to have as a backup.
 
 ## Signing PSBTs
-Krux will only sign transactions for multisig wallets, so make sure you have first set up a multisig wallet and imported it into Krux before continuing.
+Krux can sign transactions (PSBTs) for multisig and single-key wallets, but they must first be created by one of the supported desktop or mobile coordinators above. 
+
+Note: Krux can sign the inputs of a PSBT that correspond to the given private key (mnemonic) regardless of whether or not the wallet for that key has been loaded. However, without the loaded wallet, Krux cannot validate that the multisig cosigners match or that the script type matches the one defined in your wallet. If you trust your coordinator software, this should be fine. Otherwise, loading the wallet via the `Wallet` menu item before signing is the safest option as it allows for stricter checks to be performed.
 
 ### Instructions for Specter Desktop
 Signing is straightforward, you just need to create a transaction to send funds somewhere in Specter via the `Send` section, then select to sign off on it with your Krux. Specter will display a QR code for the unsigned PSBT that you can read in with your Krux at which point you will see details about the transaction to confirm they match. It will then ask you for confirmation to sign the PSBT and will then generate its own QR code that you can either display directly back to Specter or print for use at a later time. Once all necessary cosigners have signed the PSBT, you can choose to broadcast it from Specter to the Bitcoin network.
 
 ## Checking Addresses
-Once you have imported a multisig wallet, you can use Krux's QR code reader to check that a receive address belongs to the multisig wallet. Normally, you would just copy a receive address shown by your coordinator software and send coins to that address; this option exists as a way to independently verify that your multisig coordinator is giving you a valid address before you move coins.
+Once you have loaded a wallet, you can use Krux's QR code reader to check that a receive address belongs to it. Normally, you would just copy a receive address shown by your coordinator software and send coins to that address; this option exists as a way to independently verify that your coordinator is giving you a valid address before you move coins.
 
 ## Printing QRs
-Krux has the ability to print all QR codes it generates, including mnemonic, xpub, multisig policy, and signed PSBT, via a locally-connected thermal printer over its serial port. Any of [these printers from Adafruit](https://www.adafruit.com/?q=thermal+printer) should do, but [this starter pack](https://www.adafruit.com/product/600) would be the quickest way to get started. You'll also need a conversion cable with a 4-pin female Grove connector on one end (to connect to the Krux) and 4-pin male jumpers on the other end (to connect to the printer).
+Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected thermal printer over its serial port. Any of [these printers from Adafruit](https://www.adafruit.com/?q=thermal+printer) should do, but [this starter pack](https://www.adafruit.com/product/600) would be the quickest way to get started. You'll also need a conversion cable with a 4-pin female Grove connector on one end (to connect to the Krux) and 4-pin male jumpers on the other end (to connect to the printer).
 
 Note: Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can override this by adding a `printer.baudrate.txt` file under `src/settings` with the correct rate, for example `19200`.
 
 Once connected and powered on, all screens that display a QR code will begin showing a follow-up screen asking if you want to `Print to QR?`. You can use the middle button to confirm or the right-side button to cancel.
 
-Originally, the idea was to print out a QR code of the BIP-39 mnemonic to enable faster wallet opening over the manual method of having to input each word. Then, we realized it would be useful to backup a wallet's multisig configuration on paper as well (since you need knowledge of all xpubs in a multisig wallet in order to spend from it). After that, we decided to just make it a feature across the board. Want to make a "multisig paper wallet" with codes for your mnemonic, xpub, and multisig wallet on one sheet? You can! Want to print out a signed PSBT and send it in the mail? You can!
+Originally, the idea was to print out a QR code of the BIP-39 mnemonic to enable faster wallet opening over the manual method of having to input each word. Then, we realized it would be useful to backup a wallet's multisig configuration on paper as well since you need knowledge of all xpubs in a multisig wallet in order to spend from it. After that, we decided to just make it a feature across the board. Want to make a "multisig paper wallet" with codes for your mnemonic, xpub, and multisig wallet on one sheet? You can! Want to print out a signed PSBT and send it in the mail? You can!
 
 Just be careful what you do with the codes, since most smartphones can now quickly and easily read QR codes. Treat your QR mnemonic the same way you would treat a plaintext copy of it.
 

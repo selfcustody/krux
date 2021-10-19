@@ -19,201 +19,144 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import io
-import random
-from binascii import hexlify
-from embit import bip32, bip39, ec, script
-from embit.wordlists.bip39 import WORDLIST
-from embit.psbt import DerivationPath
-from embit.networks import NETWORKS
-
-SATS_PER_BTC = const(100000000)
+from embit.descriptor.descriptor import Descriptor
+from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
+from ur.ur import UR
+import urtypes
+try:
+	import ujson as json
+except ImportError:
+	import json
 
 class Wallet:
-	def __init__(self, mnemonic, network=NETWORKS['test']):
-		self.mnemonic = mnemonic
-		self.network = network
-		self.root = bip32.HDKey.from_seed(bip39.mnemonic_to_seed(mnemonic), version=network['xprv'])
-		self.fingerprint = self.root.child(0).fingerprint
-		self.derivation = 'm/48h/%dh/0h/2h' % network['bip32'] # contains coin type - 0 for main, 1 for test
-		self.account = self.root.derive(self.derivation).to_public()
-		
-	def xpub(self):
-		return self.account.to_base58()
+	def __init__(self, key):
+		self.key = key
+		self.wallet_data = None
+		self.wallet_qr_format = None
+		self.descriptor = None
+		self.label = None
+		self.policy = None
+		if not self.key.multisig:
+			self.descriptor = Descriptor.from_string('wpkh(%s/{0,1}/*)' % self.key.xpub_btc_core())
+			self.label = ( 'Single-key' )
+			self.policy = { 'type': self.descriptor.scriptpubkey_type() }
+   
+	def is_multisig(self):
+		return self.key.multisig
 
-	def xpub_btc_core(self):
-		return '[%s%s]%s' % (
-			hexlify(self.fingerprint).decode('utf-8'),
-			self.derivation[1:], # remove leading m
-			self.account.to_base58()
-		)
-	
-	def zpub(self):
-		return self.account.to_base58(self.network['Zpub'])
+	def is_loaded(self):
+		return self.wallet_data is not None
 
-	def zpub_btc_core(self):
-		return '[%s%s]%s' % (
-			hexlify(self.fingerprint).decode('utf-8'),
-			self.derivation[1:], # remove leading m
-			self.account.to_base58(self.network['Zpub'])
-		)
+	def load(self, wallet_data, qr_format):  
+		descriptor, label = parse_wallet(wallet_data)
   
-def pick_final_word(words):
-	if (len(words) != 11 and len(words) != 23):
-		return None
+		if self.is_multisig():
+			if not descriptor.is_basic_multisig:
+				raise ValueError('not multisig')
+			if self.key.xpub() not in [key.key.to_base58() for key in descriptor.keys]:
+				raise ValueError('xpub not a cosigner')
+		else:
+			if not descriptor.key:
+				raise ValueError('not single-key')
+			if self.key.xpub() != descriptor.key.key.to_base58():
+				raise ValueError('xpub does not match')
+
+		self.wallet_data = wallet_data
+		self.wallet_qr_format = qr_format
+  		self.descriptor = descriptor
+		self.label = label
+  
+		if self.descriptor.key:
+			# If child derivation info is missing to generate receive addresses, 
+			# use the default scheme
+			if isinstance(self.descriptor.key, Key) or isinstance(self.descriptor.key, KeyHash):
+				if self.descriptor.key.allowed_derivation is None:
+					self.descriptor.key.allowed_derivation = AllowedDerivation.default()
+			if not self.label:
+				self.label = ( 'Single-key' )
+			self.policy = { 'type': self.descriptor.scriptpubkey_type() }
+		else:
+			# If child derivation info is missing to generate receive addresses, 
+			# use the default scheme
+			for i in range(len(self.descriptor.miniscript.args)):
+				key = self.descriptor.miniscript.args[i]
+				if isinstance(key, Key) or isinstance(key, KeyHash):
+					if key.allowed_derivation is None:
+						key.allowed_derivation = AllowedDerivation.default()
+	 
+			m = int(str(self.descriptor.miniscript.args[0]))
+			n = len(self.descriptor.keys)
+			cosigners = [key.key.to_base58() for key in self.descriptor.keys]
+			if self.descriptor.is_sorted:
+				cosigners = sorted(cosigners)
+			if not self.label:
+				self.label = ( '%d of %d multisig' ) % (self.m, self.n)
+			self.policy = { 'type': self.descriptor.scriptpubkey_type(), 'm': m, 'n': n, 'cosigners': cosigners }
+   
+	def wallet_qr(self):
+		return (self.wallet_data, self.wallet_qr_format)
+  
+def parse_wallet(wallet_data):
+	if isinstance(wallet_data, UR):
+		# Try to parse as a Crypto-Output type
+		try:
+			output = urtypes.crypto.Output.from_cbor(wallet_data.cbor)
+			return Descriptor.from_string(output.descriptor()), None
+		except: pass
+
+		# If a generic UR bytes object was sent, extract the data for further processing
+		try:
+			wallet_data = urtypes.Bytes.from_cbor(wallet_data.cbor).data
+		except: pass
+
+	# Process as a string
+	wallet_data = wallet_data.decode() if not isinstance(wallet_data, str) else wallet_data
+
+	# Try to parse as JSON and look for a 'descriptor' key
+	try:
+		wallet_json = json.loads(wallet_data)
+		if 'descriptor' in wallet_json:
+			descriptor = Descriptor.from_string(wallet_json['descriptor'])
+			label = wallet_json['label'] if 'label' in wallet_json else None
+			return descriptor, label
+	except: pass
+
+	# Try to parse as a key-value file
+	try:
+		key_vals = []
+		for word in wallet_data.split(':'):
+			for w in word.split('\n'):
+				w = w.strip()
+				if w != '':
+					key_vals.append(w)
+
+		if len(key_vals) > 0:
+			script = key_vals[key_vals.index('Format') + 1].lower()
+			if script != 'p2wsh':
+				raise ValueError('invalid script type: %s' % script)
+				
+			policy = key_vals[key_vals.index('Policy') + 1]
+			m = int(policy[:policy.index('of')].strip())
+			n = int(policy[policy.index('of')+2:].strip())
+			
+			keys = []
+			for i in range(len(key_vals)):
+				xpub = key_vals[i]
+				if xpub.lower().startswith('xpub') or xpub.lower().startswith('tpub'):
+					fingerprint = key_vals[i-1]
+					keys.append((xpub, fingerprint))
 	
-	while True:
-		word = random.choice(WORDLIST)
-		mnemonic = ' '.join(words) + ' ' + word
-		if bip39.mnemonic_is_valid(mnemonic):
-			return word
-	return None
-		
-# Functions below adapted from: https://github.com/SeedSigner/seedsigner
-def parse_multisig(sc):
-	"""Takes a script and extracts m,n and pubkeys from it"""
-	# OP_m <len:pubkey> ... <len:pubkey> OP_n OP_CHECKMULTISIG
-	# check min size
-	if len(sc.data) < 37 or sc.data[-1] != 0xAE:
-		raise ValueError('not a multisig script')
-	m = sc.data[0] - 0x50
-	if m < 1 or m > 16:
-		raise ValueError('invalid multisig script')
-	n = sc.data[-2] - 0x50
-	if n < m or n > 16:
-		raise ValueError('invalid multisig script')
-	s = io.BytesIO(sc.data)
-	# drop first byte
-	s.read(1)
-	# read pubkeys
-	pubkeys = []
-	for i in range(n):
-		char = s.read(1)
-		if char != b'\x21':
-			raise ValueError('invalid pubkey')
-		pubkeys.append(ec.PublicKey.parse(s.read(33)))
-	# check that nothing left
-	if s.read() != sc.data[-2:]:
-		raise ValueError('invalid multisig script')
-	return m, n, pubkeys
+			if len(keys) != n:
+				raise ValueError('expected %d keys, found %d' % (n, len(keys)))
 
-def get_cosigners(pubkeys, derivations, xpubs):
-	"""Returns xpubs used to derive pubkeys using global xpub field from psbt"""
-	cosigners = []
-	for i, pubkey in enumerate(pubkeys):
-		if pubkey not in derivations:
-			raise ValueError('missing derivation')
-		der = derivations[pubkey]
-		for xpub in xpubs:
-			origin_der = xpubs[xpub]
-			# check fingerprint
-			if origin_der.fingerprint == der.fingerprint:
-				# check derivation - last two indexes give pub from xpub
-				if origin_der.derivation == der.derivation[:-2]:
-					# check that it derives to pubkey actually
-					if xpub.derive(der.derivation[-2:]).key == pubkey:
-						# append strings so they can be sorted and compared
-						cosigners.append(xpub.to_base58())
-						break
-	return sorted(cosigners)
+			derivation = key_vals[key_vals.index('Derivation') + 1]
 
-def wallet_xpubs(wallet):
-	xpubs = {}
-	if wallet:
-		for descriptor_key in wallet.descriptor.keys:
-			xpubs[descriptor_key.key] = DerivationPath(descriptor_key.origin.fingerprint, descriptor_key.origin.derivation)
-	return xpubs
+			keys.sort()
+			keys = ['[%s/%s]%s' % (key[1], derivation[2:], key[0]) for key in keys]
 
-def get_tx_policy(tx, wallet):
-	# Check inputs of the transaction and check that they use the same script type
-	# For multisig parsed policy will look like this:
-	# { script_type: p2wsh, cosigners: [xpubs strings], m: 2, n: 3}
-	policy = None
-	for inp in tx.inputs:
-		# get policy of the input
-		inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, tx.xpubs if tx.xpubs else wallet_xpubs(wallet))
-		# if policy is None - assign current
-		if policy is None:
-			policy = inp_policy
-		# otherwise check that everything in the policy is the same
-		else:
-			# check policy is the same
-			if policy != inp_policy:
-				raise RuntimeError('mixed inputs in the transaction')
-	return policy
+			descriptor = Descriptor.from_string(('wsh(sortedmulti(%d,' % m) + ','.join(keys) + '))')
+			label = key_vals[key_vals.index('Name') + 1] if key_vals.index('Name') >= 0 else None
+			return descriptor, label
+	except: pass
 
-def get_tx_input_amount(tx):
-	inp_amount = 0
-	for inp in tx.inputs:
-		inp_amount += inp.witness_utxo.value
-	return inp_amount
-
-def get_tx_input_amount_message(tx):
-	return ( 'Input:\n%.8f BTC' ) % round(get_tx_input_amount(tx) / SATS_PER_BTC, 8)
-
-def get_tx_output_amount_messages(tx, wallet, network='main'):
-	messages = []
-	policy = get_tx_policy(tx, wallet)
-	inp_amount = get_tx_input_amount(tx)
-	spending = 0
-	change = 0
-	for i, out in enumerate(tx.outputs):
-		out_policy = get_policy(out, tx.tx.vout[i].script_pubkey, tx.xpubs if tx.xpubs else wallet_xpubs(wallet))
-		is_change = False
-		# if policy is the same - probably change
-		if out_policy == policy:
-			# double-check that it's change
-			# we already checked in get_cosigners and parse_multisig
-			# that pubkeys are generated from cosigners,
-			# and witness script is corresponding multisig
-			# so we only need to check that scriptpubkey is generated from
-			# witness script
-
-			# empty script by default
-			sc = script.Script(b'')
-			# multisig, we know witness script
-			if policy['type'] == 'p2wsh':
-				sc = script.p2wsh(out.witness_script)
-			elif policy['type'] == 'p2sh-p2wsh':
-				sc = script.p2sh(script.p2wsh(out.witness_script))
-			else:
-				raise RuntimeError('unexpected single sig')
-			if sc.data == tx.tx.vout[i].script_pubkey.data:
-				is_change = True
-		if is_change:
-			change += tx.tx.vout[i].value
-		else:
-			spending += tx.tx.vout[i].value
-			messages.append(
-				( 'Sending:\n%.8f BTC\n\nTo:\n%s' )
-				% (round(tx.tx.vout[i].value / SATS_PER_BTC, 8), tx.tx.vout[i].script_pubkey.address(network=NETWORKS[network]))
-			)
-	fee = inp_amount - change - spending
-	messages.append(( 'Fee:\n%.8f BTC' ) % round(fee / SATS_PER_BTC, 8))
-	return messages
-
-def get_policy(scope, scriptpubkey, xpubs):
-	"""Parse scope and get policy"""
-	# we don't know the policy yet, let's parse it
-	script_type = scriptpubkey.script_type()
-	# p2sh can be either legacy multisig, or nested segwit multisig
-	# or nested segwit singlesig
-	if script_type == 'p2sh':
-		if scope.witness_script is not None:
-			script_type = 'p2sh-p2wsh'
-		elif (
-			scope.redeem_script is not None
-			and scope.redeem_script.script_type() == 'p2wpkh'
-		):
-			script_type = 'p2sh-p2wpkh'
-	policy = {'type': script_type}
-	# expected multisig
-	if 'p2wsh' in script_type and scope.witness_script is not None:
-		m, n, pubkeys = parse_multisig(scope.witness_script)
-		# check pubkeys are derived from cosigners
-		cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
-		policy.update({'m': m, 'n': n, 'cosigners': cosigners})
-	return policy
-
-def is_multisig(policy):
-	return 'type' in policy and 'p2wsh' in policy['type'] and 'm' in policy and 'n' in policy and 'cosigners' in policy
+	raise ValueError('invalid wallet format')

@@ -23,27 +23,28 @@ import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from page import Page
-from menu import MENU_SHUTDOWN, Menu, MENU_CONTINUE, MENU_EXIT
+from menu import Menu, MENU_CONTINUE, MENU_EXIT
 from input import BUTTON_ENTER, BUTTON_PAGE
 from qr import FORMAT_UR
-from wallet import Wallet, pick_final_word
+from key import Key, pick_final_word
+from wallet import Wallet
 import urtypes
 
 class Login(Page):
 	def __init__(self, ctx):
 		Page.__init__(self, ctx)
 		self.menu = Menu(ctx, [
-			(( 'Load Mnemonic' ), self.open_wallet),
+			(( 'Load Mnemonic' ), self.load_key),
 			(( 'About' ), self.about),
 			(( 'Shutdown' ), self.shutdown),
 		])
 
-	def open_wallet(self):
+	def load_key(self):
 		submenu = Menu(self.ctx, [
-			(( 'Via QR Code' ), self.open_wallet_with_qr_code),
-			(( 'Via Text' ), self.open_wallet_with_text),
-			(( 'Via Numbers' ), self.open_wallet_with_digits),
-			(( 'Via Bits' ), self.open_wallet_with_bits),
+			(( 'Via QR Code' ), self.load_key_from_qr_code),
+			(( 'Via Text' ), self.load_key_from_text),
+			(( 'Via Numbers' ), self.load_key_from_digits),
+			(( 'Via Bits' ), self.load_key_from_bits),
 			(( 'Back' ), lambda: MENU_EXIT)
 		])
 		index, status = submenu.run_loop()
@@ -51,17 +52,22 @@ class Login(Page):
 			return MENU_CONTINUE
 		return status
   
-	def open_wallet_with_words(self, words):
+	def load_key_from_words(self, words):
 		self.display_mnemonic(words)
 		self.ctx.display.draw_hcentered_text(( 'Continue?' ), offset_y=220)
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
+			submenu = Menu(self.ctx, [
+				(( 'Single-key' ), lambda: MENU_EXIT),
+				(( 'Multisig' ), lambda: MENU_EXIT)
+			])
+			index, _ = submenu.run_loop()
 			self.ctx.display.flash_text(( 'Loading..' ))
-			self.ctx.wallet = Wallet(' '.join(words), network=NETWORKS[self.ctx.net])
+			self.ctx.wallet = Wallet(Key(' '.join(words), index == 1, network=NETWORKS[self.ctx.net]))
 			return MENU_EXIT
 		return MENU_CONTINUE
 
-	def open_wallet_with_qr_code(self):
+	def load_key_from_qr_code(self):
 		data, qr_format = self.capture_qr_code()
 		if data is None:
 			self.ctx.display.flash_text(( 'Failed to load\nmnemonic' ), lcd.RED)
@@ -83,9 +89,9 @@ class Login(Page):
 		if not words or (len(words) != 12 and len(words) != 24):
 			self.ctx.display.flash_text(( 'Invalid mnemonic\nlength' ), lcd.RED)
 			return MENU_CONTINUE
-		return self.open_wallet_with_words(words)
+		return self.load_key_from_words(words)
 
-	def open_wallet_with_text(self):
+	def load_key_from_text(self):
 		words = []
 		self.ctx.display.draw_hcentered_text(( 'Enter each\nword of your\nBIP-39 mnemonic.' ))
 		self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
@@ -124,11 +130,11 @@ class Login(Page):
 				
 				words.append(word)
 
-			return self.open_wallet_with_words(words)
+			return self.load_key_from_words(words)
 		
 		return MENU_CONTINUE
 	
-	def open_wallet_with_digits(self):
+	def load_key_from_digits(self):
 		words = []
 		self.ctx.display.draw_hcentered_text(( 'Enter each\nword of your\nBIP-39 mnemonic\nas a number from\n1 to 2048.' ))
 		self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
@@ -170,11 +176,11 @@ class Login(Page):
 	
 				words.append(word)
 	
-			return self.open_wallet_with_words(words)
+			return self.load_key_from_words(words)
 		
 		return MENU_CONTINUE
 
-	def open_wallet_with_bits(self):
+	def load_key_from_bits(self):
 		words = []
 		self.ctx.display.draw_hcentered_text(( 'Enter each\nword of your\nBIP-39 mnemonic\nas a series of\nbinary digits.' ))
 		self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
@@ -202,7 +208,7 @@ class Login(Page):
 	
 				words.append(word)
 	
-			return self.open_wallet_with_words(words)
+			return self.load_key_from_words(words)
 		
 		return MENU_CONTINUE
 

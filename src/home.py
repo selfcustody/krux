@@ -24,11 +24,12 @@ import gc
 from display import DEFAULT_PADDING
 from embit.networks import NETWORKS
 import lcd
-from multisig import MultisigWallet, PSBTSigner
-from qr import FORMAT_NONE, to_qr_codes
+from psbt import PSBTSigner
+from qr import FORMAT_NONE, FORMAT_PMOFN, to_qr_codes
 from page import Page
 from menu import Menu, MENU_CONTINUE
 from input import BUTTON_ENTER
+from wallet import Wallet
 
 class Home(Page):
 	def __init__(self, ctx):
@@ -36,15 +37,14 @@ class Home(Page):
 		self.menu = Menu(ctx, [
 			(( 'Mnemonic' ), self.mnemonic),
 			(( 'Public Key\n(xpub)' ), self.public_key),
-			(( 'Multisig\nWallet' ), self.multisig_wallet),
+			(( 'Wallet' ), self.wallet),
 			(( 'Check\nAddress' ), self.check_address),
 			(( 'Sign PSBT' ), self.sign_psbt),
 			(( 'Shutdown' ), self.shutdown)
 		])
-	
-	def mnemonic(self):  
-		words = self.ctx.wallet.mnemonic.split(' ')
-		self.display_mnemonic(words)
+
+	def mnemonic(self):
+		self.display_mnemonic(self.ctx.wallet.key.mnemonic_words())
 		self.ctx.input.wait_for_button()
 		if self.ctx.printer.is_connected():
 			lcd.clear()
@@ -53,12 +53,12 @@ class Home(Page):
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
 				self.ctx.display.flash_text(( 'Printing..' ))
-				qr_code, _ = to_qr_codes(self.ctx.wallet.mnemonic, self.ctx.printer.qr_data_width(), FORMAT_NONE).__next__()
+				qr_code, _ = to_qr_codes(self.ctx.wallet.key.mnemonic, self.ctx.printer.qr_data_width(), FORMAT_NONE).__next__()
 				self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
 
 	def public_key(self):
-		self.display_qr_codes(self.ctx.wallet.xpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE, title=self.ctx.wallet.xpub())
+		self.display_qr_codes(self.ctx.wallet.key.xpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE, title=self.ctx.wallet.key.xpub())
 		if self.ctx.printer.is_connected():
 			lcd.clear()
 			time.sleep_ms(1000)
@@ -66,29 +66,42 @@ class Home(Page):
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
 				self.ctx.display.flash_text(( 'Printing..' ))
-				qr_code, _ = to_qr_codes(self.ctx.wallet.xpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE).__next__()
+				qr_code, _ = to_qr_codes(self.ctx.wallet.key.xpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE).__next__()
 				self.ctx.printer.print_qr_code(qr_code)
-		self.display_qr_codes(self.ctx.wallet.zpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE, title=self.ctx.wallet.zpub())
-		if self.ctx.printer.is_connected():
-			lcd.clear()
-			time.sleep_ms(1000)
-			self.ctx.display.draw_centered_text(( 'Print to QR?' ))
-			btn = self.ctx.input.wait_for_button()
-			if btn == BUTTON_ENTER:
-				self.ctx.display.flash_text(( 'Printing..' ))
-				qr_code, _ = to_qr_codes(self.ctx.wallet.zpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE).__next__()
-				self.ctx.printer.print_qr_code(qr_code)
+	
+		if self.ctx.wallet.is_multisig():
+			self.display_qr_codes(self.ctx.wallet.key.p2wsh_zpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE, title=self.ctx.wallet.key.p2wsh_zpub())
+			if self.ctx.printer.is_connected():
+				lcd.clear()
+				time.sleep_ms(1000)
+				self.ctx.display.draw_centered_text(( 'Print to QR?' ))
+				btn = self.ctx.input.wait_for_button()
+				if btn == BUTTON_ENTER:
+					self.ctx.display.flash_text(( 'Printing..' ))
+					qr_code, _ = to_qr_codes(self.ctx.wallet.key.p2wsh_zpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE).__next__()
+					self.ctx.printer.print_qr_code(qr_code)
+		else:
+			self.display_qr_codes(self.ctx.wallet.key.p2wpkh_zpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE, title=self.ctx.wallet.key.p2wpkh_zpub())
+			if self.ctx.printer.is_connected():
+				lcd.clear()
+				time.sleep_ms(1000)
+				self.ctx.display.draw_centered_text(( 'Print to QR?' ))
+				btn = self.ctx.input.wait_for_button()
+				if btn == BUTTON_ENTER:
+					self.ctx.display.flash_text(( 'Printing..' ))
+					qr_code, _ = to_qr_codes(self.ctx.wallet.key.p2wpkh_zpub_btc_core(), self.ctx.printer.qr_data_width(), FORMAT_NONE).__next__()
+					self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
 	
- 	def multisig_wallet(self):
-		if not self.ctx.multisig_wallet:
-			self.ctx.display.draw_centered_text(( 'Multisig wallet\nnot found.' ))
+ 	def wallet(self):
+		if not self.ctx.wallet.is_loaded():
+			self.ctx.display.draw_centered_text(( 'Wallet\nnot found.' ))
 			self.ctx.display.draw_hcentered_text(( 'Load one?' ), offset_y=200)
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
-				return self.load_multisig()
+				return self.load_wallet()
 		else:
-			self.display_multisig(self.ctx.multisig_wallet)
+			self.display_wallet(self.ctx.wallet)
 			if self.ctx.printer.is_connected():
 				lcd.clear()
 				time.sleep_ms(1000)
@@ -96,40 +109,38 @@ class Home(Page):
 				btn = self.ctx.input.wait_for_button()
 				if btn == BUTTON_ENTER:   
 					self.ctx.display.flash_text(( 'Printing..' ))
-					wallet_data, qr_format = self.ctx.multisig_wallet.wallet_qr()
+					wallet_data, qr_format = self.ctx.wallet.wallet_qr()
 					for qr_code, _ in to_qr_codes(wallet_data, self.ctx.printer.qr_data_width(), qr_format):
 						self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
 		
-	def load_multisig(self):
+	def load_wallet(self):
 		wallet_data, qr_format = self.capture_qr_code()
 		if wallet_data is None:
-			self.ctx.display.flash_text(( 'Failed to load\nmultisig wallet' ), lcd.RED)
+			self.ctx.display.flash_text(( 'Failed to\nload wallet' ), lcd.RED)
 			return MENU_CONTINUE
 
 		try:
-			multisig_wallet = MultisigWallet(wallet_data, qr_format)
-			if self.ctx.wallet.xpub() not in multisig_wallet.cosigners:
-				raise ValueError('xpub not a cosigner')
-
-			self.display_multisig(multisig_wallet, include_qr=False)
+			wallet = Wallet(self.ctx.wallet.key)
+   			wallet.load(wallet_data, qr_format)
+			self.display_wallet(wallet, include_qr=False)
 			self.ctx.display.draw_hcentered_text(( 'Load?' ), offset_y=200)
 			btn = self.ctx.input.wait_for_button()
 			if btn == BUTTON_ENTER:
-				self.ctx.multisig_wallet = multisig_wallet
-				self.ctx.log.debug('Multisig wallet descriptor: %s', self.ctx.multisig_wallet.descriptor.to_string())
-				self.ctx.display.flash_text(( 'Loaded multisig\nwallet' ))
+				self.ctx.wallet = wallet
+				self.ctx.log.debug('Wallet descriptor: %s', self.ctx.wallet.descriptor.to_string())
+				self.ctx.display.flash_text(( 'Loaded wallet' ))
 				return MENU_CONTINUE
 		except Exception as e:
-			self.ctx.log.exception('Exception occurred loading multisig wallet')
+			self.ctx.log.exception('Exception occurred loading wallet')
 			lcd.clear()
-			self.ctx.display.draw_centered_text(( 'Invalid multisig:\n%s' ) % repr(e), lcd.RED)
+			self.ctx.display.draw_centered_text(( 'Invalid wallet:\n%s' ) % repr(e), lcd.RED)
 			self.ctx.input.wait_for_button()
 			return MENU_CONTINUE
 	
 	def check_address(self):
-		if not self.ctx.multisig_wallet:
-			self.ctx.display.flash_text(( 'Multisig wallet\nrequired' ), lcd.RED)
+		if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
+			self.ctx.display.flash_text(( 'Wallet required' ), lcd.RED)
 			return MENU_CONTINUE
 
 		data, qr_format = self.capture_qr_code()
@@ -158,7 +169,7 @@ class Home(Page):
  
 			lcd.clear()
 			self.ctx.display.draw_centered_text(( 'Checking\nreceive address\n%d\nfor match..' ) % i)
-			child_addr = self.ctx.multisig_wallet.descriptor.derive(i, branch_index=0).address(network=NETWORKS[self.ctx.net])
+			child_addr = self.ctx.wallet.descriptor.derive(i, branch_index=0).address(network=NETWORKS[self.ctx.net])
 			if data == child_addr:
 				found = True
 				break
@@ -177,9 +188,9 @@ class Home(Page):
 		return MENU_CONTINUE
 
 	def sign_psbt(self):
-		if not self.ctx.multisig_wallet:
-			self.ctx.display.draw_centered_text(( 'Multisig wallet\nnot loaded.' ), lcd.WHITE)
-			self.ctx.display.draw_hcentered_text(( 'Sign anyway?' ), offset_y=200)
+		if not self.ctx.wallet.is_loaded():
+			self.ctx.display.draw_centered_text(( 'WARNING:\nWallet\nnot loaded.\n\nSome checks\ncannot be\nperformed.' ), lcd.WHITE)
+			self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
 			btn = self.ctx.input.wait_for_button()
 			if btn != BUTTON_ENTER:
 				return MENU_CONTINUE
@@ -192,19 +203,19 @@ class Home(Page):
 		lcd.clear()
 		self.ctx.display.draw_centered_text(( 'Loading..' ))
   
-		signer = PSBTSigner(data, qr_format)
+		signer = PSBTSigner(self.ctx.wallet, data, FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format)
 		self.ctx.log.debug('Received PSBT: %s', signer.psbt)
 
-	  	signer.validate(self.ctx.multisig_wallet)
+	  	signer.validate()
 
-		outputs = signer.outputs(self.ctx.multisig_wallet, self.ctx.net)
+		outputs = signer.outputs(self.ctx.net)
 		lcd.clear()
   		self.ctx.display.draw_hcentered_text('\n\n'.join(outputs))
 		self.ctx.display.draw_hcentered_text(( 'Sign?' ), offset_y=200)
 	
 		btn = self.ctx.input.wait_for_button()
 		if btn == BUTTON_ENTER:
-			signed_psbt, qr_format = signer.sign(self.ctx.wallet.root)
+			signed_psbt, qr_format = signer.sign()
 			self.ctx.log.debug('Signed PSBT: %s', signer.psbt)
 			signer = None
 			gc.collect()
@@ -220,14 +231,18 @@ class Home(Page):
 						self.ctx.printer.print_qr_code(qr_code)
 		return MENU_CONTINUE
 
-	def display_multisig(self, multisig_wallet, include_qr=True):
-		about = multisig_wallet.label + '\n'
-		xpubs = []
-		for i, xpub in enumerate(multisig_wallet.cosigners):
-			xpubs.append(str(i+1) + '. ' + xpub[4:8] + '...' + xpub[len(xpub)-4:len(xpub)])
-		about += '\n'.join(xpubs)
+	def display_wallet(self, wallet, include_qr=True):
+		about = wallet.label + '\n'
+		if wallet.is_multisig():
+			xpubs = []
+			for i, xpub in enumerate(wallet.policy['cosigners']):
+				xpubs.append(str(i+1) + '. ' + xpub[4:8] + '...' + xpub[len(xpub)-4:len(xpub)])
+			about += '\n'.join(xpubs)
+		else:
+			xpub = wallet.key.xpub()
+			about += xpub[4:8] + '...' + xpub[len(xpub)-4:len(xpub)]
 		if include_qr:
-			wallet_data, qr_format = self.ctx.multisig_wallet.wallet_qr()
+			wallet_data, qr_format = wallet.wallet_qr()
 			self.display_qr_codes(wallet_data, self.ctx.display.qr_data_width(), qr_format, title=about)
 		else:
 			self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
