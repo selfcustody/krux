@@ -24,22 +24,28 @@ from Maix import GPIO
 from fpioa_manager import fm
 
 class Light:
-	def __init__(self):
-		fm.register(board_info.LED_W, fm.fpioa.GPIO3)
-		self.led_w = GPIO(GPIO.GPIO3, GPIO.OUT)
-		self.led_w.value(1)
+    """Light is a singleton interface for interacting with the device's LED light"""
 
-	def is_on(self):
-		return self.led_w.value() == 0
+    def __init__(self):
+        fm.register(board_info.LED_W, fm.fpioa.GPIO3)
+        self.led_w = GPIO(GPIO.GPIO3, GPIO.OUT)
+        self.led_w.value(1)
 
-	def turn_on(self):
-		self.led_w.value(0)
-		
-	def turn_off(self):
-		self.led_w.value(1)
-  
-	def toggle(self):
-		if self.is_on():
-			self.turn_off()
-		else:
-			self.turn_on()
+    def is_on(self):
+        """Returns a boolaen indicating if the light is currently on"""
+        return self.led_w.value() == 0
+
+    def turn_on(self):
+        """Turns on the light"""
+        self.led_w.value(0)
+
+    def turn_off(self):
+        """Turns off the light"""
+        self.led_w.value(1)
+
+    def toggle(self):
+        """Toggles the light on or off"""
+        if self.is_on():
+            self.turn_off()
+        else:
+            self.turn_on()

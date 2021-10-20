@@ -25,60 +25,61 @@ import lcd
 from qr import QRPartParser
 
 class Camera:
-	def __init__(self):
-		self.initialize_sensor()
-		
-	def initialize_sensor(self):
-		sensor.reset()
-		sensor.set_pixformat(sensor.GRAYSCALE)
-		sensor.set_framesize(sensor.QVGA)
-		sensor.skip_frames()
+    """Camera is a singleton interface for interacting with the device's camera"""
 
-	def capture_qr_code_loop(self, callback):
-		""" QR codes can become too large to display and must be animated as
-			several codes in sequence.
-			This function parses the code contents until all parts are loaded.
-			The part data are then assembled into one and returned.
-   		"""
-		self.initialize_sensor()
-		sensor.run(1)
-		
-		parser = QRPartParser()
-  
-		prev_parsed_count = 0
-		new_part = False
-		while True:
-			stop = callback(parser.total_count(), parser.parsed_count(), new_part)
-			if stop:
-				sensor.run(0)
-				return None
-			
-			new_part = False
+    def __init__(self):
+        self.initialize_sensor()
 
-			img = sensor.snapshot()
-			gc.collect()
-			hist = img.get_histogram()
-			if str(type(hist)) != "<class 'histogram'>":
-				continue
-			# Convert the image to black and white by using Otsu's thresholding.
-			# This is done to account for spots, blotches, and streaks in the code
-			# that may cause issues for the decoder.
-			img.binary([(0, hist.get_threshold().value())], invert=True)
-			lcd.display(img)
- 
- 			res = img.find_qrcodes()
-			if len(res) > 0:
-				data = res[0].payload()
-	
-				parser.parse(data)
-	
-				if parser.parsed_count() > prev_parsed_count:
-					prev_parsed_count = parser.parsed_count()
-					new_part = True
-					
-			if parser.is_complete():
-				break
-			
-		sensor.run(0)
-		return (parser.result(), parser.format)
-	
+    def initialize_sensor(self):
+        """Initializes the camera"""
+        sensor.reset()
+        sensor.set_pixformat(sensor.GRAYSCALE)
+        sensor.set_framesize(sensor.QVGA)
+        sensor.skip_frames()
+
+    def capture_qr_code_loop(self, callback):
+        """Captures either singular or animated QRs and parses their contents until
+           all parts of the message have been captured. The part data are then ordered
+           and assembled into one message and returned.
+        """
+        self.initialize_sensor()
+        sensor.run(1)
+
+        parser = QRPartParser()
+
+        prev_parsed_count = 0
+        new_part = False
+        while True:
+            stop = callback(parser.total_count(), parser.parsed_count(), new_part)
+            if stop:
+                sensor.run(0)
+                return None
+
+            new_part = False
+
+            img = sensor.snapshot()
+            gc.collect()
+            hist = img.get_histogram()
+            if str(type(hist)) != "<class 'histogram'>":
+                continue
+            # Convert the image to black and white by using Otsu's thresholding.
+            # This is done to account for spots, blotches, and streaks in the code
+            # that may cause issues for the decoder.
+            img.binary([(0, hist.get_threshold().value())], invert=True)
+            lcd.display(img)
+
+            res = img.find_qrcodes()
+            if len(res) > 0:
+                data = res[0].payload()
+
+                parser.parse(data)
+
+                if parser.parsed_count() > prev_parsed_count:
+                    prev_parsed_count = parser.parsed_count()
+                    new_part = True
+
+            if parser.is_complete():
+                break
+
+        sensor.run(0)
+        return (parser.result(), parser.format)

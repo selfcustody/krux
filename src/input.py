@@ -29,33 +29,39 @@ BUTTON_PAGE  = const(1)
 NONBLOCKING_CHECKS = const(100000)
 
 class Input:
-	def __init__(self):
-		fm.register(board_info.BUTTON_A, fm.fpioa.GPIOHS21)
-		self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
-  
-		fm.register(board_info.BUTTON_B, fm.fpioa.GPIOHS22)
-		self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
-  
-	def wait_for_button(self, block=True):
-		# Loop until all buttons are released (if currently pressed)
-		while self.enter.value() == 0 or self.page.value() == 0:
-			pass
+    """Input is a singleton interface for interacting with the device's buttons"""
 
-		# Wait for first button press
-		checks = 0
-		while self.enter.value() == 1 and self.page.value() == 1:
-			checks += 1
-			if not block and checks > NONBLOCKING_CHECKS:
-				break
-		
-		if self.enter.value() == 0:
-			# Wait for release
-			while self.enter.value() == 0:
-				pass
-			return BUTTON_ENTER
-		elif self.page.value() == 0:
-			# Wait for release
-			while self.page.value() == 0:
-				pass
-			return BUTTON_PAGE
-		return None
+    def __init__(self):
+        fm.register(board_info.BUTTON_A, fm.fpioa.GPIOHS21)
+        self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
+
+        fm.register(board_info.BUTTON_B, fm.fpioa.GPIOHS22)
+        self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
+
+    def wait_for_button(self, block=True):
+        """Waits for any button to release, optionally blocking if block=True.
+           Returns the button that was released, or None if nonblocking.
+        """
+        # Loop until all buttons are released (if currently pressed)
+        while self.enter.value() == 0 or self.page.value() == 0:
+            pass
+
+        # Wait for first button press
+        checks = 0
+        while self.enter.value() == 1 and self.page.value() == 1:
+            checks += 1
+            if not block and checks > NONBLOCKING_CHECKS:
+                break
+
+        if self.enter.value() == 0:
+            # Wait for release
+            while self.enter.value() == 0:
+                pass
+            return BUTTON_ENTER
+
+        if self.page.value() == 0:
+            # Wait for release
+            while self.page.value() == 0:
+                pass
+            return BUTTON_PAGE
+        return None
