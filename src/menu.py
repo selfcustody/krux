@@ -27,38 +27,49 @@ MENU_EXIT     = const(1)
 MENU_SHUTDOWN = const(2)
 
 class Menu:
-	def __init__(self, ctx, menu):
-		self.ctx = ctx
-		self.menu = menu
-		
-	def run_loop(self):
-		selected_item_index = 0
-		while True:
-			lcd.clear()
-			self.draw_menu(selected_item_index)
-			
-			btn = self.ctx.input.wait_for_button(block=True)
-			if btn == BUTTON_ENTER:
-				try:
-					lcd.clear()
-					status = self.menu[selected_item_index][1]()
-					if status != MENU_CONTINUE:
-						return (selected_item_index, status)
-				except Exception as e:
-					self.ctx.log.exception('Exception occurred in menu item "%s"', self.menu[selected_item_index][0])
-					lcd.clear()
-					self.ctx.display.draw_centered_text(( 'Error:\n%s' ) % repr(e), lcd.RED)
-					self.ctx.input.wait_for_button()
-			elif btn == BUTTON_PAGE:
-				selected_item_index = (selected_item_index + 1) % len(self.menu)
- 
-	def draw_menu(self, selected_item_index):
-		menu_list = []
-		for i, menu_item in enumerate(self.menu):
-			menu_list_item = menu_item[0]
-			if selected_item_index == i:
-				lines = menu_item[0].split('\n')
-				menu_list_item = '- ' + lines[0] + ' -' + ('\n' + '\n'.join(lines[1:]) if len(lines) > 1 else '')
-			menu_list.append(menu_list_item)
-		self.ctx.display.draw_centered_text('\n\n'.join(menu_list))
-				
+    """Represents a menu that can render itself to the screen, handle item selection,
+       and invoke menu item callbacks that return a status
+    """
+
+    def __init__(self, ctx, menu):
+        self.ctx = ctx
+        self.menu = menu
+
+    def run_loop(self):
+        """Runs the menu loop until one of the menu items returns either a MENU_EXIT
+           or MENU_SHUTDOWN status
+        """
+        selected_item_index = 0
+        while True:
+            self.ctx.display.clear()
+            self._draw_menu(selected_item_index)
+
+            btn = self.ctx.input.wait_for_button(block=True)
+            if btn == BUTTON_ENTER:
+                try:
+                    self.ctx.display.clear()
+                    status = self.menu[selected_item_index][1]()
+                    if status != MENU_CONTINUE:
+                        return (selected_item_index, status)
+                except Exception as e:
+                    self.ctx.log.exception(
+                        'Exception occurred in menu item "%s"' % self.menu[selected_item_index][0]
+                    )
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(( 'Error:\n%s' ) % repr(e), lcd.RED)
+                    self.ctx.input.wait_for_button()
+            elif btn == BUTTON_PAGE:
+                selected_item_index = (selected_item_index + 1) % len(self.menu)
+
+    def _draw_menu(self, selected_item_index):
+        menu_list = []
+        for i, menu_item in enumerate(self.menu):
+            menu_list_item = menu_item[0]
+            if selected_item_index == i:
+                lines = menu_item[0].split('\n')
+                menu_list_item = ('- %s -' % lines[0])
+                if len(lines) > 1:
+                    menu_list_item += '\n' + '\n'.join(lines[1:])
+            menu_list.append(menu_list_item)
+        self.ctx.display.draw_centered_text('\n\n'.join(menu_list))
+                

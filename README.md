@@ -110,12 +110,12 @@ As stated above, Krux does not† generate a BIP-39 mnemonic for you, but it doe
 ### Method: Text
 Enter each word of your BIP-39 mnemonic one at a time. Krux will attempt to autocomplete your word to speed up the process. 
 
-Final word sentinel: xyz
+Final word sentinel: `zzzzz`
 
 ### Method: Numbers
 Enter each word of your BIP-39 mnemonic as a number from 1 to 2048 one at a time.
 
-Final word sentinel: 99999999999
+Final word sentinel: `99999`
 
 ### Method: Bits
 Enter each word of your BIP-39 mnemonic as an [11-bit bitstring](https://github.com/hatgit/BIP39-wordlist-printable-en/blob/master/BIP39-en-printable.txt) one at a time.

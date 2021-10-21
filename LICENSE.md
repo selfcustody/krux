@@ -8,7 +8,6 @@ The source code for the `MaixPy` firmware (which has been modified by the reposi
 
 The source code for the `embit` library is under the MIT license.
 The source code for the `urtypes` library is under the MIT license.
-The source code for the `logging` library is under the MIT license.
 The source code for the `foundation-ur-py` library is under the BSD-2-Clause Plus Patent license.
 The source code for the `Adafruit Thermal Printer` library is under the MIT license.
 

@@ -25,56 +25,57 @@ from machine import UART
 from thermal import AdafruitThermalPrinter
 
 class Printer:
-	def __init__(self, baudrate, paper_width):
-		self.paper_width = paper_width
+    """Printer is a singleton interface for interacting with the device's thermal printer"""
 
-		try:
-			fm.register(board_info.CONNEXT_A, fm.fpioa.UART2_TX, force=False)
-			fm.register(board_info.CONNEXT_B, fm.fpioa.UART2_RX, force=False)
-			self.thermal_printer = AdafruitThermalPrinter(UART.UART2, baudrate)
-			if not self.thermal_printer.has_paper():
-				raise ValueError('missing paper')
-		except:
-			self.thermal_printer = None
+    def __init__(self, baudrate, paper_width):
+        self.paper_width = paper_width
 
-	def qr_data_width(self):
-		""" This method returns a smaller width for the QR to be generated
-	 		within, which we will then scale up to fit the display's width.
-			We do this because the QR would be too dense to be readable
-			by most devices otherwise.
-	   	"""
-		return self.paper_width // 6
+        try:
+            fm.register(board_info.CONNEXT_A, fm.fpioa.UART2_TX, force=False)
+            fm.register(board_info.CONNEXT_B, fm.fpioa.UART2_RX, force=False)
+            self.thermal_printer = AdafruitThermalPrinter(UART.UART2, baudrate)
+            if not self.thermal_printer.has_paper():
+                raise ValueError('missing paper')
+        except:
+            self.thermal_printer = None
 
-	def clear(self):
-		if not self.is_connected():
-			return
-		# A full reset zeroes all memory buffers
-		self.thermal_printer.full_reset()
+    def qr_data_width(self):
+        """Returns a smaller width for the QR to be generated
+           within, which will then be scaled up to fit the paper's width.
+           We do this because the QR would be too dense to be readable
+           by most devices otherwise.
+        """
+        return self.paper_width // 6
 
-	def is_connected(self):
-		return self.thermal_printer is not None
+    def clear(self):
+        """Clears the printer's memory, resetting it"""
+        if not self.is_connected():
+            return
+        # A full reset zeroes all memory buffers
+        self.thermal_printer.full_reset()
 
-	def print_qr_code(self, qr_code):
-		""" Prints a QR code, scaling it up as large as possible"""
-		if not self.is_connected():
-			raise ValueError('no printer found')
+    def is_connected(self):
+        """Returns a boolean indicating if the printer is connected or not"""
+        return self.thermal_printer is not None
 
-		lines = qr_code.strip().split('\n')
-  
-		width = len(lines)
-		height = len(lines)
-  
-		scale = self.paper_width // width
-		for y in range(height):
-			# Scale the line (width) by scaling factor
-			line_y = ''.join([char * scale for char in lines[y]])
-			line_bytes = bitstring_to_bytes(line_y)
-			# Print height * scale lines out to scale by 
-			for _ in range(scale):
-				self.thermal_printer.write_bytes(18, 42, 1, len(line_bytes))
-				self.thermal_printer.write_bytes(line_bytes)
-				self.thermal_printer.timeout_set(self.thermal_printer.dot_print_time)
-		self.thermal_printer.feed(3)
-   
-def bitstring_to_bytes(s):
-	return int(s, 2).to_bytes((len(s) + 7) // 8, 'big')
+    def print_qr_code(self, qr_code):
+        """Prints a QR code, scaling it up as large as possible"""
+        if not self.is_connected():
+            raise ValueError('no printer found')
+
+        lines = qr_code.strip().split('\n')
+
+        width = len(lines)
+        height = len(lines)
+
+        scale = self.paper_width // width
+        for y in range(height):
+            # Scale the line (width) by scaling factor
+            line_y = ''.join([char * scale for char in lines[y]])
+            line_bytes = int(line_y, 2).to_bytes((len(line_y) + 7) // 8, 'big')
+            # Print height * scale lines out to scale by
+            for _ in range(scale):
+                self.thermal_printer.write_bytes(18, 42, 1, len(line_bytes))
+                self.thermal_printer.write_bytes(line_bytes)
+                self.thermal_printer.timeout_set(self.thermal_printer.dot_print_time)
+        self.thermal_printer.feed(3)
