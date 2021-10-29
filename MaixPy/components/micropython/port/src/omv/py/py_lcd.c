@@ -642,22 +642,16 @@ end:
     return mp_obj_new_int(mirror ? 1 : 0);
 }
 
-extern void imlib_draw_ascii_string(image_t *img, int x_off, int y_off, const char *str, int c, float scale, int x_spacing, int y_spacing, bool mono_space);
+extern int font_utf8_strlen(mp_obj_t str);
+extern void imlib_draw_string(image_t *img, int x_off, int y_off, mp_obj_t str, int c, float scale, int x_spacing, int y_spacing, bool mono_space);
 STATIC mp_obj_t py_lcd_draw_string(size_t n_args, const mp_obj_t *args)
 {
     uint8_t* str_buf = NULL;
-    char* str_cut = NULL;
     if (lcd_para.width == 0 || lcd_para.width  == 0)
         mp_raise_msg(&mp_type_ValueError, "not init");
-    str_buf = (uint8_t *)malloc(lcd_para.width / 8 * 12 * 8 * 2);
+    str_buf = (uint8_t *)malloc(lcd_para.width / 8 * 14 * 8 * 2);
     if (!str_buf)
         mp_raise_OSError(MP_ENOMEM);
-    str_cut = (char *)malloc(lcd_para.width / 8 + 1);
-    if (!str_cut)
-    {
-        free(str_buf);
-        mp_raise_OSError(MP_ENOMEM);
-    }
 
     uint16_t x0 = mp_obj_get_int(args[0]);
     uint16_t y0 = mp_obj_get_int(args[1]);
@@ -666,9 +660,7 @@ STATIC mp_obj_t py_lcd_draw_string(size_t n_args, const mp_obj_t *args)
     uint16_t bgc = BLACK;
     if (str == NULL)
         return mp_const_none;
-    if (x0 >= lcd_para.width || y0 > lcd_para.width  - 16)
-        return mp_const_none;
-    int len = strlen(str);
+    int len = font_utf8_strlen(args[2]);
     int width, height;
     if (n_args >= 4)
         fontc = mp_obj_get_int(args[3]);
@@ -678,10 +670,8 @@ STATIC mp_obj_t py_lcd_draw_string(size_t n_args, const mp_obj_t *args)
         len = (lcd_para.width - x0) / 8;
     if (len <= 0)
         return mp_const_none;
-    memcpy(str_cut, str, len);
-    str_cut[len] = 0;
     width = len * 8;
-    height = 12;
+    height = 14;
     image_t arg_img = {
         .bpp = IMAGE_BPP_RGB565,
         .w = width,
@@ -692,12 +682,11 @@ STATIC mp_obj_t py_lcd_draw_string(size_t n_args, const mp_obj_t *args)
     {
         *(uint16_t*)(str_buf + i*2) = (uint16_t)bgc;
     }
-    imlib_draw_ascii_string(&arg_img, 0, 0, str_cut,
+    imlib_draw_string(&arg_img, 0, 0, args[2],
                       fontc, 1, 0, 0,
                       true);
     lcd->draw_picture(x0, y0, width, height, (uint8_t *)str_buf);
     free(str_buf);
-    free(str_cut);
     return mp_const_none;
 }
 

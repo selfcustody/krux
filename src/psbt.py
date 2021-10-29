@@ -187,7 +187,7 @@ def get_tx_input_amount(tx):
 
 def get_tx_input_amount_message(tx):
     """Returns the total input amount as a message for the user"""
-    return ( 'Input:\n%.8f BTC' ) % round(get_tx_input_amount(tx) / SATS_PER_BTC, 8)
+    return ( 'Input:\n₿%s' ) % satcomma(get_tx_input_amount(tx))
 
 def get_tx_output_amount_messages(tx, wallet, network='main'):
     """Returns the output amounts as messages for the user"""
@@ -237,16 +237,33 @@ def get_tx_output_amount_messages(tx, wallet, network='main'):
         else:
             spending += tx.tx.vout[i].value
             messages.append(
-                ( 'Sending:\n%.8f BTC\n\nTo:\n%s' )
+                ( 'Sending:\n₿%s\n\nTo:\n%s' )
                 %
                 (
-                    round(tx.tx.vout[i].value / SATS_PER_BTC, 8),
+                    satcomma(tx.tx.vout[i].value),
                     tx.tx.vout[i].script_pubkey.address(network=NETWORKS[network])
                 )
             )
     fee = inp_amount - change - spending
-    messages.append(( 'Fee:\n%.8f BTC' ) % round(fee / SATS_PER_BTC, 8))
+    messages.append(( 'Fee:\n₿%s' ) % satcomma(fee))
     return messages
+
+def add_commas(number, comma_sep=','):
+    """Returns a number separated with commas"""
+    triplets_num = len(number) // 3
+    remainder = len(number) % 3
+    triplets = [number[:remainder]] if remainder else []
+    triplets += [number[remainder+i*3:remainder+3+i*3] for i in range(triplets_num)]
+    return comma_sep.join(triplets)
+
+def satcomma(amount):
+    """Formats a BTC amount according to the Satcomma standard:
+       https://medium.com/coinmonks/the-satcomma-standard-89f1e7c2aede
+    """
+    amount_str = '%.8f' % round(amount / SATS_PER_BTC, 8)
+    msb = amount_str[:-9] # most significant bitcoin heh heh heh
+    lsb = amount_str[len(msb)+1:]
+    return add_commas(msb, ( ',' )) + ( '.' ) + add_commas(lsb, ( ',' ))
 
 def get_policy(scope, scriptpubkey, xpubs):
     """Parse scope and get policy"""

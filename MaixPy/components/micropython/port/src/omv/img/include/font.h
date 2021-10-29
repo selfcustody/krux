@@ -32,5 +32,6 @@ enum FontSource {
 
 void font_load(uint8_t index, uint8_t width, uint8_t high, uint8_t source_type, void *src_addr);
 void font_free();
+int font_utf8_strlen(mp_obj_t str);
 
 #endif // __FONT_H__

@@ -76,4 +76,5 @@ elif [ "$1" == "flash-software" ]; then
     cp -r build/. "$2"
 elif [ "$1" == "clean" ]; then
     rm -rf build
+    docker system prune --all --force
 fi
