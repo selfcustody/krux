@@ -84,6 +84,7 @@ Prefer a different language? You can replace `en-US` in the command above with o
 
 - en-US (English)
 - de-DE (German)
+- fr-FR (French)
 - Are we missing one? Make a PR!
 
 Note that due to memory constraints of the device, the translations for the language you wish to use must be baked into the software at this step and can't be changed at runtime.
