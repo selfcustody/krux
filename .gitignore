@@ -50,6 +50,12 @@ genrst/
 
 .vagrant
 
+.config.mk
+.flash.conf.json
+in.txt
+out.txt
+sitemap.xml.gz
+
 # Krux User Settings
 src/settings/log.level.txt
 src/settings/network.txt

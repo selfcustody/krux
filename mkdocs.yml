@@ -1,0 +1,48 @@
+markdown_extensions:
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.mark
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+theme:
+  name: material
+  logo: img/favicon.png
+  favicon: img/favicon.png
+  palette:
+    primary: white
+    accent: light blue
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - navigation.expand
+    - toc.integrate
+
+site_name: Krux - Open-source hardware signer for Bitcoin
+site_description: Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisignature and single-key wallets. It is a low-cost airgapped device built from off-the-shelf parts that communicates with wallet software via QR codes and wipes its memory after every session.
+site_url: https://jreesun.github.io/krux/
+repo_url: https://github.com/jreesun/krux
+edit_uri: edit/main/mkdocs
+docs_dir: mkdocs
+site_dir: docs
+nav:
+  - Home: index.md
+  - Getting Started:
+    - About: getting-started/about.md
+    - Installing: getting-started/installing.md
+    - Generating a Mnemonic: getting-started/generating-a-mnemonic.md
+    - Loading a Mnemonic: getting-started/loading-a-mnemonic.md
+    - Navigating the Main Menu: getting-started/navigating-the-main-menu.md
+    - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.md
+    - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.md
+    - Printing: getting-started/printing.md
+    - Advanced Usage: getting-started/advanced-usage.md
+  - Part List: parts.md
+  - FAQ: faq.md
+  - Support the Project: support.md
