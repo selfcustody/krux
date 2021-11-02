@@ -114,11 +114,12 @@ class Home(Page):
             self.ctx.display.flash_text(( 'Failed to load\naddress' ), lcd.RED)
             return MENU_CONTINUE
 
+        addr = data
         if data.lower().startswith('bitcoin:'):
             addr_end = data.find('?')
             if addr_end == -1:
                 addr_end = len(data)
-            data = data[8:addr_end]
+            addr = data[8:addr_end]
 
         gc.collect()
 
@@ -141,7 +142,7 @@ class Home(Page):
             )
             desc = self.ctx.wallet.descriptor
             child_addr = desc.derive(i, branch_index=0).address(network=NETWORKS[self.ctx.net])
-            if data == child_addr:
+            if addr == child_addr:
                 found = True
                 break
             i += 1
@@ -151,16 +152,18 @@ class Home(Page):
         self.ctx.display.clear()
         if found:
             self.ctx.display.draw_centered_text(
-                ( '%s\n\nis a valid\nreceive address' ) % data,
+                ( '%s\n\nis a valid\nreceive address' ) % addr,
                 lcd.GREEN
             )
+            self.ctx.input.wait_for_button()
+            self.display_qr_codes(data, qr_format, title=addr)
+            self.print_qr_prompt(data, qr_format)
         else:
             self.ctx.display.draw_centered_text(
-                ( '%s\n\nwas\nNOT FOUND\nin the first\n%d receive\naddresses' ) % (data, i + 1),
+                ( '%s\n\nwas\nNOT FOUND\nin the first\n%d receive\naddresses' ) % (addr, i + 1),
                 lcd.RED
             )
-
-        self.ctx.input.wait_for_button()
+            self.ctx.input.wait_for_button()
 
         return MENU_CONTINUE
 
