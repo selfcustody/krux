@@ -1,4 +1,4 @@
-This guide assumes you have already created a mnemonic. If that is not the case, head over to the [Generating a Mnemonic](/getting-started/generating-a-mnemonic) page and complete those steps first.
+This guide assumes you have already created a mnemonic. If that is not the case, head over to the [Generating a Mnemonic](../generating-a-mnemonic) page and complete those steps first.
 
 === "Specter Desktop"
 

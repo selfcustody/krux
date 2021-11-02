@@ -2,7 +2,7 @@ For now, Krux must be built from source. In the future, we will make PGP-signed 
 
 ### Requirements
 #### Hardware
-You will need the M5StickV, a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test), a USB-C cable, and a computer with a USB port to continue. Consult the [part list](/parts) for more information.
+You will need the M5StickV, a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test), a USB-C cable, and a computer with a USB port to continue. Consult the [part list](../../parts) for more information.
 
 #### Software
 You will need a computer with [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [`vagrant`](https://www.vagrantup.com/downloads) installed.

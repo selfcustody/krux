@@ -31,7 +31,7 @@ Enter each word of your BIP-39 mnemonic as an [11-bit bitstring](https://github.
 ### Via QR
 <img src="../../img/pic-qr-input.png" width="100" align="right">
 
-It's unpleasant having to manually enter 12 or 24 words each time you want to use Krux. To remedy this you can instead use the device's camera to read a QR code containing the words (encoded as a single space-separated text string). You can either use an offline QR code generator for this (ideally on an airgapped device), or you can attach a thermal printer to your Krux and print out the mnemonic after opening your wallet via one of the manual methods first. Check out the [Printing section](/getting-started/printing) for more information.
+It's unpleasant having to manually enter 12 or 24 words each time you want to use Krux. To remedy this you can instead use the device's camera to read a QR code containing the words (encoded as a single space-separated text string). You can either use an offline QR code generator for this (ideally on an airgapped device), or you can attach a thermal printer to your Krux and print out the mnemonic after opening your wallet via one of the manual methods first. Check out the [Printing section](../printing) for more information.
 
 <br>
 
@@ -46,6 +46,6 @@ Once you have entered your mnemonic, you will be presented with the full list of
 
 After loading your mnemonic, you will be brought to a small menu asking if you want to use it as part of a `Single-key` or `Multisig` wallet.
 
-Your choice here will subtly change the generated xpub that is used to set up your device in your wallet coordinator software. You can learn more about the difference in the following guides for using [single-key](/getting-started/using-a-single-key-wallet) and [multisig](/getting-started/using-a-multisig-wallet) wallets.
+Your choice here will subtly change the generated xpub that is used to set up your device in your wallet coordinator software. You can learn more about the difference in the following guides for using [single-key](../using-a-single-key-wallet) and [multisig](../using-a-multisig-wallet) wallets.
 
 Now, onto the main menu...
