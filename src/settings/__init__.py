@@ -26,9 +26,18 @@ def load(setting, default, strip=True):
        If setting does not exist, default will be returned.
     """
     try:
-        value = open('/sd/settings/%s.txt' % setting, 'r').read()
-        if strip:
-            return value.strip()
-        return value
+        with open('/sd/settings/%s.txt' % setting, 'r') as setting_file:
+            value = setting_file.read()
+            if strip:
+                return value.strip()
+            return value
     except:
         return default
+
+def save(setting, value):
+    """Writes a setting to the settings directory with name <setting>.txt"""
+    try:
+        with open('/sd/settings/%s.txt' % setting, 'w') as setting_file:
+            setting_file.write(value)
+    except:
+        pass

@@ -21,14 +21,16 @@
 # THE SOFTWARE.
 import sys
 import io
+import os
 
+NONE  = 99
 ERROR = 40
 WARN  = 30
 INFO  = 20
 DEBUG = 10
-ALL   = 0
 
 LEVEL_NAMES = {
+    NONE:  'NONE',
     ERROR: 'ERROR',
     WARN:  'WARN',
     INFO:  'INFO',
@@ -42,23 +44,29 @@ def level_name(level):
 class Logger:
     """Logger logs"""
 
-    def __init__(self, filepath, level=ALL):
+    def __init__(self, filepath, level):
         self.filepath = filepath
         self.level = level
         self.file = None
+        try:
+            os.remove(self.filepath)
+        except:
+            pass
 
     def log(self, level, msg):
         """Logs a message if the given level is equal to or higher than the logger's level"""
         if level < self.level:
             return
+        self._write('%s:%s\n' % (level_name(level), msg))
 
+    def _write(self, msg):
         try:
             if self.file is None:
                 self.file = open(self.filepath, 'w')
-            self.file.write('%s:%s\n' % (level_name(level), msg))
+            self.file.write(msg)
             self.file.flush()
         except:
-            pass
+            self.file = None
 
     def debug(self, msg):
         """Logs a message at DEBUG level"""

@@ -19,9 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+from logging import LEVEL_NAMES, level_name, Logger
 import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
+from printer import Printer
+import settings
 import urtypes
 from page import Page
 from menu import Menu, MENU_CONTINUE, MENU_EXIT
@@ -41,6 +44,7 @@ class Login(Page):
     def __init__(self, ctx):
         menu = [
             (( 'Load Mnemonic' ), self.load_key),
+            (( 'Settings' ), self.settings),
             (( 'About' ), self.about),
             (( 'Shutdown' ), self.shutdown),
         ]
@@ -235,22 +239,85 @@ class Login(Page):
 
         return MENU_CONTINUE
 
-    def about(self):
-        """Handler for the 'about' menu item"""
+    def settings(self):
+        """Handler for the 'settings' menu item"""
+        submenu = Menu(self.ctx, [
+            (( 'Network' ), self.network),
+            (( 'Printer' ), self.printer),
+            (( 'Debug' ), self.debug),
+            (( 'Back' ), lambda: MENU_EXIT)
+        ])
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu)-1:
+            return MENU_CONTINUE
+        return status
+
+    def network(self):
+        """Handler for the 'network' menu item"""
         networks = ['main', 'test']
 
         while True:
+            current_network = settings.load('network', 'main')
+
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                ( 'Krux\n\n\nVersion\n%s\n\nNetwork\n%snet' ) % (self.ctx.version, self.ctx.net)
-            )
+            self.ctx.display.draw_centered_text(( 'Network\n%snet' ) % current_network)
 
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_PAGE:
                 for i, network in enumerate(networks):
-                    if self.ctx.net == network:
-                        self.ctx.net = networks[(i + 1) % len(networks)]
+                    if current_network == network:
+                        new_network = networks[(i + 1) % len(networks)]
+                        settings.save('network', new_network)
+                        self.ctx.net = new_network
                         break
             elif btn == BUTTON_ENTER:
                 break
+        return MENU_CONTINUE
+
+    def printer(self):
+        """Handler for the 'printer' menu item"""
+        baudrates = ['9600', '19200']
+
+        while True:
+            current_baudrate = settings.load('printer.baudrate', '9600')
+
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(( 'Baudrate\n%s' ) % current_baudrate)
+
+            btn = self.ctx.input.wait_for_button()
+            if btn == BUTTON_PAGE:
+                for i, baudrate in enumerate(baudrates):
+                    if current_baudrate == baudrate:
+                        settings.save('printer.baudrate', baudrates[(i + 1) % len(baudrates)])
+                        self.ctx.printer = Printer()
+                        break
+            elif btn == BUTTON_ENTER:
+                break
+        return MENU_CONTINUE
+
+    def debug(self):
+        """Handler for the 'debug' menu item"""
+        levels = sorted(LEVEL_NAMES.keys())
+
+        while True:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                ( 'Log Level\n%s' ) % level_name(self.ctx.log.level)
+            )
+
+            btn = self.ctx.input.wait_for_button()
+            if btn == BUTTON_PAGE:
+                for i, level in enumerate(levels):
+                    if self.ctx.log.level == level:
+                        self.ctx.log = Logger(self.ctx.log.filepath, levels[(i + 1) % len(levels)])
+                        break
+            elif btn == BUTTON_ENTER:
+                break
+        return MENU_CONTINUE
+
+    def about(self):
+        """Handler for the 'about' menu item"""
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(( 'Krux\n\n\nVersion\n%s' ) % self.ctx.version)
+        self.ctx.input.wait_for_button()
         return MENU_CONTINUE
