@@ -57,8 +57,8 @@ vagrant ssh -c 'cd /vagrant; ./krux build-software en-US'
 
 Prefer a different language? You can replace `en-US` in the command above with one of the following supported locales:
 
-- en-US (English)
 - de-DE (German)
+- es-MX (Spanish)
 - fr-FR (French)
 - Are we missing one? Make a PR!
 

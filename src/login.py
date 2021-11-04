@@ -86,7 +86,7 @@ class Login(Page):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(( 'Failed to load\nmnemonic' ), lcd.RED)
+            self.ctx.display.flash_text(( 'Failed to load mnemonic' ), lcd.RED)
             return MENU_CONTINUE
 
         words = []
@@ -103,14 +103,14 @@ class Login(Page):
                     words.append(WORDLIST[int(data[i:i+4])])
 
         if not words or (len(words) != 12 and len(words) != 24):
-            self.ctx.display.flash_text(( 'Invalid mnemonic\nlength' ), lcd.RED)
+            self.ctx.display.flash_text(( 'Invalid mnemonic length' ), lcd.RED)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
     def load_key_from_text(self):
         """Handler for the 'via text' menu item"""
         words = []
-        self.ctx.display.draw_hcentered_text(( 'Enter each\nword of your\nBIP-39 mnemonic.' ))
+        self.ctx.display.draw_hcentered_text(( 'Enter each word of your BIP-39 mnemonic.' ))
         self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
@@ -157,7 +157,7 @@ class Login(Page):
         """Handler for the 'via numbers' menu item"""
         words = []
         self.ctx.display.draw_hcentered_text(
-            ( 'Enter each\nword of your\nBIP-39 mnemonic\nas a number from\n1 to 2048.' )
+            ( 'Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.' )
         )
         self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
         btn = self.ctx.input.wait_for_button()
@@ -208,7 +208,7 @@ class Login(Page):
         """Handler for the 'via bits' menu item"""
         words = []
         self.ctx.display.draw_hcentered_text(
-            ( 'Enter each\nword of your\nBIP-39 mnemonic\nas a series of\nbinary digits.' )
+            ( 'Enter each word of your BIP-39 mnemonic as a series of binary digits.' )
         )
         self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
         btn = self.ctx.input.wait_for_button()
