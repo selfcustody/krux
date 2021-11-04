@@ -36,9 +36,9 @@ class Home(Page):
     def __init__(self, ctx):
         Page.__init__(self, ctx, Menu(ctx, [
             (( 'Mnemonic' ), self.mnemonic),
-            (( 'Public Key\n(xpub)' ), self.public_key),
+            (( 'Public Key (xpub)' ), self.public_key),
             (( 'Wallet' ), self.wallet),
-            (( 'Check\nAddress' ), self.check_address),
+            (( 'Check Address' ), self.check_address),
             (( 'Sign PSBT' ), self.sign_psbt),
             (( 'Shutdown' ), self.shutdown)
         ]))
@@ -53,23 +53,26 @@ class Home(Page):
     def public_key(self):
         """Handler for the 'xpub' menu item"""
         xpub = self.ctx.wallet.key.xpub_btc_core()
-        self.display_qr_codes(xpub, FORMAT_NONE, title=self.ctx.wallet.key.xpub())
+        subtitle = self.ctx.wallet.key.xpub()
+        self.display_qr_codes(xpub, FORMAT_NONE, subtitle, DEFAULT_PADDING+1)
         self.print_qr_prompt(xpub, FORMAT_NONE)
 
         if self.ctx.wallet.is_multisig():
             zpub = self.ctx.wallet.key.p2wsh_zpub_btc_core()
-            self.display_qr_codes(zpub, FORMAT_NONE, title=self.ctx.wallet.key.p2wsh_zpub())
+            subtitle = self.ctx.wallet.key.p2wsh_zpub()
+            self.display_qr_codes(zpub, FORMAT_NONE, subtitle, DEFAULT_PADDING+1)
             self.print_qr_prompt(zpub, FORMAT_NONE)
         else:
             zpub = self.ctx.wallet.key.p2wpkh_zpub_btc_core()
-            self.display_qr_codes(zpub, FORMAT_NONE, title=self.ctx.wallet.key.p2wpkh_zpub())
+            subtitle = self.ctx.wallet.key.p2wpkh_zpub()
+            self.display_qr_codes(zpub, FORMAT_NONE, subtitle, DEFAULT_PADDING+1)
             self.print_qr_prompt(zpub, FORMAT_NONE)
         return MENU_CONTINUE
 
     def wallet(self):
         """Handler for the 'wallet' menu item"""
         if not self.ctx.wallet.is_loaded():
-            self.ctx.display.draw_centered_text(( 'Wallet\nnot found.' ))
+            self.ctx.display.draw_centered_text(( 'Wallet not found.' ))
             self.ctx.display.draw_hcentered_text(( 'Load one?' ), offset_y=200)
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_ENTER:
@@ -83,7 +86,7 @@ class Home(Page):
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
         if wallet_data is None:
-            self.ctx.display.flash_text(( 'Failed to\nload wallet' ), lcd.RED)
+            self.ctx.display.flash_text(( 'Failed to load wallet' ), lcd.RED)
             return MENU_CONTINUE
 
         try:
@@ -111,7 +114,7 @@ class Home(Page):
 
         data, qr_format = self.capture_qr_code()
         if data is None or qr_format != FORMAT_NONE:
-            self.ctx.display.flash_text(( 'Failed to load\naddress' ), lcd.RED)
+            self.ctx.display.flash_text(( 'Failed to load address' ), lcd.RED)
             return MENU_CONTINUE
 
         addr = data
@@ -129,7 +132,7 @@ class Home(Page):
             if (i + 1) % 100 == 0:
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    ( 'Checked\n%d receive\naddresses with\nno matches.' ) % (i + 1)
+                    ( 'Checked %d receive addresses with no matches.' ) % (i + 1)
                 )
                 self.ctx.display.draw_hcentered_text(( 'Try more?' ), offset_y=200)
                 btn = self.ctx.input.wait_for_button()
@@ -138,7 +141,7 @@ class Home(Page):
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                ( 'Checking\nreceive address\n%d\nfor match..' ) % i
+                ( 'Checking receive address %d for match..' ) % i
             )
             desc = self.ctx.wallet.descriptor
             child_addr = desc.derive(i, branch_index=0).address(network=NETWORKS[self.ctx.net])
@@ -152,7 +155,7 @@ class Home(Page):
         self.ctx.display.clear()
         if found:
             self.ctx.display.draw_centered_text(
-                ( '%s\n\nis a valid\nreceive address' ) % addr,
+                ( '%s\n\nis a valid receive address' ) % addr,
                 lcd.GREEN
             )
             self.ctx.input.wait_for_button()
@@ -160,7 +163,7 @@ class Home(Page):
             self.print_qr_prompt(data, qr_format)
         else:
             self.ctx.display.draw_centered_text(
-                ( '%s\n\nwas\nNOT FOUND\nin the first\n%d receive\naddresses' ) % (addr, i + 1),
+                ( '%s\n\nwas NOT FOUND in the first %d receive addresses' ) % (addr, i + 1),
                 lcd.RED
             )
             self.ctx.input.wait_for_button()
@@ -171,7 +174,7 @@ class Home(Page):
         """Handler for the 'sign psbt' menu item"""
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(
-                ( 'WARNING:\nWallet\nnot loaded.\n\nSome checks\ncannot be\nperformed.' ),
+                ( 'WARNING:\nWallet not loaded.\n\nSome checks cannot be performed.' ),
                 lcd.WHITE
             )
             self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
@@ -182,7 +185,7 @@ class Home(Page):
         data, qr_format = self.capture_qr_code()
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
         if data is None:
-            self.ctx.display.flash_text(( 'Failed to load\nPSBT' ), lcd.RED)
+            self.ctx.display.flash_text(( 'Failed to load PSBT' ), lcd.RED)
             return MENU_CONTINUE
 
         self.ctx.display.clear()

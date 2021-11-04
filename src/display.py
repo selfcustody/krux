@@ -106,15 +106,25 @@ class Display:
         self.initialize_lcd()
         self.rot = 0
 
-    def to_lines(self, text, padding):
+    def to_lines(self, text, word_wrap=True, padding=DEFAULT_PADDING):
         """Takes a string of text and converts it to lines to display on
            the screen, taking into account padding
         """
         screen_width = self.width() - padding * 2
         lines = []
-        columns = math.ceil(screen_width / self.font_size)
+        columns = math.floor(screen_width / self.font_size)
         cur_column = 0
-        for char in text:
+        for i, char in enumerate(text):
+            if word_wrap and char == ' ':
+                next_word_end = text.find(' ', i+1)
+                if next_word_end == -1:
+                    next_word_end = text.find('\n', i+1)
+                    if next_word_end == -1:
+                        next_word_end = len(text)
+                next_word = text[i+1:next_word_end]
+                if len(next_word) < columns:
+                    if cur_column + 1 + len(next_word) >= columns:
+                        cur_column = 0
             if char == '\n':
                 cur_column = 0
             cur_column = (cur_column + 1) % columns
@@ -131,30 +141,31 @@ class Display:
         lcd.clear()
 
     def draw_hcentered_text(self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE,
-                            padding=DEFAULT_PADDING):
+                            word_wrap=True, padding=DEFAULT_PADDING):
         """Draws text horizontally-centered on the display, taking padding
            into account, at the given offset_y
         """
         screen_width = self.width() - padding * 2
-        lines = self.to_lines(text, padding)
+        lines = self.to_lines(text, word_wrap, padding)
         for i, line in enumerate(lines):
             offset_x = max(0, (screen_width - (self.font_size * len(line))) // 2) + 1
             lcd.draw_string(offset_x, offset_y + (i * self.line_height()), line, color, lcd.BLACK)
 
-    def draw_centered_text(self, text, color=lcd.WHITE, padding=DEFAULT_PADDING):
+    def draw_centered_text(self, text, color=lcd.WHITE, word_wrap=True, padding=DEFAULT_PADDING):
         """Draws text horizontally and vertically centered on the display,
            taking padding into account
         """
-        lines = self.to_lines(text, padding)
+        lines = self.to_lines(text, word_wrap, padding)
         screen_height = self.height() - padding * 2
         lines_height = len(lines) * self.line_height()
         offset_y = max(0, (screen_height - lines_height) // 2)
-        self.draw_hcentered_text(text, offset_y, color, padding)
+        self.draw_hcentered_text(text, offset_y, color, word_wrap, padding)
 
-    def flash_text(self, text, color=lcd.WHITE, duration=3000):
+    def flash_text(self, text, color=lcd.WHITE, word_wrap=True, padding=DEFAULT_PADDING,
+                   duration=3000):
         """Flashes text centered on the display for duration ms"""
         self.clear()
-        self.draw_centered_text(text, color)
+        self.draw_centered_text(text, color, word_wrap, padding)
         time.sleep_ms(duration)
         self.clear()
 

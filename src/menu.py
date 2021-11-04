@@ -64,12 +64,18 @@ class Menu:
     def _draw_menu(self, selected_item_index):
         menu_list = []
         for i, menu_item in enumerate(self.menu):
-            menu_list_item = menu_item[0]
+            menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             if selected_item_index == i:
-                lines = menu_item[0].split('\n')
-                menu_list_item = ('- %s -' % lines[0])
-                if len(lines) > 1:
-                    menu_list_item += '\n' + '\n'.join(lines[1:])
+                selected_line = '- %s -' % menu_item_lines[0]
+                if len(self.ctx.display.to_lines(selected_line)) > 1:
+                    selected_line = '-%s-' % menu_item_lines[0]
+                menu_item_lines[0] = selected_line
+            menu_list_item = menu_item_lines[0]
+            if len(menu_item_lines) > 1:
+                menu_list_item += '\n' + '\n'.join(menu_item_lines[1:])
             menu_list.append(menu_list_item)
-        self.ctx.display.draw_centered_text('\n\n'.join(menu_list))
-                
+        self.ctx.display.draw_centered_text(
+            '\n\n'.join(menu_list),
+            color=lcd.WHITE,
+            word_wrap=False
+        )

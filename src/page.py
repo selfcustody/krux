@@ -170,7 +170,7 @@ class Page:
             self.ctx.log.debug('Captured QR Code in format "%d": %s' % (qr_format, data))
         return (code, qr_format)
 
-    def display_qr_codes(self, data, qr_format, title=None, manual=False):
+    def display_qr_codes(self, data, qr_format, title=None, title_padding=DEFAULT_PADDING):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
            in the specified format
         """
@@ -189,14 +189,17 @@ class Page:
                 code, num_parts = code_generator.__next__()
 
             self.ctx.display.draw_qr_code(5, code)
-            if title is not None:
-                self.ctx.display.draw_hcentered_text(title, offset_y=140)
-            else:
-                self.ctx.display.draw_hcentered_text(
-                    ( 'Part %d / %d' ) % (i+1, num_parts), offset_y=175
-                )
+            subtitle = ( 'Part\n%d / %d' ) % (i+1, num_parts) if title is None else title
+            offset_y = 175 if title is None else 138
+            self.ctx.display.draw_hcentered_text(
+                subtitle,
+                offset_y=offset_y,
+                color=lcd.WHITE,
+                word_wrap=True,
+                padding=title_padding
+            )
             i = (i + 1) % num_parts
-            btn = self.ctx.input.wait_for_button(block=manual or num_parts == 1)
+            btn = self.ctx.input.wait_for_button(block=num_parts == 1)
             done = btn == BUTTON_ENTER
             if not done:
                 time.sleep_ms(QR_ANIMATION_INTERVAL_MS)
@@ -208,14 +211,14 @@ class Page:
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(( 'BIP39 Mnemonic' ))
         for i, word in enumerate(word_list[:12]):
-            offset_y = 35 + (i * self.ctx.display.line_height())
+            offset_y = 40 + (i * self.ctx.display.line_height())
             lcd.draw_string(DEFAULT_PADDING, offset_y, word, lcd.WHITE, lcd.BLACK)
         if len(word_list) > 12:
             self.ctx.input.wait_for_button()
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(( 'BIP39 Mnemonic' ))
             for i, word in enumerate(word_list[12:]):
-                offset_y = 35 + (i * self.ctx.display.line_height())
+                offset_y = 40 + (i * self.ctx.display.line_height())
                 lcd.draw_string(DEFAULT_PADDING, offset_y, word, lcd.WHITE, lcd.BLACK)
 
     def print_qr_prompt(self, data, qr_format):

@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import lcd
 import machine
 from pmu import axp192
 from context import Context
@@ -34,7 +35,12 @@ pmu.enablePMICSleepMode(True)
 
 ctx = Context()
 
-ctx.display.flash_text(settings.load('splash', ( 'Krux' ), strip=False))
+ctx.display.flash_text(
+    settings.load('splash', ( 'Krux' ), strip=False),
+    color=lcd.WHITE,
+    word_wrap=False,
+    padding=8
+)
 
 while True:
     if not Login(ctx).run():
