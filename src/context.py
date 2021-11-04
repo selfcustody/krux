@@ -34,20 +34,14 @@ class Context:
     """
 
     def __init__(self):
-        self.log = logging.Logger(
-            '/sd/.krux.log',
-            level=int(settings.load('log.level', logging.ERROR))
-        )
+        self.log = logging.Logger('/sd/.krux.log', logging.NONE)
         self.version = open('/sd/VERSION').read().strip()
         self.net = settings.load('network', 'main')
         self.display = Display()
         self.input = Input()
         self.camera = Camera()
         self.light = Light()
-        self.printer = Printer(
-            int(settings.load('printer.baudrate', '9600')),
-            int(settings.load('printer.paper_width', '384'))
-        )
+        self.printer = Printer()
         self.wallet = None
 
     def clear(self):
