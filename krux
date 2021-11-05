@@ -59,9 +59,9 @@ elif [ "$1" == "build-software" ]; then
     mkdir -p /vagrant/build
     docker run -v /vagrant:/krux --rm -w "/krux" -it krux-builder /bin/bash -c "rm -rf build/* && \
         cp -r src/. build && \
-        cp -r embit/src/embit build && \
-        cp -r urtypes/src/urtypes build && \
-        cp -r foundation-ur-py/ur build && \
+        cp -r vendor/embit/src/embit build && \
+        cp -r vendor/urtypes/src/urtypes build && \
+        cp -r vendor/foundation-ur-py/ur build && \
         cp LICENSE.md build/LICENSE.md && \
         cd i18n && python3 i18n.py translate "$locale" /krux/build"
 elif [ "$1" == "flash-software" ]; then
