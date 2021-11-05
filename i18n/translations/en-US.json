@@ -8,7 +8,7 @@
     "BIP39 Mnemonic": "BIP39 Mnemonic",
     "Back": "Back",
     "Baudrate\n%s": "Baudrate\n%s",
-    "Check Address": "Check Address",
+    "Check that address belongs to this wallet?": "Check that address belongs to this wallet?",
     "Checked %d receive addresses with no matches.": "Checked %d receive addresses with no matches.",
     "Checking receive address %d for match..": "Checking receive address %d for match..",
     "Continue?": "Continue?",
@@ -27,6 +27,7 @@
     "Fee:\n₿%s": "Fee:\n₿%s",
     "Go": "Go",
     "Input:\n₿%s": "Input:\n₿%s",
+    "Invalid address": "Invalid address",
     "Invalid mnemonic length": "Invalid mnemonic length",
     "Invalid wallet:\n%s": "Invalid wallet:\n%s",
     "Krux": "Krux",
@@ -47,6 +48,7 @@
     "Printing\n%d / %d": "Printing\n%d / %d",
     "Proceed?": "Proceed?",
     "Public Key (xpub)": "Public Key (xpub)",
+    "Scan Address": "Scan Address",
     "Sending:\n₿%s\n\nTo:\n%s": "Sending:\n₿%s\n\nTo:\n%s",
     "Settings": "Settings",
     "Shutdown": "Shutdown",
@@ -62,6 +64,5 @@
     "WARNING:\nWallet not loaded.\n\nSome checks cannot be performed.": "WARNING:\nWallet not loaded.\n\nSome checks cannot be performed.",
     "Wallet": "Wallet",
     "Wallet not found.": "Wallet not found.",
-    "Wallet required": "Wallet required",
     "Word %d": "Word %d"
 }

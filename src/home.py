@@ -22,6 +22,7 @@
 import gc
 import lcd
 from embit.networks import NETWORKS
+from embit.script import Script, address_to_scriptpubkey
 from display import DEFAULT_PADDING
 from psbt import PSBTSigner
 from qr import FORMAT_NONE, FORMAT_PMOFN
@@ -38,7 +39,7 @@ class Home(Page):
             (( 'Mnemonic' ), self.mnemonic),
             (( 'Public Key (xpub)' ), self.public_key),
             (( 'Wallet' ), self.wallet),
-            (( 'Check Address' ), self.check_address),
+            (( 'Scan Address' ), self.scan_address),
             (( 'Sign PSBT' ), self.sign_psbt),
             (( 'Shutdown' ), self.shutdown)
         ]))
@@ -106,12 +107,8 @@ class Home(Page):
             self.ctx.input.wait_for_button()
         return MENU_CONTINUE
 
-    def check_address(self):
-        """Handler for the 'check address' menu item"""
-        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            self.ctx.display.flash_text(( 'Wallet required' ), lcd.RED)
-            return MENU_CONTINUE
-
+    def scan_address(self):
+        """Handler for the 'scan address' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None or qr_format != FORMAT_NONE:
             self.ctx.display.flash_text(( 'Failed to load address' ), lcd.RED)
@@ -124,48 +121,65 @@ class Home(Page):
                 addr_end = len(data)
             addr = data[8:addr_end]
 
-        gc.collect()
+        try:
+            sc = address_to_scriptpubkey(addr)
+            if sc is None or not isinstance(sc, Script):
+                raise ValueError('invalid address')
+        except:
+            self.ctx.display.flash_text(( 'Invalid address' ), lcd.RED)
+            return MENU_CONTINUE
 
-        found = False
-        i = 0
-        while True:
-            if (i + 1) % 100 == 0:
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    ( 'Checked %d receive addresses with no matches.' ) % (i + 1)
-                )
-                self.ctx.display.draw_hcentered_text(( 'Try more?' ), offset_y=200)
-                btn = self.ctx.input.wait_for_button()
-                if btn != BUTTON_ENTER:
-                    break
+        self.display_qr_codes(data, qr_format, title=addr)
+        self.print_qr_prompt(data, qr_format)
 
+        if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                ( 'Checking receive address %d for match..' ) % i
+                ( 'Check that address belongs to this wallet?' )
             )
-            desc = self.ctx.wallet.descriptor
-            child_addr = desc.derive(i, branch_index=0).address(network=NETWORKS[self.ctx.net])
-            if addr == child_addr:
-                found = True
-                break
-            i += 1
+            btn = self.ctx.input.wait_for_button()
+            if btn != BUTTON_ENTER:
+                return MENU_CONTINUE
 
-        gc.collect()
+            gc.collect()
 
-        self.ctx.display.clear()
-        if found:
-            self.ctx.display.draw_centered_text(
-                ( '%s\n\nis a valid receive address' ) % addr,
-                lcd.GREEN
-            )
-            self.ctx.input.wait_for_button()
-            self.display_qr_codes(data, qr_format, title=addr)
-            self.print_qr_prompt(data, qr_format)
-        else:
-            self.ctx.display.draw_centered_text(
-                ( '%s\n\nwas NOT FOUND in the first %d receive addresses' ) % (addr, i + 1),
-                lcd.RED
-            )
+            found = False
+            i = 0
+            while True:
+                if (i + 1) % 100 == 0:
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(
+                        ( 'Checked %d receive addresses with no matches.' ) % (i + 1)
+                    )
+                    self.ctx.display.draw_hcentered_text(( 'Try more?' ), offset_y=200)
+                    btn = self.ctx.input.wait_for_button()
+                    if btn != BUTTON_ENTER:
+                        break
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    ( 'Checking receive address %d for match..' ) % i
+                )
+                desc = self.ctx.wallet.descriptor
+                child_addr = desc.derive(i, branch_index=0).address(network=NETWORKS[self.ctx.net])
+                if addr == child_addr:
+                    found = True
+                    break
+                i += 1
+
+            gc.collect()
+
+            self.ctx.display.clear()
+            if found:
+                self.ctx.display.draw_centered_text(
+                    ( '%s\n\nis a valid receive address' ) % addr,
+                    lcd.GREEN
+                )
+            else:
+                self.ctx.display.draw_centered_text(
+                    ( '%s\n\nwas NOT FOUND in the first %d receive addresses' ) % (addr, i + 1),
+                    lcd.RED
+                )
             self.ctx.input.wait_for_button()
 
         return MENU_CONTINUE
