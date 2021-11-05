@@ -16,7 +16,7 @@ This will pull down the Krux source code as well as the code for all its depende
 
 Note: When you wish to pull down updates to this repo, you can run the following inside the `krux` folder:
 ```bash
-git pull --recurse-submodules
+git pull origin main && git submodule update --recursive
 ```
 
 ### Spin up a virtual machine
