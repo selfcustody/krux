@@ -8,7 +8,7 @@
     "BIP39 Mnemonic": "BIP39 Mnémonique",
     "Back": "Retour",
     "Baudrate\n%s": "Débit en bauds\n%s",
-    "Check Address": "Vérification\nde l'adresse",
+    "Check that address belongs to this wallet?": "Vérifiez que l'adresse appartient à cette portefeuille?",
     "Checked %d receive addresses with no matches.": "Adresses %d reçues vérifiées sans correspondance.",
     "Checking receive address %d for match..": "Vérification de l'adresse reçue %d pour correspondance..",
     "Continue?": "Continuer?",
@@ -27,6 +27,7 @@
     "Fee:\n₿%s": "Frais:\n₿%s",
     "Go": "Go",
     "Input:\n₿%s": "Entée:\n₿%s",
+    "Invalid address": "Adresse invalide",
     "Invalid mnemonic length": "Longueur mnémonique invalide",
     "Invalid wallet:\n%s": "Portefeuille invalide:\n%s",
     "Krux": "Krux",
@@ -47,6 +48,7 @@
     "Printing\n%d / %d": "Impression\n%d / %d",
     "Proceed?": "Procéder?",
     "Public Key (xpub)": "Clé publique (xpub)",
+    "Scan Address": "Scannez l'adresse",
     "Sending:\n₿%s\n\nTo:\n%s": "Envoie:\n₿%s\n\nSur:\n%s",
     "Settings": "Paramètres",
     "Shutdown": "Fermer",
@@ -62,6 +64,5 @@
     "WARNING:\nWallet not loaded.\n\nSome checks cannot be performed.": "Attention:\nPortefeuille non chargé.\n\nLes vérifications ne peuvent pas être effectuées.",
     "Wallet": "Portefeuille",
     "Wallet not found.": "Portefeuille non trouvé.",
-    "Wallet required": "Portefeuille obligatoire",
     "Word %d": "Mot %d"
 }

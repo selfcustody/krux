@@ -8,7 +8,7 @@
     "BIP39 Mnemonic": "BIP39 Mnemónico",
     "Back": "Atrás",
     "Baudrate\n%s": "Velocidad en baudios\n%s",
-    "Check Address": "Comprobar Dirección",
+    "Check that address belongs to this wallet?": "Compruebe que la dirección pertenece a esta cartera?",
     "Checked %d receive addresses with no matches.": "Comprobado %d dirección de depósito sin coincidencias.",
     "Checking receive address %d for match..": "Comprobando la dirección de depósito %d para alguna coincidencia..",
     "Continue?": "Continuar?",
@@ -27,6 +27,7 @@
     "Fee:\n₿%s": "Comisión:\n₿%s",
     "Go": "Ir",
     "Input:\n₿%s": "Entrada:\n₿%s",
+    "Invalid address": "Dirección inválida",
     "Invalid mnemonic length": "Longitud mnemotécnica no válida",
     "Invalid wallet:\n%s": "Cartera inválida:\n%s",
     "Krux": "Krux",
@@ -47,6 +48,7 @@
     "Printing\n%d / %d": "Imprimiendo\n%d / %d",
     "Proceed?": "Continuar?",
     "Public Key (xpub)": "Llave Pública (xpub)",
+    "Scan Address": "Escanear Dirección",
     "Sending:\n₿%s\n\nTo:\n%s": "Enviando:\n₿%s\n\na:\n%s",
     "Settings": "Ajustes",
     "Shutdown": "Apagar",
@@ -62,6 +64,5 @@
     "WARNING:\nWallet not loaded.\n\nSome checks cannot be performed.": "ADVERTENCIA:\nCartera no cargada.\n\nNo se pueden realizar algunas comprobaciones.",
     "Wallet": "Cartera",
     "Wallet not found.": "No se encontró la cartera.",
-    "Wallet required": "Cartera necesaria",
     "Word %d": "Palabra %d"
 }
