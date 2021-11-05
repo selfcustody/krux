@@ -33,10 +33,14 @@ Note that you can't change the wallet once one has been loaded. To do this, you 
 
 <br>
 
-### Check Address
+### Scan Address
 <img src="../../img/pic-checking-address.png" width="100" align="right">
 
-This option turns on the camera and allows you to scan in a QR code of a receive address. If the address can be derived by your wallet, you will see it turn green, otherwise it will exhaustively search through as many addresses as you want until you choose to stop. After stopping, the address will be shown in red to indicate it could not be derived.
+This option turns on the camera and allows you to scan in a QR code of a receive address. Upon scanning, it will render its own QR code of the address back to the display along with the (text) address below it. You could use this feature to scan the address of someone you want to send coins to and display the QR back to your wallet coordinator rather than copy-pasting an address.
+
+If you have a thermal printer attached, you can also print this QR code. 
+
+After proceeding through this screen, you will be asked if you want to check that the address belongs to your wallet. If you confirm, it will exhaustively search through as many addresses derived from your wallet as you want in order to find a match. If it finds a match, the address will turn green indicating success. If it fails to find a match and you choose not to continue searching, it will turn the address red to indicate it could not be derived.
 
 This option exists as an extra security check to verify that the address your wallet coordinator has generated is authentic and belongs to your wallet.
 

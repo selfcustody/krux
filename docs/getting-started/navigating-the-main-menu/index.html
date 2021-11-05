@@ -464,8 +464,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#check-address" class="md-nav__link">
-    Check Address
+  <a href="#scan-address" class="md-nav__link">
+    Scan Address
   </a>
   
 </li>
@@ -631,9 +631,11 @@
 <p>If you return to this option after having loaded your wallet, you will see the wallet's name and the xpubs of all cosigners along with a QR code containing the same exact data that was loaded. If you have a thermal printer attached, you can print this QR code.  </p>
 <p>Note that you can't change the wallet once one has been loaded. To do this, you will need to restart the device.</p>
 <p><br></p>
-<h3 id="check-address">Check Address<a class="headerlink" href="#check-address" title="Permanent link">&para;</a></h3>
+<h3 id="scan-address">Scan Address<a class="headerlink" href="#scan-address" title="Permanent link">&para;</a></h3>
 <p><img src="../../img/pic-checking-address.png" width="100" align="right"></p>
-<p>This option turns on the camera and allows you to scan in a QR code of a receive address. If the address can be derived by your wallet, you will see it turn green, otherwise it will exhaustively search through as many addresses as you want until you choose to stop. After stopping, the address will be shown in red to indicate it could not be derived.</p>
+<p>This option turns on the camera and allows you to scan in a QR code of a receive address. Upon scanning, it will render its own QR code of the address back to the display along with the (text) address below it. You could use this feature to scan the address of someone you want to send coins to and display the QR back to your wallet coordinator rather than copy-pasting an address.</p>
+<p>If you have a thermal printer attached, you can also print this QR code. </p>
+<p>After proceeding through this screen, you will be asked if you want to check that the address belongs to your wallet. If you confirm, it will exhaustively search through as many addresses derived from your wallet as you want in order to find a match. If it finds a match, the address will turn green indicating success. If it fails to find a match and you choose not to continue searching, it will turn the address red to indicate it could not be derived.</p>
 <p>This option exists as an extra security check to verify that the address your wallet coordinator has generated is authentic and belongs to your wallet.</p>
 <p><br></p>
 <h3 id="sign-psbt">Sign PSBT<a class="headerlink" href="#sign-psbt" title="Permanent link">&para;</a></h3>
