@@ -665,7 +665,7 @@
 </code></pre></div>
 This will pull down the Krux source code as well as the code for all its dependencies and put them inside a new <code>krux</code> folder.</p>
 <p>Note: When you wish to pull down updates to this repo, you can run the following inside the <code>krux</code> folder:
-<div class="highlight"><pre><span></span><code>git pull --recurse-submodules
+<div class="highlight"><pre><span></span><code>git pull origin main <span class="o">&amp;&amp;</span> git submodule update --recursive
 </code></pre></div></p>
 <h3 id="spin-up-a-virtual-machine">Spin up a virtual machine<a class="headerlink" href="#spin-up-a-virtual-machine" title="Permanent link">&para;</a></h3>
 <p>After you have installed Vagrant, run the following inside the <code>krux</code> folder to spin up a new VM:
