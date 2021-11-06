@@ -1,0 +1,3 @@
+Translation API Basic folosește tehnologia de traducere automată neuronală de la Google pentru a traduce instantaneu texte în mai mult de o sută de limbi. API de traducere...
+
+
