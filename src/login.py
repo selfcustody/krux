@@ -23,9 +23,9 @@ from logging import LEVEL_NAMES, level_name, Logger
 import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
+import urtypes
 from printer import Printer
 import settings
-import urtypes
 from page import Page
 from menu import Menu, MENU_CONTINUE, MENU_EXIT
 from input import BUTTON_ENTER, BUTTON_PAGE
