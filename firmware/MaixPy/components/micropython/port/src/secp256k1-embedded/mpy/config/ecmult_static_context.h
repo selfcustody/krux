@@ -1,0 +1,1 @@
+#include "../../src/ecmult_static_context.h"
