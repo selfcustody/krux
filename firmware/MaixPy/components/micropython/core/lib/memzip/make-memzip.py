@@ -26,7 +26,7 @@ def create_zip(zip_filename, zip_dir):
 
 def create_c_from_file(c_filename, zip_filename):
     with open(zip_filename, 'rb') as zip_file:
-        with open(c_filename, 'wb') as c_file:
+        with open(c_filename, 'w') as c_file:
             print('#include <stdint.h>', file=c_file)
             print('', file=c_file)
             print('const uint8_t memzip_data[] = {', file=c_file)
@@ -36,10 +36,7 @@ def create_c_from_file(c_filename, zip_filename):
                     break
                 print('   ', end='', file=c_file)
                 for byte in buf:
-                    if type(byte) is types.StringType:
-                        print(' 0x{:02x},'.format(ord(byte)), end='', file=c_file)
-                    else:
-                        print(' 0x{:02x},'.format(byte), end='', file=c_file)
+                    print(' 0x{:02x},'.format(byte), end='', file=c_file)
                 print('', file=c_file)
             print('};', file=c_file)
 

@@ -10,14 +10,12 @@
 
 STATIC mp_obj_t py_gc_heap_size(size_t n_args, const mp_obj_t *args) {
     config_data_t config;
-    load_config_from_spiffs(&config);
+    load_config_from_env(&config);
     if(n_args == 0)
         return mp_obj_new_int(config.gc_heap_size);
     else if(n_args != 1)
         mp_raise_OSError(MP_EINVAL);
     config.gc_heap_size = mp_obj_get_int(args[0]);
-    if( !save_config_to_spiffs(&config) )
-        mp_raise_OSError(MP_EIO);
     return mp_const_none;
 }
 

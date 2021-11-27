@@ -156,7 +156,6 @@ PY_CORE_O_BASENAME = $(addprefix py/,\
 PY_EXTMOD_O_BASENAME = \
 	extmod/moductypes.o \
 	extmod/modujson.o \
-	extmod/modure.o \
 	extmod/moduzlib.o \
 	extmod/moduheapq.o \
 	extmod/modutimeq.o \
@@ -169,12 +168,8 @@ PY_EXTMOD_O_BASENAME = \
 	extmod/machine_pulse.o \
 	extmod/machine_i2c.o \
 	extmod/machine_spi.o \
-	extmod/modussl_axtls.o \
-	extmod/modussl_mbedtls.o \
 	extmod/modurandom.o \
 	extmod/moduselect.o \
-	extmod/moduwebsocket.o \
-	extmod/modwebrepl.o \
 	extmod/modframebuf.o \
 	extmod/vfs.o \
 	extmod/vfs_reader.o \

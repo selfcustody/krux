@@ -79,7 +79,7 @@ mp_obj_t py_cpufreq_set_frequency(size_t n_args, const mp_obj_t *pos_args, mp_ma
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    load_config_from_spiffs(&config);
+    load_config_from_env(&config);
 
     if(args[ARG_cpu].u_int != 0)
         config.freq_cpu = args[ARG_cpu].u_int*1000000;
@@ -105,8 +105,6 @@ mp_obj_t py_cpufreq_set_frequency(size_t n_args, const mp_obj_t *pos_args, mp_ma
         mp_printf(&mp_plat_print, "No change\r\n");
         return mp_const_none;
     }
-    if(!save_config_to_spiffs(&config))
-        mp_printf(&mp_plat_print, "save config fail");
     mp_printf(&mp_plat_print, "\r\nreboot now\r\n");
     mp_hal_delay_ms(50);
     sipeed_sys_reset();

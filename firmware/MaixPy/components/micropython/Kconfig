@@ -25,14 +25,6 @@ menu "Micropython configurations"
 			select FREERTOS_ENABLE
 			select STATIC_TASK_CLEAN_UP_ENABLE
 
-		config MAIXPY_NES_ENABLE
-			bool "Enable NES emulator"
-			default y
-		
-		config MAIXPY_VIDEO_ENABLE
-			bool "Enable video module"
-			default y
-
 		config MAIXPY_TOUCH_SCREEN_ENABLE
 			bool "Enable touch screen module"
 			default y
@@ -56,38 +48,6 @@ menu "Micropython configurations"
 		config MAIXPY_OMV_DOUBLE_BUFF
 			bool "Set double buffer for sensor(camera)"
 			default y
-		
-		config MAIXPY_MIC_ARRAY_ENABLE
-			select MIC_ARRAY_ENABLE
-			bool "Enable Maix.MIC_ARRAY module"
-			default y
-
-		config MAIXPY_LVGL_ENABLE
-			bool "Enbale LittlvGL"
-			default n
-			select MAIXPY_LODEPNG_ENABLE
-		config MAIXPY_LODEPNG_ENABLE
-			bool "Enable lodepng module"
-			default n
-
-		config MAIXPY_WS2812_ENABLE
-			bool "Enable Ws2812"
-			default n
-			select WS2812_ENABLE
-
-		config MAIXPY_HTPA_ENABLE
-			bool "Enable HTPA thermal sensor"
-			default n
-			select HTPA_ENABLE
-
-		config MAIXPY_AMG88XX_ENABLE
-			bool "Enable AMG88XX thermal sensor"
-			default n
-			select AMG88XX_ENABLE
-
-		config MICROPYTHON_ULAB_ENALBE
-			bool "Enable ulab module(a numpy-like fast vector module)"
-			default y
 
 		config MICROPYTHON_SECP256K1_ENABLE
 			bool "Enable secp256k1-embedded module"
@@ -100,25 +60,6 @@ menu "Micropython configurations"
 		config MICROPYTHON_QRCODE_ENABLE
 			bool "Enable qrcode module"
 			default y
-
-		config MICROPYTHON_KMODEL_V4_SUPPORT
-			bool "support v4 kmodel"
-			default n
-
-		config MAIXPY_SPEECH_RECOGNIZER_ENABLE
-			bool "Enable Speech Recognizer"
-			default n
-			select SPEECH_RECOGNIZER_ENABLE
-			
-		config MICROPY_SSL_ENABLE
-			bool "Enable Https SSL"
-			default n
-
-		config MAIXPY_WIZNET5K_ENABLE
-			bool "Enable WIZNET5K"
-			default n
-			select WIZNET5K_ENABLE
-
 	endmenu
 
 	menu "Builtin py modules configurations"
@@ -138,26 +79,9 @@ menu "Micropython configurations"
 		config MAIXPY_K210_UARTHS_DEBUG
 			bool "Use UARTHS to debug(pin9, pin10), UART2 to REPL(pin4, pin5)"
 			default n
-		config MAIXPY_LVGL_DEBUG
-			depends on MAIXPY_LVGL_ENABLE
-			bool "Enable LVGL debug info logging"
-			default y
-
-		config MAIXPY_LVGL_DEBUG_LEVEL
-			depends on MAIXPY_LVGL_DEBUG
-			int "LVGL debug level:[0,3]( [TRACE, INFO, WARN, ERROR])"
-			default 2
 	endmenu
 
 	config BUILTIN_PY_DIR
 		string "builtin py directory"
 		default ""
 endmenu
-
-menu "Others"
-	depends on COMPONENT_MICROPYTHON_ENABLE
-	config COMPONENT_LIB_SIPEED_KPU_SRC_ENABLE
-		bool "Compile lib_sipeed_kpu source code"
-		default n
-endmenu
-

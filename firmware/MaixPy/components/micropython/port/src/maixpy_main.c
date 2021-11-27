@@ -283,62 +283,23 @@ STATIC bool mpy_mount_spiffs(spiffs_user_mount_t *spiffs)
   return true;
 }
 
-bool save_config_to_spiffs(config_data_t *config)
+void load_config_from_env(config_data_t *config)
 {
-  s32_t ret;
-  spiffs_file fd = SPIFFS_open(&spiffs_user_mount_handle.fs, FREQ_STORE_FILE_NAME, SPIFFS_O_WRONLY | SPIFFS_O_CREAT, 0);
-  if (fd <= 0)
-    return false;
-  ret = SPIFFS_write(&spiffs_user_mount_handle.fs, fd, config, sizeof(config_data_t));
-  if (ret <= 0)
-  {
-    SPIFFS_close(&spiffs_user_mount_handle.fs, fd);
-    return false;
-  }
-  SPIFFS_close(&spiffs_user_mount_handle.fs, fd);
-  return true;
-}
-
-void load_config_from_spiffs(config_data_t *config)
-{
-  s32_t ret, flash_error = 0;
-  spiffs_file fd = SPIFFS_open(&spiffs_user_mount_handle.fs, FREQ_STORE_FILE_NAME, SPIFFS_O_RDONLY, 0);
   // config init
   config->freq_cpu = FREQ_CPU_DEFAULT;
   config->freq_pll1 = FREQ_PLL1_DEFAULT;
   config->kpu_div = 1;
   config->gc_heap_size = CONFIG_MAIXPY_GC_HEAP_SIZE;
-  if (fd <= 0)
+  config->freq_cpu = config->freq_cpu > FREQ_CPU_MAX ? FREQ_CPU_MAX : config->freq_cpu;
+  config->freq_cpu = config->freq_cpu < FREQ_CPU_MIN ? FREQ_CPU_MIN : config->freq_cpu;
+  config->freq_pll1 = config->freq_pll1 > FREQ_PLL1_MAX ? FREQ_PLL1_MAX : config->freq_pll1;
+  config->freq_pll1 = config->freq_pll1 < FREQ_PLL1_MIN ? FREQ_PLL1_MIN : config->freq_pll1;
+  if (config->kpu_div == 0)
+    config->kpu_div = 1;
+  if (config->gc_heap_size == 0)
   {
-    // init data;
-    flash_error = save_config_to_spiffs(config);
+    config->gc_heap_size = CONFIG_MAIXPY_GC_HEAP_SIZE;
   }
-  else
-  {
-    // memset(config, 0, sizeof(config_data_t));
-    ret = SPIFFS_read(&spiffs_user_mount_handle.fs, fd, config, sizeof(config_data_t));
-    if (ret <= 0)
-    {
-      printk("maixpy can't load freq.conf\t\r\n");
-      flash_error = false;
-    }
-    else
-    {
-      config->freq_cpu = config->freq_cpu > FREQ_CPU_MAX ? FREQ_CPU_MAX : config->freq_cpu;
-      config->freq_cpu = config->freq_cpu < FREQ_CPU_MIN ? FREQ_CPU_MIN : config->freq_cpu;
-      config->freq_pll1 = config->freq_pll1 > FREQ_PLL1_MAX ? FREQ_PLL1_MAX : config->freq_pll1;
-      config->freq_pll1 = config->freq_pll1 < FREQ_PLL1_MIN ? FREQ_PLL1_MIN : config->freq_pll1;
-      if (config->kpu_div == 0)
-        config->kpu_div = 1;
-      if (config->gc_heap_size == 0)
-      {
-        config->gc_heap_size = CONFIG_MAIXPY_GC_HEAP_SIZE;
-      }
-    }
-  }
-  SPIFFS_close(&spiffs_user_mount_handle.fs, fd);
-  // override file
-  config->gc_heap_size = CONFIG_MAIXPY_GC_HEAP_SIZE;
 }
 
 #if MICROPY_ENABLE_COMPILER
@@ -444,19 +405,7 @@ int sd_preload(int core)
 {
   bool mounted = false;
   sd_preinit_config();
-  bool sd_is_ready = false;
-  int t = 0;
-  while (t < 10000)
-  {
-    if (0 == sd_init())
-    {
-      sd_is_ready = true;
-      break;
-    }
-    msleep(100);
-    t += 100;
-  }
-  if (sd_is_ready)
+  if (0 == sd_init())
   {
     bool sd_state = sdcard_is_present();
     if (sd_state)
@@ -465,8 +414,7 @@ int sd_preload(int core)
       // if there is a file in the flash called "SKIPSD", then we don't mount the SD card
       // if (!mounted_flash || SPIFFS_stat(&spiffs_user_mount_handle.fs, "SKIPSD", &fno) != SPIFFS_OK)
       {
-        t = 0;
-        while (t < 10000)
+        for (int r = 0; r < 4; r++)
         {
           // fail try again mounted_sdcard.
           if (init_sdcard_fs())
@@ -474,8 +422,6 @@ int sd_preload(int core)
             mounted = true;
             break;
           }
-          msleep(100);
-          t += 100;
         }
       }
     }
@@ -597,10 +543,9 @@ soft_reset:
   // mp_printf(&mp_plat_print, "[MaixPy] init end\r\n"); // for maixpy ide
   // run boot-up scripts
   mp_hal_set_interrupt_char(CHAR_CTRL_C);
-  int ret = pyexec_frozen_module("_boot.py");
+  int ret = pyexec_file_if_exists("boot.py");
   if (ret != 0 && !is_ide_dbg_mode()) // user canceled or ide mode
   {
-    ret = pyexec_file_if_exists("boot.py");
     if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL)
     {
       ret = pyexec_file_if_exists("main.py");
@@ -686,7 +631,7 @@ int maixpy_main()
   uarths_config(115200, 1);
   flash_init(&manuf_id, &device_id);
   init_flash_spiffs();
-  load_config_from_spiffs(&config);
+  load_config_from_env(&config);
   sysctl_cpu_set_freq(config.freq_cpu);
   sysctl_pll_set_freq(SYSCTL_PLL1, config.freq_pll1);
   sysctl_clock_set_threshold(SYSCTL_THRESHOLD_AI, config.kpu_div - 1);
