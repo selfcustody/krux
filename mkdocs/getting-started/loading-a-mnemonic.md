@@ -8,7 +8,7 @@ Once you have either a 12 or 24-word mnemonic, choose `Load Mnemonic` on Krux's 
 
 Enter each word of your BIP-39 mnemonic one at a time. Krux will attempt to autocomplete your word to speed up the process. 
 
-On your 12th or 24th word, you can enter the special sentinel value `zzzzz` to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.
+On your 12th or 24th word, you can leave the word blank to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.
 
 <br>
 
@@ -17,7 +17,7 @@ On your 12th or 24th word, you can enter the special sentinel value `zzzzz` to h
 
 Enter each word of your BIP-39 mnemonic as a number from 1 to 2048 one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
 
-On your 12th or 24th word, you can enter the special sentinel value `99999` to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.
+On your 12th or 24th word, you can leave the word blank to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.
 
 <br>
 
@@ -25,6 +25,8 @@ On your 12th or 24th word, you can enter the special sentinel value `99999` to h
 <img src="../../img/pic-bit-input.png" width="100" align="right">
 
 Enter each word of your BIP-39 mnemonic as an [11-bit bitstring](https://github.com/hatgit/BIP39-wordlist-printable-en/blob/master/BIP39-en-printable.txt) one at a time.
+
+On your 12th or 24th word, you can leave the word blank to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.
 
 <br><br><br><br>
 

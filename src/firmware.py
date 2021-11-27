@@ -1,0 +1,262 @@
+# The MIT License (MIT)
+
+# Copyright (c) 2021 Tom J. Sun
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+import io
+import os
+import binascii
+import secp256k1
+import hashlib
+import time
+import flash
+from input import BUTTON_ENTER
+
+SIGNER_PUBKEY = '02e15227cb417c0f6c9de5aff86532ce948af7d4f607660956be79d1448307b695'
+
+MAX_FIRMWARE_SIZE = const(0x300000)
+
+FIRMWARE_SLOT_1 = const(0x00080000)
+FIRMWARE_SLOT_2 = const(0x00280000)
+
+MAIN_BOOT_CONFIG_SECTOR_ADDRESS   = const(0x00004000)
+BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = const(0x00005000)
+
+def find_active_firmware(boot_config_sector):
+    """Returns a tuple of the active firmware's configuration"""
+    for i in range(8):
+        app_entry = boot_config_sector[i*32:i*32+32]
+        config_flags = int.from_bytes(app_entry[0:4], 'big')
+        active = config_flags & 0b1 == 0b1
+        if not active:
+            continue
+        app_address = int.from_bytes(app_entry[4:4+4], 'big')
+        app_size = int.from_bytes(app_entry[8:8+4], 'big')
+        return app_address, app_size, i
+    return None, None, None
+
+def write_data(pct_cb, address, data, data_size, chunk_size, header=False, sha_suffix=None):
+    """Writes data to the flash, optionally adding header and sha suffix for firmware"""
+    buffer = bytearray(chunk_size)
+    i = 0
+    chunk_read = 0
+    total_read = 0
+    read_attempts = 0
+    while True:
+        if sha_suffix is None:
+            pct_cb(total_read / data_size)
+            if total_read == data_size:
+                break
+        else:
+            pct_cb(total_read / (data_size + len(sha_suffix)))
+            if total_read == data_size + len(sha_suffix):
+                break
+
+        header_offset = 5 if header and i == 0 else 0
+        chunk_size_after_header = chunk_size - header_offset
+
+        num_read = 0
+        if sha_suffix is not None and total_read >= data_size:
+            sha_index = total_read - data_size
+            num_read = len(sha_suffix[sha_index:])
+            buffer[:num_read] = sha_suffix[sha_index:]
+        else:
+            read_bytes = data.read(chunk_size_after_header - chunk_read)
+            num_read = len(read_bytes)
+            buffer[chunk_read:chunk_read+num_read] = read_bytes
+        total_read += num_read
+
+        if not num_read and not chunk_read:
+            if read_attempts < 5:
+                read_attempts += 1
+                continue
+            break
+
+        chunk_read += num_read
+        if num_read and chunk_read < chunk_size_after_header and total_read < data_size:
+            continue
+
+        if sha_suffix is not None and total_read >= data_size:
+            sha_index = total_read - data_size
+            remainder = min(chunk_size_after_header-chunk_read, len(sha_suffix[sha_index:]))
+            buffer[chunk_read:chunk_read+remainder] = sha_suffix[sha_index:sha_index+remainder]
+            total_read += remainder
+            chunk_read += remainder
+
+        for j in range(chunk_size_after_header - chunk_read):
+            buffer[chunk_read + j] = 0b0
+
+        cur_address = i * chunk_size + address
+        flash.erase(cur_address, chunk_size)
+        time.sleep_ms(100)
+        if header and i == 0:
+            flash.write(cur_address, b'\x00' + data_size.to_bytes(4, 'little'))
+            time.sleep_ms(100)
+        flash.write(cur_address+header_offset, buffer[:chunk_size_after_header])
+        time.sleep_ms(100)
+        i += 1
+        num_read = 0
+        chunk_read = 0
+
+def update_boot_config_sector(sector, entry_index, new_firmware_address, new_firmware_size):
+    """Updates the boot config sector in flash"""
+    updated_sector = bytearray(sector)
+    app_entry = updated_sector[entry_index*32:entry_index*32+32]
+    app_entry[0:4] = (0x5AA5D0C0 | 0b1101).to_bytes(4, 'big')
+    app_entry[4:4+4] = new_firmware_address.to_bytes(4, 'big')
+    app_entry[8:8+4] = new_firmware_size.to_bytes(4, 'big')
+    updated_sector[entry_index*32:entry_index*32+32] = app_entry
+    return bytes(updated_sector)
+
+def fsize(firmware_filename):
+    """Returns the size of the firmware"""
+    size = 0
+    with open(firmware_filename, 'rb', buffering=0) as file:
+        while True:
+            chunk = file.read(128)
+            if not chunk:
+                break
+            size += len(chunk)
+    return size
+
+def sha256(firmware_filename, firmware_size):
+    """Returns the sha256 hash of the firmware"""
+    hasher = hashlib.sha256()
+    hasher.update(b'\x00' + firmware_size.to_bytes(4, 'little'))
+    with open(firmware_filename, 'rb', buffering=0) as file:
+        while True:
+            chunk = file.read(128)
+            if not chunk:
+                break
+            hasher.update(chunk)
+    return hasher.digest()
+
+def upgrade():
+    """Installs new firmware from SD card"""
+
+    firmware_path = ''
+    try:
+        firmware_filenames = list(filter(
+            lambda filename: filename.startswith('firmware') and filename.endswith('.bin'),
+            os.listdir('/sd')
+        ))
+        firmware_filenames.sort(reverse=True)
+        if not firmware_filenames:
+            return False
+        firmware_path = '/sd/' + firmware_filenames[0]
+    except:
+        return False
+
+    from display import Display
+    from input import Input
+    display = Display()
+    inp = Input()
+
+    new_size = fsize(firmware_path)
+    new_hash = sha256(firmware_path, new_size)
+
+    display.clear()
+    display.draw_centered_text(
+        ( 'New firmware detected.\n\nSHA256:\n%s\n\n\n\nInstall?' )
+        %
+        binascii.hexlify(new_hash).decode()
+    )
+    if inp.wait_for_button() != BUTTON_ENTER:
+        return False
+
+    if new_size > MAX_FIRMWARE_SIZE:
+        display.flash_text(( 'Firmware exceeds max size: %d' ) % MAX_FIRMWARE_SIZE)
+        return False
+
+    pubkey = None
+    try:
+        pubkey = secp256k1.ec_pubkey_parse(binascii.unhexlify(SIGNER_PUBKEY))
+    except:
+        display.flash_text(( 'Invalid public key' ))
+        return False
+
+    sig = None
+    try:
+        sig = open(firmware_path + '.sig', 'rb').read()
+    except:
+        display.flash_text(( 'Missing signature file' ))
+        return False
+
+    try:
+        if not secp256k1.ecdsa_verify(sig, new_hash, pubkey):
+            display.flash_text(( 'Bad signature' ))
+            return False
+    except:
+        display.flash_text(( 'Bad signature' ))
+        return False
+
+    boot_config_sector = flash.read(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
+    address, _, entry_index = find_active_firmware(boot_config_sector)
+    if address is None:
+        boot_config_sector = flash.read(BACKUP_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
+        address, _, entry_index = find_active_firmware(boot_config_sector)
+        if address is None:
+            display.flash_text(( 'Invalid bootloader' ))
+            return False
+
+    # Write new firmware to the opposite slot
+    new_address = None
+    if address == FIRMWARE_SLOT_1:
+        new_address = FIRMWARE_SLOT_2
+    elif address == FIRMWARE_SLOT_2:
+        new_address = FIRMWARE_SLOT_1
+
+    def status_text(text):
+        display.clear()
+        display.draw_centered_text(text)
+
+    write_data(
+        lambda pct: status_text(( 'Upgrading firmware..\n\n%d%%' ) % int(pct * 100)),
+        new_address,
+        open(firmware_path, 'rb', buffering=0),
+        new_size,
+        65536,
+        True,
+        new_hash
+    )
+
+    write_data(
+        lambda pct: status_text(( 'Backing up bootloader..\n\n%d%%' ) % int(pct * 100)),
+        BACKUP_BOOT_CONFIG_SECTOR_ADDRESS,
+        io.BytesIO(boot_config_sector),
+        len(boot_config_sector),
+        4096
+    )
+
+    new_boot_config_sector = update_boot_config_sector(
+        boot_config_sector,
+        entry_index,
+        new_address,
+        new_size
+    )
+    write_data(
+        lambda pct: status_text(( 'Updating bootloader..\n\n%d%%' ) % int(pct * 100)),
+        MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
+        io.BytesIO(new_boot_config_sector),
+        len(new_boot_config_sector),
+        4096
+    )
+
+    display.flash_text(( 'Upgrade complete.\n\nShutting down..' ))
+    return True

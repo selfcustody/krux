@@ -32,9 +32,9 @@ class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
     def __init__(self):
+        self.entropy = 0
         fm.register(board_info.BUTTON_A, fm.fpioa.GPIOHS21)
         self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
-
         fm.register(board_info.BUTTON_B, fm.fpioa.GPIOHS22)
         self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
 
@@ -44,7 +44,7 @@ class Input:
         """
         # Loop until all buttons are released (if currently pressed)
         while self.enter.value() == 0 or self.page.value() == 0:
-            pass
+            self.entropy += 1
 
         # Wait for first button press
         checks = 0
@@ -56,12 +56,12 @@ class Input:
         if self.enter.value() == 0:
             # Wait for release
             while self.enter.value() == 0:
-                pass
+                self.entropy += 1
             return BUTTON_ENTER
 
         if self.page.value() == 0:
             # Wait for release
             while self.page.value() == 0:
-                pass
+                self.entropy += 1
             return BUTTON_PAGE
         return None

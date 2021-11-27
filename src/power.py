@@ -19,59 +19,31 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import machine
 import sys
-sys.path.append('')
-sys.path.append('.')
 
-import firmware
-from power import PowerManager
+class PowerManager:
+    """PowerManager is a singleton interface for controlling the device's power management unit"""
 
-pmu = PowerManager()
-if firmware.upgrade():
-    pmu.shutdown()
+    def __init__(self):
+        self.pmu = None
+        try:
+            from pmu import axp192
+            self.pmu = axp192()
+            self.pmu.enablePMICSleepMode(True)
+        except:
+            pass
 
-# Note: These imports come after the firmware upgrade check
-#       to allow it to have more memory to work with
-import lcd
-from context import Context
-from login import Login
-from home import Home
+    def shutdown(self):
+        """Shuts down the device"""
+        if self.pmu is not None:
+            self.pmu.setEnterSleepMode()
+        machine.reset()
+        sys.exit()
 
-VERSION = 'BETA'
-
-SPLASH = """
-BTCBTCBTCBTCBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-B              T
-C  K  r  u  x  B
-T              C
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTCBTCBTCBTCBT
-"""
-
-ctx = Context(VERSION)
-
-ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
-
-while True:
-    if not Login(ctx).run():
-        break
-
-    if not Home(ctx).run():
-        break
-
-ctx.display.flash_text(( 'Shutting down..' ))
-
-ctx.clear()
-
-pmu.shutdown()
+    def reboot(self):
+        """Reboots the device"""
+        if self.pmu is not None:
+            self.pmu.enablePMICSleepMode(False)
+        machine.reset()
+        sys.exit()

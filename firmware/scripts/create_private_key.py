@@ -19,25 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-def load(setting, default, strip=True):
-    """Loads a setting from the settings directory with name <setting>.txt, optionally stripping
-       the value before returning.
+import binascii
+from embit.util import key
 
-       If setting does not exist, default will be returned.
-    """
-    try:
-        with open('/sd/settings/%s.txt' % setting, 'r') as setting_file:
-            value = setting_file.read()
-            if strip:
-                return value.strip()
-            return value
-    except:
-        return default
-
-def save(setting, value):
-    """Writes a setting to the settings directory with name <setting>.txt"""
-    try:
-        with open('/sd/settings/%s.txt' % setting, 'w') as setting_file:
-            setting_file.write(value)
-    except:
-        pass
+print(binascii.hexlify(key.generate_privkey()).decode(), end='')

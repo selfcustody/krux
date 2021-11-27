@@ -20,58 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
-sys.path.append('')
-sys.path.append('.')
+import binascii
+from embit.util import secp256k1
 
-import firmware
-from power import PowerManager
+if len(sys.argv) != 2:
+    sys.exit('Private key must be provided')
 
-pmu = PowerManager()
-if firmware.upgrade():
-    pmu.shutdown()
+private_key = binascii.unhexlify(sys.argv[1])
 
-# Note: These imports come after the firmware upgrade check
-#       to allow it to have more memory to work with
-import lcd
-from context import Context
-from login import Login
-from home import Home
+if not secp256k1.ec_seckey_verify(private_key):
+    sys.exit('Private key is invalid')
 
-VERSION = 'BETA'
-
-SPLASH = """
-BTCBTCBTCBTCBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-B              T
-C  K  r  u  x  B
-T              C
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTCBTCBTCBTCBT
-"""
-
-ctx = Context(VERSION)
-
-ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
-
-while True:
-    if not Login(ctx).run():
-        break
-
-    if not Home(ctx).run():
-        break
-
-ctx.display.flash_text(( 'Shutting down..' ))
-
-ctx.clear()
-
-pmu.shutdown()
+public_key = secp256k1.ec_pubkey_create(private_key)
+sec = secp256k1.ec_pubkey_serialize(public_key)
+print(binascii.hexlify(sec).decode(), end='')

@@ -19,7 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import random
+import time
+import urandom
 from binascii import hexlify
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
@@ -90,17 +91,17 @@ class Key:
             self.account.to_base58(self.network['zpub'])
         )
 
-def pick_final_word(words):
+def pick_final_word(ctx, words):
     """Returns a random final word with a valid checksum for the given list of
        either 11 or 23 words
     """
     if (len(words) != 11 and len(words) != 23):
         return None
 
+    urandom.seed(time.ticks_ms() + ctx.input.entropy)
     while True:
-        word = random.choice(WORDLIST)
+        word = urandom.choice(WORDLIST)
         mnemonic = ' '.join(words) + ' ' + word
         if bip39.mnemonic_is_valid(mnemonic):
             return word
     return None
-        

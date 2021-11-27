@@ -25,7 +25,6 @@ from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 import urtypes
 from printer import Printer
-import settings
 from page import Page
 from menu import Menu, MENU_CONTINUE, MENU_EXIT
 from input import BUTTON_ENTER, BUTTON_PAGE
@@ -35,8 +34,6 @@ from wallet import Wallet
 
 TEST_PHRASE_DIGITS  = '11111'
 TEST_PHRASE_LETTERS = 'aaaaa'
-FINAL_WORD_DIGITS   = '99999'
-FINAL_WORD_LETTERS  = 'zzzzz'
 
 class Login(Page):
     """Represents the login page of the app"""
@@ -77,8 +74,10 @@ class Login(Page):
             ])
             index, _ = submenu.run_loop()
             multisig = index == 1
-            self.ctx.display.flash_text(( 'Loading..' ))
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(( 'Loading..' ))
             self.ctx.wallet = Wallet(Key(' '.join(words), multisig, network=NETWORKS[self.ctx.net]))
+            self.ctx.printer = Printer(self.ctx.printer_baudrate, self.ctx.printer_paper_width)
             return MENU_EXIT
         return MENU_CONTINUE
 
@@ -131,17 +130,17 @@ class Login(Page):
                     # we're testing and just want the test words
                     if i == 0 and word == TEST_PHRASE_LETTERS:
                         break
-                    # If the last 'word' is the FINAL_WORD_LETTERS sentinel,
+                    # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
-                    if (i in (11, 23)) and word == FINAL_WORD_LETTERS:
+                    if (i in (11, 23)) and word == '':
                         break
 
                 if word == TEST_PHRASE_LETTERS:
                     words = [WORDLIST[0] if n + 1 < 12 else WORDLIST[1879] for n in range(12)]
                     break
 
-                if word == FINAL_WORD_LETTERS:
-                    word = pick_final_word(words)
+                if word == '':
+                    word = pick_final_word(self.ctx, words)
 
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(word)
@@ -179,9 +178,9 @@ class Login(Page):
                     # we're testing and just want the test words
                     if i == 0 and digits == TEST_PHRASE_DIGITS:
                         break
-                    # If the last 'word' is the FINAL_WORD_DIGITS sentinel,
+                    # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
-                    if (i in (11, 23)) and digits == FINAL_WORD_DIGITS:
+                    if (i in (11, 23)) and digits == '':
                         break
 
                 if digits == TEST_PHRASE_DIGITS:
@@ -189,8 +188,8 @@ class Login(Page):
                     break
 
                 word = ''
-                if digits == FINAL_WORD_DIGITS:
-                    word = pick_final_word(words)
+                if digits == '':
+                    word = pick_final_word(self.ctx, words)
                 else:
                     word = WORDLIST[int(digits)-1]
 
@@ -226,8 +225,16 @@ class Login(Page):
                     bits = self.capture_bits_from_numpad(( 'Word %d' ) % (i+1))
                     if len(bits) == 11:
                         break
+                    # If the last 'word' is blank,
+                    # pick a random final word that is a valid checksum
+                    if (i in (11, 23)) and bits == '':
+                        break
 
-                word = WORDLIST[int('0b' + bits, 0)]
+                word = ''
+                if bits == '':
+                    word = pick_final_word(self.ctx, words)
+                else:
+                    word = WORDLIST[int('0b' + bits, 0)]
 
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(word)
@@ -257,7 +264,7 @@ class Login(Page):
         networks = ['main', 'test']
 
         while True:
-            current_network = settings.load('network', 'main')
+            current_network = self.ctx.net
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Network\n%snet' ) % current_network)
@@ -267,7 +274,6 @@ class Login(Page):
                 for i, network in enumerate(networks):
                     if current_network == network:
                         new_network = networks[(i + 1) % len(networks)]
-                        settings.save('network', new_network)
                         self.ctx.net = new_network
                         break
             elif btn == BUTTON_ENTER:
@@ -276,10 +282,10 @@ class Login(Page):
 
     def printer(self):
         """Handler for the 'printer' menu item"""
-        baudrates = ['9600', '19200']
+        baudrates = [9600, 19200]
 
         while True:
-            current_baudrate = settings.load('printer.baudrate', '9600')
+            current_baudrate = self.ctx.printer_baudrate
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Baudrate\n%s' ) % current_baudrate)
@@ -288,8 +294,8 @@ class Login(Page):
             if btn == BUTTON_PAGE:
                 for i, baudrate in enumerate(baudrates):
                     if current_baudrate == baudrate:
-                        settings.save('printer.baudrate', baudrates[(i + 1) % len(baudrates)])
-                        self.ctx.printer = Printer()
+                        new_baudrate = baudrates[(i + 1) % len(baudrates)]
+                        self.ctx.printer_baudrate = new_baudrate
                         break
             elif btn == BUTTON_ENTER:
                 break

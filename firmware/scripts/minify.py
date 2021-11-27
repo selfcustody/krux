@@ -19,59 +19,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import ast
 import sys
-sys.path.append('')
-sys.path.append('.')
+import astor
 
-import firmware
-from power import PowerManager
-
-pmu = PowerManager()
-if firmware.upgrade():
-    pmu.shutdown()
-
-# Note: These imports come after the firmware upgrade check
-#       to allow it to have more memory to work with
-import lcd
-from context import Context
-from login import Login
-from home import Home
-
-VERSION = 'BETA'
-
-SPLASH = """
-BTCBTCBTCBTCBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-B              T
-C  K  r  u  x  B
-T              C
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTCBTCBTCBTCBT
-"""
-
-ctx = Context(VERSION)
-
-ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
-
-while True:
-    if not Login(ctx).run():
-        break
-
-    if not Home(ctx).run():
-        break
-
-ctx.display.flash_text(( 'Shutting down..' ))
-
-ctx.clear()
-
-pmu.shutdown()
+source_ast = ast.parse(open(sys.argv[1], 'r').read())
+for node in ast.walk(source_ast):
+    if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
+        continue
+    if ast.get_docstring(node) is not None:
+        node.body = node.body[1:]
+        if len(node.body) == 0:
+            node.body.append(ast.Pass())
+with open(sys.argv[1], 'w') as outfile:
+    outfile.write(astor.to_source(source_ast))
