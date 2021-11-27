@@ -1,8 +1,8 @@
 [submodule "embit"]
 	path = vendor/embit
 	url = ../../diybitcoinhardware/embit
-[submodule "MaixPy/components/micropython/port/src/secp256k1-embedded"]
-	path = MaixPy/components/micropython/port/src/secp256k1-embedded
+[submodule "firmware/MaixPy/components/micropython/port/src/secp256k1-embedded"]
+	path = firmware/MaixPy/components/micropython/port/src/secp256k1-embedded
 	url = ../../diybitcoinhardware/secp256k1-embedded
 [submodule "urtypes"]
 	path = vendor/urtypes
@@ -10,3 +10,6 @@
 [submodule "foundation-ur-py"]
 	path = vendor/foundation-ur-py
 	url = ../../Foundation-Devices/foundation-ur-py
+[submodule "firmware/Kboot"]
+	path = firmware/Kboot
+	url = ../Kboot
