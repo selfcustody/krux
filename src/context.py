@@ -25,29 +25,37 @@ from display import Display
 from input import Input
 from camera import Camera
 from light import Light
-from printer import Printer
-import settings
+
+DEFAULT_NETWORK             = 'main'
+DEFAULT_PRINTER_BAUDRATE    = 9600
+DEFAULT_PRINTER_PAPER_WIDTH = 384
+DEFAULT_LOG_LEVEL           = logging.NONE
+
+LOG_FILE = '/sd/.krux.log'
 
 class Context:
     """Context is a singleton containing all 'global' state that lives throughout the
        duration of the program, including references to all device interfaces.
     """
 
-    def __init__(self):
-        self.log = logging.Logger('/sd/.krux.log', logging.NONE)
-        self.version = open('/sd/VERSION').read().strip()
-        self.net = settings.load('network', 'main')
+    def __init__(self, version):
+        self.net = DEFAULT_NETWORK
+        self.printer_baudrate = DEFAULT_PRINTER_BAUDRATE
+        self.printer_paper_width = DEFAULT_PRINTER_PAPER_WIDTH
+        self.version = version
+        self.log = logging.Logger(LOG_FILE, DEFAULT_LOG_LEVEL)
         self.display = Display()
         self.input = Input()
         self.camera = Camera()
         self.light = Light()
-        self.printer = Printer()
+        self.printer = None
         self.wallet = None
 
     def clear(self):
         """Clears all sensitive data from the context, resetting it"""
         self.wallet = None
-        self.printer.clear()
+        if self.printer is not None:
+            self.printer.clear()
         gc.collect()
 
     def debugging(self):

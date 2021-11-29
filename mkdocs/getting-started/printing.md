@@ -1,6 +1,6 @@
 Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected thermal printer over its serial port. Consult the [part list](../../parts) page for supported printers.
 
-Note: Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can override this by adding a `printer.baudrate.txt` file under `src/settings` with the correct rate, for example `19200`.
+Note: Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can change this to `19200` in the `Settings -> Printer` menu.
 
 Once connected and powered on, all screens that display a QR code will begin showing a follow-up screen asking if you want to `Print to QR?`. You can use the middle button to confirm or the right-side button to cancel.
 

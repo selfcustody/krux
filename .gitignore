@@ -2,7 +2,6 @@
 ###################
 *.o
 *.a
-!libmaix_asr.a
 *.elf
 *.bin
 *.map
@@ -55,8 +54,8 @@ genrst/
 in.txt
 out.txt
 sitemap.xml.gz
-
-# Krux User Settings
-src/settings/network.txt
-src/settings/printer.baudrate.txt
-src/settings/printer.paper_width.txt
+*.bin
+*.bin.sig
+*.bin.sha256.txt
+memzip-files.c
+memzip-files.zip

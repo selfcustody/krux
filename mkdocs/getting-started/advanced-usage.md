@@ -1,4 +1,5 @@
 TODO
 
 - Settings
-- Changing to testnet in About
+- Changing to testnet
+- Troubleshooting

@@ -223,7 +223,7 @@ class Display:
         lcd.draw_qr_code(offset_y, qr_code, self.width())
 
     def set_backlight(self, level):
-        """Sets the backlight of the display to the given powr level, from 0 to 8"""
+        """Sets the backlight of the display to the given power level, from 0 to 8"""
         # Ranges from 0 to 8
         level = max(0, min(level, 8))
         val = (level+7) << 4

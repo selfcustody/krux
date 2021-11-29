@@ -22,22 +22,18 @@
 from board import board_info
 from fpioa_manager import fm
 from machine import UART
-import settings
 from thermal import AdafruitThermalPrinter
 
 class Printer:
     """Printer is a singleton interface for interacting with the device's thermal printer"""
 
-    def __init__(self):
-        self.paper_width = int(settings.load('printer.paper_width', '384'))
+    def __init__(self, baudrate, paper_width):
+        self.paper_width = paper_width
 
         try:
             fm.register(board_info.CONNEXT_A, fm.fpioa.UART2_TX, force=False)
             fm.register(board_info.CONNEXT_B, fm.fpioa.UART2_RX, force=False)
-            self.thermal_printer = AdafruitThermalPrinter(
-                UART.UART2,
-                int(settings.load('printer.baudrate', '9600'))
-            )
+            self.thermal_printer = AdafruitThermalPrinter(UART.UART2, baudrate)
             if not self.thermal_printer.has_paper():
                 raise ValueError('missing paper')
         except:

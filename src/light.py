@@ -32,7 +32,7 @@ class Light:
         self.led_w.value(1)
 
     def is_on(self):
-        """Returns a boolaen indicating if the light is currently on"""
+        """Returns a boolean indicating if the light is currently on"""
         return self.led_w.value() == 0
 
     def turn_on(self):

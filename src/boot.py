@@ -19,28 +19,49 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import sys
+sys.path.append('')
+sys.path.append('.')
+
+import firmware
+from power import PowerManager
+
+pmu = PowerManager()
+if firmware.upgrade():
+    pmu.shutdown()
+
+# Note: These imports come after the firmware upgrade check
+#       to allow it to have more memory to work with
 import lcd
-import machine
-from pmu import axp192
 from context import Context
 from login import Login
 from home import Home
-import settings
 
-pmu = axp192()
+VERSION = 'BETA'
 
-# Enable power management so that if power button is held down 6 secs,
-# it shuts off as expected
-pmu.enablePMICSleepMode(True)
+SPLASH = """
+BTCBTCBTCBTCBTCB
+TCBTC      BTCBT
+CBTCB      TCBTC
+BTCBT      CBTCB
+TCBTC      BTCBT
+CBTCB      TCBTC
+B              T
+C  K  r  u  x  B
+T              C
+BTCBT      CBTCB
+TCBTC      BTCBT
+CBTCB      TCBTC
+BTCBT      CBTCB
+TCBTC      BTCBT
+CBTCB      TCBTC
+BTCBT      CBTCB
+TCBTCBTCBTCBTCBT
+"""
 
-ctx = Context()
+ctx = Context(VERSION)
 
-ctx.display.flash_text(
-    settings.load('splash', ( 'Krux' ), strip=False),
-    color=lcd.WHITE,
-    word_wrap=False,
-    padding=8
-)
+ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
 
 while True:
     if not Login(ctx).run():
@@ -53,5 +74,4 @@ ctx.display.flash_text(( 'Shutting down..' ))
 
 ctx.clear()
 
-pmu.setEnterSleepMode()
-machine.reset()
+pmu.shutdown()

@@ -23,6 +23,11 @@
 #!/bin/bash
 set -e
 
+SRC_DIR="/src/src"
+FIRMWARE_DIR="/src/firmware"
+SCRIPTS_DIR="$FIRMWARE_DIR/scripts"
+BUILD_DIR="$FIRMWARE_DIR/Kboot/build"
+
 # From https://unix.stackexchange.com/a/634849
 getdevice() {
     idV=${1%:*}
@@ -41,39 +46,51 @@ panic() {
     exit 1
 }
 
-if [ "$1" == "build-firmware" ]; then
+if [ "$1" == "setup" ]; then
     docker build . -t krux-builder
-elif [ "$1" == "flash-firmware" ]; then
+elif [ "$1" == "build" ]; then
+    version="$2"
+    locale="en-US"
+    if [ ! -z "$3" ]; then
+        locale="$3"
+    fi
+    
+    stty -echo
+    printf "Signer Private Key (Leave empty to generate): "
+    read privkey
+    stty echo
+    printf "\n"
+    if [ -z "$privkey" ]; then
+        privkey_cmd="docker run --rm -w "$SCRIPTS_DIR" -it krux-builder python3 create_private_key.py"
+        privkey=$($privkey_cmd)
+    fi
+
+    pubkey_cmd="docker run --rm -w "$SCRIPTS_DIR" -it krux-builder python3 derive_public_key.py "$privkey""
+    pubkey=$($pubkey_cmd)
+
+    sed -i -- "s/SIGNER_PUBKEY = '.*'/SIGNER_PUBKEY = '$pubkey'/g" src/firmware.py
+    sed -i -- "s/VERSION = '.*'/VERSION = '$version'/g" src/boot.py
+
+    docker build . -t krux-builder --build-arg LOCALE=$locale
+
+    sign_cmd="docker create -w "$SCRIPTS_DIR" krux-builder python3 sign.py $BUILD_DIR/firmware.bin "$privkey""
+    CID=$($sign_cmd)
+    docker start ${CID}
+    docker cp ${CID}:$BUILD_DIR/firmware.bin "firmware-v${version}.bin"
+    docker cp ${CID}:$BUILD_DIR/firmware.bin.sig "firmware-v${version}.bin.sig"
+    docker cp ${CID}:$BUILD_DIR/firmware.bin.sha256.txt "firmware-v${version}.bin.sha256.txt"
+    docker rm ${CID}
+
+    if [ ! -z "$privkey_cmd" ]; then
+        echo "Your generated Signer Private Key is below. Please write it down somewhere safe."
+        echo $privkey
+    fi
+elif [ "$1" == "flash" ]; then
     usb_device_name="$(getdevice 0403:6001)"
     if [ -z "$usb_device_name" ]; then
         panic "Failed to find device via USB. Is it connected and powered on?"
     fi
-    wd="/src/MaixPy/projects/maixpy_m5stickv"
-    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$wd" -it krux-builder python3 project.py -B goE -p /dev/ttyUSB0 -b 1500000 -S flash
-elif [ "$1" == "build-software" ]; then
-    locale="en-US"
-    if [ ! -z "$2" ]; then
-        locale="$2"
-    fi
-
-    mkdir -p /vagrant/build
-    docker run -v /vagrant:/krux --rm -w "/krux" -it krux-builder /bin/bash -c "rm -rf build/* && \
-        cp -r src/. build && \
-        cp -r vendor/embit/src/embit build && \
-        cp -r vendor/urtypes/src/urtypes build && \
-        cp -r vendor/foundation-ur-py/ur build && \
-        cp LICENSE.md build/LICENSE.md && \
-        cd i18n && python3 i18n.py translate "$locale" /krux/build"
-elif [ "$1" == "flash-software" ]; then
-    if [ -z "$2" ]; then
-        panic "microSD card path must be provided"
-    fi
-    if [ ! -d "$2" ]; then
-        panic "Path is invalid or not a directory"
-    fi
-
-    rm -rf "$2"/*
-    cp -r build/. "$2"
+    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
 elif [ "$1" == "clean" ]; then
     rm -rf build
     docker system prune --all --force

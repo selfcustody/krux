@@ -153,7 +153,11 @@ disable=print-statement,
         consider-using-with,
         no-self-use,
         consider-using-enumerate,
-        unspecified-encoding
+        unspecified-encoding,
+        exec-used,
+        import-outside-toplevel,
+        wrong-import-position,
+        wrong-import-order
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -252,6 +256,7 @@ contextmanager-decorators=contextlib.contextmanager
 # system, and so shouldn't trigger E1101 when accessed. Python regular
 # expressions are accepted.
 generated-members=sleep_ms,
+                  ticks_ms,
                   print_exception
 
 # Tells whether missing members accessed in mixin class should be ignored. A
@@ -449,6 +454,7 @@ good-names=i,
            sc,
            tx,
            Run,
+           firmware_hash,
            _
 
 # Good variable names regexes, separated by a comma. If names match any regex,
@@ -577,10 +583,10 @@ valid-metaclass-classmethod-first-arg=cls
 [DESIGN]
 
 # Maximum number of arguments for function / method.
-max-args=6
+max-args=7
 
 # Maximum number of attributes for a class (see R0902).
-max-attributes=10
+max-attributes=11
 
 # Maximum number of boolean expressions in an if statement (see R0916).
 max-bool-expr=5
@@ -589,7 +595,7 @@ max-bool-expr=5
 max-branches=16
 
 # Maximum number of locals for function / method body.
-max-locals=18
+max-locals=20
 
 # Maximum number of parents for a class (see R0901).
 max-parents=7
@@ -598,10 +604,10 @@ max-parents=7
 max-public-methods=20
 
 # Maximum number of return / yield for function / method body.
-max-returns=6
+max-returns=10
 
 # Maximum number of statements in function / method body.
-max-statements=50
+max-statements=56
 
 # Minimum number of public methods for a class (see R0903).
 min-public-methods=1
