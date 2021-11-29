@@ -34,6 +34,8 @@ class Printer:
             fm.register(board_info.CONNEXT_A, fm.fpioa.UART2_TX, force=False)
             fm.register(board_info.CONNEXT_B, fm.fpioa.UART2_RX, force=False)
             self.thermal_printer = AdafruitThermalPrinter(UART.UART2, baudrate)
+            if not self.thermal_printer.has_paper():
+                raise ValueError('missing paper')
         except:
             self.thermal_printer = None
 

@@ -42,8 +42,6 @@ class AdafruitThermalPrinter:
         self.timeout_set(0.5)
 
         self.wake()
-        if not self.has_paper():
-            raise ValueError('missing paper')
         self.reset()
 
         # Description of print settings from p. 23 of manual:
