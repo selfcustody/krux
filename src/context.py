@@ -29,6 +29,7 @@ from light import Light
 DEFAULT_NETWORK             = 'main'
 DEFAULT_PRINTER_BAUDRATE    = 9600
 DEFAULT_PRINTER_PAPER_WIDTH = 384
+DEFAULT_LOG_LEVEL           = logging.NONE
 
 LOG_FILE = '/sd/.krux.log'
 
@@ -42,7 +43,7 @@ class Context:
         self.printer_baudrate = DEFAULT_PRINTER_BAUDRATE
         self.printer_paper_width = DEFAULT_PRINTER_PAPER_WIDTH
         self.version = version
-        self.log = logging.Logger(LOG_FILE, logging.NONE)
+        self.log = logging.Logger(LOG_FILE, DEFAULT_LOG_LEVEL)
         self.display = Display()
         self.input = Input()
         self.camera = Camera()
