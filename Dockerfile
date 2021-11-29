@@ -49,7 +49,7 @@ RUN mkdir -p /opt && \
 
 RUN pip3 install astor
 
-FROM build-base as build-software
+FROM build-base AS build-software
 COPY . /src
 WORKDIR /src
 ARG LOCALE="en-US"
