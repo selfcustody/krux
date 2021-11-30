@@ -28,9 +28,9 @@ site_name: Krux - Open-source hardware signer for Bitcoin
 site_description: Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisignature and single-key wallets. It is a low-cost airgapped device built from off-the-shelf parts that communicates with wallet software via QR codes and wipes its memory after every session.
 site_url: https://jreesun.github.io/krux/
 repo_url: https://github.com/jreesun/krux
-edit_uri: edit/main/mkdocs
-docs_dir: mkdocs
-site_dir: docs
+edit_uri: edit/main/docs
+docs_dir: docs
+site_dir: public
 nav:
   - Home: index.md
   - Getting Started:
