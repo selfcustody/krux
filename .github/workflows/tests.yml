@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pylint
+      - name: Lint
+        run: |
+          pylint firmware/font/*.py
+          pylint firmware/scripts/*.py
+          pylint i18n/*.py
+          pylint src
+
+  translations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+      - name: Validate translations
+        run: cd i18n && python3 i18n.py validate

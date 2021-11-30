@@ -57,6 +57,7 @@ def main():
     slugs = find_translation_slugs()
 
     if sys.argv[1] == 'validate':
+        passed = True
         translation_filenames = [
             f for f in listdir(TRANSLATION_FILES_DIR)
             if isfile(join(TRANSLATION_FILES_DIR, f))
@@ -76,6 +77,9 @@ def main():
                         valid = False
             if valid:
                 print('OK')
+            passed = passed and valid
+        if not passed:
+            sys.exit(1)
     elif sys.argv[1] == 'new':
         locale = sys.argv[2]
         translations = {}

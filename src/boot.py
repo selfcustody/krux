@@ -64,8 +64,8 @@ ctx = Context(VERSION)
 ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
 
 while True:
-    if not Login(ctx).run():
-        break
+  if not Login(ctx).run():
+    break
 
     if not Home(ctx).run():
         break
