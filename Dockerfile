@@ -32,20 +32,39 @@ RUN apt-get update -y && \
         build-essential \
         libtool \
         autoconf \
+        automake \
+        autotools-dev \
+        curl \
+        libmpc-dev \
+        libmpfr-dev \
+        libgmp-dev \
+        gawk \
+        bison \
+        flex \
+        texinfo \
+        gperf \
+        libtool \
+        patchutils \
+        bc \
+        zlib1g-dev \
+        libexpat-dev \
         libisl-dev \
         python3 \
         python3-pip \
         python3-setuptools
 
+RUN mkdir -p /opt && \
+    git clone --recursive https://github.com/kendryte/kendryte-gnu-toolchain && \
+    cd kendryte-gnu-toolchain && \
+    git checkout fbf55383711b68c00ecf67e23959822180010398 && \
+    export PATH=$PATH:/opt/kendryte-toolchain/bin && \
+    ./configure --prefix=/opt/kendryte-toolchain --with-cmodel=medany --with-arch=rv64imafc --with-abi=lp64f --enable-threads=posix --enable-libatomic && \
+    make -j8
+
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.0/cmake-3.21.0.tar.gz && \
     echo "4a42d56449a51f4d3809ab4d3b61fd4a96a469e56266e896ce1009b5768bd2ab  cmake-3.21.0.tar.gz" | sha256sum -c && \
     tar -xzvf cmake-3.21.0.tar.gz && \
     cd cmake-3.21.0 && ./bootstrap && make && make install
-
-RUN mkdir -p /opt && \
-    wget https://github.com/kendryte/kendryte-gnu-toolchain/releases/download/v8.2.0-20190213/kendryte-toolchain-ubuntu-amd64-8.2.0-20190213.tar.gz && \
-    echo "aa2fcc76ff61261b3667a422d4f67dec19c4547474bff4ebadaa1258b87985da  kendryte-toolchain-ubuntu-amd64-8.2.0-20190213.tar.gz" | sha256sum -c && \
-    tar -xzvf kendryte-toolchain-ubuntu-amd64-8.2.0-20190213.tar.gz -C /opt
 
 RUN pip3 install astor
 
