@@ -101,7 +101,8 @@ class Login(Page):
 
     def _new_key_from_die(self, states, min_rolls, max_rolls):
         self.ctx.display.draw_hcentered_text(
-            ( 'Roll die %d or %d times to generate a mnemonic.' ) % (min_rolls, max_rolls)
+            ( 'Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively.' )
+            % (min_rolls, max_rolls)
         )
         self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
         btn = self.ctx.input.wait_for_button()
