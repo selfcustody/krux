@@ -19,10 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import math
 import time
 import lcd
 from ur.ur import UR
-from embit.wordlists.bip39 import WORDLIST
 from input import BUTTON_ENTER, BUTTON_PAGE
 from display import DEFAULT_PADDING, DEL, GO
 from menu import MENU_SHUTDOWN
@@ -43,87 +43,58 @@ class Page:
         self._enter_state = -1
         self._page_state = -1
 
-    def capture_digits_from_numpad(self, title):
-        """Displays a numpad and captures a series of digits until the user returns.
-           Returns a string of digits.
+    def capture_from_keypad(self, title, keys, autocomplete=None):
+        """Displays a key pad and captures a series of keys until the user returns.
+           Returns a string.
         """
-        digits = ''
-        key = 0
+        pad_width = math.floor(math.sqrt(len(keys)+2))
+        pad_height = math.ceil((len(keys)+2) / pad_width)
+
+        buffer = ''
+        cur_key_index = 0
         while True:
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(title)
-            self.ctx.display.draw_numpad(key, digits, mask_digits=False, offset_y=60)
+            self.ctx.display.draw_hcentered_text(buffer, 45)
 
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_ENTER:
-                if key == 11: # Enter
-                    break
-                if key == 10: # Del
-                    digits = digits[:len(digits)-1]
-                else:
-                    digits += str(key)
-            elif btn == BUTTON_PAGE:
-                key = (key + 1) % 12
-        return digits
-
-    def capture_bits_from_numpad(self, title):
-        """Displays a bit pad and captures a series of binary digits until the user returns.
-           Returns a string of bits.
-        """
-        bits = ''
-        key = 0
-        while True:
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(title)
-            self.ctx.display.draw_hcentered_text(bits, offset_y=50)
-            self.ctx.display.draw_hcentered_text(('> ' if key == 0 else '') + '0', offset_y=90)
-            self.ctx.display.draw_hcentered_text(('> ' if key == 1 else '') + '1', offset_y=110)
-            self.ctx.display.draw_hcentered_text(('> ' if key == 2 else '') + DEL, offset_y=130)
-            self.ctx.display.draw_hcentered_text(('> ' if key == 3 else '') + GO, offset_y=150)
-
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_ENTER:
-                if key == 3: # Enter
-                    break
-                if key == 2: # Del
-                    bits = bits[:len(bits)-1]
-                else:
-                    bits += str(key)
-            elif btn == BUTTON_PAGE:
-                key = (key + 1) % 4
-        return bits
-
-    def capture_letters_from_keypad(self, title):
-        """Displays a key pad and captures a series of letters until the user returns.
-           Returns a string of letters.
-        """
-        letters = ''
-        key = 0
-        while True:
-            self.ctx.display.clear()
-
-            self.ctx.display.draw_hcentered_text(title)
-            self.ctx.display.draw_keypad(key, letters, mask_letters=False, offset_y=50)
+            for y in range(pad_height):
+                row_keys = ''
+                for x in range(pad_width):
+                    key_index = x + y * pad_width
+                    key = None
+                    if key_index < len(keys):
+                        key = keys[key_index]
+                    elif key_index == len(keys):
+                        key = DEL
+                    elif key_index == len(keys) + 1:
+                        key = GO
+                    if key is not None:
+                        if len(key) == 1:
+                            row_keys += ' >' + key if key_index == cur_key_index else '  ' + key
+                        else:
+                            row_keys += '>' + key if key_index == cur_key_index else ' ' + key
+                offset_y = 80 + y * self.ctx.display.font_size * 4
+                self.ctx.display.draw_hcentered_text(row_keys, offset_y)
 
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_ENTER:
                 changed = False
-                if key == 27: # Enter
+                if cur_key_index == len(keys) + 1: # Enter
                     break
-                if key == 26: # Del
-                    letters = letters[:len(letters)-1]
+                if cur_key_index == len(keys): # Del
+                    buffer = buffer[:len(buffer)-1]
                     changed = True
                 else:
-                    letters += chr(ord('a') + key)
+                    buffer += keys[cur_key_index]
                     changed = True
-                if changed and len(letters) > 2:
-                    matching_words = list(filter(lambda word: word.startswith(letters), WORDLIST))
-                    if len(matching_words) == 1:
-                        letters = matching_words[0]
-                        key = 27
+                if changed and autocomplete is not None:
+                    new_buffer = autocomplete(buffer)
+                    if new_buffer is not None:
+                        buffer = new_buffer
+                        cur_key_index = len(keys) + 1
             elif btn == BUTTON_PAGE:
-                key = (key + 1) % 28
-        return letters
+                cur_key_index = (cur_key_index + 1) % (len(keys) + 2)
+        return buffer
 
     def capture_qr_code(self):
         """Captures a singular or animated series of QR codes and displays progress to the user.

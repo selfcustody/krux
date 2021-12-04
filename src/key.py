@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import hashlib
 import time
 import urandom
 from binascii import hexlify
@@ -90,6 +91,20 @@ class Key:
             self.derivation[1:], # remove leading m
             self.account.to_base58(self.network['zpub'])
         )
+
+# Adapted from: https://github.com/trezor/python-mnemonic
+def to_mnemonic_words(entropy):
+    """Turns entropy into a mnemonic"""
+    entropy_hash = hexlify(hashlib.sha256(entropy).digest()).decode()
+    bits = (
+        ('{:0>%d}' % (len(entropy) * 8)).format(bin(int.from_bytes(entropy, 'big'))[2:]) +
+        ('{:0>256}'.format(bin(int(entropy_hash, 16))[2:])[: len(entropy) * 8 // 32])
+    )
+    words = []
+    for i in range(len(bits) // 11):
+        idx = int(bits[i * 11 : (i + 1) * 11], 2)
+        words.append(WORDLIST[idx])
+    return words
 
 def pick_final_word(ctx, words):
     """Returns a random final word with a valid checksum for the given list of

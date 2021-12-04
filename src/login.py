@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 from logging import LEVEL_NAMES, level_name, Logger
+import binascii
+import hashlib
 import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
@@ -29,11 +31,24 @@ from page import Page
 from menu import Menu, MENU_CONTINUE, MENU_EXIT
 from input import BUTTON_ENTER, BUTTON_PAGE
 from qr import FORMAT_UR
-from key import Key, pick_final_word
+from key import Key, pick_final_word, to_mnemonic_words
 from wallet import Wallet
 
 TEST_PHRASE_DIGITS  = '11111'
 TEST_PHRASE_LETTERS = 'aaaaa'
+
+DIGITS  = '0123456789'
+LETTERS = 'abcdefghijklmnopqrstuvwxyz'
+BITS    = '01'
+
+D6_STATES   = [str(i+1) for i in range(6)]
+D20_STATES  = [str(i+1) for i in range(20)]
+D100_STATES = [str(i+1) for i in range(100)]
+
+D6_MIN_ROLLS  = 50
+D6_MAX_ROLLS  = 100
+D20_MIN_ROLLS = 30
+D20_MAX_ROLLS = 60
 
 class Login(Page):
     """Represents the login page of the app"""
@@ -41,6 +56,7 @@ class Login(Page):
     def __init__(self, ctx):
         menu = [
             (( 'Load Mnemonic' ), self.load_key),
+            (( 'New Mnemonic' ), self.new_key),
             (( 'Settings' ), self.settings),
             (( 'About' ), self.about),
             (( 'Shutdown' ), self.shutdown),
@@ -62,6 +78,70 @@ class Login(Page):
         if index == len(submenu.menu)-1:
             return MENU_CONTINUE
         return status
+
+    def new_key(self):
+        """Handler for the 'new mnemonic' menu item"""
+        submenu = Menu(self.ctx, [
+            (( 'Via D6' ), self.new_key_from_d6),
+            (( 'Via D20' ), self.new_key_from_d20),
+            (( 'Back' ), lambda: MENU_EXIT)
+        ])
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu)-1:
+            return MENU_CONTINUE
+        return status
+
+    def new_key_from_d6(self):
+        """Handler for the 'via D6' menu item"""
+        return self._new_key_from_die(D6_STATES, D6_MIN_ROLLS, D6_MAX_ROLLS)
+
+    def new_key_from_d20(self):
+        """Handler for the 'via D20' menu item"""
+        return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
+
+    def _new_key_from_die(self, states, min_rolls, max_rolls):
+        self.ctx.display.draw_hcentered_text(
+            ( 'Roll die %d or %d times to generate a mnemonic.' ) % (min_rolls, max_rolls)
+        )
+        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
+        btn = self.ctx.input.wait_for_button()
+        if btn == BUTTON_ENTER:
+            entropy = ''
+            num_rolls = max_rolls
+            for i in range(max_rolls):
+                if i == min_rolls:
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(( 'Done?' ))
+                    btn = self.ctx.input.wait_for_button()
+                    if btn == BUTTON_ENTER:
+                        num_rolls = min_rolls
+                        break
+
+                roll = ''
+                while True:
+                    roll = self.capture_from_keypad(( 'Roll %d' ) % (i+1), states, lambda r: r)
+                    if roll == '':
+                        continue
+                    if roll in states:
+                        break
+
+                entropy += roll if entropy == '' else '-' + roll
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(( 'Rolls:\n\n%s' ) % entropy)
+                self.ctx.input.wait_for_button()
+
+            entropy_hash = binascii.hexlify(hashlib.sha256(entropy).digest()).decode()
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                ( 'SHA256 of rolls:\n\n%s' ) % entropy_hash
+            )
+            self.ctx.input.wait_for_button()
+            num_bytes = 16 if num_rolls == min_rolls else 32
+            words = to_mnemonic_words(hashlib.sha256(entropy).digest()[:num_bytes])
+            return self._load_key_from_words(words)
+
+        return MENU_CONTINUE
 
     def _load_key_from_words(self, words):
         self.display_mnemonic(words)
@@ -108,6 +188,12 @@ class Login(Page):
 
     def load_key_from_text(self):
         """Handler for the 'via text' menu item"""
+        def autocomplete(prefix):
+            if len(prefix) > 2:
+                matching_words = list(filter(lambda word: word.startswith(prefix), WORDLIST))
+                if len(matching_words) == 1:
+                    return matching_words[0]
+            return None
         words = []
         self.ctx.display.draw_hcentered_text(( 'Enter each word of your BIP-39 mnemonic.' ))
         self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
@@ -123,9 +209,7 @@ class Login(Page):
 
                 word = ''
                 while True:
-                    word = self.capture_letters_from_keypad(( 'Word %d' ) % (i+1))
-                    if word in WORDLIST:
-                        break
+                    word = self.capture_from_keypad(( 'Word %d' ) % (i+1), LETTERS, autocomplete)
                     # If the first 'word' is the TEST_PHRASE_LETTERS sentinel,
                     # we're testing and just want the test words
                     if i == 0 and word == TEST_PHRASE_LETTERS:
@@ -133,6 +217,10 @@ class Login(Page):
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and word == '':
+                        break
+                    if word == '':
+                        continue
+                    if word in WORDLIST:
                         break
 
                 if word == TEST_PHRASE_LETTERS:
@@ -171,9 +259,7 @@ class Login(Page):
 
                 digits = ''
                 while True:
-                    digits = self.capture_digits_from_numpad(( 'Word %d' ) % (i+1))
-                    if int(digits) >= 1 and int(digits) <= 2048:
-                        break
+                    digits = self.capture_from_keypad(( 'Word %d' ) % (i+1), DIGITS)
                     # If the first 'word' is the TEST_PHRASE_DIGITS sentinel,
                     # we're testing and just want the test words
                     if i == 0 and digits == TEST_PHRASE_DIGITS:
@@ -181,6 +267,10 @@ class Login(Page):
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and digits == '':
+                        break
+                    if digits == '':
+                        continue
+                    if int(digits) >= 1 and int(digits) <= 2048:
                         break
 
                 if digits == TEST_PHRASE_DIGITS:
@@ -222,12 +312,14 @@ class Login(Page):
 
                 bits = ''
                 while True:
-                    bits = self.capture_bits_from_numpad(( 'Word %d' ) % (i+1))
-                    if len(bits) == 11:
-                        break
+                    bits = self.capture_from_keypad(( 'Word %d' ) % (i+1), BITS)
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and bits == '':
+                        break
+                    if bits == '':
+                        continue
+                    if len(bits) == 11:
                         break
 
                 word = ''
