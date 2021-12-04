@@ -235,11 +235,11 @@ class Home(Page):
         if wallet.is_multisig():
             xpubs = []
             for i, xpub in enumerate(wallet.policy['cosigners']):
-                xpubs.append(str(i+1) + '. ' + xpub[4:8] + '..' + xpub[len(xpub)-4:len(xpub)])
+                xpubs.append(str(i+1) + '. ' + xpub[4:7] + '..' + xpub[len(xpub)-3:len(xpub)])
             about += '\n'.join(xpubs)
         else:
             xpub = wallet.key.xpub()
-            about += xpub[4:8] + '..' + xpub[len(xpub)-4:len(xpub)]
+            about += xpub[4:7] + '..' + xpub[len(xpub)-3:len(xpub)]
         if include_qr:
             wallet_data, qr_format = wallet.wallet_qr()
             self.display_qr_codes(wallet_data, qr_format, title=about)
