@@ -19,14 +19,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import os
 import sys
 import binascii
 from embit.util import secp256k1
 
-if len(sys.argv) != 2:
+private_key_hex = os.environ.get('SIGNER_PRIVKEY')
+if not private_key_hex:
     sys.exit('Private key must be provided')
 
-private_key = binascii.unhexlify(sys.argv[1])
+private_key = binascii.unhexlify(private_key_hex)
 
 if not secp256k1.ec_seckey_verify(private_key):
     sys.exit('Private key is invalid')

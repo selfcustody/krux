@@ -55,36 +55,43 @@ elif [ "$1" == "build" ]; then
         locale="$3"
     fi
     
-    stty -echo
     printf "Signer Private Key (Leave empty to generate): "
-    read privkey
-    stty echo
+    IFS= read -rs privkey
     printf "\n"
     if [ -z "$privkey" ]; then
-        privkey_cmd="docker run --rm -w "$SCRIPTS_DIR" -it krux-builder python3 create_private_key.py"
+        privkey_cmd="docker run --rm -w "$SCRIPTS_DIR" krux-builder python3 create_private_key.py"
         privkey=$($privkey_cmd)
     fi
 
-    pubkey_cmd="docker run --rm -w "$SCRIPTS_DIR" -it krux-builder python3 derive_public_key.py "$privkey""
+    export SIGNER_PRIVKEY="$privkey"
+    pubkey_cmd="docker run --rm -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 derive_public_key.py"
     pubkey=$($pubkey_cmd)
+    export -n SIGNER_PRIVATE_KEY
+    unset SIGNER_PRIVATE_KEY
 
     sed -i -- "s/SIGNER_PUBKEY = '.*'/SIGNER_PUBKEY = '$pubkey'/g" src/firmware.py
     sed -i -- "s/VERSION = '.*'/VERSION = '$version'/g" src/boot.py
 
     docker build . -t krux-builder --build-arg LOCALE=$locale
 
-    sign_cmd="docker create -w "$SCRIPTS_DIR" krux-builder python3 sign.py $BUILD_DIR/firmware.bin "$privkey""
+    export SIGNER_PRIVKEY="$privkey"
+    sign_cmd="docker create -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 sign.py $BUILD_DIR/firmware.bin"
     CID=$($sign_cmd)
     docker start ${CID}
+    export -n SIGNER_PRIVATE_KEY
+    unset SIGNER_PRIVATE_KEY
+
     docker cp ${CID}:$BUILD_DIR/firmware.bin "firmware-v${version}.bin"
     docker cp ${CID}:$BUILD_DIR/firmware.bin.sig "firmware-v${version}.bin.sig"
     docker cp ${CID}:$BUILD_DIR/firmware.bin.sha256.txt "firmware-v${version}.bin.sha256.txt"
+
     docker rm ${CID}
 
     if [ ! -z "$privkey_cmd" ]; then
         echo "Your generated Signer Private Key is below. Please write it down somewhere safe."
         echo $privkey
     fi
+    unset privkey
 elif [ "$1" == "flash" ]; then
     usb_device_name="$(getdevice 0403:6001)"
     if [ -z "$usb_device_name" ]; then
