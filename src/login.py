@@ -41,9 +41,8 @@ DIGITS  = '0123456789'
 LETTERS = 'abcdefghijklmnopqrstuvwxyz'
 BITS    = '01'
 
-D6_STATES   = [str(i+1) for i in range(6)]
+D6_STATES   = '123456'
 D20_STATES  = [str(i+1) for i in range(20)]
-D100_STATES = [str(i+1) for i in range(100)]
 
 D6_MIN_ROLLS  = 50
 D6_MAX_ROLLS  = 100
@@ -121,9 +120,7 @@ class Login(Page):
                 roll = ''
                 while True:
                     roll = self.capture_from_keypad(( 'Roll %d' ) % (i+1), states, lambda r: r)
-                    if roll == '':
-                        continue
-                    if roll in states:
+                    if roll != '' and roll in states:
                         break
 
                 entropy += roll if entropy == '' else '-' + roll
@@ -211,6 +208,8 @@ class Login(Page):
                 word = ''
                 while True:
                     word = self.capture_from_keypad(( 'Word %d' ) % (i+1), LETTERS, autocomplete)
+                    if word != '' and word in WORDLIST:
+                        break
                     # If the first 'word' is the TEST_PHRASE_LETTERS sentinel,
                     # we're testing and just want the test words
                     if i == 0 and word == TEST_PHRASE_LETTERS:
@@ -218,10 +217,6 @@ class Login(Page):
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and word == '':
-                        break
-                    if word == '':
-                        continue
-                    if word in WORDLIST:
                         break
 
                 if word == TEST_PHRASE_LETTERS:
@@ -261,6 +256,8 @@ class Login(Page):
                 digits = ''
                 while True:
                     digits = self.capture_from_keypad(( 'Word %d' ) % (i+1), DIGITS)
+                    if digits != '' and int(digits) >= 1 and int(digits) <= 2048:
+                        break
                     # If the first 'word' is the TEST_PHRASE_DIGITS sentinel,
                     # we're testing and just want the test words
                     if i == 0 and digits == TEST_PHRASE_DIGITS:
@@ -268,10 +265,6 @@ class Login(Page):
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and digits == '':
-                        break
-                    if digits == '':
-                        continue
-                    if int(digits) >= 1 and int(digits) <= 2048:
                         break
 
                 if digits == TEST_PHRASE_DIGITS:
@@ -314,13 +307,11 @@ class Login(Page):
                 bits = ''
                 while True:
                     bits = self.capture_from_keypad(( 'Word %d' ) % (i+1), BITS)
+                    if len(bits) == 11:
+                        break
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and bits == '':
-                        break
-                    if bits == '':
-                        continue
-                    if len(bits) == 11:
                         break
 
                 word = ''
