@@ -66,8 +66,8 @@ elif [ "$1" == "build" ]; then
     export SIGNER_PRIVKEY="$privkey"
     pubkey_cmd="docker run --rm -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 derive_public_key.py"
     pubkey=$($pubkey_cmd)
-    export -n SIGNER_PRIVATE_KEY
-    unset SIGNER_PRIVATE_KEY
+    export -n SIGNER_PRIVKEY
+    unset SIGNER_PRIVKEY
 
     sed -i -- "s/SIGNER_PUBKEY = '.*'/SIGNER_PUBKEY = '$pubkey'/g" src/firmware.py
     sed -i -- "s/VERSION = '.*'/VERSION = '$version'/g" src/boot.py
@@ -78,8 +78,8 @@ elif [ "$1" == "build" ]; then
     sign_cmd="docker create -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 sign.py $BUILD_DIR/firmware.bin"
     CID=$($sign_cmd)
     docker start ${CID}
-    export -n SIGNER_PRIVATE_KEY
-    unset SIGNER_PRIVATE_KEY
+    export -n SIGNER_PRIVKEY
+    unset SIGNER_PRIVKEY
 
     docker cp ${CID}:$BUILD_DIR/firmware.bin "firmware-v${version}.bin"
     docker cp ${CID}:$BUILD_DIR/firmware.bin.sig "firmware-v${version}.bin.sig"
