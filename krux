@@ -78,6 +78,7 @@ elif [ "$1" == "build" ]; then
     sign_cmd="docker create -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 sign.py $BUILD_DIR/firmware.bin"
     CID=$($sign_cmd)
     docker start ${CID}
+    docker wait ${CID}
     export -n SIGNER_PRIVKEY
     unset SIGNER_PRIVKEY
 
