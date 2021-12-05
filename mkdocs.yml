@@ -31,6 +31,14 @@ repo_url: https://github.com/jreesun/krux
 edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
+extra:
+  social:
+    - icon: material/chat
+      link: https://matrix.to/#/#krux:matrix.org
+      name: Join our Matrix server
+    - icon: fontawesome/brands/github
+      link: https://github.com/jreesun/krux
+
 nav:
   - Home: index.md
   - Getting Started:
