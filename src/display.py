@@ -169,46 +169,6 @@ class Display:
         time.sleep_ms(duration)
         self.clear()
 
-    def draw_numpad(self, selected_key, digits, mask_digits=False, offset_y=DEFAULT_PADDING,
-                    color=lcd.WHITE):
-        """Draws a number pad input on the display"""
-        self.draw_hcentered_text(len(digits) * '*' if mask_digits else digits, offset_y, color)
-
-        for x in range(3):
-            for y in range(4):
-                key = x + y * 3
-                key_label = str(key)
-                if key == 10:
-                    key_label = DEL
-                elif key == 11:
-                    key_label = GO
-                pos_x = DEFAULT_PADDING + 10 + x * self.font_size * 6
-                pos_y = offset_y + 40 + y * self.font_size * 4
-                lcd.draw_string(pos_x, pos_y, key_label, color, lcd.BLACK)
-                if key == selected_key:
-                    lcd.draw_string(pos_x - 10, pos_y, '>', color, lcd.BLACK)
-
-    def draw_keypad(self, selected_key, letters, mask_letters=False, offset_y=DEFAULT_PADDING,
-                    color=lcd.WHITE):
-        """Draws a key pad input on the display"""
-        self.draw_hcentered_text(len(letters) * '*' if mask_letters else letters, offset_y, color)
-
-        for x in range(5):
-            for y in range(6):
-                key = x + y * 5
-                key_label = chr(ord('a') + key)
-                if key == 26:
-                    key_label = DEL
-                elif key == 27:
-                    key_label = GO
-                elif key > 27:
-                    continue
-                pos_x = DEFAULT_PADDING - 5 + 10 + x * self.font_size * 4
-                pos_y = offset_y + 40 + y * self.font_size * 3
-                lcd.draw_string(pos_x, pos_y, key_label, color, lcd.BLACK)
-                if key == selected_key:
-                    lcd.draw_string(pos_x - 10, pos_y, '>', color, lcd.BLACK)
-
     def draw_qr_code(self, offset_y, qr_code):
         """Draws a QR code on the screen"""
         # Add a 1px white border around the code before displaying
