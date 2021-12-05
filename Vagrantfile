@@ -28,6 +28,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :docker
 
   config.vm.provider "virtualbox" do |vb|
+    vb.memory = 4096
     vb.customize ['modifyvm', :id, '--usb', 'on']
     vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'FT232', '--vendorid', '0403', '--productid', '6001']
   end
