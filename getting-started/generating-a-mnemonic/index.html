@@ -65,6 +65,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#dice-rolls" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -380,10 +385,57 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Generating a Mnemonic
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Generating a Mnemonic
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#via-d6" class="md-nav__link">
+    Via D6
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#via-d20" class="md-nav__link">
+    Via D20
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    How it works
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -542,9 +594,19 @@
 </a>
 
 
-  <h1>Generating a Mnemonic</h1>
-
-<p>Krux does not yet offer the ability to generate a mnemonic for you and instead expects you to bring your own. See <a href="https://vault12.rebelmouse.com/seed-phrase-generation-2650084084.html">here</a> for a good method to generate a mnemonic manually, or visit <a href="https://iancoleman.io/bip39/">Ian Coleman's BIP-39 Tool</a> offline or on an airgapped device to generate one automatically. </p>
+<p>Krux has support for creating 12- and 24-word mnemonics. Because true entropy is difficult to produce, especially with an embedded device like the M5StickV, Krux outsources entropy generation to the user.</p>
+<h1 id="dice-rolls">Dice Rolls<a class="headerlink" href="#dice-rolls" title="Permanent link">&para;</a></h1>
+<p>At the start screen, once you select <code>New Mnemonic</code>, you will be taken to a second menu where you can choose to create a mnemonic via rolls of a D6 (standard six-sided die) or D20 (20-sided die). The number of dice rolls you choose determines the amount of words in the final mnemonic.</p>
+<h2 id="via-d6">Via D6<a class="headerlink" href="#via-d6" title="Permanent link">&para;</a></h2>
+<p>The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore 50 rolls will result in 128 bits of entropy, enough to generate a 12-word mnemonic. Doubling the amount of rolls doubles the entropy to 256 bits, resulting in a 24-word mnemonic.</p>
+<h2 id="via-d20">Via D20<a class="headerlink" href="#via-d20" title="Permanent link">&para;</a></h2>
+<p>Since a D20 has more possible outcomes, the entropy is increased per roll to 4.322 bits ( log<sub>2</sub>(20) ). This means that only 30 rolls are necessary to create a 12-word mnemonic and 60 rolls for a 24-word mnemonic.</p>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<p>Krux keeps track of every roll you enter and displays the cumulative string after each roll. When you have entered your final roll, Krux will hash this string using SHA256 and output the resulting hash to the screen so that you can verify it for yourself.</p>
+<p>Krux then takes this hash, runs <a href="https://docs.python.org/3/library/binascii.html#binascii.unhexlify"><code>unhexlify</code></a> on it to encode it as bytes, and deterministically converts it into a mnemonic according to the <a href="https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207">BIP-39 Reference Implementation</a>.</p>
+<p>Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).</p>
+<h1 id="alternatives">Alternatives<a class="headerlink" href="#alternatives" title="Permanent link">&para;</a></h1>
+<p>See <a href="https://vault12.rebelmouse.com/seed-phrase-generation-2650084084.html">here</a> for a good method to generate a mnemonic manually, or visit <a href="https://iancoleman.io/bip39/">Ian Coleman's BIP-39 Tool</a> offline or on an airgapped device to generate one automatically. </p>
 <p>It's worth noting that Ian's tool is able to take a mnemonic and generate a QR code that Krux can read in via the QR input method mentioned on the next page.</p>
 
               
