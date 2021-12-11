@@ -16,6 +16,13 @@ Instructions for building and running Krux can now be found on our GitHub Pages 
 
 https://jreesun.github.io/krux/
 
+# Development
+## Running tests
+```
+poetry install
+poetry run pytest --cov=krux --cov-branch --cov-report=html --show-capture=all --capture=tee-sys -r A tests
+```
+
 # Inspired by these similar projects:
 - https://github.com/SeedSigner/seedsigner for Raspberry Pi (Zero)
 - https://github.com/diybitcoinhardware/f469-disco for the F469-Discovery board
