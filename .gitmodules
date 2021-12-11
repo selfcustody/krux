@@ -9,7 +9,7 @@
 	url = ../urtypes
 [submodule "foundation-ur-py"]
 	path = vendor/foundation-ur-py
-	url = ../../Foundation-Devices/foundation-ur-py
+	url = ../foundation-ur-py
 [submodule "firmware/Kboot"]
 	path = firmware/Kboot
 	url = ../Kboot
