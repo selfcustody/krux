@@ -19,20 +19,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from logging import LEVEL_NAMES, level_name, Logger
 import binascii
 import hashlib
 import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 import urtypes
-from printer import Printer
-from page import Page
-from menu import Menu, MENU_CONTINUE, MENU_EXIT
-from input import BUTTON_ENTER, BUTTON_PAGE
-from qr import FORMAT_UR
-from key import Key, pick_final_word, to_mnemonic_words
-from wallet import Wallet
+from .logging import LEVEL_NAMES, level_name, Logger, DEBUG
+from .metadata import VERSION
+from .settings import Settings
+from .printer import Printer
+from .page import Page
+from .menu import Menu, MENU_CONTINUE, MENU_EXIT
+from .input import BUTTON_ENTER, BUTTON_PAGE
+from .qr import FORMAT_UR
+from .key import Key, pick_final_word, to_mnemonic_words
+from .wallet import Wallet
 
 TEST_PHRASE_DIGITS  = '11111'
 TEST_PHRASE_LETTERS = 'aaaaa'
@@ -60,7 +62,7 @@ class Login(Page):
             (( 'About' ), self.about),
             (( 'Shutdown' ), self.shutdown),
         ]
-        if ctx.debugging():
+        if Settings.Log.level <= DEBUG:
             menu.append((( 'DEBUG' ), lambda: MENU_CONTINUE))
         Page.__init__(self, ctx, Menu(ctx, menu))
 
@@ -154,8 +156,8 @@ class Login(Page):
             multisig = index == 1
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Loading..' ))
-            self.ctx.wallet = Wallet(Key(' '.join(words), multisig, network=NETWORKS[self.ctx.net]))
-            self.ctx.printer = Printer(self.ctx.printer_baudrate, self.ctx.printer_paper_width)
+            self.ctx.wallet = Wallet(Key(' '.join(words), multisig, network=NETWORKS[Settings.network]))
+            self.ctx.printer = Printer(Settings.Printer.baudrate, Settings.Printer.paper_width)
             return MENU_EXIT
         return MENU_CONTINUE
 
@@ -348,7 +350,7 @@ class Login(Page):
         networks = ['main', 'test']
 
         while True:
-            current_network = self.ctx.net
+            current_network = Settings.network
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Network\n%snet' ) % current_network)
@@ -358,7 +360,7 @@ class Login(Page):
                 for i, network in enumerate(networks):
                     if current_network == network:
                         new_network = networks[(i + 1) % len(networks)]
-                        self.ctx.net = new_network
+                        Settings.network = new_network
                         break
             elif btn == BUTTON_ENTER:
                 break
@@ -369,7 +371,7 @@ class Login(Page):
         baudrates = [9600, 19200]
 
         while True:
-            current_baudrate = self.ctx.printer_baudrate
+            current_baudrate = Settings.Printer.baudrate
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Baudrate\n%s' ) % current_baudrate)
@@ -379,7 +381,7 @@ class Login(Page):
                 for i, baudrate in enumerate(baudrates):
                     if current_baudrate == baudrate:
                         new_baudrate = baudrates[(i + 1) % len(baudrates)]
-                        self.ctx.printer_baudrate = new_baudrate
+                        Settings.Printer.baudrate = new_baudrate
                         break
             elif btn == BUTTON_ENTER:
                 break
@@ -390,16 +392,20 @@ class Login(Page):
         levels = sorted(LEVEL_NAMES.keys())
 
         while True:
+            current_level = Settings.Log.level
+
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                ( 'Log Level\n%s' ) % level_name(self.ctx.log.level)
+                ( 'Log Level\n%s' ) % level_name(current_level)
             )
 
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_PAGE:
                 for i, level in enumerate(levels):
-                    if self.ctx.log.level == level:
-                        self.ctx.log = Logger(self.ctx.log.filepath, levels[(i + 1) % len(levels)])
+                    if current_level == level:
+                        new_level = levels[(i + 1) % len(levels)]
+                        Settings.Log.level = new_level
+                        self.ctx.log = Logger(Settings.Log.path, Settings.Log.level)
                         break
             elif btn == BUTTON_ENTER:
                 break
@@ -408,6 +414,6 @@ class Login(Page):
     def about(self):
         """Handler for the 'about' menu item"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(( 'Krux\n\n\nVersion\n%s' ) % self.ctx.version)
+        self.ctx.display.draw_centered_text(( 'Krux\n\n\nVersion\n%s' ) % VERSION)
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

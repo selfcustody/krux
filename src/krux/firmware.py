@@ -26,17 +26,16 @@ import secp256k1
 import hashlib
 import time
 import flash
-from input import BUTTON_ENTER
+from .input import BUTTON_ENTER
+from .metadata import SIGNER_PUBKEY
 
-SIGNER_PUBKEY = '02e15227cb417c0f6c9de5aff86532ce948af7d4f607660956be79d1448307b695'
+MAX_FIRMWARE_SIZE = 0x300000
 
-MAX_FIRMWARE_SIZE = const(0x300000)
+FIRMWARE_SLOT_1 = 0x00080000
+FIRMWARE_SLOT_2 = 0x00280000
 
-FIRMWARE_SLOT_1 = const(0x00080000)
-FIRMWARE_SLOT_2 = const(0x00280000)
-
-MAIN_BOOT_CONFIG_SECTOR_ADDRESS   = const(0x00004000)
-BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = const(0x00005000)
+MAIN_BOOT_CONFIG_SECTOR_ADDRESS   = 0x00004000
+BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = 0x00005000
 
 def find_active_firmware(boot_config_sector):
     """Returns a tuple of the active firmware's configuration"""

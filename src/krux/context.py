@@ -20,34 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
-import logging
-from display import Display
-from input import Input
-from camera import Camera
-from light import Light
-
-DEFAULT_NETWORK             = 'main'
-DEFAULT_PRINTER_BAUDRATE    = 9600
-DEFAULT_PRINTER_PAPER_WIDTH = 384
-DEFAULT_LOG_LEVEL           = logging.NONE
-
-LOG_FILE = '/sd/.krux.log'
+import board
+from .logging import Logger
+from .settings import Settings
+from .display import Display
+from .input import Input
+from .camera import Camera
+from .light import Light
 
 class Context:
     """Context is a singleton containing all 'global' state that lives throughout the
        duration of the program, including references to all device interfaces.
     """
 
-    def __init__(self, version):
-        self.net = DEFAULT_NETWORK
-        self.printer_baudrate = DEFAULT_PRINTER_BAUDRATE
-        self.printer_paper_width = DEFAULT_PRINTER_PAPER_WIDTH
-        self.version = version
-        self.log = logging.Logger(LOG_FILE, DEFAULT_LOG_LEVEL)
+    def __init__(self):
+        self.log = Logger(Settings.Log.path, Settings.Log.level)
         self.display = Display()
         self.input = Input()
         self.camera = Camera()
-        self.light = Light()
+        self.light = Light() if 'LED_W' in board.config['krux.pins'] else None
         self.printer = None
         self.wallet = None
 
@@ -57,7 +48,3 @@ class Context:
         if self.printer is not None:
             self.printer.clear()
         gc.collect()
-
-    def debugging(self):
-        """Helper method to know if we are in debug mode"""
-        return self.log.level <= logging.DEBUG

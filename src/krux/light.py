@@ -19,57 +19,33 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import sys
-sys.path.append('')
-sys.path.append('.')
+import board
+from Maix import GPIO
+from fpioa_manager import fm
 
-from krux import firmware
-from krux.power import PowerManager
+class Light:
+    """Light is a singleton interface for interacting with the device's LED light"""
 
-pmu = PowerManager()
-if firmware.upgrade():
-    pmu.shutdown()
+    def __init__(self):
+        fm.register(board.config['krux.pins']['LED_W'], fm.fpioa.GPIO3)
+        self.led_w = GPIO(GPIO.GPIO3, GPIO.OUT)
+        self.turn_off()
 
-# Note: These imports come after the firmware upgrade check
-#       to allow it to have more memory to work with
-import lcd
-from krux.context import Context
-from krux.login import Login
-from krux.home import Home
+    def is_on(self):
+        """Returns a boolean indicating if the light is currently on"""
+        return self.led_w.value() == 0
 
-SPLASH = """
-BTCBTCBTCBTCBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-B              T
-C  K  r  u  x  B
-T              C
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTCBTCBTCBTCBT
-"""
+    def turn_on(self):
+        """Turns on the light"""
+        self.led_w.value(0)
 
-ctx = Context()
+    def turn_off(self):
+        """Turns off the light"""
+        self.led_w.value(1)
 
-ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
-
-while True:
-    if not Login(ctx).run():
-        break
-
-    if not Home(ctx).run():
-        break
-
-ctx.display.flash_text(( 'Shutting down..' ))
-
-ctx.clear()
-
-pmu.shutdown()
+    def toggle(self):
+        """Toggles the light on or off"""
+        if self.is_on():
+            self.turn_off()
+        else:
+            self.turn_on()

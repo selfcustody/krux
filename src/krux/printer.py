@@ -19,10 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from board import board_info
+import board
 from fpioa_manager import fm
 from machine import UART
-from thermal import AdafruitThermalPrinter
+from .thermal import AdafruitThermalPrinter
 
 class Printer:
     """Printer is a singleton interface for interacting with the device's thermal printer"""
@@ -31,8 +31,10 @@ class Printer:
         self.paper_width = paper_width
 
         try:
-            fm.register(board_info.CONNEXT_A, fm.fpioa.UART2_TX, force=False)
-            fm.register(board_info.CONNEXT_B, fm.fpioa.UART2_RX, force=False)
+            if 'UART2_TX' not in board.config['krux.pins'] or 'UART2_RX' not in board.config['krux.pins']:
+                raise ValueError('missing required ports')
+            fm.register(board.config['krux.pins']['UART2_TX'], fm.fpioa.UART2_TX, force=False)
+            fm.register(board.config['krux.pins']['UART2_RX'], fm.fpioa.UART2_RX, force=False)
             self.thermal_printer = AdafruitThermalPrinter(UART.UART2, baudrate)
             if not self.thermal_printer.has_paper():
                 raise ValueError('missing paper')
@@ -72,6 +74,7 @@ class Printer:
         for y in range(height):
             # Scale the line (width) by scaling factor
             line_y = ''.join([char * scale for char in lines[y]])
+            print(line_y)
             line_bytes = int(line_y, 2).to_bytes((len(line_y) + 7) // 8, 'big')
             # Print height * scale lines out to scale by
             for _ in range(scale):

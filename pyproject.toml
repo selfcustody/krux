@@ -19,57 +19,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import sys
-sys.path.append('')
-sys.path.append('.')
 
-from krux import firmware
-from krux.power import PowerManager
+[tool.poetry]
+name = "krux"
+version = "1.0.0-beta"
+description = "Open-source, airgapped bitcoin hardware signer for the M5StickV"
+authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
-pmu = PowerManager()
-if firmware.upgrade():
-    pmu.shutdown()
+[tool.poetry.dependencies]
+python = "3.9.1"
+embit = { path = "./vendor/embit/", develop = true }
+ur = { path = "./vendor/foundation-ur-py/", develop = true }
+urtypes = { path = "./vendor/urtypes/", develop = true }
 
-# Note: These imports come after the firmware upgrade check
-#       to allow it to have more memory to work with
-import lcd
-from krux.context import Context
-from krux.login import Login
-from krux.home import Home
-
-SPLASH = """
-BTCBTCBTCBTCBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-B              T
-C  K  r  u  x  B
-T              C
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTCBTCBTCBTCBT
-"""
-
-ctx = Context()
-
-ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
-
-while True:
-    if not Login(ctx).run():
-        break
-
-    if not Home(ctx).run():
-        break
-
-ctx.display.flash_text(( 'Shutting down..' ))
-
-ctx.clear()
-
-pmu.shutdown()
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+pytest-mock = "^3.6.1"
+pytest-cov = "^3.0.0"

@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import lcd
-from input import BUTTON_ENTER, BUTTON_PAGE
+from .input import BUTTON_ENTER, BUTTON_PAGE
 
-MENU_CONTINUE = const(0)
-MENU_EXIT     = const(1)
-MENU_SHUTDOWN = const(2)
+MENU_CONTINUE = 0
+MENU_EXIT     = 1
+MENU_SHUTDOWN = 2
 
 class Menu:
     """Represents a menu that can render itself to the screen, handle item selection,

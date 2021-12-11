@@ -19,23 +19,23 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from board import board_info
+import board
 from Maix import GPIO
 from fpioa_manager import fm
 
-BUTTON_ENTER = const(0)
-BUTTON_PAGE  = const(1)
+BUTTON_ENTER = 0
+BUTTON_PAGE  = 1
 
-NONBLOCKING_CHECKS = const(100000)
+NONBLOCKING_CHECKS = 100000
 
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
     def __init__(self):
         self.entropy = 0
-        fm.register(board_info.BUTTON_A, fm.fpioa.GPIOHS21)
+        fm.register(board.config['krux.pins']['BUTTON_A'], fm.fpioa.GPIOHS21)
         self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
-        fm.register(board_info.BUTTON_B, fm.fpioa.GPIOHS22)
+        fm.register(board.config['krux.pins']['BUTTON_B'], fm.fpioa.GPIOHS22)
         self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
 
     def wait_for_button(self, block=True):

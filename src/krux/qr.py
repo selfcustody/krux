@@ -25,9 +25,9 @@ from ur.ur_encoder import UREncoder
 from ur.ur_decoder import URDecoder
 from ur.ur import UR
 
-FORMAT_NONE  = const(0)
-FORMAT_PMOFN = const(1)
-FORMAT_UR    = const(2)
+FORMAT_NONE  = 0
+FORMAT_PMOFN = 1
+FORMAT_UR    = 2
 
 def get_size(qr_code):
     """Returns the size of the qr code as the number of chars until the first newline"""
@@ -160,12 +160,10 @@ class QRPartParser:
     def result(self):
         """Returns the combined part data"""
         if self.format == FORMAT_UR:
-            if isinstance(self.decoder.result, UR):
-                return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
-            return self.decoder.result
+            return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
         code_buffer = io.StringIO('')
         for _, part in sorted(self.parts.items()):
             code_buffer.write(part)
         code = code_buffer.getvalue()
         code_buffer.close()
-        return code
+        return bytes(code)

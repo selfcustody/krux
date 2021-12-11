@@ -23,13 +23,14 @@ import gc
 import lcd
 from embit.networks import NETWORKS
 from embit.script import Script, address_to_scriptpubkey
-from display import DEFAULT_PADDING
-from psbt import PSBTSigner
-from qr import FORMAT_NONE, FORMAT_PMOFN
-from page import Page
-from menu import Menu, MENU_CONTINUE
-from input import BUTTON_ENTER
-from wallet import Wallet
+from .settings import Settings
+from .display import DEFAULT_PADDING
+from .psbt import PSBTSigner
+from .qr import FORMAT_NONE, FORMAT_PMOFN
+from .page import Page
+from .menu import Menu, MENU_CONTINUE
+from .input import BUTTON_ENTER
+from .wallet import Wallet
 
 class Home(Page):
     """Home is the main menu page of the app"""
@@ -161,7 +162,7 @@ class Home(Page):
                     ( 'Checking receive address %d for match..' ) % i
                 )
                 desc = self.ctx.wallet.descriptor
-                child_addr = desc.derive(i, branch_index=0).address(network=NETWORKS[self.ctx.net])
+                child_addr = desc.derive(i, branch_index=0).address(network=NETWORKS[Settings.network])
                 if addr == child_addr:
                     found = True
                     break
@@ -210,7 +211,7 @@ class Home(Page):
 
         signer.validate()
 
-        outputs = signer.outputs(self.ctx.net)
+        outputs = signer.outputs(Settings.network)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text('\n\n'.join(outputs))
         self.ctx.display.draw_hcentered_text(( 'Sign?' ), offset_y=200)

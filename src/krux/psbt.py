@@ -27,9 +27,9 @@ from embit.psbt import DerivationPath, PSBT
 import urtypes
 from urtypes import BYTES
 from urtypes.crypto import CRYPTO_PSBT
-from baseconv import base_encode, try_decode
+from .baseconv import base_encode, base_decode
 
-SATS_PER_BTC = const(100000000)
+SATS_PER_BTC = 100000000
 
 class PSBTSigner:
     """Responsible for validating and signing PSBTs"""
@@ -47,11 +47,24 @@ class PSBTSigner:
                 self.ur_type = BYTES
         else:
             try:
-                psbt_data, base = try_decode(psbt_data)
-                self.base_encoding = base
-            except:
-                pass
-            self.psbt = PSBT.parse(psbt_data)
+                self.psbt = PSBT.parse(psbt_data)
+            except:            
+                try:
+                    psbt_data, base = base_decode(psbt_data, 64)
+                    self.psbt = PSBT.parse(psbt_data)
+                    self.base_encoding = base
+                except:
+                    try:
+                        psbt_data, base = base_decode(psbt_data, 58)
+                        self.psbt = PSBT.parse(psbt_data)
+                        self.base_encoding = base
+                    except:
+                        try:
+                            psbt_data, base = base_decode(psbt_data, 43)
+                            self.psbt = PSBT.parse(psbt_data)
+                            self.base_encoding = base
+                        except:
+                            raise ValueError('invalid PSBT')
 
     def validate(self):
         """Validates that the PSBT policy matches the wallet policy"""
@@ -90,7 +103,7 @@ class PSBTSigner:
             return UR(BYTES.type, urtypes.Bytes(psbt_data).to_cbor())
 
         if self.base_encoding is not None:
-            psbt_data = base_encode(psbt_data, self.base_encoding).strip().decode()
+            psbt_data = base_encode(psbt_data, self.base_encoding).decode()
         return psbt_data
 
 # Functions below adapted from: https://github.com/SeedSigner/seedsigner

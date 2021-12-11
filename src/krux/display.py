@@ -22,12 +22,14 @@
 import time
 import math
 import lcd
+import board
 from machine import I2C
 
-DEFAULT_PADDING = const(10)
+DEFAULT_PADDING = 10
+FONT_SIZE = 7
 
-MAX_BACKLIGHT = const(8)
-MIN_BACKLIGHT = const(1)
+MAX_BACKLIGHT = 8
+MIN_BACKLIGHT = 1
 
 DEL = ( 'Del' )
 GO  = ( 'Go' )
@@ -35,36 +37,49 @@ GO  = ( 'Go' )
 class Display:
     """Display is a singleton interface for interacting with the device's display"""
 
-    def __init__(self, font_size=7):
-        self.font_size = font_size
+    def __init__(self):
+        self.font_size = FONT_SIZE
         self.rot = 0
         self.initialize_lcd()
-        self.i2c = I2C(I2C.I2C0, freq=400000, scl=28, sda=29)
-        self.set_backlight(MIN_BACKLIGHT)
+        self.i2c = None
+        self.initialize_backlight()
 
     def initialize_lcd(self):
         """Initializes the LCD"""
-        lcd.init(type=3)
-        lcd.register(0x3A, 0x05)
-        lcd.register(0xB2, [0x05, 0x05, 0x00, 0x33, 0x33])
-        lcd.register(0xB7, 0x23)
-        lcd.register(0xBB, 0x22)
-        lcd.register(0xC0, 0x2C)
-        lcd.register(0xC2, 0x01)
-        lcd.register(0xC3, 0x13)
-        lcd.register(0xC4, 0x20)
-        lcd.register(0xC6, 0x0F)
-        lcd.register(0xD0, [0xA4, 0xA1])
-        lcd.register(0xD6, 0xA1)
-        lcd.register(0xE0,
-            [0x23, 0x70, 0x06, 0x0C, 0x08,
-             0x09, 0x27, 0x2E, 0x34, 0x46,
-             0x37, 0x13, 0x13, 0x25, 0x2A]
+        lcd.init(type=board.config['lcd']['lcd_type'])
+        if board.config['lcd']['lcd_type'] == 3:
+            lcd.register(0x3A, 0x05)
+            lcd.register(0xB2, [0x05, 0x05, 0x00, 0x33, 0x33])
+            lcd.register(0xB7, 0x23)
+            lcd.register(0xBB, 0x22)
+            lcd.register(0xC0, 0x2C)
+            lcd.register(0xC2, 0x01)
+            lcd.register(0xC3, 0x13)
+            lcd.register(0xC4, 0x20)
+            lcd.register(0xC6, 0x0F)
+            lcd.register(0xD0, [0xA4, 0xA1])
+            lcd.register(0xD6, 0xA1)
+            lcd.register(0xE0,
+                [0x23, 0x70, 0x06, 0x0C, 0x08,
+                0x09, 0x27, 0x2E, 0x34, 0x46,
+                0x37, 0x13, 0x13, 0x25, 0x2A]
+            )
+            lcd.register(0xE1,
+                [0x70, 0x04, 0x08, 0x09, 0x07, 0x03, 0x2C,
+                0x42, 0x42, 0x38, 0x14, 0x14, 0x27, 0x2C]
+            )
+
+    def initialize_backlight(self):
+        """Initializes the backlight"""
+        if 'I2C_SCL' not in board.config['krux.pins'] or 'I2C_SDA' not in board.config['krux.pins']:
+            return
+        self.i2c = I2C(
+            I2C.I2C0,
+            freq=400000,
+            scl=board.config['krux.pins']['I2C_SCL'],
+            sda=board.config['krux.pins']['I2C_SDA']
         )
-        lcd.register(0xE1,
-            [0x70, 0x04, 0x08, 0x09, 0x07, 0x03, 0x2C,
-             0x42, 0x42, 0x38, 0x14, 0x14, 0x27, 0x2C]
-        )
+        self.set_backlight(MIN_BACKLIGHT)
 
     def line_height(self):
         """Returns the pixel height of a line on the display"""
@@ -184,6 +199,8 @@ class Display:
 
     def set_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""
+        if not self.i2c:
+            return
         # Ranges from 0 to 8
         level = max(0, min(level, 8))
         val = (level+7) << 4

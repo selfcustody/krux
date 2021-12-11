@@ -21,35 +21,30 @@
 # THE SOFTWARE.
 from binascii import a2b_base64, b2a_base64
 
-B43CHARS = b'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:'
+B43CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:'
 assert len(B43CHARS) == 43
 
-B58CHARS = b'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+B58CHARS = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 assert len(B58CHARS) == 58
-
-def try_decode(v):
-    """Exhaustively tries to decode v from whichever base encoding it is in"""
-    for base in [43, 58, 64]:
-        try:
-            return (base_decode(v, base), base)
-        except:
-            pass
-    raise ValueError('failed to decode')
 
 def base_decode(v, base):
     """Decodes v from base encoding and returns the decoded bytes"""
-    v = bytearray(v, 'ascii') if isinstance(v, str) else bytearray(v)
     if base not in (43, 58, 64):
         raise ValueError('not supported base: {}'.format(base))
-    chars = B58CHARS
-    if base == 43:
-        chars = B43CHARS
-    elif base == 64:
-        return a2b_base64(bytes(v))
+
+    if v == b'':
+        return v
+
+    # Base64 is a special case: We just use binascii's implementation without
+    # performing bitcoin-specific padding logic
+    if base == 64:
+        return a2b_base64(v)
+
+    chars = B58CHARS if base == 58 else B43CHARS
     long_value = 0
     power_of_base = 1
     for char in reversed(v):
-        digit = chars.find(bytes([char]))
+        digit = chars.find(bytes([char]).decode())
         if digit == -1:
             raise ValueError('forbidden character {} for base {}'.format(char, base))
         long_value += digit * power_of_base
@@ -59,26 +54,33 @@ def base_decode(v, base):
         div, mod = divmod(long_value, 256)
         result.append(mod)
         long_value = div
-    result.append(long_value)
+    if long_value > 0:
+        result.append(long_value)
     n_pad = 0
     for char in v:
-        if char == chars[0]:
+        if bytes([char]).decode() == chars[0]:
             n_pad += 1
         else:
             break
-    result.extend(b'\x00' * n_pad)
+    if n_pad > 0:
+        result.extend(b'\x00' * n_pad)
     return bytes(reversed(result))
 
 def base_encode(v, base):
     """Encodes the data in v as base and returns as bytes"""
-    v = bytearray(v, 'ascii') if isinstance(v, str) else bytearray(v)
     if base not in (43, 58, 64):
         raise ValueError('not supported base: {}'.format(base))
-    chars = B58CHARS
-    if base == 43:
-        chars = B43CHARS
-    elif base == 64:
-        return b2a_base64(bytes(v))
+
+    if v == b'':
+        return v
+
+    # Base64 is a special case: We just use binascii's implementation without
+    # performing bitcoin-specific padding logic. b2a_base64 always adds a \n
+    # char at the end which we strip before returning
+    if base == 64:
+        return b2a_base64(v).rstrip()
+
+    chars = B58CHARS if base == 58 else B43CHARS
     long_value = 0
     power_of_base = 1
     for char in reversed(v):
@@ -87,9 +89,10 @@ def base_encode(v, base):
     result = bytearray()
     while long_value >= base:
         div, mod = divmod(long_value, base)
-        result.append(chars[mod])
+        result.extend(chars[mod].encode())
         long_value = div
-    result.append(chars[long_value])
+    if long_value > 0:
+        result.extend(chars[long_value].encode())
     # Bitcoin does a little leading-zero-compression:
     # leading 0-bytes in the input become leading-1s
     n_pad = 0
@@ -98,5 +101,6 @@ def base_encode(v, base):
             n_pad += 1
         else:
             break
-    result.extend(bytearray(chars[0] * n_pad))
+    if n_pad > 0:
+        result.extend((chars[0] * n_pad).encode())
     return bytes(reversed(result))

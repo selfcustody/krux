@@ -22,7 +22,7 @@
 import gc
 import sensor
 import lcd
-from qr import QRPartParser
+from .qr import QRPartParser
 
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
@@ -52,15 +52,14 @@ class Camera:
         while True:
             stop = callback(parser.total_count(), parser.parsed_count(), new_part)
             if stop:
-                sensor.run(0)
-                return None
+                break
 
             new_part = False
 
             img = sensor.snapshot()
             gc.collect()
             hist = img.get_histogram()
-            if str(type(hist)) != "<class 'histogram'>":
+            if 'histogram' not in str(type(hist)):
                 continue
             # Convert the image to black and white by using Otsu's thresholding.
             # This is done to account for spots, blotches, and streaks in the code
@@ -82,4 +81,7 @@ class Camera:
                 break
 
         sensor.run(0)
-        return (parser.result(), parser.format)
+
+        if parser.is_complete():
+            return (parser.result(), parser.format)
+        return (None, None)

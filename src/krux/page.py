@@ -23,12 +23,12 @@ import math
 import time
 import lcd
 from ur.ur import UR
-from input import BUTTON_ENTER, BUTTON_PAGE
-from display import DEFAULT_PADDING, DEL, GO
-from menu import MENU_SHUTDOWN
-from qr import to_qr_codes
+from .input import BUTTON_ENTER, BUTTON_PAGE
+from .display import DEFAULT_PADDING, DEL, GO
+from .menu import MENU_SHUTDOWN
+from .qr import to_qr_codes
 
-QR_ANIMATION_INTERVAL_MS = const(100)
+QR_ANIMATION_INTERVAL_MS = 100
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -108,7 +108,8 @@ class Page:
                 self._enter_state = self.ctx.input.enter.value()
             elif self.ctx.input.enter.value() != self._enter_state:
                 self._enter_state = self.ctx.input.enter.value()
-                self.ctx.light.toggle()
+                if self.ctx.light:
+                    self.ctx.light.toggle()
 
             # Exit the capture loop if the page button is pressed
             if self._page_state == -1:
@@ -134,7 +135,8 @@ class Page:
             code, qr_format = self.ctx.camera.capture_qr_code_loop(callback)
         except:
             self.ctx.log.exception('Exception occurred capturing QR code')
-        self.ctx.light.turn_off()
+        if self.ctx.light:
+            self.ctx.light.turn_off()
         self.ctx.display.to_portrait()
         if code is not None:
             data = code.cbor if isinstance(code, UR) else code

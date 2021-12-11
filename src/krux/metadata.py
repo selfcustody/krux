@@ -19,57 +19,5 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import sys
-sys.path.append('')
-sys.path.append('.')
-
-from krux import firmware
-from krux.power import PowerManager
-
-pmu = PowerManager()
-if firmware.upgrade():
-    pmu.shutdown()
-
-# Note: These imports come after the firmware upgrade check
-#       to allow it to have more memory to work with
-import lcd
-from krux.context import Context
-from krux.login import Login
-from krux.home import Home
-
-SPLASH = """
-BTCBTCBTCBTCBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-B              T
-C  K  r  u  x  B
-T              C
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTCBTCBTCBTCBT
-"""
-
-ctx = Context()
-
-ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
-
-while True:
-    if not Login(ctx).run():
-        break
-
-    if not Home(ctx).run():
-        break
-
-ctx.display.flash_text(( 'Shutting down..' ))
-
-ctx.clear()
-
-pmu.shutdown()
+VERSION = 'BETA'
+SIGNER_PUBKEY = '02ff950e33a830bd3ac7eec61ce7fd975d77156313f229499c30f2928150055565'
