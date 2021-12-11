@@ -50,19 +50,19 @@ class PSBTSigner:
                 self.psbt = PSBT.parse(psbt_data)
             except:            
                 try:
-                    psbt_data, base = base_decode(psbt_data, 64)
+                    psbt_data = base_decode(psbt_data, 64)
                     self.psbt = PSBT.parse(psbt_data)
-                    self.base_encoding = base
+                    self.base_encoding = 64
                 except:
                     try:
-                        psbt_data, base = base_decode(psbt_data, 58)
+                        psbt_data = base_decode(psbt_data, 58)
                         self.psbt = PSBT.parse(psbt_data)
-                        self.base_encoding = base
+                        self.base_encoding = 58
                     except:
                         try:
-                            psbt_data, base = base_decode(psbt_data, 43)
+                            psbt_data = base_decode(psbt_data, 43)
                             self.psbt = PSBT.parse(psbt_data)
-                            self.base_encoding = base
+                            self.base_encoding = 43
                         except:
                             raise ValueError('invalid PSBT')
 

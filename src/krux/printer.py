@@ -74,7 +74,6 @@ class Printer:
         for y in range(height):
             # Scale the line (width) by scaling factor
             line_y = ''.join([char * scale for char in lines[y]])
-            print(line_y)
             line_bytes = int(line_y, 2).to_bytes((len(line_y) + 7) // 8, 'big')
             # Print height * scale lines out to scale by
             for _ in range(scale):
