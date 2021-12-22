@@ -156,10 +156,10 @@ class Page:
             code = None
             num_parts = 0
             try:
-                code, num_parts = code_generator.__next__()
+                code, num_parts = next(code_generator)
             except:
                 code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
-                code, num_parts = code_generator.__next__()
+                code, num_parts = next(code_generator)
 
             self.ctx.display.draw_qr_code(5, code)
             subtitle = ( 'Part\n%d / %d' ) % (i+1, num_parts) if title is None else title
@@ -206,7 +206,7 @@ class Page:
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
             i = 0
-            for qr_code, count in to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format):
+            for qr_code, count in to_qr_codes(data, self.ctx.printer.qr_data_width(), qr_format):
                 if i == count:
                     break
                 self.ctx.display.clear()

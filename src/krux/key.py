@@ -111,7 +111,7 @@ def pick_final_word(ctx, words):
        either 11 or 23 words
     """
     if (len(words) != 11 and len(words) != 23):
-        return None
+        raise ValueError('must provide 11 or 23 words')
 
     urandom.seed(time.ticks_ms() + ctx.input.entropy)
     while True:
@@ -119,4 +119,3 @@ def pick_final_word(ctx, words):
         mnemonic = ' '.join(words) + ' ' + word
         if bip39.mnemonic_is_valid(mnemonic):
             return word
-    return None

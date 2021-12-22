@@ -19,65 +19,26 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import board
-from fpioa_manager import fm
-from machine import UART
-from .thermal import AdafruitThermalPrinter
-
 class Printer:
-    """Printer is a singleton interface for interacting with the device's thermal printer"""
-
-    def __init__(self, baudrate, paper_width):
-        self.paper_width = paper_width
-
-        try:
-            if 'UART2_TX' not in board.config['krux.pins'] or 'UART2_RX' not in board.config['krux.pins']:
-                raise ValueError('missing required ports')
-            fm.register(board.config['krux.pins']['UART2_TX'], fm.fpioa.UART2_TX, force=False)
-            fm.register(board.config['krux.pins']['UART2_RX'], fm.fpioa.UART2_RX, force=False)
-            self.thermal_printer = AdafruitThermalPrinter(UART.UART2, baudrate)
-            if not self.thermal_printer.has_paper():
-                raise ValueError('missing paper')
-        except:
-            self.thermal_printer = None
-
+    """Printer is a singleton interface for interacting with the device's printer
+    
+       Must be subclassed.
+    """
+    def __init__(self):
+        raise NotImplementedError()
+    
     def qr_data_width(self):
         """Returns a smaller width for the QR to be generated
            within, which will then be scaled up to fit the paper's width.
            We do this because the QR would be too dense to be readable
            by most devices otherwise.
         """
-        return self.paper_width // 6
+        raise NotImplementedError()
 
     def clear(self):
         """Clears the printer's memory, resetting it"""
-        if not self.is_connected():
-            return
-        # A full reset zeroes all memory buffers
-        self.thermal_printer.full_reset()
-
-    def is_connected(self):
-        """Returns a boolean indicating if the printer is connected or not"""
-        return self.thermal_printer is not None
+        raise NotImplementedError()
 
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
-        if not self.is_connected():
-            raise ValueError('no printer found')
-
-        lines = qr_code.strip().split('\n')
-
-        width = len(lines)
-        height = len(lines)
-
-        scale = self.paper_width // width
-        for y in range(height):
-            # Scale the line (width) by scaling factor
-            line_y = ''.join([char * scale for char in lines[y]])
-            line_bytes = int(line_y, 2).to_bytes((len(line_y) + 7) // 8, 'big')
-            # Print height * scale lines out to scale by
-            for _ in range(scale):
-                self.thermal_printer.write_bytes(18, 42, 1, len(line_bytes))
-                self.thermal_printer.write_bytes(line_bytes)
-                self.thermal_printer.timeout_set(self.thermal_printer.dot_print_time)
-        self.thermal_printer.feed(3)
+        raise NotImplementedError()

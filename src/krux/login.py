@@ -28,7 +28,7 @@ import urtypes
 from .logging import LEVEL_NAMES, level_name, Logger, DEBUG
 from .metadata import VERSION
 from .settings import Settings
-from .printer import Printer
+from .printers import *
 from .page import Page
 from .menu import Menu, MENU_CONTINUE, MENU_EXIT
 from .input import BUTTON_ENTER, BUTTON_PAGE
@@ -157,7 +157,7 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Loading..' ))
             self.ctx.wallet = Wallet(Key(' '.join(words), multisig, network=NETWORKS[Settings.network]))
-            self.ctx.printer = Printer(Settings.Printer.baudrate, Settings.Printer.paper_width)
+            self.ctx.printer = getattr(__import__('.printers.%s' % Settings.Printer.module), Settings.Printer.cls)()
             return MENU_EXIT
         return MENU_CONTINUE
 
@@ -368,10 +368,10 @@ class Login(Page):
 
     def printer(self):
         """Handler for the 'printer' menu item"""
-        baudrates = [9600, 19200]
+        baudrates = Settings.Printer.Adafruit.baudrates
 
         while True:
-            current_baudrate = Settings.Printer.baudrate
+            current_baudrate = Settings.Printer.Adafruit.baudrate
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Baudrate\n%s' ) % current_baudrate)
@@ -381,7 +381,7 @@ class Login(Page):
                 for i, baudrate in enumerate(baudrates):
                     if current_baudrate == baudrate:
                         new_baudrate = baudrates[(i + 1) % len(baudrates)]
-                        Settings.Printer.baudrate = new_baudrate
+                        Settings.Printer.Adafruit.baudrate = new_baudrate
                         break
             elif btn == BUTTON_ENTER:
                 break

@@ -26,9 +26,10 @@ import secp256k1
 import hashlib
 import time
 import flash
-from .input import BUTTON_ENTER
+from .input import Input, BUTTON_ENTER
 from .metadata import SIGNER_PUBKEY
-
+from .display import Display
+    
 MAX_FIRMWARE_SIZE = 0x300000
 
 FIRMWARE_SLOT_1 = 0x00080000
@@ -37,10 +38,10 @@ FIRMWARE_SLOT_2 = 0x00280000
 MAIN_BOOT_CONFIG_SECTOR_ADDRESS   = 0x00004000
 BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = 0x00005000
 
-def find_active_firmware(boot_config_sector):
+def find_active_firmware(sector):
     """Returns a tuple of the active firmware's configuration"""
     for i in range(8):
-        app_entry = boot_config_sector[i*32:i*32+32]
+        app_entry = sector[i*32:i*32+32]
         config_flags = int.from_bytes(app_entry[0:4], 'big')
         active = config_flags & 0b1 == 0b1
         if not active:
@@ -49,6 +50,16 @@ def find_active_firmware(boot_config_sector):
         app_size = int.from_bytes(app_entry[8:8+4], 'big')
         return app_address, app_size, i
     return None, None, None
+
+def update_boot_config_sector(sector, entry_index, new_firmware_address, new_firmware_size):
+    """Updates the boot config sector in flash"""
+    updated_sector = bytearray(sector)
+    app_entry = updated_sector[entry_index*32:entry_index*32+32]
+    app_entry[0:4] = (0x5AA5D0C0 | 0b1101).to_bytes(4, 'big')
+    app_entry[4:4+4] = new_firmware_address.to_bytes(4, 'big')
+    app_entry[8:8+4] = new_firmware_size.to_bytes(4, 'big')
+    updated_sector[entry_index*32:entry_index*32+32] = app_entry
+    return bytes(updated_sector)
 
 def write_data(pct_cb, address, data, data_size, chunk_size, header=False, sha_suffix=None):
     """Writes data to the flash, optionally adding header and sha suffix for firmware"""
@@ -85,7 +96,7 @@ def write_data(pct_cb, address, data, data_size, chunk_size, header=False, sha_s
             if read_attempts < 5:
                 read_attempts += 1
                 continue
-            break
+            raise ValueError('failed to read')
 
         chunk_read += num_read
         if num_read and chunk_read < chunk_size_after_header and total_read < data_size:
@@ -112,16 +123,6 @@ def write_data(pct_cb, address, data, data_size, chunk_size, header=False, sha_s
         i += 1
         num_read = 0
         chunk_read = 0
-
-def update_boot_config_sector(sector, entry_index, new_firmware_address, new_firmware_size):
-    """Updates the boot config sector in flash"""
-    updated_sector = bytearray(sector)
-    app_entry = updated_sector[entry_index*32:entry_index*32+32]
-    app_entry[0:4] = (0x5AA5D0C0 | 0b1101).to_bytes(4, 'big')
-    app_entry[4:4+4] = new_firmware_address.to_bytes(4, 'big')
-    app_entry[8:8+4] = new_firmware_size.to_bytes(4, 'big')
-    updated_sector[entry_index*32:entry_index*32+32] = app_entry
-    return bytes(updated_sector)
 
 def fsize(firmware_filename):
     """Returns the size of the firmware"""
@@ -162,8 +163,6 @@ def upgrade():
     except:
         return False
 
-    from display import Display
-    from input import Input
     display = Display()
     inp = Input()
 
@@ -215,11 +214,7 @@ def upgrade():
             return False
 
     # Write new firmware to the opposite slot
-    new_address = None
-    if address == FIRMWARE_SLOT_1:
-        new_address = FIRMWARE_SLOT_2
-    elif address == FIRMWARE_SLOT_2:
-        new_address = FIRMWARE_SLOT_1
+    new_address = FIRMWARE_SLOT_2 if address == FIRMWARE_SLOT_1 else FIRMWARE_SLOT_1
 
     def status_text(text):
         display.clear()

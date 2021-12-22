@@ -28,6 +28,9 @@ BUTTON_PAGE  = 1
 
 NONBLOCKING_CHECKS = 100000
 
+PRESSED = 0
+RELEASED = 1
+
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
@@ -43,25 +46,25 @@ class Input:
            Returns the button that was released, or None if nonblocking.
         """
         # Loop until all buttons are released (if currently pressed)
-        while self.enter.value() == 0 or self.page.value() == 0:
+        while self.enter.value() == PRESSED or self.page.value() == PRESSED:
             self.entropy += 1
 
         # Wait for first button press
         checks = 0
-        while self.enter.value() == 1 and self.page.value() == 1:
+        while self.enter.value() == RELEASED and self.page.value() == RELEASED:
             checks += 1
             if not block and checks > NONBLOCKING_CHECKS:
                 break
 
-        if self.enter.value() == 0:
+        if self.enter.value() == PRESSED:
             # Wait for release
-            while self.enter.value() == 0:
+            while self.enter.value() == PRESSED:
                 self.entropy += 1
             return BUTTON_ENTER
 
-        if self.page.value() == 0:
+        if self.page.value() == PRESSED:
             # Wait for release
-            while self.page.value() == 0:
+            while self.page.value() == PRESSED:
                 self.entropy += 1
             return BUTTON_PAGE
         return None

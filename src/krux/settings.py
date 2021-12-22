@@ -26,14 +26,22 @@ class Settings:
 
     network = 'main'
 
-    class Printer:
-        """Printer-specific settings"""
-
-        baudrate = 9600
-        paper_width = 384
-
     class Log:
         """Log-specific settings"""
 
         path = '/sd/.krux.log'
         level = NONE
+
+    class Printer:
+        """Printer-specific settings"""
+
+        module = 'adafruit'
+        cls = 'ThermalPrinter'
+
+        class Adafruit:
+            """Adafruit printer settings"""
+
+            baudrates = [9600, 19200]
+            baudrate = 9600
+            paper_width = 384
+            heat_time = 255

@@ -1,26 +1,24 @@
 from .shared_mocks import *
-from unittest import mock
 
-@mock.patch('krux.context.Logger', new=mock.MagicMock())
-@mock.patch('krux.context.Settings', new=mock.MagicMock())
-@mock.patch('krux.context.Display', new=mock.MagicMock())
-@mock.patch('krux.context.Input', new=mock.MagicMock())
-@mock.patch('krux.context.Camera', new=mock.MagicMock())
-@mock.patch('krux.context.Light', new=mock.MagicMock())
-def test_init():
+def mock_modules(mocker):
+    mocker.patch('krux.context.Logger', new=mock.MagicMock())
+    mocker.patch('krux.context.Settings', new=mock.MagicMock())
+    mocker.patch('krux.context.Display', new=mock.MagicMock())
+    mocker.patch('krux.context.Input', new=mock.MagicMock())
+    mocker.patch('krux.context.Camera', new=mock.MagicMock())
+    mocker.patch('krux.context.Light', new=mock.MagicMock())
+    mocker.patch('krux.printer.Printer', new=mock.MagicMock())
+
+def test_init(mocker):
+    mock_modules(mocker)
     from krux.context import Context
 
     c = Context()
 
     assert isinstance(c, Context)
 
-@mock.patch('krux.context.Logger', new=mock.MagicMock())
-@mock.patch('krux.context.Settings', new=mock.MagicMock())
-@mock.patch('krux.context.Display', new=mock.MagicMock())
-@mock.patch('krux.context.Input', new=mock.MagicMock())
-@mock.patch('krux.context.Camera', new=mock.MagicMock())
-@mock.patch('krux.context.Light', new=mock.MagicMock())
-def test_clear():
+def test_clear(mocker):
+    mock_modules(mocker)
     from krux.context import Context
     c = Context()
 
@@ -28,19 +26,12 @@ def test_clear():
     
     assert c.wallet is None
     
-@mock.patch('krux.context.Logger', new=mock.MagicMock())
-@mock.patch('krux.context.Settings', new=mock.MagicMock())
-@mock.patch('krux.context.Display', new=mock.MagicMock())
-@mock.patch('krux.context.Input', new=mock.MagicMock())
-@mock.patch('krux.context.Camera', new=mock.MagicMock())
-@mock.patch('krux.context.Light', new=mock.MagicMock())
-@mock.patch('krux.printer.Printer', new=mock.MagicMock())
 def test_clear_clears_printer(mocker):
+    mock_modules(mocker)
     from krux.context import Context
     from krux.printer import Printer
     c = Context()
-    c.printer = Printer(1, 1)
-    mocker.spy(c.printer, 'clear')
+    c.printer = mock.MagicMock(clear=mock.MagicMock())
 
     c.clear()
     

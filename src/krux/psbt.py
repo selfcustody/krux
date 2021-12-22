@@ -22,14 +22,13 @@
 import io
 from ur.ur import UR
 from embit import ec, script
-from embit.networks import NETWORKS
 from embit.psbt import DerivationPath, PSBT
+from embit.finalizer import parse_multisig
 import urtypes
 from urtypes import BYTES
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_encode, base_decode
-
-SATS_PER_BTC = 100000000
+from .format import satcomma
 
 class PSBTSigner:
     """Responsible for validating and signing PSBTs"""
@@ -38,50 +37,113 @@ class PSBTSigner:
         self.wallet = wallet
         self.base_encoding = None
         self.ur_type = None
+        # Parse the PSBT
         if isinstance(psbt_data, UR):
             try:
                 self.psbt = PSBT.parse(urtypes.crypto.PSBT.from_cbor(psbt_data.cbor).data)
                 self.ur_type = CRYPTO_PSBT
             except:
-                self.psbt = PSBT.parse(urtypes.Bytes.from_cbor(psbt_data.cbor).data)
-                self.ur_type = BYTES
+                raise ValueError('invalid PSBT')
         else:
+            # Process as bytes
+            psbt_data = psbt_data.encode() if isinstance(psbt_data, str) else psbt_data
             try:
                 self.psbt = PSBT.parse(psbt_data)
-            except:            
+            except:
                 try:
-                    psbt_data = base_decode(psbt_data, 64)
-                    self.psbt = PSBT.parse(psbt_data)
+                    self.psbt = PSBT.parse(base_decode(psbt_data, 64))
                     self.base_encoding = 64
                 except:
                     try:
-                        psbt_data = base_decode(psbt_data, 58)
-                        self.psbt = PSBT.parse(psbt_data)
+                        self.psbt = PSBT.parse(base_decode(psbt_data, 58))
                         self.base_encoding = 58
                     except:
                         try:
-                            psbt_data = base_decode(psbt_data, 43)
-                            self.psbt = PSBT.parse(psbt_data)
+                            self.psbt = PSBT.parse(base_decode(psbt_data, 43))
                             self.base_encoding = 43
                         except:
                             raise ValueError('invalid PSBT')
-
-    def validate(self):
-        """Validates that the PSBT policy matches the wallet policy"""
-        policy = get_tx_policy(self.psbt, self.wallet)
-
-        if not self.wallet.is_multisig() and is_multisig(policy):
+        # Validate the PSBT
+        # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
+        xpubs = self.xpubs()
+        self.policy = None
+        for inp in self.psbt.inputs:
+            # get policy of the input
+            inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, xpubs)
+            # if policy is None - assign current
+            if self.policy is None:
+                self.policy = inp_policy
+            # otherwise check that everything in the policy is the same
+            else:
+                # check policy is the same
+                if self.policy != inp_policy:
+                    raise ValueError('mixed inputs in the tx')
+    
+        if is_multisig(self.policy) and not self.wallet.is_multisig():
             raise ValueError('multisig tx')
-        if self.wallet.is_multisig() and not is_multisig(policy):
+        if not is_multisig(self.policy) and self.wallet.is_multisig():
             raise ValueError('not multisig tx')
 
+        # If a wallet descriptor has been loaded, verify that the wallet
+        # policy matches the PSBT policy
         if self.wallet.is_loaded():
-            if self.wallet.policy != policy:
+            if self.wallet.policy != self.policy:
                 raise ValueError('policy mismatch')
 
-    def outputs(self, network):
+    def outputs(self):
         """Returns a list of messages describing where amounts are going"""
-        return get_tx_output_amount_messages(self.psbt, self.wallet, network)
+        xpubs = self.xpubs()
+        messages = []
+        inp_amount = 0
+        for inp in self.psbt.inputs:
+            inp_amount += inp.witness_utxo.value
+        spending = 0
+        change = 0
+        for i, out in enumerate(self.psbt.outputs):
+            out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs)
+            is_change = False
+            # if policy is the same - probably change
+            if out_policy == self.policy:
+                # double-check that it's change
+                # we already checked in get_cosigners and parse_multisig
+                # that pubkeys are generated from cosigners,
+                # and witness script is corresponding multisig
+                # so we only need to check that scriptpubkey is generated from
+                # witness script
+
+                # empty script by default
+                sc = script.Script(b'')
+                # multisig, we know witness script
+                if self.policy['type'] == 'p2wsh':
+                    sc = script.p2wsh(out.witness_script)
+                elif self.policy['type'] == 'p2sh-p2wsh':
+                    sc = script.p2sh(script.p2wsh(out.witness_script))
+                # single-sig
+                elif 'pkh' in self.policy['type']:
+                    if len(out.bip32_derivations.values()) > 0:
+                        der = list(out.bip32_derivations.values())[0].derivation
+                        my_pubkey = self.wallet.key.root.derive(der)
+                    if self.policy['type'] == 'p2wpkh':
+                        sc = script.p2wpkh(my_pubkey)
+                    elif self.policy['type'] == 'p2sh-p2wpkh':
+                        sc = script.p2sh(script.p2wpkh(my_pubkey))
+                if sc.data == self.psbt.tx.vout[i].script_pubkey.data:
+                    is_change = True
+            if is_change:
+                change += self.psbt.tx.vout[i].value
+            else:
+                spending += self.psbt.tx.vout[i].value
+                messages.append(
+                    ( 'Sending:\n₿%s\n\nTo:\n%s' )
+                    %
+                    (
+                        satcomma(self.psbt.tx.vout[i].value),
+                        self.psbt.tx.vout[i].script_pubkey.address(network=self.wallet.key.network)
+                    )
+                )
+        fee = inp_amount - change - spending
+        messages.append(( 'Fee:\n₿%s' ) % satcomma(fee))
+        return messages
 
     def sign(self):
         """Signs the PSBT and returns it"""
@@ -99,41 +161,43 @@ class PSBTSigner:
         if self.ur_type == CRYPTO_PSBT:
             return UR(CRYPTO_PSBT.type, urtypes.crypto.PSBT(psbt_data).to_cbor())
 
-        if self.ur_type == BYTES:
-            return UR(BYTES.type, urtypes.Bytes(psbt_data).to_cbor())
-
         if self.base_encoding is not None:
             psbt_data = base_encode(psbt_data, self.base_encoding).decode()
         return psbt_data
 
-# Functions below adapted from: https://github.com/SeedSigner/seedsigner
-def parse_multisig(sc):
-    """Takes a script and extracts m,n and pubkeys from it"""
-    # OP_m <len:pubkey> ... <len:pubkey> OP_n OP_CHECKMULTISIG
-    # check min size
-    if len(sc.data) < 37 or sc.data[-1] != 0xAE:
-        raise ValueError('not a multisig script')
-    m = sc.data[0] - 0x50
-    if m < 1 or m > 16:
-        raise ValueError('invalid multisig script')
-    n = sc.data[-2] - 0x50
-    if n < m or n > 16:
-        raise ValueError('invalid multisig script')
-    s = io.BytesIO(sc.data)
-    # drop first byte
-    s.read(1)
-    # read pubkeys
-    pubkeys = []
-    for _ in range(n):
-        char = s.read(1)
-        if char != b'\x21':
-            raise ValueError('invalid pubkey')
-        pubkeys.append(ec.PublicKey.parse(s.read(33)))
-    # check that nothing left
-    if s.read() != sc.data[-2:]:
-        raise ValueError('invalid multisig script')
-    return m, n, pubkeys
+    def xpubs(self):
+        """Returns the xpubs in the PSBT mapped to their derivations, falling back to
+           the wallet descriptor xpubs if not found
+        """
+        if self.psbt.xpubs:
+            return self.psbt.xpubs
+        
+        if not self.wallet.descriptor:
+            raise ValueError('missing xpubs')
+        
+        descriptor_keys = (
+            [self.wallet.descriptor.key] if self.wallet.descriptor.key
+            else self.wallet.descriptor.keys
+        )
+        xpubs = {}
+        for descriptor_key in descriptor_keys:
+            xpubs[descriptor_key.key] = DerivationPath(
+                descriptor_key.origin.fingerprint,
+                descriptor_key.origin.derivation
+            )
+        return xpubs
 
+def is_multisig(policy):
+    """Returns a boolean indicating if the policy is a multisig"""
+    return (
+        'type' in policy and
+        'p2wsh' in policy['type'] and
+        'm' in policy and
+        'n' in policy and
+        'cosigners' in policy
+    )
+
+# From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L41
 def get_cosigners(pubkeys, derivations, xpubs):
     """Returns xpubs used to derive pubkeys using global xpub field from psbt"""
     cosigners = []
@@ -152,132 +216,11 @@ def get_cosigners(pubkeys, derivations, xpubs):
                         # append strings so they can be sorted and compared
                         cosigners.append(xpub.to_base58())
                         break
+    if len(cosigners) != len(pubkeys):
+        raise ValueError('cannot get all cosigners')
     return sorted(cosigners)
 
-def wallet_xpubs(wallet):
-    """Returns the wallet's xpubs mapped to their derivations"""
-    xpubs = {}
-    if wallet.descriptor:
-        if wallet.descriptor.key:
-            xpubs[wallet.descriptor.key.key] = DerivationPath(
-                wallet.descriptor.key.origin.fingerprint,
-                wallet.descriptor.key.origin.derivation
-            )
-        else:
-            for descriptor_key in wallet.descriptor.keys:
-                xpubs[descriptor_key.key] = DerivationPath(
-                    descriptor_key.origin.fingerprint,
-                    descriptor_key.origin.derivation
-                )
-    return xpubs
-
-def get_tx_policy(tx, wallet):
-    """Check inputs of the transaction and check that they use the same script type
-       For multisig parsed policy will look like this:
-       { script_type: p2wsh, cosigners: [xpubs strings], m: 2, n: 3}
-    """
-    xpubs = tx.xpubs if tx.xpubs else wallet_xpubs(wallet)
-    policy = None
-    for inp in tx.inputs:
-        # get policy of the input
-        inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, xpubs)
-        # if policy is None - assign current
-        if policy is None:
-            policy = inp_policy
-        # otherwise check that everything in the policy is the same
-        else:
-            # check policy is the same
-            if policy != inp_policy:
-                raise RuntimeError('mixed inputs in the transaction')
-    return policy
-
-def get_tx_input_amount(tx):
-    """Returns the the total input amount"""
-    inp_amount = 0
-    for inp in tx.inputs:
-        inp_amount += inp.witness_utxo.value
-    return inp_amount
-
-def get_tx_input_amount_message(tx):
-    """Returns the total input amount as a message for the user"""
-    return ( 'Input:\n₿%s' ) % satcomma(get_tx_input_amount(tx))
-
-def get_tx_output_amount_messages(tx, wallet, network='main'):
-    """Returns the output amounts as messages for the user"""
-    xpubs = tx.xpubs if tx.xpubs else wallet_xpubs(wallet)
-    messages = []
-    policy = get_tx_policy(tx, wallet)
-    inp_amount = get_tx_input_amount(tx)
-    spending = 0
-    change = 0
-    for i, out in enumerate(tx.outputs):
-        out_policy = get_policy(out, tx.tx.vout[i].script_pubkey, xpubs)
-        is_change = False
-        # if policy is the same - probably change
-        if out_policy == policy:
-            # multisig, we know witness script
-            if 'p2wsh' in policy['type']:
-                # double-check that it's change
-                # we already checked in get_cosigners and parse_multisig
-                # that pubkeys are generated from cosigners,
-                # and witness script is corresponding multisig
-                # so we only need to check that scriptpubkey is generated from
-                # witness script
-                sc = script.Script(b'')
-                if policy['type'] == 'p2wsh':
-                    sc = script.p2wsh(out.witness_script)
-                elif policy['type'] == 'p2sh-p2wsh':
-                    sc = script.p2sh(script.p2wsh(out.witness_script))
-                else:
-                    raise RuntimeError('unexpected script type')
-                if sc.data == tx.tx.vout[i].script_pubkey.data:
-                    is_change = True
-            elif policy['type'] == 'p2wpkh':
-                # should be one or zero for single-key addresses
-                for pub in out.bip32_derivations:
-                    # check if it is our key
-                    if out.bip32_derivations[pub].fingerprint == wallet.key.fingerprint:
-                        hdkey = wallet.key.root.derive(out.bip32_derivations[pub].derivation)
-                        mypub = hdkey.key.get_public_key()
-                        if mypub != pub:
-                            raise ValueError("bad derivation path")
-                        # now check if provided scriptpubkey matches
-                        sc = script.p2wpkh(mypub)
-                        if sc == tx.tx.vout[i].script_pubkey:
-                            is_change = True
-        if is_change:
-            change += tx.tx.vout[i].value
-        else:
-            spending += tx.tx.vout[i].value
-            messages.append(
-                ( 'Sending:\n₿%s\n\nTo:\n%s' )
-                %
-                (
-                    satcomma(tx.tx.vout[i].value),
-                    tx.tx.vout[i].script_pubkey.address(network=NETWORKS[network])
-                )
-            )
-    fee = inp_amount - change - spending
-    messages.append(( 'Fee:\n₿%s' ) % satcomma(fee))
-    return messages
-
-def add_commas(number, comma_sep=','):
-    """Returns a number separated with commas"""
-    triplets_num = len(number) // 3
-    remainder = len(number) % 3
-    triplets = [number[:remainder]] if remainder else []
-    triplets += [number[remainder+i*3:remainder+3+i*3] for i in range(triplets_num)]
-    return comma_sep.join(triplets)
-
-def satcomma(amount):
-    """Formats a BTC amount according to the Satcomma standard:
-       https://medium.com/coinmonks/the-satcomma-standard-89f1e7c2aede
-    """
-    amount_str = '%.8f' % round(amount / SATS_PER_BTC, 8)
-    msb = amount_str[:-9] # most significant bitcoin heh heh heh
-    lsb = amount_str[len(msb)+1:]
-    return add_commas(msb, ( ',' )) + ( '.' ) + add_commas(lsb, ( ',' ))
-
+# From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L64
 def get_policy(scope, scriptpubkey, xpubs):
     """Parse scope and get policy"""
     # we don't know the policy yet, let's parse it
@@ -295,18 +238,8 @@ def get_policy(scope, scriptpubkey, xpubs):
     policy = {'type': script_type}
     # expected multisig
     if 'p2wsh' in script_type and scope.witness_script is not None:
-        m, n, pubkeys = parse_multisig(scope.witness_script)
+        m, pubkeys = parse_multisig(scope.witness_script)
         # check pubkeys are derived from cosigners
         cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
-        policy.update({'m': m, 'n': n, 'cosigners': cosigners})
+        policy.update({'m': m, 'n': len(cosigners), 'cosigners': cosigners})
     return policy
-
-def is_multisig(policy):
-    """Returns a boolean indicating if the policy is a multisig"""
-    return (
-        'type' in policy and
-        'p2wsh' in policy['type'] and
-        'm' in policy and
-        'n' in policy and
-        'cosigners' in policy
-    )

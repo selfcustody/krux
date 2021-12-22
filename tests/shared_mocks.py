@@ -1,21 +1,17 @@
 import sys
+import time
 from unittest import mock
 import importlib
 
-# def mock_modules(*modules, **module_impls):
-#     def wrapper(f):
-#         def new_f(mocker):
-#             for module in modules:
-#                 sys.modules[module] = mocker.MagicMock()
-#             for module, impl in module_impls.items():
-#                 sys.modules[module] = impl(mocker)
-#             f(mocker)
-#             for module in modules:
-#                 del sys.modules[module]
-#             for module in module_impls.keys():
-#                 del sys.modules[module]
-#         return new_f
-#     return wrapper
+def get_mock_open(files: dict[str, str]):
+    def open_mock(filename, *args, **kwargs):
+        for expected_filename, content in files.items():
+            if filename == expected_filename:
+                if content == 'Exception':
+                    raise Exception()
+                return mock.mock_open(read_data=content).return_value
+        raise FileNotFoundError('(mock) Unable to open {filename}')
+    return mock.MagicMock(side_effect=open_mock)
 
 class MockQRPartParser:
     TOTAL = 10
@@ -189,7 +185,8 @@ sys.modules['flash'] = mock.MagicMock()
 
 if 'secp256k1' in sys.modules:
     del sys.modules['secp256k1']
-sys.modules['secp256k1'] = mock.MagicMock()
+from embit.util import secp256k1
+sys.modules['secp256k1'] = mock.MagicMock(wraps=secp256k1)
 
 if 'machine' in sys.modules:
     del sys.modules['machine']
@@ -218,3 +215,12 @@ sys.modules['qrcode'] = mock.MagicMock()
 if 'board' in sys.modules:
     del sys.modules['board']
 sys.modules['board'] = board_m5stickv()
+
+if 'urandom' in sys.modules:
+    del sys.modules['urandom']
+sys.modules['urandom'] = sys.modules['random']
+
+setattr(time, 'sleep_ms', getattr(time, 'sleep_ms', mock.MagicMock()))
+setattr(time, 'ticks_ms', getattr(time, 'ticks_ms', mock.MagicMock()))
+
+setattr(sys, 'print_exception', getattr(sys, 'print_exception', mock.MagicMock()))

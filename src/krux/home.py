@@ -209,9 +209,7 @@ class Home(Page):
         signer = PSBTSigner(self.ctx.wallet, data)
         self.ctx.log.debug('Received PSBT: %s' % signer.psbt)
 
-        signer.validate()
-
-        outputs = signer.outputs(Settings.network)
+        outputs = signer.outputs()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text('\n\n'.join(outputs))
         self.ctx.display.draw_hcentered_text(( 'Sign?' ), offset_y=200)

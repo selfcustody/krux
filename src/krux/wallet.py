@@ -23,6 +23,7 @@ try:
     import ujson as json
 except ImportError:
     import json
+from json.decoder import JSONDecodeError
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
@@ -68,27 +69,14 @@ class Wallet:
 
         self.wallet_data = wallet_data
         self.wallet_qr_format = qr_format
-        self.descriptor = descriptor
+        self.descriptor = to_unambiguous_descriptor(descriptor)
         self.label = label
 
         if self.descriptor.key:
-            # If child derivation info is missing to generate receive addresses,
-            # use the default scheme
-            if isinstance(self.descriptor.key, (Key, KeyHash)):
-                if self.descriptor.key.allowed_derivation is None:
-                    self.descriptor.key.allowed_derivation = AllowedDerivation.default()
             if not self.label:
                 self.label = ( 'Single-key' )
             self.policy = { 'type': self.descriptor.scriptpubkey_type() }
         else:
-            # If child derivation info is missing to generate receive addresses,
-            # use the default scheme
-            for i in range(len(self.descriptor.miniscript.args)):
-                key = self.descriptor.miniscript.args[i]
-                if isinstance(key, (Key, KeyHash)):
-                    if key.allowed_derivation is None:
-                        key.allowed_derivation = AllowedDerivation.default()
-
             m = int(str(self.descriptor.miniscript.args[0]))
             n = len(self.descriptor.keys)
             cosigners = [key.key.to_base58() for key in self.descriptor.keys]
@@ -107,6 +95,21 @@ class Wallet:
         """Returns the original wallet data and qr format for display back as a QR code"""
         return (self.wallet_data, self.wallet_qr_format)
 
+def to_unambiguous_descriptor(descriptor):
+    """If child derivation info is missing to generate receive addresses,
+       use the default scheme
+    """
+    if descriptor.key:
+        if descriptor.key.allowed_derivation is None:
+            descriptor.key.allowed_derivation = AllowedDerivation.default()
+    else:
+        for i in range(len(descriptor.miniscript.args)):
+            key = descriptor.miniscript.args[i]
+            if isinstance(key, (Key, KeyHash)):
+                if key.allowed_derivation is None:
+                    key.allowed_derivation = AllowedDerivation.default()
+    return descriptor
+
 def parse_wallet(wallet_data):
     """Exhaustively tries to parse the wallet data from a known format, returning
        a descriptor and label if possible.
@@ -121,11 +124,8 @@ def parse_wallet(wallet_data):
         except:
             pass
 
-        # If a generic UR bytes object was sent, extract the data for further processing
-        try:
-            wallet_data = urtypes.Bytes.from_cbor(wallet_data.cbor).data
-        except:
-            pass
+        # Treat the UR as a generic UR bytes object and extract the data for further processing
+        wallet_data = urtypes.Bytes.from_cbor(wallet_data.cbor).data
 
     # Process as a string
     wallet_data = wallet_data.decode() if not isinstance(wallet_data, str) else wallet_data
@@ -137,6 +137,9 @@ def parse_wallet(wallet_data):
             descriptor = Descriptor.from_string(wallet_json['descriptor'])
             label = wallet_json['label'] if 'label' in wallet_json else None
             return descriptor, label
+        raise KeyError('"descriptor" key not found in JSON')
+    except KeyError:
+        raise ValueError('invalid wallet format')
     except:
         pass
 
@@ -149,7 +152,11 @@ def parse_wallet(wallet_data):
                 if key_val != '':
                     key_vals.append(key_val)
 
-        if len(key_vals) > 0:
+        keys_present = [key in key_vals for key in ['Format', 'Policy', 'Derivation']]
+        if any(keys_present):
+            if not all(keys_present):
+                raise KeyError('"Format", "Policy", and "Derivation" keys not found in INI file')
+            
             script = key_vals[key_vals.index('Format') + 1].lower()
             if script != 'p2wsh':
                 raise ValueError('invalid script type: %s' % script)
@@ -177,6 +184,13 @@ def parse_wallet(wallet_data):
             label = key_vals[key_vals.index('Name') + 1] if key_vals.index('Name') >= 0 else None
             return descriptor, label
     except:
-        pass
+        raise ValueError('invalid wallet format')
 
+    # Try to parse directly as a descriptor
+    try:
+        descriptor = Descriptor.from_string(wallet_data)
+        return descriptor, None
+    except:
+        pass
+    
     raise ValueError('invalid wallet format')

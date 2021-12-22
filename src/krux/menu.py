@@ -58,7 +58,7 @@ class Menu:
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(( 'Error:\n%s' ) % repr(e), lcd.RED)
                     self.ctx.input.wait_for_button()
-            elif btn == BUTTON_PAGE:
+            else:
                 selected_item_index = (selected_item_index + 1) % len(self.menu)
 
     def _draw_menu(self, selected_item_index):
