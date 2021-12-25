@@ -1,8 +1,9 @@
 import pytest
-from krux.printer import Printer
+from krux.printers.printer import Printer
 
 class BadPrinter(Printer):
-    def __init__(self): pass
+    def __init__(self):
+        pass
     
 def test_init_fails():
     with pytest.raises(NotImplementedError):

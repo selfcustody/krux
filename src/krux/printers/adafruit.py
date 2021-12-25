@@ -39,7 +39,7 @@ import board
 from fpioa_manager import fm
 from machine import UART
 from ..settings import Settings
-from ..printer import Printer
+from .printer import Printer
 
 class ThermalPrinter(Printer):
     """ThermalPrinter is a minimal wrapper around a serial connection to

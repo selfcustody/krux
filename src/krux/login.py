@@ -28,7 +28,6 @@ import urtypes
 from .logging import LEVEL_NAMES, level_name, Logger, DEBUG
 from .metadata import VERSION
 from .settings import Settings
-from .printers import *
 from .page import Page
 from .menu import Menu, MENU_CONTINUE, MENU_EXIT
 from .input import BUTTON_ENTER, BUTTON_PAGE
