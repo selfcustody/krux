@@ -41,8 +41,8 @@ from machine import UART
 from ..settings import Settings
 from .printer import Printer
 
-class ThermalPrinter(Printer):
-    """ThermalPrinter is a minimal wrapper around a serial connection to
+class Adafruit(Printer):
+    """AdafruitPrinter is a minimal wrapper around a serial connection to
        to the Adafruit line of thermal printers
     """
 
@@ -55,12 +55,12 @@ class ThermalPrinter(Printer):
         # 11 bits (not 8) to accommodate idle, start and
         # stop bits.  Idle time might be unnecessary, but
         # erring on side of caution here.
-        self.byte_time = 11.0 / float(Settings.Printer.Adafruit.baudrate)
+        self.byte_time = 11.0 / float(Settings.Printer.Thermal.Adafruit.baudrate)
         self.resume_time = 0.0
         self.char_height = 24
         self.uart_conn = UART(
-            Settings.Printer.Adafruit.port,
-            Settings.Printer.Adafruit.baudrate
+            Settings.Printer.Thermal.Adafruit.port,
+            Settings.Printer.Thermal.Adafruit.baudrate
         )
         # The printer can't start receiving data immediately
         # upon power up -- it needs a moment to cold boot
@@ -106,7 +106,7 @@ class ThermalPrinter(Printer):
             27,             # Esc
             55,             # 7 (print settings)
             11,             # Heat dots
-            Settings.Printer.Adafruit.heat_time, # Lib default
+            Settings.Printer.Thermal.Adafruit.heat_time, # Lib default
             40)             # Heat interval
 
         # Description of print density from p. 23 of manual:
@@ -162,7 +162,7 @@ class ThermalPrinter(Printer):
            We do this because the QR would be too dense to be readable
            by most devices otherwise.
         """
-        return Settings.Printer.Adafruit.paper_width // 6
+        return Settings.Printer.Thermal.Adafruit.paper_width // 6
 
     def clear(self):
         """Clears the printer's memory, resetting it"""
@@ -184,7 +184,7 @@ class ThermalPrinter(Printer):
         width = len(lines)
         height = len(lines)
 
-        scale = Settings.Printer.Adafruit.paper_width // width
+        scale = Settings.Printer.Thermal.Adafruit.paper_width // width
         for y in range(height):
             # Scale the line (width) by scaling factor
             line_y = ''.join([char * scale for char in lines[y]])
