@@ -34,8 +34,8 @@ if firmware.upgrade():
 #       to allow it to have more memory to work with
 import lcd
 from krux.context import Context
-from krux.login import Login
-from krux.home import Home
+from krux.pages.login import Login
+from krux.pages.home import Home
 
 SPLASH = """
 BTCBTCBTCBTCBTCB

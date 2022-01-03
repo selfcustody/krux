@@ -1,5 +1,5 @@
 import pytest
-from krux.printers.printer import Printer
+from krux.printers import Printer
 
 class BadPrinter(Printer):
     def __init__(self):

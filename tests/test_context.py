@@ -7,7 +7,7 @@ def mock_modules(mocker):
     mocker.patch('krux.context.Input', new=mock.MagicMock())
     mocker.patch('krux.context.Camera', new=mock.MagicMock())
     mocker.patch('krux.context.Light', new=mock.MagicMock())
-    mocker.patch('krux.printers.printer.Printer', new=mock.MagicMock())
+    mocker.patch('krux.printers.Printer', new=mock.MagicMock())
 
 def test_init(mocker):
     mock_modules(mocker)
@@ -29,7 +29,7 @@ def test_clear(mocker):
 def test_clear_clears_printer(mocker):
     mock_modules(mocker)
     from krux.context import Context
-    from krux.printers.printer import Printer
+    from krux.printers import Printer
     c = Context()
     c.printer = mock.MagicMock(clear=mock.MagicMock())
 

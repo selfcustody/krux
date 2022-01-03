@@ -1,15 +1,15 @@
 from krux.input import BUTTON_ENTER, BUTTON_PAGE
-from .shared_mocks import *
+from ..shared_mocks import *
 
 def test_init(mocker):
-    from krux.menu import Menu
+    from krux.pages import Menu
     
     menu = Menu(mock.MagicMock(), [])
     
     assert isinstance(menu, Menu)
 
 def test_run_loop(mocker):
-    from krux.menu import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
+    from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
     
     ctx = mock.MagicMock()
     

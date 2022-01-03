@@ -36,15 +36,12 @@ class Settings:
         """Printer-specific settings"""
 
         module = 'thermal'
-        cls = 'Adafruit'
+        cls = 'AdafruitPrinter'
 
         class Thermal:
             """Thermal printer settings"""
-            
-            class Adafruit:
-                """Adafruit printer settings"""
 
-                baudrates = [9600, 19200]
-                baudrate = 9600
-                paper_width = 384
-                heat_time = 255
+            baudrates = [9600, 19200]
+            baudrate = 9600
+            paper_width = 384
+            heat_time = 255

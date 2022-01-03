@@ -25,15 +25,14 @@ import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 import urtypes
-from .logging import LEVEL_NAMES, level_name, Logger, DEBUG
-from .metadata import VERSION
-from .settings import Settings
-from .page import Page
-from .menu import Menu, MENU_CONTINUE, MENU_EXIT
-from .input import BUTTON_ENTER, BUTTON_PAGE
-from .qr import FORMAT_UR
-from .key import Key, pick_final_word, to_mnemonic_words
-from .wallet import Wallet
+from ..logging import LEVEL_NAMES, level_name, Logger, DEBUG
+from ..metadata import VERSION
+from ..settings import Settings
+from ..input import BUTTON_ENTER, BUTTON_PAGE
+from ..qr import FORMAT_UR
+from ..key import Key, pick_final_word, to_mnemonic_words
+from ..wallet import Wallet
+from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 
 TEST_PHRASE_DIGITS  = '11111'
 TEST_PHRASE_LETTERS = 'aaaaa'
@@ -156,7 +155,7 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Loading..' ))
             self.ctx.wallet = Wallet(Key(' '.join(words), multisig, network=NETWORKS[Settings.network]))
-            self.ctx.printer = getattr(__import__('.printers.%s' % Settings.Printer.module), Settings.Printer.cls)()
+            self.ctx.printer = getattr(__import__('..printers.%s' % Settings.Printer.module), Settings.Printer.cls)()
             return MENU_EXIT
         return MENU_CONTINUE
 

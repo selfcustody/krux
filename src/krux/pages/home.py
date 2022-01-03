@@ -23,14 +23,13 @@ import gc
 import lcd
 from embit.networks import NETWORKS
 from embit.script import Script, address_to_scriptpubkey
-from .settings import Settings
-from .display import DEFAULT_PADDING
-from .psbt import PSBTSigner
-from .qr import FORMAT_NONE, FORMAT_PMOFN
-from .page import Page
-from .menu import Menu, MENU_CONTINUE
-from .input import BUTTON_ENTER
-from .wallet import Wallet
+from ..settings import Settings
+from ..display import DEFAULT_PADDING
+from ..psbt import PSBTSigner
+from ..qr import FORMAT_NONE, FORMAT_PMOFN
+from ..input import BUTTON_ENTER
+from ..wallet import Wallet
+from . import Page, Menu, MENU_CONTINUE
 
 class Home(Page):
     """Home is the main menu page of the app"""
