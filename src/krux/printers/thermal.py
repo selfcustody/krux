@@ -59,7 +59,7 @@ class AdafruitPrinter(Printer):
         self.resume_time = 0.0
         self.char_height = 24
         self.uart_conn = UART(
-            Settings.Printer.Thermal.port,
+            UART.UART2,
             Settings.Printer.Thermal.baudrate
         )
         # The printer can't start receiving data immediately

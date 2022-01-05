@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+from ..settings import Settings
 class Printer:
     """Printer is a singleton interface for interacting with the device's printer
     
@@ -42,3 +43,12 @@ class Printer:
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
         raise NotImplementedError()
+
+def create_printer():
+    return getattr(__import__(
+        Settings.Printer.module,
+        locals=None,
+        globals=globals(),
+        fromlist=[None],
+        level=1
+    ), Settings.Printer.cls)()

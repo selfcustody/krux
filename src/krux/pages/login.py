@@ -32,6 +32,7 @@ from ..input import BUTTON_ENTER, BUTTON_PAGE
 from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word, to_mnemonic_words
 from ..wallet import Wallet
+from ..printers import create_printer
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 
 TEST_PHRASE_DIGITS  = '11111'
@@ -129,14 +130,15 @@ class Login(Page):
                 self.ctx.display.draw_centered_text(( 'Rolls:\n\n%s' ) % entropy)
                 self.ctx.input.wait_for_button()
 
-            entropy_hash = binascii.hexlify(hashlib.sha256(entropy).digest()).decode()
+            entropy_bytes = entropy.encode()
+            entropy_hash = binascii.hexlify(hashlib.sha256(entropy_bytes).digest()).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 ( 'SHA256 of rolls:\n\n%s' ) % entropy_hash
             )
             self.ctx.input.wait_for_button()
             num_bytes = 16 if num_rolls == min_rolls else 32
-            words = to_mnemonic_words(hashlib.sha256(entropy).digest()[:num_bytes])
+            words = to_mnemonic_words(hashlib.sha256(entropy_bytes).digest()[:num_bytes])
             return self._load_key_from_words(words)
 
         return MENU_CONTINUE
@@ -155,7 +157,7 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Loading..' ))
             self.ctx.wallet = Wallet(Key(' '.join(words), multisig, network=NETWORKS[Settings.network]))
-            self.ctx.printer = getattr(__import__('..printers.%s' % Settings.Printer.module), Settings.Printer.cls)()
+            self.ctx.printer = create_printer()
             return MENU_EXIT
         return MENU_CONTINUE
 
@@ -168,10 +170,7 @@ class Login(Page):
 
         words = []
         if qr_format == FORMAT_UR:
-            try:
-                words = urtypes.crypto.BIP39.from_cbor(data.cbor).words
-            except:
-                words = urtypes.Bytes.from_cbor(data.cbor).data.decode().split(' ')
+            words = urtypes.crypto.BIP39.from_cbor(data.cbor).words
         else:
             if ' ' in data:
                 words = data.split(' ')
@@ -184,151 +183,94 @@ class Login(Page):
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
+    def _load_key_from_keypad_input(self, title, charset, to_word, test_phrase_sentinel=None, autocomplete=None):
+        words = []
+        self.ctx.display.draw_hcentered_text(title)
+        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
+        btn = self.ctx.input.wait_for_button()
+        if btn == BUTTON_ENTER:
+            for i in range(24):
+                if i == 12:
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(( 'Done?' ))
+                    btn = self.ctx.input.wait_for_button()
+                    if btn == BUTTON_ENTER:
+                        break
+                    
+                word = ''
+                while True:
+                    user_input = self.capture_from_keypad(( 'Word %d' ) % (i+1), charset, autocomplete)
+                    # If the last 'word' is blank,
+                    # pick a random final word that is a valid checksum
+                    if (i in (11, 23)) and user_input == '':
+                        break
+                    # If the first 'word' is the test phrase sentinel,
+                    # we're testing and just want the test words
+                    if i == 0 and test_phrase_sentinel is not None and word == test_phrase_sentinel:
+                        break
+                    word = to_word(user_input)
+                    if word != '':
+                        break
+
+                if word not in WORDLIST:
+                    if word == test_phrase_sentinel:
+                        words = [WORDLIST[0] if n + 1 < 12 else WORDLIST[1879] for n in range(12)]
+                        break
+                    
+                    if word == '':
+                        word = pick_final_word(self.ctx, words)
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(word)
+                self.ctx.input.wait_for_button()
+
+                words.append(word)
+
+            return self._load_key_from_words(words)
+
+        return MENU_CONTINUE
+    
     def load_key_from_text(self):
         """Handler for the 'via text' menu item"""
+        title = ( 'Enter each word of your BIP-39 mnemonic.' )
+
         def autocomplete(prefix):
             if len(prefix) > 2:
                 matching_words = list(filter(lambda word: word.startswith(prefix), WORDLIST))
                 if len(matching_words) == 1:
                     return matching_words[0]
             return None
-        words = []
-        self.ctx.display.draw_hcentered_text(( 'Enter each word of your BIP-39 mnemonic.' ))
-        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
-        btn = self.ctx.input.wait_for_button()
-        if btn == BUTTON_ENTER:
-            for i in range(24):
-                if i == 12:
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(( 'Done?' ))
-                    btn = self.ctx.input.wait_for_button()
-                    if btn == BUTTON_ENTER:
-                        break
-
-                word = ''
-                while True:
-                    word = self.capture_from_keypad(( 'Word %d' ) % (i+1), LETTERS, autocomplete)
-                    if word != '' and word in WORDLIST:
-                        break
-                    # If the first 'word' is the TEST_PHRASE_LETTERS sentinel,
-                    # we're testing and just want the test words
-                    if i == 0 and word == TEST_PHRASE_LETTERS:
-                        break
-                    # If the last 'word' is blank,
-                    # pick a random final word that is a valid checksum
-                    if (i in (11, 23)) and word == '':
-                        break
-
-                if word == TEST_PHRASE_LETTERS:
-                    words = [WORDLIST[0] if n + 1 < 12 else WORDLIST[1879] for n in range(12)]
-                    break
-
-                if word == '':
-                    word = pick_final_word(self.ctx, words)
-
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(word)
-                self.ctx.input.wait_for_button()
-
-                words.append(word)
-
-            return self._load_key_from_words(words)
-
-        return MENU_CONTINUE
-
+        
+        def to_word(user_input):
+            if user_input in WORDLIST:
+                return user_input
+            return ''
+        
+        return self._load_key_from_keypad_input(title, LETTERS, to_word, TEST_PHRASE_LETTERS, autocomplete)
+        
     def load_key_from_digits(self):
         """Handler for the 'via numbers' menu item"""
-        words = []
-        self.ctx.display.draw_hcentered_text(
-            ( 'Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.' )
-        )
-        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
-        btn = self.ctx.input.wait_for_button()
-        if btn == BUTTON_ENTER:
-            for i in range(24):
-                if i == 12:
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(( 'Done?' ))
-                    btn = self.ctx.input.wait_for_button()
-                    if btn == BUTTON_ENTER:
-                        break
-
-                digits = ''
-                while True:
-                    digits = self.capture_from_keypad(( 'Word %d' ) % (i+1), DIGITS)
-                    if digits != '' and int(digits) >= 1 and int(digits) <= 2048:
-                        break
-                    # If the first 'word' is the TEST_PHRASE_DIGITS sentinel,
-                    # we're testing and just want the test words
-                    if i == 0 and digits == TEST_PHRASE_DIGITS:
-                        break
-                    # If the last 'word' is blank,
-                    # pick a random final word that is a valid checksum
-                    if (i in (11, 23)) and digits == '':
-                        break
-
-                if digits == TEST_PHRASE_DIGITS:
-                    words = [WORDLIST[0] if n + 1 < 12 else WORDLIST[1879] for n in range(12)]
-                    break
-
-                word = ''
-                if digits == '':
-                    word = pick_final_word(self.ctx, words)
-                else:
-                    word = WORDLIST[int(digits)-1]
-
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(word)
-                self.ctx.input.wait_for_button()
-
-                words.append(word)
-
-            return self._load_key_from_words(words)
-
-        return MENU_CONTINUE
+        title = ( 'Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.' )
+        
+        def to_word(user_input):
+            word_num = int(user_input)
+            if 0 < word_num <= 2048:
+                return WORDLIST[word_num-1]
+            return ''
+        
+        return self._load_key_from_keypad_input(title, DIGITS, to_word, TEST_PHRASE_DIGITS)
 
     def load_key_from_bits(self):
         """Handler for the 'via bits' menu item"""
-        words = []
-        self.ctx.display.draw_hcentered_text(
-            ( 'Enter each word of your BIP-39 mnemonic as a series of binary digits.' )
-        )
-        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
-        btn = self.ctx.input.wait_for_button()
-        if btn == BUTTON_ENTER:
-            for i in range(24):
-                if i == 12:
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(( 'Done?' ))
-                    btn = self.ctx.input.wait_for_button()
-                    if btn == BUTTON_ENTER:
-                        break
+        title = ( 'Enter each word of your BIP-39 mnemonic as a series of binary digits.' )
 
-                bits = ''
-                while True:
-                    bits = self.capture_from_keypad(( 'Word %d' ) % (i+1), BITS)
-                    if len(bits) == 11:
-                        break
-                    # If the last 'word' is blank,
-                    # pick a random final word that is a valid checksum
-                    if (i in (11, 23)) and bits == '':
-                        break
-
-                word = ''
-                if bits == '':
-                    word = pick_final_word(self.ctx, words)
-                else:
-                    word = WORDLIST[int('0b' + bits, 0)]
-
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(word)
-                self.ctx.input.wait_for_button()
-
-                words.append(word)
-
-            return self._load_key_from_words(words)
-
-        return MENU_CONTINUE
+        def to_word(user_input):
+            word_index = int('0b' + user_input, 0)
+            if 0 <= word_index < 2048:
+                return WORDLIST[word_index]
+            return ''
+        
+        return self._load_key_from_keypad_input(title, BITS, to_word)
 
     def settings(self):
         """Handler for the 'settings' menu item"""
@@ -366,10 +308,10 @@ class Login(Page):
 
     def printer(self):
         """Handler for the 'printer' menu item"""
-        baudrates = Settings.Printer.Adafruit.baudrates
+        baudrates = Settings.Printer.Thermal.baudrates
 
         while True:
-            current_baudrate = Settings.Printer.Adafruit.baudrate
+            current_baudrate = Settings.Printer.Thermal.baudrate
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Baudrate\n%s' ) % current_baudrate)
@@ -379,7 +321,7 @@ class Login(Page):
                 for i, baudrate in enumerate(baudrates):
                     if current_baudrate == baudrate:
                         new_baudrate = baudrates[(i + 1) % len(baudrates)]
-                        Settings.Printer.Adafruit.baudrate = new_baudrate
+                        Settings.Printer.Thermal.baudrate = new_baudrate
                         break
             elif btn == BUTTON_ENTER:
                 break
