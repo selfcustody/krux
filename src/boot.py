@@ -59,7 +59,7 @@ TCBTCBTCBTCBTCBT
 
 ctx = Context()
 
-ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
+ctx.display.flash_text(SPLASH.split('\n')[1:], color=lcd.WHITE, padding=8)
 
 while True:
     if not Login(ctx).run():

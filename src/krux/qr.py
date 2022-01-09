@@ -116,7 +116,7 @@ def to_qr_codes(data, max_width, qr_format):
                 part = encoder.next_part()
                 code = qrcode.encode_to_string(part)
                 yield (code, encoder.fountain_encoder.seq_len())
-                
+
 def get_size(qr_code):
     """Returns the size of the qr code as the number of chars until the first newline"""
     size = 0

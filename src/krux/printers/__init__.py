@@ -22,12 +22,12 @@
 from ..settings import Settings
 class Printer:
     """Printer is a singleton interface for interacting with the device's printer
-    
+
        Must be subclassed.
     """
     def __init__(self):
         raise NotImplementedError()
-    
+
     def qr_data_width(self):
         """Returns a smaller width for the QR to be generated
            within, which will then be scaled up to fit the paper's width.
@@ -45,10 +45,8 @@ class Printer:
         raise NotImplementedError()
 
 def create_printer():
-    return getattr(__import__(
-        Settings.Printer.module,
-        locals=None,
-        globals=globals(),
-        fromlist=[None],
-        level=1
-    ), Settings.Printer.cls)()
+    """Instantiates a new printer dynamically based on the default in Settings """
+    return getattr(
+        __import__(Settings.Printer.module, None, globals(), [None], 1),
+        Settings.Printer.cls
+    )()

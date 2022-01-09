@@ -171,7 +171,6 @@ class Page:
                 subtitle,
                 offset_y=offset_y,
                 color=lcd.WHITE,
-                word_wrap=True,
                 padding=title_padding
             )
             i = (i + 1) % num_parts
@@ -201,7 +200,7 @@ class Page:
         """Prompts the user to print a QR code in the specified format
            if a printer is connected
         """
-        if not self.ctx.printer.is_connected():
+        if self.ctx.printer is None:
             return
         self.ctx.display.clear()
         time.sleep_ms(1000)
@@ -275,7 +274,6 @@ class Menu:
                 menu_list_item += '\n' + '\n'.join(menu_item_lines[1:])
             menu_list.append(menu_list_item)
         self.ctx.display.draw_centered_text(
-            '\n\n'.join(menu_list),
-            color=lcd.WHITE,
-            word_wrap=False
+            '\n\n'.join(menu_list).split('\n'),
+            color=lcd.WHITE
         )

@@ -29,7 +29,7 @@ import flash
 from .input import Input, BUTTON_ENTER
 from .metadata import SIGNER_PUBKEY
 from .display import Display
-    
+
 MAX_FIRMWARE_SIZE = 0x300000
 
 FIRMWARE_SLOT_1 = 0x00080000

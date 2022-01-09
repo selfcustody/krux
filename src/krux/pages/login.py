@@ -35,8 +35,8 @@ from ..wallet import Wallet
 from ..printers import create_printer
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 
-TEST_PHRASE_DIGITS  = '11111'
-TEST_PHRASE_LETTERS = 'aaaaa'
+SENTINEL_DIGITS  = '11111'
+SENTINEL_LETTERS = 'aaaaa'
 
 DIGITS  = '0123456789'
 LETTERS = 'abcdefghijklmnopqrstuvwxyz'
@@ -156,8 +156,13 @@ class Login(Page):
             multisig = index == 1
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Loading..' ))
-            self.ctx.wallet = Wallet(Key(' '.join(words), multisig, network=NETWORKS[Settings.network]))
-            self.ctx.printer = create_printer()
+            self.ctx.wallet = Wallet(
+                Key(' '.join(words), multisig, network=NETWORKS[Settings.network])
+            )
+            try:
+                self.ctx.printer = create_printer()
+            except:
+                self.ctx.log.exception('Exception occurred connecting to printer')
             return MENU_EXIT
         return MENU_CONTINUE
 
@@ -183,7 +188,8 @@ class Login(Page):
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
-    def _load_key_from_keypad_input(self, title, charset, to_word, test_phrase_sentinel=None, autocomplete=None):
+    def _load_key_from_keypad(self, title, charset, to_word,
+                                    test_phrase_sentinel=None, autocomplete=None):
         words = []
         self.ctx.display.draw_hcentered_text(title)
         self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
@@ -196,19 +202,23 @@ class Login(Page):
                     btn = self.ctx.input.wait_for_button()
                     if btn == BUTTON_ENTER:
                         break
-                    
+
                 word = ''
                 while True:
-                    user_input = self.capture_from_keypad(( 'Word %d' ) % (i+1), charset, autocomplete)
+                    word = self.capture_from_keypad(
+                        ( 'Word %d' ) % (i+1),
+                        charset,
+                        autocomplete
+                    )
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
-                    if (i in (11, 23)) and user_input == '':
+                    if (i in (11, 23)) and word == '':
                         break
                     # If the first 'word' is the test phrase sentinel,
                     # we're testing and just want the test words
                     if i == 0 and test_phrase_sentinel is not None and word == test_phrase_sentinel:
                         break
-                    word = to_word(user_input)
+                    word = to_word(word)
                     if word != '':
                         break
 
@@ -216,7 +226,7 @@ class Login(Page):
                     if word == test_phrase_sentinel:
                         words = [WORDLIST[0] if n + 1 < 12 else WORDLIST[1879] for n in range(12)]
                         break
-                    
+
                     if word == '':
                         word = pick_final_word(self.ctx, words)
 
@@ -229,7 +239,7 @@ class Login(Page):
             return self._load_key_from_words(words)
 
         return MENU_CONTINUE
-    
+
     def load_key_from_text(self):
         """Handler for the 'via text' menu item"""
         title = ( 'Enter each word of your BIP-39 mnemonic.' )
@@ -240,25 +250,25 @@ class Login(Page):
                 if len(matching_words) == 1:
                     return matching_words[0]
             return None
-        
+
         def to_word(user_input):
             if user_input in WORDLIST:
                 return user_input
             return ''
-        
-        return self._load_key_from_keypad_input(title, LETTERS, to_word, TEST_PHRASE_LETTERS, autocomplete)
-        
+
+        return self._load_key_from_keypad(title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete)
+
     def load_key_from_digits(self):
         """Handler for the 'via numbers' menu item"""
         title = ( 'Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.' )
-        
+
         def to_word(user_input):
             word_num = int(user_input)
             if 0 < word_num <= 2048:
                 return WORDLIST[word_num-1]
             return ''
-        
-        return self._load_key_from_keypad_input(title, DIGITS, to_word, TEST_PHRASE_DIGITS)
+
+        return self._load_key_from_keypad(title, DIGITS, to_word, SENTINEL_DIGITS)
 
     def load_key_from_bits(self):
         """Handler for the 'via bits' menu item"""
@@ -269,8 +279,8 @@ class Login(Page):
             if 0 <= word_index < 2048:
                 return WORDLIST[word_index]
             return ''
-        
-        return self._load_key_from_keypad_input(title, BITS, to_word)
+
+        return self._load_key_from_keypad(title, BITS, to_word)
 
     def settings(self):
         """Handler for the 'settings' menu item"""

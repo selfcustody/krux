@@ -34,7 +34,9 @@
 # Python port by Phil Burgess for Adafruit Industries.
 # MIT license, all text above must be included in any redistribution.
 #*************************************************************************
+# pylint: disable=W0231
 import time
+import math
 import board
 from fpioa_manager import fm
 from machine import UART
@@ -47,40 +49,39 @@ class AdafruitPrinter(Printer):
     """
 
     def __init__(self):
-        if 'UART2_TX' not in board.config['krux.pins'] or 'UART2_RX' not in board.config['krux.pins']:
+        if (('UART2_TX' not in board.config['krux.pins']) or
+            ('UART2_RX' not in board.config['krux.pins'])):
             raise ValueError('missing required ports')
         fm.register(board.config['krux.pins']['UART2_TX'], fm.fpioa.UART2_TX, force=False)
         fm.register(board.config['krux.pins']['UART2_RX'], fm.fpioa.UART2_RX, force=False)
-        # Calculate time to issue one byte to the printer.
-        # 11 bits (not 8) to accommodate idle, start and
-        # stop bits.  Idle time might be unnecessary, but
-        # erring on side of caution here.
-        self.byte_time = 11.0 / float(Settings.Printer.Thermal.baudrate)
-        self.resume_time = 0.0
-        self.char_height = 24
+
         self.uart_conn = UART(
             UART.UART2,
             Settings.Printer.Thermal.baudrate
         )
-        # The printer can't start receiving data immediately
-        # upon power up -- it needs a moment to cold boot
-        # and initialize.  Allow at least 1/2 sec of uptime
-        # before printer can receive data.
-        self.timeout_set(0.5)
+
+        self.character_height = 24
+        self.byte_time = 11.0 / float(Settings.Printer.Thermal.baudrate)
+        self.dot_print_time = 0.03
+        self.dot_feed_time = 0.0021
+
+        self.setup()
 
         if not self.has_paper():
             raise ValueError('missing paper')
 
-        self.setup()
-
     def setup(self):
         """Sets up the connection to the printer and sets default settings"""
+		# The printer can't start receiving data immediately
+		# upon power up -- it needs a moment to cold boot
+		# and initialize.  Allow at least 1/2 sec of uptime
+		# before printer can receive data.
+        time.sleep_ms(500)
+
         # Wake up the printer to get ready for printing
-        self.timeout_set(0)
         self.write_bytes(255)
-        time.sleep(0.05)            # 50 ms
         self.write_bytes(27, 118, 0) # Sleep off (important!)
-        
+
         # Reset the printer
         self.write_bytes(27, 64) # Esc @ = init command
         # Configure tab stops on recent printers
@@ -103,11 +104,12 @@ class AdafruitPrinter(Printer):
         # may occur.  The more heating interval, the more
         # clear, but the slower printing speed.
         self.write_bytes(
-            27,             # Esc
-            55,             # 7 (print settings)
-            11,             # Heat dots
-            Settings.Printer.Thermal.heat_time, # Lib default
-            40)             # Heat interval
+            27,  # Esc
+            55,  # 7 (print settings)
+            11,  # Heat dots
+            255, # Heat time
+            40   # Heat interval
+        )
 
         # Description of print density from p. 23 of manual:
         # DC2 # n Set printing density
@@ -123,36 +125,33 @@ class AdafruitPrinter(Printer):
         self.write_bytes(
             18, # DC2
             35, # Print density
-            (print_break_time << 5) | print_density)
-        self.dot_print_time = 0.03
-        self.dot_feed_time = 0.0021
+            (print_break_time << 5) | print_density
+        )
 
     def write_bytes(self, *args):
         """Writes bytes to the printer at a stable speed"""
         for arg in args:
-            self.timeout_wait()
-            self.timeout_set(len(args) * self.byte_time)
             self.uart_conn.write(arg if isinstance(arg, bytes) else bytes([arg]))
-
-    def timeout_set(self, x):
-        """Sets estimated completion time for a just-issued task."""
-        self.resume_time = time.time() + x
-
-    def timeout_wait(self):
-        """Waits (if necessary) for the prior task to complete."""
-        while (time.time() - self.resume_time) < 0:
-            pass
+            # Calculate time to issue one byte to the printer.
+            # 11 bits (not 8) to accommodate idle, start and
+            # stop bits.  Idle time might be unnecessary, but
+            # erring on side of caution here.
+            time.sleep_ms(math.floor(self.byte_time * 1000))
 
     def feed(self, x=1):
         """Feeds paper through the machine x times"""
         self.write_bytes(27, 100, x)
-        self.timeout_set(self.dot_feed_time * self.char_height)
+        # Wait for the paper to feed
+        time.sleep_ms(math.floor(self.dot_feed_time * self.character_height * 1000))
 
     def has_paper(self):
         """Returns a boolean indicating if the printer has paper or not"""
         self.write_bytes(27, 118, 0)
         # Bit 2 of response seems to be paper status
-        stat = ord(self.uart_conn.read(1)) & 0b00000100
+        res = self.uart_conn.read(1)
+        if res is None:
+            return False
+        stat = ord(res) & 0b00000100
         # If set, we have paper; if clear, no paper
         return stat == 0
 
@@ -162,20 +161,20 @@ class AdafruitPrinter(Printer):
            We do this because the QR would be too dense to be readable
            by most devices otherwise.
         """
-        return Settings.Printer.Thermal.paper_width // 6
+        return 33
 
     def clear(self):
         """Clears the printer's memory, resetting it"""
+        # Perform a full hardware reset which clears both printer buffer and receive buffer.
+        # A full reset can only be done by setting an image in nonvolatile memory, so
+        # we will send a 1x1 image with 0 as its pixel value in order to initiate the reset
+        self.write_bytes(28, 113, 1, 1, 0, 1, 0, 0)
         # Reset the printer
         self.write_bytes(27, 64) # Esc @ = init command
         # Configure tab stops on recent printers
         self.write_bytes(27, 68)         # Set tab stops
         self.write_bytes(4, 8, 12, 16) # every 4 columns,
         self.write_bytes(20, 24, 28, 0) # 0 is end-of-list.
-        # Perform a full hardware reset which clears both printer buffer and receive buffer.
-        # A full reset can only be done by setting an image in nonvolatile memory, so
-        # we will send a 1x1 image with 0 as its pixel value in order to initiate the reset
-        self.write_bytes(28, 113, 1, 1, 0, 1, 0, 0)
 
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
@@ -193,5 +192,5 @@ class AdafruitPrinter(Printer):
             for _ in range(scale):
                 self.write_bytes(18, 42, 1, len(line_bytes))
                 self.write_bytes(line_bytes)
-                self.timeout_set(self.dot_print_time)
+                time.sleep_ms(math.floor(self.dot_print_time * 1000))
         self.feed(3)

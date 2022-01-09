@@ -44,4 +44,3 @@ class Settings:
             baudrates = [9600, 19200]
             baudrate = 9600
             paper_width = 384
-            heat_time = 255

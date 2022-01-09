@@ -121,66 +121,101 @@ class Display:
         self.initialize_lcd()
         self.rot = 0
 
-    def to_lines(self, text, word_wrap=True, padding=DEFAULT_PADDING):
+    def to_lines(self, text, padding=DEFAULT_PADDING):
         """Takes a string of text and converts it to lines to display on
            the screen, taking into account padding
         """
         screen_width = self.width() - padding * 2
-        lines = []
         columns = math.floor(screen_width / self.font_size)
-        cur_column = 0
-        for i, char in enumerate(text):
-            if word_wrap and char == ' ':
-                next_word_end = text.find(' ', i+1)
-                if next_word_end == -1:
-                    next_word_end = text.find('\n', i+1)
-                    if next_word_end == -1:
-                        next_word_end = len(text)
-                next_word = text[i+1:next_word_end]
-                if len(next_word) < columns:
-                    if cur_column + 1 + len(next_word) >= columns:
-                        cur_column = 0
-            if char == '\n':
-                cur_column = 0
-            cur_column = (cur_column + 1) % columns
-            if cur_column == 1:
-                if char in (' ', '\n'):
-                    char = ''
-                lines.append(char)
-            else:
-                lines[len(lines)-1] += char
-        return lines
+
+        words = []
+        for word in text.split(' '):
+            subwords = word.split('\n')
+            for i, subword in enumerate(subwords):
+                if len(subword) > columns:
+                    j = 0
+                    while j < len(subword):
+                        words.append(subword[j:j + columns])
+                        j += columns
+                else:
+                    words.append(subword)
+
+                if len(subwords) > 1 and i < len(subwords) - 1:
+                    words.append('\n')
+
+        num_words = len(words)
+
+        # calculate cost of all pairs of words
+        cost_between = [[0 for x in range(num_words+1)] for x in range(num_words+1)]
+        for i in range(1, num_words+1):
+            for j in range(i, num_words+1):
+                for k in range(i, j+1):
+                    cost_between[i][j] += (len(words[k-1]) + 1)
+                cost_between[i][j] -= 1
+                cost_between[i][j] = columns - cost_between[i][j]
+                if cost_between[i][j] < 0:
+                    cost_between[i][j] = float('inf')
+                cost_between[i][j] = cost_between[i][j]**2
+
+        # find optimal number of words on each line
+        indexes = [0 for _ in range(num_words+1)]
+        cost = [0 for _ in range(num_words+1)]
+        cost[0] = 0
+        for j in range(1, num_words+1):
+            cost[j] = float('inf')*float('inf')
+            for i in range(1, j+1):
+                if cost[i-1] + cost_between[i][j] < cost[j]:
+                    cost[j] = cost[i-1] + cost_between[i][j]
+                    indexes[j] = i
+
+        def build_lines(words, num_words, indexes):
+            lines = []
+            start = indexes[num_words]
+            end = num_words
+            if start != 1:
+                lines.extend(build_lines(words, start - 1, indexes))
+            line = ''
+            for i in range(start, end+1):
+                if words[i-1] == '\n':
+                    lines.append(line)
+                    line = ''
+                else:
+                    line += (' ' if len(line) > 0 else '') + words[i-1]
+            if len(line) > 0:
+                lines.append(line)
+            return lines
+        return build_lines(words, num_words, indexes)
 
     def clear(self):
         """Clears the display"""
         lcd.clear()
 
     def draw_hcentered_text(self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE,
-                            word_wrap=True, padding=DEFAULT_PADDING):
+                            padding=DEFAULT_PADDING):
         """Draws text horizontally-centered on the display, taking padding
            into account, at the given offset_y
         """
         screen_width = self.width() - padding * 2
-        lines = self.to_lines(text, word_wrap, padding)
+        lines = text if isinstance(text, list) else self.to_lines(text, padding)
         for i, line in enumerate(lines):
             offset_x = max(0, (screen_width - (self.font_size * len(line))) // 2) + 1
             lcd.draw_string(offset_x, offset_y + (i * self.line_height()), line, color, lcd.BLACK)
 
-    def draw_centered_text(self, text, color=lcd.WHITE, word_wrap=True, padding=DEFAULT_PADDING):
+    def draw_centered_text(self, text, color=lcd.WHITE, padding=DEFAULT_PADDING):
         """Draws text horizontally and vertically centered on the display,
            taking padding into account
         """
-        lines = self.to_lines(text, word_wrap, padding)
+        lines = text if isinstance(text, list) else self.to_lines(text, padding)
         screen_height = self.height() - padding * 2
         lines_height = len(lines) * self.line_height()
         offset_y = max(0, (screen_height - lines_height) // 2)
-        self.draw_hcentered_text(text, offset_y, color, word_wrap, padding)
+        self.draw_hcentered_text(text, offset_y, color, padding)
 
-    def flash_text(self, text, color=lcd.WHITE, word_wrap=True, padding=DEFAULT_PADDING,
+    def flash_text(self, text, color=lcd.WHITE, padding=DEFAULT_PADDING,
                    duration=3000):
         """Flashes text centered on the display for duration ms"""
         self.clear()
-        self.draw_centered_text(text, color, word_wrap, padding)
+        self.draw_centered_text(text, color, padding)
         time.sleep_ms(duration)
         self.clear()
 

@@ -19,13 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import io
-from ur.ur import UR
-from embit import ec, script
+from embit import script
 from embit.psbt import DerivationPath, PSBT
 from embit.finalizer import parse_multisig
+from ur.ur import UR
 import urtypes
-from urtypes import BYTES
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_encode, base_decode
 from .format import satcomma
@@ -78,7 +76,7 @@ class PSBTSigner:
                 # check policy is the same
                 if self.policy != inp_policy:
                     raise ValueError('mixed inputs in the tx')
-    
+
         if is_multisig(self.policy) and not self.wallet.is_multisig():
             raise ValueError('multisig tx')
         if not is_multisig(self.policy) and self.wallet.is_multisig():
@@ -171,10 +169,10 @@ class PSBTSigner:
         """
         if self.psbt.xpubs:
             return self.psbt.xpubs
-        
+
         if not self.wallet.descriptor:
             raise ValueError('missing xpubs')
-        
+
         descriptor_keys = (
             [self.wallet.descriptor.key] if self.wallet.descriptor.key
             else self.wallet.descriptor.keys

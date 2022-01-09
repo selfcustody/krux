@@ -161,7 +161,9 @@ class Home(Page):
                     ( 'Checking receive address %d for match..' ) % i
                 )
                 desc = self.ctx.wallet.descriptor
-                child_addr = desc.derive(i, branch_index=0).address(network=NETWORKS[Settings.network])
+                child_addr = desc.derive(i, branch_index=0).address(
+                    network=NETWORKS[Settings.network]
+                )
                 if addr == child_addr:
                     found = True
                     break

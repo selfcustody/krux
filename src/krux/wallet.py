@@ -23,7 +23,6 @@ try:
     import ujson as json
 except ImportError:
     import json
-from json.decoder import JSONDecodeError
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
@@ -156,7 +155,7 @@ def parse_wallet(wallet_data):
         if any(keys_present):
             if not all(keys_present):
                 raise KeyError('"Format", "Policy", and "Derivation" keys not found in INI file')
-            
+
             script = key_vals[key_vals.index('Format') + 1].lower()
             if script != 'p2wsh':
                 raise ValueError('invalid script type: %s' % script)
@@ -192,5 +191,5 @@ def parse_wallet(wallet_data):
         return descriptor, None
     except:
         pass
-    
+
     raise ValueError('invalid wallet format')
