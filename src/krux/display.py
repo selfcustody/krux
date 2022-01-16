@@ -27,6 +27,8 @@ from machine import I2C
 
 DEFAULT_PADDING = 10
 FONT_SIZE = 7
+if board.config['type'] == "bit":
+    FONT_SIZE = 9
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
@@ -39,15 +41,13 @@ class Display:
 
     def __init__(self):
         self.font_size = FONT_SIZE
-        self.rot = 0
         self.initialize_lcd()
         self.i2c = None
-        self.initialize_backlight()
 
     def initialize_lcd(self):
         """Initializes the LCD"""
-        lcd.init(type=board.config['lcd']['lcd_type'])
         if board.config['lcd']['lcd_type'] == 3:
+            lcd.init(type=board.config['lcd']['lcd_type'])
             lcd.register(0x3A, 0x05)
             lcd.register(0xB2, [0x05, 0x05, 0x00, 0x33, 0x33])
             lcd.register(0xB7, 0x23)
@@ -68,6 +68,12 @@ class Display:
                 [0x70, 0x04, 0x08, 0x09, 0x07, 0x03, 0x2C,
                 0x42, 0x42, 0x38, 0x14, 0x14, 0x27, 0x2C]
             )
+            self.initialize_backlight()
+            self.rot = 0
+        else:
+            lcd.init()
+            self.rotation(1)
+
 
     def initialize_backlight(self):
         """Initializes the backlight"""
@@ -119,7 +125,6 @@ class Display:
         """Changes the rotation of the display to portrait"""
         self.clear()
         self.initialize_lcd()
-        self.rot = 0
 
     def to_lines(self, text, padding=DEFAULT_PADDING):
         """Takes a string of text and converts it to lines to display on

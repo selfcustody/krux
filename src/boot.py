@@ -23,12 +23,13 @@ import sys
 sys.path.append('')
 sys.path.append('.')
 
+import board
 from krux import firmware
-from krux.power import PowerManager
-
-pmu = PowerManager()
-if firmware.upgrade():
-    pmu.shutdown()
+if board.config['type']=='m5stickv':
+    from krux.power import PowerManager
+    pmu = PowerManager()
+    if firmware.upgrade():
+        pmu.shutdown()
 
 # Note: These imports come after the firmware upgrade check
 #       to allow it to have more memory to work with

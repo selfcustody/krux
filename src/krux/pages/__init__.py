@@ -166,7 +166,11 @@ class Page:
 
             self.ctx.display.draw_qr_code(5, code)
             subtitle = ( 'Part\n%d / %d' ) % (i+1, num_parts) if title is None else title
-            offset_y = 175 if title is None else 138
+            offset_y = self.ctx.display.line_height()*25
+            if title is None:
+                offset_y -= self.ctx.display.line_height()*5
+            offset_y /=2
+            offset_y = int(offset_y)
             self.ctx.display.draw_hcentered_text(
                 subtitle,
                 offset_y=offset_y,

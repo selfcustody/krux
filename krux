@@ -101,18 +101,21 @@ elif [ "$1" == "flash" ]; then
     device_vendor_product_id=""
     if [ "$device" == "maixpy_m5stickv" ]; then
         device_vendor_product_id="0403:6001"
-    fi
-    if [ -z "$device_vendor_product_id" ]; then
-        panic "Unknown device"
+        usb_device_name_cmd="getdevice $device_vendor_product_id"
+        usb_device_name=$($usb_device_name_cmd)
+        if [ -z "$usb_device_name" ]; then
+            panic "Failed to find device via USB. Is it connected and powered on?"
+        fi
+        if [ -z "$device_vendor_product_id" ]; then
+          panic "Unknown device"
+        fi
+        docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
     fi
 
-    usb_device_name_cmd="getdevice $device_vendor_product_id"
-    usb_device_name=$($usb_device_name_cmd)
-    if [ -z "$usb_device_name" ]; then
-        panic "Failed to find device via USB. Is it connected and powered on?"
+    if [ "$device" == "maixpy_bit" ]; then
+        docker run --privileged --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B bit_mic -p /dev/ttyUSB0 kboot.kfpkg
     fi
-
-    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
+    
 elif [ "$1" == "clean" ]; then
     rm -rf build
     docker system prune --all --force

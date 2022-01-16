@@ -177,6 +177,7 @@ extern const struct _mp_print_t mp_debug_print;
 #define MICROPY_PY_SYS_EXIT                 (1)
 #define MICROPY_PY_SYS_STDFILES             (1)
 #define MICROPY_PY_SYS_STDIO_BUFFER         (1)
+#define MICROPY_PY_SYS_EXC_INFO             (1)
 #define MICROPY_PY_UERRNO                   (1)
 #define MICROPY_PY_USELECT                  (0)
 #define MICROPY_PY_UTIME_MP_HAL             (1)
