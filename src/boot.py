@@ -24,8 +24,8 @@ sys.path.append('')
 sys.path.append('.')
 
 import board
-from krux import firmware
 if board.config['type']=='m5stickv':
+    from krux import firmware
     from krux.power import PowerManager
     pmu = PowerManager()
     if firmware.upgrade():
@@ -35,8 +35,6 @@ if board.config['type']=='m5stickv':
 #       to allow it to have more memory to work with
 import lcd
 from krux.context import Context
-from krux.pages.login import Login
-from krux.pages.home import Home
 
 SPLASH = """
 BTCBTCBTCBTCBTCB
@@ -59,8 +57,12 @@ TCBTCBTCBTCBTCBT
 """
 
 ctx = Context()
+ctx.display.draw_centered_text(SPLASH.split('\n')[1:], color=lcd.WHITE, padding=8)
 
-ctx.display.flash_text(SPLASH.split('\n')[1:], color=lcd.WHITE, padding=8)
+from krux.pages.login import Login
+from krux.pages.home import Home
+
+ctx.display.clear()
 
 while True:
     if not Login(ctx).run():
@@ -72,5 +74,5 @@ while True:
 ctx.display.flash_text(( 'Shutting down..' ))
 
 ctx.clear()
-
-pmu.shutdown()
+if board.config['type']=='m5stickv':
+    pmu.shutdown()

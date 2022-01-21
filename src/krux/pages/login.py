@@ -145,7 +145,8 @@ class Login(Page):
 
     def _load_key_from_words(self, words):
         self.display_mnemonic(words)
-        self.ctx.display.draw_hcentered_text(( 'Continue?' ), offset_y=220)
+        offset_y = self.ctx.display.line_height()*16
+        self.ctx.display.draw_hcentered_text(( 'Continue?' ), offset_y=offset_y)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
             submenu = Menu(self.ctx, [
@@ -188,8 +189,9 @@ class Login(Page):
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
+
     def _load_key_from_keypad(self, title, charset, to_word,
-                                    test_phrase_sentinel=None, autocomplete=None):
+                                    test_phrase_sentinel=None, autocomplete=None, possible_letters=None):
         words = []
         self.ctx.display.draw_hcentered_text(title)
         self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
@@ -208,7 +210,8 @@ class Login(Page):
                     word = self.capture_from_keypad(
                         ( 'Word %d' ) % (i+1),
                         charset,
-                        autocomplete
+                        autocomplete,
+                        possible_letters
                     )
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
@@ -256,7 +259,19 @@ class Login(Page):
                 return user_input
             return ''
 
-        return self._load_key_from_keypad(title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete)
+
+        def possible_letters(partial_word):
+            partial_len = len(partial_word)
+            possible_letters_list = ""
+            for word in WORDLIST:
+                if word.startswith(partial_word):
+                    if len(word) > partial_len:
+                        active_letter = word[partial_len]
+                        if active_letter not in possible_letters_list:
+                            possible_letters_list += active_letter
+            return possible_letters_list
+
+        return self._load_key_from_keypad(title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete, possible_letters)
 
     def load_key_from_digits(self):
         """Handler for the 'via numbers' menu item"""

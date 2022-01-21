@@ -25,10 +25,17 @@ import lcd
 import board
 from machine import I2C
 
+PORTRAIT = 1
+LANDSCAPE = 2
 DEFAULT_PADDING = 10
 FONT_SIZE = 7
+FONT_WIDTH = 7
+M5_HIDDEN_H_PIXELS = 14
+M5_HIDDEN_V_PIXELS = 14
+
 if board.config['type'] == "bit":
     FONT_SIZE = 9
+    FONT_WIDTH = 8 #todo test
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
@@ -41,6 +48,7 @@ class Display:
 
     def __init__(self):
         self.font_size = FONT_SIZE
+        self.font_width = FONT_WIDTH
         self.initialize_lcd()
         self.i2c = None
 
@@ -69,10 +77,9 @@ class Display:
                 0x42, 0x42, 0x38, 0x14, 0x14, 0x27, 0x2C]
             )
             self.initialize_backlight()
-            self.rot = 0
         else:
             lcd.init()
-            self.rotation(1)
+        self.rotation(PORTRAIT)
 
 
     def initialize_backlight(self):
@@ -87,19 +94,34 @@ class Display:
         )
         self.set_backlight(MIN_BACKLIGHT)
 
+    def qr_offset(self):
+        """Retuns y offset to subtittle QR codes"""
+        if board.config['type']=='m5stickv':
+            return 138
+        elif board.config['type'] == "bit":
+            return 223
+
+    
     def line_height(self):
         """Returns the pixel height of a line on the display"""
         return self.font_size * 2
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""
-        if self.rot == 0:
+        if self.rot == LANDSCAPE:
             return lcd.height()
         return lcd.width()
 
+    def screen_width(self):
+        """Returns usable screen width"""
+        if board.config['type']=='m5stickv':
+            return self.width() - M5_HIDDEN_H_PIXELS
+        else: #other boards make use of full resolution
+            return self.width()
+
     def height(self):
         """Returns the height of the display, taking into account rotation"""
-        if self.rot == 0:
+        if self.rot == LANDSCAPE:
             return lcd.width()
         return lcd.height()
 
@@ -119,20 +141,18 @@ class Display:
     def to_landscape(self):
         """Changes the rotation of the display to landscape"""
         self.clear()
-        self.rotation(2)
+        self.rotation(LANDSCAPE)
 
     def to_portrait(self):
         """Changes the rotation of the display to portrait"""
         self.clear()
-        self.initialize_lcd()
+        self.rotation(PORTRAIT)
 
     def to_lines(self, text, padding=DEFAULT_PADDING):
         """Takes a string of text and converts it to lines to display on
            the screen, taking into account padding
         """
-        screen_width = self.width() - padding * 2
-        columns = math.floor(screen_width / self.font_size)
-
+        columns = math.floor(self.screen_width() / self.font_width)
         words = []
         for word in text.split(' '):
             subwords = word.split('\n')
@@ -200,18 +220,22 @@ class Display:
         """Draws text horizontally-centered on the display, taking padding
            into account, at the given offset_y
         """
-        screen_width = self.width() - padding * 2
         lines = text if isinstance(text, list) else self.to_lines(text, padding)
         for i, line in enumerate(lines):
-            offset_x = max(0, (screen_width - (self.font_size * len(line))) // 2) + 1
+            offset_x = (self.screen_width() - self.font_width * len(line)) // 2
+            offset_x = max(0, offset_x)
             lcd.draw_string(offset_x, offset_y + (i * self.line_height()), line, color, lcd.BLACK)
+            #print("of_x:"+str(offset_x)+" - len_line: "+str(len(line))+" - font: " +str(self.font_width))
 
     def draw_centered_text(self, text, color=lcd.WHITE, padding=DEFAULT_PADDING):
         """Draws text horizontally and vertically centered on the display,
            taking padding into account
         """
         lines = text if isinstance(text, list) else self.to_lines(text, padding)
-        screen_height = self.height() - padding * 2
+        if board.config['type']=='m5stickv':
+            screen_height = self.height() - M5_HIDDEN_V_PIXELS
+        else: #other boards make use of full resolution
+            screen_height = self.height()
         lines_height = len(lines) * self.line_height()
         offset_y = max(0, (screen_height - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, padding)

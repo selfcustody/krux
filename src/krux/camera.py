@@ -22,6 +22,7 @@
 import gc
 import sensor
 import lcd
+import board
 from .qr import QRPartParser
 
 class Camera:
@@ -35,6 +36,8 @@ class Camera:
         sensor.reset()
         sensor.set_pixformat(sensor.GRAYSCALE)
         sensor.set_framesize(sensor.QVGA)
+        if board.config['type'] == "bit":
+            sensor.set_vflip(1)
         sensor.skip_frames()
 
     def capture_qr_code_loop(self, callback):
@@ -44,7 +47,6 @@ class Camera:
         """
         self.initialize_sensor()
         sensor.run(1)
-
         parser = QRPartParser()
 
         prev_parsed_count = 0
