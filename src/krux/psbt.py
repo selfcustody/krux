@@ -67,7 +67,10 @@ class PSBTSigner:
         self.policy = None
         for inp in self.psbt.inputs:
             # get policy of the input
-            inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, xpubs)
+            try:
+                inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, xpubs)
+            except:
+                raise ValueError('unable to get policy')
             # if policy is None - assign current
             if self.policy is None:
                 self.policy = inp_policy
@@ -118,7 +121,7 @@ class PSBTSigner:
                     sc = script.p2sh(script.p2wsh(out.witness_script))
                 # single-sig
                 elif 'pkh' in self.policy['type']:
-                    if len(out.bip32_derivations.values()) > 0:
+                    if len(list(out.bip32_derivations.values())) > 0:
                         der = list(out.bip32_derivations.values())[0].derivation
                         my_pubkey = self.wallet.key.root.derive(der)
                     if self.policy['type'] == 'p2wpkh':

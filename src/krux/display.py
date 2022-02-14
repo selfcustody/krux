@@ -25,17 +25,20 @@ import lcd
 import board
 from machine import I2C
 
-PORTRAIT = 1
-LANDSCAPE = 2
 DEFAULT_PADDING = 10
-FONT_SIZE = 7
-FONT_WIDTH = 7
-M5_HIDDEN_H_PIXELS = 14
-M5_HIDDEN_V_PIXELS = 14
 
 if board.config['type'] == "bit":
     FONT_SIZE = 9
-    FONT_WIDTH = 8 #todo test
+    FONT_WIDTH = 8
+    PORTRAIT = 1
+    LANDSCAPE = 0
+else:
+    M5_HIDDEN_H_PIXELS = 14
+    M5_HIDDEN_V_PIXELS = 14
+    FONT_SIZE = 7
+    FONT_WIDTH = 7
+    PORTRAIT = 1
+    LANDSCAPE = 2
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
@@ -49,6 +52,7 @@ class Display:
     def __init__(self):
         self.font_size = FONT_SIZE
         self.font_width = FONT_WIDTH
+        self.bottom_line = self.line_height()*16
         self.initialize_lcd()
         self.i2c = None
 
@@ -225,7 +229,6 @@ class Display:
             offset_x = (self.screen_width() - self.font_width * len(line)) // 2
             offset_x = max(0, offset_x)
             lcd.draw_string(offset_x, offset_y + (i * self.line_height()), line, color, lcd.BLACK)
-            #print("of_x:"+str(offset_x)+" - len_line: "+str(len(line))+" - font: " +str(self.font_width))
 
     def draw_centered_text(self, text, color=lcd.WHITE, padding=DEFAULT_PADDING):
         """Draws text horizontally and vertically centered on the display,

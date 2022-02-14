@@ -37,6 +37,7 @@ class Camera:
         sensor.set_pixformat(sensor.GRAYSCALE)
         sensor.set_framesize(sensor.QVGA)
         if board.config['type'] == "bit":
+            sensor.set_hmirror(1)
             sensor.set_vflip(1)
         sensor.skip_frames()
 
@@ -48,7 +49,6 @@ class Camera:
         self.initialize_sensor()
         sensor.run(1)
         parser = QRPartParser()
-
         prev_parsed_count = 0
         new_part = False
         while True:
@@ -59,6 +59,8 @@ class Camera:
             new_part = False
 
             img = sensor.snapshot()
+            if board.config['type'] == "bit":
+                img.lens_corr(1.2)
             gc.collect()
             hist = img.get_histogram()
             if 'histogram' not in str(type(hist)):
@@ -67,9 +69,10 @@ class Camera:
             # This is done to account for spots, blotches, and streaks in the code
             # that may cause issues for the decoder.
             img.binary([(0, hist.get_threshold().value())], invert=True)
-            lcd.display(img)
-
             res = img.find_qrcodes()
+            if board.config['type'] == 'm5stickv':
+                img.lens_corr(strength=1.0, zoom=0.7) #better fit the screen - test
+            lcd.display(img)
             if len(res) > 0:
                 data = res[0].payload()
 

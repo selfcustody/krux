@@ -81,7 +81,7 @@ class Page:
                         else:
                             row_keys += '>' + key if key_index == cur_key_index else ' ' + key
                 offset_y = 80 + y * self.ctx.display.font_size * 4
-                self.ctx.display.draw_hcentered_text(row_keys, offset_y)
+                self.ctx.display.draw_hcentered_text(row_keys, offset_y=offset_y)
 
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_ENTER:

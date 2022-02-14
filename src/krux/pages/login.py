@@ -104,7 +104,7 @@ class Login(Page):
             ( 'Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively.' )
             % (min_rolls, max_rolls)
         )
-        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
+        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=self.ctx.display.bottom_line)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
             entropy = ''
@@ -145,8 +145,7 @@ class Login(Page):
 
     def _load_key_from_words(self, words):
         self.display_mnemonic(words)
-        offset_y = self.ctx.display.line_height()*16
-        self.ctx.display.draw_hcentered_text(( 'Continue?' ), offset_y=offset_y)
+        self.ctx.display.draw_hcentered_text(( 'Continue?' ), offset_y=self.ctx.display.bottom_line)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
             submenu = Menu(self.ctx, [
@@ -194,7 +193,7 @@ class Login(Page):
                                     test_phrase_sentinel=None, autocomplete=None, possible_letters=None):
         words = []
         self.ctx.display.draw_hcentered_text(title)
-        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
+        self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=self.ctx.display.bottom_line)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
             for i in range(24):

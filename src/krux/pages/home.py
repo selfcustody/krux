@@ -31,6 +31,8 @@ from ..input import BUTTON_ENTER
 from ..wallet import Wallet
 from . import Page, Menu, MENU_CONTINUE
 
+
+#todo, object dict_view has no len()
 class Home(Page):
     """Home is the main menu page of the app"""
 
@@ -74,7 +76,7 @@ class Home(Page):
         """Handler for the 'wallet' menu item"""
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(( 'Wallet not found.' ))
-            self.ctx.display.draw_hcentered_text(( 'Load one?' ), offset_y=200)
+            self.ctx.display.draw_hcentered_text(( 'Load one?' ), offset_y=self.ctx.display.bottom_line)
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_ENTER:
                 return self._load_wallet()
@@ -94,7 +96,7 @@ class Home(Page):
             wallet = Wallet(self.ctx.wallet.key)
             wallet.load(wallet_data, qr_format)
             self.display_wallet(wallet, include_qr=False)
-            self.ctx.display.draw_hcentered_text(( 'Load?' ), offset_y=200)
+            self.ctx.display.draw_hcentered_text(( 'Load?' ), offset_y=self.ctx.display.bottom_line)
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_ENTER:
                 self.ctx.wallet = wallet
@@ -151,7 +153,7 @@ class Home(Page):
                     self.ctx.display.draw_centered_text(
                         ( 'Checked %d receive addresses with no matches.' ) % (i + 1)
                     )
-                    self.ctx.display.draw_hcentered_text(( 'Try more?' ), offset_y=200)
+                    self.ctx.display.draw_hcentered_text(( 'Try more?' ), offset_y=self.ctx.display.bottom_line)
                     btn = self.ctx.input.wait_for_button()
                     if btn != BUTTON_ENTER:
                         break
@@ -193,7 +195,7 @@ class Home(Page):
                 ( 'WARNING:\nWallet not loaded.\n\nSome checks cannot be performed.' ),
                 lcd.WHITE
             )
-            self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=200)
+            self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=self.ctx.display.bottom_line)
             btn = self.ctx.input.wait_for_button()
             if btn != BUTTON_ENTER:
                 return MENU_CONTINUE
@@ -213,7 +215,7 @@ class Home(Page):
         outputs = signer.outputs()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text('\n\n'.join(outputs))
-        self.ctx.display.draw_hcentered_text(( 'Sign?' ), offset_y=200)
+        self.ctx.display.draw_hcentered_text(( 'Sign?' ), offset_y=self.ctx.display.bottom_line)
 
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
