@@ -30,12 +30,10 @@ poetry run pytest --cov=krux --cov-branch --cov-report=html --show-capture=all -
 # Contributing
 Issues and pull requests welcome! Let's make this as good as it can be.
 
-# Get Support
-For support installing or using Krux, please join [#krux:matrix.org](https://matrix.to/#/#krux:matrix.org) and ask questions there. We do not use GitHub issues for support requests, only for bug reports and feature requests.
+# Support + Community
+For support installing or using Krux, please join [#krux:matrix.org](https://matrix.to/#/#krux:matrix.org) and ask questions there. We do not use GitHub issues for support requests, only for bug reports and feature requests. 
 
 You can also post a question in our [Discussions](https://github.com/jreesun/krux/discussions) forum here on GitHub.
 
-# Give Support
-If you would like to support the project, BTC is kindly accepted!
+If you're on Telegram, check out the [DIYbitcoin group](https://t.me/diybitcoin), a broader community of tinkerers, builders, hackers, etc.
 
-`19f8HVt8LZKzBv8CuBYnxCqn5sd75V658J`
