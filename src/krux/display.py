@@ -141,16 +141,26 @@ class Display:
                     words.append(subword)
 
                 if len(subwords) > 1 and i < len(subwords) - 1:
-                    words.append('\n')
+                    if words[-1].endswith('\n'):
+                        words.append('\n')
+                    else:
+                        words[-1] += '\n'
 
         num_words = len(words)
 
         # calculate cost of all pairs of words
-        cost_between = [[0 for x in range(num_words+1)] for x in range(num_words+1)]
+        cost_between = [[0 for _ in range(num_words+1)] for _ in range(num_words+1)]
         for i in range(1, num_words+1):
             for j in range(i, num_words+1):
                 for k in range(i, j+1):
-                    cost_between[i][j] += (len(words[k-1]) + 1)
+                    if words[k-1].endswith('\n'):
+                        word = words[k-1].split('\n')[0]
+                        if word != '':
+                            cost_between[i][j] += (len(words[k-1]) + 1)
+                        if i <= k < j:
+                            cost_between[i][j] += float('inf')
+                    else:
+                        cost_between[i][j] += (len(words[k-1]) + 1)
                 cost_between[i][j] -= 1
                 cost_between[i][j] = columns - cost_between[i][j]
                 if cost_between[i][j] < 0:
@@ -176,7 +186,10 @@ class Display:
                 lines.extend(build_lines(words, start - 1, indexes))
             line = ''
             for i in range(start, end+1):
-                if words[i-1] == '\n':
+                if words[i-1].endswith('\n'):
+                    word = words[i-1].split('\n')[0]
+                    if word != '':
+                        line += (' ' if len(line) > 0 else '') + word
                     lines.append(line)
                     line = ''
                 else:
