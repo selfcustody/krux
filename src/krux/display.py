@@ -39,7 +39,7 @@ class Display:
 
     def __init__(self):
         self.font_size = FONT_SIZE
-        self.rot = 0
+        self.portrait = True
         self.initialize_lcd()
         self.i2c = None
         self.initialize_backlight()
@@ -87,13 +87,13 @@ class Display:
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""
-        if self.rot == 0:
+        if self.portrait:
             return lcd.height()
         return lcd.width()
 
     def height(self):
         """Returns the height of the display, taking into account rotation"""
-        if self.rot == 0:
+        if self.portrait:
             return lcd.width()
         return lcd.height()
 
@@ -105,21 +105,18 @@ class Display:
         """
         return self.width() // 4
 
-    def rotation(self, rot):
-        """Returns the rotation of the display"""
-        lcd.rotation(rot)
-        self.rot = rot
-
     def to_landscape(self):
         """Changes the rotation of the display to landscape"""
         self.clear()
-        self.rotation(2)
+        lcd.rotation(2)
+        self.portrait = False
 
     def to_portrait(self):
         """Changes the rotation of the display to portrait"""
         self.clear()
+        # TODO: Ideally, this should just call lcd.rotation(0) rather than reinitializing
         self.initialize_lcd()
-        self.rot = 0
+        self.portrait = True
 
     def to_lines(self, text, padding=DEFAULT_PADDING):
         """Takes a string of text and converts it to lines to display on
@@ -141,10 +138,7 @@ class Display:
                     words.append(subword)
 
                 if len(subwords) > 1 and i < len(subwords) - 1:
-                    if words[-1].endswith('\n'):
-                        words.append('\n')
-                    else:
-                        words[-1] += '\n'
+                    words[-1] += '\n'
 
         num_words = len(words)
 
