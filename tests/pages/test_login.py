@@ -329,3 +329,105 @@ def test_load_key_from_bits(mocker):
             assert ctx.wallet.key.mnemonic.startswith(case[1])
         else:
             assert ctx.wallet.key.mnemonic == case[1]
+    
+def test_network(mocker):
+    import krux
+    mocker.patch('krux.printers.thermal.AdafruitPrinter', new=mock.MagicMock())
+    from krux.pages.login import Login
+    
+    ctx = mock.MagicMock(
+        input=mock.MagicMock(wait_for_button=mock.MagicMock(
+            side_effect=(BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER)
+        )),
+        display=mock.MagicMock(to_lines=mock.MagicMock(
+            return_value=['']
+        ))
+    )
+    login = Login(ctx)
+    
+    login.network()
+    
+    assert ctx.input.wait_for_button.call_count == 3
+    ctx.display.draw_centered_text.assert_has_calls([
+        mock.call('Network\nmainnet'),
+        mock.call('Network\ntestnet'),
+        mock.call('Network\nmainnet'),
+    ])
+    assert krux.pages.login.Settings.network == 'main'
+    
+def test_printer(mocker):
+    import krux
+    mocker.patch('krux.printers.thermal.AdafruitPrinter', new=mock.MagicMock())
+    from krux.pages.login import Login
+    
+    ctx = mock.MagicMock(
+        input=mock.MagicMock(wait_for_button=mock.MagicMock(
+            side_effect=(BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER)
+        )),
+        display=mock.MagicMock(to_lines=mock.MagicMock(
+            return_value=['']
+        ))
+    )
+    login = Login(ctx)
+    
+    login.printer()
+    
+    assert ctx.input.wait_for_button.call_count == 3
+    ctx.display.draw_centered_text.assert_has_calls([
+        mock.call('Baudrate\n9600'),
+        mock.call('Baudrate\n19200'),
+        mock.call('Baudrate\n9600'),
+    ])
+    assert krux.pages.login.Settings.Printer.Thermal.baudrate == 9600
+    
+def test_debug(mocker):
+    import krux
+    mocker.patch('krux.printers.thermal.AdafruitPrinter', new=mock.MagicMock())
+    from krux.pages.login import Login
+    from krux.logging import NONE
+
+    ctx = mock.MagicMock(
+        input=mock.MagicMock(wait_for_button=mock.MagicMock(
+            side_effect=(BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER)
+        )),
+        display=mock.MagicMock(to_lines=mock.MagicMock(
+            return_value=['']
+        ))
+    )
+    login = Login(ctx)
+    
+    login.debug()
+    
+    assert ctx.input.wait_for_button.call_count == 6
+    ctx.display.draw_centered_text.assert_has_calls([
+        mock.call('Log Level\nNONE'),
+        mock.call('Log Level\nDEBUG'),
+        mock.call('Log Level\nINFO'),
+        mock.call('Log Level\nWARN'),
+        mock.call('Log Level\nERROR'),
+        mock.call('Log Level\nNONE'),
+    ])
+    assert krux.pages.login.Settings.Log.level == NONE
+    
+def test_about(mocker):
+    import krux
+    mocker.patch('krux.printers.thermal.AdafruitPrinter', new=mock.MagicMock())
+    from krux.pages.login import Login
+    from krux.metadata import VERSION
+
+    ctx = mock.MagicMock(
+        input=mock.MagicMock(wait_for_button=mock.MagicMock(
+            return_value=BUTTON_ENTER
+        )),
+        display=mock.MagicMock(to_lines=mock.MagicMock(
+            return_value=['']
+        ))
+    )
+    login = Login(ctx)
+    
+    login.about()
+    
+    ctx.input.wait_for_button.assert_called_once()
+    ctx.display.draw_centered_text.assert_called_with(
+        'Krux\n\n\nVersion\n' + VERSION
+    )

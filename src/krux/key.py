@@ -42,10 +42,6 @@ class Key:
         self.derivation = (DER_MULTI if self.multisig else DER_SINGLE) % network['bip32']
         self.account = self.root.derive(self.derivation).to_public()
 
-    def mnemonic_words(self):
-        """Returns the words of the mnemonic as a list"""
-        return self.mnemonic.split(' ')
-
     def xpub(self):
         """Returns the xpub representation of the extended master public key"""
         return self.account.to_base58()
@@ -113,7 +109,7 @@ def pick_final_word(ctx, words):
     if (len(words) != 11 and len(words) != 23):
         raise ValueError('must provide 11 or 23 words')
 
-    urandom.seed(time.ticks_ms() + ctx.input.entropy)
+    urandom.seed(int(time.ticks_ms() + ctx.input.entropy))
     while True:
         word = urandom.choice(WORDLIST)
         mnemonic = ' '.join(words) + ' ' + word

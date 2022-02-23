@@ -144,7 +144,8 @@ class Login(Page):
         return MENU_CONTINUE
 
     def _load_key_from_words(self, words):
-        self.display_mnemonic(words)
+        mnemonic = ' '.join(words)
+        self.display_mnemonic(mnemonic)
         self.ctx.display.draw_hcentered_text(( 'Continue?' ), offset_y=220)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
@@ -157,7 +158,7 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(( 'Loading..' ))
             self.ctx.wallet = Wallet(
-                Key(' '.join(words), multisig, network=NETWORKS[Settings.network])
+                Key(mnemonic, multisig, network=NETWORKS[Settings.network])
             )
             try:
                 self.ctx.printer = create_printer()

@@ -83,10 +83,6 @@ def test_parser():
 
 def test_to_qr_codes(mocker):
     from krux.qr import to_qr_codes, FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
-    
-    def encode_to_string(data):
-        return ('0' * (len(data)-10)) + '\n'
-    mocker.patch('qrcode.encode_to_string', encode_to_string)
 
     cases = [
         (FORMAT_NONE, TEST_DATA_B58, TEST_PARTS_FORMAT_NONE),

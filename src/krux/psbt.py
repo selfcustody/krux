@@ -118,13 +118,13 @@ class PSBTSigner:
                     sc = script.p2sh(script.p2wsh(out.witness_script))
                 # single-sig
                 elif 'pkh' in self.policy['type']:
-                    if len(out.bip32_derivations.values()) > 0:
+                    if len(list(out.bip32_derivations.values())) > 0:
                         der = list(out.bip32_derivations.values())[0].derivation
                         my_pubkey = self.wallet.key.root.derive(der)
-                    if self.policy['type'] == 'p2wpkh':
-                        sc = script.p2wpkh(my_pubkey)
-                    elif self.policy['type'] == 'p2sh-p2wpkh':
-                        sc = script.p2sh(script.p2wpkh(my_pubkey))
+                        if self.policy['type'] == 'p2wpkh':
+                            sc = script.p2wpkh(my_pubkey)
+                        elif self.policy['type'] == 'p2sh-p2wpkh':
+                            sc = script.p2sh(script.p2wpkh(my_pubkey))
                 if sc.data == self.psbt.tx.vout[i].script_pubkey.data:
                     is_change = True
             if is_change:

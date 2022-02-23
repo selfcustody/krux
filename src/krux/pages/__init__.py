@@ -163,7 +163,6 @@ class Page:
             except:
                 code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
                 code, num_parts = next(code_generator)
-
             self.ctx.display.draw_qr_code(5, code)
             subtitle = ( 'Part\n%d / %d' ) % (i+1, num_parts) if title is None else title
             offset_y = 175 if title is None else 138
@@ -179,8 +178,9 @@ class Page:
             if not done:
                 time.sleep_ms(QR_ANIMATION_INTERVAL_MS)
 
-    def display_mnemonic(self, words):
+    def display_mnemonic(self, mnemonic):
         """Displays the 12 or 24-word list of words to the user"""
+        words = mnemonic.split(' ')
         word_list = [str(i+1) + '.' + ('  ' if i + 1 < 10 else ' ') + word
                      for i, word in enumerate(words)]
         self.ctx.display.clear()

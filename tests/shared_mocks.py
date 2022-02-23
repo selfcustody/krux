@@ -13,6 +13,19 @@ def get_mock_open(files: dict[str, str]):
         raise FileNotFoundError('(mock) Unable to open {filename}')
     return mock.MagicMock(side_effect=open_mock)
 
+class MockPrinter:
+    def __init__(self):
+        pass
+    
+    def qr_data_width(self):
+        return 33
+
+    def clear(self):
+        pass
+
+    def print_qr_code(self, qr_code):
+        pass
+    
 class MockQRPartParser:
     TOTAL = 10
     FORMAT = 0
@@ -210,7 +223,9 @@ sys.modules['fpioa_manager'] = mock.MagicMock()
 
 if 'qrcode' in sys.modules:
     del sys.modules['qrcode']
-sys.modules['qrcode'] = mock.MagicMock()
+sys.modules['qrcode'] = mock.MagicMock(
+    encode_to_string=lambda data: ('0' * (len(data)-10)) + '\n'
+)
 
 if 'board' in sys.modules:
     del sys.modules['board']

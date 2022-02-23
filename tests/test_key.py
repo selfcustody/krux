@@ -109,13 +109,6 @@ def test_init(mocker):
         assert key.root.to_base58() == case[1]['root key']
         assert key.derivation == case[1]['derivation']
         assert key.account.to_base58() == case[1]['xpub']
-
-def test_mnemonic_words(mocker):
-    mock_modules(mocker)
-    from krux.key import Key
-
-    key = Key(TEST_MNEMONIC, False)
-    assert key.mnemonic_words() == TEST_MNEMONIC.split()
     
 def test_xpub(mocker):
     mock_modules(mocker)

@@ -26,6 +26,7 @@ except ImportError:
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
+from embit.script import Script, address_to_scriptpubkey
 import urtypes
 
 class Wallet:
@@ -93,6 +94,15 @@ class Wallet:
     def wallet_qr(self):
         """Returns the original wallet data and qr format for display back as a QR code"""
         return (self.wallet_data, self.wallet_qr_format)
+
+    def receive_addresses(self, limit=None):
+        """Returns an iterator deriving receive addresses for the wallet up to the provided limit"""
+        i = 0
+        while limit is None or i < limit:
+            yield self.descriptor.derive(i, branch_index=0).address(
+                network=self.key.network
+            )
+            i += 1
 
 def to_unambiguous_descriptor(descriptor):
     """If child derivation info is missing to generate receive addresses,
@@ -193,3 +203,24 @@ def parse_wallet(wallet_data):
         pass
 
     raise ValueError('invalid wallet format')
+
+def parse_address(address_data):
+    """Exhaustively tries to parse an address from a known format, returning
+       the address if possible.
+
+       If the address cannot be derived, an exception is raised.
+    """
+    addr = address_data
+    if address_data.lower().startswith('bitcoin:'):
+        addr_end = address_data.find('?')
+        if addr_end == -1:
+            addr_end = len(address_data)
+        addr = address_data[8:addr_end]
+
+    try:
+        sc = address_to_scriptpubkey(addr)
+        assert isinstance(sc, Script)
+    except:
+        raise ValueError('invalid address')
+
+    return addr

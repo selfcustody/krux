@@ -241,9 +241,8 @@ spelling-store-unknown-words=no
 
 # List of note tags to take in consideration, separated by a comma.
 notes=FIXME,
-      XXX,
-      TODO
-
+      XXX
+      
 # Regular expression of note tags to take in consideration.
 #notes-rgx=
 
@@ -595,7 +594,7 @@ max-attributes=11
 max-bool-expr=5
 
 # Maximum number of branch for function / method body.
-max-branches=16
+max-branches=17
 
 # Maximum number of locals for function / method body.
 max-locals=20

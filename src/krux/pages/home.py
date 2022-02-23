@@ -21,14 +21,11 @@
 # THE SOFTWARE.
 import gc
 import lcd
-from embit.networks import NETWORKS
-from embit.script import Script, address_to_scriptpubkey
-from ..settings import Settings
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..input import BUTTON_ENTER
-from ..wallet import Wallet
+from ..wallet import Wallet, parse_address
 from . import Page, Menu, MENU_CONTINUE
 
 class Home(Page):
@@ -46,7 +43,7 @@ class Home(Page):
 
     def mnemonic(self):
         """Handler for the 'mnemonic' menu item"""
-        self.display_mnemonic(self.ctx.wallet.key.mnemonic_words())
+        self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
         return MENU_CONTINUE
@@ -114,17 +111,9 @@ class Home(Page):
             self.ctx.display.flash_text(( 'Failed to load address' ), lcd.RED)
             return MENU_CONTINUE
 
-        addr = data
-        if data.lower().startswith('bitcoin:'):
-            addr_end = data.find('?')
-            if addr_end == -1:
-                addr_end = len(data)
-            addr = data[8:addr_end]
-
+        addr = None
         try:
-            sc = address_to_scriptpubkey(addr)
-            if sc is None or not isinstance(sc, Script):
-                raise ValueError('invalid address')
+            addr = parse_address(data)
         except:
             self.ctx.display.flash_text(( 'Invalid address' ), lcd.RED)
             return MENU_CONTINUE
@@ -144,46 +133,40 @@ class Home(Page):
             gc.collect()
 
             found = False
-            i = 0
-            while True:
-                if (i + 1) % 100 == 0:
+            num_checked = 0
+            for recv_addr in self.ctx.wallet.receive_addresses():
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    ( 'Checking receive address %d for match..' ) % num_checked
+                )
+
+                num_checked += 1
+
+                found = addr == recv_addr
+                if found:
+                    break
+
+                if num_checked % 100 == 0:
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(
-                        ( 'Checked %d receive addresses with no matches.' ) % (i + 1)
+                        ( 'Checked %d receive addresses with no matches.' ) % num_checked
                     )
+
                     self.ctx.display.draw_hcentered_text(( 'Try more?' ), offset_y=200)
                     btn = self.ctx.input.wait_for_button()
                     if btn != BUTTON_ENTER:
                         break
 
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    ( 'Checking receive address %d for match..' ) % i
-                )
-                desc = self.ctx.wallet.descriptor
-                child_addr = desc.derive(i, branch_index=0).address(
-                    network=NETWORKS[Settings.network]
-                )
-                if addr == child_addr:
-                    found = True
-                    break
-                i += 1
-
             gc.collect()
 
             self.ctx.display.clear()
-            if found:
-                self.ctx.display.draw_centered_text(
-                    ( '%s\n\nis a valid receive address' ) % addr,
-                    lcd.GREEN
-                )
-            else:
-                self.ctx.display.draw_centered_text(
-                    ( '%s\n\nwas NOT FOUND in the first %d receive addresses' ) % (addr, i + 1),
-                    lcd.RED
-                )
+            result_message = (
+                ( '%s\n\nis a valid receive address' ) % addr
+                if found else
+                ( '%s\n\nwas NOT FOUND in the first %d receive addresses' ) % (addr, num_checked)
+            )
+            self.ctx.display.draw_centered_text(result_message)
             self.ctx.input.wait_for_button()
-
         return MENU_CONTINUE
 
     def sign_psbt(self):

@@ -1,6 +1,4 @@
 from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
-from krux.wallet import parse_wallet
-from urtypes.crypto.output import Output
 from .shared_mocks import *
 from krux.key import Key
 from embit.networks import NETWORKS
@@ -166,6 +164,42 @@ def test_wallet_qr():
     assert wallet_data == UR_OUTPUT_MULTISIG_WALLET_DATA
     assert wallet_qr_format == FORMAT_UR
     
+def test_receive_addresses():
+    from krux.wallet import Wallet
+
+    cases = [
+        (SINGLEKEY_KEY, SPECTER_SINGLEKEY_WALLET_DATA, FORMAT_PMOFN, [
+            'bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y',
+            'bc1q6hpnrwgy7a26newf5ewgl6a3f6cqz2xtmmhghx',
+            'bc1qjfygdgjvw6euxtzs3fxx5d7fxvs8ypykzu8cjs',
+            'bc1qjl4kpu95s2z9lws3pmwlww5260n66ccnc5uc8t',
+            'bc1qzdwh9ctwj7wg5ul2pskc6rvzmmpn2l5j4lkprc',
+            'bc1qdx4z958lcu0xfe9jkjm3v5354k0tq9pqwtv6th',
+            'bc1q7s8u2g260f6qs97vmhc34kvpuque87uk3aw47h',
+            'bc1qdm8yaere7fnu02tstwrxkhfgrfpteumjsl7l4r',
+            'bc1qfz3rfm0da9m7lca8rfkzgs2uhk5cxnms5dxmxu',
+            'bc1q6mlxs236fmyeteummv9x5pmxteh86lkln4emag',
+        ]),
+        (MULTISIG_KEY1, SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN, [
+            'bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65',
+            'bc1qv72e35u2qjtzm60qznzzc63aq6mjlxg6y8xnctw9vq5q9mp43lasj69v67',
+            'bc1qymmm8s0g38hhjfxn0kdm2r9xsvch3gzxc07th2athuq7r9rje3xskwvk0q',
+            'bc1qaerrqmm0ce4qsrlsvswvm6mmcw462cydwzawh4wy7eed8fcjkvtsdkccnl',
+            'bc1qacxshm6p84zj4x6vevat65uqu6k8379x55vzp0gz5y6m0eyrgayqpuamez',
+            'bc1q0xvq09ep68jp57v3f2et2pmm6vtdu9f5le9c5qr75rmlge4et25qlt2lkz',
+            'bc1qnqq4qfa7c5vg9nh0ddvnwf9fxucms2c992h4qht9hzs96qc8fggsegfurq',
+            'bc1qnds506sq72glz8x7pq3dkywhktg7scaua3d4mdzjpluwvtzxdwcsxlmj89',
+            'bc1qss8w8dygehsqusat6hzxlrtzykqxjsmjsccdf9qlsx7yhjcze9xqekznh5',
+            'bc1qgzqffn9f4fal2ld04wdafakvgrl5gexp744gm8eg58j7a633lf9slzcjup',
+        ]),
+    ]
+    
+    for case in cases:
+        wallet = Wallet(case[0])
+        wallet.load(case[1], case[2])
+        
+        assert [addr for addr in wallet.receive_addresses(10)] == case[3]
+        
 def test_load_multisig():
     from krux.wallet import Wallet
     wallet = Wallet(MULTISIG_KEY1)
@@ -298,6 +332,8 @@ def test_parse_wallet():
         assert label == case[2]
         
 def test_parse_wallet_raises_errors():
+    from krux.wallet import parse_wallet
+    
     cases = [
         BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS,
         BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS,
@@ -309,6 +345,47 @@ def test_parse_wallet_raises_errors():
     for case in cases:
         with pytest.raises(ValueError):
             parse_wallet(case)
+
+def test_parse_address():
+    from krux.wallet import parse_address
+    
+    cases = [
+        # m/44
+        ('14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ', '14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ'),
+        # m/48/0/0/2
+        ('1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k', '1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k'),
+        # m/84
+        ('bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn', 'bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn'),
+        # m/49
+        ('32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg', '32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg'),
+        # m/0
+        ('3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw', '3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw'),
+        ('bitcoin:14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ', '14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ'),
+        ('bitcoin:1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k', '1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k'),
+        ('bitcoin:bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn', 'bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn'),
+        ('bitcoin:32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg', '32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg'),
+        ('bitcoin:3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw', '3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw'),
+        ('bitcoin:14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ?note=test', '14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ'),
+        ('bitcoin:1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k?note=test', '1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k'),
+        ('bitcoin:bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn?note=test', 'bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn'),
+        ('bitcoin:32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg?note=test', '32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg'),
+        ('bitcoin:3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw?note=test', '3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw'),
+    ]
+    
+    for case in cases:
+        assert parse_address(case[0]) == case[1]
+    
+def test_parse_address_raises_errors():
+    from krux.wallet import parse_address
+
+    cases = [
+        'invalidaddress',
+        '32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg$',
+        'bitcorn:32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg'
+    ]
+    for case in cases:
+        with pytest.raises(ValueError):
+            parse_address(case)
 
 def test_to_unambiguous_descriptor():
     from krux.wallet import to_unambiguous_descriptor
