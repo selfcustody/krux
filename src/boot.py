@@ -55,11 +55,11 @@ TCBTC      BTCBT
 CBTCB      TCBTC
 BTCBT      CBTCB
 TCBTCBTCBTCBTCBT
-"""
+""".strip()
 
 ctx = Context()
 
-ctx.display.flash_text(SPLASH.split('\n')[1:], color=lcd.WHITE, padding=8)
+ctx.display.flash_text(SPLASH.split('\n'), color=lcd.WHITE, padding=8)
 
 while True:
     if not Login(ctx).run():
