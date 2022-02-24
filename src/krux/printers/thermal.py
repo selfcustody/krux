@@ -72,10 +72,10 @@ class AdafruitPrinter(Printer):
 
     def setup(self):
         """Sets up the connection to the printer and sets default settings"""
-		# The printer can't start receiving data immediately
-		# upon power up -- it needs a moment to cold boot
-		# and initialize.  Allow at least 1/2 sec of uptime
-		# before printer can receive data.
+        # The printer can't start receiving data immediately
+        # upon power up -- it needs a moment to cold boot
+        # and initialize.  Allow at least 1/2 sec of uptime
+        # before printer can receive data.
         time.sleep_ms(500)
 
         # Wake up the printer to get ready for printing

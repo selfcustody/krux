@@ -144,6 +144,8 @@ def find_min_num_parts(data, max_width, qr_format):
         elif qr_format == FORMAT_UR:
             encoder = UREncoder(data, part_size, 0, part_size - 10)
             part = encoder.next_part()
+        # The worst-case number of bytes needed to store one QR Code, up to and including
+        # version 40. This value equals 3918, which is just under 4 kilobytes.
         if len(part) < 3918:
             code = qrcode.encode_to_string(part)
             if get_size(code) <= max_width:
