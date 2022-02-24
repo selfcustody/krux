@@ -34,7 +34,7 @@ vagrant ssh -c 'cd /vagrant; ./krux setup'
 ### Build the firmware
 Run the following:
 ```bash
-vagrant ssh -c 'cd /vagrant; ./krux build 1.0.0 en-US'
+vagrant ssh -c 'cd /vagrant; ./krux build maixpy_m5stickv 1.0.0 en-US'
 ```
 
 Replace `1.0.0` with the version you want to tag the build with.
