@@ -29,7 +29,6 @@
     "Fee:\n₿%s": "Comisión:\n₿%s",
     "Firmware exceeds max size: %d": "El firmware supera el tamaño máximo: %d",
     "Go": "Ir",
-    "Input:\n₿%s": "Entrada:\n₿%s",
     "Invalid address": "Dirección inválida",
     "Invalid bootloader": "Cargador de arranque inválido",
     "Invalid mnemonic length": "Longitud mnemotécnica no válida",

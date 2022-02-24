@@ -348,7 +348,8 @@ if(CONFIG_COMPONENT_MICROPYTHON_ENABLE)
                     DEPENDS ${mpy_build_gen_header_dir}/qstrdefs.preprocessed.h gen_qstr_i_last
                 )
 
-    set(frozen_py "${mpy_frozen_py_dir}/_boot.py")
+    set(frozen_py "${mpy_frozen_py_dir}/board.py")
+    list(APPEND frozen_py "${mpy_frozen_py_dir}/fpioa_manager.py")
     foreach(py ${frozen_py})
         get_filename_component(py_name ${py} NAME)
         string(REPLACE ".py" "" py_name ${py_name})

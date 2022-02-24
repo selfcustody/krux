@@ -10,6 +10,7 @@ The source code for the `embit` library is under the MIT license.
 The source code for the `urtypes` library is under the MIT license.
 The source code for the `foundation-ur-py` library is under the BSD-2-Clause Plus Patent license.
 The source code for the `Adafruit Thermal Printer` library is under the MIT license.
+The source code for the `Kboot` bootloader is under the Apache v2.0 license.
 
 The source code for this project created and modified by the repository owner is released under the MIT license that follows:
 

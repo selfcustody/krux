@@ -23,8 +23,8 @@ import sys
 sys.path.append('')
 sys.path.append('.')
 
-import firmware
-from power import PowerManager
+from krux import firmware
+from krux.power import PowerManager
 
 pmu = PowerManager()
 if firmware.upgrade():
@@ -33,11 +33,9 @@ if firmware.upgrade():
 # Note: These imports come after the firmware upgrade check
 #       to allow it to have more memory to work with
 import lcd
-from context import Context
-from login import Login
-from home import Home
-
-VERSION = 'BETA'
+from krux.context import Context
+from krux.pages.login import Login
+from krux.pages.home import Home
 
 SPLASH = """
 BTCBTCBTCBTCBTCB
@@ -57,11 +55,11 @@ TCBTC      BTCBT
 CBTCB      TCBTC
 BTCBT      CBTCB
 TCBTCBTCBTCBTCBT
-"""
+""".strip()
 
-ctx = Context(VERSION)
+ctx = Context()
 
-ctx.display.flash_text(SPLASH, color=lcd.WHITE, word_wrap=False, padding=8)
+ctx.display.flash_text(SPLASH.split('\n'), color=lcd.WHITE, padding=8)
 
 while True:
     if not Login(ctx).run():

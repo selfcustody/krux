@@ -26,7 +26,7 @@ jobs:
           pylint i18n/*.py
           pylint src
 
-  translations:
+  check-translations:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -36,3 +36,44 @@ jobs:
           python-version: '3.9'
       - name: Validate translations
         run: cd i18n && python3 i18n.py validate
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install poetry
+      - name: Install project and its dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run pytest --cache-clear tests
+
+  comment-coverage:
+    if: github.event.pull_request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install poetry
+      - name: Install project and its dependencies
+        run: poetry install
+      - name: Build coverage file
+        run: poetry run pytest --cache-clear --cov=krux tests > pytest-coverage.txt
+      - name: Comment coverage
+        uses: coroo/pytest-coverage-commentator@v1.0.2

@@ -32,7 +32,9 @@ tests/results/*
 # Python cache files
 ######################
 __pycache__/
+.pytest_cache
 *.pyc
+*.egg-info
 
 # Customized Makefile/project overrides
 ######################
@@ -57,5 +59,12 @@ sitemap.xml.gz
 *.bin
 *.bin.sig
 *.bin.sha256.txt
+kboot.kfpkg
 memzip-files.c
 memzip-files.zip
+.coverage
+
+!tests/firmware-v0.0.0.bin
+!tests/firmware-v0.0.0.bin.badsig
+!tests/firmware-v0.0.0.bin.sha256.txt
+!tests/firmware-v0.0.0.bin.sig

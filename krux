@@ -23,7 +23,6 @@
 #!/bin/bash
 set -e
 
-SRC_DIR="/src/src"
 FIRMWARE_DIR="/src/firmware"
 SCRIPTS_DIR="$FIRMWARE_DIR/scripts"
 BUILD_DIR="$FIRMWARE_DIR/Kboot/build"
@@ -32,10 +31,10 @@ BUILD_DIR="$FIRMWARE_DIR/Kboot/build"
 getdevice() {
     idV=${1%:*}
     idP=${1#*:}
-    for path in `find /sys/ -name idVendor | rev | cut -d/ -f 2- | rev`; do
+    for path in `(find /sys/ -name idVendor | rev | cut -d/ -f 2- | rev) 2>/dev/null`; do
         if grep -q $idV $path/idVendor; then
             if grep -q $idP $path/idProduct; then
-                find $path -name 'device' | rev | cut -d / -f 2 | rev
+                (find $path -name 'device' | rev | cut -d / -f 2 | rev) 2>/dev/null
             fi
         fi
     done
@@ -49,10 +48,11 @@ panic() {
 if [ "$1" == "setup" ]; then
     docker build . -t krux-builder
 elif [ "$1" == "build" ]; then
-    version="$2"
+    device="$2"
+    version="$3"
     locale="en-US"
-    if [ ! -z "$3" ]; then
-        locale="$3"
+    if [ ! -z "$4" ]; then
+        locale="$4"
     fi
     
     printf "Signer Private Key (Leave empty to generate): "
@@ -69,10 +69,10 @@ elif [ "$1" == "build" ]; then
     export -n SIGNER_PRIVKEY
     unset SIGNER_PRIVKEY
 
-    sed -i -- "s/SIGNER_PUBKEY = '.*'/SIGNER_PUBKEY = '$pubkey'/g" src/firmware.py
-    sed -i -- "s/VERSION = '.*'/VERSION = '$version'/g" src/boot.py
+    sed -i -- "s/SIGNER_PUBKEY = '.*'/SIGNER_PUBKEY = '$pubkey'/g" src/krux/metadata.py
+    sed -i -- "s/VERSION = '.*'/VERSION = '$version'/g" src/krux/metadata.py
 
-    docker build . -t krux-builder --build-arg LOCALE=$locale
+    docker build . -t krux-builder --build-arg DEVICE=$device --build-arg LOCALE=$locale
 
     export SIGNER_PRIVKEY="$privkey"
     sign_cmd="docker create -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 sign.py $BUILD_DIR/firmware.bin"
@@ -85,7 +85,6 @@ elif [ "$1" == "build" ]; then
     docker cp ${CID}:$BUILD_DIR/firmware.bin "firmware-v${version}.bin"
     docker cp ${CID}:$BUILD_DIR/firmware.bin.sig "firmware-v${version}.bin.sig"
     docker cp ${CID}:$BUILD_DIR/firmware.bin.sha256.txt "firmware-v${version}.bin.sha256.txt"
-
     docker rm ${CID}
 
     if [ ! -z "$privkey_cmd" ]; then
@@ -94,10 +93,25 @@ elif [ "$1" == "build" ]; then
     fi
     unset privkey
 elif [ "$1" == "flash" ]; then
-    usb_device_name="$(getdevice 0403:6001)"
+    device="maixpy_m5stickv"
+    if [ ! -z "$2" ]; then
+        device="$2"
+    fi
+
+    device_vendor_product_id=""
+    if [ "$device" == "maixpy_m5stickv" ]; then
+        device_vendor_product_id="0403:6001"
+    fi
+    if [ -z "$device_vendor_product_id" ]; then
+        panic "Unknown device"
+    fi
+
+    usb_device_name_cmd="getdevice $device_vendor_product_id"
+    usb_device_name=$($usb_device_name_cmd)
     if [ -z "$usb_device_name" ]; then
         panic "Failed to find device via USB. Is it connected and powered on?"
     fi
+
     docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
 elif [ "$1" == "clean" ]; then
     rm -rf build
