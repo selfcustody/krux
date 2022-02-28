@@ -38,24 +38,24 @@ from krux.pages.login import Login
 from krux.pages.home import Home
 
 SPLASH = """
-BTCBTCBTCBTCBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-B              T
-C  K  r  u  x  B
-T              C
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTC      BTCBT
-CBTCB      TCBTC
-BTCBT      CBTCB
-TCBTCBTCBTCBTCBT
-""".strip()
+                
+                
+                
+    ██         
+    ██         
+    ██         
+  ██████       
+    ██         
+    ██  ██     
+    ██ ██      
+    ████       
+    ██ ██      
+    ██  ██     
+    ██   ██    
+                
+                
+                
+"""[1:-1]
 
 ctx = Context()
 
