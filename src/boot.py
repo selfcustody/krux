@@ -37,7 +37,8 @@ from krux.context import Context
 from krux.pages.login import Login
 from krux.pages.home import Home
 
-SPLASH = """                
+SPLASH = """
+                
                 
                 
     ██         
@@ -53,8 +54,9 @@ SPLASH = """
     ██   ██    
                 
                 
-                """
-        
+                
+"""[1:-1]
+
 ctx = Context()
 
 ctx.display.flash_text(SPLASH.split('\n'), color=lcd.WHITE, padding=8)
