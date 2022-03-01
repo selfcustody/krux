@@ -190,7 +190,7 @@ class Login(Page):
 
 
     def _load_key_from_keypad(self, title, charset, to_word,
-                                    test_phrase_sentinel=None, autocomplete=None, possible_letters=None):
+                                    test_phrase_sentinel=None, autocomplete=None):
         words = []
         self.ctx.display.draw_hcentered_text(title)
         self.ctx.display.draw_hcentered_text(( 'Proceed?' ), offset_y=self.ctx.display.bottom_line)
@@ -209,8 +209,7 @@ class Login(Page):
                     word = self.capture_from_keypad(
                         ( 'Word %d' ) % (i+1),
                         charset,
-                        autocomplete,
-                        possible_letters
+                        autocomplete
                     )
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
@@ -258,19 +257,7 @@ class Login(Page):
                 return user_input
             return ''
 
-
-        def possible_letters(partial_word):
-            partial_len = len(partial_word)
-            possible_letters_list = ""
-            for word in WORDLIST:
-                if word.startswith(partial_word):
-                    if len(word) > partial_len:
-                        active_letter = word[partial_len]
-                        if active_letter not in possible_letters_list:
-                            possible_letters_list += active_letter
-            return possible_letters_list
-
-        return self._load_key_from_keypad(title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete, possible_letters)
+        return self._load_key_from_keypad(title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete)
 
     def load_key_from_digits(self):
         """Handler for the 'via numbers' menu item"""

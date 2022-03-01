@@ -46,7 +46,7 @@ class Page:
         self._enter_state = -1
         self._page_state = -1
 
-    def capture_from_keypad(self, title, keys, autocomplete=None, possible_letters=None):
+    def capture_from_keypad(self, title, keys, autocomplete=None):
         """Displays a key pad and captures a series of keys until the user returns.
            Returns a string.
         """
@@ -55,7 +55,6 @@ class Page:
 
         buffer = ''
         cur_key_index = 0
-        valid_letters = keys
         while True:
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(title)
@@ -67,10 +66,7 @@ class Page:
                     key_index = x + y * pad_width
                     key = None
                     if key_index < len(keys):
-                        if keys[key_index] in valid_letters:
-                            key = keys[key_index]
-                        else:
-                            key = '_'
+                        key = keys[key_index]
                     elif key_index == len(keys):
                         key = DEL
                     elif key_index == len(keys) + 1:
@@ -99,20 +95,8 @@ class Page:
                     if new_buffer is not None:
                         buffer = new_buffer
                         cur_key_index = len(keys) + 1
-                valid_letters = possible_letters(buffer)
             elif btn == BUTTON_PAGE:
                 cur_key_index = (cur_key_index + 1) % (len(keys) + 2)
-            in_deactivated_key = True
-            while in_deactivated_key:
-                if cur_key_index >= len(keys):
-                    in_deactivated_key = False
-                else:
-                    if keys[cur_key_index] in valid_letters:
-                        in_deactivated_key = False
-                    else:
-                        cur_key_index = (cur_key_index + 1) % (len(keys) + 2)
-
-
         return buffer
 
     def capture_qr_code(self):
