@@ -33,6 +33,7 @@ if firmware.upgrade():
 # Note: These imports come after the firmware upgrade check
 #       to allow it to have more memory to work with
 import lcd
+from krux.i18n import t
 from krux.context import Context
 from krux.pages.login import Login
 from krux.pages.home import Home
@@ -65,10 +66,13 @@ while True:
     if not Login(ctx).run():
         break
 
+    if ctx.wallet is None:
+        continue
+
     if not Home(ctx).run():
         break
 
-ctx.display.flash_text(( 'Shutting down..' ))
+ctx.display.flash_text(t('Shutting down..'))
 
 ctx.clear()
 

@@ -5,7 +5,7 @@ from ..shared_mocks import *
 class MockPage(Page):
     def __init__(self, ctx):
         Page.__init__(self, ctx, Menu(ctx, [
-            (( 'Test' ), mock.MagicMock()),
+            (('Test'), mock.MagicMock()),
         ]))
 
 def test_init():

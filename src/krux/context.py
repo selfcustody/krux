@@ -22,7 +22,7 @@
 import gc
 import board
 from .logging import Logger
-from .settings import Settings
+from .settings import settings
 from .display import Display
 from .input import Input
 from .camera import Camera
@@ -34,7 +34,7 @@ class Context:
     """
 
     def __init__(self):
-        self.log = Logger(Settings.Log.path, Settings.Log.level)
+        self.log = Logger(settings.log.path, settings.log.level)
         self.display = Display()
         self.input = Input()
         self.camera = Camera()

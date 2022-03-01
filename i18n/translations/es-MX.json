@@ -40,6 +40,8 @@
     "Load?": "Cargar?",
     "Loaded wallet": "La cartera ha sido cargada",
     "Loading..": "Cargando..",
+    "Locale": "Idioma",
+    "Locale\n%s": "Idioma\n%s",
     "Log Level\n%s": "Nivel de registro\n%s",
     "Missing signature file": "Falta de firma faltante",
     "Mnemonic": "Mnemotécnica",

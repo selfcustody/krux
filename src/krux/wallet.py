@@ -28,6 +28,7 @@ from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
 from embit.script import Script, address_to_scriptpubkey
 import urtypes
+from .i18n import t
 
 class Wallet:
     """Represents the wallet that the current key belongs to"""
@@ -41,7 +42,7 @@ class Wallet:
         self.policy = None
         if not self.key.multisig:
             self.descriptor = Descriptor.from_string('wpkh(%s/{0,1}/*)' % self.key.xpub_btc_core())
-            self.label = ( 'Single-key' )
+            self.label = t('Single-key')
             self.policy = { 'type': self.descriptor.scriptpubkey_type() }
 
     def is_multisig(self):
@@ -74,7 +75,7 @@ class Wallet:
 
         if self.descriptor.key:
             if not self.label:
-                self.label = ( 'Single-key' )
+                self.label = t('Single-key')
             self.policy = { 'type': self.descriptor.scriptpubkey_type() }
         else:
             m = int(str(self.descriptor.miniscript.args[0]))
@@ -83,7 +84,7 @@ class Wallet:
             if self.descriptor.is_sorted:
                 cosigners = sorted(cosigners)
             if not self.label:
-                self.label = ( '%d of %d multisig' ) % (m, n)
+                self.label = t('%d of %d multisig') % (m, n)
             self.policy = {
                 'type': self.descriptor.scriptpubkey_type(),
                 'm': m,

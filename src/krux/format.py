@@ -19,6 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+from .i18n import t
+
 SATS_PER_BTC = 100000000
 
 def satcomma(amount):
@@ -28,7 +30,7 @@ def satcomma(amount):
     amount_str = '%.8f' % round(amount / SATS_PER_BTC, 8)
     msb = amount_str[:-9] # most significant bitcoin heh heh heh
     lsb = amount_str[len(msb)+1:]
-    return _add_commas(msb, ( ',' )) + ( '.' ) + _add_commas(lsb, ( ',' ))
+    return _add_commas(msb, t(',')) + t('.') + _add_commas(lsb, t(','))
 
 def _add_commas(number, comma_sep=','):
     """Returns a number separated with commas"""

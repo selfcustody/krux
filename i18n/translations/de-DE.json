@@ -40,6 +40,8 @@
     "Load?": "Laden?",
     "Loaded wallet": "Geladene Wallet",
     "Loading..": "Wird geladen..",
+    "Locale": "Gebietsschema",
+    "Locale\n%s": "Gebietsschema\n%s",
     "Log Level\n%s": "Protokollebene\n%s",
     "Missing signature file": "Fehlende Signaturdatei",
     "Mnemonic": "Mnemonic",

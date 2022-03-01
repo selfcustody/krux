@@ -40,6 +40,8 @@
     "Load?": "Charger?",
     "Loaded wallet": "Portefeuille chargé",
     "Loading..": "Chargement..",
+    "Locale": "Paramètres régionaux",
+    "Locale\n%s": "Paramètres régionaux\n%s",
     "Log Level\n%s": "Niveau de journalisation\n%s",
     "Missing signature file": "Fichier de signature manquant",
     "Mnemonic": "Mnémonique",

@@ -40,6 +40,8 @@
     "Load?": "Load?",
     "Loaded wallet": "Loaded wallet",
     "Loading..": "Loading..",
+    "Locale": "Locale",
+    "Locale\n%s": "Locale\n%s",
     "Log Level\n%s": "Log Level\n%s",
     "Missing signature file": "Missing signature file",
     "Mnemonic": "Mnemonic",

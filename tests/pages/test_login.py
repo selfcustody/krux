@@ -1,4 +1,4 @@
-from urtypes.bytes import Bytes
+from krux.settings import I18n
 from ..shared_mocks import *
 from krux.input import BUTTON_ENTER, BUTTON_PAGE
 from krux.qr import FORMAT_UR, FORMAT_NONE
@@ -353,7 +353,7 @@ def test_network(mocker):
         mock.call('Network\ntestnet'),
         mock.call('Network\nmainnet'),
     ])
-    assert krux.pages.login.Settings.network == 'main'
+    assert krux.pages.login.settings.network == 'main'
     
 def test_printer(mocker):
     import krux
@@ -378,7 +378,35 @@ def test_printer(mocker):
         mock.call('Baudrate\n19200'),
         mock.call('Baudrate\n9600'),
     ])
-    assert krux.pages.login.Settings.Printer.Thermal.baudrate == 9600
+    assert krux.pages.login.settings.printer.thermal.baudrate == 9600
+    
+def test_locale(mocker):
+    import krux
+    mocker.patch('krux.printers.thermal.AdafruitPrinter', new=mock.MagicMock())
+    from krux.pages.login import Login
+    
+    cases = [
+        ({'Locale\n%s': 'Locale\n%s'}, [I18n.locales[(I18n.locales.index('en-US') + i) % len(I18n.locales)] for i in range(len(I18n.locales))]),
+        (None, ['en-US' for _ in range(len(I18n.locales))])
+    ]
+    for case in cases:
+        mocker.patch('krux.pages.login.translations', new=mock.MagicMock(return_value=case[0]))
+
+        ctx = mock.MagicMock(
+            input=mock.MagicMock(wait_for_button=mock.MagicMock(
+                side_effect=(BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER)
+            )),
+            display=mock.MagicMock(to_lines=mock.MagicMock(
+                return_value=['']
+            ))
+        )
+        login = Login(ctx)
+        
+        login.locale()
+        
+        assert ctx.input.wait_for_button.call_count == 6
+        ctx.display.draw_centered_text.assert_has_calls([mock.call('Locale\n%s' % locale) for locale in case[1]])
+        assert krux.pages.login.settings.i18n.locale == 'en-US'
     
 def test_debug(mocker):
     import krux
@@ -407,7 +435,7 @@ def test_debug(mocker):
         mock.call('Log Level\nERROR'),
         mock.call('Log Level\nNONE'),
     ])
-    assert krux.pages.login.Settings.Log.level == NONE
+    assert krux.pages.login.settings.log.level == NONE
     
 def test_about(mocker):
     import krux

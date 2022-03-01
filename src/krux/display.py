@@ -24,6 +24,7 @@ import math
 import lcd
 import board
 from machine import I2C
+from .i18n import t
 
 DEFAULT_PADDING = 10
 FONT_SIZE = 7
@@ -31,8 +32,8 @@ FONT_SIZE = 7
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
-DEL = ( 'Del' )
-GO  = ( 'Go' )
+DEL = t('Del')
+GO  = t('Go')
 
 class Display:
     """Display is a singleton interface for interacting with the device's display"""
@@ -138,7 +139,11 @@ class Display:
                     words.append(subword)
 
                 if len(subwords) > 1 and i < len(subwords) - 1:
-                    words[-1] += '\n'
+                    # Only add newline to the end of the word if the word
+                    # is less than the amount of columns. If it's exactly equal,
+                    # a newline will be implicit.
+                    if len(words[-1]) < columns:
+                        words[-1] += '\n'
 
         num_words = len(words)
 

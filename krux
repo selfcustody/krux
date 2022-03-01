@@ -50,10 +50,6 @@ if [ "$1" == "setup" ]; then
 elif [ "$1" == "build" ]; then
     device="$2"
     version="$3"
-    locale="en-US"
-    if [ ! -z "$4" ]; then
-        locale="$4"
-    fi
     
     printf "Signer Private Key (Leave empty to generate): "
     IFS= read -rs privkey
@@ -72,7 +68,7 @@ elif [ "$1" == "build" ]; then
     sed -i -- "s/SIGNER_PUBKEY = '.*'/SIGNER_PUBKEY = '$pubkey'/g" src/krux/metadata.py
     sed -i -- "s/VERSION = '.*'/VERSION = '$version'/g" src/krux/metadata.py
 
-    docker build . -t krux-builder --build-arg DEVICE=$device --build-arg LOCALE=$locale
+    docker build . -t krux-builder --build-arg DEVICE=$device
 
     export SIGNER_PRIVKEY="$privkey"
     sign_cmd="docker create -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 sign.py $BUILD_DIR/firmware.bin"
