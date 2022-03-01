@@ -69,7 +69,6 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.0/cmake-3.21.0
 RUN pip3 install astor
 
 FROM build-base as build-software
-ARG LOCALE="en-US"
 ARG DEVICE="maixpy_m5stickv"
 COPY . /src
 WORKDIR /src
@@ -88,8 +87,6 @@ RUN mkdir build && \
     find build -type d -name '__pycache__' -exec rm -rv {} + -depth && \
     find build -type d -name '.pytest_cache' -exec rm -rv {} + -depth && \
     find build -type d -name '*.egg-info' -exec rm -rv {} + -depth
-RUN cd i18n && \
-    python3 i18n.py translate "${LOCALE}" /src/build
 RUN find /src/build -type f -name \*.py -exec sh -c "python3 ./firmware/scripts/minify.py {}" \;
 
 FROM build-software AS build-firmware

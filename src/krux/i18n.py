@@ -19,34 +19,25 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from ..settings import settings
-class Printer:
-    """Printer is a singleton interface for interacting with the device's printer
+try:
+    import ujson as json
+except ImportError:
+    import json
+from .settings import settings
 
-       Must be subclassed.
-    """
-    def __init__(self):
-        raise NotImplementedError()
+TRANSLATIONS_FILE = '/sd/translations/%s.json'
 
-    def qr_data_width(self):
-        """Returns a smaller width for the QR to be generated
-           within, which will then be scaled up to fit the paper's width.
-           We do this because the QR would be too dense to be readable
-           by most devices otherwise.
-        """
-        raise NotImplementedError()
+def translations(locale):
+    """Returns the translations map for the given locale"""
+    try:
+        return json.load(open(TRANSLATIONS_FILE % locale, 'r'))
+    except:
+        pass
+    return None
 
-    def clear(self):
-        """Clears the printer's memory, resetting it"""
-        raise NotImplementedError()
-
-    def print_qr_code(self, qr_code):
-        """Prints a QR code, scaling it up as large as possible"""
-        raise NotImplementedError()
-
-def create_printer():
-    """Instantiates a new printer dynamically based on the default in Settings """
-    return getattr(
-        __import__(settings.printer.module, None, globals(), [None], 1),
-        settings.printer.cls
-    )()
+def t(slug):
+    """Translates a slug according to the current locale"""
+    lookup = translations(settings.i18n.locale)
+    if not lookup or slug not in lookup:
+        return slug
+    return lookup[slug]

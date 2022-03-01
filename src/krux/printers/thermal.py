@@ -40,7 +40,7 @@ import math
 import board
 from fpioa_manager import fm
 from machine import UART
-from ..settings import Settings
+from ..settings import settings
 from . import Printer
 
 class AdafruitPrinter(Printer):
@@ -57,11 +57,11 @@ class AdafruitPrinter(Printer):
 
         self.uart_conn = UART(
             UART.UART2,
-            Settings.Printer.Thermal.baudrate
+            settings.printer.thermal.baudrate
         )
 
         self.character_height = 24
-        self.byte_time = 11.0 / float(Settings.Printer.Thermal.baudrate)
+        self.byte_time = 11.0 / float(settings.printer.thermal.baudrate)
         self.dot_print_time = 0.03
         self.dot_feed_time = 0.0021
 
@@ -183,7 +183,7 @@ class AdafruitPrinter(Printer):
         width = len(lines)
         height = len(lines)
 
-        scale = Settings.Printer.Thermal.paper_width // width
+        scale = settings.printer.thermal.paper_width // width
         for y in range(height):
             # Scale the line (width) by scaling factor
             line_y = ''.join([char * scale for char in lines[y]])

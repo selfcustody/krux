@@ -24,14 +24,13 @@ import json
 from os import listdir, walk
 from os.path import isfile, join
 import re
-import shutil
 
 SRC_DIR = '../src'
 TRANSLATION_FILES_DIR = 'translations'
 
 def find_translation_slugs():
     """Searches the src directory for all 'slugs' that should be translated
-       by looking for matches of the pattern ( 'string' )
+       by looking for matches of the pattern t('string')
     """
     slugs = {}
     for (dirpath, _, filenames) in walk(SRC_DIR):
@@ -40,7 +39,7 @@ def find_translation_slugs():
                 continue
             with open(join(dirpath, filename), 'r') as src_file:
                 contents = src_file.read()
-                for match in re.findall(r'\( \'(.+?)\' \)', contents):
+                for match in re.findall(r'[^A-Za-z0-9]t\(\'(.+?)\'\)', contents):
                     slugs[match] = True
     return slugs
 
@@ -87,26 +86,6 @@ def main():
             translations[slug.replace('\\n', '\n')] = ''
         with open(join(TRANSLATION_FILES_DIR, '%s.json' % locale), 'w') as translation_file:
             translation_file.write(json.dumps(translations, sort_keys=True, indent=4))
-    elif sys.argv[1] == 'translate':
-        locale = sys.argv[2]
-        output_dir = sys.argv[3]
-        with open(join(TRANSLATION_FILES_DIR, '%s.json' % locale), 'r') as translation_file:
-            translations = load_translations(translation_file)
-            for (dirpath, _, filenames) in walk(output_dir):
-                for filename in filenames:
-                    if not filename.endswith('.py'):
-                        continue
-
-                    with open(join(dirpath, filename), 'r') as src_file:
-                        contents = src_file.read()
-                        for slug, translation in translations.items():
-                            contents = contents.replace(
-                                '( \'%s\' )' % slug,
-                                '"""%s"""' % translation
-                            )
-                        with open(join(dirpath, filename + '.tmp'), 'w') as tmp_src_file:
-                            tmp_src_file.write(contents)
-                    shutil.move(join(dirpath, filename + '.tmp'), join(dirpath, filename))
 
 if __name__ == '__main__':
     main()

@@ -27,6 +27,7 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_encode, base_decode
 from .format import satcomma
+from .i18n import t
 
 class PSBTSigner:
     """Responsible for validating and signing PSBTs"""
@@ -132,7 +133,7 @@ class PSBTSigner:
             else:
                 spending += self.psbt.tx.vout[i].value
                 messages.append(
-                    ( 'Sending:\n₿%s\n\nTo:\n%s' )
+                    t('Sending:\n₿%s\n\nTo:\n%s')
                     %
                     (
                         satcomma(self.psbt.tx.vout[i].value),
@@ -140,7 +141,7 @@ class PSBTSigner:
                     )
                 )
         fee = inp_amount - change - spending
-        messages.append(( 'Fee:\n₿%s' ) % satcomma(fee))
+        messages.append(t('Fee:\n₿%s') % satcomma(fee))
         return messages
 
     def sign(self):

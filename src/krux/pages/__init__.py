@@ -26,6 +26,7 @@ from ur.ur import UR
 from ..input import BUTTON_ENTER, BUTTON_PAGE
 from ..display import DEFAULT_PADDING, DEL, GO
 from ..qr import to_qr_codes
+from ..i18n import t
 
 QR_ANIMATION_INTERVAL_MS = 100
 
@@ -164,7 +165,7 @@ class Page:
                 code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
                 code, num_parts = next(code_generator)
             self.ctx.display.draw_qr_code(5, code)
-            subtitle = ( 'Part\n%d / %d' ) % (i+1, num_parts) if title is None else title
+            subtitle = t('Part\n%d / %d') % (i+1, num_parts) if title is None else title
             offset_y = 175 if title is None else 138
             self.ctx.display.draw_hcentered_text(
                 subtitle,
@@ -184,14 +185,14 @@ class Page:
         word_list = [str(i+1) + '.' + ('  ' if i + 1 < 10 else ' ') + word
                      for i, word in enumerate(words)]
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(( 'BIP39 Mnemonic' ))
+        self.ctx.display.draw_hcentered_text(t('BIP39 Mnemonic'))
         for i, word in enumerate(word_list[:12]):
             offset_y = 40 + (i * self.ctx.display.line_height())
             lcd.draw_string(DEFAULT_PADDING, offset_y, word, lcd.WHITE, lcd.BLACK)
         if len(word_list) > 12:
             self.ctx.input.wait_for_button()
             self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(( 'BIP39 Mnemonic' ))
+            self.ctx.display.draw_hcentered_text(t('BIP39 Mnemonic'))
             for i, word in enumerate(word_list[12:]):
                 offset_y = 40 + (i * self.ctx.display.line_height())
                 lcd.draw_string(DEFAULT_PADDING, offset_y, word, lcd.WHITE, lcd.BLACK)
@@ -204,7 +205,7 @@ class Page:
             return
         self.ctx.display.clear()
         time.sleep_ms(1000)
-        self.ctx.display.draw_centered_text(( 'Print to QR?' ))
+        self.ctx.display.draw_centered_text(t('Print to QR?'))
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
             i = 0
@@ -212,7 +213,7 @@ class Page:
                 if i == count:
                     break
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(( 'Printing\n%d / %d' ) % (i+1, count))
+                self.ctx.display.draw_centered_text(t('Printing\n%d / %d') % (i+1, count))
                 self.ctx.printer.print_qr_code(qr_code)
                 i += 1
 
@@ -255,7 +256,7 @@ class Menu:
                         'Exception occurred in menu item "%s"' % self.menu[selected_item_index][0]
                     )
                     self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(( 'Error:\n%s' ) % repr(e), lcd.RED)
+                    self.ctx.display.draw_centered_text(t('Error:\n%s') % repr(e), lcd.RED)
                     self.ctx.input.wait_for_button()
             else:
                 selected_item_index = (selected_item_index + 1) % len(self.menu)

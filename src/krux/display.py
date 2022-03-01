@@ -24,6 +24,7 @@ import math
 import lcd
 import board
 from machine import I2C
+from .i18n import t
 
 DEFAULT_PADDING = 10
 FONT_SIZE = 7
@@ -31,8 +32,8 @@ FONT_SIZE = 7
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
-DEL = ( 'Del' )
-GO  = ( 'Go' )
+DEL = t('Del')
+GO  = t('Go')
 
 class Display:
     """Display is a singleton interface for interacting with the device's display"""
