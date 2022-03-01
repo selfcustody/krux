@@ -79,6 +79,7 @@ class Settings:
     """Stores configurable user settings"""
 
     namespace = 'settings'
+    networks = ['main', 'test']
     network = Setting('network', 'main')
 
     def __init__(self):

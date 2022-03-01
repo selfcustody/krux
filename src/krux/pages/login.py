@@ -300,7 +300,7 @@ class Login(Page):
 
     def network(self):
         """Handler for the 'network' menu item"""
-        networks = ['main', 'test']
+        networks = settings.networks
 
         starting_network = settings.network
         while True:
