@@ -139,7 +139,11 @@ class Display:
                     words.append(subword)
 
                 if len(subwords) > 1 and i < len(subwords) - 1:
-                    words[-1] += '\n'
+                    # Only add newline to the end of the word if the word
+                    # is less than the amount of columns. If it's exactly equal,
+                    # a newline will be implicit.
+                    if len(words[-1]) < columns:
+                        words[-1] += '\n'
 
         num_words = len(words)
 
