@@ -28,9 +28,10 @@ from .input import Input
 from .camera import Camera
 from .light import Light
 
+
 class Context:
     """Context is a singleton containing all 'global' state that lives throughout the
-       duration of the program, including references to all device interfaces.
+    duration of the program, including references to all device interfaces.
     """
 
     def __init__(self):
@@ -38,7 +39,7 @@ class Context:
         self.display = Display()
         self.input = Input()
         self.camera = Camera()
-        self.light = Light() if 'LED_W' in board.config['krux.pins'] else None
+        self.light = Light() if "LED_W" in board.config["krux.pins"] else None
         self.printer = None
         self.wallet = None
 

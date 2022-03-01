@@ -21,18 +21,19 @@
 # THE SOFTWARE.
 from binascii import a2b_base64, b2a_base64
 
-B43CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:'
+B43CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:"
 assert len(B43CHARS) == 43
 
-B58CHARS = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+B58CHARS = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 assert len(B58CHARS) == 58
+
 
 def base_decode(v, base):
     """Decodes v from base encoding and returns the decoded bytes"""
     if base not in (43, 58, 64):
-        raise ValueError('not supported base: {}'.format(base))
+        raise ValueError("not supported base: {}".format(base))
 
-    if v == b'':
+    if v == b"":
         return v
 
     # Base64 is a special case: We just use binascii's implementation without
@@ -46,7 +47,7 @@ def base_decode(v, base):
     for char in reversed(v):
         digit = chars.find(bytes([char]).decode())
         if digit == -1:
-            raise ValueError('forbidden character {} for base {}'.format(char, base))
+            raise ValueError("forbidden character {} for base {}".format(char, base))
         long_value += digit * power_of_base
         power_of_base *= base
     result = bytearray()
@@ -63,15 +64,16 @@ def base_decode(v, base):
         else:
             break
     if n_pad > 0:
-        result.extend(b'\x00' * n_pad)
+        result.extend(b"\x00" * n_pad)
     return bytes(reversed(result))
+
 
 def base_encode(v, base):
     """Encodes the data in v as base and returns as bytes"""
     if base not in (43, 58, 64):
-        raise ValueError('not supported base: {}'.format(base))
+        raise ValueError("not supported base: {}".format(base))
 
-    if v == b'':
+    if v == b"":
         return v
 
     # Base64 is a special case: We just use binascii's implementation without

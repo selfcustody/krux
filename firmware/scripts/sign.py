@@ -29,7 +29,7 @@ from embit.util import secp256k1
 def fsize(firmware_filename):
     """Returns the size of the firmware"""
     size = 0
-    with open(firmware_filename, 'rb', buffering=0) as file:
+    with open(firmware_filename, "rb", buffering=0) as file:
         while True:
             chunk = file.read(128)
             if not chunk:
@@ -37,12 +37,13 @@ def fsize(firmware_filename):
             size += len(chunk)
     return size
 
+
 # Pulled from firmware.py
 def sha256(firmware_filename, firmware_size):
     """Returns the sha256 hash of the firmware"""
     hasher = hashlib.sha256()
-    hasher.update(b'\x00' + firmware_size.to_bytes(4, 'little'))
-    with open(firmware_filename, 'rb', buffering=0) as file:
+    hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
+    with open(firmware_filename, "rb", buffering=0) as file:
         while True:
             chunk = file.read(128)
             if not chunk:
@@ -50,23 +51,24 @@ def sha256(firmware_filename, firmware_size):
             hasher.update(chunk)
     return hasher.digest()
 
-private_key_hex = os.environ.get('SIGNER_PRIVKEY')
+
+private_key_hex = os.environ.get("SIGNER_PRIVKEY")
 if not private_key_hex:
-    sys.exit('Private key must be provided')
+    sys.exit("Private key must be provided")
 
 if len(sys.argv) != 2:
-    sys.exit('Firmware must be provided')
+    sys.exit("Firmware must be provided")
 
 firmware_path = sys.argv[1]
 private_key = binascii.unhexlify(private_key_hex)
 
 if not secp256k1.ec_seckey_verify(private_key):
-    sys.exit('Private key is invalid')
+    sys.exit("Private key is invalid")
 
 firmware_hash = sha256(firmware_path, fsize(firmware_path))
-with open(firmware_path + '.sha256.txt', 'w') as hashfile:
+with open(firmware_path + ".sha256.txt", "w") as hashfile:
     hashfile.write(binascii.hexlify(firmware_hash).decode())
 
 sig = secp256k1.ecdsa_sign(firmware_hash, private_key)
-with open(firmware_path + '.sig', 'wb') as sigfile:
+with open(firmware_path + ".sig", "wb") as sigfile:
     sigfile.write(sig)

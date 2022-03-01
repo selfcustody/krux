@@ -21,21 +21,25 @@
 # THE SOFTWARE.
 import sys
 
-with open(sys.argv[1], 'r') as input_file:
+with open(sys.argv[1], "r") as input_file:
     # Read in a hex formatted bitmap font file
     lines = input_file.readlines()
 
     # Strip out the unicode code point prefix at the beginning of each line
-    lines = map(lambda line: line.split(':')[1].rstrip('\n'), lines)
+    lines = map(lambda line: line.split(":")[1].rstrip("\n"), lines)
     # Break up each line's hex into comma-separated bytes
-    lines = list(map(
-        lambda line: ','.join(['0x' + line[i] + line[i+1] for i in range(0, len(line), 2)]),
-        lines
-    ))
+    lines = list(
+        map(
+            lambda line: ",".join(
+                ["0x" + line[i] + line[i + 1] for i in range(0, len(line), 2)]
+            ),
+            lines,
+        )
+    )
 
     # Use only the first $limit bitmaps
     limit = len(lines)
     if len(sys.argv) == 4:
         limit = sys.argv[3]
 
-    print(',\n'.join(list(lines)[:limit]))
+    print(",\n".join(list(lines)[:limit]))

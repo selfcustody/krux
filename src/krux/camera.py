@@ -24,6 +24,7 @@ import sensor
 import lcd
 from .qr import QRPartParser
 
+
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
@@ -39,8 +40,8 @@ class Camera:
 
     def capture_qr_code_loop(self, callback):
         """Captures either singular or animated QRs and parses their contents until
-           all parts of the message have been captured. The part data are then ordered
-           and assembled into one message and returned.
+        all parts of the message have been captured. The part data are then ordered
+        and assembled into one message and returned.
         """
         self.initialize_sensor()
         sensor.run(1)
@@ -59,7 +60,7 @@ class Camera:
             img = sensor.snapshot()
             gc.collect()
             hist = img.get_histogram()
-            if 'histogram' not in str(type(hist)):
+            if "histogram" not in str(type(hist)):
                 continue
             # Convert the image to black and white by using Otsu's thresholding.
             # This is done to account for spots, blotches, and streaks in the code

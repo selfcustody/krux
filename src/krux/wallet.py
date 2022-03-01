@@ -30,6 +30,7 @@ from embit.script import Script, address_to_scriptpubkey
 import urtypes
 from .i18n import t
 
+
 class Wallet:
     """Represents the wallet that the current key belongs to"""
 
@@ -41,9 +42,11 @@ class Wallet:
         self.label = None
         self.policy = None
         if not self.key.multisig:
-            self.descriptor = Descriptor.from_string('wpkh(%s/{0,1}/*)' % self.key.xpub_btc_core())
-            self.label = t('Single-key')
-            self.policy = { 'type': self.descriptor.scriptpubkey_type() }
+            self.descriptor = Descriptor.from_string(
+                "wpkh(%s/{0,1}/*)" % self.key.xpub_btc_core()
+            )
+            self.label = t("Single-key")
+            self.policy = {"type": self.descriptor.scriptpubkey_type()}
 
     def is_multisig(self):
         """Returns a boolean indicating whether or not the wallet is multisig"""
@@ -59,14 +62,14 @@ class Wallet:
 
         if self.is_multisig():
             if not descriptor.is_basic_multisig:
-                raise ValueError('not multisig')
+                raise ValueError("not multisig")
             if self.key.xpub() not in [key.key.to_base58() for key in descriptor.keys]:
-                raise ValueError('xpub not a cosigner')
+                raise ValueError("xpub not a cosigner")
         else:
             if not descriptor.key:
-                raise ValueError('not single-key')
+                raise ValueError("not single-key")
             if self.key.xpub() != descriptor.key.key.to_base58():
-                raise ValueError('xpub does not match')
+                raise ValueError("xpub does not match")
 
         self.wallet_data = wallet_data
         self.wallet_qr_format = qr_format
@@ -75,8 +78,8 @@ class Wallet:
 
         if self.descriptor.key:
             if not self.label:
-                self.label = t('Single-key')
-            self.policy = { 'type': self.descriptor.scriptpubkey_type() }
+                self.label = t("Single-key")
+            self.policy = {"type": self.descriptor.scriptpubkey_type()}
         else:
             m = int(str(self.descriptor.miniscript.args[0]))
             n = len(self.descriptor.keys)
@@ -84,12 +87,12 @@ class Wallet:
             if self.descriptor.is_sorted:
                 cosigners = sorted(cosigners)
             if not self.label:
-                self.label = t('%d of %d multisig') % (m, n)
+                self.label = t("%d of %d multisig") % (m, n)
             self.policy = {
-                'type': self.descriptor.scriptpubkey_type(),
-                'm': m,
-                'n': n,
-                'cosigners': cosigners
+                "type": self.descriptor.scriptpubkey_type(),
+                "m": m,
+                "n": n,
+                "cosigners": cosigners,
             }
 
     def wallet_qr(self):
@@ -105,9 +108,10 @@ class Wallet:
             )
             i += 1
 
+
 def to_unambiguous_descriptor(descriptor):
     """If child derivation info is missing to generate receive addresses,
-       use the default scheme
+    use the default scheme
     """
     if descriptor.key:
         if descriptor.key.allowed_derivation is None:
@@ -120,11 +124,12 @@ def to_unambiguous_descriptor(descriptor):
                     key.allowed_derivation = AllowedDerivation.default()
     return descriptor
 
+
 def parse_wallet(wallet_data):
     """Exhaustively tries to parse the wallet data from a known format, returning
-       a descriptor and label if possible.
+    a descriptor and label if possible.
 
-       If the descriptor cannot be derived, an exception is raised.
+    If the descriptor cannot be derived, an exception is raised.
     """
     if isinstance(wallet_data, UR):
         # Try to parse as a Crypto-Output type
@@ -138,63 +143,73 @@ def parse_wallet(wallet_data):
         wallet_data = urtypes.Bytes.from_cbor(wallet_data.cbor).data
 
     # Process as a string
-    wallet_data = wallet_data.decode() if not isinstance(wallet_data, str) else wallet_data
+    wallet_data = (
+        wallet_data.decode() if not isinstance(wallet_data, str) else wallet_data
+    )
 
     # Try to parse as JSON and look for a 'descriptor' key
     try:
         wallet_json = json.loads(wallet_data)
-        if 'descriptor' in wallet_json:
-            descriptor = Descriptor.from_string(wallet_json['descriptor'])
-            label = wallet_json['label'] if 'label' in wallet_json else None
+        if "descriptor" in wallet_json:
+            descriptor = Descriptor.from_string(wallet_json["descriptor"])
+            label = wallet_json["label"] if "label" in wallet_json else None
             return descriptor, label
         raise KeyError('"descriptor" key not found in JSON')
     except KeyError:
-        raise ValueError('invalid wallet format')
+        raise ValueError("invalid wallet format")
     except:
         pass
 
     # Try to parse as a key-value file
     try:
         key_vals = []
-        for word in wallet_data.split(':'):
-            for key_val in word.split('\n'):
+        for word in wallet_data.split(":"):
+            for key_val in word.split("\n"):
                 key_val = key_val.strip()
-                if key_val != '':
+                if key_val != "":
                     key_vals.append(key_val)
 
-        keys_present = [key in key_vals for key in ['Format', 'Policy', 'Derivation']]
+        keys_present = [key in key_vals for key in ["Format", "Policy", "Derivation"]]
         if any(keys_present):
             if not all(keys_present):
-                raise KeyError('"Format", "Policy", and "Derivation" keys not found in INI file')
+                raise KeyError(
+                    '"Format", "Policy", and "Derivation" keys not found in INI file'
+                )
 
-            script = key_vals[key_vals.index('Format') + 1].lower()
-            if script != 'p2wsh':
-                raise ValueError('invalid script type: %s' % script)
+            script = key_vals[key_vals.index("Format") + 1].lower()
+            if script != "p2wsh":
+                raise ValueError("invalid script type: %s" % script)
 
-            policy = key_vals[key_vals.index('Policy') + 1]
-            m = int(policy[:policy.index('of')].strip())
-            n = int(policy[policy.index('of')+2:].strip())
+            policy = key_vals[key_vals.index("Policy") + 1]
+            m = int(policy[: policy.index("of")].strip())
+            n = int(policy[policy.index("of") + 2 :].strip())
 
             keys = []
             for i in range(len(key_vals)):
                 xpub = key_vals[i]
-                if xpub.lower().startswith('xpub') or xpub.lower().startswith('tpub'):
-                    fingerprint = key_vals[i-1]
+                if xpub.lower().startswith("xpub") or xpub.lower().startswith("tpub"):
+                    fingerprint = key_vals[i - 1]
                     keys.append((xpub, fingerprint))
 
             if len(keys) != n:
-                raise ValueError('expected %d keys, found %d' % (n, len(keys)))
+                raise ValueError("expected %d keys, found %d" % (n, len(keys)))
 
-            derivation = key_vals[key_vals.index('Derivation') + 1]
+            derivation = key_vals[key_vals.index("Derivation") + 1]
 
             keys.sort()
-            keys = ['[%s/%s]%s' % (key[1], derivation[2:], key[0]) for key in keys]
+            keys = ["[%s/%s]%s" % (key[1], derivation[2:], key[0]) for key in keys]
 
-            descriptor = Descriptor.from_string(('wsh(sortedmulti(%d,' % m) + ','.join(keys) + '))')
-            label = key_vals[key_vals.index('Name') + 1] if key_vals.index('Name') >= 0 else None
+            descriptor = Descriptor.from_string(
+                ("wsh(sortedmulti(%d," % m) + ",".join(keys) + "))"
+            )
+            label = (
+                key_vals[key_vals.index("Name") + 1]
+                if key_vals.index("Name") >= 0
+                else None
+            )
             return descriptor, label
     except:
-        raise ValueError('invalid wallet format')
+        raise ValueError("invalid wallet format")
 
     # Try to parse directly as a descriptor
     try:
@@ -203,17 +218,18 @@ def parse_wallet(wallet_data):
     except:
         pass
 
-    raise ValueError('invalid wallet format')
+    raise ValueError("invalid wallet format")
+
 
 def parse_address(address_data):
     """Exhaustively tries to parse an address from a known format, returning
-       the address if possible.
+    the address if possible.
 
-       If the address cannot be derived, an exception is raised.
+    If the address cannot be derived, an exception is raised.
     """
     addr = address_data
-    if address_data.lower().startswith('bitcoin:'):
-        addr_end = address_data.find('?')
+    if address_data.lower().startswith("bitcoin:"):
+        addr_end = address_data.find("?")
         if addr_end == -1:
             addr_end = len(address_data)
         addr = address_data[8:addr_end]
@@ -222,6 +238,6 @@ def parse_address(address_data):
         sc = address_to_scriptpubkey(addr)
         assert isinstance(sc, Script)
     except:
-        raise ValueError('invalid address')
+        raise ValueError("invalid address")
 
     return addr

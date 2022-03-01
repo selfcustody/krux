@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-#*************************************************************************
+# *************************************************************************
 # This is a Python library for the Adafruit Thermal Printer.
 # Pick one up at --> http://www.adafruit.com/products/597
 # These printers use TTL serial to communicate, 2 pins are required.
@@ -33,7 +33,7 @@
 # Written by Limor Fried/Ladyada for Adafruit Industries.
 # Python port by Phil Burgess for Adafruit Industries.
 # MIT license, all text above must be included in any redistribution.
-#*************************************************************************
+# *************************************************************************
 # pylint: disable=W0231
 import time
 import math
@@ -43,22 +43,25 @@ from machine import UART
 from ..settings import settings
 from . import Printer
 
+
 class AdafruitPrinter(Printer):
     """AdafruitPrinter is a minimal wrapper around a serial connection to
-       to the Adafruit line of thermal printers
+    to the Adafruit line of thermal printers
     """
 
     def __init__(self):
-        if (('UART2_TX' not in board.config['krux.pins']) or
-            ('UART2_RX' not in board.config['krux.pins'])):
-            raise ValueError('missing required ports')
-        fm.register(board.config['krux.pins']['UART2_TX'], fm.fpioa.UART2_TX, force=False)
-        fm.register(board.config['krux.pins']['UART2_RX'], fm.fpioa.UART2_RX, force=False)
-
-        self.uart_conn = UART(
-            UART.UART2,
-            settings.printer.thermal.baudrate
+        if ("UART2_TX" not in board.config["krux.pins"]) or (
+            "UART2_RX" not in board.config["krux.pins"]
+        ):
+            raise ValueError("missing required ports")
+        fm.register(
+            board.config["krux.pins"]["UART2_TX"], fm.fpioa.UART2_TX, force=False
         )
+        fm.register(
+            board.config["krux.pins"]["UART2_RX"], fm.fpioa.UART2_RX, force=False
+        )
+
+        self.uart_conn = UART(UART.UART2, settings.printer.thermal.baudrate)
 
         self.character_height = 24
         self.byte_time = 11.0 / float(settings.printer.thermal.baudrate)
@@ -68,7 +71,7 @@ class AdafruitPrinter(Printer):
         self.setup()
 
         if not self.has_paper():
-            raise ValueError('missing paper')
+            raise ValueError("missing paper")
 
     def setup(self):
         """Sets up the connection to the printer and sets default settings"""
@@ -80,14 +83,14 @@ class AdafruitPrinter(Printer):
 
         # Wake up the printer to get ready for printing
         self.write_bytes(255)
-        self.write_bytes(27, 118, 0) # Sleep off (important!)
+        self.write_bytes(27, 118, 0)  # Sleep off (important!)
 
         # Reset the printer
-        self.write_bytes(27, 64) # Esc @ = init command
+        self.write_bytes(27, 64)  # Esc @ = init command
         # Configure tab stops on recent printers
-        self.write_bytes(27, 68)         # Set tab stops
-        self.write_bytes(4, 8, 12, 16) # every 4 columns,
-        self.write_bytes(20, 24, 28, 0) # 0 is end-of-list.
+        self.write_bytes(27, 68)  # Set tab stops
+        self.write_bytes(4, 8, 12, 16)  # every 4 columns,
+        self.write_bytes(20, 24, 28, 0)  # 0 is end-of-list.
 
         # Description of print settings from p. 23 of manual:
         # ESC 7 n1 n2 n3 Setting Control Parameter Command
@@ -107,8 +110,8 @@ class AdafruitPrinter(Printer):
             27,  # Esc
             55,  # 7 (print settings)
             11,  # Heat dots
-            255, # Heat time
-            40   # Heat interval
+            255,  # Heat time
+            40,  # Heat interval
         )
 
         # Description of print density from p. 23 of manual:
@@ -119,13 +122,11 @@ class AdafruitPrinter(Printer):
         # D7..D5 of n is used to set the printing break time.
         # Break time is n(D7-D5)*250us.
         # (Unsure of default values -- not documented)
-        print_density = 10 # 100%
-        print_break_time = 2 # 500 uS
+        print_density = 10  # 100%
+        print_break_time = 2  # 500 uS
 
         self.write_bytes(
-            18, # DC2
-            35, # Print density
-            (print_break_time << 5) | print_density
+            18, 35, (print_break_time << 5) | print_density  # DC2  # Print density
         )
 
     def write_bytes(self, *args):
@@ -157,9 +158,9 @@ class AdafruitPrinter(Printer):
 
     def qr_data_width(self):
         """Returns a smaller width for the QR to be generated
-           within, which will then be scaled up to fit the paper's width.
-           We do this because the QR would be too dense to be readable
-           by most devices otherwise.
+        within, which will then be scaled up to fit the paper's width.
+        We do this because the QR would be too dense to be readable
+        by most devices otherwise.
         """
         return 33
 
@@ -170,15 +171,15 @@ class AdafruitPrinter(Printer):
         # we will send a 1x1 image with 0 as its pixel value in order to initiate the reset
         self.write_bytes(28, 113, 1, 1, 0, 1, 0, 0)
         # Reset the printer
-        self.write_bytes(27, 64) # Esc @ = init command
+        self.write_bytes(27, 64)  # Esc @ = init command
         # Configure tab stops on recent printers
-        self.write_bytes(27, 68)         # Set tab stops
-        self.write_bytes(4, 8, 12, 16) # every 4 columns,
-        self.write_bytes(20, 24, 28, 0) # 0 is end-of-list.
+        self.write_bytes(27, 68)  # Set tab stops
+        self.write_bytes(4, 8, 12, 16)  # every 4 columns,
+        self.write_bytes(20, 24, 28, 0)  # 0 is end-of-list.
 
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
-        lines = qr_code.strip().split('\n')
+        lines = qr_code.strip().split("\n")
 
         width = len(lines)
         height = len(lines)
@@ -186,8 +187,8 @@ class AdafruitPrinter(Printer):
         scale = settings.printer.thermal.paper_width // width
         for y in range(height):
             # Scale the line (width) by scaling factor
-            line_y = ''.join([char * scale for char in lines[y]])
-            line_bytes = int(line_y, 2).to_bytes((len(line_y) + 7) // 8, 'big')
+            line_y = "".join([char * scale for char in lines[y]])
+            line_bytes = int(line_y, 2).to_bytes((len(line_y) + 7) // 8, "big")
             # Print height * scale lines out to scale by
             for _ in range(scale):
                 self.write_bytes(18, 42, 1, len(line_bytes))

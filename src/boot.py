@@ -20,8 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
-sys.path.append('')
-sys.path.append('.')
+
+sys.path.append("")
+sys.path.append(".")
 
 from krux import firmware
 from krux.power import PowerManager
@@ -56,11 +57,13 @@ SPLASH = """
                 
                 
                 
-"""[1:-1]
+"""[
+    1:-1
+]
 
 ctx = Context()
 
-ctx.display.flash_text(SPLASH.split('\n'), color=lcd.WHITE, padding=8)
+ctx.display.flash_text(SPLASH.split("\n"), color=lcd.WHITE, padding=8)
 
 while True:
     if not Login(ctx).run():
@@ -72,7 +75,7 @@ while True:
     if not Home(ctx).run():
         break
 
-ctx.display.flash_text(t('Shutting down..'))
+ctx.display.flash_text(t("Shutting down.."))
 
 ctx.clear()
 

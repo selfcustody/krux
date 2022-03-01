@@ -22,6 +22,7 @@
 import machine
 import sys
 
+
 class PowerManager:
     """PowerManager is a singleton interface for controlling the device's power management unit"""
 
@@ -29,6 +30,7 @@ class PowerManager:
         self.pmu = None
         try:
             from pmu import axp192
+
             self.pmu = axp192()
             self.pmu.enablePMICSleepMode(True)
         except:

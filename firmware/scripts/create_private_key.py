@@ -22,4 +22,4 @@
 import binascii
 from embit.util import key
 
-print(binascii.hexlify(key.generate_privkey()).decode(), end='')
+print(binascii.hexlify(key.generate_privkey()).decode(), end="")

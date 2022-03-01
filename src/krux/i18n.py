@@ -25,15 +25,17 @@ except ImportError:
     import json
 from .settings import settings
 
-TRANSLATIONS_FILE = '/sd/translations/%s.json'
+TRANSLATIONS_FILE = "/sd/translations/%s.json"
+
 
 def translations(locale):
     """Returns the translations map for the given locale"""
     try:
-        return json.load(open(TRANSLATIONS_FILE % locale, 'r'))
+        return json.load(open(TRANSLATIONS_FILE % locale, "r"))
     except:
         pass
     return None
+
 
 def t(slug):
     """Translates a slug according to the current locale"""

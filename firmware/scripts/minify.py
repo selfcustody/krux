@@ -23,13 +23,15 @@ import ast
 import sys
 import astor
 
-source_ast = ast.parse(open(sys.argv[1], 'r').read())
+source_ast = ast.parse(open(sys.argv[1], "r").read())
 for node in ast.walk(source_ast):
-    if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
+    if not isinstance(
+        node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)
+    ):
         continue
     if ast.get_docstring(node) is not None:
         node.body = node.body[1:]
         if len(node.body) == 0:
             node.body.append(ast.Pass())
-with open(sys.argv[1], 'w') as outfile:
+with open(sys.argv[1], "w") as outfile:
     outfile.write(astor.to_source(source_ast))

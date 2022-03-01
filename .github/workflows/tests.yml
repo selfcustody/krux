@@ -7,7 +7,36 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  lint-black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./firmware/font"
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./firmware/scripts"
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./i18n"
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./src"
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./tests"
+          
+  lint-pylint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

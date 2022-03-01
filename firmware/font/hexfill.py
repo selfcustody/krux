@@ -21,29 +21,37 @@
 # THE SOFTWARE.
 import sys
 
-height=int(sys.argv[2])
+height = int(sys.argv[2])
 
-with open(sys.argv[1], 'r') as input_file:
+with open(sys.argv[1], "r") as input_file:
     # Read in a hex formatted bitmap font file
     lines = input_file.readlines()
     # Zero out > height pixel width characters since they can't be scaled down
-    lines = list(map(
-        lambda line: line.split(':')[0] + ':' + ('0' * 2*height) + '\n'
-        if len(line) > height*2+6 else line,
-        lines
-    ))
+    lines = list(
+        map(
+            lambda line: line.split(":")[0] + ":" + ("0" * 2 * height) + "\n"
+            if len(line) > height * 2 + 6
+            else line,
+            lines,
+        )
+    )
     # Pad < height pixel width chars with leading 0s
-    lines = list(map(
-        lambda line: line[:5] + ('0' * ((height*2+6) - len(line))) + line[5:len(line)]
-        if len(line) < height*2+6 else line,
-        lines
-    ))
+    lines = list(
+        map(
+            lambda line: line[:5]
+            + ("0" * ((height * 2 + 6) - len(line)))
+            + line[5 : len(line)]
+            if len(line) < height * 2 + 6
+            else line,
+            lines,
+        )
+    )
     # Add missing characters (zero'd out) so the codepoint sequence is contiguous
     i = 0
     while i < len(lines):
-        codepoint = int(lines[i].split(':')[0], 16)
+        codepoint = int(lines[i].split(":")[0], 16)
         while i < codepoint:
-            lines.insert(i, ('%04X' % i) + ':' + ('0' * 2*height) + '\n')
+            lines.insert(i, ("%04X" % i) + ":" + ("0" * 2 * height) + "\n")
             i += 1
         i += 1
-    print(''.join(lines))
+    print("".join(lines))

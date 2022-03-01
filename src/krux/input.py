@@ -24,26 +24,27 @@ from Maix import GPIO
 from fpioa_manager import fm
 
 BUTTON_ENTER = 0
-BUTTON_PAGE  = 1
+BUTTON_PAGE = 1
 
 NONBLOCKING_CHECKS = 100000
 
 PRESSED = 0
 RELEASED = 1
 
+
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
     def __init__(self):
         self.entropy = 0
-        fm.register(board.config['krux.pins']['BUTTON_A'], fm.fpioa.GPIOHS21)
+        fm.register(board.config["krux.pins"]["BUTTON_A"], fm.fpioa.GPIOHS21)
         self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
-        fm.register(board.config['krux.pins']['BUTTON_B'], fm.fpioa.GPIOHS22)
+        fm.register(board.config["krux.pins"]["BUTTON_B"], fm.fpioa.GPIOHS22)
         self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
 
     def wait_for_button(self, block=True):
         """Waits for any button to release, optionally blocking if block=True.
-           Returns the button that was released, or None if nonblocking.
+        Returns the button that was released, or None if nonblocking.
         """
         # Loop until all buttons are released (if currently pressed)
         while self.enter.value() == PRESSED or self.page.value() == PRESSED:
