@@ -23,17 +23,17 @@ import sys
 
 characters = {}
 
-for i in range(len(sys.argv)-1):
-    with open(sys.argv[i+1], 'r') as font_file:
+for i in range(len(sys.argv) - 1):
+    with open(sys.argv[i + 1], "r") as font_file:
         lines = font_file.readlines()
         for line in lines:
             if not line.strip():
                 continue
-            codepoint, glyph = line.replace('\n', '').split(':')
+            codepoint, glyph = line.replace("\n", "").split(":")
             if codepoint not in characters:
                 characters[codepoint] = glyph
             else:
                 if int(characters[codepoint], 16) == 0:
                     characters[codepoint] = glyph
 for codepoint, glyph in sorted(characters.items(), key=lambda s: s[0]):
-    print('%s:%s' % (codepoint, glyph))
+    print("%s:%s" % (codepoint, glyph))

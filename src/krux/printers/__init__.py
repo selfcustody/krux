@@ -20,19 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 from ..settings import settings
+
+
 class Printer:
     """Printer is a singleton interface for interacting with the device's printer
 
-       Must be subclassed.
+    Must be subclassed.
     """
+
     def __init__(self):
         raise NotImplementedError()
 
     def qr_data_width(self):
         """Returns a smaller width for the QR to be generated
-           within, which will then be scaled up to fit the paper's width.
-           We do this because the QR would be too dense to be readable
-           by most devices otherwise.
+        within, which will then be scaled up to fit the paper's width.
+        We do this because the QR would be too dense to be readable
+        by most devices otherwise.
         """
         raise NotImplementedError()
 
@@ -44,9 +47,10 @@ class Printer:
         """Prints a QR code, scaling it up as large as possible"""
         raise NotImplementedError()
 
+
 def create_printer():
-    """Instantiates a new printer dynamically based on the default in Settings """
+    """Instantiates a new printer dynamically based on the default in Settings"""
     return getattr(
         __import__(settings.printer.module, None, globals(), [None], 1),
-        settings.printer.cls
+        settings.printer.cls,
     )()

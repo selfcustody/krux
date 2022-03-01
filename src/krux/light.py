@@ -23,11 +23,12 @@ import board
 from Maix import GPIO
 from fpioa_manager import fm
 
+
 class Light:
     """Light is a singleton interface for interacting with the device's LED light"""
 
     def __init__(self):
-        fm.register(board.config['krux.pins']['LED_W'], fm.fpioa.GPIO3)
+        fm.register(board.config["krux.pins"]["LED_W"], fm.fpioa.GPIO3)
         self.led_w = GPIO(GPIO.GPIO3, GPIO.OUT)
         self.turn_off()
 

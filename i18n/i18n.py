@@ -25,49 +25,55 @@ from os import listdir, walk
 from os.path import isfile, join
 import re
 
-SRC_DIR = '../src'
-TRANSLATION_FILES_DIR = 'translations'
+SRC_DIR = "../src"
+TRANSLATION_FILES_DIR = "translations"
+
 
 def find_translation_slugs():
     """Searches the src directory for all 'slugs' that should be translated
-       by looking for matches of the pattern t('string')
+    by looking for matches of the pattern t("string")
     """
     slugs = {}
     for (dirpath, _, filenames) in walk(SRC_DIR):
         for filename in filenames:
-            if not filename.endswith('.py'):
+            if not filename.endswith(".py"):
                 continue
-            with open(join(dirpath, filename), 'r') as src_file:
+            with open(join(dirpath, filename), "r") as src_file:
                 contents = src_file.read()
-                for match in re.findall(r'[^A-Za-z0-9]t\(\'(.+?)\'\)', contents):
+                for match in re.findall(r"[^A-Za-z0-9]t\(\s*\"(.+?)\"\s*\)", contents):
                     slugs[match] = True
     return slugs
+
 
 def load_translations(translation_file):
     """Loads translations from the given file and returns them as a map"""
     translations = json.load(translation_file)
     for slug, translation in list(translations.items()):
         del translations[slug]
-        translations[slug.replace('\n', '\\n')] = translation.replace('\n', '\\n')
+        translations[slug.replace("\n", "\\n")] = translation.replace("\n", "\\n")
     return translations
+
 
 def main():
     """Main handler"""
     slugs = find_translation_slugs()
 
-    if sys.argv[1] == 'validate':
+    if sys.argv[1] == "validate":
         passed = True
         translation_filenames = [
-            f for f in listdir(TRANSLATION_FILES_DIR)
+            f
+            for f in listdir(TRANSLATION_FILES_DIR)
             if isfile(join(TRANSLATION_FILES_DIR, f))
         ]
         for translation_filename in translation_filenames:
-            print('Validating %s...' % translation_filename)
+            print("Validating %s..." % translation_filename)
             valid = True
-            with open(join(TRANSLATION_FILES_DIR, translation_filename), 'r') as translation_file:
+            with open(
+                join(TRANSLATION_FILES_DIR, translation_filename), "r"
+            ) as translation_file:
                 translations = load_translations(translation_file)
                 for slug in slugs:
-                    if slug not in translations or translations[slug] == '':
+                    if slug not in translations or translations[slug] == "":
                         print('Missing translation for "%s"' % slug)
                         valid = False
                 for translation_slug in translations:
@@ -75,17 +81,20 @@ def main():
                         print('Unnecessary translation for "%s"' % translation_slug)
                         valid = False
             if valid:
-                print('OK')
+                print("OK")
             passed = passed and valid
         if not passed:
             sys.exit(1)
-    elif sys.argv[1] == 'new':
+    elif sys.argv[1] == "new":
         locale = sys.argv[2]
         translations = {}
         for slug in slugs:
-            translations[slug.replace('\\n', '\n')] = ''
-        with open(join(TRANSLATION_FILES_DIR, '%s.json' % locale), 'w') as translation_file:
+            translations[slug.replace("\\n", "\n")] = ""
+        with open(
+            join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w"
+        ) as translation_file:
             translation_file.write(json.dumps(translations, sort_keys=True, indent=4))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

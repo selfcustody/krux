@@ -36,3 +36,4 @@ urtypes = { path = "./vendor/urtypes/", develop = true }
 pytest = "^6.2.5"
 pytest-mock = "^3.6.1"
 pytest-cov = "^3.0.0"
+black = "^22.1.0"

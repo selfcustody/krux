@@ -28,7 +28,7 @@ from embit.util import secp256k1
 def fsize(firmware_filename):
     """Returns the size of the firmware"""
     size = 0
-    with open(firmware_filename, 'rb', buffering=0) as file:
+    with open(firmware_filename, "rb", buffering=0) as file:
         while True:
             chunk = file.read(128)
             if not chunk:
@@ -36,12 +36,13 @@ def fsize(firmware_filename):
             size += len(chunk)
     return size
 
+
 # Pulled from firmware.py
 def sha256(firmware_filename, firmware_size):
     """Returns the sha256 hash of the firmware"""
     hasher = hashlib.sha256()
-    hasher.update(b'\x00' + firmware_size.to_bytes(4, 'little'))
-    with open(firmware_filename, 'rb', buffering=0) as file:
+    hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
+    with open(firmware_filename, "rb", buffering=0) as file:
         while True:
             chunk = file.read(128)
             if not chunk:
@@ -49,14 +50,15 @@ def sha256(firmware_filename, firmware_size):
             hasher.update(chunk)
     return hasher.digest()
 
-if len(sys.argv) != 4:
-    sys.exit('All arguments must be provided')
 
-sig = open(sys.argv[1], 'rb').read()
+if len(sys.argv) != 4:
+    sys.exit("All arguments must be provided")
+
+sig = open(sys.argv[1], "rb").read()
 firmware_path = sys.argv[2]
 pubkey = secp256k1.ec_pubkey_parse(binascii.unhexlify(sys.argv[3]))
 
 if not secp256k1.ecdsa_verify(sig, sha256(firmware_path, fsize(firmware_path)), pubkey):
-    print('Bad signature')
+    print("Bad signature")
 else:
-    print('ok')
+    print("ok")

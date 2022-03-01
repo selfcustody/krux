@@ -26,14 +26,16 @@ from ur.ur_encoder import UREncoder
 from ur.ur_decoder import URDecoder
 from ur.ur import UR
 
-FORMAT_NONE  = 0
+FORMAT_NONE = 0
 FORMAT_PMOFN = 1
-FORMAT_UR    = 2
+FORMAT_UR = 2
+
 
 class QRPartParser:
     """Responsible for parsing either a singular or animated series of QR codes
-       and returning the final decoded, combined data
+    and returning the final decoded, combined data
     """
+
     def __init__(self):
         self.parts = {}
         self.total = -1
@@ -73,25 +75,26 @@ class QRPartParser:
         if self.format == FORMAT_UR:
             return self.decoder.is_complete()
         return (
-            self.total != -1 and
-            self.parsed_count() == self.total_count() and
-            sum(self.parts.keys()) == sum(range(1, self.total+1))
+            self.total != -1
+            and self.parsed_count() == self.total_count()
+            and sum(self.parts.keys()) == sum(range(1, self.total + 1))
         )
 
     def result(self):
         """Returns the combined part data"""
         if self.format == FORMAT_UR:
             return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
-        code_buffer = io.StringIO('')
+        code_buffer = io.StringIO("")
         for _, part in sorted(self.parts.items()):
             code_buffer.write(part)
         code = code_buffer.getvalue()
         code_buffer.close()
         return code
 
+
 def to_qr_codes(data, max_width, qr_format):
     """Returns the list of QR codes necessary to represent the data in the qr format, given
-       the max_width constraint
+    the max_width constraint
     """
     if qr_format == FORMAT_NONE:
         code = qrcode.encode_to_string(data)
@@ -102,12 +105,12 @@ def to_qr_codes(data, max_width, qr_format):
 
         if qr_format == FORMAT_PMOFN:
             for i in range(num_parts):
-                part_number = 'p%dof%d ' % (i + 1, num_parts)
+                part_number = "p%dof%d " % (i + 1, num_parts)
                 part = None
                 if i == num_parts - 1:
-                    part = part_number + data[i * part_size:]
+                    part = part_number + data[i * part_size :]
                 else:
-                    part = part_number + data[i * part_size: i * part_size + part_size]
+                    part = part_number + data[i * part_size : i * part_size + part_size]
                 code = qrcode.encode_to_string(part)
                 yield (code, num_parts)
         elif qr_format == FORMAT_UR:
@@ -117,12 +120,14 @@ def to_qr_codes(data, max_width, qr_format):
                 code = qrcode.encode_to_string(part)
                 yield (code, encoder.fountain_encoder.seq_len())
 
+
 def get_size(qr_code):
     """Returns the size of the qr code as the number of chars until the first newline"""
     size = 0
-    while qr_code[size] != '\n':
+    while qr_code[size] != "\n":
         size += 1
     return size
+
 
 def data_len(data):
     """Returns the length of the payload data, accounting for the UR type"""
@@ -130,16 +135,17 @@ def data_len(data):
         return len(data.cbor)
     return len(data)
 
+
 def find_min_num_parts(data, max_width, qr_format):
     """Finds the minimum number of QR parts necessary to encode the data in
-       the specified format within the max_width constraint
+    the specified format within the max_width constraint
     """
     num_parts = 1
     part_size = data_len(data) // num_parts
     while True:
-        part = ''
+        part = ""
         if qr_format == FORMAT_PMOFN:
-            part_number = 'p1of%d ' % num_parts
+            part_number = "p1of%d " % num_parts
             part = part_number + data[0:part_size]
         elif qr_format == FORMAT_UR:
             encoder = UREncoder(data, part_size, 0, part_size - 10)
@@ -154,19 +160,21 @@ def find_min_num_parts(data, max_width, qr_format):
         part_size = data_len(data) // num_parts
     return num_parts
 
+
 def parse_pmofn_qr_part(data):
     """Parses the QR as a P M-of-N part, extracting the part's content, index, and total"""
-    of_index = data.index('of')
-    space_index = data.index(' ')
+    of_index = data.index("of")
+    space_index = data.index(" ")
     part_index = int(data[1:of_index])
-    part_total = int(data[of_index+2:space_index])
-    return data[space_index + 1:], part_index, part_total
+    part_total = int(data[of_index + 2 : space_index])
+    return data[space_index + 1 :], part_index, part_total
+
 
 def detect_format(data):
     """Detects the QR format of the given data"""
     qr_format = FORMAT_NONE
-    if data.startswith('p') and data.index('of') <= 5:
+    if data.startswith("p") and data.index("of") <= 5:
         qr_format = FORMAT_PMOFN
-    elif data.lower().startswith('ur:'):
+    elif data.lower().startswith("ur:"):
         qr_format = FORMAT_UR
     return qr_format

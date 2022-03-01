@@ -36,59 +36,66 @@ from ..printers import create_printer
 from ..i18n import t, translations
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 
-SENTINEL_DIGITS  = '11111'
-SENTINEL_LETTERS = 'aaaaa'
+SENTINEL_DIGITS = "11111"
+SENTINEL_LETTERS = "aaaaa"
 
-DIGITS  = '0123456789'
-LETTERS = 'abcdefghijklmnopqrstuvwxyz'
-BITS    = '01'
+DIGITS = "0123456789"
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+BITS = "01"
 
-D6_STATES   = '123456'
-D20_STATES  = [str(i+1) for i in range(20)]
+D6_STATES = "123456"
+D20_STATES = [str(i + 1) for i in range(20)]
 
-D6_MIN_ROLLS  = 50
-D6_MAX_ROLLS  = 100
+D6_MIN_ROLLS = 50
+D6_MAX_ROLLS = 100
 D20_MIN_ROLLS = 30
 D20_MAX_ROLLS = 60
+
 
 class Login(Page):
     """Represents the login page of the app"""
 
     def __init__(self, ctx):
         menu = [
-            (t('Load Mnemonic'), self.load_key),
-            (t('New Mnemonic'), self.new_key),
-            (t('Settings'), self.settings),
-            (t('About'), self.about),
-            (t('Shutdown'), self.shutdown),
+            (t("Load Mnemonic"), self.load_key),
+            (t("New Mnemonic"), self.new_key),
+            (t("Settings"), self.settings),
+            (t("About"), self.about),
+            (t("Shutdown"), self.shutdown),
         ]
         if settings.log.level <= DEBUG:
-            menu.append((t('DEBUG'), lambda: MENU_CONTINUE))
+            menu.append((t("DEBUG"), lambda: MENU_CONTINUE))
         Page.__init__(self, ctx, Menu(ctx, menu))
 
     def load_key(self):
         """Handler for the 'load mnemonic' menu item"""
-        submenu = Menu(self.ctx, [
-            (t('Via QR Code'), self.load_key_from_qr_code),
-            (t('Via Text'), self.load_key_from_text),
-            (t('Via Numbers'), self.load_key_from_digits),
-            (t('Via Bits'), self.load_key_from_bits),
-            (t('Back'), lambda: MENU_EXIT)
-        ])
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Via QR Code"), self.load_key_from_qr_code),
+                (t("Via Text"), self.load_key_from_text),
+                (t("Via Numbers"), self.load_key_from_digits),
+                (t("Via Bits"), self.load_key_from_bits),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu)-1:
+        if index == len(submenu.menu) - 1:
             return MENU_CONTINUE
         return status
 
     def new_key(self):
         """Handler for the 'new mnemonic' menu item"""
-        submenu = Menu(self.ctx, [
-            (t('Via D6'), self.new_key_from_d6),
-            (t('Via D20'), self.new_key_from_d20),
-            (t('Back'), lambda: MENU_EXIT)
-        ])
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Via D6"), self.new_key_from_d6),
+                (t("Via D20"), self.new_key_from_d20),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu)-1:
+        if index == len(submenu.menu) - 1:
             return MENU_CONTINUE
         return status
 
@@ -102,69 +109,80 @@ class Login(Page):
 
     def _new_key_from_die(self, states, min_rolls, max_rolls):
         self.ctx.display.draw_hcentered_text(
-            t('Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively.')
+            t(
+                "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
+            )
             % (min_rolls, max_rolls)
         )
-        self.ctx.display.draw_hcentered_text(t('Proceed?'), offset_y=200)
+        self.ctx.display.draw_hcentered_text(t("Proceed?"), offset_y=200)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
-            entropy = ''
+            entropy = ""
             num_rolls = max_rolls
             for i in range(max_rolls):
                 if i == min_rolls:
                     self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(t('Done?'))
+                    self.ctx.display.draw_centered_text(t("Done?"))
                     btn = self.ctx.input.wait_for_button()
                     if btn == BUTTON_ENTER:
                         num_rolls = min_rolls
                         break
 
-                roll = ''
+                roll = ""
                 while True:
-                    roll = self.capture_from_keypad(t('Roll %d') % (i+1), states, lambda r: r)
-                    if roll != '' and roll in states:
+                    roll = self.capture_from_keypad(
+                        t("Roll %d") % (i + 1), states, lambda r: r
+                    )
+                    if roll != "" and roll in states:
                         break
 
-                entropy += roll if entropy == '' else '-' + roll
+                entropy += roll if entropy == "" else "-" + roll
 
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t('Rolls:\n\n%s') % entropy)
+                self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
                 self.ctx.input.wait_for_button()
 
             entropy_bytes = entropy.encode()
-            entropy_hash = binascii.hexlify(hashlib.sha256(entropy_bytes).digest()).decode()
+            entropy_hash = binascii.hexlify(
+                hashlib.sha256(entropy_bytes).digest()
+            ).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t('SHA256 of rolls:\n\n%s') % entropy_hash
+                t("SHA256 of rolls:\n\n%s") % entropy_hash
             )
             self.ctx.input.wait_for_button()
             num_bytes = 16 if num_rolls == min_rolls else 32
-            words = to_mnemonic_words(hashlib.sha256(entropy_bytes).digest()[:num_bytes])
+            words = to_mnemonic_words(
+                hashlib.sha256(entropy_bytes).digest()[:num_bytes]
+            )
             return self._load_key_from_words(words)
 
         return MENU_CONTINUE
 
     def _load_key_from_words(self, words):
-        mnemonic = ' '.join(words)
+        mnemonic = " ".join(words)
         self.display_mnemonic(mnemonic)
-        self.ctx.display.draw_hcentered_text(t('Continue?'), offset_y=220)
+        self.ctx.display.draw_hcentered_text(t("Continue?"), offset_y=220)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
-            submenu = Menu(self.ctx, [
-                (t('Single-key'), lambda: MENU_EXIT),
-                (t('Multisig'), lambda: MENU_EXIT)
-            ])
+            submenu = Menu(
+                self.ctx,
+                [
+                    (t("Single-key"), lambda: MENU_EXIT),
+                    (t("Multisig"), lambda: MENU_EXIT),
+                ],
+            )
             index, _ = submenu.run_loop()
             multisig = index == 1
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t('Loading..'))
+            self.ctx.display.draw_centered_text(t("Loading.."))
             self.ctx.wallet = Wallet(
                 Key(mnemonic, multisig, network=NETWORKS[settings.network])
             )
             try:
                 self.ctx.printer = create_printer()
             except:
-                self.ctx.log.exception('Exception occurred connecting to printer')
+                self.ctx.log.exception("Exception occurred connecting to printer")
             return MENU_EXIT
         return MENU_CONTINUE
 
@@ -172,64 +190,70 @@ class Login(Page):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t('Failed to load mnemonic'), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
             return MENU_CONTINUE
 
         words = []
         if qr_format == FORMAT_UR:
             words = urtypes.crypto.BIP39.from_cbor(data.cbor).words
         else:
-            if ' ' in data:
-                words = data.split(' ')
+            if " " in data:
+                words = data.split(" ")
             elif len(data) == 48 or len(data) == 96:
                 for i in range(0, len(data), 4):
-                    words.append(WORDLIST[int(data[i:i+4])])
+                    words.append(WORDLIST[int(data[i : i + 4])])
 
         if not words or (len(words) != 12 and len(words) != 24):
-            self.ctx.display.flash_text(t('Invalid mnemonic length'), lcd.RED)
+            self.ctx.display.flash_text(t("Invalid mnemonic length"), lcd.RED)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
-    def _load_key_from_keypad(self, title, charset, to_word,
-                                    test_phrase_sentinel=None, autocomplete=None):
+    def _load_key_from_keypad(
+        self, title, charset, to_word, test_phrase_sentinel=None, autocomplete=None
+    ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
-        self.ctx.display.draw_hcentered_text(t('Proceed?'), offset_y=200)
+        self.ctx.display.draw_hcentered_text(t("Proceed?"), offset_y=200)
         btn = self.ctx.input.wait_for_button()
         if btn == BUTTON_ENTER:
             for i in range(24):
                 if i == 12:
                     self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(t('Done?'))
+                    self.ctx.display.draw_centered_text(t("Done?"))
                     btn = self.ctx.input.wait_for_button()
                     if btn == BUTTON_ENTER:
                         break
 
-                word = ''
+                word = ""
                 while True:
                     word = self.capture_from_keypad(
-                        t('Word %d') % (i+1),
-                        charset,
-                        autocomplete
+                        t("Word %d") % (i + 1), charset, autocomplete
                     )
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
-                    if (i in (11, 23)) and word == '':
+                    if (i in (11, 23)) and word == "":
                         break
                     # If the first 'word' is the test phrase sentinel,
                     # we're testing and just want the test words
-                    if i == 0 and test_phrase_sentinel is not None and word == test_phrase_sentinel:
+                    if (
+                        i == 0
+                        and test_phrase_sentinel is not None
+                        and word == test_phrase_sentinel
+                    ):
                         break
                     word = to_word(word)
-                    if word != '':
+                    if word != "":
                         break
 
                 if word not in WORDLIST:
                     if word == test_phrase_sentinel:
-                        words = [WORDLIST[0] if n + 1 < 12 else WORDLIST[1879] for n in range(12)]
+                        words = [
+                            WORDLIST[0] if n + 1 < 12 else WORDLIST[1879]
+                            for n in range(12)
+                        ]
                         break
 
-                    if word == '':
+                    if word == "":
                         word = pick_final_word(self.ctx, words)
 
                 self.ctx.display.clear()
@@ -244,11 +268,13 @@ class Login(Page):
 
     def load_key_from_text(self):
         """Handler for the 'via text' menu item"""
-        title = t('Enter each word of your BIP-39 mnemonic.')
+        title = t("Enter each word of your BIP-39 mnemonic.")
 
         def autocomplete(prefix):
             if len(prefix) > 2:
-                matching_words = list(filter(lambda word: word.startswith(prefix), WORDLIST))
+                matching_words = list(
+                    filter(lambda word: word.startswith(prefix), WORDLIST)
+                )
                 if len(matching_words) == 1:
                     return matching_words[0]
             return None
@@ -256,45 +282,52 @@ class Login(Page):
         def to_word(user_input):
             if user_input in WORDLIST:
                 return user_input
-            return ''
+            return ""
 
-        return self._load_key_from_keypad(title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete)
+        return self._load_key_from_keypad(
+            title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete
+        )
 
     def load_key_from_digits(self):
         """Handler for the 'via numbers' menu item"""
-        title = t('Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.')
+        title = t("Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.")
 
         def to_word(user_input):
             word_num = int(user_input)
             if 0 < word_num <= 2048:
-                return WORDLIST[word_num-1]
-            return ''
+                return WORDLIST[word_num - 1]
+            return ""
 
         return self._load_key_from_keypad(title, DIGITS, to_word, SENTINEL_DIGITS)
 
     def load_key_from_bits(self):
         """Handler for the 'via bits' menu item"""
-        title = t('Enter each word of your BIP-39 mnemonic as a series of binary digits.')
+        title = t(
+            "Enter each word of your BIP-39 mnemonic as a series of binary digits."
+        )
 
         def to_word(user_input):
-            word_index = int('0b' + user_input, 0)
+            word_index = int("0b" + user_input, 0)
             if 0 <= word_index < 2048:
                 return WORDLIST[word_index]
-            return ''
+            return ""
 
         return self._load_key_from_keypad(title, BITS, to_word)
 
     def settings(self):
         """Handler for the 'settings' menu item"""
-        submenu = Menu(self.ctx, [
-            (t('Network'), self.network),
-            (t('Printer'), self.printer),
-            (t('Locale'), self.locale),
-            (t('Debug'), self.debug),
-            (t('Back'), lambda: MENU_EXIT)
-        ])
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Network"), self.network),
+                (t("Printer"), self.printer),
+                (t("Locale"), self.locale),
+                (t("Debug"), self.debug),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu)-1:
+        if index == len(submenu.menu) - 1:
             return MENU_CONTINUE
         return status
 
@@ -307,7 +340,7 @@ class Login(Page):
             current_network = settings.network
 
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t('Network\n%snet') % current_network)
+            self.ctx.display.draw_centered_text(t("Network\n%snet") % current_network)
 
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_PAGE:
@@ -332,7 +365,7 @@ class Login(Page):
             current_baudrate = settings.printer.thermal.baudrate
 
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t('Baudrate\n%s') % current_baudrate)
+            self.ctx.display.draw_centered_text(t("Baudrate\n%s") % current_baudrate)
 
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_PAGE:
@@ -357,7 +390,7 @@ class Login(Page):
             current_locale = settings.i18n.locale
 
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t('Locale\n%s') % current_locale)
+            self.ctx.display.draw_centered_text(t("Locale\n%s") % current_locale)
 
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_PAGE:
@@ -385,7 +418,7 @@ class Login(Page):
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t('Log Level\n%s') % level_name(current_level)
+                t("Log Level\n%s") % level_name(current_level)
             )
 
             btn = self.ctx.input.wait_for_button()
@@ -406,6 +439,6 @@ class Login(Page):
     def about(self):
         """Handler for the 'about' menu item"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t('Krux\n\n\nVersion\n%s') % VERSION)
+        self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

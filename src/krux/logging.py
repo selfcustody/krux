@@ -23,23 +23,25 @@ import sys
 import io
 import os
 
-NONE  = 99
+NONE = 99
 ERROR = 40
-WARN  = 30
-INFO  = 20
+WARN = 30
+INFO = 20
 DEBUG = 10
 
 LEVEL_NAMES = {
-    NONE:  'NONE',
-    ERROR: 'ERROR',
-    WARN:  'WARN',
-    INFO:  'INFO',
-    DEBUG: 'DEBUG',
+    NONE: "NONE",
+    ERROR: "ERROR",
+    WARN: "WARN",
+    INFO: "INFO",
+    DEBUG: "DEBUG",
 }
+
 
 def level_name(level):
     """Returns the string name for the log level"""
     return LEVEL_NAMES[level]
+
 
 class Logger:
     """Logger logs"""
@@ -57,12 +59,12 @@ class Logger:
         """Logs a message if the given level is equal to or higher than the logger's level"""
         if level < self.level:
             return
-        self._write('%s:%s\n' % (level_name(level), msg))
+        self._write("%s:%s\n" % (level_name(level), msg))
 
     def _write(self, msg):
         try:
             if self.file is None:
-                self.file = open(self.filepath, 'w')
+                self.file = open(self.filepath, "w")
             self.file.write(msg)
             self.file.flush()
         except:
