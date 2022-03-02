@@ -296,7 +296,7 @@ class Login(Page):
                             possible_letters_list += active_letter
             return possible_letters_list
 
-return self._load_key_from_keypad(
+    return self._load_key_from_keypad(
             title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete, possible_letters
         )
 
