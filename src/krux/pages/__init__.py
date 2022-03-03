@@ -48,7 +48,9 @@ class Page:
         self._enter_state = -1
         self._page_state = -1
 
-    def capture_from_keypad(self, title, keys, autocomplete=None, possible_letters=None):
+    def capture_from_keypad(
+        self, title, keys, autocomplete_fn=None, possible_keys_fn=None
+    ):
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
         """
@@ -57,11 +59,19 @@ class Page:
 
         buffer = ""
         cur_key_index = 0
-        valid_letters = keys
         while True:
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(title)
             self.ctx.display.draw_hcentered_text(buffer, 45)
+
+            possible_keys = keys
+            if possible_keys_fn is not None:
+                possible_keys = possible_keys_fn(buffer)
+
+            while (
+                cur_key_index < len(keys) and keys[cur_key_index] not in possible_keys
+            ):
+                cur_key_index = (cur_key_index + 1) % (len(keys) + 2)
 
             for y in range(pad_height):
                 row_keys = ""
@@ -69,10 +79,10 @@ class Page:
                     key_index = x + y * pad_width
                     key = None
                     if key_index < len(keys):
-                        if keys[key_index] in valid_letters:
+                        if keys[key_index] in possible_keys:
                             key = keys[key_index]
                         else:
-                            key = '_'
+                            key = "_"
                     elif key_index == len(keys):
                         key = DEL
                     elif key_index == len(keys) + 1:
@@ -100,25 +110,13 @@ class Page:
                 else:
                     buffer += keys[cur_key_index]
                     changed = True
-                if changed and autocomplete is not None:
-                    new_buffer = autocomplete(buffer)
+                if changed and autocomplete_fn is not None:
+                    new_buffer = autocomplete_fn(buffer)
                     if new_buffer is not None:
                         buffer = new_buffer
                         cur_key_index = len(keys) + 1
-                valid_letters = possible_letters(buffer)
             elif btn == BUTTON_PAGE:
                 cur_key_index = (cur_key_index + 1) % (len(keys) + 2)
-            in_deactivated_key = True
-            while in_deactivated_key:
-                if cur_key_index >= len(keys):
-                    in_deactivated_key = False
-                else:
-                    if keys[cur_key_index] in valid_letters:
-                        in_deactivated_key = False
-                    else:
-                        cur_key_index = (cur_key_index + 1) % (len(keys) + 2)
-
-
         return buffer
 
     def capture_qr_code(self):

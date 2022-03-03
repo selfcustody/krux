@@ -159,11 +159,10 @@ def test_load_key_from_text(mocker):
                 [BUTTON_ENTER]
                 +
                 # B
-                [BUTTON_PAGE, BUTTON_ENTER]
+                [BUTTON_ENTER]
                 +
                 # I
-                [BUTTON_PAGE for _ in range(7)]
-                + [BUTTON_ENTER]
+                [BUTTON_ENTER]
                 +
                 # Go + Confirm
                 [BUTTON_ENTER, BUTTON_ENTER]
@@ -175,15 +174,13 @@ def test_load_key_from_text(mocker):
                 + [BUTTON_ENTER]
                 +
                 # O
-                [BUTTON_PAGE, BUTTON_ENTER]
+                [BUTTON_ENTER]
                 +
                 # R
-                [BUTTON_PAGE for _ in range(3)]
-                + [BUTTON_ENTER]
+                [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # T
-                [BUTTON_PAGE for _ in range(2)]
-                + [BUTTON_ENTER]
+                [BUTTON_ENTER]
                 +
                 # Go
                 [BUTTON_ENTER]
@@ -200,11 +197,10 @@ def test_load_key_from_text(mocker):
                 [BUTTON_ENTER]
                 +
                 # B
-                [BUTTON_PAGE, BUTTON_ENTER]
+                [BUTTON_ENTER]
                 +
                 # I
-                [BUTTON_PAGE for _ in range(7)]
-                + [BUTTON_ENTER]
+                [BUTTON_ENTER]
                 +
                 # Go + Confirm
                 [BUTTON_ENTER, BUTTON_ENTER]
