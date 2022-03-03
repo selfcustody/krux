@@ -209,7 +209,13 @@ class Login(Page):
         return self._load_key_from_words(words)
 
     def _load_key_from_keypad(
-        self, title, charset, to_word, test_phrase_sentinel=None, autocomplete=None
+        self,
+        title,
+        charset,
+        to_word,
+        test_phrase_sentinel=None,
+        autocomplete_fn=None,
+        possible_keys_fn=None,
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
@@ -227,7 +233,10 @@ class Login(Page):
                 word = ""
                 while True:
                     word = self.capture_from_keypad(
-                        t("Word %d") % (i + 1), charset, autocomplete
+                        t("Word %d") % (i + 1),
+                        charset,
+                        autocomplete_fn,
+                        possible_keys_fn,
                     )
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
@@ -270,22 +279,68 @@ class Login(Page):
         """Handler for the 'via text' menu item"""
         title = t("Enter each word of your BIP-39 mnemonic.")
 
+        # Precompute start and stop indexes for each letter in the wordlist
+        # to reduce the search space for autocomplete, possible_letters, etc.
+        # This is much cheaper (memory-wise) than a trie.
+        search_ranges = {}
+        i = 0
+        while i < len(WORDLIST):
+            start_word = WORDLIST[i]
+            start_letter = start_word[0]
+            j = i + 1
+            while j < len(WORDLIST):
+                end_word = WORDLIST[j]
+                end_letter = end_word[0]
+                if end_letter != start_letter:
+                    search_ranges[start_letter] = (i, j)
+                    i = j - 1
+                    break
+                j += 1
+            if start_letter not in search_ranges:
+                search_ranges[start_letter] = (i, j)
+            i += 1
+
         def autocomplete(prefix):
-            if len(prefix) > 2:
+            if len(prefix) > 0:
+                letter = prefix[0]
+                if letter not in search_ranges:
+                    return None
+                start, stop = search_ranges[letter]
                 matching_words = list(
-                    filter(lambda word: word.startswith(prefix), WORDLIST)
+                    filter(
+                        lambda word: word.startswith(prefix),
+                        WORDLIST[start:stop],
+                    )
                 )
                 if len(matching_words) == 1:
                     return matching_words[0]
             return None
 
         def to_word(user_input):
-            if user_input in WORDLIST:
-                return user_input
+            if len(user_input) > 0:
+                letter = user_input[0]
+                if letter not in search_ranges:
+                    return ""
+                start, stop = search_ranges[letter]
+                if user_input in WORDLIST[start:stop]:
+                    return user_input
             return ""
 
+        def possible_letters(prefix):
+            if len(prefix) == 0:
+                return LETTERS
+            letter = prefix[0]
+            if letter not in search_ranges:
+                return ""
+            start, stop = search_ranges[letter]
+            return {
+                word[len(prefix)]
+                for word in WORDLIST[start:stop]
+                if word.startswith(prefix) and len(word) > len(prefix)
+            }
+
         return self._load_key_from_keypad(
-            title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete
+            title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete, possible_letters
         )
 
     def load_key_from_digits(self):
