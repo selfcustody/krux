@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/jreesun/krux/branch/main/graph/badge.svg)](https://codecov.io/gh/jreesun/krux)
+[![codecov](https://codecov.io/gh/jreesun/krux/branch/main/graph/badge.svg?token=XU80PT6Q9V)](https://codecov.io/gh/jreesun/krux)
 
       ██
       ██
