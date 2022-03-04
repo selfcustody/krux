@@ -86,7 +86,6 @@ jobs:
         run: poetry run pytest --cache-clear tests
 
   coverage:
-    if: github.event.pull_request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
