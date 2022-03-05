@@ -43,7 +43,7 @@ class Wallet:
         self.policy = None
         if not self.key.multisig:
             self.descriptor = Descriptor.from_string(
-                "wpkh(%s/{0,1}/*)" % self.key.xpub_btc_core()
+                "wpkh(%s/{0,1}/*)" % self.key.key_expression()
             )
             self.label = t("Single-key")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}

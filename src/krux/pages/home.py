@@ -59,21 +59,16 @@ class Home(Page):
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
-        xpub = self.ctx.wallet.key.xpub_btc_core()
-        subtitle = self.ctx.wallet.key.xpub()
-        self.display_qr_codes(xpub, FORMAT_NONE, subtitle, DEFAULT_PADDING + 1)
-        self.print_qr_prompt(xpub, FORMAT_NONE)
-
-        if self.ctx.wallet.is_multisig():
-            zpub = self.ctx.wallet.key.p2wsh_zpub_btc_core()
-            subtitle = self.ctx.wallet.key.p2wsh_zpub()
-            self.display_qr_codes(zpub, FORMAT_NONE, subtitle, DEFAULT_PADDING + 1)
-            self.print_qr_prompt(zpub, FORMAT_NONE)
-        else:
-            zpub = self.ctx.wallet.key.p2wpkh_zpub_btc_core()
-            subtitle = self.ctx.wallet.key.p2wpkh_zpub()
-            self.display_qr_codes(zpub, FORMAT_NONE, subtitle, DEFAULT_PADDING + 1)
-            self.print_qr_prompt(zpub, FORMAT_NONE)
+        zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
+        for version in [None, self.ctx.wallet.key.network[zpub]]:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                self.ctx.wallet.key.key_expression(version, pretty=True)
+            )
+            self.ctx.input.wait_for_button()
+            xpub = self.ctx.wallet.key.key_expression(version)
+            self.display_qr_codes(xpub, FORMAT_NONE, None, DEFAULT_PADDING + 1)
+            self.print_qr_prompt(xpub, FORMAT_NONE)
         return MENU_CONTINUE
 
     def wallet(self):

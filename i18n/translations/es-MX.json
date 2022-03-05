@@ -27,6 +27,7 @@
     "Failed to load mnemonic": "No se puede cargar la mnemotécnica",
     "Failed to load wallet": "No se puede cargar la cartera",
     "Fee:\n₿%s": "Comisión:\n₿%s",
+    "Fingerprint: %s\n\nDerivation: m%s\n\n%s": "Huella Dactilar: %s\n\nDerivación: m%s\n\n%s",
     "Firmware exceeds max size: %d": "El firmware supera el tamaño máximo: %d",
     "Go": "Ir",
     "Invalid address": "Dirección inválida",

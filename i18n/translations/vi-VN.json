@@ -27,6 +27,7 @@
     "Failed to load mnemonic": "Tải mã mnemonic thất bại",
     "Failed to load wallet": "Tải ví thất bại",
     "Fee:\n₿%s": "Phí:\n₿%s",
+    "Fingerprint: %s\n\nDerivation: m%s\n\n%s": "Dấu vân tay: %s\n\nNguồn gốc: m%s\n\n%s",
     "Firmware exceeds max size: %d": "Phần sụn vượt quá kích thước tối đa: %d",
     "Go": "Đến",
     "Invalid address": "Địa chỉ không hợp lệ",
