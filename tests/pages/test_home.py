@@ -74,38 +74,70 @@ def test_public_key(mocker):
 
     cases = [
         # No print prompt
-        (Wallet(SINGLEKEY_12_WORD_KEY), None, False, [BUTTON_ENTER, BUTTON_ENTER]),
-        (Wallet(MULTISIG_12_WORD_KEY), None, True, [BUTTON_ENTER, BUTTON_ENTER]),
-        # Print
         (
             Wallet(SINGLEKEY_12_WORD_KEY),
-            MockPrinter(),
-            False,
+            None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
         (
             Wallet(MULTISIG_12_WORD_KEY),
-            MockPrinter(),
-            True,
+            None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+        ),
+        # Print
+        (
+            Wallet(SINGLEKEY_12_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
+        ),
+        (
+            Wallet(MULTISIG_12_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
         ),
         # Decline to print
         (
             Wallet(SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            False,
-            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+            ],
         ),
         (
             Wallet(MULTISIG_12_WORD_KEY),
             MockPrinter(),
-            True,
-            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+            ],
         ),
     ]
     for case in cases:
         ctx = mock.MagicMock(
-            input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case[3])),
+            input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case[2])),
             wallet=case[0],
             printer=case[1],
         )
@@ -116,44 +148,32 @@ def test_public_key(mocker):
 
         home.public_key()
 
+        version = "Zpub" if ctx.wallet.key.multisig else "zpub"
         display_qr_calls = [
             mock.call(
-                ctx.wallet.key.xpub_btc_core(),
+                ctx.wallet.key.key_expression(None),
                 FORMAT_NONE,
-                ctx.wallet.key.xpub(),
+                None,
                 DEFAULT_PADDING + 1,
-            )
+            ),
+            mock.call(
+                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
+                FORMAT_NONE,
+                None,
+                DEFAULT_PADDING + 1,
+            ),
         ]
-        print_qr_calls = [mock.call(ctx.wallet.key.xpub_btc_core(), FORMAT_NONE)]
-        if case[2]:
-            display_qr_calls.append(
-                mock.call(
-                    ctx.wallet.key.p2wsh_zpub_btc_core(),
-                    FORMAT_NONE,
-                    ctx.wallet.key.p2wsh_zpub(),
-                    DEFAULT_PADDING + 1,
-                )
-            )
-            print_qr_calls.append(
-                mock.call(ctx.wallet.key.p2wsh_zpub_btc_core(), FORMAT_NONE)
-            )
-        else:
-            display_qr_calls.append(
-                mock.call(
-                    ctx.wallet.key.p2wpkh_zpub_btc_core(),
-                    FORMAT_NONE,
-                    ctx.wallet.key.p2wpkh_zpub(),
-                    DEFAULT_PADDING + 1,
-                )
-            )
-            print_qr_calls.append(
-                mock.call(ctx.wallet.key.p2wpkh_zpub_btc_core(), FORMAT_NONE)
-            )
-
+        print_qr_calls = [
+            mock.call(ctx.wallet.key.key_expression(None), FORMAT_NONE),
+            mock.call(
+                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
+                FORMAT_NONE,
+            ),
+        ]
         home.display_qr_codes.assert_has_calls(display_qr_calls)
         home.print_qr_prompt.assert_has_calls(print_qr_calls)
 
-        assert ctx.input.wait_for_button.call_count == len(case[3])
+        assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
 def test_wallet(mocker):

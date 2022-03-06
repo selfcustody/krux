@@ -26,6 +26,7 @@ from binascii import hexlify
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
+from .i18n import t
 
 DER_SINGLE = "m/84h/%dh/0h"
 DER_MULTI = "m/48h/%dh/0h/2h"
@@ -47,50 +48,22 @@ class Key:
         ]
         self.account = self.root.derive(self.derivation).to_public()
 
-    def xpub(self):
+    def xpub(self, version=None):
         """Returns the xpub representation of the extended master public key"""
-        return self.account.to_base58()
+        return self.account.to_base58(version)
 
-    def xpub_btc_core(self):
-        """Returns the xpub of the extended master public key, prefixed with
-        fingerprint and derivation
+    def key_expression(self, version=None, pretty=False):
+        """Returns the extended master public key in key expression format
+        per https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#key-expressions,
+        prefixed with fingerprint and derivation.
         """
-        return "[%s%s]%s" % (
-            hexlify(self.fingerprint).decode("utf-8"),
-            self.derivation[1:],  # remove leading m
-            self.account.to_base58(),
+        key_str = (
+            t("Fingerprint: %s\n\nDerivation: m%s\n\n%s") if pretty else "[%s%s]%s"
         )
-
-    def p2wsh_zpub(self):
-        """Returns the Zpub representation of the extended master public key
-        used for denoting P2WSH
-        """
-        return self.account.to_base58(self.network["Zpub"])
-
-    def p2wsh_zpub_btc_core(self):
-        """Returns the Zpub representation of the extended master public key
-        used for denoting P2WSH, prefixed with fingerprint and derivation
-        """
-        return "[%s%s]%s" % (
+        return key_str % (
             hexlify(self.fingerprint).decode("utf-8"),
             self.derivation[1:],  # remove leading m
-            self.account.to_base58(self.network["Zpub"]),
-        )
-
-    def p2wpkh_zpub(self):
-        """Returns the zpub representation of the extended master public key
-        used for denoting P2WPKH
-        """
-        return self.account.to_base58(self.network["zpub"])
-
-    def p2wpkh_zpub_btc_core(self):
-        """Returns the zpub representation of the extended master public key
-        used for denoting P2WPKH, prefixed with fingerprint and derivation
-        """
-        return "[%s%s]%s" % (
-            hexlify(self.fingerprint).decode("utf-8"),
-            self.derivation[1:],  # remove leading m
-            self.account.to_base58(self.network["zpub"]),
+            self.account.to_base58(version),
         )
 
 

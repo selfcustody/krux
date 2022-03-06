@@ -27,6 +27,7 @@
     "Failed to load mnemonic": "Erreur de chargement mnémonique",
     "Failed to load wallet": "Erreur de chargement du portefeuille",
     "Fee:\n₿%s": "Frais:\n₿%s",
+    "Fingerprint: %s\n\nDerivation: m%s\n\n%s": "Empreinte Digitale: %s\n\nDérivation: m%s\n\n%s",
     "Firmware exceeds max size: %d": "Le micrologiciel dépasse la taille maximale: %d",
     "Go": "Go",
     "Invalid address": "Adresse invalide",

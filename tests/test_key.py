@@ -151,7 +151,7 @@ def test_xpub(mocker):
     key.account.to_base58.assert_called()
 
 
-def test_xpub_btc_core(mocker):
+def test_key_expression(mocker):
     mock_modules(mocker)
     import krux
     from krux.key import Key
@@ -159,57 +159,16 @@ def test_xpub_btc_core(mocker):
     key = Key(TEST_MNEMONIC, False)
     mocker.spy(key.account, "to_base58")
 
-    assert key.xpub_btc_core() == TEST_DERIVATION + TEST_XPUB
-    krux.key.hexlify.assert_called_with(TEST_FINGERPRINT)
-    key.account.to_base58.assert_called()
-
-
-def test_p2wsh_zpub(mocker):
-    mock_modules(mocker)
-    from krux.key import Key
-
-    key = Key(TEST_MNEMONIC, False)
-    mocker.spy(key.account, "to_base58")
-
-    assert key.p2wsh_zpub() == TEST_P2WSH_ZPUB
-    key.account.to_base58.assert_called_with(NETWORKS["test"]["Zpub"])
-
-
-def test_p2wsh_zpub_btc_core(mocker):
-    mock_modules(mocker)
-    import krux
-    from krux.key import Key
-
-    key = Key(TEST_MNEMONIC, False)
-    mocker.spy(key.account, "to_base58")
-
-    assert key.p2wsh_zpub_btc_core() == TEST_DERIVATION + TEST_P2WSH_ZPUB
-    krux.key.hexlify.assert_called_with(TEST_FINGERPRINT)
-    key.account.to_base58.assert_called_with(NETWORKS["test"]["Zpub"])
-
-
-def test_p2wpkh_zpub(mocker):
-    mock_modules(mocker)
-    from krux.key import Key
-
-    key = Key(TEST_MNEMONIC, False)
-    mocker.spy(key.account, "to_base58")
-
-    assert key.p2wpkh_zpub() == TEST_P2WPKH_ZPUB
-    key.account.to_base58.assert_called_with(NETWORKS["test"]["zpub"])
-
-
-def test_p2wpkh_zpub_btc_core(mocker):
-    mock_modules(mocker)
-    import krux
-    from krux.key import Key
-
-    key = Key(TEST_MNEMONIC, False)
-    mocker.spy(key.account, "to_base58")
-
-    assert key.p2wpkh_zpub_btc_core() == TEST_DERIVATION + TEST_P2WPKH_ZPUB
-    krux.key.hexlify.assert_called_with(TEST_FINGERPRINT)
-    key.account.to_base58.assert_called_with(NETWORKS["test"]["zpub"])
+    cases = [
+        (None, TEST_DERIVATION + TEST_XPUB),
+        (key.network["xpub"], TEST_DERIVATION + TEST_XPUB),
+        (key.network["zpub"], TEST_DERIVATION + TEST_P2WPKH_ZPUB),
+        (key.network["Zpub"], TEST_DERIVATION + TEST_P2WSH_ZPUB),
+    ]
+    for case in cases:
+        assert key.key_expression(case[0]) == case[1]
+        krux.key.hexlify.assert_called_with(TEST_FINGERPRINT)
+        key.account.to_base58.assert_called()
 
 
 def test_to_mnemonic_words(mocker):

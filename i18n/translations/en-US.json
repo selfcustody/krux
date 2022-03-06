@@ -27,6 +27,7 @@
     "Failed to load mnemonic": "Failed to load mnemonic",
     "Failed to load wallet": "Failed to load wallet",
     "Fee:\n₿%s": "Fee:\n₿%s",
+    "Fingerprint: %s\n\nDerivation: m%s\n\n%s": "Fingerprint: %s\n\nDerivation: m%s\n\n%s",
     "Firmware exceeds max size: %d": "Firmware exceeds max size: %d",
     "Go": "Go",
     "Invalid address": "Invalid address",
