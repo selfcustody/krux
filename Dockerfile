@@ -94,6 +94,7 @@ ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/MaixPy
 RUN pip3 install -r requirements.txt
 RUN python3 ./components/micropython/core/lib/memzip/make-memzip.py --zip-file ./components/micropython/port/memzip-files.zip --c-file ./components/micropython/port/memzip-files.c /src/build
+RUN cp -rf projects/"${DEVICE}"/compile/overrides/. ./
 RUN cd projects/"${DEVICE}" && \
     python3 project.py clean && \
     python3 project.py distclean && \
