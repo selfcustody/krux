@@ -63,7 +63,7 @@ SPLASH = """
 
 ctx = Context()
 
-ctx.display.flash_text(SPLASH.split("\n"), color=lcd.WHITE, padding=8)
+ctx.display.flash_text(SPLASH.split("\n"), color=lcd.WHITE, padding=8, duration=1000)
 
 while True:
     if not Login(ctx).run():
