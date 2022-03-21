@@ -22,10 +22,10 @@
 import io
 import os
 import binascii
-import secp256k1
 import hashlib
 import time
 import flash
+from embit import ec
 from .input import Input, BUTTON_ENTER
 from .metadata import SIGNER_PUBKEY
 from .display import Display
@@ -149,10 +149,12 @@ def fsize(firmware_filename):
     return size
 
 
-def sha256(firmware_filename, firmware_size):
+def sha256(firmware_filename, firmware_size=None):
     """Returns the sha256 hash of the firmware"""
     hasher = hashlib.sha256()
-    hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
+    # If firmware size is supplied, then we want a sha256 of the firmware with its header
+    if firmware_size is not None:
+        hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
     with open(firmware_filename, "rb", buffering=0) as file:
         while True:
             chunk = file.read(128)
@@ -185,12 +187,13 @@ def upgrade():
     inp = Input()
 
     new_size = fsize(firmware_path)
-    new_hash = sha256(firmware_path, new_size)
+    firmware_hash = sha256(firmware_path)
+    firmware_with_header_hash = sha256(firmware_path, new_size)
 
     display.clear()
     display.draw_centered_text(
         t("New firmware detected.\n\nSHA256:\n%s\n\n\n\nInstall?")
-        % binascii.hexlify(new_hash).decode()
+        % binascii.hexlify(firmware_hash).decode()
     )
     if inp.wait_for_button() != BUTTON_ENTER:
         return False
@@ -201,7 +204,7 @@ def upgrade():
 
     pubkey = None
     try:
-        pubkey = secp256k1.ec_pubkey_parse(binascii.unhexlify(SIGNER_PUBKEY))
+        pubkey = ec.PublicKey.from_string(SIGNER_PUBKEY)
     except:
         display.flash_text(t("Invalid public key"))
         return False
@@ -214,7 +217,9 @@ def upgrade():
         return False
 
     try:
-        if not secp256k1.ecdsa_verify(sig, new_hash, pubkey):
+        # Parse, serialize, and reparse to ensure signature is compact prior to verification
+        sig = ec.Signature.parse(ec.Signature.parse(sig).serialize())
+        if not pubkey.verify(sig, firmware_hash):
             display.flash_text(t("Bad signature"))
             return False
     except:
@@ -244,7 +249,7 @@ def upgrade():
         new_size,
         65536,
         True,
-        new_hash,
+        firmware_with_header_hash,
     )
 
     write_data(

@@ -1,7 +1,9 @@
+import binascii
 import hashlib
 import pytest
 from .shared_mocks import *
 from embit.networks import NETWORKS
+from embit import ec
 
 TEST_12_WORD_MNEMONIC = (
     "olympic term tissue route sense program under choose bean emerge velvet absurd"
@@ -22,6 +24,14 @@ TEST_DERIVATION = "[55f8fc5d/84h/1h/0h]"
 TEST_XPUB = "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s"
 TEST_P2WSH_ZPUB = "Vpub5j5qqZeDSW2z2PiEnggvphpeiz1ipDtXHAAwMnV7quhsEWZnv5xrSwDm2hyxsyHLzeUM4EVX3P9V82inZkpeLpszEkwwsk1jNYq63ygjZ6V"
 TEST_P2WPKH_ZPUB = "vpub5YBkiKumsYUcbpYrr2DwzdUr1ByTbsCvxtXGSXDaU8sTcKzt9gaaMpMqE12VKY4SmBQNBeVQAAkyzs72GXfhCLmKQHqYULYjUpZDU4Y7tv6"
+
+TEST_HASH = binascii.unhexlify(
+    "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7"
+)
+TEST_INVALID_HASH = binascii.unhexlify("deadbeef")
+TEST_SIG = binascii.unhexlify(
+    "3044022050655d5880d719680a445bc4dbf31971869a37cc30d874480d740ee82407f43102202352f1e779e2de5a63dd90dc210db6ff80544ec0cf7410e8ffda1d2d4f002740"
+)
 
 
 def mock_modules(mocker):
@@ -169,6 +179,27 @@ def test_key_expression(mocker):
         assert key.key_expression(case[0]) == case[1]
         krux.key.hexlify.assert_called_with(TEST_FINGERPRINT)
         key.account.to_base58.assert_called()
+
+
+def test_sign(mocker):
+    mock_modules(mocker)
+    from krux.key import Key
+
+    key = Key(TEST_MNEMONIC, False)
+
+    signature = key.sign(TEST_HASH)
+    assert isinstance(signature, ec.Signature)
+    assert signature.serialize() == TEST_SIG
+
+
+def test_sign_fails_with_invalid_hash(mocker):
+    mock_modules(mocker)
+    from krux.key import Key
+
+    key = Key(TEST_MNEMONIC, False)
+
+    with pytest.raises(ValueError):
+        key.sign(TEST_INVALID_HASH)
 
 
 def test_to_mnemonic_words(mocker):

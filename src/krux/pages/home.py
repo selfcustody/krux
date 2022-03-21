@@ -19,15 +19,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import binascii
 import gc
+import hashlib
 import lcd
+from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..input import BUTTON_ENTER
 from ..wallet import Wallet, parse_address
 from ..i18n import t
-from . import Page, Menu, MENU_CONTINUE
+from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 
 
 class Home(Page):
@@ -41,10 +44,10 @@ class Home(Page):
                 ctx,
                 [
                     (t("Mnemonic"), self.mnemonic),
-                    (t("Public Key (xpub)"), self.public_key),
+                    (t("Extended Public Key"), self.public_key),
                     (t("Wallet"), self.wallet),
                     (t("Scan Address"), self.scan_address),
-                    (t("Sign PSBT"), self.sign_psbt),
+                    (t("Sign"), self.sign),
                     (t("Shutdown"), self.shutdown),
                 ],
             ),
@@ -178,6 +181,21 @@ class Home(Page):
             self.ctx.input.wait_for_button()
         return MENU_CONTINUE
 
+    def sign(self):
+        """Handler for the 'sign' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("PSBT"), self.sign_psbt),
+                (t("Message"), self.sign_message),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return MENU_CONTINUE
+        return status
+
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
         if not self.ctx.wallet.is_loaded():
@@ -215,6 +233,56 @@ class Home(Page):
             gc.collect()
             self.display_qr_codes(signed_psbt, qr_format)
             self.print_qr_prompt(signed_psbt, qr_format)
+        return MENU_CONTINUE
+
+    def sign_message(self):
+        """Handler for the 'sign message' menu item"""
+        data, qr_format = self.capture_qr_code()
+        if data is None or qr_format != FORMAT_NONE:
+            self.ctx.display.flash_text(t("Failed to load message"), lcd.RED)
+            return MENU_CONTINUE
+
+        data = data.encode() if isinstance(data, str) else data
+
+        message_hash = None
+        if len(data) == 32:
+            # It's a sha256 hash already
+            message_hash = data
+        else:
+            if len(data) == 64:
+                # It may be a hex-encoded sha256 hash
+                try:
+                    message_hash = binascii.unhexlify(data)
+                except:
+                    pass
+            if message_hash is None:
+                # It's a message, so compute its sha256 hash
+                message_hash = hashlib.sha256(data).digest()
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("SHA256:\n%s\n\n\n\nSign?") % binascii.hexlify(message_hash).decode()
+        )
+        if self.ctx.input.wait_for_button() != BUTTON_ENTER:
+            return MENU_CONTINUE
+
+        sig = self.ctx.wallet.key.sign(message_hash)
+
+        # Encode sig as base64 string
+        encoded_sig = base_encode(sig.serialize(), 64).decode()
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Signature:\n\n%s") % encoded_sig)
+        self.ctx.input.wait_for_button()
+        self.display_qr_codes(encoded_sig, qr_format)
+        self.print_qr_prompt(encoded_sig, qr_format)
+
+        pubkey = binascii.hexlify(self.ctx.wallet.key.account.sec()).decode()
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Public Key:\n\n%s") % pubkey)
+        self.ctx.input.wait_for_button()
+        self.display_qr_codes(pubkey, qr_format)
+        self.print_qr_prompt(pubkey, qr_format)
+
         return MENU_CONTINUE
 
     def display_wallet(self, wallet, include_qr=True):
