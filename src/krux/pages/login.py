@@ -37,7 +37,6 @@ from ..i18n import t, translations
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 
 SENTINEL_DIGITS = "11111"
-SENTINEL_LETTERS = "aaaaa"
 
 DIGITS = "0123456789"
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
@@ -340,7 +339,7 @@ class Login(Page):
             }
 
         return self._load_key_from_keypad(
-            title, LETTERS, to_word, SENTINEL_LETTERS, autocomplete, possible_letters
+            title, LETTERS, to_word, None, autocomplete, possible_letters
         )
 
     def load_key_from_digits(self):

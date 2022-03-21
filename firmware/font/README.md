@@ -13,13 +13,13 @@ The `hextodkz.py` script takes a `.hex` font file and converts it into the 1D bi
 
 For example, to recreate the font in Krux:
 ```
-python3 hexfill.py Fairfax.hex 14 > Fairfax.hex
-python3 hexfill.py ter-u14n.hex 14 > ter-u14n.hex
-python3 hexfill.py btc.hex 14 > btc.hex
+poetry run python hexfill.py Fairfax.hex 14 > Fairfax.hex
+poetry run python hexfill.py ter-u14n.hex 14 > ter-u14n.hex
+poetry run python hexfill.py btc.hex 14 > btc.hex
 
-python3 hexmerge.py btc.hex ter-u14n.hex Fairfax.hex > all.hex
+poetry run python hexmerge.py btc.hex ter-u14n.hex Fairfax.hex > all.hex
 
-python3 hextodkz.py all.hex > all.dkz
+poetry run python hextodkz.py all.hex > all.dkz
 ```
 
-Once you have this array in the `all.dkz` file, open `MaixPy/components/micropython/port/src/omv/img/font.c` and replace the array contents in the `unicode` variable with this new array and rebuild the firmware.
+Once you have this array in the `all.dkz` file, find the project you want to use the new font under `firmware/MaixPy/projects`, open its `overrides/components/micropython/port/src/omv/img/font.c` file and replace the array contents in the `unicode` variable with this new array and rebuild the firmware.

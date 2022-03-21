@@ -32,6 +32,9 @@ FONT_SIZE = 7
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
+QR_DARK_COLOR = 0x4208
+QR_LIGHT_COLOR = 0xEF7B
+
 DEL = t("Del")
 GO = t("Go")
 
@@ -279,7 +282,7 @@ class Display:
             new_lines.append("0" + line + "0")
         new_lines.append("0" * (size + 2))
         qr_code = "\n".join(new_lines)
-        lcd.draw_qr_code(offset_y, qr_code, self.width())
+        lcd.draw_qr_code(offset_y, qr_code, self.width(), QR_DARK_COLOR, QR_LIGHT_COLOR)
 
     def set_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""

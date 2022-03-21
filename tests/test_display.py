@@ -465,11 +465,13 @@ def test_flash_text(mocker):
 def test_draw_qr_code(mocker):
     mocker.patch("krux.display.lcd", new=mock.MagicMock())
     import krux
-    from krux.display import Display
+    from krux.display import Display, QR_DARK_COLOR, QR_LIGHT_COLOR
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)
 
     d.draw_qr_code(0, TEST_QR)
 
-    krux.display.lcd.draw_qr_code.assert_called_with(0, TEST_QR_WITH_BORDER, 135)
+    krux.display.lcd.draw_qr_code.assert_called_with(
+        0, TEST_QR_WITH_BORDER, 135, QR_DARK_COLOR, QR_LIGHT_COLOR
+    )
