@@ -12,17 +12,25 @@ from krux.firmware import (
     MAX_FIRMWARE_SIZE,
 )
 from .shared_mocks import *
+from embit import ec
 
-TEST_SIGNER_PRIVKEY = "0de8a470e0616b52c0658c38b85a5709b0ec4cdff6c57d2d04ab99554cc62421"
 TEST_SIGNER_PUBKEY = (
-    "0352c03cc5ad8b146248fd12a9a48ce2d6a236f14dd2ab7e65ec9c9611659e5642"
+    "03dc8ffc42845af7a30be30e7fc342363f43bc6d11a6c1d833e4e2fc339a1d0491"
 )
+TEST_SIGNER_PUBLIC_KEY = ec.PublicKey.from_string(TEST_SIGNER_PUBKEY)
 
 TEST_FIRMWARE_FILENAME = os.path.join(os.path.dirname(__file__), "firmware-v0.0.0.bin")
 TEST_FIRMWARE = open(TEST_FIRMWARE_FILENAME, "rb").read()
 TEST_FIRMWARE_SHA256 = open(TEST_FIRMWARE_FILENAME + ".sha256.txt", "r").read()
+TEST_FIRMWARE_WITH_HEADER_SHA256 = open(
+    TEST_FIRMWARE_FILENAME + ".withheader.sha256.txt", "r"
+).read()
 TEST_FIRMWARE_SIG = open(TEST_FIRMWARE_FILENAME + ".sig", "rb").read()
-TEST_FIRMWARE_BADSIG = open(TEST_FIRMWARE_FILENAME + ".badsig", "rb").read()
+TEST_FIRMWARE_SIGNATURE = ec.Signature.parse(TEST_FIRMWARE_SIG)
+TEST_FIRMWARE_MALFORMED_SIG = open(
+    TEST_FIRMWARE_FILENAME + ".malformed.sig", "rb"
+).read()
+TEST_FIRMWARE_BAD_SIG = open(TEST_FIRMWARE_FILENAME + ".bad.sig", "rb").read()
 
 SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1 = [
     0x5A,
@@ -12734,9 +12742,6 @@ def test_write_data_with_5_failed_read():
 def test_upgrade(mocker):
     mocker.patch("krux.firmware.flash", new=mock.MagicMock())
     mocker.patch(
-        "krux.firmware.secp256k1", new=mock.MagicMock(wraps=sys.modules["secp256k1"])
-    )
-    mocker.patch(
         "builtins.open",
         new=get_mock_open(
             {
@@ -12760,6 +12765,12 @@ def test_upgrade(mocker):
             return_value=bytes(SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1)
         ),
     )
+    mocker.patch("krux.firmware.ec", new=mock.MagicMock(wraps=ec))
+    mocker.spy(TEST_SIGNER_PUBLIC_KEY, "verify")
+    mocker.patch(
+        "krux.firmware.ec.PublicKey.from_string",
+        new=mock.MagicMock(return_value=TEST_SIGNER_PUBLIC_KEY),
+    )
     import krux
     from krux import firmware
 
@@ -12768,18 +12779,15 @@ def test_upgrade(mocker):
 
     assert firmware.upgrade()
 
-    krux.firmware.secp256k1.ec_pubkey_parse.assert_called_with(
-        binascii.unhexlify(TEST_SIGNER_PUBKEY)
-    )
-    krux.firmware.secp256k1.ecdsa_verify.assert_called_with(
-        TEST_FIRMWARE_SIG,
+    krux.firmware.ec.PublicKey.from_string.assert_called_with(TEST_SIGNER_PUBKEY)
+    krux.firmware.ec.Signature.parse.assert_called_with(TEST_FIRMWARE_SIG)
+    TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
+        TEST_FIRMWARE_SIGNATURE,
         binascii.unhexlify(TEST_FIRMWARE_SHA256),
-        krux.firmware.secp256k1.ec_pubkey_parse(binascii.unhexlify(TEST_SIGNER_PUBKEY)),
     )
-    assert krux.firmware.secp256k1.ecdsa_verify(
-        TEST_FIRMWARE_SIG,
+    assert TEST_SIGNER_PUBLIC_KEY.verify(
+        TEST_FIRMWARE_SIGNATURE,
         binascii.unhexlify(TEST_FIRMWARE_SHA256),
-        krux.firmware.secp256k1.ec_pubkey_parse(binascii.unhexlify(TEST_SIGNER_PUBKEY)),
     )
 
     krux.firmware.flash.read.assert_called_with(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
@@ -12800,7 +12808,7 @@ def test_upgrade(mocker):
                 len(TEST_FIRMWARE),
                 65536,
                 True,
-                binascii.unhexlify(TEST_FIRMWARE_SHA256),
+                binascii.unhexlify(TEST_FIRMWARE_WITH_HEADER_SHA256),
             ),
             mock.call(
                 mock.ANY,
@@ -12822,9 +12830,6 @@ def test_upgrade(mocker):
 
 def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(mocker):
     mocker.patch("krux.firmware.flash", new=mock.MagicMock())
-    mocker.patch(
-        "krux.firmware.secp256k1", new=mock.MagicMock(wraps=sys.modules["secp256k1"])
-    )
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -12852,6 +12857,12 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
             ]
         ),
     )
+    mocker.patch("krux.firmware.ec", new=mock.MagicMock(wraps=ec))
+    mocker.spy(TEST_SIGNER_PUBLIC_KEY, "verify")
+    mocker.patch(
+        "krux.firmware.ec.PublicKey.from_string",
+        new=mock.MagicMock(return_value=TEST_SIGNER_PUBLIC_KEY),
+    )
     import krux
     from krux import firmware
 
@@ -12860,18 +12871,15 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
 
     assert firmware.upgrade()
 
-    krux.firmware.secp256k1.ec_pubkey_parse.assert_called_with(
-        binascii.unhexlify(TEST_SIGNER_PUBKEY)
-    )
-    krux.firmware.secp256k1.ecdsa_verify.assert_called_with(
-        TEST_FIRMWARE_SIG,
+    krux.firmware.ec.PublicKey.from_string.assert_called_with(TEST_SIGNER_PUBKEY)
+    krux.firmware.ec.Signature.parse.assert_called_with(TEST_FIRMWARE_SIG)
+    TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
+        TEST_FIRMWARE_SIGNATURE,
         binascii.unhexlify(TEST_FIRMWARE_SHA256),
-        krux.firmware.secp256k1.ec_pubkey_parse(binascii.unhexlify(TEST_SIGNER_PUBKEY)),
     )
-    assert krux.firmware.secp256k1.ecdsa_verify(
-        TEST_FIRMWARE_SIG,
+    assert TEST_SIGNER_PUBLIC_KEY.verify(
+        TEST_FIRMWARE_SIGNATURE,
         binascii.unhexlify(TEST_FIRMWARE_SHA256),
-        krux.firmware.secp256k1.ec_pubkey_parse(binascii.unhexlify(TEST_SIGNER_PUBKEY)),
     )
 
     krux.firmware.flash.read.assert_has_calls(
@@ -12897,7 +12905,7 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
                 len(TEST_FIRMWARE),
                 65536,
                 True,
-                binascii.unhexlify(TEST_FIRMWARE_SHA256),
+                binascii.unhexlify(TEST_FIRMWARE_WITH_HEADER_SHA256),
             ),
             mock.call(
                 mock.ANY,
@@ -12919,9 +12927,6 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
 
 def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(mocker):
     mocker.patch("krux.firmware.flash", new=mock.MagicMock())
-    mocker.patch(
-        "krux.firmware.secp256k1", new=mock.MagicMock(wraps=sys.modules["secp256k1"])
-    )
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -12946,6 +12951,12 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(mocker):
             return_value=bytes(SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_2)
         ),
     )
+    mocker.patch("krux.firmware.ec", new=mock.MagicMock(wraps=ec))
+    mocker.spy(TEST_SIGNER_PUBLIC_KEY, "verify")
+    mocker.patch(
+        "krux.firmware.ec.PublicKey.from_string",
+        new=mock.MagicMock(return_value=TEST_SIGNER_PUBLIC_KEY),
+    )
     import krux
     from krux import firmware
 
@@ -12954,18 +12965,15 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(mocker):
 
     assert firmware.upgrade()
 
-    krux.firmware.secp256k1.ec_pubkey_parse.assert_called_with(
-        binascii.unhexlify(TEST_SIGNER_PUBKEY)
-    )
-    krux.firmware.secp256k1.ecdsa_verify.assert_called_with(
-        TEST_FIRMWARE_SIG,
+    krux.firmware.ec.PublicKey.from_string.assert_called_with(TEST_SIGNER_PUBKEY)
+    krux.firmware.ec.Signature.parse.assert_called_with(TEST_FIRMWARE_SIG)
+    TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
+        TEST_FIRMWARE_SIGNATURE,
         binascii.unhexlify(TEST_FIRMWARE_SHA256),
-        krux.firmware.secp256k1.ec_pubkey_parse(binascii.unhexlify(TEST_SIGNER_PUBKEY)),
     )
-    assert krux.firmware.secp256k1.ecdsa_verify(
-        TEST_FIRMWARE_SIG,
+    assert TEST_SIGNER_PUBLIC_KEY.verify(
+        TEST_FIRMWARE_SIGNATURE,
         binascii.unhexlify(TEST_FIRMWARE_SHA256),
-        krux.firmware.secp256k1.ec_pubkey_parse(binascii.unhexlify(TEST_SIGNER_PUBKEY)),
     )
 
     krux.firmware.flash.read.assert_called_with(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
@@ -12986,7 +12994,7 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(mocker):
                 len(TEST_FIRMWARE),
                 65536,
                 True,
-                binascii.unhexlify(TEST_FIRMWARE_SHA256),
+                binascii.unhexlify(TEST_FIRMWARE_WITH_HEADER_SHA256),
             ),
             mock.call(
                 mock.ANY,
@@ -13069,9 +13077,6 @@ def test_upgrade_fails_when_firmware_too_big(mocker):
 
 def test_upgrade_fails_when_pubkey_is_invalid(mocker):
     mocker.patch(
-        "krux.firmware.secp256k1", new=mock.MagicMock(wraps=sys.modules["secp256k1"])
-    )
-    mocker.patch(
         "builtins.open",
         new=get_mock_open(
             {
@@ -13120,9 +13125,6 @@ def test_upgrade_fails_when_sig_file_missing(mocker):
 
 def test_upgrade_fails_when_sig_is_invalid(mocker):
     mocker.patch(
-        "krux.firmware.secp256k1", new=mock.MagicMock(wraps=sys.modules["secp256k1"])
-    )
-    mocker.patch(
         "builtins.open",
         new=get_mock_open(
             {
@@ -13145,16 +13147,37 @@ def test_upgrade_fails_when_sig_is_invalid(mocker):
     assert not firmware.upgrade()
 
 
-def test_upgrade_fails_when_sig_is_bad(mocker):
-    mocker.patch(
-        "krux.firmware.secp256k1", new=mock.MagicMock(wraps=sys.modules["secp256k1"])
-    )
+def test_upgrade_fails_when_sig_is_malformed(mocker):
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
             {
                 "/sd/firmware-v0.0.0.bin": TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": TEST_FIRMWARE_BADSIG,
+                "/sd/firmware-v0.0.0.bin.sig": TEST_FIRMWARE_MALFORMED_SIG,
+            }
+        ),
+    )
+    mocker.patch(
+        "os.listdir",
+        new=mock.MagicMock(
+            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
+        ),
+    )
+    mocker.patch("krux.firmware.Display", new=mock.MagicMock())
+    mocker.patch("krux.firmware.Input", new=MockSuccessInput)
+    mocker.patch("krux.firmware.SIGNER_PUBKEY", TEST_SIGNER_PUBKEY)
+    from krux import firmware
+
+    assert not firmware.upgrade()
+
+
+def test_upgrade_fails_when_sig_is_bad(mocker):
+    mocker.patch(
+        "builtins.open",
+        new=get_mock_open(
+            {
+                "/sd/firmware-v0.0.0.bin": TEST_FIRMWARE,
+                "/sd/firmware-v0.0.0.bin.sig": TEST_FIRMWARE_BAD_SIG,
             }
         ),
     )
@@ -13174,9 +13197,6 @@ def test_upgrade_fails_when_sig_is_bad(mocker):
 
 def test_upgrade_fails_when_both_sectors_missing_active_firmware(mocker):
     mocker.patch("krux.firmware.flash", new=mock.MagicMock())
-    mocker.patch(
-        "krux.firmware.secp256k1", new=mock.MagicMock(wraps=sys.modules["secp256k1"])
-    )
     mocker.patch(
         "builtins.open",
         new=get_mock_open(

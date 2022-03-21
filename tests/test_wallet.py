@@ -493,23 +493,23 @@ def test_parse_address():
             "3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw",
         ),
         (
-            "bitcoin:14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ?note=test",
+            "bitcoin:14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ?message=test",
             "14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ",
         ),
         (
-            "bitcoin:1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k?note=test",
+            "bitcoin:1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k?message=test",
             "1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k",
         ),
         (
-            "bitcoin:bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn?note=test",
+            "bitcoin:bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn?message=test",
             "bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn",
         ),
         (
-            "bitcoin:32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg?note=test",
+            "bitcoin:32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg?message=test",
             "32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg",
         ),
         (
-            "bitcoin:3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw?note=test",
+            "bitcoin:3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw?message=test",
             "3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw",
         ),
     ]

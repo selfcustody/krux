@@ -1,3 +1,4 @@
+import binascii
 from krux.display import DEFAULT_PADDING
 from krux.key import Key
 from ..shared_mocks import *
@@ -701,3 +702,129 @@ def test_sign_psbt(mocker):
             home.capture_qr_code.assert_not_called()
 
         assert ctx.input.wait_for_button.call_count == len(case[9])
+
+
+def test_sign_message(mocker):
+    from krux.pages.home import Home
+    from krux.wallet import Wallet
+
+    cases = [
+        # Hex-encoded hash, Sign, No print prompt
+        (
+            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
+            FORMAT_NONE,
+            None,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+        # Hash, Sign, No print prompt
+        (
+            binascii.unhexlify(
+                "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7"
+            ),
+            FORMAT_NONE,
+            None,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+        # Message, Sign, No print prompt
+        (
+            "hello world",
+            FORMAT_NONE,
+            None,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+        # 64-byte message, Sign, No print prompt
+        (
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+            FORMAT_NONE,
+            None,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            "MEQCIEHpCMfQ+5mBAOH//OCxF6iojpVtIS6G7X+3r3qB/0CaAiAkbjW2SGrPLvju+O05yH2x/4EKL2qlkdWnquiVkUY3jQ==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+        # Hex-encoded hash, Sign, Print
+        (
+            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
+            FORMAT_NONE,
+            MockPrinter(),
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
+            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+        # Hex-encoded hash, Sign, Decline to print
+        (
+            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
+            FORMAT_NONE,
+            MockPrinter(),
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+            ],
+            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+        # Hex-encoded hash, Decline to sign
+        (
+            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
+            FORMAT_NONE,
+            None,
+            [BUTTON_PAGE],
+            None,
+            None,
+        ),
+        # Failed to capture message QR
+        (None, FORMAT_NONE, None, [], None, None),
+    ]
+    for case in cases:
+        wallet = Wallet(SINGLEKEY_SIGNING_KEY)
+
+        ctx = mock.MagicMock(
+            input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case[3])),
+            wallet=wallet,
+            printer=case[2],
+        )
+
+        home = Home(ctx)
+        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
+        mocker.patch.object(
+            home,
+            "display_qr_codes",
+            new=lambda data, qr_format, title=None, title_padding=10: ctx.input.wait_for_button(),
+        )
+        mocker.spy(home, "print_qr_prompt")
+        mocker.spy(home, "capture_qr_code")
+        mocker.spy(home, "display_qr_codes")
+
+        home.sign_message()
+
+        home.capture_qr_code.assert_called_once()
+        if case[0] and case[3][0] == BUTTON_ENTER:
+            home.display_qr_codes.assert_has_calls(
+                [mock.call(case[4], case[1]), mock.call(case[5], case[1])]
+            )
+            home.print_qr_prompt.assert_has_calls(
+                [mock.call(case[4], case[1]), mock.call(case[5], case[1])]
+            )
+        else:
+            home.display_qr_codes.assert_not_called()
+            home.print_qr_prompt.assert_not_called()
+
+        assert ctx.input.wait_for_button.call_count == len(case[3])
