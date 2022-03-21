@@ -33,7 +33,9 @@ ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
-pytest-mock = "^3.6.1"
-pytest-cov = "^3.0.0"
 black = "^22.1.0"
+mkdocs = "^1.2.3"
+pylint = "^2.12.2"
+pytest = "^6.2.5"
+pytest-cov = "^3.0.0"
+pytest-mock = "^3.6.1"
