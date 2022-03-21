@@ -45,49 +45,24 @@ panic() {
     exit 1
 }
 
-if [ "$1" == "setup" ]; then
-    docker build . -t krux-builder
-elif [ "$1" == "build" ]; then
+filesize() {
+    [ -f "$1" ] && ls -dnL -- "$1" | awk '{print $5;exit}' || { echo 0; return 1; }
+}
+
+if [ "$1" == "build" ]; then
     device="$2"
-    version="$3"
-    
-    printf "Signer Private Key (Leave empty to generate): "
-    IFS= read -rs privkey
-    printf "\n"
-    if [ -z "$privkey" ]; then
-        privkey_cmd="docker run --rm -w "$SCRIPTS_DIR" krux-builder python3 create_private_key.py"
-        privkey=$($privkey_cmd)
-    fi
 
-    export SIGNER_PRIVKEY="$privkey"
-    pubkey_cmd="docker run --rm -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 derive_public_key.py"
-    pubkey=$($pubkey_cmd)
-    export -n SIGNER_PRIVKEY
-    unset SIGNER_PRIVKEY
+    declare $(grep version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
+    sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
 
-    sed -i -- "s/SIGNER_PUBKEY = '.*'/SIGNER_PUBKEY = '$pubkey'/g" src/krux/metadata.py
-    sed -i -- "s/VERSION = '.*'/VERSION = '$version'/g" src/krux/metadata.py
-
+    mkdir -p build
     docker build . -t krux-builder --build-arg DEVICE=$device
 
-    export SIGNER_PRIVKEY="$privkey"
-    sign_cmd="docker create -w "$SCRIPTS_DIR" --env SIGNER_PRIVKEY krux-builder python3 sign.py $BUILD_DIR/firmware.bin"
-    CID=$($sign_cmd)
-    docker start ${CID}
-    docker wait ${CID}
-    export -n SIGNER_PRIVKEY
-    unset SIGNER_PRIVKEY
-
-    docker cp ${CID}:$BUILD_DIR/firmware.bin "firmware-v${version}.bin"
-    docker cp ${CID}:$BUILD_DIR/firmware.bin.sig "firmware-v${version}.bin.sig"
-    docker cp ${CID}:$BUILD_DIR/firmware.bin.sha256.txt "firmware-v${version}.bin.sha256.txt"
-    docker rm ${CID}
-
-    if [ ! -z "$privkey_cmd" ]; then
-        echo "Your generated Signer Private Key is below. Please write it down somewhere safe."
-        echo $privkey
-    fi
-    unset privkey
+    # Create a container to extract the built firmware
+    docker create --name extract-firmware krux-builder
+    docker cp extract-firmware:$BUILD_DIR/firmware.bin build/firmware.bin
+    docker cp extract-firmware:$BUILD_DIR/kboot.kfpkg build/kboot.kfpkg
+    docker rm extract-firmware
 elif [ "$1" == "flash" ]; then
     device="maixpy_m5stickv"
     if [ ! -z "$2" ]; then
@@ -109,7 +84,93 @@ elif [ "$1" == "flash" ]; then
     fi
 
     docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
+elif [ "$1" == "sha256" ]; then
+    file="$2"
+    hash=$(openssl dgst -sha256 $file)
+    hash=($hash)
+    echo ${hash[1]}
+elif [ "$1" == "sha256-with-header" ]; then
+    firmware="$2"
+    # Get size of firmware
+    fsize=$(filesize $firmware)
+    # Convert size to little endian
+    fsize_byte1=`printf '%02x' "$((fsize & 255))"`
+    fsize_byte2=`printf '%02x' "$((fsize >> 8 & 255))"`
+    fsize_byte3=`printf '%02x' "$((fsize >> 16 & 255))"`
+    fsize_byte4=`printf '%02x' "$((fsize >> 24 & 255))"`
+    # Header is leading 0 byte followed by 4-byte little-endian fsize
+    header="\x00\x$fsize_byte1\x$fsize_byte2\x$fsize_byte3\x$fsize_byte4"
+    # Copy firmware binary and increase copy's size by 5 bytes
+    xxd $firmware | xxd -r -s 5 > $firmware.withheader
+    # Prepend copy with header bytes
+    printf "%b" $header | xxd -p | xxd -r -p - $firmware.withheader
+    # Output sha256 of copy with header bytes
+    ./krux sha256 $firmware.withheader
+    rm -f $firmware.withheader
+elif [ "$1" == "b64decode" ]; then
+    b64="$2"
+    echo "$b64" | openssl base64 -d
+elif [ "$1" == "generate-keypair" ]; then
+    openssl ecparam -name secp256k1 -conv_form compressed -genkey -noout -out privkey.pem
+    openssl ec -in privkey.pem -pubout -out pubkey.pem
+elif [ "$1" == "pubkey-to-pem" ]; then
+    $pubkey="$2"
+    # https://github.com/pebwindkraft/trx_cl_suite/blob/master/tcls_key2pem.sh#L134
+    pem="3036301006072a8648ce3d020106052b8104000a032200$pubkey"
+    pem=$( echo $pem | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+    echo "-----BEGIN PUBLIC KEY-----"
+    printf $pem | openssl enc -base64
+    echo "-----END PUBLIC KEY-----"
+elif [ "$1" == "pem-to-pubkey" ]; then
+    pem="$2"
+    pubkey=$(openssl ec -noout -text -inform PEM -in $pem -pubin | tr -d '\n')
+    pubkey=$( echo $pubkey | sed 's/Public-Key: (256 bit)pub://g' )
+    pubkey=$( echo $pubkey | sed 's/ASN1 OID: secp256k1//g' )
+    pubkey=$( echo $pubkey | sed 's/://g' )
+    pubkey=$( echo $pubkey | sed 's/ //g' )
+    echo $pubkey
+elif [ "$1" == "sign" ]; then
+    file="$2"
+    privkey_pem="$3"
+    sig_bin=$file.sig
+    openssl dgst -sign $privkey_pem -keyform PEM -sha256 -out $sig_bin -binary $file
+elif [ "$1" == "verify" ]; then
+    file="$2"
+    pubkey="$3"
+    sig_bin=$file.sig
+    openssl sha256 <$file -binary | openssl pkeyutl -verify -pubin -inkey $pubkey -sigfile $sig_bin
+elif [ "$1" == "build-release" ]; then
+    declare $(grep version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
+
+    release_dir="krux-v$version"
+    mkdir -p $release_dir
+
+    cd build
+    if [ ! -f "ktool-linux" ]; then
+        wget https://github.com/selfcustody/ktool/releases/download/v0.1.0/ktool-linux
+        echo "ea09c20bf3812ed0f356cc1efd1c88092d957795fb851fabab5ae6bca9a406a8  ktool-linux" | sha256sum -c
+    fi
+    if [ ! -f "ktool-mac" ]; then
+        wget https://github.com/selfcustody/ktool/releases/download/v0.1.0/ktool-mac
+        echo "41ac5d87bf51b7d317b866c65dbb58f2d004502e6af6e3a3e527a622fb2217f9  ktool-mac" | sha256sum -c
+    fi
+    if [ ! -f "ktool-win.exe" ]; then
+        wget https://github.com/selfcustody/ktool/releases/download/v0.1.0/ktool-win.exe
+        echo "7b1e6af613279473d8f69050643ca6159f596735afd0d7e21b712e71f8c7775c  ktool-win.exe" | sha256sum -c
+    fi
+    cp -f ktool-linux ../$release_dir/ktool-linux
+    cp -f ktool-mac ../$release_dir/ktool-mac
+    cp -f ktool-win.exe ../$release_dir/ktool-win.exe
+    cd ..
+
+    devices=("maixpy_m5stickv")
+    for device in ${devices[@]}; do
+        ./krux build $device
+        mkdir -p $release_dir/$device
+        cp -f build/firmware.bin $release_dir/$device/firmware.bin
+        cp -f build/kboot.kfpkg $release_dir/$device/kboot.kfpkg
+    done
 elif [ "$1" == "clean" ]; then
     rm -rf build
-    docker system prune --all --force
+    docker system prune
 fi

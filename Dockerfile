@@ -70,7 +70,11 @@ RUN pip3 install astor
 
 FROM build-base as build-software
 ARG DEVICE="maixpy_m5stickv"
-COPY . /src
+RUN mkdir /src
+COPY ./LICENSE.md /src/LICENSE.md
+COPY ./firmware /src/firmware
+COPY ./src /src/src
+COPY ./vendor /src/vendor
 WORKDIR /src
 RUN cd vendor/embit && pip3 install -e .
 RUN mkdir build && \
