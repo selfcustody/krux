@@ -20,8 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
+import math
 
-height = int(sys.argv[2])
+width = int(sys.argv[2])
+height = int(sys.argv[3])
+
+font_byte_length = math.ceil(width / 8 * height)
+line_char_length = (font_byte_length * 2) + 6  # 6 is codepoint prefix len
 
 with open(sys.argv[1], "r") as input_file:
     # Read in a hex formatted bitmap font file
@@ -29,8 +34,8 @@ with open(sys.argv[1], "r") as input_file:
     # Zero out > height pixel width characters since they can't be scaled down
     lines = list(
         map(
-            lambda line: line.split(":")[0] + ":" + ("0" * 2 * height) + "\n"
-            if len(line) > height * 2 + 6
+            lambda line: line.split(":")[0] + ":" + ("00" * font_byte_length) + "\n"
+            if len(line) > line_char_length
             else line,
             lines,
         )
@@ -39,9 +44,9 @@ with open(sys.argv[1], "r") as input_file:
     lines = list(
         map(
             lambda line: line[:5]
-            + ("0" * ((height * 2 + 6) - len(line)))
+            + ("0" * (line_char_length - len(line)))
             + line[5 : len(line)]
-            if len(line) < height * 2 + 6
+            if len(line) < line_char_length
             else line,
             lines,
         )
@@ -51,7 +56,7 @@ with open(sys.argv[1], "r") as input_file:
     while i < len(lines):
         codepoint = int(lines[i].split(":")[0], 16)
         while i < codepoint:
-            lines.insert(i, ("%04X" % i) + ":" + ("0" * 2 * height) + "\n")
+            lines.insert(i, ("%04X" % i) + ":" + ("00" * font_byte_length) + "\n")
             i += 1
         i += 1
-    print("".join(lines))
+    print("".join(lines).strip())
