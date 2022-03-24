@@ -19,40 +19,23 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=C0103
+# pylint: disable=E1307
 import sys
-import math
 
-BYTE_LEN = 2
-
-width = int(sys.argv[2])
-height = int(sys.argv[3])
-
-width_bytes = math.ceil(width / 8)
-
-with open(sys.argv[1], "r") as input_file:
-    # Read in a hex formatted bitmap font file
-    lines = input_file.readlines()
-
-    # Strip out the unicode code point prefix at the beginning of each line
-    glyphs = list(map(lambda line: line.split(":")[1].rstrip("\n"), lines))
-
-    # Use only the first $limit glyphs
-    limit = len(glyphs)
-    if len(sys.argv) == 5:
-        limit = int(sys.argv[4])
-
-    bitmap = []
-    for i in range(len(glyphs)):
-        if i >= limit:
-            break
-        glyph = glyphs[i]
-
-        rows = []
-        for x in range(width_bytes):
-            row = []
-            for y in range(height):
-                glyph_index = y * BYTE_LEN * width_bytes + (x * BYTE_LEN)
-                row.append("0x" + glyph[glyph_index : glyph_index + BYTE_LEN])
-            rows.append(",".join(row))
-        bitmap.append(",\n".join(rows))
-    print(",\n".join(bitmap))
+with open(sys.argv[1], "r", encoding="unicode_escape") as input_file:
+    codepoint = None
+    parsing_bitmap = False
+    hex_chars = []
+    for line in input_file.readlines():
+        if line.startswith("ENCODING"):
+            codepoint = int(line.split()[1])
+        elif line.startswith("BITMAP"):
+            parsing_bitmap = True
+        elif line.startswith("ENDCHAR"):
+            if parsing_bitmap and hex_chars:
+                print("%04X:%s" % (codepoint, "".join(hex_chars).upper()))
+            parsing_bitmap = False
+            hex_chars = []
+        elif parsing_bitmap:
+            hex_chars.append(line.strip())
