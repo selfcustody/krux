@@ -1,16 +1,8 @@
 [![codecov](https://codecov.io/gh/selfcustody/krux/branch/main/graph/badge.svg?token=XU80PT6Q9V)](https://codecov.io/gh/selfcustody/krux)
 
-      ██
-      ██
-      ██
-    ██████
-      ██
-      ██  ██   ██ ████  ██    ██  ██      ██
-      ██ ██    ████     ██    ██    ██  ██
-      ████     ██       ██    ██     ████
-      ██ ██    ██       ██    ██     ████
-      ██  ██   ██       ██    ██    ██  ██
-      ██   ██  ██        ██████   ██      ██
+<p align="center">
+<img src="https://selfcustody.github.io/krux/img/logo-125.png">
+</p>
 
 Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisignature and single-key wallets. It is a low-cost airgapped device built from off-the-shelf parts that communicates with wallet software via QR codes and wipes its memory after every session.
 
