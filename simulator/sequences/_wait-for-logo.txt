@@ -1,0 +1,2 @@
+# Delay start until logo has displayed
+wait 1

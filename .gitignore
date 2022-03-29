@@ -70,6 +70,8 @@ memzip-files.zip
 .coverage
 privkey.pem
 pubkey.pem
+simulator/screenshots
+simulator/sd
 
 !tests/firmware-v0.0.0.bin
 !tests/firmware-v0.0.0.bin.badsig

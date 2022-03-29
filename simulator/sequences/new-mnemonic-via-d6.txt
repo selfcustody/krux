@@ -1,0 +1,170 @@
+include _wait-for-logo.txt
+
+# Navigate to New Mnemonic
+press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+screenshot new-mnemonic-via-d6-prompt.png
+
+press BUTTON_A
+screenshot new-mnemonic-via-d6-roll-1.png
+
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x3 press BUTTON_A
+
+x2 press BUTTON_B
+x3 press BUTTON_A
+
+x3 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+x2 press BUTTON_B
+x3 press BUTTON_A
+
+x2 press BUTTON_B
+x3 press BUTTON_A
+
+x3 press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x3 press BUTTON_A
+
+x3 press BUTTON_B
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+x2 press BUTTON_B
+x3 press BUTTON_A
+
+x3 press BUTTON_B
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+x2 press BUTTON_B
+x3 press BUTTON_A
+
+press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+press BUTTON_B
+x3 press BUTTON_A
+
+x2 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+x2 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+press BUTTON_B
+x3 press BUTTON_A
+
+x3 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+press BUTTON_B
+x3 press BUTTON_A
+
+x2 press BUTTON_B
+x3 press BUTTON_A
+
+x1 press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x3 press BUTTON_A
+
+x4 press BUTTON_B
+x3 press BUTTON_A
+
+x5 press BUTTON_B
+x2 press BUTTON_A
+
+screenshot new-mnemonic-via-d6-roll-string.png
+
+press BUTTON_A
+
+screenshot new-mnemonic-via-d6-done-rolling-prompt.png
+
+press BUTTON_A
+
+screenshot new-mnemonic-via-d6-roll-sha256.png

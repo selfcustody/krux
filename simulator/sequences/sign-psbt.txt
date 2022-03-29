@@ -1,0 +1,35 @@
+include _load-12-word-mnemonic.txt
+press BUTTON_A
+wait 1
+
+# Navigate to Sign
+x4 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+screenshot sign-psbt-wallet-not-loaded-warning.png
+
+press BUTTON_A
+
+qrcode singlekey-psbt-p1of5.png
+wait 1
+qrcode singlekey-psbt-p2of5.png
+wait 1
+qrcode singlekey-psbt-p3of5.png
+wait 1
+qrcode singlekey-psbt-p4of5.png
+wait 1
+qrcode singlekey-psbt-p5of5.png
+wait 1
+
+screenshot sign-psbt-sign-prompt.png
+
+press BUTTON_A
+screenshot sign-psbt-signed-qr.png
+wait 1
+screenshot sign-psbt-signed-qr-2.png
+wait 1
+screenshot sign-psbt-signed-qr-3.png
+wait 1
+
+press BUTTON_A

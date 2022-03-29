@@ -1,0 +1,38 @@
+include _load-12-word-mnemonic.txt
+press BUTTON_A
+wait 1
+
+# Navigate to Scan Address
+press BUTTON_B
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+qrcode specter-desktop-singlekey-wallet-receive-address.png
+
+screenshot scan-address-scanned-address.png
+
+press BUTTON_A
+
+press BUTTON_A
+
+wait 1
+screenshot scan-address-valid-address.png
+
+press BUTTON_A
+
+press BUTTON_A
+
+qrcode invalid-receive-address.png
+
+press BUTTON_A
+
+press BUTTON_A
+
+screenshot scan-address-searching.png
+
+press BUTTON_B
+
+screenshot scan-address-invalid-address.png
+
+press BUTTON_A

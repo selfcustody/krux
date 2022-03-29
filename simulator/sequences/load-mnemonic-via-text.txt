@@ -1,0 +1,44 @@
+include _wait-for-logo.txt
+
+# Navigate to via text
+press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-via-text-prompt.png
+
+press BUTTON_A
+screenshot load-mnemonic-via-text-word-1.png
+
+press BUTTON_A
+screenshot load-mnemonic-via-text-word-1-impossible-letters.png
+
+press BUTTON_A
+screenshot load-mnemonic-via-text-word-1-impossible-letters-2.png
+
+press BUTTON_A
+screenshot load-mnemonic-via-text-word-1-autocomplete.png
+
+x2 press BUTTON_A
+
+x5 press BUTTON_A
+x5 press BUTTON_A
+x5 press BUTTON_A
+x5 press BUTTON_A
+x5 press BUTTON_A
+x5 press BUTTON_A
+x5 press BUTTON_A
+x5 press BUTTON_A
+x5 press BUTTON_A
+x5 press BUTTON_A
+
+x27 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+screenshot load-mnemonic-via-text-done-entering-prompt.png
+
+press BUTTON_A
+screenshot load-mnemonic-via-text-mnemonic.png
+
+press BUTTON_A

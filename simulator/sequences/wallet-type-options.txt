@@ -1,0 +1,9 @@
+include _load-12-word-mnemonic.txt
+
+screenshot wallet-type-options.png
+
+screenshot wallet-type-options-single-key.png
+
+press BUTTON_B
+
+screenshot wallet-type-options-multisig.png

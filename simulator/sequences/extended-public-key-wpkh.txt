@@ -1,0 +1,20 @@
+include _load-12-word-mnemonic.txt
+press BUTTON_A
+wait 1
+
+# Navigate to Extended Public Key
+press BUTTON_B
+press BUTTON_A
+
+screenshot extended-public-key-wpkh-xpub-text.png
+
+press BUTTON_A
+screenshot extended-public-key-wpkh-xpub-qr.png
+
+press BUTTON_A
+screenshot extended-public-key-wpkh-zpub-text.png
+
+press BUTTON_A
+screenshot extended-public-key-wpkh-zpub-qr.png
+
+press BUTTON_A

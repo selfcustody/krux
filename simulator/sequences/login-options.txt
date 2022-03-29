@@ -1,0 +1,17 @@
+include _wait-for-logo.txt
+
+screenshot login-options.png
+
+screenshot login-options-load-mnemonic.png
+
+press BUTTON_B
+screenshot login-options-new-mnemonic.png
+
+press BUTTON_B
+screenshot login-options-settings.png
+
+press BUTTON_B
+screenshot login-options-about.png
+
+press BUTTON_B
+screenshot login-options-shutdown.png

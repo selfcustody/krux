@@ -1,0 +1,30 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Navigate to Debug
+press BUTTON_B
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+screenshot debug-options.png
+
+screenshot debug-options-none.png
+
+press BUTTON_B
+screenshot debug-options-debug.png
+
+press BUTTON_B
+screenshot debug-options-info.png
+
+press BUTTON_B
+screenshot debug-options-warn.png
+
+press BUTTON_B
+screenshot debug-options-error.png
+
+press BUTTON_B

@@ -1,0 +1,16 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Navigate to Locale
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+screenshot login-locale-de-de.png
