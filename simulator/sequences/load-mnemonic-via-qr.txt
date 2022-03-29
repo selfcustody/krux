@@ -1,0 +1,12 @@
+include _wait-for-logo.txt
+
+# Navigate to via QR
+press BUTTON_A
+
+press BUTTON_A
+qrcode 12-word-mnemonic.png
+
+screenshot load-mnemonic-via-qr-mnemonic.png
+
+press BUTTON_A
+

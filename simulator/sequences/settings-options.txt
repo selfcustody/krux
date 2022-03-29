@@ -1,0 +1,22 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+screenshot settings-options.png
+
+screenshot settings-options-network.png
+
+press BUTTON_B
+screenshot settings-options-printer.png
+
+press BUTTON_B
+screenshot settings-options-locale.png
+
+press BUTTON_B
+screenshot settings-options-debug.png
+
+press BUTTON_B
+screenshot settings-options-back.png

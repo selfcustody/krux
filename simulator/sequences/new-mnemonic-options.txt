@@ -1,0 +1,15 @@
+include _wait-for-logo.txt
+
+# Navigate to New Mnemonic
+press BUTTON_B
+press BUTTON_A
+
+screenshot new-mnemonic-options.png
+
+screenshot new-mnemonic-options-via-d6.png
+
+press BUTTON_B
+screenshot new-mnemonic-options-via-d20.png
+
+press BUTTON_B
+screenshot new-mnemonic-options-back.png

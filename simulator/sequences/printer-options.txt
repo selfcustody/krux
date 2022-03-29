@@ -1,0 +1,19 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Navigate to Printer
+press BUTTON_B
+press BUTTON_A
+
+screenshot printer-options.png
+
+screenshot printer-options-9600.png
+
+press BUTTON_B
+screenshot printer-options-19200.png
+
+press BUTTON_B

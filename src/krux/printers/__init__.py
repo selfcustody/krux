@@ -51,6 +51,6 @@ class Printer:
 def create_printer():
     """Instantiates a new printer dynamically based on the default in Settings"""
     return getattr(
-        __import__(settings.printer.module, None, globals(), [None], 1),
+        __import__(settings.printer.module, globals(), None, [None], 1),
         settings.printer.cls,
     )()

@@ -1,0 +1,29 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Navigate to Locale
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+screenshot locale-options.png
+
+screenshot locale-options-en-us.png
+
+press BUTTON_B
+screenshot locale-options-es-mx.png
+
+press BUTTON_B
+screenshot locale-options-fr-fr.png
+
+press BUTTON_B
+screenshot locale-options-vi-vn.png
+
+press BUTTON_B
+screenshot locale-options-de-de.png
+
+press BUTTON_B

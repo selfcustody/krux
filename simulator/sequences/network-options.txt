@@ -1,0 +1,18 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Navigate to Network
+press BUTTON_A
+
+screenshot network-options.png
+
+screenshot network-options-mainnet.png
+
+press BUTTON_B
+screenshot network-options-testnet.png
+
+press BUTTON_B

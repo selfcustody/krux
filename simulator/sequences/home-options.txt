@@ -1,0 +1,22 @@
+include _load-12-word-mnemonic.txt
+press BUTTON_A
+wait 1
+
+screenshot home-options.png
+
+screenshot home-options-mnemonic.png
+
+press BUTTON_B
+screenshot home-options-extended-public-key.png
+
+press BUTTON_B
+screenshot home-options-wallet.png
+
+press BUTTON_B
+screenshot home-options-scan-address.png
+
+press BUTTON_B
+screenshot home-options-sign.png
+
+press BUTTON_B
+screenshot home-options-shutdown.png

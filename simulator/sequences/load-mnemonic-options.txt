@@ -1,0 +1,20 @@
+include _wait-for-logo.txt
+
+# Navigate to Load Mnemonic
+press BUTTON_A
+
+screenshot load-mnemonic-options.png
+
+screenshot load-mnemonic-options-via-qr.png
+
+press BUTTON_B
+screenshot load-mnemonic-options-via-text.png
+
+press BUTTON_B
+screenshot load-mnemonic-options-via-numbers.png
+
+press BUTTON_B
+screenshot load-mnemonic-options-via-bits.png
+
+press BUTTON_B
+screenshot load-mnemonic-options-back.png
