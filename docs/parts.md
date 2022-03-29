@@ -12,12 +12,12 @@ This is the main hardware device that you will need. The M5StickV is available f
 - [Pimoroni](https://shop.pimoroni.com/products/m5stick-v-k210-ai-camera-without-wifi)
 - [OKDO](https://www.okdo.com/p/m5stickv-k210-ai-camera-without-wifi/)
 
-You can expect to pay $30-$50 for one depending on which distributor you choose.
+You can expect to pay around $50 for one depending on which distributor you choose.
 
 ## USB-C Charge Cable
 This will be included with the M5StickV that you purchase from one of the distributors above. It will be necessary to power and charge the device and to change its firmware.
 
-## MicroSD Card
+## (Optional) MicroSD Card
 Not all microSD cards will work with the M5StickV. Make sure to use one that has been [tested and shown to work](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test) with the device already. The size of the SD card isn't important; anything over a few megabytes will be plenty.
 
 ## (Optional) Thermal Printer
