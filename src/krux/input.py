@@ -35,7 +35,7 @@ RELEASED = 1
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
-    def __init__(self, ctx):
+    def __init__(self, ctx=None):
         self.ctx = ctx
         self.entropy = 0
         fm.register(board.config["krux.pins"]["BUTTON_A"], fm.fpioa.GPIOHS21)
@@ -49,13 +49,15 @@ class Input:
         """
         # Loop until all buttons are released (if currently pressed)
         while self.enter.value() == PRESSED or self.page.value() == PRESSED:
-            self.ctx.wdt.feed()
+            if self.ctx is not None:
+                self.ctx.wdt.feed()
             self.entropy += 1
 
         # Wait for first button press
         checks = 0
         while self.enter.value() == RELEASED and self.page.value() == RELEASED:
-            self.ctx.wdt.feed()
+            if self.ctx is not None:
+                self.ctx.wdt.feed()
             checks += 1
             if not block and checks > NONBLOCKING_CHECKS:
                 break
@@ -63,14 +65,16 @@ class Input:
         if self.enter.value() == PRESSED:
             # Wait for release
             while self.enter.value() == PRESSED:
-                self.ctx.wdt.feed()
+                if self.ctx is not None:
+                    self.ctx.wdt.feed()
                 self.entropy += 1
             return BUTTON_ENTER
 
         if self.page.value() == PRESSED:
             # Wait for release
             while self.page.value() == PRESSED:
-                self.ctx.wdt.feed()
+                if self.ctx is not None:
+                    self.ctx.wdt.feed()
                 self.entropy += 1
             return BUTTON_PAGE
         return None

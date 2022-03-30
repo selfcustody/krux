@@ -218,9 +218,9 @@ def parse_wallet(wallet_data, network):
     except:
         try:
             # If that fails, try to parse as an xpub as a last resort
-            key = Key.from_string(wallet_data)
-            if key.is_extended:
-                xpub = key.key.to_base58(version=network["xpub"])
+            pubkey = Key.from_string(wallet_data)
+            if pubkey.is_extended:
+                xpub = pubkey.key.to_base58(version=network["xpub"])
                 descriptor = Descriptor.from_string("wpkh(%s)" % xpub)
                 return descriptor, None
         except:
