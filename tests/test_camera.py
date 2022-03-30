@@ -1,12 +1,11 @@
 from .shared_mocks import *
 
-
 def test_init(mocker):
     from krux.camera import Camera
 
     spy = mocker.spy(Camera, "initialize_sensor")
-
-    c = Camera()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    c = Camera(ctx)
 
     assert isinstance(c, Camera)
     spy.assert_called()
@@ -16,7 +15,8 @@ def test_initialize_sensor():
     import krux
     from krux.camera import Camera
 
-    c = Camera()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    c = Camera(ctx)
 
     c.initialize_sensor()
 
@@ -41,7 +41,8 @@ def test_capture_qr_code_loop(mocker):
     import krux
     from krux.camera import Camera
 
-    c = Camera()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    c = Camera(ctx)
 
     prev_parsed_count = -1
 
@@ -61,7 +62,7 @@ def test_capture_qr_code_loop(mocker):
     assert format == MockQRPartParser.FORMAT
     assert prev_parsed_count == MockQRPartParser.TOTAL - 1
     krux.camera.sensor.run.assert_called_with(0)
-
+    ctx.wdt.feed.assert_called()
 
 def test_capture_qr_code_loop_returns_early_when_requested(mocker):
     mocker.patch(
@@ -71,7 +72,8 @@ def test_capture_qr_code_loop_returns_early_when_requested(mocker):
     import krux
     from krux.camera import Camera
 
-    c = Camera()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    c = Camera(ctx)
 
     prev_parsed_count = -1
 
@@ -91,6 +93,7 @@ def test_capture_qr_code_loop_returns_early_when_requested(mocker):
     assert format is None
     assert prev_parsed_count < MockQRPartParser.TOTAL - 1
     krux.camera.sensor.run.assert_called_with(0)
+    ctx.wdt.feed.assert_called()
 
 
 def test_capture_qr_code_loop_skips_bad_histogram(mocker):
@@ -102,7 +105,8 @@ def test_capture_qr_code_loop_skips_bad_histogram(mocker):
     import krux
     from krux.camera import Camera
 
-    c = Camera()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    c = Camera(ctx)
 
     prev_parsed_count = -1
 
@@ -125,6 +129,7 @@ def test_capture_qr_code_loop_skips_bad_histogram(mocker):
     assert format == MockQRPartParser.FORMAT
     assert prev_parsed_count == MockQRPartParser.TOTAL - 1
     krux.camera.sensor.run.assert_called_with(0)
+    ctx.wdt.feed.assert_called()
 
 
 def test_capture_qr_code_loop_skips_missing_qrcode(mocker):
@@ -136,7 +141,8 @@ def test_capture_qr_code_loop_skips_missing_qrcode(mocker):
     import krux
     from krux.camera import Camera
 
-    c = Camera()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    c = Camera(ctx)
 
     prev_parsed_count = -1
 
@@ -159,6 +165,7 @@ def test_capture_qr_code_loop_skips_missing_qrcode(mocker):
     assert format == MockQRPartParser.FORMAT
     assert prev_parsed_count == MockQRPartParser.TOTAL - 1
     krux.camera.sensor.run.assert_called_with(0)
+    ctx.wdt.feed.assert_called()
 
 
 def test_capture_qr_code_loop_skips_duplicate_qrcode(mocker):
@@ -170,7 +177,8 @@ def test_capture_qr_code_loop_skips_duplicate_qrcode(mocker):
     import krux
     from krux.camera import Camera
 
-    c = Camera()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    c = Camera(ctx)
 
     prev_parsed_count = -1
 
@@ -193,3 +201,4 @@ def test_capture_qr_code_loop_skips_duplicate_qrcode(mocker):
     assert format == MockQRPartParser.FORMAT
     assert prev_parsed_count == MockQRPartParser.TOTAL - 1
     krux.camera.sensor.run.assert_called_with(0)
+    ctx.wdt.feed.assert_called()

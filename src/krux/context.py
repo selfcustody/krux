@@ -41,8 +41,8 @@ class Context:
         self.wdt = machine.WDT(timeout=RESET_TIMEOUT)
         self.log = Logger(settings.log.path, settings.log.level)
         self.display = Display()
-        self.input = Input(self.wdt)
-        self.camera = Camera(self.wdt)
+        self.input = Input(self)
+        self.camera = Camera(self)
         self.light = Light() if "LED_W" in board.config["krux.pins"] else None
         self.printer = None
         self.wallet = None
