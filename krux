@@ -140,7 +140,7 @@ elif [ "$1" == "verify" ]; then
     sig_bin=$file.sig
     openssl sha256 <$file -binary | openssl pkeyutl -verify -pubin -inkey $pubkey -sigfile $sig_bin
 elif [ "$1" == "build-release" ]; then
-    declare $(grep version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
+    declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
 
     release_dir="krux-v$version"
     mkdir -p $release_dir
