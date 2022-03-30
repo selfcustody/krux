@@ -29,6 +29,9 @@ SPECTER_SINGLEKEY_WALLET_DATA = '{"label": "Specter Singlekey Wallet", "blockhei
 SPECTER_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))"
 SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
 
+BLUEWALLET_SINGLEKEY_DESCRIPTOR = "wpkh(xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
+BLUEWALLET_SINGLEKEY_WALLET_DATA = "zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw"
+
 BLUEWALLET_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
 BLUEWALLET_MULTISIG_WALLET_DATA = """
 # BlueWallet Multisig setup file
@@ -232,7 +235,7 @@ def test_receive_addresses():
         wallet = Wallet(case[0])
         wallet.load(case[1], case[2])
 
-        assert [addr for addr in wallet.receive_addresses(10)] == case[3]
+        assert [addr for addr in wallet.receive_addresses(0, limit=10)] == case[3]
 
 
 def test_load_multisig():
@@ -417,6 +420,11 @@ def test_parse_wallet():
             "Specter Multisig Wallet",
         ),
         (
+            BLUEWALLET_SINGLEKEY_WALLET_DATA,
+            BLUEWALLET_SINGLEKEY_DESCRIPTOR,
+            None,
+        ),
+        (
             BLUEWALLET_MULTISIG_WALLET_DATA,
             BLUEWALLET_MULTISIG_DESCRIPTOR,
             "BlueWallet Multisig Wallet",
@@ -434,7 +442,7 @@ def test_parse_wallet():
     ]
 
     for case in cases:
-        descriptor, label = parse_wallet(case[0])
+        descriptor, label = parse_wallet(case[0], NETWORKS["main"])
         assert descriptor.to_string() == case[1]
         assert label == case[2]
 
@@ -452,7 +460,7 @@ def test_parse_wallet_raises_errors():
     ]
     for case in cases:
         with pytest.raises(ValueError):
-            parse_wallet(case)
+            parse_wallet(case, NETWORKS["main"])
 
 
 def test_parse_address():

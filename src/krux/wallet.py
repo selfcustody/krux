@@ -223,9 +223,7 @@ def parse_wallet(wallet_data, network):
             key = Key.from_string(wallet_data)
             if key.is_extended:
                 xpub = key.key.to_base58(version=network["xpub"])
-                derivation = DER_SINGLE % (0 if xpub.startswith("xpub") else 1)
-                key_expression = "[%s%s]%s" % (hexlify(key.fingerprint).decode("utf-8"), derivation[1:], xpub)
-                descriptor = Descriptor.from_string("wpkh(%s)" % key_expression)
+                descriptor = Descriptor.from_string("wpkh(%s)" % xpub)
                 return descriptor, None
         except:
             pass
