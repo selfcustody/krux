@@ -23,12 +23,14 @@ try:
     import ujson as json
 except ImportError:
     import json
+from binascii import hexlify
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
 from embit.script import Script, address_to_scriptpubkey
 import urtypes
 from .i18n import t
+from .key import DER_SINGLE
 
 
 class Wallet:
@@ -58,7 +60,7 @@ class Wallet:
 
     def load(self, wallet_data, qr_format):
         """Loads the wallet from the given data"""
-        descriptor, label = parse_wallet(wallet_data)
+        descriptor, label = parse_wallet(wallet_data, self.key.network)
 
         if self.is_multisig():
             if not descriptor.is_basic_multisig:
@@ -125,7 +127,7 @@ def to_unambiguous_descriptor(descriptor):
     return descriptor
 
 
-def parse_wallet(wallet_data):
+def parse_wallet(wallet_data, network):
     """Exhaustively tries to parse the wallet data from a known format, returning
     a descriptor and label if possible.
 
@@ -216,7 +218,17 @@ def parse_wallet(wallet_data):
         descriptor = Descriptor.from_string(wallet_data)
         return descriptor, None
     except:
-        pass
+        try:
+            # If that fails, try to parse as an xpub as a last resort
+            key = Key.from_string(wallet_data)
+            if key.is_extended:
+                xpub = key.key.to_base58(version=network["xpub"])
+                derivation = DER_SINGLE % (0 if xpub.startswith("xpub") else 1)
+                key_expression = "[%s%s]%s" % (hexlify(key.fingerprint).decode("utf-8"), derivation[1:], xpub)
+                descriptor = Descriptor.from_string("wpkh(%s)" % key_expression)
+                return descriptor, None
+        except:
+            pass
 
     raise ValueError("invalid wallet format")
 
