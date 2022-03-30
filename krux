@@ -114,7 +114,7 @@ elif [ "$1" == "generate-keypair" ]; then
     openssl ecparam -name secp256k1 -conv_form compressed -genkey -noout -out privkey.pem
     openssl ec -in privkey.pem -pubout -out pubkey.pem
 elif [ "$1" == "pubkey-to-pem" ]; then
-    $pubkey="$2"
+    pubkey="$2"
     # https://github.com/pebwindkraft/trx_cl_suite/blob/master/tcls_key2pem.sh#L134
     pem="3036301006072a8648ce3d020106052b8104000a032200$pubkey"
     pem=$( echo $pem | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
