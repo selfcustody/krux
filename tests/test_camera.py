@@ -1,5 +1,6 @@
 from .shared_mocks import *
 
+
 def test_init(mocker):
     from krux.camera import Camera
 
@@ -63,6 +64,7 @@ def test_capture_qr_code_loop(mocker):
     assert prev_parsed_count == MockQRPartParser.TOTAL - 1
     krux.camera.sensor.run.assert_called_with(0)
     ctx.wdt.feed.assert_called()
+
 
 def test_capture_qr_code_loop_returns_early_when_requested(mocker):
     mocker.patch(

@@ -23,14 +23,12 @@ try:
     import ujson as json
 except ImportError:
     import json
-from binascii import hexlify
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
 from embit.script import Script, address_to_scriptpubkey
 import urtypes
 from .i18n import t
-from .key import DER_SINGLE
 
 
 class Wallet:
