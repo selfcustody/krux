@@ -8,7 +8,7 @@ Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisi
 
 ---
 ## Disclaimer
-**WARNING**: *This is currently beta-quality software and has not yet been audited by a third party. Use at your own risk!*
+**WARNING**: *This software has not yet been audited by a third party. Use at your own risk!*
 
 ---
 
