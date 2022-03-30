@@ -14,7 +14,8 @@ def test_init(mocker):
     from krux.input import Input
     import board
 
-    input = Input()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    input = Input(ctx)
 
     assert isinstance(input, Input)
     krux.input.fm.register.assert_has_calls(
@@ -48,7 +49,8 @@ def test_wait_for_button_blocks_until_enter_released(mocker):
     mock_modules(mocker)
     from krux.input import Input
 
-    input = Input()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    input = Input(ctx)
     mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
     mocker.patch.object(input.page, "value", new=lambda: RELEASED)
 
@@ -67,6 +69,7 @@ def test_wait_for_button_blocks_until_enter_released(mocker):
 
     assert btn == BUTTON_ENTER
     assert input.entropy > 0
+    ctx.wdt.feed.assert_called()
 
 
 # def test_wait_for_button_blocks_until_page_released(mocker):
@@ -96,7 +99,8 @@ def test_wait_for_button_waits_for_existing_press_to_release(mocker):
     mock_modules(mocker)
     from krux.input import Input
 
-    input = Input()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    input = Input(ctx)
     mocker.patch.object(input.enter, "value", new=lambda: PRESSED)
 
     def release():
@@ -116,16 +120,19 @@ def test_wait_for_button_waits_for_existing_press_to_release(mocker):
 
     assert btn == BUTTON_ENTER
     assert input.entropy > 0
+    ctx.wdt.feed.assert_called()
 
 
 def test_wait_for_button_returns_when_nonblocking(mocker):
     mock_modules(mocker)
     from krux.input import Input
 
-    input = Input()
+    ctx = mock.MagicMock(wdt=mock.MagicMock())
+    input = Input(ctx)
     mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
     mocker.patch.object(input.page, "value", new=lambda: RELEASED)
 
     btn = input.wait_for_button(False)
 
     assert btn is None
+    ctx.wdt.feed.assert_called()

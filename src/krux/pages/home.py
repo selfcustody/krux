@@ -141,23 +141,26 @@ class Home(Page):
             if btn != BUTTON_ENTER:
                 return MENU_CONTINUE
 
-            gc.collect()
-
             found = False
             num_checked = 0
-            for recv_addr in self.ctx.wallet.receive_addresses():
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    t("Checking receive address %d for match..") % num_checked
-                )
+            while not found:
+                for recv_addr in self.ctx.wallet.receive_addresses(
+                    num_checked, limit=20
+                ):
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(
+                        t("Checking receive address %d for match..") % num_checked
+                    )
 
-                num_checked += 1
+                    num_checked += 1
 
-                found = addr == recv_addr
-                if found:
-                    break
+                    found = addr == recv_addr
+                    if found:
+                        break
 
-                if num_checked % 100 == 0:
+                gc.collect()
+
+                if not found:
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(
                         t("Checked %d receive addresses with no matches.") % num_checked
@@ -167,8 +170,6 @@ class Home(Page):
                     btn = self.ctx.input.wait_for_button()
                     if btn != BUTTON_ENTER:
                         break
-
-            gc.collect()
 
             self.ctx.display.clear()
             result_message = (

@@ -58,7 +58,7 @@ class Wallet:
 
     def load(self, wallet_data, qr_format):
         """Loads the wallet from the given data"""
-        descriptor, label = parse_wallet(wallet_data)
+        descriptor, label = parse_wallet(wallet_data, self.key.network)
 
         if self.is_multisig():
             if not descriptor.is_basic_multisig:
@@ -99,10 +99,10 @@ class Wallet:
         """Returns the original wallet data and qr format for display back as a QR code"""
         return (self.wallet_data, self.wallet_qr_format)
 
-    def receive_addresses(self, limit=None):
+    def receive_addresses(self, i=0, limit=None):
         """Returns an iterator deriving receive addresses for the wallet up to the provided limit"""
-        i = 0
-        while limit is None or i < limit:
+        starting_index = i
+        while limit is None or i < starting_index + limit:
             yield self.descriptor.derive(i, branch_index=0).address(
                 network=self.key.network
             )
@@ -125,7 +125,7 @@ def to_unambiguous_descriptor(descriptor):
     return descriptor
 
 
-def parse_wallet(wallet_data):
+def parse_wallet(wallet_data, network):
     """Exhaustively tries to parse the wallet data from a known format, returning
     a descriptor and label if possible.
 
@@ -216,7 +216,15 @@ def parse_wallet(wallet_data):
         descriptor = Descriptor.from_string(wallet_data)
         return descriptor, None
     except:
-        pass
+        try:
+            # If that fails, try to parse as an xpub as a last resort
+            pubkey = Key.from_string(wallet_data)
+            if pubkey.is_extended:
+                xpub = pubkey.key.to_base58(version=network["xpub"])
+                descriptor = Descriptor.from_string("wpkh(%s)" % xpub)
+                return descriptor, None
+        except:
+            pass
 
     raise ValueError("invalid wallet format")
 

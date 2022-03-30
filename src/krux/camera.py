@@ -28,7 +28,8 @@ from .qr import QRPartParser
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
-    def __init__(self):
+    def __init__(self, ctx):
+        self.ctx = ctx
         self.initialize_sensor()
 
     def initialize_sensor(self):
@@ -51,6 +52,7 @@ class Camera:
         prev_parsed_count = 0
         new_part = False
         while True:
+            self.ctx.wdt.feed()
             stop = callback(parser.total_count(), parser.parsed_count(), new_part)
             if stop:
                 break

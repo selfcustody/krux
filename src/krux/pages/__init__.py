@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import gc
 import math
 import time
 import lcd
@@ -273,6 +274,7 @@ class Menu:
         """
         selected_item_index = 0
         while True:
+            gc.collect()
             self.ctx.display.clear()
             self._draw_menu(selected_item_index)
 

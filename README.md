@@ -1,4 +1,5 @@
 [![codecov](https://codecov.io/gh/selfcustody/krux/branch/main/graph/badge.svg?token=XU80PT6Q9V)](https://codecov.io/gh/selfcustody/krux)
+[![calver](https://img.shields.io/badge/calver-YY.0M.MICRO-22bfda.svg)](https://calver.org)
 
 <p align="center">
 <img src="https://selfcustody.github.io/krux/img/logo-125.png">
@@ -8,7 +9,7 @@ Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisi
 
 ---
 ## Disclaimer
-**WARNING**: *This is currently beta-quality software and has not yet been audited by a third party. Use at your own risk!*
+**WARNING**: *This software has not yet been audited by a third party. Use at your own risk!*
 
 ---
 

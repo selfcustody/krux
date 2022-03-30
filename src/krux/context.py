@@ -21,12 +21,15 @@
 # THE SOFTWARE.
 import gc
 import board
+import machine
 from .logging import Logger
 from .settings import settings
 from .display import Display
 from .input import Input
 from .camera import Camera
 from .light import Light
+
+RESET_TIMEOUT = 30000
 
 
 class Context:
@@ -35,10 +38,11 @@ class Context:
     """
 
     def __init__(self):
+        self.wdt = machine.WDT(timeout=RESET_TIMEOUT)
         self.log = Logger(settings.log.path, settings.log.level)
         self.display = Display()
-        self.input = Input()
-        self.camera = Camera()
+        self.input = Input(self)
+        self.camera = Camera(self)
         self.light = Light() if "LED_W" in board.config["krux.pins"] else None
         self.printer = None
         self.wallet = None
