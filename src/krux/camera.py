@@ -23,13 +23,13 @@ import gc
 import sensor
 import lcd
 from .qr import QRPartParser
+from .wdt import wdt
 
 
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
-    def __init__(self, ctx):
-        self.ctx = ctx
+    def __init__(self):
         self.initialize_sensor()
 
     def initialize_sensor(self):
@@ -52,7 +52,7 @@ class Camera:
         prev_parsed_count = 0
         new_part = False
         while True:
-            self.ctx.wdt.feed()
+            wdt.feed()
             stop = callback(parser.total_count(), parser.parsed_count(), new_part)
             if stop:
                 break

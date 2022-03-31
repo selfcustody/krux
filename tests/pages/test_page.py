@@ -36,8 +36,8 @@ def test_capture_qr_code(mocker):
         input=mock.MagicMock(
             wait_for_button=mock.MagicMock(side_effect=[BUTTON_ENTER, BUTTON_PAGE])
         ),
+        camera=Camera(),
     )
-    ctx.camera = Camera(ctx)
 
     page = MockPage(ctx)
 

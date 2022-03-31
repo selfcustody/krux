@@ -41,6 +41,7 @@ import board
 from fpioa_manager import fm
 from machine import UART
 from ..settings import settings
+from ..wdt import wdt
 from . import Printer
 
 
@@ -132,6 +133,7 @@ class AdafruitPrinter(Printer):
     def write_bytes(self, *args):
         """Writes bytes to the printer at a stable speed"""
         for arg in args:
+            wdt.feed()
             self.uart_conn.write(arg if isinstance(arg, bytes) else bytes([arg]))
             # Calculate time to issue one byte to the printer.
             # 11 bits (not 8) to accommodate idle, start and
@@ -179,16 +181,20 @@ class AdafruitPrinter(Printer):
 
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
-        lines = qr_code.strip().split("\n")
+        size = 0
+        while qr_code[size] != "\n":
+            size += 1
 
-        width = len(lines)
-        height = len(lines)
-
-        scale = settings.printer.thermal.paper_width // width
-        for y in range(height):
+        scale = settings.printer.thermal.paper_width // size
+        for y in range(size):
             # Scale the line (width) by scaling factor
-            line_y = "".join([char * scale for char in lines[y]])
-            line_bytes = int(line_y, 2).to_bytes((len(line_y) + 7) // 8, "big")
+            line = 0
+            for char in qr_code[y * (size + 1) : y * (size + 1) + size]:
+                bit = int(char)
+                for _ in range(scale):
+                    line <<= 1
+                    line |= bit
+            line_bytes = line.to_bytes((size * scale + 7) // 8, "big")
             # Print height * scale lines out to scale by
             for _ in range(scale):
                 self.write_bytes(18, 42, 1, len(line_bytes))

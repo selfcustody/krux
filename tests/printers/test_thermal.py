@@ -86,6 +86,7 @@ def test_clear(mocker):
 
 def test_print_qr_code(mocker):
     mocker.patch("krux.printers.thermal.UART", new=MockUART)
+    import krux
     from krux.printers.thermal import AdafruitPrinter
 
     p = AdafruitPrinter()
@@ -96,3 +97,4 @@ def test_print_qr_code(mocker):
 
     assert p.write_bytes.call_count == 701
     p.feed.assert_called_once()
+    krux.printers.thermal.wdt.feed.assert_called()
