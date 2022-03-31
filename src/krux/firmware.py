@@ -30,6 +30,7 @@ from .input import Input, BUTTON_ENTER
 from .metadata import SIGNER_PUBKEY
 from .display import Display
 from .i18n import t
+from .wdt import wdt
 
 MAX_FIRMWARE_SIZE = 0x300000
 
@@ -77,6 +78,7 @@ def write_data(
     total_read = 0
     read_attempts = 0
     while True:
+        wdt.feed()
         if sha_suffix is None:
             pct_cb(total_read / data_size)
             if total_read == data_size:

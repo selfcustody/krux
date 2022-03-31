@@ -82,6 +82,7 @@ RUN mkdir build && \
     cp -r vendor/embit/src/embit build && \
     rm -rf build/embit/util/prebuilt && \
     rm -f build/embit/util/ctypes_secp256k1.py && \
+    rm -f build/embit/util/py_secp256k1.py && \
     cp -r vendor/urtypes/src/urtypes build && \
     cp -r vendor/foundation-ur-py/src/ur build && \
     cp -r firmware/MaixPy/projects/"${DEVICE}"/builtin_py/. build && \
