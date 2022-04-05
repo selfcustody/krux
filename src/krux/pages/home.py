@@ -70,7 +70,7 @@ class Home(Page):
             )
             self.ctx.input.wait_for_button()
             xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, None, DEFAULT_PADDING + 1)
+            self.display_qr_codes(xpub, FORMAT_NONE, None)
             self.print_qr_prompt(xpub, FORMAT_NONE)
         return MENU_CONTINUE
 
@@ -78,8 +78,7 @@ class Home(Page):
         """Handler for the 'wallet' menu item"""
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(t("Wallet not found."))
-            self.ctx.display.draw_hcentered_text(t("Load one?"), offset_y=200)
-            btn = self.ctx.input.wait_for_button()
+            btn = self.prompt(t("Load one?"), self.ctx.display.bottom_prompt_line)
             if btn == BUTTON_ENTER:
                 return self._load_wallet()
         else:
@@ -98,8 +97,7 @@ class Home(Page):
             wallet = Wallet(self.ctx.wallet.key)
             wallet.load(wallet_data, qr_format)
             self.display_wallet(wallet, include_qr=False)
-            self.ctx.display.draw_hcentered_text(t("Load?"), offset_y=200)
-            btn = self.ctx.input.wait_for_button()
+            btn = self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line)
             if btn == BUTTON_ENTER:
                 self.ctx.wallet = wallet
                 self.ctx.log.debug(
@@ -137,7 +135,7 @@ class Home(Page):
             self.ctx.display.draw_centered_text(
                 t("Check that address belongs to this wallet?")
             )
-            btn = self.ctx.input.wait_for_button()
+            btn = self.prompt(" ", self.ctx.display.bottom_prompt_line)
             if btn != BUTTON_ENTER:
                 return MENU_CONTINUE
 
@@ -166,8 +164,9 @@ class Home(Page):
                         t("Checked %d receive addresses with no matches.") % num_checked
                     )
 
-                    self.ctx.display.draw_hcentered_text(t("Try more?"), offset_y=200)
-                    btn = self.ctx.input.wait_for_button()
+                    btn = self.prompt(
+                        t("Try more?"), self.ctx.display.bottom_prompt_line
+                    )
                     if btn != BUTTON_ENTER:
                         break
 
@@ -204,8 +203,7 @@ class Home(Page):
                 t("WARNING:\nWallet not loaded.\n\nSome checks cannot be performed."),
                 lcd.WHITE,
             )
-            self.ctx.display.draw_hcentered_text(t("Proceed?"), offset_y=200)
-            btn = self.ctx.input.wait_for_button()
+            btn = self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line)
             if btn != BUTTON_ENTER:
                 return MENU_CONTINUE
 
@@ -224,9 +222,7 @@ class Home(Page):
         outputs = signer.outputs()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text("\n\n".join(outputs))
-        self.ctx.display.draw_hcentered_text(t("Sign?"), offset_y=200)
-
-        btn = self.ctx.input.wait_for_button()
+        btn = self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line)
         if btn == BUTTON_ENTER:
             signed_psbt = signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)

@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 import machine
 import sys
+import board
 
 
 class PowerManager:
@@ -28,13 +29,24 @@ class PowerManager:
 
     def __init__(self):
         self.pmu = None
-        try:
-            from pmu import axp192
+        if (
+            board.config["type"] == "amigo_ips"
+        ):  # todo, find/make and test proper pmu.py
+            try:
+                from pmu import axp173
 
-            self.pmu = axp192()
-            self.pmu.enablePMICSleepMode(True)
-        except:
-            pass
+                self.pmu = axp173()
+                self.pmu.enablePMICSleepMode(True)
+            except:
+                pass
+        else:
+            try:
+                from pmu import axp192
+
+                self.pmu = axp192()
+                self.pmu.enablePMICSleepMode(True)
+            except:
+                pass
 
     def shutdown(self):
         """Shuts down the device"""

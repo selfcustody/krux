@@ -20,22 +20,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import time
-import math
 import lcd
 import board
 from machine import I2C
 from .i18n import t
 
 DEFAULT_PADDING = 10
-FONT_SIZE = 7
+FONT_WIDTH, FONT_HEIGHT = board.config["lcd"]["font"]
+PORTRAIT, LANDSCAPE = board.config["lcd"]["orientation"]
+if "qr_colors" in board.config["lcd"]:
+    QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["lcd"]["qr_colors"]
+else:
+    QR_DARK_COLOR = 0x0000
+    QR_LIGHT_COLOR = 0xFFFF
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
-QR_DARK_COLOR = 0x4208
-QR_LIGHT_COLOR = 0xEF7B
+TOUCH_BUTTON_BG = lcd.DARKGREY
+TOUCH_BUTTON_FG = lcd.WHITE
+BUTTON_HEIGHT = 2 * FONT_HEIGHT
 
-DEL = t("Del")
+DEL = t("<")
 GO = t("Go")
 
 
@@ -43,16 +49,24 @@ class Display:
     """Display is a singleton interface for interacting with the device's display"""
 
     def __init__(self):
-        self.font_size = FONT_SIZE
         self.portrait = True
         self.initialize_lcd()
         self.i2c = None
-        self.initialize_backlight()
+        self.font_width = FONT_WIDTH
+        self.font_height = FONT_HEIGHT
+        self.bottom_line = self.height() // FONT_HEIGHT  # total lines
+        self.bottom_line -= 1
+        self.bottom_line *= FONT_HEIGHT
+        if board.config["lcd"]["touch"]:
+            # room left fot no/yes buttons
+            self.bottom_prompt_line = self.bottom_line - 5 * FONT_HEIGHT
+        else:
+            self.bottom_prompt_line = self.bottom_line
 
     def initialize_lcd(self):
         """Initializes the LCD"""
-        lcd.init(type=board.config["lcd"]["lcd_type"])
         if board.config["lcd"]["lcd_type"] == 3:
+            lcd.init(type=board.config["lcd"]["lcd_type"])
             lcd.register(0x3A, 0x05)
             lcd.register(0xB2, [0x05, 0x05, 0x00, 0x33, 0x33])
             lcd.register(0xB7, 0x23)
@@ -103,6 +117,12 @@ class Display:
                     0x2C,
                 ],
             )
+            self.initialize_backlight()
+        else:
+            lcd.init()
+        if board.config["lcd"]["invert"]:
+            lcd.mirror(True)
+        self.to_portrait()
 
     def initialize_backlight(self):
         """Initializes the backlight"""
@@ -119,21 +139,29 @@ class Display:
         )
         self.set_backlight(MIN_BACKLIGHT)
 
-    def line_height(self):
-        """Returns the pixel height of a line on the display"""
-        return self.font_size * 2
+    def qr_offset(self):
+        """Retuns y offset to subtittle QR codes"""
+        if board.config["type"] == "m5stickv":
+            return 138
+        if board.config["type"] == "bit":
+            return 240
+        return 340
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""
         if self.portrait:
-            return lcd.height()
-        return lcd.width()
+            return lcd.width()
+        return lcd.height()
+
+    def usable_width(self):
+        """Returns avaliable width considering sides padding"""
+        return self.width() - 2 * DEFAULT_PADDING
 
     def height(self):
         """Returns the height of the display, taking into account rotation"""
         if self.portrait:
-            return lcd.width()
-        return lcd.height()
+            return lcd.height()
+        return lcd.width()
 
     def qr_data_width(self):
         """Returns a smaller width for the QR to be generated
@@ -141,28 +169,27 @@ class Display:
         We do this because the QR would be too dense to be readable
         by most devices otherwise.
         """
+        if self.width() > 300:
+            return self.width() // 6  # reduce density even more on larger screens
         return self.width() // 4
 
     def to_landscape(self):
         """Changes the rotation of the display to landscape"""
         self.clear()
-        lcd.rotation(2)
+        lcd.rotation(LANDSCAPE)
         self.portrait = False
 
     def to_portrait(self):
         """Changes the rotation of the display to portrait"""
         self.clear()
-        # TODO: Ideally, this should just call lcd.rotation(0) rather than reinitializing
-        self.initialize_lcd()
+        lcd.rotation(PORTRAIT)
         self.portrait = True
 
-    def to_lines(self, text, padding=DEFAULT_PADDING):
+    def to_lines(self, text):
         """Takes a string of text and converts it to lines to display on
-        the screen, taking into account padding
+        the screen
         """
-        screen_width = self.width() - padding * 2
-        columns = math.floor(screen_width / self.font_size)
-
+        columns = self.usable_width() // self.font_width
         words = []
         for word in text.split(" "):
             subwords = word.split("\n")
@@ -240,34 +267,60 @@ class Display:
         """Clears the display"""
         lcd.clear()
 
-    def draw_hcentered_text(
-        self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE, padding=DEFAULT_PADDING
-    ):
-        """Draws text horizontally-centered on the display, taking padding
-        into account, at the given offset_y
-        """
-        screen_width = self.width() - padding * 2
-        lines = text if isinstance(text, list) else self.to_lines(text, padding)
-        for i, line in enumerate(lines):
-            offset_x = max(0, (screen_width - (self.font_size * len(line))) // 2) + 1
-            lcd.draw_string(
-                offset_x, offset_y + (i * self.line_height()), line, color, lcd.BLACK
+    def draw_touch_button(
+        self, lines, offset_y=0
+    ):  # todo, lcd won't let draw rectangle over 320
+        """Draws buttons for LCDs with touch screen"""
+        lines_list = []
+        if isinstance(lines, list):
+            lines_list.extend(lines)
+        else:
+            lines_list.append(lines)
+        lcd.fill_rectangle(
+            DEFAULT_PADDING,
+            offset_y + 1,
+            self.usable_width(),
+            self.font_height * (len(lines_list) + 1) - 2,
+            TOUCH_BUTTON_BG,
+        )
+        for i, text in enumerate(lines_list):
+            self.draw_hcentered_text(
+                text,
+                offset_y + self.font_height // 2 + self.font_height * i,
+                TOUCH_BUTTON_FG,
+                TOUCH_BUTTON_BG,
             )
 
-    def draw_centered_text(self, text, color=lcd.WHITE, padding=DEFAULT_PADDING):
-        """Draws text horizontally and vertically centered on the display,
-        taking padding into account
-        """
-        lines = text if isinstance(text, list) else self.to_lines(text, padding)
-        screen_height = self.height() - padding * 2
-        lines_height = len(lines) * self.line_height()
-        offset_y = max(0, (screen_height - lines_height) // 2)
-        self.draw_hcentered_text(text, offset_y, color, padding)
+    def outline(self, x, y, width, height):
+        """Draws an outline rectangle from given coordinates"""
+        lcd.fill_rectangle(x, y, width + 1, 1, lcd.WHITE)  # up
+        lcd.fill_rectangle(x, y + height, width + 1, 1, lcd.WHITE)  # bottom
+        lcd.fill_rectangle(x, y, 1, height + 1, lcd.WHITE)  # left
+        lcd.fill_rectangle(x + width, y, 1, height + 1, lcd.WHITE)  # right
 
-    def flash_text(self, text, color=lcd.WHITE, padding=DEFAULT_PADDING, duration=3000):
+    def draw_hcentered_text(
+        self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE, bg_color=lcd.BLACK
+    ):
+        """Draws text horizontally-centered on the display, at the given offset_y"""
+        lines = text if isinstance(text, list) else self.to_lines(text)
+        for i, line in enumerate(lines):
+            offset_x = (self.width() - self.font_width * len(line)) // 2
+            offset_x = max(0, offset_x)
+            lcd.draw_string(
+                offset_x, offset_y + (i * FONT_HEIGHT), line, color, bg_color
+            )
+
+    def draw_centered_text(self, text, color=lcd.WHITE):
+        """Draws text horizontally and vertically centered on the display"""
+        lines = text if isinstance(text, list) else self.to_lines(text)
+        lines_height = len(lines) * FONT_HEIGHT
+        offset_y = max(0, (self.height() - lines_height) // 2)
+        self.draw_hcentered_text(text, offset_y, color)
+
+    def flash_text(self, text, color=lcd.WHITE, duration=3000):
         """Flashes text centered on the display for duration ms"""
         self.clear()
-        self.draw_centered_text(text, color, padding)
+        self.draw_centered_text(text, color)
         time.sleep_ms(duration)
         self.clear()
 
