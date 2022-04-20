@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2022 Eduardo Schoenknecht
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,34 +19,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import board
-from Maix import GPIO
-from fpioa_manager import fm
 
 
-class Light:
-    """Light is a singleton interface for interacting with the device's LED light"""
+class Touchscreen:
+    """Touchscreen is a singleton interface for interacting with the device's touchscreen IC
+    Must be subclassed.
+    """
 
     def __init__(self):
-        fm.register(board.config["krux"]["pins"]["LED_W"], fm.fpioa.GPIO3)
-        self.led_w = GPIO(GPIO.GPIO3, GPIO.OUT)
-        self.turn_off()
+        raise NotImplementedError()
 
-    def is_on(self):
-        """Returns a boolean indicating if the light is currently on"""
-        return self.led_w.value() == 0
-
-    def turn_on(self):
-        """Turns on the light"""
-        self.led_w.value(0)
-
-    def turn_off(self):
-        """Turns off the light"""
-        self.led_w.value(1)
-
-    def toggle(self):
-        """Toggles the light on or off"""
-        if self.is_on():
-            self.turn_off()
-        else:
-            self.turn_on()
+    def current_point(self):
+        """Returns a tuple with x and y position if a point at screen is being pressed"""
+        raise NotImplementedError()

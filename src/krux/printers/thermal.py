@@ -51,15 +51,15 @@ class AdafruitPrinter(Printer):
     """
 
     def __init__(self):
-        if ("UART2_TX" not in board.config["krux.pins"]) or (
-            "UART2_RX" not in board.config["krux.pins"]
+        if ("UART2_TX" not in board.config["krux"]["pins"]) or (
+            "UART2_RX" not in board.config["krux"]["pins"]
         ):
             raise ValueError("missing required ports")
         fm.register(
-            board.config["krux.pins"]["UART2_TX"], fm.fpioa.UART2_TX, force=False
+            board.config["krux"]["pins"]["UART2_TX"], fm.fpioa.UART2_TX, force=False
         )
         fm.register(
-            board.config["krux.pins"]["UART2_RX"], fm.fpioa.UART2_RX, force=False
+            board.config["krux"]["pins"]["UART2_RX"], fm.fpioa.UART2_RX, force=False
         )
 
         self.uart_conn = UART(UART.UART2, settings.printer.thermal.baudrate)

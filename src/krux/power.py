@@ -29,9 +29,7 @@ class PowerManager:
 
     def __init__(self):
         self.pmu = None
-        if (
-            board.config["type"] == "amigo_ips"
-        ):  # todo, find/make and test proper pmu.py
+        if board.config["type"] == "amigo_ips":
             try:
                 from pmu import axp173
 

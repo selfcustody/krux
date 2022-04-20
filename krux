@@ -34,7 +34,19 @@ getdevice() {
     for path in `(find /sys/ -name idVendor | rev | cut -d/ -f 2- | rev) 2>/dev/null`; do
         if grep -q $idV $path/idVendor; then
             if grep -q $idP $path/idProduct; then
-                (find $path -name 'device' | rev | cut -d / -f 2 | rev) 2>/dev/null
+                (find $path -name 'device' | rev | cut -d / -f 2 | rev) 2>/dev/null | head -1
+            fi
+        fi
+    done
+}
+
+getdevice_b() {
+    idV=${1%:*}
+    idP=${1#*:}
+    for path in `(find /sys/ -name idVendor | rev | cut -d/ -f 2- | rev) 2>/dev/null`; do
+        if grep -q $idV $path/idVendor; then
+            if grep -q $idP $path/idProduct; then
+                (find $path -name 'device' | rev | cut -d / -f 2 | rev) 2>/dev/null | tail -1
             fi
         fi
     done
@@ -72,26 +84,26 @@ elif [ "$1" == "flash" ]; then
     device_vendor_product_id=""
     if [ "$device" == "maixpy_m5stickv" ]; then
         device_vendor_product_id="0403:6001"
-
-        if [ -z "$device_vendor_product_id" ]; then
-          panic "Unknown device"
-        fi
-
+    elif [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_bit" ]; then
+        device_vendor_product_id="0403:6010"
+    fi
+    if [ -z "$device_vendor_product_id" ]; then
+        panic "Unknown device"
+    fi
+    #M5stickV has only one serial port
+    #Bit has two serial ports and use fist for flash
+    #Amigo has two ports and uses second port to flash (needs further confirmation)
+    if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_bit" ]; then
         usb_device_name_cmd="getdevice $device_vendor_product_id"
-        usb_device_name=$($usb_device_name_cmd)
-        if [ -z "$usb_device_name" ]; then
-            panic "Failed to find device via USB. Is it connected and powered on?"
-        fi
-        docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
+    elif [ "$device" == "maixpy_amigo_ips" ]; then
+        usb_device_name_cmd="getdevice_b $device_vendor_product_id"
+    fi
+    usb_device_name=$($usb_device_name_cmd)
+    if [ -z "$usb_device_name" ]; then
+        panic "Failed to find device via USB. Is it connected and powered on?"
     fi
 
-    if [ "$device" == "maixpy_bit" ]; then
-        docker run --privileged --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B bit_mic -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
-    fi
-
-    if [ "$device" == "maixpy_amigo_ips" ]; then
-        docker run --privileged --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B maixduino -p /dev/ttyUSB1 -b 1500000 kboot.kfpkg
-    fi
+    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/$usb_device_name -b 1500000 kboot.kfpkg
 
 elif [ "$1" == "sha256" ]; then
     file="$2"

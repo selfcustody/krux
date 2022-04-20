@@ -38,7 +38,7 @@ class Camera:
         sensor.reset()
         sensor.set_pixformat(sensor.GRAYSCALE)
         sensor.set_framesize(sensor.QVGA)
-        if board.config["sensor"]["flipped"]:
+        if board.config["krux"]["sensor"]["flipped"]:
             sensor.set_hmirror(1)
             sensor.set_vflip(1)
         sensor.skip_frames()
@@ -64,7 +64,7 @@ class Camera:
             new_part = False
 
             img = sensor.snapshot()
-            if board.config["sensor"]["lenses"]:
+            if board.config["krux"]["sensor"]["lenses"]:
                 img.lens_corr(1.2)
             gc.collect()
             hist = img.get_histogram()
@@ -76,7 +76,7 @@ class Camera:
             img.binary([(0, hist.get_threshold().value())], invert=True)
             res = img.find_qrcodes()
             if board.config["type"] == "m5stickv":
-                img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen
+                img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen - test
             lcd.display(img)
             if len(res) > 0:
                 data = res[0].payload()

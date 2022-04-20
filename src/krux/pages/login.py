@@ -28,7 +28,7 @@ import urtypes
 from ..logging import LEVEL_NAMES, level_name, Logger, DEBUG
 from ..metadata import VERSION
 from ..settings import settings
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_TOUCH
+from ..input import BUTTON_ENTER, BUTTON_PAGE
 from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word, to_mnemonic_words
 from ..wallet import Wallet
@@ -130,6 +130,8 @@ class Login(Page):
                     roll = self.capture_from_keypad(
                         t("Roll %d") % (i + 1), states, lambda r: r
                     )
+                    if roll == "Esc":
+                        return MENU_CONTINUE
                     if roll != "" and roll in states:
                         break
 
@@ -232,6 +234,8 @@ class Login(Page):
                         autocomplete_fn,
                         possible_keys_fn,
                     )
+                    if word == "Esc":
+                        return MENU_CONTINUE
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and word == "":
@@ -398,7 +402,7 @@ class Login(Page):
                         new_network = networks[(i + 1) % len(networks)]
                         settings.network = new_network
                         break
-            elif btn in (BUTTON_ENTER, BUTTON_TOUCH):
+            elif btn == BUTTON_ENTER:
                 break
         if settings.network == starting_network:
             return MENU_CONTINUE
@@ -423,7 +427,7 @@ class Login(Page):
                         new_baudrate = baudrates[(i + 1) % len(baudrates)]
                         settings.printer.thermal.baudrate = new_baudrate
                         break
-            elif btn in (BUTTON_ENTER, BUTTON_TOUCH):
+            elif btn == BUTTON_ENTER:
                 break
         if settings.printer.thermal.baudrate == starting_baudrate:
             return MENU_CONTINUE
@@ -450,7 +454,7 @@ class Login(Page):
                         if translations(new_locale):
                             settings.i18n.locale = new_locale
                         break
-            elif btn in (BUTTON_ENTER, BUTTON_TOUCH):
+            elif btn == BUTTON_ENTER:
                 break
         if settings.i18n.locale == starting_locale:
             return MENU_CONTINUE
@@ -478,7 +482,7 @@ class Login(Page):
                         settings.log.level = new_level
                         self.ctx.log = Logger(settings.log.path, settings.log.level)
                         break
-            elif btn in (BUTTON_ENTER, BUTTON_TOUCH):
+            elif btn == BUTTON_ENTER:
                 break
         if settings.log.level == starting_level:
             return MENU_CONTINUE

@@ -31,6 +31,7 @@ Vagrant.configure("2") do |config|
     vb.memory = 4096
     vb.customize ['modifyvm', :id, '--usb', 'on']
     vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'FT232', '--vendorid', '0403', '--productid', '6001']
+    vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'FT2232', '--vendorid', '0403', '--productid', '6010']
   end
 end
 

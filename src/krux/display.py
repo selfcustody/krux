@@ -26,10 +26,10 @@ from machine import I2C
 from .i18n import t
 
 DEFAULT_PADDING = 10
-FONT_WIDTH, FONT_HEIGHT = board.config["lcd"]["font"]
-PORTRAIT, LANDSCAPE = board.config["lcd"]["orientation"]
-if "qr_colors" in board.config["lcd"]:
-    QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["lcd"]["qr_colors"]
+FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
+PORTRAIT, LANDSCAPE = board.config["krux"]["display"]["orientation"]
+if "qr_colors" in board.config["krux"]["display"]:
+    QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 else:
     QR_DARK_COLOR = 0x0000
     QR_LIGHT_COLOR = 0xFFFF
@@ -37,12 +37,11 @@ else:
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
-TOUCH_BUTTON_BG = lcd.DARKGREY
-TOUCH_BUTTON_FG = lcd.WHITE
-BUTTON_HEIGHT = 2 * FONT_HEIGHT
-
-DEL = t("<")
+DEL = "<"
 GO = t("Go")
+CLR = t("Clr")
+ESC = t("Esc")
+FIXED_KEYS = 4
 
 
 class Display:
@@ -57,8 +56,8 @@ class Display:
         self.bottom_line = self.height() // FONT_HEIGHT  # total lines
         self.bottom_line -= 1
         self.bottom_line *= FONT_HEIGHT
-        if board.config["lcd"]["touch"]:
-            # room left fot no/yes buttons
+        if board.config["krux"]["display"]["touch"]:
+            # room left for no/yes buttons
             self.bottom_prompt_line = self.bottom_line - 5 * FONT_HEIGHT
         else:
             self.bottom_prompt_line = self.bottom_line
@@ -127,20 +126,20 @@ class Display:
     def initialize_backlight(self):
         """Initializes the backlight"""
         if (
-            "I2C_SCL" not in board.config["krux.pins"]
-            or "I2C_SDA" not in board.config["krux.pins"]
+            "I2C_SCL" not in board.config["krux"]["pins"]
+            or "I2C_SDA" not in board.config["krux"]["pins"]
         ):
             return
         self.i2c = I2C(
             I2C.I2C0,
             freq=400000,
-            scl=board.config["krux.pins"]["I2C_SCL"],
-            sda=board.config["krux.pins"]["I2C_SDA"],
+            scl=board.config["krux"]["pins"]["I2C_SCL"],
+            sda=board.config["krux"]["pins"]["I2C_SDA"],
         )
         self.set_backlight(MIN_BACKLIGHT)
 
     def qr_offset(self):
-        """Retuns y offset to subtittle QR codes"""
+        """Retuns y offset to subtitle QR codes"""
         if board.config["type"] == "m5stickv":
             return 138
         if board.config["type"] == "bit":
@@ -267,36 +266,12 @@ class Display:
         """Clears the display"""
         lcd.clear()
 
-    def draw_touch_button(
-        self, lines, offset_y=0
-    ):  # todo, lcd won't let draw rectangle over 320
-        """Draws buttons for LCDs with touch screen"""
-        lines_list = []
-        if isinstance(lines, list):
-            lines_list.extend(lines)
-        else:
-            lines_list.append(lines)
-        lcd.fill_rectangle(
-            DEFAULT_PADDING,
-            offset_y + 1,
-            self.usable_width(),
-            self.font_height * (len(lines_list) + 1) - 2,
-            TOUCH_BUTTON_BG,
-        )
-        for i, text in enumerate(lines_list):
-            self.draw_hcentered_text(
-                text,
-                offset_y + self.font_height // 2 + self.font_height * i,
-                TOUCH_BUTTON_FG,
-                TOUCH_BUTTON_BG,
-            )
-
-    def outline(self, x, y, width, height):
+    def outline(self, x, y, width, height, color=lcd.WHITE):
         """Draws an outline rectangle from given coordinates"""
-        lcd.fill_rectangle(x, y, width + 1, 1, lcd.WHITE)  # up
-        lcd.fill_rectangle(x, y + height, width + 1, 1, lcd.WHITE)  # bottom
-        lcd.fill_rectangle(x, y, 1, height + 1, lcd.WHITE)  # left
-        lcd.fill_rectangle(x + width, y, 1, height + 1, lcd.WHITE)  # right
+        lcd.fill_rectangle(x, y, width + 1, 1, color)  # up
+        lcd.fill_rectangle(x, y + height, width + 1, 1, color)  # bottom
+        lcd.fill_rectangle(x, y, 1, height + 1, color)  # left
+        lcd.fill_rectangle(x + width, y, 1, height + 1, color)  # right
 
     def draw_hcentered_text(
         self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE, bg_color=lcd.BLACK
