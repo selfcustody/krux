@@ -130,7 +130,7 @@ class Login(Page):
                     roll = self.capture_from_keypad(
                         t("Roll %d") % (i + 1), states, lambda r: r
                     )
-                    if roll == "Esc":
+                    if roll == MENU_CONTINUE:
                         return MENU_CONTINUE
                     if roll != "" and roll in states:
                         break
@@ -234,7 +234,7 @@ class Login(Page):
                         autocomplete_fn,
                         possible_keys_fn,
                     )
-                    if word == "Esc":
+                    if word == MENU_CONTINUE:
                         return MENU_CONTINUE
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum

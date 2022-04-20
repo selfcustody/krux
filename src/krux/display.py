@@ -285,17 +285,17 @@ class Display:
                 offset_x, offset_y + (i * FONT_HEIGHT), line, color, bg_color
             )
 
-    def draw_centered_text(self, text, color=lcd.WHITE):
+    def draw_centered_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK):
         """Draws text horizontally and vertically centered on the display"""
         lines = text if isinstance(text, list) else self.to_lines(text)
         lines_height = len(lines) * FONT_HEIGHT
         offset_y = max(0, (self.height() - lines_height) // 2)
-        self.draw_hcentered_text(text, offset_y, color)
+        self.draw_hcentered_text(text, offset_y, color, bg_color)
 
-    def flash_text(self, text, color=lcd.WHITE, duration=3000):
+    def flash_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK, duration=3000):
         """Flashes text centered on the display for duration ms"""
         self.clear()
-        self.draw_centered_text(text, color)
+        self.draw_centered_text(text, color, bg_color)
         time.sleep_ms(duration)
         self.clear()
 

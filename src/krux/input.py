@@ -36,9 +36,6 @@ NONBLOCKING_CHECKS = 100000
 
 PRESSED = 0
 RELEASED = 1
-TOUCH_IDLE = 0
-TOUCH_PRESSED = 1
-TOUCH_R_PERIOD = 50  # 1000/50 = 20 samples/second
 
 
 class Input:
@@ -57,11 +54,7 @@ class Input:
             self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
         self.has_touch = board.config["krux"]["display"]["touch"]
         self.touch = (
-            Touch(
-                board.config["lcd"]["width"],
-                board.config["lcd"]["height"],
-                TOUCH_R_PERIOD,
-            )
+            Touch(board.config["lcd"]["width"], board.config["lcd"]["height"])
             if self.has_touch
             else None
         )
@@ -72,37 +65,37 @@ class Input:
         else:
             self.buttons_active = True
 
-    def enter_state(self):
+    def enter_value(self):
         """Intermediary method to pull button A state, if available"""
         if "BUTTON_A" in board.config["krux"]["pins"]:
             return self.enter.value()
         return RELEASED
 
-    def page_state(self):
+    def page_value(self):
         """Intermediary method to pull button B state, if available"""
         if "BUTTON_B" in board.config["krux"]["pins"]:
             return self.page.value()
         return RELEASED
 
-    def page_prev_state(self):
+    def page_prev_value(self):
         """Intermediary method to pull button C state, if available"""
         if "BUTTON_C" in board.config["krux"]["pins"]:
             return self.page_prev.value()
         return RELEASED
 
-    def touch_state(self):
+    def touch_value(self):
         """Intermediary method to pull touch state, if touch available"""
         if self.has_touch:
             return self.touch.value()
-        return TOUCH_IDLE
+        return RELEASED
 
     def wait_for_release(self):
         """Loop until all buttons are released (if currently pressed)"""
         while (
-            self.enter_state() == PRESSED
-            or self.page_state() == PRESSED
-            or self.page_prev_state() == PRESSED
-            or self.touch_state() != TOUCH_IDLE
+            self.enter_value() == PRESSED
+            or self.page_value() == PRESSED
+            or self.page_prev_value() == PRESSED
+            or self.touch_value() == PRESSED
         ):
             self.entropy += 1
             wdt.feed()
@@ -111,10 +104,10 @@ class Input:
         """Wait for first button press"""
         time_frame = time.ticks_ms()
         while (
-            self.enter_state() == RELEASED
-            and self.page_state() == RELEASED
-            and self.page_prev_state() == RELEASED
-            and self.touch_state() == TOUCH_IDLE
+            self.enter_value() == RELEASED
+            and self.page_value() == RELEASED
+            and self.page_prev_value() == RELEASED
+            and self.touch_value() == RELEASED
         ):
             self.entropy += 1
             wdt.feed()  # here is were krux spend most of time
@@ -128,35 +121,35 @@ class Input:
         self.wait_for_release()
         self.wait_for_press(block)
 
-        if self.enter_state() == PRESSED:
+        if self.enter_value() == PRESSED:
             # Wait for release
-            while self.enter_state() == PRESSED:
+            while self.enter_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
             if self.buttons_active:
                 return BUTTON_ENTER
             self.buttons_active = True
 
-        if self.page_state() == PRESSED:
+        if self.page_value() == PRESSED:
             # Wait for release
-            while self.page_state() == PRESSED:
+            while self.page_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
             if self.buttons_active:
                 return BUTTON_PAGE
             self.buttons_active = True
 
-        if self.page_prev_state() == PRESSED:
+        if self.page_prev_value() == PRESSED:
             # Wait for release
-            while self.page_prev_state() == PRESSED:
+            while self.page_prev_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
             if self.buttons_active:
                 return BUTTON_PAGE_PREV
             self.buttons_active = True
 
-        if self.touch_state() == TOUCH_PRESSED:
-            while self.touch_state() == TOUCH_PRESSED:
+        if self.touch_value() == PRESSED:
+            while self.touch_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
             return BUTTON_TOUCH

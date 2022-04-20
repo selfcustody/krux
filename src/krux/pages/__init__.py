@@ -196,7 +196,7 @@ class Page:
                 elif cur_key_index == len(keys) + 2:  # Enter
                     break
                 elif cur_key_index == len(keys) + 3:  # Esc
-                    return "Esc"
+                    return MENU_CONTINUE
                 else:
                     buffer += keys[cur_key_index]
                     changed = True

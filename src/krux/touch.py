@@ -23,17 +23,19 @@
 import time
 from .touchscreens.ft6x36 import FT6X36
 
+TOUCH_R_PERIOD = 50  # 1000/50 = 20 samples/second
+
 
 class Touch:
     """Touch is a singleton API to interact with touchscreen driver"""
 
     idle, press, release = 0, 1, 2
 
-    def __init__(self, width, height, cycle=1000):
+    def __init__(self, width, height):
         """Touch API init - width and height are in Landscape mode
         For Krux width = max_y, height = max_x
         """
-        self.cycle = cycle
+        self.cycle = TOUCH_R_PERIOD
         self.last_time = 0
         self.y_regions = []
         self.x_regions = []
@@ -90,7 +92,7 @@ class Touch:
             else:
                 self.index = 0
 
-    def value(self):
+    def current_state(self):
         """Returns the touchscreen state"""
         if time.ticks_ms() > self.last_time + self.cycle:
             self.last_time = time.ticks_ms()
@@ -103,3 +105,7 @@ class Touch:
                 elif self.state == Touch.press:
                     self.state = Touch.release
         return self.state
+
+    def value(self):
+        """wraps touch states to behave like a regular button"""
+        return 0 if self.current_state() == Touch.press else 1
