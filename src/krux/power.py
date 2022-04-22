@@ -34,7 +34,9 @@ class PowerManager:
                 from pmu import axp173
 
                 self.pmu = axp173()
-                self.pmu.enablePMICSleepMode(True)
+                self.pmu.enablePMICSleepMode(False)
+                #Amigo already have a dedicated reset button
+                #Will only enable button checking when in sleep mode
             except:
                 pass
         else:
@@ -49,6 +51,8 @@ class PowerManager:
     def shutdown(self):
         """Shuts down the device"""
         if self.pmu is not None:
+            #Enable button checking before shutdown
+            self.pmu.enablePMICSleepMode(True)
             self.pmu.setEnterSleepMode()
         machine.reset()
         sys.exit()

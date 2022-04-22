@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import time
 from .touchscreens.ft6x36 import FT6X36
 
 TOUCH_R_PERIOD = 50  # 1000/50 = 20 samples/second
@@ -36,7 +35,6 @@ class Touch:
         For Krux width = max_y, height = max_x
         """
         self.cycle = TOUCH_R_PERIOD
-        self.last_time = 0
         self.y_regions = []
         self.x_regions = []
         self.index = 0
@@ -94,16 +92,14 @@ class Touch:
 
     def current_state(self):
         """Returns the touchscreen state"""
-        if time.ticks_ms() > self.last_time + self.cycle:
-            self.last_time = time.ticks_ms()
-            data = self.touch_driver.current_point()
-            if data is not None:
-                self.extract_index(data)
-            else:  # gets realease than return to ilde.
-                if self.state == Touch.release:
-                    self.state = Touch.idle
-                elif self.state == Touch.press:
-                    self.state = Touch.release
+        data = self.touch_driver.current_point()
+        if data is not None:
+            self.extract_index(data)
+        else:  # gets realease than return to ilde.
+            if self.state == Touch.release:
+                self.state = Touch.idle
+            elif self.state == Touch.press:
+                self.state = Touch.release
         return self.state
 
     def value(self):

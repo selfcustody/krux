@@ -258,9 +258,10 @@ class Home(Page):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            t("SHA256:\n%s\n\n\n\nSign?") % binascii.hexlify(message_hash).decode()
+            t("SHA256:\n%s") % binascii.hexlify(message_hash).decode()
         )
-        if self.ctx.input.wait_for_button() != BUTTON_ENTER:
+        btn = self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line)
+        if btn != BUTTON_ENTER:
             return MENU_CONTINUE
 
         sig = self.ctx.wallet.key.sign(message_hash)

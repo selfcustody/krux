@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=W0231
 
 from . import Touchscreen
 import board
@@ -36,8 +37,6 @@ class FT6X36(Touchscreen):
     data from FT6X36 touchscreen IC, part of Sipeed's Maix Amigo device"""
 
     def __init__(self):
-        # super().__init__()
-        # What will be the use case for the base class?
         self.addr = FT6X36_ADDR
         self.i2c = I2C(
             I2C.I2C0,
@@ -60,7 +59,7 @@ class FT6X36(Touchscreen):
 
     def current_point(self):
         """If touch is pressed, returns x and y points"""
-        if self.i2c is not None:
+        try:
             data = self.read_reg(0x02, 1)
             if data is not None and data[0] == 0x1:
                 data_buf = self.read_reg(0x03, 4)
@@ -68,4 +67,7 @@ class FT6X36(Touchscreen):
                 y = ((data_buf[2] & 0x0F) << 8) | (data_buf[3])
                 if (data_buf[0] & 0xC0) == 0x80:
                     return (x, y)
-        return None
+            else:
+                return None
+        except:
+            return None

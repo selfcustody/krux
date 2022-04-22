@@ -96,7 +96,7 @@ class I18n:
     """I18n-specific settings"""
 
     namespace = "settings.i18n"
-    locales = ["de-DE", "en-US", "es-MX", "fr-FR", "vi-VN"]
+    locales = ["de-DE", "en-US", "es-MX", "fr-FR", "vi-VN", "pt-BR"]
     locale = Setting("locale", "en-US")
 
 

@@ -87,13 +87,13 @@ class Page:
                 if key_index < len(keys):
                     key = keys[key_index]
                 elif key_index == len(keys):
-                    key = CLR
-                elif key_index == len(keys) + 1:
                     key = DEL
+                elif key_index == len(keys) + 1:
+                    key = CLR
                 elif key_index == len(keys) + 2:
-                    key = GO
-                elif key_index == len(keys) + 3:
                     key = ESC
+                elif key_index == len(keys) + 3:
+                    key = GO
                 if key is not None:
                     offset_x = x
                     if board.config["lcd"]["invert"]:  # inverted X coodinates
@@ -175,6 +175,7 @@ class Page:
             btn = self.ctx.input.wait_for_button()
             if self.ctx.input.has_touch:
                 if btn == BUTTON_TOUCH:
+                    self.ctx.input.buttons_active = False
                     if self.ctx.input.touch.index < len(keys):
                         cur_key_index = self.ctx.input.touch.index
                         if keys[cur_key_index] in possible_keys:
@@ -188,15 +189,15 @@ class Page:
                         btn = BUTTON_PAGE
             if btn == BUTTON_ENTER:
                 changed = False
-                if cur_key_index == len(keys):  # Clr
-                    buffer = ""
-                elif cur_key_index == len(keys) + 1:  # Del
+                if cur_key_index == len(keys):  # Del
                     buffer = buffer[: len(buffer) - 1]
                     changed = True
-                elif cur_key_index == len(keys) + 2:  # Enter
-                    break
-                elif cur_key_index == len(keys) + 3:  # Esc
+                elif cur_key_index == len(keys) + 1:  # Clr
+                    buffer = ""
+                elif cur_key_index == len(keys) + 2:  # Esc
                     return MENU_CONTINUE
+                elif cur_key_index == len(keys) + 3:  # Enter
+                    break
                 else:
                     buffer += keys[cur_key_index]
                     changed = True
@@ -205,7 +206,7 @@ class Page:
                         new_buffer = autocomplete_fn(buffer)
                         if new_buffer is not None:
                             buffer = new_buffer
-                            cur_key_index = len(keys) + 2
+                            cur_key_index = len(keys) + 3
             elif btn == BUTTON_PAGE:
                 moving_forward = True
                 cur_key_index = (cur_key_index + 1) % (len(keys) + FIXED_KEYS)
@@ -294,7 +295,7 @@ class Page:
                 offset_y += self.ctx.display.font_height
             self.ctx.display.draw_hcentered_text(subtitle, offset_y, color=lcd.WHITE)
             i = (i + 1) % num_parts
-            if self.ctx.input.wait_for_proceed():
+            if self.ctx.input.wait_for_proceed(block=num_parts == 1):
                 done = True
             # interval done in input.py using timers
 
@@ -353,12 +354,16 @@ class Page:
 
     def prompt(self, text, offset_y=0):
         """Prompts user to answer Yes or No"""
+        #Go up if question has multiple lines
+        offset_y -= (len(self.ctx.display.to_lines(text))-1) * self.ctx.display.font_height
         self.ctx.display.draw_hcentered_text(text, offset_y)
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()
             offset_y += (
                 len(self.ctx.display.to_lines(text)) * self.ctx.display.font_height
+                + DEFAULT_PADDING
             )
+
             self.ctx.input.touch.add_y_delimiter(offset_y)
             lcd.fill_rectangle(
                 0,
@@ -436,6 +441,7 @@ class Menu:
             btn = self.ctx.input.wait_for_button(block=True)
             if self.ctx.input.has_touch:
                 if btn == BUTTON_TOUCH:
+                    self.ctx.input.buttons_active = False
                     selected_item_index = self.ctx.input.touch.index
                     btn = BUTTON_ENTER
                 self.ctx.input.touch.clear_regions()
@@ -480,7 +486,7 @@ class Menu:
 
         # draw dividers and outline
         for i, y in enumerate(self.ctx.input.touch.y_regions[:-1]):
-            if i:
+            if i and not self.ctx.input.buttons_active:
                 lcd.fill_rectangle(0, y, self.ctx.display.width(), 1, lcd.DARKGREY)
             height = self.ctx.input.touch.y_regions[i + 1] - y
             if selected_item_index == i and self.ctx.input.buttons_active:
