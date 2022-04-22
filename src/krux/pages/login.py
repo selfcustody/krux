@@ -42,7 +42,7 @@ DIGITS = "0123456789"
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 BITS = "01"
 
-D6_STATES = "123456"
+D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
 
 D6_MIN_ROLLS = 50
