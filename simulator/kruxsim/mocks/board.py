@@ -40,18 +40,27 @@ def register_device(device):
                 "BUTTON_A": 36,
                 "BUTTON_B": 37,
             },
-            "krux.pins": {
-                "BUTTON_A": 36,
-                "BUTTON_B": 37,
-                # "LED_W": 7,
-                "UART2_TX": 35,
-                "UART2_RX": 34,
-                # "I2C_SCL": 28,
-                # "I2C_SDA": 29,
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 36,
+                    "BUTTON_B": 37,
+                    # "LED_W": 7,
+                    "UART2_TX": 35,
+                    "UART2_RX": 34
+                    # "I2C_SCL": 28,
+                    # "I2C_SDA": 29
+                },
+                "display": {
+                    "touch": False,
+                    "font": [8, 14],
+                    "orientation": [1, 2],
+                    "qr_colors": [16904, 61307],
+                },
+                "sensor": {"flipped": False, "lenses": False},
             },
         }
 
     sys.modules["board"] = mock.MagicMock(config=BOARD_CONFIG)
 
-    BUTTON_A = BOARD_CONFIG["krux.pins"]["BUTTON_A"]
-    BUTTON_B = BOARD_CONFIG["krux.pins"]["BUTTON_B"]
+    BUTTON_A = BOARD_CONFIG["krux"]["pins"]["BUTTON_A"]
+    BUTTON_B = BOARD_CONFIG["krux"]["pins"]["BUTTON_B"]

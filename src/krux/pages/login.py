@@ -120,7 +120,7 @@ class Login(Page):
             for i in range(max_rolls):
                 if i == min_rolls:
                     self.ctx.display.clear()
-                    btn = self.prompt(t("Done?"), self.ctx.display.bottom_prompt_line)
+                    btn = self.prompt(t("Done?"), self.ctx.display.height() // 2)
                     if btn == BUTTON_ENTER:
                         num_rolls = min_rolls
                         break
@@ -132,11 +132,12 @@ class Login(Page):
                     )
                     if roll == MENU_CONTINUE:
                         self.ctx.display.clear()
-                        btn = self.prompt(t("Are you sure?"), self.ctx.display.bottom_prompt_line)
+                        btn = self.prompt(
+                            t("Are you sure?"), self.ctx.display.height() // 2
+                        )
                         if btn == BUTTON_ENTER:
                             return MENU_CONTINUE
-                        else:
-                            roll = ""
+                        roll = ""
                     if roll != "" and roll in states:
                         break
 
@@ -227,7 +228,7 @@ class Login(Page):
             for i in range(24):
                 if i == 12:
                     self.ctx.display.clear()
-                    btn = self.prompt(t("Done?"), self.ctx.display.bottom_prompt_line)
+                    btn = self.prompt(t("Done?"), self.ctx.display.height() // 2)
                     if btn == BUTTON_ENTER:
                         break
 
@@ -241,11 +242,12 @@ class Login(Page):
                     )
                     if word == MENU_CONTINUE:
                         self.ctx.display.clear()
-                        btn = self.prompt(t("Are you sure?"), self.ctx.display.bottom_prompt_line)
+                        btn = self.prompt(
+                            t("Are you sure?"), self.ctx.display.height() // 2
+                        )
                         if btn == BUTTON_ENTER:
                             return MENU_CONTINUE
-                        else:
-                            word = ""
+                        word = ""
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and word == "":
@@ -384,14 +386,13 @@ class Login(Page):
             offset_y = self.ctx.display.height() * 2 // 3
             self.ctx.input.touch.add_y_delimiter(offset_y)
             self.ctx.input.touch.add_y_delimiter(
-                offset_y
-                + self.ctx.display.font_height * 3
-                )
+                offset_y + self.ctx.display.font_height * 3
+            )
             button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
             for i in range(4):
                 self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
             offset_y += self.ctx.display.font_height
-            keys = ["<", "Back", ">"] 
+            keys = ["<", t("Back"), ">"]
             for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
                 self.ctx.display.outline(
                     x,
@@ -400,19 +401,22 @@ class Login(Page):
                     self.ctx.display.font_height * 3,
                     lcd.DARKGREY,
                 )
-                #assuming inverted X coordinates
+                # assuming inverted X coordinates
                 offset_x = self.ctx.display.width() - (x + button_width)
-                offset_x += (button_width - len(keys[i]) * self.ctx.display.font_width) // 2
+                offset_x += (
+                    button_width - len(keys[i]) * self.ctx.display.font_width
+                ) // 2
                 lcd.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
 
     def _touch_to_physical(self):
-        """Mimics touch presses into phisical buttons presses"""
+        """Mimics touch presses into physical button presses"""
         if self.ctx.input.touch.index == 0:
             return BUTTON_PAGE_PREV
-        elif self.ctx.input.touch.index == 1:
+        if self.ctx.input.touch.index == 1:
             return BUTTON_ENTER
-        elif self.ctx.input.touch.index == 2:
+        if self.ctx.input.touch.index == 2:
             return BUTTON_PAGE
+        return BUTTON_ENTER
 
     def settings(self):
         """Handler for the 'settings' menu item"""
@@ -447,15 +451,14 @@ class Login(Page):
                 btn = self._touch_to_physical()
             if btn == BUTTON_ENTER:
                 break
-            else:
-                for i, network in enumerate(networks):
-                    if current_network == network:
-                        if btn == BUTTON_PAGE:
-                            new_network = networks[(i + 1) % len(networks)]
-                        else: #BUTTON_PAGE_PREV
-                            new_network = networks[(i - 1) % len(networks)]
-                        settings.network = new_network
-                        break
+            for i, network in enumerate(networks):
+                if current_network == network:
+                    if btn == BUTTON_PAGE:
+                        new_network = networks[(i + 1) % len(networks)]
+                    else:  # BUTTON_PAGE_PREV
+                        new_network = networks[(i - 1) % len(networks)]
+                    settings.network = new_network
+                    break
         if settings.network == starting_network:
             return MENU_CONTINUE
         # Force a page refresh if the setting was changed
@@ -478,15 +481,14 @@ class Login(Page):
                 btn = self._touch_to_physical()
             if btn == BUTTON_ENTER:
                 break
-            else:
-                for i, baudrate in enumerate(baudrates):
-                    if current_baudrate == baudrate:
-                        if btn == BUTTON_PAGE:
-                            new_baudrate = baudrates[(i + 1) % len(baudrates)]
-                        else: #BUTTON_PAGE_PREV
-                            new_baudrate = baudrates[(i - 1) % len(baudrates)]
-                        settings.printer.thermal.baudrate = new_baudrate
-                        break
+            for i, baudrate in enumerate(baudrates):
+                if current_baudrate == baudrate:
+                    if btn == BUTTON_PAGE:
+                        new_baudrate = baudrates[(i + 1) % len(baudrates)]
+                    else:  # BUTTON_PAGE_PREV
+                        new_baudrate = baudrates[(i - 1) % len(baudrates)]
+                    settings.printer.thermal.baudrate = new_baudrate
+                    break
         if settings.printer.thermal.baudrate == starting_baudrate:
             return MENU_CONTINUE
         # Force a page refresh if the setting was changed
@@ -509,17 +511,16 @@ class Login(Page):
                 btn = self._touch_to_physical()
             if btn == BUTTON_ENTER:
                 break
-            else:
-                for i, locale in enumerate(locales):
-                    if current_locale == locale:
-                        if btn == BUTTON_PAGE:
-                            new_locale = locales[(i + 1) % len(locales)]
-                        else: #BUTTON_PAGE_PREV
-                            new_locale = locales[(i - 1) % len(locales)]
-                        # Don't let the user change the locale if translations can't be looked up
-                        if translations(new_locale):
-                            settings.i18n.locale = new_locale
-                        break
+            for i, locale in enumerate(locales):
+                if current_locale == locale:
+                    if btn == BUTTON_PAGE:
+                        new_locale = locales[(i + 1) % len(locales)]
+                    else:  # BUTTON_PAGE_PREV
+                        new_locale = locales[(i - 1) % len(locales)]
+                    # Don't let the user change the locale if translations can't be looked up
+                    if translations(new_locale):
+                        settings.i18n.locale = new_locale
+                    break
         if settings.i18n.locale == starting_locale:
             return MENU_CONTINUE
         # Force a page refresh if the setting was changed
@@ -544,16 +545,15 @@ class Login(Page):
                 btn = self._touch_to_physical()
             if btn == BUTTON_ENTER:
                 break
-            else:
-                for i, level in enumerate(levels):
-                    if current_level == level:
-                        if btn == BUTTON_PAGE:
-                            new_level = levels[(i + 1) % len(levels)]
-                        else: #BUTTON_PAGE_PREV
-                            new_level = levels[(i - 1) % len(levels)]
-                        settings.log.level = new_level
-                        self.ctx.log = Logger(settings.log.path, settings.log.level)
-                        break
+            for i, level in enumerate(levels):
+                if current_level == level:
+                    if btn == BUTTON_PAGE:
+                        new_level = levels[(i + 1) % len(levels)]
+                    else:  # BUTTON_PAGE_PREV
+                        new_level = levels[(i - 1) % len(levels)]
+                    settings.log.level = new_level
+                    self.ctx.log = Logger(settings.log.path, settings.log.level)
+                    break
         if settings.log.level == starting_level:
             return MENU_CONTINUE
         # Force a page refresh if the setting was changed

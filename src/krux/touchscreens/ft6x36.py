@@ -67,7 +67,6 @@ class FT6X36(Touchscreen):
                 y = ((data_buf[2] & 0x0F) << 8) | (data_buf[3])
                 if (data_buf[0] & 0xC0) == 0x80:
                     return (x, y)
-            else:
-                return None
         except:
-            return None
+            pass
+        return None

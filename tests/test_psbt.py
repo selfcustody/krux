@@ -187,15 +187,15 @@ def test_outputs_singlekey():
         (
             P2WPKH_PSBT,
             [
-                "Sending:\n₿0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
-                "Fee:\n₿0.00,002,820",
+                "Sending:\n¤0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
+                "Fee:\n¤0.00,002,820",
             ],
         ),
         (
             P2SH_P2WPKH_PSBT,
             [
-                "Sending:\n₿0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
-                "Fee:\n₿0.00,003,300",
+                "Sending:\n¤0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
+                "Fee:\n¤0.00,003,300",
             ],
         ),
     ]
@@ -214,15 +214,15 @@ def test_outputs_multisig():
         (
             P2WSH_PSBT,
             [
-                "Sending:\n₿0.18,993,880\n\nTo:\ntb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n",
-                "Fee:\n₿0.00,006,120",
+                "Sending:\n¤0.18,993,880\n\nTo:\ntb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n",
+                "Fee:\n¤0.00,006,120",
             ],
         ),
         (
             P2SH_P2WSH_PSBT,
             [
-                "Sending:\n₿0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
-                "Fee:\n₿0.00,004,260",
+                "Sending:\n¤0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
+                "Fee:\n¤0.00,004,260",
             ],
         ),
     ]

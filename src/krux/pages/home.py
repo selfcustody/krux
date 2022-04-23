@@ -221,7 +221,7 @@ class Home(Page):
 
         outputs = signer.outputs()
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text("\n\n".join(outputs))
+        self.ctx.display.draw_hcentered_text("\n \n".join(outputs))
         btn = self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line)
         if btn == BUTTON_ENTER:
             signed_psbt = signer.sign()
