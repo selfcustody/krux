@@ -19,14 +19,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import time
 import board
 from Maix import GPIO
 from fpioa_manager import fm
 from .wdt import wdt
+from .touch import Touch
 
 BUTTON_ENTER = 0
 BUTTON_PAGE = 1
+BUTTON_PAGE_PREV = 2
+BUTTON_TOUCH = 3
 
+QR_ANIM_PERIOD = 900  # miliseconds
 NONBLOCKING_CHECKS = 100000
 
 PRESSED = 0
@@ -38,39 +43,119 @@ class Input:
 
     def __init__(self):
         self.entropy = 0
-        fm.register(board.config["krux.pins"]["BUTTON_A"], fm.fpioa.GPIOHS21)
-        self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
-        fm.register(board.config["krux.pins"]["BUTTON_B"], fm.fpioa.GPIOHS22)
-        self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
+        if "BUTTON_A" in board.config["krux"]["pins"]:
+            fm.register(board.config["krux"]["pins"]["BUTTON_A"], fm.fpioa.GPIOHS21)
+            self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
+        if "BUTTON_B" in board.config["krux"]["pins"]:
+            fm.register(board.config["krux"]["pins"]["BUTTON_B"], fm.fpioa.GPIOHS22)
+            self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
+        if "BUTTON_C" in board.config["krux"]["pins"]:
+            fm.register(board.config["krux"]["pins"]["BUTTON_C"], fm.fpioa.GPIOHS0)
+            self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
+        self.has_touch = board.config["krux"]["display"]["touch"]
+        self.touch = (
+            Touch(board.config["lcd"]["width"], board.config["lcd"]["height"])
+            if self.has_touch
+            else None
+        )
+
+        # This flag, used in slection outlines, is set if buttons are being used
+        if self.has_touch:
+            self.buttons_active = False
+        else:
+            self.buttons_active = True
+
+    def enter_value(self):
+        """Intermediary method to pull button A state, if available"""
+        if "BUTTON_A" in board.config["krux"]["pins"]:
+            return self.enter.value()
+        return RELEASED
+
+    def page_value(self):
+        """Intermediary method to pull button B state, if available"""
+        if "BUTTON_B" in board.config["krux"]["pins"]:
+            return self.page.value()
+        return RELEASED
+
+    def page_prev_value(self):
+        """Intermediary method to pull button C state, if available"""
+        if "BUTTON_C" in board.config["krux"]["pins"]:
+            return self.page_prev.value()
+        return RELEASED
+
+    def touch_value(self):
+        """Intermediary method to pull touch state, if touch available"""
+        if self.has_touch:
+            return self.touch.value()
+        return RELEASED
+
+    def wait_for_release(self):
+        """Loop until all buttons are released (if currently pressed)"""
+        while (
+            self.enter_value() == PRESSED
+            or self.page_value() == PRESSED
+            or self.page_prev_value() == PRESSED
+            or self.touch_value() == PRESSED
+        ):
+            self.entropy += 1
+            wdt.feed()
+
+    def wait_for_press(self, block=True):
+        """Wait for first button press"""
+        time_frame = time.ticks_ms()
+        while (
+            self.enter_value() == RELEASED
+            and self.page_value() == RELEASED
+            and self.page_prev_value() == RELEASED
+            and self.touch_value() == RELEASED
+        ):
+            self.entropy += 1
+            wdt.feed()  # here is were krux spend most of time
+            if not block and time.ticks_ms() > time_frame + QR_ANIM_PERIOD:
+                break
 
     def wait_for_button(self, block=True):
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if nonblocking.
         """
-        # Loop until all buttons are released (if currently pressed)
-        while self.enter.value() == PRESSED or self.page.value() == PRESSED:
-            wdt.feed()
-            self.entropy += 1
+        self.wait_for_release()
+        self.wait_for_press(block)
 
-        # Wait for first button press
-        checks = 0
-        while self.enter.value() == RELEASED and self.page.value() == RELEASED:
-            wdt.feed()
-            checks += 1
-            if not block and checks > NONBLOCKING_CHECKS:
-                break
-
-        if self.enter.value() == PRESSED:
+        if self.enter_value() == PRESSED:
             # Wait for release
-            while self.enter.value() == PRESSED:
-                wdt.feed()
+            while self.enter_value() == PRESSED:
                 self.entropy += 1
-            return BUTTON_ENTER
+                wdt.feed()
+            if self.buttons_active:
+                return BUTTON_ENTER
+            self.buttons_active = True
 
-        if self.page.value() == PRESSED:
+        if self.page_value() == PRESSED:
             # Wait for release
-            while self.page.value() == PRESSED:
-                wdt.feed()
+            while self.page_value() == PRESSED:
                 self.entropy += 1
-            return BUTTON_PAGE
+                wdt.feed()
+            if self.buttons_active:
+                return BUTTON_PAGE
+            self.buttons_active = True
+
+        if self.page_prev_value() == PRESSED:
+            # Wait for release
+            while self.page_prev_value() == PRESSED:
+                self.entropy += 1
+                wdt.feed()
+            if self.buttons_active:
+                return BUTTON_PAGE_PREV
+            self.buttons_active = True
+
+        if self.touch_value() == PRESSED:
+            while self.touch_value() == PRESSED:
+                self.entropy += 1
+                wdt.feed()
+            return BUTTON_TOUCH
+
         return None
+
+    def wait_for_proceed(self, block=True):
+        """Wrap acknowledgements which can be answared with multiple buttons"""
+        return self.wait_for_button(block) in (BUTTON_ENTER, BUTTON_TOUCH)

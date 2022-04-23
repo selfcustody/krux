@@ -71,7 +71,10 @@ class PSBTSigner:
         self.policy = None
         for inp in self.psbt.inputs:
             # get policy of the input
-            inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, xpubs)
+            try:
+                inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, xpubs)
+            except:
+                raise ValueError("Unable to get policy")
             # if policy is None - assign current
             if self.policy is None:
                 self.policy = inp_policy

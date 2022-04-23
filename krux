@@ -31,10 +31,11 @@ BUILD_DIR="$FIRMWARE_DIR/Kboot/build"
 getdevice() {
     idV=${1%:*}
     idP=${1#*:}
+    num=${2}
     for path in `(find /sys/ -name idVendor | rev | cut -d/ -f 2- | rev) 2>/dev/null`; do
         if grep -q $idV $path/idVendor; then
             if grep -q $idP $path/idProduct; then
-                (find $path -name 'device' | rev | cut -d / -f 2 | rev) 2>/dev/null
+                (find $path -name 'device' | rev | cut -d / -f 2 | rev) 2>/dev/null | head -$num | tail -1
             fi
         fi
     done
@@ -72,18 +73,28 @@ elif [ "$1" == "flash" ]; then
     device_vendor_product_id=""
     if [ "$device" == "maixpy_m5stickv" ]; then
         device_vendor_product_id="0403:6001"
+    elif [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_bit" ]; then
+        device_vendor_product_id="0403:6010"
     fi
     if [ -z "$device_vendor_product_id" ]; then
         panic "Unknown device"
     fi
-
-    usb_device_name_cmd="getdevice $device_vendor_product_id"
+    #M5stickV has only one serial port
+    #Bit has two serial ports and use fist for flash
+    #Amigo has two ports and uses second port to flash (needs further confirmation)
+    if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_bit" ]; then
+        device_num=1
+    elif [ "$device" == "maixpy_amigo_ips" ]; then
+        device_num=2
+    fi
+    usb_device_name_cmd="getdevice $device_vendor_product_id $device_num"
     usb_device_name=$($usb_device_name_cmd)
     if [ -z "$usb_device_name" ]; then
         panic "Failed to find device via USB. Is it connected and powered on?"
     fi
 
-    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
+    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/$usb_device_name -b 1500000 kboot.kfpkg
+
 elif [ "$1" == "sha256" ]; then
     file="$2"
     hash=$(openssl dgst -sha256 $file)

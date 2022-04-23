@@ -24,6 +24,28 @@ import sys
 sys.path.append("")
 sys.path.append(".")
 
+SPLASH = """
+                
+                
+                
+    ¡¡         
+    ¡¡         
+    ¡¡         
+  ¡¡¡¡¡¡       
+    ¡¡         
+    ¡¡  ¡¡     
+    ¡¡ ¡¡      
+    ¡¡¡¡       
+    ¡¡ ¡¡      
+    ¡¡  ¡¡     
+    ¡¡   ¡¡    
+                
+                
+                
+"""[
+    1:-1
+]
+
 from krux import firmware
 from krux.power import PowerManager
 
@@ -34,36 +56,17 @@ if firmware.upgrade():
 # Note: These imports come after the firmware upgrade check
 #       to allow it to have more memory to work with
 import lcd
-from krux.i18n import t
 from krux.context import Context
-from krux.pages.login import Login
-from krux.pages.home import Home
-
-SPLASH = """
-                
-                
-                
-    ██         
-    ██         
-    ██         
-  ██████       
-    ██         
-    ██  ██     
-    ██ ██      
-    ████       
-    ██ ██      
-    ██  ██     
-    ██   ██    
-                
-                
-                
-"""[
-    1:-1
-]
 
 ctx = Context()
 
-ctx.display.flash_text(SPLASH.split("\n"), color=lcd.WHITE, padding=8, duration=1000)
+# display splash while loading pages
+ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
+
+from krux.pages.login import Login
+from krux.pages.home import Home
+
+ctx.display.clear()
 
 while True:
     if not Login(ctx).run():
@@ -74,9 +77,9 @@ while True:
 
     if not Home(ctx).run():
         break
+from krux.i18n import t
 
 ctx.display.flash_text(t("Shutting down.."))
 
 ctx.clear()
-
 pmu.shutdown()
