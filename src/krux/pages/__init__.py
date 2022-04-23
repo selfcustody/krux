@@ -63,7 +63,9 @@ class Page:
         self.x_keypad_map = []
         key_h_spacing = self.ctx.display.width() - 2 * pad_border
         key_h_spacing //= width
-        key_v_spacing = self.ctx.display.height() - self._keypad_offset()
+        key_v_spacing = (
+            self.ctx.display.height() - DEFAULT_PADDING - self._keypad_offset()
+        )
         key_v_spacing //= height
         for y in range(height + 1):
             region = y * key_v_spacing + self._keypad_offset()
@@ -105,7 +107,7 @@ class Page:
                     key_offset_x += offset_x
                     if key_index < len(keys) and keys[key_index] not in possible_keys:
                         # faded text
-                        lcd.draw_string(key_offset_x, offset_y, key, 0x0842)
+                        lcd.draw_string(key_offset_x, offset_y, key, lcd.LIGHTBLACK)
                     else:
                         if self.ctx.input.has_touch:
                             self.ctx.display.outline(
@@ -159,7 +161,7 @@ class Page:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
             self.ctx.display.draw_hcentered_text(title, offset_y)
-            offset_y += self.ctx.display.font_height
+            offset_y += self.ctx.display.font_height * 3 // 2
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
             offset_y = self._keypad_offset()
             possible_keys = keys
@@ -354,8 +356,10 @@ class Page:
 
     def prompt(self, text, offset_y=0):
         """Prompts user to answer Yes or No"""
-        #Go up if question has multiple lines
-        offset_y -= (len(self.ctx.display.to_lines(text))-1) * self.ctx.display.font_height
+        # Go up if question has multiple lines
+        offset_y -= (
+            len(self.ctx.display.to_lines(text)) - 1
+        ) * self.ctx.display.font_height
         self.ctx.display.draw_hcentered_text(text, offset_y)
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()

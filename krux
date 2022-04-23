@@ -93,7 +93,7 @@ elif [ "$1" == "flash" ]; then
         panic "Failed to find device via USB. Is it connected and powered on?"
     fi
 
-    docker run --privileged --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/$usb_device_name -b 1500000 kboot.kfpkg
+    docker run --privileged --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/$usb_device_name -b 1500000 kboot.kfpkg
 
 elif [ "$1" == "sha256" ]; then
     file="$2"
