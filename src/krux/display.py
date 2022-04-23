@@ -39,9 +39,8 @@ MIN_BACKLIGHT = 1
 
 DEL = "<"
 GO = t("Go")
-CLR = t("Clr")
 ESC = t("Esc")
-FIXED_KEYS = 4
+FIXED_KEYS = 3
 
 
 class Display:

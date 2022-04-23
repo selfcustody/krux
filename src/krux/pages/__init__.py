@@ -26,7 +26,7 @@ import lcd
 import board
 from ur.ur import UR
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
-from ..display import DEFAULT_PADDING, DEL, GO, CLR, ESC, FIXED_KEYS
+from ..display import DEFAULT_PADDING, DEL, GO, ESC, FIXED_KEYS
 from ..qr import to_qr_codes
 from ..i18n import t
 
@@ -91,10 +91,8 @@ class Page:
                 elif key_index == len(keys):
                     key = DEL
                 elif key_index == len(keys) + 1:
-                    key = CLR
-                elif key_index == len(keys) + 2:
                     key = ESC
-                elif key_index == len(keys) + 3:
+                elif key_index == len(keys) + 2:
                     key = GO
                 if key is not None:
                     offset_x = x
@@ -194,11 +192,9 @@ class Page:
                 if cur_key_index == len(keys):  # Del
                     buffer = buffer[: len(buffer) - 1]
                     changed = True
-                elif cur_key_index == len(keys) + 1:  # Clr
-                    buffer = ""
-                elif cur_key_index == len(keys) + 2:  # Esc
+                elif cur_key_index == len(keys) + 1:  # Esc
                     return MENU_CONTINUE
-                elif cur_key_index == len(keys) + 3:  # Enter
+                elif cur_key_index == len(keys) + 2:  # Enter
                     break
                 else:
                     buffer += keys[cur_key_index]

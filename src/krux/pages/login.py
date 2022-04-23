@@ -392,7 +392,7 @@ class Login(Page):
             for i in range(4):
                 self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
             offset_y += self.ctx.display.font_height
-            keys = ["<", t("Done"), ">"]
+            keys = ["<", t("Back"), ">"]
             for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
                 self.ctx.display.outline(
                     x,
