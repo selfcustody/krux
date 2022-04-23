@@ -260,7 +260,8 @@ class Login(Page):
                         and word == test_phrase_sentinel
                     ):
                         break
-                    word = to_word(word)
+                    if word != "":
+                        word = to_word(word)
                     if word != "":
                         break
 
