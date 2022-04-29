@@ -25,7 +25,7 @@ import math
 width = int(sys.argv[2])
 height = int(sys.argv[3])
 
-font_byte_length = math.ceil(width / 8 * height)
+font_byte_length = math.ceil(width / 8) * height
 line_char_length = (font_byte_length * 2) + 6  # 6 is codepoint prefix len
 
 with open(sys.argv[1], "r") as input_file:
