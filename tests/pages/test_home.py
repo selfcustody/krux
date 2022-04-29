@@ -155,13 +155,11 @@ def test_public_key(mocker):
                 ctx.wallet.key.key_expression(None),
                 FORMAT_NONE,
                 None,
-                DEFAULT_PADDING + 1,
             ),
             mock.call(
                 ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
                 None,
-                DEFAULT_PADDING + 1,
             ),
         ]
         print_qr_calls = [
@@ -261,7 +259,7 @@ def test_wallet(mocker):
         mocker.patch.object(
             home,
             "display_qr_codes",
-            new=lambda data, qr_format, title=None, title_padding=10: ctx.input.wait_for_button(),
+            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
         mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")
@@ -512,7 +510,7 @@ def test_scan_address(mocker):
         mocker.patch.object(
             home,
             "display_qr_codes",
-            new=lambda data, qr_format, title=None, title_padding=10: ctx.input.wait_for_button(),
+            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
         mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")
@@ -683,7 +681,7 @@ def test_sign_psbt(mocker):
         mocker.patch.object(
             home,
             "display_qr_codes",
-            new=lambda data, qr_format, title=None, title_padding=10: ctx.input.wait_for_button(),
+            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
         mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")
@@ -807,7 +805,7 @@ def test_sign_message(mocker):
         mocker.patch.object(
             home,
             "display_qr_codes",
-            new=lambda data, qr_format, title=None, title_padding=10: ctx.input.wait_for_button(),
+            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
         mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")

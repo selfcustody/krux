@@ -155,7 +155,3 @@ class Input:
             return BUTTON_TOUCH
 
         return None
-
-    def wait_for_proceed(self, block=True):
-        """Wrap acknowledgements which can be answared with multiple buttons"""
-        return self.wait_for_button(block) in (BUTTON_ENTER, BUTTON_TOUCH)

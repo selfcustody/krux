@@ -208,7 +208,7 @@ def test_load_key_from_text(mocker):
             * 11
             +
             # Go
-            [BUTTON_PAGE for _ in range(27)] + [BUTTON_ENTER] +
+            [BUTTON_PAGE for _ in range(28)] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, Single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
@@ -242,7 +242,7 @@ def test_load_key_from_digits(mocker):
                 [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # Go + Confirm
-                [BUTTON_PAGE for _ in range(9)]
+                [BUTTON_PAGE for _ in range(10)]
                 + [BUTTON_ENTER, BUTTON_ENTER]
             )
             * 11
@@ -254,14 +254,14 @@ def test_load_key_from_digits(mocker):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 0
-                [BUTTON_PAGE for _ in range(10)]
+                [BUTTON_PAGE for _ in range(11)]
                 + [BUTTON_ENTER]
                 +
                 # 3
                 [BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # Go
-                [BUTTON_PAGE for _ in range(8)]
+                [BUTTON_PAGE for _ in range(9)]
                 + [BUTTON_ENTER]
             )
             +
@@ -276,13 +276,13 @@ def test_load_key_from_digits(mocker):
                 [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # Go + Confirm
-                [BUTTON_PAGE for _ in range(9)]
+                [BUTTON_PAGE for _ in range(10)]
                 + [BUTTON_ENTER, BUTTON_ENTER]
             )
             * 11
             +
             # Go
-            [BUTTON_PAGE for _ in range(11)] + [BUTTON_ENTER] +
+            [BUTTON_PAGE for _ in range(12)] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, Single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
@@ -316,7 +316,7 @@ def test_load_key_from_bits(mocker):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # Go + Confirm
-                [BUTTON_PAGE for _ in range(2)]
+                [BUTTON_PAGE for _ in range(3)]
                 + [BUTTON_ENTER, BUTTON_ENTER]
             )
             * 11
@@ -326,32 +326,32 @@ def test_load_key_from_bits(mocker):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 00
-                [BUTTON_PAGE for _ in range(3)]
+                [BUTTON_PAGE for _ in range(4)]
                 + [BUTTON_ENTER, BUTTON_ENTER]
                 +
                 # 1
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 0
-                [BUTTON_PAGE for _ in range(3)]
+                [BUTTON_PAGE for _ in range(4)]
                 + [BUTTON_ENTER]
                 +
                 # 11
                 [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER]
                 +
                 # 00
-                [BUTTON_PAGE for _ in range(3)]
+                [BUTTON_PAGE for _ in range(4)]
                 + [BUTTON_ENTER, BUTTON_ENTER]
                 +
                 # 1
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 0
-                [BUTTON_PAGE for _ in range(3)]
+                [BUTTON_PAGE for _ in range(4)]
                 + [BUTTON_ENTER]
                 +
                 # Go
-                [BUTTON_PAGE for _ in range(3)]
+                [BUTTON_PAGE for _ in range(4)]
                 + [BUTTON_ENTER]
             )
             +
@@ -366,13 +366,13 @@ def test_load_key_from_bits(mocker):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # Go + Confirm
-                [BUTTON_PAGE for _ in range(2)]
+                [BUTTON_PAGE for _ in range(3)]
                 + [BUTTON_ENTER, BUTTON_ENTER]
             )
             * 11
             +
             # Go
-            [BUTTON_PAGE for _ in range(3)] + [BUTTON_ENTER] +
+            [BUTTON_PAGE for _ in range(4)] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, Single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
@@ -387,7 +387,6 @@ def test_load_key_from_bits(mocker):
 
         login.load_key_from_bits()
 
-        assert ctx.input.wait_for_button.call_count == len(case[0])
         if len(case[1].split()) == 11:
             assert ctx.wallet.key.mnemonic.startswith(case[1])
         else:
@@ -482,6 +481,7 @@ def test_locale(mocker):
                         BUTTON_PAGE,
                         BUTTON_PAGE,
                         BUTTON_PAGE,
+                        BUTTON_PAGE,
                         BUTTON_ENTER,
                     )
                 )
@@ -492,7 +492,7 @@ def test_locale(mocker):
 
         login.locale()
 
-        assert ctx.input.wait_for_button.call_count == 6
+        assert ctx.input.wait_for_button.call_count == 7
         ctx.display.draw_centered_text.assert_has_calls(
             [mock.call("Locale\n%s" % locale) for locale in case[1]]
         )

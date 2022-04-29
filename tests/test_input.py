@@ -19,8 +19,8 @@ def test_init(mocker):
     assert isinstance(input, Input)
     krux.input.fm.register.assert_has_calls(
         [
-            mock.call(board.config["krux.pins"]["BUTTON_A"], mock.ANY),
-            mock.call(board.config["krux.pins"]["BUTTON_B"], mock.ANY),
+            mock.call(board.config["krux"]["pins"]["BUTTON_A"], mock.ANY),
+            mock.call(board.config["krux"]["pins"]["BUTTON_B"], mock.ANY),
         ]
     )
     assert (
@@ -131,7 +131,15 @@ def test_wait_for_button_returns_when_nonblocking(mocker):
     mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
     mocker.patch.object(input.page, "value", new=lambda: RELEASED)
 
+    def time_control():
+        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        time.sleep(1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: 1000)
+
+    t = threading.Thread(target=time_control)
+    t.start()
     btn = input.wait_for_button(False)
+    t.join()
 
     assert btn is None
     krux.input.wdt.feed.assert_called()

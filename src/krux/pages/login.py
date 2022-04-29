@@ -128,7 +128,7 @@ class Login(Page):
                 roll = ""
                 while True:
                     roll = self.capture_from_keypad(
-                        t("Roll %d") % (i + 1), states, lambda r: r
+                        t("Roll %d") % (i + 1), states  # , lambda r: r
                     )
                     if roll == MENU_CONTINUE:
                         self.ctx.display.clear()

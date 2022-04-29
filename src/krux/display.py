@@ -187,7 +187,10 @@ class Display:
         """Takes a string of text and converts it to lines to display on
         the screen
         """
-        columns = self.usable_width() // self.font_width
+        if self.width() > 135:
+            columns = self.usable_width() // self.font_width
+        else:
+            columns = self.width() // self.font_width
         words = []
         for word in text.split(" "):
             subwords = word.split("\n")
@@ -281,13 +284,13 @@ class Display:
             offset_x = (self.width() - self.font_width * len(line)) // 2
             offset_x = max(0, offset_x)
             lcd.draw_string(
-                offset_x, offset_y + (i * FONT_HEIGHT), line, color, bg_color
+                offset_x, offset_y + (i * self.font_height), line, color, bg_color
             )
 
     def draw_centered_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK):
         """Draws text horizontally and vertically centered on the display"""
         lines = text if isinstance(text, list) else self.to_lines(text)
-        lines_height = len(lines) * FONT_HEIGHT
+        lines_height = len(lines) * self.font_height
         offset_y = max(0, (self.height() - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, bg_color)
 

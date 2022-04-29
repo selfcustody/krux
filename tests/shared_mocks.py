@@ -134,14 +134,23 @@ def board_m5stickv():
                 "BUTTON_A": 36,
                 "BUTTON_B": 37,
             },
-            "krux.pins": {
-                "BUTTON_A": 36,
-                "BUTTON_B": 37,
-                "LED_W": 7,
-                "UART2_TX": 35,
-                "UART2_RX": 34,
-                "I2C_SCL": 28,
-                "I2C_SDA": 29,
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 36,
+                    "BUTTON_B": 37,
+                    "LED_W": 7,
+                    "UART2_TX": 35,
+                    "UART2_RX": 34,
+                    "I2C_SCL": 28,
+                    "I2C_SDA": 29,
+                },
+                "display": {
+                    "touch": False,
+                    "font": [8, 14],
+                    "orientation": [1, 2],
+                    "qr_colors": [16904, 61307],
+                },
+                "sensor": {"flipped": False, "lenses": False},
             },
         }
     )
@@ -150,11 +159,11 @@ def board_m5stickv():
 def board_amigo():
     return mock.MagicMock(
         config={
-            "type": "amigo_tft",
-            "lcd": {"height": 320, "width": 480, "invert": 0, "dir": 40, "lcd_type": 1},
+            "type": "amigo_ips",
+            "lcd": {"height": 320, "width": 480, "invert": 1, "dir": 40, "lcd_type": 2},
             "sdcard": {"sclk": 11, "mosi": 10, "miso": 6, "cs": 26},
             "board_info": {
-                "BOOT_KEY": 23,
+                "BOOT_KEY": 16,
                 "LED_R": 14,
                 "LED_G": 15,
                 "LED_B": 17,
@@ -177,7 +186,18 @@ def board_amigo():
                 "SPI_MISO": 6,
                 "SPI_CS": 12,
             },
-            "krux.pins": {"BUTTON_A": 23, "BUTTON_B": 20, "LED_W": 32},
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 16,
+                    "BUTTON_B": 20,
+                    "BUTTON_C": 23,
+                    "LED_W": 32,
+                    "I2C_SDA": 27,
+                    "I2C_SCL": 24,
+                },
+                "display": {"touch": True, "font": [12, 24], "orientation": [1, 0]},
+                "sensor": {"flipped": True, "lenses": False},
+            },
         }
     )
 

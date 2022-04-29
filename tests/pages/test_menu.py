@@ -29,46 +29,12 @@ def test_run_loop(mocker):
     )
 
     ctx.input.wait_for_button.side_effect = [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]
-    ctx.display.to_lines.side_effect = [
-        ["Option"],
-        ["- Option -"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["Option"],
-        ["- Option -"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["Option"],
-        ["Long Option"],
-        ["- Long Option -"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-    ]
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
 
     ctx.input.wait_for_button.side_effect = [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
-    ctx.display.to_lines.side_effect = [
-        ["Option"],
-        ["- Option -"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["Option"],
-        ["Long Option"],
-        ["- Long Option -"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["Option"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["- Longer Option -"],
-        ["The Longest", "Option"],
-    ]
 
     index, status = menu.run_loop()
     assert index == 2
@@ -83,43 +49,6 @@ def test_run_loop(mocker):
         BUTTON_PAGE,
         BUTTON_PAGE,
         BUTTON_ENTER,
-    ]
-    ctx.display.to_lines.side_effect = [
-        ["Option"],
-        ["- Option -"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["Option"],
-        ["Long Option"],
-        ["- Long Option -"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["Option"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["- Longer Option -"],
-        ["The Longest", "Option"],
-        ["Option"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["- The", "Longest -"],
-        ["Option"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["- The", "Longest -"],
-        ["Option"],
-        ["- Option -"],
-        ["Long Option"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
-        ["Option"],
-        ["Long Option"],
-        ["- Long Option -"],
-        ["Longer Option"],
-        ["The Longest", "Option"],
     ]
 
     index, status = menu.run_loop()
