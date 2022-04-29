@@ -94,7 +94,7 @@ class Touch:
         if time.ticks_ms() > self.last_time + TOUCH_S_PERIOD:
             self.last_time = time.ticks_ms()
             data = self.touch_driver.current_point()
-            if isinstance(data) is tuple:
+            if isinstance(data, tuple):
                 self.extract_index(data)
             elif data is None:  # gets realease than return to ilde.
                 if self.state == Touch.release:
