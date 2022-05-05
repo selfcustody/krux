@@ -409,15 +409,13 @@ class Login(Page):
                 ) // 2
                 lcd.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
 
-    def _touch_to_physical(self):
+    def _touch_to_physical(self, index):
         """Mimics touch presses into physical button presses"""
-        if self.ctx.input.touch.index == 0:
+        if index == 0:
             return BUTTON_PAGE_PREV
-        if self.ctx.input.touch.index == 1:
+        if index == 1:
             return BUTTON_ENTER
-        if self.ctx.input.touch.index == 2:
-            return BUTTON_PAGE
-        return BUTTON_ENTER
+        return BUTTON_PAGE
 
     def settings(self):
         """Handler for the 'settings' menu item"""
@@ -449,7 +447,7 @@ class Login(Page):
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical()
+                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
             for i, network in enumerate(networks):
@@ -479,7 +477,7 @@ class Login(Page):
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical()
+                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
             for i, baudrate in enumerate(baudrates):
@@ -509,7 +507,7 @@ class Login(Page):
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical()
+                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
             for i, locale in enumerate(locales):
@@ -543,7 +541,7 @@ class Login(Page):
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical()
+                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
             for i, level in enumerate(levels):
@@ -564,5 +562,18 @@ class Login(Page):
         """Handler for the 'about' menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
+        # Uncomment to display battery voltage
+        # try:
+        #     from ..power import PowerManager
+
+        #     self.pmu = PowerManager()
+        #     batt_voltage = self.pmu.batt_voltage()
+        #     batt_voltage /= 1000
+        #     self.ctx.display.draw_hcentered_text(
+        #         "Battery: " + str(round(batt_voltage, 1)) + "V",
+        #         self.ctx.display.bottom_prompt_line,
+        #     )
+        # except:
+        #     pass
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

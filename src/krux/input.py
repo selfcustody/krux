@@ -46,12 +46,18 @@ class Input:
         if "BUTTON_A" in board.config["krux"]["pins"]:
             fm.register(board.config["krux"]["pins"]["BUTTON_A"], fm.fpioa.GPIOHS21)
             self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
+        else:
+            self.enter = None
         if "BUTTON_B" in board.config["krux"]["pins"]:
             fm.register(board.config["krux"]["pins"]["BUTTON_B"], fm.fpioa.GPIOHS22)
             self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
+        else:
+            self.page = None
         if "BUTTON_C" in board.config["krux"]["pins"]:
             fm.register(board.config["krux"]["pins"]["BUTTON_C"], fm.fpioa.GPIOHS0)
             self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
+        else:
+            self.page_prev = None
         self.has_touch = board.config["krux"]["display"]["touch"]
         self.touch = (
             Touch(board.config["lcd"]["width"], board.config["lcd"]["height"])
@@ -67,25 +73,25 @@ class Input:
 
     def enter_value(self):
         """Intermediary method to pull button A state, if available"""
-        if "BUTTON_A" in board.config["krux"]["pins"]:
+        if self.enter is not None:
             return self.enter.value()
         return RELEASED
 
     def page_value(self):
         """Intermediary method to pull button B state, if available"""
-        if "BUTTON_B" in board.config["krux"]["pins"]:
+        if self.page is not None:
             return self.page.value()
         return RELEASED
 
     def page_prev_value(self):
         """Intermediary method to pull button C state, if available"""
-        if "BUTTON_C" in board.config["krux"]["pins"]:
+        if self.page_prev is not None:
             return self.page_prev.value()
         return RELEASED
 
     def touch_value(self):
         """Intermediary method to pull touch state, if touch available"""
-        if self.has_touch:
+        if self.touch is not None:
             return self.touch.value()
         return RELEASED
 
@@ -152,6 +158,7 @@ class Input:
             while self.touch_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
+            self.buttons_active = False
             return BUTTON_TOUCH
 
         return None

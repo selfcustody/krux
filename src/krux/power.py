@@ -48,6 +48,12 @@ class PowerManager:
             except:
                 pass
 
+    def batt_voltage(self):
+        """Returns the battery voltage of the device"""
+        if self.pmu is not None:
+            return self.pmu.getVbatVoltage()
+        return None
+
     def shutdown(self):
         """Shuts down the device"""
         if self.pmu is not None:

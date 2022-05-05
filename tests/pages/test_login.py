@@ -1,5 +1,5 @@
-from krux.settings import I18n
 from ..shared_mocks import *
+from krux.settings import I18n
 from krux.input import BUTTON_ENTER, BUTTON_PAGE
 from krux.qr import FORMAT_UR, FORMAT_NONE
 from ur.ur import UR
@@ -42,6 +42,7 @@ def test_new_key_from_d6(mocker):
             display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
         )
         login = Login(ctx)
+        mocker.patch.object(ctx.input, "has_touch", False)
 
         login.new_key_from_d6()
 
@@ -396,7 +397,6 @@ def test_load_key_from_bits(mocker):
 def test_network(mocker):
     import krux
 
-    mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mock.MagicMock())
     from krux.pages.login import Login
 
     ctx = mock.MagicMock(
@@ -454,7 +454,6 @@ def test_printer(mocker):
 def test_locale(mocker):
     import krux
 
-    mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mock.MagicMock())
     from krux.pages.login import Login
 
     cases = [
@@ -502,7 +501,6 @@ def test_locale(mocker):
 def test_debug(mocker):
     import krux
 
-    mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mock.MagicMock())
     from krux.pages.login import Login
     from krux.logging import NONE
 
@@ -542,7 +540,6 @@ def test_debug(mocker):
 def test_about(mocker):
     import krux
 
-    mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mock.MagicMock())
     from krux.pages.login import Login
     from krux.metadata import VERSION
 

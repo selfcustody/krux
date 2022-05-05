@@ -1,7 +1,7 @@
+from ..shared_mocks import *
 import binascii
 from krux.display import DEFAULT_PADDING
 from krux.key import Key
-from ..shared_mocks import *
 from krux.input import BUTTON_ENTER, BUTTON_PAGE
 from krux.qr import FORMAT_PMOFN, FORMAT_NONE
 from embit.networks import NETWORKS

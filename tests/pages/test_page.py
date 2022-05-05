@@ -1,6 +1,6 @@
+from ..shared_mocks import *
 from krux.input import BUTTON_ENTER, BUTTON_PAGE
 from krux.pages import Menu, Page
-from ..shared_mocks import *
 
 
 class MockPage(Page):
