@@ -57,7 +57,11 @@ class Input:
             fm.register(board.config["krux"]["pins"]["BUTTON_C"], fm.fpioa.GPIOHS0)
             self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
         else:
-            self.page_prev = None
+            if board.config["type"] == "m5stickv":
+                from pmu import PMU_Button
+                self.page_prev = PMU_Button()
+            else:
+                self.page_prev = None
         self.has_touch = board.config["krux"]["display"]["touch"]
         self.touch = (
             Touch(board.config["lcd"]["width"], board.config["lcd"]["height"])
