@@ -23,6 +23,9 @@
 from .touchscreens.ft6x36 import FT6X36, TOUCH_S_PERIOD
 import time
 
+SWIPE_THRESHOLD = 50
+SWIPE_RIGHT = 1
+SWIPE_LEFT = 2
 
 class Touch:
     """Touch is a singleton API to interact with touchscreen driver"""
@@ -37,6 +40,9 @@ class Touch:
         self.y_regions = []
         self.x_regions = []
         self.index = 0
+        self.x_press_point = 0
+        self.x_release_point = 0
+        self.gesture = None
         self.state = Touch.idle
         self.width, self.height = width, height
         self.touch_driver = FT6X36()
@@ -59,9 +65,10 @@ class Touch:
         self.x_regions.append(region)
 
     def extract_index(self, data):
-        """Gets an index from touched points, y and x delimiters"""
-        if self.state != Touch.press:
-            self.state = Touch.press
+        """Gets an index from touched points, x and y delimiters"""
+        if self.state == self.idle:
+            self.state = self.press
+            self.x_press_point = data[0]
             self.index = 0
             if self.y_regions:
                 for region in self.y_regions:
@@ -70,7 +77,7 @@ class Touch:
                 if self.index == 0 or self.index >= len(
                     self.y_regions
                 ):  # outside y areas
-                    self.state = Touch.idle
+                    self.state = self.idle
                 else:
                     self.index -= 1
                     if self.x_regions:  # if 2D array
@@ -82,12 +89,21 @@ class Touch:
                         if x_index == 0 or x_index >= len(
                             self.x_regions
                         ):  # outside x areas
-                            self.state = Touch.idle
+                            self.state = self.idle
                         else:
                             x_index -= 1
                         self.index += x_index
             else:
                 self.index = 0
+        else:
+            self.x_release_point = data[0]
+
+    def h_gesture(self, press, release):
+        if release - press > SWIPE_THRESHOLD:
+            self.gesture = SWIPE_RIGHT
+        if press - release > SWIPE_THRESHOLD:
+            self.gesture = SWIPE_LEFT
+
 
     def current_state(self):
         """Returns the touchscreen state"""
@@ -97,17 +113,30 @@ class Touch:
             if isinstance(data, tuple):
                 self.extract_index(data)
             elif data is None:  # gets realease than return to ilde.
-                if self.state == Touch.release:
-                    self.state = Touch.idle
-                elif self.state == Touch.press:
-                    self.state = Touch.release
+                if self.state == self.release:
+                    self.state = self.idle
+                elif self.state == self.press:
+                    self.h_gesture(self.x_press_point, self.x_release_point)
+                    self.state = self.release
             else:
                 print("Touch error: " + str(data))
         return self.state
 
     def value(self):
         """Wraps touch states to behave like a regular button"""
-        return 0 if self.current_state() == Touch.press else 1
+        return 0 if self.current_state() == self.press else 1
+
+    def swipe_right_value(self):
+        if self.gesture == SWIPE_RIGHT:
+            self.gesture = None
+            return 0
+        return 1
+
+    def swipe_left_value(self):
+        if self.gesture == SWIPE_LEFT:
+            self.gesture = None
+            return 0
+        return 1
 
     def current_index(self):
         """Returns current intex of last touched point"""
