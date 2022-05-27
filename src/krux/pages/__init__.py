@@ -25,7 +25,14 @@ import time
 import lcd
 import board
 from ur.ur import UR
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH, SWIPE_RIGHT, SWIPE_LEFT
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_RIGHT,
+    SWIPE_LEFT,
+)
 from ..display import DEFAULT_PADDING, DEL, GO, ESC, FIXED_KEYS
 from ..qr import to_qr_codes
 from ..i18n import t
@@ -73,100 +80,10 @@ class Page:
         """Wrap acknowledgements which can be answared with multiple buttons"""
         return self.ctx.input.wait_for_button(block) in (BUTTON_ENTER, BUTTON_TOUCH)
 
-    def _keypad_offset(self):
-        return DEFAULT_PADDING + self.ctx.display.font_height * 3
-
-    def _map_keys_array(self, width, height):
-        """Maps an array of regions for keys to be placed in
-        Returns horizontal and vertical spacing of keys
-        """
-        self.y_keypad_map = []
-        self.x_keypad_map = []
-        key_h_spacing = self.ctx.display.width() - DEFAULT_PADDING
-        key_h_spacing //= width
-        key_v_spacing = (
-            self.ctx.display.height() - DEFAULT_PADDING - self._keypad_offset()
-        )
-        key_v_spacing //= height
-        for y in range(height + 1):
-            region = y * key_v_spacing + self._keypad_offset()
-            self.y_keypad_map.append(region)
-        for x in range(width + 1):
-            region = x * key_h_spacing + DEFAULT_PADDING // 2
-            self.x_keypad_map.append(region)
-        if self.ctx.input.has_touch:
-            self.ctx.input.touch.y_regions = self.y_keypad_map
-            self.ctx.input.touch.x_regions = self.x_keypad_map
-        return key_h_spacing, key_v_spacing
-
-    def _draw_keys(
-        self, key_h_spacing, key_v_spacing, pad_type, possible_keys, cur_key_index
-    ):
-        key_index = 0
-        for y in self.y_keypad_map[:-1]:
-            offset_y = y + (key_v_spacing - self.ctx.display.font_height) // 2
-            for x in self.x_keypad_map[:-1]:
-                key = None
-                if key_index < len(KEYPADS[pad_type]):
-                    key = KEYPADS[pad_type][key_index]
-                elif key_index == len(KEYPADS[pad_type]):
-                    key = DEL
-                elif key_index == len(KEYPADS[pad_type]) + 1:
-                    key = ESC
-                elif key_index == len(KEYPADS[pad_type]) + 2:
-                    key = GO
-                if key is not None:
-                    offset_x = x
-                    if board.config["lcd"]["invert"]:  # inverted X coodinates
-                        offset_x = self.ctx.display.width() - offset_x
-                        offset_x -= key_h_spacing
-                    key_offset_x = (
-                        key_h_spacing - len(key) * self.ctx.display.font_width
-                    ) // 2
-                    key_offset_x += offset_x
-                    if key_index < len(KEYPADS[pad_type]) and KEYPADS[pad_type][key_index] not in possible_keys:
-                        # faded text
-                        lcd.draw_string(key_offset_x, offset_y, key, lcd.LIGHTBLACK)
-                    else:
-                        if self.ctx.input.has_touch:
-                            self.ctx.display.outline(
-                                offset_x + 1,
-                                y + 1,
-                                key_h_spacing - 2,
-                                key_v_spacing - 2,
-                                lcd.DARKGREY,
-                            )
-                        lcd.draw_string(key_offset_x, offset_y, key, lcd.WHITE)
-                    if key_index == cur_key_index and self.ctx.input.buttons_active:
-                        if self.ctx.input.has_touch:
-                            self.ctx.display.outline(
-                                offset_x + 1,
-                                y + 1,
-                                key_h_spacing - 2,
-                                key_v_spacing - 2,
-                            )
-                        else:
-                            self.ctx.display.outline(
-                                offset_x - 2, y, key_h_spacing + 1, key_v_spacing - 1
-                            )
-                key_index += 1
-
-    def _get_valid_index(self, cur_key_index, pad_type, possible_keys, moving_forward):
-        while cur_key_index < len(KEYPADS[pad_type]) and KEYPADS[pad_type][cur_key_index] not in possible_keys:
-            if moving_forward:
-                cur_key_index = (cur_key_index + 1) % (len(KEYPADS[pad_type]) + FIXED_KEYS)
-            else:
-                if cur_key_index:
-                    cur_key_index -= 1
-                else:
-                    cur_key_index = len(KEYPADS[pad_type]) + FIXED_KEYS - 1
-        return cur_key_index
-
-    def ESC_prompt(self):
+    def esc_prompt(self):
+        """Prompts user for leaving"""
         self.ctx.display.clear()
-        btn = self.prompt(
-            t("Are you sure?"), self.ctx.display.height() // 2
-        )
+        btn = self.prompt(t("Are you sure?"), self.ctx.display.height() // 2)
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()
         if btn == BUTTON_ENTER:
@@ -179,59 +96,39 @@ class Page:
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
         """
-
-        pad_width = math.floor(math.sqrt(len(KEYPADS[pad_type]) + FIXED_KEYS))
-        pad_height = math.ceil((len(KEYPADS[pad_type]) + FIXED_KEYS) / pad_width)
-        key_h_spacing, key_v_spacing = self._map_keys_array(pad_width, pad_height)
         buffer = ""
-        cur_key_index = 0
-        moving_forward = True
-        go_position = len(KEYPADS[pad_type]) + 2
+        pad = Pad(pad_type, self.ctx)
         while True:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
             self.ctx.display.draw_hcentered_text(title, offset_y)
             offset_y += self.ctx.display.font_height * 3 // 2
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
-            offset_y = self._keypad_offset()
-            possible_keys = KEYPADS[pad_type]
+            offset_y = pad.keypad_offset()
+            possible_keys = KEYPADS[pad.type]
             if possible_keys_fn is not None:
                 possible_keys = possible_keys_fn(buffer)
-                cur_key_index = self._get_valid_index(
-                    cur_key_index, pad_type, possible_keys, moving_forward
-                )
-            self._draw_keys(
-                key_h_spacing, key_v_spacing, pad_type, possible_keys, cur_key_index
-            )
+                pad.get_valid_index(possible_keys)
+            pad.draw_keys(possible_keys)
             btn = self.ctx.input.wait_for_button()
             if self.ctx.input.has_touch:
                 if btn == BUTTON_TOUCH:
-                    cur_key_index = self.ctx.input.touch.current_index()
-                    if cur_key_index < len(KEYPADS[pad_type]):
-                        if KEYPADS[pad_type][cur_key_index] in possible_keys:
-                            btn = BUTTON_ENTER
-                        else:
-                            btn = None
-                    elif cur_key_index < len(KEYPADS[pad_type]) + FIXED_KEYS:
-                        btn = BUTTON_ENTER
-                    else:
-                        cur_key_index = 0
-                        btn = None
+                    btn = pad.touch_to_physical(possible_keys)
             if btn == BUTTON_ENTER:
-                moving_forward = True
+                pad.moving_forward = True
                 changed = False
-                if cur_key_index == len(KEYPADS[pad_type]):
+                if pad.cur_key_index == len(KEYPADS[pad.type]):
                     buffer = buffer[: len(buffer) - 1]
                     changed = True
-                elif cur_key_index == len(KEYPADS[pad_type]) + 1:
-                    if self.ESC_prompt() == MENU_CONTINUE: 
+                elif pad.cur_key_index == len(KEYPADS[pad.type]) + 1:
+                    if self.esc_prompt() == MENU_CONTINUE:
                         return MENU_CONTINUE
-                    #remap keypad array
-                    self._map_keys_array(pad_width, pad_height)
-                elif cur_key_index == go_position:
+                    # remap keypad touch array
+                    pad.map_keys_array(pad.width, pad.height)
+                elif pad.cur_key_index == pad.go_position:
                     break
                 else:
-                    buffer += KEYPADS[pad_type][cur_key_index]
+                    buffer += KEYPADS[pad.type][pad.cur_key_index]
                     changed = True
 
                     # Don't autocomplete if deleting
@@ -239,33 +136,33 @@ class Page:
                         new_buffer = autocomplete_fn(buffer)
                         if new_buffer is not None:
                             buffer = new_buffer
-                            cur_key_index = go_position
+                            pad.cur_key_index = pad.go_position
 
                     # moves index to Go on dice presses
-                    if len(buffer) > 0 and (pad_type <= 1):
-                        cur_key_index = go_position
+                    if len(buffer) > 0 and (pad.type <= 1):
+                        pad.cur_key_index = pad.go_position
 
             elif btn == BUTTON_PAGE:
-                moving_forward = True
-                cur_key_index = (cur_key_index + 1) % (len(KEYPADS[pad_type]) + FIXED_KEYS)
+                pad.moving_forward = True
+                pad.cur_key_index = (pad.cur_key_index + 1) % (
+                    len(KEYPADS[pad.type]) + FIXED_KEYS
+                )
             elif btn == BUTTON_PAGE_PREV:
-                moving_forward = False
-                cur_key_index = (cur_key_index - 1) % (len(KEYPADS[pad_type]) + FIXED_KEYS)
+                pad.moving_forward = False
+                pad.cur_key_index = (pad.cur_key_index - 1) % (
+                    len(KEYPADS[pad.type]) + FIXED_KEYS
+                )
             elif btn == SWIPE_LEFT:
-                pad_type += 1
-                if pad_type >= len(KEYPADS):
-                    pad_type = 5
-                cur_key_index = 0
-                moving_forward = True
-                go_position = len(KEYPADS[pad_type]) + 2
+                pad.type += 1
+                if pad.type >= len(KEYPADS):
+                    pad.type = 5
+                pad.reset_type()
             elif btn == SWIPE_RIGHT:
-                pad_type -= 1
-                if pad_type < 5:
-                    pad_type = len(KEYPADS)-1
-                cur_key_index = 0
-                moving_forward = True
-                go_position = len(KEYPADS[pad_type]) + 2
-            
+                pad.type -= 1
+                if pad.type < 5:
+                    pad.type = len(KEYPADS) - 1
+                pad.reset_type()
+
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()
         return buffer
@@ -584,3 +481,142 @@ class Menu:
                     delta_y - 2,
                 )
             offset_y += delta_y
+
+
+class Pad:
+    """Stores and calculate some keypad settings"""
+
+    def __init__(self, pad_type, ctx):
+        self.type = pad_type
+        self.ctx = ctx
+        self.width = math.floor(math.sqrt(len(KEYPADS[self.type]) + FIXED_KEYS))
+        self.height = math.ceil((len(KEYPADS[self.type]) + FIXED_KEYS) / self.width)
+        self.key_h_spacing, self.key_v_spacing = self.map_keys_array(
+            self.width, self.height
+        )
+        self.cur_key_index = 0
+        self.moving_forward = True
+        self.go_position = len(KEYPADS[self.type]) + 2
+
+    def reset_type(self):
+        """Reset parameters when switching a multi-keypad"""
+        self.cur_key_index = 0
+        self.moving_forward = True
+        self.go_position = len(KEYPADS[self.type]) + 2
+
+    def map_keys_array(self, width, height):
+        """Maps an array of regions for keys to be placed in
+        Returns horizontal and vertical spacing of keys
+        """
+        self.y_keypad_map = []
+        self.x_keypad_map = []
+        key_h_spacing = self.ctx.display.width() - DEFAULT_PADDING
+        key_h_spacing //= width
+        key_v_spacing = (
+            self.ctx.display.height() - DEFAULT_PADDING - self.keypad_offset()
+        )
+        key_v_spacing //= height
+        for y in range(height + 1):
+            region = y * key_v_spacing + self.keypad_offset()
+            self.y_keypad_map.append(region)
+        for x in range(width + 1):
+            region = x * key_h_spacing + DEFAULT_PADDING // 2
+            self.x_keypad_map.append(region)
+        if self.ctx.input.has_touch:
+            self.ctx.input.touch.y_regions = self.y_keypad_map
+            self.ctx.input.touch.x_regions = self.x_keypad_map
+        return key_h_spacing, key_v_spacing
+
+    def keypad_offset(self):
+        """Returns keypad start position"""
+        return DEFAULT_PADDING + self.ctx.display.font_height * 3
+
+    def draw_keys(self, possible_keys):
+        """Draws keypad on the screen"""
+        key_index = 0
+        for y in self.y_keypad_map[:-1]:
+            offset_y = y + (self.key_v_spacing - self.ctx.display.font_height) // 2
+            for x in self.x_keypad_map[:-1]:
+                key = None
+                if key_index < len(KEYPADS[self.type]):
+                    key = KEYPADS[self.type][key_index]
+                elif key_index == len(KEYPADS[self.type]):
+                    key = DEL
+                elif key_index == len(KEYPADS[self.type]) + 1:
+                    key = ESC
+                elif key_index == len(KEYPADS[self.type]) + 2:
+                    key = GO
+                if key is not None:
+                    offset_x = x
+                    if board.config["lcd"]["invert"]:  # inverted X coodinates
+                        offset_x = self.ctx.display.width() - offset_x
+                        offset_x -= self.key_h_spacing
+                    key_offset_x = (
+                        self.key_h_spacing - len(key) * self.ctx.display.font_width
+                    ) // 2
+                    key_offset_x += offset_x
+                    if (
+                        key_index < len(KEYPADS[self.type])
+                        and KEYPADS[self.type][key_index] not in possible_keys
+                    ):
+                        # faded text
+                        lcd.draw_string(key_offset_x, offset_y, key, lcd.LIGHTBLACK)
+                    else:
+                        if self.ctx.input.has_touch:
+                            self.ctx.display.outline(
+                                offset_x + 1,
+                                y + 1,
+                                self.key_h_spacing - 2,
+                                self.key_v_spacing - 2,
+                                lcd.DARKGREY,
+                            )
+                        lcd.draw_string(key_offset_x, offset_y, key, lcd.WHITE)
+                    if (
+                        key_index == self.cur_key_index
+                        and self.ctx.input.buttons_active
+                    ):
+                        if self.ctx.input.has_touch:
+                            self.ctx.display.outline(
+                                offset_x + 1,
+                                y + 1,
+                                self.key_h_spacing - 2,
+                                self.key_v_spacing - 2,
+                            )
+                        else:
+                            self.ctx.display.outline(
+                                offset_x - 2,
+                                y,
+                                self.key_h_spacing + 1,
+                                self.key_v_spacing - 1,
+                            )
+                key_index += 1
+
+    def get_valid_index(self, possible_keys):
+        """Moves current index to a valid position"""
+        while (
+            self.cur_key_index < len(KEYPADS[self.type])
+            and KEYPADS[self.type][self.cur_key_index] not in possible_keys
+        ):
+            if self.moving_forward:
+                self.cur_key_index = (self.cur_key_index + 1) % (
+                    len(KEYPADS[self.type]) + FIXED_KEYS
+                )
+            else:
+                if self.cur_key_index:
+                    self.cur_key_index -= 1
+                else:
+                    self.cur_key_index = len(KEYPADS[self.type]) + FIXED_KEYS - 1
+        return self.cur_key_index
+
+    def touch_to_physical(self, possible_keys):
+        """Convert a touch press in button press"""
+        self.cur_key_index = self.ctx.input.touch.current_index()
+        actual_button = None
+        if self.cur_key_index < len(KEYPADS[self.type]):
+            if KEYPADS[self.type][self.cur_key_index] in possible_keys:
+                actual_button = BUTTON_ENTER
+        elif self.cur_key_index < len(KEYPADS[self.type]) + FIXED_KEYS:
+            actual_button = BUTTON_ENTER
+        else:
+            self.cur_key_index = 0
+        return actual_button
