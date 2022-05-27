@@ -32,11 +32,11 @@ import os
 width = int(sys.argv[2])
 height = int(sys.argv[3])
 
-#bdf to hex
+# bdf to hex
 hex_name = sys.argv[1][:-4]
-hex_name += '.hex'
+hex_name += ".hex"
 with open(sys.argv[1], "r", encoding="unicode_escape") as input_file:
-    with open(hex_name, 'w') as hex_file:
+    with open(hex_name, "w") as hex_file:
         codepoint = None
         parsing_bitmap = False
         hex_chars = []
@@ -48,7 +48,7 @@ with open(sys.argv[1], "r", encoding="unicode_escape") as input_file:
             elif line.startswith("ENDCHAR"):
                 if parsing_bitmap and hex_chars:
                     hex_file.write(
-                        "%04X:%s" % (codepoint, "".join(hex_chars).upper())+"\n"
+                        "%04X:%s" % (codepoint, "".join(hex_chars).upper()) + "\n"
                     )
                 parsing_bitmap = False
                 hex_chars = []
@@ -56,11 +56,11 @@ with open(sys.argv[1], "r", encoding="unicode_escape") as input_file:
                 hex_chars.append(line.strip())
     hex_file.close()
 
-#Fill
+# Fill
 font_byte_length = math.ceil(width / 8) * height
 line_char_length = (font_byte_length * 2) + 6  # 6 is codepoint prefix len
 fill_name = sys.argv[1][:-4]
-fill_name += '_fill.hex'
+fill_name += "_fill.hex"
 with open(hex_name, "r") as input_file:
     # Read in a hex formatted bitmap font file
     lines = input_file.readlines()
@@ -92,33 +92,33 @@ with open(hex_name, "r") as input_file:
             lines.insert(i, ("%04X" % i) + ":" + ("00" * font_byte_length) + "\n")
             i += 1
         i += 1
-    with open(fill_name, 'w') as fill_file:
+    with open(fill_name, "w") as fill_file:
         fill_file.write("".join(lines).strip())
     fill_file.close()
 
-#replace symbols
+# replace symbols
 r_name = sys.argv[1][:-4]
-r_name += '_r.hex'
+r_name += "_r.hex"
 
-with open(fill_name, 'r') as fill_file:
+with open(fill_name, "r") as fill_file:
     original = fill_file.readlines()
 
-#replace ¡ for █
+# replace ¡ for █
 original[0xA1] = original[0x2588]
-#replace ¤ for ₿
-#original[0xA4] = original[0x20BF]
-#Terminus does not have ₿, using B instead
+# replace ¤ for ₿
+# original[0xA4] = original[0x20BF]
+# Terminus does not have ₿, using B instead
 original[0xA4] = original[0x42]
 
-with open(r_name , 'w') as file:
+with open(r_name, "w") as file:
     file.writelines(original)
 
-#to dkz
+# to dkz
 BYTE_LEN = 2
 width_bytes = math.ceil(width / 8)
 
 dkz_name = sys.argv[1][:-4]
-dkz_name += '.dkz'
+dkz_name += ".dkz"
 
 with open(r_name, "r") as input_file:
     # Read in a hex formatted bitmap font file
@@ -146,12 +146,11 @@ with open(r_name, "r") as input_file:
                 row.append("0x" + glyph[glyph_index : glyph_index + BYTE_LEN])
             rows.append(",".join(row))
         bitmap.append(",\n".join(rows))
-    with open(dkz_name, 'w') as dkz_file:
+    with open(dkz_name, "w") as dkz_file:
         dkz_file.write(",\n".join(bitmap))
     dkz_file.close()
 
-#Comment below to debug intermediary steps files
+# Comment below to debug intermediary steps files
 os.remove(hex_name)
 os.remove(fill_name)
 os.remove(r_name)
-
