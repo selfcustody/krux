@@ -250,6 +250,10 @@ if "urandom" in sys.modules:
     del sys.modules["urandom"]
 sys.modules["urandom"] = sys.modules["random"]
 
+if "pmu" in sys.modules:
+    del sys.modules["pmu"]
+sys.modules["pmu"] = mock.MagicMock()
+
 setattr(time, "sleep_ms", getattr(time, "sleep_ms", mock.MagicMock()))
 setattr(time, "ticks_ms", getattr(time, "ticks_ms", mock.MagicMock()))
 

@@ -15,8 +15,8 @@ def test_new_key_from_d6(mocker):
             [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
-            # 1 press to confirm SHA, 1 press to continue loading key, 1 press to select single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # 1 press to confirm SHA, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "hire injury false situate rare proof supply attend pause leave bitter enter",
         ),
         (
@@ -28,8 +28,8 @@ def test_new_key_from_d6(mocker):
             [BUTTON_PAGE] +
             # 3 presses per roll
             [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
-            # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to select single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "owner muscle pioneer easily february chuckle strong fold lake lemon parade defy excuse where gap seek narrow cost convince trim great funny admit draft",
         ),
     ]
@@ -110,8 +110,8 @@ def test_load_key_from_text(mocker):
                 [BUTTON_TOUCH]  # index 28 -> "Go"
             )
             +
-            # Done?, 12 word confirm, Continue?, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
             [13, 16, 13, 29, 28],
         ),
@@ -134,8 +134,8 @@ def test_load_key_from_text(mocker):
             +
             # Go
             [BUTTON_PAGE_PREV] + [BUTTON_ENTER] +
-            # Done?, 12 word confirm, Continue?, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
             [0],
         ),
@@ -183,14 +183,12 @@ def test_network(mocker):
     index_s_e = (2, 0, 1)
     ctx = mock.MagicMock(
         input=mock.MagicMock(
-            touch=mock.MagicMock(current_index=mock.MagicMock(side_effect=index_s_e))
+            touch=mock.MagicMock(current_index=mock.MagicMock(side_effect=index_s_e)),
+            wait_for_button=mock.MagicMock(return_value=BUTTON_TOUCH),
         )
     )
-    mocker.patch.object(ctx.input, "wait_for_button", new=lambda: BUTTON_TOUCH)
     mocker.patch.object(ctx.input.touch, "x_regions", (0, 100, 200, 300))
     mocker.patch.object(ctx.input.touch, "y_regions", (100, 200))
-
-    mocker.spy(ctx.input, "wait_for_button")
 
     login = Login(ctx)
 
@@ -217,11 +215,10 @@ def test_printer(mocker):
     index_s_e = (2, 0, 1)
     ctx = mock.MagicMock(
         input=mock.MagicMock(
-            touch=mock.MagicMock(current_index=mock.MagicMock(side_effect=index_s_e))
+            touch=mock.MagicMock(current_index=mock.MagicMock(side_effect=index_s_e)),
+            wait_for_button=mock.MagicMock(return_value=BUTTON_TOUCH),
         )
     )
-    mocker.patch.object(ctx.input, "wait_for_button", new=lambda: BUTTON_TOUCH)
-    mocker.spy(ctx.input, "wait_for_button")
     login = Login(ctx)
 
     login.printer()
@@ -262,11 +259,10 @@ def test_locale(mocker):
             input=mock.MagicMock(
                 touch=mock.MagicMock(
                     current_index=mock.MagicMock(side_effect=index_s_e)
-                )
+                ),
+                wait_for_button=mock.MagicMock(return_value=BUTTON_TOUCH),
             )
         )
-        mocker.patch.object(ctx.input, "wait_for_button", new=lambda: BUTTON_TOUCH)
-        mocker.spy(ctx.input, "wait_for_button")
         login = Login(ctx)
 
         login.locale()
@@ -285,11 +281,10 @@ def test_debug(mocker):
     index_s_e = (0, 2, 1)
     ctx = mock.MagicMock(
         input=mock.MagicMock(
-            touch=mock.MagicMock(current_index=mock.MagicMock(side_effect=index_s_e))
+            touch=mock.MagicMock(current_index=mock.MagicMock(side_effect=index_s_e)),
+            wait_for_button=mock.MagicMock(return_value=BUTTON_TOUCH),
         )
     )
-    mocker.patch.object(ctx.input, "wait_for_button", new=lambda: BUTTON_TOUCH)
-    mocker.spy(ctx.input, "wait_for_button")
     login = Login(ctx)
 
     login.debug()

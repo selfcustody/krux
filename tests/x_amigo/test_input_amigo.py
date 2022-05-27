@@ -135,6 +135,7 @@ def test_touch_indexing(mocker):
 
     mocker.elapsed_time = 0
     mocker.point = (75, 150)
+    mocker.point_2 = (77, 152)
 
     def time_control():
         def timed_sleep(period):
@@ -147,6 +148,12 @@ def test_touch_indexing(mocker):
         # touch on 3º quadrant
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: mocker.point
+        )
+        timed_sleep(0.1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: mocker.elapsed_time)
+        # touch slightly sideways before release
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", new=lambda: mocker.point_2
         )
         timed_sleep(0.1)
         mocker.patch.object(time, "ticks_ms", new=lambda: mocker.elapsed_time)

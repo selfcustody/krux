@@ -2,6 +2,8 @@ from .shared_mocks import *
 
 
 def test_init_without_pmu():
+    if "pmu" in sys.modules:
+        del sys.modules["pmu"]
     from krux.power import PowerManager
 
     manager = PowerManager()
