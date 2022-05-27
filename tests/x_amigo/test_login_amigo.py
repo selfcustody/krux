@@ -1,6 +1,13 @@
 from krux.settings import I18n
 from ..shared_mocks import *
-from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+from krux.input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_RIGHT,
+    SWIPE_LEFT,
+)
 
 
 def test_new_key_from_d6(mocker):
@@ -113,7 +120,7 @@ def test_load_key_from_text(mocker):
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
-            [13, 16, 13, 29, 28],
+            [13, 26, 13, 29, 28],
         ),
         (
             [BUTTON_ENTER]
@@ -158,13 +165,16 @@ def test_load_key_from_text(mocker):
         else:
             assert ctx.wallet.key.mnemonic == case[1]
 
-    # Leaving keypad
+
+def test_leaving_keypad(mocker):
+    from krux.pages.login import Login
+
     esc_keypad = [
-        BUTTON_ENTER,
-        BUTTON_PAGE_PREV,
-        BUTTON_PAGE_PREV,
-        BUTTON_ENTER,
-        BUTTON_ENTER,
+        BUTTON_ENTER,  # Proceed
+        BUTTON_PAGE_PREV,  # Move to Go
+        BUTTON_PAGE_PREV,  # Move to ESC
+        BUTTON_ENTER,  # Press ESC
+        BUTTON_ENTER,  # Leave? Yes
     ]
     ctx = mock.MagicMock(
         input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=esc_keypad)),
@@ -173,6 +183,95 @@ def test_load_key_from_text(mocker):
     login = Login(ctx)
     login.load_key_from_text()
     assert ctx.input.wait_for_button.call_count == len(esc_keypad)
+
+
+def test_passphrase_give_up(mocker):
+    from krux.pages.login import Login
+
+    case = (
+        [BUTTON_ENTER]
+        + (
+            # A
+            [BUTTON_ENTER]
+            +
+            # B
+            [BUTTON_ENTER]
+            +
+            # I
+            [BUTTON_ENTER]
+            +
+            # Go + Confirm
+            [BUTTON_ENTER, BUTTON_ENTER]
+        )
+        * 11
+        +
+        # Go
+        [BUTTON_PAGE_PREV]
+        + [BUTTON_ENTER]
+        +
+        # Done?, 12 word confirm, Continue?, Passphrase
+        [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER]
+        + [
+            BUTTON_PAGE_PREV,  # Move to Go
+            BUTTON_PAGE_PREV,  # Move to ESC
+            BUTTON_ENTER,  # Press ESC
+            BUTTON_ENTER,  # Leave? Yes,
+        ]
+    )
+
+    ctx = mock.MagicMock(
+        input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case)),
+        display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
+    )
+    login = Login(ctx)
+    login.load_key_from_text()
+    assert ctx.input.wait_for_button.call_count == len(case)
+
+
+def test_passphrase(mocker):
+    from krux.pages.login import Login
+
+    case = (
+        [BUTTON_ENTER]
+        + (
+            # A
+            [BUTTON_ENTER]
+            +
+            # B
+            [BUTTON_ENTER]
+            +
+            # I
+            [BUTTON_ENTER]
+            +
+            # Go + Confirm
+            [BUTTON_ENTER, BUTTON_ENTER]
+        )
+        * 11
+        +
+        # Go
+        [BUTTON_PAGE_PREV]
+        + [BUTTON_ENTER]
+        +
+        # Done?, 12 word confirm, Continue?, Passphrase
+        [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER]
+        + [
+            SWIPE_RIGHT,  # Test keypad swaping
+            BUTTON_ENTER,  # Add "+" character
+            SWIPE_LEFT,  #
+            BUTTON_ENTER,  # Add "a" character
+            BUTTON_PAGE_PREV,  # Move to Go
+            BUTTON_ENTER,  # Press Go
+            BUTTON_ENTER,  # Single key
+        ]
+    )
+
+    ctx = mock.MagicMock(
+        input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case)),
+        display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
+    )
+    login = Login(ctx)
+    login.load_key_from_text()
+    assert ctx.input.wait_for_button.call_count == len(case)
 
 
 def test_network(mocker):

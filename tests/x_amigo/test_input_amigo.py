@@ -1,7 +1,15 @@
 from ..shared_mocks import *
-from krux.input import BUTTON_PAGE_PREV, BUTTON_TOUCH, PRESSED, RELEASED
+from krux.input import (
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_LEFT,
+    SWIPE_RIGHT,
+    PRESSED,
+    RELEASED,
+)
 import threading
 import sys
+import pytest
 
 
 def mock_modules(mocker):
@@ -173,10 +181,10 @@ def test_touch_indexing(mocker):
     krux.input.wdt.feed.assert_called()
 
     # 2x2 array (4 quadrants) 200x200 pxls
-    input.touch.add_y_delimiter(0)
+    input.touch.add_y_delimiter(50)
     input.touch.add_y_delimiter(100)
     input.touch.add_y_delimiter(200)
-    input.touch.add_x_delimiter(0)
+    input.touch.add_x_delimiter(50)
     input.touch.add_x_delimiter(100)
     input.touch.add_x_delimiter(200)
     t = threading.Thread(target=time_control)
@@ -186,3 +194,93 @@ def test_touch_indexing(mocker):
 
     assert btn == BUTTON_TOUCH
     assert input.touch.current_index() == 2  # (3º quadrant)
+
+    # Touch inside - 50 < x < 200
+    mocker.patch.object(input.touch, "state", input.touch.idle)
+    input.touch.extract_index((60, 60))
+    assert input.touch.state == input.touch.press
+
+    # Touch outside - x > 200
+    input.touch.state = input.touch.idle
+    input.touch.extract_index((250, 60))
+    assert input.touch.state == input.touch.release
+
+    # Touch outside - y > 200
+    input.touch.state = input.touch.idle
+    input.touch.extract_index((60, 250))
+    assert input.touch.state == input.touch.release
+
+
+def test_touch_gestures(mocker):
+    import krux
+    from krux.input import Input
+
+    input = Input()
+
+    mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
+    mocker.patch.object(input.page, "value", new=lambda: RELEASED)
+    mocker.patch.object(input.page_prev, "value", new=lambda: RELEASED)
+    mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
+
+    mocker.elapsed_time = 0
+    mocker.point = (75, 150)
+    mocker.point_2 = (175, 152)
+
+    def time_control():
+        def timed_sleep(period):
+            time.sleep(period)
+            mocker.elapsed_time += period * 1000
+
+        mocker.patch.object(time, "ticks_ms", new=lambda: mocker.elapsed_time)
+        timed_sleep(0.1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: mocker.elapsed_time)
+        # touch on 3º quadrant
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", new=lambda: mocker.point
+        )
+        timed_sleep(0.1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: mocker.elapsed_time)
+        # swipe 100 pixels to right
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", new=lambda: mocker.point_2
+        )
+        timed_sleep(0.1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: mocker.elapsed_time)
+        mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
+        timed_sleep(0.1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: mocker.elapsed_time)
+
+    # Swipe Right
+    input.touch.clear_regions()
+    t = threading.Thread(target=time_control)
+    t.start()
+    btn = input.wait_for_button(True)
+    t.join()
+    assert btn == SWIPE_RIGHT
+    krux.input.wdt.feed.assert_called()
+
+    # Swipe Left
+    mocker.point = (175, 150)
+    mocker.point_2 = (75, 152)
+    input.touch.clear_regions()
+    t = threading.Thread(target=time_control)
+    t.start()
+    btn = input.wait_for_button(True)
+    t.join()
+    assert btn == SWIPE_LEFT
+    krux.input.wdt.feed.assert_called()
+
+
+def test_invalid_touch_delimiter(mocker):
+    """Tries to add a delimiter outside screen area"""
+    import krux
+    from krux.input import Input
+
+    input = Input()
+
+    mocker.patch.object(input.touch, "width", 200)
+    mocker.patch.object(input.touch, "height", 200)
+    with pytest.raises(ValueError):
+        input.touch.add_x_delimiter(250)
+    with pytest.raises(ValueError):
+        input.touch.add_y_delimiter(250)

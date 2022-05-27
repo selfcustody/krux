@@ -152,12 +152,12 @@ class Page:
                 pad.cur_key_index = (pad.cur_key_index - 1) % (
                     len(KEYPADS[pad.type]) + FIXED_KEYS
                 )
-            elif btn == SWIPE_LEFT:
+            elif btn == SWIPE_LEFT and pad.type > 4:
                 pad.type += 1
                 if pad.type >= len(KEYPADS):
                     pad.type = 5
                 pad.reset_type()
-            elif btn == SWIPE_RIGHT:
+            elif btn == SWIPE_RIGHT and pad.type > 4:
                 pad.type -= 1
                 if pad.type < 5:
                     pad.type = len(KEYPADS) - 1
@@ -484,7 +484,7 @@ class Menu:
 
 
 class Pad:
-    """Stores and calculate some keypad settings"""
+    """Controls keypad creation and management"""
 
     def __init__(self, pad_type, ctx):
         self.type = pad_type

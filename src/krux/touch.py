@@ -78,7 +78,7 @@ class Touch:
                 if self.index == 0 or self.index >= len(
                     self.y_regions
                 ):  # outside y areas
-                    self.state = self.idle
+                    self.state = self.release
                 else:
                     self.index -= 1
                     if self.x_regions:  # if 2D array
@@ -90,7 +90,7 @@ class Touch:
                         if x_index == 0 or x_index >= len(
                             self.x_regions
                         ):  # outside x areas
-                            self.state = self.idle
+                            self.state = self.release
                         else:
                             x_index -= 1
                         self.index += x_index
