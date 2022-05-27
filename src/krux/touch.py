@@ -27,6 +27,7 @@ SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
 
+
 class Touch:
     """Touch is a singleton API to interact with touchscreen driver"""
 
@@ -95,15 +96,14 @@ class Touch:
                         self.index += x_index
             else:
                 self.index = 0
-        else:
-            self.x_release_point = data[0]
+        self.x_release_point = data[0]
 
     def h_gesture(self, press, release):
+        """Detects touch gestures"""
         if release - press > SWIPE_THRESHOLD:
             self.gesture = SWIPE_RIGHT
         if press - release > SWIPE_THRESHOLD:
             self.gesture = SWIPE_LEFT
-
 
     def current_state(self):
         """Returns the touchscreen state"""
@@ -127,12 +127,14 @@ class Touch:
         return 0 if self.current_state() == self.press else 1
 
     def swipe_right_value(self):
+        """Returns detected gestures and clean respective variable"""
         if self.gesture == SWIPE_RIGHT:
             self.gesture = None
             return 0
         return 1
 
     def swipe_left_value(self):
+        """Returns detected gestures and clean respective variable"""
         if self.gesture == SWIPE_LEFT:
             self.gesture = None
             return 0

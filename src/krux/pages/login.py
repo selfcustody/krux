@@ -161,7 +161,7 @@ class Login(Page):
     def _load_key_from_words(self, words):
         mnemonic = " ".join(words)
         self.display_mnemonic(mnemonic)
-        btn = self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line)        
+        btn = self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line)
         if btn != BUTTON_ENTER:
             return MENU_CONTINUE
         self.ctx.display.clear()
@@ -183,14 +183,18 @@ class Login(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
         self.ctx.wallet = Wallet(
-            Key(mnemonic, multisig, network=NETWORKS[settings.network], password=passphrase)
+            Key(
+                mnemonic,
+                multisig,
+                network=NETWORKS[settings.network],
+                password=passphrase,
+            )
         )
         try:
             self.ctx.printer = create_printer()
         except:
             self.ctx.log.exception("Exception occurred connecting to printer")
         return MENU_EXIT
-        
 
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
@@ -377,9 +381,8 @@ class Login(Page):
         return self._load_key_from_keypad(title, BITS, to_word)
 
     def load_passphrase(self):
-        passphrase = self.capture_from_keypad(
-                        t("Passphrase:"), MULTI
-                    )
+        """Loads and returns a passphrase from keypad"""
+        passphrase = self.capture_from_keypad(t("Passphrase:"), MULTI)
         return passphrase
 
     def _draw_settings_pad(self):

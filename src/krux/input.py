@@ -34,7 +34,7 @@ SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 
 QR_ANIM_PERIOD = 900  # miliseconds
-LONG_PRESS_T = 1000 #miliseconds
+LONG_PRESS_T = 1000  # miliseconds
 NONBLOCKING_CHECKS = 100000
 
 PRESSED = 0
@@ -62,6 +62,7 @@ class Input:
         else:
             if board.config["type"] == "m5stickv":
                 from pmu import PMU_Button
+
                 self.page_prev = PMU_Button()
             else:
                 self.page_prev = None
