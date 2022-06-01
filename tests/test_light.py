@@ -18,7 +18,7 @@ def test_init(mocker):
 
     assert isinstance(light, Light)
     krux.light.fm.register.assert_called_with(
-        board.config["krux.pins"]["LED_W"], mock.ANY
+        board.config["krux"]["pins"]["LED_W"], mock.ANY
     )
     assert (
         krux.light.fm.register.call_args.args[1]._extract_mock_name()

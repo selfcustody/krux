@@ -20,9 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .touchscreens.ft6x36 import FT6X36
-
-TOUCH_R_PERIOD = 50  # 1000/50 = 20 samples/second
+from .touchscreens.ft6x36 import FT6X36, TOUCH_S_PERIOD
+import time
 
 
 class Touch:
@@ -34,7 +33,7 @@ class Touch:
         """Touch API init - width and height are in Landscape mode
         For Krux width = max_y, height = max_x
         """
-        self.cycle = TOUCH_R_PERIOD
+        self.last_time = 0
         self.y_regions = []
         self.x_regions = []
         self.index = 0
@@ -92,16 +91,24 @@ class Touch:
 
     def current_state(self):
         """Returns the touchscreen state"""
-        data = self.touch_driver.current_point()
-        if data is not None:
-            self.extract_index(data)
-        else:  # gets realease than return to ilde.
-            if self.state == Touch.release:
-                self.state = Touch.idle
-            elif self.state == Touch.press:
-                self.state = Touch.release
+        if time.ticks_ms() > self.last_time + TOUCH_S_PERIOD:
+            self.last_time = time.ticks_ms()
+            data = self.touch_driver.current_point()
+            if isinstance(data, tuple):
+                self.extract_index(data)
+            elif data is None:  # gets realease than return to ilde.
+                if self.state == Touch.release:
+                    self.state = Touch.idle
+                elif self.state == Touch.press:
+                    self.state = Touch.release
+            else:
+                print("Touch error: " + str(data))
         return self.state
 
     def value(self):
-        """wraps touch states to behave like a regular button"""
+        """Wraps touch states to behave like a regular button"""
         return 0 if self.current_state() == Touch.press else 1
+
+    def current_index(self):
+        """Returns current intex of last touched point"""
+        return self.index

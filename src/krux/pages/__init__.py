@@ -51,6 +51,10 @@ class Page:
         self.y_keypad_map = []
         self.x_keypad_map = []
 
+    def wait_for_proceed(self, block=True):
+        """Wrap acknowledgements which can be answared with multiple buttons"""
+        return self.ctx.input.wait_for_button(block) in (BUTTON_ENTER, BUTTON_TOUCH)
+
     def _keypad_offset(self):
         return DEFAULT_PADDING + self.ctx.display.font_height * 3
 
@@ -58,10 +62,9 @@ class Page:
         """Maps an array of regions for keys to be placed in
         Returns horizontal and vertical spacing of keys
         """
-        pad_border = 5  # need less PADD(extra pixels) for m5stickv
         self.y_keypad_map = []
         self.x_keypad_map = []
-        key_h_spacing = self.ctx.display.width() - 2 * pad_border
+        key_h_spacing = self.ctx.display.width() - DEFAULT_PADDING
         key_h_spacing //= width
         key_v_spacing = (
             self.ctx.display.height() - DEFAULT_PADDING - self._keypad_offset()
@@ -71,7 +74,7 @@ class Page:
             region = y * key_v_spacing + self._keypad_offset()
             self.y_keypad_map.append(region)
         for x in range(width + 1):
-            region = x * key_h_spacing + pad_border
+            region = x * key_h_spacing + DEFAULT_PADDING // 2
             self.x_keypad_map.append(region)
         if self.ctx.input.has_touch:
             self.ctx.input.touch.y_regions = self.y_keypad_map
@@ -115,9 +118,7 @@ class Page:
                                 key_v_spacing - 2,
                                 lcd.DARKGREY,
                             )
-                            lcd.draw_string(key_offset_x, offset_y, key, lcd.WHITE)
-                        else:
-                            lcd.draw_string(key_offset_x, offset_y, key, lcd.WHITE)
+                        lcd.draw_string(key_offset_x, offset_y, key, lcd.WHITE)
                     if key_index == cur_key_index and self.ctx.input.buttons_active:
                         if self.ctx.input.has_touch:
                             self.ctx.display.outline(
@@ -155,6 +156,7 @@ class Page:
         buffer = ""
         cur_key_index = 0
         moving_forward = True
+        go_position = len(keys) + 2
         while True:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
@@ -171,40 +173,45 @@ class Page:
             self._draw_keys(
                 key_h_spacing, key_v_spacing, keys, possible_keys, cur_key_index
             )
-
             btn = self.ctx.input.wait_for_button()
             if self.ctx.input.has_touch:
                 if btn == BUTTON_TOUCH:
-                    self.ctx.input.buttons_active = False
-                    if self.ctx.input.touch.index < len(keys):
-                        cur_key_index = self.ctx.input.touch.index
+                    cur_key_index = self.ctx.input.touch.current_index()
+                    if cur_key_index < len(keys):
                         if keys[cur_key_index] in possible_keys:
                             btn = BUTTON_ENTER
                         else:
-                            btn = BUTTON_PAGE
-                    elif self.ctx.input.touch.index < len(keys) + FIXED_KEYS:
-                        cur_key_index = self.ctx.input.touch.index
+                            btn = None
+                    elif cur_key_index < len(keys) + FIXED_KEYS:
                         btn = BUTTON_ENTER
                     else:
-                        btn = BUTTON_PAGE
+                        cur_key_index = 0
+                        btn = None
             if btn == BUTTON_ENTER:
+                moving_forward = True
                 changed = False
-                if cur_key_index == len(keys):  # Del
+                if cur_key_index == len(keys):
                     buffer = buffer[: len(buffer) - 1]
                     changed = True
-                elif cur_key_index == len(keys) + 1:  # Esc
+                elif cur_key_index == len(keys) + 1:
                     return MENU_CONTINUE
-                elif cur_key_index == len(keys) + 2:  # Enter
+                elif cur_key_index == go_position:
                     break
                 else:
                     buffer += keys[cur_key_index]
                     changed = True
+
                     # Don't autocomplete if deleting
                     if changed and autocomplete_fn is not None:
                         new_buffer = autocomplete_fn(buffer)
                         if new_buffer is not None:
                             buffer = new_buffer
-                            cur_key_index = len(keys) + 3
+                            cur_key_index = go_position
+
+                    # moves index to Go on dice presses
+                    if len(buffer) > 0 and (len(keys) == 6 or len(keys) == 20):
+                        cur_key_index = go_position
+
             elif btn == BUTTON_PAGE:
                 moving_forward = True
                 cur_key_index = (cur_key_index + 1) % (len(keys) + FIXED_KEYS)
@@ -293,7 +300,7 @@ class Page:
                 offset_y += self.ctx.display.font_height
             self.ctx.display.draw_hcentered_text(subtitle, offset_y, color=lcd.WHITE)
             i = (i + 1) % num_parts
-            if self.ctx.input.wait_for_proceed(block=num_parts == 1):
+            if self.wait_for_proceed(block=num_parts == 1):
                 done = True
             # interval done in input.py using timers
 
@@ -336,7 +343,7 @@ class Page:
         self.ctx.display.clear()
         time.sleep_ms(1000)
         self.ctx.display.draw_centered_text(t("Print to QR?"))
-        if self.ctx.input.wait_for_proceed():
+        if self.wait_for_proceed():
             i = 0
             for qr_code, count in to_qr_codes(
                 data, self.ctx.printer.qr_data_width(), qr_format
@@ -373,7 +380,7 @@ class Page:
                 lcd.DARKGREY,
             )
             self.ctx.display.draw_hcentered_text(
-                t("No"), offset_y + self.ctx.display.font_height // 2, lcd.WHITE
+                t("Yes"), offset_y + self.ctx.display.font_height // 2, lcd.WHITE
             )
             offset_y += 2 * self.ctx.display.font_height
             self.ctx.input.touch.add_y_delimiter(offset_y)
@@ -385,7 +392,7 @@ class Page:
                 lcd.DARKGREY,
             )
             self.ctx.display.draw_hcentered_text(
-                t("Yes"), offset_y + self.ctx.display.font_height // 2, lcd.WHITE
+                t("No"), offset_y + self.ctx.display.font_height // 2, lcd.WHITE
             )
             offset_y += 2 * self.ctx.display.font_height
             self.ctx.input.touch.add_y_delimiter(offset_y)
@@ -400,10 +407,9 @@ class Page:
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()
             if btn == BUTTON_TOUCH:
-                if self.ctx.input.touch.index:  # index 1 = Yes = ENTER
-                    btn = BUTTON_ENTER
-                else:  # index 0 = No = PAGE
-                    btn = BUTTON_PAGE
+                # index 0 = Yes = ENTER
+                # index 1 = No = PAGE
+                btn = self.ctx.input.touch.current_index()
         return btn
 
     def shutdown(self):
@@ -441,8 +447,7 @@ class Menu:
             btn = self.ctx.input.wait_for_button(block=True)
             if self.ctx.input.has_touch:
                 if btn == BUTTON_TOUCH:
-                    self.ctx.input.buttons_active = False
-                    selected_item_index = self.ctx.input.touch.index
+                    selected_item_index = self.ctx.input.touch.current_index()
                     btn = BUTTON_ENTER
                 self.ctx.input.touch.clear_regions()
             if btn == BUTTON_ENTER:
@@ -479,16 +484,16 @@ class Menu:
             Page.y_keypad_map.append(offset_y)
         height_multiplier = self.ctx.display.height() - 2 * DEFAULT_PADDING
         height_multiplier //= offset_y
-        for n in Page.y_keypad_map:
-            self.ctx.input.touch.add_y_delimiter(
-                n * height_multiplier + DEFAULT_PADDING
-            )
+        Page.y_keypad_map = [
+            n * height_multiplier + DEFAULT_PADDING for n in Page.y_keypad_map
+        ]
+        self.ctx.input.touch.y_regions = Page.y_keypad_map
 
         # draw dividers and outline
-        for i, y in enumerate(self.ctx.input.touch.y_regions[:-1]):
+        for i, y in enumerate(Page.y_keypad_map[:-1]):
             if i and not self.ctx.input.buttons_active:
                 lcd.fill_rectangle(0, y, self.ctx.display.width(), 1, lcd.DARKGREY)
-            height = self.ctx.input.touch.y_regions[i + 1] - y
+            height = Page.y_keypad_map[i + 1] - y
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.outline(
                     DEFAULT_PADDING - 1,
@@ -500,13 +505,10 @@ class Menu:
         # draw centralized strings in regions
         for i, menu_item in enumerate(self.menu):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
-            offset_y = (
-                self.ctx.input.touch.y_regions[i + 1]
-                - self.ctx.input.touch.y_regions[i]
-            )
+            offset_y = Page.y_keypad_map[i + 1] - Page.y_keypad_map[i]
             offset_y -= len(menu_item_lines) * self.ctx.display.font_height
             offset_y //= 2
-            offset_y += self.ctx.input.touch.y_regions[i]
+            offset_y += Page.y_keypad_map[i]
             for j, text in enumerate(menu_item_lines):
                 self.ctx.display.draw_hcentered_text(
                     text, offset_y + self.ctx.display.font_height * j

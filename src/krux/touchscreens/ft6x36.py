@@ -21,15 +21,23 @@
 # THE SOFTWARE.
 # pylint: disable=W0231
 
+# FT3x36 specs:
+# Max sample rate: 100 samples per second
+
 from . import Touchscreen
 import board
 from machine import I2C
 
-FT_DEVIDE_MODE = 0x00
+FT_DEVICE_MODE = 0x00
+TD_STATUS = 0x02
+PN_XH = 0x03
 FT_ID_G_MODE = 0xA4
 FT_ID_G_THGROUP = 0x80
-FT_ID_G_PERIODACTIVE = 0x88
+FT_ID_SR_PERIODACTIVE = 0x88
 FT6X36_ADDR = 0x38
+
+TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
+TOUCH_THRESHOLD = 22  # Default 22
 
 
 class FT6X36(Touchscreen):
@@ -40,14 +48,17 @@ class FT6X36(Touchscreen):
         self.addr = FT6X36_ADDR
         self.i2c = I2C(
             I2C.I2C0,
-            freq=400000,
+            freq=100000,
             scl=board.config["krux"]["pins"]["I2C_SCL"],
             sda=board.config["krux"]["pins"]["I2C_SDA"],
         )
         """Setup registers"""
-        self.write_reg(FT_DEVIDE_MODE, 0)
-        self.write_reg(FT_ID_G_THGROUP, 12)
-        self.write_reg(FT_DEVIDE_MODE, 14)
+        # Device mode
+        self.write_reg(FT_DEVICE_MODE, 0)
+        # Threshold for touch detection
+        self.write_reg(FT_ID_G_THGROUP, TOUCH_THRESHOLD)
+        # Mode = 0 = polling mode
+        self.write_reg(FT_ID_G_MODE, 0)
 
     def write_reg(self, reg_addr, buf):
         """Writes buffer content to a register address"""
@@ -60,13 +71,14 @@ class FT6X36(Touchscreen):
     def current_point(self):
         """If touch is pressed, returns x and y points"""
         try:
-            data = self.read_reg(0x02, 1)
+            data = self.read_reg(TD_STATUS, 1)
+            # if touch points==1
             if data is not None and data[0] == 0x1:
-                data_buf = self.read_reg(0x03, 4)
+                # Read Xhigh, Xlow, Yhigh and Ylow
+                data_buf = self.read_reg(PN_XH, 4)
                 x = ((data_buf[0] & 0x0F) << 8) | (data_buf[1])
                 y = ((data_buf[2] & 0x0F) << 8) | (data_buf[3])
-                if (data_buf[0] & 0xC0) == 0x80:
-                    return (x, y)
-        except:
-            pass
+                return (x, y)
+        except Exception as e:
+            return e  # debug
         return None

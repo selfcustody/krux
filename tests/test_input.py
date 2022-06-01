@@ -19,8 +19,8 @@ def test_init(mocker):
     assert isinstance(input, Input)
     krux.input.fm.register.assert_has_calls(
         [
-            mock.call(board.config["krux.pins"]["BUTTON_A"], mock.ANY),
-            mock.call(board.config["krux.pins"]["BUTTON_B"], mock.ANY),
+            mock.call(board.config["krux"]["pins"]["BUTTON_A"], mock.ANY),
+            mock.call(board.config["krux"]["pins"]["BUTTON_B"], mock.ANY),
         ]
     )
     assert (
@@ -33,6 +33,7 @@ def test_init(mocker):
     )
     assert input.enter is not None
     assert input.page is not None
+
     assert krux.input.GPIO.call_count == 2
     assert (
         krux.input.GPIO.call_args_list[0].args[0]._extract_mock_name()
@@ -71,27 +72,31 @@ def test_wait_for_button_blocks_until_enter_released(mocker):
     krux.input.wdt.feed.assert_called()
 
 
-# def test_wait_for_button_blocks_until_page_released(mocker):
-#     mock_modules(mocker)
-#     from krux.input import Input
-#     input = Input()
-#     mocker.patch.object(input.enter, 'value', new=lambda: RELEASED)
-#     mocker.patch.object(input.page, 'value', new=lambda: RELEASED)
-#     def release():
-#         time.sleep(1)
-#         mocker.patch.object(input.page, 'value', new=lambda: PRESSED)
-#         time.sleep(1)
-#         mocker.patch.object(input.page, 'value', new=lambda: RELEASED)
+def test_wait_for_button_blocks_until_page_released(mocker):
+    mock_modules(mocker)
+    import krux
+    from krux.input import Input
 
-#     assert input.entropy == 0
+    input = Input()
+    mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
+    mocker.patch.object(input.page, "value", new=lambda: RELEASED)
 
-#     t = threading.Thread(target=release)
-#     t.start()
-#     btn = input.wait_for_button(True)
-#     t.join()
+    def release():
+        time.sleep(1)
+        mocker.patch.object(input, "page_value", new=lambda: PRESSED)
+        time.sleep(1)
+        mocker.patch.object(input, "page_value", new=lambda: RELEASED)
 
-#     assert btn == BUTTON_PAGE
-#     assert input.entropy > 0
+    assert input.entropy == 0
+
+    t = threading.Thread(target=release)
+    t.start()
+    btn = input.wait_for_button(True)
+    t.join()
+
+    assert btn == BUTTON_PAGE
+    assert input.entropy > 0
+    krux.input.wdt.feed.assert_called()
 
 
 def test_wait_for_button_waits_for_existing_press_to_release(mocker):
@@ -131,7 +136,15 @@ def test_wait_for_button_returns_when_nonblocking(mocker):
     mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
     mocker.patch.object(input.page, "value", new=lambda: RELEASED)
 
+    def time_control():
+        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        time.sleep(1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: 1000)
+
+    t = threading.Thread(target=time_control)
+    t.start()
     btn = input.wait_for_button(False)
+    t.join()
 
     assert btn is None
     krux.input.wdt.feed.assert_called()
