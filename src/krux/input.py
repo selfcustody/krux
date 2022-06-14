@@ -66,6 +66,11 @@ class Input:
                 self.page_prev = PMU_Button()
             else:
                 self.page_prev = None
+        if "ENCODER" in board.config["krux"]["pins"]:
+            from .r_encoder import EncoderPage, EncoderPagePrev
+            self.page = EncoderPage()
+            self.page_prev = EncoderPagePrev()
+
         self.has_touch = board.config["krux"]["display"]["touch"]
         self.touch = (
             Touch(board.config["lcd"]["width"], board.config["lcd"]["height"])
