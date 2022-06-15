@@ -75,6 +75,8 @@ elif [ "$1" == "flash" ]; then
         device_vendor_product_id="0403:6001"
     elif [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_bit" ]; then
         device_vendor_product_id="0403:6010"
+    elif [ "$device" == "maixpy_dock" ]; then
+        device_vendor_product_id="1a86:7523"
     fi
     if [ -z "$device_vendor_product_id" ]; then
         panic "Unknown device"
@@ -82,7 +84,7 @@ elif [ "$1" == "flash" ]; then
     #M5stickV has only one serial port
     #Bit has two serial ports and use fist for flash
     #Amigo has two ports and uses second port to flash (needs further confirmation)
-    if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_bit" ]; then
+    if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_bit" ]||[ "$device" == "maixpy_dock" ]; then
         device_num=1
     elif [ "$device" == "maixpy_amigo_ips" ]; then
         device_num=2
@@ -92,8 +94,12 @@ elif [ "$1" == "flash" ]; then
     if [ -z "$usb_device_name" ]; then
         panic "Failed to find device via USB. Is it connected and powered on?"
     fi
-
-    docker run --privileged --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B goE -p /dev/$usb_device_name -b 1500000 kboot.kfpkg
+    if [ "$device" == "maixpy_dock" ]; then
+        BOARD="dan"
+    else
+        BOARD="goE"
+    fi
+    docker run --privileged --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/$usb_device_name -b 1500000 kboot.kfpkg
 
 elif [ "$1" == "sha256" ]; then
     file="$2"
@@ -174,7 +180,7 @@ elif [ "$1" == "build-release" ]; then
     cp -f ktool-win.exe ../$release_dir/ktool-win.exe
     cd ..
 
-    devices=("maixpy_m5stickv")
+    devices=("maixpy_bit")
     for device in ${devices[@]}; do
         ./krux build $device
         mkdir -p $release_dir/$device
