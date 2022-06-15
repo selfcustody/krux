@@ -177,16 +177,16 @@ class Page:
         def callback(part_total, num_parts_captured, new_part):
             # Turn on the light as long as the enter button is held down
             if self._enter_state == -1:
-                self._enter_state = self.ctx.input.enter.value()
-            elif self.ctx.input.enter.value() != self._enter_state:
-                self._enter_state = self.ctx.input.enter.value()
+                self._enter_state = self.ctx.input.enter_value()
+            elif self.ctx.input.enter_value() != self._enter_state:
+                self._enter_state = self.ctx.input.enter_value()
                 if self.ctx.light:
                     self.ctx.light.toggle()
 
             # Exit the capture loop if the page button is pressed
             if self._page_state == -1:
-                self._page_state = self.ctx.input.page.value()
-            elif self.ctx.input.page.value() != self._page_state:
+                self._page_state = self.ctx.input.page_value()
+            elif self.ctx.input.page_value() != self._page_state:
                 return True
 
             # Indicate progress to the user that a new part was captured

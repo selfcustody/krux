@@ -68,6 +68,7 @@ class Input:
                 self.page_prev = None
         if "ENCODER" in board.config["krux"]["pins"]:
             from .r_encoder import EncoderPage, EncoderPagePrev
+
             self.page = EncoderPage()
             self.page_prev = EncoderPagePrev()
 
@@ -154,9 +155,12 @@ class Input:
 
         if self.enter_value() == PRESSED:
             # Wait for release
+            time_frame = time.ticks_ms()
             while self.enter_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
+                if time.ticks_ms() > time_frame + LONG_PRESS_T:
+                    return SWIPE_LEFT
             if self.buttons_active:
                 return BUTTON_ENTER
             self.buttons_active = True
