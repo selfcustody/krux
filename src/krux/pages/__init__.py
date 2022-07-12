@@ -83,10 +83,10 @@ class Page:
     def esc_prompt(self):
         """Prompts user for leaving"""
         self.ctx.display.clear()
-        btn = self.prompt(t("Are you sure?"), self.ctx.display.height() // 2)
+        answer = self.prompt(t("Are you sure?"), self.ctx.display.height() // 2)
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()
-        if btn == BUTTON_ENTER:
+        if answer:
             return MENU_CONTINUE
         return None
 
@@ -309,53 +309,70 @@ class Page:
             len(self.ctx.display.to_lines(text)) - 1
         ) * self.ctx.display.font_height
         self.ctx.display.draw_hcentered_text(text, offset_y)
-        if self.ctx.input.has_touch:
-            self.ctx.input.touch.clear_regions()
+        answer = False
+        self.y_keypad_map = []
+        if board.config["type"] == "m5stickv":
+            answer = not self.ctx.input.wait_for_button()
+        else:
             offset_y += (
-                len(self.ctx.display.to_lines(text)) * self.ctx.display.font_height
-                + DEFAULT_PADDING
-            )
-
-            self.ctx.input.touch.add_y_delimiter(offset_y)
-            lcd.fill_rectangle(
-                0,
-                offset_y,
-                self.ctx.display.width(),
-                1,
-                lcd.DARKGREY,
-            )
-            self.ctx.display.draw_hcentered_text(
-                t("Yes"), offset_y + self.ctx.display.font_height // 2, lcd.WHITE
-            )
-            offset_y += 2 * self.ctx.display.font_height
-            self.ctx.input.touch.add_y_delimiter(offset_y)
-            lcd.fill_rectangle(
-                0,
-                offset_y,
-                self.ctx.display.width(),
-                1,
-                lcd.DARKGREY,
-            )
-            self.ctx.display.draw_hcentered_text(
-                t("No"), offset_y + self.ctx.display.font_height // 2, lcd.WHITE
-            )
-            offset_y += 2 * self.ctx.display.font_height
-            self.ctx.input.touch.add_y_delimiter(offset_y)
-            lcd.fill_rectangle(
-                0,
-                offset_y,
-                self.ctx.display.width(),
-                1,
-                lcd.DARKGREY,
-            )
-        btn = self.ctx.input.wait_for_button()
-        if self.ctx.input.has_touch:
-            self.ctx.input.touch.clear_regions()
-            if btn == BUTTON_TOUCH:
-                # index 0 = Yes = ENTER
-                # index 1 = No = PAGE
-                btn = self.ctx.input.touch.current_index()
-        return btn
+                    len(self.ctx.display.to_lines(text)) * self.ctx.display.font_height
+                    + DEFAULT_PADDING
+                )
+            self.y_keypad_map.append(offset_y)
+            for x in range(2):
+                offset_y += 2 * self.ctx.display.font_height
+                self.y_keypad_map.append(offset_y)
+            btn = None
+            if self.ctx.input.has_touch:
+                self.ctx.input.touch.clear_regions()
+                self.ctx.input.touch.y_regions = self.y_keypad_map
+            while btn != BUTTON_ENTER:
+                lcd.fill_rectangle(
+                    0, self.y_keypad_map[0],
+                    self.ctx.display.width() + 1, 5 * self.ctx.display.font_height,
+                    lcd.BLACK
+                )
+                self.ctx.display.draw_hcentered_text(
+                    t("Yes"), self.y_keypad_map[0] + self.ctx.display.font_height // 2, lcd.WHITE
+                )
+                self.ctx.display.draw_hcentered_text(
+                    t("No"), self.y_keypad_map[1] + self.ctx.display.font_height // 2, lcd.WHITE
+                )
+                if self.ctx.input.buttons_active:
+                    if answer:
+                        self.ctx.display.outline(
+                            DEFAULT_PADDING - 1,
+                            self.y_keypad_map[0] + 1,
+                            self.ctx.display.usable_width(),
+                            2 * self.ctx.display.font_height - 2,
+                        )
+                    else:
+                        self.ctx.display.outline(
+                            DEFAULT_PADDING - 1,
+                            self.y_keypad_map[1] + 1,
+                            self.ctx.display.usable_width(),
+                            2 * self.ctx.display.font_height - 2,
+                        )
+                elif self.ctx.input.has_touch:
+                    for region in self.y_keypad_map:
+                        lcd.fill_rectangle(
+                            0,
+                            region,
+                            self.ctx.display.width(),
+                            1,
+                            lcd.DARKGREY,
+                        )
+                btn = self.ctx.input.wait_for_button()
+                if btn in (BUTTON_PAGE, BUTTON_PAGE_PREV):
+                    answer = not answer
+                elif btn == BUTTON_TOUCH:
+                    self.ctx.input.touch.clear_regions()
+                    # index 0 = Yes
+                    # index 1 = No
+                    if self.ctx.input.touch.current_index():
+                        return False
+                    return True
+        return answer
 
     def shutdown(self):
         """Handler for the 'shutdown' menu item"""
@@ -414,10 +431,7 @@ class Menu:
             elif btn == BUTTON_PAGE:
                 selected_item_index = (selected_item_index + 1) % len(self.menu)
             elif btn == BUTTON_PAGE_PREV:
-                if selected_item_index == 0:
-                    selected_item_index = len(self.menu) - 1
-                else:
-                    selected_item_index = selected_item_index - 1
+                selected_item_index = (selected_item_index - 1) % len(self.menu)
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen

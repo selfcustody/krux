@@ -113,15 +113,13 @@ class Login(Page):
             )
             % (min_rolls, max_rolls)
         )
-        btn = self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line)
-        if btn == BUTTON_ENTER:
+        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             entropy = ""
             num_rolls = max_rolls
             for i in range(max_rolls):
                 if i == min_rolls:
                     self.ctx.display.clear()
-                    btn = self.prompt(t("Done?"), self.ctx.display.height() // 2)
-                    if btn == BUTTON_ENTER:
+                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         num_rolls = min_rolls
                         break
 
@@ -161,13 +159,11 @@ class Login(Page):
     def _load_key_from_words(self, words):
         mnemonic = " ".join(words)
         self.display_mnemonic(mnemonic)
-        btn = self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line)
-        if btn != BUTTON_ENTER:
+        if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
             return MENU_CONTINUE
         self.ctx.display.clear()
-        btn = self.prompt(t("Add passphrase?"), self.ctx.display.height() // 2)
         passphrase = ""
-        if btn == BUTTON_ENTER:
+        if self.prompt(t("Add passphrase?"), self.ctx.display.height() // 2):
             passphrase = self.load_passphrase()
             if passphrase == MENU_CONTINUE:
                 return MENU_CONTINUE
@@ -229,13 +225,11 @@ class Login(Page):
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
-        btn = self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line)
-        if btn == BUTTON_ENTER:
+        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             for i in range(24):
                 if i == 12:
                     self.ctx.display.clear()
-                    btn = self.prompt(t("Done?"), self.ctx.display.height() // 2)
-                    if btn == BUTTON_ENTER:
+                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         break
 
                 word = ""

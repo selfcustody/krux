@@ -78,8 +78,7 @@ class Home(Page):
         """Handler for the 'wallet' menu item"""
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(t("Wallet not found."))
-            btn = self.prompt(t("Load one?"), self.ctx.display.bottom_prompt_line)
-            if btn == BUTTON_ENTER:
+            if self.prompt(t("Load one?"), self.ctx.display.bottom_prompt_line):
                 return self._load_wallet()
         else:
             self.display_wallet(self.ctx.wallet)
@@ -97,8 +96,7 @@ class Home(Page):
             wallet = Wallet(self.ctx.wallet.key)
             wallet.load(wallet_data, qr_format)
             self.display_wallet(wallet, include_qr=False)
-            btn = self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line)
-            if btn == BUTTON_ENTER:
+            if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
                 self.ctx.wallet = wallet
                 self.ctx.log.debug(
                     "Wallet descriptor: %s" % self.ctx.wallet.descriptor.to_string()
@@ -132,11 +130,7 @@ class Home(Page):
 
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Check that address belongs to this wallet?")
-            )
-            btn = self.prompt(" ", self.ctx.display.bottom_prompt_line)
-            if btn != BUTTON_ENTER:
+            if not self.prompt("Check that address belongs to this wallet?", self.ctx.display.height // 2):
                 return MENU_CONTINUE
 
             found = False
@@ -163,11 +157,7 @@ class Home(Page):
                     self.ctx.display.draw_centered_text(
                         t("Checked %d receive addresses with no matches.") % num_checked
                     )
-
-                    btn = self.prompt(
-                        t("Try more?"), self.ctx.display.bottom_prompt_line
-                    )
-                    if btn != BUTTON_ENTER:
+                    if not self.prompt(t("Try more?"), self.ctx.display.bottom_prompt_line):
                         break
 
             self.ctx.display.clear()
@@ -203,8 +193,7 @@ class Home(Page):
                 t("WARNING:\nWallet not loaded.\n\nSome checks cannot be performed."),
                 lcd.WHITE,
             )
-            btn = self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line)
-            if btn != BUTTON_ENTER:
+            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
 
         data, qr_format = self.capture_qr_code()
@@ -222,8 +211,7 @@ class Home(Page):
         outputs = signer.outputs()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text("\n \n".join(outputs))
-        btn = self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line)
-        if btn == BUTTON_ENTER:
+        if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             signed_psbt = signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
             signer = None
@@ -260,8 +248,7 @@ class Home(Page):
         self.ctx.display.draw_centered_text(
             t("SHA256:\n%s") % binascii.hexlify(message_hash).decode()
         )
-        btn = self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line)
-        if btn != BUTTON_ENTER:
+        if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             return MENU_CONTINUE
 
         sig = self.ctx.wallet.key.sign(message_hash)
