@@ -59,7 +59,7 @@ class Display:
             self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
         else:
             # room left for no/yes buttons
-            self.bottom_prompt_line = self.bottom_line - 5 * FONT_HEIGHT
+            self.bottom_prompt_line = self.bottom_line - 3 * FONT_HEIGHT
 
     def initialize_lcd(self):
         """Initializes the LCD"""

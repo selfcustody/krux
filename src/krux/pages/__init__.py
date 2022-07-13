@@ -183,7 +183,7 @@ class Page:
                 if self.ctx.light:
                     self.ctx.light.toggle()
 
-            # Exit the capture loop if the page button is pressed
+                # Exit the capture loop if the page button is pressed
             if self._page_state == -1:
                 self._page_state = self.ctx.input.page_value()
             elif self.ctx.input.page_value() != self._page_state:
@@ -267,17 +267,28 @@ class Page:
                 offset_x = DEFAULT_PADDING
             lcd.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
         if len(word_list) > 12:
-            self.ctx.input.wait_for_button()
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(t("BIP39 Mnemonic"))
-            for i, word in enumerate(word_list[12:]):
-                offset_y = 40 + (i * self.ctx.display.font_height)
-                if board.config["lcd"]["invert"]:
-                    offset_x = self.ctx.display.width() - DEFAULT_PADDING
-                    offset_x -= len(word) * self.ctx.display.font_width
-                else:
-                    offset_x = DEFAULT_PADDING
-                lcd.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
+            if board.config["type"] == "m5stickv":
+                self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
+                self.ctx.display.draw_hcentered_text(t("BIP39 Mnemonic"))
+                for i, word in enumerate(word_list[12:]):
+                    offset_y = 40 + (i * self.ctx.display.font_height)
+                    if board.config["lcd"]["invert"]:
+                        offset_x = self.ctx.display.width() - DEFAULT_PADDING
+                        offset_x -= len(word) * self.ctx.display.font_width
+                    else:
+                        offset_x = DEFAULT_PADDING
+                    lcd.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
+            else:
+                for i, word in enumerate(word_list[12:]):
+                    offset_y = 40 + (i * self.ctx.display.font_height)
+                    if board.config["lcd"]["invert"]:
+                        offset_x = self.ctx.display.width() // 2
+                        offset_x -= len(word) * self.ctx.display.font_width
+                    else:
+                        offset_x = self.ctx.display.width() // 2
+                    lcd.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
+
 
     def print_qr_prompt(self, data, qr_format):
         """Prompts the user to print a QR code in the specified format
@@ -311,55 +322,81 @@ class Page:
         self.ctx.display.draw_hcentered_text(text, offset_y)
         answer = False
         self.y_keypad_map = []
+        self.x_keypad_map = []
         if board.config["type"] == "m5stickv":
             answer = not self.ctx.input.wait_for_button()
         else:
             offset_y += (
-                    len(self.ctx.display.to_lines(text)) * self.ctx.display.font_height
-                    + DEFAULT_PADDING
+                    (len(self.ctx.display.to_lines(text)) + 1) * self.ctx.display.font_height
                 )
-            self.y_keypad_map.append(offset_y)
-            for x in range(2):
-                offset_y += 2 * self.ctx.display.font_height
-                self.y_keypad_map.append(offset_y)
+            self.x_keypad_map.append(DEFAULT_PADDING)
+            self.x_keypad_map.append(self.ctx.display.width() // 2)
+            self.x_keypad_map.append(self.ctx.display.width() - DEFAULT_PADDING)
+            y_key_map = offset_y - self.ctx.display.font_height // 2
+            self.y_keypad_map.append(y_key_map)
+            y_key_map += 2 * self.ctx.display.font_height
+            self.y_keypad_map.append(y_key_map)
             btn = None
             if self.ctx.input.has_touch:
                 self.ctx.input.touch.clear_regions()
+                self.ctx.input.touch.x_regions = self.x_keypad_map
                 self.ctx.input.touch.y_regions = self.y_keypad_map
             while btn != BUTTON_ENTER:
+                #erase yes/no area
                 lcd.fill_rectangle(
-                    0, self.y_keypad_map[0],
-                    self.ctx.display.width() + 1, 5 * self.ctx.display.font_height,
+                    0, offset_y - self.ctx.display.font_height,
+                    self.ctx.display.width() + 1, 3 * self.ctx.display.font_height,
                     lcd.BLACK
                 )
-                self.ctx.display.draw_hcentered_text(
-                    t("Yes"), self.y_keypad_map[0] + self.ctx.display.font_height // 2, lcd.WHITE
-                )
-                self.ctx.display.draw_hcentered_text(
-                    t("No"), self.y_keypad_map[1] + self.ctx.display.font_height // 2, lcd.WHITE
-                )
+                offset_x = self.ctx.display.width() // 4
+                if board.config["lcd"]["invert"]:
+                    offset_x = self.ctx.display.width() - offset_x
+                offset_x -= self.ctx.display.font_width
+                lcd.draw_string(offset_x, offset_y, t("Yes"), lcd.GREEN)
+                offset_x = (self.ctx.display.width() * 3) // 4
+                if board.config["lcd"]["invert"]:
+                    offset_x = self.ctx.display.width() - offset_x
+                offset_x -= self.ctx.display.font_width
+                lcd.draw_string(offset_x, offset_y, t("No"))
+                # self.ctx.display.draw_hcentered_text(
+                #     t("Yes"), self.y_keypad_map[0] + self.ctx.display.font_height // 2, lcd.WHITE
+                # )
+                # self.ctx.display.draw_hcentered_text(
+                #     t("No"), self.y_keypad_map[1] + self.ctx.display.font_height // 2, lcd.WHITE
+                # )
                 if self.ctx.input.buttons_active:
+
                     if answer:
+                        if board.config["lcd"]["invert"]:
+                            offset_x = self.ctx.display.width() // 2
+                        else:
+                            offset_x = DEFAULT_PADDING
                         self.ctx.display.outline(
-                            DEFAULT_PADDING - 1,
-                            self.y_keypad_map[0] + 1,
-                            self.ctx.display.usable_width(),
+                            offset_x,
+                            offset_y - self.ctx.display.font_height // 2,
+                            self.ctx.display.usable_width() // 2,
                             2 * self.ctx.display.font_height - 2,
+                            lcd.GREEN
                         )
                     else:
+                        if board.config["lcd"]["invert"]:
+                            offset_x = DEFAULT_PADDING
+                        else:
+                            offset_x = self.ctx.display.width() // 2
                         self.ctx.display.outline(
-                            DEFAULT_PADDING - 1,
-                            self.y_keypad_map[1] + 1,
-                            self.ctx.display.usable_width(),
+                            offset_x,
+                            offset_y - self.ctx.display.font_height // 2,
+                            self.ctx.display.usable_width() // 2,
                             2 * self.ctx.display.font_height - 2,
+                            lcd.RED
                         )
                 elif self.ctx.input.has_touch:
-                    for region in self.y_keypad_map:
+                    for region in self.x_keypad_map:
                         lcd.fill_rectangle(
-                            0,
                             region,
-                            self.ctx.display.width(),
+                            self.y_keypad_map[0],
                             1,
+                            2 * self.ctx.display.font_height,
                             lcd.DARKGREY,
                         )
                 btn = self.ctx.input.wait_for_button()

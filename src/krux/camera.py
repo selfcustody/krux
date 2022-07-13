@@ -36,7 +36,8 @@ class Camera:
     def initialize_sensor(self):
         """Initializes the camera"""
         sensor.reset()
-        sensor.set_pixformat(sensor.GRAYSCALE)
+        # sensor.set_pixformat(sensor.GRAYSCALE)
+        sensor.set_pixformat(sensor.RGB565)
         sensor.set_framesize(sensor.QVGA)
         if board.config["krux"]["sensor"]["flipped"]:
             sensor.set_hmirror(1)
@@ -66,6 +67,7 @@ class Camera:
             img = sensor.snapshot()
             if board.config["krux"]["sensor"]["lenses"]:
                 img.lens_corr(1.2)
+            lcd.display(img)
             gc.collect()
             hist = img.get_histogram()
             if "histogram" not in str(type(hist)):
@@ -75,9 +77,8 @@ class Camera:
             # that may cause issues for the decoder.
             img.binary([(0, hist.get_threshold().value())], invert=True)
             res = img.find_qrcodes()
-            if board.config["type"] == "m5stickv":
-                img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen - test
-            lcd.display(img)
+            # if board.config["type"] == "m5stickv":
+            #     img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen - test
             if len(res) > 0:
                 data = res[0].payload()
 
