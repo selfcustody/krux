@@ -130,7 +130,7 @@ class Home(Page):
 
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
             self.ctx.display.clear()
-            if not self.prompt("Check that address belongs to this wallet?", self.ctx.display.height // 2):
+            if not self.prompt(t("Check that address belongs to this wallet?"), self.ctx.display.height() // 2):
                 return MENU_CONTINUE
 
             found = False

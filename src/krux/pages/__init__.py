@@ -41,6 +41,9 @@ MENU_CONTINUE = 0
 MENU_EXIT = 1
 MENU_SHUTDOWN = 2
 
+DEL_DICE = 0
+ESC_KEY = 1
+
 KEYPADS = [
     # 0 - D6_STATES
     [str(i + 1) for i in range(6)],
@@ -70,8 +73,7 @@ class Page:
     def __init__(self, ctx, menu):
         self.ctx = ctx
         self.menu = menu
-        self._enter_state = -1
-        self._page_state = -1
+        self._time_frame = 0
         # context has its own keypad mapping in case touch is not used
         self.y_keypad_map = []
         self.x_keypad_map = []
@@ -87,7 +89,7 @@ class Page:
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()
         if answer:
-            return MENU_CONTINUE
+            return ESC_KEY
         return None
 
     def capture_from_keypad(
@@ -118,11 +120,14 @@ class Page:
                 pad.moving_forward = True
                 changed = False
                 if pad.cur_key_index == len(KEYPADS[pad.type]):
-                    buffer = buffer[: len(buffer) - 1]
-                    changed = True
+                    if pad.type > 1:
+                        buffer = buffer[: len(buffer) - 1]
+                        changed = True
+                    else:
+                        return DEL_DICE
                 elif pad.cur_key_index == len(KEYPADS[pad.type]) + 1:
-                    if self.esc_prompt() == MENU_CONTINUE:
-                        return MENU_CONTINUE
+                    if self.esc_prompt() == ESC_KEY:
+                        return ESC_KEY
                     # remap keypad touch array
                     pad.map_keys_array(pad.width, pad.height)
                 elif pad.cur_key_index == pad.go_position:
@@ -138,9 +143,9 @@ class Page:
                             buffer = new_buffer
                             pad.cur_key_index = pad.go_position
 
-                    # moves index to Go on dice presses
+                    # automatic "Go" on dice presses
                     if len(buffer) > 0 and (pad.type <= 1):
-                        pad.cur_key_index = pad.go_position
+                        break
 
             elif btn == BUTTON_PAGE:
                 pad.moving_forward = True
@@ -171,23 +176,26 @@ class Page:
         """Captures a singular or animated series of QR codes and displays progress to the user.
         Returns the contents of the QR code(s).
         """
-        self._enter_state = -1
-        self._page_state = -1
+        self._time_frame = time.ticks_ms()
 
         def callback(part_total, num_parts_captured, new_part):
             # Turn on the light as long as the enter button is held down
-            if self._enter_state == -1:
-                self._enter_state = self.ctx.input.enter_value()
-            elif self.ctx.input.enter_value() != self._enter_state:
-                self._enter_state = self.ctx.input.enter_value()
+            if time.ticks_ms() > self._time_frame + 1000:
                 if self.ctx.light:
-                    self.ctx.light.toggle()
+                    if not self.ctx.input.enter_value():
+                        self.ctx.light.turn_on()
+                    else:
+                        self.ctx.light.turn_off()
+                elif not self.ctx.input.enter_value():
+                    return True
 
-                # Exit the capture loop if the page button is pressed
-            if self._page_state == -1:
-                self._page_state = self.ctx.input.page_value()
-            elif self.ctx.input.page_value() != self._page_state:
-                return True
+                # Exit the capture loop if a button is pressed
+                if(
+                    not self.ctx.input.page_value()
+                    or not self.ctx.input.page_prev_value()
+                    or not self.ctx.input.touch_value()
+                ):
+                    return True
 
             # Indicate progress to the user that a new part was captured
             if new_part:
@@ -351,7 +359,7 @@ class Page:
                 offset_x = self.ctx.display.width() // 4
                 if board.config["lcd"]["invert"]:
                     offset_x = self.ctx.display.width() - offset_x
-                offset_x -= self.ctx.display.font_width
+                offset_x -= (3 * self.ctx.display.font_width) // 2
                 lcd.draw_string(offset_x, offset_y, t("Yes"), lcd.GREEN)
                 offset_x = (self.ctx.display.width() * 3) // 4
                 if board.config["lcd"]["invert"]:

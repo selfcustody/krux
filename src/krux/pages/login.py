@@ -34,7 +34,7 @@ from ..key import Key, pick_final_word, to_mnemonic_words
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..i18n import t, translations
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, DEFAULT_PADDING, KEYPADS
+from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY, DEL_DICE, DEFAULT_PADDING, KEYPADS
 
 SENTINEL_DIGITS = "11111"
 
@@ -116,7 +116,8 @@ class Login(Page):
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             entropy = ""
             num_rolls = max_rolls
-            for i in range(max_rolls):
+            i = 0
+            while i < max_rolls:
                 if i == min_rolls:
                     self.ctx.display.clear()
                     if self.prompt(t("Done?"), self.ctx.display.height() // 2):
@@ -125,19 +126,29 @@ class Login(Page):
 
                 roll = ""
                 while True:
+                    dice_title = t("Rolls %d\n") % i
+                    if len(entropy) <= 10:
+                        dice_title += entropy
+                    else:
+                        dice_title += "..." + entropy[-10:] 
                     roll = self.capture_from_keypad(
-                        t("Roll %d") % (i + 1), pad_type  # , lambda r: r
+                        dice_title, pad_type  # , lambda r: r
                     )
-                    if roll == MENU_CONTINUE:
+                    if roll == ESC_KEY:
                         return MENU_CONTINUE
+                    elif roll == DEL_DICE:
+                        if len(entropy) > 1:
+                            i -= 1
+                            entropy = entropy[:-2]
+                        elif len(entropy) == 1:
+                            entropy = ""
+                            i -= 1
+
                     if roll != "" and roll in KEYPADS[pad_type]:
+                        i += 1
                         break
 
                 entropy += roll if entropy == "" else "-" + roll
-
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
-                self.ctx.input.wait_for_button()
 
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
