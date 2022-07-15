@@ -112,11 +112,12 @@ class Printer:
     """Printer-specific settings"""
 
     namespace = "settings.printer"
-    module = Setting("module", "thermal")
-    cls = Setting("cls", "AdafruitPrinter")
+    module = Setting("module", "cnc")
+    cls = Setting("cls", "FilePrinter")
 
     def __init__(self):
         self.thermal = Thermal()
+        self.cnc = CNC()
 
 
 class Thermal:
@@ -126,6 +127,25 @@ class Thermal:
     baudrates = [9600, 19200]
     baudrate = Setting("baudrate", 9600)
     paper_width = Setting("paper_width", 384)
+
+
+class CNC:
+    """CNC "printer" settings"""
+
+    namespace = "settings.printer.cnc"
+    baudrates = [115200]
+    baudrate = Setting("baudrate", 115200)
+    unit = Setting("unit", "in")
+    flute_diameter = Setting("flute_diameter", 0.0625)
+    plunge_rate = Setting("plunge_rate", 30)
+    feed_rate = Setting("feed_rate", 65)
+    cut_depth = Setting("cut_depth", 0.2)
+    depth_per_pass = Setting("depth_per_pass", 0.1)
+    part_width = Setting("part_width", 3.5)
+    border_size = Setting("border_size", 0.0625)
+    cell_margin = Setting("cell_margin", 0)
+    invert = Setting("invert", False)
+    cut_method = Setting("cut_method", "spiral")
 
 
 # Initialize singleton
