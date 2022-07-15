@@ -44,10 +44,12 @@ extra:
       link: https://github.com/selfcustody/krux
 
 nav:
-  - Home: index.md
+  - Home: 
+    - index.en.md
+    - index.pt.md
   - Getting Started:
-    - About: getting-started/index.md
-    - Installing: getting-started/installing.md
+    - About: getting-started/index.en.md
+    - Installing: getting-started/installing.en.md
     - Generating a Mnemonic: getting-started/generating-a-mnemonic.md
     - Loading a Mnemonic: getting-started/loading-a-mnemonic.md
     - Navigating the Main Menu: getting-started/navigating-the-main-menu.md
@@ -55,6 +57,43 @@ nav:
     - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.md
     - Printing: getting-started/printing.md
     - Settings: getting-started/settings.md
-  - Part List: parts.md
+  - Part List:
+    - parts.en.md
+    - parts.pt.md
   - FAQ: faq.md
-  - Support the Project: support.md
+  - Support the Project:
+    - support.en.md
+    - support.pt.md
+
+
+plugins:
+  - search
+  - i18n:
+      default_language: en
+      languages:
+        en: English
+        pt: 
+          name: Português
+          site_name: Krux - Hardware de assinatura de código-aberto para Bitcoin 
+      nav_translations:
+        en:
+          Home: Home
+          Getting Started: Getting Started
+          Part List: Part List
+          FAQ: FAQ
+          Support the Project: Support the Project
+        pt:
+          Home: Principal
+          Getting Started: Começando
+          Part List: Lista de peças
+          FAQ: Perguntas frequentes
+          Support the Project: Apoie o Projeto
+          About: Sobre
+          Installing: Instalando
+          Generating a Mnemonic: Gerando um Mnemônico
+          Loading a Mnemonic: Carregando um Mnemônico
+          Navigating the Main Menu: Navegando no Menu principal
+          Using a Single-key Wallet: Usando uma carteira de chave-única
+          Using a Multisig Wallet: Usando uma carteira Multiassinatura
+          Printing: Imprimindo
+          Settings: Configurações
