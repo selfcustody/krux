@@ -44,13 +44,11 @@ extra:
       link: https://github.com/selfcustody/krux
 
 nav:
-  - Home: 
-    - index.en.md
-    - index.pt.md
+  - Home: index.en.md
   - Getting Started:
     - About: getting-started/index.en.md
     - Installing: getting-started/installing.en.md
-    - Generating a Mnemonic: getting-started/generating-a-mnemonic.md
+    - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
     - Loading a Mnemonic: getting-started/loading-a-mnemonic.md
     - Navigating the Main Menu: getting-started/navigating-the-main-menu.md
     - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.md
@@ -72,16 +70,46 @@ plugins:
       default_language: en
       languages:
         en: English
+        es: 
+          name: Español
+          site_name: Krux - Hardware de firma de código abierto para Bitcoin
+        se: 
+          name: Esperanto
+          site_name: Krux - Malfermfonta Subskribo-Aparataro por Bitcoin
         pt: 
           name: Português
-          site_name: Krux - Hardware de assinatura de código-aberto para Bitcoin 
+          site_name: Krux - Hardware de assinatura de código-aberto para Bitcoin
       nav_translations:
-        en:
-          Home: Home
-          Getting Started: Getting Started
-          Part List: Part List
-          FAQ: FAQ
-          Support the Project: Support the Project
+        es:
+          Home: Principal
+          Getting Started: Empezando
+          Part List: Lista de piezas
+          FAQ: Preguntas frecuentes
+          Support the Project: Apoyar el proyecto
+          About: Sobre
+          Installing: Instalando
+          Generating a Mnemonic: Generando un mnemotécnico
+          Loading a Mnemonic: Cargando un mnemotécnico
+          Navigating the Main Menu: Navegación por el menú principal
+          Using a Single-key Wallet: Usando una billetera de una sola tecla
+          Using a Multisig Wallet: Uso de una billetera de firmas múltiples
+          Printing: Impresión
+          Settings: Ajustes
+        se:
+          Home: Hejmen
+          Getting Started: Komencante
+          Part List: Parto listo
+          FAQ: Oftaj demandoj
+          Support the Project: Subtenu la projekton
+          About: Pri
+          Installing: Instalante
+          Generating a Mnemonic: Generante Mnemonikon
+          Loading a Mnemonic: Ŝargante Mnemonikon
+          Navigating the Main Menu: Navigante la Ĉefan Menuon
+          Using a Single-key Wallet: Uzante la Unuŝlosan Monujon
+          Using a Multisig Wallet: Uzante la Multisig Monujon
+          Printing: Presado
+          Settings: Agordoj
         pt:
           Home: Principal
           Getting Started: Começando
@@ -97,3 +125,4 @@ plugins:
           Using a Multisig Wallet: Usando uma carteira Multiassinatura
           Printing: Imprimindo
           Settings: Configurações
+
