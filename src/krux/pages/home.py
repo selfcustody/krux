@@ -27,7 +27,6 @@ from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
-from ..input import BUTTON_ENTER
 from ..wallet import Wallet, parse_address
 from ..i18n import t
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
@@ -130,7 +129,10 @@ class Home(Page):
 
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
             self.ctx.display.clear()
-            if not self.prompt(t("Check that address belongs to this wallet?"), self.ctx.display.height() // 2):
+            if not self.prompt(
+                t("Check that address belongs to this wallet?"),
+                self.ctx.display.height() // 2,
+            ):
                 return MENU_CONTINUE
 
             found = False
@@ -157,7 +159,9 @@ class Home(Page):
                     self.ctx.display.draw_centered_text(
                         t("Checked %d receive addresses with no matches.") % num_checked
                     )
-                    if not self.prompt(t("Try more?"), self.ctx.display.bottom_prompt_line):
+                    if not self.prompt(
+                        t("Try more?"), self.ctx.display.bottom_prompt_line
+                    ):
                         break
 
             self.ctx.display.clear()

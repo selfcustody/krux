@@ -148,25 +148,16 @@ class Page:
                         break
 
             elif btn == BUTTON_PAGE:
-                pad.moving_forward = True
-                pad.cur_key_index = (pad.cur_key_index + 1) % (
-                    len(KEYPADS[pad.type]) + FIXED_KEYS
-                )
+                pad.page()
+
             elif btn == BUTTON_PAGE_PREV:
-                pad.moving_forward = False
-                pad.cur_key_index = (pad.cur_key_index - 1) % (
-                    len(KEYPADS[pad.type]) + FIXED_KEYS
-                )
+                pad.page_prev()
+
             elif btn == SWIPE_LEFT and pad.type > 4:
-                pad.type += 1
-                if pad.type >= len(KEYPADS):
-                    pad.type = 5
-                pad.reset_type()
+                pad.swipe_left()
+
             elif btn == SWIPE_RIGHT and pad.type > 4:
-                pad.type -= 1
-                if pad.type < 5:
-                    pad.type = len(KEYPADS) - 1
-                pad.reset_type()
+                pad.swipe_right()
 
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()
@@ -190,7 +181,7 @@ class Page:
                     return True
 
                 # Exit the capture loop if a button is pressed
-                if(
+                if (
                     not self.ctx.input.page_value()
                     or not self.ctx.input.page_prev_value()
                     or not self.ctx.input.touch_value()
@@ -297,7 +288,6 @@ class Page:
                         offset_x = self.ctx.display.width() // 2
                     lcd.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
 
-
     def print_qr_prompt(self, data, qr_format):
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
@@ -335,8 +325,8 @@ class Page:
             answer = not self.ctx.input.wait_for_button()
         else:
             offset_y += (
-                    (len(self.ctx.display.to_lines(text)) + 1) * self.ctx.display.font_height
-                )
+                len(self.ctx.display.to_lines(text)) + 1
+            ) * self.ctx.display.font_height
             self.x_keypad_map.append(DEFAULT_PADDING)
             self.x_keypad_map.append(self.ctx.display.width() // 2)
             self.x_keypad_map.append(self.ctx.display.width() - DEFAULT_PADDING)
@@ -350,11 +340,13 @@ class Page:
                 self.ctx.input.touch.x_regions = self.x_keypad_map
                 self.ctx.input.touch.y_regions = self.y_keypad_map
             while btn != BUTTON_ENTER:
-                #erase yes/no area
+                # erase yes/no area
                 lcd.fill_rectangle(
-                    0, offset_y - self.ctx.display.font_height,
-                    self.ctx.display.width() + 1, 3 * self.ctx.display.font_height,
-                    lcd.BLACK
+                    0,
+                    offset_y - self.ctx.display.font_height,
+                    self.ctx.display.width() + 1,
+                    3 * self.ctx.display.font_height,
+                    lcd.BLACK,
                 )
                 offset_x = self.ctx.display.width() // 4
                 if board.config["lcd"]["invert"]:
@@ -384,7 +376,7 @@ class Page:
                             offset_y - self.ctx.display.font_height // 2,
                             self.ctx.display.usable_width() // 2,
                             2 * self.ctx.display.font_height - 2,
-                            lcd.GREEN
+                            lcd.GREEN,
                         )
                     else:
                         if board.config["lcd"]["invert"]:
@@ -396,7 +388,7 @@ class Page:
                             offset_y - self.ctx.display.font_height // 2,
                             self.ctx.display.usable_width() // 2,
                             2 * self.ctx.display.font_height - 2,
-                            lcd.RED
+                            lcd.RED,
                         )
                 elif self.ctx.input.has_touch:
                     for region in self.x_keypad_map:
@@ -679,3 +671,31 @@ class Pad:
         else:
             self.cur_key_index = 0
         return actual_button
+
+    def page(self):
+        """Increments cursor when page button is pressed"""
+        self.moving_forward = True
+        self.cur_key_index = (self.cur_key_index + 1) % (
+            len(KEYPADS[self.type]) + FIXED_KEYS
+        )
+
+    def page_prev(self):
+        """Decrements cursor when page_prev button is pressed"""
+        self.moving_forward = False
+        self.cur_key_index = (self.cur_key_index - 1) % (
+            len(KEYPADS[self.type]) + FIXED_KEYS
+        )
+
+    def swipe_left(self):
+        """Change keys for the next type"""
+        self.type += 1
+        if self.type >= len(KEYPADS):
+            self.type = 5
+        self.reset_type()
+
+    def swipe_right(self):
+        """Change keys for the previous type"""
+        self.type -= 1
+        if self.type < 5:
+            self.type = len(KEYPADS) - 1
+        self.reset_type()

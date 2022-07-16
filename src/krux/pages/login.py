@@ -34,7 +34,16 @@ from ..key import Key, pick_final_word, to_mnemonic_words
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..i18n import t, translations
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY, DEL_DICE, DEFAULT_PADDING, KEYPADS
+from . import (
+    Page,
+    Menu,
+    MENU_CONTINUE,
+    MENU_EXIT,
+    ESC_KEY,
+    DEL_DICE,
+    DEFAULT_PADDING,
+    KEYPADS,
+)
 
 SENTINEL_DIGITS = "11111"
 
@@ -107,6 +116,17 @@ class Login(Page):
         return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
 
     def _new_key_from_die(self, pad_type, min_rolls, max_rolls):
+        def del_dice(entropy):
+            while True:
+                if len(entropy) > 1:
+                    entropy, char = entropy[:-1], entropy[-1]
+                    if char == "-":
+                        break
+                else:
+                    entropy = ""
+                    break
+            return entropy
+
         self.ctx.display.draw_hcentered_text(
             t(
                 "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
@@ -130,18 +150,15 @@ class Login(Page):
                     if len(entropy) <= 10:
                         dice_title += entropy
                     else:
-                        dice_title += "..." + entropy[-10:] 
+                        dice_title += "..." + entropy[-10:]
                     roll = self.capture_from_keypad(
                         dice_title, pad_type  # , lambda r: r
                     )
                     if roll == ESC_KEY:
                         return MENU_CONTINUE
-                    elif roll == DEL_DICE:
-                        if len(entropy) > 1:
-                            i -= 1
-                            entropy = entropy[:-2]
-                        elif len(entropy) == 1:
-                            entropy = ""
+                    if roll == DEL_DICE:
+                        entropy = del_dice(entropy)
+                        if i:
                             i -= 1
 
                     if roll != "" and roll in KEYPADS[pad_type]:
@@ -150,6 +167,7 @@ class Login(Page):
 
                 entropy += roll if entropy == "" else "-" + roll
 
+            entropy = entropy.replace("-", "")
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
                 hashlib.sha256(entropy_bytes).digest()
