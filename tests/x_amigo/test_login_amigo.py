@@ -16,28 +16,28 @@ def test_new_key_from_d6(mocker):
 
     cases = [
         (
-            # 1 press to proceed
-            [BUTTON_ENTER] +
+            # Yes and proceed
+            [BUTTON_PAGE, BUTTON_ENTER] +
             # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
-            # 1 press to be done at min rolls
-            [BUTTON_ENTER] +
-            # 1 press to confirm SHA, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-            "hire injury false situate rare proof supply attend pause leave bitter enter",
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            # Done? Yes and proceed
+            [BUTTON_PAGE, BUTTON_ENTER] +
+            # Confirm SHA, Move to Yes, Loading key, Skip passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            "diet glad hat rural panther lawsuit act drop gallery urge where fit",
         ),
         (
-            # 1 press to proceed
+            # Yes and proceed
+            [BUTTON_PAGE, BUTTON_ENTER] +
+            # 3 presses per roll
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            # Done? No and proceed
             [BUTTON_ENTER] +
             # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
-            # 1 press to continue rolling to max rolls
-            [BUTTON_PAGE] +
-            # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
-            # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-            "owner muscle pioneer easily february chuckle strong fold lake lemon parade defy excuse where gap seek narrow cost convince trim great funny admit draft",
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            # Confirm SHA, Move to Yes, Loading key, Skip passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            "day fog body unfold two filter bundle obey pause pattern penalty sweet shell quantum critic bridge stage patch purpose reflect flat domain post produce",
         ),
     ]
     for case in cases:
@@ -54,10 +54,17 @@ def test_new_key_from_d6(mocker):
 
     # Leaving keypad
     esc_keypad = [
+        # Move to Yes
+        BUTTON_PAGE,
+        # Enter Keypad
         BUTTON_ENTER,
+        # Go to ESC position
         BUTTON_PAGE_PREV,
         BUTTON_PAGE_PREV,
         BUTTON_ENTER,
+        # Move to Yes
+        BUTTON_PAGE,
+        # Leave
         BUTTON_ENTER,
     ]
     ctx = mock.MagicMock(
@@ -75,7 +82,7 @@ def test_load_key_from_text(mocker):
 
     cases = [
         (
-            [BUTTON_ENTER]
+            [BUTTON_PAGE, BUTTON_ENTER]
             + (
                 # A
                 [BUTTON_ENTER]
@@ -115,15 +122,25 @@ def test_load_key_from_text(mocker):
                 +
                 # Go
                 [BUTTON_TOUCH]  # index 28 -> "Go"
+                +
+                # Confirm word <north>
+                [BUTTON_TOUCH]
             )
             +
-            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            # Done? Move to Yes, Confirm, Words correct? Move to Yes, Confirm, No passphrase, Single-key
+            [
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
             [13, 26, 13, 29, 28],
         ),
         (
-            [BUTTON_ENTER]
+            [BUTTON_PAGE, BUTTON_ENTER]
             + (
                 # A
                 [BUTTON_ENTER]
@@ -139,10 +156,17 @@ def test_load_key_from_text(mocker):
             )
             * 11
             +
-            # Go
-            [BUTTON_PAGE_PREV] + [BUTTON_ENTER] +
-            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            # Move to Go, press Go, confirm word
+            [BUTTON_PAGE_PREV] + [BUTTON_ENTER] + [BUTTON_ENTER] +
+            # Done? Move to Yes, Confirm, Words correct? Move to Yes, Confirm, No passphrase, Single-key
+            [
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
             "ability ability ability ability ability ability ability ability ability ability ability",
             [0],
         ),
@@ -170,11 +194,13 @@ def test_leaving_keypad(mocker):
     from krux.pages.login import Login
 
     esc_keypad = [
+        BUTTON_PAGE,  # Yes
         BUTTON_ENTER,  # Proceed
         BUTTON_PAGE_PREV,  # Move to Go
         BUTTON_PAGE_PREV,  # Move to ESC
         BUTTON_ENTER,  # Press ESC
-        BUTTON_ENTER,  # Leave? Yes
+        BUTTON_PAGE,  # Move to Yes
+        BUTTON_ENTER,  # Leave
     ]
     ctx = mock.MagicMock(
         input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=esc_keypad)),
@@ -189,7 +215,7 @@ def test_passphrase_give_up(mocker):
     from krux.pages.login import Login
 
     case = (
-        [BUTTON_ENTER]
+        [BUTTON_PAGE, BUTTON_ENTER]
         + (
             # A
             [BUTTON_ENTER]
@@ -205,17 +231,27 @@ def test_passphrase_give_up(mocker):
         )
         * 11
         +
-        # Go
+        # Move to Go, press Go, confirm word
         [BUTTON_PAGE_PREV]
         + [BUTTON_ENTER]
+        + [BUTTON_ENTER]
         +
-        # Done?, 12 word confirm, Continue?, Passphrase
-        [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER]
-        + [
+        # Done? Move to Yes, Confirm
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # Words correct? Move to Yes, Confirm
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # Passphrase, Move to Yes, confirm
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # In passphrase keypad:
+        [
             BUTTON_PAGE_PREV,  # Move to Go
             BUTTON_PAGE_PREV,  # Move to ESC
             BUTTON_ENTER,  # Press ESC
-            BUTTON_ENTER,  # Leave? Yes,
+            BUTTON_PAGE,  # Move to Yes
+            BUTTON_ENTER,  # Leave
         ]
     )
 
@@ -232,7 +268,7 @@ def test_passphrase(mocker):
     from krux.pages.login import Login
 
     case = (
-        [BUTTON_ENTER]
+        [BUTTON_PAGE, BUTTON_ENTER]
         + (
             # A
             [BUTTON_ENTER]
@@ -248,13 +284,22 @@ def test_passphrase(mocker):
         )
         * 11
         +
-        # Go
+        # Move to Go, press Go, confirm word
         [BUTTON_PAGE_PREV]
         + [BUTTON_ENTER]
+        + [BUTTON_ENTER]
         +
-        # Done?, 12 word confirm, Continue?, Passphrase
-        [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER]
-        + [
+        # Done? Move to Yes, Confirm
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # Words correct? Move to Yes, Confirm
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # Passphrase, Move to Yes, confirm
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # In passphrase keypad:
+        [
             SWIPE_RIGHT,  # Test keypad swaping
             BUTTON_ENTER,  # Add "+" character
             SWIPE_LEFT,  #

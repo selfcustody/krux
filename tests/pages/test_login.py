@@ -15,25 +15,25 @@ def test_new_key_from_d6(mocker):
             # 1 press to proceed
             [BUTTON_ENTER] +
             # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
             # 1 press to confirm SHA, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-            "hire injury false situate rare proof supply attend pause leave bitter enter",
+            "diet glad hat rural panther lawsuit act drop gallery urge where fit",
         ),
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
             # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # 1 press to continue rolling to max rolls
             [BUTTON_PAGE] +
             # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-            "owner muscle pioneer easily february chuckle strong fold lake lemon parade defy excuse where gap seek narrow cost convince trim great funny admit draft",
+            "day fog body unfold two filter bundle obey pause pattern penalty sweet shell quantum critic bridge stage patch purpose reflect flat domain post produce",
         ),
     ]
     for case in cases:
@@ -59,25 +59,25 @@ def test_new_key_from_d20(mocker):
             # 1 press to proceed
             [BUTTON_ENTER] +
             # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D20_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
             # 1 press to confirm SHA, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-            "erupt remain ride bleak year cabin orange sure ghost gospel husband oppose",
+            "shield flip when fade actor weapon mouse grid friend few coral sport",
         ),
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
             # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D20_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to continue rolling to max rolls
             [BUTTON_PAGE] +
             # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D20_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-            "fun island vivid slide cable pyramid device tuition only essence thought gain silk jealous eternal anger response virus couple faculty ozone test key vocal",
+            "ignore opinion kiwi great badge renew sweet online wasp high minimum bread rival brass cruel inch cram soft disorder enter midnight install elite disagree",
         ),
     ]
     for case in cases:

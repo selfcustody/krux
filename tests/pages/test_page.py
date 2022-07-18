@@ -33,11 +33,13 @@ def test_capture_qr_code(mocker):
     from krux.camera import Camera
 
     ctx = mock.MagicMock(
-        input=mock.MagicMock(
-            wait_for_button=mock.MagicMock(side_effect=[BUTTON_ENTER, BUTTON_PAGE])
-        ),
+        #  input=mock.MagicMock(
+        #      wait_for_button=mock.MagicMock(side_effect=[BUTTON_PAGE, BUTTON_ENTER, BUTTON_PAGE]),
+        #  ),
         camera=Camera(),
     )
+
+    mocker.patch("time.ticks_ms", new=lambda: 0)
 
     page = MockPage(ctx)
 

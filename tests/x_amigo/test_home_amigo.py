@@ -25,20 +25,20 @@ def test_mnemonic_touch(mocker):
     cases = [
         # No print prompt
         (Wallet(SINGLEKEY_12_WORD_KEY), None, [BUTTON_TOUCH]),
-        (Wallet(SINGLEKEY_24_WORD_KEY), None, [BUTTON_TOUCH, BUTTON_TOUCH]),
+        (Wallet(SINGLEKEY_24_WORD_KEY), None, [BUTTON_TOUCH]),
         # Print
         (Wallet(SINGLEKEY_12_WORD_KEY), MockPrinter(), [BUTTON_TOUCH, BUTTON_TOUCH]),
         (
             Wallet(SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [BUTTON_TOUCH, BUTTON_TOUCH],
         ),
         # Decline to print
         (Wallet(SINGLEKEY_12_WORD_KEY), MockPrinter(), [BUTTON_TOUCH, BUTTON_PAGE]),
         (
             Wallet(SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_PAGE],
+            [BUTTON_TOUCH, BUTTON_TOUCH],
         ),
     ]
     for case in cases:

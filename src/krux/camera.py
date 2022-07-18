@@ -36,8 +36,7 @@ class Camera:
     def initialize_sensor(self):
         """Initializes the camera"""
         sensor.reset()
-        # sensor.set_pixformat(sensor.GRAYSCALE)
-        sensor.set_pixformat(sensor.RGB565)
+        sensor.set_pixformat(sensor.GRAYSCALE)
         sensor.set_framesize(sensor.QVGA)
         if board.config["krux"]["sensor"]["flipped"]:
             sensor.set_hmirror(1)
@@ -77,6 +76,7 @@ class Camera:
             # that may cause issues for the decoder.
             img.binary([(0, hist.get_threshold().value())], invert=True)
             res = img.find_qrcodes()
+            # Zoom out disabled now that image is presented before pre-processing and QR reading
             # if board.config["type"] == "m5stickv":
             #     img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen - test
             if len(res) > 0:

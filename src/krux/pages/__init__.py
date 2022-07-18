@@ -177,6 +177,7 @@ class Page:
                         self.ctx.light.turn_on()
                     else:
                         self.ctx.light.turn_off()
+                # If board don't have light, ENTER stops the capture
                 elif not self.ctx.input.enter_value():
                     return True
 

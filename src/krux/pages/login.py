@@ -194,7 +194,7 @@ class Login(Page):
         passphrase = ""
         if self.prompt(t("Add passphrase?"), self.ctx.display.height() // 2):
             passphrase = self.load_passphrase()
-            if passphrase == MENU_CONTINUE:
+            if passphrase == ESC_KEY:
                 return MENU_CONTINUE
         submenu = Menu(
             self.ctx,
@@ -269,7 +269,7 @@ class Login(Page):
                         autocomplete_fn,
                         possible_keys_fn,
                     )
-                    if word == MENU_CONTINUE:
+                    if word == ESC_KEY:
                         return MENU_CONTINUE
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
