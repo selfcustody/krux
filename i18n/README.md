@@ -145,7 +145,7 @@ Consectetur lorem donec massa sapien faucibus et molestie ac.
 
 Now you can execute the docs server to check your change:
 
-```bash
+```bash-
 $> mkdocs serve
 INFO     -  Building documentation...
 WARNING  -  Language 'lo' is not supported by lunr.js, not setting it in the 'plugins.search.lang' option
