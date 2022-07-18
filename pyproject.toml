@@ -31,6 +31,7 @@ python = "^3.9.1"
 embit = { path = "./vendor/embit/", develop = true }
 ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
+mkdocs-static-i18n = {version = "^0.46", optional = true}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
@@ -45,3 +46,6 @@ opencv-python = {version = "^4.5.5", optional = true}
 numpy = {version = "^1.22.3", optional = true}
 Pillow = {version = "^9.0.1", optional = true}
 pyzbar = {version = "^0.1.9", optional = true}
+
+[tool.poetry.extras]
+docs = ["mkdocs-static-i18n"]
