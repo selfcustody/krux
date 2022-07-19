@@ -1,6 +1,6 @@
 from ..shared_mocks import *
 from krux.settings import I18n
-from krux.input import BUTTON_ENTER, BUTTON_PAGE
+from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 from krux.qr import FORMAT_UR, FORMAT_NONE
 from ur.ur import UR
 import binascii
@@ -14,7 +14,7 @@ def test_new_key_from_d6(mocker):
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            # 3 presses per roll
+            # 1 presses per roll
             [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
@@ -25,11 +25,11 @@ def test_new_key_from_d6(mocker):
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            # 3 presses per roll
+            # 1 presses per roll
             [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # 1 press to continue rolling to max rolls
             [BUTTON_PAGE] +
-            # 3 presses per roll
+            # 1 presses per roll
             [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
@@ -58,7 +58,14 @@ def test_new_key_from_d20(mocker):
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            # 3 presses per roll
+            
+            # 2 roll presses
+            [BUTTON_ENTER] + [BUTTON_ENTER] +
+            # 2 deletions
+            [BUTTON_PAGE_PREV for _ in range(3)] + [BUTTON_ENTER] +
+            [BUTTON_PAGE_PREV for _ in range(3)] + [BUTTON_ENTER] +
+
+            # 1 presses per roll
             [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
@@ -69,11 +76,11 @@ def test_new_key_from_d20(mocker):
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            # 3 presses per roll
+            # 1 presses per roll
             [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to continue rolling to max rolls
             [BUTTON_PAGE] +
-            # 3 presses per roll
+            # 1 presses per roll
             [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],

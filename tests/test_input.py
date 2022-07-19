@@ -58,10 +58,10 @@ def test_wait_for_button_blocks_until_enter_released(mocker):
     def release():
         mocker.patch.object(time, "ticks_ms", new=lambda: 0)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0.1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
         mocker.patch.object(input.enter, "value", new=lambda: PRESSED)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0.2)
+        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
         mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
 
     assert input.entropy == 0
@@ -119,13 +119,13 @@ def test_wait_for_button_waits_for_existing_press_to_release(mocker):
     def release():
         mocker.patch.object(time, "ticks_ms", new=lambda: 0)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0.1)
+        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
         mocker.patch.object(input.page, "value", new=lambda: RELEASED)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0.2)
+        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
         mocker.patch.object(input.enter, "value", new=lambda: PRESSED)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0.3)
+        mocker.patch.object(time, "ticks_ms", new=lambda: 300)
         mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
 
     assert input.entropy == 0
