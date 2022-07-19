@@ -58,13 +58,14 @@ def test_new_key_from_d20(mocker):
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            
             # 2 roll presses
             [BUTTON_ENTER] + [BUTTON_ENTER] +
             # 2 deletions
-            [BUTTON_PAGE_PREV for _ in range(3)] + [BUTTON_ENTER] +
-            [BUTTON_PAGE_PREV for _ in range(3)] + [BUTTON_ENTER] +
-
+            [BUTTON_PAGE_PREV for _ in range(3)]
+            + [BUTTON_ENTER]
+            + [BUTTON_PAGE_PREV for _ in range(3)]
+            + [BUTTON_ENTER]
+            +
             # 1 presses per roll
             [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to be done at min rolls

@@ -9,6 +9,7 @@ def test_change_to_dock(mocker):
     import board
 
     import krux.input
+
     importlib.reload(krux.input)
 
     krux.input.GPIO.reset_mock()

@@ -17,6 +17,7 @@ def mock_modules(mocker):
     mocker.patch("krux.input.fm.register", new=mock.MagicMock())
     mocker.patch("krux.input.GPIO", new=mock.MagicMock())
 
+
 def test_init_dock(mocker):
     mock_modules(mocker)
 
@@ -107,6 +108,7 @@ def test_encoder_spin_right(mocker):
     assert btn == BUTTON_PAGE
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
+
 
 def test_encoder_spin_left(mocker):
     mock_modules(mocker)
