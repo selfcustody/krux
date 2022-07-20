@@ -330,7 +330,7 @@ class Page:
                 self.ctx.input.touch.y_regions = self.y_keypad_map
             while btn != BUTTON_ENTER:
                 # erase yes/no area
-                lcd.fill_rectangle(
+                self.ctx.display.fill_rectangle(
                     0,
                     offset_y - self.ctx.display.font_height,
                     self.ctx.display.width() + 1,
@@ -343,12 +343,6 @@ class Page:
                 offset_x = (self.ctx.display.width() * 3) // 4
                 offset_x -= self.ctx.display.font_width
                 self.ctx.display.draw_string(offset_x, offset_y, t("No"), lcd.RED)
-                # self.ctx.display.draw_hcentered_text(
-                #     t("Yes"), self.y_keypad_map[0] + self.ctx.display.font_height // 2, lcd.WHITE
-                # )
-                # self.ctx.display.draw_hcentered_text(
-                #     t("No"), self.y_keypad_map[1] + self.ctx.display.font_height // 2, lcd.WHITE
-                # )
                 if self.ctx.input.buttons_active:
                     if answer:
                         self.ctx.display.outline(
@@ -360,7 +354,7 @@ class Page:
                         )
                     else:
                         self.ctx.display.outline(
-                            DEFAULT_PADDING,
+                            self.ctx.display.width() // 2,
                             offset_y - self.ctx.display.font_height // 2,
                             self.ctx.display.usable_width() // 2,
                             2 * self.ctx.display.font_height - 2,
@@ -368,7 +362,7 @@ class Page:
                         )
                 elif self.ctx.input.has_touch:
                     for region in self.x_keypad_map:
-                        lcd.fill_rectangle(
+                        self.ctx.display.fill_rectangle(
                             region,
                             self.y_keypad_map[0],
                             1,
@@ -464,7 +458,7 @@ class Menu:
         # draw dividers and outline
         for i, y in enumerate(Page.y_keypad_map[:-1]):
             if i and not self.ctx.input.buttons_active:
-                lcd.fill_rectangle(0, y, self.ctx.display.width(), 1, lcd.DARKGREY)
+                self.ctx.display.fill_rectangle(0, y, self.ctx.display.width(), 1, lcd.DARKGREY)
             height = Page.y_keypad_map[i + 1] - y
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.outline(

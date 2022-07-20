@@ -320,7 +320,7 @@ def test_draw_hcentered_text(mocker):
         "Hello world", 50, krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 
-    krux.display.lcd.draw_string.assert_called_with(
+    krux.display.draw_string.assert_called_with(
         23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 

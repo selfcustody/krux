@@ -435,7 +435,7 @@ class Login(Page):
                 offset_x += (
                     button_width - len(keys[i]) * self.ctx.display.font_width
                 ) // 2
-                lcd.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
+                self.ctx.display.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
 
     def _touch_to_physical(self, index):
         """Mimics touch presses into physical button presses"""
