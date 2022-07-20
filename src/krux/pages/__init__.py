@@ -259,35 +259,23 @@ class Page:
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("BIP39 Mnemonic"))
         for i, word in enumerate(word_list[:12]):
+            offset_x = DEFAULT_PADDING
             offset_y = 40 + (i * self.ctx.display.font_height)
-            if board.config["lcd"]["invert"]:
-                offset_x = self.ctx.display.width() - DEFAULT_PADDING
-                offset_x -= len(word) * self.ctx.display.font_width
-            else:
-                offset_x = DEFAULT_PADDING
-            lcd.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
+            self.ctx.display.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
         if len(word_list) > 12:
             if board.config["type"] == "m5stickv":
                 self.ctx.input.wait_for_button()
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(t("BIP39 Mnemonic"))
                 for i, word in enumerate(word_list[12:]):
+                    offset_x = DEFAULT_PADDING
                     offset_y = 40 + (i * self.ctx.display.font_height)
-                    if board.config["lcd"]["invert"]:
-                        offset_x = self.ctx.display.width() - DEFAULT_PADDING
-                        offset_x -= len(word) * self.ctx.display.font_width
-                    else:
-                        offset_x = DEFAULT_PADDING
-                    lcd.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
+                    self.ctx.display.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
             else:
                 for i, word in enumerate(word_list[12:]):
+                    offset_x = self.ctx.display.width() // 2
                     offset_y = 40 + (i * self.ctx.display.font_height)
-                    if board.config["lcd"]["invert"]:
-                        offset_x = self.ctx.display.width() // 2
-                        offset_x -= len(word) * self.ctx.display.font_width
-                    else:
-                        offset_x = self.ctx.display.width() // 2
-                    lcd.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
+                    self.ctx.display.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
 
     def print_qr_prompt(self, data, qr_format):
         """Prompts the user to print a QR code in the specified format
@@ -350,15 +338,11 @@ class Page:
                     lcd.BLACK,
                 )
                 offset_x = self.ctx.display.width() // 4
-                if board.config["lcd"]["invert"]:
-                    offset_x = self.ctx.display.width() - offset_x
                 offset_x -= (3 * self.ctx.display.font_width) // 2
-                lcd.draw_string(offset_x, offset_y, t("Yes"), lcd.GREEN)
+                self.ctx.display.draw_string(offset_x, offset_y, t("Yes"), lcd.GREEN)
                 offset_x = (self.ctx.display.width() * 3) // 4
-                if board.config["lcd"]["invert"]:
-                    offset_x = self.ctx.display.width() - offset_x
                 offset_x -= self.ctx.display.font_width
-                lcd.draw_string(offset_x, offset_y, t("No"))
+                self.ctx.display.draw_string(offset_x, offset_y, t("No"), lcd.RED)
                 # self.ctx.display.draw_hcentered_text(
                 #     t("Yes"), self.y_keypad_map[0] + self.ctx.display.font_height // 2, lcd.WHITE
                 # )
@@ -366,26 +350,17 @@ class Page:
                 #     t("No"), self.y_keypad_map[1] + self.ctx.display.font_height // 2, lcd.WHITE
                 # )
                 if self.ctx.input.buttons_active:
-
                     if answer:
-                        if board.config["lcd"]["invert"]:
-                            offset_x = self.ctx.display.width() // 2
-                        else:
-                            offset_x = DEFAULT_PADDING
                         self.ctx.display.outline(
-                            offset_x,
+                            DEFAULT_PADDING,
                             offset_y - self.ctx.display.font_height // 2,
                             self.ctx.display.usable_width() // 2,
                             2 * self.ctx.display.font_height - 2,
                             lcd.GREEN,
                         )
                     else:
-                        if board.config["lcd"]["invert"]:
-                            offset_x = DEFAULT_PADDING
-                        else:
-                            offset_x = self.ctx.display.width() // 2
                         self.ctx.display.outline(
-                            offset_x,
+                            DEFAULT_PADDING,
                             offset_y - self.ctx.display.font_height // 2,
                             self.ctx.display.usable_width() // 2,
                             2 * self.ctx.display.font_height - 2,
@@ -600,9 +575,6 @@ class Pad:
                     key = GO
                 if key is not None:
                     offset_x = x
-                    if board.config["lcd"]["invert"]:  # inverted X coodinates
-                        offset_x = self.ctx.display.width() - offset_x
-                        offset_x -= self.key_h_spacing
                     key_offset_x = (
                         self.key_h_spacing - len(key) * self.ctx.display.font_width
                     ) // 2
@@ -612,7 +584,7 @@ class Pad:
                         and KEYPADS[self.type][key_index] not in possible_keys
                     ):
                         # faded text
-                        lcd.draw_string(key_offset_x, offset_y, key, lcd.LIGHTBLACK)
+                        self.ctx.display.draw_string(key_offset_x, offset_y, key, lcd.LIGHTBLACK)
                     else:
                         if self.ctx.input.has_touch:
                             self.ctx.display.outline(
@@ -622,7 +594,7 @@ class Pad:
                                 self.key_v_spacing - 2,
                                 lcd.DARKGREY,
                             )
-                        lcd.draw_string(key_offset_x, offset_y, key, lcd.WHITE)
+                        self.ctx.display.draw_string(key_offset_x, offset_y, key, lcd.WHITE)
                     if (
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active

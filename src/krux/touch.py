@@ -20,13 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .touchscreens.ft6x36 import FT6X36, TOUCH_S_PERIOD
+from .touchscreens.ft6x36 import FT6X36
 import time
 
 SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
 
+TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
 
 class Touch:
     """Touch is a singleton API to interact with touchscreen driver"""

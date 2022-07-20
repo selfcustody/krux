@@ -10,15 +10,13 @@ COLOR_BLACK = (0, 0, 0)
 COLOR_WHITE = (255, 255, 255)
 COLOR_RED = (255, 0, 0)
 COLOR_BLUE = (0, 0, 255)
+COLOR_GREEN = (0, 255, 0)
+COLOR_LIGHTGREY = (10, 10, 20)
 COLOR_DARKGREY = (237, 237, 220)
 COLOR_LIGHTBLACK = (10, 10, 20)
 
 WIDTH = BOARD_CONFIG["lcd"]["width"]
 HEIGHT = BOARD_CONFIG["lcd"]["height"]
-
-FONT = pg.font.Font(
-    os.path.join("assets", "Terminess (TTF) Nerd Font Complete Mono.ttf"), 16
-)
 
 screen = None
 portrait = True
@@ -64,10 +62,10 @@ def rotation(r):
         global portrait
         if r == BOARD_CONFIG["krux"]["display"]["orientation"][0]:
             portrait = True
-            screen = pg.Surface((HEIGHT, WIDTH))
+            screen = pg.Surface((HEIGHT, WIDTH)).convert()
         else:
             portrait = False
-            screen = pg.Surface((WIDTH, HEIGHT))
+            screen = pg.Surface((WIDTH, HEIGHT)).convert()
 
     pg.event.post(pg.event.Event(events.LCD_ROTATION_EVENT, {"f": run}))
 
@@ -82,8 +80,12 @@ def height():
 
 def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
     def run():
-        text = FONT.render(s, True, color, bgcolor)
-        screen.blit(text, (x, y))
+        from kruxsim import devices
+        out = s
+        out = out.replace("¡", "█")
+        out = out.replace("¤", "₿")
+        text = devices.load_font(BOARD_CONFIG["type"]).render(out, True, color, bgcolor)
+        screen.blit(text, (width() - text.get_width() - x if BOARD_CONFIG["lcd"]["invert"] else x, y))
 
     pg.event.post(pg.event.Event(events.LCD_DRAW_STRING_EVENT, {"f": run}))
 
@@ -113,9 +115,9 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
     pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
 
 
-def fill_rectangle(x, y, width, height, color):
+def fill_rectangle(x, y, w, h, color):
     def run():
-        pg.draw.rect(screen, color, (x, y, width, height))
+        pg.draw.rect(screen, color, (width() - w - x if BOARD_CONFIG["lcd"]["invert"] else x, y, w, h))
 
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 
@@ -132,9 +134,12 @@ if "lcd" not in sys.modules:
         draw_string=draw_string,
         draw_qr_code=draw_qr_code,
         fill_rectangle=fill_rectangle,
-        WHITE=COLOR_WHITE,
         BLACK=COLOR_BLACK,
-        LIGHTBLACK=COLOR_LIGHTBLACK,
-        DARKGREY=COLOR_DARKGREY,
+        WHITE=COLOR_WHITE,
         RED=COLOR_RED,
+        BLUE=COLOR_BLUE,
+        GREEN=COLOR_GREEN,
+        LIGHTGREY=COLOR_LIGHTGREY,
+        DARKGREY=COLOR_DARKGREY,
+        LIGHTBLACK=COLOR_LIGHTBLACK,
     )
