@@ -3,7 +3,8 @@ name: Tests
 on:
   push:
     branches:
-      - passphrase
+      - main
+      - develop
   pull_request:
 
 jobs:

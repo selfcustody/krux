@@ -3,7 +3,8 @@ name: Build
 on:
   push:
     branches:
-      - passphrase
+      - main
+      - develop
   pull_request:
 
 jobs:
