@@ -34,16 +34,25 @@ from ..key import Key, pick_final_word, to_mnemonic_words
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..i18n import t, translations
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, DEFAULT_PADDING
+from . import (
+    Page,
+    Menu,
+    MENU_CONTINUE,
+    MENU_EXIT,
+    ESC_KEY,
+    DEL_DICE,
+    DEFAULT_PADDING,
+    KEYPADS,
+)
 
 SENTINEL_DIGITS = "11111"
 
-DIGITS = "0123456789"
-LETTERS = "abcdefghijklmnopqrstuvwxyz"
-BITS = "01"
-
-D6_STATES = [str(i + 1) for i in range(6)]
-D20_STATES = [str(i + 1) for i in range(20)]
+D6_STATES = 0
+D20_STATES = 1
+BITS = 2
+DIGITS = 3
+LETTERS = 4
+MULTI = 5
 
 D6_MIN_ROLLS = 50
 D6_MAX_ROLLS = 100
@@ -106,47 +115,59 @@ class Login(Page):
         """Handler for the 'via D20' menu item"""
         return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
 
-    def _new_key_from_die(self, states, min_rolls, max_rolls):
+    def _new_key_from_die(self, pad_type, min_rolls, max_rolls):
+        def del_dice(entropy):
+            while True:
+                if len(entropy) > 1:
+                    entropy, char = entropy[:-1], entropy[-1]
+                    if char == "-":
+                        break
+                else:
+                    entropy = ""
+                    break
+            return entropy
+
         self.ctx.display.draw_hcentered_text(
             t(
                 "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
             )
             % (min_rolls, max_rolls)
         )
-        btn = self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line)
-        if btn == BUTTON_ENTER:
+        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             entropy = ""
             num_rolls = max_rolls
-            for i in range(max_rolls):
+            i = 0
+            while i < max_rolls:
                 if i == min_rolls:
                     self.ctx.display.clear()
-                    btn = self.prompt(t("Done?"), self.ctx.display.height() // 2)
-                    if btn == BUTTON_ENTER:
+                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         num_rolls = min_rolls
                         break
 
                 roll = ""
                 while True:
+                    dice_title = t("Rolls %d\n") % i
+                    if len(entropy) <= 10:
+                        dice_title += entropy
+                    else:
+                        dice_title += "..." + entropy[-10:]
                     roll = self.capture_from_keypad(
-                        t("Roll %d") % (i + 1), states  # , lambda r: r
+                        dice_title, pad_type  # , lambda r: r
                     )
-                    if roll == MENU_CONTINUE:
-                        self.ctx.display.clear()
-                        btn = self.prompt(
-                            t("Are you sure?"), self.ctx.display.height() // 2
-                        )
-                        if btn == BUTTON_ENTER:
-                            return MENU_CONTINUE
-                        roll = ""
-                    if roll != "" and roll in states:
+                    if roll == ESC_KEY:
+                        return MENU_CONTINUE
+                    if roll == DEL_DICE:
+                        entropy = del_dice(entropy)
+                        if i:
+                            i -= 1
+
+                    if roll != "" and roll in KEYPADS[pad_type]:
+                        i += 1
                         break
 
                 entropy += roll if entropy == "" else "-" + roll
 
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
-                self.ctx.input.wait_for_button()
-
+            entropy = entropy.replace("-", "")
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
                 hashlib.sha256(entropy_bytes).digest()
@@ -167,28 +188,38 @@ class Login(Page):
     def _load_key_from_words(self, words):
         mnemonic = " ".join(words)
         self.display_mnemonic(mnemonic)
-        btn = self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line)
-        if btn == BUTTON_ENTER:
-            submenu = Menu(
-                self.ctx,
-                [
-                    (t("Single-key"), lambda: MENU_EXIT),
-                    (t("Multisig"), lambda: MENU_EXIT),
-                ],
+        if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
+            return MENU_CONTINUE
+        self.ctx.display.clear()
+        passphrase = ""
+        if self.prompt(t("Add passphrase?"), self.ctx.display.height() // 2):
+            passphrase = self.load_passphrase()
+            if passphrase == ESC_KEY:
+                return MENU_CONTINUE
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Single-key"), lambda: MENU_EXIT),
+                (t("Multisig"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        multisig = index == 1
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Loading.."))
+        self.ctx.wallet = Wallet(
+            Key(
+                mnemonic,
+                multisig,
+                network=NETWORKS[settings.network],
+                password=passphrase,
             )
-            index, _ = submenu.run_loop()
-            multisig = index == 1
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Loading.."))
-            self.ctx.wallet = Wallet(
-                Key(mnemonic, multisig, network=NETWORKS[settings.network])
-            )
-            try:
-                self.ctx.printer = create_printer()
-            except:
-                self.ctx.log.exception("Exception occurred connecting to printer")
-            return MENU_EXIT
-        return MENU_CONTINUE
+        )
+        try:
+            self.ctx.printer = create_printer()
+        except:
+            self.ctx.log.exception("Exception occurred connecting to printer")
+        return MENU_EXIT
 
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
@@ -223,13 +254,11 @@ class Login(Page):
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
-        btn = self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line)
-        if btn == BUTTON_ENTER:
+        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             for i in range(24):
                 if i == 12:
                     self.ctx.display.clear()
-                    btn = self.prompt(t("Done?"), self.ctx.display.height() // 2)
-                    if btn == BUTTON_ENTER:
+                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         break
 
                 word = ""
@@ -240,14 +269,8 @@ class Login(Page):
                         autocomplete_fn,
                         possible_keys_fn,
                     )
-                    if word == MENU_CONTINUE:
-                        self.ctx.display.clear()
-                        btn = self.prompt(
-                            t("Are you sure?"), self.ctx.display.height() // 2
-                        )
-                        if btn == BUTTON_ENTER:
-                            return MENU_CONTINUE
-                        word = ""
+                    if word == ESC_KEY:
+                        return MENU_CONTINUE
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and word == "":
@@ -339,7 +362,7 @@ class Login(Page):
 
         def possible_letters(prefix):
             if len(prefix) == 0:
-                return LETTERS
+                return KEYPADS[LETTERS]
             letter = prefix[0]
             if letter not in search_ranges:
                 return ""
@@ -379,6 +402,11 @@ class Login(Page):
             return ""
 
         return self._load_key_from_keypad(title, BITS, to_word)
+
+    def load_passphrase(self):
+        """Loads and returns a passphrase from keypad"""
+        passphrase = self.capture_from_keypad(t("Passphrase:"), MULTI)
+        return passphrase
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""

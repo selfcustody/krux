@@ -40,12 +40,12 @@ DER_MULTI = "m/48h/%dh/0h/2h"
 class Key:
     """Represents a BIP-39 mnemonic-based private key"""
 
-    def __init__(self, mnemonic, multisig, network=NETWORKS["test"]):
+    def __init__(self, mnemonic, multisig, network=NETWORKS["test"], password=""):
         self.mnemonic = mnemonic
         self.multisig = multisig
         self.network = network
         self.root = bip32.HDKey.from_seed(
-            bip39.mnemonic_to_seed(mnemonic), version=network["xprv"]
+            bip39.mnemonic_to_seed(mnemonic, password), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
         self.derivation = (DER_MULTI if self.multisig else DER_SINGLE) % network[

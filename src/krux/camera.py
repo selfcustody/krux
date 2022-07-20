@@ -66,6 +66,7 @@ class Camera:
             img = sensor.snapshot()
             if board.config["krux"]["sensor"]["lenses"]:
                 img.lens_corr(1.2)
+            lcd.display(img)
             gc.collect()
             hist = img.get_histogram()
             if "histogram" not in str(type(hist)):
@@ -75,9 +76,9 @@ class Camera:
             # that may cause issues for the decoder.
             img.binary([(0, hist.get_threshold().value())], invert=True)
             res = img.find_qrcodes()
-            if board.config["type"] == "m5stickv":
-                img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen - test
-            lcd.display(img)
+            # Zoom out disabled now that image is presented before pre-processing and QR reading
+            # if board.config["type"] == "m5stickv":
+            #     img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen - test
             if len(res) > 0:
                 data = res[0].payload()
 

@@ -1,6 +1,6 @@
 from ..shared_mocks import *
 from krux.settings import I18n
-from krux.input import BUTTON_ENTER, BUTTON_PAGE
+from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 from krux.qr import FORMAT_UR, FORMAT_NONE
 from ur.ur import UR
 import binascii
@@ -14,26 +14,26 @@ def test_new_key_from_d6(mocker):
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
+            # 1 presses per roll
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
-            # 1 press to confirm SHA, 1 press to continue loading key, 1 press to select single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "hire injury false situate rare proof supply attend pause leave bitter enter",
+            # 1 press to confirm SHA, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            "diet glad hat rural panther lawsuit act drop gallery urge where fit",
         ),
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
+            # 1 presses per roll
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # 1 press to continue rolling to max rolls
             [BUTTON_PAGE] +
-            # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D6_MIN_ROLLS)] +
-            # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to select single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "owner muscle pioneer easily february chuckle strong fold lake lemon parade defy excuse where gap seek narrow cost convince trim great funny admit draft",
+            # 1 presses per roll
+            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            "day fog body unfold two filter bundle obey pause pattern penalty sweet shell quantum critic bridge stage patch purpose reflect flat domain post produce",
         ),
     ]
     for case in cases:
@@ -58,26 +58,34 @@ def test_new_key_from_d20(mocker):
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D20_MIN_ROLLS)] +
+            # 2 roll presses
+            [BUTTON_ENTER] + [BUTTON_ENTER] +
+            # 2 deletions
+            [BUTTON_PAGE_PREV for _ in range(3)]
+            + [BUTTON_ENTER]
+            + [BUTTON_PAGE_PREV for _ in range(3)]
+            + [BUTTON_ENTER]
+            +
+            # 1 presses per roll
+            [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
-            # 1 press to confirm SHA, 1 press to continue loading key, 1 press to select single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "erupt remain ride bleak year cabin orange sure ghost gospel husband oppose",
+            # 1 press to confirm SHA, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            "shield flip when fade actor weapon mouse grid friend few coral sport",
         ),
         (
             # 1 press to proceed
             [BUTTON_ENTER] +
-            # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D20_MIN_ROLLS)] +
+            # 1 presses per roll
+            [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
             # 1 press to continue rolling to max rolls
             [BUTTON_PAGE] +
-            # 3 presses per roll
-            [BUTTON_ENTER for _ in range(3 * D20_MIN_ROLLS)] +
-            # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to select single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "fun island vivid slide cable pyramid device tuition only essence thought gain silk jealous eternal anger response virus couple faculty ozone test key vocal",
+            # 1 presses per roll
+            [BUTTON_ENTER for _ in range(D20_MIN_ROLLS)] +
+            # 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            "ignore opinion kiwi great badge renew sweet online wasp high minimum bread rival brass cruel inch cram soft disorder enter midnight install elite disagree",
         ),
     ]
     for case in cases:
@@ -99,26 +107,36 @@ def test_load_key_from_qr_code(mocker):
 
     cases = [
         (
+            # 12 word confirm, No passphrase, Single-key
+            (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
             FORMAT_NONE,
             "olympic term tissue route sense program under choose bean emerge velvet absurd",
             "olympic term tissue route sense program under choose bean emerge velvet absurd",
         ),
         (
+            # 12 word confirm, 24 word confirm, No passphrase, Single-key
+            (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
             FORMAT_NONE,
             "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
             "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
         ),
         (
+            # 12 word confirm, No passphrase, Single-key
+            (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
             FORMAT_NONE,
             "123417871814150815661375189403220156058119360008",
             "olympic term tissue route sense program under choose bean emerge velvet absurd",
         ),
         (
+            # 12 word confirm, 24 word confirm, No passphrase, Single-key
+            (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
             FORMAT_NONE,
             "023301391610171019391278098413310856127602420628160203911717091708861236056502660800183118111075",
             "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
         ),
         (
+            # 12 word confirm, No passphrase, Single-key
+            (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
             FORMAT_UR,
             UR(
                 "crypto-bip39",
@@ -133,19 +151,17 @@ def test_load_key_from_qr_code(mocker):
     ]
     for case in cases:
         ctx = mock.MagicMock(
-            input=mock.MagicMock(
-                wait_for_button=mock.MagicMock(return_value=BUTTON_ENTER)
-            ),
+            input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case[0])),
             display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
         )
         login = Login(ctx)
         mocker.patch.object(
-            login, "capture_qr_code", mock.MagicMock(return_value=(case[1], case[0]))
+            login, "capture_qr_code", mock.MagicMock(return_value=(case[2], case[1]))
         )
 
         login.load_key_from_qr_code()
 
-        assert ctx.wallet.key.mnemonic == case[2]
+        assert ctx.wallet.key.mnemonic == case[3]
 
 
 def test_load_key_from_text(mocker):
@@ -187,8 +203,8 @@ def test_load_key_from_text(mocker):
                 [BUTTON_ENTER]
             )
             +
-            # Done?, 12 word confirm, Continue?, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -210,8 +226,8 @@ def test_load_key_from_text(mocker):
             +
             # Go
             [BUTTON_PAGE for _ in range(28)] + [BUTTON_ENTER] +
-            # Done?, 12 word confirm, Continue?, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
@@ -266,8 +282,8 @@ def test_load_key_from_digits(mocker):
                 + [BUTTON_ENTER]
             )
             +
-            # Done?, 12 word confirm, Continue?, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -284,8 +300,8 @@ def test_load_key_from_digits(mocker):
             +
             # Go
             [BUTTON_PAGE for _ in range(12)] + [BUTTON_ENTER] +
-            # Done?, 12 word confirm, Continue?, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
@@ -356,8 +372,8 @@ def test_load_key_from_bits(mocker):
                 + [BUTTON_ENTER]
             )
             +
-            # Done?, 12 word confirm, Continue?, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -374,8 +390,8 @@ def test_load_key_from_bits(mocker):
             +
             # Go
             [BUTTON_PAGE for _ in range(4)] + [BUTTON_ENTER] +
-            # Done?, 12 word confirm, Continue?, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]

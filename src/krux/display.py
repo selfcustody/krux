@@ -32,7 +32,7 @@ if "qr_colors" in board.config["krux"]["display"]:
     QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 else:
     QR_DARK_COLOR = 0x0000
-    QR_LIGHT_COLOR = 0xFFFF
+    QR_LIGHT_COLOR = lcd.LIGHTGREY
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
@@ -55,11 +55,11 @@ class Display:
         self.bottom_line = self.height() // FONT_HEIGHT  # total lines
         self.bottom_line -= 1
         self.bottom_line *= FONT_HEIGHT
-        if board.config["krux"]["display"]["touch"]:
-            # room left for no/yes buttons
-            self.bottom_prompt_line = self.bottom_line - 5 * FONT_HEIGHT
-        else:
+        if board.config["type"] == "m5stickv":
             self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
+        else:
+            # room left for no/yes buttons
+            self.bottom_prompt_line = self.bottom_line - 3 * FONT_HEIGHT
 
     def initialize_lcd(self):
         """Initializes the LCD"""
@@ -139,11 +139,7 @@ class Display:
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
-        if board.config["type"] == "m5stickv":
-            return 138
-        if board.config["type"] == "bit":
-            return 240
-        return 340
+        return self.width() + 3
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""

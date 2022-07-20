@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 # pylint: disable=W0231
 
-# FT3x36 specs:
+# FT6x36 specs:
 # Max sample rate: 100 samples per second
 
 from . import Touchscreen
@@ -29,6 +29,7 @@ import board
 from machine import I2C
 
 FT_DEVICE_MODE = 0x00
+GEST_ID = 0x01
 TD_STATUS = 0x02
 PN_XH = 0x03
 FT_ID_G_MODE = 0xA4
