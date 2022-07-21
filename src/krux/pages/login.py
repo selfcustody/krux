@@ -146,13 +146,13 @@ class Login(Page):
 
                 roll = ""
                 while True:
-                    dice_title = t("Rolls %d\n") % i
+                    dice_title = t("Roll %d\n") % (i + 1)
                     if len(entropy) <= 10:
                         dice_title += entropy
                     else:
                         dice_title += "..." + entropy[-10:]
                     roll = self.capture_from_keypad(
-                        dice_title, pad_type  # , lambda r: r
+                        dice_title, pad_type
                     )
                     if roll == ESC_KEY:
                         return MENU_CONTINUE
@@ -167,7 +167,13 @@ class Login(Page):
 
                 entropy += roll if entropy == "" else "-" + roll
 
-            entropy = entropy.replace("-", "")
+            if len(KEYPADS[pad_type]) < 10:
+                entropy = entropy.replace("-", "")
+
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
+            self.ctx.input.wait_for_button()
+                
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
                 hashlib.sha256(entropy_bytes).digest()
