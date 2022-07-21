@@ -33,7 +33,7 @@ def test_init_dock(mocker):
             mock.call(board.config["krux"]["pins"]["BUTTON_A"], mock.ANY),
         ]
     )
-    krux.r_encoder.fm.register.assert_has_calls(
+    krux.rotary.fm.register.assert_has_calls(
         [
             mock.call(board.config["krux"]["pins"]["ENCODER"][0], mock.ANY),
             mock.call(board.config["krux"]["pins"]["ENCODER"][1], mock.ANY),
@@ -44,11 +44,11 @@ def test_init_dock(mocker):
         == "mock.fm.fpioa.GPIOHS21"
     )
     assert (
-        krux.r_encoder.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        krux.rotary.fm.register.call_args_list[1].args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIOHS22"
     )
     assert (
-        krux.r_encoder.fm.register.call_args_list[2].args[1]._extract_mock_name()
+        krux.rotary.fm.register.call_args_list[2].args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIOHS0"
     )
     assert input.enter is not None
@@ -56,17 +56,17 @@ def test_init_dock(mocker):
     assert input.page_prev is not None
 
     assert krux.input.GPIO.call_count == 1
-    assert krux.r_encoder.GPIO.call_count == 2
+    assert krux.rotary.GPIO.call_count == 2
     assert (
         krux.input.GPIO.call_args_list[0].args[0]._extract_mock_name()
         == "mock.GPIOHS21"
     )
     assert (
-        krux.r_encoder.GPIO.call_args_list[0].args[0]._extract_mock_name()
+        krux.rotary.GPIO.call_args_list[0].args[0]._extract_mock_name()
         == "mock.GPIO.GPIOHS22"
     )
     assert (
-        krux.r_encoder.GPIO.call_args_list[1].args[0]._extract_mock_name()
+        krux.rotary.GPIO.call_args_list[1].args[0]._extract_mock_name()
         == "mock.GPIO.GPIOHS0"
     )
 
@@ -85,20 +85,20 @@ def test_encoder_spin_right(mocker):
         # Here it will count a PAGE press
         time.sleep(0.2)
         mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        krux.r_encoder.encoder.process((0, 1))
+        krux.rotary.encoder.process((0, 1))
 
         # Keep spining through all modes
         time.sleep(0.2)
         mocker.patch.object(time, "ticks_ms", new=lambda: 400)
-        krux.r_encoder.encoder.process((1, 1))
+        krux.rotary.encoder.process((1, 1))
 
         time.sleep(0.2)
         mocker.patch.object(time, "ticks_ms", new=lambda: 600)
-        krux.r_encoder.encoder.process((1, 0))
+        krux.rotary.encoder.process((1, 0))
 
         time.sleep(0.2)
         mocker.patch.object(time, "ticks_ms", new=lambda: 800)
-        krux.r_encoder.encoder.process((0, 0))
+        krux.rotary.encoder.process((0, 0))
 
     t = threading.Thread(target=spin)
     t.start()
@@ -124,21 +124,21 @@ def test_encoder_spin_left(mocker):
         # Here it will change direction to Left
         time.sleep(0.2)
         mocker.patch.object(time, "ticks_ms", new=lambda: 1000)
-        krux.r_encoder.encoder.process((1, 0))
+        krux.rotary.encoder.process((1, 0))
 
         # Here it will count a PAGE_PREV press
         time.sleep(0.2)
         mocker.patch.object(time, "ticks_ms", new=lambda: 1200)
-        krux.r_encoder.encoder.process((1, 1))
+        krux.rotary.encoder.process((1, 1))
 
         # Keep spining through all modes
         time.sleep(0.2)
         mocker.patch.object(time, "ticks_ms", new=lambda: 1400)
-        krux.r_encoder.encoder.process((0, 1))
+        krux.rotary.encoder.process((0, 1))
 
         time.sleep(0.2)
         mocker.patch.object(time, "ticks_ms", new=lambda: 1600)
-        krux.r_encoder.encoder.process((0, 0))
+        krux.rotary.encoder.process((0, 0))
 
     t = threading.Thread(target=spin)
     t.start()

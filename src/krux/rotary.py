@@ -27,7 +27,7 @@ import time
 
 RIGHT = 1
 LEFT = 0
-DEBOUNCE = 100  # miliseconds
+DEBOUNCE = 100  # milliseconds
 
 
 def __handler__(pin_num=None):
@@ -100,13 +100,13 @@ encoder = RotaryEncoder()  # Singleton
 
 
 class EncoderPage:
-    """Encoder class that mimics Krux Page GPIO Button beavior"""
+    """Encoder class that mimics Krux Page GPIO Button behavior"""
 
     def __init__(self):
         pass
 
     def value(self):
-        """Returns encoder status while mimics Krux GPIO Buttons beavior"""
+        """Returns encoder status while mimics Krux GPIO Buttons behavior"""
         if encoder.value > 0:
             encoder.value -= 1
             return 0
@@ -114,13 +114,13 @@ class EncoderPage:
 
 
 class EncoderPagePrev:
-    """Encoder class that mimics Krux Page_prev GPIO Button beavior"""
+    """Encoder class that mimics Krux Page_prev GPIO Button behavior"""
 
     def __init__(self):
         pass
 
     def value(self):
-        """Returns encoder status while mimics Krux GPIO Buttons beavior"""
+        """Returns encoder status while mimics Krux GPIO Buttons behavior"""
         if encoder.value < 0:
             encoder.value += 1
             return 0
