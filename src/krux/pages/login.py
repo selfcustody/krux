@@ -217,8 +217,8 @@ class Login(Page):
             Key(
                 mnemonic,
                 multisig,
-                network=NETWORKS[settings.network],
-                password=passphrase,
+                NETWORKS[settings.network],
+                passphrase,
             )
         )
         try:
