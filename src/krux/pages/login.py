@@ -146,7 +146,7 @@ class Login(Page):
 
                 roll = ""
                 while True:
-                    dice_title = t("Roll %d\n") % (i + 1)
+                    dice_title = t("Rolls: %d\n") % i
                     if len(entropy) <= 10:
                         dice_title += entropy
                     else:
