@@ -46,7 +46,6 @@ def display(img):
             (screen.get_width(), screen.get_height()),
             interpolation=cv2.INTER_AREA,
         )
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = frame.swapaxes(0, 1)
         pg.surfarray.blit_array(screen, frame)
 
@@ -60,12 +59,13 @@ def rotation(r):
     def run():
         global screen
         global portrait
-        if r == BOARD_CONFIG["krux"]["display"]["orientation"][0]:
-            portrait = True
-            screen = pg.Surface((HEIGHT, WIDTH)).convert()
-        else:
-            portrait = False
-            screen = pg.Surface((WIDTH, HEIGHT)).convert()
+        if not screen:
+            if r == BOARD_CONFIG["krux"]["display"]["orientation"][0]:
+                portrait = True
+                screen = pg.Surface((HEIGHT, WIDTH)).convert()
+            else:
+                portrait = False
+                screen = pg.Surface((WIDTH, HEIGHT)).convert()
 
     pg.event.post(pg.event.Event(events.LCD_ROTATION_EVENT, {"f": run}))
 
