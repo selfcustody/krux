@@ -401,7 +401,7 @@ class Login(Page):
 
     def load_passphrase(self):
         """Loads and returns a passphrase from keypad"""
-        return self.capture_from_keypad(t("Passphrase:"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2])
+        return self.capture_from_keypad(t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2])
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""

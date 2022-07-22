@@ -33,7 +33,7 @@ from ..input import (
     SWIPE_RIGHT,
     SWIPE_LEFT,
 )
-from ..display import DEFAULT_PADDING, DEL, GO, ESC, FIXED_KEYS
+from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
 from ..i18n import t
 
@@ -42,6 +42,12 @@ MENU_EXIT = 1
 MENU_SHUTDOWN = 2
 
 ESC_KEY = 1
+
+DEL = "<"
+GO = t("Go")
+ESC = t("Esc")
+MORE = t("ABC")
+FIXED_KEYS = 3 # More only appears when there are multiple keysets
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -83,8 +89,9 @@ class Page:
         while True:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
-            self.ctx.display.draw_hcentered_text(title, offset_y)
-            offset_y += self.ctx.display.font_height * 3 // 2
+            if len(buffer) * self.ctx.display.font_width < self.ctx.display.width():
+                self.ctx.display.draw_hcentered_text(title, offset_y)
+                offset_y += self.ctx.display.font_height * 3 // 2
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
             offset_y = pad.keypad_offset()
             possible_keys = pad.keys
@@ -99,19 +106,21 @@ class Page:
             if btn == BUTTON_ENTER:
                 pad.moving_forward = True
                 changed = False
-                if pad.cur_key_index == len(pad.keys):
+                if pad.cur_key_index == pad.del_index:
                     if delete_key_fn is not None:
                         buffer = delete_key_fn(buffer)
                     else:
                         buffer = buffer[: len(buffer) - 1]
                     changed = True
-                elif pad.cur_key_index == len(pad.keys) + 1:
+                elif pad.cur_key_index == pad.esc_index:
                     if self.esc_prompt() == ESC_KEY:
                         return ESC_KEY
                     # remap keypad touch array
                     pad.map_keys_array(pad.width, pad.height)
-                elif pad.cur_key_index == pad.go_position:
+                elif pad.cur_key_index == pad.go_index:
                     break
+                elif pad.cur_key_index == pad.more_index:
+                    pad.next_keyset()
                 else:
                     buffer += pad.keys[pad.cur_key_index]
                     changed = True
@@ -121,22 +130,22 @@ class Page:
                         new_buffer = autocomplete_fn(buffer)
                         if new_buffer is not None:
                             buffer = new_buffer
-                            pad.cur_key_index = pad.go_position
+                            pad.cur_key_index = pad.go_index
 
                 if changed and go_on_change:
                     break
 
             elif btn == BUTTON_PAGE:
-                pad.page()
+                pad.next_key()
 
             elif btn == BUTTON_PAGE_PREV:
-                pad.page_prev()
+                pad.previous_key()
 
             elif btn == SWIPE_LEFT:
-                pad.swipe_left()
+                pad.next_keyset()
 
             elif btn == SWIPE_RIGHT:
-                pad.swipe_right()
+                pad.previous_keyset()
 
         if self.ctx.input.has_touch:
             self.ctx.input.touch.clear_regions()
@@ -489,25 +498,52 @@ class Keypad:
         self.ctx = ctx
         self.keysets = keysets
         self.keyset_index = 0
-        self.width = math.floor(math.sqrt(len(self.keys) + FIXED_KEYS))
-        self.height = math.ceil((len(self.keys) + FIXED_KEYS) / self.width)
         self.key_h_spacing, self.key_v_spacing = self.map_keys_array(
             self.width, self.height
         )
         self.cur_key_index = 0
         self.moving_forward = True
-        self.go_position = len(self.keys) + 2
 
     @property
     def keys(self):
         """Returns the current set of keys being displayed"""
         return self.keysets[self.keyset_index]
     
+    @property
+    def total_keys(self):
+        return len(self.keys) + FIXED_KEYS + (1 if len(self.keysets) > 1 else 0)
+
+    @property
+    def more_index(self):
+        return len(self.keys)
+    
+    @property
+    def del_index(self):
+        return len(self.keys) + (1 if len(self.keysets) > 1 else 0)
+    
+    @property
+    def esc_index(self):
+        return self.del_index + 1
+    
+    @property
+    def go_index(self):
+        return self.esc_index + 1
+    
+    @property
+    def width(self):
+        return math.floor(math.sqrt(self.total_keys))
+    
+    @property
+    def height(self):
+        return math.ceil((self.total_keys) / self.width)
+    
     def reset(self):
         """Reset parameters when switching a multi-keypad"""
+        self.key_h_spacing, self.key_v_spacing = self.map_keys_array(
+            self.width, self.height
+        )
         self.cur_key_index = 0
         self.moving_forward = True
-        self.go_position = len(self.keys) + 2
 
     def map_keys_array(self, width, height):
         """Maps an array of regions for keys to be placed in
@@ -545,12 +581,14 @@ class Keypad:
                 key = None
                 if key_index < len(self.keys):
                     key = self.keys[key_index]
-                elif key_index == len(self.keys):
+                elif key_index == self.del_index:
                     key = DEL
-                elif key_index == len(self.keys) + 1:
+                elif key_index == self.esc_index:
                     key = ESC
-                elif key_index == len(self.keys) + 2:
+                elif key_index == self.go_index:
                     key = GO
+                elif key_index == self.more_index and len(self.keysets) > 1:
+                    key = MORE
                 if key is not None:
                     offset_x = x
                     key_offset_x = (
@@ -600,14 +638,12 @@ class Keypad:
             and self.keys[self.cur_key_index] not in possible_keys
         ):
             if self.moving_forward:
-                self.cur_key_index = (self.cur_key_index + 1) % (
-                    len(self.keys) + FIXED_KEYS
-                )
+                self.cur_key_index = (self.cur_key_index + 1) % self.total_keys
             else:
                 if self.cur_key_index:
                     self.cur_key_index -= 1
                 else:
-                    self.cur_key_index = len(self.keys) + FIXED_KEYS - 1
+                    self.cur_key_index = self.total_keys - 1
         return self.cur_key_index
 
     def touch_to_physical(self, possible_keys):
@@ -617,32 +653,30 @@ class Keypad:
         if self.cur_key_index < len(self.keys):
             if self.keys[self.cur_key_index] in possible_keys:
                 actual_button = BUTTON_ENTER
-        elif self.cur_key_index < len(self.keys) + FIXED_KEYS:
+        elif self.cur_key_index < self.total_keys:
             actual_button = BUTTON_ENTER
         else:
             self.cur_key_index = 0
         return actual_button
 
-    def page(self):
+    def next_key(self):
         """Increments cursor when page button is pressed"""
         self.moving_forward = True
-        self.cur_key_index = (self.cur_key_index + 1) % (
-            len(self.keys) + FIXED_KEYS
-        )
+        self.cur_key_index = (self.cur_key_index + 1) % self.total_keys
 
-    def page_prev(self):
+    def previous_key(self):
         """Decrements cursor when page_prev button is pressed"""
         self.moving_forward = False
-        self.cur_key_index = (self.cur_key_index - 1) % (
-            len(self.keys) + FIXED_KEYS
-        )
+        self.cur_key_index = (self.cur_key_index - 1) % self.total_keys
 
-    def swipe_left(self):
+    def next_keyset(self):
         """Change keys for the next keyset"""
-        self.keyset_index = (self.keyset_index + 1) % len(self.keysets)
-        self.reset()
+        if len(self.keysets) > 1:
+            self.keyset_index = (self.keyset_index + 1) % len(self.keysets)
+            self.reset()
 
-    def swipe_right(self):
+    def previous_keyset(self):
         """Change keys for the previous keyset"""
-        self.keyset_index = (self.keyset_index - 1) % len(self.keysets)
-        self.reset()
+        if len(self.keysets) > 1:
+            self.keyset_index = (self.keyset_index - 1) % len(self.keysets)
+            self.reset()
