@@ -34,7 +34,7 @@ SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 
 QR_ANIM_PERIOD = 900  # milliseconds
-LONG_PRESS_T = 1000  # milliseconds
+LONG_PRESS_PERIOD = 1000  # milliseconds
 NONBLOCKING_CHECKS = 100000
 
 PRESSED = 0
@@ -156,7 +156,7 @@ class Input:
             while self.enter_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-                if time.ticks_ms() > time_frame + LONG_PRESS_T:
+                if time.ticks_ms() > time_frame + LONG_PRESS_PERIOD:
                     return SWIPE_LEFT
             if self.buttons_active:
                 return BUTTON_ENTER
@@ -168,7 +168,7 @@ class Input:
             while self.page_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-                if time.ticks_ms() > time_frame + LONG_PRESS_T:
+                if time.ticks_ms() > time_frame + LONG_PRESS_PERIOD:
                     return SWIPE_LEFT
             if self.buttons_active:
                 return BUTTON_PAGE
