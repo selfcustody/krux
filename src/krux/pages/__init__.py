@@ -89,7 +89,7 @@ class Page:
         while True:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
-            if len(buffer) * self.ctx.display.font_width < self.ctx.display.width():
+            if (len(buffer) + 1) * self.ctx.display.font_width < self.ctx.display.width():
                 self.ctx.display.draw_hcentered_text(title, offset_y)
                 offset_y += self.ctx.display.font_height * 3 // 2
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
@@ -317,14 +317,6 @@ class Page:
                 self.ctx.input.touch.x_regions = self.x_keypad_map
                 self.ctx.input.touch.y_regions = self.y_keypad_map
             while btn != BUTTON_ENTER:
-                # erase yes/no area
-                self.ctx.display.fill_rectangle(
-                    0,
-                    offset_y - self.ctx.display.font_height,
-                    self.ctx.display.width() + 1,
-                    3 * self.ctx.display.font_height,
-                    lcd.BLACK,
-                )
                 offset_x = self.ctx.display.width() // 4
                 offset_x -= (3 * self.ctx.display.font_width) // 2
                 self.ctx.display.draw_string(offset_x, offset_y, t("Yes"), lcd.GREEN)
@@ -360,6 +352,14 @@ class Page:
                 btn = self.ctx.input.wait_for_button()
                 if btn in (BUTTON_PAGE, BUTTON_PAGE_PREV):
                     answer = not answer
+                    # erase yes/no area for next loop
+                    self.ctx.display.fill_rectangle(
+                        0,
+                        offset_y - self.ctx.display.font_height,
+                        self.ctx.display.width() + 1,
+                        3 * self.ctx.display.font_height,
+                        lcd.BLACK,
+                    )
                 elif btn == BUTTON_TOUCH:
                     self.ctx.input.touch.clear_regions()
                     # index 0 = Yes
