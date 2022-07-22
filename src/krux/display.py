@@ -32,7 +32,7 @@ if "qr_colors" in board.config["krux"]["display"]:
     QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 else:
     QR_DARK_COLOR = 0x0000
-    QR_LIGHT_COLOR = lcd.LIGHTGREY
+    QR_LIGHT_COLOR = 0xFFFF
     
 
 MAX_BACKLIGHT = 8
