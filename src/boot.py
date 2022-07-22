@@ -60,6 +60,7 @@ import lcd
 from krux.context import Context
 
 ctx = Context()
+ctx.pmu = pmu
 
 # Display splash while loading pages
 ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)

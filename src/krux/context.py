@@ -40,6 +40,7 @@ class Context:
         self.input = Input()
         self.camera = Camera()
         self.light = Light() if "LED_W" in board.config["krux"]["pins"] else None
+        self.pmu = None
         self.printer = None
         self.wallet = None
 

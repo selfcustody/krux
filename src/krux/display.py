@@ -38,11 +38,6 @@ else:
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
-DEL = "<"
-GO = t("Go")
-ESC = t("Esc")
-FIXED_KEYS = 3
-
 
 class Display:
     """Display is a singleton interface for interacting with the device's display"""
@@ -170,13 +165,11 @@ class Display:
 
     def to_landscape(self):
         """Changes the rotation of the display to landscape"""
-        self.clear()
         lcd.rotation(LANDSCAPE)
         self.portrait = False
 
     def to_portrait(self):
         """Changes the rotation of the display to portrait"""
-        self.clear()
         lcd.rotation(PORTRAIT)
         self.portrait = True
 
@@ -264,7 +257,7 @@ class Display:
     def clear(self):
         """Clears the display"""
         lcd.clear()
-
+        
     def outline(self, x, y, width, height, color=lcd.WHITE):
         """Draws an outline rectangle from given coordinates"""
         self.fill_rectangle(x, y, width + 1, 1, color)  # up
