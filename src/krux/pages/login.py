@@ -425,8 +425,7 @@ class Login(Page):
                     self.ctx.display.font_height * 3,
                     lcd.DARKGREY,
                 )
-                # assuming inverted X coordinates
-                offset_x = self.ctx.display.width() - (x + button_width)
+                offset_x = x
                 offset_x += (
                     button_width - len(keys[i]) * self.ctx.display.font_width
                 ) // 2
