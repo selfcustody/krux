@@ -142,7 +142,7 @@ class Login(Page):
                 roll = ""
                 while True:
                     dice_title = t("Rolls: %d\n") % len(rolls)
-                    entropy = "-".join(rolls)
+                    entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
                     if len(entropy) <= 10:
                         dice_title += entropy
                     else:
