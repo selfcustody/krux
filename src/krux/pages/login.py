@@ -40,19 +40,19 @@ from . import (
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
-    DEL_DICE,
     DEFAULT_PADDING,
-    KEYPADS,
 )
 
 SENTINEL_DIGITS = "11111"
 
-D6_STATES = 0
-D20_STATES = 1
-BITS = 2
-DIGITS = 3
-LETTERS = 4
-MULTI = 5
+D6_STATES = [str(i + 1) for i in range(6)]
+D20_STATES = [str(i + 1) for i in range(20)]
+BITS = "01"
+DIGITS = "0123456789"
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
+NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
 D6_MIN_ROLLS = 50
 D6_MAX_ROLLS = 100
@@ -115,18 +115,7 @@ class Login(Page):
         """Handler for the 'via D20' menu item"""
         return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
 
-    def _new_key_from_die(self, pad_type, min_rolls, max_rolls):
-        def del_dice(entropy):
-            while True:
-                if len(entropy) > 1:
-                    entropy, char = entropy[:-1], entropy[-1]
-                    if char == "-":
-                        break
-                else:
-                    entropy = ""
-                    break
-            return entropy
-
+    def _new_key_from_die(self, roll_states, min_rolls, max_rolls):
         self.ctx.display.draw_hcentered_text(
             t(
                 "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
@@ -134,11 +123,17 @@ class Login(Page):
             % (min_rolls, max_rolls)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            entropy = ""
+            rolls = []
+            
+            def delete_roll(buffer):
+                nonlocal rolls
+                if len(rolls) > 0:
+                    rolls.pop()
+                return buffer
+            
             num_rolls = max_rolls
-            i = 0
-            while i < max_rolls:
-                if i == min_rolls:
+            while len(rolls) < max_rolls:
+                if len(rolls) == min_rolls:
                     self.ctx.display.clear()
                     if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         num_rolls = min_rolls
@@ -146,29 +141,24 @@ class Login(Page):
 
                 roll = ""
                 while True:
-                    dice_title = t("Rolls: %d\n") % i
+                    dice_title = t("Rolls: %d\n") % len(rolls)
+                    entropy = "-".join(rolls)
                     if len(entropy) <= 10:
                         dice_title += entropy
                     else:
                         dice_title += "..." + entropy[-10:]
                     roll = self.capture_from_keypad(
-                        dice_title, pad_type
+                        dice_title, [roll_states], delete_key_fn=delete_roll, go_on_change=True
                     )
                     if roll == ESC_KEY:
                         return MENU_CONTINUE
-                    if roll == DEL_DICE:
-                        entropy = del_dice(entropy)
-                        if i:
-                            i -= 1
 
-                    if roll != "" and roll in KEYPADS[pad_type]:
-                        i += 1
+                    if roll != "" and roll in roll_states:
                         break
 
-                entropy += roll if entropy == "" else "-" + roll
+                rolls.append(roll)
 
-            if len(KEYPADS[pad_type]) < 10:
-                entropy = entropy.replace("-", "")
+            entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
@@ -257,7 +247,7 @@ class Login(Page):
         test_phrase_sentinel=None,
         autocomplete_fn=None,
         possible_keys_fn=None,
-    ):
+    ):        
         words = []
         self.ctx.display.draw_hcentered_text(title)
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
@@ -271,7 +261,7 @@ class Login(Page):
                 while True:
                     word = self.capture_from_keypad(
                         t("Word %d") % (i + 1),
-                        charset,
+                        [charset],
                         autocomplete_fn,
                         possible_keys_fn,
                     )
@@ -368,7 +358,7 @@ class Login(Page):
 
         def possible_letters(prefix):
             if len(prefix) == 0:
-                return KEYPADS[LETTERS]
+                return LETTERS
             letter = prefix[0]
             if letter not in search_ranges:
                 return ""
@@ -411,8 +401,7 @@ class Login(Page):
 
     def load_passphrase(self):
         """Loads and returns a passphrase from keypad"""
-        passphrase = self.capture_from_keypad(t("Passphrase:"), MULTI)
-        return passphrase
+        return self.capture_from_keypad(t("Passphrase:"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2])
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
