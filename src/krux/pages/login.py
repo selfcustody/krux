@@ -25,7 +25,7 @@ import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 import urtypes
-from ..logging import LEVEL_NAMES, level_name, Logger, DEBUG
+from ..logging import LEVEL_NAMES, level_name, logger, DEBUG
 from ..metadata import VERSION
 from ..settings import settings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
@@ -573,7 +573,7 @@ class Login(Page):
                     else:  # BUTTON_PAGE_PREV
                         new_level = levels[(i - 1) % len(levels)]
                     settings.log.level = new_level
-                    self.ctx.log = Logger(settings.log.path, settings.log.level)
+                    logger.level = settings.log.level
                     break
         if settings.log.level == starting_level:
             return MENU_CONTINUE

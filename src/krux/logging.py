@@ -22,6 +22,7 @@
 import sys
 import io
 import os
+from .settings import settings
 
 NONE = 99
 ERROR = 40
@@ -59,13 +60,14 @@ class Logger:
         """Logs a message if the given level is equal to or higher than the logger's level"""
         if level < self.level:
             return
-        self._write("%s:%s\n" % (level_name(level), msg))
+        self._write("%s:%s" % (level_name(level), msg))
 
     def _write(self, msg):
+        print(msg)
         try:
             if self.file is None:
                 self.file = open(self.filepath, "w")
-            self.file.write(msg)
+            self.file.write(msg + "\n")
             self.file.flush()
         except:
             self.file = None
@@ -94,3 +96,5 @@ class Logger:
         buf = io.StringIO()
         sys.print_exception(e, buf)
         self.log(ERROR, msg + "\n" + buf.getvalue())
+
+logger = Logger(settings.log.path, settings.log.level)

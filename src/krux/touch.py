@@ -20,8 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .touchscreens.ft6x36 import FT6X36
 import time
+from .touchscreens.ft6x36 import FT6X36
+from .logging import logger as log
 
 SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
@@ -113,14 +114,14 @@ class Touch:
             data = self.touch_driver.current_point()
             if isinstance(data, tuple):
                 self.extract_index(data)
-            elif data is None:  # gets realease than return to ilde.
+            elif data is None:  # gets release then return to idle.
                 if self.state == self.release:
                     self.state = self.idle
                 elif self.state == self.press:
                     self.h_gesture(self.x_press_point, self.x_release_point)
                     self.state = self.release
             else:
-                print("Touch error: " + str(data))
+                log.warn("Touch error: " + str(data))
         return self.state
 
     def value(self):

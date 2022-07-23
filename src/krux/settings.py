@@ -23,7 +23,6 @@ try:
     import ujson as json
 except ImportError:
     import json
-from .logging import NONE
 
 SETTINGS_FILE = "/sd/settings.json"
 
@@ -105,7 +104,7 @@ class Log:
 
     namespace = "settings.log"
     path = Setting("path", "/sd/.krux.log")
-    level = Setting("level", NONE)
+    level = Setting("level", 99)
 
 
 class Printer:

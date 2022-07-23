@@ -79,9 +79,6 @@ class Camera:
             # fading.
             img.binary([(0, hist.get_threshold().value())], invert=True)
             res = img.find_qrcodes()
-            # Zoom out disabled now that image is presented before pre-processing and QR reading
-            # if board.config["type"] == "m5stickv":
-            #     img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen - test
             if len(res) > 0:
                 data = res[0].payload()
 

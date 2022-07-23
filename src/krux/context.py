@@ -21,8 +21,7 @@
 # THE SOFTWARE.
 import gc
 import board
-from .logging import Logger
-from .settings import settings
+from .logging import logger
 from .display import Display
 from .input import Input
 from .camera import Camera
@@ -35,7 +34,6 @@ class Context:
     """
 
     def __init__(self):
-        self.log = Logger(settings.log.path, settings.log.level)
         self.display = Display()
         self.input = Input()
         self.camera = Camera()
@@ -43,6 +41,10 @@ class Context:
         self.pmu = None
         self.printer = None
         self.wallet = None
+
+    @property
+    def log(self):
+        return logger
 
     def clear(self):
         """Clears all sensitive data from the context, resetting it"""

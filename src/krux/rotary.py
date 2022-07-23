@@ -24,6 +24,7 @@ import board
 from Maix import GPIO
 from fpioa_manager import fm
 import time
+from .logging import logger as log
 
 RIGHT = 1
 LEFT = 0
@@ -53,7 +54,8 @@ class RotaryEncoder:
         self.direction = RIGHT
         self.value = 0
         self.time_frame = 0
-        print("Encoder Initiated Pins:", pins[0], " and ", pins[1])
+        
+        log.info("Encoder Initiated Pins:", pins[0], " and ", pins[1])
 
     def process(self, new_state):
         """Sets new encoder state after position is changed"""
