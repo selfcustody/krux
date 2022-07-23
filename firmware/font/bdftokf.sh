@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2022 Tom J. Sun
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,40 +19,33 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import sys
-import math
+set -e
 
-BYTE_LEN = 2
+fonts=$1
+width=$2
+height=$3
 
-width = int(sys.argv[2])
-height = int(sys.argv[3])
+# Convert from bdf to hex for all fonts
+for font in $(echo $fonts | sed "s/,/ /g")
+do
+    poetry run python bdftohex.py $font.bdf > $font.hex
+    poetry run python hexfill.py $font.hex $width $height > tmp.hex && cat tmp.hex > $font.hex && rm tmp.hex
+done
 
-width_bytes = math.ceil(width / 8)
+# Merge all hex files into one
+hexes=()
+for font in $(echo $fonts | sed "s/,/ /g")
+do
+    hexes+=( $font.hex )
+done
+poetry run python hexmerge.py ${hexes[@]} > merged.hex
 
-with open(sys.argv[1], "r") as input_file:
-    # Read in a hex formatted bitmap font file
-    lines = input_file.readlines()
+# Convert merged hex to krux format
+poetry run python hextokf.py merged.hex $width $height
 
-    # Strip out the unicode code point prefix at the beginning of each line
-    glyphs = list(map(lambda line: line.split(":")[1].rstrip("\n"), lines))
-
-    # Use only the first $limit glyphs
-    limit = len(glyphs)
-    if len(sys.argv) == 5:
-        limit = int(sys.argv[4])
-
-    bitmap = []
-    for i in range(len(glyphs)):
-        if i >= limit:
-            break
-        glyph = glyphs[i]
-
-        rows = []
-        for x in range(width_bytes):
-            row = []
-            for y in range(height):
-                glyph_index = y * BYTE_LEN * width_bytes + (x * BYTE_LEN)
-                row.append("0x" + glyph[glyph_index : glyph_index + BYTE_LEN])
-            rows.append(",".join(row))
-        bitmap.append(",\n".join(rows))
-    print(",\n".join(bitmap))
+# Remove generated files
+rm merged.hex
+for font in $(echo $fonts | sed "s/,/ /g")
+do
+    rm $font.hex
+done

@@ -81,10 +81,7 @@ def height():
 def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
     def run():
         from kruxsim import devices
-        out = s
-        out = out.replace("¡", "█")
-        out = out.replace("¤", "₿")
-        text = devices.load_font(BOARD_CONFIG["type"]).render(out, True, color, bgcolor)
+        text = devices.load_font(BOARD_CONFIG["type"]).render(s, True, color, bgcolor)
         screen.blit(text, (width() - text.get_width() - x if BOARD_CONFIG["lcd"]["invert"] else x, y))
 
     pg.event.post(pg.event.Event(events.LCD_DRAW_STRING_EVENT, {"f": run}))

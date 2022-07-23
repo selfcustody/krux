@@ -6,6 +6,7 @@
 *.bin
 *.map
 *.hex
+*.kf
 *.dis
 *.exe
 

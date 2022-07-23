@@ -45,7 +45,9 @@ with open(sys.argv[1], "r") as input_file:
         map(
             lambda line: line[:5]
             + ("0" * (line_char_length - len(line)))
-            + line[5 : len(line)]
+            + line[5 : len(line)-1]
+            # + ("0" * (line_char_length - len(line)))
+            + "\n"
             if len(line) < line_char_length
             else line,
             lines,

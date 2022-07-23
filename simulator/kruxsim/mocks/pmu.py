@@ -2,8 +2,6 @@ import sys
 import time
 from unittest import mock
 import pygame as pg
-from kruxsim.mocks.board import BUTTON_A, BUTTON_B
-from kruxsim.mocks.fpioa_manager import fm_map
 
 sequence_executor = None
 
