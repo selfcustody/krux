@@ -2,13 +2,11 @@ from .shared_mocks import *
 
 
 def mock_modules(mocker):
-    mocker.patch("krux.context.Logger", new=mock.MagicMock())
-    mocker.patch("krux.context.settings", new=mock.MagicMock())
+    mocker.patch("krux.context.logger", new=mock.MagicMock())
     mocker.patch("krux.context.Display", new=mock.MagicMock())
     mocker.patch("krux.context.Input", new=mock.MagicMock())
     mocker.patch("krux.context.Camera", new=mock.MagicMock())
     mocker.patch("krux.context.Light", new=mock.MagicMock())
-    mocker.patch("krux.printers.Printer", new=mock.MagicMock())
 
 
 def test_init(mocker):

@@ -157,25 +157,22 @@ def test_to_landscape(mocker):
     from krux.display import Display
 
     d = Display()
-    mocker.spy(d, "clear")
 
     d.to_landscape()
 
-    d.clear.assert_called()
     krux.display.lcd.rotation.assert_called()
 
 
 def test_to_portrait(mocker):
     mocker.patch("krux.display.lcd", new=mock.MagicMock())
+    import krux
     from krux.display import Display
 
     d = Display()
-    mocker.spy(d, "clear")
-    mocker.spy(d, "initialize_lcd")
 
     d.to_portrait()
 
-    d.clear.assert_called()
+    krux.display.lcd.rotation.assert_called()
 
 
 def test_to_lines(mocker):
@@ -315,12 +312,13 @@ def test_draw_hcentered_text(mocker):
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.spy(d, "draw_string")
 
     d.draw_hcentered_text(
         "Hello world", 50, krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 
-    krux.display.draw_string.assert_called_with(
+    d.draw_string.assert_called_with(
         23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 

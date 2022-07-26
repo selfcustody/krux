@@ -22,8 +22,15 @@ def test_new_key_from_d6(mocker):
             [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # Done? Yes and proceed
             [BUTTON_PAGE, BUTTON_ENTER] +
-            # Confirm SHA, Move to Yes, Loading key, Skip passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Confirm roll string, Confirm SHA, Move to Yes, Loading key, Skip passphrase, Single-key
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
             "diet glad hat rural panther lawsuit act drop gallery urge where fit",
         ),
         (
@@ -35,15 +42,26 @@ def test_new_key_from_d6(mocker):
             [BUTTON_ENTER] +
             # 3 presses per roll
             [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
-            # Confirm SHA, Move to Yes, Loading key, Skip passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            # Confirm roll string, Confirm SHA, Move to Yes, Loading key, Skip passphrase, Single-key
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
             "day fog body unfold two filter bundle obey pause pattern penalty sweet shell quantum critic bridge stage patch purpose reflect flat domain post produce",
         ),
     ]
     for case in cases:
         ctx = mock.MagicMock(
             input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case[0])),
-            display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
+            display=mock.MagicMock(
+                font_width=12,
+                width=mock.MagicMock(return_value=480),
+                to_lines=mock.MagicMock(return_value=[""]),
+            ),
         )
         login = Login(ctx)
 
@@ -69,7 +87,11 @@ def test_new_key_from_d6(mocker):
     ]
     ctx = mock.MagicMock(
         input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=esc_keypad)),
-        display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
+        display=mock.MagicMock(
+            font_width=12,
+            width=mock.MagicMock(return_value=480),
+            to_lines=mock.MagicMock(return_value=[""]),
+        ),
     )
     login = Login(ctx)
     login.new_key_from_d6()
@@ -178,7 +200,11 @@ def test_load_key_from_text(mocker):
                 wait_for_button=mock.MagicMock(side_effect=case[0]),
                 touch=mock.MagicMock(current_index=mock.MagicMock(side_effect=case[2])),
             ),
-            display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
+            display=mock.MagicMock(
+                font_width=12,
+                width=mock.MagicMock(return_value=480),
+                to_lines=mock.MagicMock(return_value=[""]),
+            ),
         )
         login = Login(ctx)
         login.load_key_from_text()
@@ -204,7 +230,11 @@ def test_leaving_keypad(mocker):
     ]
     ctx = mock.MagicMock(
         input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=esc_keypad)),
-        display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
+        display=mock.MagicMock(
+            font_width=12,
+            width=mock.MagicMock(return_value=480),
+            to_lines=mock.MagicMock(return_value=[""]),
+        ),
     )
     login = Login(ctx)
     login.load_key_from_text()
@@ -257,7 +287,11 @@ def test_passphrase_give_up(mocker):
 
     ctx = mock.MagicMock(
         input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case)),
-        display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
+        display=mock.MagicMock(
+            font_width=12,
+            width=mock.MagicMock(return_value=480),
+            to_lines=mock.MagicMock(return_value=[""]),
+        ),
     )
     login = Login(ctx)
     login.load_key_from_text()
@@ -312,7 +346,11 @@ def test_passphrase(mocker):
 
     ctx = mock.MagicMock(
         input=mock.MagicMock(wait_for_button=mock.MagicMock(side_effect=case)),
-        display=mock.MagicMock(to_lines=mock.MagicMock(return_value=[""])),
+        display=mock.MagicMock(
+            font_width=12,
+            width=mock.MagicMock(return_value=480),
+            to_lines=mock.MagicMock(return_value=[""]),
+        ),
     )
     login = Login(ctx)
     login.load_key_from_text()
