@@ -68,6 +68,7 @@ ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
 preimport_ticks = time.ticks_ms()
 from krux.pages.login import Login
 from krux.pages.home import Home
+
 postimport_ticks = time.ticks_ms()
 
 # If importing happened in under 1s, sleep the difference so the logo

@@ -33,7 +33,7 @@ with open(sys.argv[1], "r", encoding="unicode_escape") as input_file:
         elif line.startswith("BITMAP"):
             parsing_bitmap = True
         elif line.startswith("ENDCHAR"):
-            if parsing_bitmap and hex_chars and codepoint > 0:
+            if parsing_bitmap and hex_chars and codepoint >= 0:
                 print("%04X:%s" % (codepoint, "".join(hex_chars).upper()))
             parsing_bitmap = False
             hex_chars = []
