@@ -54,8 +54,8 @@ class RotaryEncoder:
         self.direction = RIGHT
         self.value = 0
         self.time_frame = 0
-        
-        log.info("Encoder Initiated Pins:", pins[0], " and ", pins[1])
+
+        log.info("Encoder Initiated Pins: %d and %d" % (pins[0], pins[1]))
 
     def process(self, new_state):
         """Sets new encoder state after position is changed"""

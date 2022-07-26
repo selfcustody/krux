@@ -44,6 +44,7 @@ class Context:
 
     @property
     def log(self):
+        """Returns the default logger"""
         return logger
 
     def clear(self):

@@ -46,12 +46,12 @@ class Input:
 
     def __init__(self):
         self.entropy = 0
-        
+
         self.enter = None
         if "BUTTON_A" in board.config["krux"]["pins"]:
             fm.register(board.config["krux"]["pins"]["BUTTON_A"], fm.fpioa.GPIOHS21)
             self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
-            
+
         self.page = None
         self.page_prev = None
         if "ENCODER" in board.config["krux"]["pins"]:
@@ -63,23 +63,26 @@ class Input:
             if "BUTTON_B" in board.config["krux"]["pins"]:
                 fm.register(board.config["krux"]["pins"]["BUTTON_B"], fm.fpioa.GPIOHS22)
                 self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
-                
+
             if "BUTTON_C" in board.config["krux"]["pins"]:
                 fm.register(board.config["krux"]["pins"]["BUTTON_C"], fm.fpioa.GPIOHS0)
                 self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
             else:
                 try:
                     from pmu import PMU_Button
+
                     self.page_prev = PMU_Button()
                 except ImportError:
                     pass
-         
+
         # This flag, used in selection outlines, is set if buttons are being used
         self.buttons_active = True
         self.touch = None
         self.has_touch = board.config["krux"]["display"]["touch"]
         if self.has_touch:
-            self.touch = Touch(board.config["lcd"]["width"], board.config["lcd"]["height"])
+            self.touch = Touch(
+                board.config["lcd"]["width"], board.config["lcd"]["height"]
+            )
             self.buttons_active = False
 
     def enter_value(self):

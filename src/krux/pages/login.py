@@ -124,13 +124,13 @@ class Login(Page):
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
-            
+
             def delete_roll(buffer):
                 nonlocal rolls
                 if len(rolls) > 0:
                     rolls.pop()
                 return buffer
-            
+
             num_rolls = max_rolls
             while len(rolls) < max_rolls:
                 if len(rolls) == min_rolls:
@@ -142,13 +142,18 @@ class Login(Page):
                 roll = ""
                 while True:
                     dice_title = t("Rolls: %d\n") % len(rolls)
-                    entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
+                    entropy = (
+                        "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
+                    )
                     if len(entropy) <= 10:
                         dice_title += entropy
                     else:
                         dice_title += "..." + entropy[-10:]
                     roll = self.capture_from_keypad(
-                        dice_title, [roll_states], delete_key_fn=delete_roll, go_on_change=True
+                        dice_title,
+                        [roll_states],
+                        delete_key_fn=delete_roll,
+                        go_on_change=True,
                     )
                     if roll == ESC_KEY:
                         return MENU_CONTINUE
@@ -163,7 +168,7 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
             self.ctx.input.wait_for_button()
-                
+
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
                 hashlib.sha256(entropy_bytes).digest()
@@ -247,7 +252,7 @@ class Login(Page):
         test_phrase_sentinel=None,
         autocomplete_fn=None,
         possible_keys_fn=None,
-    ):        
+    ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
@@ -401,7 +406,9 @@ class Login(Page):
 
     def load_passphrase(self):
         """Loads and returns a passphrase from keypad"""
-        return self.capture_from_keypad(t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2])
+        return self.capture_from_keypad(
+            t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+        )
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""

@@ -97,4 +97,5 @@ class Logger:
         sys.print_exception(e, buf)
         self.log(ERROR, msg + "\n" + buf.getvalue())
 
+
 logger = Logger(settings.log.path, settings.log.level)

@@ -30,6 +30,7 @@ SWIPE_LEFT = 2
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
 
+
 class Touch:
     """Touch is a singleton API to interact with touchscreen driver"""
 

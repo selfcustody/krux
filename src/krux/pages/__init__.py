@@ -47,7 +47,8 @@ DEL = "<"
 GO = t("Go")
 ESC = t("Esc")
 MORE = t("ABC")
-FIXED_KEYS = 3 # More only appears when there are multiple keysets
+FIXED_KEYS = 3  # More only appears when there are multiple keysets
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -79,7 +80,13 @@ class Page:
         return None
 
     def capture_from_keypad(
-        self, title, keysets, autocomplete_fn=None, possible_keys_fn=None, delete_key_fn=None, go_on_change=False
+        self,
+        title,
+        keysets,
+        autocomplete_fn=None,
+        possible_keys_fn=None,
+        delete_key_fn=None,
+        go_on_change=False,
     ):
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
@@ -89,7 +96,9 @@ class Page:
         while True:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
-            if (len(buffer) + 1) * self.ctx.display.font_width < self.ctx.display.width():
+            if (
+                len(buffer) + 1
+            ) * self.ctx.display.font_width < self.ctx.display.width():
                 self.ctx.display.draw_hcentered_text(title, offset_y)
                 offset_y += self.ctx.display.font_height * 3 // 2
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
@@ -124,7 +133,7 @@ class Page:
                 else:
                     buffer += pad.keys[pad.cur_key_index]
                     changed = True
-                    
+
                     # Don't autocomplete if deleting
                     if autocomplete_fn is not None:
                         new_buffer = autocomplete_fn(buffer)
@@ -258,12 +267,16 @@ class Page:
                 for i, word in enumerate(word_list[12:]):
                     offset_x = DEFAULT_PADDING
                     offset_y = 40 + (i * self.ctx.display.font_height)
-                    self.ctx.display.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
+                    self.ctx.display.draw_string(
+                        offset_x, offset_y, word, lcd.WHITE, lcd.BLACK
+                    )
             else:
                 for i, word in enumerate(word_list[12:]):
                     offset_x = self.ctx.display.width() // 2
                     offset_y = 40 + (i * self.ctx.display.font_height)
-                    self.ctx.display.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
+                    self.ctx.display.draw_string(
+                        offset_x, offset_y, word, lcd.WHITE, lcd.BLACK
+                    )
 
     def print_qr_prompt(self, data, qr_format):
         """Prompts the user to print a QR code in the specified format
@@ -446,7 +459,9 @@ class Menu:
         # draw dividers and outline
         for i, y in enumerate(Page.y_keypad_map[:-1]):
             if i and not self.ctx.input.buttons_active:
-                self.ctx.display.fill_rectangle(0, y, self.ctx.display.width(), 1, lcd.DARKGREY)
+                self.ctx.display.fill_rectangle(
+                    0, y, self.ctx.display.width(), 1, lcd.DARKGREY
+                )
             height = Page.y_keypad_map[i + 1] - y
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.outline(
@@ -490,10 +505,11 @@ class Menu:
                     delta_y - 2,
                 )
             offset_y += delta_y
-    
+
+
 class Keypad:
     """Controls keypad creation and management"""
-    
+
     def __init__(self, ctx, keysets):
         self.ctx = ctx
         self.keysets = keysets
@@ -508,35 +524,42 @@ class Keypad:
     def keys(self):
         """Returns the current set of keys being displayed"""
         return self.keysets[self.keyset_index]
-    
+
     @property
     def total_keys(self):
+        """Returns the total number of keys in the current keyset, including fixed"""
         return len(self.keys) + FIXED_KEYS + (1 if len(self.keysets) > 1 else 0)
 
     @property
     def more_index(self):
+        """Returns the index of the "More" key"""
         return len(self.keys)
-    
+
     @property
     def del_index(self):
+        """Returns the index of the "Del" key"""
         return len(self.keys) + (1 if len(self.keysets) > 1 else 0)
-    
+
     @property
     def esc_index(self):
+        """Returns the index of the "Esc" key"""
         return self.del_index + 1
-    
+
     @property
     def go_index(self):
+        """Returns the index of the "Go" key"""
         return self.esc_index + 1
-    
+
     @property
     def width(self):
+        """Returns the needed width for the current keyset"""
         return math.floor(math.sqrt(self.total_keys))
-    
+
     @property
     def height(self):
+        """Returns the needed height for the current keyset"""
         return math.ceil((self.total_keys) / self.width)
-    
+
     def reset(self):
         """Reset parameters when switching a multi-keypad"""
         self.key_h_spacing, self.key_v_spacing = self.map_keys_array(
@@ -600,7 +623,9 @@ class Keypad:
                         and self.keys[key_index] not in possible_keys
                     ):
                         # faded text
-                        self.ctx.display.draw_string(key_offset_x, offset_y, key, lcd.LIGHTBLACK)
+                        self.ctx.display.draw_string(
+                            key_offset_x, offset_y, key, lcd.LIGHTBLACK
+                        )
                     else:
                         if self.ctx.input.has_touch:
                             self.ctx.display.outline(
@@ -610,7 +635,9 @@ class Keypad:
                                 self.key_v_spacing - 2,
                                 lcd.DARKGREY,
                             )
-                        self.ctx.display.draw_string(key_offset_x, offset_y, key, lcd.WHITE)
+                        self.ctx.display.draw_string(
+                            key_offset_x, offset_y, key, lcd.WHITE
+                        )
                     if (
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active

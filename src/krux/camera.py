@@ -70,9 +70,9 @@ class Camera:
             hist = img.get_histogram()
             if "histogram" not in str(type(hist)):
                 continue
-            
+
             lcd.display(img)
-            
+
             # Convert the image to black and white by using Otsu's thresholding.
             # This is done to account for low light and glare conditions, as well as
             # for imperfections in (printed) QR codes such as spots, blotches, streaks, and

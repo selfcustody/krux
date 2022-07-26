@@ -23,7 +23,6 @@ import time
 import lcd
 import board
 from machine import I2C
-from .i18n import t
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
@@ -33,7 +32,7 @@ if "qr_colors" in board.config["krux"]["display"]:
 else:
     QR_DARK_COLOR = 0x0000
     QR_LIGHT_COLOR = 0xFFFF
-    
+
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
@@ -257,7 +256,7 @@ class Display:
     def clear(self):
         """Clears the display"""
         lcd.clear()
-        
+
     def outline(self, x, y, width, height, color=lcd.WHITE):
         """Draws an outline rectangle from given coordinates"""
         self.fill_rectangle(x, y, width + 1, 1, color)  # up
@@ -271,7 +270,7 @@ class Display:
             x = self.width() - x
             x -= width
         lcd.fill_rectangle(x, y, width, height, color)
-            
+
     def draw_string(self, x, y, text, color, bg_color=lcd.BLACK):
         """Draws a string to the screen"""
         if board.config["lcd"]["invert"]:

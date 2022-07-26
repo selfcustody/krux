@@ -84,8 +84,8 @@ def validate_translation_files():
         passed = passed and valid
     if not passed:
         sys.exit(1)
-            
-            
+
+
 def bake_translations():
     """Bakes all translations into a translations.py file inside the krux namespace"""
     translation_table = {}
@@ -101,28 +101,28 @@ def bake_translations():
             translations = load_translations(translation_file)
             lookup = {}
             for slug, translation in list(translations.items()):
-                lookup[binascii.crc32(slug.encode('utf-8'))] = translation
+                lookup[binascii.crc32(slug.encode("utf-8"))] = translation
             translation_table[basename(translation_filename).split(".")[0]] = lookup
 
-    with open(
-        join(SRC_DIR, "krux", "translations.py"), "w"
-    ) as translations:
+    with open(join(SRC_DIR, "krux", "translations.py"), "w") as translations:
         translations.write("# pylint: disable=C0301\n")
         translations.write("translation_table = ")
         translations.write(repr(translation_table))
         translations.write("\n")
-        
+
+
 def create_translation_file(locale):
     """Creates a new translation file for the given locale with stubbed-out translations"""
     translations = {}
     slugs = find_translation_slugs()
     for slug in slugs:
         translations[slug.replace("\\n", "\n")] = ""
-    with open(
-        join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w"
-    ) as translation_file:
-        translation_file.write(json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False))
-        
+    with open(join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w") as translation_file:
+        translation_file.write(
+            json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
+        )
+
+
 def prettify_translation_files():
     """Sorts and pretty-prints all translation files"""
     translation_filenames = [
@@ -139,8 +139,11 @@ def prettify_translation_files():
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "w"
         ) as translation_file:
-            translation_file.write(json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False))
-            
+            translation_file.write(
+                json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
+            )
+
+
 def main():
     """Main handler"""
 
