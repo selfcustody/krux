@@ -155,33 +155,33 @@ class Input:
 
         if self.enter_value() == PRESSED:
             # Wait for release
-            time_frame = time.ticks_ms()
             while self.enter_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-                if time.ticks_ms() > time_frame + LONG_PRESS_PERIOD:
-                    return SWIPE_LEFT
             if self.buttons_active:
                 return BUTTON_ENTER
             self.buttons_active = True
 
         if self.page_value() == PRESSED:
+            start_time = time.ticks_ms()
             # Wait for release
-            time_frame = time.ticks_ms()
             while self.page_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-                if time.ticks_ms() > time_frame + LONG_PRESS_PERIOD:
+                if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
                     return SWIPE_LEFT
             if self.buttons_active:
                 return BUTTON_PAGE
             self.buttons_active = True
 
         if self.page_prev_value() == PRESSED:
+            start_time = time.ticks_ms()
             # Wait for release
             while self.page_prev_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
+                if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
+                    return SWIPE_RIGHT
             if self.buttons_active:
                 return BUTTON_PAGE_PREV
             self.buttons_active = True
