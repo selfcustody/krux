@@ -1,7 +1,4 @@
-import sys
-import time
 from unittest import mock
-import importlib
 
 
 def get_mock_open(files: dict[str, str]):
@@ -195,7 +192,12 @@ def board_amigo():
                     "I2C_SDA": 27,
                     "I2C_SCL": 24,
                 },
-                "display": {"touch": True, "font": [12, 24], "orientation": [1, 0]},
+                "display": {
+                    "touch": True,
+                    "font": [12, 24],
+                    "orientation": [1, 0],
+                    "qr_colors": [0, 6342],
+                },
                 "sensor": {"flipped": True, "lenses": False},
             },
         }
@@ -219,66 +221,13 @@ def board_dock():
             },
             "krux": {
                 "pins": {"BUTTON_A": 9, "ENCODER": [10, 11]},
-                "display": {"touch": False, "font": [8, 16], "orientation": [1, 0]},
-                "sensor": {"flipped": True, "lenses": True},
+                "display": {
+                    "touch": False,
+                    "font": [8, 16],
+                    "orientation": [1, 0],
+                    "qr_colors": [0, 6342],
+                },
+                "sensor": {"flipped": True, "lenses": False},
             },
         }
     )
-
-
-# Create mock modules for all the micropython-specific modules
-# that are not available in regular python
-importlib.invalidate_caches()
-
-if "flash" in sys.modules:
-    del sys.modules["flash"]
-sys.modules["flash"] = mock.MagicMock()
-
-if "secp256k1" in sys.modules:
-    del sys.modules["secp256k1"]
-from embit.util import secp256k1
-
-sys.modules["secp256k1"] = mock.MagicMock(wraps=secp256k1)
-
-if "machine" in sys.modules:
-    del sys.modules["machine"]
-sys.modules["machine"] = mock.MagicMock()
-
-if "sensor" in sys.modules:
-    del sys.modules["sensor"]
-sys.modules["sensor"] = mock.MagicMock()
-
-if "lcd" in sys.modules:
-    del sys.modules["lcd"]
-sys.modules["lcd"] = mock.MagicMock()
-
-if "Maix" in sys.modules:
-    del sys.modules["Maix"]
-sys.modules["Maix"] = mock.MagicMock()
-
-if "fpioa_manager" in sys.modules:
-    del sys.modules["fpioa_manager"]
-sys.modules["fpioa_manager"] = mock.MagicMock()
-
-if "qrcode" in sys.modules:
-    del sys.modules["qrcode"]
-sys.modules["qrcode"] = mock.MagicMock(
-    encode_to_string=lambda data: ("0" * (len(data) - 10)) + "\n"
-)
-
-if "board" in sys.modules:
-    del sys.modules["board"]
-sys.modules["board"] = board_m5stickv()
-
-if "urandom" in sys.modules:
-    del sys.modules["urandom"]
-sys.modules["urandom"] = sys.modules["random"]
-
-if "pmu" in sys.modules:
-    del sys.modules["pmu"]
-sys.modules["pmu"] = mock.MagicMock()
-
-setattr(time, "sleep_ms", getattr(time, "sleep_ms", mock.MagicMock()))
-setattr(time, "ticks_ms", getattr(time, "ticks_ms", mock.MagicMock()))
-
-setattr(sys, "print_exception", getattr(sys, "print_exception", mock.MagicMock()))

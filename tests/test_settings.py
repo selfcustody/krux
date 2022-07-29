@@ -1,7 +1,4 @@
-from unittest import mock
-
-
-def test_init(mocker):
+def test_init(mocker, m5stickv):
     from krux.settings import Settings
 
     s = Settings()
@@ -9,7 +6,7 @@ def test_init(mocker):
     assert isinstance(s, Settings)
 
 
-def test_store_init(mocker):
+def test_store_init(mocker, m5stickv):
     from krux.settings import Store, SETTINGS_FILE
 
     cases = [
@@ -17,7 +14,7 @@ def test_store_init(mocker):
         ("""{"settings":{"network":"test"}}""", {"settings": {"network": "test"}}),
     ]
     for case in cases:
-        mo = mock.mock_open(read_data=case[0])
+        mo = mocker.mock_open(read_data=case[0])
         mocker.patch("builtins.open", mo)
         s = Store()
 
@@ -26,8 +23,8 @@ def test_store_init(mocker):
         assert s.settings == case[1]
 
 
-def test_store_get(mocker):
-    mo = mock.mock_open()
+def test_store_get(mocker, m5stickv):
+    mo = mocker.mock_open()
     mocker.patch("builtins.open", mo)
     from krux.settings import Store
 
@@ -45,8 +42,8 @@ def test_store_get(mocker):
         assert s.get(case[0], case[1], case[3]) == case[2]
 
 
-def test_store_set(mocker):
-    mo = mock.mock_open()
+def test_store_set(mocker, m5stickv):
+    mo = mocker.mock_open()
     mocker.patch("builtins.open", mo)
     from krux.settings import Store
 
@@ -68,8 +65,8 @@ def test_store_set(mocker):
         assert s.get(case[0], case[1], "default") == case[4]
 
 
-def test_setting(mocker):
-    mo = mock.mock_open()
+def test_setting(mocker, m5stickv):
+    mo = mocker.mock_open()
     mocker.patch("builtins.open", mo)
     from krux.settings import Setting
 
