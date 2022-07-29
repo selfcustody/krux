@@ -30,8 +30,12 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
     vb.memory = 4096
     vb.customize ['modifyvm', :id, '--usb', 'on']
+    # M5StickV https://devicehunt.com/view/type/usb/vendor/0403/device/6001
     vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'FT232', '--vendorid', '0403', '--productid', '6001']
+    # Amigo + Bit https://devicehunt.com/view/type/usb/vendor/0403/device/6010
     vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'FT2232', '--vendorid', '0403', '--productid', '6010']
+    # Dock https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
+    vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'CH340', '--vendorid', '1a86', '--productid', '7523']
   end
 end
 
