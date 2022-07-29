@@ -98,7 +98,7 @@ def bake_translations():
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r"
         ) as translation_file:
-            translations = load_translations(translation_file)
+            translations = json.load(translation_file)
             lookup = {}
             for slug, translation in list(translations.items()):
                 lookup[binascii.crc32(slug.encode("utf-8"))] = translation

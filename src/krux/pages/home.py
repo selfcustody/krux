@@ -75,6 +75,7 @@ class Home(Page):
 
     def wallet(self):
         """Handler for the 'wallet' menu item"""
+        self.ctx.display.clear()
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(t("Wallet not found."))
             if self.prompt(t("Load one?"), self.ctx.display.bottom_prompt_line):
@@ -94,6 +95,7 @@ class Home(Page):
         try:
             wallet = Wallet(self.ctx.wallet.key)
             wallet.load(wallet_data, qr_format)
+            self.ctx.display.clear()
             self.display_wallet(wallet, include_qr=False)
             if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
                 self.ctx.wallet = wallet
