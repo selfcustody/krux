@@ -948,91 +948,58 @@ def test_printer_on_amigo(mocker, amigo):
 
 def test_locale(mocker, m5stickv):
     import krux
-
     from krux.pages.login import Login
-    from krux.settings import I18n
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
-    cases = [
-        (
-            {"Locale\n%s": "Locale\n%s"},
-            [
-                I18n.locales[(I18n.locales.index("en-US") + i) % len(I18n.locales)]
-                for i in range(len(I18n.locales))
-            ],
-        ),
-        (None, ["en-US" for _ in range(len(I18n.locales))]),
-    ]
-    for case in cases:
-        mocker.patch(
-            "krux.pages.login.translations", new=mocker.MagicMock(return_value=case[0])
-        )
-
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(
-                    side_effect=(
-                        BUTTON_PAGE,
-                        BUTTON_PAGE,
-                        BUTTON_PAGE,
-                        BUTTON_PAGE,
-                        BUTTON_PAGE,
-                        BUTTON_PAGE,
-                        BUTTON_ENTER,
-                    )
+    ctx = mocker.MagicMock(
+        input=mocker.MagicMock(
+            wait_for_button=mocker.MagicMock(
+                side_effect=(
+                    BUTTON_PAGE,
+                    BUTTON_PAGE_PREV,
+                    BUTTON_ENTER,
                 )
-            ),
-            display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
-        )
-        login = Login(ctx)
+            )
+        ),
+        display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
+    )
+    login = Login(ctx)
 
-        login.locale()
+    login.locale()
 
-        assert ctx.input.wait_for_button.call_count == 7
-        ctx.display.draw_centered_text.assert_has_calls(
-            [mocker.call("Locale\n%s" % locale) for locale in case[1]]
-        )
-        assert krux.pages.login.settings.i18n.locale == "en-US"
+    assert ctx.input.wait_for_button.call_count == 3
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call("Locale\nen-US"),
+            mocker.call("Idioma\nes-MX"),
+            mocker.call("Locale\nen-US"),
+        ]
+    )
+    assert krux.pages.login.settings.i18n.locale == "en-US"
 
 
-def test_locale_on_amigo(mocker, amigo):
+def test_locale_with_settings_pad(mocker, amigo):
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
-    from krux.settings import I18n
 
-    cases = [
-        (
-            {"Locale\n%s": "Locale\n%s"},
-            [
-                I18n.locales[(I18n.locales.index("en-US") + i) % len(I18n.locales)]
-                for i in range(len(I18n.locales))
-            ],
-        ),
-        (None, ["en-US" for _ in range(len(I18n.locales))]),
-    ]
-    for case in cases:
-        mocker.patch(
-            "krux.pages.login.translations", new=mocker.MagicMock(return_value=case[0])
+    # page_prev, page, enter
+    index_s_e = (0, 2, 1)
+    ctx = mocker.MagicMock(
+        input=mocker.MagicMock(
+            touch=mocker.MagicMock(
+                current_index=mocker.MagicMock(side_effect=index_s_e)
+            ),
+            wait_for_button=mocker.MagicMock(return_value=BUTTON_TOUCH),
         )
+    )
+    login = Login(ctx)
 
-        # page_prev, page, enter
-        index_s_e = (0, 2, 1)
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                touch=mocker.MagicMock(
-                    current_index=mocker.MagicMock(side_effect=index_s_e)
-                ),
-                wait_for_button=mocker.MagicMock(return_value=BUTTON_TOUCH),
-            )
-        )
-        login = Login(ctx)
+    login.locale()
 
-        login.locale()
-
-        assert ctx.input.wait_for_button.call_count == len(index_s_e)
-        # asser if locales were called already done with m5stickV
-        assert krux.pages.login.settings.i18n.locale == "en-US"
+    assert ctx.input.wait_for_button.call_count == len(index_s_e)
+    # assert if locales were called was already done with m5stickV
+    assert krux.pages.login.settings.i18n.locale == "en-US"
 
 
 def test_debug(mocker, m5stickv):

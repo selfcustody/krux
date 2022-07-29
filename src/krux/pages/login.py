@@ -33,7 +33,7 @@ from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word, to_mnemonic_words
 from ..wallet import Wallet
 from ..printers import create_printer
-from ..i18n import t, translations
+from ..i18n import t
 from . import (
     Page,
     Menu,
@@ -545,9 +545,7 @@ class Login(Page):
                         new_locale = locales[(i + 1) % len(locales)]
                     else:  # BUTTON_PAGE_PREV
                         new_locale = locales[(i - 1) % len(locales)]
-                    # Don't let the user change the locale if translations can't be looked up
-                    if translations(new_locale):
-                        settings.i18n.locale = new_locale
+                    settings.i18n.locale = new_locale
                     break
         if settings.i18n.locale == starting_locale:
             return MENU_CONTINUE
