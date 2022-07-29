@@ -27,11 +27,7 @@ from machine import I2C
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 PORTRAIT, LANDSCAPE = board.config["krux"]["display"]["orientation"]
-if "qr_colors" in board.config["krux"]["display"]:
-    QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
-else:
-    QR_DARK_COLOR = 0x0000
-    QR_LIGHT_COLOR = 0xFFFF
+QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
 
 MAX_BACKLIGHT = 8
@@ -143,7 +139,7 @@ class Display:
         return lcd.height()
 
     def usable_width(self):
-        """Returns avaliable width considering sides padding"""
+        """Returns available width considering side padding"""
         return self.width() - 2 * DEFAULT_PADDING
 
     def height(self):
