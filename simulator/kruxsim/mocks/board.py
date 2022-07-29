@@ -53,7 +53,7 @@ def register_device(device):
                 "BUTTON_B": 37
             },
             "krux": {
-                "pins":{
+                "pins": {
                     "BUTTON_A": 36,
                     "BUTTON_B": 37,
                     # "LED_W": 7,
@@ -115,7 +115,7 @@ def register_device(device):
                 "SPI_CS": 12
             },
             "krux": {
-                "pins":{
+                "pins": {
                     "BUTTON_A": 16,
                     "BUTTON_B": 20,
                     "BUTTON_C": 23,
@@ -127,6 +127,7 @@ def register_device(device):
                     "touch": True,
                     "font": [12, 24],
                     "orientation":[1, 0],
+                    "qr_colors": [0, 6342]
                 },
                 "sensor": {
                     "flipped": True,
@@ -175,7 +176,7 @@ def register_device(device):
                 "SPI_CS": 12
             },
             "krux": {
-                "pins":{
+                "pins": {
                     "BUTTON_A": 16,
                     "BUTTON_B": 20,
                     "BUTTON_C": 23,
@@ -186,7 +187,8 @@ def register_device(device):
                 "display": {
                     "touch": True,
                     "font": [12, 24],
-                    "orientation": [1, 0]
+                    "orientation": [1, 0],
+                    "qr_colors": [0, 65535]
                 },
                 "sensor": {
                     "flipped": True,
