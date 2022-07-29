@@ -1,26 +1,33 @@
-from .shared_mocks import *
-import os
-
-TEST_LOG_PATH = os.path.join(os.path.dirname(__file__), "krux.log")
+import pytest
 
 
-def test_init():
+@pytest.fixture
+def tdata(mocker):
+    import os
+    from collections import namedtuple
+
+    TEST_LOG_PATH = os.path.join(os.path.dirname(__file__), "krux.log")
+
+    return namedtuple("TestData", ["TEST_LOG_PATH"])(TEST_LOG_PATH)
+
+
+def test_init(mocker, m5stickv, tdata):
     from krux.logging import Logger, DEBUG
 
-    logger = Logger(TEST_LOG_PATH, DEBUG)
+    logger = Logger(tdata.TEST_LOG_PATH, DEBUG)
 
     assert isinstance(logger, Logger)
-    assert logger.filepath == TEST_LOG_PATH
+    assert logger.filepath == tdata.TEST_LOG_PATH
     assert logger.level == DEBUG
 
 
-def test_log(mocker):
-    m = mock.mock_open()
+def test_log(mocker, m5stickv, tdata):
+    m = mocker.mock_open()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, DEBUG, INFO, WARN, ERROR, NONE
 
     for i, level in enumerate([DEBUG, INFO, WARN, ERROR, NONE]):
-        logger = Logger(TEST_LOG_PATH, level)
+        logger = Logger(tdata.TEST_LOG_PATH, level)
 
         cases = [
             (DEBUG, "test", "DEBUG:test\n"),
@@ -37,23 +44,23 @@ def test_log(mocker):
                 m().write.assert_not_called()
 
 
-def test_log_fails_quietly_if_file_unavailable(mocker):
-    m = mock.mock_open().side_effect = IOError()
+def test_log_fails_quietly_if_file_unavailable(mocker, m5stickv, tdata):
+    m = mocker.mock_open().side_effect = IOError()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, DEBUG
 
-    logger = Logger(TEST_LOG_PATH, DEBUG)
+    logger = Logger(tdata.TEST_LOG_PATH, DEBUG)
 
     logger.log(DEBUG, "test")
     assert logger.file is None
 
 
-def test_debug(mocker):
-    m = mock.mock_open()
+def test_debug(mocker, m5stickv, tdata):
+    m = mocker.mock_open()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, DEBUG
 
-    logger = Logger(TEST_LOG_PATH, DEBUG)
+    logger = Logger(tdata.TEST_LOG_PATH, DEBUG)
     mocker.spy(logger, "log")
 
     logger.debug("test")
@@ -61,12 +68,12 @@ def test_debug(mocker):
     logger.log.assert_called_with(DEBUG, "test")
 
 
-def test_info(mocker):
-    m = mock.mock_open()
+def test_info(mocker, m5stickv, tdata):
+    m = mocker.mock_open()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, INFO
 
-    logger = Logger(TEST_LOG_PATH, INFO)
+    logger = Logger(tdata.TEST_LOG_PATH, INFO)
     mocker.spy(logger, "log")
 
     logger.info("test")
@@ -74,12 +81,12 @@ def test_info(mocker):
     logger.log.assert_called_with(INFO, "test")
 
 
-def test_warn(mocker):
-    m = mock.mock_open()
+def test_warn(mocker, m5stickv, tdata):
+    m = mocker.mock_open()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, WARN
 
-    logger = Logger(TEST_LOG_PATH, WARN)
+    logger = Logger(tdata.TEST_LOG_PATH, WARN)
     mocker.spy(logger, "log")
 
     logger.warn("test")
@@ -87,12 +94,12 @@ def test_warn(mocker):
     logger.log.assert_called_with(WARN, "test")
 
 
-def test_error(mocker):
-    m = mock.mock_open()
+def test_error(mocker, m5stickv, tdata):
+    m = mocker.mock_open()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, ERROR
 
-    logger = Logger(TEST_LOG_PATH, ERROR)
+    logger = Logger(tdata.TEST_LOG_PATH, ERROR)
     mocker.spy(logger, "log")
 
     logger.error("test")
@@ -100,12 +107,12 @@ def test_error(mocker):
     logger.log.assert_called_with(ERROR, "test")
 
 
-def test_exception(mocker):
-    m = mock.mock_open()
+def test_exception(mocker, m5stickv, tdata):
+    m = mocker.mock_open()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, ERROR
 
-    logger = Logger(TEST_LOG_PATH, ERROR)
+    logger = Logger(tdata.TEST_LOG_PATH, ERROR)
     mocker.spy(logger, "log")
 
     logger.exception("test")

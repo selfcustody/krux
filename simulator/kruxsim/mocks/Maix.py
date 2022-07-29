@@ -2,7 +2,7 @@ import sys
 import time
 from unittest import mock
 import pygame as pg
-from kruxsim.mocks.board import BUTTON_A, BUTTON_B
+from kruxsim.mocks.board import BUTTON_A, BUTTON_B, BUTTON_C
 from kruxsim.mocks.fpioa_manager import fm_map
 
 sequence_executor = None
@@ -66,7 +66,9 @@ class GPIO:
         if pin == BUTTON_A:
             self.key = pg.K_RETURN
         if pin == BUTTON_B:
-            self.key = pg.K_SPACE
+            self.key = pg.K_DOWN
+        if pin == BUTTON_C:
+            self.key = pg.K_UP
 
     def value(self):
         if not self.key:

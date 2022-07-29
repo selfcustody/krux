@@ -37,7 +37,6 @@ FT_ID_G_THGROUP = 0x80
 FT_ID_SR_PERIODACTIVE = 0x88
 FT6X36_ADDR = 0x38
 
-TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
 TOUCH_THRESHOLD = 22  # Default 22
 
 

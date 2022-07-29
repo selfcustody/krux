@@ -1,5 +1,4 @@
 import pytest
-from ..shared_mocks import *
 
 TEST_QR = """
 00000000000000000000000000000000000
@@ -40,23 +39,36 @@ TEST_QR = """
 """.strip()
 
 
-class MockUART(mock.MagicMock):
-    UART2 = 0
+@pytest.fixture
+def mock_uart_cls(mocker):
+    class MockUART(mocker.MagicMock):
+        UART2 = 0
 
-    def read(self, bytes):
-        return 0b00000000.to_bytes(1, "big")
+        def read(self, bytes):
+            return 0b00000000.to_bytes(1, "big")
 
-    def write(self, bytes):
-        pass
+        def write(self, bytes):
+            pass
 
-
-class MockUARTNoPaper(MockUART):
-    def read(self, bytes):
-        return 0b00000100.to_bytes(1, "big")
+    return MockUART
 
 
-def test_init(mocker):
-    mocker.patch("krux.printers.thermal.UART", new=MockUART)
+@pytest.fixture
+def mock_uart_no_paper_cls(mocker):
+    class MockUARTNoPaper(mocker.MagicMock):
+        UART2 = 0
+
+        def read(self, bytes):
+            return 0b00000100.to_bytes(1, "big")
+
+        def write(self, bytes):
+            pass
+
+    return MockUARTNoPaper
+
+
+def test_init(mocker, m5stickv, mock_uart_cls):
+    mocker.patch("krux.printers.thermal.UART", new=mock_uart_cls)
     from krux.printers.thermal import AdafruitPrinter
 
     p = AdafruitPrinter()
@@ -64,16 +76,16 @@ def test_init(mocker):
     assert isinstance(p, AdafruitPrinter)
 
 
-def test_init_fails_when_no_paper(mocker):
-    mocker.patch("krux.printers.thermal.UART", new=MockUARTNoPaper)
+def test_init_fails_when_no_paper(mocker, m5stickv, mock_uart_no_paper_cls):
+    mocker.patch("krux.printers.thermal.UART", new=mock_uart_no_paper_cls)
     from krux.printers.thermal import AdafruitPrinter
 
     with pytest.raises(ValueError):
         AdafruitPrinter()
 
 
-def test_clear(mocker):
-    mocker.patch("krux.printers.thermal.UART", new=MockUART)
+def test_clear(mocker, m5stickv, mock_uart_cls):
+    mocker.patch("krux.printers.thermal.UART", new=mock_uart_cls)
     from krux.printers.thermal import AdafruitPrinter
 
     p = AdafruitPrinter()
@@ -84,8 +96,8 @@ def test_clear(mocker):
     assert p.write_bytes.call_count == 5
 
 
-def test_print_qr_code(mocker):
-    mocker.patch("krux.printers.thermal.UART", new=MockUART)
+def test_print_qr_code(mocker, m5stickv, mock_uart_cls):
+    mocker.patch("krux.printers.thermal.UART", new=mock_uart_cls)
     import krux
     from krux.printers.thermal import AdafruitPrinter
 

@@ -1,7 +1,6 @@
-from .shared_mocks import *
+def test_init_without_pmu(mocker, m5stickv):
+    import sys
 
-
-def test_init_without_pmu():
     if "pmu" in sys.modules:
         del sys.modules["pmu"]
     from krux.power import PowerManager
@@ -12,7 +11,7 @@ def test_init_without_pmu():
     assert manager.pmu is None
 
 
-def test_shutdown_without_pmu(mocker):
+def test_shutdown_without_pmu(mocker, m5stickv):
     mocker.patch("sys.exit")
     import krux
     from krux.power import PowerManager
@@ -25,7 +24,7 @@ def test_shutdown_without_pmu(mocker):
     krux.power.sys.exit.assert_called()
 
 
-def test_reboot_without_pmu(mocker):
+def test_reboot_without_pmu(mocker, m5stickv):
     mocker.patch("sys.exit")
     import krux
     from krux.power import PowerManager

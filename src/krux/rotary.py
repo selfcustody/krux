@@ -24,10 +24,11 @@ import board
 from Maix import GPIO
 from fpioa_manager import fm
 import time
+from .logging import logger as log
 
 RIGHT = 1
 LEFT = 0
-DEBOUNCE = 100  # miliseconds
+DEBOUNCE = 100  # milliseconds
 
 
 def __handler__(pin_num=None):
@@ -53,7 +54,8 @@ class RotaryEncoder:
         self.direction = RIGHT
         self.value = 0
         self.time_frame = 0
-        print("Encoder Initiated Pins:", pins[0], " and ", pins[1])
+
+        log.info("Encoder Initiated Pins: %d and %d" % (pins[0], pins[1]))
 
     def process(self, new_state):
         """Sets new encoder state after position is changed"""
@@ -100,13 +102,13 @@ encoder = RotaryEncoder()  # Singleton
 
 
 class EncoderPage:
-    """Encoder class that mimics Krux Page GPIO Button beavior"""
+    """Encoder class that mimics Krux Page GPIO Button behavior"""
 
     def __init__(self):
         pass
 
     def value(self):
-        """Returns encoder status while mimics Krux GPIO Buttons beavior"""
+        """Returns encoder status while mimics Krux GPIO Buttons behavior"""
         if encoder.value > 0:
             encoder.value -= 1
             return 0
@@ -114,13 +116,13 @@ class EncoderPage:
 
 
 class EncoderPagePrev:
-    """Encoder class that mimics Krux Page_prev GPIO Button beavior"""
+    """Encoder class that mimics Krux Page_prev GPIO Button behavior"""
 
     def __init__(self):
         pass
 
     def value(self):
-        """Returns encoder status while mimics Krux GPIO Buttons beavior"""
+        """Returns encoder status while mimics Krux GPIO Buttons behavior"""
         if encoder.value < 0:
             encoder.value += 1
             return 0

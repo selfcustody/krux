@@ -23,24 +23,15 @@ import time
 import lcd
 import board
 from machine import I2C
-from .i18n import t
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 PORTRAIT, LANDSCAPE = board.config["krux"]["display"]["orientation"]
-if "qr_colors" in board.config["krux"]["display"]:
-    QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
-else:
-    QR_DARK_COLOR = 0x0000
-    QR_LIGHT_COLOR = lcd.LIGHTGREY
+QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
+
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
-
-DEL = "<"
-GO = t("Go")
-ESC = t("Esc")
-FIXED_KEYS = 3
 
 
 class Display:
@@ -118,9 +109,9 @@ class Display:
             self.initialize_backlight()
         else:
             lcd.init()
+        self.to_portrait()
         if board.config["lcd"]["invert"]:
             lcd.mirror(True)
-        self.to_portrait()
 
     def initialize_backlight(self):
         """Initializes the backlight"""
@@ -148,7 +139,7 @@ class Display:
         return lcd.height()
 
     def usable_width(self):
-        """Returns avaliable width considering sides padding"""
+        """Returns available width considering side padding"""
         return self.width() - 2 * DEFAULT_PADDING
 
     def height(self):
@@ -169,13 +160,11 @@ class Display:
 
     def to_landscape(self):
         """Changes the rotation of the display to landscape"""
-        self.clear()
         lcd.rotation(LANDSCAPE)
         self.portrait = False
 
     def to_portrait(self):
         """Changes the rotation of the display to portrait"""
-        self.clear()
         lcd.rotation(PORTRAIT)
         self.portrait = True
 
@@ -266,10 +255,24 @@ class Display:
 
     def outline(self, x, y, width, height, color=lcd.WHITE):
         """Draws an outline rectangle from given coordinates"""
-        lcd.fill_rectangle(x, y, width + 1, 1, color)  # up
-        lcd.fill_rectangle(x, y + height, width + 1, 1, color)  # bottom
-        lcd.fill_rectangle(x, y, 1, height + 1, color)  # left
-        lcd.fill_rectangle(x + width, y, 1, height + 1, color)  # right
+        self.fill_rectangle(x, y, width + 1, 1, color)  # up
+        self.fill_rectangle(x, y + height, width + 1, 1, color)  # bottom
+        self.fill_rectangle(x, y, 1, height + 1, color)  # left
+        self.fill_rectangle(x + width, y, 1, height + 1, color)  # right
+
+    def fill_rectangle(self, x, y, width, height, color):
+        """Draws a rectangle to the screen"""
+        if board.config["lcd"]["invert"]:
+            x = self.width() - x
+            x -= width
+        lcd.fill_rectangle(x, y, width, height, color)
+
+    def draw_string(self, x, y, text, color, bg_color=lcd.BLACK):
+        """Draws a string to the screen"""
+        if board.config["lcd"]["invert"]:
+            x = self.width() - x
+            x -= len(text) * self.font_width
+        lcd.draw_string(x, y, text, color, bg_color)
 
     def draw_hcentered_text(
         self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE, bg_color=lcd.BLACK
@@ -279,7 +282,7 @@ class Display:
         for i, line in enumerate(lines):
             offset_x = (self.width() - self.font_width * len(line)) // 2
             offset_x = max(0, offset_x)
-            lcd.draw_string(
+            self.draw_string(
                 offset_x, offset_y + (i * self.font_height), line, color, bg_color
             )
 

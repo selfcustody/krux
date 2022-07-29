@@ -1,64 +1,69 @@
-from ..shared_mocks import *
-from krux.input import BUTTON_ENTER, BUTTON_PAGE
-from krux.pages import Menu, Page
+import pytest
+from ..shared_mocks import snapshot_generator, MockQRPartParser, SNAP_SUCCESS
 
 
-class MockPage(Page):
-    def __init__(self, ctx):
-        Page.__init__(
-            self,
-            ctx,
-            Menu(
+@pytest.fixture
+def mock_page_cls(mocker):
+    from krux.pages import Page, Menu
+
+    class MockPage(Page):
+        def __init__(self, ctx):
+            Page.__init__(
+                self,
                 ctx,
-                [
-                    (("Test"), mock.MagicMock()),
-                ],
-            ),
-        )
+                Menu(
+                    ctx,
+                    [
+                        (("Test"), mocker.MagicMock()),
+                    ],
+                ),
+            )
+
+    return MockPage
 
 
-def test_init():
+def test_init(mocker, m5stickv, mock_page_cls):
     from krux.pages import Page
 
-    page = MockPage(mock.MagicMock())
+    page = mock_page_cls(mocker.MagicMock())
 
     assert isinstance(page, Page)
 
 
-def test_capture_qr_code(mocker):
+def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
     mocker.patch(
         "krux.camera.sensor.snapshot", new=snapshot_generator(outcome=SNAP_SUCCESS)
     )
     mocker.patch("krux.camera.QRPartParser", new=MockQRPartParser)
     from krux.camera import Camera
 
-    ctx = mock.MagicMock(
-        #  input=mock.MagicMock(
-        #      wait_for_button=mock.MagicMock(side_effect=[BUTTON_PAGE, BUTTON_ENTER, BUTTON_PAGE]),
+    ctx = mocker.MagicMock(
+        #  input=mocker.MagicMock(
+        #      wait_for_button=mocker.MagicMock(side_effect=[BUTTON_PAGE, BUTTON_ENTER, BUTTON_PAGE]),
         #  ),
         camera=Camera(),
     )
 
     mocker.patch("time.ticks_ms", new=lambda: 0)
 
-    page = MockPage(ctx)
+    page = mock_page_cls(ctx)
 
     qr_code, qr_format = page.capture_qr_code()
     assert qr_code == "12345678910"
     assert qr_format == MockQRPartParser.FORMAT
 
-    ctx.display.to_landscape.assert_has_calls([mock.call() for _ in range(10)])
-    ctx.display.to_portrait.assert_has_calls([mock.call() for _ in range(10)])
+    ctx.display.to_landscape.assert_has_calls([mocker.call() for _ in range(10)])
+    ctx.display.to_portrait.assert_has_calls([mocker.call() for _ in range(10)])
     ctx.display.draw_centered_text.assert_has_calls(
         [
-            mock.call("10%"),
-            mock.call("20%"),
-            mock.call("30%"),
-            mock.call("40%"),
-            mock.call("50%"),
-            mock.call("60%"),
-            mock.call("70%"),
-            mock.call("80%"),
-            mock.call("90%"),
+            mocker.call("10%"),
+            mocker.call("20%"),
+            mocker.call("30%"),
+            mocker.call("40%"),
+            mocker.call("50%"),
+            mocker.call("60%"),
+            mocker.call("70%"),
+            mocker.call("80%"),
+            mocker.call("90%"),
         ]
     )

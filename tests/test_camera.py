@@ -1,7 +1,14 @@
-from .shared_mocks import *
+from .shared_mocks import (
+    snapshot_generator,
+    MockQRPartParser,
+    SNAP_SUCCESS,
+    SNAP_REPEAT_QRCODE,
+    SNAP_HISTOGRAM_FAIL,
+    SNAP_FIND_QRCODES_FAIL,
+)
 
 
-def test_init(mocker):
+def test_init(mocker, m5stickv):
     from krux.camera import Camera
 
     spy = mocker.spy(Camera, "initialize_sensor")
@@ -11,7 +18,7 @@ def test_init(mocker):
     spy.assert_called()
 
 
-def test_initialize_sensor():
+def test_initialize_sensor(mocker, m5stickv):
     import krux
     from krux.camera import Camera
 
@@ -32,7 +39,7 @@ def test_initialize_sensor():
     )
 
 
-def test_capture_qr_code_loop(mocker):
+def test_capture_qr_code_loop(mocker, m5stickv):
     mocker.patch(
         "krux.camera.sensor.snapshot", new=snapshot_generator(outcome=SNAP_SUCCESS)
     )
@@ -63,7 +70,7 @@ def test_capture_qr_code_loop(mocker):
     krux.camera.wdt.feed.assert_called()
 
 
-def test_capture_qr_code_loop_returns_early_when_requested(mocker):
+def test_capture_qr_code_loop_returns_early_when_requested(mocker, m5stickv):
     mocker.patch(
         "krux.camera.sensor.snapshot", new=snapshot_generator(outcome=SNAP_SUCCESS)
     )
@@ -94,7 +101,7 @@ def test_capture_qr_code_loop_returns_early_when_requested(mocker):
     krux.camera.wdt.feed.assert_called()
 
 
-def test_capture_qr_code_loop_skips_bad_histogram(mocker):
+def test_capture_qr_code_loop_skips_bad_histogram(mocker, m5stickv):
     mocker.patch(
         "krux.camera.sensor.snapshot",
         new=snapshot_generator(outcome=SNAP_HISTOGRAM_FAIL),
@@ -129,7 +136,7 @@ def test_capture_qr_code_loop_skips_bad_histogram(mocker):
     krux.camera.wdt.feed.assert_called()
 
 
-def test_capture_qr_code_loop_skips_missing_qrcode(mocker):
+def test_capture_qr_code_loop_skips_missing_qrcode(mocker, m5stickv):
     mocker.patch(
         "krux.camera.sensor.snapshot",
         new=snapshot_generator(outcome=SNAP_FIND_QRCODES_FAIL),
@@ -164,7 +171,7 @@ def test_capture_qr_code_loop_skips_missing_qrcode(mocker):
     krux.camera.wdt.feed.assert_called()
 
 
-def test_capture_qr_code_loop_skips_duplicate_qrcode(mocker):
+def test_capture_qr_code_loop_skips_duplicate_qrcode(mocker, m5stickv):
     mocker.patch(
         "krux.camera.sensor.snapshot",
         new=snapshot_generator(outcome=SNAP_REPEAT_QRCODE),

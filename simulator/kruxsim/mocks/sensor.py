@@ -63,7 +63,8 @@ def snapshot():
     if sequence_executor:
         if sequence_executor.camera_image is not None:
             frame = np.array(sequence_executor.camera_image)
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
             img = sequence_executor.camera_image
 
             m.get_frame.return_value = frame
@@ -75,7 +76,8 @@ def snapshot():
             m.get_histogram.return_value = "failed"
     else:
         _, frame = capturer.read()
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
         img = PIL.Image.fromarray(frame)
 
         m.get_frame.return_value = frame

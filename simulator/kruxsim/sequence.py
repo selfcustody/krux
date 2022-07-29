@@ -5,22 +5,28 @@ import pygame as pg
 import PIL
 import PIL.Image
 from kruxsim import events
+from kruxsim.mocks.board import BOARD_CONFIG
 
-COMMANDS = ["press", "qrcode", "screenshot", "wait", "include", "x"]
+COMMANDS = ["press", "touch", "qrcode", "screenshot", "wait", "include", "x"]
 
 
 class SequenceExecutor:
     def __init__(self, sequence_filepath):
         self.filepath = sequence_filepath
-        self.commands = deque(load_commands(self.filepath))
-        self.commands.append(("wait", ["1"]))
         self.command = None
         self.command_params = []
         self.command_fn = None
         self.command_timer = 0
         self.key = None
         self.key_press_timer = 0
+        self.touch_pos = None
+        self.touch_timer = 0
         self.camera_image = None
+        commands = load_commands(self.filepath)
+        if commands[0][0] == "wait" and BOARD_CONFIG["krux"]["display"]["touch"]:
+            commands = commands[0:1] + [("press", ["BUTTON_A"])] + commands[1:]
+        commands.append(("wait", ["1"]))
+        self.commands = deque(commands)
 
     def execute(self):
         if self.command_fn:
@@ -37,6 +43,8 @@ class SequenceExecutor:
             self.command_params = params
             if cmd == "press":
                 self.command_fn = self.press_key
+            elif cmd == "touch":
+                self.command_fn = self.touch
             elif cmd == "qrcode":
                 self.command_fn = self.show_qrcode
             elif cmd == "screenshot":
@@ -52,8 +60,14 @@ class SequenceExecutor:
         if key == "BUTTON_A":
             self.key = pg.K_RETURN
         elif key == "BUTTON_B":
-            self.key = pg.K_SPACE
+            self.key = pg.K_DOWN
+        elif key == "BUTTON_C":
+            self.key = pg.K_UP
 
+    def touch(self):
+        self.touch_pos = (self.command_params[0], self.command_params[1])
+        self.touch_timer = time.time()
+        
     def show_qrcode(self):
         filename = self.command_params[0]
         self.camera_image = PIL.Image.open(

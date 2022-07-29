@@ -1,12 +1,9 @@
-from .shared_mocks import *
-
-
 def mock_modules(mocker):
-    mocker.patch("krux.light.fm.register", new=mock.MagicMock())
-    mocker.patch("krux.light.GPIO", new=mock.MagicMock())
+    mocker.patch("krux.light.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.light.GPIO", new=mocker.MagicMock())
 
 
-def test_init(mocker):
+def test_init(mocker, m5stickv):
     mock_modules(mocker)
     import krux
     from krux.light import Light
@@ -18,7 +15,7 @@ def test_init(mocker):
 
     assert isinstance(light, Light)
     krux.light.fm.register.assert_called_with(
-        board.config["krux"]["pins"]["LED_W"], mock.ANY
+        board.config["krux"]["pins"]["LED_W"], mocker.ANY
     )
     assert (
         krux.light.fm.register.call_args.args[1]._extract_mock_name()
@@ -30,7 +27,7 @@ def test_init(mocker):
     light.turn_off.assert_called()
 
 
-def test_is_on(mocker):
+def test_is_on(mocker, m5stickv):
     mock_modules(mocker)
     from krux.light import Light
 
@@ -43,7 +40,7 @@ def test_is_on(mocker):
     light.led_w.value.assert_called_with()
 
 
-def test_turn_on(mocker):
+def test_turn_on(mocker, m5stickv):
     mock_modules(mocker)
     from krux.light import Light
 
@@ -55,7 +52,7 @@ def test_turn_on(mocker):
     light.led_w.value.assert_called_with(0)
 
 
-def test_turn_off(mocker):
+def test_turn_off(mocker, m5stickv):
     mock_modules(mocker)
     from krux.light import Light
 
@@ -67,7 +64,7 @@ def test_turn_off(mocker):
     light.led_w.value.assert_called_with(1)
 
 
-def test_toggle_from_off(mocker):
+def test_toggle_from_off(mocker, m5stickv):
     mock_modules(mocker)
     from krux.light import Light
 
@@ -80,7 +77,7 @@ def test_toggle_from_off(mocker):
     light.turn_on.assert_called()
 
 
-def test_toggle_from_on(mocker):
+def test_toggle_from_on(mocker, m5stickv):
     mock_modules(mocker)
     from krux.light import Light
 
