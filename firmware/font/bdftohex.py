@@ -21,21 +21,45 @@
 # THE SOFTWARE.
 # pylint: disable=C0103
 # pylint: disable=E1307
+from collections import namedtuple
+import math
 import sys
 
+BBox = namedtuple("BoundingBox", ["width", "height", "x", "y"])
+
 with open(sys.argv[1], "r", encoding="unicode_escape") as input_file:
-    codepoint = None
+    font_bbox = None
+    glyph_bbox = None
+    codepoint = -1
     parsing_bitmap = False
     hex_chars = []
     for line in input_file.readlines():
-        if line.startswith("ENCODING"):
+        if line.startswith("FONTBOUNDINGBOX"):
+            font_bbox = BBox(*[int(c) for c in line.split()[1:]])
+        elif line.startswith("BBX"):
+            glyph_bbox = BBox(*[int(c) for c in line.split()[1:]])
+        elif line.startswith("ENCODING"):
             codepoint = int(line.split()[1])
         elif line.startswith("BITMAP"):
             parsing_bitmap = True
         elif line.startswith("ENDCHAR"):
             if parsing_bitmap and hex_chars and codepoint >= 0:
-                print("%04X:%s" % (codepoint, "".join(hex_chars).upper()))
+                bitmap = "".join(hex_chars).upper()
+                if font_bbox and glyph_bbox:
+                    row = "00" * math.ceil(font_bbox.width / 8)
+                    glyph_height = len(hex_chars)
+                    padding = font_bbox.height - glyph_height
+                    if padding > 0:
+                        bottom_padding = glyph_bbox.y - font_bbox.y
+                        top_padding = padding - bottom_padding
+                        if top_padding > 0:
+                            bitmap = row * top_padding + bitmap
+                        if bottom_padding > 0:
+                            bitmap = bitmap + row * bottom_padding
+                print("%04X:%s" % (codepoint, bitmap))
             parsing_bitmap = False
             hex_chars = []
+            codepoint = -1
+            glyph_bbox = None
         elif parsing_bitmap:
             hex_chars.append(line.strip())

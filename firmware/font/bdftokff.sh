@@ -41,7 +41,7 @@ done
 poetry run python hexmerge.py ${hexes[@]} > merged.hex
 
 # Convert merged hex to krux format
-poetry run python hextokf.py merged.hex $width $height
+poetry run python hextokff.py merged.hex $width $height
 
 # Remove generated files
 rm merged.hex

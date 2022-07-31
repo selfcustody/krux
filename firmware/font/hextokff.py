@@ -53,7 +53,7 @@ with open(sys.argv[1], "r") as input_file:
     # Read in a hex formatted bitmap font file
     lines = input_file.readlines()
 
-    # Output in modified dkz format ("krux format") where first two bytes
+    # Output in modified dkz format ("krux font format") where first two bytes
     # of each row are the codepoint
     bitmap = []
     total_codepoints = 0
