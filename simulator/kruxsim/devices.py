@@ -27,10 +27,8 @@ fonts = {}
 def load_font(device):
     device = with_prefix(device)
     if device not in fonts:
-        size = 16 if device == M5STICKV else 24
-        fonts[device] = pg.font.Font(
-            os.path.join("assets", "Terminess (TTF) Nerd Font Complete Mono.ttf"), size
-        )
+        size = 14 if device == M5STICKV else 24
+        fonts[device] = pg.freetype.Font(os.path.join("..", "firmware", "font", "ter-u%dn.bdf" % size))
     return fonts[device]
 
 def screenshot_rect(device):

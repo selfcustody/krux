@@ -14,6 +14,7 @@ parser.add_argument("--exit-after-sequence", type=bool, default=True, required=F
 args = parser.parse_args()
 
 pg.init()
+pg.freetype.init()
 
 from kruxsim.mocks import board
 
