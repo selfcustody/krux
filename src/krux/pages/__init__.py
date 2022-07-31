@@ -331,10 +331,10 @@ class Page:
                 self.ctx.input.touch.y_regions = self.y_keypad_map
             while btn != BUTTON_ENTER:
                 offset_x = self.ctx.display.width() // 4
-                offset_x -= (3 * self.ctx.display.font_width) // 2
+                offset_x -= (len(t("Yes")) * self.ctx.display.font_width) // 2
                 self.ctx.display.draw_string(offset_x, offset_y, t("Yes"), lcd.GREEN)
                 offset_x = (self.ctx.display.width() * 3) // 4
-                offset_x -= self.ctx.display.font_width
+                offset_x -= (len(t("No")) * self.ctx.display.font_width) // 2
                 self.ctx.display.draw_string(offset_x, offset_y, t("No"), lcd.RED)
                 if self.ctx.input.buttons_active:
                     if answer:
