@@ -26,6 +26,6 @@ From there, you can run the `hexfill.py` script which takes in a `.hex` file and
 
 The `hexmerge.py` script takes a list of `.hex` font files and merges them into one combined `.hex` file sorted by unicode codepoint. If multiple files refer to the same character, the earliest non-zero glyph will be used.
 
-Finally, the `hextokff.py` script takes a `.hex` font file and font width and height and converts it into the 1D sparse bitmap array format that Krux needs. **Importantly, this script scans the `i18n/translations` folder and builds the set of unique codepoints used across all translations to drastically reduce the number of glyphs stored.
+Finally, the `hextokff.py` script takes a `.hex` font file and font width and height and converts it into the 1D sparse bitmap array format that Krux needs. Importantly, this script scans the `i18n/translations` folder and builds the set of unique codepoints used across all translations to drastically reduce the number of glyphs stored.
 
 To simplify this process, a `bdftokff.sh` bash script has been added that invokes the aforementioned scripts as needed to compile one `.kff` file given a list of fonts.
