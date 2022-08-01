@@ -303,11 +303,11 @@ class Page:
             len(self.ctx.display.to_lines(text)) - 1
         ) * self.ctx.display.font_height
         self.ctx.display.draw_hcentered_text(text, offset_y)
-        answer = False
+        answer = True
         self.y_keypad_map = []
         self.x_keypad_map = []
         if board.config["type"] == "m5stickv":
-            answer = not self.ctx.input.wait_for_button()
+            answer = self.ctx.input.wait_for_button() == BUTTON_ENTER
         else:
             offset_y += (
                 len(self.ctx.display.to_lines(text)) + 1
