@@ -42,12 +42,7 @@ MENU_EXIT = 1
 MENU_SHUTDOWN = 2
 
 ESC_KEY = 1
-
-DEL = "<"
-GO = t("Go")
-ESC = t("Esc")
-MORE = t("ABC")
-FIXED_KEYS = 3  # More only appears when there are multiple keysets
+FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
 
 class Page:
@@ -605,13 +600,13 @@ class Keypad:
                 if key_index < len(self.keys):
                     key = self.keys[key_index]
                 elif key_index == self.del_index:
-                    key = DEL
+                    key = "<"
                 elif key_index == self.esc_index:
-                    key = ESC
+                    key = t("Esc")
                 elif key_index == self.go_index:
-                    key = GO
+                    key = t("Go")
                 elif key_index == self.more_index and len(self.keysets) > 1:
-                    key = MORE
+                    key = t("ABC")
                 if key is not None:
                     offset_x = x
                     key_offset_x = (
