@@ -44,17 +44,80 @@ extra:
       link: https://github.com/selfcustody/krux
 
 nav:
-  - Home: index.md
+  - Home: index.en.md
   - Getting Started:
-    - About: getting-started/index.md
-    - Installing: getting-started/installing.md
-    - Generating a Mnemonic: getting-started/generating-a-mnemonic.md
-    - Loading a Mnemonic: getting-started/loading-a-mnemonic.md
-    - Navigating the Main Menu: getting-started/navigating-the-main-menu.md
-    - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.md
-    - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.md
-    - Printing: getting-started/printing.md
-    - Settings: getting-started/settings.md
-  - Part List: parts.md
-  - FAQ: faq.md
-  - Support the Project: support.md
+    - About: getting-started/index.en.md
+    - Installing: getting-started/installing.en.md
+    - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
+    - Loading a Mnemonic: getting-started/loading-a-mnemonic.en.md
+    - Navigating the Main Menu: getting-started/navigating-the-main-menu.en.md
+    - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.en.md
+    - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.en.md
+    - Printing: getting-started/printing.en.md
+    - Settings: getting-started/settings.en.md
+  - Part List: parts.en.md
+  - FAQ: faq.en.md
+  - Support the Project: support.en.md
+
+plugins:
+  - search
+  - i18n:
+      default_language: en
+      languages:
+        en: English
+      #nav_translations:
+      #  es: 
+      #    name: Español
+      #    site_name: Krux - Hardware de firma de código abierto para Bitcoin
+      #  se: 
+      #    name: Esperanto
+      #    site_name: Krux - Malfermfonta Subskribo-Aparataro por Bitcoin
+      #  pt: 
+      #    name: Português
+      #    site_name: Krux - Hardware de assinatura de código-aberto para Bitcoin
+      # nav_translations:
+      #  es:
+      #    Home: Principal
+      #    Getting Started: Empezando
+      #    Part List: Lista de piezas
+      #    FAQ: Preguntas frecuentes
+      #    Support the Project: Apoyar el proyecto
+      #    About: Sobre
+      #    Installing: Instalando
+      #    Generating a Mnemonic: Generando un mnemotécnico
+      #    Loading a Mnemonic: Cargando un mnemotécnico
+      #    Navigating the Main Menu: Navegación por el menú principal
+      #    Using a Single-key Wallet: Usando una billetera de una sola tecla
+      #    Using a Multisig Wallet: Uso de una billetera de firmas múltiples
+      #    Printing: Impresión
+      #    Settings: Ajustes
+      #  se:
+      #    Home: Hejmen
+      #    Getting Started: Komencante
+      #    Part List: Parto listo
+      #    FAQ: Oftaj demandoj
+      #    Support the Project: Subtenu la projekton
+      #    About: Pri
+      #    Installing: Instalante
+      #    Generating a Mnemonic: Generante Mnemonikon
+      #    Loading a Mnemonic: Ŝargante Mnemonikon
+      #    Navigating the Main Menu: Navigante la Ĉefan Menuon
+      #    Using a Single-key Wallet: Uzante la Unuŝlosan Monujon
+      #    Using a Multisig Wallet: Uzante la Multisig Monujon
+      #    Printing: Presado
+      #    Settings: Agordoj
+      #  pt:
+      #    Home: Principal
+      #    Getting Started: Começando
+      #    Part List: Lista de peças
+      #    FAQ: Perguntas frequentes
+      #    Support the Project: Apoie o Projeto
+      #    About: Sobre
+      #    Installing: Instalando
+      #    Generating a Mnemonic: Gerando um Mnemônico
+      #    Loading a Mnemonic: Carregando um Mnemônico
+      #    Navigating the Main Menu: Navegando no Menu principal
+      #    Using a Single-key Wallet: Usando uma carteira de chave-única
+      #    Using a Multisig Wallet: Usando uma carteira Multiassinatura
+      #    Printing: Imprimindo
+      #    Settings: Configurações
