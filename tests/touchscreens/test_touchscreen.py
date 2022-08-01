@@ -12,14 +12,14 @@ def bad_touch_cls():
     return BadTouch
 
 
-def test_init_fails(mocker, amigo):
+def test_init_fails(mocker, amigo_ips):
     from krux.touchscreens import Touchscreen
 
     with pytest.raises(NotImplementedError):
         Touchscreen()
 
 
-def test_current_point_fails(mocker, amigo, bad_touch_cls):
+def test_current_point_fails(mocker, amigo_ips, bad_touch_cls):
     touch = bad_touch_cls()
 
     with pytest.raises(NotImplementedError):

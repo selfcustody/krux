@@ -43,7 +43,7 @@ def test_init(mocker, m5stickv):
     )
 
 
-def test_init_amigo(mocker, amigo):
+def test_init_amigo_ips(mocker, amigo_ips):
     mock_modules(mocker)
     import krux
     from krux.input import Input
@@ -210,7 +210,7 @@ def test_wait_for_button_blocks_until_page_released(mocker, m5stickv):
     krux.input.wdt.feed.assert_called()
 
 
-def test_wait_for_button_blocks_until_page_prev_released(mocker, amigo):
+def test_wait_for_button_blocks_until_page_prev_released(mocker, amigo_ips):
     mock_modules(mocker)
     import threading
     import krux
@@ -254,7 +254,7 @@ def test_wait_for_button_blocks_until_page_prev_released(mocker, amigo):
     krux.input.wdt.feed.assert_called()
 
 
-def test_wait_for_button_blocks_until_touch_released(mocker, amigo):
+def test_wait_for_button_blocks_until_touch_released(mocker, amigo_ips):
     mock_modules(mocker)
     import threading
     import krux
@@ -421,7 +421,7 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
     krux.input.wdt.feed.assert_called()
 
 
-def test_touch_indexing(mocker, amigo):
+def test_touch_indexing(mocker, amigo_ips):
     import threading
     import krux
     from krux.input import Input, RELEASED, BUTTON_TOUCH
@@ -505,7 +505,7 @@ def test_touch_indexing(mocker, amigo):
     assert input.touch.state == input.touch.release
 
 
-def test_touch_gestures(mocker, amigo):
+def test_touch_gestures(mocker, amigo_ips):
     import threading
     import krux
     from krux.input import Input, RELEASED, SWIPE_LEFT, SWIPE_RIGHT
@@ -568,7 +568,7 @@ def test_touch_gestures(mocker, amigo):
     krux.input.wdt.feed.assert_called()
 
 
-def test_invalid_touch_delimiter(mocker, amigo):
+def test_invalid_touch_delimiter(mocker, amigo_ips):
     """Tries to add a delimiter outside screen area"""
     import krux
     from krux.input import Input

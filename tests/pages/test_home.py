@@ -118,7 +118,7 @@ def test_mnemonic(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
-def test_mnemonic_touch(mocker, amigo, tdata):
+def test_mnemonic_touch(mocker, amigo_ips, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_TOUCH, BUTTON_PAGE

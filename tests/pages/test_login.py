@@ -55,7 +55,7 @@ def test_new_key_from_d6(mocker, m5stickv):
         assert ctx.wallet.key.mnemonic == case[1]
 
 
-def test_new_key_from_d6_on_amigo_without_touch(mocker, amigo):
+def test_new_key_from_d6_on_amigo_ips_without_touch(mocker, amigo_ips):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
     from krux.pages.login import Login, D6_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -372,7 +372,7 @@ def test_load_key_from_text(mocker, m5stickv):
             assert ctx.wallet.key.mnemonic == case[1]
 
 
-def test_load_key_from_text_on_amigo_with_touch(mocker, amigo):
+def test_load_key_from_text_on_amigo_ips_with_touch(mocker, amigo_ips):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
@@ -670,7 +670,7 @@ def test_load_key_from_bits(mocker, m5stickv):
             assert ctx.wallet.key.mnemonic == case[1]
 
 
-def test_leaving_keypad(mocker, amigo):
+def test_leaving_keypad(mocker, amigo_ips):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -698,7 +698,7 @@ def test_leaving_keypad(mocker, amigo):
     assert ctx.input.wait_for_button.call_count == len(esc_keypad)
 
 
-def test_passphrase_give_up(mocker, amigo):
+def test_passphrase_give_up(mocker, amigo_ips):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -756,7 +756,7 @@ def test_passphrase_give_up(mocker, amigo):
     assert ctx.input.wait_for_button.call_count == len(case)
 
 
-def test_passphrase(mocker, amigo):
+def test_passphrase(mocker, amigo_ips):
     from krux.pages.login import Login
     from krux.input import (
         BUTTON_ENTER,
@@ -851,7 +851,7 @@ def test_network(mocker, m5stickv):
     assert krux.pages.login.settings.network == "main"
 
 
-def test_network_on_amigo(mocker, amigo):
+def test_network_on_amigo_ips(mocker, amigo_ips):
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
@@ -914,7 +914,7 @@ def test_printer(mocker, m5stickv):
     assert krux.pages.login.settings.printer.thermal.baudrate == 9600
 
 
-def test_printer_on_amigo(mocker, amigo):
+def test_printer_on_amigo_ips(mocker, amigo_ips):
     import krux
 
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
@@ -978,7 +978,7 @@ def test_locale(mocker, m5stickv):
     assert krux.pages.login.settings.i18n.locale == "en-US"
 
 
-def test_locale_with_settings_pad(mocker, amigo):
+def test_locale_with_settings_pad(mocker, amigo_ips):
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
@@ -1042,7 +1042,7 @@ def test_debug(mocker, m5stickv):
     assert krux.pages.login.settings.log.level == NONE
 
 
-def test_debug_on_amigo(mocker, amigo):
+def test_debug_on_amigo_ips(mocker, amigo_ips):
     import krux
     from krux.pages.login import Login
     from krux.logging import NONE

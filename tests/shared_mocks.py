@@ -153,7 +153,7 @@ def board_m5stickv():
     )
 
 
-def board_amigo():
+def board_amigo_ips():
     return mock.MagicMock(
         config={
             "type": "amigo_ips",

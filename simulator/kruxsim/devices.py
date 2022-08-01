@@ -2,12 +2,14 @@ import os
 import pygame as pg
 
 M5STICKV = "maixpy_m5stickv"
-AMIGO = "maixpy_amigo_ips"
+AMIGO_IPS = "maixpy_amigo_ips"
+AMIGO_TFT = "maixpy_amigo_tft"
 PC = "maixpy_pc"
 
 WINDOW_SIZES = {
     M5STICKV: (320, 640),
-    AMIGO: (480, 768),
+    AMIGO_IPS: (480, 768),
+    AMIGO_TFT: (480, 768),
     PC: (480, 640),
 }
 
@@ -44,7 +46,7 @@ def screenshot_rect(device):
             screen.get_rect().center[0] - 1,
             screen.get_rect().center[1] + 57,
         )
-    elif device == AMIGO:
+    elif device == AMIGO_IPS or device == AMIGO_TFT:
         rect.width -= 370
         rect.height -= 95
         rect.center = (

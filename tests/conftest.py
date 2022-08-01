@@ -1,5 +1,5 @@
 import pytest
-from .shared_mocks import board_amigo, board_dock, board_m5stickv
+from .shared_mocks import board_amigo_ips, board_dock, board_m5stickv
 
 
 def reset_krux_modules():
@@ -45,10 +45,10 @@ def m5stickv(monkeypatch, mp_modules):
 
 
 @pytest.fixture
-def amigo(monkeypatch, mp_modules):
+def amigo_ips(monkeypatch, mp_modules):
     import sys
 
-    monkeypatch.setitem(sys.modules, "board", board_amigo())
+    monkeypatch.setitem(sys.modules, "board", board_amigo_ips())
     reset_krux_modules()
 
 
