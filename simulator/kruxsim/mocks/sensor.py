@@ -62,7 +62,7 @@ def snapshot():
     m = mock.MagicMock()
     if sequence_executor:
         if sequence_executor.camera_image is not None:
-            frame = np.array(sequence_executor.camera_image)
+            frame = sequence_executor.camera_image
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
             img = sequence_executor.camera_image

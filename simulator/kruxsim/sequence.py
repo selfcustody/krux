@@ -2,8 +2,7 @@ from collections import deque
 import os
 import time
 import pygame as pg
-import PIL
-import PIL.Image
+import cv2
 from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
 
@@ -70,9 +69,7 @@ class SequenceExecutor:
         
     def show_qrcode(self):
         filename = self.command_params[0]
-        self.camera_image = PIL.Image.open(
-            os.path.join(os.path.dirname(self.filepath), "qrcodes", filename)
-        )
+        self.camera_image = cv2.imread(os.path.join(os.path.dirname(self.filepath), "qrcodes", filename), cv2.IMREAD_COLOR)
 
     def request_screenshot(self):
         filename = self.command_params[0]
