@@ -110,7 +110,7 @@ class Display:
         else:
             lcd.init()
         self.to_portrait()
-        if board.config["lcd"]["invert"]:
+        if board.config["type"].startswith("amigo"):
             lcd.mirror(True)
 
     def initialize_backlight(self):
