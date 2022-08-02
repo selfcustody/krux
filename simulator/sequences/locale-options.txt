@@ -21,6 +21,9 @@ press BUTTON_B
 screenshot locale-options-fr-fr.png
 
 press BUTTON_B
+screenshot locale-options-pt-BR.png
+
+press BUTTON_B
 screenshot locale-options-vi-vn.png
 
 press BUTTON_B

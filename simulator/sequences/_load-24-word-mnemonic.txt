@@ -8,3 +8,6 @@ qrcode 24-word-mnemonic.png
 
 press BUTTON_A
 press BUTTON_A
+
+# Don't add a passphrase
+press BUTTON_B

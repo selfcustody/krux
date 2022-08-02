@@ -10,6 +10,7 @@ press BUTTON_A
 
 qrcode specter-desktop-singlekey-wallet-receive-address.png
 
+wait 1
 screenshot scan-address-scanned-address.png
 
 press BUTTON_A

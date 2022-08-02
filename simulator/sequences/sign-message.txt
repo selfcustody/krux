@@ -11,6 +11,7 @@ press BUTTON_A
 
 qrcode message-sha256.png
 
+wait 1
 screenshot sign-message-sha256-sign-prompt.png
 
 press BUTTON_A

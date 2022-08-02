@@ -3,6 +3,9 @@ import time
 from unittest import mock
 import pygame as pg
 
+PRESSED = 0
+RELEASED = 1
+
 sequence_executor = None
 
 
@@ -21,10 +24,19 @@ class PMU_Button:
             and sequence_executor.key is not None
             and sequence_executor.key == self.key
         ):
-            if time.time() - sequence_executor.key_press_timer > 0.25:
-                sequence_executor.key_press_timer = 0
+            sequence_executor.key_checks += 1
+            # wait for release
+            if sequence_executor.key_checks == 1:
+                return RELEASED
+            # wait for press
+            # if pressed
+            elif sequence_executor.key_checks == 2 or sequence_executor.key_checks == 3:
+                return PRESSED
+            # released
+            elif sequence_executor.key_checks == 4:
                 sequence_executor.key = None
-            return 0
+                sequence_executor.key_checks = 0
+                return RELEASED
         return 0 if pg.key.get_pressed()[self.key] else 1
 
 

@@ -32,7 +32,7 @@ x5 press BUTTON_A
 x5 press BUTTON_A
 x5 press BUTTON_A
 
-x27 press BUTTON_B
+x28 press BUTTON_B
 press BUTTON_A
 
 press BUTTON_A

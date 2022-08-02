@@ -53,7 +53,6 @@ def run_krux():
     with open("../src/boot.py") as boot_file:
         exec(boot_file.read())
 
-
 t = threading.Thread(target=run_krux)
 t.daemon = True
 
@@ -65,50 +64,53 @@ pg.display.set_caption("Krux Simulator")
 
 device_image = devices.load_image(args.device)
 
-clock = pg.time.Clock()
 t.start()
-last_ticks = pg.time.get_ticks()
-while True:
-    clock.tick(60)
 
-    if sequence_executor:
-        if not sequence_executor.commands and args.exit_after_sequence:
-            pg.quit()
-            sys.exit()
-        sequence_executor.execute()
+def shutdown():
+    if t.is_alive():
+        t.alive = False
+    
+    pg.quit()
+    sys.exit()
+    
+try:
+    while True:
+        if sequence_executor:
+            if not sequence_executor.commands and args.exit_after_sequence:
+                shutdown()
+            sequence_executor.execute()
 
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            pg.quit()
-            sys.exit()
-        elif event.type >= pg.USEREVENT:
-            if event.type == events.SCREENSHOT_EVENT:
-                sub = screen.subsurface(devices.screenshot_rect(args.device))
-                pg.image.save(sub, os.path.join("screenshots", event.dict["filename"]))
-            else:
-                event.dict["f"]()
-            
-    if lcd.screen:
-        lcd_rect = lcd.screen.get_rect()
-        lcd_rect.center = buffer_image.get_rect().center
-        buffer_image.blit(lcd.screen, lcd_rect)
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                shutdown()
+            elif event.type >= pg.USEREVENT:
+                if event.type == events.SCREENSHOT_EVENT:
+                    sub = screen.subsurface(devices.screenshot_rect(args.device))
+                    pg.image.save(sub, os.path.join("screenshots", event.dict["filename"]))
+                else:
+                    event.dict["f"]()
+                
+        if lcd.screen:
+            lcd_rect = lcd.screen.get_rect()
+            lcd_rect.center = buffer_image.get_rect().center
+            buffer_image.blit(lcd.screen, lcd_rect)
 
-    if device_image:
-        device_rect = device_image.get_rect()
-        device_rect.center = buffer_image.get_rect().center
-        buffer_image.blit(device_image, device_rect)
+        if device_image:
+            device_rect = device_image.get_rect()
+            device_rect.center = buffer_image.get_rect().center
+            buffer_image.blit(device_image, device_rect)
 
-    scaled_image = buffer_image
-    scaled_rect = scaled_image.get_rect()
-    scaled_rect.center = buffer_image.get_rect().center
-    if args.device == devices.M5STICKV:
-        scaled_image = pg.transform.smoothscale(
-            buffer_image, (screen.get_width() * 0.95, screen.get_height() * 0.85)
-        )
+        scaled_image = buffer_image
         scaled_rect = scaled_image.get_rect()
         scaled_rect.center = buffer_image.get_rect().center
-    screen.blit(scaled_image, scaled_rect)
+        if args.device == devices.M5STICKV:
+            scaled_image = pg.transform.smoothscale(
+                buffer_image, (screen.get_width() * 0.95, screen.get_height() * 0.85)
+            )
+            scaled_rect = scaled_image.get_rect()
+            scaled_rect.center = buffer_image.get_rect().center
+        screen.blit(scaled_image, scaled_rect)
 
-    if last_ticks + 10 < pg.time.get_ticks():
-        last_ticks = pg.time.get_ticks()
         pg.display.flip()
+except KeyboardInterrupt:
+    shutdown()

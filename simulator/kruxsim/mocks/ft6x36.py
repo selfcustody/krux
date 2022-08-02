@@ -52,10 +52,19 @@ class FT6X36:
             sequence_executor
             and sequence_executor.touch_pos is not None
         ):
-            if time.time() - sequence_executor.touch_timer > 0.25:
-                sequence_executor.touch_timer = 0
+            sequence_executor.touch_checks += 1
+            # wait for release
+            if sequence_executor.touch_checks == 1:
+                return None
+            # wait for press
+            # if pressed
+            elif sequence_executor.touch_checks == 2 or sequence_executor.touch_checks == 3:
+                return sequence_executor.touch_pos
+            # released
+            elif sequence_executor.touch_checks == 4:
                 sequence_executor.touch_pos = None
-            return sequence_executor.touch_pos
+                sequence_executor.touch_checks = 0
+                return None
         return to_screen_pos(pg.mouse.get_pos()) if pg.mouse.get_pressed()[0] else None
     
 if "krux.touchscreens.ft6x36" not in sys.modules:

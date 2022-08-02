@@ -17,9 +17,9 @@ class SequenceExecutor:
         self.command_fn = None
         self.command_timer = 0
         self.key = None
-        self.key_press_timer = 0
+        self.key_checks = 0
         self.touch_pos = None
-        self.touch_timer = 0
+        self.touch_checks = 0
         self.camera_image = None
         commands = load_commands(self.filepath)
         if commands[0][0] == "wait" and BOARD_CONFIG["krux"]["display"]["touch"]:
@@ -29,7 +29,7 @@ class SequenceExecutor:
 
     def execute(self):
         if self.command_fn:
-            if time.time() - self.command_timer > 0.5:
+            if time.time() - self.command_timer > 0.1:
                 print("Executing (%s, %r)" % (self.command, self.command_params))
                 self.command_timer = 0
                 self.command_fn()
@@ -55,7 +55,7 @@ class SequenceExecutor:
     def press_key(self):
         key = self.command_params[0]
         self.key = None
-        self.key_press_timer = time.time()
+        self.key_checks = 0
         if key == "BUTTON_A":
             self.key = pg.K_RETURN
         elif key == "BUTTON_B":
@@ -65,7 +65,7 @@ class SequenceExecutor:
 
     def touch(self):
         self.touch_pos = (self.command_params[0], self.command_params[1])
-        self.touch_timer = time.time()
+        self.touch_checks = 0
         
     def show_qrcode(self):
         filename = self.command_params[0]
