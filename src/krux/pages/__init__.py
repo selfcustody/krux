@@ -460,9 +460,9 @@ class Menu:
             height = Page.y_keypad_map[i + 1] - y
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.outline(
-                    DEFAULT_PADDING - 1,
+                    DEFAULT_PADDING//2 - 1,
                     y + 1,
-                    self.ctx.display.usable_width(),
+                    self.ctx.display.usable_width() + DEFAULT_PADDING,
                     height - 2,
                 )
 
@@ -494,9 +494,9 @@ class Menu:
                 )
             if selected_item_index == i:
                 self.ctx.display.outline(
-                    DEFAULT_PADDING,
+                    DEFAULT_PADDING//2 - 1,
                     offset_y + 1,
-                    self.ctx.display.usable_width(),
+                    self.ctx.display.usable_width() + DEFAULT_PADDING,
                     delta_y - 2,
                 )
             offset_y += delta_y
