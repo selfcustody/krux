@@ -250,9 +250,14 @@ class Page:
         ]
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("BIP39 Mnemonic"))
+        starting_y_offset = DEFAULT_PADDING // 4 + (
+            len(self.ctx.display.to_lines(t("BIP39 Mnemonic")))
+            * self.ctx.display.font_height
+            + self.ctx.display.font_height
+        )
         for i, word in enumerate(word_list[:12]):
             offset_x = DEFAULT_PADDING
-            offset_y = 40 + (i * self.ctx.display.font_height)
+            offset_y = starting_y_offset + (i * self.ctx.display.font_height)
             self.ctx.display.draw_string(offset_x, offset_y, word, lcd.WHITE, lcd.BLACK)
         if len(word_list) > 12:
             if board.config["type"] == "m5stickv":
@@ -261,14 +266,14 @@ class Page:
                 self.ctx.display.draw_hcentered_text(t("BIP39 Mnemonic"))
                 for i, word in enumerate(word_list[12:]):
                     offset_x = DEFAULT_PADDING
-                    offset_y = 40 + (i * self.ctx.display.font_height)
+                    offset_y = starting_y_offset + (i * self.ctx.display.font_height)
                     self.ctx.display.draw_string(
                         offset_x, offset_y, word, lcd.WHITE, lcd.BLACK
                     )
             else:
                 for i, word in enumerate(word_list[12:]):
                     offset_x = self.ctx.display.width() // 2
-                    offset_y = 40 + (i * self.ctx.display.font_height)
+                    offset_y = starting_y_offset + (i * self.ctx.display.font_height)
                     self.ctx.display.draw_string(
                         offset_x, offset_y, word, lcd.WHITE, lcd.BLACK
                     )
