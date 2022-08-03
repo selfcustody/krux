@@ -10,8 +10,8 @@ press BUTTON_B
 press BUTTON_A
 
 qrcode message-sha256.png
+wait 0.5
 
-wait 1
 screenshot sign-message-sha256-sign-prompt.png
 
 press BUTTON_A

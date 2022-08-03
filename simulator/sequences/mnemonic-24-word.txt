@@ -1,13 +1,1 @@
-include _load-24-word-mnemonic.txt
-press BUTTON_A
-wait 1
-
-# Navigate to Mnemonic
-press BUTTON_A
-
-screenshot mnemonic-24-word-1.png
-
-press BUTTON_A
-screenshot mnemonic-24-word-2.png
-
-press BUTTON_A
+include _mnemonic-24-word.txt

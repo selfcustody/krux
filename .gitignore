@@ -71,6 +71,7 @@ memzip-files.zip
 .coverage
 privkey.pem
 pubkey.pem
+simulator/krux-screenshots
 simulator/screenshots
 simulator/sd
 

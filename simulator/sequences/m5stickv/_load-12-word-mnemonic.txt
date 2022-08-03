@@ -7,7 +7,7 @@ press BUTTON_A
 qrcode 12-word-mnemonic.png
 wait 0.5
 
-screenshot load-mnemonic-via-qr-mnemonic.png
-
 press BUTTON_A
 
+# Don't add a passphrase
+press BUTTON_B

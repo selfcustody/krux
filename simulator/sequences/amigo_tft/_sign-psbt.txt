@@ -29,7 +29,5 @@ screenshot sign-psbt-signed-qr.png
 wait 0.5
 screenshot sign-psbt-signed-qr-2.png
 wait 0.5
-screenshot sign-psbt-signed-qr-3.png
-wait 0.5
 
 press BUTTON_A

@@ -4,10 +4,11 @@ include _wait-for-logo.txt
 press BUTTON_A
 
 press BUTTON_A
-qrcode 12-word-mnemonic.png
+qrcode 24-word-mnemonic.png
 wait 0.5
 
-screenshot load-mnemonic-via-qr-mnemonic.png
-
+press BUTTON_A
 press BUTTON_A
 
+# Don't add a passphrase
+press BUTTON_B
