@@ -13,31 +13,43 @@ WINDOW_SIZES = {
     PC: (480, 640),
 }
 
+
 def with_prefix(device):
     return device if device.startswith("maixpy_") else "maixpy_" + device
 
+
 images = {}
+
+
 def load_image(device):
     device = with_prefix(device)
     if device == PC:
         return None
     if device not in images:
-        images[device] = pg.image.load(os.path.join("assets", "%s.png" % device)).convert_alpha()
+        images[device] = pg.image.load(
+            os.path.join("assets", "%s.png" % device)
+        ).convert_alpha()
     return images[device]
 
+
 fonts = {}
+
+
 def load_font(device):
     device = with_prefix(device)
     if device not in fonts:
         size = 14 if device == M5STICKV else 24
-        fonts[device] = pg.freetype.Font(os.path.join("..", "firmware", "font", "ter-u%dn.bdf" % size))
+        fonts[device] = pg.freetype.Font(
+            os.path.join("..", "firmware", "font", "ter-u%dn.bdf" % size)
+        )
     return fonts[device]
+
 
 def screenshot_rect(device):
     screen = pg.display.get_surface()
     if device == PC:
         return screen.get_rect()
-    
+
     rect = load_image(device).get_rect()
     if device == M5STICKV:
         rect.width -= 20

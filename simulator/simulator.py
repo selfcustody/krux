@@ -49,9 +49,11 @@ Maix.register_sequence_executor(sequence_executor)
 sensor.register_sequence_executor(sequence_executor)
 ft6x36.register_sequence_executor(sequence_executor)
 
+
 def run_krux():
     with open("../src/boot.py") as boot_file:
         exec(boot_file.read())
+
 
 t = threading.Thread(target=run_krux)
 t.daemon = True
@@ -66,15 +68,20 @@ device_image = devices.load_image(args.device)
 
 t.start()
 
+
 def shutdown():
     if t.is_alive():
         t.alive = False
-    
+
     pg.quit()
     sys.exit()
-    
+
+
 try:
+    clock = pg.time.Clock()
     while True:
+        clock.tick(60)
+
         if sequence_executor:
             if not sequence_executor.commands and args.exit_after_sequence:
                 shutdown()
@@ -86,10 +93,12 @@ try:
             elif event.type >= pg.USEREVENT:
                 if event.type == events.SCREENSHOT_EVENT:
                     sub = screen.subsurface(devices.screenshot_rect(args.device))
-                    pg.image.save(sub, os.path.join("screenshots", event.dict["filename"]))
+                    pg.image.save(
+                        sub, os.path.join("screenshots", event.dict["filename"])
+                    )
                 else:
                     event.dict["f"]()
-                
+
         if lcd.screen:
             lcd_rect = lcd.screen.get_rect()
             lcd_rect.center = buffer_image.get_rect().center

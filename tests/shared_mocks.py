@@ -145,6 +145,7 @@ def board_m5stickv():
                     "touch": False,
                     "font": [8, 14],
                     "orientation": [1, 2],
+                    "inverted_coordinates": False,
                     "qr_colors": [16904, 61307],
                 },
                 "sensor": {"flipped": False, "lenses": False},
@@ -153,20 +154,20 @@ def board_m5stickv():
     )
 
 
-def board_amigo_ips():
+def board_amigo_tft():
     return mock.MagicMock(
         config={
-            "type": "amigo_ips",
-            "lcd": {"height": 320, "width": 480, "invert": 1, "dir": 40, "lcd_type": 2},
+            "type": "amigo_tft",
+            "lcd": {"height": 320, "width": 480, "invert": 0, "dir": 40, "lcd_type": 1},
             "sdcard": {"sclk": 11, "mosi": 10, "miso": 6, "cs": 26},
             "board_info": {
-                "BOOT_KEY": 16,
+                "BOOT_KEY": 23,
                 "LED_R": 14,
                 "LED_G": 15,
                 "LED_B": 17,
                 "LED_W": 32,
-                "BACK": 31,
-                "ENTER": 23,
+                "BACK": 23,
+                "ENTER": 16,
                 "NEXT": 20,
                 "WIFI_TX": 6,
                 "WIFI_RX": 7,
@@ -196,6 +197,7 @@ def board_amigo_ips():
                     "touch": True,
                     "font": [12, 24],
                     "orientation": [1, 0],
+                    "inverted_coordinates": True,
                     "qr_colors": [0, 6342],
                 },
                 "sensor": {"flipped": True, "lenses": False},
@@ -225,6 +227,7 @@ def board_dock():
                     "touch": False,
                     "font": [8, 16],
                     "orientation": [1, 0],
+                    "inverted_coordinates": False,
                     "qr_colors": [0, 6342],
                 },
                 "sensor": {"flipped": True, "lenses": False},

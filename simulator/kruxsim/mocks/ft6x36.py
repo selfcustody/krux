@@ -32,8 +32,8 @@ sequence_executor = None
 def register_sequence_executor(s):
     global sequence_executor
     sequence_executor = s
-    
-    
+
+
 def to_screen_pos(pos):
     if lcd.screen:
         rect = lcd.screen.get_rect()
@@ -43,22 +43,23 @@ def to_screen_pos(pos):
             return out
     return None
 
+
 class FT6X36:
     def __init__(self):
         pass
-    
+
     def current_point(self):
-        if (
-            sequence_executor
-            and sequence_executor.touch_pos is not None
-        ):
+        if sequence_executor and sequence_executor.touch_pos is not None:
             sequence_executor.touch_checks += 1
             # wait for release
             if sequence_executor.touch_checks == 1:
                 return None
             # wait for press
             # if pressed
-            elif sequence_executor.touch_checks == 2 or sequence_executor.touch_checks == 3:
+            elif (
+                sequence_executor.touch_checks == 2
+                or sequence_executor.touch_checks == 3
+            ):
                 return sequence_executor.touch_pos
             # released
             elif sequence_executor.touch_checks == 4:
@@ -66,7 +67,8 @@ class FT6X36:
                 sequence_executor.touch_checks = 0
                 return None
         return to_screen_pos(pg.mouse.get_pos()) if pg.mouse.get_pressed()[0] else None
-    
+
+
 if "krux.touchscreens.ft6x36" not in sys.modules:
     sys.modules["krux.touchscreens.ft6x36"] = mock.MagicMock(
         FT6X36=FT6X36,

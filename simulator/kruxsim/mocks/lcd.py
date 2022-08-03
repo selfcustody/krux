@@ -81,8 +81,17 @@ def height():
 def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
     def run():
         from kruxsim import devices
+
         text, _ = devices.load_font(BOARD_CONFIG["type"]).render(s, color, bgcolor)
-        screen.blit(text, (width() - text.get_width() - x if BOARD_CONFIG["lcd"]["invert"] else x, y))
+        screen.blit(
+            text,
+            (
+                width() - text.get_width() - x
+                if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
+                else x,
+                y,
+            ),
+        )
 
     pg.event.post(pg.event.Event(events.LCD_DRAW_STRING_EVENT, {"f": run}))
 
@@ -114,7 +123,18 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
 
 def fill_rectangle(x, y, w, h, color):
     def run():
-        pg.draw.rect(screen, color, (width() - w - x if BOARD_CONFIG["lcd"]["invert"] else x, y, w, h))
+        pg.draw.rect(
+            screen,
+            color,
+            (
+                width() - w - x
+                if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
+                else x,
+                y,
+                w,
+                h,
+            ),
+        )
 
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 

@@ -108,7 +108,10 @@ class Display:
             )
             self.initialize_backlight()
         else:
-            lcd.init()
+            invert = board.config["lcd"]["invert"]
+            lcd.init(invert=invert)
+            if invert:
+                lcd.bgr_to_rgb(True)
         self.to_portrait()
         if board.config["type"].startswith("amigo"):
             lcd.mirror(True)
@@ -262,14 +265,14 @@ class Display:
 
     def fill_rectangle(self, x, y, width, height, color):
         """Draws a rectangle to the screen"""
-        if board.config["lcd"]["invert"]:
+        if board.config["krux"]["display"]["inverted_coordinates"]:
             x = self.width() - x
             x -= width
         lcd.fill_rectangle(x, y, width, height, color)
 
     def draw_string(self, x, y, text, color, bg_color=lcd.BLACK):
         """Draws a string to the screen"""
-        if board.config["lcd"]["invert"]:
+        if board.config["krux"]["display"]["inverted_coordinates"]:
             x = self.width() - x
             x -= len(text) * self.font_width
         lcd.draw_string(x, y, text, color, bg_color)

@@ -12,8 +12,8 @@ sequence_executor = None
 def register_sequence_executor(s):
     global sequence_executor
     sequence_executor = s
-    
-    
+
+
 class PMU_Button:
     def __init__(self):
         self.key = pg.K_UP

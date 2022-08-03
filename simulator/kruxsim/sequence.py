@@ -66,10 +66,13 @@ class SequenceExecutor:
     def touch(self):
         self.touch_pos = (self.command_params[0], self.command_params[1])
         self.touch_checks = 0
-        
+
     def show_qrcode(self):
         filename = self.command_params[0]
-        self.camera_image = cv2.imread(os.path.join(os.path.dirname(self.filepath), "qrcodes", filename), cv2.IMREAD_COLOR)
+        self.camera_image = cv2.imread(
+            os.path.join(os.path.dirname(self.filepath), "qrcodes", filename),
+            cv2.IMREAD_COLOR,
+        )
 
     def request_screenshot(self):
         filename = self.command_params[0]
@@ -81,7 +84,17 @@ class SequenceExecutor:
 
 def load_commands(sequence_filepath):
     commands = []
-    with open(sequence_filepath, "r") as sequence_file:
+
+    # If the sequence doesn't exist, it may be board-specific; look for it within a subfolder named for the board
+    filepath = sequence_filepath
+    if not os.path.exists(filepath):
+        filepath = os.path.join(
+            os.path.dirname(sequence_filepath),
+            BOARD_CONFIG["type"],
+            os.path.basename(sequence_filepath),
+        )
+
+    with open(filepath, "r") as sequence_file:
         raw_commands = sequence_file.readlines()
         for raw_command in raw_commands:
             if not any(raw_command.startswith(cmd) for cmd in COMMANDS):
