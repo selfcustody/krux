@@ -54,7 +54,7 @@ def test_run_loop(mocker, m5stickv):
     assert status == MENU_EXIT
 
 
-def test_run_loop_on_amigo_ips(mocker, amigo_ips):
+def test_run_loop_on_amigo_tft(mocker, amigo_tft):
     from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 

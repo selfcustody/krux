@@ -55,7 +55,7 @@ def test_new_key_from_d6(mocker, m5stickv):
         assert ctx.wallet.key.mnemonic == case[1]
 
 
-def test_new_key_from_d6_on_amigo_ips_without_touch(mocker, amigo_ips):
+def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
     from krux.pages.login import Login, D6_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -63,17 +63,17 @@ def test_new_key_from_d6_on_amigo_ips_without_touch(mocker, amigo_ips):
     cases = [
         (
             # Yes and proceed
-            [BUTTON_PAGE, BUTTON_ENTER] +
-            # 3 presses per roll
+            [BUTTON_ENTER] +
+            # 1 press per roll
             [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # Done? Yes and proceed
-            [BUTTON_PAGE, BUTTON_ENTER] +
-            # Confirm roll string, Confirm SHA, Move to Yes, Loading key, Skip passphrase, Single-key
+            [BUTTON_ENTER] +
+            # Confirm roll string, Confirm SHA, Yes, Skip passphrase, Single-key
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_PAGE,
                 BUTTON_ENTER,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
             ],
@@ -81,19 +81,19 @@ def test_new_key_from_d6_on_amigo_ips_without_touch(mocker, amigo_ips):
         ),
         (
             # Yes and proceed
-            [BUTTON_PAGE, BUTTON_ENTER] +
-            # 3 presses per roll
+            [BUTTON_ENTER] +
+            # 1 press per roll
             [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
             # Done? No and proceed
-            [BUTTON_ENTER] +
-            # 3 presses per roll
+            [BUTTON_PAGE, BUTTON_ENTER] +
+            # 1 press per roll
             [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
-            # Confirm roll string, Confirm SHA, Move to Yes, Loading key, Skip passphrase, Single-key
+            # Confirm roll string, Confirm SHA, Yes, Skip passphrase, Single-key
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_PAGE,
                 BUTTON_ENTER,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
             ],
@@ -120,16 +120,12 @@ def test_new_key_from_d6_on_amigo_ips_without_touch(mocker, amigo_ips):
 
     # Leaving keypad
     esc_keypad = [
-        # Move to Yes
-        BUTTON_PAGE,
         # Enter Keypad
         BUTTON_ENTER,
         # Go to ESC position
         BUTTON_PAGE_PREV,
         BUTTON_PAGE_PREV,
         BUTTON_ENTER,
-        # Move to Yes
-        BUTTON_PAGE,
         # Leave
         BUTTON_ENTER,
     ]
@@ -372,14 +368,14 @@ def test_load_key_from_text(mocker, m5stickv):
             assert ctx.wallet.key.mnemonic == case[1]
 
 
-def test_load_key_from_text_on_amigo_ips_with_touch(mocker, amigo_ips):
+def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
     cases = [
         (
-            [BUTTON_PAGE, BUTTON_ENTER]
+            [BUTTON_ENTER]
             + (
                 # A
                 [BUTTON_ENTER]
@@ -424,12 +420,11 @@ def test_load_key_from_text_on_amigo_ips_with_touch(mocker, amigo_ips):
                 [BUTTON_TOUCH]
             )
             +
-            # Done? Move to Yes, Confirm, Words correct? Move to Yes, Confirm, No passphrase, Single-key
+            # Done? Confirm, Words correct? Confirm, No passphrase, Single-key
             [
-                BUTTON_PAGE,
+                BUTTON_ENTER,
                 BUTTON_ENTER,
                 BUTTON_PAGE,
-                BUTTON_ENTER,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
             ],
@@ -437,7 +432,7 @@ def test_load_key_from_text_on_amigo_ips_with_touch(mocker, amigo_ips):
             [13, 26, 13, 29, 28],
         ),
         (
-            [BUTTON_PAGE, BUTTON_ENTER]
+            [BUTTON_ENTER]
             + (
                 # A
                 [BUTTON_ENTER]
@@ -455,12 +450,11 @@ def test_load_key_from_text_on_amigo_ips_with_touch(mocker, amigo_ips):
             +
             # Move to Go, press Go, confirm word
             [BUTTON_PAGE_PREV] + [BUTTON_ENTER] + [BUTTON_ENTER] +
-            # Done? Move to Yes, Confirm, Words correct? Move to Yes, Confirm, No passphrase, Single-key
+            # Done? Confirm, Words correct? Confirm, No passphrase, Single-key
             [
-                BUTTON_PAGE,
+                BUTTON_ENTER,
                 BUTTON_ENTER,
                 BUTTON_PAGE,
-                BUTTON_ENTER,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
             ],
@@ -670,17 +664,15 @@ def test_load_key_from_bits(mocker, m5stickv):
             assert ctx.wallet.key.mnemonic == case[1]
 
 
-def test_leaving_keypad(mocker, amigo_ips):
+def test_leaving_keypad(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     esc_keypad = [
-        BUTTON_PAGE,  # Yes
         BUTTON_ENTER,  # Proceed
         BUTTON_PAGE_PREV,  # Move to Go
         BUTTON_PAGE_PREV,  # Move to ESC
         BUTTON_ENTER,  # Press ESC
-        BUTTON_PAGE,  # Move to Yes
         BUTTON_ENTER,  # Leave
     ]
     ctx = mocker.MagicMock(
@@ -698,12 +690,12 @@ def test_leaving_keypad(mocker, amigo_ips):
     assert ctx.input.wait_for_button.call_count == len(esc_keypad)
 
 
-def test_passphrase_give_up(mocker, amigo_ips):
+def test_passphrase_give_up(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     case = (
-        [BUTTON_PAGE, BUTTON_ENTER]
+        [BUTTON_ENTER]
         + (
             # A
             [BUTTON_ENTER]
@@ -724,21 +716,20 @@ def test_passphrase_give_up(mocker, amigo_ips):
         + [BUTTON_ENTER]
         + [BUTTON_ENTER]
         +
-        # Done? Move to Yes, Confirm
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Done? Confirm
+        [BUTTON_ENTER]
         +
-        # Words correct? Move to Yes, Confirm
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Words correct? Confirm
+        [BUTTON_ENTER]
         +
-        # Passphrase, Move to Yes, confirm
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Passphrase, confirm
+        [BUTTON_ENTER]
         +
         # In passphrase keypad:
         [
             BUTTON_PAGE_PREV,  # Move to Go
             BUTTON_PAGE_PREV,  # Move to ESC
             BUTTON_ENTER,  # Press ESC
-            BUTTON_PAGE,  # Move to Yes
             BUTTON_ENTER,  # Leave
         ]
     )
@@ -756,7 +747,7 @@ def test_passphrase_give_up(mocker, amigo_ips):
     assert ctx.input.wait_for_button.call_count == len(case)
 
 
-def test_passphrase(mocker, amigo_ips):
+def test_passphrase(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import (
         BUTTON_ENTER,
@@ -767,7 +758,7 @@ def test_passphrase(mocker, amigo_ips):
     )
 
     case = (
-        [BUTTON_PAGE, BUTTON_ENTER]
+        [BUTTON_ENTER]
         + (
             # A
             [BUTTON_ENTER]
@@ -788,14 +779,14 @@ def test_passphrase(mocker, amigo_ips):
         + [BUTTON_ENTER]
         + [BUTTON_ENTER]
         +
-        # Done? Move to Yes, Confirm
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Done? Confirm
+        [BUTTON_ENTER]
         +
-        # Words correct? Move to Yes, Confirm
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Words correct? Confirm
+        [BUTTON_ENTER]
         +
-        # Passphrase, Move to Yes, confirm
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Passphrase, confirm
+        [BUTTON_ENTER]
         +
         # In passphrase keypad:
         [
@@ -851,7 +842,7 @@ def test_network(mocker, m5stickv):
     assert krux.pages.login.settings.network == "main"
 
 
-def test_network_on_amigo_ips(mocker, amigo_ips):
+def test_network_on_amigo_tft(mocker, amigo_tft):
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
@@ -914,7 +905,7 @@ def test_printer(mocker, m5stickv):
     assert krux.pages.login.settings.printer.thermal.baudrate == 9600
 
 
-def test_printer_on_amigo_ips(mocker, amigo_ips):
+def test_printer_on_amigo_tft(mocker, amigo_tft):
     import krux
 
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
@@ -978,7 +969,7 @@ def test_locale(mocker, m5stickv):
     assert krux.pages.login.settings.i18n.locale == "en-US"
 
 
-def test_locale_with_settings_pad(mocker, amigo_ips):
+def test_locale_with_settings_pad(mocker, amigo_tft):
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
@@ -1042,7 +1033,7 @@ def test_debug(mocker, m5stickv):
     assert krux.pages.login.settings.log.level == NONE
 
 
-def test_debug_on_amigo_ips(mocker, amigo_ips):
+def test_debug_on_amigo_tft(mocker, amigo_tft):
     import krux
     from krux.pages.login import Login
     from krux.logging import NONE

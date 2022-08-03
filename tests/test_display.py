@@ -337,7 +337,7 @@ def test_fill_rectangle(mocker, m5stickv):
     )
 
 
-def test_fill_rectangle_on_inverted_display(mocker, amigo_ips):
+def test_fill_rectangle_on_inverted_display(mocker, amigo_tft):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -366,7 +366,7 @@ def test_draw_string(mocker, m5stickv):
     )
 
 
-def test_draw_string_on_inverted_display(mocker, amigo_ips):
+def test_draw_string_on_inverted_display(mocker, amigo_tft):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
