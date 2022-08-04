@@ -1,6 +1,6 @@
 Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected thermal printer over its serial port. Consult the [part list](../../parts) page for supported printers.
 
-<img src="../../img/print-qr-printing-150.png">
+<img src="../../img/maixpy_m5stickv/print-qr-printing-125.png">
 
 <video width="430" height="300" controls>
   <source src="../../img/printing-qr.mp4" type="video/mp4"></source>
@@ -10,9 +10,9 @@ Krux has the ability to print all QR codes it generates, including mnemonic, xpu
   <source src="../../img/scanning-printed-qr.mp4" type="video/mp4"></source>
 </video>
 
-<img src="../../img/print-qr-prompt-125.png" align="right">
+<img src="../../img/maixpy_m5stickv/print-qr-prompt-125.png" align="right">
 
-Once connected and powered on, all screens that display a QR code will begin showing a follow-up screen asking if you want to `Print to QR?`. You can use the middle button to confirm or the right-side button to cancel.
+Once connected and powered on, all screens that display a QR code will begin showing a follow-up screen asking if you want to `Print to QR?`.
 
 There are many ways you can use this functionality, including:
 
