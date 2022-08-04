@@ -23,7 +23,7 @@
 [tool.poetry]
 name = "krux"
 version = "22.08.0"
-description = "Open-source, airgapped bitcoin hardware signer for the M5StickV"
+description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
 [tool.poetry.dependencies]
