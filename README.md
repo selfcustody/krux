@@ -5,7 +5,7 @@
 <img src="https://selfcustody.github.io/krux/img/logo-125.png">
 </p>
 
-Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisignature and single-key wallets. It is a low-cost airgapped device built from off-the-shelf parts that communicates with wallet software via QR codes and wipes its memory after every session.
+Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts. It runs on Kendryte K210 devices such as the [M5StickV](https://docs.m5stack.com/en/core/m5stickv) and [Maix Amigo](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html), converting them into airgapped devices that can sign transactions for multisignature and single-key wallets.
 
 ---
 ## Disclaimer
@@ -80,6 +80,16 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>>
 ```
 
+## Run the simulator
+This can be useful for testing a change to the krux code without having to run a full build and flash, visual regression testing,
+generating screenshots, or even just trying out Krux before purchasing a device.
+```bash
+cd simulator && poetry run python simulator.py --device maixpy_amigo_tfts
+```
+```bash
+cd simulator && poetry run python simulator.py --device maixpy_m5stickv
+```
+
 ## Live debug a device
 If you've made a fresh build and flashed it to your device, you can connect to the device over serial connection with:
 ```bash
@@ -130,17 +140,27 @@ Type "help()" for more information.
 >>>
 ```
 
-# Inspired by these similar projects:
+# Run mkdocs
+```bash
+poetry run mkdocs serve
+```
+
+# Inspired by these similar projects
 - https://github.com/SeedSigner/seedsigner for Raspberry Pi (Zero)
 - https://github.com/diybitcoinhardware/f469-disco for the F469-Discovery board
+
+# Powered by
+- [embit](https://embit.rocks/), a Bitcoin library for Python 3 and Micropython
+- [MaixPy](https://github.com/sipeed/MaixPy), MicroPython for K210 RISC-V
+- [MicroPython](https://github.com/micropython/micropython), a lean and efficient Python implementation for microcontrollers and constrained systems
+- [Kboot](https://github.com/loboris/Kboot) and [ktool](https://github.com/loboris/ktool)
 
 # Contributing
 Issues and pull requests welcome! Let's make this as good as it can be.
 
-# Support + Community
-For support installing or using Krux, please join [#krux:matrix.org](https://matrix.to/#/#krux:matrix.org) and ask questions there. We do not use GitHub issues for support requests, only for bug reports and feature requests. 
+# Support
+For technical support installing or using Krux, you can join our [#krux:matrix.org](https://matrix.to/#/#krux:matrix.org) server or [Telegram chat](https://t.me/SC_Krux). Make sure to also check out the [DIYbitcoin chat](https://t.me/diybitcoin) on Telegram, a broader community of tinkerers, builders, hackers, etc.
+
+We do not use GitHub issues for support requests, only for bug reports and feature requests. 
 
 You can also post a question in our [Discussions](https://github.com/selfcustody/krux/discussions) forum here on GitHub.
-
-If you're on Telegram, check out the [DIYbitcoin group](https://t.me/diybitcoin), a broader community of tinkerers, builders, hackers, etc.
-
