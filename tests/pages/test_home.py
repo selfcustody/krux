@@ -72,29 +72,33 @@ def test_mnemonic(mocker, m5stickv, tdata):
 
     cases = [
         # No print prompt
-        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_ENTER]),
-        (Wallet(tdata.SINGLEKEY_24_WORD_KEY), None, [BUTTON_ENTER, BUTTON_ENTER]),
+        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_ENTER, BUTTON_ENTER]),
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            None,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+        ),
         # Print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
         # Decline to print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_PAGE],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
         ),
     ]
     for case in cases:
@@ -108,11 +112,14 @@ def test_mnemonic(mocker, m5stickv, tdata):
         home = Home(ctx)
 
         mocker.spy(home, "display_mnemonic")
+        mocker.spy(home, "display_qr_codes")
         mocker.spy(home, "print_qr_prompt")
-
         home.mnemonic()
 
         home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic)
+        home.display_qr_codes.assert_called_with(
+            ctx.wallet.key.mnemonic, FORMAT_NONE, None
+        )
         home.print_qr_prompt.assert_called_with(ctx.wallet.key.mnemonic, FORMAT_NONE)
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
@@ -126,29 +133,29 @@ def test_mnemonic_touch(mocker, amigo_tft, tdata):
 
     cases = [
         # No print prompt
-        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_TOUCH]),
-        (Wallet(tdata.SINGLEKEY_24_WORD_KEY), None, [BUTTON_TOUCH]),
+        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_TOUCH, BUTTON_TOUCH]),
+        (Wallet(tdata.SINGLEKEY_24_WORD_KEY), None, [BUTTON_TOUCH, BUTTON_TOUCH]),
         # Print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH],
+            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH],
+            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
         ),
         # Decline to print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_PAGE],
+            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_PAGE],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH],
+            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
         ),
     ]
     for case in cases:
@@ -162,11 +169,15 @@ def test_mnemonic_touch(mocker, amigo_tft, tdata):
         home = Home(ctx)
 
         mocker.spy(home, "display_mnemonic")
+        mocker.spy(home, "display_qr_codes")
         mocker.spy(home, "print_qr_prompt")
 
         home.mnemonic()
 
         home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic)
+        home.display_qr_codes.assert_called_with(
+            ctx.wallet.key.mnemonic, FORMAT_NONE, None
+        )
         home.print_qr_prompt.assert_called_with(ctx.wallet.key.mnemonic, FORMAT_NONE)
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
@@ -264,7 +275,7 @@ def test_public_key(mocker, m5stickv, tdata):
                 None,
             ),
             mocker.call(
-                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
+                ctx.wallet.key.xpub(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
                 None,
             ),
@@ -272,7 +283,7 @@ def test_public_key(mocker, m5stickv, tdata):
         print_qr_calls = [
             mocker.call(ctx.wallet.key.key_expression(None), FORMAT_NONE),
             mocker.call(
-                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
+                ctx.wallet.key.xpub(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
             ),
         ]
