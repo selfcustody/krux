@@ -56,21 +56,32 @@ class Home(Page):
         """Handler for the 'mnemonic' menu item"""
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
+        self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
         return MENU_CONTINUE
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
-        zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
-        for version in [None, self.ctx.wallet.key.network[zpub]]:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                self.ctx.wallet.key.key_expression(version, pretty=True)
-            )
-            self.ctx.input.wait_for_button()
-            xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, None)
-            self.print_qr_prompt(xpub, FORMAT_NONE)
+        # Display xpub with key origin + derivation info
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            self.ctx.wallet.key.key_expression(None, pretty=True)
+        )
+        self.ctx.input.wait_for_button()
+        xpub = self.ctx.wallet.key.key_expression(None)
+        self.display_qr_codes(xpub, FORMAT_NONE, None)
+        self.print_qr_prompt(xpub, FORMAT_NONE)
+        # Display zpub without key origin
+        zpub = self.ctx.wallet.key.xpub(
+            self.ctx.wallet.key.network[
+                "Zpub" if self.ctx.wallet.key.multisig else "zpub"
+            ]
+        )
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(zpub)
+        self.ctx.input.wait_for_button()
+        self.display_qr_codes(zpub, FORMAT_NONE, None)
+        self.print_qr_prompt(zpub, FORMAT_NONE)
         return MENU_CONTINUE
 
     def wallet(self):
