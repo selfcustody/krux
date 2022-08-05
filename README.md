@@ -141,7 +141,7 @@ Type "help()" for more information.
 >>>
 ```
 
-# Run mkdocs
+## Run mkdocs
 ```bash
 poetry run mkdocs serve
 ```
