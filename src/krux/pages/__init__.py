@@ -216,9 +216,8 @@ class Page:
         done = False
         i = 0
         code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
+        self.ctx.display.clear()
         while not done:
-            self.ctx.display.clear()
-
             code = None
             num_parts = 0
             try:
@@ -228,13 +227,20 @@ class Page:
                     data, self.ctx.display.qr_data_width(), qr_format
                 )
                 code, num_parts = next(code_generator)
-            self.ctx.display.draw_qr_code(5, code)
+            self.ctx.display.draw_qr_code(0, code)
             subtitle = (
                 t("Part\n%d / %d") % (i + 1, num_parts) if title is None else title
             )
             offset_y = self.ctx.display.qr_offset()
             if title is not None:
                 offset_y += self.ctx.display.font_height
+            self.ctx.display.fill_rectangle(
+                0,
+                offset_y,
+                self.ctx.display.width(),
+                self.ctx.display.height() - offset_y,
+                lcd.BLACK,
+            )
             self.ctx.display.draw_hcentered_text(subtitle, offset_y, color=lcd.WHITE)
             i = (i + 1) % num_parts
             if self.wait_for_proceed(block=num_parts == 1):

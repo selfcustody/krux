@@ -133,7 +133,7 @@ class Display:
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
-        return self.width() + 3
+        return self.width() + DEFAULT_PADDING // 2
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""
