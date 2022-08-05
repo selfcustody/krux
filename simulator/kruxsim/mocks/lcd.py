@@ -97,6 +97,7 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
 
 
 def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
+    offset_y += 5
     def run():
         starting_size = 0
         while code_str[starting_size] != "\n":
