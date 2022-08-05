@@ -101,6 +101,8 @@ def to_qr_codes(data, max_width, qr_format):
         yield (code, 1)
     else:
         num_parts = find_min_num_parts(data, max_width, qr_format)
+        while data_len(data) // num_parts > 128:
+            num_parts *= 2
         part_size = data_len(data) // num_parts
 
         if qr_format == FORMAT_PMOFN:
