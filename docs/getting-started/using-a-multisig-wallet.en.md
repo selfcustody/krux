@@ -218,11 +218,13 @@ Selecting `Multisig` will derive an xpub using the derivation path `m/48'/0'/0'/
 
     Specter Desktop will display an animated QR code of the PSBT that you can scan with Krux by going to *Sign > PSBT* in its main menu. After scanning, Krux should display info about the transaction for you to confirm before signing.
 
-    <img src="../../img/sign-psbt-sign-prompt-125.png">
+    <img src="../../img/maixpy_m5stickv/sign-psbt-sign-prompt-125.png">
+    <img src="../../img/maixpy_amigo_tft/sign-psbt-sign-prompt-150.png">
 
     Once you have confirmed, Krux will begin animating a QR code of the signed transaction that you can scan into Specter Desktop. 
     
-    <img src="../../img/sign-psbt-signed-qr-125.png">
+    <img src="../../img/maixpy_m5stickv/sign-psbt-signed-qr-125.png">
+    <img src="../../img/maixpy_amigo_tft/sign-psbt-signed-qr-150.png">
 
     In Specter Desktop, click *Scan signed transaction* and show it the QR. Each part of the QR code that is read will receive a ghost icon to indicate progress.
 
