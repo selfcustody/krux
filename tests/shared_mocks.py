@@ -26,6 +26,7 @@ def encode_to_string(data):
 
     return new_code_str
 
+
 def get_mock_open(files: dict[str, str]):
     def open_mock(filename, *args, **kwargs):
         for expected_filename, content in files.items():
