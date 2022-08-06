@@ -644,7 +644,7 @@ simulator = []
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9.1"
-content-hash = "34d9e0b13d21b7ade658e54006aeb3de9e6e2369b6d22f91abe7fc5c6665c2d0"
+content-hash = "c8a5d7ca03d5b61b145c3f5e55c5cd1e58720e9205bcba59246df8aa694771f0"
 
 [metadata.files]
 astroid = []
