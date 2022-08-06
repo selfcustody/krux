@@ -116,9 +116,9 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
     from krux.qr import to_qr_codes, FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
     cases = [
-        (FORMAT_NONE, tdata.TEST_DATA_B58, tdata.TEST_PARTS_FORMAT_NONE),
-        (FORMAT_PMOFN, tdata.TEST_DATA_B58, tdata.TEST_PARTS_FORMAT_PMOFN),
-        (FORMAT_UR, tdata.TEST_DATA_UR, tdata.TEST_PARTS_FORMAT_UR),
+        (FORMAT_NONE, tdata.TEST_DATA_B58, 1),
+        (FORMAT_PMOFN, tdata.TEST_DATA_B58, 3),
+        (FORMAT_UR, tdata.TEST_DATA_UR, 3),
     ]
     for case in cases:
         fmt = case[0]
@@ -132,10 +132,10 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
             try:
                 code, total = next(code_generator)
                 codes.append(code)
-                assert total == len(expected_parts)
+                assert total == expected_parts
                 if i == total - 1:
                     break
             except:
                 break
             i += 1
-        assert len(codes) == len(expected_parts)
+        assert len(codes) == expected_parts

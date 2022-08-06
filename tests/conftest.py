@@ -1,5 +1,5 @@
 import pytest
-from .shared_mocks import board_amigo_tft, board_dock, board_m5stickv
+from .shared_mocks import board_amigo_tft, board_dock, board_m5stickv, encode_to_string
 
 
 def reset_krux_modules():
@@ -20,7 +20,7 @@ def mp_modules(mocker, monkeypatch):
     monkeypatch.setitem(
         sys.modules,
         "qrcode",
-        mocker.MagicMock(encode_to_string=lambda data: ("0" * (len(data) - 10)) + "\n"),
+        mocker.MagicMock(encode_to_string=encode_to_string),
     )
     monkeypatch.setitem(sys.modules, "secp256k1", mocker.MagicMock(wraps=secp256k1))
     monkeypatch.setitem(sys.modules, "urandom", random)
