@@ -443,7 +443,7 @@ name = "pyqrcode"
 version = "1.2.1"
 description = "A QR code generator written purely in Python with SVG, EPS, PNG and terminal output."
 category = "dev"
-optional = true
+optional = false
 python-versions = "*"
 
 [package.extras]
@@ -644,7 +644,7 @@ simulator = []
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9.1"
-content-hash = "c8a5d7ca03d5b61b145c3f5e55c5cd1e58720e9205bcba59246df8aa694771f0"
+content-hash = "d4703799b46ad23dbc71f8c8038ef102686e4e417dde342457ee52ad2a442600"
 
 [metadata.files]
 astroid = []
