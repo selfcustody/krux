@@ -1,10 +1,17 @@
 ## Why does Krux show an xpub for a segwit address?
-The xpub that Krux displays follows the bitcoin core descriptors spec and includes key origin and derivation info that, in theory, makes zpubs (and ypubs) unnecessary *if the wallet software being shown this extra information can parse it*. 
+The xpub that Krux displays follows the [bitcoin core descriptors spec](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md#key-origin-identification) and includes key origin and derivation info that, in theory, makes zpubs (and ypubs) unnecessary *if the wallet software being shown this extra information can parse it*. 
 
 From the spec:
 > Every public key can be prefixed by an 8-character hexadecimal fingerprint plus optional derivation steps (hardened and unhardened) surrounded by brackets, identifying the master and derivation path the key or xpub that follows was derived with.
 
 However, in practice not all wallet software supports this extended format, so Krux still provides a zpub as a fallback.
+
+For more information, check out [https://outputdescriptors.org/](https://outputdescriptors.org/).
+
+## Why am I unable to sign a PSBT from BlueWallet?
+As mentioned above, some wallet software does not support the descriptor key expression format. In this case, BlueWallet will ignore the key origin and derivation info when importing the xpub to create a single-key wallet. This will result in the wrong derivation being used in BlueWallet and thus the inability to sign an outbound transaction in Krux.
+
+Currently, the way to properly create a single-key wallet in BlueWallet is to export the second QR code that Krux displays which contains the zpub. BlueWallet can then correctly infer the derivation path when creating the wallet.
 
 ## Why isn't Krux scanning my QR code?
 The level of detail that you see is what Krux sees. If the QR code shown on the device's screen is blurry, the camera lens of the device may be out of focus. It can be adjusted by rotating it (with your fingertip) clockwise or counter-clockwise to achieve a clearer result. 

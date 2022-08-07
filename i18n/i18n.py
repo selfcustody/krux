@@ -105,7 +105,8 @@ def bake_translations():
             translation_table[basename(translation_filename).split(".")[0]] = lookup
 
     with open(join(SRC_DIR, "krux", "translations.py"), "w") as translations:
-        translations.write("""# The MIT License (MIT)
+        translations.write(
+            """# The MIT License (MIT)
 
 # Copyright (c) 2021-2022 Krux contributors
 
@@ -125,7 +126,8 @@ def bake_translations():
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.\n""")
+# THE SOFTWARE.\n"""
+        )
         translations.write("# pylint: disable=C0301\n")
         translations.write("translation_table = ")
         translations.write(repr(translation_table))
