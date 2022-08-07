@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 import gc
 import board
+import os
 from .logging import logger
 from .display import Display
 from .input import Input
@@ -53,3 +54,14 @@ class Context:
         if self.printer is not None:
             self.printer.clear()
         gc.collect()
+
+    @property
+    def sd(self):
+        try:
+            fn = "/sd/.chkmnt"
+            with open(fn, "w") as f:
+                f.write("")
+            os.remove(fn)
+            return True
+        except:
+            return False

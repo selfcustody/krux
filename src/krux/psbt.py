@@ -22,6 +22,7 @@
 from embit import script
 from embit.psbt import DerivationPath, PSBT
 from embit.finalizer import parse_multisig
+from krux.qr import FORMAT_PMOFN
 from ur.ur import UR
 import urtypes
 from urtypes.crypto import CRYPTO_PSBT
@@ -33,10 +34,11 @@ from .i18n import t
 class PSBTSigner:
     """Responsible for validating and signing PSBTs"""
 
-    def __init__(self, wallet, psbt_data):
+    def __init__(self, wallet, psbt_data, qr_format):
         self.wallet = wallet
         self.base_encoding = None
         self.ur_type = None
+        self.qr_format = qr_format
         # Parse the PSBT
         if isinstance(psbt_data, UR):
             try:
@@ -51,6 +53,10 @@ class PSBTSigner:
             psbt_data = psbt_data.encode() if isinstance(psbt_data, str) else psbt_data
             try:
                 self.psbt = PSBT.parse(psbt_data)
+                if self.qr_format == FORMAT_PMOFN:
+                    # We can't return the PSBT as a multi-part sequence of bytes, so convert to
+                    # base64 first
+                    self.base_encoding = 64
             except:
                 try:
                     self.psbt = PSBT.parse(base_decode(psbt_data, 64))
@@ -152,7 +158,7 @@ class PSBTSigner:
         return messages
 
     def sign(self):
-        """Signs the PSBT and returns it"""
+        """Signs the PSBT"""
         sigs_added = self.psbt.sign_with(self.wallet.key.root)
         if sigs_added == 0:
             raise ValueError("cannot sign")
@@ -162,14 +168,15 @@ class PSBTSigner:
             trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
         self.psbt = trimmed_psbt
-
-        psbt_data = self.psbt.serialize()
+    
+    def psbt_qr(self):
+        """Returns the psbt in the same form it was read as a QR code"""
         if self.ur_type == CRYPTO_PSBT:
-            return UR(CRYPTO_PSBT.type, urtypes.crypto.PSBT(psbt_data).to_cbor())
+            return UR(CRYPTO_PSBT.type, urtypes.crypto.PSBT(self.psbt.serialize()).to_cbor()), self.qr_format
 
         if self.base_encoding is not None:
-            psbt_data = base_encode(psbt_data, self.base_encoding).decode()
-        return psbt_data
+            psbt_data = base_encode(self.psbt.serialize(), self.base_encoding).decode()
+        return psbt_data, self.qr_format
 
     def xpubs(self):
         """Returns the xpubs in the PSBT mapped to their derivations, falling back to

@@ -43,6 +43,7 @@ board.register_device(args.device)
 
 if args.with_sd:
     from kruxsim.mocks import uopen
+    from kruxsim.mocks import uos
 
 from kruxsim.mocks import usys
 from kruxsim.mocks import utime

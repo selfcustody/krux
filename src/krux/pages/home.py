@@ -22,6 +22,7 @@
 import binascii
 import gc
 import hashlib
+import os
 import lcd
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
@@ -213,8 +214,28 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
 
-        data, qr_format = self.capture_qr_code()
+        data, qr_format = (None, FORMAT_NONE)
+        psbt_filename = None
+        try:
+            psbt_filename = next(
+                filter(
+                    lambda filename: filename.endswith(".psbt"),
+                    os.listdir("/sd"),
+                )
+            )
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(t("Found PSBT on disk:\n%s") % psbt_filename)
+            if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
+                with open("/sd/%s" % psbt_filename, "rb") as psbt_file:
+                    data = psbt_file.read()
+        except:
+            pass
+        
+        if data is None:
+            data, qr_format = self.capture_qr_code()
+
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
+
         if data is None:
             self.ctx.display.flash_text(t("Failed to load PSBT"), lcd.RED)
             return MENU_CONTINUE
@@ -222,15 +243,23 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        signer = PSBTSigner(self.ctx.wallet, data)
+        signer = PSBTSigner(self.ctx.wallet, data, qr_format)
         self.ctx.log.debug("Received PSBT: %s" % signer.psbt)
 
         outputs = signer.outputs()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text("\n \n".join(outputs))
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
-            signed_psbt = signer.sign()
+            signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
+            if self.ctx.sd:
+                self.ctx.display.clear()
+                if self.prompt(t("Save PSBT to disk?"), self.ctx.display.height() // 2):
+                    psbt_filename = "signed-%s" % (psbt_filename if psbt_filename is not None else "psbt")
+                    with open("/sd/%s" % psbt_filename, "wb") as psbt_file:
+                        psbt_file.write(signer.psbt.serialize())
+                    self.ctx.display.flash_text(t("Saved PSBT to disk:\n%s") % psbt_filename)
+            signed_psbt, qr_format = signer.psbt_qr()
             signer = None
             gc.collect()
             self.display_qr_codes(signed_psbt, qr_format)
