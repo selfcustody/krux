@@ -226,7 +226,7 @@ class Home(Page):
                 )
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(
-                    t("Found PSBT on disk:\n%s") % psbt_filename
+                    t("Found PSBT on SD card:\n%s") % psbt_filename
                 )
                 if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
                     with open("/sd/%s" % psbt_filename, "rb") as psbt_file:
@@ -257,14 +257,16 @@ class Home(Page):
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
             if self.ctx.sd_card is not None:
                 self.ctx.display.clear()
-                if self.prompt(t("Save PSBT to disk?"), self.ctx.display.height() // 2):
+                if self.prompt(
+                    t("Save PSBT to SD card?"), self.ctx.display.height() // 2
+                ):
                     psbt_filename = "signed-%s" % (
                         psbt_filename if psbt_filename is not None else "psbt"
                     )
                     with open("/sd/%s" % psbt_filename, "wb") as psbt_file:
                         psbt_file.write(signer.psbt.serialize())
                     self.ctx.display.flash_text(
-                        t("Saved PSBT to disk:\n%s") % psbt_filename
+                        t("Saved PSBT to SD card:\n%s") % psbt_filename
                     )
             signed_psbt, qr_format = signer.psbt_qr()
             signer = None
