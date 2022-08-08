@@ -854,7 +854,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             ),
             wallet=wallet,
             printer=case[8],
-            sd=case[10] is not None,
+            sd_card=case[10],
         )
 
         home = Home(ctx)

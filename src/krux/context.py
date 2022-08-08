@@ -56,12 +56,14 @@ class Context:
         gc.collect()
 
     @property
-    def sd(self):
+    def sd_card(self):
+        """Returns whether or not an SD card is present. This property should eventually
+        be replaced by an SD interface class for reading and writing to disk"""
         try:
-            fn = "/sd/.chkmnt"
-            with open(fn, "w") as f:
-                f.write("")
-            os.remove(fn)
-            return True
+            tmpfile = "/sd/.chkmnt"
+            with open(tmpfile, "w") as tmp:
+                tmp.write("")
+            os.remove(tmpfile)
+            return object()
         except:
-            return False
+            return None
