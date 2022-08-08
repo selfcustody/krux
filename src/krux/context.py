@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 import gc
 import board
+import os
 from .logging import logger
 from .display import Display
 from .input import Input
@@ -53,3 +54,16 @@ class Context:
         if self.printer is not None:
             self.printer.clear()
         gc.collect()
+
+    @property
+    def sd_card(self):
+        """Returns whether or not an SD card is present. This property should eventually
+        be replaced by an SD interface class for reading and writing to disk"""
+        try:
+            tmpfile = "/sd/.chkmnt"
+            with open(tmpfile, "w") as tmp:
+                tmp.write("")
+            os.remove(tmpfile)
+            return object()
+        except:
+            return None

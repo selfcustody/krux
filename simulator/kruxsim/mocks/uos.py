@@ -19,14 +19,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import builtins
+import os
 
-old_open = open
+old_listdir = os.listdir
+old_remove = os.remove
 
 
-def new_open(path, *args, **kwargs):
+def new_listdir(path, *args, **kwargs):
     path = path.lstrip("/") if path.startswith("/sd") else path
-    return old_open(path, *args, **kwargs)
+    return old_listdir(path, *args, **kwargs)
 
 
-builtins.open = new_open
+def new_remove(path, *args, **kwargs):
+    path = path.lstrip("/") if path.startswith("/sd") else path
+    return old_remove(path, *args, **kwargs)
+
+
+setattr(os, "listdir", new_listdir)
+setattr(os, "remove", new_remove)
