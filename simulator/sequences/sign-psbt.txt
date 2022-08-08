@@ -24,6 +24,9 @@ wait 0.5
 screenshot sign-psbt-sign-prompt.png
 
 press BUTTON_A
+
+press BUTTON_B
+
 wait 0.5
 screenshot sign-psbt-signed-qr.png
 wait 0.5
