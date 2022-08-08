@@ -1,3 +1,6 @@
+from .shared_mocks import get_mock_open
+
+
 def mock_modules(mocker):
     mocker.patch("krux.context.logger", new=mocker.MagicMock())
     mocker.patch("krux.context.Display", new=mocker.MagicMock())
@@ -48,3 +51,28 @@ def test_clear_clears_printer(mocker, m5stickv):
 
     assert c.wallet is None
     c.printer.clear.assert_called()
+
+def test_sd_card(mocker, m5stickv):
+    mock_modules(mocker)
+    from krux.context import Context
+
+    c = Context()
+    
+    mocker.patch("os.remove", new=mocker.MagicMock())
+    mocker.patch(
+        "builtins.open",
+        new=get_mock_open(
+            {
+                "/sd/.chkmnt": "",
+            }
+        ),
+    )
+            
+    assert c.sd_card is not None
+    
+    mocker.patch(
+        "builtins.open",
+        new=mocker.MagicMock(side_effect=Exception)
+    )
+            
+    assert c.sd_card is None
