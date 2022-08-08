@@ -160,23 +160,24 @@ def test_init_singlekey(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
     cases = [
-        tdata.P2WPKH_PSBT,
-        tdata.P2WPKH_PSBT_B43,
-        tdata.P2WPKH_PSBT_B58,
-        tdata.P2WPKH_PSBT_B64,
-        tdata.P2WPKH_PSBT_UR_PSBT,
-        tdata.P2SH_P2WPKH_PSBT,
-        tdata.P2SH_P2WPKH_PSBT_B43,
-        tdata.P2SH_P2WPKH_PSBT_B58,
-        tdata.P2SH_P2WPKH_PSBT_B64,
-        tdata.P2SH_P2WPKH_PSBT_UR_PSBT,
+        (tdata.P2WPKH_PSBT, FORMAT_NONE),
+        (tdata.P2WPKH_PSBT_B43, FORMAT_PMOFN),
+        (tdata.P2WPKH_PSBT_B58, FORMAT_PMOFN),
+        (tdata.P2WPKH_PSBT_B64, FORMAT_PMOFN),
+        (tdata.P2WPKH_PSBT_UR_PSBT, FORMAT_UR),
+        (tdata.P2SH_P2WPKH_PSBT, FORMAT_NONE),
+        (tdata.P2SH_P2WPKH_PSBT_B43, FORMAT_PMOFN),
+        (tdata.P2SH_P2WPKH_PSBT_B58, FORMAT_PMOFN),
+        (tdata.P2SH_P2WPKH_PSBT_B64, FORMAT_PMOFN),
+        (tdata.P2SH_P2WPKH_PSBT_UR_PSBT, FORMAT_UR),
     ]
 
     for case in cases:
-        signer = PSBTSigner(wallet, case)
+        signer = PSBTSigner(wallet, case[0], case[1])
         assert isinstance(signer, PSBTSigner)
 
 
@@ -185,23 +186,24 @@ def test_init_multisig(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
     cases = [
-        tdata.P2WSH_PSBT,
-        tdata.P2WSH_PSBT_B43,
-        tdata.P2WSH_PSBT_B58,
-        tdata.P2WSH_PSBT_B64,
-        tdata.P2WSH_PSBT_UR_PSBT,
-        tdata.P2SH_P2WSH_PSBT,
-        tdata.P2SH_P2WSH_PSBT_B43,
-        tdata.P2SH_P2WSH_PSBT_B58,
-        tdata.P2SH_P2WSH_PSBT_B64,
-        tdata.P2SH_P2WSH_PSBT_UR_PSBT,
+        (tdata.P2WSH_PSBT, FORMAT_NONE),
+        (tdata.P2WSH_PSBT_B43, FORMAT_PMOFN),
+        (tdata.P2WSH_PSBT_B58, FORMAT_PMOFN),
+        (tdata.P2WSH_PSBT_B64, FORMAT_PMOFN),
+        (tdata.P2WSH_PSBT_UR_PSBT, FORMAT_UR),
+        (tdata.P2SH_P2WSH_PSBT, FORMAT_NONE),
+        (tdata.P2SH_P2WSH_PSBT_B43, FORMAT_PMOFN),
+        (tdata.P2SH_P2WSH_PSBT_B58, FORMAT_PMOFN),
+        (tdata.P2SH_P2WSH_PSBT_B64, FORMAT_PMOFN),
+        (tdata.P2SH_P2WSH_PSBT_UR_PSBT, FORMAT_UR),
     ]
 
     for case in cases:
-        signer = PSBTSigner(wallet, case)
+        signer = PSBTSigner(wallet, case[0], case[1])
         assert isinstance(signer, PSBTSigner)
 
 
@@ -211,16 +213,17 @@ def test_init_fails_on_invalid_psbt(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_UR
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
 
     cases = [
-        "thisisnotavalidpsbt",
-        UR("unknown-type", bytearray("thisisnotavalidpsbt".encode())),
+        ("thisisnotavalidpsbt", FORMAT_NONE),
+        (UR("unknown-type", bytearray("thisisnotavalidpsbt".encode())), FORMAT_UR),
     ]
     for case in cases:
         with pytest.raises(ValueError):
-            PSBTSigner(wallet, case)
+            PSBTSigner(wallet, case[0], case[1])
 
 
 def test_sign_singlekey(mocker, m5stickv, tdata):
@@ -228,25 +231,32 @@ def test_sign_singlekey(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
     cases = [
-        (tdata.P2WPKH_PSBT, tdata.SIGNED_P2WPKH_PSBT),
-        (tdata.P2WPKH_PSBT_B43, tdata.SIGNED_P2WPKH_PSBT_B43),
-        (tdata.P2WPKH_PSBT_B58, tdata.SIGNED_P2WPKH_PSBT_B58),
-        (tdata.P2WPKH_PSBT_B64, tdata.SIGNED_P2WPKH_PSBT_B64),
-        (tdata.P2WPKH_PSBT_UR_PSBT, tdata.SIGNED_P2WPKH_PSBT_UR_PSBT),
-        (tdata.P2SH_P2WPKH_PSBT, tdata.SIGNED_P2SH_P2WPKH_PSBT),
-        (tdata.P2SH_P2WPKH_PSBT_B43, tdata.SIGNED_P2SH_P2WPKH_PSBT_B43),
-        (tdata.P2SH_P2WPKH_PSBT_B58, tdata.SIGNED_P2SH_P2WPKH_PSBT_B58),
-        (tdata.P2SH_P2WPKH_PSBT_B64, tdata.SIGNED_P2SH_P2WPKH_PSBT_B64),
-        (tdata.P2SH_P2WPKH_PSBT_UR_PSBT, tdata.SIGNED_P2SH_P2WPKH_PSBT_UR_PSBT),
+        (tdata.P2WPKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2WPKH_PSBT),
+        (tdata.P2WPKH_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_P2WPKH_PSBT_B43),
+        (tdata.P2WPKH_PSBT_B58, FORMAT_PMOFN, tdata.SIGNED_P2WPKH_PSBT_B58),
+        (tdata.P2WPKH_PSBT_B64, FORMAT_PMOFN, tdata.SIGNED_P2WPKH_PSBT_B64),
+        (tdata.P2WPKH_PSBT_UR_PSBT, FORMAT_UR, tdata.SIGNED_P2WPKH_PSBT_UR_PSBT),
+        (tdata.P2SH_P2WPKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2SH_P2WPKH_PSBT),
+        (tdata.P2SH_P2WPKH_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WPKH_PSBT_B43),
+        (tdata.P2SH_P2WPKH_PSBT_B58, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WPKH_PSBT_B58),
+        (tdata.P2SH_P2WPKH_PSBT_B64, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WPKH_PSBT_B64),
+        (
+            tdata.P2SH_P2WPKH_PSBT_UR_PSBT,
+            FORMAT_UR,
+            tdata.SIGNED_P2SH_P2WPKH_PSBT_UR_PSBT,
+        ),
+        (tdata.P2WPKH_PSBT, FORMAT_PMOFN, tdata.SIGNED_P2WPKH_PSBT_B64),
+        (tdata.P2SH_P2WPKH_PSBT, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WPKH_PSBT_B64),
     ]
 
     for case in cases:
-        signer = PSBTSigner(wallet, case[0])
-        signed_psbt = signer.sign()
-        assert signed_psbt == case[1]
+        signer = PSBTSigner(wallet, case[0], case[1])
+        signer.sign()
+        assert signer.psbt_qr() == (case[2], case[1])
 
 
 def test_sign_multisig(mocker, m5stickv, tdata):
@@ -254,25 +264,32 @@ def test_sign_multisig(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
     cases = [
-        (tdata.P2WSH_PSBT, tdata.SIGNED_P2WSH_PSBT),
-        (tdata.P2WSH_PSBT_B43, tdata.SIGNED_P2WSH_PSBT_B43),
-        (tdata.P2WSH_PSBT_B58, tdata.SIGNED_P2WSH_PSBT_B58),
-        (tdata.P2WSH_PSBT_B64, tdata.SIGNED_P2WSH_PSBT_B64),
-        (tdata.P2WSH_PSBT_UR_PSBT, tdata.SIGNED_P2WSH_PSBT_UR_PSBT),
-        (tdata.P2SH_P2WSH_PSBT, tdata.SIGNED_P2SH_P2WSH_PSBT),
-        (tdata.P2SH_P2WSH_PSBT_B43, tdata.SIGNED_P2SH_P2WSH_PSBT_B43),
-        (tdata.P2SH_P2WSH_PSBT_B58, tdata.SIGNED_P2SH_P2WSH_PSBT_B58),
-        (tdata.P2SH_P2WSH_PSBT_B64, tdata.SIGNED_P2SH_P2WSH_PSBT_B64),
-        (tdata.P2SH_P2WSH_PSBT_UR_PSBT, tdata.SIGNED_P2SH_P2WSH_PSBT_UR_PSBT),
+        (tdata.P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2WSH_PSBT),
+        (tdata.P2WSH_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_P2WSH_PSBT_B43),
+        (tdata.P2WSH_PSBT_B58, FORMAT_PMOFN, tdata.SIGNED_P2WSH_PSBT_B58),
+        (tdata.P2WSH_PSBT_B64, FORMAT_PMOFN, tdata.SIGNED_P2WSH_PSBT_B64),
+        (tdata.P2WSH_PSBT_UR_PSBT, FORMAT_UR, tdata.SIGNED_P2WSH_PSBT_UR_PSBT),
+        (tdata.P2SH_P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2SH_P2WSH_PSBT),
+        (tdata.P2SH_P2WSH_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WSH_PSBT_B43),
+        (tdata.P2SH_P2WSH_PSBT_B58, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WSH_PSBT_B58),
+        (tdata.P2SH_P2WSH_PSBT_B64, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WSH_PSBT_B64),
+        (
+            tdata.P2SH_P2WSH_PSBT_UR_PSBT,
+            FORMAT_UR,
+            tdata.SIGNED_P2SH_P2WSH_PSBT_UR_PSBT,
+        ),
+        (tdata.P2WSH_PSBT, FORMAT_PMOFN, tdata.SIGNED_P2WSH_PSBT_B64),
+        (tdata.P2SH_P2WSH_PSBT, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WSH_PSBT_B64),
     ]
 
     for case in cases:
-        signer = PSBTSigner(wallet, case[0])
-        signed_psbt = signer.sign()
-        assert signed_psbt == case[1]
+        signer = PSBTSigner(wallet, case[0], case[1])
+        signer.sign()
+        assert signer.psbt_qr() == (case[2], case[1])
 
 
 def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
@@ -280,9 +297,10 @@ def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
-    signer = PSBTSigner(wallet, tdata.P2WSH_PSBT)
+    signer = PSBTSigner(wallet, tdata.P2WSH_PSBT, FORMAT_NONE)
     mocker.patch.object(signer.psbt, "sign_with", mocker.MagicMock(return_value=0))
 
     with pytest.raises(ValueError):
@@ -295,6 +313,7 @@ def test_outputs_singlekey(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
     cases = [
@@ -315,7 +334,7 @@ def test_outputs_singlekey(mocker, m5stickv, tdata):
     ]
 
     for case in cases:
-        signer = PSBTSigner(wallet, case[0])
+        signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
         outputs = signer.outputs()
         assert outputs == case[1]
 
@@ -325,6 +344,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
     cases = [
@@ -345,7 +365,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
     ]
 
     for case in cases:
-        signer = PSBTSigner(wallet, case[0])
+        signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
         outputs = signer.outputs()
         assert outputs == case[1]
 
@@ -355,9 +375,10 @@ def test_xpubs_fails_with_no_xpubs(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
 
     with pytest.raises(ValueError):
-        signer = PSBTSigner(wallet, tdata.MISSING_GLOBAL_XPUBS_PSBT)
+        signer = PSBTSigner(wallet, tdata.MISSING_GLOBAL_XPUBS_PSBT, FORMAT_NONE)
         signer.xpubs()

@@ -168,14 +168,21 @@ class PSBTSigner:
             trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
         self.psbt = trimmed_psbt
-    
+
     def psbt_qr(self):
         """Returns the psbt in the same form it was read as a QR code"""
-        if self.ur_type == CRYPTO_PSBT:
-            return UR(CRYPTO_PSBT.type, urtypes.crypto.PSBT(self.psbt.serialize()).to_cbor()), self.qr_format
-
+        psbt_data = self.psbt.serialize()
         if self.base_encoding is not None:
-            psbt_data = base_encode(self.psbt.serialize(), self.base_encoding).decode()
+            psbt_data = base_encode(psbt_data, self.base_encoding).decode()
+
+        if self.ur_type == CRYPTO_PSBT:
+            return (
+                UR(
+                    CRYPTO_PSBT.type,
+                    urtypes.crypto.PSBT(psbt_data).to_cbor(),
+                ),
+                self.qr_format,
+            )
         return psbt_data, self.qr_format
 
     def xpubs(self):
