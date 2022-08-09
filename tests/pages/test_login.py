@@ -247,6 +247,20 @@ def test_load_key_from_qr_code(mocker, m5stickv):
             "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
         ),
         (
+            # 12 word confirm, 24 word confirm, No passphrase, Single-key
+            (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+            FORMAT_NONE,
+            b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE",
+            "forum undo fragile fade shy sign arrest garment culture tube off merit",
+        ),
+        (
+            # 12 word confirm, 24 word confirm, No passphrase, Single-key
+            (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+            FORMAT_NONE,
+            b"\x0et\xb6A\x07\xf9L\xc0\xcc\xfa\xe6\xa1=\xcb\xec6b\x15O\xecg\xe0\xe0\t\x99\xc0x\x92Y}\x19\n",
+            "attack pizza motion avocado network gather crop fresh patrol unusual wild holiday candy pony ranch winter theme error hybrid van cereal salon goddess expire",
+        ),
+        (
             # 12 word confirm, No passphrase, Single-key
             (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
             FORMAT_UR,
@@ -269,6 +283,7 @@ def test_load_key_from_qr_code(mocker, m5stickv):
             display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
         )
         login = Login(ctx)
+
         mocker.patch.object(
             login, "capture_qr_code", mocker.MagicMock(return_value=(case[2], case[1]))
         )

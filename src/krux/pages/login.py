@@ -24,6 +24,7 @@ import hashlib
 import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
+from embit import bip39
 import urtypes
 from ..logging import LEVEL_NAMES, level_name, logger, DEBUG
 from ..metadata import VERSION
@@ -233,11 +234,28 @@ class Login(Page):
         if qr_format == FORMAT_UR:
             words = urtypes.crypto.BIP39.from_cbor(data.cbor).words
         else:
-            if " " in data:
-                words = data.split(" ")
-            elif len(data) == 48 or len(data) == 96:
-                for i in range(0, len(data), 4):
-                    words.append(WORDLIST[int(data[i : i + 4])])
+            try:
+                data_str = data.decode() if not isinstance(data, str) else data
+                if " " in data_str and len(data_str.split()) in (12, 24):
+                    words = data_str.split()
+            except:
+                pass
+
+            if not words:
+                try:
+                    data_bytes = data.encode() if isinstance(data, str) else data
+
+                    # CompactSeedQR format
+                    if len(data_bytes) in (16, 32):
+                        words = bip39.mnemonic_from_bytes(data_bytes).split()
+                    # SeedQR format
+                    elif len(data_bytes) in (48, 96):
+                        words = [
+                            WORDLIST[int(data_bytes[i : i + 4])]
+                            for i in range(0, len(data_bytes), 4)
+                        ]
+                except:
+                    pass
 
         if not words or (len(words) != 12 and len(words) != 24):
             self.ctx.display.flash_text(t("Invalid mnemonic length"), lcd.RED)
