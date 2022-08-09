@@ -113,7 +113,7 @@ class Display:
                 or board.config["lcd"]["invert"]
             )
             lcd.init(invert=invert)
-            lcd.bgr_to_rgb(True)
+            lcd.bgr_to_rgb(invert)
         self.to_portrait()
         if board.config["type"].startswith("amigo"):
             lcd.mirror(True)
