@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -66,19 +66,19 @@ class Camera:
             img = sensor.snapshot()
             if board.config["krux"]["sensor"]["lenses"]:
                 img.lens_corr(1.2)
-            lcd.display(img)
             gc.collect()
             hist = img.get_histogram()
             if "histogram" not in str(type(hist)):
                 continue
+
+            lcd.display(img)
+
             # Convert the image to black and white by using Otsu's thresholding.
-            # This is done to account for spots, blotches, and streaks in the code
-            # that may cause issues for the decoder.
+            # This is done to account for low light and glare conditions, as well as
+            # for imperfections in (printed) QR codes such as spots, blotches, streaks, and
+            # fading.
             img.binary([(0, hist.get_threshold().value())], invert=True)
             res = img.find_qrcodes()
-            # Zoom out disabled now that image is presented before pre-processing and QR reading
-            # if board.config["type"] == "m5stickv":
-            #     img.lens_corr(strength=1.0, zoom=0.7)  # better fit the screen - test
             if len(res) > 0:
                 data = res[0].payload()
 

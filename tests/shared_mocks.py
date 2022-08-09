@@ -1,7 +1,30 @@
-import sys
-import time
 from unittest import mock
-import importlib
+import pyqrcode
+
+
+def encode_to_string(data):
+    code_str = pyqrcode.create(data, error="L", mode="binary").text()
+    size = 0
+    while code_str[size] != "\n":
+        size += 1
+    i = 0
+    padding = 0
+    while code_str[i] != "1":
+        if code_str[i] == "\n":
+            padding += 1
+        i += 1
+    code_str = code_str[(padding) * (size + 1) : -(padding) * (size + 1)]
+    size -= 2 * padding
+
+    new_code_str = ""
+    for i in range(size):
+        for j in range(size + 2 * padding + 1):
+            if padding <= j < size + padding:
+                index = i * (size + 2 * padding + 1) + j
+                new_code_str += code_str[index]
+        new_code_str += "\n"
+
+    return new_code_str
 
 
 def get_mock_open(files: dict[str, str]):
@@ -148,6 +171,7 @@ def board_m5stickv():
                     "touch": False,
                     "font": [8, 14],
                     "orientation": [1, 2],
+                    "inverted_coordinates": False,
                     "qr_colors": [16904, 61307],
                 },
                 "sensor": {"flipped": False, "lenses": False},
@@ -156,20 +180,20 @@ def board_m5stickv():
     )
 
 
-def board_amigo():
+def board_amigo_tft():
     return mock.MagicMock(
         config={
-            "type": "amigo_ips",
-            "lcd": {"height": 320, "width": 480, "invert": 1, "dir": 40, "lcd_type": 2},
+            "type": "amigo_tft",
+            "lcd": {"height": 320, "width": 480, "invert": 0, "dir": 40, "lcd_type": 1},
             "sdcard": {"sclk": 11, "mosi": 10, "miso": 6, "cs": 26},
             "board_info": {
-                "BOOT_KEY": 16,
+                "BOOT_KEY": 23,
                 "LED_R": 14,
                 "LED_G": 15,
                 "LED_B": 17,
                 "LED_W": 32,
-                "BACK": 31,
-                "ENTER": 23,
+                "BACK": 23,
+                "ENTER": 16,
                 "NEXT": 20,
                 "WIFI_TX": 6,
                 "WIFI_RX": 7,
@@ -195,7 +219,13 @@ def board_amigo():
                     "I2C_SDA": 27,
                     "I2C_SCL": 24,
                 },
-                "display": {"touch": True, "font": [12, 24], "orientation": [1, 0]},
+                "display": {
+                    "touch": True,
+                    "font": [12, 24],
+                    "orientation": [1, 0],
+                    "inverted_coordinates": True,
+                    "qr_colors": [0, 6342],
+                },
                 "sensor": {"flipped": True, "lenses": False},
             },
         }
@@ -219,66 +249,14 @@ def board_dock():
             },
             "krux": {
                 "pins": {"BUTTON_A": 9, "ENCODER": [10, 11]},
-                "display": {"touch": False, "font": [8, 16], "orientation": [1, 0]},
-                "sensor": {"flipped": True, "lenses": True},
+                "display": {
+                    "touch": False,
+                    "font": [8, 16],
+                    "orientation": [1, 0],
+                    "inverted_coordinates": False,
+                    "qr_colors": [0, 6342],
+                },
+                "sensor": {"flipped": True, "lenses": False},
             },
         }
     )
-
-
-# Create mock modules for all the micropython-specific modules
-# that are not available in regular python
-importlib.invalidate_caches()
-
-if "flash" in sys.modules:
-    del sys.modules["flash"]
-sys.modules["flash"] = mock.MagicMock()
-
-if "secp256k1" in sys.modules:
-    del sys.modules["secp256k1"]
-from embit.util import secp256k1
-
-sys.modules["secp256k1"] = mock.MagicMock(wraps=secp256k1)
-
-if "machine" in sys.modules:
-    del sys.modules["machine"]
-sys.modules["machine"] = mock.MagicMock()
-
-if "sensor" in sys.modules:
-    del sys.modules["sensor"]
-sys.modules["sensor"] = mock.MagicMock()
-
-if "lcd" in sys.modules:
-    del sys.modules["lcd"]
-sys.modules["lcd"] = mock.MagicMock()
-
-if "Maix" in sys.modules:
-    del sys.modules["Maix"]
-sys.modules["Maix"] = mock.MagicMock()
-
-if "fpioa_manager" in sys.modules:
-    del sys.modules["fpioa_manager"]
-sys.modules["fpioa_manager"] = mock.MagicMock()
-
-if "qrcode" in sys.modules:
-    del sys.modules["qrcode"]
-sys.modules["qrcode"] = mock.MagicMock(
-    encode_to_string=lambda data: ("0" * (len(data) - 10)) + "\n"
-)
-
-if "board" in sys.modules:
-    del sys.modules["board"]
-sys.modules["board"] = board_m5stickv()
-
-if "urandom" in sys.modules:
-    del sys.modules["urandom"]
-sys.modules["urandom"] = sys.modules["random"]
-
-if "pmu" in sys.modules:
-    del sys.modules["pmu"]
-sys.modules["pmu"] = mock.MagicMock()
-
-setattr(time, "sleep_ms", getattr(time, "sleep_ms", mock.MagicMock()))
-setattr(time, "ticks_ms", getattr(time, "ticks_ms", mock.MagicMock()))
-
-setattr(sys, "print_exception", getattr(sys, "print_exception", mock.MagicMock()))

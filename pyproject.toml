@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,8 @@
 
 [tool.poetry]
 name = "krux"
-version = "22.03.0"
-description = "Open-source, airgapped bitcoin hardware signer for the M5StickV"
+version = "22.08.0-rc1"
+description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
 [tool.poetry.dependencies]
@@ -31,21 +31,28 @@ python = "^3.9.1"
 embit = { path = "./vendor/embit/", develop = true }
 ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
-mkdocs-static-i18n = {version = "^0.46", optional = true}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
-mkdocs = "^1.2.3"
 pylint = "^2.12.2"
 pytest = "^6.2.5"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
-PyQRCode = {version = "^1.2.1", optional = true}
-pygame = {version = "^2.1.2", optional = true}
-opencv-python = {version = "^4.5.5", optional = true}
-numpy = {version = "^1.22.3", optional = true}
-Pillow = {version = "^9.0.1", optional = true}
-pyzbar = {version = "^0.1.9", optional = true}
+PyQRCode = "^1.2.1"
+
+# Docs site dependencies
+mkdocs = { version = "^1.2.3", optional = true }
+mkdocs-material = { version = "^8.3.9", optional = true }
+mkdocs-static-i18n = { version = "^0.46", optional = true }
+pymdown-extensions = { version = "^9.5", optional = true }
+
+# Simulator dependencies
+numpy = { version = "^1.22.3", optional = true }
+opencv-python = { version = "^4.5.5", optional = true }
+Pillow = { version = "^9.0.1", optional = true }
+pygame = { version = "^2.1.2", optional = true }
+pyzbar = { version = "^0.1.9", optional = true }
 
 [tool.poetry.extras]
-docs = ["mkdocs-static-i18n"]
+docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
+simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]

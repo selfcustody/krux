@@ -12,18 +12,21 @@ press BUTTON_A
 
 screenshot locale-options.png
 
-screenshot locale-options-en-us.png
+screenshot locale-options-1.png
 
 press BUTTON_B
-screenshot locale-options-es-mx.png
+screenshot locale-options-2.png
 
 press BUTTON_B
-screenshot locale-options-fr-fr.png
+screenshot locale-options-3.png
 
 press BUTTON_B
-screenshot locale-options-vi-vn.png
+screenshot locale-options-4.png
 
 press BUTTON_B
-screenshot locale-options-de-de.png
+screenshot locale-options-5.png
+
+press BUTTON_B
+screenshot locale-options-6.png
 
 press BUTTON_B

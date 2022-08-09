@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -33,8 +33,8 @@ BUTTON_TOUCH = 3
 SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 
-QR_ANIM_PERIOD = 900  # miliseconds
-LONG_PRESS_T = 1000  # miliseconds
+QR_ANIM_PERIOD = 300  # milliseconds
+LONG_PRESS_PERIOD = 1000  # milliseconds
 NONBLOCKING_CHECKS = 100000
 
 PRESSED = 0
@@ -46,44 +46,44 @@ class Input:
 
     def __init__(self):
         self.entropy = 0
+
+        self.enter = None
         if "BUTTON_A" in board.config["krux"]["pins"]:
             fm.register(board.config["krux"]["pins"]["BUTTON_A"], fm.fpioa.GPIOHS21)
             self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
-        else:
-            self.enter = None
-        if "BUTTON_B" in board.config["krux"]["pins"]:
-            fm.register(board.config["krux"]["pins"]["BUTTON_B"], fm.fpioa.GPIOHS22)
-            self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
-        else:
-            self.page = None
-        if "BUTTON_C" in board.config["krux"]["pins"]:
-            fm.register(board.config["krux"]["pins"]["BUTTON_C"], fm.fpioa.GPIOHS0)
-            self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
-        else:
-            if board.config["type"] == "m5stickv":
-                from pmu import PMU_Button
 
-                self.page_prev = PMU_Button()
-            else:
-                self.page_prev = None
+        self.page = None
+        self.page_prev = None
         if "ENCODER" in board.config["krux"]["pins"]:
-            from .r_encoder import EncoderPage, EncoderPagePrev
+            from .rotary import EncoderPage, EncoderPagePrev
 
             self.page = EncoderPage()
             self.page_prev = EncoderPagePrev()
-
-        self.has_touch = board.config["krux"]["display"]["touch"]
-        self.touch = (
-            Touch(board.config["lcd"]["width"], board.config["lcd"]["height"])
-            if self.has_touch
-            else None
-        )
-
-        # This flag, used in slection outlines, is set if buttons are being used
-        if self.has_touch:
-            self.buttons_active = False
         else:
-            self.buttons_active = True
+            if "BUTTON_B" in board.config["krux"]["pins"]:
+                fm.register(board.config["krux"]["pins"]["BUTTON_B"], fm.fpioa.GPIOHS22)
+                self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
+
+            if "BUTTON_C" in board.config["krux"]["pins"]:
+                fm.register(board.config["krux"]["pins"]["BUTTON_C"], fm.fpioa.GPIOHS0)
+                self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
+            else:
+                try:
+                    from pmu import PMU_Button
+
+                    self.page_prev = PMU_Button()
+                except ImportError:
+                    pass
+
+        # This flag, used in selection outlines, is set if buttons are being used
+        self.buttons_active = True
+        self.touch = None
+        self.has_touch = board.config["krux"]["display"]["touch"]
+        if self.has_touch:
+            self.touch = Touch(
+                board.config["lcd"]["width"], board.config["lcd"]["height"]
+            )
+            self.buttons_active = False
 
     def enter_value(self):
         """Intermediary method to pull button A state, if available"""
@@ -134,7 +134,7 @@ class Input:
 
     def wait_for_press(self, block=True):
         """Wait for first button press"""
-        time_frame = time.ticks_ms()
+        start_time = time.ticks_ms()
         while (
             self.enter_value() == RELEASED
             and self.page_value() == RELEASED
@@ -142,8 +142,8 @@ class Input:
             and self.touch_value() == RELEASED
         ):
             self.entropy += 1
-            wdt.feed()  # here is were krux spend most of time
-            if not block and time.ticks_ms() > time_frame + QR_ANIM_PERIOD:
+            wdt.feed()  # here is where krux spends most of its time
+            if not block and time.ticks_ms() > start_time + QR_ANIM_PERIOD:
                 break
 
     def wait_for_button(self, block=True):
@@ -155,33 +155,33 @@ class Input:
 
         if self.enter_value() == PRESSED:
             # Wait for release
-            time_frame = time.ticks_ms()
             while self.enter_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-                if time.ticks_ms() > time_frame + LONG_PRESS_T:
-                    return SWIPE_LEFT
             if self.buttons_active:
                 return BUTTON_ENTER
             self.buttons_active = True
 
         if self.page_value() == PRESSED:
+            start_time = time.ticks_ms()
             # Wait for release
-            time_frame = time.ticks_ms()
             while self.page_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-                if time.ticks_ms() > time_frame + LONG_PRESS_T:
+                if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
                     return SWIPE_LEFT
             if self.buttons_active:
                 return BUTTON_PAGE
             self.buttons_active = True
 
         if self.page_prev_value() == PRESSED:
+            start_time = time.ticks_ms()
             # Wait for release
             while self.page_prev_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
+                if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
+                    return SWIPE_RIGHT
             if self.buttons_active:
                 return BUTTON_PAGE_PREV
             self.buttons_active = True

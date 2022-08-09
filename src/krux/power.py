@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ class PowerManager:
 
     def __init__(self):
         self.pmu = None
-        if board.config["type"] == "amigo_ips":
+        if board.config["type"].startswith("amigo"):
             try:
                 from pmu import axp173
 
@@ -47,12 +47,6 @@ class PowerManager:
                 self.pmu.enablePMICSleepMode(True)
             except:
                 pass
-
-    def batt_voltage(self):
-        """Returns the battery voltage of the device"""
-        if self.pmu is not None:
-            return self.pmu.getVbatVoltage()
-        return None
 
     def shutdown(self):
         """Shuts down the device"""

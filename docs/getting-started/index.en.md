@@ -1,5 +1,4 @@
-# About
-Krux is an airgapped hardware signer built on top of the [M5StickV](https://shop.m5stack.com/products/stickv), an open-source hardware device from [M5Stack](https://m5stack.com/about-us).
+Krux is open-source signing device firmware for Bitcoin that runs on the K210 chipset.
 
 All operations in Krux are done via QR code. You can load your BIP-39 mnemonic, import a wallet descriptor, and sign transactions without having to plug the device into your computer (except to initially flash the firmware). It reads QR codes in with its camera and outputs QR codes to its screen or to paper via an optional [thermal printer attachment](../getting-started/printing).
 

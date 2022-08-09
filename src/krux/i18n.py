@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,27 +19,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-try:
-    import ujson as json
-except ImportError:
-    import json
+import binascii
 from .settings import settings
-
-TRANSLATIONS_FILE = "/sd/translations/%s.json"
+from .translations import translation_table
 
 
 def translations(locale):
     """Returns the translations map for the given locale"""
-    try:
-        return json.load(open(TRANSLATIONS_FILE % locale, "r"))
-    except:
-        pass
+    if locale in translation_table:
+        return translation_table[locale]
     return None
 
 
 def t(slug):
     """Translates a slug according to the current locale"""
+    slug_id = binascii.crc32(slug.encode("utf-8"))
     lookup = translations(settings.i18n.locale)
-    if not lookup or slug not in lookup:
+    if not lookup or slug_id not in lookup:
         return slug
-    return lookup[slug]
+    return lookup[slug_id]

@@ -5,6 +5,7 @@ press BUTTON_A
 
 press BUTTON_A
 qrcode 12-word-mnemonic.png
+wait 0.5
 
 screenshot load-mnemonic-via-qr-mnemonic.png
 

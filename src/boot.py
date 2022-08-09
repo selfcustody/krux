@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
+import time
 
 sys.path.append("")
 sys.path.append(".")
@@ -28,17 +29,17 @@ SPLASH = """
                 
                 
                 
-    ¡¡         
-    ¡¡         
-    ¡¡         
-  ¡¡¡¡¡¡       
-    ¡¡         
-    ¡¡  ¡¡     
-    ¡¡ ¡¡      
-    ¡¡¡¡       
-    ¡¡ ¡¡      
-    ¡¡  ¡¡     
-    ¡¡   ¡¡    
+    ██         
+    ██         
+    ██         
+  ██████       
+    ██         
+    ██  ██     
+    ██ ██      
+    ████       
+    ██ ██      
+    ██  ██     
+    ██   ██    
                 
                 
                 
@@ -59,12 +60,21 @@ import lcd
 from krux.context import Context
 
 ctx = Context()
+ctx.pmu = pmu
 
-# display splash while loading pages
+# Display splash while loading pages
 ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
 
+preimport_ticks = time.ticks_ms()
 from krux.pages.login import Login
 from krux.pages.home import Home
+
+postimport_ticks = time.ticks_ms()
+
+# If importing happened in under 1s, sleep the difference so the logo
+# will be shown
+if preimport_ticks + 1000 > postimport_ticks:
+    time.sleep_ms(preimport_ticks + 1000 - postimport_ticks)
 
 ctx.display.clear()
 

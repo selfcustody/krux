@@ -1,8 +1,8 @@
 ### Requirements
 #### Hardware
-You will need the M5StickV, a USB-C cable, and a computer with a USB port to continue. Consult the [part list](../../parts) for more information.
+You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, or Maix Bit and a USB-C cable to continue. Consult the [part list](../../parts) for more information.
 
-If you wish to perform airgapped firmware updates, want persistent settings, or wish to use Krux in a different language, you will also need a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test).
+If you wish to perform airgapped firmware updates or want persistent settings, you will also need a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test).
 
 #### Software
 You will need a computer with [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [`vagrant`](https://www.vagrantup.com/downloads) installed.
@@ -44,17 +44,17 @@ The first command will create `privkey.pem` and `pubkey.pem` files you can use w
 Once you've updated the `SIGNER_PUBKEY` with this value, you can proceed with the regular build process.
 
 #### Build
-Run the following:
+Run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, `dock`, or `bit`:
 ```bash
-vagrant ssh -c 'cd /vagrant; ./krux build maixpy_m5stickv'
+vagrant ssh -c 'cd /vagrant; ./krux build maixpy_DEVICE'
 ```
 
 This will take around an hour or so to complete the first time. Subsequent builds should take only a few minutes.
 
 If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
-### Flash the firmware onto the M5StickV
-Connect the M5StickV to your computer via USB, power it on (left-side button), and run the following:
+### Flash the firmware onto the device
+Connect the device to your computer via USB, power it on, and run the following:
 ```bash
 vagrant ssh -c 'cd /vagrant; ./krux flash'
 ```
@@ -68,26 +68,17 @@ sudo usermod -a -G vboxusers yourusername
 
 If the flashing process fails midway through, check the connection, restart the device, and try the command again.
 
-When the flashing process completes, you should see...
+When the flashing process completes, you should see the Krux logo:
 
-<img src="../../img/logo-150.png">
+<img src="../../img/maixpy_m5stickv/logo-125.png">
+<img src="../../img/maixpy_amigo_tft/logo-150.png">
 
 If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
 
 Congrats, you're now running Krux!
 
 ### Multilingual support
-<img src="../../img/login-locale-de-de-150.png" align="right">
-
-Prefer a different language? Krux has support for multiple languages, including:
-
-- de-DE (German)
-- es-MX (Spanish)
-- fr-FR (French)
-- vi-VN (Vietnamese)
-- Are we missing one? Make a PR!
-
-To use a translation, first copy the [`i18n/translations`](https://github.com/selfcustody/krux/tree/main/i18n/translations) folder to a `translations` folder at the root of a FAT-32 formatted microSD card, then insert the card into your M5StickV, and reboot the device. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use. Your preference will be automatically saved to a `settings.json` file at the root of your microSD card.
+Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use. If you have a microSD card inserted into the device, your preference will be automatically saved to a `settings.json` file at the root of the card.
 
 ### Upgrade via microSD card
 Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades via microSD card to keep the device airgapped.
@@ -120,6 +111,6 @@ vagrant ssh -c 'cd /vagrant; ./krux sign build/firmware.bin privkey.pem'
 This will generate a `firmware.bin.sig` file containing a signature of the firmware's SHA256 hash.
 
 ### Upgrade via microSD card (continued)
-To perform an upgrade, simply copy the `firmware.bin` and `firmware.bin.sig` files to the root of a FAT-32 formatted microSD card, insert the card into your M5StickV, and reboot the device. If it detects the new firmware file and is able to verify the signature, you will be prompted to install it.
+To perform an upgrade, simply copy the `firmware.bin` and `firmware.bin.sig` files to the root of a FAT-32 formatted microSD card, insert the card into your device, and reboot the device. If it detects the new firmware file and is able to verify the signature, you will be prompted to install it.
 
 Once installation is complete, eject the microSD card and delete the firmware files before reinserting and rebooting.

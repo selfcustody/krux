@@ -1,21 +1,17 @@
-from ..shared_mocks import *
-from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
-
-def test_init(mocker):
+def test_init(mocker, m5stickv):
     from krux.pages import Menu
 
-    menu = Menu(mock.MagicMock(), [])
+    menu = Menu(mocker.MagicMock(), [])
 
     assert isinstance(menu, Menu)
 
 
-def test_run_loop(mocker):
+def test_run_loop(mocker, m5stickv):
     import board
     from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
-    ctx = mock.MagicMock()
-    mocker.patch.object(ctx.input, "has_touch", False)
+    ctx = mocker.MagicMock()
 
     def exception_raiser():
         raise ValueError("oops")
@@ -53,6 +49,55 @@ def test_run_loop(mocker):
         BUTTON_ENTER,
     ]
 
+    index, status = menu.run_loop()
+    assert index == 1
+    assert status == MENU_EXIT
+
+
+def test_run_loop_on_amigo_tft(mocker, amigo_tft):
+    from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+
+    ctx = mocker.MagicMock()
+
+    def exception_raiser():
+        raise ValueError("oops")
+
+    menu = Menu(
+        ctx,
+        [
+            ("Option", lambda: MENU_CONTINUE),
+            ("Long Option", lambda: MENU_EXIT),
+            ("Longer Option", lambda: MENU_SHUTDOWN),
+            ("The Longest Option", exception_raiser),
+        ],
+    )
+
+    ctx.input.wait_for_button.side_effect = [
+        BUTTON_ENTER,
+        BUTTON_PAGE,
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE,
+        BUTTON_ENTER,
+    ]
+
+    index, status = menu.run_loop()
+    assert index == 1
+    assert status == MENU_EXIT
+
+    ctx.input.wait_for_button.side_effect = [
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,
+        BUTTON_ENTER,
+    ]
+
+    index, status = menu.run_loop()
+    assert index == 2
+    assert status == MENU_SHUTDOWN
+
+    mocker.patch.object(ctx.input.touch, "current_index", new=lambda: 1)
+    mocker.patch.object(ctx.input, "buttons_active", False)
+    ctx.input.wait_for_button.side_effect = [BUTTON_TOUCH]
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 import urtypes
-from ..logging import LEVEL_NAMES, level_name, Logger, DEBUG
+from ..logging import LEVEL_NAMES, level_name, logger, DEBUG
 from ..metadata import VERSION
 from ..settings import settings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
@@ -33,26 +33,26 @@ from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word, to_mnemonic_words
 from ..wallet import Wallet
 from ..printers import create_printer
-from ..i18n import t, translations
+from ..i18n import t
 from . import (
     Page,
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
-    DEL_DICE,
     DEFAULT_PADDING,
-    KEYPADS,
 )
 
 SENTINEL_DIGITS = "11111"
 
-D6_STATES = 0
-D20_STATES = 1
-BITS = 2
-DIGITS = 3
-LETTERS = 4
-MULTI = 5
+D6_STATES = [str(i + 1) for i in range(6)]
+D20_STATES = [str(i + 1) for i in range(20)]
+BITS = "01"
+DIGITS = "0123456789"
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
+NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
 D6_MIN_ROLLS = 50
 D6_MAX_ROLLS = 100
@@ -115,18 +115,7 @@ class Login(Page):
         """Handler for the 'via D20' menu item"""
         return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
 
-    def _new_key_from_die(self, pad_type, min_rolls, max_rolls):
-        def del_dice(entropy):
-            while True:
-                if len(entropy) > 1:
-                    entropy, char = entropy[:-1], entropy[-1]
-                    if char == "-":
-                        break
-                else:
-                    entropy = ""
-                    break
-            return entropy
-
+    def _new_key_from_die(self, roll_states, min_rolls, max_rolls):
         self.ctx.display.draw_hcentered_text(
             t(
                 "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
@@ -134,11 +123,17 @@ class Login(Page):
             % (min_rolls, max_rolls)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            entropy = ""
+            rolls = []
+
+            def delete_roll(buffer):
+                nonlocal rolls
+                if len(rolls) > 0:
+                    rolls.pop()
+                return buffer
+
             num_rolls = max_rolls
-            i = 0
-            while i < max_rolls:
-                if i == min_rolls:
+            while len(rolls) < max_rolls:
+                if len(rolls) == min_rolls:
                     self.ctx.display.clear()
                     if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         num_rolls = min_rolls
@@ -146,28 +141,34 @@ class Login(Page):
 
                 roll = ""
                 while True:
-                    dice_title = t("Rolls %d\n") % i
+                    dice_title = t("Rolls: %d\n") % len(rolls)
+                    entropy = (
+                        "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
+                    )
                     if len(entropy) <= 10:
                         dice_title += entropy
                     else:
                         dice_title += "..." + entropy[-10:]
                     roll = self.capture_from_keypad(
-                        dice_title, pad_type  # , lambda r: r
+                        dice_title,
+                        [roll_states],
+                        delete_key_fn=delete_roll,
+                        go_on_change=True,
                     )
                     if roll == ESC_KEY:
                         return MENU_CONTINUE
-                    if roll == DEL_DICE:
-                        entropy = del_dice(entropy)
-                        if i:
-                            i -= 1
 
-                    if roll != "" and roll in KEYPADS[pad_type]:
-                        i += 1
+                    if roll != "" and roll in roll_states:
                         break
 
-                entropy += roll if entropy == "" else "-" + roll
+                rolls.append(roll)
 
-            entropy = entropy.replace("-", "")
+            entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
+
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
+            self.ctx.input.wait_for_button()
+
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
                 hashlib.sha256(entropy_bytes).digest()
@@ -211,8 +212,8 @@ class Login(Page):
             Key(
                 mnemonic,
                 multisig,
-                network=NETWORKS[settings.network],
-                password=passphrase,
+                NETWORKS[settings.network],
+                passphrase,
             )
         )
         try:
@@ -265,7 +266,7 @@ class Login(Page):
                 while True:
                     word = self.capture_from_keypad(
                         t("Word %d") % (i + 1),
-                        charset,
+                        [charset],
                         autocomplete_fn,
                         possible_keys_fn,
                     )
@@ -362,7 +363,7 @@ class Login(Page):
 
         def possible_letters(prefix):
             if len(prefix) == 0:
-                return KEYPADS[LETTERS]
+                return LETTERS
             letter = prefix[0]
             if letter not in search_ranges:
                 return ""
@@ -405,8 +406,9 @@ class Login(Page):
 
     def load_passphrase(self):
         """Loads and returns a passphrase from keypad"""
-        passphrase = self.capture_from_keypad(t("Passphrase:"), MULTI)
-        return passphrase
+        return self.capture_from_keypad(
+            t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+        )
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
@@ -421,7 +423,7 @@ class Login(Page):
             for i in range(4):
                 self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
             offset_y += self.ctx.display.font_height
-            keys = ["<", t("Back"), ">"]
+            keys = ["<", t("Go"), ">"]
             for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
                 self.ctx.display.outline(
                     x,
@@ -430,12 +432,11 @@ class Login(Page):
                     self.ctx.display.font_height * 3,
                     lcd.DARKGREY,
                 )
-                # assuming inverted X coordinates
-                offset_x = self.ctx.display.width() - (x + button_width)
+                offset_x = x
                 offset_x += (
                     button_width - len(keys[i]) * self.ctx.display.font_width
                 ) // 2
-                lcd.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
+                self.ctx.display.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
 
     def _touch_to_physical(self, index):
         """Mimics touch presses into physical button presses"""
@@ -544,9 +545,7 @@ class Login(Page):
                         new_locale = locales[(i + 1) % len(locales)]
                     else:  # BUTTON_PAGE_PREV
                         new_locale = locales[(i - 1) % len(locales)]
-                    # Don't let the user change the locale if translations can't be looked up
-                    if translations(new_locale):
-                        settings.i18n.locale = new_locale
+                    settings.i18n.locale = new_locale
                     break
         if settings.i18n.locale == starting_locale:
             return MENU_CONTINUE
@@ -579,7 +578,7 @@ class Login(Page):
                     else:  # BUTTON_PAGE_PREV
                         new_level = levels[(i - 1) % len(levels)]
                     settings.log.level = new_level
-                    self.ctx.log = Logger(settings.log.path, settings.log.level)
+                    logger.level = settings.log.level
                     break
         if settings.log.level == starting_level:
             return MENU_CONTINUE
@@ -590,18 +589,5 @@ class Login(Page):
         """Handler for the 'about' menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
-        # Uncomment to display battery voltage
-        # try:
-        #     from ..power import PowerManager
-
-        #     self.pmu = PowerManager()
-        #     batt_voltage = self.pmu.batt_voltage()
-        #     batt_voltage /= 1000
-        #     self.ctx.display.draw_hcentered_text(
-        #         "Battery: " + str(round(batt_voltage, 1)) + "V",
-        #         self.ctx.display.bottom_prompt_line,
-        #     )
-        # except:
-        #     pass
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

@@ -10,26 +10,29 @@ press BUTTON_A
 screenshot sign-psbt-wallet-not-loaded-warning.png
 
 press BUTTON_A
-
 qrcode singlekey-psbt-p1of5.png
-wait 1
+wait 0.5
 qrcode singlekey-psbt-p2of5.png
-wait 1
+wait 0.5
 qrcode singlekey-psbt-p3of5.png
-wait 1
+wait 0.5
 qrcode singlekey-psbt-p4of5.png
-wait 1
+wait 0.5
 qrcode singlekey-psbt-p5of5.png
-wait 1
+wait 0.5
 
 screenshot sign-psbt-sign-prompt.png
 
 press BUTTON_A
+
+press BUTTON_B
+
+wait 0.5
 screenshot sign-psbt-signed-qr.png
-wait 1
+wait 0.5
 screenshot sign-psbt-signed-qr-2.png
-wait 1
+wait 0.5
 screenshot sign-psbt-signed-qr-3.png
-wait 1
+wait 0.5
 
 press BUTTON_A

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -65,42 +65,48 @@ if [ "$1" == "build" ]; then
     docker cp extract-firmware:$BUILD_DIR/kboot.kfpkg build/kboot.kfpkg
     docker rm extract-firmware
 elif [ "$1" == "flash" ]; then
-    device="maixpy_m5stickv"
-    if [ ! -z "$2" ]; then
-        device="$2"
-    fi
+    device="$2"
 
     device_vendor_product_id=""
     if [ "$device" == "maixpy_m5stickv" ]; then
+        # https://devicehunt.com/view/type/usb/vendor/0403/device/6001
         device_vendor_product_id="0403:6001"
-    elif [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_bit" ]; then
+    elif [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_amigo_tft" ]||[ "$device" == "maixpy_bit" ]; then
+        # https://devicehunt.com/view/type/usb/vendor/0403/device/6010
         device_vendor_product_id="0403:6010"
     elif [ "$device" == "maixpy_dock" ]; then
+        # https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
         device_vendor_product_id="1a86:7523"
     fi
     if [ -z "$device_vendor_product_id" ]; then
         panic "Unknown device"
     fi
-    #M5stickV has only one serial port
-    #Bit has two serial ports and use fist for flash
-    #Amigo has two ports and uses second port to flash (needs further confirmation)
-    if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_bit" ]||[ "$device" == "maixpy_dock" ]; then
-        device_num=1
-    elif [ "$device" == "maixpy_amigo_ips" ]; then
-        device_num=1
-    fi
-    usb_device_name_cmd="getdevice $device_vendor_product_id $device_num"
+
+    usb_device_name_cmd="getdevice $device_vendor_product_id 1"
     usb_device_name=$($usb_device_name_cmd)
     if [ -z "$usb_device_name" ]; then
         panic "Failed to find device via USB. Is it connected and powered on?"
     fi
+
     if [ "$device" == "maixpy_dock" ]; then
         BOARD="dan"
     else
         BOARD="goE"
     fi
-    docker run --privileged --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/$usb_device_name -b 1500000 kboot.kfpkg
 
+    if ! docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg; then
+        # M5stickV has only one serial port
+        # Bit has two serial ports and uses first for flash
+        # Amigo has two ports and uses second port to flash
+        if [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_amigo_tft" ]||[ "$device" == "maixpy_bit" ]; then
+            usb_device_name_cmd="getdevice $device_vendor_product_id 2"
+            usb_device_name=$($usb_device_name_cmd)
+            if [ -z "$usb_device_name" ]; then
+                panic "Failed to find device via USB. Is it connected and powered on?"
+            fi
+            docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
+        fi
+    fi
 elif [ "$1" == "sha256" ]; then
     file="$2"
     hash=$(openssl dgst -sha256 $file)
@@ -164,23 +170,28 @@ elif [ "$1" == "build-release" ]; then
 
     cd build
     if [ ! -f "ktool-linux" ]; then
-        wget https://github.com/selfcustody/ktool/releases/download/v0.1.0/ktool-linux
-        echo "ea09c20bf3812ed0f356cc1efd1c88092d957795fb851fabab5ae6bca9a406a8  ktool-linux" | sha256sum -c
+        wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-linux
+        echo "2b8be0c95abe9f0ff7016e9a5b343ff8d3df9751783bc4d6a4b4df775693fb57  ktool-linux" | sha256sum -c
     fi
     if [ ! -f "ktool-mac" ]; then
-        wget https://github.com/selfcustody/ktool/releases/download/v0.1.0/ktool-mac
-        echo "41ac5d87bf51b7d317b866c65dbb58f2d004502e6af6e3a3e527a622fb2217f9  ktool-mac" | sha256sum -c
+        wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac
+        echo "008bbcfb81da7921510c73e09b46771677d013dc5d148de4d2205b901a2cc892  ktool-mac" | sha256sum -c
+    fi
+    if [ ! -f "ktool-mac-10" ]; then
+        wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac-10
+        echo "fc386abbde4a1b1b35f8ffad2df429786a737756063f137f69f0e080b190cb4c  ktool-mac-10" | sha256sum -c
     fi
     if [ ! -f "ktool-win.exe" ]; then
-        wget https://github.com/selfcustody/ktool/releases/download/v0.1.0/ktool-win.exe
-        echo "7b1e6af613279473d8f69050643ca6159f596735afd0d7e21b712e71f8c7775c  ktool-win.exe" | sha256sum -c
+        wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-win.exe
+        echo "5fca13023de5bfbf349bc898e046b4858217644bf60381b2af5c2649d9384c39  ktool-win.exe" | sha256sum -c
     fi
     cp -f ktool-linux ../$release_dir/ktool-linux
     cp -f ktool-mac ../$release_dir/ktool-mac
+    cp -f ktool-mac-10 ../$release_dir/ktool-mac-10
     cp -f ktool-win.exe ../$release_dir/ktool-win.exe
     cd ..
 
-    devices=("maixpy_m5stickv" "maixpy_dock" "maixpy_amigo_ips" "maixpy_bit")
+    devices=("maixpy_m5stickv" "maixpy_amigo_ips" "maixpy_amigo_tft" "maixpy_bit" "maixpy_dock")
     for device in ${devices[@]}; do
         ./krux build $device
         mkdir -p $release_dir/$device

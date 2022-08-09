@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 import binascii
 import gc
 import hashlib
+import os
 import lcd
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
@@ -56,25 +57,37 @@ class Home(Page):
         """Handler for the 'mnemonic' menu item"""
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
+        self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
         return MENU_CONTINUE
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
-        zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
-        for version in [None, self.ctx.wallet.key.network[zpub]]:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                self.ctx.wallet.key.key_expression(version, pretty=True)
-            )
-            self.ctx.input.wait_for_button()
-            xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, None)
-            self.print_qr_prompt(xpub, FORMAT_NONE)
+        # Display xpub with key origin + derivation info
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            self.ctx.wallet.key.key_expression(None, pretty=True)
+        )
+        self.ctx.input.wait_for_button()
+        xpub = self.ctx.wallet.key.key_expression(None)
+        self.display_qr_codes(xpub, FORMAT_NONE, None)
+        self.print_qr_prompt(xpub, FORMAT_NONE)
+        # Display zpub without key origin
+        zpub = self.ctx.wallet.key.xpub(
+            self.ctx.wallet.key.network[
+                "Zpub" if self.ctx.wallet.key.multisig else "zpub"
+            ]
+        )
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(zpub)
+        self.ctx.input.wait_for_button()
+        self.display_qr_codes(zpub, FORMAT_NONE, None)
+        self.print_qr_prompt(zpub, FORMAT_NONE)
         return MENU_CONTINUE
 
     def wallet(self):
         """Handler for the 'wallet' menu item"""
+        self.ctx.display.clear()
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(t("Wallet not found."))
             if self.prompt(t("Load one?"), self.ctx.display.bottom_prompt_line):
@@ -94,6 +107,7 @@ class Home(Page):
         try:
             wallet = Wallet(self.ctx.wallet.key)
             wallet.load(wallet_data, qr_format)
+            self.ctx.display.clear()
             self.display_wallet(wallet, include_qr=False)
             if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
                 self.ctx.wallet = wallet
@@ -200,8 +214,31 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
 
-        data, qr_format = self.capture_qr_code()
+        data, qr_format = (None, FORMAT_NONE)
+        psbt_filename = None
+        if self.ctx.sd_card is not None:
+            try:
+                psbt_filename = next(
+                    filter(
+                        lambda filename: filename.endswith(".psbt"),
+                        os.listdir("/sd"),
+                    )
+                )
+                self.ctx.display.clear()
+                self.ctx.display.draw_hcentered_text(
+                    t("Found PSBT on SD card:\n%s") % psbt_filename
+                )
+                if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
+                    with open("/sd/%s" % psbt_filename, "rb") as psbt_file:
+                        data = psbt_file.read()
+            except:
+                pass
+
+        if data is None:
+            data, qr_format = self.capture_qr_code()
+
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
+
         if data is None:
             self.ctx.display.flash_text(t("Failed to load PSBT"), lcd.RED)
             return MENU_CONTINUE
@@ -209,15 +246,29 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        signer = PSBTSigner(self.ctx.wallet, data)
+        signer = PSBTSigner(self.ctx.wallet, data, qr_format)
         self.ctx.log.debug("Received PSBT: %s" % signer.psbt)
 
         outputs = signer.outputs()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text("\n \n".join(outputs))
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
-            signed_psbt = signer.sign()
+            signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
+            if self.ctx.sd_card is not None:
+                self.ctx.display.clear()
+                if self.prompt(
+                    t("Save PSBT to SD card?"), self.ctx.display.height() // 2
+                ):
+                    psbt_filename = "signed-%s" % (
+                        psbt_filename if psbt_filename is not None else "psbt"
+                    )
+                    with open("/sd/%s" % psbt_filename, "wb") as psbt_file:
+                        psbt_file.write(signer.psbt.serialize())
+                    self.ctx.display.flash_text(
+                        t("Saved PSBT to SD card:\n%s") % psbt_filename
+                    )
+            signed_psbt, qr_format = signer.psbt_qr()
             signer = None
             gc.collect()
             self.display_qr_codes(signed_psbt, qr_format)
@@ -255,13 +306,26 @@ class Home(Page):
         if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             return MENU_CONTINUE
 
-        sig = self.ctx.wallet.key.sign(message_hash)
+        sig = self.ctx.wallet.key.sign(message_hash).serialize()
 
         # Encode sig as base64 string
-        encoded_sig = base_encode(sig.serialize(), 64).decode()
+        encoded_sig = base_encode(sig, 64).decode()
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Signature:\n\n%s") % encoded_sig)
         self.ctx.input.wait_for_button()
+
+        if self.ctx.sd_card is not None:
+            self.ctx.display.clear()
+            if self.prompt(
+                t("Save signature to SD card?"), self.ctx.display.height() // 2
+            ):
+                sig_filename = "signed-message.sig"
+                with open("/sd/%s" % sig_filename, "wb") as sig_file:
+                    sig_file.write(sig)
+                self.ctx.display.flash_text(
+                    t("Saved signature to SD card:\n%s") % sig_filename
+                )
+
         self.display_qr_codes(encoded_sig, qr_format)
         self.print_qr_prompt(encoded_sig, qr_format)
 

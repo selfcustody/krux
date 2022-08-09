@@ -11,6 +11,7 @@ screenshot wallet-load-prompt.png
 
 press BUTTON_A
 qrcode specter-desktop-singlekey-wallet.png
+wait 0.5
 
 screenshot wallet-wpkh-load-prompt.png
 

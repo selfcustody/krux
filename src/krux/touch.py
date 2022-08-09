@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2022 Eduardo Schoenknecht
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .touchscreens.ft6x36 import FT6X36, TOUCH_S_PERIOD
 import time
+from .touchscreens.ft6x36 import FT6X36
+from .logging import logger as log
 
 SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
+
+TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
 
 
 class Touch:
@@ -112,14 +115,14 @@ class Touch:
             data = self.touch_driver.current_point()
             if isinstance(data, tuple):
                 self.extract_index(data)
-            elif data is None:  # gets realease than return to ilde.
+            elif data is None:  # gets release then return to idle.
                 if self.state == self.release:
                     self.state = self.idle
                 elif self.state == self.press:
                     self.h_gesture(self.x_press_point, self.x_release_point)
                     self.state = self.release
             else:
-                print("Touch error: " + str(data))
+                log.warn("Touch error: " + str(data))
         return self.state
 
     def value(self):
