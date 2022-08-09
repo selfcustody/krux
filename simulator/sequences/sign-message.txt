@@ -19,6 +19,7 @@ press BUTTON_A
 screenshot sign-message-signed-message-text.png
 
 press BUTTON_A
+press BUTTON_B
 
 screenshot sign-message-signed-message-qr.png
 

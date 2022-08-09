@@ -914,6 +914,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
             "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            None,
         ),
         # Hash, Sign, No print prompt
         (
@@ -925,6 +926,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
             "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            None,
         ),
         # Message, Sign, No print prompt
         (
@@ -934,6 +936,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
             "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            None,
         ),
         # 64-byte message, Sign, No print prompt
         (
@@ -943,6 +946,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
             "MEQCIEHpCMfQ+5mBAOH//OCxF6iojpVtIS6G7X+3r3qB/0CaAiAkbjW2SGrPLvju+O05yH2x/4EKL2qlkdWnquiVkUY3jQ==",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            None,
         ),
         # Hex-encoded hash, Sign, Print
         (
@@ -960,6 +964,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             ],
             "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            None,
         ),
         # Hex-encoded hash, Sign, Decline to print
         (
@@ -977,6 +982,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             ],
             "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            None,
         ),
         # Hex-encoded hash, Decline to sign
         (
@@ -986,9 +992,32 @@ def test_sign_message(mocker, m5stickv, tdata):
             [BUTTON_PAGE],
             None,
             None,
+            None,
         ),
         # Failed to capture message QR
-        (None, FORMAT_NONE, None, [], None, None),
+        (None, FORMAT_NONE, None, [], None, None, None),
+        # Message, Sign, Save to SD, No print prompt
+        (
+            "hello world",
+            FORMAT_NONE,
+            None,
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
+            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            binascii.b2a_base64(
+                "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==".encode(
+                    "utf-8"
+                ),
+                newline=False,
+            ),
+        ),
     ]
     for case in cases:
         wallet = Wallet(tdata.SINGLEKEY_SIGNING_KEY)
@@ -999,6 +1028,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             ),
             wallet=wallet,
             printer=case[2],
+            sd_card=case[6],
         )
 
         home = Home(ctx)
@@ -1011,6 +1041,18 @@ def test_sign_message(mocker, m5stickv, tdata):
         mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
+        mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
+        if case[6] is not None:
+            mocker.patch(
+                "builtins.open",
+                new=get_mock_open(
+                    {
+                        "/sd/signed-message.sig": case[6],
+                    }
+                ),
+            )
+        else:
+            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=Exception))
 
         home.sign_message()
 

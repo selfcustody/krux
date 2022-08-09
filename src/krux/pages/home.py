@@ -306,13 +306,26 @@ class Home(Page):
         if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             return MENU_CONTINUE
 
-        sig = self.ctx.wallet.key.sign(message_hash)
+        sig = self.ctx.wallet.key.sign(message_hash).serialize()
 
         # Encode sig as base64 string
-        encoded_sig = base_encode(sig.serialize(), 64).decode()
+        encoded_sig = base_encode(sig, 64).decode()
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Signature:\n\n%s") % encoded_sig)
         self.ctx.input.wait_for_button()
+
+        if self.ctx.sd_card is not None:
+            self.ctx.display.clear()
+            if self.prompt(
+                t("Save signature to SD card?"), self.ctx.display.height() // 2
+            ):
+                sig_filename = "signed-message.sig"
+                with open("/sd/%s" % sig_filename, "wb") as sig_file:
+                    sig_file.write(sig)
+                self.ctx.display.flash_text(
+                    t("Saved signature to SD card:\n%s") % sig_filename
+                )
+
         self.display_qr_codes(encoded_sig, qr_format)
         self.print_qr_prompt(encoded_sig, qr_format)
 
