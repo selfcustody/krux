@@ -17,9 +17,11 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install mkdocs mkdocs-material pymdown-extensions
+          python3 -m pip install poetry
+      - name: Install docs dependencies
+        run: poetry install --extras docs
       - name: Build docs
-        run: mkdocs build
+        run: poetry run mkdocs build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:

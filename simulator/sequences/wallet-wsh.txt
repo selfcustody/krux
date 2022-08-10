@@ -12,21 +12,21 @@ screenshot wallet-load-prompt.png
 
 press BUTTON_A
 qrcode specter-desktop-multisig-wallet-p1of8.png
-wait 1
+wait 0.5
 qrcode specter-desktop-multisig-wallet-p2of8.png
-wait 1
+wait 0.5
 qrcode specter-desktop-multisig-wallet-p3of8.png
-wait 1
+wait 0.5
 qrcode specter-desktop-multisig-wallet-p4of8.png
-wait 1
+wait 0.5
 qrcode specter-desktop-multisig-wallet-p5of8.png
-wait 1
+wait 0.5
 qrcode specter-desktop-multisig-wallet-p6of8.png
-wait 1
+wait 0.5
 qrcode specter-desktop-multisig-wallet-p7of8.png
-wait 1
+wait 0.5
 qrcode specter-desktop-multisig-wallet-p8of8.png
-wait 1
+wait 0.5
 
 screenshot wallet-wsh-load-prompt.png
 

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ import math
 width = int(sys.argv[2])
 height = int(sys.argv[3])
 
-font_byte_length = math.ceil(width / 8 * height)
+font_byte_length = math.ceil(width / 8) * height
 line_char_length = (font_byte_length * 2) + 6  # 6 is codepoint prefix len
 
 with open(sys.argv[1], "r") as input_file:
@@ -45,9 +45,9 @@ with open(sys.argv[1], "r") as input_file:
         map(
             lambda line: line[:5]
             + ("0" * (line_char_length - len(line)))
-            + line[5 : len(line)]
-            if len(line) < line_char_length
-            else line,
+            + line[5 : len(line) - 1]
+            # + ("0" * (line_char_length - len(line)))
+            + "\n" if len(line) < line_char_length else line,
             lines,
         )
     )

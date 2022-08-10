@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 import gc
 import sensor
 import lcd
+import board
 from .qr import QRPartParser
 from .wdt import wdt
 
@@ -37,6 +38,9 @@ class Camera:
         sensor.reset()
         sensor.set_pixformat(sensor.GRAYSCALE)
         sensor.set_framesize(sensor.QVGA)
+        if board.config["krux"]["sensor"]["flipped"]:
+            sensor.set_hmirror(1)
+            sensor.set_vflip(1)
         sensor.skip_frames()
 
     def capture_qr_code_loop(self, callback):
@@ -60,16 +64,20 @@ class Camera:
             new_part = False
 
             img = sensor.snapshot()
+            if board.config["krux"]["sensor"]["lenses"]:
+                img.lens_corr(1.2)
             gc.collect()
             hist = img.get_histogram()
             if "histogram" not in str(type(hist)):
                 continue
-            # Convert the image to black and white by using Otsu's thresholding.
-            # This is done to account for spots, blotches, and streaks in the code
-            # that may cause issues for the decoder.
-            img.binary([(0, hist.get_threshold().value())], invert=True)
+
             lcd.display(img)
 
+            # Convert the image to black and white by using Otsu's thresholding.
+            # This is done to account for low light and glare conditions, as well as
+            # for imperfections in (printed) QR codes such as spots, blotches, streaks, and
+            # fading.
+            img.binary([(0, hist.get_threshold().value())], invert=True)
             res = img.find_qrcodes()
             if len(res) > 0:
                 data = res[0].payload()

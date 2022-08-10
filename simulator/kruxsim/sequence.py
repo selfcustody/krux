@@ -1,30 +1,56 @@
+# The MIT License (MIT)
+
+# Copyright (c) 2021-2022 Krux contributors
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 from collections import deque
 import os
 import time
 import pygame as pg
-import PIL
-import PIL.Image
+import cv2
 from kruxsim import events
+from kruxsim.mocks.board import BOARD_CONFIG
 
-COMMANDS = ["press", "qrcode", "screenshot", "wait", "include", "x"]
+COMMANDS = ["press", "touch", "qrcode", "screenshot", "wait", "include", "x"]
 
 
 class SequenceExecutor:
     def __init__(self, sequence_filepath):
         self.filepath = sequence_filepath
-        self.commands = deque(load_commands(self.filepath))
-        self.commands.append(("wait", ["1"]))
         self.command = None
         self.command_params = []
         self.command_fn = None
         self.command_timer = 0
         self.key = None
-        self.key_press_timer = 0
+        self.key_checks = 0
+        self.touch_pos = None
+        self.touch_checks = 0
         self.camera_image = None
+        commands = load_commands(self.filepath)
+        if commands[0][0] == "wait" and BOARD_CONFIG["krux"]["display"]["touch"]:
+            commands = commands[0:1] + [("press", ["BUTTON_A"])] + commands[1:]
+        commands.append(("wait", ["1"]))
+        self.commands = deque(commands)
 
     def execute(self):
         if self.command_fn:
-            if time.time() - self.command_timer > 0.5:
+            if time.time() - self.command_timer > 0.1:
                 print("Executing (%s, %r)" % (self.command, self.command_params))
                 self.command_timer = 0
                 self.command_fn()
@@ -37,6 +63,8 @@ class SequenceExecutor:
             self.command_params = params
             if cmd == "press":
                 self.command_fn = self.press_key
+            elif cmd == "touch":
+                self.command_fn = self.touch
             elif cmd == "qrcode":
                 self.command_fn = self.show_qrcode
             elif cmd == "screenshot":
@@ -48,16 +76,23 @@ class SequenceExecutor:
     def press_key(self):
         key = self.command_params[0]
         self.key = None
-        self.key_press_timer = time.time()
+        self.key_checks = 0
         if key == "BUTTON_A":
             self.key = pg.K_RETURN
         elif key == "BUTTON_B":
-            self.key = pg.K_SPACE
+            self.key = pg.K_DOWN
+        elif key == "BUTTON_C":
+            self.key = pg.K_UP
+
+    def touch(self):
+        self.touch_pos = (self.command_params[0], self.command_params[1])
+        self.touch_checks = 0
 
     def show_qrcode(self):
         filename = self.command_params[0]
-        self.camera_image = PIL.Image.open(
-            os.path.join(os.path.dirname(self.filepath), "qrcodes", filename)
+        self.camera_image = cv2.imread(
+            os.path.join(os.path.dirname(self.filepath), "qrcodes", filename),
+            cv2.IMREAD_COLOR,
         )
 
     def request_screenshot(self):
@@ -70,7 +105,17 @@ class SequenceExecutor:
 
 def load_commands(sequence_filepath):
     commands = []
-    with open(sequence_filepath, "r") as sequence_file:
+
+    # If the sequence doesn't exist, it may be board-specific; look for it within a subfolder named for the board
+    filepath = sequence_filepath
+    if not os.path.exists(filepath):
+        filepath = os.path.join(
+            os.path.dirname(sequence_filepath),
+            BOARD_CONFIG["type"],
+            os.path.basename(sequence_filepath),
+        )
+
+    with open(filepath, "r") as sequence_file:
         raw_commands = sequence_file.readlines()
         for raw_command in raw_commands:
             if not any(raw_command.startswith(cmd) for cmd in COMMANDS):

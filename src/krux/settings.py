@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@ try:
     import ujson as json
 except ImportError:
     import json
-from .logging import NONE
 
 SETTINGS_FILE = "/sd/settings.json"
 
@@ -96,7 +95,7 @@ class I18n:
     """I18n-specific settings"""
 
     namespace = "settings.i18n"
-    locales = ["de-DE", "en-US", "es-MX", "fr-FR", "vi-VN"]
+    locales = ["de-DE", "en-US", "es-MX", "fr-FR", "pt-BR", "vi-VN"]
     locale = Setting("locale", "en-US")
 
 
@@ -105,7 +104,7 @@ class Log:
 
     namespace = "settings.log"
     path = Setting("path", "/sd/.krux.log")
-    level = Setting("level", NONE)
+    level = Setting("level", 99)
 
 
 class Printer:

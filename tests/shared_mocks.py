@@ -1,7 +1,30 @@
-import sys
-import time
 from unittest import mock
-import importlib
+import pyqrcode
+
+
+def encode_to_string(data):
+    code_str = pyqrcode.create(data, error="L", mode="binary").text()
+    size = 0
+    while code_str[size] != "\n":
+        size += 1
+    i = 0
+    padding = 0
+    while code_str[i] != "1":
+        if code_str[i] == "\n":
+            padding += 1
+        i += 1
+    code_str = code_str[(padding) * (size + 1) : -(padding) * (size + 1)]
+    size -= 2 * padding
+
+    new_code_str = ""
+    for i in range(size):
+        for j in range(size + 2 * padding + 1):
+            if padding <= j < size + padding:
+                index = i * (size + 2 * padding + 1) + j
+                new_code_str += code_str[index]
+        new_code_str += "\n"
+
+    return new_code_str
 
 
 def get_mock_open(files: dict[str, str]):
@@ -134,20 +157,30 @@ def board_m5stickv():
                 "BUTTON_A": 36,
                 "BUTTON_B": 37,
             },
-            "krux.pins": {
-                "BUTTON_A": 36,
-                "BUTTON_B": 37,
-                "LED_W": 7,
-                "UART2_TX": 35,
-                "UART2_RX": 34,
-                "I2C_SCL": 28,
-                "I2C_SDA": 29,
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 36,
+                    "BUTTON_B": 37,
+                    "LED_W": 7,
+                    "UART2_TX": 35,
+                    "UART2_RX": 34,
+                    "I2C_SCL": 28,
+                    "I2C_SDA": 29,
+                },
+                "display": {
+                    "touch": False,
+                    "font": [8, 14],
+                    "orientation": [1, 2],
+                    "inverted_coordinates": False,
+                    "qr_colors": [16904, 61307],
+                },
+                "sensor": {"flipped": False, "lenses": False},
             },
         }
     )
 
 
-def board_amigo():
+def board_amigo_tft():
     return mock.MagicMock(
         config={
             "type": "amigo_tft",
@@ -159,8 +192,8 @@ def board_amigo():
                 "LED_G": 15,
                 "LED_B": 17,
                 "LED_W": 32,
-                "BACK": 31,
-                "ENTER": 23,
+                "BACK": 23,
+                "ENTER": 16,
                 "NEXT": 20,
                 "WIFI_TX": 6,
                 "WIFI_RX": 7,
@@ -177,60 +210,53 @@ def board_amigo():
                 "SPI_MISO": 6,
                 "SPI_CS": 12,
             },
-            "krux.pins": {"BUTTON_A": 23, "BUTTON_B": 20, "LED_W": 32},
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 16,
+                    "BUTTON_B": 20,
+                    "BUTTON_C": 23,
+                    "LED_W": 32,
+                    "I2C_SDA": 27,
+                    "I2C_SCL": 24,
+                },
+                "display": {
+                    "touch": True,
+                    "font": [12, 24],
+                    "orientation": [1, 0],
+                    "inverted_coordinates": True,
+                    "qr_colors": [0, 6342],
+                },
+                "sensor": {"flipped": True, "lenses": False},
+            },
         }
     )
 
 
-# Create mock modules for all the micropython-specific modules
-# that are not available in regular python
-importlib.invalidate_caches()
-
-if "flash" in sys.modules:
-    del sys.modules["flash"]
-sys.modules["flash"] = mock.MagicMock()
-
-if "secp256k1" in sys.modules:
-    del sys.modules["secp256k1"]
-from embit.util import secp256k1
-
-sys.modules["secp256k1"] = mock.MagicMock(wraps=secp256k1)
-
-if "machine" in sys.modules:
-    del sys.modules["machine"]
-sys.modules["machine"] = mock.MagicMock()
-
-if "sensor" in sys.modules:
-    del sys.modules["sensor"]
-sys.modules["sensor"] = mock.MagicMock()
-
-if "lcd" in sys.modules:
-    del sys.modules["lcd"]
-sys.modules["lcd"] = mock.MagicMock()
-
-if "Maix" in sys.modules:
-    del sys.modules["Maix"]
-sys.modules["Maix"] = mock.MagicMock()
-
-if "fpioa_manager" in sys.modules:
-    del sys.modules["fpioa_manager"]
-sys.modules["fpioa_manager"] = mock.MagicMock()
-
-if "qrcode" in sys.modules:
-    del sys.modules["qrcode"]
-sys.modules["qrcode"] = mock.MagicMock(
-    encode_to_string=lambda data: ("0" * (len(data) - 10)) + "\n"
-)
-
-if "board" in sys.modules:
-    del sys.modules["board"]
-sys.modules["board"] = board_m5stickv()
-
-if "urandom" in sys.modules:
-    del sys.modules["urandom"]
-sys.modules["urandom"] = sys.modules["random"]
-
-setattr(time, "sleep_ms", getattr(time, "sleep_ms", mock.MagicMock()))
-setattr(time, "ticks_ms", getattr(time, "ticks_ms", mock.MagicMock()))
-
-setattr(sys, "print_exception", getattr(sys, "print_exception", mock.MagicMock()))
+def board_dock():
+    return mock.MagicMock(
+        config={
+            "type": "dock",
+            "lcd": {"height": 240, "width": 320, "invert": 0, "lcd_type": 0},
+            "sdcard": {"sclk": 27, "mosi": 28, "miso": 26, "cs": 29},
+            "board_info": {
+                "BOOT_KEY": 16,
+                "LED_R": 13,
+                "LED_G": 12,
+                "LED_B": 14,
+                "MIC0_WS": 19,
+                "MIC0_DATA": 20,
+                "MIC0_BCK": 18,
+            },
+            "krux": {
+                "pins": {"BUTTON_A": 9, "ENCODER": [10, 11]},
+                "display": {
+                    "touch": False,
+                    "font": [8, 16],
+                    "orientation": [1, 0],
+                    "inverted_coordinates": False,
+                    "qr_colors": [0, 6342],
+                },
+                "sensor": {"flipped": True, "lenses": False},
+            },
+        }
+    )

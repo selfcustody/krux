@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,26 +24,36 @@ import hashlib
 import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
+from embit import bip39
 import urtypes
-from ..logging import LEVEL_NAMES, level_name, Logger, DEBUG
+from ..logging import LEVEL_NAMES, level_name, logger, DEBUG
 from ..metadata import VERSION
 from ..settings import settings
-from ..input import BUTTON_ENTER, BUTTON_PAGE
+from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word, to_mnemonic_words
 from ..wallet import Wallet
 from ..printers import create_printer
-from ..i18n import t, translations
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
+from ..i18n import t
+from . import (
+    Page,
+    Menu,
+    MENU_CONTINUE,
+    MENU_EXIT,
+    ESC_KEY,
+    DEFAULT_PADDING,
+)
 
 SENTINEL_DIGITS = "11111"
 
+D6_STATES = [str(i + 1) for i in range(6)]
+D20_STATES = [str(i + 1) for i in range(20)]
+BITS = "01"
 DIGITS = "0123456789"
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
-BITS = "01"
-
-D6_STATES = "123456"
-D20_STATES = [str(i + 1) for i in range(20)]
+UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
+NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
 D6_MIN_ROLLS = 50
 D6_MAX_ROLLS = 100
@@ -106,40 +116,59 @@ class Login(Page):
         """Handler for the 'via D20' menu item"""
         return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
 
-    def _new_key_from_die(self, states, min_rolls, max_rolls):
+    def _new_key_from_die(self, roll_states, min_rolls, max_rolls):
         self.ctx.display.draw_hcentered_text(
             t(
                 "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
             )
             % (min_rolls, max_rolls)
         )
-        self.ctx.display.draw_hcentered_text(t("Proceed?"), offset_y=200)
-        btn = self.ctx.input.wait_for_button()
-        if btn == BUTTON_ENTER:
-            entropy = ""
+        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+            rolls = []
+
+            def delete_roll(buffer):
+                nonlocal rolls
+                if len(rolls) > 0:
+                    rolls.pop()
+                return buffer
+
             num_rolls = max_rolls
-            for i in range(max_rolls):
-                if i == min_rolls:
+            while len(rolls) < max_rolls:
+                if len(rolls) == min_rolls:
                     self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(t("Done?"))
-                    btn = self.ctx.input.wait_for_button()
-                    if btn == BUTTON_ENTER:
+                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         num_rolls = min_rolls
                         break
 
                 roll = ""
                 while True:
-                    roll = self.capture_from_keypad(
-                        t("Roll %d") % (i + 1), states, lambda r: r
+                    dice_title = t("Rolls: %d\n") % len(rolls)
+                    entropy = (
+                        "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
                     )
-                    if roll != "" and roll in states:
+                    if len(entropy) <= 10:
+                        dice_title += entropy
+                    else:
+                        dice_title += "..." + entropy[-10:]
+                    roll = self.capture_from_keypad(
+                        dice_title,
+                        [roll_states],
+                        delete_key_fn=delete_roll,
+                        go_on_change=True,
+                    )
+                    if roll == ESC_KEY:
+                        return MENU_CONTINUE
+
+                    if roll != "" and roll in roll_states:
                         break
 
-                entropy += roll if entropy == "" else "-" + roll
+                rolls.append(roll)
 
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
-                self.ctx.input.wait_for_button()
+            entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
+
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
+            self.ctx.input.wait_for_button()
 
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
@@ -161,29 +190,38 @@ class Login(Page):
     def _load_key_from_words(self, words):
         mnemonic = " ".join(words)
         self.display_mnemonic(mnemonic)
-        self.ctx.display.draw_hcentered_text(t("Continue?"), offset_y=220)
-        btn = self.ctx.input.wait_for_button()
-        if btn == BUTTON_ENTER:
-            submenu = Menu(
-                self.ctx,
-                [
-                    (t("Single-key"), lambda: MENU_EXIT),
-                    (t("Multisig"), lambda: MENU_EXIT),
-                ],
+        if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
+            return MENU_CONTINUE
+        self.ctx.display.clear()
+        passphrase = ""
+        if self.prompt(t("Add passphrase?"), self.ctx.display.height() // 2):
+            passphrase = self.load_passphrase()
+            if passphrase == ESC_KEY:
+                return MENU_CONTINUE
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Single-key"), lambda: MENU_EXIT),
+                (t("Multisig"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        multisig = index == 1
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Loading.."))
+        self.ctx.wallet = Wallet(
+            Key(
+                mnemonic,
+                multisig,
+                NETWORKS[settings.network],
+                passphrase,
             )
-            index, _ = submenu.run_loop()
-            multisig = index == 1
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Loading.."))
-            self.ctx.wallet = Wallet(
-                Key(mnemonic, multisig, network=NETWORKS[settings.network])
-            )
-            try:
-                self.ctx.printer = create_printer()
-            except:
-                self.ctx.log.exception("Exception occurred connecting to printer")
-            return MENU_EXIT
-        return MENU_CONTINUE
+        )
+        try:
+            self.ctx.printer = create_printer()
+        except:
+            self.ctx.log.exception("Exception occurred connecting to printer")
+        return MENU_EXIT
 
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
@@ -196,11 +234,28 @@ class Login(Page):
         if qr_format == FORMAT_UR:
             words = urtypes.crypto.BIP39.from_cbor(data.cbor).words
         else:
-            if " " in data:
-                words = data.split(" ")
-            elif len(data) == 48 or len(data) == 96:
-                for i in range(0, len(data), 4):
-                    words.append(WORDLIST[int(data[i : i + 4])])
+            try:
+                data_str = data.decode() if not isinstance(data, str) else data
+                if " " in data_str and len(data_str.split()) in (12, 24):
+                    words = data_str.split()
+            except:
+                pass
+
+            if not words:
+                try:
+                    data_bytes = data.encode() if isinstance(data, str) else data
+
+                    # CompactSeedQR format
+                    if len(data_bytes) in (16, 32):
+                        words = bip39.mnemonic_from_bytes(data_bytes).split()
+                    # SeedQR format
+                    elif len(data_bytes) in (48, 96):
+                        words = [
+                            WORDLIST[int(data_bytes[i : i + 4])]
+                            for i in range(0, len(data_bytes), 4)
+                        ]
+                except:
+                    pass
 
         if not words or (len(words) != 12 and len(words) != 24):
             self.ctx.display.flash_text(t("Invalid mnemonic length"), lcd.RED)
@@ -218,25 +273,23 @@ class Login(Page):
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
-        self.ctx.display.draw_hcentered_text(t("Proceed?"), offset_y=200)
-        btn = self.ctx.input.wait_for_button()
-        if btn == BUTTON_ENTER:
+        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             for i in range(24):
                 if i == 12:
                     self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(t("Done?"))
-                    btn = self.ctx.input.wait_for_button()
-                    if btn == BUTTON_ENTER:
+                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         break
 
                 word = ""
                 while True:
                     word = self.capture_from_keypad(
                         t("Word %d") % (i + 1),
-                        charset,
+                        [charset],
                         autocomplete_fn,
                         possible_keys_fn,
                     )
+                    if word == ESC_KEY:
+                        return MENU_CONTINUE
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (i in (11, 23)) and word == "":
@@ -249,7 +302,8 @@ class Login(Page):
                         and word == test_phrase_sentinel
                     ):
                         break
-                    word = to_word(word)
+                    if word != "":
+                        word = to_word(word)
                     if word != "":
                         break
 
@@ -368,6 +422,48 @@ class Login(Page):
 
         return self._load_key_from_keypad(title, BITS, to_word)
 
+    def load_passphrase(self):
+        """Loads and returns a passphrase from keypad"""
+        return self.capture_from_keypad(
+            t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+        )
+
+    def _draw_settings_pad(self):
+        """Draws buttons to change settings with touch"""
+        if self.ctx.input.has_touch:
+            self.ctx.input.touch.clear_regions()
+            offset_y = self.ctx.display.height() * 2 // 3
+            self.ctx.input.touch.add_y_delimiter(offset_y)
+            self.ctx.input.touch.add_y_delimiter(
+                offset_y + self.ctx.display.font_height * 3
+            )
+            button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
+            for i in range(4):
+                self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
+            offset_y += self.ctx.display.font_height
+            keys = ["<", t("Go"), ">"]
+            for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
+                self.ctx.display.outline(
+                    x,
+                    self.ctx.input.touch.y_regions[0],
+                    button_width - 1,
+                    self.ctx.display.font_height * 3,
+                    lcd.DARKGREY,
+                )
+                offset_x = x
+                offset_x += (
+                    button_width - len(keys[i]) * self.ctx.display.font_width
+                ) // 2
+                self.ctx.display.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
+
+    def _touch_to_physical(self, index):
+        """Mimics touch presses into physical button presses"""
+        if index == 0:
+            return BUTTON_PAGE_PREV
+        if index == 1:
+            return BUTTON_ENTER
+        return BUTTON_PAGE
+
     def settings(self):
         """Handler for the 'settings' menu item"""
         submenu = Menu(
@@ -395,16 +491,20 @@ class Login(Page):
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Network\n%snet") % current_network)
-
+            self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_PAGE:
-                for i, network in enumerate(networks):
-                    if current_network == network:
-                        new_network = networks[(i + 1) % len(networks)]
-                        settings.network = new_network
-                        break
-            elif btn == BUTTON_ENTER:
+            if btn == BUTTON_TOUCH:
+                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
+            if btn == BUTTON_ENTER:
                 break
+            for i, network in enumerate(networks):
+                if current_network == network:
+                    if btn == BUTTON_PAGE:
+                        new_network = networks[(i + 1) % len(networks)]
+                    else:  # BUTTON_PAGE_PREV
+                        new_network = networks[(i - 1) % len(networks)]
+                    settings.network = new_network
+                    break
         if settings.network == starting_network:
             return MENU_CONTINUE
         # Force a page refresh if the setting was changed
@@ -421,15 +521,20 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Baudrate\n%s") % current_baudrate)
 
+            self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_PAGE:
-                for i, baudrate in enumerate(baudrates):
-                    if current_baudrate == baudrate:
-                        new_baudrate = baudrates[(i + 1) % len(baudrates)]
-                        settings.printer.thermal.baudrate = new_baudrate
-                        break
-            elif btn == BUTTON_ENTER:
+            if btn == BUTTON_TOUCH:
+                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
+            if btn == BUTTON_ENTER:
                 break
+            for i, baudrate in enumerate(baudrates):
+                if current_baudrate == baudrate:
+                    if btn == BUTTON_PAGE:
+                        new_baudrate = baudrates[(i + 1) % len(baudrates)]
+                    else:  # BUTTON_PAGE_PREV
+                        new_baudrate = baudrates[(i - 1) % len(baudrates)]
+                    settings.printer.thermal.baudrate = new_baudrate
+                    break
         if settings.printer.thermal.baudrate == starting_baudrate:
             return MENU_CONTINUE
         # Force a page refresh if the setting was changed
@@ -446,17 +551,20 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Locale\n%s") % current_locale)
 
+            self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_PAGE:
-                for i, locale in enumerate(locales):
-                    if current_locale == locale:
-                        new_locale = locales[(i + 1) % len(locales)]
-                        # Don't let the user change the locale if translations can't be looked up
-                        if translations(new_locale):
-                            settings.i18n.locale = new_locale
-                        break
-            elif btn == BUTTON_ENTER:
+            if btn == BUTTON_TOUCH:
+                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
+            if btn == BUTTON_ENTER:
                 break
+            for i, locale in enumerate(locales):
+                if current_locale == locale:
+                    if btn == BUTTON_PAGE:
+                        new_locale = locales[(i + 1) % len(locales)]
+                    else:  # BUTTON_PAGE_PREV
+                        new_locale = locales[(i - 1) % len(locales)]
+                    settings.i18n.locale = new_locale
+                    break
         if settings.i18n.locale == starting_locale:
             return MENU_CONTINUE
         # Force a page refresh if the setting was changed
@@ -475,16 +583,21 @@ class Login(Page):
                 t("Log Level\n%s") % level_name(current_level)
             )
 
+            self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_PAGE:
-                for i, level in enumerate(levels):
-                    if current_level == level:
-                        new_level = levels[(i + 1) % len(levels)]
-                        settings.log.level = new_level
-                        self.ctx.log = Logger(settings.log.path, settings.log.level)
-                        break
-            elif btn == BUTTON_ENTER:
+            if btn == BUTTON_TOUCH:
+                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
+            if btn == BUTTON_ENTER:
                 break
+            for i, level in enumerate(levels):
+                if current_level == level:
+                    if btn == BUTTON_PAGE:
+                        new_level = levels[(i + 1) % len(levels)]
+                    else:  # BUTTON_PAGE_PREV
+                        new_level = levels[(i - 1) % len(levels)]
+                    settings.log.level = new_level
+                    logger.level = settings.log.level
+                    break
         if settings.log.level == starting_level:
             return MENU_CONTINUE
         # Force a page refresh if the setting was changed

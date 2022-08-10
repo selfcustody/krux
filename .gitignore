@@ -6,6 +6,7 @@
 *.bin
 *.map
 *.hex
+*.kff
 *.dis
 *.exe
 
@@ -70,6 +71,7 @@ memzip-files.zip
 .coverage
 privkey.pem
 pubkey.pem
+simulator/krux-screenshots
 simulator/screenshots
 simulator/sd
 

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 import machine
 import sys
+import board
 
 
 class PowerManager:
@@ -28,17 +29,30 @@ class PowerManager:
 
     def __init__(self):
         self.pmu = None
-        try:
-            from pmu import axp192
+        if board.config["type"].startswith("amigo"):
+            try:
+                from pmu import axp173
 
-            self.pmu = axp192()
-            self.pmu.enablePMICSleepMode(True)
-        except:
-            pass
+                self.pmu = axp173()
+                self.pmu.enablePMICSleepMode(False)
+                # Amigo already have a dedicated reset button
+                # Will only enable button checking when in sleep mode
+            except:
+                pass
+        else:
+            try:
+                from pmu import axp192
+
+                self.pmu = axp192()
+                self.pmu.enablePMICSleepMode(True)
+            except:
+                pass
 
     def shutdown(self):
         """Shuts down the device"""
         if self.pmu is not None:
+            # Enable button checking before shutdown
+            self.pmu.enablePMICSleepMode(True)
             self.pmu.setEnterSleepMode()
         machine.reset()
         sys.exit()

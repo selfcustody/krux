@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -101,7 +101,9 @@ def to_qr_codes(data, max_width, qr_format):
         yield (code, 1)
     else:
         num_parts = find_min_num_parts(data, max_width, qr_format)
-        part_size = data_len(data) // num_parts
+        while math.ceil(data_len(data) / num_parts) > 128:
+            num_parts += 1
+        part_size = math.ceil(data_len(data) / num_parts)
 
         if qr_format == FORMAT_PMOFN:
             for i in range(num_parts):
@@ -114,7 +116,7 @@ def to_qr_codes(data, max_width, qr_format):
                 code = qrcode.encode_to_string(part)
                 yield (code, num_parts)
         elif qr_format == FORMAT_UR:
-            encoder = UREncoder(data, part_size, 0, part_size - 10)
+            encoder = UREncoder(data, part_size, 0)
             while True:
                 part = encoder.next_part()
                 code = qrcode.encode_to_string(part)
@@ -141,14 +143,14 @@ def find_min_num_parts(data, max_width, qr_format):
     the specified format within the max_width constraint
     """
     num_parts = 1
-    part_size = data_len(data) // num_parts
+    part_size = math.ceil(data_len(data) / num_parts)
     while True:
         part = ""
         if qr_format == FORMAT_PMOFN:
             part_number = "p1of%d " % num_parts
             part = part_number + data[0:part_size]
         elif qr_format == FORMAT_UR:
-            encoder = UREncoder(data, part_size, 0, part_size - 10)
+            encoder = UREncoder(data, part_size, 0)
             part = encoder.next_part()
         # The worst-case number of bytes needed to store one QR Code, up to and including
         # version 40. This value equals 3918, which is just under 4 kilobytes.
@@ -157,7 +159,7 @@ def find_min_num_parts(data, max_width, qr_format):
             if get_size(code) <= max_width:
                 break
         num_parts += 1
-        part_size = data_len(data) // num_parts
+        part_size = math.ceil(data_len(data) / num_parts)
     return num_parts
 
 

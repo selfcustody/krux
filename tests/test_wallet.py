@@ -1,148 +1,215 @@
-from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
-from .shared_mocks import *
-from krux.key import Key
-from embit.networks import NETWORKS
-from embit.descriptor import Descriptor
-import binascii
-from ur.ur import UR
 import pytest
 
-TEST_MNEMONIC1 = (
-    "olympic term tissue route sense program under choose bean emerge velvet absurd"
-)
-TEST_MNEMONIC2 = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
-TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
-SINGLEKEY_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"])
-MULTISIG_KEY1 = Key(TEST_MNEMONIC1, True, NETWORKS["main"])
-MULTISIG_KEY2 = Key(TEST_MNEMONIC2, True, NETWORKS["main"])
-MULTISIG_KEY3 = Key(TEST_MNEMONIC3, True, NETWORKS["main"])
+@pytest.fixture
+def tdata(mocker):
+    import binascii
+    from collections import namedtuple
+    from ur.ur import UR
+    from embit.networks import NETWORKS
+    from krux.key import Key
 
-# SINGLEKEY_KEY [55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA
-# MULTISIG_KEY1 [55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
-# MULTISIG_KEY2 [3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
-# MULTISIG_KEY3 [d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
+    TEST_MNEMONIC1 = (
+        "olympic term tissue route sense program under choose bean emerge velvet absurd"
+    )
+    TEST_MNEMONIC2 = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
+    TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
-SPECTER_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)"
-SPECTER_SINGLEKEY_WALLET_DATA = '{"label": "Specter Singlekey Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
+    SINGLEKEY_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"])
+    MULTISIG_KEY1 = Key(TEST_MNEMONIC1, True, NETWORKS["main"])
+    MULTISIG_KEY2 = Key(TEST_MNEMONIC2, True, NETWORKS["main"])
+    MULTISIG_KEY3 = Key(TEST_MNEMONIC3, True, NETWORKS["main"])
 
-SPECTER_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))"
-SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
+    # SINGLEKEY_KEY [55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA
+    # MULTISIG_KEY1 [55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
+    # MULTISIG_KEY2 [3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
+    # MULTISIG_KEY3 [d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
 
-BLUEWALLET_SINGLEKEY_DESCRIPTOR = "wpkh(xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
-BLUEWALLET_SINGLEKEY_WALLET_DATA = "zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw"
+    SPECTER_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)"
+    SPECTER_SINGLEKEY_WALLET_DATA = '{"label": "Specter Singlekey Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
 
-BLUEWALLET_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
-BLUEWALLET_MULTISIG_WALLET_DATA = """
-# BlueWallet Multisig setup file
-# this file contains only public keys and is safe to
-# distribute among cosigners
-#
-Name: BlueWallet Multisig Wallet
-Policy: 2 of 3
-Derivation: m/48'/0'/0'/2'
-Format: P2WSH
+    SPECTER_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))"
+    SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
 
-55f8fc5d:
-xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
+    BLUEWALLET_SINGLEKEY_DESCRIPTOR = "wpkh(xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
+    BLUEWALLET_SINGLEKEY_WALLET_DATA = "zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw"
 
-3e15470d:
-xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
+    BLUEWALLET_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
+    BLUEWALLET_MULTISIG_WALLET_DATA = """
+    # BlueWallet Multisig setup file
+    # this file contains only public keys and is safe to
+    # distribute among cosigners
+    #
+    Name: BlueWallet Multisig Wallet
+    Policy: 2 of 3
+    Derivation: m/48'/0'/0'/2'
+    Format: P2WSH
 
-d3a80c8b:
-xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
-"""
+    55f8fc5d:
+    xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
 
-BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT = """
-# BlueWallet Multisig setup file
-# this file contains only public keys and is safe to
-# distribute among cosigners
-#
-Name: BlueWallet Multisig Wallet
-Policy: 2 of 3
-Derivation: m/48'/0'/0'/2'
-Format: P2WPH
+    3e15470d:
+    xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
 
-55f8fc5d:
-xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
+    d3a80c8b:
+    xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
+    """
 
-3e15470d:
-xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
+    BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT = """
+    # BlueWallet Multisig setup file
+    # this file contains only public keys and is safe to
+    # distribute among cosigners
+    #
+    Name: BlueWallet Multisig Wallet
+    Policy: 2 of 3
+    Derivation: m/48'/0'/0'/2'
+    Format: P2WPH
 
-d3a80c8b:
-xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
-"""
+    55f8fc5d:
+    xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
 
-BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS = """
-# BlueWallet Multisig setup file
-# this file contains only public keys and is safe to
-# distribute among cosigners
-#
-Name: BlueWallet Multisig Wallet
-Policy: 2 of 3
-Derivation: m/48'/0'/0'/2'
-Format: P2WSH
+    3e15470d:
+    xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
 
-55f8fc5d:
-xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
-"""
+    d3a80c8b:
+    xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
+    """
 
-BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS = """
-# BlueWallet Multisig setup file
-# this file contains only public keys and is safe to
-# distribute among cosigners
-#
-Name: BlueWallet Multisig Wallet
-Policy: 2 of 3
-"""
+    BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS = """
+    # BlueWallet Multisig setup file
+    # this file contains only public keys and is safe to
+    # distribute among cosigners
+    #
+    Name: BlueWallet Multisig Wallet
+    Policy: 2 of 3
+    Derivation: m/48'/0'/0'/2'
+    Format: P2WSH
 
-# TODO: Switch to 2-of-3 from keys defined above
-UR_OUTPUT_MULTISIG_DESCRIPTOR = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))"
-UR_OUTPUT_MULTISIG_WALLET_DATA = UR(
-    "crypto-output",
-    bytearray(
-        binascii.unhexlify(
-            "d90191d90196a201010282d9012fa403582103cbcaa9c98c877a26977d00825c956a238e8dddfbd322cce4f74b0b5bd6ace4a704582060499f801b896d83179a4374aeb7822aaeaceaa0db1f85ee3e904c4defbd968906d90130a20180030007d90130a1018601f400f480f4d9012fa403582102fc9e5af0ac8d9b3cecfe2a888e2117ba3d089d8585886c9c826b6b22a98d12ea045820f0909affaa7ee7abe5dd4e100598d4dc53cd709d5a5c2cac40e7412f232f7c9c06d90130a2018200f4021abd16bee507d90130a1018600f400f480f4"
-        )
-    ),
-)
+    55f8fc5d:
+    xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
+    """
 
-UR_BYTES_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))"
-UR_BYTES_MULTISIG_WALLET_DATA = UR(
-    "bytes",
-    bytearray(
-        b"y\x01\xf3"
-        + '{"label": "Unknown Multisig Wallet", "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy"}'.encode()
-    ),
-)
+    BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS = """
+    # BlueWallet Multisig setup file
+    # this file contains only public keys and is safe to
+    # distribute among cosigners
+    #
+    Name: BlueWallet Multisig Wallet
+    Policy: 2 of 3
+    """
 
-UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/{0,1}/*)"
-AMBIGUOUS_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
+    # TODO: Switch to 2-of-3 from keys defined above
+    UR_OUTPUT_MULTISIG_DESCRIPTOR = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))"
+    UR_OUTPUT_MULTISIG_WALLET_DATA = UR(
+        "crypto-output",
+        bytearray(
+            binascii.unhexlify(
+                "d90191d90196a201010282d9012fa403582103cbcaa9c98c877a26977d00825c956a238e8dddfbd322cce4f74b0b5bd6ace4a704582060499f801b896d83179a4374aeb7822aaeaceaa0db1f85ee3e904c4defbd968906d90130a20180030007d90130a1018601f400f480f4d9012fa403582102fc9e5af0ac8d9b3cecfe2a888e2117ba3d089d8585886c9c826b6b22a98d12ea045820f0909affaa7ee7abe5dd4e100598d4dc53cd709d5a5c2cac40e7412f232f7c9c06d90130a2018200f4021abd16bee507d90130a1018600f400f480f4"
+            )
+        ),
+    )
 
-UNAMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/{0,1}/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/{0,1}/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/{0,1}/*))"
-AMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
+    UR_BYTES_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))"
+    UR_BYTES_MULTISIG_WALLET_DATA = UR(
+        "bytes",
+        bytearray(
+            b"y\x01\xf3"
+            + '{"label": "Unknown Multisig Wallet", "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy"}'.encode()
+        ),
+    )
 
-UNRELATED_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB)"
-UNRELATED_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
+    UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/{0,1}/*)"
+    AMBIGUOUS_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
 
-UNSORTED_MULTISIG_DESCRIPTOR = "wsh(multi(2,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/{0,1}/*,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/{0,1}/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/{0,1}/*))"
+    UNAMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/{0,1}/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/{0,1}/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/{0,1}/*))"
+    AMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
+
+    UNRELATED_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB)"
+    UNRELATED_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
+
+    UNSORTED_MULTISIG_DESCRIPTOR = "wsh(multi(2,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/{0,1}/*,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/{0,1}/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/{0,1}/*))"
+
+    return namedtuple(
+        "TestData",
+        [
+            "TEST_MNEMONIC1",
+            "TEST_MNEMONIC2",
+            "TEST_MNEMONIC3",
+            "SINGLEKEY_KEY",
+            "MULTISIG_KEY1",
+            "MULTISIG_KEY2",
+            "MULTISIG_KEY3",
+            "SPECTER_SINGLEKEY_DESCRIPTOR",
+            "SPECTER_SINGLEKEY_WALLET_DATA",
+            "SPECTER_MULTISIG_DESCRIPTOR",
+            "SPECTER_MULTISIG_WALLET_DATA",
+            "BLUEWALLET_SINGLEKEY_DESCRIPTOR",
+            "BLUEWALLET_SINGLEKEY_WALLET_DATA",
+            "BLUEWALLET_MULTISIG_DESCRIPTOR",
+            "BLUEWALLET_MULTISIG_WALLET_DATA",
+            "BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT",
+            "BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS",
+            "BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS",
+            "UR_OUTPUT_MULTISIG_DESCRIPTOR",
+            "UR_OUTPUT_MULTISIG_WALLET_DATA",
+            "UR_BYTES_MULTISIG_DESCRIPTOR",
+            "UR_BYTES_MULTISIG_WALLET_DATA",
+            "UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR",
+            "AMBIGUOUS_SINGLEKEY_DESCRIPTOR",
+            "UNAMBIGUOUS_MULTISIG_DESCRIPTOR",
+            "AMBIGUOUS_MULTISIG_DESCRIPTOR",
+            "UNRELATED_SINGLEKEY_DESCRIPTOR",
+            "UNRELATED_MULTISIG_DESCRIPTOR",
+            "UNSORTED_MULTISIG_DESCRIPTOR",
+        ],
+    )(
+        TEST_MNEMONIC1,
+        TEST_MNEMONIC2,
+        TEST_MNEMONIC3,
+        SINGLEKEY_KEY,
+        MULTISIG_KEY1,
+        MULTISIG_KEY2,
+        MULTISIG_KEY3,
+        SPECTER_SINGLEKEY_DESCRIPTOR,
+        SPECTER_SINGLEKEY_WALLET_DATA,
+        SPECTER_MULTISIG_DESCRIPTOR,
+        SPECTER_MULTISIG_WALLET_DATA,
+        BLUEWALLET_SINGLEKEY_DESCRIPTOR,
+        BLUEWALLET_SINGLEKEY_WALLET_DATA,
+        BLUEWALLET_MULTISIG_DESCRIPTOR,
+        BLUEWALLET_MULTISIG_WALLET_DATA,
+        BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT,
+        BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS,
+        BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS,
+        UR_OUTPUT_MULTISIG_DESCRIPTOR,
+        UR_OUTPUT_MULTISIG_WALLET_DATA,
+        UR_BYTES_MULTISIG_DESCRIPTOR,
+        UR_BYTES_MULTISIG_WALLET_DATA,
+        UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+        AMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+        UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+        AMBIGUOUS_MULTISIG_DESCRIPTOR,
+        UNRELATED_SINGLEKEY_DESCRIPTOR,
+        UNRELATED_MULTISIG_DESCRIPTOR,
+        UNSORTED_MULTISIG_DESCRIPTOR,
+    )
 
 
-def test_init_singlekey():
+def test_init_singlekey(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
-    wallet = Wallet(SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLEKEY_KEY)
 
     assert isinstance(wallet, Wallet)
-    assert wallet.descriptor.to_string() == UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR
+    assert wallet.descriptor.to_string() == tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR
     assert wallet.label == "Single-key"
     assert wallet.policy == {"type": "p2wpkh"}
 
 
-def test_init_multisig():
+def test_init_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
-    wallet = Wallet(MULTISIG_KEY1)
+    wallet = Wallet(tdata.MULTISIG_KEY1)
 
     assert isinstance(wallet, Wallet)
     assert wallet.descriptor is None
@@ -150,54 +217,56 @@ def test_init_multisig():
     assert wallet.policy is None
 
 
-def test_is_multisig():
+def test_is_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
-    wallet = Wallet(SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLEKEY_KEY)
 
     assert not wallet.is_multisig()
 
-    wallet = Wallet(MULTISIG_KEY1)
+    wallet = Wallet(tdata.MULTISIG_KEY1)
 
     assert wallet.is_multisig()
 
 
-def test_is_loaded():
+def test_is_loaded(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
-    wallet = Wallet(SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLEKEY_KEY)
 
     assert not wallet.is_loaded()
 
-    wallet = Wallet(MULTISIG_KEY1)
+    wallet = Wallet(tdata.MULTISIG_KEY1)
 
     assert not wallet.is_loaded()
 
-    wallet.wallet_data = UR_OUTPUT_MULTISIG_WALLET_DATA
+    wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
 
     assert wallet.is_loaded()
 
 
-def test_wallet_qr():
+def test_wallet_qr(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_UR
 
-    wallet = Wallet(MULTISIG_KEY1)
-    wallet.wallet_data = UR_OUTPUT_MULTISIG_WALLET_DATA
+    wallet = Wallet(tdata.MULTISIG_KEY1)
+    wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
     wallet.wallet_qr_format = FORMAT_UR
 
     wallet_data, wallet_qr_format = wallet.wallet_qr()
 
-    assert wallet_data == UR_OUTPUT_MULTISIG_WALLET_DATA
+    assert wallet_data == tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
     assert wallet_qr_format == FORMAT_UR
 
 
-def test_receive_addresses():
+def test_receive_addresses(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_PMOFN
 
     cases = [
         (
-            SINGLEKEY_KEY,
-            SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLEKEY_KEY,
+            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
             FORMAT_PMOFN,
             [
                 "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
@@ -213,8 +282,8 @@ def test_receive_addresses():
             ],
         ),
         (
-            MULTISIG_KEY1,
-            SPECTER_MULTISIG_WALLET_DATA,
+            tdata.MULTISIG_KEY1,
+            tdata.SPECTER_MULTISIG_WALLET_DATA,
             FORMAT_PMOFN,
             [
                 "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
@@ -238,81 +307,82 @@ def test_receive_addresses():
         assert [addr for addr in wallet.receive_addresses(0, limit=10)] == case[3]
 
 
-def test_load_multisig():
+def test_load_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
-    wallet = Wallet(MULTISIG_KEY1)
+    wallet = Wallet(tdata.MULTISIG_KEY1)
 
     cases = [
         (
-            SPECTER_MULTISIG_WALLET_DATA,
+            tdata.SPECTER_MULTISIG_WALLET_DATA,
             FORMAT_PMOFN,
-            SPECTER_MULTISIG_DESCRIPTOR,
+            tdata.SPECTER_MULTISIG_DESCRIPTOR,
             "Specter Multisig Wallet",
             {
                 "type": "p2wsh",
                 "m": 2,
                 "n": 3,
                 "cosigners": [
-                    MULTISIG_KEY1.xpub(),
-                    MULTISIG_KEY2.xpub(),
-                    MULTISIG_KEY3.xpub(),
+                    tdata.MULTISIG_KEY1.xpub(),
+                    tdata.MULTISIG_KEY2.xpub(),
+                    tdata.MULTISIG_KEY3.xpub(),
                 ],
             },
         ),
         (
-            BLUEWALLET_MULTISIG_WALLET_DATA,
+            tdata.BLUEWALLET_MULTISIG_WALLET_DATA,
             FORMAT_NONE,
-            UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
             "BlueWallet Multisig Wallet",
             {
                 "type": "p2wsh",
                 "m": 2,
                 "n": 3,
                 "cosigners": [
-                    MULTISIG_KEY1.xpub(),
-                    MULTISIG_KEY2.xpub(),
-                    MULTISIG_KEY3.xpub(),
+                    tdata.MULTISIG_KEY1.xpub(),
+                    tdata.MULTISIG_KEY2.xpub(),
+                    tdata.MULTISIG_KEY3.xpub(),
                 ],
             },
         ),
         # TODO: Fix
-        # (UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR, UR_OUTPUT_MULTISIG_DESCRIPTOR, '2 of 3', {
+        # (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR, tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR, '2 of 3', {
         #     'type': 'p2wsh', 'm': 2, 'n': 3, 'cosigners': [
-        #         MULTISIG_KEY1.xpub(),
-        #         MULTISIG_KEY2.xpub(),
-        #         MULTISIG_KEY3.xpub()
+        #         tdata.MULTISIG_KEY1.xpub(),
+        #         tdata.MULTISIG_KEY2.xpub(),
+        #         tdata.MULTISIG_KEY3.xpub()
         #     ]
         # }),
         (
-            UR_BYTES_MULTISIG_WALLET_DATA,
+            tdata.UR_BYTES_MULTISIG_WALLET_DATA,
             FORMAT_UR,
-            UR_BYTES_MULTISIG_DESCRIPTOR,
+            tdata.UR_BYTES_MULTISIG_DESCRIPTOR,
             "Unknown Multisig Wallet",
             {
                 "type": "p2wsh",
                 "m": 2,
                 "n": 3,
                 "cosigners": [
-                    MULTISIG_KEY1.xpub(),
-                    MULTISIG_KEY2.xpub(),
-                    MULTISIG_KEY3.xpub(),
+                    tdata.MULTISIG_KEY1.xpub(),
+                    tdata.MULTISIG_KEY2.xpub(),
+                    tdata.MULTISIG_KEY3.xpub(),
                 ],
             },
         ),
         (
-            UNSORTED_MULTISIG_DESCRIPTOR,
+            tdata.UNSORTED_MULTISIG_DESCRIPTOR,
             FORMAT_NONE,
-            UNSORTED_MULTISIG_DESCRIPTOR,
+            tdata.UNSORTED_MULTISIG_DESCRIPTOR,
             "2 of 3 multisig",
             {
                 "type": "p2wsh",
                 "m": 2,
                 "n": 3,
                 "cosigners": [
-                    MULTISIG_KEY2.xpub(),
-                    MULTISIG_KEY1.xpub(),
-                    MULTISIG_KEY3.xpub(),
+                    tdata.MULTISIG_KEY2.xpub(),
+                    tdata.MULTISIG_KEY1.xpub(),
+                    tdata.MULTISIG_KEY3.xpub(),
                 ],
             },
         ),
@@ -326,23 +396,24 @@ def test_load_multisig():
         assert wallet.policy == case[4]
 
 
-def test_load_singlekey():
+def test_load_singlekey(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN
 
-    wallet = Wallet(SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLEKEY_KEY)
 
     cases = [
         (
-            SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
             FORMAT_PMOFN,
-            SPECTER_SINGLEKEY_DESCRIPTOR,
+            tdata.SPECTER_SINGLEKEY_DESCRIPTOR,
             "Specter Singlekey Wallet",
             {"type": "p2wpkh"},
         ),
         (
-            UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
             FORMAT_NONE,
-            UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
             "Single-key",
             {"type": "p2wpkh"},
         ),
@@ -356,89 +427,114 @@ def test_load_singlekey():
         assert wallet.policy == case[4]
 
 
-def test_load_singlekey_fails_with_multisig_descriptor():
+def test_load_singlekey_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
-    wallet = Wallet(SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLEKEY_KEY)
 
     cases = [
-        (SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN),
-        (BLUEWALLET_MULTISIG_WALLET_DATA, FORMAT_NONE),
+        (tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.BLUEWALLET_MULTISIG_WALLET_DATA, FORMAT_NONE),
         # TODO: Fix
-        # (UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR),
-        (UR_BYTES_MULTISIG_WALLET_DATA, FORMAT_UR),
+        # (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR),
+        (tdata.UR_BYTES_MULTISIG_WALLET_DATA, FORMAT_UR),
     ]
     for case in cases:
         with pytest.raises(ValueError):
             wallet.load(case[0], case[1])
 
 
-def test_load_multisig_fails_with_singlekey_descriptor():
+def test_load_multisig_fails_with_singlekey_descriptor(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN
 
-    wallet = Wallet(MULTISIG_KEY1)
+    wallet = Wallet(tdata.MULTISIG_KEY1)
 
     cases = [
-        (SPECTER_SINGLEKEY_WALLET_DATA, FORMAT_PMOFN),
-        (UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR, FORMAT_NONE),
+        (tdata.SPECTER_SINGLEKEY_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR, FORMAT_NONE),
     ]
     for case in cases:
         with pytest.raises(ValueError):
             wallet.load(case[0], case[1])
 
 
-def test_load_singlekey_fails_when_key_not_in_descriptor():
+def test_load_singlekey_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLEKEY_KEY)
 
     with pytest.raises(ValueError):
-        wallet.load(UNRELATED_SINGLEKEY_DESCRIPTOR, FORMAT_NONE)
+        wallet.load(tdata.UNRELATED_SINGLEKEY_DESCRIPTOR, FORMAT_NONE)
 
 
-def test_load_multisig_fails_when_key_not_in_descriptor():
+def test_load_multisig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(MULTISIG_KEY1)
+    wallet = Wallet(tdata.MULTISIG_KEY1)
 
     with pytest.raises(ValueError):
-        wallet.load(UNRELATED_MULTISIG_DESCRIPTOR, FORMAT_NONE)
+        wallet.load(tdata.UNRELATED_MULTISIG_DESCRIPTOR, FORMAT_NONE)
 
 
-def test_parse_wallet():
+def test_parse_wallet(mocker, m5stickv, tdata):
     from krux.wallet import parse_wallet
+    from embit.networks import NETWORKS
 
     cases = [
         (
-            SPECTER_SINGLEKEY_WALLET_DATA,
-            SPECTER_SINGLEKEY_DESCRIPTOR,
+            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SPECTER_SINGLEKEY_DESCRIPTOR,
             "Specter Singlekey Wallet",
         ),
         (
-            SPECTER_MULTISIG_WALLET_DATA,
-            SPECTER_MULTISIG_DESCRIPTOR,
+            tdata.SPECTER_MULTISIG_WALLET_DATA,
+            tdata.SPECTER_MULTISIG_DESCRIPTOR,
             "Specter Multisig Wallet",
         ),
         (
-            BLUEWALLET_SINGLEKEY_WALLET_DATA,
-            BLUEWALLET_SINGLEKEY_DESCRIPTOR,
+            tdata.BLUEWALLET_SINGLEKEY_WALLET_DATA,
+            tdata.BLUEWALLET_SINGLEKEY_DESCRIPTOR,
             None,
         ),
         (
-            BLUEWALLET_MULTISIG_WALLET_DATA,
-            BLUEWALLET_MULTISIG_DESCRIPTOR,
+            tdata.BLUEWALLET_MULTISIG_WALLET_DATA,
+            tdata.BLUEWALLET_MULTISIG_DESCRIPTOR,
             "BlueWallet Multisig Wallet",
         ),
-        (UR_OUTPUT_MULTISIG_WALLET_DATA, UR_OUTPUT_MULTISIG_DESCRIPTOR, None),
         (
-            UR_BYTES_MULTISIG_WALLET_DATA,
-            UR_BYTES_MULTISIG_DESCRIPTOR,
+            tdata.UR_OUTPUT_MULTISIG_WALLET_DATA,
+            tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.UR_BYTES_MULTISIG_WALLET_DATA,
+            tdata.UR_BYTES_MULTISIG_DESCRIPTOR,
             "Unknown Multisig Wallet",
         ),
-        (AMBIGUOUS_MULTISIG_DESCRIPTOR, AMBIGUOUS_MULTISIG_DESCRIPTOR, None),
-        (UNAMBIGUOUS_MULTISIG_DESCRIPTOR, UNAMBIGUOUS_MULTISIG_DESCRIPTOR, None),
-        (AMBIGUOUS_SINGLEKEY_DESCRIPTOR, AMBIGUOUS_SINGLEKEY_DESCRIPTOR, None),
-        (UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR, UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR, None),
+        (
+            tdata.AMBIGUOUS_MULTISIG_DESCRIPTOR,
+            tdata.AMBIGUOUS_MULTISIG_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.AMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.AMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            None,
+        ),
     ]
 
     for case in cases:
@@ -447,13 +543,15 @@ def test_parse_wallet():
         assert label == case[2]
 
 
-def test_parse_wallet_raises_errors():
+def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
     from krux.wallet import parse_wallet
+    from embit.networks import NETWORKS
+    from ur.ur import UR
 
     cases = [
-        BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS,
-        BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS,
-        BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT,
+        tdata.BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS,
+        tdata.BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS,
+        tdata.BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT,
         UR("unknown-type", bytearray("invalid wallet format".encode())),
         "invalid wallet format",
         '{"invalid": "json", "wallet": "format"}',
@@ -463,7 +561,7 @@ def test_parse_wallet_raises_errors():
             parse_wallet(case, NETWORKS["main"])
 
 
-def test_parse_address():
+def test_parse_address(mocker, m5stickv, tdata):
     from krux.wallet import parse_address
 
     cases = [
@@ -526,7 +624,7 @@ def test_parse_address():
         assert parse_address(case[0]) == case[1]
 
 
-def test_parse_address_raises_errors():
+def test_parse_address_raises_errors(mocker, m5stickv, tdata):
     from krux.wallet import parse_address
 
     cases = [
@@ -539,16 +637,32 @@ def test_parse_address_raises_errors():
             parse_address(case)
 
 
-def test_to_unambiguous_descriptor():
+def test_to_unambiguous_descriptor(mocker, m5stickv, tdata):
+    from embit.descriptor import Descriptor
     from krux.wallet import to_unambiguous_descriptor
 
     cases = [
-        (AMBIGUOUS_SINGLEKEY_DESCRIPTOR, UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR),
-        (AMBIGUOUS_MULTISIG_DESCRIPTOR, UNAMBIGUOUS_MULTISIG_DESCRIPTOR),
-        (UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR, UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR),
-        (UNAMBIGUOUS_MULTISIG_DESCRIPTOR, UNAMBIGUOUS_MULTISIG_DESCRIPTOR),
-        (UR_OUTPUT_MULTISIG_DESCRIPTOR, UR_OUTPUT_MULTISIG_DESCRIPTOR),
-        (SPECTER_MULTISIG_DESCRIPTOR, SPECTER_MULTISIG_DESCRIPTOR),
+        (
+            tdata.AMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+        ),
+        (
+            tdata.AMBIGUOUS_MULTISIG_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+        ),
+        (
+            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+        ),
+        (
+            tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+        ),
+        (
+            tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR,
+            tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR,
+        ),
+        (tdata.SPECTER_MULTISIG_DESCRIPTOR, tdata.SPECTER_MULTISIG_DESCRIPTOR),
     ]
 
     for case in cases:

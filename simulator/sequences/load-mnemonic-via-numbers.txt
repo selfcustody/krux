@@ -12,60 +12,60 @@ screenshot load-mnemonic-via-numbers-word-1.png
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
 press BUTTON_B
 press BUTTON_A
-x10 press BUTTON_B
+x2 press BUTTON_C
 x2 press BUTTON_A
 
-x11 press BUTTON_B
+press BUTTON_C
 press BUTTON_A
 
 press BUTTON_A

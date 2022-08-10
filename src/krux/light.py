@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ class Light:
     """Light is a singleton interface for interacting with the device's LED light"""
 
     def __init__(self):
-        fm.register(board.config["krux.pins"]["LED_W"], fm.fpioa.GPIO3)
+        fm.register(board.config["krux"]["pins"]["LED_W"], fm.fpioa.GPIO3)
         self.led_w = GPIO(GPIO.GPIO3, GPIO.OUT)
         self.turn_off()
 

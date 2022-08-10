@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021 Tom J. Sun
+# Copyright (c) 2021-2022 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -51,15 +51,15 @@ class AdafruitPrinter(Printer):
     """
 
     def __init__(self):
-        if ("UART2_TX" not in board.config["krux.pins"]) or (
-            "UART2_RX" not in board.config["krux.pins"]
+        if ("UART2_TX" not in board.config["krux"]["pins"]) or (
+            "UART2_RX" not in board.config["krux"]["pins"]
         ):
             raise ValueError("missing required ports")
         fm.register(
-            board.config["krux.pins"]["UART2_TX"], fm.fpioa.UART2_TX, force=False
+            board.config["krux"]["pins"]["UART2_TX"], fm.fpioa.UART2_TX, force=False
         )
         fm.register(
-            board.config["krux.pins"]["UART2_RX"], fm.fpioa.UART2_RX, force=False
+            board.config["krux"]["pins"]["UART2_RX"], fm.fpioa.UART2_RX, force=False
         )
 
         self.uart_conn = UART(UART.UART2, settings.printer.thermal.baudrate)
@@ -198,6 +198,6 @@ class AdafruitPrinter(Printer):
             # Print height * scale lines out to scale by
             for _ in range(scale):
                 self.write_bytes(18, 42, 1, len(line_bytes))
-                self.write_bytes(line_bytes)
+                self.write_bytes(*line_bytes)
                 time.sleep_ms(math.floor(self.dot_print_time * 1000))
         self.feed(3)

@@ -1,5 +1,3 @@
-from .shared_mocks import *
-
 TEST_QR = """
 111111100111000100010011001111111
 100000101001100100101111001000001
@@ -75,8 +73,8 @@ TEST_QR_WITH_BORDER = """
 """.strip()
 
 
-def test_init(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
+def test_init(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
     import board
@@ -96,16 +94,8 @@ def test_init(mocker):
     )
 
 
-def test_line_height():
-    from krux.display import Display, FONT_SIZE
-
-    d = Display()
-
-    assert d.line_height() == FONT_SIZE * 2
-
-
-def test_width(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
+def test_width(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
@@ -113,96 +103,97 @@ def test_width(mocker):
 
     d.to_portrait()
 
-    assert d.width() == krux.display.lcd.height()
+    assert d.width() == krux.display.lcd.width()
     krux.display.lcd.height.assert_called()
 
     d.to_landscape()
 
-    assert d.width() == krux.display.lcd.width()
+    assert d.width() == krux.display.lcd.height()
     krux.display.lcd.width.assert_called()
 
 
-def test_height(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
+def test_height(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
     d = Display()
 
     d.to_portrait()
-
-    assert d.height() == krux.display.lcd.width()
-    krux.display.lcd.width.assert_called()
-
-    d.to_landscape()
 
     assert d.height() == krux.display.lcd.height()
     krux.display.lcd.height.assert_called()
 
+    d.to_landscape()
 
-def test_qr_data_width(mocker):
+    assert d.height() == krux.display.lcd.width()
+    krux.display.lcd.width.assert_called()
+
+
+def test_qr_data_width(mocker, m5stickv):
     from krux.display import Display
 
     d = Display()
+    d.to_portrait()
 
+    mocker.patch.object(d, "width", new=lambda: 135)
     width = d.width()
     mocker.spy(d, "width")
-
     assert d.qr_data_width() == width // 4
+
+    mocker.patch.object(d, "width", new=lambda: 320)
+    width = d.width()
+    mocker.spy(d, "width")
+    assert d.qr_data_width() == width // 6
+
     d.width.assert_called()
 
 
-def test_to_landscape(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
+def test_to_landscape(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
     d = Display()
-    mocker.spy(d, "clear")
 
     d.to_landscape()
 
-    d.clear.assert_called()
     krux.display.lcd.rotation.assert_called()
 
 
-def test_to_portrait(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
+def test_to_portrait(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
     from krux.display import Display
 
     d = Display()
-    mocker.spy(d, "clear")
-    mocker.spy(d, "initialize_lcd")
 
     d.to_portrait()
 
-    d.clear.assert_called()
-    d.initialize_lcd.assert_called()
+    krux.display.lcd.rotation.assert_called()
 
 
-def test_to_lines(mocker):
+def test_to_lines(mocker, m5stickv):
     from krux.display import Display
 
     cases = [
-        (135, 10, "Two Words", ["Two Words"]),
-        (135, 10, "Two\nWords", ["Two", "Words"]),
-        (135, 10, "Two\n\nWords", ["Two", "", "Words"]),
-        (135, 10, "Two\n\n\nWords", ["Two", "", "", "Words"]),
-        (135, 10, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
-        (135, 10, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
-        (135, 10, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (135, 10, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
-        (135, 10, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
-        (135, 10, "More Than Two Words", ["More Than", "Two Words"]),
+        (135, "Two Words", ["Two Words"]),
+        (135, "Two\nWords", ["Two", "Words"]),
+        (135, "Two\n\nWords", ["Two", "", "Words"]),
+        (135, "Two\n\n\nWords", ["Two", "", "", "Words"]),
+        (135, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
+        (135, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
+        (135, "\nTwo\nWords\n", ["", "Two", "Words"]),
+        (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
+        (135, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
+        (135, "More Than Two Words", ["More Than", "Two Words"]),
         (
             135,
-            10,
             "A bunch of words that span multiple lines..",
             ["A bunch of", "words that span", "multiple lines.."],
         ),
         (
             135,
-            10,
             "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
             [
                 "tpubDCDuqu5HtBX2",
@@ -216,7 +207,6 @@ def test_to_lines(mocker):
         ),
         (
             135,
-            10,
             "xpub: tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
             [
                 "xpub:",
@@ -229,10 +219,9 @@ def test_to_lines(mocker):
                 "KgqwcEGv1BVpD7s",
             ],
         ),
-        (135, 10, "Log Level\nNONE", ["Log Level", "NONE"]),
+        (135, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             135,
-            10,
             "New firmware detected.\n\nSHA256:\n1621f9c0e9ccb7995a29327066566adfd134e19109d7ce8e52aad7bd7dcce121\n\n\n\nInstall?",
             [
                 "New firmware",
@@ -248,150 +237,55 @@ def test_to_lines(mocker):
                 "Install?",
             ],
         ),
-        (75, 10, "Two Words", ["Two", "Words"]),
-        (75, 10, "Two\nWords", ["Two", "Words"]),
-        (75, 10, "Two\n\nWords", ["Two", "", "Words"]),
-        (75, 10, "Two\n\n\nWords", ["Two", "", "", "Words"]),
-        (75, 10, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
-        (75, 10, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
-        (75, 10, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (75, 10, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
-        (75, 10, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
-        (75, 10, "More Than Two Words", ["More", "Than", "Two", "Words"]),
-        (
-            75,
-            10,
-            "A bunch of text that spans multiple lines..",
-            ["A bunch", "of text", "that", "spans", "multipl", "e", "lines.."],
-        ),
-        (
-            75,
-            10,
-            "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
-            [
-                "tpubDCD",
-                "uqu5HtB",
-                "X2aD7wx",
-                "vnHcj1D",
-                "gFN1UVg",
-                "zLkA1Ms",
-                "4Va4P7T",
-                "pJ3jDkn",
-                "kPLwWT2",
-                "SqrKXNN",
-                "AtJBCPc",
-                "bJ8Tcpm",
-                "6nLxgFa",
-                "pCZyhKg",
-                "qwcEGv1",
-                "BVpD7s",
-            ],
-        ),
-        (
-            75,
-            10,
-            "xpub: tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
-            [
-                "xpub:",
-                "tpubDCD",
-                "uqu5HtB",
-                "X2aD7wx",
-                "vnHcj1D",
-                "gFN1UVg",
-                "zLkA1Ms",
-                "4Va4P7T",
-                "pJ3jDkn",
-                "kPLwWT2",
-                "SqrKXNN",
-                "AtJBCPc",
-                "bJ8Tcpm",
-                "6nLxgFa",
-                "pCZyhKg",
-                "qwcEGv1",
-                "BVpD7s",
-            ],
-        ),
-        (75, 10, "Log Level\nNONE", ["Log", "Level", "NONE"]),
-        (
-            75,
-            10,
-            "New firmware detected.\n\nSHA256:\n1621f9c0e9ccb7995a29327066566adfd134e19109d7ce8e52aad7bd7dcce121\n\n\n\nInstall?",
-            [
-                "New",
-                "firmwar",
-                "e",
-                "detecte",
-                "d.",
-                "",
-                "SHA256:",
-                "1621f9c",
-                "0e9ccb7",
-                "995a293",
-                "2706656",
-                "6adfd13",
-                "4e19109",
-                "d7ce8e5",
-                "2aad7bd",
-                "7dcce12",
-                "1",
-                "",
-                "",
-                "",
-                "Install",
-                "?",
-            ],
-        ),
-        (240, 10, "Two Words", ["Two Words"]),
-        (240, 10, "Two\nWords", ["Two", "Words"]),
-        (240, 10, "Two\n\nWords", ["Two", "", "Words"]),
-        (240, 10, "Two\n\n\nWords", ["Two", "", "", "Words"]),
-        (240, 10, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
-        (240, 10, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
-        (240, 10, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (240, 10, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
-        (240, 10, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
-        (240, 10, "More Than Two Words", ["More Than Two Words"]),
+        (240, "Two Words", ["Two Words"]),
+        (240, "Two\nWords", ["Two", "Words"]),
+        (240, "Two\n\nWords", ["Two", "", "Words"]),
+        (240, "Two\n\n\nWords", ["Two", "", "", "Words"]),
+        (240, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
+        (240, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
+        (240, "\nTwo\nWords\n", ["", "Two", "Words"]),
+        (240, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
+        (240, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
+        (240, "More Than Two Words", ["More Than Two Words"]),
         (
             240,
-            10,
             "A bunch of text that spans multiple lines..",
             ["A bunch of text that", "spans multiple lines.."],
         ),
         (
             240,
-            10,
             "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
             [
-                "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN",
-                "1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT",
-                "2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapC",
-                "ZyhKgqwcEGv1BVpD7s",
+                "tpubDCDuqu5HtBX2aD7wxvnHcj1",
+                "DgFN1UVgzLkA1Ms4Va4P7TpJ3jD",
+                "knkPLwWT2SqrKXNNAtJBCPcbJ8T",
+                "cpm6nLxgFapCZyhKgqwcEGv1BVp",
+                "D7s",
             ],
         ),
         (
             240,
-            10,
             "xpub: tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
             [
                 "xpub:",
-                "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN",
-                "1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT",
-                "2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapC",
-                "ZyhKgqwcEGv1BVpD7s",
+                "tpubDCDuqu5HtBX2aD7wxvnHcj1",
+                "DgFN1UVgzLkA1Ms4Va4P7TpJ3jD",
+                "knkPLwWT2SqrKXNNAtJBCPcbJ8T",
+                "cpm6nLxgFapCZyhKgqwcEGv1BVp",
+                "D7s",
             ],
         ),
-        (240, 10, "Log Level\nNONE", ["Log Level", "NONE"]),
+        (240, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             240,
-            10,
             "New firmware detected.\n\nSHA256:\n1621f9c0e9ccb7995a29327066566adfd134e19109d7ce8e52aad7bd7dcce121\n\n\n\nInstall?",
             [
                 "New firmware detected.",
                 "",
                 "SHA256:",
-                "1621f9c0e9ccb7995a29327066566ad",
-                "fd134e19109d7ce8e52aad7bd7dcce1",
-                "21",
+                "1621f9c0e9ccb7995a293270665",
+                "66adfd134e19109d7ce8e52aad7",
+                "bd7dcce121",
                 "",
                 "",
                 "",
@@ -402,32 +296,111 @@ def test_to_lines(mocker):
     for case in cases:
         mocker.patch(
             "krux.display.lcd",
-            new=mock.MagicMock(height=mock.MagicMock(return_value=case[0])),
+            new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
         )
         d = Display()
+        lines = d.to_lines(case[1])
+        assert lines == case[2]
 
-        lines = d.to_lines(case[2], padding=case[1])
-        assert lines == case[3]
+
+def test_outline(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "fill_rectangle")
+
+    d.outline(0, 0, 100, 100, krux.display.lcd.WHITE)
+
+    d.fill_rectangle.assert_has_calls(
+        [
+            mocker.call(0, 0, 101, 1, krux.display.lcd.WHITE),
+            mocker.call(0, 100, 101, 1, krux.display.lcd.WHITE),
+            mocker.call(0, 0, 1, 101, krux.display.lcd.WHITE),
+            mocker.call(100, 0, 1, 101, krux.display.lcd.WHITE),
+        ]
+    )
 
 
-def test_draw_hcentered_text(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
+def test_fill_rectangle(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+
+    d.fill_rectangle(0, 0, 100, 100, krux.display.lcd.WHITE)
+
+    krux.display.lcd.fill_rectangle.assert_called_with(
+        0, 0, 100, 100, krux.display.lcd.WHITE
+    )
+
+
+def test_fill_rectangle_on_inverted_display(mocker, amigo_tft):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.fill_rectangle(0, 0, 100, 100, krux.display.lcd.WHITE)
+
+    krux.display.lcd.fill_rectangle.assert_called_with(
+        480 - 0 - 100, 0, 100, 100, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_string(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+
+    d.draw_string(0, 0, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK)
+
+    krux.display.lcd.draw_string.assert_called_with(
+        0, 0, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+
+def test_draw_string_on_inverted_display(mocker, amigo_tft):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.draw_string(0, 0, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK)
+
+    krux.display.lcd.draw_string.assert_called_with(
+        480 - 0 - 132, 0, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+
+def test_draw_hcentered_text(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)
-    mocker.patch.object(d, "height", new=lambda: 240)
+    mocker.spy(d, "draw_string")
 
-    d.draw_hcentered_text("Hello world", 10, krux.display.lcd.WHITE, 0)
+    d.draw_hcentered_text(
+        "Hello world", 50, krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
 
-    krux.display.lcd.draw_string.assert_called_with(
-        30, 10, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    d.draw_string.assert_called_with(
+        23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 
 
-def test_draw_centered_text(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
+def test_draw_centered_text(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
@@ -443,9 +416,9 @@ def test_draw_centered_text(mocker):
     )
 
 
-def test_flash_text(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
-    mocker.patch("krux.display.time", new=mock.MagicMock())
+def test_flash_text(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    mocker.patch("krux.display.time", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
@@ -462,8 +435,8 @@ def test_flash_text(mocker):
     krux.display.time.sleep_ms.assert_called_with(1000)
 
 
-def test_draw_qr_code(mocker):
-    mocker.patch("krux.display.lcd", new=mock.MagicMock())
+def test_draw_qr_code(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display, QR_DARK_COLOR, QR_LIGHT_COLOR
 

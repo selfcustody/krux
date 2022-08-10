@@ -1,9 +1,33 @@
+# The MIT License (MIT)
+
+# Copyright (c) 2021-2022 Krux contributors
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 import sys
 import time
 from unittest import mock
 import pygame as pg
-from kruxsim.mocks.board import BUTTON_A, BUTTON_B
+from kruxsim.mocks.board import BUTTON_A, BUTTON_B, BUTTON_C
 from kruxsim.mocks.fpioa_manager import fm_map
+
+PRESSED = 0
+RELEASED = 1
 
 sequence_executor = None
 
@@ -66,7 +90,9 @@ class GPIO:
         if pin == BUTTON_A:
             self.key = pg.K_RETURN
         if pin == BUTTON_B:
-            self.key = pg.K_SPACE
+            self.key = pg.K_DOWN
+        if pin == BUTTON_C:
+            self.key = pg.K_UP
 
     def value(self):
         if not self.key:
@@ -76,11 +102,20 @@ class GPIO:
             and sequence_executor.key is not None
             and sequence_executor.key == self.key
         ):
-            if time.time() - sequence_executor.key_press_timer > 0.25:
-                sequence_executor.key_press_timer = 0
+            sequence_executor.key_checks += 1
+            # wait for release
+            if sequence_executor.key_checks == 1:
+                return RELEASED
+            # wait for press
+            # if pressed
+            elif sequence_executor.key_checks == 2 or sequence_executor.key_checks == 3:
+                return PRESSED
+            # released
+            elif sequence_executor.key_checks == 4:
                 sequence_executor.key = None
-            return 0
-        return 0 if pg.key.get_pressed()[self.key] else 1
+                sequence_executor.key_checks = 0
+                return RELEASED
+        return PRESSED if pg.key.get_pressed()[self.key] else RELEASED
 
 
 if "Maix" not in sys.modules:

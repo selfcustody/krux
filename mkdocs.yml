@@ -28,8 +28,8 @@ theme:
     - navigation.expand
     - toc.integrate
 
-site_name: Krux - Open-source hardware signer for Bitcoin
-site_description: Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisignature and single-key wallets. It is a low-cost airgapped device built from off-the-shelf parts that communicates with wallet software via QR codes and wipes its memory after every session.
+site_name: Krux - Open-source signing device firmware for Bitcoin
+site_description: Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts.
 site_url: https://selfcustody.github.io/krux/
 repo_url: https://github.com/selfcustody/krux
 edit_uri: edit/main/docs
@@ -40,21 +40,34 @@ extra:
     - icon: material/chat
       link: https://matrix.to/#/#krux:matrix.org
       name: Join our Matrix server
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/SC_Krux
+      name: Join our community-led Telegram
     - icon: fontawesome/brands/github
       link: https://github.com/selfcustody/krux
+  generator: true
+copyright: 
+  Powered by <a href="https://embit.rocks/">embit</a>, the Bitcoin library for Python 3 and Micropython
 
 nav:
-  - Home: index.md
+  - Home: index.en.md
   - Getting Started:
-    - About: getting-started/index.md
-    - Installing: getting-started/installing.md
-    - Generating a Mnemonic: getting-started/generating-a-mnemonic.md
-    - Loading a Mnemonic: getting-started/loading-a-mnemonic.md
-    - Navigating the Main Menu: getting-started/navigating-the-main-menu.md
-    - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.md
-    - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.md
-    - Printing: getting-started/printing.md
-    - Settings: getting-started/settings.md
-  - Part List: parts.md
-  - FAQ: faq.md
-  - Support the Project: support.md
+    - About: getting-started/index.en.md
+    - Installing: getting-started/installing.en.md
+    - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
+    - Loading a Mnemonic: getting-started/loading-a-mnemonic.en.md
+    - Navigating the Main Menu: getting-started/navigating-the-main-menu.en.md
+    - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.en.md
+    - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.en.md
+    - Printing: getting-started/printing.en.md
+    - Settings: getting-started/settings.en.md
+  - Part List: parts.en.md
+  - FAQ: faq.en.md
+  - Support the Project: support.en.md
+
+plugins:
+  - search
+  - i18n:
+      default_language: en
+      languages:
+        en: English
