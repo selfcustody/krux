@@ -22,13 +22,13 @@
 from embit import script
 from embit.psbt import DerivationPath, PSBT
 from embit.finalizer import parse_multisig
-from krux.qr import FORMAT_PMOFN
 from ur.ur import UR
 import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_encode, base_decode
 from .format import satcomma
 from .i18n import t
+from .qr import FORMAT_PMOFN
 
 
 class PSBTSigner:
