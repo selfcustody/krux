@@ -198,6 +198,6 @@ class AdafruitPrinter(Printer):
             # Print height * scale lines out to scale by
             for _ in range(scale):
                 self.write_bytes(18, 42, 1, len(line_bytes))
-                self.write_bytes(line_bytes)
+                self.write_bytes(*line_bytes)
                 time.sleep_ms(math.floor(self.dot_print_time * 1000))
         self.feed(3)
