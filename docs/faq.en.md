@@ -26,7 +26,7 @@ If Krux is recognizing that it sees a QR code but is displaying an error message
 For mnemonics, Krux recognizes:
 
 1. BIP-39 Plaintext (Used by Krux and [https://iancoleman.io/bip39/](https://iancoleman.io/bip39/))
-2. SeedSigner Seed QR Format
+2. SeedSigner SeedQR and CompactSeedQR Formats
 3. [UR Type `crypto-bip39`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md)
 
 For loading wallets, Krux recognizes:
@@ -44,7 +44,7 @@ For PSBTs, Krux recognizes:
 Additionally, Krux recognizes animated QR codes that use either the plaintext `pMofN` or binary [`UR`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md) encodings.
 
 ## Why can't my computer read the QR code that Krux displays?
-If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays. In the future, more work will be done to support displaying lower density QR codes. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV.
+If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays. In the future, more work will be done to support displaying lower density QR codes. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes.
 
 ## Why won't my (Linux) OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
@@ -53,3 +53,15 @@ Your OS may not be loading the correct drivers to create the serial ports to con
 ```bash
 sudo apt-get remove brltty
 ```
+
+## Why are the buttons on my Amigo in the wrong order?
+Some Amigo screens have inverted x coordinates while others don’t.
+
+If after flashing `maixpy_amigo_tft` to your device you notice that the buttons on keypad input screens appear to be in the wrong order, please try flashing `maixpy_amigo_ips` instead (or vice versa) which should correct the issue. 
+
+
+## Why isn't Krux detecting my microSD card?
+## Why does the option to save to SD not appear?
+First, make sure you are using a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test). We hope to add support for more cards in the future.
+
+Second, make sure that Krux is powered off when you insert your microSD into the device. The firmware does not have support for hot plugging and can only detect the card on boot.

@@ -43,6 +43,11 @@ If after 30 seconds you still see a black screen, try power cycling the device b
 
 Congrats, you're now running Krux!
 
+#### A note about the Amigo
+Some Amigo screens have inverted x coordinates while others don’t.
+
+If after flashing `maixpy_amigo_tft` to your device you notice that the buttons on keypad input screens appear to be in the wrong order, please try flashing `maixpy_amigo_ips` instead (or vice versa) which should correct the issue. 
+
 ### Multilingual support
 Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use. If you have a microSD card inserted into the device, your preference will be automatically saved to a `settings.json` file at the root of the card.
 
