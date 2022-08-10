@@ -6,18 +6,18 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisignature and single-key wallets. It is a low-cost airgapped device built from off-the-shelf parts that communicates with wallet software via QR codes and wipes its memory after every session.">
+        <meta name="description" content="Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts.">
       
       
       
         <link rel="canonical" href="https://selfcustody.github.io/krux/getting-started/generating-a-mnemonic/">
       
       <link rel="icon" href="../../img/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
-        <title>Generating a Mnemonic - Krux - Open-source hardware signer for Bitcoin</title>
+        <title>Generating a Mnemonic - Krux - Open-source signing device firmware for Bitcoin</title>
       
     
     
@@ -84,7 +84,7 @@
 
 <header class="md-header md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Krux - Open-source hardware signer for Bitcoin" class="md-header__button md-logo" aria-label="Krux - Open-source hardware signer for Bitcoin" data-md-component="logo">
+    <a href="../.." title="Krux - Open-source signing device firmware for Bitcoin" class="md-header__button md-logo" aria-label="Krux - Open-source signing device firmware for Bitcoin" data-md-component="logo">
       
   <img src="../../img/favicon.png" alt="logo">
 
@@ -96,7 +96,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Krux - Open-source hardware signer for Bitcoin
+            Krux - Open-source signing device firmware for Bitcoin
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -260,12 +260,12 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Krux - Open-source hardware signer for Bitcoin" class="md-nav__button md-logo" aria-label="Krux - Open-source hardware signer for Bitcoin" data-md-component="logo">
+    <a href="../.." title="Krux - Open-source signing device firmware for Bitcoin" class="md-nav__button md-logo" aria-label="Krux - Open-source signing device firmware for Bitcoin" data-md-component="logo">
       
   <img src="../../img/favicon.png" alt="logo">
 
     </a>
-    Krux - Open-source hardware signer for Bitcoin
+    Krux - Open-source signing device firmware for Bitcoin
   </label>
   
     <div class="md-nav__source">
@@ -587,30 +587,35 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/selfcustody/krux/edit/main/docs/getting-started/generating-a-mnemonic.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/selfcustody/krux/edit/main/docs/getting-started/generating-a-mnemonic.en.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<p>Krux has support for creating 12- and 24-word mnemonics. Because true entropy is difficult to produce, especially with an embedded device like the M5StickV, Krux outsources entropy generation to the user.</p>
+<p>Krux has support for creating 12- and 24-word mnemonics. Because true entropy is difficult to produce, especially with an embedded device, Krux outsources entropy generation to the user.</p>
 <h1 id="dice-rolls">Dice Rolls<a class="headerlink" href="#dice-rolls" title="Permanent link">&para;</a></h1>
 <p>At the start screen, once you select <code>New Mnemonic</code>, you will be taken to a second menu where you can choose to create a mnemonic via rolls of a D6 (standard six-sided die) or D20 (20-sided die). The number of dice rolls you choose determines the amount of words in the final mnemonic.</p>
-<p><img src="../../img/new-mnemonic-options-150.png"></p>
+<p><img src="../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
+<img src="../../img/maixpy_amigo_tft/new-mnemonic-options-150.png"></p>
 <h2 id="via-d6">Via D6<a class="headerlink" href="#via-d6" title="Permanent link">&para;</a></h2>
-<p><img src="../../img/new-mnemonic-via-d6-roll-1-125.png" align="right"></p>
+<p><img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-1-150.png" align="right"></p>
 <p>The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore 50 rolls will result in 128 bits of entropy, enough to generate a 12-word mnemonic. Doubling the amount of rolls doubles the entropy to 256 bits, resulting in a 24-word mnemonic.</p>
 <p><br><br><br><br></p>
 <h2 id="via-d20">Via D20<a class="headerlink" href="#via-d20" title="Permanent link">&para;</a></h2>
-<p><img src="../../img/new-mnemonic-via-d20-roll-1-125.png" align="right"></p>
+<p><img src="../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d20-roll-1-150.png" align="right"></p>
 <p>Since a D20 has more possible outcomes, the entropy is increased per roll to 4.322 bits ( log<sub>2</sub>(20) ). This means that only 30 rolls are necessary to create a 12-word mnemonic and 60 rolls for a 24-word mnemonic.</p>
 <p><br><br><br><br></p>
 <h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
-<p><img src="../../img/new-mnemonic-via-d6-roll-string-125.png" align="right"></p>
+<p><img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-string-150.png" align="right"></p>
 <p>Krux keeps track of every roll you enter and displays the cumulative string of outcomes after each roll. </p>
 <p><br><br><br><br>
 <br><br><br><br></p>
-<p><img src="../../img/new-mnemonic-via-d6-roll-sha256-125.png" align="right"></p>
+<p><img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-sha256-150.png" align="right"></p>
 <p>When you have entered your final roll, Krux will hash this string using SHA256 and output the resulting hash to the screen so that you can verify it for yourself.</p>
 <p>Krux then takes this hash, runs <a href="https://docs.python.org/3/library/binascii.html#binascii.unhexlify"><code>unhexlify</code></a> on it to encode it as bytes, and deterministically converts it into a mnemonic according to the <a href="https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207">BIP-39 Reference Implementation</a>.</p>
 <p>Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).</p>
@@ -674,6 +679,10 @@
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
+    <div class="md-copyright__highlight">
+      Powered by <a href="https://embit.rocks/">embit</a>, the Bitcoin library for Python 3 and Micropython
+    </div>
+  
   
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -688,6 +697,12 @@
     
     <a href="https://matrix.to/#/#krux:matrix.org" target="_blank" rel="noopener" title="Join our Matrix server" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3c5.5 0 10 3.58 10 8s-4.5 8-10 8c-1.24 0-2.43-.18-3.53-.5C5.55 21 2 21 2 21c2.33-2.33 2.7-3.9 2.75-4.5C3.05 15.07 2 13.13 2 11c0-4.42 4.5-8 10-8Z"/></svg>
+    </a>
+  
+    
+    
+    <a href="https://t.me/SC_Krux" target="_blank" rel="noopener" title="Join our community-led Telegram" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M248 8C111.033 8 0 119.033 0 256s111.033 248 248 248 248-111.033 248-248S384.967 8 248 8Zm114.952 168.66c-3.732 39.215-19.881 134.378-28.1 178.3-3.476 18.584-10.322 24.816-16.948 25.425-14.4 1.326-25.338-9.517-39.287-18.661-21.827-14.308-34.158-23.215-55.346-37.177-24.485-16.135-8.612-25 5.342-39.5 3.652-3.793 67.107-61.51 68.335-66.746.153-.655.3-3.1-1.154-4.384s-3.59-.849-5.135-.5q-3.283.746-104.608 69.142-14.845 10.194-26.894 9.934c-8.855-.191-25.888-5.006-38.551-9.123-15.531-5.048-27.875-7.717-26.8-16.291q.84-6.7 18.45-13.7 108.446-47.248 144.628-62.3c68.872-28.647 83.183-33.623 92.511-33.789 2.052-.034 6.639.474 9.61 2.885a10.452 10.452 0 0 1 3.53 6.716 43.765 43.765 0 0 1 .417 9.769Z"/></svg>
     </a>
   
     

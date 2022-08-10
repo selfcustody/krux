@@ -6,18 +6,18 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Krux is an open-source DIY hardware signer for Bitcoin that can sign for multisignature and single-key wallets. It is a low-cost airgapped device built from off-the-shelf parts that communicates with wallet software via QR codes and wipes its memory after every session.">
+        <meta name="description" content="Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts.">
       
       
       
         <link rel="canonical" href="https://selfcustody.github.io/krux/getting-started/installing-from-source/">
       
       <link rel="icon" href="../../img/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
-        <title>Installing from source - Krux - Open-source hardware signer for Bitcoin</title>
+        <title>Installing from source - Krux - Open-source signing device firmware for Bitcoin</title>
       
     
     
@@ -84,7 +84,7 @@
 
 <header class="md-header md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Krux - Open-source hardware signer for Bitcoin" class="md-header__button md-logo" aria-label="Krux - Open-source hardware signer for Bitcoin" data-md-component="logo">
+    <a href="../.." title="Krux - Open-source signing device firmware for Bitcoin" class="md-header__button md-logo" aria-label="Krux - Open-source signing device firmware for Bitcoin" data-md-component="logo">
       
   <img src="../../img/favicon.png" alt="logo">
 
@@ -96,7 +96,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Krux - Open-source hardware signer for Bitcoin
+            Krux - Open-source signing device firmware for Bitcoin
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -258,12 +258,12 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Krux - Open-source hardware signer for Bitcoin" class="md-nav__button md-logo" aria-label="Krux - Open-source hardware signer for Bitcoin" data-md-component="logo">
+    <a href="../.." title="Krux - Open-source signing device firmware for Bitcoin" class="md-nav__button md-logo" aria-label="Krux - Open-source signing device firmware for Bitcoin" data-md-component="logo">
       
   <img src="../../img/favicon.png" alt="logo">
 
     </a>
-    Krux - Open-source hardware signer for Bitcoin
+    Krux - Open-source signing device firmware for Bitcoin
   </label>
   
     <div class="md-nav__source">
@@ -528,7 +528,7 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/selfcustody/krux/edit/main/docs/getting-started/installing-from-source.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/selfcustody/krux/edit/main/docs/getting-started/installing-from-source.en.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
@@ -538,8 +538,8 @@
 
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <h4 id="hardware">Hardware<a class="headerlink" href="#hardware" title="Permanent link">&para;</a></h4>
-<p>You will need the M5StickV, a USB-C cable, and a computer with a USB port to continue. Consult the <a href="../../parts">part list</a> for more information.</p>
-<p>If you wish to perform airgapped firmware updates, want persistent settings, or wish to use Krux in a different language, you will also need a <a href="https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test">supported microSD card</a>.</p>
+<p>You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, or Maix Bit and a USB-C cable to continue. Consult the <a href="../../parts">part list</a> for more information.</p>
+<p>If you wish to perform airgapped firmware updates or want persistent settings, you will also need a <a href="https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test">supported microSD card</a>.</p>
 <h4 id="software">Software<a class="headerlink" href="#software" title="Permanent link">&para;</a></h4>
 <p>You will need a computer with <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"><code>git</code></a> and <a href="https://www.vagrantup.com/downloads"><code>vagrant</code></a> installed.</p>
 <h3 id="fetch-the-code">Fetch the code<a class="headerlink" href="#fetch-the-code" title="Permanent link">&para;</a></h3>
@@ -566,13 +566,13 @@ vagrant ssh -c <span class="s1">&#39;cd /vagrant; ./krux pem-to-pubkey pubkey.pe
 <p>The first command will create <code>privkey.pem</code> and <code>pubkey.pem</code> files you can use with openssl, and the second command will output your public key in the form expected by Krux.</p>
 <p>Once you've updated the <code>SIGNER_PUBKEY</code> with this value, you can proceed with the regular build process.</p>
 <h4 id="build">Build<a class="headerlink" href="#build" title="Permanent link">&para;</a></h4>
-<p>Run the following:
-<div class="highlight"><pre><span></span><code>vagrant ssh -c <span class="s1">&#39;cd /vagrant; ./krux build maixpy_m5stickv&#39;</span>
+<p>Run the following, replacing <code>DEVICE</code> with either <code>m5stickv</code>, <code>amigo_tft</code>, <code>amigo_ips</code>, <code>dock</code>, or <code>bit</code>:
+<div class="highlight"><pre><span></span><code>vagrant ssh -c <span class="s1">&#39;cd /vagrant; ./krux build maixpy_DEVICE&#39;</span>
 </code></pre></div></p>
 <p>This will take around an hour or so to complete the first time. Subsequent builds should take only a few minutes.</p>
 <p>If all goes well, you should see a new <code>build</code> folder containing <code>firmware.bin</code> and <code>kboot.kfpkg</code> files when the build completes.</p>
-<h3 id="flash-the-firmware-onto-the-m5stickv">Flash the firmware onto the M5StickV<a class="headerlink" href="#flash-the-firmware-onto-the-m5stickv" title="Permanent link">&para;</a></h3>
-<p>Connect the M5StickV to your computer via USB, power it on (left-side button), and run the following:
+<h3 id="flash-the-firmware-onto-the-device">Flash the firmware onto the device<a class="headerlink" href="#flash-the-firmware-onto-the-device" title="Permanent link">&para;</a></h3>
+<p>Connect the device to your computer via USB, power it on, and run the following:
 <div class="highlight"><pre><span></span><code>vagrant ssh -c <span class="s1">&#39;cd /vagrant; ./krux flash&#39;</span>
 </code></pre></div>
 Note: Running <code>vagrant reload</code> prior to flashing may be necessary in order for the newly-inserted USB device to be detected and passed through to the VM on startup.</p>
@@ -580,21 +580,16 @@ Note: Running <code>vagrant reload</code> prior to flashing may be necessary in 
 <div class="highlight"><pre><span></span><code>sudo usermod -a -G vboxusers yourusername
 </code></pre></div>
 <p>If the flashing process fails midway through, check the connection, restart the device, and try the command again.</p>
-<p>When the flashing process completes, you should see...</p>
-<p><img src="../../img/logo-150.png"></p>
+<p>When the flashing process completes, you should see the Krux logo:</p>
+<p><img src="../../img/maixpy_m5stickv/logo-125.png">
+<img src="../../img/maixpy_amigo_tft/logo-150.png"></p>
 <p>If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.</p>
 <p>Congrats, you're now running Krux!</p>
+<h4 id="a-note-about-the-amigo">A note about the Amigo<a class="headerlink" href="#a-note-about-the-amigo" title="Permanent link">&para;</a></h4>
+<p>Some Amigo screens have inverted x coordinates while others don’t.</p>
+<p>If after flashing <code>maixpy_amigo_tft</code> to your device you notice that the buttons on keypad input screens appear to be in the wrong order, please try flashing <code>maixpy_amigo_ips</code> instead (or vice versa) which should correct the issue. </p>
 <h3 id="multilingual-support">Multilingual support<a class="headerlink" href="#multilingual-support" title="Permanent link">&para;</a></h3>
-<p><img src="../../img/login-locale-de-de-150.png" align="right"></p>
-<p>Prefer a different language? Krux has support for multiple languages, including:</p>
-<ul>
-<li>de-DE (German)</li>
-<li>es-MX (Spanish)</li>
-<li>fr-FR (French)</li>
-<li>vi-VN (Vietnamese)</li>
-<li>Are we missing one? Make a PR!</li>
-</ul>
-<p>To use a translation, first copy the <a href="https://github.com/selfcustody/krux/tree/main/i18n/translations"><code>i18n/translations</code></a> folder to a <code>translations</code> folder at the root of a FAT-32 formatted microSD card, then insert the card into your M5StickV, and reboot the device. Once at the start screen, go to <code>Settings</code>, followed by <code>Locale</code>, and select the locale you wish to use. Your preference will be automatically saved to a <code>settings.json</code> file at the root of your microSD card.</p>
+<p>Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to <code>Settings</code>, followed by <code>Locale</code>, and select the locale you wish to use. If you have a microSD card inserted into the device, your preference will be automatically saved to a <code>settings.json</code> file at the root of the card.</p>
 <h3 id="upgrade-via-microsd-card">Upgrade via microSD card<a class="headerlink" href="#upgrade-via-microsd-card" title="Permanent link">&para;</a></h3>
 <p>Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades via microSD card to keep the device airgapped.</p>
 <p>After you've built the firmware, you can sign it using one of the following methods.</p>
@@ -614,7 +609,7 @@ Note: Running <code>vagrant reload</code> prior to flashing may be necessary in 
 </code></pre></div></p>
 <p>This will generate a <code>firmware.bin.sig</code> file containing a signature of the firmware's SHA256 hash.</p>
 <h3 id="upgrade-via-microsd-card-continued">Upgrade via microSD card (continued)<a class="headerlink" href="#upgrade-via-microsd-card-continued" title="Permanent link">&para;</a></h3>
-<p>To perform an upgrade, simply copy the <code>firmware.bin</code> and <code>firmware.bin.sig</code> files to the root of a FAT-32 formatted microSD card, insert the card into your M5StickV, and reboot the device. If it detects the new firmware file and is able to verify the signature, you will be prompted to install it.</p>
+<p>To perform an upgrade, simply copy the <code>firmware.bin</code> and <code>firmware.bin.sig</code> files to the root of a FAT-32 formatted microSD card, insert the card into your device, and reboot the device. If it detects the new firmware file and is able to verify the signature, you will be prompted to install it.</p>
 <p>Once installation is complete, eject the microSD card and delete the firmware files before reinserting and rebooting.</p>
 
               
@@ -636,6 +631,10 @@ Note: Running <code>vagrant reload</code> prior to flashing may be necessary in 
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
+    <div class="md-copyright__highlight">
+      Powered by <a href="https://embit.rocks/">embit</a>, the Bitcoin library for Python 3 and Micropython
+    </div>
+  
   
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -650,6 +649,12 @@ Note: Running <code>vagrant reload</code> prior to flashing may be necessary in 
     
     <a href="https://matrix.to/#/#krux:matrix.org" target="_blank" rel="noopener" title="Join our Matrix server" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3c5.5 0 10 3.58 10 8s-4.5 8-10 8c-1.24 0-2.43-.18-3.53-.5C5.55 21 2 21 2 21c2.33-2.33 2.7-3.9 2.75-4.5C3.05 15.07 2 13.13 2 11c0-4.42 4.5-8 10-8Z"/></svg>
+    </a>
+  
+    
+    
+    <a href="https://t.me/SC_Krux" target="_blank" rel="noopener" title="Join our community-led Telegram" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M248 8C111.033 8 0 119.033 0 256s111.033 248 248 248 248-111.033 248-248S384.967 8 248 8Zm114.952 168.66c-3.732 39.215-19.881 134.378-28.1 178.3-3.476 18.584-10.322 24.816-16.948 25.425-14.4 1.326-25.338-9.517-39.287-18.661-21.827-14.308-34.158-23.215-55.346-37.177-24.485-16.135-8.612-25 5.342-39.5 3.652-3.793 67.107-61.51 68.335-66.746.153-.655.3-3.1-1.154-4.384s-3.59-.849-5.135-.5q-3.283.746-104.608 69.142-14.845 10.194-26.894 9.934c-8.855-.191-25.888-5.006-38.551-9.123-15.531-5.048-27.875-7.717-26.8-16.291q.84-6.7 18.45-13.7 108.446-47.248 144.628-62.3c68.872-28.647 83.183-33.623 92.511-33.789 2.052-.034 6.639.474 9.61 2.885a10.452 10.452 0 0 1 3.53 6.716 43.765 43.765 0 0 1 .417 9.769Z"/></svg>
     </a>
   
     
