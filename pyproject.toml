@@ -32,14 +32,6 @@ embit = { path = "./vendor/embit/", develop = true }
 ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
 
-[tool.poetry.dev-dependencies]
-black = "^22.1.0"
-pylint = "^2.12.2"
-pytest = "^6.2.5"
-pytest-cov = "^3.0.0"
-pytest-mock = "^3.6.1"
-PyQRCode = "^1.2.1"
-
 # Docs site dependencies
 mkdocs = { version = "^1.2.3", optional = true }
 mkdocs-material = { version = "^8.3.9", optional = true }
@@ -52,6 +44,14 @@ opencv-python = { version = "^4.5.5", optional = true }
 Pillow = { version = "^9.0.1", optional = true }
 pygame = { version = "^2.1.2", optional = true }
 pyzbar = { version = "^0.1.9", optional = true }
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+pylint = "^2.12.2"
+pytest = "^6.2.5"
+pytest-cov = "^3.0.0"
+pytest-mock = "^3.6.1"
+PyQRCode = "^1.2.1"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]

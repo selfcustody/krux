@@ -59,7 +59,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -70,13 +70,13 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 name = "colorama"
 version = "0.4.5"
 description = "Cross-platform colored terminal text."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "coverage"
-version = "6.4.2"
+version = "6.4.3"
 description = "Code coverage measurement for Python"
 category = "dev"
 optional = false
@@ -101,7 +101,7 @@ graph = ["objgraph (>=1.7.2)"]
 
 [[package]]
 name = "embit"
-version = "0.4.12"
+version = "0.5.0"
 description = "yet another bitcoin library"
 category = "main"
 optional = false
@@ -116,7 +116,7 @@ url = "vendor/embit"
 name = "ghp-import"
 version = "2.1.0"
 description = "Copy your docs directly to the gh-pages branch."
-category = "dev"
+category = "main"
 optional = true
 python-versions = "*"
 
@@ -130,7 +130,7 @@ dev = ["wheel", "flake8", "markdown", "twine"]
 name = "importlib-metadata"
 version = "4.12.0"
 description = "Read metadata from Python packages"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.7"
 
@@ -168,7 +168,7 @@ plugins = ["setuptools"]
 name = "jinja2"
 version = "3.1.2"
 description = "A very fast and expressive template engine."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.7"
 
@@ -190,7 +190,7 @@ python-versions = ">=3.6"
 name = "markdown"
 version = "3.3.7"
 description = "Python implementation of Markdown."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -204,7 +204,7 @@ testing = ["coverage", "pyyaml"]
 name = "markupsafe"
 version = "2.1.1"
 description = "Safely add untrusted strings to HTML/XML markup."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.7"
 
@@ -220,7 +220,7 @@ python-versions = ">=3.6"
 name = "mergedeep"
 version = "1.3.4"
 description = "A deep merge function for 🐍."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -228,7 +228,7 @@ python-versions = ">=3.6"
 name = "mkdocs"
 version = "1.3.1"
 description = "Project documentation with Markdown."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -251,7 +251,7 @@ i18n = ["babel (>=2.9.0)"]
 name = "mkdocs-material"
 version = "8.3.9"
 description = "Documentation that simply works"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.7"
 
@@ -267,7 +267,7 @@ pymdown-extensions = ">=9.4"
 name = "mkdocs-material-extensions"
 version = "1.0.3"
 description = "Extension pack for Python Markdown."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -275,7 +275,7 @@ python-versions = ">=3.6"
 name = "mkdocs-static-i18n"
 version = "0.46"
 description = "MkDocs i18n plugin using static translation markdown files"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.7"
 
@@ -294,7 +294,7 @@ python-versions = "*"
 name = "numpy"
 version = "1.23.1"
 description = "NumPy is the fundamental package for array computing with Python."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.8"
 
@@ -302,7 +302,7 @@ python-versions = ">=3.8"
 name = "opencv-python"
 version = "4.6.0.66"
 description = "Wrapper package for OpenCV python bindings."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -318,7 +318,7 @@ numpy = [
 name = "packaging"
 version = "21.3"
 description = "Core utilities for Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -337,7 +337,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 name = "pillow"
 version = "9.2.0"
 description = "Python Imaging Library (Fork)"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.7"
 
@@ -381,7 +381,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "pygame"
 version = "2.1.2"
 description = "Python Game Development"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -389,7 +389,7 @@ python-versions = ">=3.6"
 name = "pygments"
 version = "2.12.0"
 description = "Pygments is a syntax highlighting package written in Python."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -420,7 +420,7 @@ testutils = ["gitpython (>3)"]
 name = "pymdown-extensions"
 version = "9.5"
 description = "Extension pack for Python Markdown."
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.7"
 
@@ -431,7 +431,7 @@ markdown = ">=3.2"
 name = "pyparsing"
 version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.8"
 
@@ -503,7 +503,7 @@ dev = ["pre-commit", "tox", "pytest-asyncio"]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
-category = "dev"
+category = "main"
 optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 
@@ -514,7 +514,7 @@ six = ">=1.5"
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -522,7 +522,7 @@ python-versions = ">=3.6"
 name = "pyyaml-env-tag"
 version = "0.1"
 description = "A custom YAML tag for referencing environment variables in YAML files. "
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -533,7 +533,7 @@ pyyaml = "*"
 name = "pyzbar"
 version = "0.1.9"
 description = "Read one-dimensional barcodes and QR codes from Python 2 and 3."
-category = "dev"
+category = "main"
 optional = true
 python-versions = "*"
 
@@ -544,7 +544,7 @@ scripts = ["Pillow (>=3.2.0)"]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -566,7 +566,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "tomlkit"
-version = "0.11.1"
+version = "0.11.3"
 description = "Style preserving TOML library"
 category = "dev"
 optional = false
@@ -610,7 +610,7 @@ url = "vendor/urtypes"
 name = "watchdog"
 version = "2.1.9"
 description = "Filesystem events monitoring"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.6"
 
@@ -629,7 +629,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 name = "zipp"
 version = "3.8.1"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.7"
 
@@ -638,13 +638,13 @@ docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tideli
 testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.3)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-docs = []
-simulator = []
+docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
+simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9.1"
-content-hash = "d4703799b46ad23dbc71f8c8038ef102686e4e417dde342457ee52ad2a442600"
+content-hash = "4fc85ba08de4120aee31ff740c5a923db077bf1061748e949bf80e259f12d65e"
 
 [metadata.files]
 astroid = []
