@@ -1,3 +1,7 @@
+# Version 22.08.1 - August 11, 2022
+
+This release is to fix a bug that would have prevented Amigos from performing airgapped upgrades to the next release.
+
 # Version 22.08.0 - August 10, 2022
 
 This latest version of Krux is brought to you by @odudex, who tirelessly worked for months to get Krux working on three new devices: the Maix Amigo, Maix Bit, and Maix Dock. Thank you for all your hard work! 
