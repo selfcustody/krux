@@ -197,6 +197,7 @@ def upgrade():
         t("New firmware detected.\n\nSHA256:\n%s\n\n\n\nInstall?")
         % binascii.hexlify(firmware_hash).decode()
     )
+    inp.buttons_active = True
     if inp.wait_for_button() != BUTTON_ENTER:
         return False
 
