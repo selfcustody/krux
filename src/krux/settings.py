@@ -27,6 +27,88 @@ except ImportError:
 SETTINGS_FILE = "/sd/settings.json"
 
 
+class SettingsNamespace:
+    """Represents a settings namespace containing settings and child namespaces"""
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        raise NotImplementedError()
+
+    def namespace_list(self):
+        """Returns the list of child SettingsNamespace objects"""
+        return [
+            ns for ns in self.__dict__.values() if isinstance(ns, SettingsNamespace)
+        ]
+
+    def setting_list(self):
+        """Returns the list of child Setting objects"""
+        return [
+            setting
+            for setting in self.__class__.__dict__.values()
+            if isinstance(setting, Setting)
+        ]
+
+
+class Settings(SettingsNamespace):
+    """The top-level settings namespace under which other namespaces reside"""
+
+    namespace = "settings"
+
+    def __init__(self):
+        # Have to import these on init to avoid a circular import
+        from .key import BitcoinSettings
+        from .i18n import I18nSettings
+        from .logging import LoggingSettings
+        from .printers import PrinterSettings
+
+        self.bitcoin = BitcoinSettings()
+        self.i18n = I18nSettings()
+        self.logging = LoggingSettings()
+        self.printer = PrinterSettings()
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        from .i18n import t
+
+        return {
+            "bitcoin": t("Bitcoin"),
+            "i18n": t("Language"),
+            "logging": t("Logging"),
+            "printer": t("Printer"),
+        }[attr]
+
+
+class Setting:
+    """Implements the descriptor protocol for reading and writing a single setting"""
+
+    def __init__(self, attr, default_value):
+        self.attr = attr
+        self.default_value = default_value
+
+    def __get__(self, obj, objtype=None):
+        return store.get(obj.namespace, self.attr, self.default_value)
+
+    def __set__(self, obj, value):
+        store.set(obj.namespace, self.attr, value)
+
+
+class CategorySetting(Setting):
+    """Setting that can be one of N categories"""
+
+    def __init__(self, attr, default_value, categories):
+        super().__init__(attr, default_value)
+        self.categories = categories
+
+
+class NumberSetting(Setting):
+    """Setting that can be a number within a defined range"""
+
+    def __init__(self, numtype, attr, default_value, value_range):
+        super().__init__(attr, default_value)
+        self.numtype = numtype
+        self.value_range = value_range
+
+
 class Store:
     """Acts as a simple JSON file store for settings, falling back to an in-memory dict if no SD"""
 
@@ -62,70 +144,3 @@ class Store:
 
 # Initialize singleton
 store = Store()
-
-
-class Setting:
-    """Implements the descriptor protocol for reading and writing a single setting"""
-
-    def __init__(self, attr, default_value):
-        self.attr = attr
-        self.default_value = default_value
-
-    def __get__(self, obj, objtype=None):
-        return store.get(obj.namespace, self.attr, self.default_value)
-
-    def __set__(self, obj, value):
-        store.set(obj.namespace, self.attr, value)
-
-
-class Settings:
-    """Stores configurable user settings"""
-
-    namespace = "settings"
-    networks = ["main", "test"]
-    network = Setting("network", "main")
-
-    def __init__(self):
-        self.i18n = I18n()
-        self.log = Log()
-        self.printer = Printer()
-
-
-class I18n:
-    """I18n-specific settings"""
-
-    namespace = "settings.i18n"
-    locales = ["de-DE", "en-US", "es-MX", "fr-FR", "pt-BR", "vi-VN"]
-    locale = Setting("locale", "en-US")
-
-
-class Log:
-    """Log-specific settings"""
-
-    namespace = "settings.log"
-    path = Setting("path", "/sd/.krux.log")
-    level = Setting("level", 99)
-
-
-class Printer:
-    """Printer-specific settings"""
-
-    namespace = "settings.printer"
-    module = Setting("module", "thermal")
-    cls = Setting("cls", "AdafruitPrinter")
-
-    def __init__(self):
-        self.thermal = Thermal()
-
-
-class Thermal:
-    """Thermal printer settings"""
-
-    namespace = "settings.printer.thermal"
-    baudrates = [9600, 19200]
-    baudrate = Setting("baudrate", 9600)
-    paper_width = Setting("paper_width", 384)
-
-
-# Initialize singleton
-settings = Settings()

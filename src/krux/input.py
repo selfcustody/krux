@@ -145,6 +145,7 @@ class Input:
             wdt.feed()  # here is where krux spends most of its time
             if not block and time.ticks_ms() > start_time + QR_ANIM_PERIOD:
                 break
+            time.sleep_ms(10)
 
     def wait_for_button(self, block=True):
         """Waits for any button to release, optionally blocking if block=True.

@@ -22,7 +22,10 @@
 import sys
 import io
 import os
-from .settings import settings
+from .i18n import t
+from .settings import CategorySetting, SettingsNamespace, Settings
+
+LOG_FILEPATH = "/sd/.krux.log"
 
 NONE = 99
 ERROR = 40
@@ -39,17 +42,24 @@ LEVEL_NAMES = {
 }
 
 
-def level_name(level):
-    """Returns the string name for the log level"""
-    return LEVEL_NAMES[level]
+class LoggingSettings(SettingsNamespace):
+    """Log-specific settings"""
+
+    namespace = "settings.logging"
+    level = CategorySetting("level", "NONE", list(LEVEL_NAMES.values()))
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "level": t("Log Level"),
+        }[attr]
 
 
 class Logger:
     """Logger logs"""
 
-    def __init__(self, filepath, level):
+    def __init__(self, filepath):
         self.filepath = filepath
-        self.level = level
         self.file = None
         try:
             os.remove(self.filepath)
@@ -58,9 +68,9 @@ class Logger:
 
     def log(self, level, msg):
         """Logs a message if the given level is equal to or higher than the logger's level"""
-        if level < self.level:
+        if level < level_id(Settings().logging.level):
             return
-        self._write("%s:%s" % (level_name(level), msg))
+        self._write("%s:%s" % (LEVEL_NAMES[level], msg))
 
     def _write(self, msg):
         print(msg)
@@ -98,4 +108,12 @@ class Logger:
         self.log(ERROR, msg + "\n" + buf.getvalue())
 
 
-logger = Logger(settings.log.path, settings.log.level)
+def level_id(level_name):
+    """Returns the log level for the string name"""
+    for lvl_id, name in LEVEL_NAMES.items():
+        if name == level_name:
+            return lvl_id
+    return NONE
+
+
+logger = Logger(LOG_FILEPATH)
