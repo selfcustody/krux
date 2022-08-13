@@ -19,7 +19,31 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from ..settings import settings
+from ..i18n import t
+from ..settings import CategorySetting, SettingsNamespace, Settings
+
+PRINTERS = {
+    "thermal/adafruit": ("thermal", "AdafruitPrinter"),
+}
+
+
+class PrinterSettings(SettingsNamespace):
+    """Printer-specific settings"""
+
+    namespace = "settings.printer"
+    driver = CategorySetting("driver", "thermal/adafruit", list(PRINTERS.keys()))
+
+    def __init__(self):
+        from .thermal import ThermalSettings
+
+        self.thermal = ThermalSettings()
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "thermal": t("Thermal"),
+            "driver": t("Driver"),
+        }[attr]
 
 
 class Printer:
@@ -50,7 +74,8 @@ class Printer:
 
 def create_printer():
     """Instantiates a new printer dynamically based on the default in Settings"""
+    module, cls = PRINTERS[Settings().printer.driver]
     return getattr(
-        __import__(settings.printer.module, globals(), None, [None], 1),
-        settings.printer.cls,
+        __import__(module, globals(), None, [None], 1),
+        cls,
     )()

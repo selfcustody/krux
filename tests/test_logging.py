@@ -12,22 +12,23 @@ def tdata(mocker):
 
 
 def test_init(mocker, m5stickv, tdata):
-    from krux.logging import Logger, DEBUG
+    from krux.logging import Logger
 
-    logger = Logger(tdata.TEST_LOG_PATH, DEBUG)
+    logger = Logger(tdata.TEST_LOG_PATH)
 
     assert isinstance(logger, Logger)
     assert logger.filepath == tdata.TEST_LOG_PATH
-    assert logger.level == DEBUG
 
 
 def test_log(mocker, m5stickv, tdata):
     m = mocker.mock_open()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, DEBUG, INFO, WARN, ERROR, NONE
+    from krux.settings import Settings
 
-    for i, level in enumerate([DEBUG, INFO, WARN, ERROR, NONE]):
-        logger = Logger(tdata.TEST_LOG_PATH, level)
+    for i, level in enumerate(["DEBUG", "INFO", "WARN", "ERROR", "NONE"]):
+        logger = Logger(tdata.TEST_LOG_PATH)
+        Settings().logging.level = level
 
         cases = [
             (DEBUG, "test", "DEBUG:test\n"),
@@ -49,7 +50,7 @@ def test_log_fails_quietly_if_file_unavailable(mocker, m5stickv, tdata):
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, DEBUG
 
-    logger = Logger(tdata.TEST_LOG_PATH, DEBUG)
+    logger = Logger(tdata.TEST_LOG_PATH)
 
     logger.log(DEBUG, "test")
     assert logger.file is None
@@ -60,7 +61,7 @@ def test_debug(mocker, m5stickv, tdata):
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, DEBUG
 
-    logger = Logger(tdata.TEST_LOG_PATH, DEBUG)
+    logger = Logger(tdata.TEST_LOG_PATH)
     mocker.spy(logger, "log")
 
     logger.debug("test")
@@ -73,7 +74,7 @@ def test_info(mocker, m5stickv, tdata):
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, INFO
 
-    logger = Logger(tdata.TEST_LOG_PATH, INFO)
+    logger = Logger(tdata.TEST_LOG_PATH)
     mocker.spy(logger, "log")
 
     logger.info("test")
@@ -86,7 +87,7 @@ def test_warn(mocker, m5stickv, tdata):
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, WARN
 
-    logger = Logger(tdata.TEST_LOG_PATH, WARN)
+    logger = Logger(tdata.TEST_LOG_PATH)
     mocker.spy(logger, "log")
 
     logger.warn("test")
@@ -99,7 +100,7 @@ def test_error(mocker, m5stickv, tdata):
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, ERROR
 
-    logger = Logger(tdata.TEST_LOG_PATH, ERROR)
+    logger = Logger(tdata.TEST_LOG_PATH)
     mocker.spy(logger, "log")
 
     logger.error("test")
@@ -112,7 +113,7 @@ def test_exception(mocker, m5stickv, tdata):
     mocker.patch("builtins.open", m)
     from krux.logging import Logger, ERROR
 
-    logger = Logger(tdata.TEST_LOG_PATH, ERROR)
+    logger = Logger(tdata.TEST_LOG_PATH)
     mocker.spy(logger, "log")
 
     logger.exception("test")
