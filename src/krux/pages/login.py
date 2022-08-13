@@ -56,7 +56,7 @@ NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
 D6_MIN_ROLLS = 50
-D6_MAX_ROLLS = 100
+D6_MAX_ROLLS = 99
 D20_MIN_ROLLS = 30
 D20_MAX_ROLLS = 60
 
