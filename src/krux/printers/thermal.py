@@ -40,9 +40,61 @@ import math
 import board
 from fpioa_manager import fm
 from machine import UART
-from ..settings import settings
+from ..settings import CategorySetting, NumberSetting, SettingsNamespace, Settings
+from ..i18n import t
 from ..wdt import wdt
 from . import Printer
+
+DEFAULT_TX_PIN = (
+    board.config["board_info"]["CONNEXT_A"]
+    if "CONNEXT_A" in board.config["board_info"]
+    else 35
+)
+DEFAULT_RX_PIN = (
+    board.config["board_info"]["CONNEXT_B"]
+    if "CONNEXT_B" in board.config["board_info"]
+    else 34
+)
+
+
+class ThermalSettings(SettingsNamespace):
+    """Thermal printer settings"""
+
+    namespace = "settings.printer.thermal"
+
+    def __init__(self):
+        self.adafruit = AdafruitPrinterSettings()
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "adafruit": t("Adafruit"),
+        }[attr]
+
+
+class AdafruitPrinterSettings(SettingsNamespace):
+    """Adafruit thermal printer settings"""
+
+    namespace = "settings.printer.thermal.adafruit"
+    baudrate = CategorySetting("baudrate", 9600, [9600, 19200])
+    paper_width = NumberSetting(int, "paper_width", 384, [100, 1000])
+    tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
+    rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])
+    heat_dots = NumberSetting(int, "heat_dots", 11, [0, 255])
+    heat_time = NumberSetting(int, "heat_time", 255, [3, 255])
+    heat_interval = NumberSetting(int, "heat_interval", 40, [0, 255])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "baudrate": t("Baudrate"),
+            "paper_width": t("Paper Width"),
+            "tx_pin": t("TX Pin"),
+            "rx_pin": t("RX Pin"),
+            "heat_dots": t("Heat Dots"),
+            "heat_time": t("Heat Time"),
+            "heat_interval": t("Heat Interval"),
+        }[attr]
 
 
 class AdafruitPrinter(Printer):
@@ -51,21 +103,17 @@ class AdafruitPrinter(Printer):
     """
 
     def __init__(self):
-        if ("UART2_TX" not in board.config["krux"]["pins"]) or (
-            "UART2_RX" not in board.config["krux"]["pins"]
-        ):
-            raise ValueError("missing required ports")
         fm.register(
-            board.config["krux"]["pins"]["UART2_TX"], fm.fpioa.UART2_TX, force=False
+            Settings().printer.thermal.adafruit.tx_pin, fm.fpioa.UART2_TX, force=False
         )
         fm.register(
-            board.config["krux"]["pins"]["UART2_RX"], fm.fpioa.UART2_RX, force=False
+            Settings().printer.thermal.adafruit.rx_pin, fm.fpioa.UART2_RX, force=False
         )
 
-        self.uart_conn = UART(UART.UART2, settings.printer.thermal.baudrate)
+        self.uart_conn = UART(UART.UART2, Settings().printer.thermal.adafruit.baudrate)
 
         self.character_height = 24
-        self.byte_time = 11.0 / float(settings.printer.thermal.baudrate)
+        self.byte_time = 11.0 / float(Settings().printer.thermal.adafruit.baudrate)
         self.dot_print_time = 0.03
         self.dot_feed_time = 0.0021
 
@@ -110,9 +158,9 @@ class AdafruitPrinter(Printer):
         self.write_bytes(
             27,  # Esc
             55,  # 7 (print settings)
-            11,  # Heat dots
-            255,  # Heat time
-            40,  # Heat interval
+            Settings().printer.thermal.adafruit.heat_dots,
+            Settings().printer.thermal.adafruit.heat_time,
+            Settings().printer.thermal.adafruit.heat_interval,
         )
 
         # Description of print density from p. 23 of manual:
@@ -185,7 +233,7 @@ class AdafruitPrinter(Printer):
         while qr_code[size] != "\n":
             size += 1
 
-        scale = settings.printer.thermal.paper_width // size
+        scale = Settings().printer.thermal.adafruit.paper_width // size
         for y in range(size):
             # Scale the line (width) by scaling factor
             line = 0

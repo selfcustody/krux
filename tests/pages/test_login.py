@@ -828,249 +828,298 @@ def test_passphrase(mocker, amigo_tft):
     assert ctx.input.wait_for_button.call_count == len(case)
 
 
-def test_network(mocker, m5stickv):
+def test_settings(mocker, m5stickv):
     import krux
 
-    from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
-    ctx = mocker.MagicMock(
-        input=mocker.MagicMock(
-            wait_for_button=mocker.MagicMock(
-                side_effect=(BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER)
-            )
-        ),
-        display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
-    )
-    login = Login(ctx)
-
-    login.network()
-
-    assert ctx.input.wait_for_button.call_count == 3
-    ctx.display.draw_centered_text.assert_has_calls(
-        [
-            mocker.call("Network\nmainnet"),
-            mocker.call("Network\ntestnet"),
-            mocker.call("Network\nmainnet"),
-        ]
-    )
-    assert krux.pages.login.settings.network == "main"
-
-
-def test_network_on_amigo_tft(mocker, amigo_tft):
-    import krux
-    from krux.pages.login import Login
-    from krux.input import BUTTON_TOUCH
-
-    # page, page_prev, enter
-    index_s_e = (2, 0, 1)
-    ctx = mocker.MagicMock(
-        input=mocker.MagicMock(
-            touch=mocker.MagicMock(
-                current_index=mocker.MagicMock(side_effect=index_s_e)
-            ),
-            wait_for_button=mocker.MagicMock(return_value=BUTTON_TOUCH),
-        )
-    )
-    mocker.patch.object(ctx.input.touch, "x_regions", (0, 100, 200, 300))
-    mocker.patch.object(ctx.input.touch, "y_regions", (100, 200))
-
-    login = Login(ctx)
-
-    login.network()
-
-    assert ctx.input.wait_for_button.call_count == len(index_s_e)
-    ctx.display.draw_centered_text.assert_has_calls(
-        [
-            mocker.call("Network\nmainnet"),
-            mocker.call("Network\ntestnet"),
-            mocker.call("Network\nmainnet"),
-        ]
-    )
-    assert krux.pages.login.settings.network == "main"
-
-
-def test_printer(mocker, m5stickv):
-    import krux
-
-    mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
-    from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
-    ctx = mocker.MagicMock(
-        input=mocker.MagicMock(
-            wait_for_button=mocker.MagicMock(
-                side_effect=(BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER)
-            )
-        ),
-        display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
-    )
-    login = Login(ctx)
-
-    login.printer()
-
-    assert ctx.input.wait_for_button.call_count == 3
-    ctx.display.draw_centered_text.assert_has_calls(
-        [
-            mocker.call("Baudrate\n9600"),
-            mocker.call("Baudrate\n19200"),
-            mocker.call("Baudrate\n9600"),
-        ]
-    )
-    assert krux.pages.login.settings.printer.thermal.baudrate == 9600
-
-
-def test_printer_on_amigo_tft(mocker, amigo_tft):
-    import krux
-
-    mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
-    from krux.pages.login import Login
-    from krux.input import BUTTON_TOUCH
-
-    # page, page_prev, enter
-    index_s_e = (2, 0, 1)
-    ctx = mocker.MagicMock(
-        input=mocker.MagicMock(
-            touch=mocker.MagicMock(
-                current_index=mocker.MagicMock(side_effect=index_s_e)
-            ),
-            wait_for_button=mocker.MagicMock(return_value=BUTTON_TOUCH),
-        )
-    )
-    login = Login(ctx)
-
-    login.printer()
-
-    assert ctx.input.wait_for_button.call_count == len(index_s_e)
-    ctx.display.draw_centered_text.assert_has_calls(
-        [
-            mocker.call("Baudrate\n9600"),
-            mocker.call("Baudrate\n19200"),
-            mocker.call("Baudrate\n9600"),
-        ]
-    )
-    assert krux.pages.login.settings.printer.thermal.baudrate == 9600
-
-
-def test_locale(mocker, m5stickv):
-    import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.settings import Settings, CategorySetting, NumberSetting
 
-    ctx = mocker.MagicMock(
-        input=mocker.MagicMock(
-            wait_for_button=mocker.MagicMock(
-                side_effect=(
-                    BUTTON_PAGE,
-                    BUTTON_PAGE_PREV,
-                    BUTTON_ENTER,
-                )
-            )
+    cases = [
+        (
+            (
+                # Bitcoin
+                BUTTON_ENTER,
+                # Change network
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Leave Settings
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+            ),
+            [
+                mocker.call("Network\nmain"),
+                mocker.call("Network\ntest"),
+            ],
+            lambda: Settings().bitcoin.network == "test",
+            CategorySetting,
         ),
-        display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
-    )
-    login = Login(ctx)
+        (
+            (
+                # Printer
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Thermal
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Change Baudrate
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Back to Thermal
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+                # Back to Printer
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Leave Settings
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+            ),
+            [
+                mocker.call("Baudrate\n9600"),
+                mocker.call("Baudrate\n19200"),
+            ],
+            lambda: Settings().printer.thermal.adafruit.baudrate == 19200,
+            CategorySetting,
+        ),
+        (
+            (
+                # Language
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Change Locale
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+            ),
+            [
+                mocker.call("Locale\nen-US"),
+                mocker.call("Idioma\nes-MX"),
+            ],
+            lambda: Settings().i18n.locale == "es-MX",
+            CategorySetting,
+        ),
+        (
+            (
+                # Logging
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Change log level
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Leave Settings
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+            ),
+            [
+                mocker.call("Log Level\nNONE"),
+                mocker.call("Log Level\nERROR"),
+                mocker.call("Log Level\nWARN"),
+                mocker.call("Log Level\nINFO"),
+                mocker.call("Log Level\nDEBUG"),
+            ],
+            lambda: Settings().logging.level == "ERROR",
+            CategorySetting,
+        ),
+        (
+            (
+                # Printer
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Thermal
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Paper Width
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Change width
+                # Remove digit
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+                # Add 9
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+                # Go
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Back to Thermal
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+                # Back to Printer
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Leave Settings
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+            ),
+            [
+                mocker.call("Paper Width", 10),
+            ],
+            lambda: Settings().printer.thermal.adafruit.paper_width == 389,
+            NumberSetting,
+        ),
+    ]
+    for case in cases:
+        ctx = mocker.MagicMock(
+            input=mocker.MagicMock(
+                wait_for_button=mocker.MagicMock(side_effect=case[0])
+            ),
+            display=mocker.MagicMock(
+                to_lines=mocker.MagicMock(return_value=[""]),
+                font_width=8,
+                font_height=14,
+                width=mocker.MagicMock(return_value=135),
+            ),
+        )
+        login = Login(ctx)
 
-    login.locale()
+        Settings().i18n.locale = "en-US"
+        login.settings()
 
-    assert ctx.input.wait_for_button.call_count == 3
-    ctx.display.draw_centered_text.assert_has_calls(
-        [
-            mocker.call("Locale\nen-US"),
-            mocker.call("Idioma\nes-MX"),
-            mocker.call("Locale\nen-US"),
-        ]
-    )
-    assert krux.pages.login.settings.i18n.locale == "en-US"
+        assert ctx.input.wait_for_button.call_count == len(case[0])
+        if case[3] == NumberSetting:
+            ctx.display.draw_hcentered_text.assert_has_calls(case[1])
+        else:
+            ctx.display.draw_centered_text.assert_has_calls(case[1])
+        assert case[2]
 
 
-def test_locale_with_settings_pad(mocker, amigo_tft):
+def test_settings_on_amigo_tft(mocker, amigo_tft):
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
+    from krux.settings import Settings, CategorySetting, NumberSetting
 
-    # page_prev, page, enter
-    index_s_e = (0, 2, 1)
-    ctx = mocker.MagicMock(
-        input=mocker.MagicMock(
-            touch=mocker.MagicMock(
-                current_index=mocker.MagicMock(side_effect=index_s_e)
+    PREV_INDEX = 0
+    GO_INDEX = 1
+    NEXT_INDEX = 2
+
+    cases = [
+        (
+            (
+                # Bitcoin
+                0,
+                # Change network
+                NEXT_INDEX,
+                GO_INDEX,
+                # Leave Settings
+                4,
             ),
-            wait_for_button=mocker.MagicMock(return_value=BUTTON_TOUCH),
-        )
-    )
-    login = Login(ctx)
-
-    login.locale()
-
-    assert ctx.input.wait_for_button.call_count == len(index_s_e)
-    # assert if locales were called was already done with m5stickV
-    assert krux.pages.login.settings.i18n.locale == "en-US"
-
-
-def test_debug(mocker, m5stickv):
-    import krux
-
-    from krux.pages.login import Login
-    from krux.logging import NONE
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
-    ctx = mocker.MagicMock(
-        input=mocker.MagicMock(
-            wait_for_button=mocker.MagicMock(
-                side_effect=(
-                    BUTTON_PAGE,
-                    BUTTON_PAGE,
-                    BUTTON_PAGE,
-                    BUTTON_PAGE,
-                    BUTTON_PAGE,
-                    BUTTON_ENTER,
-                )
-            )
+            [
+                mocker.call("Network\nmain"),
+                mocker.call("Network\ntest"),
+            ],
+            lambda: Settings().bitcoin.network == "test",
+            CategorySetting,
         ),
-        display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
-    )
-    login = Login(ctx)
-
-    login.debug()
-
-    assert ctx.input.wait_for_button.call_count == 6
-    ctx.display.draw_centered_text.assert_has_calls(
-        [
-            mocker.call("Log Level\nNONE"),
-            mocker.call("Log Level\nDEBUG"),
-            mocker.call("Log Level\nINFO"),
-            mocker.call("Log Level\nWARN"),
-            mocker.call("Log Level\nERROR"),
-            mocker.call("Log Level\nNONE"),
-        ]
-    )
-    assert krux.pages.login.settings.log.level == NONE
-
-
-def test_debug_on_amigo_tft(mocker, amigo_tft):
-    import krux
-    from krux.pages.login import Login
-    from krux.logging import NONE
-    from krux.input import BUTTON_TOUCH
-
-    # page_prev, page, enter
-    index_s_e = (0, 2, 1)
-    ctx = mocker.MagicMock(
-        input=mocker.MagicMock(
-            touch=mocker.MagicMock(
-                current_index=mocker.MagicMock(side_effect=index_s_e)
+        (
+            (
+                # Printer
+                3,
+                # Thermal
+                1,
+                # Change Baudrate
+                0,
+                NEXT_INDEX,
+                GO_INDEX,
+                # Back to Thermal
+                7,
+                # Back to Printer
+                2,
+                # Leave Settings
+                4,
             ),
-            wait_for_button=mocker.MagicMock(return_value=BUTTON_TOUCH),
+            [
+                mocker.call("Baudrate\n9600"),
+                mocker.call("Baudrate\n19200"),
+            ],
+            lambda: Settings().printer.thermal.adafruit.baudrate == 19200,
+            CategorySetting,
+        ),
+        (
+            (
+                # Language
+                1,
+                # Change Locale
+                NEXT_INDEX,
+                GO_INDEX,
+            ),
+            [
+                mocker.call("Locale\nen-US"),
+                mocker.call("Idioma\nes-MX"),
+            ],
+            lambda: Settings().i18n.locale == "es-MX",
+            CategorySetting,
+        ),
+        (
+            (
+                # Logging
+                2,
+                # Change log level
+                NEXT_INDEX,
+                NEXT_INDEX,
+                NEXT_INDEX,
+                NEXT_INDEX,
+                GO_INDEX,
+                # Leave Settings
+                4,
+            ),
+            [
+                mocker.call("Log Level\nNONE"),
+                mocker.call("Log Level\nERROR"),
+                mocker.call("Log Level\nWARN"),
+                mocker.call("Log Level\nINFO"),
+                mocker.call("Log Level\nDEBUG"),
+            ],
+            lambda: Settings().logging.level == "ERROR",
+            CategorySetting,
+        ),
+    ]
+    for case in cases:
+        ctx = mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=mocker.MagicMock(
+                    current_index=mocker.MagicMock(side_effect=case[0])
+                ),
+                wait_for_button=mocker.MagicMock(return_value=BUTTON_TOUCH),
+                display=mocker.MagicMock(
+                    to_lines=mocker.MagicMock(return_value=[""]),
+                    font_width=12,
+                    font_height=24,
+                    width=mocker.MagicMock(return_value=320),
+                ),
+            )
         )
-    )
-    login = Login(ctx)
+        mocker.patch.object(ctx.input.touch, "x_regions", (0, 100, 200, 300))
+        mocker.patch.object(ctx.input.touch, "y_regions", (100, 200))
 
-    login.debug()
+        login = Login(ctx)
 
-    assert ctx.input.wait_for_button.call_count == len(index_s_e)
-    # assert run over all debug levels already done with m5stickV
-    assert krux.pages.login.settings.log.level == NONE
+        Settings().i18n.locale = "en-US"
+        login.settings()
+
+        assert ctx.input.wait_for_button.call_count == len(case[0])
+        if case[3] == NumberSetting:
+            ctx.display.draw_hcentered_text.assert_has_calls(case[1])
+        else:
+            ctx.display.draw_centered_text.assert_has_calls(case[1])
+        assert case[2]
 
 
 def test_about(mocker, m5stickv):

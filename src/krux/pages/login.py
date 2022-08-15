@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=C2801
 import binascii
 import hashlib
 import lcd
@@ -26,9 +27,8 @@ from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
 import urtypes
-from ..logging import LEVEL_NAMES, level_name, logger, DEBUG
 from ..metadata import VERSION
-from ..settings import settings
+from ..settings import CategorySetting, NumberSetting, Settings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word, to_mnemonic_words
@@ -54,6 +54,7 @@ LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
+NUMERALS = "0123456789."
 
 D6_MIN_ROLLS = 50
 D6_MAX_ROLLS = 99
@@ -65,16 +66,20 @@ class Login(Page):
     """Represents the login page of the app"""
 
     def __init__(self, ctx):
-        menu = [
-            (t("Load Mnemonic"), self.load_key),
-            (t("New Mnemonic"), self.new_key),
-            (t("Settings"), self.settings),
-            (t("About"), self.about),
-            (t("Shutdown"), self.shutdown),
-        ]
-        if settings.log.level <= DEBUG:
-            menu.append((t("DEBUG"), lambda: MENU_CONTINUE))
-        Page.__init__(self, ctx, Menu(ctx, menu))
+        Page.__init__(
+            self,
+            ctx,
+            Menu(
+                ctx,
+                [
+                    (t("Load Mnemonic"), self.load_key),
+                    (t("New Mnemonic"), self.new_key),
+                    (t("Settings"), self.settings),
+                    (t("About"), self.about),
+                    (t("Shutdown"), self.shutdown),
+                ],
+            ),
+        )
 
     def load_key(self):
         """Handler for the 'load mnemonic' menu item"""
@@ -213,7 +218,7 @@ class Login(Page):
             Key(
                 mnemonic,
                 multisig,
-                NETWORKS[settings.network],
+                NETWORKS[Settings().bitcoin.network],
                 passphrase,
             )
         )
@@ -466,142 +471,108 @@ class Login(Page):
 
     def settings(self):
         """Handler for the 'settings' menu item"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("Network"), self.network),
-                (t("Printer"), self.printer),
-                (t("Locale"), self.locale),
-                (t("Debug"), self.debug),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        return self.namespace(Settings())()
+
+    def namespace(self, settings_namespace):
+        """Handler for navigating a particular settings namespace"""
+
+        def handler():
+            setting_list = settings_namespace.setting_list()
+            namespace_list = settings_namespace.namespace_list()
+            items = [
+                (
+                    settings_namespace.label(setting.attr),
+                    self.setting(settings_namespace, setting),
+                )
+                for setting in setting_list
+            ]
+            items.extend(
+                [
+                    (
+                        settings_namespace.label(ns.namespace.split(".")[-1]),
+                        self.namespace(ns),
+                    )
+                    for ns in namespace_list
+                ]
+            )
+
+            # If there is only one item in the namespace, don't show a submenu
+            # and instead jump straight to the item's menu
+            if len(items) == 1:
+                return items[0][1]()
+
+            items.append((t("Back"), lambda: MENU_EXIT))
+
+            submenu = Menu(self.ctx, items)
+            index, status = submenu.run_loop()
+            if index == len(submenu.menu) - 1:
+                return MENU_CONTINUE
+            return status
+
+        return handler
+
+    def setting(self, settings_namespace, setting):
+        """Handler for viewing and editing a particular setting"""
+
+        def handler():
+            if isinstance(setting, CategorySetting):
+                return self.category_setting(settings_namespace, setting)
+            if isinstance(setting, NumberSetting):
+                return self.number_setting(settings_namespace, setting)
             return MENU_CONTINUE
-        return status
 
-    def network(self):
-        """Handler for the 'network' menu item"""
-        networks = settings.networks
+        return handler
 
-        starting_network = settings.network
+    def category_setting(self, settings_namespace, setting):
+        """Handler for viewing and editing a CategorySetting"""
+        categories = setting.categories
+
+        starting_category = setting.__get__(settings_namespace)
         while True:
-            current_network = settings.network
-
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Network\n%snet") % current_network)
-            self._draw_settings_pad()
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
-            if btn == BUTTON_ENTER:
-                break
-            for i, network in enumerate(networks):
-                if current_network == network:
-                    if btn == BUTTON_PAGE:
-                        new_network = networks[(i + 1) % len(networks)]
-                    else:  # BUTTON_PAGE_PREV
-                        new_network = networks[(i - 1) % len(networks)]
-                    settings.network = new_network
-                    break
-        if settings.network == starting_network:
-            return MENU_CONTINUE
-        # Force a page refresh if the setting was changed
-        return MENU_EXIT
-
-    def printer(self):
-        """Handler for the 'printer' menu item"""
-        baudrates = settings.printer.thermal.baudrates
-
-        starting_baudrate = settings.printer.thermal.baudrate
-        while True:
-            current_baudrate = settings.printer.thermal.baudrate
-
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Baudrate\n%s") % current_baudrate)
-
-            self._draw_settings_pad()
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
-            if btn == BUTTON_ENTER:
-                break
-            for i, baudrate in enumerate(baudrates):
-                if current_baudrate == baudrate:
-                    if btn == BUTTON_PAGE:
-                        new_baudrate = baudrates[(i + 1) % len(baudrates)]
-                    else:  # BUTTON_PAGE_PREV
-                        new_baudrate = baudrates[(i - 1) % len(baudrates)]
-                    settings.printer.thermal.baudrate = new_baudrate
-                    break
-        if settings.printer.thermal.baudrate == starting_baudrate:
-            return MENU_CONTINUE
-        # Force a page refresh if the setting was changed
-        return MENU_EXIT
-
-    def locale(self):
-        """Handler for the 'locale' menu item"""
-        locales = settings.i18n.locales
-
-        starting_locale = settings.i18n.locale
-        while True:
-            current_locale = settings.i18n.locale
-
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Locale\n%s") % current_locale)
-
-            self._draw_settings_pad()
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
-            if btn == BUTTON_ENTER:
-                break
-            for i, locale in enumerate(locales):
-                if current_locale == locale:
-                    if btn == BUTTON_PAGE:
-                        new_locale = locales[(i + 1) % len(locales)]
-                    else:  # BUTTON_PAGE_PREV
-                        new_locale = locales[(i - 1) % len(locales)]
-                    settings.i18n.locale = new_locale
-                    break
-        if settings.i18n.locale == starting_locale:
-            return MENU_CONTINUE
-        # Force a page refresh if the setting was changed
-        return MENU_EXIT
-
-    def debug(self):
-        """Handler for the 'debug' menu item"""
-        levels = sorted(LEVEL_NAMES.keys())
-
-        starting_level = settings.log.level
-        while True:
-            current_level = settings.log.level
+            current_category = setting.__get__(settings_namespace)
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Log Level\n%s") % level_name(current_level)
+                settings_namespace.label(setting.attr) + "\n" + str(current_category)
             )
-
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
-            for i, level in enumerate(levels):
-                if current_level == level:
+            for i, category in enumerate(categories):
+                if current_category == category:
                     if btn == BUTTON_PAGE:
-                        new_level = levels[(i + 1) % len(levels)]
+                        new_category = categories[(i + 1) % len(categories)]
                     else:  # BUTTON_PAGE_PREV
-                        new_level = levels[(i - 1) % len(levels)]
-                    settings.log.level = new_level
-                    logger.level = settings.log.level
+                        new_category = categories[(i - 1) % len(categories)]
+                    setting.__set__(settings_namespace, new_category)
                     break
-        if settings.log.level == starting_level:
+        if (
+            setting.attr == "locale"
+            and setting.__get__(settings_namespace) != starting_category
+        ):
+            return MENU_EXIT
+        return MENU_CONTINUE
+
+    def number_setting(self, settings_namespace, setting):
+        """Handler for viewing and editing a NumberSetting"""
+
+        starting_value = setting.numtype(setting.__get__(settings_namespace))
+        new_value = self.capture_from_keypad(
+            settings_namespace.label(setting.attr),
+            [NUMERALS],
+            starting_buffer=str(starting_value),
+        )
+        if new_value in (ESC_KEY, ""):
             return MENU_CONTINUE
-        # Force a page refresh if the setting was changed
-        return MENU_EXIT
+
+        new_value = setting.numtype(new_value)
+        if setting.value_range[0] <= new_value <= setting.value_range[1]:
+            setting.__set__(settings_namespace, new_value)
+
+        return MENU_CONTINUE
 
     def about(self):
         """Handler for the 'about' menu item"""

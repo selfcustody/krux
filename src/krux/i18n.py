@@ -20,8 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import binascii
-from .settings import settings
+from .settings import CategorySetting, SettingsNamespace, Settings
 from .translations import translation_table
+
+
+class I18nSettings(SettingsNamespace):
+    """I18n-specific settings"""
+
+    namespace = "settings.i18n"
+    locale = CategorySetting("locale", "en-US", list(translation_table.keys()))
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "locale": t("Locale"),
+        }[attr]
 
 
 def translations(locale):
@@ -34,7 +47,7 @@ def translations(locale):
 def t(slug):
     """Translates a slug according to the current locale"""
     slug_id = binascii.crc32(slug.encode("utf-8"))
-    lookup = translations(settings.i18n.locale)
+    lookup = translations(Settings().i18n.locale)
     if not lookup or slug_id not in lookup:
         return slug
     return lookup[slug_id]

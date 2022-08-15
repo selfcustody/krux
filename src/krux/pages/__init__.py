@@ -82,11 +82,12 @@ class Page:
         possible_keys_fn=None,
         delete_key_fn=None,
         go_on_change=False,
+        starting_buffer="",
     ):
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
         """
-        buffer = ""
+        buffer = starting_buffer
         pad = Keypad(self.ctx, keysets)
         while True:
             self.ctx.display.clear()
