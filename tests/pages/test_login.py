@@ -940,6 +940,9 @@ def test_settings(mocker, m5stickv):
                 BUTTON_ENTER,
                 # Paper Width
                 BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Change width
                 # Remove digit
@@ -958,8 +961,9 @@ def test_settings(mocker, m5stickv):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Back to Thermal
-                BUTTON_PAGE_PREV,
-                BUTTON_PAGE_PREV,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Back to Printer
                 BUTTON_PAGE,
