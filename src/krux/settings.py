@@ -43,9 +43,9 @@ class SettingsNamespace:
     def setting_list(self):
         """Returns the list of child Setting objects"""
         return [
-            setting
-            for setting in self.__class__.__dict__.values()
-            if isinstance(setting, Setting)
+            getattr(self.__class__, setting)
+            for setting in dir(self.__class__)
+            if isinstance(getattr(self.__class__, setting), Setting)
         ]
 
 
@@ -86,6 +86,8 @@ class Setting:
         self.default_value = default_value
 
     def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
         return store.get(obj.namespace, self.attr, self.default_value)
 
     def __set__(self, obj, value):
