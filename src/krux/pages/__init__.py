@@ -30,8 +30,10 @@ from ..input import (
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
     BUTTON_TOUCH,
+    SWIPE_DOWN,
     SWIPE_RIGHT,
     SWIPE_LEFT,
+    SWIPE_UP,
 )
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
@@ -399,6 +401,37 @@ class Page:
         return status != MENU_SHUTDOWN
 
 
+class ListView:
+    def __init__(self, lst, size):
+        self.list = lst
+        self.size = size
+        self.offset = 0
+        self.iter_index = 0
+
+    def __getitem__(self, key):
+        return self.list[self.offset + key]
+
+    def __iter__(self):
+        self.iter_index = 0
+        return self
+
+    def __next__(self):
+        if self.iter_index < self.size:
+            self.iter_index += 1
+            return self.__getitem__(self.iter_index - 1)
+        raise StopIteration
+
+    def move_forward(self):
+        self.offset += self.size
+        if self.offset >= len(self.list):
+            self.offset = 0
+
+    def move_backward(self):
+        self.offset -= self.size
+        if self.offset < 0:
+            self.offset = len(self.list) - self.size
+
+
 class Menu:
     """Represents a menu that can render itself to the screen, handle item selection,
     and invoke menu item callbacks that return a status
@@ -407,6 +440,14 @@ class Menu:
     def __init__(self, ctx, menu):
         self.ctx = ctx
         self.menu = menu
+        view_size = (self.ctx.display.height() - 2 * DEFAULT_PADDING) // (
+            3 * self.ctx.display.font_height
+        )
+        if view_size > len(self.menu):
+            view_size = len(self.menu)
+        while len(self.menu) % view_size != 0:
+            view_size -= 1
+        self.menu_view = ListView(self.menu, view_size)
 
     def run_loop(self):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
@@ -430,13 +471,13 @@ class Menu:
             if btn == BUTTON_ENTER:
                 try:
                     self.ctx.display.clear()
-                    status = self.menu[selected_item_index][1]()
+                    status = self.menu_view[selected_item_index][1]()
                     if status != MENU_CONTINUE:
                         return (selected_item_index, status)
                 except Exception as e:
                     self.ctx.log.exception(
                         'Exception occurred in menu item "%s"'
-                        % self.menu[selected_item_index][0]
+                        % self.menu_view[selected_item_index][0]
                     )
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(
@@ -444,16 +485,24 @@ class Menu:
                     )
                     self.ctx.input.wait_for_button()
             elif btn == BUTTON_PAGE:
-                selected_item_index = (selected_item_index + 1) % len(self.menu)
+                selected_item_index = (selected_item_index + 1) % self.menu_view.size
+                if selected_item_index == 0:
+                    self.menu_view.move_forward()
             elif btn == BUTTON_PAGE_PREV:
-                selected_item_index = (selected_item_index - 1) % len(self.menu)
+                selected_item_index = (selected_item_index - 1) % self.menu_view.size
+                if selected_item_index == self.menu_view.size - 1:
+                    self.menu_view.move_backward()
+            elif btn == SWIPE_UP:
+                self.menu_view.move_forward()
+            elif btn == SWIPE_DOWN:
+                self.menu_view.move_backward()
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
         self.ctx.input.touch.clear_regions()
         offset_y = 0
         Page.y_keypad_map = [offset_y]
-        for menu_item in self.menu:
+        for menu_item in self.menu_view:
             offset_y += len(self.ctx.display.to_lines(menu_item[0])) + 1
             Page.y_keypad_map.append(offset_y)
         height_multiplier = self.ctx.display.height() - 2 * DEFAULT_PADDING
@@ -479,7 +528,7 @@ class Menu:
                 )
 
         # draw centralized strings in regions
-        for i, menu_item in enumerate(self.menu):
+        for i, menu_item in enumerate(self.menu_view):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             offset_y = Page.y_keypad_map[i + 1] - Page.y_keypad_map[i]
             offset_y -= len(menu_item_lines) * self.ctx.display.font_height
@@ -491,10 +540,10 @@ class Menu:
                 )
 
     def _draw_menu(self, selected_item_index):
-        offset_y = len(self.menu) * self.ctx.display.font_height * 2
+        offset_y = self.menu_view.size * self.ctx.display.font_height * 2
         offset_y = self.ctx.display.height() - offset_y
         offset_y //= 2
-        for i, menu_item in enumerate(self.menu):
+        for i, menu_item in enumerate(self.menu_view):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             delta_y = (len(menu_item_lines) + 1) * self.ctx.display.font_height
             for j, text in enumerate(menu_item_lines):
