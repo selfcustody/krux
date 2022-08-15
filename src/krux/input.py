@@ -32,6 +32,8 @@ BUTTON_PAGE_PREV = 2
 BUTTON_TOUCH = 3
 SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
+SWIPE_UP = 6
+SWIPE_DOWN = 7
 
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
@@ -121,6 +123,18 @@ class Input:
             return self.touch.swipe_left_value()
         return RELEASED
 
+    def swipe_up_value(self):
+        """Intermediary method to pull touch gesture, if touch available"""
+        if self.touch is not None:
+            return self.touch.swipe_up_value()
+        return RELEASED
+
+    def swipe_down_value(self):
+        """Intermediary method to pull touch gesture, if touch available"""
+        if self.touch is not None:
+            return self.touch.swipe_down_value()
+        return RELEASED
+
     def wait_for_release(self):
         """Loop until all buttons are released (if currently pressed)"""
         while (
@@ -197,6 +211,10 @@ class Input:
                 return SWIPE_RIGHT
             if self.swipe_left_value() == PRESSED:
                 return SWIPE_LEFT
+            if self.swipe_up_value() == PRESSED:
+                return SWIPE_UP
+            if self.swipe_down_value() == PRESSED:
+                return SWIPE_DOWN
             return BUTTON_TOUCH
 
         return None

@@ -27,6 +27,8 @@ from .logging import logger as log
 SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
+SWIPE_UP = 3
+SWIPE_DOWN = 4
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
 
@@ -44,8 +46,8 @@ class Touch:
         self.y_regions = []
         self.x_regions = []
         self.index = 0
-        self.x_press_point = 0
-        self.x_release_point = 0
+        self.press_point = (0, 0)
+        self.release_point = (0, 0)
         self.gesture = None
         self.state = Touch.idle
         self.width, self.height = width, height
@@ -72,7 +74,7 @@ class Touch:
         """Gets an index from touched points, x and y delimiters"""
         if self.state == self.idle:
             self.state = self.press
-            self.x_press_point = data[0]
+            self.press_point = data
             self.index = 0
             if self.y_regions:
                 for region in self.y_regions:
@@ -99,14 +101,7 @@ class Touch:
                         self.index += x_index
             else:
                 self.index = 0
-        self.x_release_point = data[0]
-
-    def h_gesture(self, press, release):
-        """Detects touch gestures"""
-        if release - press > SWIPE_THRESHOLD:
-            self.gesture = SWIPE_RIGHT
-        if press - release > SWIPE_THRESHOLD:
-            self.gesture = SWIPE_LEFT
+        self.release_point = data
 
     def current_state(self):
         """Returns the touchscreen state"""
@@ -119,7 +114,14 @@ class Touch:
                 if self.state == self.release:
                     self.state = self.idle
                 elif self.state == self.press:
-                    self.h_gesture(self.x_press_point, self.x_release_point)
+                    if self.release_point[0] - self.press_point[0] > SWIPE_THRESHOLD:
+                        self.gesture = SWIPE_RIGHT
+                    elif self.press_point[0] - self.release_point[0] > SWIPE_THRESHOLD:
+                        self.gesture = SWIPE_LEFT
+                    elif self.release_point[1] - self.press_point[1] > SWIPE_THRESHOLD:
+                        self.gesture = SWIPE_DOWN
+                    elif self.press_point[1] - self.release_point[1] > SWIPE_THRESHOLD:
+                        self.gesture = SWIPE_UP
                     self.state = self.release
             else:
                 log.warn("Touch error: " + str(data))
@@ -139,6 +141,20 @@ class Touch:
     def swipe_left_value(self):
         """Returns detected gestures and clean respective variable"""
         if self.gesture == SWIPE_LEFT:
+            self.gesture = None
+            return 0
+        return 1
+
+    def swipe_up_value(self):
+        """Returns detected gestures and clean respective variable"""
+        if self.gesture == SWIPE_UP:
+            self.gesture = None
+            return 0
+        return 1
+
+    def swipe_down_value(self):
+        """Returns detected gestures and clean respective variable"""
+        if self.gesture == SWIPE_DOWN:
             self.gesture = None
             return 0
         return 1
