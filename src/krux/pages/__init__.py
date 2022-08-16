@@ -402,6 +402,8 @@ class Page:
 
 
 class ListView:
+    """Acts as a fixed-size, sliding window over an underlying list"""
+
     def __init__(self, lst, size):
         self.list = lst
         self.size = size
@@ -422,14 +424,20 @@ class ListView:
         raise StopIteration
 
     def move_forward(self):
+        """Slides the window one size-increment forward, wrapping around"""
         self.offset += self.size
         if self.offset >= len(self.list):
             self.offset = 0
 
     def move_backward(self):
+        """Slides the window one size-increment backward, wrapping around"""
         self.offset -= self.size
         if self.offset < 0:
             self.offset = len(self.list) - self.size
+
+    def index(self, i):
+        """Returns the true index of an element in the underlying list"""
+        return self.offset + i
 
 
 class Menu:
@@ -441,7 +449,7 @@ class Menu:
         self.ctx = ctx
         self.menu = menu
         view_size = (self.ctx.display.height() - 2 * DEFAULT_PADDING) // (
-            3 * self.ctx.display.font_height
+            2 * self.ctx.display.font_height
         )
         if view_size > len(self.menu):
             view_size = len(self.menu)
@@ -473,7 +481,7 @@ class Menu:
                     self.ctx.display.clear()
                     status = self.menu_view[selected_item_index][1]()
                     if status != MENU_CONTINUE:
-                        return (selected_item_index, status)
+                        return (self.menu_view.index(selected_item_index), status)
                 except Exception as e:
                     self.ctx.log.exception(
                         'Exception occurred in menu item "%s"'
@@ -549,14 +557,12 @@ class Menu:
             for j, text in enumerate(menu_item_lines):
                 self.ctx.display.draw_hcentered_text(
                     text,
-                    offset_y
-                    + self.ctx.display.font_height // 2
-                    + self.ctx.display.font_height * j,
+                    offset_y + self.ctx.display.font_height * j,
                 )
             if selected_item_index == i:
                 self.ctx.display.outline(
                     DEFAULT_PADDING // 2 - 1,
-                    offset_y + 1,
+                    offset_y + 1 - self.ctx.display.font_height // 2,
                     self.ctx.display.usable_width() + DEFAULT_PADDING,
                     delta_y - 2,
                 )

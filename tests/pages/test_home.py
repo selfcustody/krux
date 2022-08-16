@@ -115,6 +115,10 @@ def test_mnemonic(mocker, m5stickv, tdata):
     ]
     for case in cases:
         ctx = mocker.MagicMock(
+            display=mocker.MagicMock(
+                height=mocker.MagicMock(return_value=240),
+                font_height=14,
+            ),
             input=mocker.MagicMock(
                 wait_for_button=mocker.MagicMock(side_effect=case[2])
             ),
@@ -172,6 +176,10 @@ def test_mnemonic_touch(mocker, amigo_tft, tdata):
     ]
     for case in cases:
         ctx = mocker.MagicMock(
+            display=mocker.MagicMock(
+                height=mocker.MagicMock(return_value=480),
+                font_height=24,
+            ),
             input=mocker.MagicMock(
                 wait_for_button=mocker.MagicMock(side_effect=case[2])
             ),
@@ -266,6 +274,10 @@ def test_public_key(mocker, m5stickv, tdata):
     ]
     for case in cases:
         ctx = mocker.MagicMock(
+            display=mocker.MagicMock(
+                height=mocker.MagicMock(return_value=240),
+                font_height=14,
+            ),
             input=mocker.MagicMock(
                 wait_for_button=mocker.MagicMock(side_effect=case[2])
             ),
@@ -379,6 +391,10 @@ def test_wallet(mocker, m5stickv, tdata):
             wallet.load(case[2], FORMAT_PMOFN)
 
         ctx = mocker.MagicMock(
+            display=mocker.MagicMock(
+                height=mocker.MagicMock(return_value=240),
+                font_height=14,
+            ),
             input=mocker.MagicMock(
                 wait_for_button=mocker.MagicMock(side_effect=case[4])
             ),
@@ -636,6 +652,10 @@ def test_scan_address(mocker, m5stickv, tdata):
             wallet.load(case[1], FORMAT_PMOFN)
 
         ctx = mocker.MagicMock(
+            display=mocker.MagicMock(
+                height=mocker.MagicMock(return_value=240),
+                font_height=14,
+            ),
             input=mocker.MagicMock(
                 wait_for_button=mocker.MagicMock(side_effect=case[6])
             ),
@@ -849,6 +869,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             wallet.load(case[1], FORMAT_PMOFN)
 
         ctx = mocker.MagicMock(
+            display=mocker.MagicMock(
+                height=mocker.MagicMock(return_value=240),
+                font_height=14,
+            ),
             input=mocker.MagicMock(
                 wait_for_button=mocker.MagicMock(side_effect=case[9])
             ),
@@ -1023,6 +1047,10 @@ def test_sign_message(mocker, m5stickv, tdata):
         wallet = Wallet(tdata.SINGLEKEY_SIGNING_KEY)
 
         ctx = mocker.MagicMock(
+            display=mocker.MagicMock(
+                height=mocker.MagicMock(return_value=240),
+                font_height=14,
+            ),
             input=mocker.MagicMock(
                 wait_for_button=mocker.MagicMock(side_effect=case[3])
             ),

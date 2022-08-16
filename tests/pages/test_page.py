@@ -25,7 +25,17 @@ def mock_page_cls(mocker):
 def test_init(mocker, m5stickv, mock_page_cls):
     from krux.pages import Page
 
-    page = mock_page_cls(mocker.MagicMock())
+    page = mock_page_cls(
+        mocker.MagicMock(
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=14,
+                width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
+                to_lines=mocker.MagicMock(return_value=[""]),
+            ),
+        )
+    )
 
     assert isinstance(page, Page)
 
@@ -38,9 +48,13 @@ def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
     from krux.camera import Camera
 
     ctx = mocker.MagicMock(
-        #  input=mocker.MagicMock(
-        #      wait_for_button=mocker.MagicMock(side_effect=[BUTTON_PAGE, BUTTON_ENTER, BUTTON_PAGE]),
-        #  ),
+        display=mocker.MagicMock(
+            font_width=8,
+            font_height=14,
+            width=mocker.MagicMock(return_value=135),
+            height=mocker.MagicMock(return_value=240),
+            to_lines=mocker.MagicMock(return_value=[""]),
+        ),
         camera=Camera(),
     )
 

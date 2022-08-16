@@ -43,7 +43,9 @@ def test_new_key_from_d6(mocker, m5stickv):
             ),
             display=mocker.MagicMock(
                 font_width=8,
+                font_height=14,
                 width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
                 to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
@@ -107,7 +109,9 @@ def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
             ),
             display=mocker.MagicMock(
                 font_width=12,
-                width=mocker.MagicMock(return_value=480),
+                font_height=24,
+                width=mocker.MagicMock(return_value=320),
+                height=mocker.MagicMock(return_value=480),
                 to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
@@ -135,7 +139,9 @@ def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
         ),
         display=mocker.MagicMock(
             font_width=12,
-            width=mocker.MagicMock(return_value=480),
+            font_height=24,
+            width=mocker.MagicMock(return_value=320),
+            height=mocker.MagicMock(return_value=480),
             to_lines=mocker.MagicMock(return_value=[""]),
         ),
     )
@@ -197,7 +203,9 @@ def test_new_key_from_d20(mocker, m5stickv):
             ),
             display=mocker.MagicMock(
                 font_width=8,
+                font_height=14,
                 width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
                 to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
@@ -280,7 +288,13 @@ def test_load_key_from_qr_code(mocker, m5stickv):
             input=mocker.MagicMock(
                 wait_for_button=mocker.MagicMock(side_effect=case[0])
             ),
-            display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=14,
+                width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
+                to_lines=mocker.MagicMock(return_value=[""]),
+            ),
         )
         login = Login(ctx)
 
@@ -368,7 +382,9 @@ def test_load_key_from_text(mocker, m5stickv):
             ),
             display=mocker.MagicMock(
                 font_width=8,
+                font_height=14,
                 width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
                 to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
@@ -488,7 +504,9 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
             ),
             display=mocker.MagicMock(
                 font_width=12,
-                width=mocker.MagicMock(return_value=480),
+                font_height=24,
+                width=mocker.MagicMock(return_value=320),
+                height=mocker.MagicMock(return_value=480),
                 to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
@@ -568,7 +586,9 @@ def test_load_key_from_digits(mocker, m5stickv):
             ),
             display=mocker.MagicMock(
                 font_width=8,
+                font_height=14,
                 width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
                 to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
@@ -665,7 +685,9 @@ def test_load_key_from_bits(mocker, m5stickv):
             ),
             display=mocker.MagicMock(
                 font_width=8,
+                font_height=14,
                 width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
                 to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
@@ -695,8 +717,10 @@ def test_leaving_keypad(mocker, amigo_tft):
             wait_for_button=mocker.MagicMock(side_effect=esc_keypad)
         ),
         display=mocker.MagicMock(
-            font_width=12,
-            width=mocker.MagicMock(return_value=480),
+            font_width=8,
+            font_height=14,
+            width=mocker.MagicMock(return_value=135),
+            height=mocker.MagicMock(return_value=240),
             to_lines=mocker.MagicMock(return_value=[""]),
         ),
     )
@@ -752,8 +776,10 @@ def test_passphrase_give_up(mocker, amigo_tft):
     ctx = mocker.MagicMock(
         input=mocker.MagicMock(wait_for_button=mocker.MagicMock(side_effect=case)),
         display=mocker.MagicMock(
-            font_width=12,
-            width=mocker.MagicMock(return_value=480),
+            font_width=8,
+            font_height=14,
+            width=mocker.MagicMock(return_value=135),
+            height=mocker.MagicMock(return_value=240),
             to_lines=mocker.MagicMock(return_value=[""]),
         ),
     )
@@ -819,7 +845,9 @@ def test_passphrase(mocker, amigo_tft):
         input=mocker.MagicMock(wait_for_button=mocker.MagicMock(side_effect=case)),
         display=mocker.MagicMock(
             font_width=12,
-            width=mocker.MagicMock(return_value=480),
+            font_height=24,
+            width=mocker.MagicMock(return_value=320),
+            height=mocker.MagicMock(return_value=480),
             to_lines=mocker.MagicMock(return_value=[""]),
         ),
     )
@@ -985,10 +1013,11 @@ def test_settings(mocker, m5stickv):
                 wait_for_button=mocker.MagicMock(side_effect=case[0])
             ),
             display=mocker.MagicMock(
-                to_lines=mocker.MagicMock(return_value=[""]),
                 font_width=8,
                 font_height=14,
                 width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
+                to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
         login = Login(ctx)
@@ -1102,13 +1131,14 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
                     current_index=mocker.MagicMock(side_effect=case[0])
                 ),
                 wait_for_button=mocker.MagicMock(return_value=BUTTON_TOUCH),
-                display=mocker.MagicMock(
-                    to_lines=mocker.MagicMock(return_value=[""]),
-                    font_width=12,
-                    font_height=24,
-                    width=mocker.MagicMock(return_value=320),
-                ),
-            )
+            ),
+            display=mocker.MagicMock(
+                font_width=12,
+                font_height=24,
+                width=mocker.MagicMock(return_value=320),
+                height=mocker.MagicMock(return_value=480),
+                to_lines=mocker.MagicMock(return_value=[""]),
+            ),
         )
         mocker.patch.object(ctx.input.touch, "x_regions", (0, 100, 200, 300))
         mocker.patch.object(ctx.input.touch, "y_regions", (100, 200))
@@ -1137,7 +1167,13 @@ def test_about(mocker, m5stickv):
         input=mocker.MagicMock(
             wait_for_button=mocker.MagicMock(return_value=BUTTON_ENTER)
         ),
-        display=mocker.MagicMock(to_lines=mocker.MagicMock(return_value=[""])),
+        display=mocker.MagicMock(
+            font_width=8,
+            font_height=14,
+            width=mocker.MagicMock(return_value=135),
+            height=mocker.MagicMock(return_value=240),
+            to_lines=mocker.MagicMock(return_value=[""]),
+        ),
     )
     login = Login(ctx)
 
