@@ -30,8 +30,10 @@ from ..input import (
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
     BUTTON_TOUCH,
+    SWIPE_DOWN,
     SWIPE_RIGHT,
     SWIPE_LEFT,
+    SWIPE_UP,
 )
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
@@ -68,7 +70,7 @@ class Page:
         """Prompts user for leaving"""
         self.ctx.display.clear()
         answer = self.prompt(t("Are you sure?"), self.ctx.display.height() // 2)
-        if self.ctx.input.has_touch:
+        if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
         if answer:
             return ESC_KEY
@@ -105,7 +107,7 @@ class Page:
                 pad.get_valid_index(possible_keys)
             pad.draw_keys(possible_keys)
             btn = self.ctx.input.wait_for_button()
-            if self.ctx.input.has_touch:
+            if self.ctx.input.touch is not None:
                 if btn == BUTTON_TOUCH:
                     btn = pad.touch_to_physical(possible_keys)
             if btn == BUTTON_ENTER:
@@ -152,7 +154,7 @@ class Page:
             elif btn == SWIPE_RIGHT:
                 pad.previous_keyset()
 
-        if self.ctx.input.has_touch:
+        if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
         return buffer
 
@@ -332,7 +334,7 @@ class Page:
             y_key_map += 2 * self.ctx.display.font_height
             self.y_keypad_map.append(y_key_map)
             btn = None
-            if self.ctx.input.has_touch:
+            if self.ctx.input.touch is not None:
                 self.ctx.input.touch.clear_regions()
                 self.ctx.input.touch.x_regions = self.x_keypad_map
                 self.ctx.input.touch.y_regions = self.y_keypad_map
@@ -360,7 +362,7 @@ class Page:
                             2 * self.ctx.display.font_height - 2,
                             lcd.RED,
                         )
-                elif self.ctx.input.has_touch:
+                elif self.ctx.input.touch is not None:
                     for region in self.x_keypad_map:
                         self.ctx.display.fill_rectangle(
                             region,
@@ -399,6 +401,45 @@ class Page:
         return status != MENU_SHUTDOWN
 
 
+class ListView:
+    """Acts as a fixed-size, sliding window over an underlying list"""
+
+    def __init__(self, lst, size):
+        self.list = lst
+        self.size = size
+        self.offset = 0
+        self.iter_index = 0
+
+    def __getitem__(self, key):
+        return self.list[self.offset + key]
+
+    def __iter__(self):
+        self.iter_index = 0
+        return self
+
+    def __next__(self):
+        if self.iter_index < self.size:
+            self.iter_index += 1
+            return self.__getitem__(self.iter_index - 1)
+        raise StopIteration
+
+    def move_forward(self):
+        """Slides the window one size-increment forward, wrapping around"""
+        self.offset += self.size
+        if self.offset >= len(self.list):
+            self.offset = 0
+
+    def move_backward(self):
+        """Slides the window one size-increment backward, wrapping around"""
+        self.offset -= self.size
+        if self.offset < 0:
+            self.offset = len(self.list) - self.size
+
+    def index(self, i):
+        """Returns the true index of an element in the underlying list"""
+        return self.offset + i
+
+
 class Menu:
     """Represents a menu that can render itself to the screen, handle item selection,
     and invoke menu item callbacks that return a status
@@ -407,6 +448,14 @@ class Menu:
     def __init__(self, ctx, menu):
         self.ctx = ctx
         self.menu = menu
+        view_size = (self.ctx.display.height() - 2 * DEFAULT_PADDING) // (
+            2 * self.ctx.display.font_height
+        )
+        if view_size > len(self.menu):
+            view_size = len(self.menu)
+        while len(self.menu) % view_size != 0:
+            view_size -= 1
+        self.menu_view = ListView(self.menu, view_size)
 
     def run_loop(self):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
@@ -416,13 +465,13 @@ class Menu:
         while True:
             gc.collect()
             self.ctx.display.clear()
-            if self.ctx.input.has_touch:
+            if self.ctx.input.touch is not None:
                 self._draw_touch_menu(selected_item_index)
             else:
                 self._draw_menu(selected_item_index)
 
             btn = self.ctx.input.wait_for_button(block=True)
-            if self.ctx.input.has_touch:
+            if self.ctx.input.touch is not None:
                 if btn == BUTTON_TOUCH:
                     selected_item_index = self.ctx.input.touch.current_index()
                     btn = BUTTON_ENTER
@@ -430,13 +479,13 @@ class Menu:
             if btn == BUTTON_ENTER:
                 try:
                     self.ctx.display.clear()
-                    status = self.menu[selected_item_index][1]()
+                    status = self.menu_view[selected_item_index][1]()
                     if status != MENU_CONTINUE:
-                        return (selected_item_index, status)
+                        return (self.menu_view.index(selected_item_index), status)
                 except Exception as e:
                     self.ctx.log.exception(
                         'Exception occurred in menu item "%s"'
-                        % self.menu[selected_item_index][0]
+                        % self.menu_view[selected_item_index][0]
                     )
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(
@@ -444,16 +493,24 @@ class Menu:
                     )
                     self.ctx.input.wait_for_button()
             elif btn == BUTTON_PAGE:
-                selected_item_index = (selected_item_index + 1) % len(self.menu)
+                selected_item_index = (selected_item_index + 1) % self.menu_view.size
+                if selected_item_index == 0:
+                    self.menu_view.move_forward()
             elif btn == BUTTON_PAGE_PREV:
-                selected_item_index = (selected_item_index - 1) % len(self.menu)
+                selected_item_index = (selected_item_index - 1) % self.menu_view.size
+                if selected_item_index == self.menu_view.size - 1:
+                    self.menu_view.move_backward()
+            elif btn == SWIPE_UP:
+                self.menu_view.move_forward()
+            elif btn == SWIPE_DOWN:
+                self.menu_view.move_backward()
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
         self.ctx.input.touch.clear_regions()
         offset_y = 0
         Page.y_keypad_map = [offset_y]
-        for menu_item in self.menu:
+        for menu_item in self.menu_view:
             offset_y += len(self.ctx.display.to_lines(menu_item[0])) + 1
             Page.y_keypad_map.append(offset_y)
         height_multiplier = self.ctx.display.height() - 2 * DEFAULT_PADDING
@@ -479,7 +536,7 @@ class Menu:
                 )
 
         # draw centralized strings in regions
-        for i, menu_item in enumerate(self.menu):
+        for i, menu_item in enumerate(self.menu_view):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             offset_y = Page.y_keypad_map[i + 1] - Page.y_keypad_map[i]
             offset_y -= len(menu_item_lines) * self.ctx.display.font_height
@@ -491,23 +548,21 @@ class Menu:
                 )
 
     def _draw_menu(self, selected_item_index):
-        offset_y = len(self.menu) * self.ctx.display.font_height * 2
+        offset_y = self.menu_view.size * self.ctx.display.font_height * 2
         offset_y = self.ctx.display.height() - offset_y
         offset_y //= 2
-        for i, menu_item in enumerate(self.menu):
+        for i, menu_item in enumerate(self.menu_view):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             delta_y = (len(menu_item_lines) + 1) * self.ctx.display.font_height
             for j, text in enumerate(menu_item_lines):
                 self.ctx.display.draw_hcentered_text(
                     text,
-                    offset_y
-                    + self.ctx.display.font_height // 2
-                    + self.ctx.display.font_height * j,
+                    offset_y + self.ctx.display.font_height * j,
                 )
             if selected_item_index == i:
                 self.ctx.display.outline(
                     DEFAULT_PADDING // 2 - 1,
-                    offset_y + 1,
+                    offset_y + 1 - self.ctx.display.font_height // 2,
                     self.ctx.display.usable_width() + DEFAULT_PADDING,
                     delta_y - 2,
                 )
@@ -593,7 +648,7 @@ class Keypad:
         for x in range(width + 1):
             region = x * key_h_spacing + DEFAULT_PADDING // 2
             self.x_keypad_map.append(region)
-        if self.ctx.input.has_touch:
+        if self.ctx.input.touch is not None:
             self.ctx.input.touch.y_regions = self.y_keypad_map
             self.ctx.input.touch.x_regions = self.x_keypad_map
         return key_h_spacing, key_v_spacing
@@ -634,7 +689,7 @@ class Keypad:
                             key_offset_x, offset_y, key, lcd.LIGHTBLACK
                         )
                     else:
-                        if self.ctx.input.has_touch:
+                        if self.ctx.input.touch is not None:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,
@@ -649,7 +704,7 @@ class Keypad:
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active
                     ):
-                        if self.ctx.input.has_touch:
+                        if self.ctx.input.touch is not None:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,

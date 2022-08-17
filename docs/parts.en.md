@@ -5,7 +5,7 @@ Available from many distributors, including:
 
 - [M5Stack](https://shop.m5stack.com/products/stickv)
 - [Adafruit](https://www.adafruit.com/product/4321)
-- [Mouser](https://www.mouser.com/ProductDetail/Adafruit/4321)
+- [Mouser](https://www.mouser.com/)
 - [Digi-Key](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/K027/10492135)
 - [Lee's Electronic](https://leeselectronic.com/en/product/169940-m5stick-ai-camera-kendryte-k210-risc-v-core-no-wifi.html)
 - [Cytron](https://www.cytron.io/c-development-tools/c-fpga/p-m5stickv-k210-ai-camera-without-wifi)
@@ -18,8 +18,11 @@ You can expect to pay around $50 for one depending on which distributor you choo
 Available from many distributors, including:
 
 - [Seeed Studio](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html)
-- [Mouser](https://www.mouser.com/ProductDetail/Seeed-Studio/102110463)
+- [Mouser](https://www.mouser.com/)
+- [Electromaker](https://www.electromaker.io/shop/product/sipeed-maix-amigo)
+- [Antratek](https://www.antratek.com/sipeed-maix-amigo)
 - [Digi-Key](https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/102110463/13168813)
+- [AliExpress](https://www.aliexpress.com/)
 
 You can expect to pay around $70 for one depending on which distributor you choose.
 

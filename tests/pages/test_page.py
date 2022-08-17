@@ -1,5 +1,10 @@
 import pytest
-from ..shared_mocks import snapshot_generator, MockQRPartParser, SNAP_SUCCESS
+from ..shared_mocks import (
+    mock_context,
+    snapshot_generator,
+    MockQRPartParser,
+    SNAP_SUCCESS,
+)
 
 
 @pytest.fixture
@@ -25,7 +30,7 @@ def mock_page_cls(mocker):
 def test_init(mocker, m5stickv, mock_page_cls):
     from krux.pages import Page
 
-    page = mock_page_cls(mocker.MagicMock())
+    page = mock_page_cls(mock_context(mocker))
 
     assert isinstance(page, Page)
 
@@ -37,12 +42,8 @@ def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
     mocker.patch("krux.camera.QRPartParser", new=MockQRPartParser)
     from krux.camera import Camera
 
-    ctx = mocker.MagicMock(
-        #  input=mocker.MagicMock(
-        #      wait_for_button=mocker.MagicMock(side_effect=[BUTTON_PAGE, BUTTON_ENTER, BUTTON_PAGE]),
-        #  ),
-        camera=Camera(),
-    )
+    ctx = mock_context(mocker)
+    ctx.camera = Camera()
 
     mocker.patch("time.ticks_ms", new=lambda: 0)
 

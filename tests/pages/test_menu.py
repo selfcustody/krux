@@ -1,17 +1,22 @@
-def test_init(mocker, m5stickv):
-    from krux.pages import Menu
+from tests.shared_mocks import mock_context
 
-    menu = Menu(mocker.MagicMock(), [])
+
+def test_init(mocker, m5stickv):
+    from krux.pages import Menu, MENU_EXIT
+
+    menu = Menu(
+        mock_context(mocker),
+        [("Long Option", lambda: MENU_EXIT)],
+    )
 
     assert isinstance(menu, Menu)
 
 
 def test_run_loop(mocker, m5stickv):
-    import board
     from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
-    ctx = mocker.MagicMock()
+    ctx = mock_context(mocker)
 
     def exception_raiser():
         raise ValueError("oops")
@@ -58,7 +63,7 @@ def test_run_loop_on_amigo_tft(mocker, amigo_tft):
     from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
-    ctx = mocker.MagicMock()
+    ctx = mock_context(mocker)
 
     def exception_raiser():
         raise ValueError("oops")

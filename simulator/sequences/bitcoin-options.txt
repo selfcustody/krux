@@ -5,14 +5,14 @@ press BUTTON_B
 press BUTTON_B
 press BUTTON_A
 
-# Navigate to Network
+# Navigate to Bitcoin
 press BUTTON_A
 
-screenshot network-options.png
+screenshot bitcoin-options.png
 
-screenshot network-options-mainnet.png
+screenshot bitcoin-options-mainnet.png
 
 press BUTTON_B
-screenshot network-options-testnet.png
+screenshot bitcoin-options-testnet.png
 
 press BUTTON_B
