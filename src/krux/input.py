@@ -32,10 +32,11 @@ BUTTON_PAGE_PREV = 2
 BUTTON_TOUCH = 3
 SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
+SWIPE_UP = 6
+SWIPE_DOWN = 7
 
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
-NONBLOCKING_CHECKS = 100000
 
 PRESSED = 0
 RELEASED = 1
@@ -78,8 +79,10 @@ class Input:
         # This flag, used in selection outlines, is set if buttons are being used
         self.buttons_active = True
         self.touch = None
-        self.has_touch = board.config["krux"]["display"]["touch"]
-        if self.has_touch:
+        if (
+            "touch" in board.config["krux"]["display"]
+            and board.config["krux"]["display"]["touch"]
+        ):
             self.touch = Touch(
                 board.config["lcd"]["width"], board.config["lcd"]["height"]
             )
@@ -119,6 +122,18 @@ class Input:
         """Intermediary method to pull touch gesture, if touch available"""
         if self.touch is not None:
             return self.touch.swipe_left_value()
+        return RELEASED
+
+    def swipe_up_value(self):
+        """Intermediary method to pull touch gesture, if touch available"""
+        if self.touch is not None:
+            return self.touch.swipe_up_value()
+        return RELEASED
+
+    def swipe_down_value(self):
+        """Intermediary method to pull touch gesture, if touch available"""
+        if self.touch is not None:
+            return self.touch.swipe_down_value()
         return RELEASED
 
     def wait_for_release(self):
@@ -162,8 +177,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_ENTER
             self.buttons_active = True
-
-        if self.page_value() == PRESSED:
+        elif self.page_value() == PRESSED:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_value() == PRESSED:
@@ -174,8 +188,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_PAGE
             self.buttons_active = True
-
-        if self.page_prev_value() == PRESSED:
+        elif self.page_prev_value() == PRESSED:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_prev_value() == PRESSED:
@@ -186,8 +199,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_PAGE_PREV
             self.buttons_active = True
-
-        if self.touch_value() == PRESSED:
+        elif self.touch_value() == PRESSED:
             # Wait for release
             while self.touch_value() == PRESSED:
                 self.entropy += 1
@@ -197,6 +209,10 @@ class Input:
                 return SWIPE_RIGHT
             if self.swipe_left_value() == PRESSED:
                 return SWIPE_LEFT
+            if self.swipe_up_value() == PRESSED:
+                return SWIPE_UP
+            if self.swipe_down_value() == PRESSED:
+                return SWIPE_DOWN
             return BUTTON_TOUCH
 
         return None

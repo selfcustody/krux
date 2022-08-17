@@ -260,3 +260,40 @@ def board_dock():
             },
         }
     )
+
+
+def mock_context(mocker):
+    import board
+
+    if board.config["type"] == "m5stickv":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(touch=None),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=14,
+                width=mocker.MagicMock(return_value=135),
+                height=mocker.MagicMock(return_value=240),
+                to_lines=mocker.MagicMock(return_value=[""]),
+            ),
+        )
+    elif board.config["type"] == "dock":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(touch=None),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=16,
+                width=mocker.MagicMock(return_value=240),
+                height=mocker.MagicMock(return_value=320),
+                to_lines=mocker.MagicMock(return_value=[""]),
+            ),
+        )
+    elif board.config["type"].startswith("amigo"):
+        return mocker.MagicMock(
+            display=mocker.MagicMock(
+                font_width=12,
+                font_height=24,
+                width=mocker.MagicMock(return_value=320),
+                height=mocker.MagicMock(return_value=480),
+                to_lines=mocker.MagicMock(return_value=[""]),
+            ),
+        )
