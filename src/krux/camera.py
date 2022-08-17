@@ -22,36 +22,31 @@
 import gc
 import sensor
 import lcd
+import board
 from .qr import QRPartParser
 from .wdt import wdt
 
-OV9650_ID = 0x96
-OV2640_ID = 0x2642 # Lenses, vertical flip - Bit
-OV5640_ID = 0x5640
-OV5642_ID = 0x5642 # Lenses, horizontal flip - Bit
-OV7725_ID = 0x77
-OV7740_ID = 0x7742 # No lenses, no Flip - M5sitckV, Amigo
-OV3660_ID = 0x3660
-MT9V034_ID = 0x13
-LEPTON_ID = 0x54
-GC0328_ID = 0x9d # Dock
+OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
+OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
+OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
+GC0328_ID = 0x9D  # Dock
 
 
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
     def __init__(self):
-        self.ID = None
+        self.cam_id = None
 
     def initialize_sensor(self):
         """Initializes the camera"""
         sensor.reset()
-        self.ID = sensor.get_id()
+        self.cam_id = sensor.get_id()
         sensor.set_pixformat(sensor.GRAYSCALE)
         sensor.set_framesize(sensor.QVGA)
-        if self.ID == OV5642_ID:
+        if self.cam_id == OV5642_ID:
             sensor.set_hmirror(1)
-        if self.ID == OV2640_ID:
+        if self.cam_id == OV2640_ID:
             sensor.set_vflip(1)
         sensor.skip_frames()
 
@@ -76,9 +71,9 @@ class Camera:
             new_part = False
 
             img = sensor.snapshot()
-            if self.ID in (OV2640_ID, OV5642_ID):
+            if self.cam_id in (OV2640_ID, OV5642_ID):
                 img.lens_corr(1.2)
-            if self.ID == OV2640_ID:
+            if self.cam_id == OV2640_ID:
                 img.rotation_corr(z_rotation=180)
             gc.collect()
             hist = img.get_histogram()
