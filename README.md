@@ -159,6 +159,10 @@ poetry run mkdocs serve
 # Contributing
 Issues and pull requests welcome! Let's make this as good as it can be.
 
+Before opening a pull request for a new feature, please first start a [new discussion](https://github.com/selfcustody/krux/discussions) if the feature is large, is a proposal, or is in need of fleshing out before it can be turned into issue(s) for work. If the pull request you're opening already has an associated issue, please reference it when making your pull request and briefly explain how your PR resolves it. Ideally, each PR should be focused on resolving one issue (exceptions can be made if the work is related or tightly coupled).
+
+**Please note**: When adding a new feature, please checkout and branch off of the `develop` branch. When making a PR, please also make sure to explicitly target `develop`; `main` is the default branch on GitHub because we want it to be easy for users (who aren't necessarily devs) to download and install Krux from source.
+
 # Support
 For technical support installing or using Krux, you can join our [#krux:matrix.org](https://matrix.to/#/#krux:matrix.org) server or [Telegram chat](https://t.me/SC_Krux). Make sure to also check out the [DIYbitcoin chat](https://t.me/diybitcoin) on Telegram, a broader community of tinkerers, builders, hackers, etc.
 
