@@ -18,7 +18,7 @@ def test_point_read(mocker, m5stickv):
     assert data == point
 
 
-def test_gesture_discarted(mocker, m5stickv):
+def test_gesture_discarded(mocker, m5stickv):
     from krux.touchscreens.ft6x36 import FT6X36
 
     touch = FT6X36()
@@ -26,7 +26,7 @@ def test_gesture_discarted(mocker, m5stickv):
     reg_point = [0x00, 0x09, 0x00, 0x09]
     touch.i2c.readfrom_mem = mocker.MagicMock(side_effect=([0x02], reg_point))
     data = touch.current_point()
-    assert data == None
+    assert data is None
 
 
 def test_point_read_error(mocker, m5stickv):

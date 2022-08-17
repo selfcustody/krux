@@ -70,7 +70,7 @@ class Page:
         """Prompts user for leaving"""
         self.ctx.display.clear()
         answer = self.prompt(t("Are you sure?"), self.ctx.display.height() // 2)
-        if self.ctx.input.has_touch:
+        if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
         if answer:
             return ESC_KEY
@@ -107,7 +107,7 @@ class Page:
                 pad.get_valid_index(possible_keys)
             pad.draw_keys(possible_keys)
             btn = self.ctx.input.wait_for_button()
-            if self.ctx.input.has_touch:
+            if self.ctx.input.touch is not None:
                 if btn == BUTTON_TOUCH:
                     btn = pad.touch_to_physical(possible_keys)
             if btn == BUTTON_ENTER:
@@ -154,7 +154,7 @@ class Page:
             elif btn == SWIPE_RIGHT:
                 pad.previous_keyset()
 
-        if self.ctx.input.has_touch:
+        if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
         return buffer
 
@@ -334,7 +334,7 @@ class Page:
             y_key_map += 2 * self.ctx.display.font_height
             self.y_keypad_map.append(y_key_map)
             btn = None
-            if self.ctx.input.has_touch:
+            if self.ctx.input.touch is not None:
                 self.ctx.input.touch.clear_regions()
                 self.ctx.input.touch.x_regions = self.x_keypad_map
                 self.ctx.input.touch.y_regions = self.y_keypad_map
@@ -362,7 +362,7 @@ class Page:
                             2 * self.ctx.display.font_height - 2,
                             lcd.RED,
                         )
-                elif self.ctx.input.has_touch:
+                elif self.ctx.input.touch is not None:
                     for region in self.x_keypad_map:
                         self.ctx.display.fill_rectangle(
                             region,
@@ -465,13 +465,13 @@ class Menu:
         while True:
             gc.collect()
             self.ctx.display.clear()
-            if self.ctx.input.has_touch:
+            if self.ctx.input.touch is not None:
                 self._draw_touch_menu(selected_item_index)
             else:
                 self._draw_menu(selected_item_index)
 
             btn = self.ctx.input.wait_for_button(block=True)
-            if self.ctx.input.has_touch:
+            if self.ctx.input.touch is not None:
                 if btn == BUTTON_TOUCH:
                     selected_item_index = self.ctx.input.touch.current_index()
                     btn = BUTTON_ENTER
@@ -648,7 +648,7 @@ class Keypad:
         for x in range(width + 1):
             region = x * key_h_spacing + DEFAULT_PADDING // 2
             self.x_keypad_map.append(region)
-        if self.ctx.input.has_touch:
+        if self.ctx.input.touch is not None:
             self.ctx.input.touch.y_regions = self.y_keypad_map
             self.ctx.input.touch.x_regions = self.x_keypad_map
         return key_h_spacing, key_v_spacing
@@ -689,7 +689,7 @@ class Keypad:
                             key_offset_x, offset_y, key, lcd.LIGHTBLACK
                         )
                     else:
-                        if self.ctx.input.has_touch:
+                        if self.ctx.input.touch is not None:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,
@@ -704,7 +704,7 @@ class Keypad:
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active
                     ):
-                        if self.ctx.input.has_touch:
+                        if self.ctx.input.touch is not None:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,

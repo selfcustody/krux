@@ -1,5 +1,5 @@
 import pytest
-from ..shared_mocks import MockPrinter, get_mock_open
+from ..shared_mocks import MockPrinter, get_mock_open, mock_context
 
 
 @pytest.fixture
@@ -114,17 +114,11 @@ def test_mnemonic(mocker, m5stickv, tdata):
         ),
     ]
     for case in cases:
-        ctx = mocker.MagicMock(
-            display=mocker.MagicMock(
-                height=mocker.MagicMock(return_value=240),
-                font_height=14,
-            ),
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[2])
-            ),
-            wallet=case[0],
-            printer=case[1],
-        )
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
+        ctx.wallet = case[0]
+        ctx.printer = case[1]
+
         home = Home(ctx)
 
         mocker.spy(home, "display_mnemonic")
@@ -175,17 +169,11 @@ def test_mnemonic_touch(mocker, amigo_tft, tdata):
         ),
     ]
     for case in cases:
-        ctx = mocker.MagicMock(
-            display=mocker.MagicMock(
-                height=mocker.MagicMock(return_value=480),
-                font_height=24,
-            ),
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[2])
-            ),
-            wallet=case[0],
-            printer=case[1],
-        )
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
+        ctx.wallet = case[0]
+        ctx.printer = case[1]
+
         home = Home(ctx)
 
         mocker.spy(home, "display_mnemonic")
@@ -273,17 +261,11 @@ def test_public_key(mocker, m5stickv, tdata):
         ),
     ]
     for case in cases:
-        ctx = mocker.MagicMock(
-            display=mocker.MagicMock(
-                height=mocker.MagicMock(return_value=240),
-                font_height=14,
-            ),
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[2])
-            ),
-            wallet=case[0],
-            printer=case[1],
-        )
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
+        ctx.wallet = case[0]
+        ctx.printer = case[1]
+
         home = Home(ctx)
 
         mocker.spy(home, "display_qr_codes")
@@ -390,17 +372,10 @@ def test_wallet(mocker, m5stickv, tdata):
         if case[0]:
             wallet.load(case[2], FORMAT_PMOFN)
 
-        ctx = mocker.MagicMock(
-            display=mocker.MagicMock(
-                height=mocker.MagicMock(return_value=240),
-                font_height=14,
-            ),
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[4])
-            ),
-            wallet=wallet,
-            printer=case[3],
-        )
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[4])
+        ctx.wallet = wallet
+        ctx.printer = case[3]
 
         home = Home(ctx)
         mocker.patch.object(
@@ -651,17 +626,10 @@ def test_scan_address(mocker, m5stickv, tdata):
         if case[2]:
             wallet.load(case[1], FORMAT_PMOFN)
 
-        ctx = mocker.MagicMock(
-            display=mocker.MagicMock(
-                height=mocker.MagicMock(return_value=240),
-                font_height=14,
-            ),
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[6])
-            ),
-            wallet=wallet,
-            printer=case[4],
-        )
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[6])
+        ctx.wallet = wallet
+        ctx.printer = case[4]
 
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], FORMAT_NONE))
@@ -868,18 +836,11 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         if case[2]:
             wallet.load(case[1], FORMAT_PMOFN)
 
-        ctx = mocker.MagicMock(
-            display=mocker.MagicMock(
-                height=mocker.MagicMock(return_value=240),
-                font_height=14,
-            ),
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[9])
-            ),
-            wallet=wallet,
-            printer=case[8],
-            sd_card=case[10],
-        )
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[9])
+        ctx.wallet = wallet
+        ctx.printer = case[8]
+        ctx.sd_card = case[10]
 
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], case[4]))
@@ -1046,18 +1007,11 @@ def test_sign_message(mocker, m5stickv, tdata):
     for case in cases:
         wallet = Wallet(tdata.SINGLEKEY_SIGNING_KEY)
 
-        ctx = mocker.MagicMock(
-            display=mocker.MagicMock(
-                height=mocker.MagicMock(return_value=240),
-                font_height=14,
-            ),
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[3])
-            ),
-            wallet=wallet,
-            printer=case[2],
-            sd_card=case[6],
-        )
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[3])
+        ctx.wallet = wallet
+        ctx.printer = case[2]
+        ctx.sd_card = case[6]
 
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))

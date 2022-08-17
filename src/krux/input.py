@@ -37,7 +37,6 @@ SWIPE_DOWN = 7
 
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
-NONBLOCKING_CHECKS = 100000
 
 PRESSED = 0
 RELEASED = 1
@@ -80,8 +79,10 @@ class Input:
         # This flag, used in selection outlines, is set if buttons are being used
         self.buttons_active = True
         self.touch = None
-        self.has_touch = board.config["krux"]["display"]["touch"]
-        if self.has_touch:
+        if (
+            "touch" in board.config["krux"]["display"]
+            and board.config["krux"]["display"]["touch"]
+        ):
             self.touch = Touch(
                 board.config["lcd"]["width"], board.config["lcd"]["height"]
             )
@@ -176,8 +177,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_ENTER
             self.buttons_active = True
-
-        if self.page_value() == PRESSED:
+        elif self.page_value() == PRESSED:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_value() == PRESSED:
@@ -188,8 +188,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_PAGE
             self.buttons_active = True
-
-        if self.page_prev_value() == PRESSED:
+        elif self.page_prev_value() == PRESSED:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_prev_value() == PRESSED:
@@ -200,8 +199,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_PAGE_PREV
             self.buttons_active = True
-
-        if self.touch_value() == PRESSED:
+        elif self.touch_value() == PRESSED:
             # Wait for release
             while self.touch_value() == PRESSED:
                 self.entropy += 1

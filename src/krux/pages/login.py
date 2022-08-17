@@ -435,7 +435,7 @@ class Login(Page):
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
-        if self.ctx.input.has_touch:
+        if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
             offset_y = self.ctx.display.height() * 2 // 3
             self.ctx.input.touch.add_y_delimiter(offset_y)
@@ -545,7 +545,7 @@ class Login(Page):
                 if current_category == category:
                     if btn == BUTTON_PAGE:
                         new_category = categories[(i + 1) % len(categories)]
-                    else:  # BUTTON_PAGE_PREV
+                    elif btn == BUTTON_PAGE_PREV:
                         new_category = categories[(i - 1) % len(categories)]
                     setting.__set__(settings_namespace, new_category)
                     break
