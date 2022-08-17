@@ -1,0 +1,41 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Navigate to Printer
+press BUTTON_B
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Navigate to Thermal
+press BUTTON_B
+press BUTTON_A
+
+screenshot thermal-options.png
+
+screenshot thermal-options-baudrate.png
+
+press BUTTON_B
+screenshot thermal-options-heat-dots.png
+
+press BUTTON_B
+screenshot thermal-options-heat-interval.png
+
+press BUTTON_B
+screenshot thermal-options-heat-time.png
+
+press BUTTON_B
+screenshot thermal-options-paper-width.png
+
+press BUTTON_B
+screenshot thermal-options-rx-pin.png
+
+press BUTTON_B
+screenshot thermal-options-tx-pin.png
+
+press BUTTON_B
+screenshot thermal-options-back.png

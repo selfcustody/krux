@@ -7,13 +7,16 @@ press BUTTON_A
 
 # Navigate to Printer
 press BUTTON_B
+press BUTTON_B
+press BUTTON_B
 press BUTTON_A
 
 screenshot printer-options.png
 
-screenshot printer-options-9600.png
+screenshot printer-options-driver.png
 
 press BUTTON_B
-screenshot printer-options-19200.png
+screenshot printer-options-thermal.png
 
 press BUTTON_B
+screenshot printer-options-back.png

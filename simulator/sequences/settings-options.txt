@@ -7,16 +7,16 @@ press BUTTON_A
 
 screenshot settings-options.png
 
-screenshot settings-options-network.png
+screenshot settings-options-bitcoin.png
+
+press BUTTON_B
+screenshot settings-options-language.png
+
+press BUTTON_B
+screenshot settings-options-logging.png
 
 press BUTTON_B
 screenshot settings-options-printer.png
-
-press BUTTON_B
-screenshot settings-options-locale.png
-
-press BUTTON_B
-screenshot settings-options-debug.png
 
 press BUTTON_B
 screenshot settings-options-back.png
