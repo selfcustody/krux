@@ -404,9 +404,9 @@ class Page:
 class ListView:
     """Acts as a fixed-size, sliding window over an underlying list"""
 
-    def __init__(self, lst, size):
+    def __init__(self, lst, max_size):
         self.list = lst
-        self.size = size
+        self.max_size = max_size
         self.offset = 0
         self.iter_index = 0
 
@@ -418,22 +418,27 @@ class ListView:
         return self
 
     def __next__(self):
-        if self.iter_index < self.size:
+        if self.iter_index < len(self):
             self.iter_index += 1
             return self.__getitem__(self.iter_index - 1)
         raise StopIteration
 
+    def __len__(self):
+        return min(self.max_size, len(self.list[self.offset :]))
+
     def move_forward(self):
         """Slides the window one size-increment forward, wrapping around"""
-        self.offset += self.size
+        self.offset += self.max_size
         if self.offset >= len(self.list):
             self.offset = 0
 
     def move_backward(self):
         """Slides the window one size-increment backward, wrapping around"""
-        self.offset -= self.size
+        self.offset -= self.max_size
         if self.offset < 0:
-            self.offset = len(self.list) - self.size
+            self.offset = int(
+                (math.ceil(len(self.list) / self.max_size) - 1) * self.max_size
+            )
 
     def index(self, i):
         """Returns the true index of an element in the underlying list"""
@@ -448,14 +453,12 @@ class Menu:
     def __init__(self, ctx, menu):
         self.ctx = ctx
         self.menu = menu
-        view_size = (self.ctx.display.height() - 2 * DEFAULT_PADDING) // (
-            2 * self.ctx.display.font_height
+        max_viewable = min(
+            (self.ctx.display.height() - 2 * DEFAULT_PADDING)
+            // (2 * self.ctx.display.font_height),
+            len(self.menu),
         )
-        if view_size > len(self.menu):
-            view_size = len(self.menu)
-        while len(self.menu) % view_size != 0:
-            view_size -= 1
-        self.menu_view = ListView(self.menu, view_size)
+        self.menu_view = ListView(self.menu, max_viewable)
 
     def run_loop(self):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
@@ -493,13 +496,16 @@ class Menu:
                     )
                     self.ctx.input.wait_for_button()
             elif btn == BUTTON_PAGE:
-                selected_item_index = (selected_item_index + 1) % self.menu_view.size
+                selected_item_index = (selected_item_index + 1) % len(self.menu_view)
                 if selected_item_index == 0:
                     self.menu_view.move_forward()
             elif btn == BUTTON_PAGE_PREV:
-                selected_item_index = (selected_item_index - 1) % self.menu_view.size
-                if selected_item_index == self.menu_view.size - 1:
+                selected_item_index = (selected_item_index - 1) % len(self.menu_view)
+                if selected_item_index == len(self.menu_view) - 1:
                     self.menu_view.move_backward()
+                    # Update selected item index to be the last viewable item,
+                    # which may be a different index than before we moved backward
+                    selected_item_index = len(self.menu_view) - 1
             elif btn == SWIPE_UP:
                 self.menu_view.move_forward()
             elif btn == SWIPE_DOWN:
@@ -548,7 +554,7 @@ class Menu:
                 )
 
     def _draw_menu(self, selected_item_index):
-        offset_y = self.menu_view.size * self.ctx.display.font_height * 2
+        offset_y = len(self.menu_view) * self.ctx.display.font_height * 2
         offset_y = self.ctx.display.height() - offset_y
         offset_y //= 2
         for i, menu_item in enumerate(self.menu_view):

@@ -43,7 +43,7 @@ from machine import UART
 from ..settings import CategorySetting, NumberSetting, SettingsNamespace, Settings
 from ..i18n import t
 from ..wdt import wdt
-from . import Printer
+from . import Printer, BAUDRATES
 
 DEFAULT_TX_PIN = (
     board.config["board_info"]["CONNEXT_A"]
@@ -76,7 +76,7 @@ class AdafruitPrinterSettings(SettingsNamespace):
     """Adafruit thermal printer settings"""
 
     namespace = "settings.printer.thermal.adafruit"
-    baudrate = CategorySetting("baudrate", 9600, [9600, 19200])
+    baudrate = CategorySetting("baudrate", 9600, BAUDRATES)
     paper_width = NumberSetting(int, "paper_width", 384, [100, 1000])
     tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
     rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])

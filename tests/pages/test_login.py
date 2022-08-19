@@ -800,6 +800,7 @@ def test_settings(mocker, m5stickv):
                 BUTTON_ENTER,
                 # Back to Printer
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE,
@@ -894,6 +895,7 @@ def test_settings(mocker, m5stickv):
                 BUTTON_ENTER,
                 # Back to Printer
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE,
@@ -964,7 +966,7 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
                 # Back to Thermal
                 7,
                 # Back to Printer
-                2,
+                3,
                 # Leave Settings
                 4,
             ),

@@ -24,7 +24,11 @@ from ..settings import CategorySetting, SettingsNamespace, Settings
 
 PRINTERS = {
     "thermal/adafruit": ("thermal", "AdafruitPrinter"),
+    "cnc/file": ("cnc", "FilePrinter"),
+    # "cnc/grbl": ("cnc", "GRBLPrinter"),
 }
+
+BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
 
 class PrinterSettings(SettingsNamespace):
@@ -35,14 +39,17 @@ class PrinterSettings(SettingsNamespace):
 
     def __init__(self):
         from .thermal import ThermalSettings
+        from .cnc import CNCSettings
 
         self.thermal = ThermalSettings()
+        self.cnc = CNCSettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "thermal": t("Thermal"),
             "driver": t("Driver"),
+            "cnc": t("CNC"),
         }[attr]
 
 
