@@ -26,7 +26,7 @@ from machine import I2C
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
-PORTRAIT, LANDSCAPE = board.config["krux"]["display"]["orientation"]
+PORTRAIT, LANDSCAPE = [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
 

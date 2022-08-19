@@ -13,6 +13,7 @@ def test_init(mocker, m5stickv):
 
     spy = mocker.spy(Camera, "initialize_sensor")
     c = Camera()
+    c.initialize_sensor()
 
     assert isinstance(c, Camera)
     spy.assert_called()
