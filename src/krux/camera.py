@@ -22,7 +22,6 @@
 import gc
 import sensor
 import lcd
-import board
 from .qr import QRPartParser
 from .wdt import wdt
 
