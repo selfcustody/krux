@@ -66,8 +66,7 @@ class Login(Page):
     """Represents the login page of the app"""
 
     def __init__(self, ctx):
-        Page.__init__(
-            self,
+        super().__init__(
             ctx,
             Menu(
                 ctx,

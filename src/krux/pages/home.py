@@ -37,8 +37,7 @@ class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
-        Page.__init__(
-            self,
+        super().__init__(
             ctx,
             Menu(
                 ctx,

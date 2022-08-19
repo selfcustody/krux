@@ -27,11 +27,40 @@ import pygame as pg
 from kruxsim import devices, events
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--device", type=str, default=devices.PC, required=False)
-parser.add_argument("--with-printer", type=bool, default=False, required=False)
-parser.add_argument("--with-sd", type=bool, default=False, required=False)
-parser.add_argument("--sequence", type=str, default="", required=False)
-parser.add_argument("--exit-after-sequence", type=bool, default=True, required=False)
+parser.add_argument(
+    "--device",
+    type=str,
+    default=devices.PC,
+    required=False,
+)
+parser.add_argument(
+    "--sequence",
+    type=str,
+    default="",
+    required=False,
+)
+parser.add_argument(
+    "--printer",
+    type=bool,
+    default=False,
+    required=False,
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--sd",
+    type=bool,
+    default=False,
+    required=False,
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--exit-after-sequence",
+    type=bool,
+    default=True,
+    required=False,
+    action=argparse.BooleanOptionalAction,
+)
+
 args = parser.parse_args()
 
 pg.init()
@@ -41,7 +70,7 @@ from kruxsim.mocks import board
 
 board.register_device(args.device)
 
-if args.with_sd:
+if args.sd:
     from kruxsim.mocks import uopen
     from kruxsim.mocks import uos
 
@@ -53,7 +82,7 @@ from kruxsim.mocks import flash
 from kruxsim.mocks import machine
 from kruxsim.mocks import pmu
 
-if args.with_printer:
+if args.printer:
     machine.simulate_printer()
 
 from kruxsim.mocks import secp256k1
