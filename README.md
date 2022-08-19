@@ -85,7 +85,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 This can be useful for testing a change to the krux code without having to run a full build and flash, visual regression testing,
 generating screenshots, or even just trying out Krux before purchasing a device.
 ```bash
-cd simulator && poetry run python simulator.py --device maixpy_amigo_tfts
+cd simulator && poetry run python simulator.py --device maixpy_amigo_tft
 ```
 ```bash
 cd simulator && poetry run python simulator.py --device maixpy_m5stickv
