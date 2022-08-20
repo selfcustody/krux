@@ -31,7 +31,7 @@ from ..metadata import VERSION
 from ..settings import CategorySetting, NumberSetting, Settings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
-from ..key import Key, pick_final_word, to_mnemonic_words
+from ..key import Key, pick_final_word
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..i18n import t
@@ -184,9 +184,9 @@ class Login(Page):
             )
             self.ctx.input.wait_for_button()
             num_bytes = 16 if num_rolls == min_rolls else 32
-            words = to_mnemonic_words(
+            words = bip39.mnemonic_from_bytes(
                 hashlib.sha256(entropy_bytes).digest()[:num_bytes]
-            )
+            ).split()
             return self._load_key_from_words(words)
 
         return MENU_CONTINUE
