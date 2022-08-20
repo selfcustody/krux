@@ -36,17 +36,21 @@ class SettingsNamespace:
 
     def namespace_list(self):
         """Returns the list of child SettingsNamespace objects"""
-        return [
+        namespaces = [
             ns for ns in self.__dict__.values() if isinstance(ns, SettingsNamespace)
         ]
+        namespaces.sort(key=lambda ns: str(ns.__class__.__name__))
+        return namespaces
 
     def setting_list(self):
         """Returns the list of child Setting objects"""
-        return [
+        settings = [
             getattr(self.__class__, setting)
             for setting in dir(self.__class__)
             if isinstance(getattr(self.__class__, setting), Setting)
         ]
+        settings.sort(key=lambda s: s.attr)
+        return settings
 
 
 class Settings(SettingsNamespace):

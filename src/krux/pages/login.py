@@ -480,18 +480,18 @@ class Login(Page):
             namespace_list = settings_namespace.namespace_list()
             items = [
                 (
-                    settings_namespace.label(setting.attr),
-                    self.setting(settings_namespace, setting),
+                    settings_namespace.label(ns.namespace.split(".")[-1]),
+                    self.namespace(ns),
                 )
-                for setting in setting_list
+                for ns in namespace_list
             ]
             items.extend(
                 [
                     (
-                        settings_namespace.label(ns.namespace.split(".")[-1]),
-                        self.namespace(ns),
+                        settings_namespace.label(setting.attr),
+                        self.setting(settings_namespace, setting),
                     )
-                    for ns in namespace_list
+                    for setting in setting_list
                 ]
             )
 
