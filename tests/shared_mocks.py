@@ -173,7 +173,6 @@ def board_m5stickv():
                     "inverted_coordinates": False,
                     "qr_colors": [16904, 61307],
                 },
-                "sensor": {"flipped": False, "lenses": False},
             },
         }
     )
@@ -224,7 +223,6 @@ def board_amigo_tft():
                     "inverted_coordinates": True,
                     "qr_colors": [0, 6342],
                 },
-                "sensor": {"flipped": True, "lenses": False},
             },
         }
     )
@@ -253,7 +251,6 @@ def board_dock():
                     "inverted_coordinates": False,
                     "qr_colors": [0, 6342],
                 },
-                "sensor": {"flipped": True, "lenses": False},
             },
         }
     )
