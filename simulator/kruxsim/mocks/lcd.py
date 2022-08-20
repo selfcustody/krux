@@ -81,12 +81,8 @@ def rotation(r):
         global screen
         global portrait
         if not screen:
-            if r == BOARD_CONFIG["krux"]["display"]["orientation"][0]:
-                portrait = True
-                screen = pg.Surface((HEIGHT, WIDTH)).convert()
-            else:
-                portrait = False
-                screen = pg.Surface((WIDTH, HEIGHT)).convert()
+            portrait = True
+            screen = pg.Surface((HEIGHT, WIDTH)).convert()
 
     pg.event.post(pg.event.Event(events.LCD_ROTATION_EVENT, {"f": run}))
 
