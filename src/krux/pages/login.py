@@ -31,7 +31,7 @@ from ..metadata import VERSION
 from ..settings import CategorySetting, NumberSetting, Settings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
-from ..key import Key, pick_final_word, to_mnemonic_words
+from ..key import Key, pick_final_word
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..i18n import t
@@ -66,8 +66,7 @@ class Login(Page):
     """Represents the login page of the app"""
 
     def __init__(self, ctx):
-        Page.__init__(
-            self,
+        super().__init__(
             ctx,
             Menu(
                 ctx,
@@ -185,9 +184,9 @@ class Login(Page):
             )
             self.ctx.input.wait_for_button()
             num_bytes = 16 if num_rolls == min_rolls else 32
-            words = to_mnemonic_words(
+            words = bip39.mnemonic_from_bytes(
                 hashlib.sha256(entropy_bytes).digest()[:num_bytes]
-            )
+            ).split()
             return self._load_key_from_words(words)
 
         return MENU_CONTINUE
@@ -481,18 +480,18 @@ class Login(Page):
             namespace_list = settings_namespace.namespace_list()
             items = [
                 (
-                    settings_namespace.label(setting.attr),
-                    self.setting(settings_namespace, setting),
+                    settings_namespace.label(ns.namespace.split(".")[-1]),
+                    self.namespace(ns),
                 )
-                for setting in setting_list
+                for ns in namespace_list
             ]
             items.extend(
                 [
                     (
-                        settings_namespace.label(ns.namespace.split(".")[-1]),
-                        self.namespace(ns),
+                        settings_namespace.label(setting.attr),
+                        self.setting(settings_namespace, setting),
                     )
-                    for ns in namespace_list
+                    for setting in setting_list
                 ]
             )
 

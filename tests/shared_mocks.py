@@ -170,11 +170,9 @@ def board_m5stickv():
                 "display": {
                     "touch": False,
                     "font": [8, 14],
-                    "orientation": [1, 2],
                     "inverted_coordinates": False,
                     "qr_colors": [16904, 61307],
                 },
-                "sensor": {"flipped": False, "lenses": False},
             },
         }
     )
@@ -222,11 +220,9 @@ def board_amigo_tft():
                 "display": {
                     "touch": True,
                     "font": [12, 24],
-                    "orientation": [1, 0],
                     "inverted_coordinates": True,
                     "qr_colors": [0, 6342],
                 },
-                "sensor": {"flipped": True, "lenses": False},
             },
         }
     )
@@ -252,11 +248,9 @@ def board_dock():
                 "display": {
                     "touch": False,
                     "font": [8, 16],
-                    "orientation": [1, 0],
                     "inverted_coordinates": False,
                     "qr_colors": [0, 6342],
                 },
-                "sensor": {"flipped": True, "lenses": False},
             },
         }
     )

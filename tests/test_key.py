@@ -14,8 +14,8 @@ def tdata(mocker):
     D6_STATES = "123456"
     D20_STATES = [str(i + 1) for i in range(20)]
 
-    TEST_D6_MIN_ENTROPY = "-".join([D6_STATES[i % 6] for i in range(50)])
-    TEST_D6_MAX_ENTROPY = "-".join([D6_STATES[i % 6] for i in range(100)])
+    TEST_D6_MIN_ENTROPY = "".join([D6_STATES[i % 6] for i in range(50)])
+    TEST_D6_MAX_ENTROPY = "".join([D6_STATES[i % 6] for i in range(100)])
     TEST_D20_MIN_ENTROPY = "-".join([D20_STATES[i % 20] for i in range(30)])
     TEST_D20_MAX_ENTROPY = "-".join([D20_STATES[i % 20] for i in range(60)])
 
@@ -249,18 +249,18 @@ def test_sign_fails_with_invalid_hash(mocker, m5stickv, tdata):
 def test_to_mnemonic_words(mocker, m5stickv, tdata):
     mock_modules(mocker)
     import hashlib
-    from krux.key import to_mnemonic_words
+    from embit.bip39 import mnemonic_from_bytes
 
     cases = [
         (
             tdata.TEST_D6_MIN_ENTROPY,
             16,
-            "range fatigue into stadium endless kitchen royal present rally welcome scatter twice",
+            "unveil nice picture region tragic fault cream strike tourist control recipe tourist",
         ),
         (
             tdata.TEST_D6_MAX_ENTROPY,
             32,
-            "universe multiply siege pizza chapter copper huge regular flock soft tragic what method lesson ancient acquire amused dinner dial skate toilet affair warrior crazy",
+            "tornado cactus wheel picture target finish home neither trend picture shoulder endless deputy glide open oxygen another ability forum swear side alcohol devote random",
         ),
         (
             tdata.TEST_D20_MIN_ENTROPY,
@@ -274,8 +274,10 @@ def test_to_mnemonic_words(mocker, m5stickv, tdata):
         ),
     ]
     for case in cases:
-        words = to_mnemonic_words(hashlib.sha256(case[0].encode()).digest()[: case[1]])
-        assert " ".join(words) == case[2]
+        words = mnemonic_from_bytes(
+            hashlib.sha256(case[0].encode()).digest()[: case[1]]
+        )
+        assert words == case[2]
 
 
 def test_pick_final_word(mocker, m5stickv, tdata):

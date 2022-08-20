@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # pylint: disable=W0102
-import hashlib
 import time
 
 try:
@@ -88,20 +87,6 @@ class Key:
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
         return self.root.derive(self.derivation).sign(message_hash)
-
-
-# Adapted from: https://github.com/trezor/python-mnemonic
-def to_mnemonic_words(entropy):
-    """Turns entropy into a mnemonic"""
-    entropy_hash = hexlify(hashlib.sha256(entropy).digest()).decode()
-    bits = ("{:0>%d}" % (len(entropy) * 8)).format(
-        bin(int.from_bytes(entropy, "big"))[2:]
-    ) + ("{:0>256}".format(bin(int(entropy_hash, 16))[2:])[: len(entropy) * 8 // 32])
-    words = []
-    for i in range(len(bits) // 11):
-        idx = int(bits[i * 11 : (i + 1) * 11], 2)
-        words.append(WORDLIST[idx])
-    return words
 
 
 def pick_final_word(ctx, words):

@@ -11,12 +11,10 @@ from .shared_mocks import (
 def test_init(mocker, m5stickv):
     from krux.camera import Camera
 
-    spy = mocker.spy(Camera, "initialize_sensor")
     c = Camera()
     c.initialize_sensor()
 
     assert isinstance(c, Camera)
-    spy.assert_called()
 
 
 def test_initialize_sensor(mocker, m5stickv):
