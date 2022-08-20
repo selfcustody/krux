@@ -24,6 +24,8 @@ import gc
 import hashlib
 import os
 import lcd
+from embit.wordlists.bip39 import WORDLIST
+from ..settings import Settings
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
@@ -56,8 +58,20 @@ class Home(Page):
         """Handler for the 'mnemonic' menu item"""
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
-        self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
-        self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
+
+        def to_compact_seed_qr(mnemonic):
+            checksum_bits = 8 if len(mnemonic) == 24 else 4
+            indexes = [WORDLIST.index(word) for word in mnemonic]
+            bitstring = "".join(
+                ["{:0>11}".format(bin(index)[2:]) for index in indexes]
+            )[:-checksum_bits]
+            return int(bitstring, 2).to_bytes((len(bitstring) + 7) // 8, "big")
+
+        mnemonic = self.ctx.wallet.key.mnemonic
+        if Settings().display.qr.mnemonic_format == "compact_seed_qr":
+            mnemonic = to_compact_seed_qr(mnemonic.split())
+        self.display_qr_codes(mnemonic, FORMAT_NONE, None)
+        self.print_qr_prompt(mnemonic, FORMAT_NONE)
         return MENU_CONTINUE
 
     def public_key(self):

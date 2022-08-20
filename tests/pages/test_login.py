@@ -804,6 +804,7 @@ def test_settings(mocker, m5stickv):
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
@@ -842,6 +843,7 @@ def test_settings(mocker, m5stickv):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Leave Settings
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
@@ -899,6 +901,7 @@ def test_settings(mocker, m5stickv):
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
@@ -944,7 +947,7 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Leave Settings
-                4,
+                5,
             ),
             [
                 mocker.call("Network\nmain"),
@@ -968,7 +971,7 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
                 # Back to Printer
                 3,
                 # Leave Settings
-                4,
+                5,
             ),
             [
                 mocker.call("Baudrate\n9600"),
@@ -1003,7 +1006,7 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Leave Settings
-                4,
+                5,
             ),
             [
                 mocker.call("Log Level\nNONE"),

@@ -60,11 +60,13 @@ class Settings(SettingsNamespace):
         from .i18n import I18nSettings
         from .logging import LoggingSettings
         from .printers import PrinterSettings
+        from .display import DisplaySettings
 
         self.bitcoin = BitcoinSettings()
         self.i18n = I18nSettings()
         self.logging = LoggingSettings()
         self.printer = PrinterSettings()
+        self.display = DisplaySettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -75,6 +77,7 @@ class Settings(SettingsNamespace):
             "i18n": t("Language"),
             "logging": t("Logging"),
             "printer": t("Printer"),
+            "display": t("Display"),
         }[attr]
 
 

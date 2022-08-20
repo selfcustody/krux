@@ -19,19 +19,51 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=C0103
 import time
 import lcd
 import board
 from machine import I2C
+from .i18n import t
+from .settings import CategorySetting, SettingsNamespace
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 PORTRAIT, LANDSCAPE = [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
-
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
+
+
+class DisplaySettings(SettingsNamespace):
+    """Display-specific settings"""
+
+    namespace = "settings.display"
+
+    def __init__(self):
+        self.qr = QRSettings()
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "qr": t("QR"),
+        }[attr]
+
+
+class QRSettings(SettingsNamespace):
+    """QR-specific settings"""
+
+    namespace = "settings.display.qr"
+    mnemonic_format = CategorySetting(
+        "mnemonic_format", "plaintext", ["plaintext", "compact_seed_qr"]
+    )
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "mnemonic_format": t("Mnemonic Format"),
+        }[attr]
 
 
 class Display:
