@@ -119,7 +119,7 @@ class AdafruitPrinter(Printer):
 
         self.setup()
 
-        if not self.has_paper():
+        if self.has_paper() == 0:
             raise ValueError("missing paper")
 
     def setup(self):
@@ -201,7 +201,7 @@ class AdafruitPrinter(Printer):
         # Bit 2 of response seems to be paper status
         res = self.uart_conn.read(1)
         if res is None:
-            return False
+            return None
         stat = ord(res) & 0b00000100
         # If set, we have paper; if clear, no paper
         return stat == 0
