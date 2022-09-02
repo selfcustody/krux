@@ -393,7 +393,9 @@ class Page:
 
     def shutdown(self):
         """Handler for the 'shutdown' menu item"""
-        return MENU_SHUTDOWN
+        if self.prompt("Are you sure?", self.ctx.display.height() // 2):
+            return MENU_SHUTDOWN
+        return None
 
     def run(self):
         """Runs the page's menu loop"""
