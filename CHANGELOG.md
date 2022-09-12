@@ -1,3 +1,18 @@
+# Version 22.08.2 - September 13, 2022
+
+This patch release reverts the zpub QR code format, once again including key origin derivation info which is necessary for BlueWallet to use when preparing PSBTs for signing with single-key wallets.
+
+It is recommended to update to this version if you are using a single-key "Imported Watch-only" wallet with BlueWallet and are seeing a "cannot sign" error message when trying to send an outgoing transaction. If so, please do the following:
+
+1. Upgrade Krux to this new release
+2. Delete the affected wallet in BlueWallet (funds are safu as long as you have your mnemonic)
+3. Create a new wallet in BlueWallet by importing from the new zpub QR code that Krux now displays.
+4. Open the wallet in BlueWallet and pull down to fetch the old wallet's transaction history.
+5. Create a new outgoing transaction and scan the QR code with Krux.
+6. Krux should display the tx information and allow you to sign.
+7. Display the signed QR back to BlueWallet.
+8. Broadcast!
+
 # Version 22.08.1 - August 11, 2022
 
 This release is to fix a bug that would have prevented Amigos from performing airgapped upgrades to the next release.
