@@ -281,7 +281,7 @@ def test_public_key(mocker, m5stickv, tdata):
                 None,
             ),
             mocker.call(
-                ctx.wallet.key.xpub(ctx.wallet.key.network[version]),
+                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
                 None,
             ),
@@ -289,7 +289,7 @@ def test_public_key(mocker, m5stickv, tdata):
         print_qr_calls = [
             mocker.call(ctx.wallet.key.key_expression(None), FORMAT_NONE),
             mocker.call(
-                ctx.wallet.key.xpub(ctx.wallet.key.network[version]),
+                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
             ),
         ]

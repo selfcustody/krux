@@ -19,7 +19,10 @@ def tdata(mocker):
         "p1of3 UUucvki6KWyS35DhetbWPw1DiaccbHKywScF96E8VUwEnN1gss947UasRfkNxtrkzCeHziHyMCuoiQ2mSYsbYXuV3YwYBZwFh1c6xtBAEK1aDgPwMgqf74xTzf3m4KH",
         "p3of3 gNNg4A4LNC2ZUGLsALZffNvg3yh3qg6rFxhkiyzWc44kx9Khp6Evm1j4Njh8kjifkngLTPFtX3uWNLAB1XrvpPMx6kkkhr7RnFVrA4JsDp5BwVGAXBoSBLTqweFevZ5",
     ]
-    TEST_PARTS_FORMAT_UR = [
+    TEST_PARTS_FORMAT_SINGLEPART_UR = [
+        "ur:crypto-psbt/hkadchjojkidjyzmadaejsaoaeaeaeadtkfnhdsrdtlfplcxgdlotarygawmndaopsurgtfsplkooncmswqdampahlvloyglaeaeaeaeaezczmzmzmaokefhhlahaeaeaeaecmaebbdleepkcewtbkgupfgooemenbftkifewtolmklugmlamtmkaeaeaeaeaecmaebbvaimzezmsrlsmnjswtoekgatvlpfbaueimvsvyhnaeaeaeaeaeadadctaevyykahaeaeaeaecmaebbtissotwsaswlmsrpwlnneskbgymyvlvecybylkoycpamaovdpydaemretynnmsaxaspkvtjtnngawfjzvysozerktyglspvtttsfnbqzytsrcfcsjksktnbkghaeaelaadaeaelaaeaeaelaaeaeaeaeaeaeaeaeaecpaoaxhlgawpsnghtiasnnfxioidktstoltyidhlhscapdlehlwkndytgyknktmeosktoncsjksktnbkghaeaelaadaeaelaaeaeaelaadaeaeaeaeaeaeaeaeaeamgrmswl"
+    ]
+    TEST_PARTS_FORMAT_MULTIPART_UR = [
         "ur:crypto-psbt/2-8/lpaoaycfadcycyamgrmswlhddkplkooncmswqdampahlvloyglaeaeaeaeaezczmzmzmaokefhhlahaeaeaeaecmaebbdleepktpcpnyde",
         "ur:crypto-psbt/1-8/lpadaycfadcycyamgrmswlhddkhkadchjojkidjyzmadaejsaoaeaeaeadtkfnhdsrdtlfplcxgdlotarygawmndaopsurgtfswmwkinva",
         "ur:crypto-psbt/3-8/lpaxaycfadcycyamgrmswlhddkcewtbkgupfgooemenbftkifewtolmklugmlamtmkaeaeaeaeaecmaebbvaimzezmsrlsmnjseylanegy",
@@ -38,7 +41,8 @@ def tdata(mocker):
             "TEST_DATA_UR",
             "TEST_PARTS_FORMAT_NONE",
             "TEST_PARTS_FORMAT_PMOFN",
-            "TEST_PARTS_FORMAT_UR",
+            "TEST_PARTS_FORMAT_SINGLEPART_UR",
+            "TEST_PARTS_FORMAT_MULTIPART_UR",
         ],
     )(
         TEST_DATA_BYTES,
@@ -46,7 +50,8 @@ def tdata(mocker):
         TEST_DATA_UR,
         TEST_PARTS_FORMAT_NONE,
         TEST_PARTS_FORMAT_PMOFN,
-        TEST_PARTS_FORMAT_UR,
+        TEST_PARTS_FORMAT_SINGLEPART_UR,
+        TEST_PARTS_FORMAT_MULTIPART_UR,
     )
 
 
@@ -71,7 +76,8 @@ def test_parser(mocker, m5stickv, tdata):
     cases = [
         (FORMAT_NONE, tdata.TEST_PARTS_FORMAT_NONE),
         (FORMAT_PMOFN, tdata.TEST_PARTS_FORMAT_PMOFN),
-        (FORMAT_UR, tdata.TEST_PARTS_FORMAT_UR),
+        (FORMAT_UR, tdata.TEST_PARTS_FORMAT_SINGLEPART_UR),
+        (FORMAT_UR, tdata.TEST_PARTS_FORMAT_MULTIPART_UR),
     ]
     for case in cases:
         fmt = case[0]
