@@ -278,19 +278,6 @@ class Login(Page):
         words = []
         self.ctx.display.draw_hcentered_text(title)
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-
-            def delete_word(buffer):
-                nonlocal words
-                if len(buffer) > 0:
-                    return buffer[0:-1]
-                if len(words) > 0:
-                    self.ctx.display.clear()
-                    if self.prompt("Delete word "+str(len(words))+"?("+str(words[-1])+")", self.ctx.display.height() // 2):
-                        words.pop()
-                        return("Del")
-                    return("Keep")
-                return buffer
-
             while len(words) < 24:
                 if len(words) == 12:
                     self.ctx.display.clear()
@@ -304,7 +291,6 @@ class Login(Page):
                         [charset],
                         autocomplete_fn,
                         possible_keys_fn,
-                        delete_key_fn=delete_word,
                     )
                     if word == ESC_KEY:
                         return MENU_CONTINUE
@@ -337,10 +323,8 @@ class Login(Page):
                         word = pick_final_word(self.ctx, words)
 
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(word)
-                self.ctx.input.wait_for_button()
-
-                words.append(word)
+                if self.prompt(word, self.ctx.display.height() // 2):
+                    words.append(word)
 
             return self._load_key_from_words(words)
 

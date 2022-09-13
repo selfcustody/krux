@@ -116,14 +116,6 @@ class Page:
                 if pad.cur_key_index == pad.del_index:
                     if delete_key_fn is not None:
                         buffer = delete_key_fn(buffer)
-                        if buffer == "Del":
-                            buffer = ""
-                            pad.reset()
-                            number = int(title.split()[1])
-                            title = "Word " + str(number-1)
-                        elif buffer == "Keep":
-                            buffer = ""
-                            pad.reset()
                     else:
                         buffer = buffer[: len(buffer) - 1]
                     changed = True
@@ -149,7 +141,7 @@ class Page:
 
                     #auto-Go for load "Via Numbers"
                     if len(pad.keys) == 10:
-                        if len(buffer) == 4 or (len(buffer) == 3 and int(buffer[0]) > 2):
+                        if len(buffer) == 4 or (len(buffer) == 3 and int(buffer) > 204):
                             break
 
                 if changed and go_on_change:
