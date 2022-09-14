@@ -299,9 +299,7 @@ class Page:
         if self.ctx.printer is None:
             return
         self.ctx.display.clear()
-        time.sleep_ms(1000)
-        self.ctx.display.draw_centered_text(t("Print to QR?"))
-        if self.wait_for_proceed():
+        if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
             i = 0
             for qr_code, count in to_qr_codes(
                 data, self.ctx.printer.qr_data_width(), qr_format
