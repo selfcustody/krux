@@ -24,10 +24,11 @@ import gc
 import hashlib
 import os
 import lcd
+from embit import bip39
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
-from ..qr import FORMAT_NONE, FORMAT_PMOFN
+from ..qr import to_qr_codes, FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
 from ..i18n import t
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
@@ -54,11 +55,88 @@ class Home(Page):
 
     def mnemonic(self):
         """Handler for the 'mnemonic' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Words"), self.display_mnemonic_words),
+                (t("Standard QR"), self.display_standard_qr),
+                (t("Compact SeedQR"), self.display_compact_qr),
+                (t("Transcribe SeedQR"), self.transcribe_compact_qr),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        submenu.run_loop()
+        return MENU_CONTINUE
+
+    def display_mnemonic_words(self):
+        """Displays only the mnemonic words"""
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
+
+    def display_standard_qr(self):
+        """Displays regular words QR code"""
         self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
-        return MENU_CONTINUE
+
+    def display_compact_qr(self):
+        """Displays binary compact SeedQR code"""
+        self.display_qr_codes(
+            bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic), FORMAT_NONE, None
+        )
+        self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
+
+    def transcribe_compact_qr(self):
+        """Disables touch and displays compact SeedQR code with grid to help drawing"""
+
+        def draw_grided_qr(grid_size):
+            """Draws grided QR"""
+            self.ctx.display.draw_qr_code(0, code, bright=True)
+            grif_offset = self.ctx.display.width() % 23
+            grif_offset //= 2
+            grid_pad = self.ctx.display.width() // 23
+            grif_offset += grid_pad
+            for i in range(22):
+                self.ctx.display.fill_rectangle(
+                    grif_offset,
+                    grif_offset + i * grid_pad,
+                    21 * grid_pad + 1,
+                    grid_size,
+                    lcd.RED,
+                )
+                self.ctx.display.fill_rectangle(
+                    grif_offset + i * grid_pad,
+                    grif_offset,
+                    grid_size,
+                    21 * grid_pad + 1,
+                    lcd.RED,
+                )
+
+        code, _ = next(
+            to_qr_codes(
+                bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic),
+                self.ctx.display.qr_data_width(),
+                FORMAT_NONE,
+            )
+        )
+        if self.ctx.input.touch is not None:
+            self.ctx.display.draw_hcentered_text(
+                "Touch disabled\nPress Enter twice to leave",
+                self.ctx.display.qr_offset(),
+                color=lcd.WHITE,
+            )
+        grid_size = self.ctx.display.width() // 100
+        draw_grided_qr(grid_size)
+        button = None
+        while button != 0:
+            button = self.ctx.input.wait_for_button()
+            if button == 1:  # page
+                grid_size += 1
+                grid_size %= 5
+                draw_grided_qr(grid_size)
+            if button == 2:  # page_prev
+                grid_size -= 1
+                grid_size %= 5
+                draw_grided_qr(grid_size)
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""

@@ -137,27 +137,19 @@ class Page:
                         new_buffer = autocomplete_fn(buffer)
                         if new_buffer is not None:
                             buffer = new_buffer
-                            break # auto-Go for load "Via Text"
+                            break  # auto-Go for load "Via Text"
 
-                    #auto-Go for load "Via Numbers"
-                    if len(pad.keys) == 10:
-                        if len(buffer) == 4 or (len(buffer) == 3 and int(buffer) > 204):
-                            break
+                    # auto-Go for load "Via Numbers"
+                    if len(pad.keys) == 10 and (
+                        len(buffer) == 4 or (len(buffer) == 3 and int(buffer) > 204)
+                    ):
+                        break
 
                 if changed and go_on_change:
                     break
 
-            elif btn == BUTTON_PAGE:
-                pad.next_key()
-
-            elif btn == BUTTON_PAGE_PREV:
-                pad.previous_key()
-
-            elif btn == SWIPE_LEFT:
-                pad.next_keyset()
-
-            elif btn == SWIPE_RIGHT:
-                pad.previous_keyset()
+            else:
+                pad.navigate(btn)
 
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
@@ -759,12 +751,26 @@ class Keypad:
             self.cur_key_index = 0
         return actual_button
 
-    def next_key(self):
+    def navigate(self, btn):
+        """Groups navigation methods in one place"""
+        if btn == BUTTON_PAGE:
+            self._next_key()
+
+        elif btn == BUTTON_PAGE_PREV:
+            self._previous_key()
+
+        elif btn == SWIPE_LEFT:
+            self.next_keyset()
+
+        elif btn == SWIPE_RIGHT:
+            self._previous_keyset()
+
+    def _next_key(self):
         """Increments cursor when page button is pressed"""
         self.moving_forward = True
         self.cur_key_index = (self.cur_key_index + 1) % self.total_keys
 
-    def previous_key(self):
+    def _previous_key(self):
         """Decrements cursor when page_prev button is pressed"""
         self.moving_forward = False
         self.cur_key_index = (self.cur_key_index - 1) % self.total_keys
@@ -775,7 +781,7 @@ class Keypad:
             self.keyset_index = (self.keyset_index + 1) % len(self.keysets)
             self.reset()
 
-    def previous_keyset(self):
+    def _previous_keyset(self):
         """Change keys for the previous keyset"""
         if len(self.keysets) > 1:
             self.keyset_index = (self.keyset_index - 1) % len(self.keysets)
