@@ -247,8 +247,9 @@ class Login(Page):
 
             if not words:
                 try:
-                    data_bytes = data.encode() if isinstance(data, str) else data
-
+                    data_bytes = (
+                        data.encode("latin-1") if isinstance(data, str) else data
+                    )
                     # CompactSeedQR format
                     if len(data_bytes) in (16, 32):
                         words = bip39.mnemonic_from_bytes(data_bytes).split()
