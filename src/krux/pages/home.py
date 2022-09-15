@@ -28,10 +28,11 @@ from embit import bip39
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
-from ..qr import to_qr_codes, FORMAT_NONE, FORMAT_PMOFN
+from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
 from ..i18n import t
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
+import qrcode
 
 
 class Home(Page):
@@ -80,26 +81,26 @@ class Home(Page):
 
     def display_compact_qr(self):
         """Displays binary compact SeedQR code"""
-        self.display_qr_codes(
-            bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic), FORMAT_NONE, None
-        )
+        code, _ = self._binary_seed_qr()
+        self.ctx.display.draw_qr_code(0, code, bright=True)
+        self.ctx.input.wait_for_button()
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
 
     def transcribe_compact_qr(self):
         """Disables touch and displays compact SeedQR code with grid to help drawing"""
 
-        def draw_grided_qr(grid_size):
+        def draw_grided_qr(grid_size, qr_size):
             """Draws grided QR"""
             self.ctx.display.draw_qr_code(0, code, bright=True)
-            grif_offset = self.ctx.display.width() % 23
+            grif_offset = self.ctx.display.width() % (qr_size + 2)
             grif_offset //= 2
-            grid_pad = self.ctx.display.width() // 23
+            grid_pad = self.ctx.display.width() // (qr_size + 2)
             grif_offset += grid_pad
-            for i in range(22):
+            for i in range(qr_size + 1):
                 self.ctx.display.fill_rectangle(
                     grif_offset,
                     grif_offset + i * grid_pad,
-                    21 * grid_pad + 1,
+                    qr_size * grid_pad + 1,
                     grid_size,
                     lcd.RED,
                 )
@@ -107,17 +108,11 @@ class Home(Page):
                     grif_offset + i * grid_pad,
                     grif_offset,
                     grid_size,
-                    21 * grid_pad + 1,
+                    qr_size * grid_pad + 1,
                     lcd.RED,
                 )
 
-        code, _ = next(
-            to_qr_codes(
-                bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic),
-                self.ctx.display.qr_data_width(),
-                FORMAT_NONE,
-            )
-        )
+        code, qr_size = self._binary_seed_qr()
         if self.ctx.input.touch is not None:
             self.ctx.display.draw_hcentered_text(
                 "Touch disabled\nPress Enter twice to leave",
@@ -125,18 +120,18 @@ class Home(Page):
                 color=lcd.WHITE,
             )
         grid_size = self.ctx.display.width() // 100
-        draw_grided_qr(grid_size)
+        draw_grided_qr(grid_size, qr_size)
         button = None
         while button != 0:
             button = self.ctx.input.wait_for_button()
             if button == 1:  # page
                 grid_size += 1
                 grid_size %= 5
-                draw_grided_qr(grid_size)
+                draw_grided_qr(grid_size, qr_size)
             if button == 2:  # page_prev
                 grid_size -= 1
                 grid_size %= 5
-                draw_grided_qr(grid_size)
+                draw_grided_qr(grid_size, qr_size)
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
@@ -164,6 +159,11 @@ class Home(Page):
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             self.print_qr_prompt(wallet_data, qr_format)
         return MENU_CONTINUE
+
+    def _binary_seed_qr(self):
+        binary_seed = bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic)
+        qr_size = 21 if len(binary_seed) == 16 else 25
+        return qrcode.encode_to_string(binary_seed), qr_size
 
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()

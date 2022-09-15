@@ -20,6 +20,7 @@
     "Check that address belongs to this wallet?": "Kiểm tra địa chỉ đó có thuộc về ví này không?",
     "Checked %d receive addresses with no matches.": "Đã kiểm tra %d địa chỉ nhận được và không tìm thấy tương thích.",
     "Checking receive address %d for match..": "Đang kiểm tra %d địa chỉ..",
+    "Compact SeedQR": "SeedQR nhỏ gọn",
     "Continue?": "Tiếp tục?",
     "Cut Depth": "Chiều sâu cắt",
     "Cut Method": "Phương pháp cắt",
@@ -102,8 +103,10 @@
     "Sign?": "Kí?",
     "Signature:\n\n%s": "Chữ ký:\n\n%s",
     "Single-key": "Khóa đơn",
+    "Standard QR": "SeedQR tiêu chuẩn",
     "TX Pin": "TX Ghim",
     "Thermal": "Nhiệt",
+    "Transcribe SeedQR": "Phiên âm SeedQR",
     "Try more?": "Thử thêm nữa?",
     "Unit": "Đơn vị",
     "Updating bootloader..\n\n%d%%": "Cập nhật bộ tải khởi động..\n\n%d%%",
@@ -119,5 +122,6 @@
     "Wallet": "Ví",
     "Wallet not found.": "Không tìm thấy ví.",
     "Word %d": "Kí tự %d",
+    "Words": "Từ ngữ",
     "Yes": "Đúng"
 }

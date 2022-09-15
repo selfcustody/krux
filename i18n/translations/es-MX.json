@@ -20,6 +20,7 @@
     "Check that address belongs to this wallet?": "¿Compruebe que la dirección pertenece a esta cartera?",
     "Checked %d receive addresses with no matches.": "Comprobado %d dirección de depósito sin coincidencias.",
     "Checking receive address %d for match..": "Comprobando la dirección de depósito %d para alguna coincidencia..",
+    "Compact SeedQR": "SeedQR Compacto",
     "Continue?": "¿Continuar?",
     "Cut Depth": "Profundidad de corte",
     "Cut Method": "Método de corte",
@@ -102,8 +103,10 @@
     "Sign?": "¿Firmar?",
     "Signature:\n\n%s": "Firma:\n\n%s",
     "Single-key": "Single-key",
+    "Standard QR": "QR Estándar",
     "TX Pin": "TX Alfiler",
     "Thermal": "Térmico",
+    "Transcribe SeedQR": "Transcribir SeedQR",
     "Try more?": "¿Intentar con mas?",
     "Unit": "Unidad",
     "Updating bootloader..\n\n%d%%": "Actualización de Bootloader..\n\n%d%%",
@@ -119,5 +122,6 @@
     "Wallet": "Cartera",
     "Wallet not found.": "No se encontró la cartera.",
     "Word %d": "Palabra %d",
+    "Words": "Palabras",
     "Yes": "Sí"
 }

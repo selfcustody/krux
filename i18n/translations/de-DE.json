@@ -20,6 +20,7 @@
     "Check that address belongs to this wallet?": "Überprüfen Sie die Adresse dieser Wallet gehört?",
     "Checked %d receive addresses with no matches.": "Überprüfte %d Empfängsadressen ohne Übereinstimmungen.",
     "Checking receive address %d for match..": "Überprüfen der Empfängsadresse %d auf Übereinstimmung.",
+    "Compact SeedQR": "Kompakt SeedQR",
     "Continue?": "Fortsetzen?",
     "Cut Depth": "Schnitttiefe",
     "Cut Method": "Cut-Methode",
@@ -102,8 +103,10 @@
     "Sign?": "Unterzeichnen?",
     "Signature:\n\n%s": "Unterschrift:\n\n%s",
     "Single-key": "Single-key",
+    "Standard QR": "Standard QR",
     "TX Pin": "TX Stift",
     "Thermal": "Thermisch",
+    "Transcribe SeedQR": "Kopieren SeedQR",
     "Try more?": "Mehr versuchen?",
     "Unit": "Einheit",
     "Updating bootloader..\n\n%d%%": "Bootloader aktualisieren..\n\n%d%%",
@@ -119,5 +122,6 @@
     "Wallet": "Wallet",
     "Wallet not found.": "Wallet nicht gefunden.",
     "Word %d": "Wort %d",
+    "Words": "Wörter",
     "Yes": "Ja"
 }

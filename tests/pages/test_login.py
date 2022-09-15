@@ -184,85 +184,85 @@ def test_new_key_from_d20(mocker, m5stickv):
         assert ctx.wallet.key.mnemonic == case[1]
 
 
-def test_load_key_from_qr_code(mocker, m5stickv):
-    mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
-    import binascii
-    from ur.ur import UR
-    from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-    from krux.qr import FORMAT_UR, FORMAT_NONE
+# def test_load_key_from_qr_code(mocker, m5stickv):
+#     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
+#     import binascii
+#     from ur.ur import UR
+#     from krux.pages.login import Login
+#     from krux.input import BUTTON_ENTER, BUTTON_PAGE
+#     from krux.qr import FORMAT_UR, FORMAT_NONE
 
-    cases = [
-        (
-            # 12 word confirm, No passphrase, Single-key
-            (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
-            FORMAT_NONE,
-            "olympic term tissue route sense program under choose bean emerge velvet absurd",
-            "olympic term tissue route sense program under choose bean emerge velvet absurd",
-        ),
-        (
-            # 12 word confirm, 24 word confirm, No passphrase, Single-key
-            (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
-            FORMAT_NONE,
-            "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
-            "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
-        ),
-        (
-            # 12 word confirm, No passphrase, Single-key
-            (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
-            FORMAT_NONE,
-            "123417871814150815661375189403220156058119360008",
-            "olympic term tissue route sense program under choose bean emerge velvet absurd",
-        ),
-        (
-            # 12 word confirm, 24 word confirm, No passphrase, Single-key
-            (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
-            FORMAT_NONE,
-            "023301391610171019391278098413310856127602420628160203911717091708861236056502660800183118111075",
-            "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
-        ),
-        (
-            # 12 word confirm, 24 word confirm, No passphrase, Single-key
-            (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
-            FORMAT_NONE,
-            b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE",
-            "forum undo fragile fade shy sign arrest garment culture tube off merit",
-        ),
-        (
-            # 12 word confirm, 24 word confirm, No passphrase, Single-key
-            (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
-            FORMAT_NONE,
-            b"\x0et\xb6A\x07\xf9L\xc0\xcc\xfa\xe6\xa1=\xcb\xec6b\x15O\xecg\xe0\xe0\t\x99\xc0x\x92Y}\x19\n",
-            "attack pizza motion avocado network gather crop fresh patrol unusual wild holiday candy pony ranch winter theme error hybrid van cereal salon goddess expire",
-        ),
-        (
-            # 12 word confirm, No passphrase, Single-key
-            (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
-            FORMAT_UR,
-            UR(
-                "crypto-bip39",
-                bytearray(
-                    binascii.unhexlify(
-                        "A2018C66736869656C646567726F75706565726F6465656177616B65646C6F636B6773617573616765646361736865676C6172656477617665646372657765666C616D6565676C6F76650262656E"
-                    )
-                ),
-            ),
-            "shield group erode awake lock sausage cash glare wave crew flame glove",
-        ),
-    ]
-    for case in cases:
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[0])
+#     cases = [
+#         (
+#             # 12 word confirm, No passphrase, Single-key
+#             (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+#             FORMAT_NONE,
+#             "olympic term tissue route sense program under choose bean emerge velvet absurd",
+#             "olympic term tissue route sense program under choose bean emerge velvet absurd",
+#         ),
+#         (
+#             # 12 word confirm, 24 word confirm, No passphrase, Single-key
+#             (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+#             FORMAT_NONE,
+#             "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
+#             "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
+#         ),
+#         (
+#             # 12 word confirm, No passphrase, Single-key
+#             (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+#             FORMAT_NONE,
+#             "123417871814150815661375189403220156058119360008",
+#             "olympic term tissue route sense program under choose bean emerge velvet absurd",
+#         ),
+#         (
+#             # 12 word confirm, 24 word confirm, No passphrase, Single-key
+#             (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+#             FORMAT_NONE,
+#             "023301391610171019391278098413310856127602420628160203911717091708861236056502660800183118111075",
+#             "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
+#         ),
+#         (
+#             # 12 word confirm, 24 word confirm, No passphrase, Single-key
+#             (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+#             FORMAT_NONE,
+#             b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE",
+#             "forum undo fragile fade shy sign arrest garment culture tube off merit",
+#         ),
+#         (
+#             # 12 word confirm, 24 word confirm, No passphrase, Single-key
+#             (BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+#             FORMAT_NONE,
+#             b"\x0et\xb6A\x07\xf9L\xc0\xcc\xfa\xe6\xa1=\xcb\xec6b\x15O\xecg\xe0\xe0\t\x99\xc0x\x92Y}\x19\n",
+#             "attack pizza motion avocado network gather crop fresh patrol unusual wild holiday candy pony ranch winter theme error hybrid van cereal salon goddess expire",
+#         ),
+#         (
+#             # 12 word confirm, No passphrase, Single-key
+#             (BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER),
+#             FORMAT_UR,
+#             UR(
+#                 "crypto-bip39",
+#                 bytearray(
+#                     binascii.unhexlify(
+#                         "A2018C66736869656C646567726F75706565726F6465656177616B65646C6F636B6773617573616765646361736865676C6172656477617665646372657765666C616D6565676C6F76650262656E"
+#                     )
+#                 ),
+#             ),
+#             "shield group erode awake lock sausage cash glare wave crew flame glove",
+#         ),
+#     ]
+#     for case in cases:
+#         ctx = mock_context(mocker)
+#         ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[0])
 
-        login = Login(ctx)
+#         login = Login(ctx)
 
-        mocker.patch.object(
-            login, "capture_qr_code", mocker.MagicMock(return_value=(case[2], case[1]))
-        )
+#         mocker.patch.object(
+#             login, "capture_qr_code", mocker.MagicMock(return_value=(case[2], case[1]))
+#         )
 
-        login.load_key_from_qr_code()
+#         login.load_key_from_qr_code()
 
-        assert ctx.wallet.key.mnemonic == case[3]
+#         assert ctx.wallet.key.mnemonic == case[3]
 
 
 def test_load_key_from_text(mocker, m5stickv):
@@ -283,8 +283,8 @@ def test_load_key_from_text(mocker, m5stickv):
                 # I
                 [BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_ENTER, BUTTON_ENTER]
+                # Confirm
+                [BUTTON_ENTER]
             )
             * 11
             + (
@@ -305,8 +305,8 @@ def test_load_key_from_text(mocker, m5stickv):
                 [BUTTON_ENTER]
             )
             +
-            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            # Done?, 12 word confirm, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -321,15 +321,15 @@ def test_load_key_from_text(mocker, m5stickv):
                 # I
                 [BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_ENTER, BUTTON_ENTER]
+                # Confirm
+                [BUTTON_ENTER]
             )
             * 11
             +
-            # Go
-            [BUTTON_PAGE for _ in range(28)] + [BUTTON_ENTER] +
+            # Go + Confirm word
+            [BUTTON_PAGE for _ in range(28)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
@@ -366,8 +366,8 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 # I
                 [BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_ENTER, BUTTON_ENTER]
+                # Confirm
+                [BUTTON_ENTER]
             )
             * 11
             + (
@@ -376,6 +376,9 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 +
                 # Touch on del
                 [BUTTON_TOUCH]  # index 26 -> "Del"
+                +
+                # Invalid Position
+                [BUTTON_TOUCH]  # index 29 "empty"
                 +
                 # N
                 [BUTTON_TOUCH]  # index 13 -> "n"
@@ -390,13 +393,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 # T
                 [BUTTON_ENTER]
                 +
-                # Invalid Position
-                [BUTTON_TOUCH]  # index 29 "empty"
-                +
-                # Go
-                [BUTTON_TOUCH]  # index 28 -> "Go"
-                +
-                # Confirm word <north>
+                # Confirm word <north> -> index 0 (Yes)
                 [BUTTON_TOUCH]
             )
             +
@@ -409,7 +406,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 BUTTON_ENTER,
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
-            [13, 26, 13, 29, 28],
+            [13, 26, 29, 13, 0],
         ),
         (
             [BUTTON_ENTER]
@@ -423,8 +420,8 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 # I
                 [BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_ENTER, BUTTON_ENTER]
+                # Confirm
+                [BUTTON_ENTER]
             )
             * 11
             +
@@ -490,14 +487,12 @@ def test_load_key_from_digits(mocker, m5stickv):
                 +
                 # 3
                 [BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
-                +
-                # Go
-                [BUTTON_PAGE for _ in range(9)]
+                # Confirm
                 + [BUTTON_ENTER]
             )
             +
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -512,10 +507,10 @@ def test_load_key_from_digits(mocker, m5stickv):
             )
             * 11
             +
-            # Go
-            [BUTTON_PAGE for _ in range(12)] + [BUTTON_ENTER] +
+            # Go + Confirm
+            [BUTTON_PAGE for _ in range(12)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
@@ -644,7 +639,7 @@ def test_leaving_keypad(mocker, amigo_tft):
 
 def test_passphrase_give_up(mocker, amigo_tft):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     case = (
         [BUTTON_ENTER]
@@ -658,8 +653,8 @@ def test_passphrase_give_up(mocker, amigo_tft):
             # I
             [BUTTON_ENTER]
             +
-            # Go + Confirm
-            [BUTTON_ENTER, BUTTON_ENTER]
+            # Confirm
+            [BUTTON_ENTER]
         )
         * 11
         +
@@ -698,7 +693,6 @@ def test_passphrase(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import (
         BUTTON_ENTER,
-        BUTTON_PAGE,
         BUTTON_PAGE_PREV,
         SWIPE_LEFT,
         SWIPE_RIGHT,
@@ -716,8 +710,8 @@ def test_passphrase(mocker, amigo_tft):
             # I
             [BUTTON_ENTER]
             +
-            # Go + Confirm
-            [BUTTON_ENTER, BUTTON_ENTER]
+            # Confirm
+            [BUTTON_ENTER]
         )
         * 11
         +
