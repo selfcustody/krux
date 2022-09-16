@@ -818,9 +818,9 @@ def test_settings(mocker, m5stickv):
             ),
             [
                 mocker.call("Locale\nen-US"),
-                mocker.call("Idioma\nes-MX"),
+                mocker.call("Idioma\npt-BR"),
             ],
-            lambda: Settings().i18n.locale == "es-MX",
+            lambda: Settings().i18n.locale == "pt-BR",
             CategorySetting,
         ),
         (
@@ -981,9 +981,9 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
             ),
             [
                 mocker.call("Locale\nen-US"),
-                mocker.call("Idioma\nes-MX"),
+                mocker.call("Idioma\npt-BR"),
             ],
-            lambda: Settings().i18n.locale == "es-MX",
+            lambda: Settings().i18n.locale == "pt-BR",
             CategorySetting,
         ),
         (
