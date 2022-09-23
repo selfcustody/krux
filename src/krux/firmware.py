@@ -26,7 +26,7 @@ import hashlib
 import time
 import flash
 from embit import ec
-from .input import Input, BUTTON_ENTER
+from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
 from .metadata import SIGNER_PUBKEY
 from .display import Display
 from .i18n import t
@@ -198,7 +198,7 @@ def upgrade():
         % binascii.hexlify(firmware_hash).decode()
     )
     inp.buttons_active = True
-    if inp.wait_for_button() != BUTTON_ENTER:
+    if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
         return False
 
     if new_size > MAX_FIRMWARE_SIZE:
