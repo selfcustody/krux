@@ -192,6 +192,8 @@ class Page:
 
             return False
 
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text("Loading Camera")
         self.ctx.display.to_landscape()
         code = None
         qr_format = None
