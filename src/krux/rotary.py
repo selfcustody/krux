@@ -28,7 +28,7 @@ from .logging import logger as log
 
 RIGHT = 1
 LEFT = 0
-DEBOUNCE = 100  # milliseconds
+DEBOUNCE = 50  # milliseconds
 
 
 def __handler__(pin_num=None):
