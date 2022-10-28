@@ -28,13 +28,14 @@ from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
 import urtypes
 from ..metadata import VERSION
-from ..settings import CategorySetting, NumberSetting, Settings
+from ..settings import CategorySetting, NumberSetting
+from ..krux_settings import Settings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word
 from ..wallet import Wallet
 from ..printers import create_printer
-from ..i18n import t
+from ..krux_settings import t
 from . import (
     Page,
     Menu,

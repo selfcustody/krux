@@ -30,7 +30,7 @@ from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
-from ..i18n import t
+from ..krux_settings import t
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 import qrcode
 

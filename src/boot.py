@@ -86,7 +86,7 @@ while True:
 
     if not Home(ctx).run():
         break
-from krux.i18n import t
+from krux.krux_settings import t
 
 ctx.display.flash_text(t("Shutting down.."))
 

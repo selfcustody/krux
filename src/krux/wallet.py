@@ -28,7 +28,7 @@ from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
 from embit.script import Script, address_to_scriptpubkey
 import urtypes
-from .i18n import t
+from .krux_settings import t
 
 
 class Wallet:

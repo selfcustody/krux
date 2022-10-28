@@ -27,7 +27,7 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_encode, base_decode
 from .format import satcomma
-from .i18n import t
+from .krux_settings import t
 from .qr import FORMAT_PMOFN
 
 

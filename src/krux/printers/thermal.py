@@ -37,64 +37,15 @@
 # pylint: disable=W0231
 import time
 import math
-import board
 from fpioa_manager import fm
 from machine import UART
-from ..settings import CategorySetting, NumberSetting, SettingsNamespace, Settings
-from ..i18n import t
+
+# from ..settings import CategorySetting, NumberSetting, SettingsNamespace
+from ..krux_settings import Settings
+
+# from ..krux_settings import t
 from ..wdt import wdt
-from . import Printer, BAUDRATES
-
-DEFAULT_TX_PIN = (
-    board.config["board_info"]["CONNEXT_A"]
-    if "CONNEXT_A" in board.config["board_info"]
-    else 35
-)
-DEFAULT_RX_PIN = (
-    board.config["board_info"]["CONNEXT_B"]
-    if "CONNEXT_B" in board.config["board_info"]
-    else 34
-)
-
-
-class ThermalSettings(SettingsNamespace):
-    """Thermal printer settings"""
-
-    namespace = "settings.printer.thermal"
-
-    def __init__(self):
-        self.adafruit = AdafruitPrinterSettings()
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "adafruit": t("Adafruit"),
-        }[attr]
-
-
-class AdafruitPrinterSettings(SettingsNamespace):
-    """Adafruit thermal printer settings"""
-
-    namespace = "settings.printer.thermal.adafruit"
-    baudrate = CategorySetting("baudrate", 9600, BAUDRATES)
-    paper_width = NumberSetting(int, "paper_width", 384, [100, 1000])
-    tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
-    rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])
-    heat_dots = NumberSetting(int, "heat_dots", 11, [0, 255])
-    heat_time = NumberSetting(int, "heat_time", 255, [3, 255])
-    heat_interval = NumberSetting(int, "heat_interval", 40, [0, 255])
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "baudrate": t("Baudrate"),
-            "paper_width": t("Paper Width"),
-            "tx_pin": t("TX Pin"),
-            "rx_pin": t("RX Pin"),
-            "heat_dots": t("Heat Dots"),
-            "heat_time": t("Heat Time"),
-            "heat_interval": t("Heat Interval"),
-        }[attr]
+from . import Printer
 
 
 class AdafruitPrinter(Printer):
