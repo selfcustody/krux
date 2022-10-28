@@ -46,6 +46,9 @@ MENU_SHUTDOWN = 2
 ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
+BATTERY_FULL = 3900
+BATTERY_LOW = 3300
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -471,6 +474,7 @@ class Menu:
                 self._draw_touch_menu(selected_item_index)
             else:
                 self._draw_menu(selected_item_index)
+            self.draw_battery()
 
             btn = self.ctx.input.wait_for_button(block=True)
             if self.ctx.input.touch is not None:
@@ -509,6 +513,35 @@ class Menu:
                 self.menu_view.move_forward()
             elif btn == SWIPE_DOWN:
                 self.menu_view.move_backward()
+
+    def draw_battery(self):
+        """Draws a battery icon with depletion proportional to battery voltage"""
+        if self.ctx.power_manager.pmu is not None:
+            batt_mv = int(self.ctx.power_manager.batt_voltage())
+            if batt_mv > BATTERY_LOW:
+                batt_color = lcd.WHITE
+            else:
+                batt_color = lcd.RED
+            self.ctx.display.fill_rectangle(
+                self.ctx.display.width() - 30, 5, 20, 8, batt_color
+            )
+            self.ctx.display.fill_rectangle(
+                self.ctx.display.width() - 10, 7, 3, 4, batt_color
+            )
+            if batt_mv < BATTERY_FULL:
+                if batt_mv > BATTERY_LOW:
+                    depleted_lenght = BATTERY_FULL - batt_mv
+                    depleted_lenght *= 18  # 18 pixels
+                    depleted_lenght //= BATTERY_FULL - BATTERY_LOW  # possible range
+                else:
+                    depleted_lenght = 18
+                self.ctx.display.fill_rectangle(
+                    self.ctx.display.width() - 11 - depleted_lenght,
+                    6,
+                    depleted_lenght,
+                    6,
+                    lcd.BLACK,
+                )
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen

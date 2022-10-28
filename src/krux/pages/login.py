@@ -576,5 +576,13 @@ class Login(Page):
         """Handler for the 'about' menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
+        if self.ctx.power_manager.pmu is not None:
+            batt_voltage = self.ctx.power_manager.batt_voltage()
+            if batt_voltage is not None:
+                batt_voltage /= 1000
+                self.ctx.display.draw_hcentered_text(
+                    "Battery: " + str(round(batt_voltage, 1)) + "V",
+                    self.ctx.display.bottom_prompt_line,
+                )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
