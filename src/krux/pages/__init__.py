@@ -24,6 +24,7 @@ import math
 import time
 import lcd
 import board
+from ..camera import OV7740_ID
 from ur.ur import UR
 from ..input import (
     BUTTON_ENTER,
@@ -163,8 +164,10 @@ class Page:
         Returns the contents of the QR code(s).
         """
         self._time_frame = time.ticks_ms()
+        anti_glare = False
 
         def callback(part_total, num_parts_captured, new_part):
+            nonlocal anti_glare
             # Turn on the light as long as the enter button is held down
             if time.ticks_ms() > self._time_frame + 1000:
                 if self.ctx.light:
@@ -174,34 +177,84 @@ class Page:
                         self.ctx.light.turn_off()
                 # If board don't have light, ENTER stops the capture
                 elif not self.ctx.input.enter_value():
-                    return True
+                    return 1
 
+                # Anti-glare mode - OV7740 only
+                if self.ctx.input.page_value() == 0:
+                    if self.ctx.camera.cam_id == OV7740_ID:
+                        if not anti_glare:
+                            self._time_frame = time.ticks_ms()
+                            anti_glare = True
+                            self.ctx.display.to_portrait()
+                            self.ctx.display.draw_centered_text("anti-glare mode")
+                            time.sleep_ms(500)
+                            self.ctx.display.to_landscape()
+                            return 2
+                        self._time_frame = time.ticks_ms()
+                        anti_glare = False
+                        self.ctx.display.to_portrait()
+                        self.ctx.display.draw_centered_text("standard mode")
+                        time.sleep_ms(500)
+                        self.ctx.display.to_landscape()
+                        return 3
+                    return 1
                 # Exit the capture loop if a button is pressed
                 if (
-                    not self.ctx.input.page_value()
-                    or not self.ctx.input.page_prev_value()
-                    or not self.ctx.input.touch_value()
+                    self.ctx.input.page_prev_value() == 0
+                    or self.ctx.input.touch_value() == 0
                 ):
-                    return True
+                    return 1
 
             # Indicate progress to the user that a new part was captured
             if new_part:
                 self.ctx.display.to_portrait()
-                self.ctx.display.draw_centered_text(
-                    "%.0f%%" % (100 * float(num_parts_captured) / float(part_total))
-                )
-                time.sleep_ms(100)
+                if self.ctx.display.width() < 320:
+                    self.ctx.display.draw_centered_text(
+                        "%.0f%%" % (100 * float(num_parts_captured) / float(part_total))
+                    )
+                    time.sleep_ms(100)
+                else:
+                    filled = self.ctx.display.usable_width() * num_parts_captured
+                    filled //= part_total
+                    self.ctx.display.fill_rectangle(
+                        DEFAULT_PADDING,
+                        335,
+                        filled,
+                        self.ctx.display.font_height,
+                        lcd.WHITE,
+                    )
                 self.ctx.display.to_landscape()
 
-            return False
+            return 0
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text("Loading Camera")
+        if self.ctx.display.width() < 320:
+            camera_offset = False
+        else:
+            camera_offset = True
+            self.ctx.display.draw_hcentered_text(
+                "Up: Abort\nDown: Anti-Glare\nEnter: Flashlight", 380
+            )
+            self.ctx.display.outline(
+                39,
+                1,
+                241,
+                321,
+            )
+            self.ctx.display.outline(
+                DEFAULT_PADDING,
+                335,
+                self.ctx.display.usable_width(),
+                self.ctx.display.font_height,
+            )
         self.ctx.display.to_landscape()
         code = None
         qr_format = None
         try:
-            code, qr_format = self.ctx.camera.capture_qr_code_loop(callback)
+            code, qr_format = self.ctx.camera.capture_qr_code_loop(
+                callback, camera_offset
+            )
         except:
             self.ctx.log.exception("Exception occurred capturing QR code")
         if self.ctx.light:

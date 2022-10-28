@@ -22,6 +22,7 @@
 import gc
 import sensor
 import lcd
+import board
 from .qr import QRPartParser
 from .wdt import wdt
 
@@ -39,17 +40,42 @@ class Camera:
 
     def initialize_sensor(self):
         """Initializes the camera"""
-        sensor.reset()
+        sensor.reset(dual_buff=True)
         self.cam_id = sensor.get_id()
-        sensor.set_pixformat(sensor.GRAYSCALE)
-        sensor.set_framesize(sensor.QVGA)
+        sensor.set_pixformat(sensor.RGB565)
         if self.cam_id == OV5642_ID:
+            # CIF mode will use central pixels and discard darker periphery
+            sensor.set_framesize(sensor.CIF)
             sensor.set_hmirror(1)
         if self.cam_id == OV2640_ID:
+            sensor.set_framesize(sensor.CIF)
             sensor.set_vflip(1)
+        else:
+            sensor.set_framesize(sensor.QVGA)
+        if self.cam_id == OV7740_ID:
+            self.config_ov_7740()
         sensor.skip_frames()
 
-    def capture_qr_code_loop(self, callback):
+    def config_ov_7740(self):
+        """Specialized config for OV7740 sensor"""
+        # Allowed luminance thresholds:
+        # luminance high threshold, default=0x78
+        sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+        # luminance low threshold, default=0x68
+        sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+
+        # Average-based sensing window definition
+        # Ingnore periphery and measure luminance only on central area
+        # Regions 1,2,3,4
+        sensor.__write_reg(0x56, 0x0)  # pylint: disable=W0212
+        # Regions 5,6,7,8
+        sensor.__write_reg(0x57, 0b00111100)  # pylint: disable=W0212
+        # Regions 9,10,11,12
+        sensor.__write_reg(0x58, 0b00111100)  # pylint: disable=W0212
+        # Regions 13,14,15,16
+        sensor.__write_reg(0x59, 0x0)  # pylint: disable=W0212
+
+    def capture_qr_code_loop(self, callback, x_offset=False):
         """Captures either singular or animated QRs and parses their contents until
         all parts of the message have been captured. The part data are then ordered
         and assembled into one message and returned.
@@ -63,30 +89,38 @@ class Camera:
         new_part = False
         while True:
             wdt.feed()
-            stop = callback(parser.total_count(), parser.parsed_count(), new_part)
-            if stop:
+            command = callback(parser.total_count(), parser.parsed_count(), new_part)
+            if command == 1:
                 break
+            if command == 2:
+                # luminance high level, default=0x78
+                sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
+                # luminance low level, default=0x68
+                sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
+                # Disable frame integrtation (night mode)
+                sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
+                sensor.skip_frames()
+            elif command == 3:
+                # luminance high level, default=0x78
+                sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+                # luminance low level, default=0x68
+                sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+                sensor.skip_frames()
 
             new_part = False
 
             img = sensor.snapshot()
             if self.cam_id in (OV2640_ID, OV5642_ID):
-                img.lens_corr(1.2)
+                img.lens_corr(strength=1.1, zoom=0.96)
             if self.cam_id == OV2640_ID:
                 img.rotation_corr(z_rotation=180)
-            gc.collect()
-            hist = img.get_histogram()
-            if "histogram" not in str(type(hist)):
-                continue
-
-            lcd.display(img)
-
-            # Convert the image to black and white by using Otsu's thresholding.
-            # This is done to account for low light and glare conditions, as well as
-            # for imperfections in (printed) QR codes such as spots, blotches, streaks, and
-            # fading.
-            img.binary([(0, hist.get_threshold().value())], invert=True)
             res = img.find_qrcodes()
+            if board.config["type"] == "m5stickv":
+                img.lens_corr(strength=1.0, zoom=0.56)
+            if x_offset:
+                lcd.display(img, oft=(2, 40))  # 40 will centralize image in Amigo
+            else:
+                lcd.display(img)
             if len(res) > 0:
                 data = res[0].payload()
 
@@ -98,7 +132,7 @@ class Camera:
 
             if parser.is_complete():
                 break
-
+        gc.collect()
         sensor.run(0)
 
         if parser.is_complete():
