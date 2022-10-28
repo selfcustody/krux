@@ -36,6 +36,7 @@ from ..key import Key, pick_final_word
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..krux_settings import t
+from .metal_seed import TinySeed, Stackbit
 from . import (
     Page,
     Menu,
@@ -90,6 +91,8 @@ class Login(Page):
                 (t("Via Text"), self.load_key_from_text),
                 (t("Via Numbers"), self.load_key_from_digits),
                 (t("Via Bits"), self.load_key_from_bits),
+                ("Stackbit 1248", self.load_key_from_1248),
+                ("Tiny Seed", self.load_key_from_tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -425,6 +428,22 @@ class Login(Page):
             return ""
 
         return self._load_key_from_keypad(title, BITS, to_word)
+
+    def load_key_from_1248(self):
+        """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
+        stackbit = Stackbit(self.ctx)
+        words = stackbit.enter_1248()
+        if words is not None:
+            return self._load_key_from_words(words)
+        return MENU_CONTINUE
+
+    def load_key_from_tiny_seed(self):
+        """Menu handler to load key from Tiny Seed sheet metal storage method"""
+        tiny_seed = TinySeed(self.ctx)
+        words = tiny_seed.enter_tiny_seed()
+        if words is not None:
+            return self._load_key_from_words(words)
+        return MENU_CONTINUE
 
     def load_passphrase(self):
         """Loads and returns a passphrase from keypad"""

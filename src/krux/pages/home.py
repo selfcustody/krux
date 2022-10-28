@@ -25,6 +25,7 @@ import hashlib
 import os
 import lcd
 from embit import bip39
+from .metal_seed import TinySeed, Stackbit
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
@@ -63,6 +64,8 @@ class Home(Page):
                 (t("Standard QR"), self.display_standard_qr),
                 (t("Compact SeedQR"), self.display_compact_qr),
                 (t("Transcribe SeedQR"), self.transcribe_compact_qr),
+                ("Stackbit 1248", self.stackbit),
+                ("Tiny Seed", self.tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -132,6 +135,34 @@ class Home(Page):
                 grid_size -= 1
                 grid_size %= 5
                 draw_grided_qr(grid_size, qr_size)
+
+    def stackbit(self):
+        """Displays which numbers 1248 user should punch on 1248 steel card"""
+        stackbit = Stackbit(self.ctx)
+        word_index = 1
+        words = self.ctx.wallet.key.mnemonic.split(" ")
+
+        while word_index < len(words):
+            y_offset = 2 * self.ctx.display.font_height
+            for _ in range(6):
+                stackbit.export_1248(word_index, y_offset, words[word_index - 1])
+                if self.ctx.display.height() > 240:
+                    y_offset += 3 * self.ctx.display.font_height
+                else:
+                    y_offset += 5 + 2 * self.ctx.display.font_height
+                word_index += 1
+            if self.ctx.input.wait_for_button() == 2:
+                if word_index > 12:
+                    word_index -= 12
+                else:
+                    word_index = 1
+
+            self.ctx.display.clear()
+
+    def tiny_seed(self):
+        """Displays the seed in Tiny Seed format"""
+        tiny_seed = TinySeed(self.ctx)
+        tiny_seed.export()
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""

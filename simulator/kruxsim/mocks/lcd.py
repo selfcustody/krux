@@ -33,7 +33,7 @@ COLOR_RED = (255, 0, 0)
 COLOR_BLUE = (0, 0, 255)
 COLOR_GREEN = (0, 255, 0)
 COLOR_DARKGREY = (100, 100, 100)
-COLOR_LIGHTGREY = (237, 237, 220)
+COLOR_LIGHTGREY = (180, 180, 180)
 COLOR_LIGHTBLACK = (10, 10, 20)
 
 WIDTH = BOARD_CONFIG["lcd"]["width"]
@@ -41,6 +41,7 @@ HEIGHT = BOARD_CONFIG["lcd"]["height"]
 
 screen = None
 portrait = True
+landscape = False
 
 
 def clear():
@@ -59,7 +60,7 @@ def register(addr, val):
     pass
 
 
-def display(img):
+def display(img, oft=None):
     def run():
         frame = img.get_frame()
         frame = cv2.resize(
@@ -76,13 +77,19 @@ def display(img):
 def rotation(r):
     global screen
     global portrait
+    global landscape
 
     def run():
         global screen
         global portrait
+        global landscape
         if not screen:
             portrait = True
             screen = pg.Surface((HEIGHT, WIDTH)).convert()
+        if r == 2:
+            landscape = True
+        else:
+            landscape = False
 
     pg.event.post(pg.event.Event(events.LCD_ROTATION_EVENT, {"f": run}))
 
@@ -98,17 +105,28 @@ def height():
 def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
     def run():
         from kruxsim import devices
-
         text, _ = devices.load_font(BOARD_CONFIG["type"]).render(s, color, bgcolor)
-        screen.blit(
-            text,
-            (
-                width() - text.get_width() - x
-                if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
-                else x,
-                y,
-            ),
-        )
+        if landscape:
+            text = pg.transform.rotate(text, 90)
+            screen.blit(
+                text,
+                (
+                    height() - text.get_width() - y
+                    if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
+                    else y,
+                    x,
+                ),
+            )
+        else:
+            screen.blit(
+                text,
+                (
+                    width() - text.get_width() - x
+                    if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
+                    else x,
+                    y,
+                ),
+            )
 
     pg.event.post(pg.event.Event(events.LCD_DRAW_STRING_EVENT, {"f": run}))
 

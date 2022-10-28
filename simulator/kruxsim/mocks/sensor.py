@@ -56,7 +56,7 @@ class Mockqrcode:
 capturer = None
 
 
-def reset():
+def reset(dual_buff=False):
     pass
 
 
