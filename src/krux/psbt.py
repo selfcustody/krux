@@ -145,7 +145,7 @@ class PSBTSigner:
             else:
                 spending += self.psbt.tx.vout[i].value
                 messages.append(
-                    t("Sending:\n₿%s\n\nTo:\n%s")
+                    t("Sending: ₿%s\nTo:%s")
                     % (
                         satcomma(self.psbt.tx.vout[i].value),
                         self.psbt.tx.vout[i].script_pubkey.address(
@@ -154,7 +154,7 @@ class PSBTSigner:
                     )
                 )
         fee = inp_amount - change - spending
-        messages.append(t("Fee:\n₿%s") % satcomma(fee))
+        messages.append(t("Fee: ₿%s") % satcomma(fee))
         return messages
 
     def sign(self):
