@@ -64,8 +64,8 @@ class AdafruitPrinter(Printer):
         self.uart_conn = UART(UART.UART2, Settings().printer.thermal.adafruit.baudrate)
 
         self.character_height = 24
-        self.byte_time = 11.0 / float(Settings().printer.thermal.adafruit.baudrate)
-        self.dot_print_time = 0.03
+        self.byte_time = 1
+        self.dot_print_time = 30
         self.dot_feed_time = 0.0021
 
         self.setup()
@@ -138,7 +138,7 @@ class AdafruitPrinter(Printer):
             # 11 bits (not 8) to accommodate idle, start and
             # stop bits.  Idle time might be unnecessary, but
             # erring on side of caution here.
-            time.sleep_ms(math.floor(self.byte_time * 1000))
+            time.sleep_ms(self.byte_time)
 
     def feed(self, x=1):
         """Feeds paper through the machine x times"""
@@ -198,5 +198,5 @@ class AdafruitPrinter(Printer):
             for _ in range(scale):
                 self.write_bytes(18, 42, 1, len(line_bytes))
                 self.write_bytes(*line_bytes)
-                time.sleep_ms(math.floor(self.dot_print_time * 1000))
+                time.sleep_ms(self.dot_print_time)
         self.feed(3)

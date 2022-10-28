@@ -85,9 +85,15 @@ class Home(Page):
     def display_compact_qr(self):
         """Displays binary compact SeedQR code"""
         code, _ = self._binary_seed_qr()
-        self.ctx.display.draw_qr_code(0, code, bright=True)
+        self.ctx.display.draw_qr_code(0, code, bright=False)
         self.ctx.input.wait_for_button()
-        self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
+        self.ctx.display.clear()
+        if self.prompt(t("Print Seed QR?"), self.ctx.display.height() // 2):
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                "Printing Compact Seed QR ...", self.ctx.display.height() // 2
+            )
+            self.ctx.printer.print_qr_code(code)
 
     def transcribe_compact_qr(self):
         """Disables touch and displays compact SeedQR code with grid to help drawing"""
@@ -370,7 +376,7 @@ class Home(Page):
             signer = None
             gc.collect()
             self.display_qr_codes(signed_psbt, qr_format)
-            self.print_qr_prompt(signed_psbt, qr_format)
+            self.print_qr_prompt(signed_psbt, qr_format, width=45)
         return MENU_CONTINUE
 
     def sign_message(self):

@@ -342,7 +342,7 @@ class Page:
                         offset_x, offset_y, word, lcd.WHITE, lcd.BLACK
                     )
 
-    def print_qr_prompt(self, data, qr_format):
+    def print_qr_prompt(self, data, qr_format, width=33):
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
         """
@@ -351,9 +351,7 @@ class Page:
         self.ctx.display.clear()
         if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
             i = 0
-            for qr_code, count in to_qr_codes(
-                data, self.ctx.printer.qr_data_width(), qr_format
-            ):
+            for qr_code, count in to_qr_codes(data, width, qr_format):
                 if i == count:
                     break
                 self.ctx.display.clear()
