@@ -58,8 +58,8 @@ NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 NUMERALS = "0123456789."
 
-D6_MIN_ROLLS = 50
-D6_MAX_ROLLS = 100
+D6_12W_ROLLS = 50
+D6_24W_MIN_ROLLS = 99
 D20_MIN_ROLLS = 30
 D20_MAX_ROLLS = 60
 
@@ -118,34 +118,33 @@ class Login(Page):
 
     def new_key_from_d6(self):
         """Handler for the 'via D6' menu item"""
-        return self._new_key_from_die(D6_STATES, D6_MIN_ROLLS, D6_MAX_ROLLS)
+        return self._new_key_from_die(D6_STATES, D6_12W_ROLLS, D6_24W_MIN_ROLLS)
 
     def new_key_from_d20(self):
         """Handler for the 'via D20' menu item"""
         return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
 
-    def _new_key_from_die(self, roll_states, min_rolls, max_rolls):
+    def _new_key_from_die(self, roll_states, min_rolls, min_rolls_24w):
+        delete_flag = False
         self.ctx.display.draw_hcentered_text(
             t(
                 "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
             )
-            % (min_rolls, max_rolls)
+            % (min_rolls, min_rolls_24w)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
 
             def delete_roll(buffer):
-                nonlocal rolls
-                if len(rolls) > 0:
-                    rolls.pop()
+                # buffer not used here
+                nonlocal delete_flag
+                delete_flag = True
                 return buffer
 
-            num_rolls = max_rolls
-            while len(rolls) < max_rolls:
-                if len(rolls) == min_rolls:
+            while True:
+                if len(rolls) in (min_rolls, min_rolls_24w):
                     self.ctx.display.clear()
                     if self.prompt(t("Done?"), self.ctx.display.height() // 2):
-                        num_rolls = min_rolls
                         break
 
                 roll = ""
@@ -166,11 +165,21 @@ class Login(Page):
                     )
                     if roll == ESC_KEY:
                         return MENU_CONTINUE
-
-                    if roll != "" and roll in roll_states:
+                    else:
                         break
 
-                rolls.append(roll)
+                if roll !="":
+                    rolls.append(roll)
+                else:
+                    # If its not a roll it is Del or Go
+                    if delete_flag: # Del
+                        delete_flag = False
+                        if len(rolls) > 0:
+                            rolls.pop()
+                    elif len(rolls) < min_rolls_24w: # Not enough to G
+                        self.ctx.display.flash_text(t("Not enough rolls!"), lcd.WHITE, duration=1000)
+                    else: # Go
+                        break
 
             entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
 
@@ -187,7 +196,7 @@ class Login(Page):
                 t("SHA256 of rolls:\n\n%s") % entropy_hash
             )
             self.ctx.input.wait_for_button()
-            num_bytes = 16 if num_rolls == min_rolls else 32
+            num_bytes = 16 if len(rolls) == min_rolls else 32
             words = bip39.mnemonic_from_bytes(
                 hashlib.sha256(entropy_bytes).digest()[:num_bytes]
             ).split()
