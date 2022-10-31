@@ -24,8 +24,8 @@ import gc
 import hashlib
 import os
 import lcd
-from embit import bip39
 from .metal_seed import TinySeed, Stackbit
+from embit.wordlists.bip39 import WORDLIST
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
@@ -61,9 +61,8 @@ class Home(Page):
             self.ctx,
             [
                 (t("Words"), self.display_mnemonic_words),
-                (t("Standard QR"), self.display_standard_qr),
+                (t("Plaintext QR"), self.display_standard_qr),
                 (t("Compact SeedQR"), self.display_compact_qr),
-                (t("Transcribe SeedQR"), self.transcribe_compact_qr),
                 ("Stackbit 1248", self.stackbit),
                 ("Tiny Seed", self.tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
@@ -83,24 +82,14 @@ class Home(Page):
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
 
     def display_compact_qr(self):
-        """Displays binary compact SeedQR code"""
-        code, _ = self._binary_seed_qr()
-        self.ctx.display.draw_qr_code(0, code, bright=False)
-        self.ctx.input.wait_for_button()
-        self.ctx.display.clear()
-        if self.prompt(t("Print Seed QR?"), self.ctx.display.height() // 2):
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(
-                "Printing Compact Seed QR ...", self.ctx.display.height() // 2
-            )
-            self.ctx.printer.print_qr_code(code)
-
-    def transcribe_compact_qr(self):
         """Disables touch and displays compact SeedQR code with grid to help drawing"""
 
         def draw_grided_qr(grid_size, qr_size):
             """Draws grided QR"""
-            self.ctx.display.draw_qr_code(0, code, bright=True)
+            if grid_size:
+                self.ctx.display.draw_qr_code(0, code, bright=True)
+            else:
+                self.ctx.display.draw_qr_code(0, code)
             grif_offset = self.ctx.display.width() % (qr_size + 2)
             grif_offset //= 2
             grid_pad = self.ctx.display.width() // (qr_size + 2)
@@ -124,11 +113,11 @@ class Home(Page):
         code, qr_size = self._binary_seed_qr()
         if self.ctx.input.touch is not None:
             self.ctx.display.draw_hcentered_text(
-                "Touch disabled\nPress Enter twice to leave",
+                t("Touch disabled for transcription.\nPress enter twice to leave."),
                 self.ctx.display.qr_offset(),
                 color=lcd.WHITE,
             )
-        grid_size = self.ctx.display.width() // 100
+        grid_size = 0
         draw_grided_qr(grid_size, qr_size)
         button = None
         while button != 0:
@@ -141,6 +130,15 @@ class Home(Page):
                 grid_size -= 1
                 grid_size %= 5
                 draw_grided_qr(grid_size, qr_size)
+        if self.ctx.printer is None:
+            return
+        self.ctx.display.clear()
+        if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                t("Printing ..."), self.ctx.display.height() // 2
+            )
+            self.ctx.printer.print_qr_code(code)
 
     def stackbit(self):
         """Displays which numbers 1248 user should punch on 1248 steel card"""
@@ -198,9 +196,18 @@ class Home(Page):
         return MENU_CONTINUE
 
     def _binary_seed_qr(self):
-        binary_seed = bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic)
+        binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
         qr_size = 21 if len(binary_seed) == 16 else 25
         return qrcode.encode_to_string(binary_seed), qr_size
+
+    def _to_compact_seed_qr(self, mnemonic):
+        mnemonic = mnemonic.split(" ")
+        checksum_bits = 8 if len(mnemonic) == 24 else 4
+        indexes = [WORDLIST.index(word) for word in mnemonic]
+        bitstring = "".join(["{:0>11}".format(bin(index)[2:]) for index in indexes])[
+            :-checksum_bits
+        ]
+        return int(bitstring, 2).to_bytes((len(bitstring) + 7) // 8, "big")
 
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()

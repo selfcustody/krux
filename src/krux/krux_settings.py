@@ -205,7 +205,6 @@ class PrinterSettings(SettingsNamespace):
     PRINTERS = {
         "thermal/adafruit": ("thermal", "AdafruitPrinter"),
         "cnc/file": ("cnc", "FilePrinter"),
-        # "cnc/grbl": t("cnc", "GRBLPrinter"),
     }
     namespace = "settings.printer"
     driver = CategorySetting("driver", "thermal/adafruit", list(PRINTERS.keys()))

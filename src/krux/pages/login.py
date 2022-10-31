@@ -165,20 +165,21 @@ class Login(Page):
                     )
                     if roll == ESC_KEY:
                         return MENU_CONTINUE
-                    else:
-                        break
+                    break
 
-                if roll !="":
+                if roll != "":
                     rolls.append(roll)
                 else:
                     # If its not a roll it is Del or Go
-                    if delete_flag: # Del
+                    if delete_flag:  # Del
                         delete_flag = False
                         if len(rolls) > 0:
                             rolls.pop()
-                    elif len(rolls) < min_rolls_24w: # Not enough to G
-                        self.ctx.display.flash_text(t("Not enough rolls!"), lcd.WHITE, duration=1000)
-                    else: # Go
+                    elif len(rolls) < min_rolls_24w:  # Not enough to Go
+                        self.ctx.display.flash_text(
+                            t("Not enough rolls!"), lcd.WHITE, duration=1000
+                        )
+                    else:  # Go
                         break
 
             entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)

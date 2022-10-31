@@ -147,7 +147,7 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
                         x = og_x * scale + j
                         og_yx_index = og_y * (starting_size + 1) + og_x
                         screen.set_at(
-                            (offset + x, offset + y),
+                            (offset + x, offset + offset_y + y),
                             COLOR_BLACK
                             if code_str[og_yx_index] == "1"
                             else COLOR_WHITE,

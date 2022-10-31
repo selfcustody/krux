@@ -173,7 +173,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
 def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
@@ -210,48 +210,11 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             MockPrinter(),
             [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
         ),
-    ]
-    for case in cases:
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
-        ctx.wallet = case[0]
-        ctx.printer = case[1]
-
-        home = Home(ctx)
-
-        mocker.spy(home, "_binary_seed_qr")
-        mocker.spy(home, "print_qr_prompt")
-        home.mnemonic()
-
-        home._binary_seed_qr.assert_called_once()
-        home.print_qr_prompt.assert_called_once()
-
-        assert ctx.input.wait_for_button.call_count == len(case[2])
-
-
-def test_mnemonic_transcribe_qr(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.qr import FORMAT_NONE
-
-    cases = [
-        (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
-            None,
-            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
-            None,
-            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
-        ),
         # Changing grid thickness
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
             [
-                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
@@ -269,10 +232,12 @@ def test_mnemonic_transcribe_qr(mocker, m5stickv, tdata):
 
         home = Home(ctx)
 
-        mocker.spy(home, "transcribe_compact_qr")
+        mocker.spy(home, "_binary_seed_qr")
+        # mocker.spy(home, "print_qr_prompt")
         home.mnemonic()
 
-        home.transcribe_compact_qr.assert_called_once()
+        home._binary_seed_qr.assert_called_once()
+        # home.print_qr_prompt.assert_called_once()
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 

@@ -228,7 +228,7 @@ class Page:
             return 0
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text("Loading Camera")
+        self.ctx.display.draw_centered_text(t("Loading Camera"))
         if self.ctx.display.width() < 320:
             camera_offset = False
         else:
@@ -849,7 +849,7 @@ class Keypad:
             self.next_keyset()
 
         elif btn == SWIPE_RIGHT:
-            self._previous_keyset()
+            self.previous_keyset()
 
     def _next_key(self):
         """Increments cursor when page button is pressed"""
@@ -867,7 +867,7 @@ class Keypad:
             self.keyset_index = (self.keyset_index + 1) % len(self.keysets)
             self.reset()
 
-    def _previous_keyset(self):
+    def previous_keyset(self):
         """Change keys for the previous keyset"""
         if len(self.keysets) > 1:
             self.keyset_index = (self.keyset_index - 1) % len(self.keysets)
