@@ -75,6 +75,30 @@ class Home(Page):
         """Displays only the mnemonic words"""
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
+        if self.ctx.printer is None:
+            return
+        self.ctx.display.clear()
+        if self.prompt(t("Print?"), self.ctx.display.height() // 2):
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                t("Printing ..."), self.ctx.display.height() // 2
+            )
+            self.ctx.printer.print_string("Seed Words\n")
+            words = self.ctx.wallet.key.mnemonic.split(" ")
+            lines = (len(words)//3)
+            for i in range(lines):
+                index = i + 1
+                string = str(index) + ":" + words[index - 1] + " "
+                while len(string) < 10:
+                    string += " "
+                index += lines 
+                string += str(index) + ":" + words[index - 1] + " "
+                while len(string) < 21:
+                    string += " "
+                index += lines 
+                string += str(index) + ":" + words[index - 1] + "\n"
+                self.ctx.printer.print_string(string)
+            self.ctx.printer.feed(3)
 
     def display_standard_qr(self):
         """Displays regular words QR code"""
@@ -113,7 +137,7 @@ class Home(Page):
         code, qr_size = self._binary_seed_qr()
         if self.ctx.input.touch is not None:
             self.ctx.display.draw_hcentered_text(
-                t("Touch disabled for transcription.\nPress enter twice to leave."),
+                t("Touch disabled for transcription.\nPress enter to leave."),
                 self.ctx.display.qr_offset(),
                 color=lcd.WHITE,
             )
@@ -121,6 +145,9 @@ class Home(Page):
         draw_grided_qr(grid_size, qr_size)
         button = None
         while button != 0:
+            #Avoid the need of double click
+            self.ctx.input.buttons_active = True
+
             button = self.ctx.input.wait_for_button()
             if button == 1:  # page
                 grid_size += 1
@@ -138,6 +165,7 @@ class Home(Page):
             self.ctx.display.draw_hcentered_text(
                 t("Printing ..."), self.ctx.display.height() // 2
             )
+            self.ctx.printer.print_string("Compact SeedQR\n\n")
             self.ctx.printer.print_qr_code(code)
 
     def stackbit(self):
@@ -167,6 +195,8 @@ class Home(Page):
         """Displays the seed in Tiny Seed format"""
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()
+        if self.prompt(t("Print?"), self.ctx.display.height() // 2):
+            tiny_seed.print_tiny_seed()
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""

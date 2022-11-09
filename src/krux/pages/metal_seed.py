@@ -22,6 +22,8 @@
 
 import hashlib
 import lcd
+import image
+from ..wdt import wdt
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..krux_settings import t
@@ -136,6 +138,94 @@ class TinySeed(Page):
             self._draw_punched(words, page)
             self.ctx.input.wait_for_button()
             self.ctx.display.clear()
+
+
+    def print_tiny_seed(self):
+        words = self.ctx.wallet.key.mnemonic.split(" ")
+        pad = 22
+        image_size = 296
+        grid_print_offset = 24
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text(
+            t("Printing ..."), self.ctx.display.height() // 2
+        )
+        self.ctx.printer.print_string("Tiny Seed\n\n")
+        for page in range(len(words) // 12):
+            #labels
+            im = image.Image(size=(image_size,image_size), copy_to_fb=True)
+            im.clear() # draw_rectangle(0, 0, image_size, image_size, color=lcd.WHITE, fill=True)
+            y_offset = 3
+            for x in range(12):
+                line = str(page * 12 + x + 1)
+                if (page * 12 + x + 1) < 10:
+                    line = " " + line
+                im.draw_string(
+                    0, y_offset, line, lcd.WHITE
+                )
+                y_offset += pad
+
+            #grid
+            y_var = 0
+            x_offset = grid_print_offset
+            for _ in range(13):
+                im.draw_rectangle(
+                    x_offset,
+                    0,
+                    1,
+                    12 * pad,
+                    lcd.WHITE,
+                )
+                x_offset += pad
+                im.draw_rectangle(
+                    grid_print_offset,
+                    y_var,
+                    12 * pad,
+                    1,
+                    lcd.WHITE,
+                )
+                y_var += pad
+                
+            #draw punched
+            y_offset = 0
+            for x in range(12):
+                if isinstance(words[0], str):
+                    word_list_index = WORDLIST.index(words[page * 12 + x]) + 1
+                else:
+                    word_list_index = words[page * 12 + x]
+                for y in range(12):
+                    if (word_list_index >> (11 - y)) & 1:
+                        x_offset = grid_print_offset + pad//2
+                        x_offset += y * (pad)
+                        im.draw_circle(
+                            x_offset,
+                            y_offset + pad//2,
+                            6,
+                            lcd.WHITE,
+                            fill=True
+                        )
+                y_offset += pad
+            # convert image to bitmap bytes and print
+            im.to_grayscale()
+            im.binary([(125,255)])
+            # lcd.display(im, roi=(0,0,image_size,image_size))
+            for y in range(image_size):
+                line_bytes = bytes([])
+                x = 0
+                for _ in range (image_size//8):
+                    im_byte = 0
+                    for _ in range(8):
+                        im_byte <<= 1
+                        if im.get_pixel(x, y):
+                            im_byte |= 1
+                        x += 1
+                    line_bytes += bytes([im_byte])
+                #send line by line to be printed
+                self.ctx.printer.print_bitmap_line(line_bytes)
+                wdt.feed()
+
+        self.ctx.printer.feed(3)
+        self.ctx.display.clear()
+
 
     def _draw_index(self, index):
         """Outline index respective"""

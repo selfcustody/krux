@@ -64,9 +64,12 @@ class AdafruitPrinter(Printer):
         self.uart_conn = UART(UART.UART2, Settings().printer.thermal.adafruit.baudrate)
 
         self.character_height = 24
-        self.byte_time = 1
-        self.dot_print_time = 30
-        self.dot_feed_time = 0.0021
+        self.byte_time = 1 # miliseconds
+        if Settings().printer.thermal.adafruit.baudrate > 9600:
+            self.dot_print_time = 10 # miliseconds
+        else:
+            self.dot_print_time = 5 # miliseconds
+        self.dot_feed_time = 2 # miliseconds
 
         self.setup()
 
@@ -144,7 +147,7 @@ class AdafruitPrinter(Printer):
         """Feeds paper through the machine x times"""
         self.write_bytes(27, 100, x)
         # Wait for the paper to feed
-        time.sleep_ms(math.floor(self.dot_feed_time * self.character_height * 1000))
+        time.sleep_ms(self.dot_feed_time * self.character_height)
 
     def has_paper(self):
         """Returns a boolean indicating if the printer has paper or not"""
@@ -195,8 +198,25 @@ class AdafruitPrinter(Printer):
                     line |= bit
             line_bytes = line.to_bytes((size * scale + 7) // 8, "big")
             # Print height * scale lines out to scale by
+            command = b'\x12\x2A\x01'
+            command += bytes([len(line_bytes)])
+            command += line_bytes
             for _ in range(scale):
-                self.write_bytes(18, 42, 1, len(line_bytes))
-                self.write_bytes(*line_bytes)
+                self.uart_conn.write(command)
                 time.sleep_ms(self.dot_print_time)
         self.feed(3)
+
+    def print_bitmap_line(self, data):
+        """Print a bitmap line"""
+        # Done line by line to save RAM
+
+        command = b'\x12\x2A\x01'
+        command += bytes([len(data)])
+        command += data
+        self.uart_conn.write(command)
+        time.sleep_ms(self.dot_print_time)
+
+    def print_string(self, text):
+        """Print a text string"""
+        self.uart_conn.write(text)
+        time.sleep_ms(self.dot_print_time)

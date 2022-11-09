@@ -350,6 +350,7 @@ class Page:
             return
         self.ctx.display.clear()
         if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
+            self.ctx.printer.print_string("Plain Text QR\n\n")
             i = 0
             for qr_code, count in to_qr_codes(data, width, qr_format):
                 if i == count:
