@@ -247,8 +247,9 @@ class Login(Page):
 
             if not words:
                 try:
-                    data_bytes = data.encode() if isinstance(data, str) else data
-
+                    data_bytes = (
+                        data.encode("latin-1") if isinstance(data, str) else data
+                    )
                     # CompactSeedQR format
                     if len(data_bytes) in (16, 32):
                         words = bip39.mnemonic_from_bytes(data_bytes).split()
@@ -278,8 +279,8 @@ class Login(Page):
         words = []
         self.ctx.display.draw_hcentered_text(title)
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            for i in range(24):
-                if i == 12:
+            while len(words) < 24:
+                if len(words) == 12:
                     self.ctx.display.clear()
                     if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                         break
@@ -287,7 +288,7 @@ class Login(Page):
                 word = ""
                 while True:
                     word = self.capture_from_keypad(
-                        t("Word %d") % (i + 1),
+                        t("Word %d") % (len(words) + 1),
                         [charset],
                         autocomplete_fn,
                         possible_keys_fn,
@@ -296,12 +297,12 @@ class Login(Page):
                         return MENU_CONTINUE
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
-                    if (i in (11, 23)) and word == "":
+                    if (len(words) in (11, 23)) and word == "":
                         break
                     # If the first 'word' is the test phrase sentinel,
                     # we're testing and just want the test words
                     if (
-                        i == 0
+                        len(words) == 0
                         and test_phrase_sentinel is not None
                         and word == test_phrase_sentinel
                     ):
@@ -323,10 +324,8 @@ class Login(Page):
                         word = pick_final_word(self.ctx, words)
 
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(word)
-                self.ctx.input.wait_for_button()
-
-                words.append(word)
+                if self.prompt(word, self.ctx.display.height() // 2):
+                    words.append(word)
 
             return self._load_key_from_words(words)
 

@@ -24,6 +24,7 @@ import gc
 import hashlib
 import os
 import lcd
+from embit.wordlists.bip39 import WORDLIST
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
@@ -31,6 +32,7 @@ from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
 from ..i18n import t
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
+import qrcode
 
 
 class Home(Page):
@@ -54,11 +56,86 @@ class Home(Page):
 
     def mnemonic(self):
         """Handler for the 'mnemonic' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Words"), self.display_mnemonic_words),
+                (t("Plaintext QR"), self.display_standard_qr),
+                (t("Compact SeedQR"), self.display_compact_qr),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        submenu.run_loop()
+        return MENU_CONTINUE
+
+    def display_mnemonic_words(self):
+        """Displays only the mnemonic words"""
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
+
+    def display_standard_qr(self):
+        """Displays regular words QR code"""
         self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
-        return MENU_CONTINUE
+
+    def display_compact_qr(self):
+        """Disables touch and displays compact SeedQR code with grid to help drawing"""
+
+        def draw_grided_qr(grid_size, qr_size):
+            """Draws grided QR"""
+            if grid_size:
+                self.ctx.display.draw_qr_code(0, code, bright=True)
+            else:
+                self.ctx.display.draw_qr_code(0, code)
+            grif_offset = self.ctx.display.width() % (qr_size + 2)
+            grif_offset //= 2
+            grid_pad = self.ctx.display.width() // (qr_size + 2)
+            grif_offset += grid_pad
+            for i in range(qr_size + 1):
+                self.ctx.display.fill_rectangle(
+                    grif_offset,
+                    grif_offset + i * grid_pad,
+                    qr_size * grid_pad + 1,
+                    grid_size,
+                    lcd.RED,
+                )
+                self.ctx.display.fill_rectangle(
+                    grif_offset + i * grid_pad,
+                    grif_offset,
+                    grid_size,
+                    qr_size * grid_pad + 1,
+                    lcd.RED,
+                )
+
+        code, qr_size = self._binary_seed_qr()
+        if self.ctx.input.touch is not None:
+            self.ctx.display.draw_hcentered_text(
+                t("Touch disabled for transcription.\nPress enter twice to leave."),
+                self.ctx.display.qr_offset(),
+                color=lcd.WHITE,
+            )
+        grid_size = 0
+        draw_grided_qr(grid_size, qr_size)
+        button = None
+        while button != 0:
+            button = self.ctx.input.wait_for_button()
+            if button == 1:  # page
+                grid_size += 1
+                grid_size %= 5
+                draw_grided_qr(grid_size, qr_size)
+            if button == 2:  # page_prev
+                grid_size -= 1
+                grid_size %= 5
+                draw_grided_qr(grid_size, qr_size)
+        if self.ctx.printer is None:
+            return
+        self.ctx.display.clear()
+        if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                "Printing Compact Seed QR ...", self.ctx.display.height() // 2
+            )
+            self.ctx.printer.print_qr_code(code)
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
@@ -86,6 +163,20 @@ class Home(Page):
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             self.print_qr_prompt(wallet_data, qr_format)
         return MENU_CONTINUE
+
+    def _binary_seed_qr(self):
+        binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
+        qr_size = 21 if len(binary_seed) == 16 else 25
+        return qrcode.encode_to_string(binary_seed), qr_size
+
+    def _to_compact_seed_qr(self, mnemonic):
+        mnemonic = mnemonic.split(" ")
+        checksum_bits = 8 if len(mnemonic) == 24 else 4
+        indexes = [WORDLIST.index(word) for word in mnemonic]
+        bitstring = "".join(["{:0>11}".format(bin(index)[2:]) for index in indexes])[
+            :-checksum_bits
+        ]
+        return int(bitstring, 2).to_bytes((len(bitstring) + 7) // 8, "big")
 
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()

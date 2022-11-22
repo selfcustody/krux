@@ -20,6 +20,7 @@
     "Check that address belongs to this wallet?": "Check that address belongs to this wallet?",
     "Checked %d receive addresses with no matches.": "Checked %d receive addresses with no matches.",
     "Checking receive address %d for match..": "Checking receive address %d for match..",
+    "Compact SeedQR": "Compact SeedQR",
     "Continue?": "Continue?",
     "Cut Depth": "Cut Depth",
     "Cut Method": "Cut Method",
@@ -60,6 +61,7 @@
     "Load one?": "Load one?",
     "Load?": "Load?",
     "Loaded wallet": "Loaded wallet",
+    "Loading Camera": "Loading Camera",
     "Loading..": "Loading..",
     "Locale": "Locale",
     "Log Level": "Log Level",
@@ -77,6 +79,7 @@
     "Part\n%d / %d": "Part\n%d / %d",
     "Part Size": "Part Size",
     "Passphrase": "Passphrase",
+    "Plaintext QR": "Plaintext QR",
     "Plunge Rate": "Plunge Rate",
     "Print to QR?": "Print to QR?",
     "Printer": "Printer",
@@ -104,6 +107,7 @@
     "Single-key": "Single-key",
     "TX Pin": "TX Pin",
     "Thermal": "Thermal",
+    "Touch disabled for transcription.\nPress enter twice to leave.": "Touch disabled for transcription.\nPress enter twice to leave.",
     "Try more?": "Try more?",
     "Unit": "Unit",
     "Updating bootloader..\n\n%d%%": "Updating bootloader..\n\n%d%%",
@@ -119,5 +123,6 @@
     "Wallet": "Wallet",
     "Wallet not found.": "Wallet not found.",
     "Word %d": "Word %d",
+    "Words": "Words",
     "Yes": "Yes"
 }

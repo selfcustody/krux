@@ -12,6 +12,7 @@ def test_init(mocker, m5stickv):
     from krux.camera import Camera
 
     c = Camera()
+    c.initialize_sensor()
 
     assert isinstance(c, Camera)
 

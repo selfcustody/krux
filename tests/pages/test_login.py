@@ -283,8 +283,8 @@ def test_load_key_from_text(mocker, m5stickv):
                 # I
                 [BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_ENTER, BUTTON_ENTER]
+                # Confirm
+                [BUTTON_ENTER]
             )
             * 11
             + (
@@ -305,8 +305,8 @@ def test_load_key_from_text(mocker, m5stickv):
                 [BUTTON_ENTER]
             )
             +
-            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            # Done?, 12 word confirm, No passphrase, Single-key
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -321,15 +321,15 @@ def test_load_key_from_text(mocker, m5stickv):
                 # I
                 [BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_ENTER, BUTTON_ENTER]
+                # Confirm
+                [BUTTON_ENTER]
             )
             * 11
             +
-            # Go
-            [BUTTON_PAGE for _ in range(28)] + [BUTTON_ENTER] +
+            # Go + Confirm word
+            [BUTTON_PAGE for _ in range(28)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
@@ -366,8 +366,8 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 # I
                 [BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_ENTER, BUTTON_ENTER]
+                # Confirm
+                [BUTTON_ENTER]
             )
             * 11
             + (
@@ -376,6 +376,9 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 +
                 # Touch on del
                 [BUTTON_TOUCH]  # index 26 -> "Del"
+                +
+                # Invalid Position
+                [BUTTON_TOUCH]  # index 29 "empty"
                 +
                 # N
                 [BUTTON_TOUCH]  # index 13 -> "n"
@@ -390,13 +393,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 # T
                 [BUTTON_ENTER]
                 +
-                # Invalid Position
-                [BUTTON_TOUCH]  # index 29 "empty"
-                +
-                # Go
-                [BUTTON_TOUCH]  # index 28 -> "Go"
-                +
-                # Confirm word <north>
+                # Confirm word <north> -> index 0 (Yes)
                 [BUTTON_TOUCH]
             )
             +
@@ -409,7 +406,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 BUTTON_ENTER,
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
-            [13, 26, 13, 29, 28],
+            [13, 26, 29, 13, 0],
         ),
         (
             [BUTTON_ENTER]
@@ -423,8 +420,8 @@ def test_load_key_from_text_on_amigo_tft_with_touch(mocker, amigo_tft):
                 # I
                 [BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_ENTER, BUTTON_ENTER]
+                # Confirm
+                [BUTTON_ENTER]
             )
             * 11
             +
@@ -490,14 +487,12 @@ def test_load_key_from_digits(mocker, m5stickv):
                 +
                 # 3
                 [BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
-                +
-                # Go
-                [BUTTON_PAGE for _ in range(9)]
+                # Confirm
                 + [BUTTON_ENTER]
             )
             +
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -512,10 +507,10 @@ def test_load_key_from_digits(mocker, m5stickv):
             )
             * 11
             +
-            # Go
-            [BUTTON_PAGE for _ in range(12)] + [BUTTON_ENTER] +
+            # Go + Confirm
+            [BUTTON_PAGE for _ in range(12)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
@@ -644,7 +639,7 @@ def test_leaving_keypad(mocker, amigo_tft):
 
 def test_passphrase_give_up(mocker, amigo_tft):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     case = (
         [BUTTON_ENTER]
@@ -658,8 +653,8 @@ def test_passphrase_give_up(mocker, amigo_tft):
             # I
             [BUTTON_ENTER]
             +
-            # Go + Confirm
-            [BUTTON_ENTER, BUTTON_ENTER]
+            # Confirm
+            [BUTTON_ENTER]
         )
         * 11
         +
@@ -698,7 +693,6 @@ def test_passphrase(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import (
         BUTTON_ENTER,
-        BUTTON_PAGE,
         BUTTON_PAGE_PREV,
         SWIPE_LEFT,
         SWIPE_RIGHT,
@@ -716,8 +710,8 @@ def test_passphrase(mocker, amigo_tft):
             # I
             [BUTTON_ENTER]
             +
-            # Go + Confirm
-            [BUTTON_ENTER, BUTTON_ENTER]
+            # Confirm
+            [BUTTON_ENTER]
         )
         * 11
         +
@@ -824,9 +818,9 @@ def test_settings(mocker, m5stickv):
             ),
             [
                 mocker.call("Locale\nen-US"),
-                mocker.call("Idioma\nes-MX"),
+                mocker.call("Idioma\npt-BR"),
             ],
-            lambda: Settings().i18n.locale == "es-MX",
+            lambda: Settings().i18n.locale == "pt-BR",
             CategorySetting,
         ),
         (
@@ -987,9 +981,9 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
             ),
             [
                 mocker.call("Locale\nen-US"),
-                mocker.call("Idioma\nes-MX"),
+                mocker.call("Idioma\npt-BR"),
             ],
-            lambda: Settings().i18n.locale == "es-MX",
+            lambda: Settings().i18n.locale == "pt-BR",
             CategorySetting,
         ),
         (

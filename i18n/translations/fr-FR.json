@@ -20,6 +20,7 @@
     "Check that address belongs to this wallet?": "Vérifiez que l'adresse appartient à cette portefeuille?",
     "Checked %d receive addresses with no matches.": "Adresses %d reçues vérifiées sans correspondance.",
     "Checking receive address %d for match..": "Vérification de l'adresse reçue %d pour correspondance..",
+    "Compact SeedQR": "SeedQR Compact",
     "Continue?": "Continuer?",
     "Cut Depth": "Profondeur de coupe",
     "Cut Method": "Méthode de coupe",
@@ -60,6 +61,7 @@
     "Load one?": "En charger qu'un?",
     "Load?": "Charger?",
     "Loaded wallet": "Portefeuille chargé",
+    "Loading Camera": "Caméra de Chargement",
     "Loading..": "Chargement..",
     "Locale": "Paramètres régionaux",
     "Log Level": "Niveau de journalisation",
@@ -77,6 +79,7 @@
     "Part\n%d / %d": "Partie\n%d / %d",
     "Part Size": "Taille de la pièce",
     "Passphrase": "Phrase de passe",
+    "Plaintext QR": "QR en Texte Brut",
     "Plunge Rate": "Taux de plongée",
     "Print to QR?": "Imprimer en QR?",
     "Printer": "Imprimante",
@@ -104,6 +107,7 @@
     "Single-key": "Clé unique",
     "TX Pin": "TX Fiche",
     "Thermal": "Thermique",
+    "Touch disabled for transcription.\nPress enter twice to leave.": "Toucher désactivé pour la transcription.\nAppuyez deux fois sur Entrée pour quitter.",
     "Try more?": "Réessayer?",
     "Unit": "Unité",
     "Updating bootloader..\n\n%d%%": "Mise à jour du chargeur de démarrage..\n\n%d%%",
@@ -119,5 +123,6 @@
     "Wallet": "Portefeuille",
     "Wallet not found.": "Portefeuille non trouvé.",
     "Word %d": "Mot %d",
+    "Words": "Mots",
     "Yes": "Oui"
 }

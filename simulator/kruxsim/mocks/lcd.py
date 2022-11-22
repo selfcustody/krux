@@ -114,15 +114,13 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
 
 
 def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
-    offset_y += 5
-
     def run():
         starting_size = 0
         while code_str[starting_size] != "\n":
             starting_size += 1
         scale = max_width // starting_size
         qr_width = starting_size * scale
-        offset_x = (max_width - qr_width) // 2
+        offset = (max_width - qr_width) // 2
         for og_y in range(starting_size):
             for i in range(scale):
                 y = og_y * scale + i
@@ -131,7 +129,7 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
                         x = og_x * scale + j
                         og_yx_index = og_y * (starting_size + 1) + og_x
                         screen.set_at(
-                            (offset_x + x, offset_y + y),
+                            (offset + x, offset + offset_y + y),
                             COLOR_BLACK
                             if code_str[og_yx_index] == "1"
                             else COLOR_WHITE,

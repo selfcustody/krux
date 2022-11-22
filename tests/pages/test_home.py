@@ -76,41 +76,20 @@ def tdata(mocker):
     )
 
 
-def test_mnemonic(mocker, m5stickv, tdata):
+def test_mnemonic_words(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # No print prompt
+        # See 12 Words
         (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_ENTER, BUTTON_ENTER]),
+        # See 24 Words
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Print
-        (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
-            MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
-            MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Decline to print
-        (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
-            MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
-        ),
-        (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
-            MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
         ),
     ]
     for case in cases:
@@ -127,6 +106,62 @@ def test_mnemonic(mocker, m5stickv, tdata):
         home.mnemonic()
 
         home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic)
+        assert ctx.input.wait_for_button.call_count == len(case[2])
+
+
+def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
+    from krux.pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        # No print prompt
+        (
+            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            None,
+            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+        ),
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            None,
+            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+        ),
+        # Print
+        (
+            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            MockPrinter(),
+            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+        ),
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            MockPrinter(),
+            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+        ),
+        # Decline to print
+        (
+            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            MockPrinter(),
+            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+        ),
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            MockPrinter(),
+            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+        ),
+    ]
+    for case in cases:
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
+        ctx.wallet = case[0]
+        ctx.printer = case[1]
+
+        home = Home(ctx)
+
+        mocker.spy(home, "display_qr_codes")
+        mocker.spy(home, "print_qr_prompt")
+        home.mnemonic()
+
         home.display_qr_codes.assert_called_with(
             ctx.wallet.key.mnemonic, FORMAT_NONE, None
         )
@@ -135,37 +170,58 @@ def test_mnemonic(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
-def test_mnemonic_touch(mocker, amigo_tft, tdata):
+def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_TOUCH, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
         # No print prompt
-        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_TOUCH, BUTTON_TOUCH]),
-        (Wallet(tdata.SINGLEKEY_24_WORD_KEY), None, [BUTTON_TOUCH, BUTTON_TOUCH]),
+        (
+            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            None,
+            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+        ),
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            None,
+            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+        ),
         # Print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
         # Decline to print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_PAGE],
+            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+        ),
+        # Changing grid thickness
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            None,
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+            ],
         ),
     ]
     for case in cases:
@@ -176,13 +232,79 @@ def test_mnemonic_touch(mocker, amigo_tft, tdata):
 
         home = Home(ctx)
 
-        mocker.spy(home, "display_mnemonic")
+        mocker.spy(home, "_binary_seed_qr")
+        # mocker.spy(home, "print_qr_prompt")
+        home.mnemonic()
+
+        home._binary_seed_qr.assert_called_once()
+        # home.print_qr_prompt.assert_called_once()
+
+        assert ctx.input.wait_for_button.call_count == len(case[2])
+
+
+def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
+    from krux.pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_TOUCH, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        # No print prompt
+        (
+            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            None,
+            [BUTTON_TOUCH, BUTTON_TOUCH],
+            [1, 0],
+        ),
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            None,
+            [BUTTON_TOUCH, BUTTON_TOUCH],
+            [1, 0],
+        ),
+        # Print
+        (
+            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            MockPrinter(),
+            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [1, 0, 0],
+        ),
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            MockPrinter(),
+            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [1, 0, 0],
+        ),
+        # Decline to print
+        (
+            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            MockPrinter(),
+            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [1, 0, 1],
+        ),
+        (
+            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            MockPrinter(),
+            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [1, 0, 1],
+        ),
+    ]
+    for case in cases:
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
+        ctx.input.touch = mocker.MagicMock(
+            current_index=mocker.MagicMock(side_effect=case[3])
+        )
+        ctx.wallet = case[0]
+        ctx.printer = case[1]
+
+        home = Home(ctx)
+
         mocker.spy(home, "display_qr_codes")
         mocker.spy(home, "print_qr_prompt")
 
         home.mnemonic()
 
-        home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic)
         home.display_qr_codes.assert_called_with(
             ctx.wallet.key.mnemonic, FORMAT_NONE, None
         )

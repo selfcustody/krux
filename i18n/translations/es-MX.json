@@ -20,6 +20,7 @@
     "Check that address belongs to this wallet?": "¿Compruebe que la dirección pertenece a esta cartera?",
     "Checked %d receive addresses with no matches.": "Comprobado %d dirección de depósito sin coincidencias.",
     "Checking receive address %d for match..": "Comprobando la dirección de depósito %d para alguna coincidencia..",
+    "Compact SeedQR": "SeedQR Compacto",
     "Continue?": "¿Continuar?",
     "Cut Depth": "Profundidad de corte",
     "Cut Method": "Método de corte",
@@ -60,6 +61,7 @@
     "Load one?": "¿Cargar algo?",
     "Load?": "¿Cargar?",
     "Loaded wallet": "La cartera ha sido cargada",
+    "Loading Camera": "Carregando Camara",
     "Loading..": "Cargando..",
     "Locale": "Idioma",
     "Log Level": "Nivel de registro",
@@ -77,6 +79,7 @@
     "Part\n%d / %d": "Parte\n%d / %d",
     "Part Size": "Tamaño de la pieza",
     "Passphrase": "Contraseña",
+    "Plaintext QR": "QR de Texto",
     "Plunge Rate": "Tasa de caída",
     "Print to QR?": "¿Imprimir con Codigo QR?",
     "Printer": "Impresora",
@@ -104,6 +107,7 @@
     "Single-key": "Single-key",
     "TX Pin": "TX Alfiler",
     "Thermal": "Térmico",
+    "Touch disabled for transcription.\nPress enter twice to leave.": "Toque deshabilitado para la transcripción.\nPresiona enter dos veces para salir.",
     "Try more?": "¿Intentar con mas?",
     "Unit": "Unidad",
     "Updating bootloader..\n\n%d%%": "Actualización de Bootloader..\n\n%d%%",
@@ -119,5 +123,6 @@
     "Wallet": "Cartera",
     "Wallet not found.": "No se encontró la cartera.",
     "Word %d": "Palabra %d",
+    "Words": "Palabras",
     "Yes": "Sí"
 }

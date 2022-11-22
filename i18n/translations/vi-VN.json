@@ -20,6 +20,7 @@
     "Check that address belongs to this wallet?": "Kiểm tra địa chỉ đó có thuộc về ví này không?",
     "Checked %d receive addresses with no matches.": "Đã kiểm tra %d địa chỉ nhận được và không tìm thấy tương thích.",
     "Checking receive address %d for match..": "Đang kiểm tra %d địa chỉ..",
+    "Compact SeedQR": "SeedQR nhỏ gọn",
     "Continue?": "Tiếp tục?",
     "Cut Depth": "Chiều sâu cắt",
     "Cut Method": "Phương pháp cắt",
@@ -60,6 +61,7 @@
     "Load one?": "Tải một?",
     "Load?": "Tải?",
     "Loaded wallet": "Đã tải ví",
+    "Loading Camera": "Đang tải máy ảnh",
     "Loading..": "Đang tải..",
     "Locale": "Ngôn ngữ",
     "Log Level": "Log Level",
@@ -77,6 +79,7 @@
     "Part\n%d / %d": "Phần\n%d / %d",
     "Part Size": "Kích thước một phần",
     "Passphrase": "Cụm mật khẩu",
+    "Plaintext QR": "Văn bản rõ QR",
     "Plunge Rate": "Tỷ lệ sụt giảm",
     "Print to QR?": "In ra mã QR?",
     "Printer": "Máy in",
@@ -104,6 +107,7 @@
     "Single-key": "Khóa đơn",
     "TX Pin": "TX Ghim",
     "Thermal": "Nhiệt",
+    "Touch disabled for transcription.\nPress enter twice to leave.": "Đã tắt tính năng chạm để phiên âm.\nNhấn enter hai lần để thoát.",
     "Try more?": "Thử thêm nữa?",
     "Unit": "Đơn vị",
     "Updating bootloader..\n\n%d%%": "Cập nhật bộ tải khởi động..\n\n%d%%",
@@ -119,5 +123,6 @@
     "Wallet": "Ví",
     "Wallet not found.": "Không tìm thấy ví.",
     "Word %d": "Kí tự %d",
+    "Words": "Từ ngữ",
     "Yes": "Đúng"
 }

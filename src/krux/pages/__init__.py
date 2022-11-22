@@ -137,22 +137,19 @@ class Page:
                         new_buffer = autocomplete_fn(buffer)
                         if new_buffer is not None:
                             buffer = new_buffer
-                            pad.cur_key_index = pad.go_index
+                            break  # auto-Go for load "Via Text"
+
+                    # auto-Go for load "Via Numbers"
+                    if len(pad.keys) == 10 and (
+                        len(buffer) == 4 or (len(buffer) == 3 and int(buffer) > 204)
+                    ):
+                        break
 
                 if changed and go_on_change:
                     break
 
-            elif btn == BUTTON_PAGE:
-                pad.next_key()
-
-            elif btn == BUTTON_PAGE_PREV:
-                pad.previous_key()
-
-            elif btn == SWIPE_LEFT:
-                pad.next_keyset()
-
-            elif btn == SWIPE_RIGHT:
-                pad.previous_keyset()
+            else:
+                pad.navigate(btn)
 
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
@@ -195,6 +192,8 @@ class Page:
 
             return False
 
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Loading Camera"))
         self.ctx.display.to_landscape()
         code = None
         qr_format = None
@@ -294,9 +293,7 @@ class Page:
         if self.ctx.printer is None:
             return
         self.ctx.display.clear()
-        time.sleep_ms(1000)
-        self.ctx.display.draw_centered_text(t("Print to QR?"))
-        if self.wait_for_proceed():
+        if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
             i = 0
             for qr_code, count in to_qr_codes(
                 data, self.ctx.printer.qr_data_width(), qr_format
@@ -393,7 +390,9 @@ class Page:
 
     def shutdown(self):
         """Handler for the 'shutdown' menu item"""
-        return MENU_SHUTDOWN
+        if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+            return MENU_SHUTDOWN
+        return MENU_CONTINUE
 
     def run(self):
         """Runs the page's menu loop"""
@@ -754,12 +753,26 @@ class Keypad:
             self.cur_key_index = 0
         return actual_button
 
-    def next_key(self):
+    def navigate(self, btn):
+        """Groups navigation methods in one place"""
+        if btn == BUTTON_PAGE:
+            self._next_key()
+
+        elif btn == BUTTON_PAGE_PREV:
+            self._previous_key()
+
+        elif btn == SWIPE_LEFT:
+            self.next_keyset()
+
+        elif btn == SWIPE_RIGHT:
+            self.previous_keyset()
+
+    def _next_key(self):
         """Increments cursor when page button is pressed"""
         self.moving_forward = True
         self.cur_key_index = (self.cur_key_index + 1) % self.total_keys
 
-    def previous_key(self):
+    def _previous_key(self):
         """Decrements cursor when page_prev button is pressed"""
         self.moving_forward = False
         self.cur_key_index = (self.cur_key_index - 1) % self.total_keys
