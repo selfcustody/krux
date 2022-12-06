@@ -24,7 +24,8 @@ import gc
 import hashlib
 import os
 import lcd
-from .metal_seed import TinySeed, Stackbit
+from .stack_1248 import Stackbit
+from .tiny_seed import TinySeed
 from embit.wordlists.bip39 import WORDLIST
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
@@ -85,17 +86,17 @@ class Home(Page):
             )
             self.ctx.printer.print_string("Seed Words\n")
             words = self.ctx.wallet.key.mnemonic.split(" ")
-            lines = (len(words)//3)
+            lines = len(words) // 3
             for i in range(lines):
                 index = i + 1
                 string = str(index) + ":" + words[index - 1] + " "
                 while len(string) < 10:
                     string += " "
-                index += lines 
+                index += lines
                 string += str(index) + ":" + words[index - 1] + " "
                 while len(string) < 21:
                     string += " "
-                index += lines 
+                index += lines
                 string += str(index) + ":" + words[index - 1] + "\n"
                 self.ctx.printer.print_string(string)
             self.ctx.printer.feed(3)
@@ -145,7 +146,7 @@ class Home(Page):
         draw_grided_qr(grid_size, qr_size)
         button = None
         while button != 0:
-            #Avoid the need of double click
+            # Avoid the need of double click
             self.ctx.input.buttons_active = True
 
             button = self.ctx.input.wait_for_button()
@@ -263,6 +264,14 @@ class Home(Page):
                 t("Invalid wallet:\n%s") % repr(e), lcd.RED
             )
             self.ctx.input.wait_for_button()
+        if self.ctx.wallet.descriptor.key:  # If single sig
+            if not self.ctx.wallet.descriptor.key.origin:
+                # Blue exports descriptors without a fingerprint
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("Warning:\nIncomplete descriptor"), lcd.RED
+                )
+                self.ctx.input.wait_for_button()
         return MENU_CONTINUE
 
     def scan_address(self):
