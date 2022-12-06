@@ -202,9 +202,11 @@ class PSBTSigner:
         )
         xpubs = {}
         for descriptor_key in descriptor_keys:
-            xpubs[descriptor_key.key] = DerivationPath(
-                descriptor_key.origin.fingerprint, descriptor_key.origin.derivation
-            )
+            if descriptor_key.origin:
+                # Pure xpub descriptors (Blue Wallet) don't have origin data
+                xpubs[descriptor_key.key] = DerivationPath(
+                    descriptor_key.origin.fingerprint, descriptor_key.origin.derivation
+                )
         return xpubs
 
 
