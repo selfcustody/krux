@@ -36,7 +36,6 @@
 # *************************************************************************
 # pylint: disable=W0231
 import time
-import math
 from fpioa_manager import fm
 from machine import UART
 
@@ -64,12 +63,12 @@ class AdafruitPrinter(Printer):
         self.uart_conn = UART(UART.UART2, Settings().printer.thermal.adafruit.baudrate)
 
         self.character_height = 24
-        self.byte_time = 1 # miliseconds
+        self.byte_time = 1  # miliseconds
         if Settings().printer.thermal.adafruit.baudrate > 9600:
-            self.dot_print_time = 10 # miliseconds
+            self.dot_print_time = 10  # miliseconds
         else:
-            self.dot_print_time = 5 # miliseconds
-        self.dot_feed_time = 2 # miliseconds
+            self.dot_print_time = 5  # miliseconds
+        self.dot_feed_time = 2  # miliseconds
 
         self.setup()
 
@@ -198,7 +197,7 @@ class AdafruitPrinter(Printer):
                     line |= bit
             line_bytes = line.to_bytes((size * scale + 7) // 8, "big")
             # Print height * scale lines out to scale by
-            command = b'\x12\x2A\x01'
+            command = b"\x12\x2A\x01"
             command += bytes([len(line_bytes)])
             command += line_bytes
             for _ in range(scale):
@@ -210,7 +209,7 @@ class AdafruitPrinter(Printer):
         """Print a bitmap line"""
         # Done line by line to save RAM
 
-        command = b'\x12\x2A\x01'
+        command = b"\x12\x2A\x01"
         command += bytes([len(data)])
         command += data
         self.uart_conn.write(command)

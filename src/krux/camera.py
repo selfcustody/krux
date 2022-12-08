@@ -38,11 +38,14 @@ class Camera:
     def __init__(self):
         self.cam_id = None
 
-    def initialize_sensor(self):
+    def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
         sensor.reset(dual_buff=True)
         self.cam_id = sensor.get_id()
-        sensor.set_pixformat(sensor.RGB565)
+        if grayscale:
+            sensor.set_pixformat(sensor.GRAYSCALE)
+        else:
+            sensor.set_pixformat(sensor.RGB565)
         if self.cam_id == OV5642_ID:
             # CIF mode will use central pixels and discard darker periphery
             sensor.set_framesize(sensor.CIF)

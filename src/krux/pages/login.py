@@ -36,7 +36,8 @@ from ..key import Key, pick_final_word
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..krux_settings import t
-from .metal_seed import TinySeed, Stackbit
+from .stack_1248 import Stackbit
+from .tiny_seed import TinySeed, TinyScanner
 from . import (
     Page,
     Menu,
@@ -91,8 +92,25 @@ class Login(Page):
                 (t("Via Text"), self.load_key_from_text),
                 (t("Via Numbers"), self.load_key_from_digits),
                 (t("Via Bits"), self.load_key_from_bits),
+                (t("Metal Storage"), self.load_metal_key),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return MENU_CONTINUE
+        return status
+
+    def load_metal_key(self):
+        """Handler to load metal seed storgare"""
+        submenu = Menu(
+            self.ctx,
+            [
                 ("Stackbit 1248", self.load_key_from_1248),
-                ("Tiny Seed", self.load_key_from_tiny_seed),
+                ("Tiny Seed 12", self.load_key_from_tiny_seed),
+                ("Tiny Seed 24", lambda: self.load_key_from_tiny_seed(True)),
+                ("Scan Tiny Seed 12", self.scan_from_tiny_seed),
+                ("Scan Tiny Seed 24", lambda: self.scan_from_tiny_seed(True)),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -447,10 +465,19 @@ class Login(Page):
             return self._load_key_from_words(words)
         return MENU_CONTINUE
 
-    def load_key_from_tiny_seed(self):
-        """Menu handler to load key from Tiny Seed sheet metal storage method"""
+    def load_key_from_tiny_seed(self, w24=False):
+        """Menu handler to manually load key from Tiny Seed sheet metal storage method"""
+        # w24 - true if 24 words mode
         tiny_seed = TinySeed(self.ctx)
-        words = tiny_seed.enter_tiny_seed()
+        words = tiny_seed.enter_tiny_seed(w24)
+        if words is not None:
+            return self._load_key_from_words(words)
+        return MENU_CONTINUE
+
+    def scan_from_tiny_seed(self, w24=False):
+        """Menu handler to scan key from Tiny Seed sheet metal storage method"""
+        tiny_scanner = TinyScanner(self.ctx)
+        words = tiny_scanner.scanner(w24)
         if words is not None:
             return self._load_key_from_words(words)
         return MENU_CONTINUE

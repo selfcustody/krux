@@ -69,8 +69,8 @@ class Wallet:
             if not descriptor.key:
                 if len(descriptor.keys) > 1:
                     raise ValueError("not single-key")
-                else:  # Nunchuk exports single sig as a "multi 1 of 1"
-                    descriptor.key = descriptor.keys[0]
+                # Nunchuk exports single sig as a "multi 1 of 1"
+                descriptor.key = descriptor.keys[0]
             if self.key.xpub() != descriptor.key.key.to_base58():
                 raise ValueError("xpub does not match")
 

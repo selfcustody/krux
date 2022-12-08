@@ -80,6 +80,7 @@ from kruxsim.mocks import fpioa_manager
 from kruxsim.mocks import Maix
 from kruxsim.mocks import flash
 from kruxsim.mocks import machine
+from kruxsim.mocks import image
 from kruxsim.mocks import pmu
 
 if args.printer:
