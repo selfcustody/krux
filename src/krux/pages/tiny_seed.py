@@ -9,7 +9,7 @@ from . import Page
 from ..wdt import wdt
 from ..krux_settings import t
 from ..display import DEFAULT_PADDING
-from ..camera import OV7740_ID, OV2640_ID, GC0328_ID
+from ..camera import OV7740_ID, OV2640_ID, OV5642_ID, GC0328_ID
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -427,27 +427,26 @@ class TinySeed(Page):
         return word_numbers
 
     def _new_index(self, index, btn, w24, page):
+        def _last_editable_bit():
+            if w24:
+                if page == 0:
+                    return TS_LAST_BIT_NO_CS
+                return TS_LAST_BIT_24W_CS
+            return TS_LAST_BIT_12W_CS
+
         if btn == BUTTON_PAGE:
             if index >= TS_GO_POSITION:
                 index = 0
             elif index >= TS_ESC_POSITION:
                 index = TS_GO_POSITION
-            elif (
-                (w24 and page == 0 and index >= TS_LAST_BIT_NO_CS)
-                or (w24 and page == 1 and index >= TS_LAST_BIT_24W_CS)
-                or index >= TS_LAST_BIT_12W_CS
-            ):
+            elif index >= _last_editable_bit():
                 index = TS_ESC_POSITION
             else:
                 index += 1
         elif btn == BUTTON_PAGE_PREV:
             if index <= 0:
                 index = TS_GO_POSITION
-            elif (
-                (w24 and page == 0 and index <= TS_LAST_BIT_NO_CS)
-                or (w24 and page == 1 and index <= TS_LAST_BIT_24W_CS)
-                or index <= TS_LAST_BIT_12W_CS
-            ):
+            elif index <= _last_editable_bit():
                 index -= 1
             elif index <= TS_ESC_POSITION:
                 if w24:
@@ -461,9 +460,20 @@ class TinySeed(Page):
                 index = TS_ESC_POSITION
         return index
 
-
     def enter_tiny_seed(self, w24=False, seed_numbers=None, scanning=False):
         """UI to manually enter a Tiny Seed"""
+
+        def _editable_bit():
+            if w24:
+                if page == 0:
+                    if index <= TS_LAST_BIT_NO_CS:
+                        return True
+                elif index <= TS_LAST_BIT_24W_CS:
+                    return True
+            elif index <= TS_LAST_BIT_12W_CS:
+                return True
+            return False
+
         index = 0
         if seed_numbers:
             tiny_seed_numbers = seed_numbers
@@ -502,11 +512,7 @@ class TinySeed(Page):
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                         break
                     self._map_keys_array()
-                elif (
-                    index <= TS_LAST_BIT_12W_CS
-                    or (w24 and page == 0 and index <= TS_LAST_BIT_NO_CS)
-                    or (w24 and page == 1 and index <= TS_LAST_BIT_24W_CS)
-                ):
+                elif _editable_bit():
                     word_index = index // 12
                     word_index += page * 12
                     bit = 11 - (index % 12)
@@ -528,11 +534,25 @@ class TinyScanner(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
+        # Capturing flaf used for first page of 24 words seed
+        self.capturing = False
+        # X, Y array map for punched area
         self.x_regions = []
         self.y_regions = []
+        # Gratdient corners:
+        # Upper left
+        self.gradient_bg_ul = 0
+        # Upper right
+        self.gradient_bg_ur = 0
+        # Lower left
+        self.gradient_bg_ll = 0
+        # Lower right
+        self.gradient_bg_lr = 0
+        self.time_frame = time.ticks_ms()
+        self.previous_seed_numbers = [1] * 12
         self.tiny_seed = TinySeed(self.ctx)
 
-    def _map_dot_region(self, rect_size, page=0):
+    def _map_punches_region(self, rect_size, page=0):
         # Think in portrait mode, with Tiny Seed tilted 90 degrees
         self.x_regions = []
         self.y_regions = []
@@ -566,31 +586,90 @@ class TinyScanner(Page):
                 return False
         return True
 
-    def _exit_camera(self):
-        sensor.run(0)
-        self.ctx.display.to_portrait()
-        self.ctx.display.clear()
+    def _gradient_corners(self, rect, img):
+        """Calcule histogram for four corners of tinyseed to be later
+        used as a gradient reference threshold"""
+        if board.config["type"].startswith("amigo"):
+            region_ul = (rect[0], rect[1], rect[2] // 4, rect[3] // 2)
+            region_ur = (
+                rect[0] + 3 * rect[2] // 4,
+                rect[1],
+                rect[2] // 4,
+                rect[3] // 2,
+            )
+            region_ll = (
+                rect[0],
+                rect[1] + rect[3] // 2,
+                rect[2] // 4,
+                rect[3] // 2,
+            )
+            region_lr = (
+                rect[0] + 3 * rect[2] // 4,
+                rect[1] + rect[3] // 2,
+                rect[2] // 4,
+                rect[3] // 2,
+            )
+        else:
+            region_ul = (
+                rect[0] + 3 * rect[2] // 4,
+                rect[1] + rect[3] // 2,
+                rect[2] // 4,
+                rect[3] // 2,
+            )
+            region_ur = (
+                rect[0],
+                rect[1] + rect[3] // 2,
+                rect[2] // 4,
+                rect[3] // 2,
+            )
+            region_ll = (
+                rect[0] + 3 * rect[2] // 4,
+                rect[1],
+                rect[2] // 4,
+                rect[3] // 2,
+            )
+            region_lr = (rect[0], rect[1], rect[2] // 4, rect[3] // 2)
 
+        ul_hist = img.get_histogram(roi=region_ul)
+        if "histogram" not in str(type(ul_hist)):
+            return
+        self.gradient_bg_ul = ul_hist.get_threshold().l_value()
 
-    def scanner(self, w24=False):
-        """Uses camera sensor to scan punched pattern on Tiny Seed format"""
+        ur_hist = img.get_histogram(roi=region_ur)
+        if "histogram" not in str(type(ur_hist)):
+            return
+        self.gradient_bg_ur = ur_hist.get_threshold().l_value()
 
-        def gradient(up_right, up_left, low_left, low_right, index):
-            """Calculates a reference threshold acording to an interpolation
-            gradient of luminosity from 4 corners of Tiny Seed"""
-            y_position = index % 12
-            x_position = index // 12
-            gradient_upper_x = (
-                up_left * x_position + up_right * (11 - x_position)
-            ) // 11
-            gradient_lower_x = (
-                low_left * x_position + low_right * (11 - x_position)
-            ) // 11
-            return (
-                gradient_upper_x * (11 - y_position) + gradient_lower_x * (y_position)
-            ) // 11
+        ll_hist = img.get_histogram(roi=region_ll)
+        if "histogram" not in str(type(ll_hist)):
+            return
+        self.gradient_bg_ll = ll_hist.get_threshold().l_value()
+
+        lr_hist = img.get_histogram(roi=region_lr)
+        if "histogram" not in str(type(lr_hist)):
+            return
+        self.gradient_bg_lr = lr_hist.get_threshold().l_value()
+
+    def _gradient_value(self, index):
+        """Calculates a reference threshold according to an interpolation
+        gradient of luminosity from 4 corners of Tiny Seed"""
+        y_position = index % 12
+        x_position = index // 12
+        gradient_upper_x = (
+            self.gradient_bg_ul * x_position + self.gradient_bg_ur * (11 - x_position)
+        ) // 11
+        gradient_lower_x = (
+            self.gradient_bg_ll * x_position + self.gradient_bg_lr * (11 - x_position)
+        ) // 11
+        return (
+            gradient_upper_x * (11 - y_position) + gradient_lower_x * (y_position)
+        ) // 11
+
+    def _detect_tiny_seed(self, img):
+        """Detects Tiny Seed as a bright blob against a dark surface"""
 
         def _choose_rect(rects):
+            # Big lenses cameras seems to distor aspect ratio
             for rect in rects:
                 aspect = rect[2] / rect[3]
                 if (
@@ -598,16 +677,216 @@ class TinyScanner(Page):
                     and rect[1]
                     and (rect[0] + rect[2]) < img.width()
                     and (rect[1] + rect[3]) < img.height()
-                    and 1.2 < aspect < 1.3
+                    and aspect_low < aspect < 1.3
                 ):
                     return rect
             return None
 
+        aspect_low = 1.1 if self.ctx.camera.cam_id in (OV2640_ID, OV5642_ID) else 1.2
+        # upper quartile luminosity as initial threshold
+        luminosity = img.get_statistics().l_uq()
+        # if "histogram" not in str(type(hist)):
+        #     print("bad histogram")
+        #     return None
+        attempts = 2
+        while attempts:
+            blob_threshold = [
+                (0, luminosity),
+                (-50, 50),
+                (-50, 50),
+            ]
+            rects = img.find_blobs(
+                blob_threshold,
+                x_stride=5,
+                y_stride=5,
+                area_threshold=10000,
+                invert=True,
+            )
+            # # Debug blobs
+            # for rect in rects:
+            #     img.draw_rectangle(rect.rect(), color=lcd.YELLOW, thickness=3)
+            rect = _choose_rect(rects)
+            if rect:
+                break
+            attempts -= 1
+            # Reduce luminosity threshold in 10%
+            luminosity *= 9
+            luminosity //= 10
+        # # Debug attempts
+        # img.draw_string(10,10,"Attempts:"+str(attempts))
+        if rect:
+            # Outline Tiny Seed
+            outline = (
+                rect.rect()[0] - 1,
+                rect.rect()[1] - 1,
+                rect.rect()[2] + 1,
+                rect.rect()[3] + 1,
+            )
+            if self.capturing:
+                img.draw_rectangle(outline, lcd.RED, thickness=2)
+            else:
+                img.draw_rectangle(outline, lcd.BLUE, thickness=2)
+        return rect
+
+    def _draw_grid(self, img):
+        if self.ctx.display.height() > 240:
+            for i in range(13):
+                img.draw_line(
+                    self.x_regions[i],
+                    self.y_regions[0],
+                    self.x_regions[i],
+                    self.y_regions[-1],
+                    lcd.BLUE,
+                )
+                img.draw_line(
+                    self.x_regions[0],
+                    self.y_regions[i],
+                    self.x_regions[-1],
+                    self.y_regions[i],
+                    lcd.BLUE,
+                )
+
+    def _detect_punches(self, img):
+        """Applies gradient threshold to detect punched(black painted) bits"""
+        page_seed_numbers = [0] * 12
+        index = 0
+        pad_x = self.x_regions[1] - self.x_regions[0]
+        pad_y = self.y_regions[1] - self.y_regions[0]
+        if pad_x < 4 or pad_y < 4:  # Punches are too small
+            return page_seed_numbers
+        y_map = self.y_regions[0:-1]
+        x_map = self.x_regions[0:-1]
+        if board.config["type"].startswith("amigo"):
+            x_map.reverse()
+        else:
+            y_map.reverse()
+        # Think in portrait mode, with Tiny Seed tilted 90 degrees
+        for x in x_map:
+            for y in y_map:
+                eval_rect = (x + 2, y + 2, pad_x - 3, pad_y - 3)
+                dot_l = img.get_statistics(bins=8, roi=eval_rect).l_mean()
+                gradient_ref = self._gradient_value(index)
+
+                # # Debug gradient
+                # if index == 0:
+                #     img.draw_string(10,10,"0:"+str(gradient_ref))
+                # if index == 11:
+                #     img.draw_string(70,10,"11:"+str(gradient_ref))
+                # if index == 131:
+                #     img.draw_string(10,25,"131:"+str(gradient_ref))
+                # if index == 143:
+                #     img.draw_string(70,25,"143:"+str(gradient_ref))
+
+                # Seems these cameras has better dynamic range
+                if self.ctx.camera.cam_id in (GC0328_ID, OV2640_ID, OV5642_ID):
+                    punch_threshold = (gradient_ref * 4) // 5  # ~-20%
+                else:
+                    punch_threshold = (gradient_ref * 11) // 12  # ~-9%
+                punched = dot_l < punch_threshold
+                # Sensor image will be downscaled on small displays
+                punch_thickness = 1 if self.ctx.display.height() > 240 else 2
+                if punched:
+                    _ = img.draw_rectangle(
+                        eval_rect, thickness=punch_thickness, color=lcd.BLUE
+                    )
+                    word_index = index // 12
+                    bit = 11 - (index % 12)
+                    page_seed_numbers[word_index] = (
+                        self.tiny_seed.toggle_bit(page_seed_numbers[word_index], bit)
+                        % 2048
+                    )
+                index += 1
+        return page_seed_numbers
+
+    def _set_camera_sensitivity(self):
+        if self.ctx.camera.cam_id == OV7740_ID:
+            # reduce sensitivity to avoid saturated reflactions
+            # luminance high level, default=0x78
+            sensor.__write_reg(0x24, 0x48)  # pylint: disable=W0212
+            # luminance low level, default=0x68
+            sensor.__write_reg(0x25, 0x38)  # pylint: disable=W0212
+            # Disable frame integrtation (night mode)
+            sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
+
+    def _run_camera(self):
+        """Turns camera on, returns True if image fills full screen)"""
+        sensor.run(1)
+        self.ctx.display.clear()
+        if self.ctx.display.width() < 320:
+            full_screen = True
+        else:
+            full_screen = False
+            self.ctx.display.outline(
+                39,
+                1,
+                241,
+                321,
+            )
+        self.ctx.display.to_landscape()
+        return full_screen
+
+    def _exit_camera(self):
+        sensor.run(0)
+        self.ctx.display.to_portrait()
+        self.ctx.display.clear()
+
+    def _check_buttons(self, w24, page):
+        if time.ticks_ms() > self.time_frame + 1000:
+            if w24 and not page and not self.ctx.input.enter_value():
+                self.capturing = True
+            if not self.ctx.input.page_value() or not self.ctx.input.page_prev_value():
+                return True
+        return False
+
+    def _process_12w_scan(self, page_seed_numbers):
+        if (
+            self.tiny_seed.check_sum(page_seed_numbers)
+            == (page_seed_numbers[11] - 1) & 0b00000001111
+        ):
+            if page_seed_numbers == self.previous_seed_numbers:
+                self._exit_camera()
+                self.ctx.display.draw_centered_text(
+                    t("Review scanned data, edit if necessary")
+                )
+                self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
+                words = self.tiny_seed.enter_tiny_seed(seed_numbers=page_seed_numbers)
+                if words:  # If words confirmed
+                    return words
+                # Else turn camera on again and reset words
+                self._run_camera()
+                self.previous_seed_numbers = [1] * 12
+            else:
+                self.previous_seed_numbers = page_seed_numbers
+        return None
+
+    def _process_24w_pg0_scan(self, page_seed_numbers):
+        if page_seed_numbers == self.previous_seed_numbers and self.capturing:
+            self._exit_camera()
+            self.ctx.display.draw_centered_text(
+                t("Review scanned data, edit if necessary")
+            )
+            self.ctx.input.wait_for_button()
+            self.ctx.display.clear()
+            words = self.tiny_seed.enter_tiny_seed(True, page_seed_numbers, True)
+            self.capturing = False
+            if words is not None:  # Fisrt 12 words confirmed, moving to 13-24
+                self._run_camera()
+                return words
+            # Esc command was given
+            self.ctx.display.clear()
+            self.ctx.display.flash_text(t("Scanning words 1-12 again"), duration=700)
+            self._run_camera()  # Run camera and rotate screen after message was given
+        elif self._valid_numbers(page_seed_numbers):
+            self.previous_seed_numbers = page_seed_numbers
+        return None
+
+    def scanner(self, w24=False):
+        """Uses camera sensor to scan punched pattern on Tiny Seed format"""
         page = 0
-        capturing = False
         if w24:
             w24_seed_numbers = [0] * 24
-        previous_seed_numbers = [1] * 12
+        self.previous_seed_numbers = [1] * 12
         intro = t(
             "Paint punched dots black so they can be detected. "
             + "Use a black background surface. "
@@ -620,285 +899,54 @@ class TinyScanner(Page):
             return None
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading Camera"))
-        self._time_frame = time.ticks_ms()
         self.ctx.camera.initialize_sensor()
-        if self.ctx.camera.cam_id == OV7740_ID:
-            # reduce sensitivity to avoid saturated reflactions
-            # luminance high level, default=0x78
-            sensor.__write_reg(0x24, 0x48)  # pylint: disable=W0212
-            # luminance low level, default=0x68
-            sensor.__write_reg(0x25, 0x38)  # pylint: disable=W0212
-            # Disable frame integrtation (night mode)
-            sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
-        sensor.run(1)
-        self.ctx.display.clear()
-        if self.ctx.display.width() < 320:
-            camera_offset = False
-        else:
-            camera_offset = True
-            self.ctx.display.outline(
-                39,
-                1,
-                241,
-                321,
-            )
-        self.ctx.display.to_landscape()
+        self._set_camera_sensitivity()
+        full_screen = self._run_camera()
         while True:
             wdt.feed()
-            page_seed_numbers = [0] * 12
+            page_seed_numbers = None
             img = sensor.snapshot()
             if self.ctx.camera.cam_id == OV2640_ID:
                 img.rotation_corr(z_rotation=180)
-            hist = img.get_histogram()
-            if "histogram" not in str(type(hist)):
-                continue
-            luminosity_threshold = [
-                (0, hist.get_threshold().l_value()),
-                (-50, 50),
-                (-50, 50),
-            ]
-            rects = img.find_blobs(
-                luminosity_threshold,
-                x_stride=5,
-                y_stride=5,
-                area_threshold=10000,
-                invert=True,
-            )
-            # blobs_count = len(rects)
-            rect = _choose_rect(rects)
-            if rect is None:
-                luminosity_threshold = [
-                    (0, hist.get_threshold().l_value() * 8 // 10),
-                    (-50, 50),
-                    (-50, 50),
-                ]
-                rects = img.find_blobs(
-                    luminosity_threshold,
-                    x_stride=5,
-                    y_stride=5,
-                    area_threshold=10000,
-                    invert=True,
-                )
-                rect = _choose_rect(rects)
+            rect = self._detect_tiny_seed(img)
             if rect:
-                ##get statistics
-                if board.config["type"].startswith("amigo"):
-                    region_ul = (rect[0], rect[1], rect[2] // 4, rect[3] // 2)
-                    region_ur = (
-                        rect[0] + 3 * rect[2] // 4,
-                        rect[1],
-                        rect[2] // 4,
-                        rect[3] // 2,
-                    )
-                    region_ll = (
-                        rect[0],
-                        rect[1] + rect[3] // 2,
-                        rect[2] // 4,
-                        rect[3] // 2,
-                    )
-                    region_lr = (
-                        rect[0] + 3 * rect[2] // 4,
-                        rect[1] + rect[3] // 2,
-                        rect[2] // 4,
-                        rect[3] // 2,
-                    )
-                else:
-                    region_ul = (
-                        rect[0] + 3 * rect[2] // 4,
-                        rect[1] + rect[3] // 2,
-                        rect[2] // 4,
-                        rect[3] // 2,
-                    )
-                    region_ur = (
-                        rect[0],
-                        rect[1] + rect[3] // 2,
-                        rect[2] // 4,
-                        rect[3] // 2,
-                    )
-                    region_ll = (
-                        rect[0] + 3 * rect[2] // 4,
-                        rect[1],
-                        rect[2] // 4,
-                        rect[3] // 2,
-                    )
-                    region_lr = (rect[0], rect[1], rect[2] // 4, rect[3] // 2)
-
-                # ul_lum = img.get_statistics(bins=8, roi=region_ul).l_mean()
-                # ur_lum = img.get_statistics(bins=8, roi=region_ur).l_mean()
-                # ll_lum = img.get_statistics(bins=8, roi=region_ll).l_mean()
-                # lr_lum = img.get_statistics(bins=8, roi=region_lr).l_mean()
-
-                ul_hist = img.get_histogram(roi=region_ul)
-                if "histogram" not in str(type(ul_hist)):
-                    continue
-                ul_lum = ul_hist.get_threshold().l_value()
-
-                ur_hist = img.get_histogram(roi=region_ur)
-                if "histogram" not in str(type(ur_hist)):
-                    continue
-                ur_lum = ur_hist.get_threshold().l_value()
-
-                ll_hist = img.get_histogram(roi=region_ll)
-                if "histogram" not in str(type(ll_hist)):
-                    continue
-                ll_lum = ll_hist.get_threshold().l_value()
-
-                lr_hist = img.get_histogram(roi=region_lr)
-                if "histogram" not in str(type(lr_hist)):
-                    continue
-                lr_lum = lr_hist.get_threshold().l_value()
-
-                # Debug Blobs Count
-                # img.draw_string(10, 10, "Blobs: " + str(blobs_count))
-                # img.draw_string(10, 30, "Blobs 2: " + str(len(rects)))
-
-                # Outline Tiny Seed
-                outline = (
-                    rect.rect()[0] - 1,
-                    rect.rect()[1] - 1,
-                    rect.rect()[2] + 1,
-                    rect.rect()[3] + 1,
-                )
-                if capturing:
-                    img.draw_rectangle(outline, lcd.RED, thickness=2)
-                else:
-                    img.draw_rectangle(outline, lcd.BLUE, thickness=2)
+                self._gradient_corners(rect, img)
 
                 # map_regions
-                self._map_dot_region(rect.rect(), page)
-                pad_x = self.x_regions[1] - self.x_regions[0]
-                pad_y = self.y_regions[1] - self.y_regions[0]
-                if pad_x < 4 or pad_y < 4:
-                    break
-                index = 0
-                # Think in portrait mode, with Tiny Seed tilted 90 degrees
-                y_map = self.y_regions[0:-1]
-                x_map = self.x_regions[0:-1]
-                if board.config["type"].startswith("amigo"):
-                    x_map.reverse()
-                else:
-                    y_map.reverse()
-                for x in x_map:
-                    for y in y_map:
-                        eval_rect = (x + 2, y + 2, pad_x - 3, pad_y - 3)
-                        dot_l = img.get_statistics(bins=8, roi=eval_rect).l_mean()
-                        gradient_ref = gradient(ur_lum, ul_lum, ll_lum, lr_lum, index)
-
-                        # # Debug gradient
-                        # if index == 0:
-                        #     img.draw_string(10,10,"0:"+str(gradient_ref))
-                        # if index == 11:
-                        #     img.draw_string(70,10,"11:"+str(gradient_ref))
-                        # if index == 131:
-                        #     img.draw_string(10,25,"131:"+str(gradient_ref))
-                        # if index == 143:
-                        #     img.draw_string(70,25,"143:"+str(gradient_ref))
-
-                        # Seems this camera has better dynamic range
-                        if self.ctx.camera.cam_id == GC0328_ID:
-                            punch_threshold = (gradient_ref * 4) // 5  # ~-20%
-                        else:
-                            punch_threshold = (gradient_ref * 11) // 12  # ~-9%
-                        punched = (dot_l < punch_threshold)
-                        # Sensor image will be downscaled on small displays
-                        punch_thickness = 1 if self.ctx.display.height() > 240 else 2
-                        if punched:
-                            _ = img.draw_rectangle(
-                                eval_rect, thickness=punch_thickness, color=lcd.BLUE
-                            )
-                            word_index = index // 12
-                            bit = 11 - (index % 12)
-                            page_seed_numbers[word_index] = (
-                                self.tiny_seed.toggle_bit(
-                                    page_seed_numbers[word_index], bit
-                                )
-                                % 2048
-                            )
-                        index += 1
-                if self.ctx.display.height() > 240:
-                    for i in range(13):
-                        img.draw_line(
-                            self.x_regions[i],
-                            self.y_regions[0],
-                            self.x_regions[i],
-                            self.y_regions[-1],
-                            lcd.BLUE,
-                        )
-                        img.draw_line(
-                            self.x_regions[0],
-                            self.y_regions[i],
-                            self.x_regions[-1],
-                            self.y_regions[i],
-                            lcd.BLUE,
-                        )
+                self._map_punches_region(rect.rect(), page)
+                page_seed_numbers = self._detect_punches(img)
+                self._draw_grid(img)
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
-            if camera_offset:
-                lcd.display(img, oft=(2, 40))  # 40 will centralize image in Amigo
-            else:
+            if full_screen:
                 lcd.display(img)
-            if not w24:
-                if (
-                    self.tiny_seed.check_sum(page_seed_numbers)
-                    == (page_seed_numbers[11] - 1) & 0b00000001111
-                ):
-                    if page_seed_numbers == previous_seed_numbers:
-                        self._exit_camera()
-                        self.ctx.display.draw_centered_text(
-                            t("Review scanned data, edit if necessary")
-                        )
-                        self.ctx.input.wait_for_button()
-                        self.ctx.display.clear()
-                        return self.tiny_seed.enter_tiny_seed(
-                            seed_numbers=page_seed_numbers
-                        )
-                    previous_seed_numbers = page_seed_numbers
             else:
-                if not page:
-                    if page_seed_numbers == previous_seed_numbers and capturing:
-                        self._exit_camera()
-                        self.ctx.display.draw_centered_text(
-                            t("Review scanned data, edit if necessary")
-                        )
-                        self.ctx.input.wait_for_button()
-                        self.ctx.display.clear()
-                        words = self.tiny_seed.enter_tiny_seed(
-                            True, page_seed_numbers, True
-                        )
-                        if words is not None:
-                            w24_seed_numbers[0:12] = words
+                lcd.display(img, oft=(2, 40))  # Centralize image in Amigo
+            if page_seed_numbers:
+                if w24:
+                    if page == 0:  # Scanning first 12 words (page 0)
+                        first_page = self._process_24w_pg0_scan(page_seed_numbers)
+                        if first_page:  # If page 0 confirmed, move to page 1
+                            w24_seed_numbers[0:12] = first_page
                             page = 1
-                        else:
-                            self.ctx.display.clear()
-                            self.ctx.display.flash_text(
-                                t("Scanning words 1-12 again"), duration=700
-                            )
-                        sensor.run(1)
-                        sensor.skip_frames()
-                        self.ctx.display.clear()
-                        self.ctx.display.to_landscape()
-                        capturing = False
-                    elif self._valid_numbers(page_seed_numbers):
-                        previous_seed_numbers = page_seed_numbers
+                    else:  # Scanning words 13-24 (page 1)
+                        w24_seed_numbers[12:24] = page_seed_numbers
+                        if (
+                            self.tiny_seed.check_sum(w24_seed_numbers)
+                            == (w24_seed_numbers[23] - 1) & 0b00011111111
+                        ):
+                            if page_seed_numbers == self.previous_seed_numbers:
+                                self._exit_camera()
+                                return self.tiny_seed.to_words(w24_seed_numbers)
+                            self.previous_seed_numbers = page_seed_numbers
                 else:
-                    w24_seed_numbers[12:24] = page_seed_numbers
-                    if (
-                        self.tiny_seed.check_sum(w24_seed_numbers)
-                        == (w24_seed_numbers[23] - 1) & 0b00011111111
-                    ):
-                        if page_seed_numbers == previous_seed_numbers:
-                            self._exit_camera()
-                            return self.tiny_seed.to_words(w24_seed_numbers)
-                        previous_seed_numbers = page_seed_numbers
+                    words = self._process_12w_scan(page_seed_numbers)
+                    if words:
+                        return words
+            if self._check_buttons(w24, page):
+                break
 
-            if time.ticks_ms() > self._time_frame + 1000:
-                if w24 and not page and not self.ctx.input.enter_value():
-                    capturing = True
-                if (
-                    not self.ctx.input.page_value()
-                    or not self.ctx.input.page_prev_value()
-                ):
-                    break
         self._exit_camera()
-        lcd.clear()
+        self.ctx.display.clear()
+        self.ctx.display.flash_text(t("Aborting scan"), duration=1000)
         return None
