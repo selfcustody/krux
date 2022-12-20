@@ -9,7 +9,7 @@ from . import Page
 from ..wdt import wdt
 from ..krux_settings import t
 from ..display import DEFAULT_PADDING
-from ..camera import OV7740_ID, OV2640_ID, OV5642_ID, GC0328_ID
+from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -541,13 +541,13 @@ class TinyScanner(Page):
         self.y_regions = []
         # Gratdient corners:
         # Upper left
-        self.gradient_bg_ul = 0
+        self.gradient_bg_ul = 50
         # Upper right
-        self.gradient_bg_ur = 0
+        self.gradient_bg_ur = 50
         # Lower left
-        self.gradient_bg_ll = 0
+        self.gradient_bg_ll = 50
         # Lower right
-        self.gradient_bg_lr = 0
+        self.gradient_bg_lr = 50
         self.time_frame = time.ticks_ms()
         self.previous_seed_numbers = [1] * 12
         self.tiny_seed = TinySeed(self.ctx)
@@ -558,6 +558,7 @@ class TinyScanner(Page):
         self.y_regions = []
         if not page:
             if board.config["type"].startswith("amigo"):
+                # Amigo has mirrored coordinates
                 x_offset = rect_size[0] + (rect_size[2] * 39) / 345
                 y_offset = rect_size[1] + (rect_size[3] * 44) / 272
             else:
@@ -589,66 +590,74 @@ class TinyScanner(Page):
     def _gradient_corners(self, rect, img):
         """Calcule histogram for four corners of tinyseed to be later
         used as a gradient reference threshold"""
-        if board.config["type"].startswith("amigo"):
-            region_ul = (rect[0], rect[1], rect[2] // 4, rect[3] // 2)
-            region_ur = (
-                rect[0] + 3 * rect[2] // 4,
-                rect[1],
+        if not board.config["type"].startswith("amigo"):
+            region_ul = (
+                rect[0] + rect[2] // 8,
+                rect[1] + rect[3] // 30,
                 rect[2] // 4,
-                rect[3] // 2,
+                rect[3] // 4,
+            )
+            region_ur = (
+                rect[0] + 8 * rect[2] // 11,
+                rect[1] + rect[3] // 30,
+                rect[2] // 4,
+                rect[3] // 4,
             )
             region_ll = (
-                rect[0],
-                rect[1] + rect[3] // 2,
+                rect[0] + rect[2] // 8,
+                rect[1] + (rect[3] * 5) // 7,
                 rect[2] // 4,
-                rect[3] // 2,
+                rect[3] // 4,
             )
             region_lr = (
-                rect[0] + 3 * rect[2] // 4,
-                rect[1] + rect[3] // 2,
+                rect[0] + 8 * rect[2] // 11,
+                rect[1] + (rect[3] * 5) // 7,
                 rect[2] // 4,
-                rect[3] // 2,
+                rect[3] // 4,
             )
-        else:
+        else:  # Amigo has mirrored coordinates
             region_ul = (
-                rect[0] + 3 * rect[2] // 4,
-                rect[1] + rect[3] // 2,
+                rect[0] + 7 * rect[2] // 11,
+                rect[1] + (rect[3] * 5) // 7,
                 rect[2] // 4,
-                rect[3] // 2,
+                rect[3] // 4,
             )
             region_ur = (
-                rect[0],
-                rect[1] + rect[3] // 2,
+                rect[0] + rect[2] // 30,
+                rect[1] + (rect[3] * 5) // 7,
                 rect[2] // 4,
-                rect[3] // 2,
+                rect[3] // 4,
             )
             region_ll = (
-                rect[0] + 3 * rect[2] // 4,
-                rect[1],
+                rect[0] + 7 * rect[2] // 11,
+                rect[1] + rect[3] // 8,
                 rect[2] // 4,
-                rect[3] // 2,
+                rect[3] // 4,
             )
-            region_lr = (rect[0], rect[1], rect[2] // 4, rect[3] // 2)
+            region_lr = (
+                rect[0] + rect[2] // 30,
+                rect[1] + rect[3] // 8,
+                rect[2] // 4,
+                rect[3] // 4,
+            )
 
-        ul_hist = img.get_histogram(roi=region_ul)
-        if "histogram" not in str(type(ul_hist)):
-            return
-        self.gradient_bg_ul = ul_hist.get_threshold().l_value()
+        # # Debug gradient corners
+        # # Warning: These rectangles affect detection
+        # img.draw_rectangle(region_ul, color=lcd.YELLOW, thickness=2)
+        # img.draw_rectangle(region_ur, color=lcd.ORANGE, thickness=2)
+        # img.draw_rectangle(region_ll, color=lcd.RED, thickness=2)
+        # img.draw_rectangle(region_lr, color=lcd.MAGENTA, thickness=2)
 
-        ur_hist = img.get_histogram(roi=region_ur)
-        if "histogram" not in str(type(ur_hist)):
-            return
-        self.gradient_bg_ur = ur_hist.get_threshold().l_value()
+        self.gradient_bg_ul = img.get_statistics(bins=8, roi=region_ul).l_median()
+        self.gradient_bg_ur = img.get_statistics(bins=8, roi=region_ur).l_median()
+        self.gradient_bg_ll = img.get_statistics(bins=8, roi=region_ll).l_median()
+        self.gradient_bg_lr = img.get_statistics(bins=8, roi=region_lr).l_median()
 
-        ll_hist = img.get_histogram(roi=region_ll)
-        if "histogram" not in str(type(ll_hist)):
-            return
-        self.gradient_bg_ll = ll_hist.get_threshold().l_value()
-
-        lr_hist = img.get_histogram(roi=region_lr)
-        if "histogram" not in str(type(lr_hist)):
-            return
-        self.gradient_bg_lr = lr_hist.get_threshold().l_value()
+        # # Debug corners luminosity
+        # img.draw_string(10,40,str(self.gradient_bg_ul))
+        # img.draw_string(70,40,str(self.gradient_bg_ur))
+        # img.draw_string(10,55,str(self.gradient_bg_ll))
+        # img.draw_string(70,55,str(self.gradient_bg_lr))
 
     def _gradient_value(self, index):
         """Calculates a reference threshold according to an interpolation
@@ -656,14 +665,28 @@ class TinyScanner(Page):
         y_position = index % 12
         x_position = index // 12
         gradient_upper_x = (
-            self.gradient_bg_ul * x_position + self.gradient_bg_ur * (11 - x_position)
+            self.gradient_bg_ul * (11 - x_position) + self.gradient_bg_ur * x_position
         ) // 11
         gradient_lower_x = (
-            self.gradient_bg_ll * x_position + self.gradient_bg_lr * (11 - x_position)
+            self.gradient_bg_ll * (11 - x_position) + self.gradient_bg_lr * x_position
         ) // 11
-        return (
-            gradient_upper_x * (11 - y_position) + gradient_lower_x * (y_position)
+        gradient = (
+            gradient_upper_x * (11 - y_position) + gradient_lower_x * y_position
         ) // 11
+
+        # Average filter
+        # Here you can change the relevance of the gradient vs medium luminance as a reference
+        filtered = (
+            self.gradient_bg_ul
+            + self.gradient_bg_ur
+            + self.gradient_bg_ll
+            + self.gradient_bg_lr
+        )  # weight 4/6 - 67% average
+        filtered += 2 * gradient  # weight 2/6 = 33% raw gradient
+        filtered //= 6
+        return filtered
+
+        # return gradient #pure gradient
 
     def _detect_tiny_seed(self, img):
         """Detects Tiny Seed as a bright blob against a dark surface"""
@@ -683,35 +706,39 @@ class TinyScanner(Page):
             return None
 
         aspect_low = 1.1 if self.ctx.camera.cam_id in (OV2640_ID, OV5642_ID) else 1.2
-        # upper quartile luminosity as initial threshold
-        luminosity = img.get_statistics().l_uq()
-        # if "histogram" not in str(type(hist)):
-        #     print("bad histogram")
-        #     return None
+        # Luminosity as initial threshold
+        stats = img.get_statistics()
+        # # Debug stats
+        # img.draw_string(10,10,"Mean:"+str(stats.l_mean()))
+        # img.draw_string(10,30,"Median:"+str(stats.l_median()))
+        # img.draw_string(10,50,"UQ:"+str(stats.l_uq()))
+        # img.draw_string(10,70,"LQ:"+str(stats.l_lq()))
+
+        # Luminosity
+        luminosity = stats.l_median() * 2
         attempts = 2
         while attempts:
             blob_threshold = [
-                (0, luminosity),
-                (-50, 50),
-                (-50, 50),
+                (luminosity, 100),
+                (-100, 100),
+                (-100, 100),
             ]
             rects = img.find_blobs(
                 blob_threshold,
                 x_stride=5,
                 y_stride=5,
                 area_threshold=10000,
-                invert=True,
             )
-            # # Debug blobs
+            # Debug blobs
             # for rect in rects:
-            #     img.draw_rectangle(rect.rect(), color=lcd.YELLOW, thickness=3)
+            #     img.draw_rectangle(rect.rect(), color=(255,125*attempts,0), thickness=3)
             rect = _choose_rect(rects)
             if rect:
                 break
             attempts -= 1
-            # Reduce luminosity threshold in 10%
+            # Reduce luminosity threshold to try again
             luminosity *= 9
-            luminosity //= 10
+            luminosity //= 11
         # # Debug attempts
         # img.draw_string(10,10,"Attempts:"+str(attempts))
         if rect:
@@ -764,28 +791,22 @@ class TinyScanner(Page):
         for x in x_map:
             for y in y_map:
                 eval_rect = (x + 2, y + 2, pad_x - 3, pad_y - 3)
-                dot_l = img.get_statistics(bins=8, roi=eval_rect).l_mean()
-                gradient_ref = self._gradient_value(index)
+                dot_l = img.get_statistics(bins=8, roi=eval_rect).l_median()
 
                 # # Debug gradient
                 # if index == 0:
                 #     img.draw_string(10,10,"0:"+str(gradient_ref))
                 # if index == 11:
-                #     img.draw_string(70,10,"11:"+str(gradient_ref))
-                # if index == 131:
-                #     img.draw_string(10,25,"131:"+str(gradient_ref))
+                #     img.draw_string(10,25,"11:"+str(gradient_ref))
+                # if index == 132:
+                #     img.draw_string(70,10,"132:"+str(gradient_ref))
                 # if index == 143:
                 #     img.draw_string(70,25,"143:"+str(gradient_ref))
 
-                # Seems these cameras has better dynamic range
-                if self.ctx.camera.cam_id in (GC0328_ID, OV2640_ID, OV5642_ID):
-                    punch_threshold = (gradient_ref * 4) // 5  # ~-20%
-                else:
-                    punch_threshold = (gradient_ref * 11) // 12  # ~-9%
-                punched = dot_l < punch_threshold
+                punch_threshold = (self._gradient_value(index) * 4) // 5  # ~-20%
                 # Sensor image will be downscaled on small displays
                 punch_thickness = 1 if self.ctx.display.height() > 240 else 2
-                if punched:
+                if dot_l < punch_threshold:
                     _ = img.draw_rectangle(
                         eval_rect, thickness=punch_thickness, color=lcd.BLUE
                     )
@@ -804,12 +825,12 @@ class TinyScanner(Page):
             # luminance high level, default=0x78
             sensor.__write_reg(0x24, 0x48)  # pylint: disable=W0212
             # luminance low level, default=0x68
-            sensor.__write_reg(0x25, 0x38)  # pylint: disable=W0212
+            sensor.__write_reg(0x25, 0x44)  # pylint: disable=W0212
             # Disable frame integrtation (night mode)
             sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
 
     def _run_camera(self):
-        """Turns camera on, returns True if image fills full screen)"""
+        """Turns camera on, returns True if image fills full screen"""
         sensor.run(1)
         self.ctx.display.clear()
         if self.ctx.display.width() < 320:
@@ -823,6 +844,7 @@ class TinyScanner(Page):
                 321,
             )
         self.ctx.display.to_landscape()
+
         return full_screen
 
     def _exit_camera(self):
