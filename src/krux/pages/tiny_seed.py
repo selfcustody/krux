@@ -110,7 +110,7 @@ class TinySeed(Page):
                         y_offset + 3,
                         self.x_pad - 5,
                         self.y_pad - 5,
-                        lcd.BLUE,
+                        lcd.WHITE,
                     )
             y_offset += self.y_pad
 
@@ -648,10 +648,10 @@ class TinyScanner(Page):
         # img.draw_rectangle(region_ll, color=lcd.RED, thickness=2)
         # img.draw_rectangle(region_lr, color=lcd.MAGENTA, thickness=2)
 
-        self.gradient_bg_ul = img.get_statistics(bins=8, roi=region_ul).l_median()
-        self.gradient_bg_ur = img.get_statistics(bins=8, roi=region_ur).l_median()
-        self.gradient_bg_ll = img.get_statistics(bins=8, roi=region_ll).l_median()
-        self.gradient_bg_lr = img.get_statistics(bins=8, roi=region_lr).l_median()
+        self.gradient_bg_ul = img.get_statistics(roi=region_ul).median()
+        self.gradient_bg_ur = img.get_statistics(roi=region_ur).median()
+        self.gradient_bg_ll = img.get_statistics(roi=region_ll).median()
+        self.gradient_bg_lr = img.get_statistics(roi=region_lr).median()
 
         # # Debug corners luminosity
         # img.draw_string(10,40,str(self.gradient_bg_ul))
@@ -692,7 +692,6 @@ class TinyScanner(Page):
         """Detects Tiny Seed as a bright blob against a dark surface"""
 
         def _choose_rect(rects):
-            # Big lenses cameras seems to distor aspect ratio
             for rect in rects:
                 aspect = rect[2] / rect[3]
                 if (
@@ -704,29 +703,26 @@ class TinyScanner(Page):
                 ):
                     return rect
             return None
-
+        # Big lenses cameras seems to distor aspect ratio to 1.1
         aspect_low = 1.1 if self.ctx.camera.cam_id in (OV2640_ID, OV5642_ID) else 1.2
-        # Luminosity as initial threshold
         stats = img.get_statistics()
         # # Debug stats
-        # img.draw_string(10,10,"Mean:"+str(stats.l_mean()))
-        # img.draw_string(10,30,"Median:"+str(stats.l_median()))
-        # img.draw_string(10,50,"UQ:"+str(stats.l_uq()))
-        # img.draw_string(10,70,"LQ:"+str(stats.l_lq()))
+        # img.draw_string(10,10,"Mean:"+str(stats.mean()))
+        # img.draw_string(10,30,"Median:"+str(stats.median()))
+        # img.draw_string(10,50,"UQ:"+str(stats.uq()))
+        # img.draw_string(10,70,"LQ:"+str(stats.lq()))
 
         # Luminosity
-        luminosity = stats.l_median() * 2
-        attempts = 2
+        luminosity = stats.median()*2
+        attempts = 3
         while attempts:
             blob_threshold = [
-                (luminosity, 100),
-                (-100, 100),
-                (-100, 100),
+                (luminosity, 255),
             ]
             rects = img.find_blobs(
                 blob_threshold,
-                x_stride=5,
-                y_stride=5,
+                x_stride=50,
+                y_stride=50,
                 area_threshold=10000,
             )
             # Debug blobs
@@ -737,8 +733,8 @@ class TinyScanner(Page):
                 break
             attempts -= 1
             # Reduce luminosity threshold to try again
-            luminosity *= 9
-            luminosity //= 11
+            luminosity *= 7
+            luminosity //= 10
         # # Debug attempts
         # img.draw_string(10,10,"Attempts:"+str(attempts))
         if rect:
@@ -750,9 +746,9 @@ class TinyScanner(Page):
                 rect.rect()[3] + 1,
             )
             if self.capturing:
-                img.draw_rectangle(outline, lcd.RED, thickness=2)
+                img.draw_rectangle(outline, lcd.WHITE, thickness=4)
             else:
-                img.draw_rectangle(outline, lcd.BLUE, thickness=2)
+                img.draw_rectangle(outline, lcd.WHITE, thickness=2)
         return rect
 
     def _draw_grid(self, img):
@@ -763,14 +759,14 @@ class TinyScanner(Page):
                     self.y_regions[0],
                     self.x_regions[i],
                     self.y_regions[-1],
-                    lcd.BLUE,
+                    lcd.WHITE,
                 )
                 img.draw_line(
                     self.x_regions[0],
                     self.y_regions[i],
                     self.x_regions[-1],
                     self.y_regions[i],
-                    lcd.BLUE,
+                    lcd.WHITE,
                 )
 
     def _detect_punches(self, img):
@@ -791,7 +787,7 @@ class TinyScanner(Page):
         for x in x_map:
             for y in y_map:
                 eval_rect = (x + 2, y + 2, pad_x - 3, pad_y - 3)
-                dot_l = img.get_statistics(bins=8, roi=eval_rect).l_median()
+                dot_l = img.get_statistics(roi=eval_rect).median()
 
                 # # Debug gradient
                 # if index == 0:
@@ -808,7 +804,7 @@ class TinyScanner(Page):
                 punch_thickness = 1 if self.ctx.display.height() > 240 else 2
                 if dot_l < punch_threshold:
                     _ = img.draw_rectangle(
-                        eval_rect, thickness=punch_thickness, color=lcd.BLUE
+                        eval_rect, thickness=punch_thickness, color=lcd.WHITE
                     )
                     word_index = index // 12
                     bit = 11 - (index % 12)
@@ -921,10 +917,15 @@ class TinyScanner(Page):
             return None
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading Camera"))
-        self.ctx.camera.initialize_sensor()
+        self.ctx.camera.initialize_sensor(grayscale=True)
         self._set_camera_sensitivity()
         full_screen = self._run_camera()
+        # # Debug FPS 1/4
+        # clock = time.clock()
+        # fps = 0
         while True:
+            # # Debug FPS 2/4
+            # clock.tick()
             wdt.feed()
             page_seed_numbers = None
             img = sensor.snapshot()
@@ -940,6 +941,8 @@ class TinyScanner(Page):
                 self._draw_grid(img)
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
+            # # Debug FPS 3/4
+            # img.draw_string(10,100,str(fps))
             if full_screen:
                 lcd.display(img)
             else:
@@ -967,6 +970,8 @@ class TinyScanner(Page):
                         return words
             if self._check_buttons(w24, page):
                 break
+            # # Debug FPS 4/4
+            # fps = clock.fps()
 
         self._exit_camera()
         self.ctx.display.clear()
