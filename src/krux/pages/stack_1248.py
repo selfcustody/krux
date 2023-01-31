@@ -337,6 +337,7 @@ class Stackbit(Page):
     def _map_keys_array(self):
         """Maps an array of regions for keys to be placed in"""
         if self.ctx.input.touch is not None:
+            self.ctx.input.touch.clear_regions()
             x_region = self.x_offset + self.x_pad
             for _ in range(8):
                 self.ctx.input.touch.x_regions.append(x_region)
@@ -382,9 +383,9 @@ class Stackbit(Page):
         index = 0
         digits = [0, 0, 0, 0]
         word_index = 1
-        self._map_keys_array()
         words = []
         while word_index <= 24:
+            self._map_keys_array()
             self.ctx.display.draw_hcentered_text("Stackbit 1248")
             y_offset = self.y_offset
             self._draw_labels(y_offset, word_index)
@@ -403,18 +404,24 @@ class Stackbit(Page):
                     if word is not None:
                         digits = [0, 0, 0, 0]
                         index = 0
-                        words.append(word)
+                        self.ctx.display.clear()
+                        prompt_str = str(word_index) + ": " + str(word)
+                        if self.prompt(prompt_str, self.ctx.display.height() // 2):
+                            words.append(word)
+                        else:
+                            self.ctx.display.clear()
+                            continue
                         if word_index == 12:
                             self.ctx.display.clear()
                             if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                                 break
-                            self._map_keys_array()
+                            # self._map_keys_array() #can be removed?
                         word_index += 1
                 elif index >= STACKBIT_ESC_INDEX:  # ESC
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                         break
-                    self._map_keys_array()
+                    # self._map_keys_array()
                 elif index < 14:
                     digits = self._toggle_bit(digits, index)
             else:
