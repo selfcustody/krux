@@ -70,6 +70,7 @@ class Home(Page):
                 (t("Words"), self.display_mnemonic_words),
                 (t("Plaintext QR"), self.display_standard_qr),
                 (t("Compact SeedQR"), self.display_compact_qr),
+                ("SeedQR", self.display_seed_qr),
                 ("Stackbit 1248", self.stackbit),
                 ("Tiny Seed", self.tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
@@ -112,6 +113,69 @@ class Home(Page):
         self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
 
+    def display_seed_qr(self):
+        """Disables touch and displays compact SeedQR code with grid to help drawing"""
+
+        def draw_grided_qr(grid_size, qr_size):
+            """Draws grided QR"""
+            if grid_size:
+                self.ctx.display.draw_qr_code(0, code, bright=True)
+            else:
+                self.ctx.display.draw_qr_code(0, code)
+            grif_offset = self.ctx.display.width() % (qr_size + 2)
+            grif_offset //= 2
+            grid_pad = self.ctx.display.width() // (qr_size + 2)
+            grif_offset += grid_pad
+            for i in range(qr_size + 1):
+                self.ctx.display.fill_rectangle(
+                    grif_offset,
+                    grif_offset + i * grid_pad,
+                    qr_size * grid_pad + 1,
+                    grid_size,
+                    lcd.RED,
+                )
+                self.ctx.display.fill_rectangle(
+                    grif_offset + i * grid_pad,
+                    grif_offset,
+                    grid_size,
+                    qr_size * grid_pad + 1,
+                    lcd.RED,
+                )
+
+        code, qr_size = self._seed_qr()
+        if self.ctx.input.touch is not None:
+            self.ctx.display.draw_hcentered_text(
+                t("Touch disabled for transcription.\nPress enter to leave.\nUp, down for grid"),
+                self.ctx.display.qr_offset(),
+                color=lcd.WHITE,
+            )
+        grid_size = 0
+        draw_grided_qr(grid_size, qr_size)
+        button = None
+        while button != 0:
+            # Avoid the need of double click
+            self.ctx.input.buttons_active = True
+
+            button = self.ctx.input.wait_for_button()
+            if button == 1:  # page
+                grid_size += 1
+                grid_size %= 5
+                draw_grided_qr(grid_size, qr_size)
+            if button == 2:  # page_prev
+                grid_size -= 1
+                grid_size %= 5
+                draw_grided_qr(grid_size, qr_size)
+        if self.ctx.printer is None:
+            return
+        self.ctx.display.clear()
+        if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                t("Printing ..."), self.ctx.display.height() // 2
+            )
+            self.ctx.printer.print_string("SeedQR\n\n")
+            self.ctx.printer.print_qr_code(code)    
+
     def display_compact_qr(self):
         """Disables touch and displays compact SeedQR code with grid to help drawing"""
 
@@ -144,7 +208,7 @@ class Home(Page):
         code, qr_size = self._binary_seed_qr()
         if self.ctx.input.touch is not None:
             self.ctx.display.draw_hcentered_text(
-                t("Touch disabled for transcription.\nPress enter to leave."),
+                t("Touch disabled for transcription.\nPress enter to leave.\nUp, down for grid"),
                 self.ctx.display.qr_offset(),
                 color=lcd.WHITE,
             )
@@ -202,6 +266,8 @@ class Home(Page):
         """Displays the seed in Tiny Seed format"""
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()
+        if self.ctx.printer is None:
+            return
         if self.prompt(t("Print?"), self.ctx.display.height() // 2):
             tiny_seed.print_tiny_seed()
 
@@ -245,6 +311,14 @@ class Home(Page):
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             self.print_qr_prompt(wallet_data, qr_format)
         return MENU_CONTINUE
+
+    def _seed_qr(self):
+        words = self.ctx.wallet.key.mnemonic.split(" ")
+        numbers = ""
+        for word in words:
+            numbers += str("%04d" % WORDLIST.index(word))
+        qr_size = 25 if len(words) == 12 else 29
+        return qrcode.encode_to_string(numbers), qr_size
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
