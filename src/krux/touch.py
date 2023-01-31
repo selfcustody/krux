@@ -31,6 +31,7 @@ SWIPE_UP = 3
 SWIPE_DOWN = 4
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
+TOUCH_DEBOUNCE = 200  # Time to wait before sampling touch again after a release
 
 
 class Touch:
@@ -42,7 +43,8 @@ class Touch:
         """Touch API init - width and height are in Landscape mode
         For Krux width = max_y, height = max_x
         """
-        self.last_time = 0
+        self.sample_time = 0
+        self.debounce = 0
         self.y_regions = []
         self.x_regions = []
         self.index = 0
@@ -120,14 +122,16 @@ class Touch:
 
     def current_state(self):
         """Returns the touchscreen state"""
-        if time.ticks_ms() > self.last_time + TOUCH_S_PERIOD:
-            self.last_time = time.ticks_ms()
+        current_time = time.ticks_ms()
+        if current_time > self.sample_time + TOUCH_S_PERIOD and current_time > self.debounce + TOUCH_DEBOUNCE:
+            self.sample_time = time.ticks_ms()
             data = self.touch_driver.current_point()
             if isinstance(data, tuple):
                 self._store_points(data)
             elif data is None:  # gets release then return to idle.
                 if self.state == self.release:
                     self.state = self.idle
+                    self.debounce = time.ticks_ms()
                 elif self.state == self.press:
                     if self.release_point[0] - self.press_point[0][0] > SWIPE_THRESHOLD:
                         self.gesture = SWIPE_RIGHT
