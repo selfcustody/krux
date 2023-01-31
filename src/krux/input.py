@@ -150,16 +150,19 @@ class Input:
     def wait_for_press(self, block=True):
         """Wait for first button press"""
         start_time = time.ticks_ms()
-        while (
-            self.enter_value() == RELEASED
-            and self.page_value() == RELEASED
-            and self.page_prev_value() == RELEASED
-            and self.touch_value() == RELEASED
-        ):
+        while (True):
+            if self.enter_value() == PRESSED:
+                return BUTTON_ENTER
+            if self.page_value() == PRESSED:
+                return BUTTON_PAGE
+            if self.page_prev_value() == PRESSED:
+                return BUTTON_PAGE_PREV
+            if self.touch_value() == PRESSED:
+                return BUTTON_TOUCH
             self.entropy += 1
             wdt.feed()  # here is where krux spends most of its time
             if not block and time.ticks_ms() > start_time + QR_ANIM_PERIOD:
-                break
+                return None
             time.sleep_ms(10)
 
     def wait_for_button(self, block=True):
@@ -167,9 +170,9 @@ class Input:
         Returns the button that was released, or None if nonblocking.
         """
         self.wait_for_release()
-        self.wait_for_press(block)
+        btn = self.wait_for_press(block)
 
-        if self.enter_value() == PRESSED:
+        if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:
                 self.entropy += 1
@@ -177,7 +180,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_ENTER
             self.buttons_active = True
-        elif self.page_value() == PRESSED:
+        elif btn == BUTTON_PAGE:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_value() == PRESSED:
@@ -188,7 +191,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_PAGE
             self.buttons_active = True
-        elif self.page_prev_value() == PRESSED:
+        elif btn == BUTTON_PAGE_PREV:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_prev_value() == PRESSED:
@@ -199,7 +202,7 @@ class Input:
             if self.buttons_active:
                 return BUTTON_PAGE_PREV
             self.buttons_active = True
-        elif self.touch_value() == PRESSED:
+        elif btn == BUTTON_TOUCH:
             # Wait for release
             while self.touch_value() == PRESSED:
                 self.entropy += 1

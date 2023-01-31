@@ -63,14 +63,14 @@ class RotaryEncoder:
         def _right():
             if self.direction:
                 if time.ticks_ms() > self.time_frame + DEBOUNCE:
-                    self.value += 2
+                    self.value += 1
                     self.time_frame = time.ticks_ms()
             self.direction = RIGHT
 
         def _left():
             if not self.direction:
                 if time.ticks_ms() > self.time_frame + DEBOUNCE:
-                    self.value -= 2
+                    self.value -= 1
                     self.time_frame = time.ticks_ms()
             self.direction = LEFT
 
