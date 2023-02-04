@@ -24,13 +24,22 @@ You can either do this manually or with the `krux` shell script, which contains 
 Fun fact: Each Krux release is signed with Krux!
 
 ### Flash the firmware onto the device
-Connect the device to your computer via USB, power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, `dock`, or `bit`:
+Extract the latest version of Krux you downloaded and enter the folder:
 ```bash
 unzip krux-vX.Y.Z.zip && cd krux-vX.Y.Z
+```
+
+Connect the device to your computer via USB, power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, or `bit`:
+```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
 
-If `ktool` fails to run, you may need to give it executable permissions with `chmod +x ./ktool`, or in Windows or Mac explicitly allow the tool to run by adding an exception for it.
+For `dock` the `-b` parameter changes, so run:
+```bash
+./ktool -B dan -b 1500000 maixpy_dock/kboot.kfpkg
+```
+
+If `ktool` fails to run, you may need to give it executable permissions with `chmod +x ./ktool`, or you might need to use "sudo" if your user don't have access to serial port. In Windows or Mac you may need to explicitly allow the tool to run by adding an exception for it.
 
 If the flashing process fails midway through, check the connection, restart the device, and try the command again.
 
