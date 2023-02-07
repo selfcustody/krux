@@ -37,6 +37,7 @@ class Camera:
 
     def __init__(self):
         self.cam_id = None
+        self.initialize_sensor()
 
     def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""

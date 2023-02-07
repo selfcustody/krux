@@ -128,13 +128,13 @@ class TinySeed(Page):
         """Creates a bitmap image of a punched Tiny Seed and sends it to a thermal printer"""
         # Scale from original: 1.5X
         words = self.ctx.wallet.key.mnemonic.split(" ")
-        image_size = 312
-        border_y = 16
-        border_x = 32
-        grid_x_offset = border_x + 34  # border + 4,3mm*8px
-        grid_y_offset = border_y + 52  # border + 6,5mm*8px
-        pad_x = 14  # 1,75mm*8px
-        pad_y = 16  # 2mm*8px
+        image_size = 156
+        border_y = 8
+        border_x = 16
+        grid_x_offset = border_x + 17  # border + 4,3mm*8px
+        grid_y_offset = border_y + 26  # border + 6,5mm*8px
+        pad_x = 7  # 1,75mm*8px
+        pad_y = 8  # 2mm*8px
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             t("Printing ..."), self.ctx.display.height() // 2
@@ -144,13 +144,12 @@ class TinySeed(Page):
             # creates an image
             ts_image = image.Image(size=(image_size, image_size), copy_to_fb=True)
             ts_image.clear()
-
             # Frame
             # Upper
             ts_image.draw_rectangle(
                 0,
                 0,
-                218 + 2 * border_x,  # 27,2mm*8px + ...
+                109 + 2 * border_x,  # 27,2mm*8px + ...
                 border_y,
                 lcd.WHITE,
                 fill=True,
@@ -158,34 +157,23 @@ class TinySeed(Page):
             # Lower
             ts_image.draw_rectangle(
                 0,
-                276 + border_y,
-                218 + 2 * border_x,  # 27,2mm*8px + ...
+                138 + border_y,
+                109 + 2 * border_x,  # 27,2mm*8px + ...
                 border_y,
                 lcd.WHITE,
                 fill=True,
             )
             # Left
-            ts_image.draw_rectangle(0, border_y, border_x, 276, lcd.WHITE, fill=True)
+            ts_image.draw_rectangle(0, border_y, border_x, 138, lcd.WHITE, fill=True)
             # Right
             ts_image.draw_rectangle(
-                218 + border_x, border_y, border_x, 276, lcd.WHITE, fill=True
+                109 + border_x, border_y, border_x, 138, lcd.WHITE, fill=True
             )
 
             # labels
             y_offset = grid_y_offset
             if self.ctx.display.font_height > pad_y:
                 y_offset -= (self.ctx.display.font_height - pad_y) // 2 + 1
-            for x in range(12):
-                line = str(page * 12 + x + 1)
-                if (page * 12 + x + 1) < 10:
-                    line = " " + line
-                ts_image.draw_string(
-                    border_x + self.ctx.display.font_width // 2,
-                    y_offset,
-                    line,
-                    lcd.WHITE,
-                )
-                y_offset += pad_y
 
             # grid
             y_offset = grid_y_offset
@@ -218,10 +206,10 @@ class TinySeed(Page):
                     word_list_index = words[page * 12 + y]
                 for x in range(12):
                     if (word_list_index >> (11 - x)) & 1:
-                        x_offset = grid_x_offset + pad_x // 2
+                        x_offset = grid_x_offset
                         x_offset += x * (pad_x)
-                        ts_image.draw_circle(
-                            x_offset, y_offset + pad_y // 2, 6, lcd.WHITE, fill=True
+                        ts_image.draw_rectangle(
+                            x_offset, y_offset, pad_x, pad_y, lcd.WHITE, fill=True
                         )
                 y_offset += pad_y
 
@@ -233,6 +221,7 @@ class TinySeed(Page):
             # self.ctx.input.wait_for_button()
 
             # Print
+            self.ctx.printer.set_bitmap_mode(image_size // 8, image_size, 3)
             for y in range(image_size):
                 line_bytes = bytes([])
                 x = 0
@@ -247,8 +236,8 @@ class TinySeed(Page):
                 # send line by line to be printed
                 self.ctx.printer.print_bitmap_line(line_bytes)
                 wdt.feed()
-            grid_x_offset = border_x + 33  # 4,1mm*8px
-            grid_y_offset = border_y + 50  # 6,2mm*8px
+            grid_x_offset = border_x + 16  # 4,1mm*8px
+            grid_y_offset = border_y + 25  # 6,2mm*8px
         self.ctx.printer.feed(3)
         self.ctx.display.clear()
 
@@ -387,19 +376,20 @@ class TinySeed(Page):
                     binary_seed.append(index << (8 - remaining))
                     offset = remaining
                     remaining = 0
-
         checksum_length_bits = len(tiny_seed_numbers) * 11 // 33
         num_remainder = checksum_length_bits % 8
         if num_remainder:
             checksum_length = checksum_length_bits // 8 + 1
+            bits_to_ignore = 8 - num_remainder
         else:
             checksum_length = checksum_length_bits // 8
+            bits_to_ignore = 0
         raw = bytes(binary_seed)
         data = raw[:-checksum_length]
-        computed_checksum = int.from_bytes(
-            hashlib.sha256(data).digest()[:checksum_length], "big"
-        )
-        checksum = computed_checksum >> (8 - checksum_length_bits)
+        computed_checksum = bytearray(hashlib.sha256(data).digest()[:checksum_length])
+        computed_checksum[-1] &= 256 - (1 << (bits_to_ignore + 1) - 1)
+        checksum = int.from_bytes(computed_checksum, "big")
+        checksum = checksum >> (8 - checksum_length_bits)
         return checksum
 
     def toggle_bit(self, word, bit):
@@ -703,6 +693,7 @@ class TinyScanner(Page):
                 ):
                     return rect
             return None
+
         # Big lenses cameras seems to distor aspect ratio to 1.1
         aspect_low = 1.1 if self.ctx.camera.cam_id in (OV2640_ID, OV5642_ID) else 1.2
         stats = img.get_statistics()
@@ -713,7 +704,7 @@ class TinyScanner(Page):
         # img.draw_string(10,70,"LQ:"+str(stats.lq()))
 
         # Luminosity
-        luminosity = stats.median()*2
+        luminosity = stats.median() * 2
         attempts = 3
         while attempts:
             blob_threshold = [
@@ -808,9 +799,8 @@ class TinyScanner(Page):
                     )
                     word_index = index // 12
                     bit = 11 - (index % 12)
-                    page_seed_numbers[word_index] = (
-                        self.tiny_seed.toggle_bit(page_seed_numbers[word_index], bit)
-                        % 2048
+                    page_seed_numbers[word_index] = self.tiny_seed.toggle_bit(
+                        page_seed_numbers[word_index], bit
                     )
                 index += 1
         return page_seed_numbers
@@ -911,7 +901,7 @@ class TinyScanner(Page):
             + "Align camera and Tiny Seed precisely using the tracking rectangle."
         )
         if w24:
-            intro += t(" Press ENTER when punches are correctly mapped")
+            intro += t("Press ENTER when punches are correctly mapped")
         self.ctx.display.draw_hcentered_text(intro)
         if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             return None

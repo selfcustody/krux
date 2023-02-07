@@ -131,7 +131,7 @@ class AdafruitPrinterSettings(SettingsNamespace):
     tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
     rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])
     heat_dots = NumberSetting(int, "heat_dots", 11, [0, 255])
-    heat_time = NumberSetting(int, "heat_time", 255, [3, 255])
+    heat_time = NumberSetting(int, "heat_time", 120, [3, 255])
     heat_interval = NumberSetting(int, "heat_interval", 40, [0, 255])
 
     def label(self, attr):
