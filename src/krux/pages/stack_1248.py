@@ -391,7 +391,8 @@ class Stackbit(Page):
             self._draw_labels(y_offset, word_index)
             self._draw_grid(y_offset)
             self._draw_menu()
-            self._draw_index(index)
+            if self.ctx.input.buttons_active:
+                self._draw_index(index)
             self.preview_word(digits)
             self._draw_punched(digits, y_offset)
             btn = self.ctx.input.wait_for_button()

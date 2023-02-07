@@ -150,7 +150,7 @@ class Input:
     def wait_for_press(self, block=True):
         """Wait for first button press"""
         start_time = time.ticks_ms()
-        while (True):
+        while True:
             if self.enter_value() == PRESSED:
                 return BUTTON_ENTER
             if self.page_value() == PRESSED:

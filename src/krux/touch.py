@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=R0902
 
 import time
 from .touchscreens.ft6x36 import FT6X36
@@ -123,7 +124,10 @@ class Touch:
     def current_state(self):
         """Returns the touchscreen state"""
         current_time = time.ticks_ms()
-        if current_time > self.sample_time + TOUCH_S_PERIOD and current_time > self.debounce + TOUCH_DEBOUNCE:
+        if (
+            current_time > self.sample_time + TOUCH_S_PERIOD
+            and current_time > self.debounce + TOUCH_DEBOUNCE
+        ):
             self.sample_time = time.ticks_ms()
             data = self.touch_driver.current_point()
             if isinstance(data, tuple):
