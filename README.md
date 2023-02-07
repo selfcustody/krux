@@ -142,6 +142,8 @@ Type "help()" for more information.
 >>>
 ```
 
+Customizations made to the firmware removed the support to MaixPy IDE (due to size constraints), but you can still use it's terminal (MaixPy IDE menu bar > Tools > Open Terminal).
+
 ## Run mkdocs
 ```bash
 poetry run mkdocs serve
