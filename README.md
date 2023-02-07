@@ -125,7 +125,12 @@ init i2c:2 freq:XXX
 [MAIXPY]: find ov sensor
 ```
 
-From here, you can use the device as normal and, if you added any print statements to the code, they should appear whenever your code is reached.
+Krux makes use of MaixPy's [WDT watchdog module](https://wiki.sipeed.com/soft/maixpy/en/api_reference/machine/wdt.html), you can see it [here](src/krux/wdt.py). This will reset the device if not fed for some time. To stop the watchdog, when connected through the terminal, run the following:
+```python
+
+```
+
+Now, with watchdog disabled, you can use the device normally. So no more resets, and if you added any print statements to the code, they should appear whenever your code is reached.
 
 You can also drop into a live Python REPL at any point by issuing an interrupt with Ctrl-C:
 
@@ -142,7 +147,7 @@ Type "help()" for more information.
 >>>
 ```
 
-Customizations made to the firmware removed the support to MaixPy IDE (due to size constraints), but you can still use it's terminal (MaixPy IDE menu bar > Tools > Open Terminal).
+Customizations made to the firmware removed the support to MaixPy IDE (due to size constraints), but you still can use it's terminal (MaixPy IDE menu bar > Tools > Open Terminal).
 
 ## Run mkdocs
 ```bash
