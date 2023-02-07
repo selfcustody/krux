@@ -43,14 +43,14 @@ class Home(Page):
 
     def __init__(self, ctx):
         menu_list = [
-                    (t("Mnemonic"), self.mnemonic),
-                    (t("Extended Public Key"), self.public_key),
-                    (t("Nostr Public Key"), self.nostr_public_key),
-                    (t("Wallet"), self.wallet),
-                    (t("Scan Address"), self.scan_address),
-                    (t("Sign"), self.sign),
-                    (t("Shutdown"), self.shutdown),
-                ]
+            (t("Mnemonic"), self.mnemonic),
+            (t("Extended Public Key"), self.public_key),
+            (t("Nostr Public Key"), self.nostr_public_key),
+            (t("Wallet"), self.wallet),
+            (t("Scan Address"), self.scan_address),
+            (t("Sign"), self.sign),
+            (t("Shutdown"), self.shutdown),
+        ]
         # Nostr not available for 12 words seeds
         if len(ctx.wallet.key.mnemonic.split()) < 24:
             del menu_list[2]
@@ -69,7 +69,7 @@ class Home(Page):
             [
                 (t("Words"), self.display_mnemonic_words),
                 (t("Plaintext QR"), self.display_standard_qr),
-                (t("Compact SeedQR"), self.display_compact_qr),
+                (t("Compact SeedQR"), lambda: self.display_seed_qr(True)),
                 ("SeedQR", self.display_seed_qr),
                 ("Stackbit 1248", self.stackbit),
                 ("Tiny Seed", self.tiny_seed),
@@ -84,7 +84,7 @@ class Home(Page):
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
         if self.ctx.printer is None:
-            return
+            return MENU_CONTINUE
         self.ctx.display.clear()
         if self.prompt(t("Print?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
@@ -107,136 +107,115 @@ class Home(Page):
                 string += str(index) + ":" + words[index - 1] + "\n"
                 self.ctx.printer.print_string(string)
             self.ctx.printer.feed(3)
+        return MENU_CONTINUE
 
     def display_standard_qr(self):
         """Displays regular words QR code"""
         self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
+        return MENU_CONTINUE
 
-    def display_seed_qr(self):
+    def display_seed_qr(self, binary=False):
         """Disables touch and displays compact SeedQR code with grid to help drawing"""
 
-        def draw_grided_qr(grid_size, qr_size):
+        def draw_grided_qr(mode, qr_size):
             """Draws grided QR"""
-            if grid_size:
+            if mode > 0:
                 self.ctx.display.draw_qr_code(0, code, bright=True)
+                if self.ctx.display.width() > 140:
+                    grid_size = self.ctx.display.width() // 140
+                else:
+                    grid_size = 1
             else:
                 self.ctx.display.draw_qr_code(0, code)
-            grif_offset = self.ctx.display.width() % (qr_size + 2)
-            grif_offset //= 2
+                grid_size = 0
+            grid_offset = self.ctx.display.width() % (qr_size + 2)
+            grid_offset //= 2
             grid_pad = self.ctx.display.width() // (qr_size + 2)
-            grif_offset += grid_pad
-            for i in range(qr_size + 1):
-                self.ctx.display.fill_rectangle(
-                    grif_offset,
-                    grif_offset + i * grid_pad,
-                    qr_size * grid_pad + 1,
-                    grid_size,
-                    lcd.RED,
-                )
-                self.ctx.display.fill_rectangle(
-                    grif_offset + i * grid_pad,
-                    grif_offset,
-                    grid_size,
-                    qr_size * grid_pad + 1,
-                    lcd.RED,
-                )
+            grid_offset += grid_pad
+            if mode == 2:
+                for i in range(2):
+                    line_offset = grid_pad * line
+                    self.ctx.display.fill_rectangle(
+                        grid_offset,
+                        grid_offset + i * grid_pad + line_offset,
+                        qr_size * grid_pad + 1,
+                        grid_size,
+                        lcd.RED,
+                    )
+                for i in range(qr_size + 1):
+                    self.ctx.display.fill_rectangle(
+                        grid_offset + i * grid_pad,
+                        grid_offset + line_offset,
+                        grid_size,
+                        grid_pad + 1,
+                        lcd.RED,
+                    )
+            else:
+                for i in range(qr_size + 1):
+                    self.ctx.display.fill_rectangle(
+                        grid_offset,
+                        grid_offset + i * grid_pad,
+                        qr_size * grid_pad + 1,
+                        grid_size,
+                        lcd.RED,
+                    )
+                    self.ctx.display.fill_rectangle(
+                        grid_offset + i * grid_pad,
+                        grid_offset,
+                        grid_size,
+                        qr_size * grid_pad + 1,
+                        lcd.RED,
+                    )
 
-        code, qr_size = self._seed_qr()
+        if binary:
+            code, qr_size = self._binary_seed_qr()
+            label = "Compact SeedQR"
+        else:
+            code, qr_size = self._seed_qr()
+            label = "SeedQR"
+        label += "\nSwipe to change mode"
         if self.ctx.input.touch is not None:
             self.ctx.display.draw_hcentered_text(
-                t("Touch disabled for transcription.\nPress enter to leave.\nUp, down for grid"),
+                t(label),
                 self.ctx.display.qr_offset(),
                 color=lcd.WHITE,
             )
-        grid_size = 0
-        draw_grided_qr(grid_size, qr_size)
+        mode = 0
+        line = 0
         button = None
-        while button != 0:
-            # Avoid the need of double click
-            self.ctx.input.buttons_active = True
-
+        while button not in (6, 7):
+            draw_grided_qr(mode, qr_size)
+            # # Avoid the need of double click
+            # self.ctx.input.buttons_active = True
             button = self.ctx.input.wait_for_button()
-            if button == 1:  # page
-                grid_size += 1
-                grid_size %= 5
-                draw_grided_qr(grid_size, qr_size)
-            if button == 2:  # page_prev
-                grid_size -= 1
-                grid_size %= 5
-                draw_grided_qr(grid_size, qr_size)
+            if button in (1, 4):  # page, swipe
+                mode += 1
+                mode %= 3
+                line = 0
+                # draw_grided_qr(grid_size, qr_size)
+            elif button in (2, 5):  # page, swipe
+                mode -= 1
+                mode %= 3
+                line = 0
+            elif button == 3:
+                if mode == 0:
+                    button = 6  # leave
+                elif mode == 2:  # Lines mode
+                    line += 1
+                    line %= qr_size
         if self.ctx.printer is None:
-            return
+            return MENU_CONTINUE
         self.ctx.display.clear()
         if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
                 t("Printing ..."), self.ctx.display.height() // 2
             )
-            self.ctx.printer.print_string("SeedQR\n\n")
-            self.ctx.printer.print_qr_code(code)    
-
-    def display_compact_qr(self):
-        """Disables touch and displays compact SeedQR code with grid to help drawing"""
-
-        def draw_grided_qr(grid_size, qr_size):
-            """Draws grided QR"""
-            if grid_size:
-                self.ctx.display.draw_qr_code(0, code, bright=True)
+            if binary:
+                self.ctx.printer.print_string("Compact SeedQR\n\n")
             else:
-                self.ctx.display.draw_qr_code(0, code)
-            grif_offset = self.ctx.display.width() % (qr_size + 2)
-            grif_offset //= 2
-            grid_pad = self.ctx.display.width() // (qr_size + 2)
-            grif_offset += grid_pad
-            for i in range(qr_size + 1):
-                self.ctx.display.fill_rectangle(
-                    grif_offset,
-                    grif_offset + i * grid_pad,
-                    qr_size * grid_pad + 1,
-                    grid_size,
-                    lcd.RED,
-                )
-                self.ctx.display.fill_rectangle(
-                    grif_offset + i * grid_pad,
-                    grif_offset,
-                    grid_size,
-                    qr_size * grid_pad + 1,
-                    lcd.RED,
-                )
-
-        code, qr_size = self._binary_seed_qr()
-        if self.ctx.input.touch is not None:
-            self.ctx.display.draw_hcentered_text(
-                t("Touch disabled for transcription.\nPress enter to leave.\nUp, down for grid"),
-                self.ctx.display.qr_offset(),
-                color=lcd.WHITE,
-            )
-        grid_size = 0
-        draw_grided_qr(grid_size, qr_size)
-        button = None
-        while button != 0:
-            # Avoid the need of double click
-            self.ctx.input.buttons_active = True
-
-            button = self.ctx.input.wait_for_button()
-            if button == 1:  # page
-                grid_size += 1
-                grid_size %= 5
-                draw_grided_qr(grid_size, qr_size)
-            if button == 2:  # page_prev
-                grid_size -= 1
-                grid_size %= 5
-                draw_grided_qr(grid_size, qr_size)
-        if self.ctx.printer is None:
-            return
-        self.ctx.display.clear()
-        if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(
-                t("Printing ..."), self.ctx.display.height() // 2
-            )
-            self.ctx.printer.print_string("Compact SeedQR\n\n")
+                self.ctx.printer.print_string("SeedQR\n\n")
             self.ctx.printer.print_qr_code(code)
 
     def stackbit(self):
@@ -259,17 +238,18 @@ class Home(Page):
                     word_index -= 12
                 else:
                     word_index = 1
-
             self.ctx.display.clear()
+        return MENU_CONTINUE
 
     def tiny_seed(self):
         """Displays the seed in Tiny Seed format"""
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()
         if self.ctx.printer is None:
-            return
+            return MENU_CONTINUE
         if self.prompt(t("Print?"), self.ctx.display.height() // 2):
             tiny_seed.print_tiny_seed()
+        return MENU_CONTINUE
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
@@ -284,13 +264,20 @@ class Home(Page):
             self.display_qr_codes(xpub, FORMAT_NONE, None)
             self.print_qr_prompt(xpub, FORMAT_NONE)
         return MENU_CONTINUE
-    
+
     def nostr_public_key(self):
-        private_key = (bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic, ignore_checksum=True))
+        """Experimental creation of nostr pub key from mnemonic"""
+        private_key = bip39.mnemonic_to_bytes(
+            self.ctx.wallet.key.mnemonic, ignore_checksum=True
+        )
         pubkey = ec.PrivateKey(private_key).get_public_key().serialize()[1:]
-        pubkey_text = "Hex pubkey:\n" + binascii.hexlify(pubkey).decode("ascii") + "\n\n"
+        pubkey_text = (
+            "Hex pubkey:\n" + binascii.hexlify(pubkey).decode("ascii") + "\n\n"
+        )
         converted_bits = bech32.convertbits(pubkey, 8, 5)
-        bech32_pubkey = bech32.bech32_encode(bech32.Encoding.BECH32, "npub", converted_bits)
+        bech32_pubkey = bech32.bech32_encode(
+            bech32.Encoding.BECH32, "npub", converted_bits
+        )
         pubkey_text += "Bech32 pubkey:\n" + bech32_pubkey
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(pubkey_text, DEFAULT_PADDING)
@@ -436,11 +423,11 @@ class Home(Page):
     def sign(self):
         """Handler for the 'sign' menu item"""
         sign_list = [
-                (t("PSBT"), self.sign_psbt),
-                (t("Message"), self.sign_message),
-                (t("Nostr event"), self.sign_nostr),
-                (t("Back"), lambda: MENU_EXIT),
-            ]
+            (t("PSBT"), self.sign_psbt),
+            (t("Message"), self.sign_message),
+            (t("Nostr event"), self.sign_nostr),
+            (t("Back"), lambda: MENU_EXIT),
+        ]
         if len(self.ctx.wallet.key.mnemonic.split()) < 24:
             del sign_list[2]
         submenu = Menu(
@@ -591,18 +578,20 @@ class Home(Page):
         data, qr_format = self.capture_qr_code()
         data_bytes = None
         try:
-            data_bytes = (
-                data.encode("latin-1") if isinstance(data, str) else data
-            )
+            data_bytes = data.encode("latin-1") if isinstance(data, str) else data
         except:
             return MENU_CONTINUE
         if data_bytes and len(data_bytes) == 32:
-            private_key = ec.PrivateKey(bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic, ignore_checksum=True))
+            private_key = ec.PrivateKey(
+                bip39.mnemonic_to_bytes(
+                    self.ctx.wallet.key.mnemonic, ignore_checksum=True
+                )
+            )
             signature = str(private_key.schnorr_sign(data_bytes))
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Event ID:\n%s") % binascii.hexlify(data_bytes).decode()
-                )
+            )
             if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
             self.display_qr_codes(signature, qr_format)
