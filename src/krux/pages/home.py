@@ -35,6 +35,16 @@ from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
 from ..krux_settings import t
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_DOWN,
+    SWIPE_RIGHT,
+    SWIPE_LEFT,
+    SWIPE_UP,
+)
 import qrcode
 
 
@@ -184,26 +194,32 @@ class Home(Page):
         mode = 0
         line = 0
         button = None
-        while button not in (6, 7):
+        while button not in (SWIPE_DOWN, SWIPE_UP):
             draw_grided_qr(mode, qr_size)
             # # Avoid the need of double click
             # self.ctx.input.buttons_active = True
             button = self.ctx.input.wait_for_button()
-            if button in (1, 4):  # page, swipe
+            if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
                 mode += 1
                 mode %= 3
                 line = 0
                 # draw_grided_qr(grid_size, qr_size)
-            elif button in (2, 5):  # page, swipe
+            elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
                 mode -= 1
                 mode %= 3
                 line = 0
-            elif button == 3:
+            elif button == BUTTON_TOUCH:
                 if mode == 0:
-                    button = 6  # leave
-                elif mode == 2:  # Lines mode
+                    button = SWIPE_DOWN  # leave
+                if mode == 2:  # Lines mode
                     line += 1
                     line %= qr_size
+            elif button == BUTTON_ENTER:
+                if mode == 2:  # Lines mode
+                    line += 1
+                    line %= qr_size
+                else:
+                    button = SWIPE_DOWN  # leave
         if self.ctx.printer is None:
             return MENU_CONTINUE
         self.ctx.display.clear()
