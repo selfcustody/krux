@@ -25,3 +25,17 @@ RESET_TIMEOUT = 30000
 
 # Create a watchdog timer that resets the device if not fed for 30s
 wdt = machine.WDT(timeout=RESET_TIMEOUT)
+
+# Check if user wanted to disable the watchdog!
+import json
+
+try:
+  with open('/flash/config.json', 'rb') as f:
+    conf_dict = json.loads(f.read())
+    if 'WATCHDOG_DISABLE' in conf_dict.keys():
+        wdt.stop()
+    del conf_dict
+except:
+    pass
+
+
