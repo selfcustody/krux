@@ -127,9 +127,9 @@ init i2c:2 freq:XXX
 
 Krux makes use of MaixPy's [WDT watchdog module](https://wiki.sipeed.com/soft/maixpy/en/api_reference/machine/wdt.html), you can see it [here](src/krux/wdt.py). This will reset the device if not fed for some time. To stop the watchdog, when connected through the terminal, run the following:
 ```python
-# This will read the board config file, add the config to disable watchdog and save the new config file
+# This will read the board config file, add the config to disable watchdog, save the new config file and reset the device (in order to make krux read the new file!)
 
-import json
+import json, machine
 
 conf_dict = {}
 try:
@@ -142,6 +142,8 @@ conf_dict['WATCHDOG_DISABLE'] = 1
 
 with open('/flash/config.json', 'w') as f:
     f.write(json.dumps(conf_dict))
+    
+machine.reset()
 ```
 
 Now, with watchdog disabled, you can use the device normally. So no more resets, and if you added any print statements to the code, they should appear whenever your code is reached.
