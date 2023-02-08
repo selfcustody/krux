@@ -30,12 +30,11 @@ wdt = machine.WDT(timeout=RESET_TIMEOUT)
 import json
 
 try:
-  with open('/flash/config.json', 'rb') as f:
-    conf_dict = json.loads(f.read())
-    if 'WATCHDOG_DISABLE' in conf_dict.keys():
-        wdt.stop()
-    del conf_dict
+    with open("/flash/config.json", "rb") as f:
+        conf_dict = json.loads(f.read())
+        if "WATCHDOG_DISABLE" in conf_dict.keys():
+            if conf_dict["WATCHDOG_DISABLE"]:
+                wdt.stop()
+        del conf_dict
 except:
     pass
-
-

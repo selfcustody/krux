@@ -146,7 +146,7 @@ with open('/flash/config.json', 'w') as f:
 machine.reset()
 ```
 
-Now, with watchdog disabled, you can use the device normally. So no more resets, and if you added any print statements to the code, they should appear whenever your code is reached.
+Now, with watchdog disabled, you can use the device normally. So no more automatic resets, and if you added any print statements to the code, they should appear whenever your code is reached.
 
 You can also drop into a live Python REPL at any point by issuing an interrupt with Ctrl-C:
 
