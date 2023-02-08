@@ -1,4 +1,4 @@
-def test_satcomma():
+def test_satcomma(m5stickv):
     from krux.format import satcomma
 
     cases = [
