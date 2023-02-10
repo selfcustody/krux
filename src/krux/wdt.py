@@ -22,6 +22,7 @@
 import machine
 
 RESET_TIMEOUT = 30000
+WDT_CONFIG_NAME = "WATCHDOG_DISABLE"
 
 # Create a watchdog timer that resets the device if not fed for 30s
 wdt = machine.WDT(timeout=RESET_TIMEOUT)
@@ -32,8 +33,8 @@ import json
 try:
     with open("/flash/config.json", "rb") as f:
         conf_dict = json.loads(f.read())
-        if "WATCHDOG_DISABLE" in conf_dict.keys():
-            if conf_dict["WATCHDOG_DISABLE"]:
+        if WDT_CONFIG_NAME in conf_dict.keys():
+            if conf_dict[WDT_CONFIG_NAME]:
                 wdt.stop()
         del conf_dict
 except:

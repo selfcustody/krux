@@ -1,5 +1,7 @@
 import pytest
 
+WDT_CONFIG_NAME = "WATCHDOG_DISABLE"
+
 
 @pytest.fixture
 def mocker_config_unset(mocker):
@@ -21,7 +23,9 @@ def mocker_config_set(mocker):
 def mocker_config_set_false(mocker):
     # Read a mocked /etc/release file
     mocked_data = mocker.mock_open(
-        read_data='{"WATCHDOG_DISABLE": 0, "type": "dock", "board_info": {"LED_G": 12, "MIC0_WS": 19, "LED_B": 14, "BOOT_KEY": 16, "LED_R": 13, "MIC0_DATA": 20, "MIC0_BCK": 18}}'
+        read_data='{"'
+        + WDT_CONFIG_NAME
+        + '": 0, "type": "dock", "board_info": {"LED_G": 12, "MIC0_WS": 19, "LED_B": 14, "BOOT_KEY": 16, "LED_R": 13, "MIC0_DATA": 20, "MIC0_BCK": 18}}'
     )
     mocker.patch("builtins.open", mocked_data)
 
@@ -30,7 +34,9 @@ def mocker_config_set_false(mocker):
 def mocker_config_set_true(mocker):
     # Read a mocked /etc/release file
     mocked_data = mocker.mock_open(
-        read_data='{"WATCHDOG_DISABLE": 1, "type": "dock", "board_info": {"LED_G": 12, "MIC0_WS": 19, "LED_B": 14, "BOOT_KEY": 16, "LED_R": 13, "MIC0_DATA": 20, "MIC0_BCK": 18}}'
+        read_data='{"'
+        + WDT_CONFIG_NAME
+        + '": 1, "type": "dock", "board_info": {"LED_G": 12, "MIC0_WS": 19, "LED_B": 14, "BOOT_KEY": 16, "LED_R": 13, "MIC0_DATA": 20, "MIC0_BCK": 18}}'
     )
     mocker.patch("builtins.open", mocked_data)
 
