@@ -37,7 +37,7 @@ git pull origin main && git submodule update --init --recursive
 This will make sure that all submodules (and their submodules, etc.) are pulled down and updated.
 
 ## Install krux and dev tools
-The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/).
+The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/) (You can try to install with pip: `pip3 install poetry`).
 ```bash
 poetry install
 ```
@@ -85,11 +85,25 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## Run the simulator
 This can be useful for testing a change to the krux code without having to run a full build and flash, visual regression testing,
 generating screenshots, or even just trying out Krux before purchasing a device.
+
+Before executing the simulator, make sure you have installed the poetry extras: `poetry install --extras simulator`. Otherwise you will get this error: `ModuleNotFoundError: No module named 'pygame'`
 ```bash
 cd simulator && poetry run python simulator.py --device maixpy_amigo_tft
 ```
 ```bash
 cd simulator && poetry run python simulator.py --device maixpy_m5stickv
+```
+
+Simulator error troubleshooting:
+```bash
+# ImportError: Unable to find zbar shared library
+sudo apt install python3-zbar
+
+# ImportError: libGL.so.1: cannot open shared object file: No such file or directory
+sudo apt install libgl1
+
+# `pygame.error: No available video device`
+# You are trying to run the simulator on a SO without a GUI (some kind of terminal only or WSL). Try one with GUI!
 ```
 
 ## Live debug a device
@@ -131,16 +145,19 @@ Krux makes use of MaixPy's [WDT watchdog module](https://wiki.sipeed.com/soft/ma
 
 import json, machine
 
+CONF_FILENAME="/flash/config.json"
+CONF_NAME="WATCHDOG_DISABLE"
+
 conf_dict = {}
 try:
-  with open('/flash/config.json', 'rb') as f:
+  with open(CONF_FILENAME, "rb") as f:
     conf_dict = json.loads(f.read())
 except:
     pass
 
-conf_dict['WATCHDOG_DISABLE'] = 1
+conf_dict[CONF_NAME] = 1
 
-with open('/flash/config.json', 'w') as f:
+with open(CONF_FILENAME, "w") as f:
     f.write(json.dumps(conf_dict))
     
 machine.reset()
