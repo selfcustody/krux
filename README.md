@@ -36,6 +36,18 @@ git pull origin main && git submodule update --init --recursive
 ```
 This will make sure that all submodules (and their submodules, etc.) are pulled down and updated.
 
+## Krux bash script helper
+The [krux](krux) file is a bash script helper that have the following functions: `build`, `flash`, `sha256`, `sha256-with-header`, `b64decode`, `generate-keypair`, `pubkey-to-pem`, `pem-to-pubkey`, `sign`, `verify`, `build-release`, `clean`. Some of them uses [Docker](https://www.docker.com/) or the `openssl` lib or even a command-line tool like `wget`. Make sure they are installed before use. It is also a good idea to use [Vagrant](https://www.vagrantup.com/).
+
+Exemples:
+```bash
+# build project for MaixDock
+./krux build maixpy_dock
+
+#flash the project on a MaixDock
+./krux flash maixpy_dock
+```
+
 ## Install krux and dev tools
 The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/) (You can try to install with pip: `pip3 install poetry`).
 ```bash
