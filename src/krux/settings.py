@@ -19,12 +19,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+from .sd_card import SDHandler
+
 try:
     import ujson as json
 except ImportError:
     import json
 
-SETTINGS_FILE = "/sd/settings.json"
+SETTINGS_FILE = "settings.json"
 
 
 class SettingsNamespace:
@@ -121,7 +123,8 @@ class Store:
     def __init__(self):
         self.settings = {}
         try:
-            self.settings = json.load(open(SETTINGS_FILE, "r"))
+            with SDHandler() as sd:
+                self.settings = json.load(sd.read(SETTINGS_FILE))
         except:
             pass
 
@@ -143,7 +146,8 @@ class Store:
             s = s[level]
         s[setting_name] = setting_value
         try:
-            json.dump(self.settings, open(SETTINGS_FILE, "w"))
+            with SDHandler() as sd:
+                sd.write(SETTINGS_FILE, json.dumps(self.settings))
         except:
             pass
 

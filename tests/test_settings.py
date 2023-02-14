@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_init(mocker, m5stickv):
     from krux.settings import Settings
 
@@ -6,7 +9,15 @@ def test_init(mocker, m5stickv):
     assert isinstance(s, Settings)
 
 
-def test_store_init(mocker, m5stickv):
+@pytest.fixture
+def mocker_sd_card(mocker):
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+    )
+    
+
+def test_store_init(mocker, m5stickv, mocker_sd_card):
     from krux.settings import Store, SETTINGS_FILE
 
     cases = [
@@ -19,7 +30,7 @@ def test_store_init(mocker, m5stickv):
         s = Store()
 
         assert isinstance(s, Store)
-        mo.assert_called_once_with(SETTINGS_FILE, "r")
+        mo.assert_called_once_with("/sd/%s" % SETTINGS_FILE, "r")
         assert s.settings == case[1]
 
 

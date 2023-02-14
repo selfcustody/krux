@@ -32,6 +32,7 @@ from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
 from ..i18n import t
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
+from ..sd_card import SDHandler
 import qrcode
 
 
@@ -296,8 +297,8 @@ class Home(Page):
 
         data, qr_format = (None, FORMAT_NONE)
         psbt_filename = None
-        if self.ctx.sd_card is not None:
-            try:
+        try:
+            with SDHandler() as sd:
                 psbt_filename = next(
                     filter(
                         lambda filename: filename.endswith(".psbt"),
@@ -309,12 +310,12 @@ class Home(Page):
                     t("Found PSBT on SD card:\n%s") % psbt_filename
                 )
                 if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
-                    with open("/sd/%s" % psbt_filename, "rb") as psbt_file:
-                        data = psbt_file.read()
-            except:
-                pass
+                    data = sd.read_binary(psbt_filename)
+        except:
+            pass
 
         if data is None:
+            psbt_filename = None
             data, qr_format = self.capture_qr_code()
 
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
@@ -335,19 +336,24 @@ class Home(Page):
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
-            if self.ctx.sd_card is not None:
-                self.ctx.display.clear()
-                if self.prompt(
-                    t("Save PSBT to SD card?"), self.ctx.display.height() // 2
-                ):
-                    psbt_filename = "signed-%s" % (
-                        psbt_filename if psbt_filename is not None else "psbt"
-                    )
-                    with open("/sd/%s" % psbt_filename, "wb") as psbt_file:
-                        psbt_file.write(signer.psbt.serialize())
-                    self.ctx.display.flash_text(
-                        t("Saved PSBT to SD card:\n%s") % psbt_filename
-                    )
+            try:
+                with SDHandler() as sd:
+                    self.ctx.display.clear()
+                    if self.prompt(
+                        t("Save PSBT to SD card?"), self.ctx.display.height() // 2
+                    ):
+                        psbt_filename = "signed-%s" % (
+                            psbt_filename
+                            if psbt_filename is not None
+                            else "QRCode.psbt"
+                        )
+                        sd.write_binary(psbt_filename, signer.psbt.serialize())
+                        self.ctx.display.flash_text(
+                            t("Saved PSBT to SD card:\n%s") % psbt_filename
+                        )
+            except:
+                pass
+
             signed_psbt, qr_format = signer.psbt_qr()
             signer = None
             gc.collect()
@@ -394,17 +400,19 @@ class Home(Page):
         self.ctx.display.draw_centered_text(t("Signature:\n\n%s") % encoded_sig)
         self.ctx.input.wait_for_button()
 
-        if self.ctx.sd_card is not None:
-            self.ctx.display.clear()
-            if self.prompt(
-                t("Save signature to SD card?"), self.ctx.display.height() // 2
-            ):
-                sig_filename = "signed-message.sig"
-                with open("/sd/%s" % sig_filename, "wb") as sig_file:
-                    sig_file.write(sig)
-                self.ctx.display.flash_text(
-                    t("Saved signature to SD card:\n%s") % sig_filename
-                )
+        try:
+            with SDHandler() as sd:
+                self.ctx.display.clear()
+                if self.prompt(
+                    t("Save signature to SD card?"), self.ctx.display.height() // 2
+                ):
+                    sig_filename = "signed-message.sig"
+                    sd.write_binary(sig_filename, sig)
+                    self.ctx.display.flash_text(
+                        t("Saved signature to SD card:\n%s") % sig_filename
+                    )
+        except:
+            pass
 
         self.display_qr_codes(encoded_sig, qr_format)
         self.print_qr_prompt(encoded_sig, qr_format)

@@ -962,7 +962,6 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[9])
         ctx.wallet = wallet
         ctx.printer = case[8]
-        ctx.sd_card = case[10]
 
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], case[4]))
@@ -1133,7 +1132,6 @@ def test_sign_message(mocker, m5stickv, tdata):
         ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[3])
         ctx.wallet = wallet
         ctx.printer = case[2]
-        ctx.sd_card = case[6]
 
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))

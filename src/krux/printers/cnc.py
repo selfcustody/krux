@@ -26,6 +26,7 @@ from ..settings import CategorySetting, NumberSetting, Settings, SettingsNamespa
 from ..i18n import t
 from ..wdt import wdt
 from . import Printer, BAUDRATES
+from ..sd_card import SDHandler
 
 G0_XY = "G0 X%.4f Y%.4f"
 G0_Z = "G0 Z%.4f"
@@ -313,10 +314,15 @@ class FilePrinter(GCodeGenerator):
 
     def print_qr_code(self, qr_code):
         """Creates an nc file on the SD card with commands to cut out the specified QR code"""
-        self.file = open("/sd/qr.nc", "w")
-        super().print_qr_code(qr_code)
-        self.file.flush()
-        self.file.close()
+        try:
+            with SDHandler() as sd:
+                self.file = open("/sd/qr.nc", "w")
+                super().print_qr_code(qr_code)
+        except:
+            pass
+        finally:
+            self.file.flush()
+            self.file.close()
 
     def clear(self):
         """Clears the printer's memory, resetting it"""
