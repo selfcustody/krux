@@ -19,14 +19,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from .sd_card import SDHandler
+#
+# Removed SDHandler dependency, we check for SD remount, just before entering
+# the settings view
+# from .sd_card import SDHandler
 
 try:
     import ujson as json
 except ImportError:
     import json
 
-SETTINGS_FILE = "settings.json"
+SETTINGS_FILE = "/sd/settings.json"
 
 
 class SettingsNamespace:
@@ -123,8 +126,10 @@ class Store:
     def __init__(self):
         self.settings = {}
         try:
-            with SDHandler() as sd:
-                self.settings = json.load(sd.read(SETTINGS_FILE))
+            self.settings = json.load(open(SETTINGS_FILE, "r"))
+            # Removed SDHandler dependency
+            # with SDHandler() as sd:
+            #     self.settings = json.loads(sd.read(SETTINGS_FILE))
         except:
             pass
 
@@ -139,15 +144,20 @@ class Store:
         return s[setting_name]
 
     def set(self, namespace, setting_name, setting_value):
-        """Stores a setting value under the given namespace"""
+        """Stores a setting value under the given namespace. We don't use SDHandler
+        here because set is called too many times every time the user changes a setting
+        and SDHandler remount causes a small delay
+        """
         s = self.settings
         for level in namespace.split("."):
             s[level] = s.get(level, {})
             s = s[level]
         s[setting_name] = setting_value
         try:
-            with SDHandler() as sd:
-                sd.write(SETTINGS_FILE, json.dumps(self.settings))
+            json.dump(self.settings, open(SETTINGS_FILE, "w"))
+            # We don't use the SDHandler, see comment above
+            # with SDHandler() as sd:
+            #     sd.write(SETTINGS_FILE, json.dumps(self.settings))
         except:
             pass
 

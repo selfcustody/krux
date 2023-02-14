@@ -45,20 +45,25 @@ class SDHandler:
         pass
 
     def write_binary(self, filename, data):
+        """Writes the data in binary format into the filename, truncating the file first"""
         with open(SDHandler.SD_PATH % filename, "wb") as file:
             file.write(data)
 
     def write(self, filename, data):
+        """Writes the data into the filename, truncating the file first"""
         with open(SDHandler.SD_PATH % filename, "w") as file:
             file.write(data)
 
     def read_binary(self, filename):
+        """Reads the filename in binary format and returns the data"""
         with open(SDHandler.SD_PATH % filename, "rb") as file:
             return file.read()
 
     def read(self, filename):
+        """Reads the filename and returns the data"""
         with open(SDHandler.SD_PATH % filename, "r") as file:
             return file.read()
 
     def delete(self, filename):
+        """Deletes the filename"""
         os.remove(SDHandler.SD_PATH % filename)

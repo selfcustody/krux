@@ -35,6 +35,7 @@ from ..key import Key, pick_final_word
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..i18n import t
+from ..sd_card import SDHandler
 from . import (
     Page,
     Menu,
@@ -469,6 +470,13 @@ class Login(Page):
 
     def settings(self):
         """Handler for the 'settings' menu item"""
+        try:
+            # Check for SD hot-plug
+            with SDHandler():
+                pass
+        except:
+            pass
+
         return self.namespace(Settings())()
 
     def namespace(self, settings_namespace):

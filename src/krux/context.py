@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 import gc
 import board
-import os
 from .logging import logger
 from .display import Display
 from .input import Input

@@ -315,7 +315,7 @@ class FilePrinter(GCodeGenerator):
     def print_qr_code(self, qr_code):
         """Creates an nc file on the SD card with commands to cut out the specified QR code"""
         try:
-            with SDHandler() as sd:
+            with SDHandler():
                 self.file = open("/sd/qr.nc", "w")
                 super().print_qr_code(qr_code)
         except:
