@@ -39,7 +39,7 @@ def find_translation_slugs():
         for filename in filenames:
             if not filename.endswith(".py"):
                 continue
-            with open(join(dirpath, filename), "r") as src_file:
+            with open(join(dirpath, filename), "r", encoding="utf8") as src_file:
                 contents = src_file.read()
                 for match in re.findall(r"[^A-Za-z0-9]t\(\s*\"(.+?)\"\s*\)", contents):
                     slugs[match] = True
@@ -68,7 +68,7 @@ def validate_translation_files():
         print("Validating %s..." % translation_filename)
         valid = True
         with open(
-            join(TRANSLATION_FILES_DIR, translation_filename), "r"
+            join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
         ) as translation_file:
             translations = load_translations(translation_file)
             for slug in slugs:
@@ -96,7 +96,7 @@ def bake_translations():
     ]
     for translation_filename in translation_filenames:
         with open(
-            join(TRANSLATION_FILES_DIR, translation_filename), "r"
+            join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
         ) as translation_file:
             translations = json.load(translation_file)
             lookup = {}
@@ -104,7 +104,7 @@ def bake_translations():
                 lookup[binascii.crc32(slug.encode("utf-8"))] = translation
             translation_table[basename(translation_filename).split(".")[0]] = lookup
 
-    with open(join(SRC_DIR, "krux", "translations.py"), "w") as translations:
+    with open(join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8") as translations:
         translations.write(
             """# The MIT License (MIT)
 
@@ -140,7 +140,7 @@ def create_translation_file(locale):
     slugs = find_translation_slugs()
     for slug in slugs:
         translations[slug.replace("\\n", "\n")] = ""
-    with open(join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w") as translation_file:
+    with open(join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w", encoding="utf8") as translation_file:
         translation_file.write(
             json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
         )
@@ -156,11 +156,11 @@ def prettify_translation_files():
     for translation_filename in translation_filenames:
         translations = {}
         with open(
-            join(TRANSLATION_FILES_DIR, translation_filename), "r"
+            join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
         ) as translation_file:
             translations = json.load(translation_file)
         with open(
-            join(TRANSLATION_FILES_DIR, translation_filename), "w"
+            join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8"
         ) as translation_file:
             translation_file.write(
                 json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
