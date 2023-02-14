@@ -100,10 +100,14 @@ generating screenshots, or even just trying out Krux before purchasing a device.
 
 Before executing the simulator, make sure you have installed the poetry extras: `poetry install --extras simulator`. Otherwise you will get this error: `ModuleNotFoundError: No module named 'pygame'`
 ```bash
-cd simulator && poetry run python simulator.py --device maixpy_amigo_tft
-```
-```bash
-cd simulator && poetry run python simulator.py --device maixpy_m5stickv
+# Enter simulator folder:
+cd simulator
+
+# Run simulator with the touch device amigo, then use mouse to navigate:
+poetry run python simulator.py --device maixpy_amigo_tft
+
+# Run simulator with the small device m5stick, then use keyboard to navigate:
+poetry run python simulator.py --device maixpy_m5stickv
 ```
 
 Simulator error troubleshooting:
@@ -193,6 +197,24 @@ Type "help()" for more information.
 ```
 
 Customizations made to the firmware removed the support to MaixPy IDE (due to size constraints), but you still can use it's terminal (MaixPy IDE menu bar > Tools > Open Terminal).
+
+## Create new translations - i18n
+
+The project has lots of translations [here](i18n/translations), if you add new english messages in code using `t()` function, you will need to:
+
+```bash
+# Enter i18n folder:
+cd i18n
+
+# Make sure all files have this new translated message:
+python3 i18n.py validade
+
+# Format translation files properly:
+python3 i18n.py prettify
+
+# Create the compiled table for krux translations.py
+python3 i18n.py bake
+```
 
 ## Run mkdocs
 ```bash
