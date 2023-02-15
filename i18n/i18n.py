@@ -140,7 +140,9 @@ def create_translation_file(locale):
     slugs = find_translation_slugs()
     for slug in slugs:
         translations[slug.replace("\\n", "\n")] = ""
-    with open(join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w", encoding="utf8") as translation_file:
+    with open(
+        join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w", encoding="utf8"
+    ) as translation_file:
         translation_file.write(
             json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
         )
