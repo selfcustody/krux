@@ -122,6 +122,18 @@ sudo apt install libgl1
 # You are trying to run the simulator on a SO without a GUI (some kind of terminal only or WSL). Try one with GUI!
 ```
 
+Simulator sequences (automatic testing):
+```bash
+# Enter simulator folder:
+cd simulator
+
+# Run all sequences of commands to all devices and all locales
+./generate-all-screenshots.sh
+
+# Run a specific sequence for a specific device (need to have the screenshots and the sd folder with the file settings.json inside)
+poetry run python simulator.py --sequence sequences/about.txt --sd --device maixpy_m5stickv
+```
+
 ## Live debug a device
 If you've made a fresh build and flashed it to your device, you can connect to the device over serial connection with:
 ```bash
