@@ -473,9 +473,17 @@ class Login(Page):
         try:
             # Check for SD hot-plug
             with SDHandler():
-                pass
+                self.ctx.display.flash_text(
+                    t("The settings.json file will keep the changes on the SD card."),
+                    lcd.WHITE,
+                )
         except:
-            pass
+            self.ctx.display.flash_text(
+                t(
+                    "Incompatible or missing SD card:\n\nChanges will last until shutdown."
+                ),
+                lcd.WHITE,
+            )
 
         return self.namespace(Settings())()
 
