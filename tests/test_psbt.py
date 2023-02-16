@@ -320,15 +320,15 @@ def test_outputs_singlekey(mocker, m5stickv, tdata):
         (
             tdata.P2WPKH_PSBT,
             [
-                "Sending:\n₿0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
-                "Fee:\n₿0.00,002,820",
+                "Sending: ₿0.10,000,000\nTo:tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
+                "Fee: ₿0.00,002,820",
             ],
         ),
         (
             tdata.P2SH_P2WPKH_PSBT,
             [
-                "Sending:\n₿0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
-                "Fee:\n₿0.00,003,300",
+                "Sending: ₿0.10,000,000\nTo:tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
+                "Fee: ₿0.00,003,300",
             ],
         ),
     ]
@@ -351,15 +351,15 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         (
             tdata.P2WSH_PSBT,
             [
-                "Sending:\n₿0.18,993,880\n\nTo:\ntb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n",
-                "Fee:\n₿0.00,006,120",
+                "Sending: ₿0.18,993,880\nTo:tb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n",
+                "Fee: ₿0.00,006,120",
             ],
         ),
         (
             tdata.P2SH_P2WSH_PSBT,
             [
-                "Sending:\n₿0.10,000,000\n\nTo:\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
-                "Fee:\n₿0.00,004,260",
+                "Sending: ₿0.10,000,000\nTo:tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx",
+                "Fee: ₿0.00,004,260",
             ],
         ),
     ]

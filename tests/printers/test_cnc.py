@@ -69,7 +69,7 @@ def test_clear(mocker, m5stickv):
 def test_print_qr_code_with_row_cutmethod(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
-    from krux.settings import Settings
+    from krux.krux_settings import Settings
     import os
 
     gcode = list(
@@ -100,7 +100,7 @@ def test_print_qr_code_with_row_cutmethod(mocker, m5stickv, mocker_sd_card):
 def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
-    from krux.settings import Settings
+    from krux.krux_settings import Settings
     import os
 
     gcode = list(
@@ -131,7 +131,7 @@ def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv, mocker_sd_card):
 def test_print_qr_code_inverted(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
-    from krux.settings import Settings
+    from krux.krux_settings import Settings
     import os
 
     gcode = list(

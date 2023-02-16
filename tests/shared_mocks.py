@@ -55,6 +55,9 @@ class MockPrinter:
     def print_qr_code(self, qr_code):
         pass
 
+    def print_string(self, string):
+        pass
+
 
 class MockQRPartParser:
     TOTAL = 10

@@ -2,7 +2,7 @@ import pytest
 
 
 def test_init(mocker, m5stickv):
-    from krux.settings import Settings
+    from krux.krux_settings import Settings
 
     s = Settings()
 
