@@ -60,7 +60,8 @@ Note that you can run `poetry install` after making a change to the krux code if
 
 ## Format code
 ```bash
-poetry run black ./src && poetry run black ./tests
+poetry run black ./src
+poetry run black ./tests
 ```
 
 ## Run pylint
@@ -120,6 +121,18 @@ sudo apt install libgl1
 
 # `pygame.error: No available video device`
 # You are trying to run the simulator on a SO without a GUI (some kind of terminal only or WSL). Try one with GUI!
+```
+
+Simulator sequences (automatic testing):
+```bash
+# Enter simulator folder:
+cd simulator
+
+# Run all sequences of commands to all devices and all locales
+./generate-all-screenshots.sh
+
+# Run a specific sequence for a specific device (need to have the screenshots and the sd folder with the file settings.json inside)
+poetry run python simulator.py --sequence sequences/about.txt --sd --device maixpy_m5stickv
 ```
 
 ## Live debug a device

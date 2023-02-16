@@ -118,7 +118,6 @@
     "Signature:\n\n%s": "Chữ ký:\n\n%s",
     "Single-key": "Khóa đơn",
     "TX Pin": "TX Ghim",
-    "The settings.json file will keep the changes on the SD card.": "Tệp settings.json sẽ giữ các thay đổi trên thẻ SD.",
     "Thermal": "Nhiệt",
     "Try more?": "Thử thêm nữa?",
     "Unit": "Đơn vị",
@@ -137,5 +136,6 @@
     "Warning:\nIncomplete descriptor": "Cảnh báo:\nMô tả không đầy đủ",
     "Word %d": "Kí tự %d",
     "Words": "Từ ngữ",
-    "Yes": "Đúng"
+    "Yes": "Đúng",
+    "Your changes will be kept on the SD card.": "Các thay đổi của bạn sẽ được lưu trên thẻ SD."
 }

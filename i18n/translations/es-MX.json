@@ -118,7 +118,6 @@
     "Signature:\n\n%s": "Firma:\n\n%s",
     "Single-key": "Single-key",
     "TX Pin": "TX Alfiler",
-    "The settings.json file will keep the changes on the SD card.": "El archivo settings.json guardará los cambios en la tarjeta SD.",
     "Thermal": "Térmico",
     "Try more?": "¿Intentar con mas?",
     "Unit": "Unidad",
@@ -137,5 +136,6 @@
     "Warning:\nIncomplete descriptor": "Advertencia:\ndescriptor incompleto",
     "Word %d": "Palabra %d",
     "Words": "Palabras",
-    "Yes": "Sí"
+    "Yes": "Sí",
+    "Your changes will be kept on the SD card.": "Sus cambios se guardarán en la tarjeta SD."
 }

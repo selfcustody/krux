@@ -118,7 +118,6 @@
     "Signature:\n\n%s": "Signature:\n\n%s",
     "Single-key": "Clé unique",
     "TX Pin": "TX Fiche",
-    "The settings.json file will keep the changes on the SD card.": "Le fichier settings.json conservera les modifications sur la carte SD.",
     "Thermal": "Thermique",
     "Try more?": "Réessayer?",
     "Unit": "Unité",
@@ -137,5 +136,6 @@
     "Warning:\nIncomplete descriptor": "Avertissement :\nDescripteur incomplet",
     "Word %d": "Mot %d",
     "Words": "Mots",
-    "Yes": "Oui"
+    "Yes": "Oui",
+    "Your changes will be kept on the SD card.": "Vos modifications seront conservées sur la carte SD."
 }

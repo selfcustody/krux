@@ -49,6 +49,7 @@ from . import (
 )
 
 SENTINEL_DIGITS = "11111"
+SD_SETTINGS_MSG_DURATION = 2000
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
@@ -531,8 +532,9 @@ class Login(Page):
             # Check for SD hot-plug
             with SDHandler():
                 self.ctx.display.flash_text(
-                    t("The settings.json file will keep the changes on the SD card."),
+                    t("Your changes will be kept on the SD card."),
                     lcd.WHITE,
+                    duration=SD_SETTINGS_MSG_DURATION,
                 )
         except:
             self.ctx.display.flash_text(
@@ -540,6 +542,7 @@ class Login(Page):
                     "Incompatible or missing SD card:\n\nChanges will last until shutdown."
                 ),
                 lcd.WHITE,
+                duration=SD_SETTINGS_MSG_DURATION,
             )
 
         return self.namespace(Settings())()
