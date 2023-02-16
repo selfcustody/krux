@@ -19,38 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from ..i18n import t
-from ..settings import CategorySetting, SettingsNamespace, Settings
+from ..krux_settings import t
 
-PRINTERS = {
-    "thermal/adafruit": ("thermal", "AdafruitPrinter"),
-    "cnc/file": ("cnc", "FilePrinter"),
-    # "cnc/grbl": ("cnc", "GRBLPrinter"),
-}
-
-BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
-
-
-class PrinterSettings(SettingsNamespace):
-    """Printer-specific settings"""
-
-    namespace = "settings.printer"
-    driver = CategorySetting("driver", "thermal/adafruit", list(PRINTERS.keys()))
-
-    def __init__(self):
-        from .thermal import ThermalSettings
-        from .cnc import CNCSettings
-
-        self.thermal = ThermalSettings()
-        self.cnc = CNCSettings()
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "thermal": t("Thermal"),
-            "driver": t("Driver"),
-            "cnc": t("CNC"),
-        }[attr]
+# from ..settings import CategorySetting, SettingsNamespace
+from ..krux_settings import Settings, PrinterSettings
 
 
 class Printer:
@@ -81,7 +53,8 @@ class Printer:
 
 def create_printer():
     """Instantiates a new printer dynamically based on the default in Settings"""
-    module, cls = PRINTERS[Settings().printer.driver]
+
+    module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
     return getattr(
         __import__(module, globals(), None, [None], 1),
         cls,

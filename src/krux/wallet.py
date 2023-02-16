@@ -28,7 +28,7 @@ from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
 from embit.script import Script, address_to_scriptpubkey
 import urtypes
-from .i18n import t
+from .krux_settings import t
 
 
 class Wallet:
@@ -67,7 +67,10 @@ class Wallet:
                 raise ValueError("xpub not a cosigner")
         else:
             if not descriptor.key:
-                raise ValueError("not single-key")
+                if len(descriptor.keys) > 1:
+                    raise ValueError("not single-key")
+                # Nunchuk exports single sig as a "multi 1 of 1"
+                descriptor.key = descriptor.keys[0]
             if self.key.xpub() != descriptor.key.key.to_base58():
                 raise ValueError("xpub does not match")
 
