@@ -60,7 +60,8 @@ Note that you can run `poetry install` after making a change to the krux code if
 
 ## Format code
 ```bash
-poetry run black ./src && poetry run black ./tests
+poetry run black ./src
+poetry run black ./tests
 ```
 
 ## Run pylint

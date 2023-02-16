@@ -107,7 +107,6 @@
     "Signature:\n\n%s": "Signature:\n\n%s",
     "Single-key": "Clé unique",
     "TX Pin": "TX Fiche",
-    "The settings.json file will keep the changes on the SD card.": "Le fichier settings.json conservera les modifications sur la carte SD.",
     "Thermal": "Thermique",
     "Touch disabled for transcription.\nPress enter twice to leave.": "Toucher désactivé pour la transcription.\nAppuyez deux fois sur Entrée pour quitter.",
     "Try more?": "Réessayer?",
@@ -126,5 +125,6 @@
     "Wallet not found.": "Portefeuille non trouvé.",
     "Word %d": "Mot %d",
     "Words": "Mots",
-    "Yes": "Oui"
+    "Yes": "Oui",
+    "Your changes will be kept on the SD card.": "Vos modifications seront conservées sur la carte SD."
 }

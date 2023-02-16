@@ -107,7 +107,6 @@
     "Signature:\n\n%s": "Assinatura:\n\n%s",
     "Single-key": "Single-key",
     "TX Pin": "Pino TX",
-    "The settings.json file will keep the changes on the SD card.": "O arquivo settings.json manterá suas alterações no cartão SD.",
     "Thermal": "Térmica",
     "Touch disabled for transcription.\nPress enter twice to leave.": "Touch desativado.\nPressione enter duas vezes para sair.",
     "Try more?": "Tentar mais?",
@@ -126,5 +125,6 @@
     "Wallet not found.": "Carteira não encontrada.",
     "Word %d": "Palavra %d",
     "Words": "Palavras",
-    "Yes": "Sim"
+    "Yes": "Sim",
+    "Your changes will be kept on the SD card.": "Suas alterações serão mantidas no cartão SD."
 }
