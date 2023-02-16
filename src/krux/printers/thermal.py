@@ -36,65 +36,15 @@
 # *************************************************************************
 # pylint: disable=W0231
 import time
-import math
-import board
 from fpioa_manager import fm
 from machine import UART
-from ..settings import CategorySetting, NumberSetting, SettingsNamespace, Settings
-from ..i18n import t
+
+# from ..settings import CategorySetting, NumberSetting, SettingsNamespace
+from ..krux_settings import Settings
+
+# from ..krux_settings import t
 from ..wdt import wdt
-from . import Printer, BAUDRATES
-
-DEFAULT_TX_PIN = (
-    board.config["board_info"]["CONNEXT_A"]
-    if "CONNEXT_A" in board.config["board_info"]
-    else 35
-)
-DEFAULT_RX_PIN = (
-    board.config["board_info"]["CONNEXT_B"]
-    if "CONNEXT_B" in board.config["board_info"]
-    else 34
-)
-
-
-class ThermalSettings(SettingsNamespace):
-    """Thermal printer settings"""
-
-    namespace = "settings.printer.thermal"
-
-    def __init__(self):
-        self.adafruit = AdafruitPrinterSettings()
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "adafruit": t("Adafruit"),
-        }[attr]
-
-
-class AdafruitPrinterSettings(SettingsNamespace):
-    """Adafruit thermal printer settings"""
-
-    namespace = "settings.printer.thermal.adafruit"
-    baudrate = CategorySetting("baudrate", 9600, BAUDRATES)
-    paper_width = NumberSetting(int, "paper_width", 384, [100, 1000])
-    tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
-    rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])
-    heat_dots = NumberSetting(int, "heat_dots", 11, [0, 255])
-    heat_time = NumberSetting(int, "heat_time", 255, [3, 255])
-    heat_interval = NumberSetting(int, "heat_interval", 40, [0, 255])
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "baudrate": t("Baudrate"),
-            "paper_width": t("Paper Width"),
-            "tx_pin": t("TX Pin"),
-            "rx_pin": t("RX Pin"),
-            "heat_dots": t("Heat Dots"),
-            "heat_time": t("Heat Time"),
-            "heat_interval": t("Heat Interval"),
-        }[attr]
+from . import Printer
 
 
 class AdafruitPrinter(Printer):
@@ -113,9 +63,9 @@ class AdafruitPrinter(Printer):
         self.uart_conn = UART(UART.UART2, Settings().printer.thermal.adafruit.baudrate)
 
         self.character_height = 24
-        self.byte_time = 11.0 / float(Settings().printer.thermal.adafruit.baudrate)
-        self.dot_print_time = 0.03
-        self.dot_feed_time = 0.0021
+        self.byte_time = 1  # miliseconds
+        self.dot_print_time = 10  # miliseconds
+        self.dot_feed_time = 2  # miliseconds
 
         self.setup()
 
@@ -187,13 +137,13 @@ class AdafruitPrinter(Printer):
             # 11 bits (not 8) to accommodate idle, start and
             # stop bits.  Idle time might be unnecessary, but
             # erring on side of caution here.
-            time.sleep_ms(math.floor(self.byte_time * 1000))
+            time.sleep_ms(self.byte_time)
 
     def feed(self, x=1):
         """Feeds paper through the machine x times"""
         self.write_bytes(27, 100, x)
         # Wait for the paper to feed
-        time.sleep_ms(math.floor(self.dot_feed_time * self.character_height * 1000))
+        time.sleep_ms(self.dot_feed_time * self.character_height)
 
     def has_paper(self):
         """Returns a boolean indicating if the printer has paper or not"""
@@ -234,6 +184,12 @@ class AdafruitPrinter(Printer):
             size += 1
 
         scale = Settings().printer.thermal.adafruit.paper_width // size
+        scale //= 3
+        # Maximum size is //2 Command will scale up by 2x later
+        # Being at full size sometimes makes prints more faded (can't apply too much heat?)
+
+        line_bytes_size = (size * scale + 7) // 8  # amount of bytes per line
+        self.set_bitmap_mode(line_bytes_size, scale * size, 3)
         for y in range(size):
             # Scale the line (width) by scaling factor
             line = 0
@@ -242,10 +198,33 @@ class AdafruitPrinter(Printer):
                 for _ in range(scale):
                     line <<= 1
                     line |= bit
-            line_bytes = line.to_bytes((size * scale + 7) // 8, "big")
+            line_bytes = line.to_bytes(line_bytes_size, "big")
             # Print height * scale lines out to scale by
+
             for _ in range(scale):
-                self.write_bytes(18, 42, 1, len(line_bytes))
-                self.write_bytes(*line_bytes)
-                time.sleep_ms(math.floor(self.dot_print_time * 1000))
+                # command += line_bytes
+                self.uart_conn.write(line_bytes)
+                time.sleep_ms(self.dot_print_time)
         self.feed(3)
+
+    def set_bitmap_mode(self, width, height, scale_mode=1):
+        """Set image format to be printed"""
+        # width in bytes, height in pixels
+        # scale_mode=1-> unchanged scale. scale_mode=3-> 2x scale
+        command = b"\x1D\x76\x00"
+        command += bytes([scale_mode])
+        command += bytes([width])
+        command += b"\x00"
+        command += bytes([height])
+        command += b"\x00"
+        self.uart_conn.write(command)
+
+    def print_bitmap_line(self, data):
+        """Print a bitmap line"""
+        self.uart_conn.write(data)
+        time.sleep_ms(self.dot_print_time)
+
+    def print_string(self, text):
+        """Print a text string"""
+        self.uart_conn.write(text)
+        time.sleep_ms(self.dot_print_time)

@@ -30,24 +30,10 @@ from binascii import hexlify
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
-from .i18n import t
-from .settings import CategorySetting, SettingsNamespace
+from .krux_settings import t
 
 DER_SINGLE = "m/84h/%dh/0h"
 DER_MULTI = "m/48h/%dh/0h/2h"
-
-
-class BitcoinSettings(SettingsNamespace):
-    """Bitcoin-specific settings"""
-
-    namespace = "settings.bitcoin"
-    network = CategorySetting("network", "main", ["main", "test"])
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "network": t("Network"),
-        }[attr]
 
 
 class Key:

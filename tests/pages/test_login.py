@@ -3,7 +3,7 @@ from ..shared_mocks import mock_context
 
 def test_new_key_from_d6(mocker, m5stickv):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
-    from krux.pages.login import Login, D6_MIN_ROLLS
+    from krux.pages.login import Login, D6_12W_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     cases = [
@@ -11,7 +11,7 @@ def test_new_key_from_d6(mocker, m5stickv):
             # 1 press to proceed
             [BUTTON_ENTER] +
             # 1 presses per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
             # 1 press to confirm roll string, 1 press to confirm SHA, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
@@ -22,11 +22,11 @@ def test_new_key_from_d6(mocker, m5stickv):
             # 1 press to proceed
             [BUTTON_ENTER] +
             # 1 presses per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # 1 press to continue rolling to max rolls
             [BUTTON_PAGE] +
             # 1 presses per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # 1 press to confirm roll string, 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
             [
                 BUTTON_ENTER,
@@ -53,7 +53,7 @@ def test_new_key_from_d6(mocker, m5stickv):
 
 def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
-    from krux.pages.login import Login, D6_MIN_ROLLS
+    from krux.pages.login import Login, D6_12W_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     cases = [
@@ -61,7 +61,7 @@ def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
             # Yes and proceed
             [BUTTON_ENTER] +
             # 1 press per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # Done? Yes and proceed
             [BUTTON_ENTER] +
             # Confirm roll string, Confirm SHA, Yes, Skip passphrase, Single-key
@@ -79,11 +79,11 @@ def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
             # Yes and proceed
             [BUTTON_ENTER] +
             # 1 press per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # Done? No and proceed
             [BUTTON_PAGE, BUTTON_ENTER] +
             # 1 press per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # Confirm roll string, Confirm SHA, Yes, Skip passphrase, Single-key
             [
                 BUTTON_ENTER,
@@ -763,7 +763,7 @@ def test_settings(mocker, m5stickv):
 
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting, NumberSetting
     from krux.translations import translation_table
 
     tlist = list(translation_table)
@@ -946,7 +946,7 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
-    from krux.settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting, NumberSetting
 
     from krux.translations import translation_table
 

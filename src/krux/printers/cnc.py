@@ -21,80 +21,15 @@
 # THE SOFTWARE.
 # pylint: disable=W0231
 import math
-import board
-from ..settings import CategorySetting, NumberSetting, Settings, SettingsNamespace
-from ..i18n import t
+from ..krux_settings import Settings
 from ..wdt import wdt
-from . import Printer, BAUDRATES
+from . import Printer
 from ..sd_card import SDHandler
 
 G0_XY = "G0 X%.4f Y%.4f"
 G0_Z = "G0 Z%.4f"
 G1_XY = "G1 X%.4f Y%.4f F%.1f"
 G1_Z = "G1 Z%.4f F%.1f"
-
-DEFAULT_TX_PIN = (
-    board.config["board_info"]["CONNEXT_A"]
-    if "CONNEXT_A" in board.config["board_info"]
-    else 35
-)
-DEFAULT_RX_PIN = (
-    board.config["board_info"]["CONNEXT_B"]
-    if "CONNEXT_B" in board.config["board_info"]
-    else 34
-)
-
-
-class CNCSettings(SettingsNamespace):
-    """CNC "printer" settings"""
-
-    namespace = "settings.printer.cnc"
-    invert = CategorySetting("invert", False, [False, True])
-    cut_method = CategorySetting("cut_method", "spiral", ["spiral", "row"])
-    unit = CategorySetting("unit", "in", ["in", "mm"])
-    flute_diameter = NumberSetting(float, "flute_diameter", 0.02, [0.0001, 10000])
-    plunge_rate = NumberSetting(float, "plunge_rate", 30, [0.0001, 10000])
-    feed_rate = NumberSetting(float, "feed_rate", 65, [0.0001, 10000])
-    cut_depth = NumberSetting(float, "cut_depth", 0.0625, [0.0001, 10000])
-    depth_per_pass = NumberSetting(float, "depth_per_pass", 0.03125, [0.0001, 10000])
-    part_size = NumberSetting(float, "part_size", 3.5, [0.0001, 10000])
-    border_padding = NumberSetting(float, "border_padding", 0.0625, [0.0001, 10000])
-
-    def __init__(self):
-        self.grbl = GRBLSettings()
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "invert": t("Invert"),
-            "cut_method": t("Cut Method"),
-            "unit": t("Unit"),
-            "flute_diameter": t("Flute Diameter"),
-            "plunge_rate": t("Plunge Rate"),
-            "feed_rate": t("Feed Rate"),
-            "cut_depth": t("Cut Depth"),
-            "depth_per_pass": t("Depth Per Pass"),
-            "part_size": t("Part Size"),
-            "border_padding": t("Border Padding"),
-            "grbl": t("GRBL"),
-        }[attr]
-
-
-class GRBLSettings(SettingsNamespace):
-    """GRBL settings"""
-
-    namespace = "settings.printer.cnc.grbl"
-    baudrate = CategorySetting("baudrate", 115200, BAUDRATES)
-    tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
-    rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "baudrate": t("Baudrate"),
-            "tx_pin": t("TX Pin"),
-            "rx_pin": t("RX Pin"),
-        }[attr]
 
 
 class GCodeGenerator(Printer):

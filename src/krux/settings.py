@@ -58,35 +58,6 @@ class SettingsNamespace:
         return settings
 
 
-class Settings(SettingsNamespace):
-    """The top-level settings namespace under which other namespaces reside"""
-
-    namespace = "settings"
-
-    def __init__(self):
-        # Have to import these on init to avoid a circular import
-        from .key import BitcoinSettings
-        from .i18n import I18nSettings
-        from .logging import LoggingSettings
-        from .printers import PrinterSettings
-
-        self.bitcoin = BitcoinSettings()
-        self.i18n = I18nSettings()
-        self.logging = LoggingSettings()
-        self.printer = PrinterSettings()
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        from .i18n import t
-
-        return {
-            "bitcoin": t("Bitcoin"),
-            "i18n": t("Language"),
-            "logging": t("Logging"),
-            "printer": t("Printer"),
-        }[attr]
-
-
 class Setting:
     """Implements the descriptor protocol for reading and writing a single setting"""
 

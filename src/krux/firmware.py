@@ -29,7 +29,7 @@ from embit import ec
 from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
 from .metadata import SIGNER_PUBKEY
 from .display import Display
-from .i18n import t
+from .krux_settings import t
 from .wdt import wdt
 
 MAX_FIRMWARE_SIZE = 0x300000

@@ -22,7 +22,7 @@
 import sys
 from unittest import mock
 import pygame as pg
-from krux.settings import Settings
+from krux.krux_settings import Settings
 
 simulating_printer = False
 

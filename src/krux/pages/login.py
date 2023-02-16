@@ -28,13 +28,16 @@ from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
 import urtypes
 from ..metadata import VERSION
-from ..settings import CategorySetting, NumberSetting, Settings
+from ..settings import CategorySetting, NumberSetting
+from ..krux_settings import Settings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word
 from ..wallet import Wallet
 from ..printers import create_printer
-from ..i18n import t
+from ..krux_settings import t
+from .stack_1248 import Stackbit
+from .tiny_seed import TinySeed, TinyScanner
 from ..sd_card import SDHandler
 from . import (
     Page,
@@ -58,8 +61,8 @@ NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 NUMERALS = "0123456789."
 
-D6_MIN_ROLLS = 50
-D6_MAX_ROLLS = 100
+D6_12W_ROLLS = 50
+D6_24W_MIN_ROLLS = 99
 D20_MIN_ROLLS = 30
 D20_MAX_ROLLS = 60
 
@@ -91,6 +94,25 @@ class Login(Page):
                 (t("Via Text"), self.load_key_from_text),
                 (t("Via Numbers"), self.load_key_from_digits),
                 (t("Via Bits"), self.load_key_from_bits),
+                (t("Metal Storage"), self.load_metal_key),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return MENU_CONTINUE
+        return status
+
+    def load_metal_key(self):
+        """Handler to load metal seed storgare"""
+        submenu = Menu(
+            self.ctx,
+            [
+                ("Stackbit 1248", self.load_key_from_1248),
+                ("Tiny Seed 12", self.load_key_from_tiny_seed),
+                ("Tiny Seed 24", lambda: self.load_key_from_tiny_seed(True)),
+                ("Scan Tiny Seed 12", self.scan_from_tiny_seed),
+                ("Scan Tiny Seed 24", lambda: self.scan_from_tiny_seed(True)),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -116,34 +138,33 @@ class Login(Page):
 
     def new_key_from_d6(self):
         """Handler for the 'via D6' menu item"""
-        return self._new_key_from_die(D6_STATES, D6_MIN_ROLLS, D6_MAX_ROLLS)
+        return self._new_key_from_die(D6_STATES, D6_12W_ROLLS, D6_24W_MIN_ROLLS)
 
     def new_key_from_d20(self):
         """Handler for the 'via D20' menu item"""
         return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
 
-    def _new_key_from_die(self, roll_states, min_rolls, max_rolls):
+    def _new_key_from_die(self, roll_states, min_rolls, min_rolls_24w):
+        delete_flag = False
         self.ctx.display.draw_hcentered_text(
             t(
                 "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
             )
-            % (min_rolls, max_rolls)
+            % (min_rolls, min_rolls_24w)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
 
             def delete_roll(buffer):
-                nonlocal rolls
-                if len(rolls) > 0:
-                    rolls.pop()
+                # buffer not used here
+                nonlocal delete_flag
+                delete_flag = True
                 return buffer
 
-            num_rolls = max_rolls
-            while len(rolls) < max_rolls:
-                if len(rolls) == min_rolls:
+            while True:
+                if len(rolls) in (min_rolls, min_rolls_24w):
                     self.ctx.display.clear()
                     if self.prompt(t("Done?"), self.ctx.display.height() // 2):
-                        num_rolls = min_rolls
                         break
 
                 roll = ""
@@ -164,11 +185,22 @@ class Login(Page):
                     )
                     if roll == ESC_KEY:
                         return MENU_CONTINUE
+                    break
 
-                    if roll != "" and roll in roll_states:
+                if roll != "":
+                    rolls.append(roll)
+                else:
+                    # If its not a roll it is Del or Go
+                    if delete_flag:  # Del
+                        delete_flag = False
+                        if len(rolls) > 0:
+                            rolls.pop()
+                    elif len(rolls) < min_rolls_24w:  # Not enough to Go
+                        self.ctx.display.flash_text(
+                            t("Not enough rolls!"), lcd.WHITE, duration=1000
+                        )
+                    else:  # Go
                         break
-
-                rolls.append(roll)
 
             entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
 
@@ -185,7 +217,7 @@ class Login(Page):
                 t("SHA256 of rolls:\n\n%s") % entropy_hash
             )
             self.ctx.input.wait_for_button()
-            num_bytes = 16 if num_rolls == min_rolls else 32
+            num_bytes = 16 if len(rolls) == min_rolls else 32
             words = bip39.mnemonic_from_bytes(
                 hashlib.sha256(entropy_bytes).digest()[:num_bytes]
             ).split()
@@ -427,6 +459,31 @@ class Login(Page):
 
         return self._load_key_from_keypad(title, BITS, to_word)
 
+    def load_key_from_1248(self):
+        """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
+        stackbit = Stackbit(self.ctx)
+        words = stackbit.enter_1248()
+        if words is not None:
+            return self._load_key_from_words(words)
+        return MENU_CONTINUE
+
+    def load_key_from_tiny_seed(self, w24=False):
+        """Menu handler to manually load key from Tiny Seed sheet metal storage method"""
+        # w24 - true if 24 words mode
+        tiny_seed = TinySeed(self.ctx)
+        words = tiny_seed.enter_tiny_seed(w24)
+        if words is not None:
+            return self._load_key_from_words(words)
+        return MENU_CONTINUE
+
+    def scan_from_tiny_seed(self, w24=False):
+        """Menu handler to scan key from Tiny Seed sheet metal storage method"""
+        tiny_scanner = TinyScanner(self.ctx)
+        words = tiny_scanner.scanner(w24)
+        if words is not None:
+            return self._load_key_from_words(words)
+        return MENU_CONTINUE
+
     def load_passphrase(self):
         """Loads and returns a passphrase from keypad"""
         return self.capture_from_keypad(
@@ -595,5 +652,13 @@ class Login(Page):
         """Handler for the 'about' menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
+        if self.ctx.power_manager.pmu is not None:
+            batt_voltage = self.ctx.power_manager.batt_voltage()
+            if batt_voltage is not None:
+                batt_voltage /= 1000
+                self.ctx.display.draw_hcentered_text(
+                    "Battery: " + str(round(batt_voltage, 1)) + "V",
+                    self.ctx.display.bottom_prompt_line,
+                )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
