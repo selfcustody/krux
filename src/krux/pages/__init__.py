@@ -208,21 +208,16 @@ class Page:
             # Indicate progress to the user that a new part was captured
             if new_part:
                 self.ctx.display.to_portrait()
-                if self.ctx.display.width() < 320:
-                    self.ctx.display.draw_centered_text(
-                        "%.0f%%" % (100 * float(num_parts_captured) / float(part_total))
-                    )
-                    time.sleep_ms(100)
-                else:
-                    filled = self.ctx.display.usable_width() * num_parts_captured
-                    filled //= part_total
-                    self.ctx.display.fill_rectangle(
-                        DEFAULT_PADDING,
-                        335,
-                        filled,
-                        self.ctx.display.font_height,
-                        lcd.WHITE,
-                    )
+                filled = self.ctx.display.usable_width() * num_parts_captured
+                filled //= part_total
+                self.ctx.display.fill_rectangle(
+                    DEFAULT_PADDING,
+                    self.ctx.display.height() // 2 - self.ctx.display.font_height // 2,
+                    filled,
+                    self.ctx.display.font_height,
+                    lcd.WHITE,
+                )
+                time.sleep_ms(100)
                 self.ctx.display.to_landscape()
 
             return 0
