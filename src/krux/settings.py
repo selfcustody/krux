@@ -19,6 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+#
+# Removed SDHandler dependency, we check for SD remount, just before entering
+# the settings view
+# from .sd_card import SDHandler
+
 try:
     import ujson as json
 except ImportError:
@@ -51,35 +56,6 @@ class SettingsNamespace:
         ]
         settings.sort(key=lambda s: s.attr)
         return settings
-
-
-class Settings(SettingsNamespace):
-    """The top-level settings namespace under which other namespaces reside"""
-
-    namespace = "settings"
-
-    def __init__(self):
-        # Have to import these on init to avoid a circular import
-        from .key import BitcoinSettings
-        from .i18n import I18nSettings
-        from .logging import LoggingSettings
-        from .printers import PrinterSettings
-
-        self.bitcoin = BitcoinSettings()
-        self.i18n = I18nSettings()
-        self.logging = LoggingSettings()
-        self.printer = PrinterSettings()
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        from .i18n import t
-
-        return {
-            "bitcoin": t("Bitcoin"),
-            "i18n": t("Language"),
-            "logging": t("Logging"),
-            "printer": t("Printer"),
-        }[attr]
 
 
 class Setting:
@@ -122,6 +98,9 @@ class Store:
         self.settings = {}
         try:
             self.settings = json.load(open(SETTINGS_FILE, "r"))
+            # Removed SDHandler dependency
+            # with SDHandler() as sd:
+            #     self.settings = json.loads(sd.read(SETTINGS_FILE))
         except:
             pass
 
@@ -136,7 +115,10 @@ class Store:
         return s[setting_name]
 
     def set(self, namespace, setting_name, setting_value):
-        """Stores a setting value under the given namespace"""
+        """Stores a setting value under the given namespace. We don't use SDHandler
+        here because set is called too many times every time the user changes a setting
+        and SDHandler remount causes a small delay
+        """
         s = self.settings
         for level in namespace.split("."):
             s[level] = s.get(level, {})
@@ -144,6 +126,9 @@ class Store:
         s[setting_name] = setting_value
         try:
             json.dump(self.settings, open(SETTINGS_FILE, "w"))
+            # We don't use the SDHandler, see comment above
+            # with SDHandler() as sd:
+            #     sd.write(SETTINGS_FILE, json.dumps(self.settings))
         except:
             pass
 

@@ -962,7 +962,6 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[9])
         ctx.wallet = wallet
         ctx.printer = case[8]
-        ctx.sd_card = case[10]
 
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], case[4]))
@@ -986,7 +985,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 ),
             )
         else:
-            mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
+            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=Exception))
             mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=Exception))
 
         home.sign_psbt()
@@ -1133,7 +1132,6 @@ def test_sign_message(mocker, m5stickv, tdata):
         ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[3])
         ctx.wallet = wallet
         ctx.printer = case[2]
-        ctx.sd_card = case[6]
 
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
@@ -1145,8 +1143,8 @@ def test_sign_message(mocker, m5stickv, tdata):
         mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
-        mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
         if case[6] is not None:
+            mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
             mocker.patch(
                 "builtins.open",
                 new=get_mock_open(
@@ -1156,6 +1154,7 @@ def test_sign_message(mocker, m5stickv, tdata):
                 ),
             )
         else:
+            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=Exception))
             mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=Exception))
 
         home.sign_message()

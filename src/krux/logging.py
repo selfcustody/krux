@@ -22,37 +22,12 @@
 import sys
 import io
 import os
-from .i18n import t
-from .settings import CategorySetting, SettingsNamespace, Settings
+
+# from .krux_settings import t
+# from .settings import CategorySetting, SettingsNamespace
+from .krux_settings import Settings, LoggingSettings
 
 LOG_FILEPATH = "/sd/.krux.log"
-
-NONE = 99
-ERROR = 40
-WARN = 30
-INFO = 20
-DEBUG = 10
-
-LEVEL_NAMES = {
-    NONE: "NONE",
-    ERROR: "ERROR",
-    WARN: "WARN",
-    INFO: "INFO",
-    DEBUG: "DEBUG",
-}
-
-
-class LoggingSettings(SettingsNamespace):
-    """Log-specific settings"""
-
-    namespace = "settings.logging"
-    level = CategorySetting("level", "NONE", list(LEVEL_NAMES.values()))
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "level": t("Log Level"),
-        }[attr]
 
 
 class Logger:
@@ -70,7 +45,7 @@ class Logger:
         """Logs a message if the given level is equal to or higher than the logger's level"""
         if level < level_id(Settings().logging.level):
             return
-        self._write("%s:%s" % (LEVEL_NAMES[level], msg))
+        self._write("%s:%s" % (LoggingSettings.LEVEL_NAMES[level], msg))
 
     def _write(self, msg):
         print(msg)
@@ -84,19 +59,19 @@ class Logger:
 
     def debug(self, msg):
         """Logs a message at DEBUG level"""
-        self.log(DEBUG, msg)
+        self.log(LoggingSettings.DEBUG, msg)
 
     def info(self, msg):
         """Logs a message at INFO level"""
-        self.log(INFO, msg)
+        self.log(LoggingSettings.INFO, msg)
 
     def warn(self, msg):
         """Logs a message at WARN level"""
-        self.log(WARN, msg)
+        self.log(LoggingSettings.WARN, msg)
 
     def error(self, msg):
         """Logs a message at ERROR level"""
-        self.log(ERROR, msg)
+        self.log(LoggingSettings.ERROR, msg)
 
     def exception(self, msg):
         """Logs a message including exception at ERROR level"""
@@ -105,15 +80,15 @@ class Logger:
     def _exc(self, e, msg):
         buf = io.StringIO()
         sys.print_exception(e, buf)
-        self.log(ERROR, msg + "\n" + buf.getvalue())
+        self.log(LoggingSettings.ERROR, msg + "\n" + buf.getvalue())
 
 
 def level_id(level_name):
     """Returns the log level for the string name"""
-    for lvl_id, name in LEVEL_NAMES.items():
+    for lvl_id, name in LoggingSettings.LEVEL_NAMES.items():
         if name == level_name:
             return lvl_id
-    return NONE
+    return LoggingSettings.NONE
 
 
 logger = Logger(LOG_FILEPATH)

@@ -24,14 +24,28 @@ import gc
 import hashlib
 import os
 import lcd
+from .stack_1248 import Stackbit
+from .tiny_seed import TinySeed
 from embit.wordlists.bip39 import WORDLIST
+from embit import ec, bip39, bech32
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
-from ..i18n import t
+from ..krux_settings import t
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
+from ..sd_card import SDHandler
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_DOWN,
+    SWIPE_RIGHT,
+    SWIPE_LEFT,
+    SWIPE_UP,
+)
 import qrcode
 
 
@@ -39,18 +53,23 @@ class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
+        menu_list = [
+            (t("Mnemonic"), self.mnemonic),
+            (t("Extended Public Key"), self.public_key),
+            (t("Nostr Public Key"), self.nostr_public_key),
+            (t("Wallet"), self.wallet),
+            (t("Scan Address"), self.scan_address),
+            (t("Sign"), self.sign),
+            (t("Shutdown"), self.shutdown),
+        ]
+        # Nostr not available for 12 words seeds
+        if len(ctx.wallet.key.mnemonic.split()) < 24:
+            del menu_list[2]
         super().__init__(
             ctx,
             Menu(
                 ctx,
-                [
-                    (t("Mnemonic"), self.mnemonic),
-                    (t("Extended Public Key"), self.public_key),
-                    (t("Wallet"), self.wallet),
-                    (t("Scan Address"), self.scan_address),
-                    (t("Sign"), self.sign),
-                    (t("Shutdown"), self.shutdown),
-                ],
+                menu_list,
             ),
         )
 
@@ -61,7 +80,10 @@ class Home(Page):
             [
                 (t("Words"), self.display_mnemonic_words),
                 (t("Plaintext QR"), self.display_standard_qr),
-                (t("Compact SeedQR"), self.display_compact_qr),
+                (t("Compact SeedQR"), lambda: self.display_seed_qr(True)),
+                ("SeedQR", self.display_seed_qr),
+                ("Stackbit 1248", self.stackbit),
+                ("Tiny Seed", self.tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -72,70 +94,179 @@ class Home(Page):
         """Displays only the mnemonic words"""
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
+        if self.ctx.printer is None:
+            return MENU_CONTINUE
+        self.ctx.display.clear()
+        if self.prompt(t("Print?"), self.ctx.display.height() // 2):
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                t("Printing ..."), self.ctx.display.height() // 2
+            )
+            self.ctx.printer.print_string("Seed Words\n")
+            words = self.ctx.wallet.key.mnemonic.split(" ")
+            lines = len(words) // 3
+            for i in range(lines):
+                index = i + 1
+                string = str(index) + ":" + words[index - 1] + " "
+                while len(string) < 10:
+                    string += " "
+                index += lines
+                string += str(index) + ":" + words[index - 1] + " "
+                while len(string) < 21:
+                    string += " "
+                index += lines
+                string += str(index) + ":" + words[index - 1] + "\n"
+                self.ctx.printer.print_string(string)
+            self.ctx.printer.feed(3)
+        return MENU_CONTINUE
 
     def display_standard_qr(self):
         """Displays regular words QR code"""
         self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
+        return MENU_CONTINUE
 
-    def display_compact_qr(self):
+    def display_seed_qr(self, binary=False):
         """Disables touch and displays compact SeedQR code with grid to help drawing"""
 
-        def draw_grided_qr(grid_size, qr_size):
+        def draw_grided_qr(mode, qr_size):
             """Draws grided QR"""
-            if grid_size:
+            if mode > 0:
                 self.ctx.display.draw_qr_code(0, code, bright=True)
+                if self.ctx.display.width() > 140:
+                    grid_size = self.ctx.display.width() // 140
+                else:
+                    grid_size = 1
             else:
                 self.ctx.display.draw_qr_code(0, code)
-            grif_offset = self.ctx.display.width() % (qr_size + 2)
-            grif_offset //= 2
+                grid_size = 0
+            grid_offset = self.ctx.display.width() % (qr_size + 2)
+            grid_offset //= 2
             grid_pad = self.ctx.display.width() // (qr_size + 2)
-            grif_offset += grid_pad
-            for i in range(qr_size + 1):
-                self.ctx.display.fill_rectangle(
-                    grif_offset,
-                    grif_offset + i * grid_pad,
-                    qr_size * grid_pad + 1,
-                    grid_size,
-                    lcd.RED,
-                )
-                self.ctx.display.fill_rectangle(
-                    grif_offset + i * grid_pad,
-                    grif_offset,
-                    grid_size,
-                    qr_size * grid_pad + 1,
-                    lcd.RED,
-                )
+            grid_offset += grid_pad
+            if mode == 2:
+                for i in range(2):
+                    line_offset = grid_pad * line
+                    self.ctx.display.fill_rectangle(
+                        grid_offset,
+                        grid_offset + i * grid_pad + line_offset,
+                        qr_size * grid_pad + 1,
+                        grid_size,
+                        lcd.RED,
+                    )
+                for i in range(qr_size + 1):
+                    self.ctx.display.fill_rectangle(
+                        grid_offset + i * grid_pad,
+                        grid_offset + line_offset,
+                        grid_size,
+                        grid_pad + 1,
+                        lcd.RED,
+                    )
+            else:
+                for i in range(qr_size + 1):
+                    self.ctx.display.fill_rectangle(
+                        grid_offset,
+                        grid_offset + i * grid_pad,
+                        qr_size * grid_pad + 1,
+                        grid_size,
+                        lcd.RED,
+                    )
+                    self.ctx.display.fill_rectangle(
+                        grid_offset + i * grid_pad,
+                        grid_offset,
+                        grid_size,
+                        qr_size * grid_pad + 1,
+                        lcd.RED,
+                    )
 
-        code, qr_size = self._binary_seed_qr()
+        if binary:
+            code, qr_size = self._binary_seed_qr()
+            label = "Compact SeedQR"
+        else:
+            code, qr_size = self._seed_qr()
+            label = "SeedQR"
+        label += "\nSwipe to change mode"
         if self.ctx.input.touch is not None:
             self.ctx.display.draw_hcentered_text(
-                t("Touch disabled for transcription.\nPress enter twice to leave."),
+                t(label),
                 self.ctx.display.qr_offset(),
                 color=lcd.WHITE,
             )
-        grid_size = 0
-        draw_grided_qr(grid_size, qr_size)
+        mode = 0
+        line = 0
         button = None
-        while button != 0:
+        while button not in (SWIPE_DOWN, SWIPE_UP):
+            draw_grided_qr(mode, qr_size)
+            # # Avoid the need of double click
+            # self.ctx.input.buttons_active = True
             button = self.ctx.input.wait_for_button()
-            if button == 1:  # page
-                grid_size += 1
-                grid_size %= 5
-                draw_grided_qr(grid_size, qr_size)
-            if button == 2:  # page_prev
-                grid_size -= 1
-                grid_size %= 5
-                draw_grided_qr(grid_size, qr_size)
+            if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
+                mode += 1
+                mode %= 3
+                line = 0
+                # draw_grided_qr(grid_size, qr_size)
+            elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
+                mode -= 1
+                mode %= 3
+                line = 0
+            elif button == BUTTON_TOUCH:
+                if mode == 0:
+                    button = SWIPE_DOWN  # leave
+                if mode == 2:  # Lines mode
+                    line += 1
+                    line %= qr_size
+            elif button == BUTTON_ENTER:
+                if mode == 2:  # Lines mode
+                    line += 1
+                    line %= qr_size
+                else:
+                    button = SWIPE_DOWN  # leave
         if self.ctx.printer is None:
-            return
+            return MENU_CONTINUE
         self.ctx.display.clear()
         if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
-                "Printing Compact Seed QR ...", self.ctx.display.height() // 2
+                t("Printing ..."), self.ctx.display.height() // 2
             )
+            if binary:
+                self.ctx.printer.print_string("Compact SeedQR\n\n")
+            else:
+                self.ctx.printer.print_string("SeedQR\n\n")
             self.ctx.printer.print_qr_code(code)
+
+    def stackbit(self):
+        """Displays which numbers 1248 user should punch on 1248 steel card"""
+        stackbit = Stackbit(self.ctx)
+        word_index = 1
+        words = self.ctx.wallet.key.mnemonic.split(" ")
+
+        while word_index < len(words):
+            y_offset = 2 * self.ctx.display.font_height
+            for _ in range(6):
+                stackbit.export_1248(word_index, y_offset, words[word_index - 1])
+                if self.ctx.display.height() > 240:
+                    y_offset += 3 * self.ctx.display.font_height
+                else:
+                    y_offset += 5 + 2 * self.ctx.display.font_height
+                word_index += 1
+            if self.ctx.input.wait_for_button() == 2:
+                if word_index > 12:
+                    word_index -= 12
+                else:
+                    word_index = 1
+            self.ctx.display.clear()
+        return MENU_CONTINUE
+
+    def tiny_seed(self):
+        """Displays the seed in Tiny Seed format"""
+        tiny_seed = TinySeed(self.ctx)
+        tiny_seed.export()
+        if self.ctx.printer is None:
+            return MENU_CONTINUE
+        if self.prompt(t("Print?"), self.ctx.display.height() // 2):
+            tiny_seed.print_tiny_seed()
+        return MENU_CONTINUE
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
@@ -151,6 +282,27 @@ class Home(Page):
             self.print_qr_prompt(xpub, FORMAT_NONE)
         return MENU_CONTINUE
 
+    def nostr_public_key(self):
+        """Experimental creation of nostr pub key from mnemonic"""
+        private_key = bip39.mnemonic_to_bytes(
+            self.ctx.wallet.key.mnemonic, ignore_checksum=True
+        )
+        pubkey = ec.PrivateKey(private_key).get_public_key().serialize()[1:]
+        pubkey_text = (
+            "Hex pubkey:\n" + binascii.hexlify(pubkey).decode("ascii") + "\n\n"
+        )
+        converted_bits = bech32.convertbits(pubkey, 8, 5)
+        bech32_pubkey = bech32.bech32_encode(
+            bech32.Encoding.BECH32, "npub", converted_bits
+        )
+        pubkey_text += "Bech32 pubkey:\n" + bech32_pubkey
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text(pubkey_text, DEFAULT_PADDING)
+        self.ctx.input.wait_for_button()
+        self.ctx.display.clear()
+        self.display_qr_codes(bech32_pubkey, FORMAT_NONE, title="Bech32 Public Key")
+        return MENU_CONTINUE
+
     def wallet(self):
         """Handler for the 'wallet' menu item"""
         self.ctx.display.clear()
@@ -163,6 +315,14 @@ class Home(Page):
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             self.print_qr_prompt(wallet_data, qr_format)
         return MENU_CONTINUE
+
+    def _seed_qr(self):
+        words = self.ctx.wallet.key.mnemonic.split(" ")
+        numbers = ""
+        for word in words:
+            numbers += str("%04d" % WORDLIST.index(word))
+        qr_size = 25 if len(words) == 12 else 29
+        return qrcode.encode_to_string(numbers), qr_size
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
@@ -202,6 +362,14 @@ class Home(Page):
                 t("Invalid wallet:\n%s") % repr(e), lcd.RED
             )
             self.ctx.input.wait_for_button()
+        if self.ctx.wallet.descriptor.key:  # If single sig
+            if not self.ctx.wallet.descriptor.key.origin:
+                # Blue exports descriptors without a fingerprint
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("Warning:\nIncomplete descriptor"), lcd.RED
+                )
+                self.ctx.input.wait_for_button()
         return MENU_CONTINUE
 
     def scan_address(self):
@@ -271,13 +439,17 @@ class Home(Page):
 
     def sign(self):
         """Handler for the 'sign' menu item"""
+        sign_list = [
+            (t("PSBT"), self.sign_psbt),
+            (t("Message"), self.sign_message),
+            (t("Nostr event"), self.sign_nostr),
+            (t("Back"), lambda: MENU_EXIT),
+        ]
+        if len(self.ctx.wallet.key.mnemonic.split()) < 24:
+            del sign_list[2]
         submenu = Menu(
             self.ctx,
-            [
-                (t("PSBT"), self.sign_psbt),
-                (t("Message"), self.sign_message),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
+            sign_list,
         )
         index, status = submenu.run_loop()
         if index == len(submenu.menu) - 1:
@@ -296,8 +468,8 @@ class Home(Page):
 
         data, qr_format = (None, FORMAT_NONE)
         psbt_filename = None
-        if self.ctx.sd_card is not None:
-            try:
+        try:
+            with SDHandler() as sd:
                 psbt_filename = next(
                     filter(
                         lambda filename: filename.endswith(".psbt"),
@@ -309,12 +481,12 @@ class Home(Page):
                     t("Found PSBT on SD card:\n%s") % psbt_filename
                 )
                 if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
-                    with open("/sd/%s" % psbt_filename, "rb") as psbt_file:
-                        data = psbt_file.read()
-            except:
-                pass
+                    data = sd.read_binary(psbt_filename)
+        except:
+            pass
 
         if data is None:
+            psbt_filename = None
             data, qr_format = self.capture_qr_code()
 
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
@@ -335,24 +507,29 @@ class Home(Page):
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
-            if self.ctx.sd_card is not None:
-                self.ctx.display.clear()
-                if self.prompt(
-                    t("Save PSBT to SD card?"), self.ctx.display.height() // 2
-                ):
-                    psbt_filename = "signed-%s" % (
-                        psbt_filename if psbt_filename is not None else "psbt"
-                    )
-                    with open("/sd/%s" % psbt_filename, "wb") as psbt_file:
-                        psbt_file.write(signer.psbt.serialize())
-                    self.ctx.display.flash_text(
-                        t("Saved PSBT to SD card:\n%s") % psbt_filename
-                    )
+            try:
+                with SDHandler() as sd:
+                    self.ctx.display.clear()
+                    if self.prompt(
+                        t("Save PSBT to SD card?"), self.ctx.display.height() // 2
+                    ):
+                        psbt_filename = "signed-%s" % (
+                            psbt_filename
+                            if psbt_filename is not None
+                            else "QRCode.psbt"
+                        )
+                        sd.write_binary(psbt_filename, signer.psbt.serialize())
+                        self.ctx.display.flash_text(
+                            t("Saved PSBT to SD card:\n%s") % psbt_filename
+                        )
+            except:
+                pass
+
             signed_psbt, qr_format = signer.psbt_qr()
             signer = None
             gc.collect()
             self.display_qr_codes(signed_psbt, qr_format)
-            self.print_qr_prompt(signed_psbt, qr_format)
+            self.print_qr_prompt(signed_psbt, qr_format, width=45)
         return MENU_CONTINUE
 
     def sign_message(self):
@@ -394,17 +571,19 @@ class Home(Page):
         self.ctx.display.draw_centered_text(t("Signature:\n\n%s") % encoded_sig)
         self.ctx.input.wait_for_button()
 
-        if self.ctx.sd_card is not None:
-            self.ctx.display.clear()
-            if self.prompt(
-                t("Save signature to SD card?"), self.ctx.display.height() // 2
-            ):
-                sig_filename = "signed-message.sig"
-                with open("/sd/%s" % sig_filename, "wb") as sig_file:
-                    sig_file.write(sig)
-                self.ctx.display.flash_text(
-                    t("Saved signature to SD card:\n%s") % sig_filename
-                )
+        try:
+            with SDHandler() as sd:
+                self.ctx.display.clear()
+                if self.prompt(
+                    t("Save signature to SD card?"), self.ctx.display.height() // 2
+                ):
+                    sig_filename = "signed-message.sig"
+                    sd.write_binary(sig_filename, sig)
+                    self.ctx.display.flash_text(
+                        t("Saved signature to SD card:\n%s") % sig_filename
+                    )
+        except:
+            pass
 
         self.display_qr_codes(encoded_sig, qr_format)
         self.print_qr_prompt(encoded_sig, qr_format)
@@ -416,6 +595,30 @@ class Home(Page):
         self.display_qr_codes(pubkey, qr_format)
         self.print_qr_prompt(pubkey, qr_format)
 
+        return MENU_CONTINUE
+
+    def sign_nostr(self):
+        """Handler for the 'sign nostr event' menu item"""
+        data, qr_format = self.capture_qr_code()
+        data_bytes = None
+        try:
+            data_bytes = data.encode("latin-1") if isinstance(data, str) else data
+        except:
+            return MENU_CONTINUE
+        if data_bytes and len(data_bytes) == 32:
+            private_key = ec.PrivateKey(
+                bip39.mnemonic_to_bytes(
+                    self.ctx.wallet.key.mnemonic, ignore_checksum=True
+                )
+            )
+            signature = str(private_key.schnorr_sign(data_bytes))
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Event ID:\n%s") % binascii.hexlify(data_bytes).decode()
+            )
+            if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
+                return MENU_CONTINUE
+            self.display_qr_codes(signature, qr_format)
         return MENU_CONTINUE
 
     def display_wallet(self, wallet, include_qr=True):

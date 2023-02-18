@@ -31,6 +31,7 @@ def mp_modules(mocker, monkeypatch):
     monkeypatch.setitem(sys.modules, "Maix", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "fpioa_manager", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "pmu", mocker.MagicMock())
+    monkeypatch.setitem(sys.modules, "image", mocker.MagicMock())
     monkeypatch.setattr(time, "sleep_ms", mocker.MagicMock(), raising=False)
     monkeypatch.setattr(time, "ticks_ms", mocker.MagicMock(), raising=False)
     monkeypatch.setattr(sys, "print_exception", mocker.MagicMock(), raising=False)

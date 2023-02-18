@@ -27,7 +27,7 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_encode, base_decode
 from .format import satcomma
-from .i18n import t
+from .krux_settings import t
 from .qr import FORMAT_PMOFN
 
 
@@ -145,7 +145,7 @@ class PSBTSigner:
             else:
                 spending += self.psbt.tx.vout[i].value
                 messages.append(
-                    t("Sending:\n₿%s\n\nTo:\n%s")
+                    t("Sending: ₿%s\nTo:%s")
                     % (
                         satcomma(self.psbt.tx.vout[i].value),
                         self.psbt.tx.vout[i].script_pubkey.address(
@@ -154,7 +154,7 @@ class PSBTSigner:
                     )
                 )
         fee = inp_amount - change - spending
-        messages.append(t("Fee:\n₿%s") % satcomma(fee))
+        messages.append(t("Fee: ₿%s") % satcomma(fee))
         return messages
 
     def sign(self):
@@ -202,9 +202,11 @@ class PSBTSigner:
         )
         xpubs = {}
         for descriptor_key in descriptor_keys:
-            xpubs[descriptor_key.key] = DerivationPath(
-                descriptor_key.origin.fingerprint, descriptor_key.origin.derivation
-            )
+            if descriptor_key.origin:
+                # Pure xpub descriptors (Blue Wallet) don't have origin data
+                xpubs[descriptor_key.key] = DerivationPath(
+                    descriptor_key.origin.fingerprint, descriptor_key.origin.derivation
+                )
         return xpubs
 
 

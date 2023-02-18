@@ -48,11 +48,10 @@ SPLASH = """
 ]
 
 from krux import firmware
-from krux.power import PowerManager
+from krux.power import power_manager
 
-pmu = PowerManager()
 if firmware.upgrade():
-    pmu.shutdown()
+    power_manager.shutdown()
 
 # Note: These imports come after the firmware upgrade check
 #       to allow it to have more memory to work with
@@ -60,7 +59,7 @@ import lcd
 from krux.context import Context
 
 ctx = Context()
-ctx.pmu = pmu
+ctx.power_manager = power_manager
 
 # Display splash while loading pages
 ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
@@ -87,9 +86,9 @@ while True:
 
     if not Home(ctx).run():
         break
-from krux.i18n import t
+from krux.krux_settings import t
 
 ctx.display.flash_text(t("Shutting down.."))
 
 ctx.clear()
-pmu.shutdown()
+power_manager.shutdown()

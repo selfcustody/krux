@@ -36,8 +36,20 @@ git pull origin main && git submodule update --init --recursive
 ```
 This will make sure that all submodules (and their submodules, etc.) are pulled down and updated.
 
+## Krux bash script helper
+The [krux](krux) file is a bash script helper that have the following functions: `build`, `flash`, `sha256`, `sha256-with-header`, `b64decode`, `generate-keypair`, `pubkey-to-pem`, `pem-to-pubkey`, `sign`, `verify`, `build-release`, `clean`. Some of them uses [Docker](https://www.docker.com/) or the `openssl` lib or even a command-line tool like `wget`. Make sure they are installed before use. It is also a good idea to use [Vagrant](https://www.vagrantup.com/).
+
+Exemples:
+```bash
+# build project for MaixDock
+./krux build maixpy_dock
+
+#flash the project on a MaixDock
+./krux flash maixpy_dock
+```
+
 ## Install krux and dev tools
-The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/).
+The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/) (You can try to install with pip: `pip3 install poetry`).
 ```bash
 poetry install
 ```
@@ -48,7 +60,8 @@ Note that you can run `poetry install` after making a change to the krux code if
 
 ## Format code
 ```bash
-poetry run black ./src && poetry run black ./tests
+poetry run black ./src
+poetry run black ./tests
 ```
 
 ## Run pylint
@@ -85,11 +98,41 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## Run the simulator
 This can be useful for testing a change to the krux code without having to run a full build and flash, visual regression testing,
 generating screenshots, or even just trying out Krux before purchasing a device.
+
+Before executing the simulator, make sure you have installed the poetry extras: `poetry install --extras simulator`. Otherwise you will get this error: `ModuleNotFoundError: No module named 'pygame'`
 ```bash
-cd simulator && poetry run python simulator.py --device maixpy_amigo_tft
+# Enter simulator folder:
+cd simulator
+
+# Run simulator with the touch device amigo, then use mouse to navigate:
+poetry run python simulator.py --device maixpy_amigo_tft
+
+# Run simulator with the small device m5stick, then use keyboard to navigate:
+poetry run python simulator.py --device maixpy_m5stickv
 ```
+
+Simulator error troubleshooting:
 ```bash
-cd simulator && poetry run python simulator.py --device maixpy_m5stickv
+# ImportError: Unable to find zbar shared library
+sudo apt install python3-zbar
+
+# ImportError: libGL.so.1: cannot open shared object file: No such file or directory
+sudo apt install libgl1
+
+# `pygame.error: No available video device`
+# You are trying to run the simulator on a SO without a GUI (some kind of terminal only or WSL). Try one with GUI!
+```
+
+Simulator sequences (automatic testing):
+```bash
+# Enter simulator folder:
+cd simulator
+
+# Run all sequences of commands to all devices and all locales
+./generate-all-screenshots.sh
+
+# Run a specific sequence for a specific device (need to have the screenshots and the sd folder with the file settings.json inside)
+poetry run python simulator.py --sequence sequences/about.txt --sd --device maixpy_m5stickv
 ```
 
 ## Live debug a device
@@ -125,7 +168,31 @@ init i2c:2 freq:XXX
 [MAIXPY]: find ov sensor
 ```
 
-From here, you can use the device as normal and, if you added any print statements to the code, they should appear whenever your code is reached.
+Krux makes use of MaixPy's [WDT watchdog module](https://wiki.sipeed.com/soft/maixpy/en/api_reference/machine/wdt.html), you can see it [here](src/krux/wdt.py). This will reset the device if not fed for some time. To stop the watchdog, when connected through the terminal, run the following:
+```python
+# This will read the board config file, add the config to disable watchdog, save the new config file and reset the device (in order to make krux read the new file!)
+
+import json, machine
+
+CONF_FILENAME="/flash/config.json"
+CONF_NAME="WATCHDOG_DISABLE"
+
+conf_dict = {}
+try:
+  with open(CONF_FILENAME, "rb") as f:
+    conf_dict = json.loads(f.read())
+except:
+    pass
+
+conf_dict[CONF_NAME] = 1
+
+with open(CONF_FILENAME, "w") as f:
+    f.write(json.dumps(conf_dict))
+    
+machine.reset()
+```
+
+Now, with watchdog disabled, you can use the device normally. So no more automatic resets, and if you added any print statements to the code, they should appear whenever your code is reached.
 
 You can also drop into a live Python REPL at any point by issuing an interrupt with Ctrl-C:
 
@@ -140,6 +207,26 @@ MicroPython; Sipeed_M1 with kendryte-k210
 Type "help()" for more information.
 >>>
 >>>
+```
+
+Customizations made to the firmware removed the support to MaixPy IDE (due to size constraints), but you still can use it's terminal (MaixPy IDE menu bar > Tools > Open Terminal).
+
+## Create new translations - i18n
+
+The project has lots of translations [here](i18n/translations), if you add new english messages in code using `t()` function, you will need to:
+
+```bash
+# Enter i18n folder:
+cd i18n
+
+# Make sure all files have this new translated message:
+python3 i18n.py validade
+
+# Format translation files properly:
+python3 i18n.py prettify
+
+# Create the compiled table for krux translations.py
+python3 i18n.py bake
 ```
 
 ## Run mkdocs

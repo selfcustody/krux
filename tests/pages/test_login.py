@@ -3,7 +3,7 @@ from ..shared_mocks import mock_context
 
 def test_new_key_from_d6(mocker, m5stickv):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
-    from krux.pages.login import Login, D6_MIN_ROLLS
+    from krux.pages.login import Login, D6_12W_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     cases = [
@@ -11,7 +11,7 @@ def test_new_key_from_d6(mocker, m5stickv):
             # 1 press to proceed
             [BUTTON_ENTER] +
             # 1 presses per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # 1 press to be done at min rolls
             [BUTTON_ENTER] +
             # 1 press to confirm roll string, 1 press to confirm SHA, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
@@ -22,11 +22,11 @@ def test_new_key_from_d6(mocker, m5stickv):
             # 1 press to proceed
             [BUTTON_ENTER] +
             # 1 presses per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # 1 press to continue rolling to max rolls
             [BUTTON_PAGE] +
             # 1 presses per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # 1 press to confirm roll string, 1 press to confirm SHA, 1 press to see last 12 words, 1 press to continue loading key, 1 press to skip passphrase, 1 press to select single-key
             [
                 BUTTON_ENTER,
@@ -53,7 +53,7 @@ def test_new_key_from_d6(mocker, m5stickv):
 
 def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
-    from krux.pages.login import Login, D6_MIN_ROLLS
+    from krux.pages.login import Login, D6_12W_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     cases = [
@@ -61,7 +61,7 @@ def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
             # Yes and proceed
             [BUTTON_ENTER] +
             # 1 press per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # Done? Yes and proceed
             [BUTTON_ENTER] +
             # Confirm roll string, Confirm SHA, Yes, Skip passphrase, Single-key
@@ -79,11 +79,11 @@ def test_new_key_from_d6_on_amigo_tft_without_touch(mocker, amigo_tft):
             # Yes and proceed
             [BUTTON_ENTER] +
             # 1 press per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # Done? No and proceed
             [BUTTON_PAGE, BUTTON_ENTER] +
             # 1 press per roll
-            [BUTTON_ENTER for _ in range(D6_MIN_ROLLS)] +
+            [BUTTON_ENTER for _ in range(D6_12W_ROLLS)] +
             # Confirm roll string, Confirm SHA, Yes, Skip passphrase, Single-key
             [
                 BUTTON_ENTER,
@@ -250,7 +250,11 @@ def test_load_key_from_qr_code(mocker, m5stickv):
             "shield group erode awake lock sausage cash glare wave crew flame glove",
         ),
     ]
+    case_num = 0
     for case in cases:
+        print("test_load_key_from_qr_code cases[" + str(case_num) + "]")
+        case_num = case_num + 1
+
         ctx = mock_context(mocker)
         ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[0])
 
@@ -749,12 +753,26 @@ def test_passphrase(mocker, amigo_tft):
     assert ctx.input.wait_for_button.call_count == len(case)
 
 
+# import unittest
+# tc = unittest.TestCase()
+# tc.assertEqual(Settings().i18n.locale, 'b')
+
+
 def test_settings(mocker, m5stickv):
     import krux
 
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+    from krux.translations import translation_table
+
+    tlist = list(translation_table)
+    index_en = tlist.index("en-US")
+    index_next = (index_en + 1) % (len(tlist))
+    text_en = translation_table[tlist[index_en]][1177338798] + "\n" + tlist[index_en]
+    text_next = (
+        translation_table[tlist[index_next]][1177338798] + "\n" + tlist[index_next]
+    )
 
     cases = [
         (
@@ -817,10 +835,10 @@ def test_settings(mocker, m5stickv):
                 BUTTON_ENTER,
             ),
             [
-                mocker.call("Locale\nen-US"),
-                mocker.call("Idioma\npt-BR"),
+                mocker.call(text_en),
+                mocker.call(text_next),
             ],
-            lambda: Settings().i18n.locale == "pt-BR",
+            lambda: Settings().i18n.locale == tlist[index_next],
             CategorySetting,
         ),
         (
@@ -847,7 +865,7 @@ def test_settings(mocker, m5stickv):
                 mocker.call("Log Level\nINFO"),
                 mocker.call("Log Level\nDEBUG"),
             ],
-            lambda: Settings().logging.level == "ERROR",
+            lambda: Settings().logging.level == "DEBUG",
             CategorySetting,
         ),
         (
@@ -902,7 +920,11 @@ def test_settings(mocker, m5stickv):
             NumberSetting,
         ),
     ]
+    case_num = 0
     for case in cases:
+        print("test_settings cases[" + str(case_num) + "]")
+        case_num = case_num + 1
+
         ctx = mock_context(mocker)
         ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[0])
 
@@ -916,14 +938,25 @@ def test_settings(mocker, m5stickv):
             ctx.display.draw_hcentered_text.assert_has_calls(case[1])
         else:
             ctx.display.draw_centered_text.assert_has_calls(case[1])
-        assert case[2]
+
+        assert case[2]()
 
 
 def test_settings_on_amigo_tft(mocker, amigo_tft):
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
-    from krux.settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+
+    from krux.translations import translation_table
+
+    tlist = list(translation_table)
+    index_en = tlist.index("en-US")
+    index_next = (index_en + 1) % (len(tlist))
+    text_en = translation_table[tlist[index_en]][1177338798] + "\n" + tlist[index_en]
+    text_next = (
+        translation_table[tlist[index_next]][1177338798] + "\n" + tlist[index_next]
+    )
 
     PREV_INDEX = 0
     GO_INDEX = 1
@@ -980,10 +1013,10 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
                 GO_INDEX,
             ),
             [
-                mocker.call("Locale\nen-US"),
-                mocker.call("Idioma\npt-BR"),
+                mocker.call(text_en),
+                mocker.call(text_next),
             ],
-            lambda: Settings().i18n.locale == "pt-BR",
+            lambda: Settings().i18n.locale == tlist[index_next],
             CategorySetting,
         ),
         (
@@ -1006,11 +1039,15 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
                 mocker.call("Log Level\nINFO"),
                 mocker.call("Log Level\nDEBUG"),
             ],
-            lambda: Settings().logging.level == "ERROR",
+            lambda: Settings().logging.level == "DEBUG",
             CategorySetting,
         ),
     ]
+    case_num = 0
     for case in cases:
+        print("test_settings_on_amigo_tft cases[" + str(case_num) + "]")
+        case_num = case_num + 1
+
         ctx = mock_context(mocker)
         ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_TOUCH)
         ctx.input.touch = mocker.MagicMock(
@@ -1030,7 +1067,8 @@ def test_settings_on_amigo_tft(mocker, amigo_tft):
             ctx.display.draw_hcentered_text.assert_has_calls(case[1])
         else:
             ctx.display.draw_centered_text.assert_has_calls(case[1])
-        assert case[2]
+
+        assert case[2]()
 
 
 def test_about(mocker, m5stickv):
@@ -1041,6 +1079,7 @@ def test_about(mocker, m5stickv):
     from krux.input import BUTTON_ENTER
 
     ctx = mock_context(mocker)
+    ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_ENTER)
     ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_ENTER)
 
     login = Login(ctx)

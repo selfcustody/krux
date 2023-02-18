@@ -39,6 +39,14 @@ TEST_QR = """
 """.strip()
 
 
+@pytest.fixture
+def mocker_sd_card(mocker):
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+    )
+
+
 def test_init(mocker, m5stickv):
     from krux.printers.cnc import FilePrinter
 
@@ -58,10 +66,10 @@ def test_clear(mocker, m5stickv):
     assert p.file is None
 
 
-def test_print_qr_code_with_row_cutmethod(mocker, m5stickv):
+def test_print_qr_code_with_row_cutmethod(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
-    from krux.settings import Settings
+    from krux.krux_settings import Settings
     import os
 
     gcode = list(
@@ -89,10 +97,10 @@ def test_print_qr_code_with_row_cutmethod(mocker, m5stickv):
     krux.printers.cnc.wdt.feed.assert_called()
 
 
-def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv):
+def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
-    from krux.settings import Settings
+    from krux.krux_settings import Settings
     import os
 
     gcode = list(
@@ -120,10 +128,10 @@ def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv):
     krux.printers.cnc.wdt.feed.assert_called()
 
 
-def test_print_qr_code_inverted(mocker, m5stickv):
+def test_print_qr_code_inverted(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
-    from krux.settings import Settings
+    from krux.krux_settings import Settings
     import os
 
     gcode = list(
