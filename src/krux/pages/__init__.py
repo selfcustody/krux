@@ -179,25 +179,24 @@ class Page:
                 elif not self.ctx.input.enter_value():
                     return 1
 
-                # Anti-glare mode - OV7740 only
+                # Anti-glare mode
                 if self.ctx.input.page_value() == 0:
-                    if self.ctx.camera.cam_id == OV7740_ID:
-                        if not anti_glare:
-                            self._time_frame = time.ticks_ms()
-                            anti_glare = True
-                            self.ctx.display.to_portrait()
-                            self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
-                            time.sleep_ms(500)
-                            self.ctx.display.to_landscape()
-                            return 2
+                    if not anti_glare:
                         self._time_frame = time.ticks_ms()
-                        anti_glare = False
+                        anti_glare = True
                         self.ctx.display.to_portrait()
-                        self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
+                        self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
                         time.sleep_ms(500)
                         self.ctx.display.to_landscape()
-                        return 3
-                    return 1
+                        return 2
+                    self._time_frame = time.ticks_ms()
+                    anti_glare = False
+                    self.ctx.display.to_portrait()
+                    self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
+                    time.sleep_ms(500)
+                    self.ctx.display.to_landscape()
+                    return 3
+                
                 # Exit the capture loop if a button is pressed
                 if (
                     self.ctx.input.page_prev_value() == 0

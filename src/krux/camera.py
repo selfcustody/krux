@@ -31,6 +31,8 @@ OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
 
+ANTI_GLARE_ENABLED = 2
+ANTI_GLARE_DISABLED = 3
 
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
@@ -96,20 +98,22 @@ class Camera:
             command = callback(parser.total_count(), parser.parsed_count(), new_part)
             if command == 1:
                 break
-            if command == 2:
-                # luminance high level, default=0x78
-                sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
-                # luminance low level, default=0x68
-                sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
-                # Disable frame integrtation (night mode)
-                sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
-                sensor.skip_frames()
-            elif command == 3:
-                # luminance high level, default=0x78
-                sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
-                # luminance low level, default=0x68
-                sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
-                sensor.skip_frames()
+            if command == ANTI_GLARE_ENABLED:
+                if self.cam_id == OV7740_ID:
+                    # luminance high level, default=0x78
+                    sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
+                    # luminance low level, default=0x68
+                    sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
+                    # Disable frame integrtation (night mode)
+                    sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
+                    sensor.skip_frames()
+            elif command == ANTI_GLARE_DISABLED:
+                if self.cam_id == OV7740_ID:
+                    # luminance high level, default=0x78
+                    sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+                    # luminance low level, default=0x68
+                    sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+                    sensor.skip_frames()
 
             new_part = False
 
