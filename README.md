@@ -36,10 +36,10 @@ git pull origin main && git submodule update --init --recursive
 ```
 This will make sure that all submodules (and their submodules, etc.) are pulled down and updated.
 
-## Krux bash script helper
-The [krux](krux) file is a bash script helper that have the following functions: `build`, `flash`, `sha256`, `sha256-with-header`, `b64decode`, `generate-keypair`, `pubkey-to-pem`, `pem-to-pubkey`, `sign`, `verify`, `build-release`, `clean`. Some of them uses [Docker](https://www.docker.com/) or the `openssl` lib or even a command-line tool like `wget`. Make sure they are installed before use. It is also a good idea to use [Vagrant](https://www.vagrantup.com/).
+## Krux (script)
+The [krux](krux) bash script contains commands for common development tasks. It assumes a Linux host, but may work on other systems. For this reason, we suggest you use [Vagrant](https://www.vagrantup.com/). If running outside of Vagrant, you will need to have [Docker](https://www.docker.com/), `openssl`, and `wget` installed at a minimum for the commands to work as expected.
 
-Exemples:
+Examples:
 ```bash
 # build project for MaixDock
 ./krux build maixpy_dock
@@ -49,8 +49,9 @@ Exemples:
 ```
 
 ## Install krux and dev tools
-The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/) (You can try to install with pip: `pip3 install poetry`).
+The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/).
 ```bash
+pip install poetry
 poetry install
 ```
 
@@ -220,7 +221,7 @@ The project has lots of translations [here](i18n/translations), if you add new e
 cd i18n
 
 # Make sure all files have this new translated message:
-python3 i18n.py validade
+python3 i18n.py validate
 
 # Format translation files properly:
 python3 i18n.py prettify
