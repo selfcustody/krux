@@ -222,32 +222,13 @@ class Page:
             return 0
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading Camera"))
-        if self.ctx.display.width() < 320:
-            camera_offset = False
-        else:
-            camera_offset = True
-            self.ctx.display.draw_hcentered_text(
-                t("Up: Abort\nDown: Anti-glare\nEnter: Flash"), 380
-            )
-            self.ctx.display.outline(
-                39,
-                1,
-                241,
-                321,
-            )
-            self.ctx.display.outline(
-                DEFAULT_PADDING,
-                335,
-                self.ctx.display.usable_width(),
-                self.ctx.display.font_height,
-            )
+        self.ctx.display.draw_centered_text(t("Loading camera"))
         self.ctx.display.to_landscape()
         code = None
         qr_format = None
         try:
             code, qr_format = self.ctx.camera.capture_qr_code_loop(
-                callback, camera_offset
+                callback
             )
         except:
             self.ctx.log.exception("Exception occurred capturing QR code")
