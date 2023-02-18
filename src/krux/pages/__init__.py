@@ -164,10 +164,7 @@ class Page:
         Returns the contents of the QR code(s).
         """
         self._time_frame = time.ticks_ms()
-        anti_glare = False
-
         def callback(part_total, num_parts_captured, new_part):
-            nonlocal anti_glare
             # Turn on the light as long as the enter button is held down
             if time.ticks_ms() > self._time_frame + 1000:
                 if self.ctx.light:
@@ -181,21 +178,19 @@ class Page:
 
                 # Anti-glare mode
                 if self.ctx.input.page_value() == 0:
-                    if not anti_glare:
+                    if self.ctx.camera.has_antiglare():
                         self._time_frame = time.ticks_ms()
-                        anti_glare = True
                         self.ctx.display.to_portrait()
-                        self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
+                        if not self.ctx.camera.antiglare_enabled:
+                            self.ctx.camera.enable_antiglare()
+                            self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
+                        else:
+                            self.ctx.camera.disable_antiglare()
+                            self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
                         time.sleep_ms(500)
                         self.ctx.display.to_landscape()
-                        return 2
-                    self._time_frame = time.ticks_ms()
-                    anti_glare = False
-                    self.ctx.display.to_portrait()
-                    self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
-                    time.sleep_ms(500)
-                    self.ctx.display.to_landscape()
-                    return 3
+                        return 0
+                    return 1
                 
                 # Exit the capture loop if a button is pressed
                 if (
