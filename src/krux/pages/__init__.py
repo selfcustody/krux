@@ -186,14 +186,14 @@ class Page:
                             self._time_frame = time.ticks_ms()
                             anti_glare = True
                             self.ctx.display.to_portrait()
-                            self.ctx.display.draw_centered_text("anti-glare mode")
+                            self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
                             time.sleep_ms(500)
                             self.ctx.display.to_landscape()
                             return 2
                         self._time_frame = time.ticks_ms()
                         anti_glare = False
                         self.ctx.display.to_portrait()
-                        self.ctx.display.draw_centered_text("standard mode")
+                        self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
                         time.sleep_ms(500)
                         self.ctx.display.to_landscape()
                         return 3
@@ -234,7 +234,7 @@ class Page:
         else:
             camera_offset = True
             self.ctx.display.draw_hcentered_text(
-                "Up: Abort\nDown: Anti-Glare\nEnter: Flashlight", 380
+                t("Up: Abort\nDown: Anti-glare\nEnter: Flash"), 380
             )
             self.ctx.display.outline(
                 39,

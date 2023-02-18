@@ -66,7 +66,7 @@ class TinySeed(Page):
 
     def _draw_labels(self, page):
         """Draws labels for import and export Tinyseed UI"""
-        self.ctx.display.draw_hcentered_text("Tiny Seed")
+        self.ctx.display.draw_hcentered_text(t("Tiny Seed"))
         if self.ctx.display.width() > 135:
             self.ctx.display.to_landscape()
             bit_number = 2048

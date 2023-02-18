@@ -201,7 +201,7 @@ class Stackbit(Page):
         self.y_offset = 2 * self.ctx.display.font_height
         self.y_pad = self.ctx.display.font_height
 
-        self.ctx.display.draw_hcentered_text("Stackbit 1248")
+        self.ctx.display.draw_hcentered_text(t("Stackbit 1248"))
         self._draw_labels(y_offset, word_index)
         self._draw_grid(y_offset)
         digits, digits_str = self._word_to_digits(word)
@@ -386,7 +386,7 @@ class Stackbit(Page):
         words = []
         while word_index <= 24:
             self._map_keys_array()
-            self.ctx.display.draw_hcentered_text("Stackbit 1248")
+            self.ctx.display.draw_hcentered_text(t("Stackbit 1248"))
             y_offset = self.y_offset
             self._draw_labels(y_offset, word_index)
             self._draw_grid(y_offset)

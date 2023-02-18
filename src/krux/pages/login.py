@@ -657,7 +657,7 @@ class Login(Page):
             if batt_voltage is not None:
                 batt_voltage /= 1000
                 self.ctx.display.draw_hcentered_text(
-                    "Battery: " + str(round(batt_voltage, 1)) + "V",
+                    t("Battery: %sV") % str(round(batt_voltage, 1)),
                     self.ctx.display.bottom_prompt_line,
                 )
         self.ctx.input.wait_for_button()
