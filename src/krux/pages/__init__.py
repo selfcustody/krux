@@ -577,15 +577,15 @@ class Menu:
             )
             if batt_mv < BATTERY_FULL:
                 if batt_mv > BATTERY_LOW:
-                    depleted_lenght = BATTERY_FULL - batt_mv
-                    depleted_lenght *= 18  # 18 pixels
-                    depleted_lenght //= BATTERY_FULL - BATTERY_LOW  # possible range
+                    depleted_length = BATTERY_FULL - batt_mv
+                    depleted_length *= 18  # 18 pixels
+                    depleted_length //= BATTERY_FULL - BATTERY_LOW  # possible range
                 else:
-                    depleted_lenght = 18
+                    depleted_length = 18
                 self.ctx.display.fill_rectangle(
-                    self.ctx.display.width() - 11 - depleted_lenght,
+                    self.ctx.display.width() - 11 - depleted_length,
                     6,
-                    depleted_lenght,
+                    depleted_length,
                     6,
                     lcd.BLACK,
                 )
