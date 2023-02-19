@@ -53,7 +53,6 @@ SD_SETTINGS_MSG_DURATION = 2000
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
-BITS = "01"
 DIGITS = "0123456789"
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -123,7 +122,6 @@ class Login(Page):
             [
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.load_key_from_digits),
-                (t("Bits"), self.load_key_from_bits),
                 (t("Tiny Seed (12)"), lambda: self.load_key_from_tiny_seed(w24=False)),
                 (t("Tiny Seed (24)"), lambda: self.load_key_from_tiny_seed(w24=True)),
                 (t("Stackbit 1248"), self.load_key_from_1248),
@@ -458,20 +456,6 @@ class Login(Page):
             return ""
 
         return self._load_key_from_keypad(title, DIGITS, to_word, SENTINEL_DIGITS)
-
-    def load_key_from_bits(self):
-        """Handler for the 'via bits' menu item"""
-        title = t(
-            "Enter each word of your BIP-39 mnemonic as a series of binary digits."
-        )
-
-        def to_word(user_input):
-            word_index = int("0b" + user_input, 0)
-            if 0 <= word_index < 2048:
-                return WORDLIST[word_index]
-            return ""
-
-        return self._load_key_from_keypad(title, BITS, to_word)
 
     def load_key_from_1248(self):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
