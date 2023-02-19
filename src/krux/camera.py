@@ -31,9 +31,6 @@ OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
 
-ANTI_GLARE_ENABLED = 2
-ANTI_GLARE_DISABLED = 3
-
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
