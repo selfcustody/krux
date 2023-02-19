@@ -90,11 +90,24 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via QR Code"), self.load_key_from_qr_code),
-                (t("Via Text"), self.load_key_from_text),
-                (t("Via Numbers"), self.load_key_from_digits),
-                (t("Via Bits"), self.load_key_from_bits),
-                (t("Metal Storage"), self.load_metal_key),
+                (t("Via Camera"), self.load_key_from_camera),
+                (t("Via Manual Input"), self.load_key_from_manual_input),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return MENU_CONTINUE
+        return status
+    
+    def load_key_from_camera(self):
+        """Handler for the 'via camera' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("QR Code"), self.load_key_from_qr_code),
+                (t("Tiny Seed (12)"), lambda: self.load_key_from_tiny_seed_image(w24=False)),
+                (t("Tiny Seed (24)"), lambda: self.load_key_from_tiny_seed_image(w24=True)),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -103,16 +116,17 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def load_metal_key(self):
-        """Handler to load metal seed storgare"""
+    def load_key_from_manual_input(self):
+        """Handler for the 'via manual input' menu item"""
         submenu = Menu(
             self.ctx,
             [
-                ("Stackbit 1248", self.load_key_from_1248),
-                ("Tiny Seed 12", self.load_key_from_tiny_seed),
-                ("Tiny Seed 24", lambda: self.load_key_from_tiny_seed(True)),
-                ("Scan Tiny Seed 12", self.scan_from_tiny_seed),
-                ("Scan Tiny Seed 24", lambda: self.scan_from_tiny_seed(True)),
+                (t("Words"), self.load_key_from_text),
+                (t("Word Numbers"), self.load_key_from_digits),
+                (t("Bits"), self.load_key_from_bits),
+                (t("Tiny Seed (12)"), lambda: self.load_key_from_tiny_seed(w24=False)),
+                (t("Tiny Seed (24)"), lambda: self.load_key_from_tiny_seed(w24=True)),
+                (t("Stackbit 1248"), self.load_key_from_1248),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -476,7 +490,7 @@ class Login(Page):
             return self._load_key_from_words(words)
         return MENU_CONTINUE
 
-    def scan_from_tiny_seed(self, w24=False):
+    def load_key_from_tiny_seed_image(self, w24=False):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
         tiny_scanner = TinyScanner(self.ctx)
         words = tiny_scanner.scanner(w24)
@@ -539,7 +553,7 @@ class Login(Page):
         except:
             self.ctx.display.flash_text(
                 t(
-                    "Incompatible or missing SD card:\n\nChanges will last until shutdown."
+                    "SD card not detected.\n\nChanges will last until shutdown."
                 ),
                 lcd.WHITE,
                 duration=SD_SETTINGS_MSG_DURATION,

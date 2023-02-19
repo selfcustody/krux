@@ -284,10 +284,10 @@ class Stackbit(Page):
         label_y_offset = (self.y_pad - self.ctx.display.font_height) // 2
         x_offset = self.x_offset + self.x_pad
         self.ctx.display.draw_string(
-            x_offset + self.x_pad, y_offset + label_y_offset, "ESC", lcd.WHITE
+            x_offset + self.x_pad, y_offset + label_y_offset, t("Esc"), lcd.WHITE
         )
         self.ctx.display.draw_string(
-            x_offset + 4 * self.x_pad, y_offset + label_y_offset, "GO", lcd.WHITE
+            x_offset + 4 * self.x_pad, y_offset + label_y_offset, t("Go"), lcd.WHITE
         )
         self.ctx.display.fill_rectangle(
             x_offset,
