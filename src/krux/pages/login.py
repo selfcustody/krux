@@ -49,7 +49,6 @@ from . import (
 )
 
 SENTINEL_DIGITS = "11111"
-SD_SETTINGS_MSG_DURATION = 2000
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
@@ -60,10 +59,10 @@ NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 NUMERALS = "0123456789."
 
-D6_12W_ROLLS = 50
+D6_12W_MIN_ROLLS = 50
 D6_24W_MIN_ROLLS = 99
-D20_MIN_ROLLS = 30
-D20_MAX_ROLLS = 60
+D20_12W_MIN_ROLLS = 30
+D20_24W_MIN_ROLLS = 60
 
 
 class Login(Page):
@@ -150,19 +149,30 @@ class Login(Page):
 
     def new_key_from_d6(self):
         """Handler for the 'via D6' menu item"""
-        return self._new_key_from_die(D6_STATES, D6_12W_ROLLS, D6_24W_MIN_ROLLS)
+        return self._new_key_from_die(D6_STATES, D6_12W_MIN_ROLLS, D6_24W_MIN_ROLLS)
 
     def new_key_from_d20(self):
         """Handler for the 'via D20' menu item"""
-        return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
+        return self._new_key_from_die(D20_STATES, D20_12W_MIN_ROLLS, D20_24W_MIN_ROLLS)
 
-    def _new_key_from_die(self, roll_states, min_rolls, min_rolls_24w):
+    def _new_key_from_die(self, roll_states, min_rolls_12w, min_rolls_24w):
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("12 words"), lambda: MENU_EXIT),
+                (t("24 words"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        min_rolls = min_rolls_12w if index == 0 else min_rolls_24w
+        self.ctx.display.clear()
+        
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
             t(
-                "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
+                "Roll die at least %d times to generate a mnemonic."
             )
-            % (min_rolls, min_rolls_24w)
+            % (min_rolls)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
@@ -174,11 +184,6 @@ class Login(Page):
                 return buffer
 
             while True:
-                if len(rolls) in (min_rolls, min_rolls_24w):
-                    self.ctx.display.clear()
-                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
-                        break
-
                 roll = ""
                 while True:
                     dice_title = t("Rolls: %d\n") % len(rolls)
@@ -207,10 +212,8 @@ class Login(Page):
                         delete_flag = False
                         if len(rolls) > 0:
                             rolls.pop()
-                    elif len(rolls) < min_rolls_24w:  # Not enough to Go
-                        self.ctx.display.flash_text(
-                            t("Not enough rolls!"), lcd.WHITE, duration=1000
-                        )
+                    elif len(rolls) < min_rolls:  # Not enough to Go
+                        self.ctx.display.flash_text(t("Not enough rolls!"))
                     else:  # Go
                         break
 
@@ -229,7 +232,7 @@ class Login(Page):
                 t("SHA256 of rolls:\n\n%s") % entropy_hash
             )
             self.ctx.input.wait_for_button()
-            num_bytes = 16 if len(rolls) == min_rolls else 32
+            num_bytes = 16 if min_rolls == min_rolls_12w else 32
             words = bip39.mnemonic_from_bytes(
                 hashlib.sha256(entropy_bytes).digest()[:num_bytes]
             ).split()
@@ -532,7 +535,6 @@ class Login(Page):
                 self.ctx.display.flash_text(
                     t("Your changes will be kept on the SD card."),
                     lcd.WHITE,
-                    duration=SD_SETTINGS_MSG_DURATION,
                 )
         except:
             self.ctx.display.flash_text(
@@ -540,7 +542,6 @@ class Login(Page):
                     "SD card not detected.\n\nChanges will last until shutdown."
                 ),
                 lcd.WHITE,
-                duration=SD_SETTINGS_MSG_DURATION,
             )
 
         return self.namespace(Settings())()
