@@ -33,6 +33,9 @@ QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
+# KRUX CUSTOM COLORS
+SLATEGRAY = 0x2E5B
+
 
 class Display:
     """Display is a singleton interface for interacting with the device's display"""
