@@ -915,16 +915,7 @@ class TinyScanner(Page):
         if w24:
             w24_seed_numbers = [0] * 24
         self.previous_seed_numbers = [1] * 12
-        intro = t(
-            "Paint punched dots black so they can be detected. "
-            + "Use a black background surface. "
-            + "Align camera and Tiny Seed precisely using the tracking rectangle."
-        )
-        if w24:
-            intro += t("Press ENTER when punches are correctly mapped")
-        self.ctx.display.draw_hcentered_text(intro)
-        if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            return None
+        
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading Camera"))
         self.ctx.camera.initialize_sensor(grayscale=True)
