@@ -151,14 +151,14 @@ class Stackbit(Page):
             word_list_index_str = "0" + word_list_index_str
         return [int(x) for x in str(word_list_index_str)], word_list_index_str
 
-    def _draw_punched(self, digits, y_offset):
+    def _draw_punched(self, digits, y_offset, export=False):
         """Draws punched bits for import and export Stackbit UI"""
         outline_width = self.x_pad - 6
         outline_height = self.y_pad - 4
         outline_x_offset = self.x_offset + self.x_pad + 3
 
         # print border around numbers only on touch devices
-        if self.ctx.input.touch is not None:
+        if not export and self.ctx.input.touch is not None:
             # x for each col
             for x in range(7):
                 # y for each line
@@ -227,6 +227,9 @@ class Stackbit(Page):
         """Draws punch pattern for Stackbit 1248 seed layout"""
 
         self.x_offset = DEFAULT_PADDING
+        # case for m5stickv
+        if self.ctx.display.width() == 135:
+            self.x_offset = 5
         self.x_pad = 2 * self.ctx.display.font_width
         self.y_offset = 2 * self.ctx.display.font_height
         self.y_pad = self.ctx.display.font_height
@@ -235,7 +238,7 @@ class Stackbit(Page):
         self._draw_grid(y_offset)
         self._draw_labels(y_offset, word_index)
         digits, digits_str = self._word_to_digits(word)
-        self._draw_punched(digits, y_offset)
+        self._draw_punched(digits, y_offset, True)
         if self.ctx.display.height() > 240:
             self.ctx.display.draw_string(
                 self.x_offset + 17 * self.ctx.display.font_width,

@@ -463,6 +463,7 @@ class Login(Page):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
         stackbit = Stackbit(self.ctx)
         words = stackbit.enter_1248()
+        del stackbit
         if words is not None:
             return self._load_key_from_words(words)
         return MENU_CONTINUE
@@ -472,17 +473,20 @@ class Login(Page):
         # w24 - true if 24 words mode
         tiny_seed = TinySeed(self.ctx)
         words = tiny_seed.enter_tiny_seed(w24)
+        del tiny_seed
         if words is not None:
-            return self._load_key_from_words(words)
+            return self._load_key_from_words(words)       
         return MENU_CONTINUE
-
+        
     def scan_from_tiny_seed(self, w24=False):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
         tiny_scanner = TinyScanner(self.ctx)
         words = tiny_scanner.scanner(w24)
-        if words is not None:
-            return self._load_key_from_words(words)
-        return MENU_CONTINUE
+        del tiny_scanner
+        if words is None:
+            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
+            return MENU_CONTINUE
+        return self._load_key_from_words(words)
 
     def load_passphrase(self):
         """Loads and returns a passphrase from keypad"""

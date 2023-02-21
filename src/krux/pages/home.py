@@ -223,6 +223,7 @@ class Home(Page):
                     button = SWIPE_DOWN  # leave
         if self.ctx.printer is None:
             return MENU_CONTINUE
+        
         self.ctx.display.clear()
         if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
@@ -234,6 +235,7 @@ class Home(Page):
             else:
                 self.ctx.printer.print_string("SeedQR\n\n")
             self.ctx.printer.print_qr_code(code)
+        return MENU_CONTINUE
 
     def stackbit(self):
         """Displays which numbers 1248 user should punch on 1248 steel card"""
