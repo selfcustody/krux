@@ -89,4 +89,3 @@ class PowerManager:
 
 
 power_manager = PowerManager()  # Singleton
-

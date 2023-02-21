@@ -126,4 +126,3 @@ def test_exception(mocker, m5stickv, tdata):
     logger.exception("test")
 
     logger.log.assert_called_with(LoggingSettings.ERROR, "test\n")
-
