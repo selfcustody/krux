@@ -161,6 +161,7 @@ class Page:
         Returns the contents of the QR code(s).
         """
         self._time_frame = time.ticks_ms()
+
         def callback(part_total, num_parts_captured, new_part):
             # Turn on the light as long as the enter button is held down
             if time.ticks_ms() > self._time_frame + 1000:
@@ -183,12 +184,14 @@ class Page:
                             self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
                         else:
                             self.ctx.camera.disable_antiglare()
-                            self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
+                            self.ctx.display.draw_centered_text(
+                                t("Anti-glare disabled")
+                            )
                         time.sleep_ms(500)
                         self.ctx.display.to_landscape()
                         return 0
                     return 1
-                
+
                 # Exit the capture loop if a button is pressed
                 if (
                     self.ctx.input.page_prev_value() == 0
@@ -219,9 +222,7 @@ class Page:
         code = None
         qr_format = None
         try:
-            code, qr_format = self.ctx.camera.capture_qr_code_loop(
-                callback
-            )
+            code, qr_format = self.ctx.camera.capture_qr_code_loop(callback)
         except:
             self.ctx.log.exception("Exception occurred capturing QR code")
         if self.ctx.light:
@@ -493,7 +494,7 @@ class Menu:
                 self._draw_touch_menu(selected_item_index)
             else:
                 self._draw_menu(selected_item_index)
-                
+
             self.draw_status_bar()
 
             btn = self.ctx.input.wait_for_button(block=True)
@@ -538,42 +539,42 @@ class Menu:
         """Draws a status bar along the top of the UI"""
         self.draw_logging_indicator()
         self.draw_battery_indicator()
-        
+
     def draw_logging_indicator(self):
         if Settings().logging.level.lower() == "none":
             return
-        
+
         self.ctx.display.fill_rectangle(5, 5, 8, 8, lcd.RED)
         self.ctx.display.fill_rectangle(6, 6, 6, 6, lcd.BLACK)
         self.ctx.display.fill_rectangle(7, 7, 4, 4, lcd.RED)
-            
+
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
         if not self.ctx.power_manager.has_battery():
             return
-        
+
         charge = self.ctx.power_manager.battery_charge_remaining()
         battery_color = lcd.RED if charge < 0.3 else lcd.WHITE
-            
+
         # Draw (filled) outline of battery in top-right corner of display
         padding = 5
         cylinder_length = 20
         cylinder_height = 8
         self.ctx.display.fill_rectangle(
-            self.ctx.display.width() - padding - cylinder_length, 
-            padding, 
-            cylinder_length, 
-            cylinder_height, 
-            battery_color
+            self.ctx.display.width() - padding - cylinder_length,
+            padding,
+            cylinder_length,
+            cylinder_height,
+            battery_color,
         )
         self.ctx.display.fill_rectangle(
-            self.ctx.display.width() - padding, 
-            padding + (cylinder_height // 4), 
-            1, 
-            cylinder_height // 2, 
-            battery_color
+            self.ctx.display.width() - padding,
+            padding + (cylinder_height // 4),
+            1,
+            cylinder_height // 2,
+            battery_color,
         )
-        
+
         # If not fully charged, overlay black rect to indicate how much battery is depleted
         if charge < 1:
             depleted_height = cylinder_height - 2
@@ -591,18 +592,18 @@ class Menu:
             self.ctx.display.fill_rectangle(
                 self.ctx.display.width() - padding - cylinder_length // 2,
                 padding + 2,
-                cylinder_height//2-1,
-                cylinder_height//2-1,
-                lcd.WHITE
+                cylinder_height // 2 - 1,
+                cylinder_height // 2 - 1,
+                lcd.WHITE,
             )
             self.ctx.display.fill_rectangle(
                 self.ctx.display.width() - padding - cylinder_length // 2 - 3,
-                padding + cylinder_height//2 - 1,
+                padding + cylinder_height // 2 - 1,
                 3,
                 1,
-                lcd.WHITE
+                lcd.WHITE,
             )
-            
+
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
         self.ctx.input.touch.clear_regions()

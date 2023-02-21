@@ -97,15 +97,21 @@ class Login(Page):
         if index == len(submenu.menu) - 1:
             return MENU_CONTINUE
         return status
-    
+
     def load_key_from_camera(self):
         """Handler for the 'via camera' menu item"""
         submenu = Menu(
             self.ctx,
             [
                 (t("QR Code"), self.load_key_from_qr_code),
-                (t("Tiny Seed (12)"), lambda: self.load_key_from_tiny_seed_image(w24=False)),
-                (t("Tiny Seed (24)"), lambda: self.load_key_from_tiny_seed_image(w24=True)),
+                (
+                    t("Tiny Seed (12)"),
+                    lambda: self.load_key_from_tiny_seed_image(w24=False),
+                ),
+                (
+                    t("Tiny Seed (24)"),
+                    lambda: self.load_key_from_tiny_seed_image(w24=True),
+                ),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -166,13 +172,10 @@ class Login(Page):
         index, _ = submenu.run_loop()
         min_rolls = min_rolls_12w if index == 0 else min_rolls_24w
         self.ctx.display.clear()
-        
+
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
-            t(
-                "Roll die at least %d times to generate a mnemonic."
-            )
-            % (min_rolls)
+            t("Roll die at least %d times to generate a mnemonic.") % (min_rolls)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
@@ -491,7 +494,7 @@ class Login(Page):
         self.ctx.display.draw_hcentered_text(intro)
         if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             return MENU_CONTINUE
-        
+
         tiny_scanner = TinyScanner(self.ctx)
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
@@ -553,9 +556,7 @@ class Login(Page):
                 )
         except:
             self.ctx.display.flash_text(
-                t(
-                    "SD card not detected.\n\nChanges will last until shutdown."
-                ),
+                t("SD card not detected.\n\nChanges will last until shutdown."),
                 lcd.WHITE,
             )
 
@@ -676,4 +677,3 @@ class Login(Page):
                 )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
-

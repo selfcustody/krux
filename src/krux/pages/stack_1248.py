@@ -87,7 +87,7 @@ class Stackbit(Page):
         # Horizontal lines
         width = 8 * self.x_pad + self.ctx.display.font_width // 2
         height = 2 * self.y_pad + 2
-        
+
         # Word_num background
         self.ctx.display.fill_rectangle(
             x_bar_offset - self.ctx.display.font_width // 2,
@@ -320,7 +320,10 @@ class Stackbit(Page):
             x_offset + 1 * self.x_pad, y_offset + label_y_offset, t("Esc"), lcd.WHITE
         )
         self.ctx.display.draw_string(
-            round(x_offset + 4.2 * self.x_pad), y_offset + label_y_offset, t("Go"), lcd.WHITE
+            round(x_offset + 4.2 * self.x_pad),
+            y_offset + label_y_offset,
+            t("Go"),
+            lcd.WHITE,
         )
         # print border around buttons only on touch devices
         if self.ctx.input.touch is not None:

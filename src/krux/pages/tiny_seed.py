@@ -249,7 +249,7 @@ class TinySeed(Page):
         """Outline index respective"""
         width = 6 * self.x_pad - 2
         height = self.y_pad - 2
-        
+
         if index >= 162:
             x_position = self.x_offset + 6 * self.x_pad + 1
             # case for m5stickv
@@ -287,10 +287,8 @@ class TinySeed(Page):
         # case for non m5stickv
         if self.ctx.display.width() > 135:
             esc_x_offset = round(x_offset + 2.3 * self.x_pad)
-            
-        self.ctx.display.draw_string(
-            esc_x_offset, y_offset + 1, t("Esc"), lcd.WHITE
-        )
+
+        self.ctx.display.draw_string(esc_x_offset, y_offset + 1, t("Esc"), lcd.WHITE)
         self.ctx.display.draw_string(
             round(x_offset + 8.4 * self.x_pad), y_offset + 1, t("Go"), lcd.WHITE
         )
@@ -915,7 +913,7 @@ class TinyScanner(Page):
         if w24:
             w24_seed_numbers = [0] * 24
         self.previous_seed_numbers = [1] * 12
-        
+
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading Camera"))
         self.ctx.camera.initialize_sensor(grayscale=True)
@@ -974,5 +972,5 @@ class TinyScanner(Page):
             # # Debug FPS 4/4
             # fps = clock.fps()
 
-        self._exit_camera()     
+        self._exit_camera()
         return None

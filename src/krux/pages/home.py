@@ -47,6 +47,7 @@ from ..input import (
 )
 import qrcode
 
+
 class Home(Page):
     """Home is the main menu page of the app"""
 
@@ -120,7 +121,8 @@ class Home(Page):
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
-        """Disables touch and displays compact SeedQR code with grid to help drawing"""
+        """Disables touch and displays compact SeedQR code with grid to help 
+        drawing"""
 
         def draw_grided_qr(mode, qr_size):
             """Draws grided QR"""
@@ -592,4 +594,3 @@ class Home(Page):
             self.display_qr_codes(wallet_data, qr_format, title=about)
         else:
             self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
-
