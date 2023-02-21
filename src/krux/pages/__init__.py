@@ -38,7 +38,7 @@ from ..input import (
 )
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
-from ..krux_settings import t
+from ..krux_settings import t, Settings
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -46,9 +46,6 @@ MENU_SHUTDOWN = 2
 
 ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
-
-BATTERY_FULL = 3900
-BATTERY_LOW = 3300
 
 
 class Page:
@@ -496,7 +493,8 @@ class Menu:
                 self._draw_touch_menu(selected_item_index)
             else:
                 self._draw_menu(selected_item_index)
-            self.draw_battery()
+                
+            self.draw_status_bar()
 
             btn = self.ctx.input.wait_for_button(block=True)
             if self.ctx.input.touch is not None:
@@ -536,35 +534,75 @@ class Menu:
             elif btn == SWIPE_DOWN:
                 self.menu_view.move_backward()
 
-    def draw_battery(self):
+    def draw_status_bar(self):
+        """Draws a status bar along the top of the UI"""
+        self.draw_logging_indicator()
+        self.draw_battery_indicator()
+        
+    def draw_logging_indicator(self):
+        if Settings().logging.level.lower() == "none":
+            return
+        
+        self.ctx.display.fill_rectangle(5, 5, 8, 8, lcd.RED)
+        self.ctx.display.fill_rectangle(6, 6, 6, 6, lcd.BLACK)
+        self.ctx.display.fill_rectangle(7, 7, 4, 4, lcd.RED)
+            
+    def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
-        if self.ctx.power_manager.pmu is not None:
-            batt_mv = int(self.ctx.power_manager.batt_voltage())
-            if batt_mv > BATTERY_LOW:
-                batt_color = lcd.WHITE
-            else:
-                batt_color = lcd.RED
+        if not self.ctx.power_manager.has_battery():
+            return
+        
+        charge = self.ctx.power_manager.battery_charge_remaining()
+        battery_color = lcd.RED if charge < 0.3 else lcd.WHITE
+            
+        # Draw (filled) outline of battery in top-right corner of display
+        padding = 5
+        cylinder_length = 20
+        cylinder_height = 8
+        self.ctx.display.fill_rectangle(
+            self.ctx.display.width() - padding - cylinder_length, 
+            padding, 
+            cylinder_length, 
+            cylinder_height, 
+            battery_color
+        )
+        self.ctx.display.fill_rectangle(
+            self.ctx.display.width() - padding, 
+            padding + (cylinder_height // 4), 
+            1, 
+            cylinder_height // 2, 
+            battery_color
+        )
+        
+        # If not fully charged, overlay black rect to indicate how much battery is depleted
+        if charge < 1:
+            depleted_height = cylinder_height - 2
+            depleted_length = int((cylinder_length - 2) * (1 - charge))
             self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - 30, 5, 20, 8, batt_color
+                self.ctx.display.width() - padding - depleted_length - 1,
+                padding + 1,
+                depleted_length,
+                depleted_height,
+                lcd.BLACK,
             )
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - 10, 7, 3, 4, batt_color
-            )
-            if batt_mv < BATTERY_FULL:
-                if batt_mv > BATTERY_LOW:
-                    depleted_length = BATTERY_FULL - batt_mv
-                    depleted_length *= 18  # 18 pixels
-                    depleted_length //= BATTERY_FULL - BATTERY_LOW  # possible range
-                else:
-                    depleted_length = 18
-                self.ctx.display.fill_rectangle(
-                    self.ctx.display.width() - 11 - depleted_length,
-                    6,
-                    depleted_length,
-                    6,
-                    lcd.BLACK,
-                )
 
+        # Indicate if the device is plugged in and detecting voltage over USB
+        if self.ctx.power_manager.is_battery_charging():
+            self.ctx.display.fill_rectangle(
+                self.ctx.display.width() - padding - cylinder_length // 2,
+                padding + 2,
+                cylinder_height//2-1,
+                cylinder_height//2-1,
+                lcd.WHITE
+            )
+            self.ctx.display.fill_rectangle(
+                self.ctx.display.width() - padding - cylinder_length // 2 - 3,
+                padding + cylinder_height//2 - 1,
+                3,
+                1,
+                lcd.WHITE
+            )
+            
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
         self.ctx.input.touch.clear_regions()
