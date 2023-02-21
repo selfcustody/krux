@@ -24,11 +24,7 @@ import lcd
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..krux_settings import t
-<<<<<<< HEAD
 from ..display import DEFAULT_PADDING, SLATEGRAY
-=======
-from ..display import DEFAULT_PADDING
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -63,11 +59,7 @@ class Stackbit(Page):
             y_offset + self.y_pad // 2,
             str(word_index),
             lcd.WHITE,
-<<<<<<< HEAD
             SLATEGRAY,
-=======
-            lcd.BLACK,
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         )
         numbers_offset = self.x_offset + self.x_pad
         numbers_offset += (self.x_pad - self.ctx.display.font_width) // 2
@@ -94,7 +86,6 @@ class Stackbit(Page):
         x_bar_offset = self.x_offset
         # Horizontal lines
         width = 8 * self.x_pad + self.ctx.display.font_width // 2
-<<<<<<< HEAD
         height = 2 * self.y_pad + 2
         
         # Word_num background
@@ -107,9 +98,6 @@ class Stackbit(Page):
         )
 
         # top line
-=======
-        height = 2 * self.y_pad + 6
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         self.ctx.display.fill_rectangle(
             x_bar_offset - self.ctx.display.font_width // 2,
             y_offset,
@@ -117,10 +105,7 @@ class Stackbit(Page):
             1,
             lcd.DARKGREY,
         )
-<<<<<<< HEAD
         # bottom line
-=======
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         self.ctx.display.fill_rectangle(
             x_bar_offset - self.ctx.display.font_width // 2,
             y_offset + height,
@@ -129,10 +114,7 @@ class Stackbit(Page):
             lcd.DARKGREY,
         )
         # Vertical lines
-<<<<<<< HEAD
         # Left v line
-=======
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         self.ctx.display.fill_rectangle(
             x_bar_offset - self.ctx.display.font_width // 2,
             y_offset,
@@ -140,10 +122,7 @@ class Stackbit(Page):
             height,
             lcd.DARKGREY,
         )
-<<<<<<< HEAD
         # Second left vertical line
-=======
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         x_bar_offset += self.x_pad
         self.ctx.display.fill_rectangle(
             x_bar_offset,
@@ -153,10 +132,7 @@ class Stackbit(Page):
             lcd.DARKGREY,
         )
         x_bar_offset += self.x_pad
-<<<<<<< HEAD
         # Next 4 vertical lines
-=======
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         for _ in range(4):
             self.ctx.display.fill_rectangle(
                 x_bar_offset,
@@ -175,7 +151,6 @@ class Stackbit(Page):
             word_list_index_str = "0" + word_list_index_str
         return [int(x) for x in str(word_list_index_str)], word_list_index_str
 
-<<<<<<< HEAD
     def _draw_punched(self, digits, y_offset, export=False):
         """Draws punched bits for import and export Stackbit UI"""
         outline_width = self.x_pad - 6
@@ -196,13 +171,6 @@ class Stackbit(Page):
                         lcd.DARKGREY,
                     )
 
-=======
-    def _draw_punched(self, digits, y_offset):
-        """Draws punched bits for import and export Tinyseed UI"""
-        outline_width = self.x_pad - 6
-        outline_height = self.y_pad - 4
-        outline_x_offset = self.x_offset + self.x_pad + 3
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         if digits[0] == 2:
             self.ctx.display.outline(
                 outline_x_offset,
@@ -259,29 +227,18 @@ class Stackbit(Page):
         """Draws punch pattern for Stackbit 1248 seed layout"""
 
         self.x_offset = DEFAULT_PADDING
-<<<<<<< HEAD
         # case for m5stickv
         if self.ctx.display.width() == 135:
             self.x_offset = 5
-=======
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         self.x_pad = 2 * self.ctx.display.font_width
         self.y_offset = 2 * self.ctx.display.font_height
         self.y_pad = self.ctx.display.font_height
 
-<<<<<<< HEAD
         self.ctx.display.draw_hcentered_text("Stackbit 1248")
         self._draw_grid(y_offset)
         self._draw_labels(y_offset, word_index)
         digits, digits_str = self._word_to_digits(word)
         self._draw_punched(digits, y_offset, True)
-=======
-        self.ctx.display.draw_hcentered_text(t("Stackbit 1248"))
-        self._draw_labels(y_offset, word_index)
-        self._draw_grid(y_offset)
-        digits, digits_str = self._word_to_digits(word)
-        self._draw_punched(digits, y_offset)
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         if self.ctx.display.height() > 240:
             self.ctx.display.draw_string(
                 self.x_offset + 17 * self.ctx.display.font_width,
@@ -360,7 +317,6 @@ class Stackbit(Page):
         label_y_offset = (self.y_pad - self.ctx.display.font_height) // 2
         x_offset = self.x_offset + self.x_pad
         self.ctx.display.draw_string(
-<<<<<<< HEAD
             x_offset + 1 * self.x_pad, y_offset + label_y_offset, t("Esc"), lcd.WHITE
         )
         self.ctx.display.draw_string(
@@ -391,36 +347,6 @@ class Stackbit(Page):
                     lcd.DARKGREY,
                 )
                 x_offset += 3 * self.x_pad
-=======
-            x_offset + self.x_pad, y_offset + label_y_offset, t("Esc"), lcd.WHITE
-        )
-        self.ctx.display.draw_string(
-            x_offset + 4 * self.x_pad, y_offset + label_y_offset, t("Go"), lcd.WHITE
-        )
-        self.ctx.display.fill_rectangle(
-            x_offset,
-            y_offset,
-            6 * self.x_pad,
-            1,
-            lcd.DARKGREY,
-        )
-        self.ctx.display.fill_rectangle(
-            x_offset,
-            y_offset + self.y_pad,
-            6 * self.x_pad,
-            1,
-            lcd.DARKGREY,
-        )
-        for _ in range(3):
-            self.ctx.display.fill_rectangle(
-                x_offset,
-                y_offset,
-                1,
-                self.y_pad,
-                lcd.DARKGREY,
-            )
-            x_offset += 3 * self.x_pad
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
 
     def digits_to_word(self, digits):
         """Returns seed word respective to digits BIP39 dictionaty position"""
@@ -435,23 +361,15 @@ class Stackbit(Page):
     def preview_word(self, digits):
         """Draws word respective to current state"""
         preview_string = ""
-<<<<<<< HEAD
         color = lcd.RED
-=======
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
         for digit in digits:
             preview_string += str(digit)
         word = self.digits_to_word(digits)
         if word is not None:
             preview_string += ": " + word
-<<<<<<< HEAD
             color = lcd.WHITE
         y_offset = self.y_offset + 3 * self.y_pad
         self.ctx.display.draw_hcentered_text(preview_string, y_offset, color=color)
-=======
-        y_offset = self.y_offset + 3 * self.y_pad
-        self.ctx.display.draw_hcentered_text(preview_string, y_offset)
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
 
     def _map_keys_array(self):
         """Maps an array of regions for keys to be placed in"""
@@ -505,17 +423,10 @@ class Stackbit(Page):
         words = []
         while word_index <= 24:
             self._map_keys_array()
-<<<<<<< HEAD
             self.ctx.display.draw_hcentered_text("Stackbit 1248")
             y_offset = self.y_offset
             self._draw_grid(y_offset)
             self._draw_labels(y_offset, word_index)
-=======
-            self.ctx.display.draw_hcentered_text(t("Stackbit 1248"))
-            y_offset = self.y_offset
-            self._draw_labels(y_offset, word_index)
-            self._draw_grid(y_offset)
->>>>>>> 28e900c2b0d1cf42e925266f7a2725453d39cf39
             self._draw_menu()
             if self.ctx.input.buttons_active:
                 self._draw_index(index)

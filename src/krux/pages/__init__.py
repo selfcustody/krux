@@ -38,7 +38,7 @@ from ..input import (
 )
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
-from ..krux_settings import Settings
+from ..krux_settings import t, Settings
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1

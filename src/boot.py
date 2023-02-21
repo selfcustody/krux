@@ -48,10 +48,10 @@ SPLASH = """
 ]
 
 from krux import firmware
-from krux.power import PowerManager
+from krux.power import power_manager
 
 if firmware.upgrade():
-    pmu.shutdown()
+    power_manager.shutdown()
 
 # Unimport firware
 sys.modules.pop('krux.firmware')
@@ -93,9 +93,9 @@ while True:
 
     if not Home(ctx).run():
         break
-from krux.i18n import t
+from krux.krux_settings import t
 
 ctx.display.flash_text(t("Shutting down.."))
 
 ctx.clear()
-pmu.shutdown()
+power_manager.shutdown()
