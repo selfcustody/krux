@@ -68,7 +68,7 @@ class TinySeed(Page):
 
     def _draw_labels(self, page):
         """Draws labels for import and export Tinyseed UI"""
-        self.ctx.display.draw_hcentered_text("Tiny Seed")
+        self.ctx.display.draw_hcentered_text(t("Tiny Seed"))
 
         # case for non m5stickv
         if self.ctx.display.width() > 135:

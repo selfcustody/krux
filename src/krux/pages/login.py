@@ -105,12 +105,8 @@ class Login(Page):
             [
                 (t("QR Code"), self.load_key_from_qr_code),
                 (
-                    t("Tiny Seed (12)"),
-                    lambda: self.load_key_from_tiny_seed_image(w24=False),
-                ),
-                (
-                    t("Tiny Seed (24)"),
-                    lambda: self.load_key_from_tiny_seed_image(w24=True),
+                    t("Tiny Seed"),
+                    self.load_key_from_tiny_seed_image,
                 ),
                 (t("Back"), lambda: MENU_EXIT),
             ],
@@ -127,8 +123,7 @@ class Login(Page):
             [
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.load_key_from_digits),
-                (t("Tiny Seed (12)"), lambda: self.load_key_from_tiny_seed(w24=False)),
-                (t("Tiny Seed (24)"), lambda: self.load_key_from_tiny_seed(w24=True)),
+                (t("Tiny Seed (Bits)"), self.load_key_from_tiny_seed),
                 (t("Stackbit 1248"), self.load_key_from_1248),
                 (t("Back"), lambda: MENU_EXIT),
             ],
@@ -472,9 +467,19 @@ class Login(Page):
             return self._load_key_from_words(words)
         return MENU_CONTINUE
 
-    def load_key_from_tiny_seed(self, w24=False):
+    def load_key_from_tiny_seed(self):
         """Menu handler to manually load key from Tiny Seed sheet metal storage method"""
-        # w24 - true if 24 words mode
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("12 words"), lambda: MENU_EXIT),
+                (t("24 words"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        w24 = index == 1
+        self.ctx.display.clear()
+        
         tiny_seed = TinySeed(self.ctx)
         words = tiny_seed.enter_tiny_seed(w24)
         del tiny_seed
@@ -482,8 +487,19 @@ class Login(Page):
             return self._load_key_from_words(words)
         return MENU_CONTINUE
 
-    def load_key_from_tiny_seed_image(self, w24=False):
+    def load_key_from_tiny_seed_image(self):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("12 words"), lambda: MENU_EXIT),
+                (t("24 words"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        w24 = index == 1
+        self.ctx.display.clear()
+        
         intro = t(
             "Paint punched dots black so they can be detected. "
             + "Use a black background surface. "
@@ -667,13 +683,5 @@ class Login(Page):
         """Handler for the 'about' menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
-        if self.ctx.power_manager.pmu is not None:
-            batt_voltage = self.ctx.power_manager.batt_voltage()
-            if batt_voltage is not None:
-                batt_voltage /= 1000
-                self.ctx.display.draw_hcentered_text(
-                    t("Battery: %sV") % str(round(batt_voltage, 1)),
-                    self.ctx.display.bottom_prompt_line,
-                )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
