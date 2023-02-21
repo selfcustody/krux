@@ -31,12 +31,12 @@ OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
 
-
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
     def __init__(self):
         self.cam_id = None
+        self.antiglare_enabled = False
         self.initialize_sensor()
 
     def initialize_sensor(self, grayscale=False):
@@ -79,7 +79,33 @@ class Camera:
         # Regions 13,14,15,16
         sensor.__write_reg(0x59, 0x0)  # pylint: disable=W0212
 
-    def capture_qr_code_loop(self, callback, x_offset=False):
+    def has_antiglare(self):
+        """Returns whether the camera has anti-glare functionality"""
+        return self.cam_id == OV7740_ID
+
+    def enable_antiglare(self):
+        """Enables anti-glare mode"""
+        if self.cam_id == OV7740_ID:
+            # luminance high level, default=0x78
+            sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
+            # luminance low level, default=0x68
+            sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
+            # Disable frame integrtation (night mode)
+            sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
+            sensor.skip_frames()
+            self.antiglare_enabled = True
+            
+    def disable_antiglare(self):
+        """Disables anti-glare mode"""
+        if self.cam_id == OV7740_ID:
+            # luminance high level, default=0x78
+            sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+            # luminance low level, default=0x68
+            sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+            sensor.skip_frames()
+            self.antiglare_enabled = False
+            
+    def capture_qr_code_loop(self, callback):
         """Captures either singular or animated QRs and parses their contents until
         all parts of the message have been captured. The part data are then ordered
         and assembled into one message and returned.
@@ -96,21 +122,6 @@ class Camera:
             command = callback(parser.total_count(), parser.parsed_count(), new_part)
             if command == 1:
                 break
-            if command == 2:
-                # luminance high level, default=0x78
-                sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
-                # luminance low level, default=0x68
-                sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
-                # Disable frame integrtation (night mode)
-                sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
-                sensor.skip_frames()
-            elif command == 3:
-                # luminance high level, default=0x78
-                sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
-                # luminance low level, default=0x68
-                sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
-                sensor.skip_frames()
-
             new_part = False
 
             img = sensor.snapshot()
@@ -121,10 +132,7 @@ class Camera:
             res = img.find_qrcodes()
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
-            if x_offset:
-                lcd.display(img, oft=(2, 40))  # 40 will centralize image in Amigo
-            else:
-                lcd.display(img)
+            lcd.display(img)
             if len(res) > 0:
                 data = res[0].payload()
 

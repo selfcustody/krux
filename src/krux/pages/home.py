@@ -27,7 +27,6 @@ import lcd
 from .stack_1248 import Stackbit
 from .tiny_seed import TinySeed
 from embit.wordlists.bip39 import WORDLIST
-from embit import ec, bip39, bech32
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
@@ -48,28 +47,22 @@ from ..input import (
 )
 import qrcode
 
-
 class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
-        menu_list = [
-            (t("Mnemonic"), self.mnemonic),
-            (t("Extended Public Key"), self.public_key),
-            (t("Nostr Public Key"), self.nostr_public_key),
-            (t("Wallet"), self.wallet),
-            (t("Scan Address"), self.scan_address),
-            (t("Sign"), self.sign),
-            (t("Shutdown"), self.shutdown),
-        ]
-        # Nostr not available for 12 words seeds
-        if len(ctx.wallet.key.mnemonic.split()) < 24:
-            del menu_list[2]
         super().__init__(
             ctx,
             Menu(
                 ctx,
-                menu_list,
+                [
+                    (t("Mnemonic"), self.mnemonic),
+                    (t("Extended Public Key"), self.public_key),
+                    (t("Wallet"), self.wallet),
+                    (t("Scan Address"), self.scan_address),
+                    (t("Sign"), self.sign),
+                    (t("Shutdown"), self.shutdown),
+                ],
             ),
         )
 
@@ -223,7 +216,6 @@ class Home(Page):
                     button = SWIPE_DOWN  # leave
         if self.ctx.printer is None:
             return MENU_CONTINUE
-        
         self.ctx.display.clear()
         if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
@@ -282,27 +274,6 @@ class Home(Page):
             xpub = self.ctx.wallet.key.key_expression(version)
             self.display_qr_codes(xpub, FORMAT_NONE, None)
             self.print_qr_prompt(xpub, FORMAT_NONE)
-        return MENU_CONTINUE
-
-    def nostr_public_key(self):
-        """Experimental creation of nostr pub key from mnemonic"""
-        private_key = bip39.mnemonic_to_bytes(
-            self.ctx.wallet.key.mnemonic, ignore_checksum=True
-        )
-        pubkey = ec.PrivateKey(private_key).get_public_key().serialize()[1:]
-        pubkey_text = (
-            "Hex pubkey:\n" + binascii.hexlify(pubkey).decode("ascii") + "\n\n"
-        )
-        converted_bits = bech32.convertbits(pubkey, 8, 5)
-        bech32_pubkey = bech32.bech32_encode(
-            bech32.Encoding.BECH32, "npub", converted_bits
-        )
-        pubkey_text += "Bech32 pubkey:\n" + bech32_pubkey
-        self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(pubkey_text, DEFAULT_PADDING)
-        self.ctx.input.wait_for_button()
-        self.ctx.display.clear()
-        self.display_qr_codes(bech32_pubkey, FORMAT_NONE, title="Bech32 Public Key")
         return MENU_CONTINUE
 
     def wallet(self):
@@ -441,17 +412,13 @@ class Home(Page):
 
     def sign(self):
         """Handler for the 'sign' menu item"""
-        sign_list = [
-            (t("PSBT"), self.sign_psbt),
-            (t("Message"), self.sign_message),
-            (t("Nostr event"), self.sign_nostr),
-            (t("Back"), lambda: MENU_EXIT),
-        ]
-        if len(self.ctx.wallet.key.mnemonic.split()) < 24:
-            del sign_list[2]
         submenu = Menu(
             self.ctx,
-            sign_list,
+            [
+                (t("PSBT"), self.sign_psbt),
+                (t("Message"), self.sign_message),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
         )
         index, status = submenu.run_loop()
         if index == len(submenu.menu) - 1:
@@ -599,30 +566,6 @@ class Home(Page):
 
         return MENU_CONTINUE
 
-    def sign_nostr(self):
-        """Handler for the 'sign nostr event' menu item"""
-        data, qr_format = self.capture_qr_code()
-        data_bytes = None
-        try:
-            data_bytes = data.encode("latin-1") if isinstance(data, str) else data
-        except:
-            return MENU_CONTINUE
-        if data_bytes and len(data_bytes) == 32:
-            private_key = ec.PrivateKey(
-                bip39.mnemonic_to_bytes(
-                    self.ctx.wallet.key.mnemonic, ignore_checksum=True
-                )
-            )
-            signature = str(private_key.schnorr_sign(data_bytes))
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Event ID:\n%s") % binascii.hexlify(data_bytes).decode()
-            )
-            if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
-                return MENU_CONTINUE
-            self.display_qr_codes(signature, qr_format)
-        return MENU_CONTINUE
-
     def display_wallet(self, wallet, include_qr=True):
         """Displays a wallet, including its label and abbreviated xpubs.
         If include_qr is True, a QR code of the wallet will be shown
@@ -649,3 +592,4 @@ class Home(Page):
             self.display_qr_codes(wallet_data, qr_format, title=about)
         else:
             self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+

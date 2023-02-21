@@ -38,7 +38,7 @@ from ..input import (
 )
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
-from ..krux_settings import t
+from ..krux_settings import Settings
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -46,9 +46,6 @@ MENU_SHUTDOWN = 2
 
 ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
-
-BATTERY_FULL = 3900
-BATTERY_LOW = 3300
 
 
 class Page:
@@ -164,10 +161,7 @@ class Page:
         Returns the contents of the QR code(s).
         """
         self._time_frame = time.ticks_ms()
-        anti_glare = False
-
         def callback(part_total, num_parts_captured, new_part):
-            nonlocal anti_glare
             # Turn on the light as long as the enter button is held down
             if time.ticks_ms() > self._time_frame + 1000:
                 if self.ctx.light:
@@ -179,25 +173,22 @@ class Page:
                 elif not self.ctx.input.enter_value():
                     return 1
 
-                # Anti-glare mode - OV7740 only
+                # Anti-glare mode
                 if self.ctx.input.page_value() == 0:
-                    if self.ctx.camera.cam_id == OV7740_ID:
-                        if not anti_glare:
-                            self._time_frame = time.ticks_ms()
-                            anti_glare = True
-                            self.ctx.display.to_portrait()
-                            self.ctx.display.draw_centered_text("anti-glare mode")
-                            time.sleep_ms(500)
-                            self.ctx.display.to_landscape()
-                            return 2
+                    if self.ctx.camera.has_antiglare():
                         self._time_frame = time.ticks_ms()
-                        anti_glare = False
                         self.ctx.display.to_portrait()
-                        self.ctx.display.draw_centered_text("standard mode")
+                        if not self.ctx.camera.antiglare_enabled:
+                            self.ctx.camera.enable_antiglare()
+                            self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
+                        else:
+                            self.ctx.camera.disable_antiglare()
+                            self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
                         time.sleep_ms(500)
                         self.ctx.display.to_landscape()
-                        return 3
+                        return 0
                     return 1
+                
                 # Exit the capture loop if a button is pressed
                 if (
                     self.ctx.input.page_prev_value() == 0
@@ -208,52 +199,28 @@ class Page:
             # Indicate progress to the user that a new part was captured
             if new_part:
                 self.ctx.display.to_portrait()
-                if self.ctx.display.width() < 320:
-                    self.ctx.display.draw_centered_text(
-                        "%.0f%%" % (100 * float(num_parts_captured) / float(part_total))
-                    )
-                    time.sleep_ms(100)
-                else:
-                    filled = self.ctx.display.usable_width() * num_parts_captured
-                    filled //= part_total
-                    self.ctx.display.fill_rectangle(
-                        DEFAULT_PADDING,
-                        335,
-                        filled,
-                        self.ctx.display.font_height,
-                        lcd.WHITE,
-                    )
+                filled = self.ctx.display.usable_width() * num_parts_captured
+                filled //= part_total
+                self.ctx.display.fill_rectangle(
+                    DEFAULT_PADDING,
+                    self.ctx.display.height() // 2 - self.ctx.display.font_height // 2,
+                    filled,
+                    self.ctx.display.font_height,
+                    lcd.WHITE,
+                )
+                time.sleep_ms(100)
                 self.ctx.display.to_landscape()
 
             return 0
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading Camera"))
-        if self.ctx.display.width() < 320:
-            camera_offset = False
-        else:
-            camera_offset = True
-            self.ctx.display.draw_hcentered_text(
-                "Up: Abort\nDown: Anti-Glare\nEnter: Flashlight", 380
-            )
-            self.ctx.display.outline(
-                39,
-                1,
-                241,
-                321,
-            )
-            self.ctx.display.outline(
-                DEFAULT_PADDING,
-                335,
-                self.ctx.display.usable_width(),
-                self.ctx.display.font_height,
-            )
+        self.ctx.display.draw_centered_text(t("Loading camera"))
         self.ctx.display.to_landscape()
         code = None
         qr_format = None
         try:
             code, qr_format = self.ctx.camera.capture_qr_code_loop(
-                callback, camera_offset
+                callback
             )
         except:
             self.ctx.log.exception("Exception occurred capturing QR code")
@@ -526,7 +493,8 @@ class Menu:
                 self._draw_touch_menu(selected_item_index)
             else:
                 self._draw_menu(selected_item_index)
-            self.draw_battery()
+                
+            self.draw_status_bar()
 
             btn = self.ctx.input.wait_for_button(block=True)
             if self.ctx.input.touch is not None:
@@ -566,35 +534,75 @@ class Menu:
             elif btn == SWIPE_DOWN:
                 self.menu_view.move_backward()
 
-    def draw_battery(self):
+    def draw_status_bar(self):
+        """Draws a status bar along the top of the UI"""
+        self.draw_logging_indicator()
+        self.draw_battery_indicator()
+        
+    def draw_logging_indicator(self):
+        if Settings().logging.level.lower() == "none":
+            return
+        
+        self.ctx.display.fill_rectangle(5, 5, 8, 8, lcd.RED)
+        self.ctx.display.fill_rectangle(6, 6, 6, 6, lcd.BLACK)
+        self.ctx.display.fill_rectangle(7, 7, 4, 4, lcd.RED)
+            
+    def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
-        if self.ctx.power_manager.pmu is not None:
-            batt_mv = int(self.ctx.power_manager.batt_voltage())
-            if batt_mv > BATTERY_LOW:
-                batt_color = lcd.WHITE
-            else:
-                batt_color = lcd.RED
+        if not self.ctx.power_manager.has_battery():
+            return
+        
+        charge = self.ctx.power_manager.battery_charge_remaining()
+        battery_color = lcd.RED if charge < 0.3 else lcd.WHITE
+            
+        # Draw (filled) outline of battery in top-right corner of display
+        padding = 5
+        cylinder_length = 20
+        cylinder_height = 8
+        self.ctx.display.fill_rectangle(
+            self.ctx.display.width() - padding - cylinder_length, 
+            padding, 
+            cylinder_length, 
+            cylinder_height, 
+            battery_color
+        )
+        self.ctx.display.fill_rectangle(
+            self.ctx.display.width() - padding, 
+            padding + (cylinder_height // 4), 
+            1, 
+            cylinder_height // 2, 
+            battery_color
+        )
+        
+        # If not fully charged, overlay black rect to indicate how much battery is depleted
+        if charge < 1:
+            depleted_height = cylinder_height - 2
+            depleted_length = int((cylinder_length - 2) * (1 - charge))
             self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - 30, 5, 20, 8, batt_color
+                self.ctx.display.width() - padding - depleted_length - 1,
+                padding + 1,
+                depleted_length,
+                depleted_height,
+                lcd.BLACK,
             )
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - 10, 7, 3, 4, batt_color
-            )
-            if batt_mv < BATTERY_FULL:
-                if batt_mv > BATTERY_LOW:
-                    depleted_lenght = BATTERY_FULL - batt_mv
-                    depleted_lenght *= 18  # 18 pixels
-                    depleted_lenght //= BATTERY_FULL - BATTERY_LOW  # possible range
-                else:
-                    depleted_lenght = 18
-                self.ctx.display.fill_rectangle(
-                    self.ctx.display.width() - 11 - depleted_lenght,
-                    6,
-                    depleted_lenght,
-                    6,
-                    lcd.BLACK,
-                )
 
+        # Indicate if the device is plugged in and detecting voltage over USB
+        if self.ctx.power_manager.is_battery_charging():
+            self.ctx.display.fill_rectangle(
+                self.ctx.display.width() - padding - cylinder_length // 2,
+                padding + 2,
+                cylinder_height//2-1,
+                cylinder_height//2-1,
+                lcd.WHITE
+            )
+            self.ctx.display.fill_rectangle(
+                self.ctx.display.width() - padding - cylinder_length // 2 - 3,
+                padding + cylinder_height//2 - 1,
+                3,
+                1,
+                lcd.WHITE
+            )
+            
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
         self.ctx.input.touch.clear_regions()

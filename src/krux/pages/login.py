@@ -49,11 +49,9 @@ from . import (
 )
 
 SENTINEL_DIGITS = "11111"
-SD_SETTINGS_MSG_DURATION = 2000
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
-BITS = "01"
 DIGITS = "0123456789"
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -61,10 +59,10 @@ NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 NUMERALS = "0123456789."
 
-D6_12W_ROLLS = 50
+D6_12W_MIN_ROLLS = 50
 D6_24W_MIN_ROLLS = 99
-D20_MIN_ROLLS = 30
-D20_MAX_ROLLS = 60
+D20_12W_MIN_ROLLS = 30
+D20_24W_MIN_ROLLS = 60
 
 
 class Login(Page):
@@ -90,11 +88,24 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via QR Code"), self.load_key_from_qr_code),
-                (t("Via Text"), self.load_key_from_text),
-                (t("Via Numbers"), self.load_key_from_digits),
-                (t("Via Bits"), self.load_key_from_bits),
-                (t("Metal Storage"), self.load_metal_key),
+                (t("Via Camera"), self.load_key_from_camera),
+                (t("Via Manual Input"), self.load_key_from_manual_input),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return MENU_CONTINUE
+        return status
+    
+    def load_key_from_camera(self):
+        """Handler for the 'via camera' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("QR Code"), self.load_key_from_qr_code),
+                (t("Tiny Seed (12)"), lambda: self.load_key_from_tiny_seed_image(w24=False)),
+                (t("Tiny Seed (24)"), lambda: self.load_key_from_tiny_seed_image(w24=True)),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -103,16 +114,16 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def load_metal_key(self):
-        """Handler to load metal seed storgare"""
+    def load_key_from_manual_input(self):
+        """Handler for the 'via manual input' menu item"""
         submenu = Menu(
             self.ctx,
             [
-                ("Stackbit 1248", self.load_key_from_1248),
-                ("Tiny Seed 12", self.load_key_from_tiny_seed),
-                ("Tiny Seed 24", lambda: self.load_key_from_tiny_seed(True)),
-                ("Scan Tiny Seed 12", self.scan_from_tiny_seed),
-                ("Scan Tiny Seed 24", lambda: self.scan_from_tiny_seed(True)),
+                (t("Words"), self.load_key_from_text),
+                (t("Word Numbers"), self.load_key_from_digits),
+                (t("Tiny Seed (12)"), lambda: self.load_key_from_tiny_seed(w24=False)),
+                (t("Tiny Seed (24)"), lambda: self.load_key_from_tiny_seed(w24=True)),
+                (t("Stackbit 1248"), self.load_key_from_1248),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -138,19 +149,30 @@ class Login(Page):
 
     def new_key_from_d6(self):
         """Handler for the 'via D6' menu item"""
-        return self._new_key_from_die(D6_STATES, D6_12W_ROLLS, D6_24W_MIN_ROLLS)
+        return self._new_key_from_die(D6_STATES, D6_12W_MIN_ROLLS, D6_24W_MIN_ROLLS)
 
     def new_key_from_d20(self):
         """Handler for the 'via D20' menu item"""
-        return self._new_key_from_die(D20_STATES, D20_MIN_ROLLS, D20_MAX_ROLLS)
+        return self._new_key_from_die(D20_STATES, D20_12W_MIN_ROLLS, D20_24W_MIN_ROLLS)
 
-    def _new_key_from_die(self, roll_states, min_rolls, min_rolls_24w):
+    def _new_key_from_die(self, roll_states, min_rolls_12w, min_rolls_24w):
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("12 words"), lambda: MENU_EXIT),
+                (t("24 words"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        min_rolls = min_rolls_12w if index == 0 else min_rolls_24w
+        self.ctx.display.clear()
+        
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
             t(
-                "Roll die %d or %d times to generate a 12- or 24-word mnemonic, respectively."
+                "Roll die at least %d times to generate a mnemonic."
             )
-            % (min_rolls, min_rolls_24w)
+            % (min_rolls)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
@@ -162,11 +184,6 @@ class Login(Page):
                 return buffer
 
             while True:
-                if len(rolls) in (min_rolls, min_rolls_24w):
-                    self.ctx.display.clear()
-                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
-                        break
-
                 roll = ""
                 while True:
                     dice_title = t("Rolls: %d\n") % len(rolls)
@@ -195,10 +212,8 @@ class Login(Page):
                         delete_flag = False
                         if len(rolls) > 0:
                             rolls.pop()
-                    elif len(rolls) < min_rolls_24w:  # Not enough to Go
-                        self.ctx.display.flash_text(
-                            t("Not enough rolls!"), lcd.WHITE, duration=1000
-                        )
+                    elif len(rolls) < min_rolls:  # Not enough to Go
+                        self.ctx.display.flash_text(t("Not enough rolls!"))
                     else:  # Go
                         break
 
@@ -217,7 +232,7 @@ class Login(Page):
                 t("SHA256 of rolls:\n\n%s") % entropy_hash
             )
             self.ctx.input.wait_for_button()
-            num_bytes = 16 if len(rolls) == min_rolls else 32
+            num_bytes = 16 if min_rolls == min_rolls_12w else 32
             words = bip39.mnemonic_from_bytes(
                 hashlib.sha256(entropy_bytes).digest()[:num_bytes]
             ).split()
@@ -445,20 +460,6 @@ class Login(Page):
 
         return self._load_key_from_keypad(title, DIGITS, to_word, SENTINEL_DIGITS)
 
-    def load_key_from_bits(self):
-        """Handler for the 'via bits' menu item"""
-        title = t(
-            "Enter each word of your BIP-39 mnemonic as a series of binary digits."
-        )
-
-        def to_word(user_input):
-            word_index = int("0b" + user_input, 0)
-            if 0 <= word_index < 2048:
-                return WORDLIST[word_index]
-            return ""
-
-        return self._load_key_from_keypad(title, BITS, to_word)
-
     def load_key_from_1248(self):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
         stackbit = Stackbit(self.ctx)
@@ -475,11 +476,22 @@ class Login(Page):
         words = tiny_seed.enter_tiny_seed(w24)
         del tiny_seed
         if words is not None:
-            return self._load_key_from_words(words)       
+            return self._load_key_from_words(words)
         return MENU_CONTINUE
-        
-    def scan_from_tiny_seed(self, w24=False):
+
+    def load_key_from_tiny_seed_image(self, w24=False):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
+        intro = t(
+            "Paint punched dots black so they can be detected. "
+            + "Use a black background surface. "
+            + "Align camera and Tiny Seed precisely using the tracking rectangle."
+        )
+        if w24:
+            intro += t("Press ENTER when punches are correctly mapped")
+        self.ctx.display.draw_hcentered_text(intro)
+        if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+            return MENU_CONTINUE
+        
         tiny_scanner = TinyScanner(self.ctx)
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
@@ -538,15 +550,13 @@ class Login(Page):
                 self.ctx.display.flash_text(
                     t("Your changes will be kept on the SD card."),
                     lcd.WHITE,
-                    duration=SD_SETTINGS_MSG_DURATION,
                 )
         except:
             self.ctx.display.flash_text(
                 t(
-                    "Incompatible or missing SD card:\n\nChanges will last until shutdown."
+                    "SD card not detected.\n\nChanges will last until shutdown."
                 ),
                 lcd.WHITE,
-                duration=SD_SETTINGS_MSG_DURATION,
             )
 
         return self.namespace(Settings())()
@@ -661,8 +671,9 @@ class Login(Page):
             if batt_voltage is not None:
                 batt_voltage /= 1000
                 self.ctx.display.draw_hcentered_text(
-                    "Battery: " + str(round(batt_voltage, 1)) + "V",
+                    t("Battery: %sV") % str(round(batt_voltage, 1)),
                     self.ctx.display.bottom_prompt_line,
                 )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
+
