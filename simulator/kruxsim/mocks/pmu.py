@@ -63,7 +63,9 @@ class PMU_Button:
 class Battery:
     def getVbatVoltage(self):
         return 3400
-
+    def getUSBVoltage(self):
+        return 3400
+    
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
         PMU_Button=PMU_Button,
