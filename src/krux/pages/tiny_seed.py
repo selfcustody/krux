@@ -32,12 +32,14 @@ class TinySeed(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.x_offset = DEFAULT_PADDING // 2 + 2 * self.ctx.display.font_width
+        # case for non m5stickv
         if self.ctx.display.width() > 135:
             self.y_offset = DEFAULT_PADDING + 3 * self.ctx.display.font_height
             self.x_pad = self.ctx.display.font_height
             self.y_pad = self.ctx.display.font_height
             self.y_pad += self.ctx.display.height() // 120
         else:
+            # case for m5stickv
             self.y_offset = 2 * self.ctx.display.font_height
             self.x_pad = self.ctx.display.font_width + 1
             self.y_pad = self.ctx.display.font_height
@@ -66,7 +68,9 @@ class TinySeed(Page):
 
     def _draw_labels(self, page):
         """Draws labels for import and export Tinyseed UI"""
-        self.ctx.display.draw_hcentered_text(t("Tiny Seed"))
+        self.ctx.display.draw_hcentered_text("Tiny Seed")
+
+        # case for non m5stickv
         if self.ctx.display.width() > 135:
             self.ctx.display.to_landscape()
             bit_number = 2048
@@ -244,10 +248,18 @@ class TinySeed(Page):
     def _draw_index(self, index):
         """Outline index respective"""
         width = 6 * self.x_pad - 2
+        height = self.y_pad - 2
+
         if index >= 162:
             x_position = self.x_offset + 6 * self.x_pad + 1
+            # case for m5stickv
+            if self.ctx.display.width() == 135:
+                height = self.y_pad
         elif index >= 156:
             x_position = self.x_offset + 1
+            # case for m5stickv
+            if self.ctx.display.width() == 135:
+                height = self.y_pad
         elif index <= TS_LAST_BIT_NO_CS:
             x_position = index % 12
             x_position *= self.x_pad
@@ -262,7 +274,7 @@ class TinySeed(Page):
             x_position,
             y_position,
             width,
-            self.y_pad - 2,
+            height,
             lcd.WHITE,
         )
 
@@ -270,35 +282,41 @@ class TinySeed(Page):
         """Draws options to leave and proceed"""
         y_offset = self.y_offset + 13 * self.y_pad
         x_offset = self.x_offset
+        esc_x_offset = round(x_offset + 1.9 * self.x_pad)
+
+        # case for non m5stickv
+        if self.ctx.display.width() > 135:
+            esc_x_offset = round(x_offset + 2.3 * self.x_pad)
+
+        self.ctx.display.draw_string(esc_x_offset, y_offset + 1, t("Esc"), lcd.WHITE)
         self.ctx.display.draw_string(
-            x_offset + (5 * self.x_pad) // 2, y_offset + 1, t("Esc"), lcd.WHITE
+            round(x_offset + 8.4 * self.x_pad), y_offset + 1, t("Go"), lcd.WHITE
         )
-        self.ctx.display.draw_string(
-            x_offset + (17 * self.x_pad) // 2, y_offset + 1, t("Go"), lcd.WHITE
-        )
-        self.ctx.display.fill_rectangle(
-            x_offset,
-            y_offset,
-            12 * self.x_pad,
-            1,
-            lcd.DARKGREY,
-        )
-        self.ctx.display.fill_rectangle(
-            x_offset,
-            y_offset + self.y_pad,
-            12 * self.x_pad,
-            1,
-            lcd.DARKGREY,
-        )
-        for _ in range(3):
+        # print border around buttons only on touch devices
+        if self.ctx.input.touch is not None:
             self.ctx.display.fill_rectangle(
                 x_offset,
                 y_offset,
+                12 * self.x_pad,
                 1,
-                self.y_pad,
                 lcd.DARKGREY,
             )
-            x_offset += 6 * self.x_pad
+            self.ctx.display.fill_rectangle(
+                x_offset,
+                y_offset + self.y_pad,
+                12 * self.x_pad,
+                1,
+                lcd.DARKGREY,
+            )
+            for _ in range(3):
+                self.ctx.display.fill_rectangle(
+                    x_offset,
+                    y_offset,
+                    1,
+                    self.y_pad,
+                    lcd.DARKGREY,
+                )
+                x_offset += 6 * self.x_pad
 
     def _map_keys_array(self):
         """Maps an array of regions for keys to be placed in"""
@@ -524,7 +542,7 @@ class TinyScanner(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
-        # Capturing flaf used for first page of 24 words seed
+        # Capturing flag used for first page of 24 words seed
         self.capturing = False
         # X, Y array map for punched area
         self.x_regions = []
@@ -895,16 +913,7 @@ class TinyScanner(Page):
         if w24:
             w24_seed_numbers = [0] * 24
         self.previous_seed_numbers = [1] * 12
-        intro = t(
-            "Paint punched dots black so they can be detected. "
-            + "Use a black background surface. "
-            + "Align camera and Tiny Seed precisely using the tracking rectangle."
-        )
-        if w24:
-            intro += t("Press ENTER when punches are correctly mapped")
-        self.ctx.display.draw_hcentered_text(intro)
-        if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            return None
+
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading Camera"))
         self.ctx.camera.initialize_sensor(grayscale=True)
@@ -964,6 +973,4 @@ class TinyScanner(Page):
             # fps = clock.fps()
 
         self._exit_camera()
-        self.ctx.display.clear()
-        self.ctx.display.flash_text(t("Aborting scan"), duration=1000)
         return None

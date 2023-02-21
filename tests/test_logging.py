@@ -23,7 +23,7 @@ def test_init(mocker, m5stickv, tdata):
 def test_log(mocker, m5stickv, tdata):
     m = mocker.mock_open()
     mocker.patch("builtins.open", m)
-    from krux.logging import Logger #
+    from krux.logging import Logger
     from krux.krux_settings import Settings
     from krux.krux_settings import LoggingSettings
 

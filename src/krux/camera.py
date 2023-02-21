@@ -31,6 +31,7 @@ OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
 
+
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
@@ -94,7 +95,7 @@ class Camera:
             sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
             sensor.skip_frames()
             self.antiglare_enabled = True
-            
+
     def disable_antiglare(self):
         """Disables anti-glare mode"""
         if self.cam_id == OV7740_ID:
@@ -104,7 +105,7 @@ class Camera:
             sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
             sensor.skip_frames()
             self.antiglare_enabled = False
-            
+
     def capture_qr_code_loop(self, callback):
         """Captures either singular or animated QRs and parses their contents until
         all parts of the message have been captured. The part data are then ordered

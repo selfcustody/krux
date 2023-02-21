@@ -26,6 +26,7 @@ import board
 MAX_BATTERY_MV = 4100
 MIN_BATTERY_MV = 3000
 
+
 class PowerManager:
     """PowerManager is a singleton interface for controlling the device's power management unit"""
 
@@ -57,12 +58,12 @@ class PowerManager:
         except:
             return False
         return True
-    
+
     def battery_charge_remaining(self):
         """Returns the state of charge of the device's battery"""
         if not self.has_battery():
             return 1
-        
+
         mv = int(self.pmu.getVbatVoltage())
         return max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
 
@@ -70,7 +71,7 @@ class PowerManager:
         if not self.has_battery():
             return False
         return int(self.pmu.getUSBVoltage()) > 0
-        
+
     def shutdown(self):
         """Shuts down the device"""
         if self.pmu is not None:

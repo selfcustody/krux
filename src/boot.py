@@ -53,6 +53,11 @@ from krux.power import power_manager
 if firmware.upgrade():
     power_manager.shutdown()
 
+# Unimport firware
+sys.modules.pop("krux.firmware")
+del sys.modules["krux"].firmware
+del firmware
+
 # Note: These imports come after the firmware upgrade check
 #       to allow it to have more memory to work with
 import lcd
@@ -72,8 +77,10 @@ postimport_ticks = time.ticks_ms()
 
 # If importing happened in under 1s, sleep the difference so the logo
 # will be shown
-if preimport_ticks + 1000 > postimport_ticks:
-    time.sleep_ms(preimport_ticks + 1000 - postimport_ticks)
+MIN_LOGO_TIME = 1000  # 1s
+if preimport_ticks + MIN_LOGO_TIME > postimport_ticks:
+    time.sleep_ms(preimport_ticks + MIN_LOGO_TIME - postimport_ticks)
+del preimport_ticks, postimport_ticks, MIN_LOGO_TIME
 
 ctx.display.clear()
 

@@ -60,8 +60,13 @@ class PMU_Button:
                 return RELEASED
         return 0 if pg.key.get_pressed()[self.key] else 1
 
+class Battery:
+    def getVbatVoltage(self):
+        return 3400
 
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
         PMU_Button=PMU_Button,
+        axp192=Battery,
+        axp173=Battery,
     )

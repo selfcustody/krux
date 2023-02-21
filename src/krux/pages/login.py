@@ -97,15 +97,21 @@ class Login(Page):
         if index == len(submenu.menu) - 1:
             return MENU_CONTINUE
         return status
-    
+
     def load_key_from_camera(self):
         """Handler for the 'via camera' menu item"""
         submenu = Menu(
             self.ctx,
             [
                 (t("QR Code"), self.load_key_from_qr_code),
-                (t("Tiny Seed (12)"), lambda: self.load_key_from_tiny_seed_image(w24=False)),
-                (t("Tiny Seed (24)"), lambda: self.load_key_from_tiny_seed_image(w24=True)),
+                (
+                    t("Tiny Seed (12)"),
+                    lambda: self.load_key_from_tiny_seed_image(w24=False),
+                ),
+                (
+                    t("Tiny Seed (24)"),
+                    lambda: self.load_key_from_tiny_seed_image(w24=True),
+                ),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -166,13 +172,10 @@ class Login(Page):
         index, _ = submenu.run_loop()
         min_rolls = min_rolls_12w if index == 0 else min_rolls_24w
         self.ctx.display.clear()
-        
+
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
-            t(
-                "Roll die at least %d times to generate a mnemonic."
-            )
-            % (min_rolls)
+            t("Roll die at least %d times to generate a mnemonic.") % (min_rolls)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
@@ -464,6 +467,7 @@ class Login(Page):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
         stackbit = Stackbit(self.ctx)
         words = stackbit.enter_1248()
+        del stackbit
         if words is not None:
             return self._load_key_from_words(words)
         return MENU_CONTINUE
@@ -473,17 +477,31 @@ class Login(Page):
         # w24 - true if 24 words mode
         tiny_seed = TinySeed(self.ctx)
         words = tiny_seed.enter_tiny_seed(w24)
+        del tiny_seed
         if words is not None:
             return self._load_key_from_words(words)
         return MENU_CONTINUE
 
     def load_key_from_tiny_seed_image(self, w24=False):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
+        intro = t(
+            "Paint punched dots black so they can be detected. "
+            + "Use a black background surface. "
+            + "Align camera and Tiny Seed precisely using the tracking rectangle."
+        )
+        if w24:
+            intro += t("Press ENTER when punches are correctly mapped")
+        self.ctx.display.draw_hcentered_text(intro)
+        if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+            return MENU_CONTINUE
+
         tiny_scanner = TinyScanner(self.ctx)
         words = tiny_scanner.scanner(w24)
-        if words is not None:
-            return self._load_key_from_words(words)
-        return MENU_CONTINUE
+        del tiny_scanner
+        if words is None:
+            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
+            return MENU_CONTINUE
+        return self._load_key_from_words(words)
 
     def load_passphrase(self):
         """Loads and returns a passphrase from keypad"""
@@ -538,9 +556,7 @@ class Login(Page):
                 )
         except:
             self.ctx.display.flash_text(
-                t(
-                    "SD card not detected.\n\nChanges will last until shutdown."
-                ),
+                t("SD card not detected.\n\nChanges will last until shutdown."),
                 lcd.WHITE,
             )
 

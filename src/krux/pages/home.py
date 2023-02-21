@@ -47,6 +47,7 @@ from ..input import (
 )
 import qrcode
 
+
 class Home(Page):
     """Home is the main menu page of the app"""
 
@@ -120,7 +121,8 @@ class Home(Page):
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
-        """Disables touch and displays compact SeedQR code with grid to help drawing"""
+        """Disables touch and displays compact SeedQR code with grid to help 
+        drawing"""
 
         def draw_grided_qr(mode, qr_size):
             """Draws grided QR"""
@@ -227,6 +229,7 @@ class Home(Page):
             else:
                 self.ctx.printer.print_string("SeedQR\n\n")
             self.ctx.printer.print_qr_code(code)
+        return MENU_CONTINUE
 
     def stackbit(self):
         """Displays which numbers 1248 user should punch on 1248 steel card"""
