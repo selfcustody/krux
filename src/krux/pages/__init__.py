@@ -594,14 +594,14 @@ class Menu:
                 padding + 2,
                 cylinder_height // 2 - 1,
                 cylinder_height // 2 - 1,
-                lcd.WHITE,
+                lcd.GREEN,
             )
             self.ctx.display.fill_rectangle(
                 self.ctx.display.width() - padding - cylinder_length // 2 - 3,
                 padding + cylinder_height // 2 - 1,
                 3,
                 1,
-                lcd.WHITE,
+                lcd.GREEN,
             )
 
     def _draw_touch_menu(self, selected_item_index):

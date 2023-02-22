@@ -75,9 +75,9 @@ class Home(Page):
                 (t("Words"), self.display_mnemonic_words),
                 (t("Plaintext QR"), self.display_standard_qr),
                 (t("Compact SeedQR"), lambda: self.display_seed_qr(True)),
-                ("SeedQR", self.display_seed_qr),
-                ("Stackbit 1248", self.stackbit),
-                ("Tiny Seed", self.tiny_seed),
+                (t("SeedQR"), self.display_seed_qr),
+                (t("Stackbit 1248"), self.stackbit),
+                (t("Tiny Seed"), self.tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
