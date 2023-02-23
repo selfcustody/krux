@@ -230,12 +230,6 @@ class Home(Page):
             code, qr_size = self._seed_qr()
             label = t("SeedQR")
         label += t("\nSwipe to change mode")
-        if self.ctx.input.touch is not None:
-            self.ctx.display.draw_hcentered_text(
-                label,
-                self.ctx.display.qr_offset() + self.ctx.display.font_height,
-                color=lcd.WHITE,
-            )
         mode = 0
         lr_index = 0
         region_size = 7 if qr_size == 21 else 5
@@ -243,6 +237,12 @@ class Home(Page):
         button = None
         while button not in (SWIPE_DOWN, SWIPE_UP):
             draw_grided_qr(mode, qr_size)
+            if self.ctx.input.touch is not None:
+                self.ctx.display.draw_hcentered_text(
+                    label,
+                    self.ctx.display.qr_offset() + self.ctx.display.font_height,
+                    color=lcd.WHITE,
+                )
             # # Avoid the need of double click
             # self.ctx.input.buttons_active = True
             button = self.ctx.input.wait_for_button()
