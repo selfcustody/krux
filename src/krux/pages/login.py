@@ -53,6 +53,7 @@ SENTINEL_DIGITS = "11111"
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
 DIGITS = "0123456789"
+DIGITS_HEX = "0123456789ABCDEF"
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
@@ -122,7 +123,7 @@ class Login(Page):
             self.ctx,
             [
                 (t("Words"), self.load_key_from_text),
-                (t("Word Numbers"), self.load_key_from_digits),
+                (t("Word Numbers"), self.pre_load_key_from_digits),
                 (t("Tiny Seed (Bits)"), self.load_key_from_tiny_seed),
                 (t("Stackbit 1248"), self.load_key_from_1248),
                 (t("Back"), lambda: MENU_EXIT),
@@ -446,8 +447,52 @@ class Login(Page):
             title, LETTERS, to_word, None, autocomplete, possible_letters
         )
 
-    def load_key_from_digits(self):
+    def pre_load_key_from_digits(self):
         """Handler for the 'via numbers' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Decimal"), lambda: MENU_EXIT),
+                (t("Hexadecimal"), lambda: MENU_EXIT),
+                (t("Octal"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        self.ctx.display.clear()
+        if index == 0:
+            return self.load_key_from_digits()
+        if index == 1:
+            return self.load_key_from_hexadecimal()
+        return MENU_CONTINUE
+    
+    def load_key_from_hexadecimal(self):
+        """Handler for the 'via numbers'>'Hexadecimal' submenu item"""
+        title = t("Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800.")
+
+        def autocomplete(prefix):
+            if len(prefix) == 3 or (len(prefix) == 2 and int(prefix, 16) > 128):
+                return prefix
+            return None
+
+        def to_word(user_input):
+            word_num = int(user_input, 16)
+            if 0 < word_num <= 2048:
+                return WORDLIST[word_num - 1]
+            return ""
+
+        def possible_letters(prefix):
+            if prefix == "":
+                return DIGITS_HEX.replace("0", "")
+            if prefix == "80":
+                return "0"
+            return DIGITS_HEX
+
+        return self._load_key_from_keypad(
+            title, DIGITS_HEX, to_word, autocomplete_fn=autocomplete, possible_keys_fn=possible_letters
+        )
+
+    def load_key_from_digits(self):
+        """Handler for the 'via numbers'>'Decimal' submenu item"""
         title = t("Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.")
 
         def to_word(user_input):
@@ -459,10 +504,9 @@ class Login(Page):
         def possible_letters(prefix):
             if prefix == "":
                 return DIGITS.replace("0", "")
-            elif prefix == "204":
+            if prefix == "204":
                 return DIGITS.replace("9", "")
-            else:
-                return DIGITS
+            return DIGITS
 
         return self._load_key_from_keypad(
             title, DIGITS, to_word, SENTINEL_DIGITS, possible_keys_fn=possible_letters
@@ -658,7 +702,7 @@ class Login(Page):
                 break
             for i, category in enumerate(categories):
                 if current_category == category:
-                    if btn == BUTTON_PAGE or btn == None:
+                    if btn in (BUTTON_PAGE, None):
                         new_category = categories[(i + 1) % len(categories)]
                     elif btn == BUTTON_PAGE_PREV:
                         new_category = categories[(i - 1) % len(categories)]

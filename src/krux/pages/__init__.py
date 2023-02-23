@@ -541,6 +541,7 @@ class Menu:
         self.draw_battery_indicator()
 
     def draw_logging_indicator(self):
+        """Draws a square mark if logging is enabled"""
         if Settings().logging.level.lower() == "none":
             return
 
