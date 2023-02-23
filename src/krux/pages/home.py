@@ -121,7 +121,7 @@ class Home(Page):
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
-        """Disables touch and displays compact SeedQR code with grid to help 
+        """Disables touch and displays compact SeedQR code with grid to help
         drawing"""
 
         def draw_grided_qr(mode, qr_size):

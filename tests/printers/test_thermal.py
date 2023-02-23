@@ -95,6 +95,7 @@ def test_clear(mocker, m5stickv, mock_uart_cls):
 
     assert p.write_bytes.call_count == 5
 
+
 """
 TODO: FIX this broken test
 
