@@ -455,8 +455,16 @@ class Login(Page):
             if 0 < word_num <= 2048:
                 return WORDLIST[word_num - 1]
             return ""
+        
+        def possible_letters(prefix):
+            if prefix == "":
+                return DIGITS.replace("0","")
+            elif prefix == "204":
+                return DIGITS.replace("9","")
+            else:
+                return DIGITS
 
-        return self._load_key_from_keypad(title, DIGITS, to_word, SENTINEL_DIGITS)
+        return self._load_key_from_keypad(title, DIGITS, to_word, SENTINEL_DIGITS, possible_keys_fn=possible_letters)
 
     def load_key_from_1248(self):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
