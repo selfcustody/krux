@@ -26,7 +26,7 @@ import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
-import urtypes
+from urtypes.crypto.bip39 import BIP39
 from ..metadata import VERSION
 from ..settings import CategorySetting, NumberSetting
 from ..krux_settings import Settings
@@ -283,7 +283,7 @@ class Login(Page):
 
         words = []
         if qr_format == FORMAT_UR:
-            words = urtypes.crypto.BIP39.from_cbor(data.cbor).words
+            words = BIP39.from_cbor(data.cbor).words
         else:
             try:
                 data_str = data.decode() if not isinstance(data, str) else data

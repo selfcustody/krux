@@ -75,29 +75,48 @@ def tdata(mocker):
         SIGNED_P2WSH_PSBT_B64,
     )
 
+def create_ctx(mocker, btn_seq, wallet, printer, touch_seq = None):
+    """Helper to create mocked context obj"""
+    ctx = mock_context(mocker)
+    ctx.power_manager.battery_charge_remaining.return_value = 1
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
+
+    ctx.wallet = wallet
+    ctx.printer = printer
+
+    if touch_seq:
+        ctx.input.touch = mocker.MagicMock(
+                current_index=mocker.MagicMock(side_effect=touch_seq)
+            )
+    return ctx
+
 
 def test_mnemonic_words(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
         # See 12 Words
-        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_ENTER, BUTTON_ENTER]),
+        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [
+        BUTTON_ENTER, BUTTON_ENTER, 
+        BUTTON_PAGE_PREV, BUTTON_ENTER # change to btn Back and click to return to home init screen
+        ]),
         # See 24 Words
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
+             BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ], 
         ),
     ]
+    num = 0
     for case in cases:
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
-        ctx.wallet = case[0]
-        ctx.printer = case[1]
-
+        print(num)
+        num=num+1
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
         mocker.spy(home, "display_mnemonic")
@@ -112,50 +131,67 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
 def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
         # No print prompt
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
-            None,
-            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+            None, 
+            [
+                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
-            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         # Print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         # Decline to print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
     ]
+    num = 0
     for case in cases:
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
-        ctx.wallet = case[0]
-        ctx.printer = case[1]
-
+        print(num)
+        num=num+1
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
         mocker.spy(home, "display_qr_codes")
@@ -181,34 +217,52 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             None,
-            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
-            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         # Print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         # Decline to print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
         ),
         # Changing grid thickness
         (
@@ -221,15 +275,15 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
             ],
         ),
     ]
+    num = 0
     for case in cases:
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
-        ctx.wallet = case[0]
-        ctx.printer = case[1]
-
+        print(num)
+        num=num+1
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
         mocker.spy(home, "_binary_seed_qr")
@@ -245,7 +299,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
 def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_TOUCH, BUTTON_PAGE
+    from krux.input import BUTTON_TOUCH, BUTTON_PAGE_PREV, BUTTON_ENTER
     from krux.qr import FORMAT_NONE
 
     cases = [
@@ -253,51 +307,65 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             None,
-            [BUTTON_TOUCH, BUTTON_TOUCH],
+            [
+                BUTTON_TOUCH, BUTTON_TOUCH, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
             [1, 0],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
-            [BUTTON_TOUCH, BUTTON_TOUCH],
+            [
+                BUTTON_TOUCH, BUTTON_TOUCH, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
             [1, 0],
         ),
         # Print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [
+                BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
             [1, 0, 0],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [
+                BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
             [1, 0, 0],
         ),
         # Decline to print
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [
+                BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
             [1, 0, 1],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [
+                BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH, 
+                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+            ],
             [1, 0, 1],
         ),
     ]
+    num=0
     for case in cases:
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
-        ctx.input.touch = mocker.MagicMock(
-            current_index=mocker.MagicMock(side_effect=case[3])
-        )
-        ctx.wallet = case[0]
-        ctx.printer = case[1]
-
+        print(num)
+        num=num+1
+        ctx = create_ctx(mocker, case[2], case[0], case[1], touch_seq=case[3])
         home = Home(ctx)
 
         mocker.spy(home, "display_qr_codes")
@@ -383,11 +451,7 @@ def test_public_key(mocker, m5stickv, tdata):
         ),
     ]
     for case in cases:
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[2])
-        ctx.wallet = case[0]
-        ctx.printer = case[1]
-
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
         mocker.spy(home, "display_qr_codes")
@@ -494,11 +558,7 @@ def test_wallet(mocker, m5stickv, tdata):
         if case[0]:
             wallet.load(case[2], FORMAT_PMOFN)
 
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[4])
-        ctx.wallet = wallet
-        ctx.printer = case[3]
-
+        ctx = create_ctx(mocker, case[4], wallet, case[3])
         home = Home(ctx)
         mocker.patch.object(
             home, "capture_qr_code", new=lambda: (case[2], FORMAT_PMOFN)
@@ -748,11 +808,7 @@ def test_scan_address(mocker, m5stickv, tdata):
         if case[2]:
             wallet.load(case[1], FORMAT_PMOFN)
 
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[6])
-        ctx.wallet = wallet
-        ctx.printer = case[4]
-
+        ctx = create_ctx(mocker, case[6], wallet, case[4])
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], FORMAT_NONE))
         mocker.patch.object(
@@ -958,11 +1014,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         if case[2]:
             wallet.load(case[1], FORMAT_PMOFN)
 
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[9])
-        ctx.wallet = wallet
-        ctx.printer = case[8]
-
+        ctx = create_ctx(mocker, case[9], wallet, case[8])
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], case[4]))
         mocker.patch.object(
@@ -1128,11 +1180,7 @@ def test_sign_message(mocker, m5stickv, tdata):
     for case in cases:
         wallet = Wallet(tdata.SINGLEKEY_SIGNING_KEY)
 
-        ctx = mock_context(mocker)
-        ctx.input.wait_for_button = mocker.MagicMock(side_effect=case[3])
-        ctx.wallet = wallet
-        ctx.printer = case[2]
-
+        ctx = create_ctx(mocker, case[3], wallet, case[2])
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
         mocker.patch.object(
