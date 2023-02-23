@@ -455,16 +455,18 @@ class Login(Page):
             if 0 < word_num <= 2048:
                 return WORDLIST[word_num - 1]
             return ""
-        
+
         def possible_letters(prefix):
             if prefix == "":
-                return DIGITS.replace("0","")
+                return DIGITS.replace("0", "")
             elif prefix == "204":
-                return DIGITS.replace("9","")
+                return DIGITS.replace("9", "")
             else:
                 return DIGITS
 
-        return self._load_key_from_keypad(title, DIGITS, to_word, SENTINEL_DIGITS, possible_keys_fn=possible_letters)
+        return self._load_key_from_keypad(
+            title, DIGITS, to_word, SENTINEL_DIGITS, possible_keys_fn=possible_letters
+        )
 
     def load_key_from_1248(self):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
@@ -487,7 +489,7 @@ class Login(Page):
         index, _ = submenu.run_loop()
         w24 = index == 1
         self.ctx.display.clear()
-        
+
         tiny_seed = TinySeed(self.ctx)
         words = tiny_seed.enter_tiny_seed(w24)
         del tiny_seed
@@ -507,7 +509,7 @@ class Login(Page):
         index, _ = submenu.run_loop()
         w24 = index == 1
         self.ctx.display.clear()
-        
+
         intro = t(
             "Paint punched dots black so they can be detected. "
             + "Use a black background surface. "
