@@ -308,23 +308,24 @@ class Display:
         time.sleep_ms(duration)
         self.clear()
 
-    def draw_qr_code(self, offset_y, qr_code, bright=False):
-        """Draws a QR code on the screen"""
-        # Add a 1px white border around the code before displaying
+    def add_qr_frame(self, qr_code):
+        """Add a 1px white border around the code before displaying"""
         qr_code = qr_code.strip()
         lines = qr_code.split("\n")
         size = len(lines)
-        new_lines = ["0" * (size + 2)]
+        size += 2
+        new_lines = ["0" * size]
         for line in lines:
             new_lines.append("0" + line + "0")
-        new_lines.append("0" * (size + 2))
-        qr_code = "\n".join(new_lines)
-        if bright:
-            lcd.draw_qr_code(offset_y, qr_code, self.width(), lcd.BLACK, lcd.WHITE)
-        else:
-            lcd.draw_qr_code(
-                offset_y, qr_code, self.width(), QR_DARK_COLOR, QR_LIGHT_COLOR
-            )
+        new_lines.append("0" * size)
+        return size, "\n".join(new_lines)
+
+    def draw_qr_code(
+        self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
+    ):
+        """Draws a QR code on the screen"""
+        _, qr_code = self.add_qr_frame(qr_code)
+        lcd.draw_qr_code(offset_y, qr_code, self.width(), dark_color, light_color)
 
     def set_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""

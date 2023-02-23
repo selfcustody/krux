@@ -185,8 +185,7 @@ class AdafruitPrinter(Printer):
 
         scale = Settings().printer.thermal.adafruit.paper_width // size
         scale *= Settings().printer.thermal.adafruit.scale
-        scale //= 200  # 100*2 because printer will scale 2X later to save data 
-        # Maximum size is //2 Command will scale up by 2x later
+        scale //= 200  # 100*2 because printer will scale 2X later to save data
         # Being at full size sometimes makes prints more faded (can't apply too much heat?)
 
         line_bytes_size = (size * scale + 7) // 8  # amount of bytes per line

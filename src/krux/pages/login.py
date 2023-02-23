@@ -479,7 +479,7 @@ class Login(Page):
         index, _ = submenu.run_loop()
         w24 = index == 1
         self.ctx.display.clear()
-        
+
         tiny_seed = TinySeed(self.ctx)
         words = tiny_seed.enter_tiny_seed(w24)
         del tiny_seed
@@ -499,7 +499,7 @@ class Login(Page):
         index, _ = submenu.run_loop()
         w24 = index == 1
         self.ctx.display.clear()
-        
+
         intro = t(
             "Paint punched dots black so they can be detected. "
             + "Use a black background surface. "
