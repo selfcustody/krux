@@ -656,7 +656,7 @@ class Login(Page):
                 break
             for i, category in enumerate(categories):
                 if current_category == category:
-                    if btn == BUTTON_PAGE:
+                    if btn == BUTTON_PAGE or btn == None:
                         new_category = categories[(i + 1) % len(categories)]
                     elif btn == BUTTON_PAGE_PREV:
                         new_category = categories[(i - 1) % len(categories)]
