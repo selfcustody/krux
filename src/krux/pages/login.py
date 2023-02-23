@@ -464,10 +464,12 @@ class Login(Page):
         if index == 1:
             return self.load_key_from_hexadecimal()
         return MENU_CONTINUE
-    
+
     def load_key_from_hexadecimal(self):
         """Handler for the 'via numbers'>'Hexadecimal' submenu item"""
-        title = t("Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800.")
+        title = t(
+            "Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800."
+        )
 
         def autocomplete(prefix):
             if len(prefix) == 3 or (len(prefix) == 2 and int(prefix, 16) > 128):
@@ -488,12 +490,21 @@ class Login(Page):
             return DIGITS_HEX
 
         return self._load_key_from_keypad(
-            title, DIGITS_HEX, to_word, autocomplete_fn=autocomplete, possible_keys_fn=possible_letters
+            title,
+            DIGITS_HEX,
+            to_word,
+            autocomplete_fn=autocomplete,
+            possible_keys_fn=possible_letters,
         )
 
     def load_key_from_digits(self):
         """Handler for the 'via numbers'>'Decimal' submenu item"""
         title = t("Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.")
+
+        def autocomplete(prefix):
+            if len(prefix) == 4 or (len(prefix) == 3 and int(prefix) > 204):
+                return prefix
+            return None
 
         def to_word(user_input):
             word_num = int(user_input)
@@ -509,7 +520,12 @@ class Login(Page):
             return DIGITS
 
         return self._load_key_from_keypad(
-            title, DIGITS, to_word, SENTINEL_DIGITS, possible_keys_fn=possible_letters
+            title,
+            DIGITS,
+            to_word,
+            SENTINEL_DIGITS,
+            autocomplete_fn=autocomplete,
+            possible_keys_fn=possible_letters,
         )
 
     def load_key_from_1248(self):
