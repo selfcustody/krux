@@ -447,7 +447,7 @@ class Login(Page):
         )
 
     def load_key_from_digits(self):
-        """Handler for the 'via numbers'>'Decimal' submenu item"""
+        """Handler for the 'via numbers' menu item"""
         title = t("Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.")
 
         def autocomplete(prefix):
