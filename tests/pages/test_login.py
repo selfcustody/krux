@@ -674,19 +674,19 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
 
     cases = [
         (
-            [BUTTON_ENTER]
+            [BUTTON_ENTER] # 1 press confirm msg
             + (
-                # 2
-                [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+                # 1 press change to number "2" and 1 press to select
+                [BUTTON_PAGE, BUTTON_ENTER]
                 +
-                # Go + Confirm
+                # 10 press to place on btn Go
                 [BUTTON_PAGE for _ in range(10)]
-                + [BUTTON_ENTER, BUTTON_ENTER]
+                + [BUTTON_ENTER, BUTTON_ENTER] # 1 press to select and 1 press to confirm
             )
-            * 11
+            * 11 # repeat selection of word=2 (ability) eleven times
             + (
                 # 1
-                [BUTTON_PAGE, BUTTON_ENTER]
+                [BUTTON_ENTER]
                 +
                 # 2
                 [BUTTON_PAGE, BUTTON_ENTER]
@@ -696,7 +696,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 + [BUTTON_ENTER]
                 +
                 # 3
-                [BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+                [BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER] # twelve word=1203 (north)
                 # Confirm
                 + [BUTTON_ENTER]
             )
@@ -709,7 +709,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             [BUTTON_ENTER]
             + (
                 # 2
-                [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+                [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # Go + Confirm
                 [BUTTON_PAGE for _ in range(10)]
@@ -718,13 +718,16 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             * 11
             +
             # Go + Confirm
-            [BUTTON_PAGE for _ in range(12)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
+            [BUTTON_PAGE for _ in range(11)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
+    num=0
     for case in cases:
+        print(num)
+        num=num+1
         ctx = create_ctx(mocker, case[0])
         login = Login(ctx)
 
@@ -1056,7 +1059,7 @@ def test_settings(m5stickv, mocker, mocker_printer):
 def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
     import krux
     from krux.pages.login import Login
-    from krux.input import BUTTON_TOUCH, BUTTON_ENTER
+    from krux.input import BUTTON_TOUCH
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
 
     from krux.translations import translation_table
@@ -1159,7 +1162,13 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         print("test_settings_on_amigo_tft cases[" + str(case_num) + "]")
         case_num = case_num + 1
 
-        ctx = create_ctx(mocker, BUTTON_TOUCH, case[0])
+        ctx = mock_context(mocker)
+        ctx.power_manager.battery_charge_remaining.return_value = 1
+        ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_TOUCH)
+        ctx.input.touch = mocker.MagicMock(
+            current_index=mocker.MagicMock(side_effect=case[0])
+        )
+        
         mocker.patch.object(ctx.input.touch, "x_regions", (0, 100, 200, 300))
         mocker.patch.object(ctx.input.touch, "y_regions", (100, 200))
 

@@ -65,6 +65,10 @@ class Battery:
         return 3400
     def getUSBVoltage(self):
         return 3400
+    def enablePMICSleepMode(self, val):
+        pass
+    def setEnterSleepMode(self):
+        pass
     
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
