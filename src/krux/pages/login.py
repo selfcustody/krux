@@ -54,6 +54,7 @@ D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
 DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
+DIGITS_OCT = "01234567"
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
@@ -463,7 +464,41 @@ class Login(Page):
             return self.load_key_from_digits()
         if index == 1:
             return self.load_key_from_hexadecimal()
+        if index == 2:
+            return self.load_key_from_octal()
         return MENU_CONTINUE
+    
+    def load_key_from_octal(self):
+        """Handler for the 'via numbers'>'Octal' submenu item"""
+        title = t(
+            "Enter each word of your BIP-39 mnemonic as a number in octal from 1 to 4000."
+        )
+
+        def autocomplete(prefix):
+            if len(prefix) == 4 or (len(prefix) == 3 and int(prefix, 8) > 256):
+                return prefix
+            return None
+
+        def to_word(user_input):
+            word_num = int(user_input, 8)
+            if 0 < word_num <= 2048:
+                return WORDLIST[word_num - 1]
+            return ""
+
+        def possible_letters(prefix):
+            if prefix == "":
+                return DIGITS_OCT.replace("0", "")
+            if prefix == "400":
+                return "0"
+            return DIGITS_OCT
+
+        return self._load_key_from_keypad(
+            title,
+            DIGITS_OCT,
+            to_word,
+            autocomplete_fn=autocomplete,
+            possible_keys_fn=possible_letters,
+        )
 
     def load_key_from_hexadecimal(self):
         """Handler for the 'via numbers'>'Hexadecimal' submenu item"""
