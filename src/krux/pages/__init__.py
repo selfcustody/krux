@@ -212,7 +212,7 @@ class Page:
             return 0
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading camera"))
+        self.ctx.display.draw_centered_text(t("Loading Camera"))
         self.ctx.display.to_landscape()
         code = None
         qr_format = None
@@ -407,6 +407,7 @@ class Page:
         return answer
     
     def display_centered_text(self, message, duration=FLASH_MSG_TIME, color=lcd.WHITE, bg_color=lcd.BLACK):
+        """Display a text for duration ms or until you press a button"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(message, color, bg_color)
         self.ctx.input.wait_for_press(block=False, wait_duration=duration)
