@@ -76,16 +76,21 @@ class LoggingSettings(SettingsNamespace):
     WARN = 30
     INFO = 20
     DEBUG = 10
+    NONE_TXT = "NONE"
+    ERROR_TXT = "ERROR"
+    WARN_TXT = "WARN"
+    INFO_TXT = "INFO"
+    DEBUG_TXT = "DEBUG"
     LEVEL_NAMES = {
-        NONE: "NONE",
-        ERROR: "ERROR",
-        WARN: "WARN",
-        INFO: "INFO",
-        DEBUG: "DEBUG",
+        NONE: NONE_TXT,
+        ERROR: ERROR_TXT,
+        WARN: WARN_TXT,
+        INFO: INFO_TXT,
+        DEBUG: DEBUG_TXT,
     }
 
     namespace = "settings.logging"
-    level = CategorySetting("level", "NONE", list(LEVEL_NAMES.values()))
+    level = CategorySetting("level", NONE_TXT, list(LEVEL_NAMES.values()))
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""

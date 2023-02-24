@@ -38,7 +38,8 @@ from ..input import (
 )
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
-from ..krux_settings import t, Settings
+from ..krux_settings import t, Settings, LoggingSettings
+from ..settings import DARKGREEN
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -536,12 +537,23 @@ class Menu:
 
     def draw_logging_indicator(self):
         """Draws a square mark if logging is enabled"""
-        if Settings().logging.level.lower() == "none":
-            return
+        log_level = Settings().logging.level
 
-        self.ctx.display.fill_rectangle(5, 5, 8, 8, lcd.RED)
+        if log_level == LoggingSettings.NONE_TXT:
+            return
+        
+        color = lcd.RED # ERROR
+        if log_level == LoggingSettings.WARN_TXT:
+            color = lcd.ORANGE
+        if log_level == LoggingSettings.INFO_TXT:
+            color = DARKGREEN
+        if log_level == LoggingSettings.DEBUG_TXT:
+            color = lcd.MAGENTA
+
+        # print the square at the top left
+        self.ctx.display.fill_rectangle(5, 5, 8, 8, color)
         self.ctx.display.fill_rectangle(6, 6, 6, 6, lcd.BLACK)
-        self.ctx.display.fill_rectangle(7, 7, 4, 4, lcd.RED)
+        self.ctx.display.fill_rectangle(7, 7, 4, 4, color)
 
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""

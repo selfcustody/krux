@@ -28,8 +28,8 @@ from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
 from urtypes.crypto.bip39 import BIP39
 from ..metadata import VERSION
-from ..settings import CategorySetting, NumberSetting
-from ..krux_settings import Settings
+from ..settings import CategorySetting, NumberSetting, DARKGREEN
+from ..krux_settings import Settings, LoggingSettings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word
@@ -66,6 +66,12 @@ D6_24W_MIN_ROLLS = 99
 D20_12W_MIN_ROLLS = 30
 D20_24W_MIN_ROLLS = 60
 
+CATEGORY_SETTING_COLOR_DICT = {
+    LoggingSettings.ERROR_TXT: lcd.RED, 
+    LoggingSettings.WARN_TXT: lcd.ORANGE,
+    LoggingSettings.INFO_TXT: DARKGREEN,
+    LoggingSettings.DEBUG_TXT: lcd.MAGENTA,
+}
 
 class Login(Page):
     """Represents the login page of the app"""
@@ -740,10 +746,14 @@ class Login(Page):
         starting_category = setting.__get__(settings_namespace)
         while True:
             current_category = setting.__get__(settings_namespace)
+            color = lcd.WHITE
+            if current_category in CATEGORY_SETTING_COLOR_DICT:
+                color = CATEGORY_SETTING_COLOR_DICT[current_category]
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                settings_namespace.label(setting.attr) + "\n" + str(current_category)
+                settings_namespace.label(setting.attr) + "\n" + str(current_category),
+                color
             )
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
