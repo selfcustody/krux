@@ -33,6 +33,7 @@ QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
+FLASH_MSG_TIME = 2000
 
 class Display:
     """Display is a singleton interface for interacting with the device's display"""
@@ -298,7 +299,7 @@ class Display:
         offset_y = max(0, (self.height() - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, bg_color)
 
-    def flash_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK, duration=2000):
+    def flash_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK, duration=FLASH_MSG_TIME):
         """Flashes text centered on the display for duration ms"""
         self.clear()
         self.draw_centered_text(text, color, bg_color)

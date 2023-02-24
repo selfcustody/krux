@@ -147,8 +147,9 @@ class Input:
             self.entropy += 1
             wdt.feed()
 
-    def wait_for_press(self, block=True):
-        """Wait for first button press"""
+    def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
+        """Wait for first button press or for wait_duration ms. 
+        Use block to wait indefinitely"""
         start_time = time.ticks_ms()
         while True:
             if self.enter_value() == PRESSED:
@@ -161,7 +162,7 @@ class Input:
                 return BUTTON_TOUCH
             self.entropy += 1
             wdt.feed()  # here is where krux spends most of its time
-            if not block and time.ticks_ms() > start_time + QR_ANIM_PERIOD:
+            if not block and time.ticks_ms() > start_time + wait_duration:
                 return None
             time.sleep_ms(10)
 

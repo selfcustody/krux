@@ -36,7 +36,7 @@ from ..input import (
     SWIPE_LEFT,
     SWIPE_UP,
 )
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, FLASH_MSG_TIME
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, LoggingSettings
 from ..settings import DARKGREEN
@@ -405,6 +405,12 @@ class Page:
                         return False
                     return True
         return answer
+    
+    def display_centered_text(self, message, duration=FLASH_MSG_TIME):
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(message)
+        self.ctx.input.wait_for_press(block=False, wait_duration=duration)
+        self.ctx.display.clear()
 
     def shutdown(self):
         """Handler for the 'shutdown' menu item"""
@@ -492,7 +498,7 @@ class Menu:
 
             self.draw_status_bar()
 
-            btn = self.ctx.input.wait_for_button(block=True)
+            btn = self.ctx.input.wait_for_button()
             if self.ctx.input.touch is not None:
                 if btn == BUTTON_TOUCH:
                     selected_item_index = self.ctx.input.touch.current_index()

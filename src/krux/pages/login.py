@@ -66,6 +66,8 @@ D6_24W_MIN_ROLLS = 99
 D20_12W_MIN_ROLLS = 30
 D20_24W_MIN_ROLLS = 60
 
+SD_MSG_TIME = 2500
+
 CATEGORY_SETTING_COLOR_DICT = {
     LoggingSettings.ERROR_TXT: lcd.RED, 
     LoggingSettings.WARN_TXT: lcd.ORANGE,
@@ -677,15 +679,9 @@ class Login(Page):
         try:
             # Check for SD hot-plug
             with SDHandler():
-                self.ctx.display.flash_text(
-                    t("Your changes will be kept on the SD card."),
-                    lcd.WHITE,
-                )
+                self.display_centered_text(t("Your changes will be kept on the SD card."), duration=SD_MSG_TIME)
         except:
-            self.ctx.display.flash_text(
-                t("SD card not detected.\n\nChanges will last until shutdown."),
-                lcd.WHITE,
-            )
+            self.display_centered_text(t("SD card not detected.\n\nChanges will last until shutdown."), duration=SD_MSG_TIME)
 
         return self.namespace(Settings())()
 
