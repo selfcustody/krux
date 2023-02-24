@@ -498,8 +498,7 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
     krux.input.wdt.feed.assert_called()
 
 
-# TODO: FIX THESE 2 tests below (infinite execution)
-"""
+""" TODO: FIX THESE 2 tests below (infinite execution)
 
 def test_touch_indexing(mocker, amigo_tft):
     import threading

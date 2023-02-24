@@ -19,7 +19,7 @@ def create_ctx(mocker, btn_seq, touch_seq=None):
         )
     return ctx
 
-"""
+
 ################### new words from dice tests
 
 
@@ -933,7 +933,7 @@ def test_passphrase(amigo_tft, mocker, mocker_printer):
     login.load_key_from_text()
     assert ctx.input.wait_for_button.call_count == len(case)
 
-"""
+
 # import unittest
 # tc = unittest.TestCase()
 # tc.assertEqual(Settings().i18n.locale, 'b')

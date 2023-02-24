@@ -96,8 +96,7 @@ def test_clear(mocker, m5stickv, mock_uart_cls):
     assert p.write_bytes.call_count == 5
 
 
-"""
-TODO: FIX this broken test
+""" TODO: FIX this broken test
 
 def test_print_qr_code(mocker, m5stickv, mock_uart_cls):
     mocker.patch("krux.printers.thermal.UART", new=mock_uart_cls)

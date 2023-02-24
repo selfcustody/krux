@@ -406,9 +406,9 @@ class Page:
                     return True
         return answer
     
-    def display_centered_text(self, message, duration=FLASH_MSG_TIME):
+    def display_centered_text(self, message, duration=FLASH_MSG_TIME, color=lcd.WHITE, bg_color=lcd.BLACK):
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(message)
+        self.ctx.display.draw_centered_text(message, color, bg_color)
         self.ctx.input.wait_for_press(block=False, wait_duration=duration)
         self.ctx.display.clear()
 
