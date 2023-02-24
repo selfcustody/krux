@@ -34,6 +34,7 @@
     "Driver": "Driver",
     "Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.": "Geben Sie jedes Wort Ihrer BIP-39 Mnemonic als Zahl von 1 bis 2048 ein.",
     "Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800.": "Geben Sie jedes Wort Ihrer BIP-39-Mnemonik als Hexadezimalzahl von 1 bis 800 ein.",
+    "Enter each word of your BIP-39 mnemonic as a number in octal from 1 to 4000.": "Geben Sie jedes Wort Ihrer BIP-39-Mnemonik als Oktalzahl von 1 bis 4000 ein.",
     "Enter each word of your BIP-39 mnemonic.": "Geben Sie jedes Wort Ihrer BIP-39 Mnemonic ein.",
     "Error:\n%s": "Fehler:\n%s",
     "Esc": "Esc",

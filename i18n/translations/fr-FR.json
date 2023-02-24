@@ -34,6 +34,7 @@
     "Driver": "Conducteur",
     "Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.": "Entrez chaque mot de votre BIP-39 mnémonique sous la forme d'un nombre 1 jusqu'à 2048.",
     "Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800.": "Entrez chaque mot de votre mnémonique BIP-39 sous la forme d'un nombre en hexadécimal de 1 à 800.",
+    "Enter each word of your BIP-39 mnemonic as a number in octal from 1 to 4000.": "Entrez chaque mot de votre mnémonique BIP-39 sous la forme d'un nombre en octal de 1 à 4000.",
     "Enter each word of your BIP-39 mnemonic.": "Entrez chaque mot de votre BIP-39 mnémonique.",
     "Error:\n%s": "Erreur:\n%s",
     "Esc": "Esc",

@@ -34,6 +34,7 @@
     "Driver": "Người cầm lái",
     "Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.": "Nhập từng kí tự của mã mnemonic BIP-39 của bạn dưới dạng số từ 1 đến 2048.",
     "Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800.": "Nhập từng từ trong bản ghi nhớ BIP-39 của bạn dưới dạng số thập lục phân từ 1 đến 800.",
+    "Enter each word of your BIP-39 mnemonic as a number in octal from 1 to 4000.": "Nhập từng từ trong bản ghi nhớ BIP-39 của bạn dưới dạng số bát phân từ 1 đến 4000.",
     "Enter each word of your BIP-39 mnemonic.": "Nhập từng kí tự của mã mnemonic BIP-39 của bạn.",
     "Error:\n%s": "Lỗi:\n%s",
     "Esc": "Esc",
