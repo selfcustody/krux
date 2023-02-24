@@ -235,24 +235,35 @@ class Page:
             )
         return (code, qr_format)
 
-    def highlight_qr_region(self, code, region=(0, 0, 0, 0)):
+    def highlight_qr_region(self, code, region=(0, 0, 0, 0), zoom=False):
         """Draws in white a highlighted region of the QR code"""
         reg_x, reg_y, reg_width, reg_height = region
         size, code = self.ctx.display.add_qr_frame(code)
-        # starting size is the amount of blocks per line
         max_width = self.ctx.display.width()
-        # scale is how many pixels per block
-        scale = max_width // size
-        qr_width = size * scale
-        offset = (max_width - qr_width) // 2
+        if zoom:
+            max_width -= DEFAULT_PADDING
+            if size == 23:  # 21 + 2(frame)
+                qr_size = 7
+            else:
+                qr_size = 5
+            offset_x = 0
+            offset_y = 0
+        else:
+            qr_size = size
+            offset_x = reg_x + 1
+            offset_y = reg_y + 1
+
+        scale = max_width // qr_size
+        qr_width = qr_size * scale
+        offset = (self.ctx.display.width() - qr_width) // 2
         for y in range(reg_height):  # vertical blocks loop
             for x in range(reg_width):  # horizontal blocks loop
                 xy_index = (reg_y + y + 1) * (size + 1)
                 xy_index += reg_x + x + 1
                 if code[xy_index] == "0":
                     self.ctx.display.fill_rectangle(
-                        offset + (reg_x + x + 1) * scale,
-                        offset + (reg_y + y + 1) * scale,
+                        offset + (offset_x + x) * scale,
+                        offset + (offset_y + y) * scale,
                         scale,
                         scale,
                         lcd.WHITE,

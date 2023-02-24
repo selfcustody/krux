@@ -49,8 +49,9 @@ import qrcode
 
 STANDARD_MODE = 0
 LINE_MODE = 1
-REGION_MODE = 2
-TRANSCRIBE_MODE = 3
+ZOOMED_R_MODE = 2
+REGION_MODE = 3
+TRANSCRIBE_MODE = 4
 
 
 class Home(Page):
@@ -129,6 +130,14 @@ class Home(Page):
         """Disables touch and displays compact SeedQR code with grid to help
         drawing"""
 
+        def region_legend(row, column):
+            region_char = chr(65 + row)
+            self.ctx.display.draw_hcentered_text(
+                t("Region: ") + region_char + str(column + 1),
+                self.ctx.display.qr_offset(),
+                color=lcd.RED,
+            )
+
         def draw_grided_qr(mode, qr_size):
             """Draws grided QR"""
             self.ctx.display.clear()
@@ -142,7 +151,6 @@ class Home(Page):
             grid_offset += grid_pad
             if mode == STANDARD_MODE:
                 self.ctx.display.draw_qr_code(0, code)
-                return
             elif mode == LINE_MODE:
                 self.ctx.display.draw_qr_code(0, code, light_color=lcd.DARKGREY)
                 self.highlight_qr_region(code, region=(0, lr_index, qr_size, 1))
@@ -168,6 +176,42 @@ class Home(Page):
                     self.ctx.display.qr_offset(),
                     color=lcd.RED,
                 )
+            elif mode == ZOOMED_R_MODE:
+                max_width = self.ctx.display.width() - DEFAULT_PADDING
+                zoomed_grid_pad = max_width // region_size
+                zoomed_grid_offset = (
+                    self.ctx.display.width() - region_size * zoomed_grid_pad
+                )
+                zoomed_grid_offset //= 2
+                row = lr_index // columns
+                column = lr_index % columns
+                self.highlight_qr_region(
+                    code,
+                    region=(
+                        column * region_size,
+                        (row) * region_size,
+                        region_size,
+                        region_size,
+                    ),
+                    zoom=True,
+                )
+                for i in range(region_size + 1):
+                    self.ctx.display.fill_rectangle(
+                        zoomed_grid_offset,
+                        zoomed_grid_offset + i * zoomed_grid_pad,
+                        region_size * zoomed_grid_pad + 1,
+                        grid_size,
+                        lcd.RED,
+                    )
+                for i in range(region_size + 1):
+                    self.ctx.display.fill_rectangle(
+                        zoomed_grid_offset + i * zoomed_grid_pad,
+                        zoomed_grid_offset,
+                        grid_size,
+                        region_size * zoomed_grid_pad + 1,
+                        lcd.RED,
+                    )
+                region_legend(row, column)
             elif mode == REGION_MODE:
                 row = lr_index // columns
                 column = lr_index % columns
@@ -199,12 +243,7 @@ class Home(Page):
                         region_size * grid_pad + 1,
                         lcd.RED,
                     )
-                region_char = chr(65 + row)
-                self.ctx.display.draw_hcentered_text(
-                    t("Region: ") + region_char + str(column + 1),
-                    self.ctx.display.qr_offset(),
-                    color=lcd.RED,
-                )
+                region_legend(row, column)
             else:  #  TRANSCRIBE_MODE
                 self.ctx.display.draw_qr_code(0, code, light_color=lcd.WHITE)
                 for i in range(qr_size + 1):
@@ -248,26 +287,22 @@ class Home(Page):
             button = self.ctx.input.wait_for_button()
             if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
                 mode += 1
-                mode %= 4
+                mode %= 5
                 lr_index = 0
                 # draw_grided_qr(grid_size, qr_size)
             elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
                 mode -= 1
-                mode %= 4
+                mode %= 5
                 lr_index = 0
-            elif button == BUTTON_TOUCH:
-                if mode == 0:
-                    button = SWIPE_DOWN  # leave
-                if mode in (LINE_MODE, REGION_MODE):
-                    lr_index += 1
-            elif button == BUTTON_ENTER:
-                if mode in (LINE_MODE, REGION_MODE):
+            elif button in (BUTTON_ENTER, BUTTON_TOUCH):
+                if mode in (LINE_MODE, REGION_MODE, ZOOMED_R_MODE):
                     lr_index += 1
                 else:
-                    button = SWIPE_DOWN  # leave
+                    if not (button == BUTTON_TOUCH and mode == TRANSCRIBE_MODE):
+                        button = SWIPE_DOWN  # leave
             if mode == LINE_MODE:
                 lr_index %= qr_size
-            elif mode == REGION_MODE:
+            elif mode in (REGION_MODE, ZOOMED_R_MODE):
                 lr_index %= columns * columns
         if self.ctx.printer is None:
             return MENU_CONTINUE
