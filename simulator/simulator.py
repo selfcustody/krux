@@ -79,6 +79,7 @@ from kruxsim.mocks import utime
 from kruxsim.mocks import fpioa_manager
 from kruxsim.mocks import Maix
 from kruxsim.mocks import flash
+from kruxsim.mocks import lcd
 from kruxsim.mocks import machine
 from kruxsim.mocks import image
 from kruxsim.mocks import pmu
@@ -89,7 +90,7 @@ if args.printer:
 from kruxsim.mocks import secp256k1
 from kruxsim.mocks import qrcode
 from kruxsim.mocks import sensor
-from kruxsim.mocks import lcd
+
 from kruxsim.mocks import ft6x36
 from kruxsim.sequence import SequenceExecutor
 
@@ -107,6 +108,10 @@ def run_krux():
     with open("../src/boot.py") as boot_file:
         exec(boot_file.read())
 
+# mock for krux custom colors
+from krux import settings
+settings.DARKGREEN = (0, 166, 0)
+settings.SLATEGRAY = (80, 93, 175)
 
 t = threading.Thread(target=run_krux)
 t.daemon = True

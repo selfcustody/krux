@@ -24,7 +24,8 @@ import lcd
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING, SLATEGRAY
+from ..settings import SLATEGRAY
+from ..display import DEFAULT_PADDING
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
