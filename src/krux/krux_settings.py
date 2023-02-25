@@ -130,9 +130,10 @@ class AdafruitPrinterSettings(SettingsNamespace):
     paper_width = NumberSetting(int, "paper_width", 384, [100, 1000])
     tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
     rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])
-    heat_dots = NumberSetting(int, "heat_dots", 11, [0, 255])
     heat_time = NumberSetting(int, "heat_time", 120, [3, 255])
     heat_interval = NumberSetting(int, "heat_interval", 40, [0, 255])
+    line_delay = NumberSetting(int, "line_delay", 20, [0, 255])
+    scale = NumberSetting(int, "scale", 75, [25, 100])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -141,9 +142,10 @@ class AdafruitPrinterSettings(SettingsNamespace):
             "paper_width": t("Paper Width"),
             "tx_pin": t("TX Pin"),
             "rx_pin": t("RX Pin"),
-            "heat_dots": t("Heat Dots"),
             "heat_time": t("Heat Time"),
             "heat_interval": t("Heat Interval"),
+            "line_delay": t("Line Delay"),
+            "scale": t("Scale"),
         }[attr]
 
 
