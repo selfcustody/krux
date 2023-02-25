@@ -63,8 +63,6 @@ class PMU_Button:
 class Battery:
     def getVbatVoltage(self):
         return 3400
-    def getUSBVoltage(self):
-        return 3400
     def enablePMICSleepMode(self, val):
         pass
     def setEnterSleepMode(self):

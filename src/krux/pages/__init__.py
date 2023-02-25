@@ -572,10 +572,7 @@ class Menu:
         """Draws a square mark if logging is enabled"""
         if Settings().logging.level.lower() == "none":
             return
-
-        self.ctx.display.fill_rectangle(5, 5, 8, 8, lcd.RED)
-        self.ctx.display.fill_rectangle(6, 6, 6, 6, lcd.BLACK)
-        self.ctx.display.fill_rectangle(7, 7, 4, 4, lcd.RED)
+        self.ctx.display.fill_rectangle(5, 5, 3, 3, lcd.RED)
 
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
@@ -584,23 +581,16 @@ class Menu:
 
         charge = self.ctx.power_manager.battery_charge_remaining()
         battery_color = lcd.RED if charge < 0.3 else lcd.WHITE
-
+            
         # Draw (filled) outline of battery in top-right corner of display
         padding = 5
         cylinder_length = 20
-        cylinder_height = 8
+        cylinder_height = 5
         self.ctx.display.fill_rectangle(
             self.ctx.display.width() - padding - cylinder_length,
             padding,
             cylinder_length,
             cylinder_height,
-            battery_color,
-        )
-        self.ctx.display.fill_rectangle(
-            self.ctx.display.width() - padding,
-            padding + (cylinder_height // 4),
-            1,
-            cylinder_height // 2,
             battery_color,
         )
 
@@ -614,23 +604,6 @@ class Menu:
                 depleted_length,
                 depleted_height,
                 lcd.BLACK,
-            )
-
-        # Indicate if the device is plugged in and detecting voltage over USB
-        if self.ctx.power_manager.is_battery_charging():
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - padding - cylinder_length // 2,
-                padding + 2,
-                cylinder_height // 2 - 1,
-                cylinder_height // 2 - 1,
-                lcd.GREEN,
-            )
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - padding - cylinder_length // 2 - 3,
-                padding + cylinder_height // 2 - 1,
-                3,
-                1,
-                lcd.GREEN,
             )
 
     def _draw_touch_menu(self, selected_item_index):

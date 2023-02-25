@@ -23,9 +23,10 @@ import machine
 import sys
 import board
 
-MAX_BATTERY_MV = 4100
+# https://github.com/m5stack/M5StickC/blob/0527606d9e56c956ab17b278c25e3d07d7664f5e/src/AXP192.cpp#L20
+MAX_BATTERY_MV = 4200
+# https://github.com/m5stack/M5StickC/blob/0527606d9e56c956ab17b278c25e3d07d7664f5e/src/AXP192.cpp#L56
 MIN_BATTERY_MV = 3000
-
 
 class PowerManager:
     """PowerManager is a singleton interface for controlling the device's power management unit"""
@@ -50,29 +51,23 @@ class PowerManager:
                 self.pmu.enablePMICSleepMode(True)
             except:
                 pass
-
+    
     def has_battery(self):
         """Returns if the device has a battery"""
         try:
-            mv = self.pmu.getVbatVoltage()
-            assert mv is not None
+            assert int(self.pmu.getVbatVoltage()) > 0
         except:
             return False
         return True
 
     def battery_charge_remaining(self):
         """Returns the state of charge of the device's battery"""
-        if not self.has_battery():
-            return 1
-
         mv = int(self.pmu.getVbatVoltage())
+        if board.config["type"].startswith("amigo"):
+            return max(0, (mv - 3394.102415024943) / 416.73204356)
+        elif board.config["type"] == "m5stickv":
+            return max(0, (mv - 3131.427782118631) / 790.56172897)
         return max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
-
-    def is_battery_charging(self):
-        """Returns if the device is connected to the USB port"""
-        if not self.has_battery():
-            return False
-        return int(self.pmu.getUSBVoltage()) > 0
 
     def shutdown(self):
         """Shuts down the device"""
