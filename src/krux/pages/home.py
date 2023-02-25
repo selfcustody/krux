@@ -46,6 +46,7 @@ from ..input import (
     SWIPE_UP,
 )
 import qrcode
+from ..printers.cnc import FilePrinter
 
 
 class Home(Page):
@@ -228,6 +229,12 @@ class Home(Page):
                 self.ctx.printer.print_string("Compact SeedQR\n\n")
             else:
                 self.ctx.printer.print_string("SeedQR\n\n")
+
+            # Warn of SD read here because Printer don't have access to display
+            if isinstance(self.ctx.printer, FilePrinter):
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Checking for SD card"))
+
             self.ctx.printer.print_qr_code(code)
         return MENU_CONTINUE
 
@@ -439,9 +446,10 @@ class Home(Page):
 
         data, qr_format = (None, FORMAT_NONE)
         psbt_filename = None
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Checking for SD card"))
         try:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card"))
             with SDHandler() as sd:
                 psbt_filename = next(
                     filter(
@@ -480,9 +488,10 @@ class Home(Page):
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
+
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Checking for SD card"))
             try:
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Checking for SD card"))
                 with SDHandler() as sd:
                     self.ctx.display.clear()
                     if self.prompt(
@@ -546,9 +555,9 @@ class Home(Page):
         self.ctx.display.draw_centered_text(t("Signature:\n\n%s") % encoded_sig)
         self.ctx.input.wait_for_button()
 
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Checking for SD card"))
         try:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card"))
             with SDHandler() as sd:
                 self.ctx.display.clear()
                 if self.prompt(

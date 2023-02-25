@@ -40,6 +40,7 @@ from ..display import DEFAULT_PADDING, FLASH_MSG_TIME
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, LoggingSettings
 from ..settings import DARKGREEN
+from ..printers.cnc import FilePrinter
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -322,6 +323,12 @@ class Page:
                 self.ctx.display.draw_centered_text(
                     t("Printing\n%d / %d") % (i + 1, count)
                 )
+
+                # Warn of SD read here because Printer don't have access to display
+                if isinstance(self.ctx.printer, FilePrinter):
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(t("Checking for SD card"))
+
                 self.ctx.printer.print_qr_code(qr_code)
                 i += 1
 

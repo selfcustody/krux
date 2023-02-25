@@ -677,10 +677,10 @@ class Login(Page):
 
     def settings(self):
         """Handler for the 'settings' menu item"""
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Checking for SD card"))
         try:
             # Check for SD hot-plug
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card"))
             with SDHandler():
                 self.display_centered_text(
                     t("Your changes will be kept on the SD card."), duration=SD_MSG_TIME
@@ -750,10 +750,7 @@ class Login(Page):
         starting_category = setting.__get__(settings_namespace)
         while True:
             current_category = setting.__get__(settings_namespace)
-            color = lcd.WHITE
-            if current_category in CATEGORY_SETTING_COLOR_DICT:
-                color = CATEGORY_SETTING_COLOR_DICT[current_category]
-
+            color = CATEGORY_SETTING_COLOR_DICT.get(current_category, lcd.WHITE)
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 settings_namespace.label(setting.attr) + "\n" + str(current_category),
