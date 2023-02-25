@@ -678,6 +678,8 @@ class Login(Page):
         """Handler for the 'settings' menu item"""
         try:
             # Check for SD hot-plug
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Checking for SD card"))
             with SDHandler():
                 self.display_centered_text(t("Your changes will be kept on the SD card."), duration=SD_MSG_TIME)
         except:

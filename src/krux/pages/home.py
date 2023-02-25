@@ -440,6 +440,8 @@ class Home(Page):
         data, qr_format = (None, FORMAT_NONE)
         psbt_filename = None
         try:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Checking for SD card"))
             with SDHandler() as sd:
                 psbt_filename = next(
                     filter(
@@ -479,6 +481,8 @@ class Home(Page):
             signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
             try:
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Checking for SD card"))
                 with SDHandler() as sd:
                     self.ctx.display.clear()
                     if self.prompt(
@@ -543,6 +547,8 @@ class Home(Page):
         self.ctx.input.wait_for_button()
 
         try:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Checking for SD card"))
             with SDHandler() as sd:
                 self.ctx.display.clear()
                 if self.prompt(
