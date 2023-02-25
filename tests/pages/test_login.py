@@ -7,7 +7,7 @@ def mocker_printer(mocker):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
 
 
-def create_ctx(mocker, btn_seq, touch_seq = None):
+def create_ctx(mocker, btn_seq, touch_seq=None):
     """Helper to create mocked context obj"""
     ctx = mock_context(mocker)
     ctx.power_manager.battery_charge_remaining.return_value = 1
@@ -15,12 +15,13 @@ def create_ctx(mocker, btn_seq, touch_seq = None):
 
     if touch_seq:
         ctx.input.touch = mocker.MagicMock(
-                current_index=mocker.MagicMock(side_effect=touch_seq)
-            )
+            current_index=mocker.MagicMock(side_effect=touch_seq)
+        )
     return ctx
 
 
 ################### new words from dice tests
+
 
 def test_new_12w_from_d6(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login, D6_12W_MIN_ROLLS
@@ -28,19 +29,22 @@ def test_new_12w_from_d6(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed to 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to proceed msg
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D6_12W_MIN_ROLLS)] +
+        [BUTTON_ENTER for _ in range(D6_12W_MIN_ROLLS)]
+        +
         # 1 press prev and 1 press on btn Go
-        [BUTTON_PAGE_PREV, BUTTON_ENTER] +
-        [
-        BUTTON_ENTER, # 1 press to confirm roll string,
-        BUTTON_ENTER, # 1 press to confirm SHA
-        BUTTON_ENTER, # 1 press to continue loading key
-        BUTTON_PAGE,  # 1 press to skip passphrase
-        BUTTON_ENTER, # 1 press to select single-key
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # 1 press to confirm roll string,
+            BUTTON_ENTER,  # 1 press to confirm SHA
+            BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_PAGE,  # 1 press to skip passphrase
+            BUTTON_ENTER,  # 1 press to select single-key
         ]
     )
     MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
@@ -59,20 +63,23 @@ def test_new_24w_from_d6(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press change to 24 words and 1 press to proceed
-        [BUTTON_PAGE, BUTTON_ENTER] +
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
         # 1 press to proceed msg
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D6_24W_MIN_ROLLS)] +
+        [BUTTON_ENTER for _ in range(D6_24W_MIN_ROLLS)]
+        +
         # 1 press prev and 1 press on btn Go
-        [BUTTON_PAGE_PREV, BUTTON_ENTER] +
-        [
-        BUTTON_ENTER, # 1 press to confirm roll string,
-        BUTTON_ENTER, # 1 press to confirm SHA
-        BUTTON_ENTER, # 1 press to see the next 12 words (24 total)
-        BUTTON_ENTER, # 1 press to continue loading key
-        BUTTON_PAGE,  # 1 press to skip passphrase
-        BUTTON_ENTER, # 1 press to select single-key
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # 1 press to confirm roll string,
+            BUTTON_ENTER,  # 1 press to confirm SHA
+            BUTTON_ENTER,  # 1 press to see the next 12 words (24 total)
+            BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_PAGE,  # 1 press to skip passphrase
+            BUTTON_ENTER,  # 1 press to select single-key
         ]
     )
     MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
@@ -91,19 +98,23 @@ def test_new_12w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed to 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to proceed msg
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D6_12W_MIN_ROLLS)] +
+        [BUTTON_ENTER for _ in range(D6_12W_MIN_ROLLS)]
+        +
         # 1 press prev and 1 press on btn Go
-        [BUTTON_PAGE_PREV, BUTTON_ENTER] +
-        [
-        BUTTON_ENTER, # 1 press to confirm roll string,
-        BUTTON_ENTER, # 1 press to confirm SHA
-        BUTTON_ENTER, # 1 press to continue loading key
-        BUTTON_PAGE, BUTTON_ENTER,  # 1 press change to btn No and 1 press to proceed (skip passphrase)
-        BUTTON_ENTER, # 1 press to select single-key
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # 1 press to confirm roll string,
+            BUTTON_ENTER,  # 1 press to confirm SHA
+            BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_PAGE,
+            BUTTON_ENTER,  # 1 press change to btn No and 1 press to proceed (skip passphrase)
+            BUTTON_ENTER,  # 1 press to select single-key
         ]
     )
     MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
@@ -122,19 +133,23 @@ def test_new_24w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press change to 24 words and 1 press to proceed
-        [BUTTON_PAGE, BUTTON_ENTER] +
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
         # 1 press to proceed msg
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D6_24W_MIN_ROLLS)] +
+        [BUTTON_ENTER for _ in range(D6_24W_MIN_ROLLS)]
+        +
         # 1 press prev and 1 press on btn Go
-        [BUTTON_PAGE_PREV, BUTTON_ENTER] +
-        [
-        BUTTON_ENTER, # 1 press to confirm roll string,
-        BUTTON_ENTER, # 1 press to confirm SHA
-        BUTTON_ENTER, # 1 press to continue loading key
-        BUTTON_PAGE, BUTTON_ENTER,  # 1 press change to btn No and 1 press to proceed (skip passphrase)
-        BUTTON_ENTER, # 1 press to select single-key
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # 1 press to confirm roll string,
+            BUTTON_ENTER,  # 1 press to confirm SHA
+            BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_PAGE,
+            BUTTON_ENTER,  # 1 press change to btn No and 1 press to proceed (skip passphrase)
+            BUTTON_ENTER,  # 1 press to select single-key
         ]
     )
     MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
@@ -154,11 +169,14 @@ def test_cancel_new_12w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printe
 
     BTN_SEQUENCE = (
         # 1 press to proceed to 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to proceed msg
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 2 press prev and 1 press on btn Esc
-        [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER] +
+        [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+        +
         # 1 press to proceed confirm exit msg
         [BUTTON_ENTER]
     )
@@ -176,22 +194,27 @@ def test_new_12w_from_d20(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed to 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to proceed msg
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D20_12W_MIN_ROLLS)] +
+        [BUTTON_ENTER for _ in range(D20_12W_MIN_ROLLS)]
+        +
         # 1 press prev and 1 press on btn Go
-        [BUTTON_PAGE_PREV, BUTTON_ENTER] +
-        [
-        BUTTON_ENTER, # 1 press to confirm roll string,
-        BUTTON_ENTER, # 1 press to confirm SHA
-        BUTTON_ENTER, # 1 press to continue loading key
-        BUTTON_PAGE,  # 1 press to skip passphrase
-        BUTTON_ENTER, # 1 press to select single-key
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # 1 press to confirm roll string,
+            BUTTON_ENTER,  # 1 press to confirm SHA
+            BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_PAGE,  # 1 press to skip passphrase
+            BUTTON_ENTER,  # 1 press to select single-key
         ]
     )
-    MNEMONIC = "erupt remain ride bleak year cabin orange sure ghost gospel husband oppose"
+    MNEMONIC = (
+        "erupt remain ride bleak year cabin orange sure ghost gospel husband oppose"
+    )
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
@@ -207,20 +230,23 @@ def test_new_24w_from_d20(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press change to 24 words and 1 press to proceed
-        [BUTTON_PAGE, BUTTON_ENTER] +
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
         # 1 press to proceed msg
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D20_24W_MIN_ROLLS)] +
+        [BUTTON_ENTER for _ in range(D20_24W_MIN_ROLLS)]
+        +
         # 1 press prev and 1 press on btn Go
-        [BUTTON_PAGE_PREV, BUTTON_ENTER] +
-        [
-        BUTTON_ENTER, # 1 press to confirm roll string,
-        BUTTON_ENTER, # 1 press to confirm SHA
-        BUTTON_ENTER, # 1 press to see the next 12 words (24 total)
-        BUTTON_ENTER, # 1 press to continue loading key
-        BUTTON_PAGE,  # 1 press to skip passphrase
-        BUTTON_ENTER, # 1 press to select single-key
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # 1 press to confirm roll string,
+            BUTTON_ENTER,  # 1 press to confirm SHA
+            BUTTON_ENTER,  # 1 press to see the next 12 words (24 total)
+            BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_PAGE,  # 1 press to skip passphrase
+            BUTTON_ENTER,  # 1 press to select single-key
         ]
     )
     MNEMONIC = "fun island vivid slide cable pyramid device tuition only essence thought gain silk jealous eternal anger response virus couple faculty ozone test key vocal"
@@ -240,19 +266,26 @@ def test_cancel_new_12w_from_d20(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed to 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to proceed msg
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D20_12W_MIN_ROLLS)] +
+        [BUTTON_ENTER for _ in range(D20_12W_MIN_ROLLS)]
+        +
         # 3 press prev and 1 press on btn < (delete last roll)
-        [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER] +
+        [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+        +
         # 1 press prev and 1 press on btn Go
-        [BUTTON_PAGE_PREV, BUTTON_ENTER] +
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        +
         # 1 press for msg not enough rolls!
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 2 press prev and 1 press on btn Esc
-        [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER] +
+        [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+        +
         # 1 press to proceed confirm exit msg
         [BUTTON_ENTER]
     )
@@ -274,14 +307,18 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
-        [BUTTON_PAGE] +
+        [BUTTON_PAGE]
+        +
         # 1 press to select single-key
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
-    MNEMONIC = "olympic term tissue route sense program under choose bean emerge velvet absurd"
+    MNEMONIC = (
+        "olympic term tissue route sense program under choose bean emerge velvet absurd"
+    )
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
@@ -300,21 +337,26 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
-        [BUTTON_PAGE] +
+        [BUTTON_PAGE]
+        +
         # 1 press to select single-key
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
-    MNEMONIC = "olympic term tissue route sense program under choose bean emerge velvet absurd"
+    MNEMONIC = (
+        "olympic term tissue route sense program under choose bean emerge velvet absurd"
+    )
     ENCODED_MNEMONIC = "123417871814150815661375189403220156058119360008"
-
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=(ENCODED_MNEMONIC, QR_FORMAT))
+        login,
+        "capture_qr_code",
+        mocker.MagicMock(return_value=(ENCODED_MNEMONIC, QR_FORMAT)),
     )
     login.load_key_from_qr_code()
 
@@ -328,9 +370,11 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
-        [BUTTON_PAGE] +
+        [BUTTON_PAGE]
+        +
         # 1 press to select single-key
         [BUTTON_ENTER]
     )
@@ -338,11 +382,12 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
     MNEMONIC = "forum undo fragile fade shy sign arrest garment culture tube off merit"
     BINARY_MNEMONIC = b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE"
 
-
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=(BINARY_MNEMONIC, QR_FORMAT))
+        login,
+        "capture_qr_code",
+        mocker.MagicMock(return_value=(BINARY_MNEMONIC, QR_FORMAT)),
     )
     login.load_key_from_qr_code()
 
@@ -356,17 +401,19 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to proceed with the next 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
-        [BUTTON_PAGE] +
+        [BUTTON_PAGE]
+        +
         # 1 press to select single-key
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
     MNEMONIC = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
-
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
@@ -385,11 +432,14 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to proceed with the next 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
-        [BUTTON_PAGE] +
+        [BUTTON_PAGE]
+        +
         # 1 press to select single-key
         [BUTTON_ENTER]
     )
@@ -397,11 +447,12 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     MNEMONIC = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     ENCODED_MNEMONIC = "023301391610171019391278098413310856127602420628160203911717091708861236056502660800183118111075"
 
-
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=(ENCODED_MNEMONIC, QR_FORMAT))
+        login,
+        "capture_qr_code",
+        mocker.MagicMock(return_value=(ENCODED_MNEMONIC, QR_FORMAT)),
     )
     login.load_key_from_qr_code()
 
@@ -415,11 +466,14 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to proceed with the next 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
-        [BUTTON_PAGE] +
+        [BUTTON_PAGE]
+        +
         # 1 press to select single-key
         [BUTTON_ENTER]
     )
@@ -427,11 +481,12 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
     MNEMONIC = "attack pizza motion avocado network gather crop fresh patrol unusual wild holiday candy pony ranch winter theme error hybrid van cereal salon goddess expire"
     BINARY_MNEMONIC = b"\x0et\xb6A\x07\xf9L\xc0\xcc\xfa\xe6\xa1=\xcb\xec6b\x15O\xecg\xe0\xe0\t\x99\xc0x\x92Y}\x19\n"
 
-
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=(BINARY_MNEMONIC, QR_FORMAT))
+        login,
+        "capture_qr_code",
+        mocker.MagicMock(return_value=(BINARY_MNEMONIC, QR_FORMAT)),
     )
     login.load_key_from_qr_code()
 
@@ -447,21 +502,23 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
-        [BUTTON_ENTER] +
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
-        [BUTTON_PAGE] +
+        [BUTTON_PAGE]
+        +
         # 1 press to select single-key
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_UR
     UR_DATA = UR(
-                "crypto-bip39",
-                bytearray(
-                    binascii.unhexlify(
-                        "A2018C66736869656C646567726F75706565726F6465656177616B65646C6F636B6773617573616765646361736865676C6172656477617665646372657765666C616D6565676C6F76650262656E"
-                    )
-                ),
+        "crypto-bip39",
+        bytearray(
+            binascii.unhexlify(
+                "A2018C66736869656C646567726F75706565726F6465656177616B65646C6F636B6773617573616765646361736865676C6172656477617665646372657765666C616D6565676C6F76650262656E"
             )
+        ),
+    )
     MNEMONIC = "shield group erode awake lock sausage cash glare wave crew flame glove"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -651,7 +708,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
     num = 0
     for case in cases:
         print(num)
-        num = num+1
+        num = num + 1
 
         ctx = create_ctx(mocker, case[0], case[2])
 
@@ -674,19 +731,22 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
 
     cases = [
         (
-            [BUTTON_ENTER]
+            [BUTTON_ENTER]  # 1 press confirm msg
             + (
-                # 2
-                [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+                # 1 press change to number "2" and 1 press to select
+                [BUTTON_PAGE, BUTTON_ENTER]
                 +
-                # Go + Confirm
+                # 10 press to place on btn Go
                 [BUTTON_PAGE for _ in range(10)]
-                + [BUTTON_ENTER, BUTTON_ENTER]
+                + [
+                    BUTTON_ENTER,
+                    BUTTON_ENTER,
+                ]  # 1 press to select and 1 press to confirm
             )
-            * 11
+            * 11  # repeat selection of word=2 (ability) eleven times
             + (
                 # 1
-                [BUTTON_PAGE, BUTTON_ENTER]
+                [BUTTON_ENTER]
                 +
                 # 2
                 [BUTTON_PAGE, BUTTON_ENTER]
@@ -696,7 +756,12 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 + [BUTTON_ENTER]
                 +
                 # 3
-                [BUTTON_PAGE, BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+                [
+                    BUTTON_PAGE,
+                    BUTTON_PAGE,
+                    BUTTON_PAGE,
+                    BUTTON_ENTER,
+                ]  # twelve word=1203 (north)
                 # Confirm
                 + [BUTTON_ENTER]
             )
@@ -709,7 +774,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             [BUTTON_ENTER]
             + (
                 # 2
-                [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+                [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # Go + Confirm
                 [BUTTON_PAGE for _ in range(10)]
@@ -718,13 +783,16 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             * 11
             +
             # Go + Confirm
-            [BUTTON_PAGE for _ in range(12)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
+            [BUTTON_PAGE for _ in range(11)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
             # Done?, 12 word confirm, Continue?, No passphrase, Single-key
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
+    num = 0
     for case in cases:
+        print(num)
+        num = num + 1
         ctx = create_ctx(mocker, case[0])
         login = Login(ctx)
 
@@ -1056,7 +1124,7 @@ def test_settings(m5stickv, mocker, mocker_printer):
 def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
     import krux
     from krux.pages.login import Login
-    from krux.input import BUTTON_TOUCH, BUTTON_ENTER
+    from krux.input import BUTTON_TOUCH
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
 
     from krux.translations import translation_table
@@ -1159,7 +1227,13 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         print("test_settings_on_amigo_tft cases[" + str(case_num) + "]")
         case_num = case_num + 1
 
-        ctx = create_ctx(mocker, BUTTON_TOUCH, case[0])
+        ctx = mock_context(mocker)
+        ctx.power_manager.battery_charge_remaining.return_value = 1
+        ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_TOUCH)
+        ctx.input.touch = mocker.MagicMock(
+            current_index=mocker.MagicMock(side_effect=case[0])
+        )
+
         mocker.patch.object(ctx.input.touch, "x_regions", (0, 100, 200, 300))
         mocker.patch.object(ctx.input.touch, "y_regions", (100, 200))
 

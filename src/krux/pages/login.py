@@ -450,13 +450,32 @@ class Login(Page):
         """Handler for the 'via numbers' menu item"""
         title = t("Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.")
 
+        def autocomplete(prefix):
+            if len(prefix) == 4 or (len(prefix) == 3 and int(prefix) > 204):
+                return prefix
+            return None
+
         def to_word(user_input):
             word_num = int(user_input)
             if 0 < word_num <= 2048:
                 return WORDLIST[word_num - 1]
             return ""
 
-        return self._load_key_from_keypad(title, DIGITS, to_word, SENTINEL_DIGITS)
+        def possible_letters(prefix):
+            if prefix == "":
+                return DIGITS.replace("0", "")
+            if prefix == "204":
+                return DIGITS.replace("9", "")
+            return DIGITS
+
+        return self._load_key_from_keypad(
+            title,
+            DIGITS,
+            to_word,
+            SENTINEL_DIGITS,
+            autocomplete_fn=autocomplete,
+            possible_keys_fn=possible_letters,
+        )
 
     def load_key_from_1248(self):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
@@ -479,7 +498,7 @@ class Login(Page):
         index, _ = submenu.run_loop()
         w24 = index == 1
         self.ctx.display.clear()
-        
+
         tiny_seed = TinySeed(self.ctx)
         words = tiny_seed.enter_tiny_seed(w24)
         del tiny_seed
@@ -499,7 +518,7 @@ class Login(Page):
         index, _ = submenu.run_loop()
         w24 = index == 1
         self.ctx.display.clear()
-        
+
         intro = t(
             "Paint punched dots black so they can be detected. "
             + "Use a black background surface. "
@@ -648,7 +667,7 @@ class Login(Page):
                 break
             for i, category in enumerate(categories):
                 if current_category == category:
-                    if btn == BUTTON_PAGE:
+                    if btn in (BUTTON_PAGE, None):
                         new_category = categories[(i + 1) % len(categories)]
                     elif btn == BUTTON_PAGE_PREV:
                         new_category = categories[(i - 1) % len(categories)]

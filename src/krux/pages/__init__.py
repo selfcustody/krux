@@ -140,12 +140,6 @@ class Page:
                             buffer = new_buffer
                             break  # auto-Go for load "Via Text"
 
-                    # auto-Go for load "Via Numbers"
-                    if len(pad.keys) == 10 and (
-                        len(buffer) == 4 or (len(buffer) == 3 and int(buffer) > 204)
-                    ):
-                        break
-
                 if changed and go_on_change:
                     break
 
@@ -541,6 +535,7 @@ class Menu:
         self.draw_battery_indicator()
 
     def draw_logging_indicator(self):
+        """Draws a square mark if logging is enabled"""
         if Settings().logging.level.lower() == "none":
             return
 

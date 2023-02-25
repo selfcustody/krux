@@ -52,6 +52,7 @@ class PowerManager:
                 pass
 
     def has_battery(self):
+        """Returns if the device has a battery"""
         try:
             mv = self.pmu.getVbatVoltage()
             assert mv is not None
@@ -68,6 +69,7 @@ class PowerManager:
         return max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
 
     def is_battery_charging(self):
+        """Returns if the device is connected to the USB port"""
         if not self.has_battery():
             return False
         return int(self.pmu.getUSBVoltage()) > 0
