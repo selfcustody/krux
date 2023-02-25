@@ -69,11 +69,12 @@ D20_24W_MIN_ROLLS = 60
 SD_MSG_TIME = 2500
 
 CATEGORY_SETTING_COLOR_DICT = {
-    LoggingSettings.ERROR_TXT: lcd.RED, 
+    LoggingSettings.ERROR_TXT: lcd.RED,
     LoggingSettings.WARN_TXT: lcd.ORANGE,
     LoggingSettings.INFO_TXT: DARKGREEN,
     LoggingSettings.DEBUG_TXT: lcd.MAGENTA,
 }
+
 
 class Login(Page):
     """Represents the login page of the app"""
@@ -475,7 +476,7 @@ class Login(Page):
         if index == 2:
             return self.load_key_from_octal()
         return MENU_CONTINUE
-    
+
     def load_key_from_octal(self):
         """Handler for the 'via numbers'>'Octal' submenu item"""
         title = t(
@@ -681,9 +682,14 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Checking for SD card"))
             with SDHandler():
-                self.display_centered_text(t("Your changes will be kept on the SD card."), duration=SD_MSG_TIME)
+                self.display_centered_text(
+                    t("Your changes will be kept on the SD card."), duration=SD_MSG_TIME
+                )
         except:
-            self.display_centered_text(t("SD card not detected.\n\nChanges will last until shutdown."), duration=SD_MSG_TIME)
+            self.display_centered_text(
+                t("SD card not detected.\n\nChanges will last until shutdown."),
+                duration=SD_MSG_TIME,
+            )
 
         return self.namespace(Settings())()
 
@@ -751,7 +757,7 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 settings_namespace.label(setting.attr) + "\n" + str(current_category),
-                color
+                color,
             )
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()

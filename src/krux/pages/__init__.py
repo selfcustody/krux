@@ -405,8 +405,10 @@ class Page:
                         return False
                     return True
         return answer
-    
-    def display_centered_text(self, message, duration=FLASH_MSG_TIME, color=lcd.WHITE, bg_color=lcd.BLACK):
+
+    def display_centered_text(
+        self, message, duration=FLASH_MSG_TIME, color=lcd.WHITE, bg_color=lcd.BLACK
+    ):
         """Display a text for duration ms or until you press a button"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(message, color, bg_color)
@@ -548,8 +550,8 @@ class Menu:
 
         if log_level == LoggingSettings.NONE_TXT:
             return
-        
-        color = lcd.RED # ERROR
+
+        color = lcd.RED  # ERROR
         if log_level == LoggingSettings.WARN_TXT:
             color = lcd.ORANGE
         if log_level == LoggingSettings.INFO_TXT:

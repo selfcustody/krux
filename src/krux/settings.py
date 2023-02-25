@@ -35,6 +35,7 @@ SETTINGS_FILE = "/sd/settings.json"
 SLATEGRAY = 0x2E5B
 DARKGREEN = 0x2005
 
+
 class SettingsNamespace:
     """Represents a settings namespace containing settings and child namespaces"""
 

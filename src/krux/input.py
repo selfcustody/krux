@@ -148,7 +148,7 @@ class Input:
             wdt.feed()
 
     def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
-        """Wait for first button press or for wait_duration ms. 
+        """Wait for first button press or for wait_duration ms.
         Use block to wait indefinitely"""
         start_time = time.ticks_ms()
         while True:
