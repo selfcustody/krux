@@ -785,6 +785,7 @@ class Login(Page):
             settings_namespace.label(setting.attr),
             [NUMERALS],
             starting_buffer=str(starting_value),
+            esc_prompt=False
         )
         if new_value in (ESC_KEY, ""):
             return MENU_CONTINUE

@@ -90,6 +90,7 @@ class Page:
         delete_key_fn=None,
         go_on_change=False,
         starting_buffer="",
+        esc_prompt=True,
     ):
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
@@ -125,7 +126,10 @@ class Page:
                         buffer = buffer[: len(buffer) - 1]
                     changed = True
                 elif pad.cur_key_index == pad.esc_index:
-                    if self.esc_prompt() == ESC_KEY:
+                    if esc_prompt:
+                        if self.esc_prompt() == ESC_KEY:
+                            return ESC_KEY
+                    else:
                         return ESC_KEY
                     # remap keypad touch array
                     pad.map_keys_array(pad.width, pad.height)
