@@ -211,7 +211,7 @@ class PrinterSettings(SettingsNamespace):
     """Printer-specific settings"""
 
     PRINTERS = {
-        "none": {"none", None},
+        "none": ("none", None),
         "thermal/adafruit": ("thermal", "AdafruitPrinter"),
         "cnc/file": ("cnc", "FilePrinter"),
     }
