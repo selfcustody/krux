@@ -970,8 +970,8 @@ def test_settings(m5stickv, mocker, mocker_printer):
                 BUTTON_ENTER,
             ),
             [
-                mocker.call("Network\nmain", lcd.WHITE),
-                mocker.call("Network\ntest", lcd.WHITE),
+                mocker.call("Network\nmain", lcd.ORANGE),
+                mocker.call("Network\ntest", lcd.GREEN),
             ],
             lambda: Settings().bitcoin.network == "test",
             CategorySetting,
@@ -1157,8 +1157,8 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 4,
             ),
             [
-                mocker.call("Network\nmain", lcd.WHITE),
-                mocker.call("Network\ntest", lcd.WHITE),
+                mocker.call("Network\nmain", lcd.ORANGE),
+                mocker.call("Network\ntest", lcd.GREEN),
             ],
             lambda: Settings().bitcoin.network == "test",
             CategorySetting,

@@ -58,8 +58,11 @@ def t(slug):
 class BitcoinSettings(SettingsNamespace):
     """Bitcoin-specific settings"""
 
+    MAIN_TXT = "main"
+    TEST_TXT = "test"
+
     namespace = "settings.bitcoin"
-    network = CategorySetting("network", "main", ["main", "test"])
+    network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""

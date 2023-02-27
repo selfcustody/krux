@@ -38,7 +38,7 @@ from ..input import (
 )
 from ..display import DEFAULT_PADDING, FLASH_MSG_TIME
 from ..qr import to_qr_codes
-from ..krux_settings import t, Settings, LoggingSettings
+from ..krux_settings import t, Settings, LoggingSettings, BitcoinSettings
 from ..settings import DARKGREEN
 from ..printers.cnc import FilePrinter
 
@@ -562,6 +562,7 @@ class Menu:
         """Draws a status bar along the top of the UI"""
         self.draw_logging_indicator()
         self.draw_battery_indicator()
+        self.draw_network_indicator()
 
     def draw_logging_indicator(self):
         """Draws a square mark if logging is enabled"""
@@ -638,6 +639,11 @@ class Menu:
                 1,
                 lcd.GREEN,
             )
+
+    def draw_network_indicator(self):
+        """Draws test at top if testnet is enabled"""
+        if Settings().bitcoin.network == BitcoinSettings.TEST_TXT:
+            self.ctx.display.draw_string(18, 0, "test", lcd.GREEN)
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen

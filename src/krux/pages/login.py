@@ -29,7 +29,7 @@ from embit import bip39
 from urtypes.crypto.bip39 import BIP39
 from ..metadata import VERSION
 from ..settings import CategorySetting, NumberSetting, DARKGREEN
-from ..krux_settings import Settings, LoggingSettings
+from ..krux_settings import Settings, LoggingSettings, BitcoinSettings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
 from ..key import Key, pick_final_word
@@ -73,6 +73,8 @@ CATEGORY_SETTING_COLOR_DICT = {
     LoggingSettings.WARN_TXT: lcd.ORANGE,
     LoggingSettings.INFO_TXT: DARKGREEN,
     LoggingSettings.DEBUG_TXT: lcd.MAGENTA,
+    BitcoinSettings.MAIN_TXT: lcd.ORANGE,
+    BitcoinSettings.TEST_TXT: lcd.GREEN,
 }
 
 
@@ -785,7 +787,7 @@ class Login(Page):
             settings_namespace.label(setting.attr),
             [NUMERALS],
             starting_buffer=str(starting_value),
-            esc_prompt=False
+            esc_prompt=False,
         )
         if new_value in (ESC_KEY, ""):
             return MENU_CONTINUE
