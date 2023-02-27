@@ -50,6 +50,10 @@ class Printer:
         """Prints a QR code, scaling it up as large as possible"""
         raise NotImplementedError()
 
+    def print_string(self, text):
+        """Print a text string"""
+        raise NotImplementedError()
+
 
 def create_printer():
     """Instantiates a new printer dynamically based on the default in Settings"""

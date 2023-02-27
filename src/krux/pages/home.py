@@ -92,27 +92,29 @@ class Home(Page):
         if self.ctx.printer is None:
             return MENU_CONTINUE
         self.ctx.display.clear()
-        if self.prompt(t("Print?"), self.ctx.display.height() // 2):
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(
-                t("Printing ..."), self.ctx.display.height() // 2
-            )
-            self.ctx.printer.print_string("Seed Words\n")
-            words = self.ctx.wallet.key.mnemonic.split(" ")
-            lines = len(words) // 3
-            for i in range(lines):
-                index = i + 1
-                string = str(index) + ":" + words[index - 1] + " "
-                while len(string) < 10:
-                    string += " "
-                index += lines
-                string += str(index) + ":" + words[index - 1] + " "
-                while len(string) < 21:
-                    string += " "
-                index += lines
-                string += str(index) + ":" + words[index - 1] + "\n"
-                self.ctx.printer.print_string(string)
-            self.ctx.printer.feed(3)
+        # Avoid printing text on a cnc
+        if not isinstance(self.ctx.printer, FilePrinter):
+            if self.prompt(t("Print?"), self.ctx.display.height() // 2):
+                self.ctx.display.clear()
+                self.ctx.display.draw_hcentered_text(
+                    t("Printing ..."), self.ctx.display.height() // 2
+                )
+                self.ctx.printer.print_string("Seed Words\n")
+                words = self.ctx.wallet.key.mnemonic.split(" ")
+                lines = len(words) // 3
+                for i in range(lines):
+                    index = i + 1
+                    string = str(index) + ":" + words[index - 1] + " "
+                    while len(string) < 10:
+                        string += " "
+                    index += lines
+                    string += str(index) + ":" + words[index - 1] + " "
+                    while len(string) < 21:
+                        string += " "
+                    index += lines
+                    string += str(index) + ":" + words[index - 1] + "\n"
+                    self.ctx.printer.print_string(string)
+                self.ctx.printer.feed(3)
         return MENU_CONTINUE
 
     def display_standard_qr(self):
@@ -267,8 +269,10 @@ class Home(Page):
         tiny_seed.export()
         if self.ctx.printer is None:
             return MENU_CONTINUE
-        if self.prompt(t("Print?"), self.ctx.display.height() // 2):
-            tiny_seed.print_tiny_seed()
+        # Avoid printing text on a cnc
+        if not isinstance(self.ctx.printer, FilePrinter):
+            if self.prompt(t("Print?"), self.ctx.display.height() // 2):
+                tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
 
     def public_key(self):
