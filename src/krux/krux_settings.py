@@ -208,11 +208,12 @@ class PrinterSettings(SettingsNamespace):
     """Printer-specific settings"""
 
     PRINTERS = {
+        "none": {"none", None},
         "thermal/adafruit": ("thermal", "AdafruitPrinter"),
         "cnc/file": ("cnc", "FilePrinter"),
     }
     namespace = "settings.printer"
-    driver = CategorySetting("driver", "thermal/adafruit", list(PRINTERS.keys()))
+    driver = CategorySetting("driver", "none", list(PRINTERS.keys()))
 
     def __init__(self):
         self.thermal = ThermalSettings()
