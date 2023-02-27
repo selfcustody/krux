@@ -43,6 +43,7 @@ def test_new_12w_from_d6(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm roll string,
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path
             BUTTON_PAGE,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -78,6 +79,7 @@ def test_new_24w_from_d6(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to see the next 12 words (24 total)
             BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path
             BUTTON_PAGE,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -112,8 +114,8 @@ def test_new_12w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm roll string,
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,
-            BUTTON_ENTER,  # 1 press change to btn No and 1 press to proceed (skip passphrase)
+            BUTTON_PAGE,  # 1 press change to btn 'No'
+            BUTTON_ENTER,  # 1 press to proceed (skip passphrase)
             BUTTON_ENTER,  # 1 press to select single-key
         ]
     )
@@ -147,8 +149,8 @@ def test_new_24w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm roll string,
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,
-            BUTTON_ENTER,  # 1 press change to btn No and 1 press to proceed (skip passphrase)
+            BUTTON_PAGE,  # 1 press change to btn 'No'
+            BUTTON_ENTER,  # 1 press to proceed (skip passphrase)
             BUTTON_ENTER,  # 1 press to select single-key
         ]
     )
@@ -208,6 +210,7 @@ def test_new_12w_from_d20(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm roll string,
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
             BUTTON_PAGE,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -245,6 +248,7 @@ def test_new_24w_from_d20(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to see the next 12 words (24 total)
             BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
             BUTTON_PAGE,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -309,6 +313,9 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
+        # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
         [BUTTON_PAGE]
         +
@@ -337,6 +344,9 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
         [BUTTON_ENTER]
         +
         # 1 press to skip passphrase
@@ -370,6 +380,9 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
         [BUTTON_ENTER]
         +
         # 1 press to skip passphrase
@@ -406,6 +419,9 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the next 12 words
         [BUTTON_ENTER]
         +
+        # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
         [BUTTON_PAGE]
         +
@@ -435,6 +451,9 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
         [BUTTON_ENTER]
         +
         # 1 press to proceed with the next 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
         [BUTTON_ENTER]
         +
         # 1 press to skip passphrase
@@ -471,6 +490,9 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the next 12 words
         [BUTTON_ENTER]
         +
+        # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+        [BUTTON_ENTER]
+        +
         # 1 press to skip passphrase
         [BUTTON_PAGE]
         +
@@ -502,6 +524,9 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
         [BUTTON_ENTER]
         +
         # 1 press to skip passphrase
@@ -572,9 +597,13 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
                 # Go
                 [BUTTON_ENTER]
             )
-            +
-            # Done?, 12 word confirm, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            + [
+                BUTTON_ENTER,  # Done?
+                BUTTON_ENTER,  # 12 word confirm
+                BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+                BUTTON_PAGE,  # No passphrase
+                BUTTON_ENTER,  # Single-key
+            ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -595,13 +624,23 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
             * 11
             +
             # Go + Confirm word
-            [BUTTON_PAGE for _ in range(28)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
-            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            [BUTTON_PAGE for _ in range(28)]
+            + [BUTTON_ENTER]
+            + [BUTTON_ENTER]
+            + [
+                BUTTON_ENTER,  # Done?
+                BUTTON_ENTER,  # 12 word confirm
+                BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+                BUTTON_PAGE,  # No passphrase
+                BUTTON_ENTER,  # Single-key
+            ],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]
+    num = 0
     for case in cases:
+        print(num)
+        num += 1
         ctx = create_ctx(mocker, case[0])
         login = Login(ctx)
 
@@ -765,9 +804,13 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 # Confirm
                 + [BUTTON_ENTER]
             )
-            +
-            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            + [
+                BUTTON_ENTER,  # Done?
+                BUTTON_ENTER,  # 12 word confirm
+                BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+                BUTTON_PAGE,  # No passphrase
+                BUTTON_ENTER,  # Single-key
+            ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
@@ -783,9 +826,16 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             * 11
             +
             # Go + Confirm
-            [BUTTON_PAGE for _ in range(11)] + [BUTTON_ENTER] + [BUTTON_ENTER] +
-            # Done?, 12 word confirm, Continue?, No passphrase, Single-key
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            [BUTTON_PAGE for _ in range(11)]
+            + [BUTTON_ENTER]
+            + [BUTTON_ENTER]
+            + [
+                BUTTON_ENTER,  # Done?
+                BUTTON_ENTER,  # 12 word confirm
+                BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+                BUTTON_PAGE,  # No passphrase
+                BUTTON_ENTER,  # Single-key
+            ],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
     ]

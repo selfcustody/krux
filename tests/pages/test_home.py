@@ -106,6 +106,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
+                BUTTON_ENTER,  # for fingerprint and derivation path
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -118,6 +119,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
                 BUTTON_ENTER,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
+                BUTTON_ENTER,  # for fingerprint and derivation path
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],

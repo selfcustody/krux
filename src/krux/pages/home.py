@@ -290,7 +290,11 @@ class Home(Page):
         for version in [None, self.ctx.wallet.key.network[zpub]]:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                self.ctx.wallet.key.key_expression(version, pretty=True)
+                self.ctx.wallet.key.fingerprint_hex_str(True)
+                + "\n\n"
+                + self.ctx.wallet.key.derivation_str(True)
+                + "\n\n"
+                + self.ctx.wallet.key.account_pubkey_str(version)
             )
             self.ctx.input.wait_for_button()
             xpub = self.ctx.wallet.key.key_expression(version)

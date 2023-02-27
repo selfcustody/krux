@@ -311,6 +311,24 @@ class Page:
                     self.ctx.display.draw_string(
                         offset_x, offset_y, word, lcd.WHITE, lcd.BLACK
                     )
+        # Show Fingerprint and Derivation path
+        if self.ctx.wallet:
+            if board.config["type"] == "m5stickv":
+                self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    self.ctx.wallet.key.fingerprint_hex_str(True)
+                    + "\n\n"
+                    + self.ctx.wallet.key.derivation_str(True)
+                )
+            else:
+                self.ctx.display.draw_centered_text(
+                    "\n\n\n"  # jump header
+                    + "\n\n\n\n\n\n\n\n\n\n\n\n"  # jump 12 word
+                    + self.ctx.wallet.key.fingerprint_hex_str(True)
+                    + "\n\n"
+                    + self.ctx.wallet.key.derivation_str(True)
+                )
 
     def print_qr_prompt(self, data, qr_format, width=33):
         """Prompts the user to print a QR code in the specified format

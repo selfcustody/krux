@@ -56,19 +56,32 @@ class Key:
         """Returns the xpub representation of the extended master public key"""
         return self.account.to_base58(version)
 
-    def key_expression(self, version=None, pretty=False):
-        """Returns the extended master public key in key expression format
+    def key_expression(self, version=None):
+        """Returns the extended master public key (xpub/ypub/zpub) in key expression format
         per https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#key-expressions,
         prefixed with fingerprint and derivation.
         """
-        key_str = (
-            t("Fingerprint: %s\n\nDerivation: m%s\n\n%s") if pretty else "[%s%s]%s"
+        return "[%s%s]%s" % (
+            self.fingerprint_hex_str(False),
+            self.derivation[
+                1:
+            ],  # remove leading m, necessary for creating a descriptor
+            self.account_pubkey_str(version),
         )
-        return key_str % (
-            hexlify(self.fingerprint).decode("utf-8"),
-            self.derivation[1:],  # remove leading m
-            self.account.to_base58(version),
-        )
+
+    def account_pubkey_str(self, version=None):
+        """Returns the account extended public key (xpub/ypub/zpub)"""
+        return self.account.to_base58(version)
+
+    def fingerprint_hex_str(self, pretty=False):
+        """Returns the master key fingerprint in hex format"""
+        formatted_txt = t("Fingerprint: %s") if pretty else "%s"
+        return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
+
+    def derivation_str(self, pretty=False):
+        """Returns the derivation path for the Hierarchical Deterministic Wallet"""
+        formatted_txt = t("Derivation: %s") if pretty else "%s"
+        return formatted_txt % self.derivation
 
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
