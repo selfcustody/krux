@@ -23,6 +23,7 @@
     "CNC": "CNC",
     "Check that address belongs to this wallet?": "Kiểm tra địa chỉ đó có thuộc về ví này không?",
     "Checked %d receive addresses with no matches.": "Đã kiểm tra %d địa chỉ nhận được và không tìm thấy tương thích.",
+    "Checking for SD card": "Kiểm tra thẻ SD",
     "Checking receive address %d for match..": "Đang kiểm tra %d địa chỉ..",
     "Compact SeedQR": "SeedQR nhỏ gọn",
     "Continue?": "Tiếp tục?",

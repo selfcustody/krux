@@ -23,6 +23,7 @@
     "CNC": "CNC",
     "Check that address belongs to this wallet?": "¿Compruebe que la dirección pertenece a esta cartera?",
     "Checked %d receive addresses with no matches.": "Comprobado %d dirección de depósito sin coincidencias.",
+    "Checking for SD card": "Comprobación de la tarjeta SD",
     "Checking receive address %d for match..": "Comprobando la dirección de depósito %d para alguna coincidencia..",
     "Compact SeedQR": "SeedQR Compacto",
     "Continue?": "¿Continuar?",
