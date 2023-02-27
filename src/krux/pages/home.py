@@ -32,7 +32,7 @@ from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
-from ..krux_settings import t
+from ..krux_settings import t, Settings
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 from ..sd_card import SDHandler
 from ..input import (
@@ -94,7 +94,10 @@ class Home(Page):
         self.ctx.display.clear()
         # Avoid printing text on a cnc
         if not isinstance(self.ctx.printer, FilePrinter):
-            if self.prompt(t("Print?"), self.ctx.display.height() // 2):
+            if self.prompt(
+                t("Print?\n\n%s\n\n") % Settings().printer.driver,
+                self.ctx.display.height() // 2,
+            ):
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(
                     t("Printing ..."), self.ctx.display.height() // 2
@@ -222,7 +225,10 @@ class Home(Page):
         if self.ctx.printer is None:
             return MENU_CONTINUE
         self.ctx.display.clear()
-        if self.prompt(t("Print to QR?"), self.ctx.display.height() // 2):
+        if self.prompt(
+            t("Print to QR?\n\n%s\n\n") % Settings().printer.driver,
+            self.ctx.display.height() // 2,
+        ):
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
                 t("Printing ..."), self.ctx.display.height() // 2
@@ -271,7 +277,10 @@ class Home(Page):
             return MENU_CONTINUE
         # Avoid printing text on a cnc
         if not isinstance(self.ctx.printer, FilePrinter):
-            if self.prompt(t("Print?"), self.ctx.display.height() // 2):
+            if self.prompt(
+                t("Print?\n\n%s\n\n") % Settings().printer.driver,
+                self.ctx.display.height() // 2,
+            ):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
 
