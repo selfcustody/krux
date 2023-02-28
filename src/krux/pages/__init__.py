@@ -237,7 +237,7 @@ class Page:
             )
         return (code, qr_format)
 
-    def display_qr_codes(self, data, qr_format, title=None):
+    def display_qr_codes(self, data, qr_format, title=None, allowAnyBtn=False):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
@@ -271,7 +271,11 @@ class Page:
             )
             self.ctx.display.draw_hcentered_text(subtitle, offset_y, color=lcd.WHITE)
             i = (i + 1) % num_parts
-            if self.wait_for_proceed(block=num_parts == 1):
+            # In some cases we don't need to restrict the input to change the screen
+            if allowAnyBtn:
+                self.ctx.input.wait_for_button()
+                done = True
+            elif self.wait_for_proceed(block=num_parts == 1):
                 done = True
             # interval done in input.py using timers
 
@@ -322,12 +326,13 @@ class Page:
                     + self.ctx.wallet.key.derivation_str(True)
                 )
             else:
-                self.ctx.display.draw_centered_text(
-                    "\n\n\n"  # jump header
-                    + "\n\n\n\n\n\n\n\n\n\n\n\n"  # jump 12 word
-                    + self.ctx.wallet.key.fingerprint_hex_str(True)
+                self.ctx.display.draw_hcentered_text(
+                    self.ctx.wallet.key.fingerprint_hex_str(True)
                     + "\n\n"
-                    + self.ctx.wallet.key.derivation_str(True)
+                    + self.ctx.wallet.key.derivation_str(True),
+                    DEFAULT_PADDING
+                    + 15
+                    * self.ctx.display.font_height,  # 15 lines offset (2 for header + 12 words + 1)
                 )
 
     def print_qr_prompt(self, data, qr_format, width=33):

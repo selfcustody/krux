@@ -122,7 +122,9 @@ class Home(Page):
 
     def display_standard_qr(self):
         """Displays regular words QR code"""
-        self.display_qr_codes(self.ctx.wallet.key.mnemonic, FORMAT_NONE, None)
+        self.display_qr_codes(
+            self.ctx.wallet.key.mnemonic, FORMAT_NONE, None, allowAnyBtn=True
+        )
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
         return MENU_CONTINUE
 
@@ -261,11 +263,14 @@ class Home(Page):
                 else:
                     y_offset += 5 + 2 * self.ctx.display.font_height
                 word_index += 1
-            if self.ctx.input.wait_for_button() == 2:
-                if word_index > 12:
-                    word_index -= 12
-                else:
-                    word_index = 1
+            self.ctx.input.wait_for_button()
+
+            # removed the hability to go back in favor or the Krux UI patter (always move forward)
+            # if self.ctx.input.wait_for_button() == BUTTON_PAGE_PREV:
+            #     if word_index > 12:
+            #         word_index -= 12
+            #     else:
+            #         word_index = 1
             self.ctx.display.clear()
         return MENU_CONTINUE
 
@@ -298,7 +303,7 @@ class Home(Page):
             )
             self.ctx.input.wait_for_button()
             xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, None)
+            self.display_qr_codes(xpub, FORMAT_NONE, None, allowAnyBtn=True)
             self.print_qr_prompt(xpub, FORMAT_NONE)
         return MENU_CONTINUE
 
