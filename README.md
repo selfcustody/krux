@@ -82,6 +82,11 @@ For more verbose test output (e.g., to see the output of print statements), run:
 poetry run pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests
 ```
 
+To run just a specific test from a specific file, run:
+```bash
+poetry run pytest --cache-clear .\tests\pages\test_login.py -k 'test_load_key_from_hexadecimal'
+```
+
 ## Use the Python interpreter (REPL)
 This can be useful for testing a change to the krux code without having to run a full build and flash:
 ```bash
