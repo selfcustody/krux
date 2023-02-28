@@ -486,6 +486,7 @@ class Login(Page):
         )
 
         def autocomplete(prefix):
+            # 256 in decimal is 400 in octal
             if len(prefix) == 4 or (len(prefix) == 3 and int(prefix, 8) > 256):
                 return prefix
             return None
@@ -518,6 +519,7 @@ class Login(Page):
         )
 
         def autocomplete(prefix):
+            # 128 decimal is 0x80
             if len(prefix) == 3 or (len(prefix) == 2 and int(prefix, 16) > 128):
                 return prefix
             return None

@@ -855,6 +855,211 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             assert ctx.wallet.key.mnemonic == case[1]
 
 
+def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # 1 press confirm msg
+        + (
+            # 4 press change to number "F"
+            [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV]
+            + [BUTTON_ENTER]  # 1 press to select F
+            + [BUTTON_ENTER]  # 1 press to select F again
+            + [BUTTON_ENTER]  # 1 press to confirm word=FF(255 decimal) cabin
+        )
+        * 11  # repeat selection of word=FF(255, cabin) eleven times
+        + (
+            [BUTTON_ENTER]  # 1 press to number 1
+            + [BUTTON_ENTER]  # 1 press to number 1
+            + [BUTTON_PAGE for _ in range(4)]  # 4 press change to number 5
+            + [BUTTON_ENTER]  # 1 press to select 5
+            + [BUTTON_ENTER]  # Confirm word=115(277 decimal) card
+        )
+        + [
+            BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 word confirm
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+            BUTTON_PAGE,  # No passphrase
+            BUTTON_ENTER,  # Single-key
+        ]
+    )
+    MNEMONIC = "cabin cabin cabin cabin cabin cabin cabin cabin cabin cabin cabin card"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    login.load_key_from_hexadecimal()
+
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # 1 press confirm msg
+        + (
+            # 7 press change to number "8"
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+            ]
+            + [BUTTON_ENTER]  # 1 press to select 8
+            +
+            # 8 press change to number "0"
+            [
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+            ]
+            + [BUTTON_ENTER]  # 1 press to select 0
+            +
+            # 3 press change to btn "Go" (all other numbers are disabled)
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+            ]
+            + [BUTTON_ENTER]  # 1 press to select Go
+            + [BUTTON_ENTER]  # 1 press to confirm word=80(128 decimal) avocado
+        )
+        * 11  # repeat selection of word=80(128, avocado) eleven times
+        + (
+            [BUTTON_PAGE_PREV]  # 1 press change to btn Go
+            + [BUTTON_ENTER]  # 1 press to select Go
+            + [BUTTON_ENTER]  # Confirm last random word
+        )
+        + [
+            BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 word confirm
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+            BUTTON_PAGE,  # No passphrase
+            BUTTON_ENTER,  # Single-key
+        ]
+    )
+    MNEMONIC = "avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado "
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    login.load_key_from_hexadecimal()
+
+    assert ctx.wallet.key.mnemonic.startswith(MNEMONIC)
+
+
+def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # 1 press confirm msg
+        + (
+            # 4 press change to number "7"
+            [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV]
+            + [BUTTON_ENTER]  # 1 press to select 7
+            + [BUTTON_ENTER]  # 1 press to select 7 again
+            + [BUTTON_ENTER]  # 1 press to select 7 again
+            + [BUTTON_ENTER]  # 1 press to confirm word=777(511 decimal) divert
+        )
+        * 11  # repeat selection of word=777(511, divert) eleven times
+        + (
+            [BUTTON_ENTER]  # 1 press to number 1
+            + [BUTTON_PAGE for _ in range(4)]  # 4 press change to number 5
+            + [BUTTON_ENTER]  # 1 press to number 5
+            + [BUTTON_PAGE_PREV for _ in range(3)]  # 3 press change to number 2
+            + [BUTTON_ENTER]  # 1 press to select 2
+            + [BUTTON_PAGE for _ in range(2)]  # 2 press change to number 4
+            + [BUTTON_ENTER]  # 1 press to select 4
+            + [BUTTON_ENTER]  # Confirm word=1524(852 decimal) heavy
+        )
+        + [
+            BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 word confirm
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+            BUTTON_PAGE,  # No passphrase
+            BUTTON_ENTER,  # Single-key
+        ]
+    )
+    MNEMONIC = "divert divert divert divert divert divert divert divert divert divert divert heavy"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    login.load_key_from_octal()
+
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # 1 press confirm msg
+        + (
+            # 3 press change to number "4"
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+            ]
+            + [BUTTON_ENTER]  # 1 press to select 4
+            +
+            # 4 press change to number "0"
+            [
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+            ]
+            + [BUTTON_ENTER]  # 1 press to select 0
+            + [BUTTON_ENTER]  # 1 press to select 0
+            +
+            # 3 press change to btn "Go" (all other numbers are disabled)
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+            ]
+            + [BUTTON_ENTER]  # 1 press to select Go
+            + [BUTTON_ENTER]  # 1 press to confirm word=400(256 decimal) cable
+        )
+        * 11  # repeat selection of word=400(256, cable) eleven times
+        + (
+            [BUTTON_PAGE_PREV]  # 1 press change to btn Go
+            + [BUTTON_ENTER]  # 1 press to select Go
+            + [BUTTON_ENTER]  # Confirm last random word
+        )
+        + [
+            BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 word confirm
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+            BUTTON_PAGE,  # No passphrase
+            BUTTON_ENTER,  # Single-key
+        ]
+    )
+    MNEMONIC = "cable cable cable cable cable cable cable cable cable cable cable "
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    login.load_key_from_octal()
+
+    assert ctx.wallet.key.mnemonic.startswith(MNEMONIC)
+
+
 def test_leaving_keypad(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -982,6 +1187,101 @@ def test_passphrase(amigo_tft, mocker, mocker_printer):
     login = Login(ctx)
     login.load_key_from_text()
     assert ctx.input.wait_for_button.call_count == len(case)
+
+
+############### load words from tiny seed (bits)
+
+
+def test_load_12w_from_tiny_seed(m5stickv, mocker, mocker_printer):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # 1 press 12w
+        + [BUTTON_PAGE_PREV]  # 1 press to change to "Go"
+        + [BUTTON_ENTER]  # 1 press to select Go
+        + [
+            BUTTON_ENTER,  # 12 word confirm
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+            BUTTON_PAGE,  # No passphrase
+            BUTTON_ENTER,  # Single-key
+        ]
+    )
+    MNEMONIC = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo daring"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    login.load_key_from_tiny_seed()
+
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_PAGE]  # 1 press to change to 24w
+        + [BUTTON_ENTER]  # 1 press select 24w
+        + [BUTTON_PAGE]  # 1 press to change to bit 1024
+        + [BUTTON_ENTER]  # 1 press to select bit 1024
+        + [BUTTON_PAGE_PREV for _ in range(2)]  # 2 press to change to "Go"
+        + [BUTTON_ENTER]  # 1 press to select Go screen 12w
+        + [BUTTON_ENTER]  # 1 press to select Go screen 24w
+        + [
+            BUTTON_ENTER,  # 12 word confirm
+            BUTTON_ENTER,  # 24 word confirm
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+            BUTTON_PAGE,  # No passphrase
+            BUTTON_ENTER,  # Single-key
+        ]
+    )
+    MNEMONIC = "lend zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo blossom"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    login.load_key_from_tiny_seed()
+
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        (
+            [BUTTON_ENTER]  # 1 press select first column num 1
+            + [BUTTON_PAGE_PREV]  # 1 press to change to "Go"
+            + [BUTTON_ENTER]  # 1 press to select Go
+            + [BUTTON_ENTER]  # 1 press to confirm word 1000 language
+        )
+        * 11  # do this eleven times
+        + [BUTTON_PAGE for _ in range(2)]  # 2 press to change second column num 1
+        + [BUTTON_ENTER]  # 1 press to select second column num 1
+        + [BUTTON_PAGE for _ in range(5)]  # 5 press to change third column num 2
+        + [BUTTON_ENTER]  # 1 press to select third column num 2
+        + [BUTTON_PAGE for _ in range(8)]  # 8 press to change to "Go"
+        + [BUTTON_ENTER]  # 1 press to select Go
+        + [BUTTON_ENTER]  # 1 press to confirm word 120 auction
+        + [
+            BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 word confirm
+            BUTTON_ENTER,  # 1 press for fingerprint and derivation path (because we mock ctx.wallet)
+            BUTTON_PAGE,  # No passphrase
+            BUTTON_ENTER,  # Single-key
+        ]
+    )
+    MNEMONIC = "language language language language language language language language language language language auction"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    login.load_key_from_1248()
+
+    assert ctx.wallet.key.mnemonic == MNEMONIC
 
 
 # import unittest
