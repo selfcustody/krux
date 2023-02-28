@@ -10,12 +10,7 @@ from ..wdt import wdt
 from ..krux_settings import t
 from ..display import DEFAULT_PADDING
 from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
-from ..input import (
-    BUTTON_ENTER,
-    BUTTON_PAGE,
-    BUTTON_PAGE_PREV,
-    BUTTON_TOUCH,
-)
+from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH, PRESSED
 
 # Tiny Seed last bit index positions according to checksums
 TS_LAST_BIT_NO_CS = 143
@@ -858,9 +853,19 @@ class TinyScanner(Page):
 
     def _check_buttons(self, w24, page):
         if time.ticks_ms() > self.time_frame + 1000:
-            if w24 and not page and not self.ctx.input.enter_value():
-                self.capturing = True
-            if not self.ctx.input.page_value() or not self.ctx.input.page_prev_value():
+            enter_or_touch = (
+                self.ctx.input.enter_value() == PRESSED
+                or self.ctx.input.touch_value() == PRESSED
+            )
+            if w24:
+                if page == 0 and enter_or_touch:
+                    self.capturing = True
+            elif enter_or_touch:
+                return True
+            if (
+                self.ctx.input.page_value() == PRESSED
+                or self.ctx.input.page_prev_value() == PRESSED
+            ):
                 return True
         return False
 
@@ -879,7 +884,11 @@ class TinyScanner(Page):
                 words = self.tiny_seed.enter_tiny_seed(seed_numbers=page_seed_numbers)
                 if words:  # If words confirmed
                     return words
-                # Else turn camera on again and reset words
+                # Else esc command was given, turn camera on again and reset words
+                self.ctx.display.clear()
+                self.ctx.display.flash_text(
+                    t("Scanning words 1-12 again"), duration=700
+                )
                 self._run_camera()
                 self.previous_seed_numbers = [1] * 12
             else:
