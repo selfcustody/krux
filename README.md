@@ -37,14 +37,19 @@ git pull origin main && git submodule update --init --recursive
 This will make sure that all submodules (and their submodules, etc.) are pulled down and updated.
 
 ## Krux (script)
-The [krux](krux) bash script contains commands for common development tasks. It assumes a Linux host, but may work on other systems. For this reason, we suggest you use [Vagrant](https://www.vagrantup.com/). If running outside of Vagrant, you will need to have [Docker](https://www.docker.com/), `openssl`, and `wget` installed at a minimum for the commands to work as expected.
+The [krux](krux) bash script contains commands for common development tasks. It assumes a Linux host, but may work on other systems. For this reason, we suggest you use [Vagrant](https://www.vagrantup.com/) since all dependencies for development will be included. If running outside of Vagrant, you will need to have [Docker](https://www.docker.com/), `openssl`, and `wget` installed at a minimum for the commands to work as expected.
 
-Examples:
+For building and flashing Krux from within Vagrant, please follow the [Installing from source](https://selfcustody.github.io/krux/getting-started/installing-from-source) guide on the website.
+
+Otherwise, to run the commands on bare metal, remove the `vagrant ssh -c 'cd /vagrant; <command>'` wrapper from all commands like so:
+
 ```bash
-# build project for MaixDock
+# build firmware for MaixDock
+# vagrant ssh -c 'cd /vagrant; ./krux build maixpy_dock'
 ./krux build maixpy_dock
 
-#flash the project on a MaixDock
+# flash the firmware to a MaixDock
+# vagrant ssh -c 'cd /vagrant; ./krux flash maixpy_dock'
 ./krux flash maixpy_dock
 ```
 
@@ -100,15 +105,20 @@ Type "help", "copyright", "credits" or "license" for more information.
 This can be useful for testing a change to the krux code without having to run a full build and flash, visual regression testing,
 generating screenshots, or even just trying out Krux before purchasing a device.
 
-Before executing the simulator, make sure you have installed the poetry extras: `poetry install --extras simulator`. Otherwise you will get this error: `ModuleNotFoundError: No module named 'pygame'`
+Before executing the simulator, make sure you have installed the poetry extras:
 ```bash
-# Enter simulator folder:
+poetry install --extras simulator
+```
+
+Run the simulator:
+```bash
+# Enter simulator folder
 cd simulator
 
-# Run simulator with the touch device amigo, then use mouse to navigate:
+# Run simulator with the touch device amigo, then use mouse to navigate
 poetry run python simulator.py --device maixpy_amigo_tft
 
-# Run simulator with the small device m5stick, then use keyboard to navigate:
+# Run simulator with the small button-only m5stick, then use keyboard to navigate
 poetry run python simulator.py --device maixpy_m5stickv
 ```
 
@@ -121,7 +131,7 @@ sudo apt install python3-zbar
 sudo apt install libgl1
 
 # `pygame.error: No available video device`
-# You are trying to run the simulator on a SO without a GUI (some kind of terminal only or WSL). Try one with GUI!
+# You are trying to run the simulator on an OS without a GUI (some kind of terminal only or WSL). Try one with GUI!
 ```
 
 Simulator sequences (automatic testing):
@@ -129,7 +139,7 @@ Simulator sequences (automatic testing):
 # Enter simulator folder:
 cd simulator
 
-# Run all sequences of commands to all devices and all locales
+# Run all sequences of commands on all devices and in all locales (languages)
 ./generate-all-screenshots.sh
 
 # Run a specific sequence for a specific device (need to have the screenshots and the sd folder with the file settings.json inside)

@@ -75,7 +75,8 @@ def tdata(mocker):
         SIGNED_P2WSH_PSBT_B64,
     )
 
-def create_ctx(mocker, btn_seq, wallet, printer, touch_seq = None):
+
+def create_ctx(mocker, btn_seq, wallet, printer, touch_seq=None):
     """Helper to create mocked context obj"""
     ctx = mock_context(mocker)
     ctx.power_manager.battery_charge_remaining.return_value = 1
@@ -86,8 +87,8 @@ def create_ctx(mocker, btn_seq, wallet, printer, touch_seq = None):
 
     if touch_seq:
         ctx.input.touch = mocker.MagicMock(
-                current_index=mocker.MagicMock(side_effect=touch_seq)
-            )
+            current_index=mocker.MagicMock(side_effect=touch_seq)
+        )
     return ctx
 
 
@@ -99,23 +100,33 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
 
     cases = [
         # See 12 Words
-        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [
-        BUTTON_ENTER, BUTTON_ENTER, 
-        BUTTON_PAGE_PREV, BUTTON_ENTER # change to btn Back and click to return to home init screen
-        ]),
+        (
+            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            None,
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
         # See 24 Words
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
-             BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
-            ], 
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
         ),
     ]
     num = 0
     for case in cases:
         print(num)
-        num=num+1
+        num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
@@ -138,18 +149,26 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         # No print prompt
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
-            None, 
+            None,
             [
-                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
             [
-                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         # Print
@@ -157,16 +176,26 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         # Decline to print
@@ -174,23 +203,33 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
     ]
     num = 0
     for case in cases:
         print(num)
-        num=num+1
+        num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
@@ -218,16 +257,28 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             None,
             [
-                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
             [
-                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         # Print
@@ -235,16 +286,30 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         # Decline to print
@@ -252,16 +317,30 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
         # Changing grid thickness
@@ -275,14 +354,17 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
     ]
     num = 0
     for case in cases:
         print(num)
-        num=num+1
+        num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
@@ -308,8 +390,11 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             None,
             [
-                BUTTON_TOUCH, BUTTON_TOUCH, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
             [1, 0],
         ),
@@ -317,8 +402,11 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             None,
             [
-                BUTTON_TOUCH, BUTTON_TOUCH, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
             [1, 0],
         ),
@@ -327,8 +415,12 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
             [1, 0, 0],
         ),
@@ -336,8 +428,12 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
             [1, 0, 0],
         ),
@@ -346,8 +442,12 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
             [1, 0, 1],
         ),
@@ -355,16 +455,20 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
             MockPrinter(),
             [
-                BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH, 
-                BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER  # change to btn Back and click to return to home init screen
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
             ],
             [1, 0, 1],
         ),
     ]
-    num=0
+    num = 0
     for case in cases:
         print(num)
-        num=num+1
+        num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1], touch_seq=case[3])
         home = Home(ctx)
 

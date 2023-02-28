@@ -55,8 +55,4 @@ def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
 
     ctx.display.to_landscape.assert_has_calls([mocker.call() for _ in range(10)])
     ctx.display.to_portrait.assert_has_calls([mocker.call() for _ in range(10)])
-    ctx.display.draw_centered_text.assert_has_calls(
-        [
-            mocker.call("Loading camera")
-        ]
-    )
+    ctx.display.draw_centered_text.assert_has_calls([mocker.call("Loading camera")])
