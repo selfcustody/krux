@@ -237,6 +237,40 @@ class Page:
             )
         return (code, qr_format)
 
+    def highlight_qr_region(self, code, region=(0, 0, 0, 0), zoom=False):
+        """Draws in white a highlighted region of the QR code"""
+        reg_x, reg_y, reg_width, reg_height = region
+        size, code = self.ctx.display.add_qr_frame(code)
+        max_width = self.ctx.display.width()
+        if zoom:
+            max_width -= DEFAULT_PADDING
+            if size == 23:  # 21 + 2(frame)
+                qr_size = 7
+            else:
+                qr_size = 5
+            offset_x = 0
+            offset_y = 0
+        else:
+            qr_size = size
+            offset_x = reg_x + 1
+            offset_y = reg_y + 1
+
+        scale = max_width // qr_size
+        qr_width = qr_size * scale
+        offset = (self.ctx.display.width() - qr_width) // 2
+        for y in range(reg_height):  # vertical blocks loop
+            for x in range(reg_width):  # horizontal blocks loop
+                xy_index = (reg_y + y + 1) * (size + 1)
+                xy_index += reg_x + x + 1
+                if code[xy_index] == "0":
+                    self.ctx.display.fill_rectangle(
+                        offset + (offset_x + x) * scale,
+                        offset + (offset_y + y) * scale,
+                        scale,
+                        scale,
+                        lcd.WHITE,
+                    )
+
     def display_qr_codes(self, data, qr_format, title=None, allowAnyBtn=False):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
@@ -603,9 +637,7 @@ class Menu:
             color = lcd.MAGENTA
 
         # print the square at the top left
-        self.ctx.display.fill_rectangle(5, 5, 8, 8, color)
-        self.ctx.display.fill_rectangle(6, 6, 6, 6, lcd.BLACK)
-        self.ctx.display.fill_rectangle(7, 7, 4, 4, color)
+        self.ctx.display.fill_rectangle(5, 5, 3, 3, color)
 
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
@@ -618,19 +650,12 @@ class Menu:
         # Draw (filled) outline of battery in top-right corner of display
         padding = 5
         cylinder_length = 20
-        cylinder_height = 8
+        cylinder_height = 5
         self.ctx.display.fill_rectangle(
             self.ctx.display.width() - padding - cylinder_length,
             padding,
             cylinder_length,
             cylinder_height,
-            battery_color,
-        )
-        self.ctx.display.fill_rectangle(
-            self.ctx.display.width() - padding,
-            padding + (cylinder_height // 4),
-            1,
-            cylinder_height // 2,
             battery_color,
         )
 
@@ -644,23 +669,6 @@ class Menu:
                 depleted_length,
                 depleted_height,
                 lcd.BLACK,
-            )
-
-        # Indicate if the device is plugged in and detecting voltage over USB
-        if self.ctx.power_manager.is_battery_charging():
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - padding - cylinder_length // 2,
-                padding + 2,
-                cylinder_height // 2 - 1,
-                cylinder_height // 2 - 1,
-                lcd.GREEN,
-            )
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - padding - cylinder_length // 2 - 3,
-                padding + cylinder_height // 2 - 1,
-                3,
-                1,
-                lcd.GREEN,
             )
 
     def draw_network_indicator(self):
