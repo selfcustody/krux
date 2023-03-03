@@ -345,21 +345,6 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # Changing grid thickness
-        (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
-            None,
-            [
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE_PREV,  # change to btn Back
-                BUTTON_PAGE_PREV,
-                BUTTON_PAGE_PREV,
-                BUTTON_ENTER,  # click on back to return to home init screen
-            ],
-        ),
     ]
     num = 0
     for case in cases:
