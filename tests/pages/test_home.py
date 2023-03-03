@@ -292,7 +292,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_ENTER,
+                BUTTON_ENTER,  # say yes to print prompt
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
@@ -307,7 +307,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_ENTER,
+                BUTTON_ENTER,  # say yes to print prompt
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
@@ -323,7 +323,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_PAGE,
+                BUTTON_PAGE,  # say no to print prompt
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
@@ -338,7 +338,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_PAGE,
+                BUTTON_PAGE,  # say no to print prompt
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
@@ -353,8 +353,6 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
-                BUTTON_PAGE,
-                BUTTON_PAGE_PREV,
                 BUTTON_ENTER,
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,

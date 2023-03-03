@@ -1289,7 +1289,7 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
 # tc.assertEqual(Settings().i18n.locale, 'b')
 
 
-def test_settings(m5stickv, mocker, mocker_printer):
+def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     import krux
     import lcd
 
@@ -1437,6 +1437,7 @@ def test_settings(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Back to Printer
                 BUTTON_PAGE,
@@ -1524,7 +1525,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Back to Thermal
-                7,
+                8,
                 # Back to Printer
                 3,
                 # Leave Settings
