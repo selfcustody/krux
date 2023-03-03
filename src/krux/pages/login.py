@@ -258,7 +258,7 @@ class Login(Page):
             return MENU_CONTINUE
         self.ctx.display.clear()
         passphrase = ""
-        if self.prompt(t("Add passphrase?"), self.ctx.display.height() // 2):
+        if self.prompt(t("Add BIP39 passphrase?"), self.ctx.display.height() // 2):
             passphrase = self.load_passphrase()
             if passphrase == ESC_KEY:
                 return MENU_CONTINUE

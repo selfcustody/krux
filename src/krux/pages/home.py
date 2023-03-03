@@ -66,7 +66,7 @@ class Home(Page):
                 [
                     (t("Mnemonic"), self.mnemonic),
                     (t("Extended Public Key"), self.public_key),
-                    (t("Wallet"), self.wallet),
+                    (t("Wallet Descriptor"), self.wallet),
                     (t("Scan Address"), self.scan_address),
                     (t("Sign"), self.sign),
                     (t("Shutdown"), self.shutdown),
@@ -129,7 +129,7 @@ class Home(Page):
     def display_standard_qr(self):
         """Displays regular words QR code"""
         self.display_qr_codes(
-            self.ctx.wallet.key.mnemonic, FORMAT_NONE, None, allowAnyBtn=True
+            self.ctx.wallet.key.mnemonic, FORMAT_NONE, None, allow_any_btn=True
         )
         self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
         return MENU_CONTINUE
@@ -276,7 +276,7 @@ class Home(Page):
         else:
             code, qr_size = self._seed_qr()
             label = t("SeedQR")
-        label += t("\nSwipe to change mode")
+        label += "\n" + t("Swipe to change mode")
         mode = 0
         lr_index = 0
         region_size = 7 if qr_size == 21 else 5
@@ -391,7 +391,7 @@ class Home(Page):
             )
             self.ctx.input.wait_for_button()
             xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, None, allowAnyBtn=True)
+            self.display_qr_codes(xpub, FORMAT_NONE, None, allow_any_btn=True)
             self.print_qr_prompt(xpub, FORMAT_NONE)
         return MENU_CONTINUE
 
@@ -399,7 +399,9 @@ class Home(Page):
         """Handler for the 'wallet' menu item"""
         self.ctx.display.clear()
         if not self.ctx.wallet.is_loaded():
-            self.ctx.display.draw_centered_text(t("Wallet not found."))
+            self.ctx.display.draw_centered_text(
+                t("Wallet output descriptor not found.")
+            )
             if self.prompt(t("Load one?"), self.ctx.display.bottom_prompt_line):
                 return self._load_wallet()
         else:
@@ -699,6 +701,9 @@ class Home(Page):
         which will contain the same data as was originally loaded, in
         the same QR format
         """
+        XPUB_START = 4
+        XPUB_DIGITS = 4
+
         about = wallet.label + "\n"
         if wallet.is_multisig():
             xpubs = []
@@ -706,14 +711,18 @@ class Home(Page):
                 xpubs.append(
                     str(i + 1)
                     + ". "
-                    + xpub[4:7]
+                    + xpub[XPUB_START : XPUB_START + XPUB_DIGITS]
                     + ".."
-                    + xpub[len(xpub) - 3 : len(xpub)]
+                    + xpub[len(xpub) - XPUB_DIGITS : len(xpub)]
                 )
             about += "\n".join(xpubs)
         else:
             xpub = wallet.key.xpub()
-            about += xpub[4:7] + ".." + xpub[len(xpub) - 3 : len(xpub)]
+            about += (
+                xpub[XPUB_START : XPUB_START + XPUB_DIGITS]
+                + ".."
+                + xpub[len(xpub) - XPUB_DIGITS : len(xpub)]
+            )
         if include_qr:
             wallet_data, qr_format = wallet.wallet_qr()
             self.display_qr_codes(wallet_data, qr_format, title=about)

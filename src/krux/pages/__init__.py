@@ -271,7 +271,7 @@ class Page:
                         lcd.WHITE,
                     )
 
-    def display_qr_codes(self, data, qr_format, title=None, allowAnyBtn=False):
+    def display_qr_codes(self, data, qr_format, title=None, allow_any_btn=False):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
@@ -306,7 +306,7 @@ class Page:
             self.ctx.display.draw_hcentered_text(subtitle, offset_y, color=lcd.WHITE)
             i = (i + 1) % num_parts
             # In some cases we don't need to restrict the input to change the screen
-            if allowAnyBtn:
+            if allow_any_btn:
                 self.ctx.input.wait_for_button()
                 done = True
             elif self.wait_for_proceed(block=num_parts == 1):
