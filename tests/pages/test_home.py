@@ -240,7 +240,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         home.mnemonic()
 
         home.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, None, allowAnyBtn=True
+            ctx.wallet.key.mnemonic, FORMAT_NONE, None, allow_any_btn=True
         )
         home.print_qr_prompt.assert_called_with(ctx.wallet.key.mnemonic, FORMAT_NONE)
 
@@ -478,7 +478,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
         home.mnemonic()
 
         home.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, None, allowAnyBtn=True
+            ctx.wallet.key.mnemonic, FORMAT_NONE, None, allow_any_btn=True
         )
         home.print_qr_prompt.assert_called_with(ctx.wallet.key.mnemonic, FORMAT_NONE)
 
@@ -569,13 +569,13 @@ def test_public_key(mocker, m5stickv, tdata):
                 ctx.wallet.key.key_expression(None),
                 FORMAT_NONE,
                 None,
-                allowAnyBtn=True,
+                allow_any_btn=True,
             ),
             mocker.call(
                 ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
                 None,
-                allowAnyBtn=True,
+                allow_any_btn=True,
             ),
         ]
         print_qr_calls = [
