@@ -467,6 +467,7 @@ class Login(Page):
                 (t("Decimal"), lambda: MENU_EXIT),
                 (t("Hexadecimal"), lambda: MENU_EXIT),
                 (t("Octal"), lambda: MENU_EXIT),
+                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, _ = submenu.run_loop()
@@ -592,12 +593,15 @@ class Login(Page):
             [
                 (t("12 words"), lambda: MENU_EXIT),
                 (t("24 words"), lambda: MENU_EXIT),
+                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, _ = submenu.run_loop()
-        w24 = index == 1
         self.ctx.display.clear()
+        if index == 2:
+            return MENU_CONTINUE
 
+        w24 = index == 1
         tiny_seed = TinySeed(self.ctx)
         words = tiny_seed.enter_tiny_seed(w24)
         del tiny_seed
@@ -612,17 +616,21 @@ class Login(Page):
             [
                 (t("12 words"), lambda: MENU_EXIT),
                 (t("24 words"), lambda: MENU_EXIT),
+                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, _ = submenu.run_loop()
-        w24 = index == 1
         self.ctx.display.clear()
+        if index == 2:
+            return MENU_CONTINUE
+
         intro = t("Paint punched dots black so they can be detected.") + " "
         intro += t("Use a black background surface.") + " "
         intro += (
             t("Align camera and Tiny Seed precisely using the tracking rectangle.")
             + " "
         )
+        w24 = index == 1
         if w24:
             intro += t("TOUCH or press ENTER when punches are correctly mapped.")
         self.ctx.display.draw_hcentered_text(intro)
