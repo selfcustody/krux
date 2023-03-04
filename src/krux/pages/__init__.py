@@ -35,6 +35,7 @@ from ..input import (
     SWIPE_RIGHT,
     SWIPE_LEFT,
     SWIPE_UP,
+    PRESSED,
 )
 from ..display import DEFAULT_PADDING, FLASH_MSG_TIME
 from ..qr import to_qr_codes
@@ -50,6 +51,9 @@ ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
 WAIT_TO_CHECK_INPUT = 200
+ANTI_GLARE_WAIT_TIME = 500
+QR_CODE_STEP_TIME = 100
+CAMERA_INIT_TIME = 1000
 
 
 class Page:
@@ -165,8 +169,8 @@ class Page:
         self._time_frame = time.ticks_ms()
 
         def callback(part_total, num_parts_captured, new_part):
-            # Turn on the light as long as the enter button is held down
-            if time.ticks_ms() > self._time_frame + 1000:
+            # Turn on the light as long as the enter button is held down (M5stickV and Amigo)
+            if time.ticks_ms() > self._time_frame + CAMERA_INIT_TIME:
                 if self.ctx.light:
                     if not self.ctx.input.enter_value():
                         self.ctx.light.turn_on()
@@ -176,8 +180,8 @@ class Page:
                 elif not self.ctx.input.enter_value():
                     return 1
 
-                # Anti-glare mode
-                if self.ctx.input.page_value() == 0:
+                # Anti-glare mode (M5stickV and Amigo)
+                if self.ctx.input.page_value() == PRESSED:
                     if self.ctx.camera.has_antiglare():
                         self._time_frame = time.ticks_ms()
                         self.ctx.display.to_portrait()
@@ -189,15 +193,15 @@ class Page:
                             self.ctx.display.draw_centered_text(
                                 t("Anti-glare disabled")
                             )
-                        time.sleep_ms(500)
+                        time.sleep_ms(ANTI_GLARE_WAIT_TIME)
                         self.ctx.display.to_landscape()
                         return 0
                     return 1
 
-                # Exit the capture loop if a button is pressed
+                # Exit the capture loop with PAGE_PREV or TOUCH
                 if (
-                    self.ctx.input.page_prev_value() == 0
-                    or self.ctx.input.touch_value() == 0
+                    self.ctx.input.page_prev_value() == PRESSED
+                    or self.ctx.input.touch_value() == PRESSED
                 ):
                     return 1
 
@@ -213,7 +217,7 @@ class Page:
                     self.ctx.display.font_height,
                     lcd.WHITE,
                 )
-                time.sleep_ms(100)
+                time.sleep_ms(QR_CODE_STEP_TIME)
                 self.ctx.display.to_landscape()
 
             return 0
