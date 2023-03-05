@@ -109,7 +109,7 @@ class TinySeed(Page):
                         y_offset + 3,
                         self.x_pad - 5,
                         self.y_pad - 5,
-                        lcd.WHITE,
+                        lcd.WHITE,  # GREEN would be better
                     )
             y_offset += self.y_pad
 
@@ -773,7 +773,7 @@ class TinyScanner(Page):
                     lcd.WHITE,
                 )
 
-    def _detect_punches(self, img):
+    def _detect_and_draw_punches(self, img):
         """Applies gradient threshold to detect punched(black painted) bits"""
         page_seed_numbers = [0] * 12
         index = 0
@@ -809,7 +809,7 @@ class TinyScanner(Page):
                 if dot_l < punch_threshold:
                     _ = img.draw_rectangle(
                         eval_rect, thickness=punch_thickness, color=lcd.WHITE
-                    )
+                    )  # GREEN would be better, but img.format() == GRAYSCALE
                     word_index = index // 12
                     bit = 11 - (index % 12)
                     page_seed_numbers[word_index] = self.tiny_seed.toggle_bit(
@@ -945,16 +945,37 @@ class TinyScanner(Page):
 
                 # map_regions
                 self._map_punches_region(rect.rect(), page)
-                page_seed_numbers = self._detect_punches(img)
+                page_seed_numbers = self._detect_and_draw_punches(img)
                 self._draw_grid(img)
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
             # # Debug FPS 3/4
             # img.draw_string(10,100,str(fps))
+
+            # display info for the user how to capture in 24 words
+            message = t("Wait for the capture")
+            if w24 and page == 0:
+                message = t("TOUCH or ENTER to capture")
+
+            img_text = image.Image(
+                size=(
+                    self.ctx.display.usable_width(),
+                    self.ctx.display.usable_width(),
+                ),
+                copy_to_fb=True,  # avoid not enough memory in heap space
+            ).clear()
+            lines = self.ctx.display.draw_square_image_hcentered_text(img_text, message)
+            self.ctx.display.draw_img_hcentered_other_img(
+                img,
+                img_text,
+                img.width() - (len(lines) + 1) * self.ctx.display.font_height,
+            )
+
             if full_screen:
                 lcd.display(img)
             else:
                 lcd.display(img, oft=(2, 40))  # Centralize image in Amigo
+
             if page_seed_numbers:
                 if w24:
                     if page == 0:  # Scanning first 12 words (page 0)

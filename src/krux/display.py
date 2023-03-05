@@ -274,6 +274,37 @@ class Display:
             x -= width
         lcd.fill_rectangle(x, y, width, height, color)
 
+    def draw_square_image_hcentered_text(
+        self, img, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE
+    ):
+        """Draws text horizontally-centered on the img, at the given offset_y.
+        The bg_color will be equal to the img pixels. Img needs to be a square. Returns text as list"""
+        lines = text if isinstance(text, list) else self.to_lines(text)
+        for i, line in enumerate(lines):
+            offset_x = (img.width() - self.font_width * len(line)) // 2
+            offset_x = max(0, offset_x)
+            img.draw_string(offset_x, offset_y + (i * self.font_height), line, color)
+
+        # Krux UI rotates the display, so we need to rotate the img
+        points = [
+            (0, 0),
+            (img.width(), 0),
+            (img.width(), img.height()),
+            (0, img.height()),
+        ]
+        img.rotation_corr(z_rotation=-90, corners=points)
+
+        return lines
+
+    def draw_img_hcentered_other_img(
+        self, img, other_img, offset_y=DEFAULT_PADDING, alpha=255
+    ):
+        """Draws other_img horizontally-centered on the img, at the given offset_y.
+        Alpha value is used, so any value less than 256 makes black pixels invisible"""
+        img.draw_image(
+            other_img, offset_y, (img.height() - other_img.height()) // 2, alpha=alpha
+        )
+
     def draw_string(self, x, y, text, color, bg_color=lcd.BLACK):
         """Draws a string to the screen"""
         if board.config["krux"]["display"]["inverted_coordinates"]:

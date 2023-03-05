@@ -626,17 +626,12 @@ class Login(Page):
 
         intro = t("Paint punched dots black so they can be detected.") + " "
         intro += t("Use a black background surface.") + " "
-        intro += (
-            t("Align camera and Tiny Seed precisely using the tracking rectangle.")
-            + " "
-        )
-        w24 = index == 1
-        if w24:
-            intro += t("TOUCH or press ENTER when punches are correctly mapped.")
+        intro += t("Align camera and Tiny Seed properly.")
         self.ctx.display.draw_hcentered_text(intro)
         if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             return MENU_CONTINUE
 
+        w24 = index == 1
         tiny_scanner = TinyScanner(self.ctx)
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
