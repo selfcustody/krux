@@ -54,6 +54,11 @@ ZOOMED_R_MODE = 2
 REGION_MODE = 3
 TRANSCRIBE_MODE = 4
 
+# consider xpub value without xpub/zpub/ypub prefix
+WALLET_XPUB_START = 4
+# the amount of chars from the xpub to show from beginning and end
+WALLET_XPUB_DIGITS = 4
+
 
 class Home(Page):
     """Home is the main menu page of the app"""
@@ -701,9 +706,6 @@ class Home(Page):
         which will contain the same data as was originally loaded, in
         the same QR format
         """
-        XPUB_START = 4
-        XPUB_DIGITS = 4
-
         about = wallet.label + "\n"
         if wallet.is_multisig():
             xpubs = []
@@ -711,17 +713,17 @@ class Home(Page):
                 xpubs.append(
                     str(i + 1)
                     + ". "
-                    + xpub[XPUB_START : XPUB_START + XPUB_DIGITS]
+                    + xpub[WALLET_XPUB_START : WALLET_XPUB_START + WALLET_XPUB_DIGITS]
                     + ".."
-                    + xpub[len(xpub) - XPUB_DIGITS : len(xpub)]
+                    + xpub[len(xpub) - WALLET_XPUB_DIGITS : len(xpub)]
                 )
             about += "\n".join(xpubs)
         else:
             xpub = wallet.key.xpub()
             about += (
-                xpub[XPUB_START : XPUB_START + XPUB_DIGITS]
+                xpub[WALLET_XPUB_START : WALLET_XPUB_START + WALLET_XPUB_DIGITS]
                 + ".."
-                + xpub[len(xpub) - XPUB_DIGITS : len(xpub)]
+                + xpub[len(xpub) - WALLET_XPUB_DIGITS : len(xpub)]
             )
         if include_qr:
             wallet_data, qr_format = wallet.wallet_qr()
