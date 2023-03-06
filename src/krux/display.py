@@ -278,7 +278,8 @@ class Display:
         self, img, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE
     ):
         """Draws text horizontally-centered on the img, at the given offset_y.
-        The bg_color will be equal to the img pixels. Img needs to be a square. Returns text as list"""
+        The bg_color will be equal to the img pixels. Img needs to be a square.
+        Returns text as list"""
         lines = text if isinstance(text, list) else self.to_lines(text)
         for i, line in enumerate(lines):
             offset_x = (img.width() - self.font_width * len(line)) // 2

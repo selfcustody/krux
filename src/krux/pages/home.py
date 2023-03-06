@@ -449,7 +449,7 @@ class Home(Page):
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
         if wallet_data is None:
-            self.ctx.display.flash_text(t("Failed to load wallet"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load output descriptor"), lcd.RED)
             return MENU_CONTINUE
 
         try:
@@ -460,9 +460,10 @@ class Home(Page):
             if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
                 self.ctx.wallet = wallet
                 self.ctx.log.debug(
-                    "Wallet descriptor: %s" % self.ctx.wallet.descriptor.to_string()
+                    "Wallet output descriptor: %s"
+                    % self.ctx.wallet.descriptor.to_string()
                 )
-                self.ctx.display.flash_text(t("Loaded wallet"))
+                self.ctx.display.flash_text(t("Wallet output descriptor loaded!"))
         except Exception as e:
             self.ctx.log.exception("Exception occurred loading wallet")
             self.ctx.display.clear()
@@ -475,7 +476,7 @@ class Home(Page):
                 # Blue exports descriptors without a fingerprint
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    t("Warning:\nIncomplete descriptor"), lcd.RED
+                    t("Warning:\nIncomplete output descriptor"), lcd.RED
                 )
                 self.ctx.input.wait_for_button()
         return MENU_CONTINUE
@@ -579,9 +580,7 @@ class Home(Page):
 
     def show_address(self, addr, title=None, qr_format=FORMAT_NONE):
         """Show addr provided as a QRCode"""
-        self.display_qr_codes(
-            addr, qr_format, title=title, allow_any_btn=True
-        )
+        self.display_qr_codes(addr, qr_format, title=title, allow_any_btn=True)
         self.print_qr_prompt(addr, qr_format)
         return MENU_CONTINUE
 
@@ -644,7 +643,7 @@ class Home(Page):
             found = False
             num_checked = 0
             while not found:
-                for recv_addr in self.ctx.wallet.obtain_addresses(
+                for some_addr in self.ctx.wallet.obtain_addresses(
                     num_checked, limit=SCAN_ADDRESS_LIMIT, branch_index=addr_type
                 ):
                     self.ctx.display.clear()
@@ -654,7 +653,7 @@ class Home(Page):
 
                     num_checked += 1
 
-                    found = addr == recv_addr
+                    found = addr == some_addr
                     if found:
                         break
 
@@ -672,7 +671,9 @@ class Home(Page):
 
             self.ctx.display.clear()
             result_message = (
-                is_valid_txt % (str(num_checked) + ". \n\n" + addr) if found else not_found_txt % (addr, num_checked)
+                is_valid_txt % (str(num_checked) + ". \n\n" + addr)
+                if found
+                else not_found_txt % (addr, num_checked)
             )
             self.ctx.display.draw_centered_text(result_message)
             self.ctx.input.wait_for_button()

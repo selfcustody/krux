@@ -262,7 +262,6 @@ class FilePrinter(GCodeGenerator):
 
     def print_string(self, text):
         """Print a text string. Avoided on CNC"""
-        pass
 
     def clear(self):
         """Clears the printer's memory, resetting it"""
