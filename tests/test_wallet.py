@@ -304,7 +304,7 @@ def test_receive_addresses(mocker, m5stickv, tdata):
         wallet = Wallet(case[0])
         wallet.load(case[1], case[2])
 
-        assert [addr for addr in wallet.receive_addresses(0, limit=10)] == case[3]
+        assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 
 
 def test_load_multisig(mocker, m5stickv, tdata):

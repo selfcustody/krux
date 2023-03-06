@@ -590,7 +590,12 @@ class Menu:
             if btn == BUTTON_ENTER:
                 try:
                     self.ctx.display.clear()
-                    status = self.menu_view[selected_item_index][1]()
+                    try:
+                        status = self.menu_view[selected_item_index][1](
+                            *self.menu_view[selected_item_index][2]
+                        )
+                    except:
+                        status = self.menu_view[selected_item_index][1]()
                     if status != MENU_CONTINUE:
                         return (self.menu_view.index(selected_item_index), status)
                 except Exception as e:

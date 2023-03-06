@@ -905,7 +905,7 @@ def test_scan_address(mocker, m5stickv, tdata):
         mocker.patch.object(
             home,
             "display_qr_codes",
-            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+            new=lambda data, qr_format, title=None, allow_any_btn=True: ctx.input.wait_for_button(),
         )
         mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")

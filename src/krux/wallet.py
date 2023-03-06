@@ -102,11 +102,12 @@ class Wallet:
         """Returns the original wallet data and qr format for display back as a QR code"""
         return (self.wallet_data, self.wallet_qr_format)
 
-    def receive_addresses(self, i=0, limit=None):
-        """Returns an iterator deriving receive addresses for the wallet up to the provided limit"""
+    def obtain_addresses(self, i=0, limit=None, branch_index=0):
+        """Returns an iterator deriving addresses (default branch_index is receive)
+        for the wallet up to the provided limit"""
         starting_index = i
         while limit is None or i < starting_index + limit:
-            yield self.descriptor.derive(i, branch_index=0).address(
+            yield self.descriptor.derive(i, branch_index=branch_index).address(
                 network=self.key.network
             )
             i += 1
