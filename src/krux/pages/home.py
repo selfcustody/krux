@@ -515,6 +515,10 @@ class Home(Page):
                 custom_separator = " "
             start_digits = custom_start_digits
 
+            loading_txt = t("Loading receive address %d..")
+            if addr_type == 1:
+                loading_txt = t("Loading change address %d..")
+
             num_checked = 0
             while True:
                 items = []
@@ -530,9 +534,7 @@ class Home(Page):
                     num_checked, limit=LIST_ADDRESS_QTD, branch_index=addr_type
                 ):
                     self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(
-                        t("Loading receive address %d..") % (num_checked + 1)
-                    )
+                    self.ctx.display.draw_centered_text(loading_txt % (num_checked + 1))
 
                     if num_checked + 1 > 99:
                         start_digits = custom_start_digits - 1
@@ -545,7 +547,7 @@ class Home(Page):
                             + ".."
                             + addr[len(addr) - custom_end_digts :],
                             self.show_address,
-                            (addr, pos_str + ".\n\n" + addr),
+                            (addr, pos_str + ". " + addr),
                         )
                     )
 
