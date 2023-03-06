@@ -525,7 +525,7 @@ class Home(Page):
                 if num_checked + 1 > LIST_ADDRESS_QTD:
                     items.append(
                         (
-                            t("%d..%d") % (num_checked - LIST_ADDRESS_QTD, num_checked),
+                            "%d..%d" % (num_checked - LIST_ADDRESS_QTD, num_checked),
                             lambda: MENU_EXIT,
                         )
                     )
@@ -555,7 +555,7 @@ class Home(Page):
 
                 items.append(
                     (
-                        t("%d..%d") % (num_checked + 1, num_checked + LIST_ADDRESS_QTD),
+                        "%d..%d" % (num_checked + 1, num_checked + LIST_ADDRESS_QTD),
                         lambda: MENU_EXIT,
                     )
                 )
@@ -632,12 +632,12 @@ class Home(Page):
 
             checking_match_txt = t("Checking receive address %d for match..")
             checked_no_match_txt = t("Checked %d receive addresses with no matches.")
-            is_valid_txt = t("%s\n\nis a valid receive address")
+            is_valid_txt = t("%s\n\nis a valid receive address!")
             not_found_txt = t("%s\n\nwas NOT FOUND in the first %d receive addresses")
             if addr_type == 1:
                 checking_match_txt = t("Checking change address %d for match..")
                 checked_no_match_txt = t("Checked %d change addresses with no matches.")
-                is_valid_txt = t("%s\n\nis a valid change address")
+                is_valid_txt = t("%s\n\nis a valid change address!")
                 not_found_txt = t(
                     "%s\n\nwas NOT FOUND in the first %d change addresses"
                 )
