@@ -8,7 +8,7 @@ from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..wdt import wdt
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, FLASH_MSG_TIME
 from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH, PRESSED
 
@@ -887,7 +887,7 @@ class TinyScanner(Page):
                 # Else esc command was given, turn camera on again and reset words
                 self.ctx.display.clear()
                 self.ctx.display.flash_text(
-                    t("Scanning words 1-12 again"), duration=700
+                    t("Scanning words 1-12 again") + "\n\n" + t("Wait for the capture")
                 )
                 self._run_camera()
                 self.previous_seed_numbers = [1] * 12
@@ -906,11 +906,17 @@ class TinyScanner(Page):
             words = self.tiny_seed.enter_tiny_seed(True, page_seed_numbers, True)
             self.capturing = False
             if words is not None:  # Fisrt 12 words confirmed, moving to 13-24
+                self.ctx.display.clear()
+                self.ctx.display.flash_text(
+                    t("Scanning words 13-24") + "\n\n" + t("Wait for the capture")
+                )
                 self._run_camera()
                 return words
             # Esc command was given
             self.ctx.display.clear()
-            self.ctx.display.flash_text(t("Scanning words 1-12 again"), duration=700)
+            self.ctx.display.flash_text(
+                t("Scanning words 1-12 again") + "\n\n" + t("TOUCH or ENTER to capture")
+            )
             self._run_camera()  # Run camera and rotate screen after message was given
         elif self._valid_numbers(page_seed_numbers):
             self.previous_seed_numbers = page_seed_numbers
@@ -924,10 +930,21 @@ class TinyScanner(Page):
         self.previous_seed_numbers = [1] * 12
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading Camera"))
+        message = t("Wait for the capture")
+        if w24 and page == 0:
+            message = t("TOUCH or ENTER to capture")
+        self.ctx.display.draw_centered_text(message)
+
+        precamera_ticks = time.ticks_ms()
         self.ctx.camera.initialize_sensor(grayscale=True)
         self._set_camera_sensitivity()
         full_screen = self._run_camera()
+        postcamera_ticks = time.ticks_ms()
+
+        # check how much ms camera took to retain message on the screen
+        if precamera_ticks + FLASH_MSG_TIME > postcamera_ticks:
+            time.sleep_ms(precamera_ticks + FLASH_MSG_TIME - postcamera_ticks)
+        del message, precamera_ticks, postcamera_ticks
         # # Debug FPS 1/4
         # clock = time.clock()
         # fps = 0
@@ -951,26 +968,6 @@ class TinyScanner(Page):
                 img.lens_corr(strength=1.0, zoom=0.56)
             # # Debug FPS 3/4
             # img.draw_string(10,100,str(fps))
-
-            # display info for the user how to capture in 24 words
-            message = t("Wait for the capture")
-            if w24 and page == 0:
-                message = t("TOUCH or ENTER to capture")
-
-            img_text = image.Image(
-                size=(
-                    self.ctx.display.usable_width(),
-                    self.ctx.display.usable_width(),
-                ),
-                copy_to_fb=True,  # avoid not enough memory in heap space
-            ).clear()
-            lines = self.ctx.display.draw_square_image_hcentered_text(img_text, message)
-            self.ctx.display.draw_img_hcentered_other_img(
-                img,
-                img_text,
-                img.width() - (len(lines) + 1) * self.ctx.display.font_height,
-            )
-
             if full_screen:
                 lcd.display(img)
             else:
