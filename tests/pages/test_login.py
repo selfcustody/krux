@@ -1079,7 +1079,7 @@ def test_leaving_keypad(mocker, amigo_tft):
     assert ctx.input.wait_for_button.call_count == len(esc_keypad)
 
 
-def test_passphrase_give_up(mocker, amigo_tft):
+def test_passphrase_give_up_on_amigo(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -1119,13 +1119,20 @@ def test_passphrase_give_up(mocker, amigo_tft):
             BUTTON_PAGE_PREV,  # Move to Go
             BUTTON_PAGE_PREV,  # Move to ESC
             BUTTON_ENTER,  # Press ESC
-            BUTTON_ENTER,  # Leave
+            BUTTON_ENTER,  # Confirm ESC
         ]
+        +
+        # Passphrase, cancel
+        [
+            BUTTON_PAGE_PREV,  # Move to NO passphrase
+            BUTTON_ENTER,  # Press NO
+        ]
+        +
+        # Single-key
+        [BUTTON_ENTER]
     )
 
-    ctx = mock_context(mocker)
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=case)
-
+    ctx = create_ctx(mocker, case)
     login = Login(ctx)
     login.load_key_from_text()
     assert ctx.input.wait_for_button.call_count == len(case)
