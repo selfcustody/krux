@@ -16,7 +16,8 @@ ignore=CVS,
        embit,
        foundation-ur-py,
        MaixPy,
-       urtypes
+       urtypes,
+       translations.py
 
 # Add files or directories matching the regex patterns to the blacklist. The
 # regex matches against base names, not paths.
@@ -459,6 +460,7 @@ good-names=i,
            Run,
            firmware_hash,
            sd,
+           mv,
            _
 
 # Good variable names regexes, separated by a comma. If names match any regex,

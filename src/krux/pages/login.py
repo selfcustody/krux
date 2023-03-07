@@ -259,13 +259,11 @@ class Login(Page):
         self.ctx.display.clear()
 
         # Temporary wallet, Just to show the fingerprint
-        temp_wallet = Wallet(
-            Key(
-                mnemonic,
-                False,
-                NETWORKS[Settings().bitcoin.network],
-                "",
-            )
+        temp_key = Key(
+            mnemonic,
+            False,
+            NETWORKS[Settings().bitcoin.network],
+            "",
         )
 
         # Will wait until user defines a passphrase or select NO on the prompt
@@ -273,7 +271,7 @@ class Login(Page):
         while passphrase_undefined:
             passphrase = ""
             if self.prompt(
-                temp_wallet.key.fingerprint_hex_str(True)
+                temp_key.fingerprint_hex_str(True)
                 + "\n\n"
                 + t("Add BIP39 passphrase?"),
                 self.ctx.display.height() // 2,
@@ -288,19 +286,17 @@ class Login(Page):
         self.ctx.display.clear()
 
         # Temporary wallet, just to show the fingerprint
-        temp_wallet = Wallet(
-            Key(
-                mnemonic,
-                False,
-                NETWORKS[Settings().bitcoin.network],
-                passphrase,
-            )
+        temp_key = Key(
+            mnemonic,
+            False,
+            NETWORKS[Settings().bitcoin.network],
+            passphrase,
         )
 
         # Show fingerprint again because password can change the fingerprint,
         # and user needs to confirm not just the words, but the fingerprint too
         if not self.prompt(
-            temp_wallet.key.fingerprint_hex_str(True) + "\n\n" + t("Continue?"),
+            temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?"),
             self.ctx.display.height() // 2,
         ):
             return MENU_CONTINUE
@@ -317,7 +313,7 @@ class Login(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        del temp_wallet
+        del temp_key
 
         # Permanent wallet loaded
         self.ctx.wallet = Wallet(
