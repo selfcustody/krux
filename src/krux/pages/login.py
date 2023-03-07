@@ -258,11 +258,26 @@ class Login(Page):
             return MENU_CONTINUE
         self.ctx.display.clear()
 
+        # Temporary wallet, Just to show the fingerprint
+        temp_wallet = Wallet(
+            Key(
+                mnemonic,
+                False,
+                NETWORKS[Settings().bitcoin.network],
+                "",
+            )
+        )
+
         # Will wait until user defines a passphrase or select NO on the prompt
         passphrase_undefined = True
         while passphrase_undefined:
             passphrase = ""
-            if self.prompt(t("Add BIP39 passphrase?"), self.ctx.display.height() // 2):
+            if self.prompt(
+                temp_wallet.key.fingerprint_hex_str(True)
+                + "\n\n"
+                + t("Add BIP39 passphrase?"),
+                self.ctx.display.height() // 2,
+            ):
                 passphrase = self.load_passphrase()
                 if passphrase == ESC_KEY:
                     passphrase = ""
@@ -270,6 +285,26 @@ class Login(Page):
                     passphrase_undefined = False
             else:
                 passphrase_undefined = False
+        self.ctx.display.clear()
+
+        # Temporary wallet, just to show the fingerprint
+        temp_wallet = Wallet(
+            Key(
+                mnemonic,
+                False,
+                NETWORKS[Settings().bitcoin.network],
+                passphrase,
+            )
+        )
+
+        # Show fingerprint again because password can change the fingerprint,
+        # and user needs to confirm not just the words, but the fingerprint too
+        if not self.prompt(
+            temp_wallet.key.fingerprint_hex_str(True) + "\n\n" + t("Continue?"),
+            self.ctx.display.height() // 2,
+        ):
+            return MENU_CONTINUE
+
         submenu = Menu(
             self.ctx,
             [
@@ -281,6 +316,10 @@ class Login(Page):
         multisig = index == 1
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
+
+        del temp_wallet
+
+        # Permanent wallet loaded
         self.ctx.wallet = Wallet(
             Key(
                 mnemonic,
