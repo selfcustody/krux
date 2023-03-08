@@ -68,7 +68,14 @@ class UART:
         pass
 
 
+class SDCard:
+
+    def remount():
+        pass
+
+
 if "machine" not in sys.modules:
     sys.modules["machine"] = mock.MagicMock(
-        reset=reset, UART=mock.MagicMock(wraps=UART)
+        reset=reset, UART=mock.MagicMock(wraps=UART),
+        SDCard=SDCard
     )

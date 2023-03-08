@@ -266,7 +266,7 @@ class Login(Page):
             "",
         )
 
-        # Will wait until user defines a passphrase or select NO on the prompt
+        # Wait until user defines a passphrase or select NO on the prompt
         passphrase_undefined = True
         while passphrase_undefined:
             passphrase = ""
