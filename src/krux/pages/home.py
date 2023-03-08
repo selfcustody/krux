@@ -33,7 +33,7 @@ from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
 from ..krux_settings import t, Settings
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
+from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
 from ..sd_card import SDHandler
 from ..input import (
     BUTTON_ENTER,
@@ -66,6 +66,15 @@ LIST_ADDRESS_DIGITS = 8  # len on large devices per menu item
 LIST_ADDRESS_DIGITS_SMALL = 4  # len on small devices per menu item
 
 SCAN_ADDRESS_LIMIT = 20
+
+LIST_FILE_DIGITS = LIST_ADDRESS_DIGITS + 1
+LIST_FILE_DIGITS_SMALL = LIST_ADDRESS_DIGITS_SMALL + 1
+
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+NUM_SPECIAL_1 = "0123456789()-.[\\]_~"
+
+SD_ROOT_PATH = "/sd"
 
 
 class Home(Page):
@@ -514,7 +523,7 @@ class Home(Page):
                 custom_start_digits = (
                     LIST_ADDRESS_DIGITS_SMALL + 3
                 )  # 3 more because of bc1 address
-                custom_end_digts = LIST_ADDRESS_DIGITS
+                custom_end_digts = LIST_ADDRESS_DIGITS_SMALL
                 custom_separator = " "
             start_digits = custom_start_digits
 
@@ -571,6 +580,7 @@ class Home(Page):
 
                     # Back
                     if index == len(submenu.menu) - 1:
+                        del submenu, items
                         gc.collect()
                         return MENU_CONTINUE
                     # Next
@@ -699,6 +709,52 @@ class Home(Page):
             return MENU_CONTINUE
         return status
 
+    def _select_file(self):
+        custom_start_digits = LIST_FILE_DIGITS
+        custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
+        if board.config["type"] == "m5stickv":
+            custom_start_digits = LIST_FILE_DIGITS_SMALL
+            custom_end_digts = LIST_FILE_DIGITS_SMALL + 4  # 3 more because of file type
+
+        path = SD_ROOT_PATH
+        while True:
+            items = []
+            menu_items = []
+            # if is a dir then list all files in it
+            if os.path.isdir(path):
+                if path != SD_ROOT_PATH:
+                    items.append("..")
+                    menu_items.append(("..", lambda: MENU_EXIT))
+
+                dir_files = os.listdir(path)
+                for filename in dir_files:
+                    items.append(filename)
+                    if len(filename) >= custom_start_digits + 2 + custom_end_digts:
+                        filename = (
+                            filename[:custom_start_digits]
+                            + ".."
+                            + filename[len(filename) - custom_end_digts :]
+                        )
+                    menu_items.append((filename, lambda: MENU_EXIT))
+
+                submenu = Menu(self.ctx, menu_items)
+                index, _ = submenu.run_loop()
+
+                # selected ".."
+                if index == 0 and path != SD_ROOT_PATH:
+                    path = path.split("/")
+                    path.pop()
+                    path = "/".join(path)
+                else:
+                    path += "/" + items[index]
+            # it is a file!
+            else:
+                del submenu, menu_items, items
+                gc.collect()
+                return path
+
+        return None
+
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
         if not self.ctx.wallet.is_loaded():
@@ -709,26 +765,24 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
 
-        data, qr_format = (None, FORMAT_NONE)
-        psbt_filename = None
+        # TODO: Camera first, SD later!
 
+        data, qr_format = (None, FORMAT_NONE)
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Checking for SD card.."))
         try:
             with SDHandler() as sd:
-                psbt_filename = next(
-                    filter(
-                        lambda filename: filename.endswith(".psbt"),
-                        os.listdir("/sd"),
+                psbt_filename = self._select_file()
+
+                if psbt_filename:
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_hcentered_text(
+                        t("PSBT selected:\n%s") % psbt_filename
                     )
-                )
-                self.ctx.display.clear()
-                self.ctx.display.draw_hcentered_text(
-                    t("Found PSBT on SD card:\n%s") % psbt_filename
-                )
-                if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
-                    data = sd.read_binary(psbt_filename)
-        except:
+                    if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
+                        data = sd.read_binary(psbt_filename[4:]) #remove /sd/ prefix
+        except Exception as e:
+            print("ERRORT!!", e)
             pass
 
         if data is None:
@@ -754,23 +808,54 @@ class Home(Page):
             signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
 
+            # TODO: Camera first, SD later!
+
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Checking for SD card.."))
             try:
                 with SDHandler() as sd:
                     self.ctx.display.clear()
-                    if self.prompt(
-                        t("Save PSBT to SD card?"), self.ctx.display.height() // 2
-                    ):
-                        psbt_filename = "signed-%s" % (
-                            psbt_filename
-                            if psbt_filename is not None
-                            else "QRCode.psbt"
-                        )
-                        sd.write_binary(psbt_filename, signer.psbt.serialize())
-                        self.ctx.display.flash_text(
-                            t("Saved PSBT to SD card:\n%s") % psbt_filename
-                        )
+
+                    # Wait until user defines a filename or select NO on the prompt
+                    filename_undefined = True
+                    while filename_undefined:
+                        if self.prompt(
+                            t("Save PSBT to SD card?"), self.ctx.display.height() // 2
+                        ):
+                            psbt_filename = self.capture_from_keypad(
+                                t("Filename"),
+                                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
+                                starting_buffer="signed-%s" % psbt_filename
+                                if psbt_filename
+                                else "QRCode.psbt",
+                            )
+                            # Verify if user defined a filename and it is not just dots
+                            if (
+                                psbt_filename
+                                and psbt_filename != ESC_KEY
+                                and not all(c in "." for c in psbt_filename)
+                            ):
+                                # check and warn for overwrite filename
+                                if psbt_filename in os.listdir("/sd"):
+                                    if self.prompt(
+                                        t("Filename %s exists on SD card, overwrite?")
+                                        % psbt_filename,
+                                        self.ctx.display.height() // 2,
+                                    ):
+                                        filename_undefined = False
+                                else:
+                                    filename_undefined = False
+
+                                # if user defined a filename and it is ok, save!
+                                if not filename_undefined:
+                                    sd.write_binary(
+                                        psbt_filename, signer.psbt.serialize()
+                                    )
+                                    self.ctx.display.flash_text(
+                                        t("Saved PSBT to SD card:\n%s") % psbt_filename
+                                    )
+                        else:
+                            filename_undefined = False
             except:
                 pass
 
