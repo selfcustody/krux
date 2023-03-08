@@ -258,7 +258,7 @@ class Login(Page):
             return MENU_CONTINUE
         self.ctx.display.clear()
 
-        # Temporary wallet, Just to show the fingerprint
+        # Temporary key, Just to show the fingerprint
         temp_key = Key(
             mnemonic,
             False,
@@ -285,7 +285,7 @@ class Login(Page):
                 passphrase_undefined = False
         self.ctx.display.clear()
 
-        # Temporary wallet, just to show the fingerprint
+        # Temporary key, just to show the fingerprint
         temp_key = Key(
             mnemonic,
             False,

@@ -55,16 +55,15 @@ ZOOMED_R_MODE = 2
 REGION_MODE = 3
 TRANSCRIBE_MODE = 4
 
-# consider xpub value without xpub/zpub/ypub prefix
+# to start xpub value without the xpub/zpub/ypub prefix
 WALLET_XPUB_START = 4
-# the amount of chars from the xpub to show from beginning and end
+# len of the xpub to show
 WALLET_XPUB_DIGITS = 4
 
-LIST_ADDRESS_QTD = 4
-LIST_ADDRESS_START_DIGITS = 11
-LIST_ADDRESS_END_DIGITS = 8
-LIST_ADDRESS_START_DIGITS_SMALL = 7
-LIST_ADDRESS_END_DIGITS_SMALL = 4
+
+LIST_ADDRESS_QTD = 4  # qtd of address per page
+LIST_ADDRESS_DIGITS = 8  # len on large devices per menu item
+LIST_ADDRESS_DIGITS_SMALL = 4  # len on small devices per menu item
 
 SCAN_ADDRESS_LIMIT = 20
 
@@ -506,12 +505,16 @@ class Home(Page):
         """Handler for the 'receive addresses' or 'change addresses' menu item"""
         # only show address for single-key or multisig with wallet output descriptor loaded
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
-            custom_start_digits = LIST_ADDRESS_START_DIGITS
-            custom_end_digts = LIST_ADDRESS_END_DIGITS
+            custom_start_digits = (
+                LIST_ADDRESS_DIGITS + 3
+            )  # 3 more because of bc1 address
+            custom_end_digts = LIST_ADDRESS_DIGITS
             custom_separator = ". "
             if board.config["type"] == "m5stickv":
-                custom_start_digits = LIST_ADDRESS_START_DIGITS_SMALL
-                custom_end_digts = LIST_ADDRESS_END_DIGITS_SMALL
+                custom_start_digits = (
+                    LIST_ADDRESS_DIGITS_SMALL + 3
+                )  # 3 more because of bc1 address
+                custom_end_digts = LIST_ADDRESS_DIGITS
                 custom_separator = " "
             start_digits = custom_start_digits
 
