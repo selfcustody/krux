@@ -728,7 +728,7 @@ class Login(Page):
     def settings(self):
         """Handler for the 'settings' menu item"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card"))
+        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
         try:
             # Check for SD hot-plug
             with SDHandler():

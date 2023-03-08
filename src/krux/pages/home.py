@@ -344,7 +344,7 @@ class Home(Page):
             # Warn of SD read here because Printer don't have access to display
             if isinstance(self.ctx.printer, FilePrinter):
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Checking for SD card"))
+                self.ctx.display.draw_centered_text(t("Checking for SD card.."))
 
             self.ctx.printer.print_qr_code(code)
         return MENU_CONTINUE
@@ -713,7 +713,7 @@ class Home(Page):
         psbt_filename = None
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card"))
+        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
         try:
             with SDHandler() as sd:
                 psbt_filename = next(
@@ -755,7 +755,7 @@ class Home(Page):
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
 
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card"))
+            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
             try:
                 with SDHandler() as sd:
                     self.ctx.display.clear()
@@ -821,7 +821,7 @@ class Home(Page):
         self.ctx.input.wait_for_button()
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card"))
+        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
         try:
             with SDHandler() as sd:
                 self.ctx.display.clear()
