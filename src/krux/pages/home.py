@@ -72,10 +72,12 @@ LIST_FILE_DIGITS_SMALL = LIST_ADDRESS_DIGITS_SMALL + 1
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-NUM_SPECIAL_1 = "0123456789()-.[\\]_~"
+NUM_SPECIAL_1 = "0123456789()-.[]_~"
 
 SD_ROOT_PATH = "/sd"
 
+PSBT_FILE_SUFFIX = "-signed"
+PSBT_FILE_EXTENSION = ".psbt"
 
 class Home(Page):
     """Home is the main menu page of the app"""
@@ -777,12 +779,12 @@ class Home(Page):
                 if psbt_filename:
                     self.ctx.display.clear()
                     self.ctx.display.draw_hcentered_text(
-                        t("PSBT selected:\n%s") % psbt_filename
+                        t("PSBT selected:\n\n%s") % psbt_filename
                     )
+                    psbt_filename = psbt_filename[4:] #remove "/sd/" prefix
                     if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
-                        data = sd.read_binary(psbt_filename[4:]) #remove /sd/ prefix
-        except Exception as e:
-            print("ERRORT!!", e)
+                        data = sd.read_binary(psbt_filename) 
+        except:
             pass
 
         if data is None:
@@ -814,20 +816,23 @@ class Home(Page):
             self.ctx.display.draw_centered_text(t("Checking for SD card.."))
             try:
                 with SDHandler() as sd:
-                    self.ctx.display.clear()
-
                     # Wait until user defines a filename or select NO on the prompt
                     filename_undefined = True
                     while filename_undefined:
+                        self.ctx.display.clear()
                         if self.prompt(
                             t("Save PSBT to SD card?"), self.ctx.display.height() // 2
                         ):
+                            # remove the extension ".psbt" from the name
+                            psbt_filename = psbt_filename[:len(psbt_filename) -5] if psbt_filename.endswith(PSBT_FILE_EXTENSION) else psbt_filename
+                            # remove the PSBT_FILE_SUFFIX, because we will add it
+                            psbt_filename = psbt_filename[:len(psbt_filename) -7] if psbt_filename.endswith(PSBT_FILE_SUFFIX) else psbt_filename
                             psbt_filename = self.capture_from_keypad(
                                 t("Filename"),
                                 [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
-                                starting_buffer="signed-%s" % psbt_filename
+                                starting_buffer=("%s" + PSBT_FILE_SUFFIX) % psbt_filename
                                 if psbt_filename
-                                else "QRCode.psbt",
+                                else "QRCode" + PSBT_FILE_SUFFIX,
                             )
                             # Verify if user defined a filename and it is not just dots
                             if (
@@ -835,8 +840,12 @@ class Home(Page):
                                 and psbt_filename != ESC_KEY
                                 and not all(c in "." for c in psbt_filename)
                             ):
+                                # return the extension .psbt
+                                psbt_filename = psbt_filename if psbt_filename.endswith(PSBT_FILE_EXTENSION) else psbt_filename + PSBT_FILE_EXTENSION
                                 # check and warn for overwrite filename
-                                if psbt_filename in os.listdir("/sd"):
+                                # add the "/sd/" prefix
+                                if os.path.isfile("/sd/"+ psbt_filename):
+                                    self.ctx.display.clear()
                                     if self.prompt(
                                         t("Filename %s exists on SD card, overwrite?")
                                         % psbt_filename,
@@ -851,6 +860,7 @@ class Home(Page):
                                     sd.write_binary(
                                         psbt_filename, signer.psbt.serialize()
                                     )
+                                    self.ctx.display.clear()
                                     self.ctx.display.flash_text(
                                         t("Saved PSBT to SD card:\n%s") % psbt_filename
                                     )
