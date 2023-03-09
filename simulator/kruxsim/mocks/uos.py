@@ -24,6 +24,7 @@ import os
 old_listdir = os.listdir
 old_remove = os.remove
 old_isdir = os.path.isdir
+old_isfile = os.path.isfile
 
 
 def new_listdir(path, *args, **kwargs):
@@ -40,7 +41,12 @@ def new_isdir(path, *args, **kwargs):
     path = path.lstrip("/") if path.startswith("/sd") else path
     return old_isdir(path, *args, **kwargs)
 
+def new_isfile(path, *args, **kwargs):
+    path = path.lstrip("/") if path.startswith("/sd") else path
+    return old_isfile(path, *args, **kwargs)
+
 
 setattr(os, "listdir", new_listdir)
 setattr(os, "remove", new_remove)
 setattr(os.path, "isdir", new_isdir)
+setattr(os.path, "isfile", new_isfile)
