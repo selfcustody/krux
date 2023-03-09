@@ -79,6 +79,7 @@ SD_ROOT_PATH = "/sd"
 PSBT_FILE_SUFFIX = "-signed"
 PSBT_FILE_EXTENSION = ".psbt"
 
+
 class Home(Page):
     """Home is the main menu page of the app"""
 
@@ -767,51 +768,74 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
 
-        # TODO: Camera first, SD later!
+        # Try to read a PSBT from camera
+        psbt_filename = None
+        data, qr_format = self.capture_qr_code()
 
-        data, qr_format = (None, FORMAT_NONE)
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-        try:
-            with SDHandler() as sd:
-                psbt_filename = self._select_file()
-
-                if psbt_filename:
+        if data is None:
+            # Try to read a PSBT from a file on the SD card
+            qr_format = FORMAT_NONE
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+            try:
+                with SDHandler() as sd:
                     self.ctx.display.clear()
-                    self.ctx.display.draw_hcentered_text(
-                        t("PSBT selected:\n\n%s") % psbt_filename
-                    )
-                    psbt_filename = psbt_filename[4:] #remove "/sd/" prefix
-                    if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
-                        data = sd.read_binary(psbt_filename) 
-        except:
-            pass
+                    if self.prompt(
+                        t("Load PSBT from SD card?"), self.ctx.display.height() // 2
+                    ):
+                        psbt_filename = self._select_file()
+
+                        if psbt_filename:
+                            self.ctx.display.clear()
+                            self.ctx.display.draw_hcentered_text(
+                                t("PSBT selected:\n\n%s") % psbt_filename
+                            )
+                            psbt_filename = psbt_filename[4:]  # remove "/sd/" prefix
+                            if self.prompt(
+                                t("Load?"), self.ctx.display.bottom_prompt_line
+                            ):
+                                data = sd.read_binary(psbt_filename)
+            except FileNotFoundError:
+                pass
 
         if data is None:
-            psbt_filename = None
-            data, qr_format = self.capture_qr_code()
-
-        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
-
-        if data is None:
+            # Both the camera and the file on SD card failed!
             self.ctx.display.flash_text(t("Failed to load PSBT"), lcd.RED)
             return MENU_CONTINUE
 
+        # PSBT read OK! Will try to sign
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
+        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
         signer = PSBTSigner(self.ctx.wallet, data, qr_format)
         self.ctx.log.debug("Received PSBT: %s" % signer.psbt)
 
         outputs = signer.outputs()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text("\n \n".join(outputs))
+
+        # If user confirm, Krux will sign
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             signer.sign()
             self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
 
-            # TODO: Camera first, SD later!
+            qr_signed_psbt, qr_format = signer.psbt_qr()
+            serialized_signed_psbt = signer.psbt.serialize()
 
+            # memory management
+            del data, signer, outputs
+            gc.collect()
+
+            # Show the signed PSBT as a QRCode
+            self.display_qr_codes(qr_signed_psbt, qr_format)
+            self.print_qr_prompt(qr_signed_psbt, qr_format, width=45)
+
+            # memory management
+            del qr_signed_psbt
+            gc.collect()
+
+            # Try to save the signed PSBT file on the SD card
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Checking for SD card.."))
             try:
@@ -824,16 +848,26 @@ class Home(Page):
                             t("Save PSBT to SD card?"), self.ctx.display.height() // 2
                         ):
                             # remove the extension ".psbt" from the name
-                            psbt_filename = psbt_filename[:len(psbt_filename) -5] if psbt_filename.endswith(PSBT_FILE_EXTENSION) else psbt_filename
+                            psbt_filename = (
+                                psbt_filename[: len(psbt_filename) - 5]
+                                if psbt_filename.endswith(PSBT_FILE_EXTENSION)
+                                else psbt_filename
+                            )
                             # remove the PSBT_FILE_SUFFIX, because we will add it
-                            psbt_filename = psbt_filename[:len(psbt_filename) -7] if psbt_filename.endswith(PSBT_FILE_SUFFIX) else psbt_filename
+                            psbt_filename = (
+                                psbt_filename[: len(psbt_filename) - 7]
+                                if psbt_filename.endswith(PSBT_FILE_SUFFIX)
+                                else psbt_filename
+                            )
                             psbt_filename = self.capture_from_keypad(
                                 t("Filename"),
                                 [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
-                                starting_buffer=("%s" + PSBT_FILE_SUFFIX) % psbt_filename
+                                starting_buffer=("%s" + PSBT_FILE_SUFFIX)
+                                % psbt_filename
                                 if psbt_filename
                                 else "QRCode" + PSBT_FILE_SUFFIX,
                             )
+
                             # Verify if user defined a filename and it is not just dots
                             if (
                                 psbt_filename
@@ -841,10 +875,14 @@ class Home(Page):
                                 and not all(c in "." for c in psbt_filename)
                             ):
                                 # return the extension .psbt
-                                psbt_filename = psbt_filename if psbt_filename.endswith(PSBT_FILE_EXTENSION) else psbt_filename + PSBT_FILE_EXTENSION
+                                psbt_filename = (
+                                    psbt_filename
+                                    if psbt_filename.endswith(PSBT_FILE_EXTENSION)
+                                    else psbt_filename + PSBT_FILE_EXTENSION
+                                )
                                 # check and warn for overwrite filename
                                 # add the "/sd/" prefix
-                                if os.path.isfile("/sd/"+ psbt_filename):
+                                if os.path.isfile("/sd/" + psbt_filename):
                                     self.ctx.display.clear()
                                     if self.prompt(
                                         t("Filename %s exists on SD card, overwrite?")
@@ -858,7 +896,7 @@ class Home(Page):
                                 # if user defined a filename and it is ok, save!
                                 if not filename_undefined:
                                     sd.write_binary(
-                                        psbt_filename, signer.psbt.serialize()
+                                        psbt_filename, serialized_signed_psbt
                                     )
                                     self.ctx.display.clear()
                                     self.ctx.display.flash_text(
@@ -866,14 +904,9 @@ class Home(Page):
                                     )
                         else:
                             filename_undefined = False
-            except:
+            except FileNotFoundError:
                 pass
 
-            signed_psbt, qr_format = signer.psbt_qr()
-            signer = None
-            gc.collect()
-            self.display_qr_codes(signed_psbt, qr_format)
-            self.print_qr_prompt(signed_psbt, qr_format, width=45)
         return MENU_CONTINUE
 
     def sign_message(self):

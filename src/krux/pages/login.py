@@ -735,7 +735,7 @@ class Login(Page):
                 self.display_centered_text(
                     t("Your changes will be kept on the SD card."), duration=SD_MSG_TIME
                 )
-        except:
+        except FileNotFoundError:
             self.display_centered_text(
                 t("SD card not detected.\n\nChanges will last until shutdown."),
                 duration=SD_MSG_TIME,
