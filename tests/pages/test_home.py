@@ -1173,19 +1173,20 @@ def test_sign_message(mocker, m5stickv, tdata):
     import binascii
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
         # Hex-encoded hash, Sign, No print prompt
         (
-            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
-            FORMAT_NONE,
-            None,
+            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",  # 0 data for capture_qr_code
+            FORMAT_NONE,  # 1 qr_format for capture_qr_code
+            None,  # 2 printer
+            # 3 btn_seq
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
-            None,
+            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",  # 4 base64 for display_qr_codes / print_qr_prompt
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
+            None,  # 6 SD file
         ),
         # Hash, Sign, No print prompt
         (
@@ -1269,19 +1270,23 @@ def test_sign_message(mocker, m5stickv, tdata):
         (None, FORMAT_NONE, None, [], None, None, None),
         # Message, Sign, Save to SD, No print prompt
         (
-            "hello world",
-            FORMAT_NONE,
-            None,
+            "hello world",  # 0 data for capture_qr_code
+            FORMAT_NONE,  # 1 qr_format for capture_qr_code
+            None,  # 2 printer
+            # 3 btn_seq
             [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
+                BUTTON_ENTER,  # SHA256 sign confirm
+                BUTTON_ENTER,  # Signature pass
+                BUTTON_ENTER,  # QRCode pass
+                BUTTON_ENTER,  # Public Key pass
+                BUTTON_ENTER,  # QRCode pass
+                BUTTON_ENTER,  # Yes save SD
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Press "Go"
             ],
-            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",  # 4 base64 for display_qr_codes / print_qr_prompt
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
+            # 6 SD file
             binascii.b2a_base64(
                 "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==".encode(
                     "utf-8"
@@ -1290,7 +1295,10 @@ def test_sign_message(mocker, m5stickv, tdata):
             ),
         ),
     ]
+    num = 0
     for case in cases:
+        print("test_sign_message case: ", num)
+        num += 1
         wallet = Wallet(tdata.SINGLEKEY_SIGNING_KEY)
 
         ctx = create_ctx(mocker, case[3], wallet, case[2])
@@ -1315,8 +1323,8 @@ def test_sign_message(mocker, m5stickv, tdata):
                 ),
             )
         else:
-            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=Exception))
-            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=Exception))
+            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=OSError))
+            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=OSError))
 
         home.sign_message()
 
