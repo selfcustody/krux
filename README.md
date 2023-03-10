@@ -123,8 +123,8 @@ cd simulator
 # Run simulator with the touch device amigo, then use mouse to navigate
 poetry run python simulator.py --device maixpy_amigo_tft
 
-# Run simulator with the small button-only m5stick, then use keyboard to navigate
-poetry run python simulator.py --device maixpy_m5stickv
+# Run simulator with sd enabled and the small button-only m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
+poetry run python simulator.py --device maixpy_m5stickv --sd
 ```
 
 Simulator error troubleshooting:
