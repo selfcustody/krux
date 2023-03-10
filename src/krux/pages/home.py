@@ -740,9 +740,16 @@ class Home(Page):
                         )
                     menu_items.append((filename, lambda: MENU_EXIT))
 
+                # We need to add this option because /sd can be empty!
+                items.append("Back")
+                menu_items.append((t("Back"), lambda: MENU_EXIT))
+
                 submenu = Menu(self.ctx, menu_items)
                 index, _ = submenu.run_loop()
 
+                # selected "Back"
+                if index == len(items) - 1:
+                    return ""
                 # selected ".."
                 if index == 0 and path != SD_ROOT_PATH:
                     path = path.split("/")
@@ -756,7 +763,7 @@ class Home(Page):
                 gc.collect()
                 return path
 
-        return None
+        return ""
 
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
