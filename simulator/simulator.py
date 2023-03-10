@@ -113,6 +113,10 @@ from krux import settings
 settings.DARKGREEN = (0, 166, 0)
 settings.SLATEGRAY = (80, 93, 175)
 
+# mock for SD
+if args.sd:
+    from kruxsim.mocks import sd_card
+
 t = threading.Thread(target=run_krux)
 t.daemon = True
 

@@ -19,21 +19,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import os
+from krux.sd_card import SDHandler
 
-old_listdir = os.listdir
-old_remove = os.remove
-
-
-def new_listdir(path, *args, **kwargs):
-    path = path.lstrip("/") if path.startswith("/sd") else path
-    return old_listdir(path, *args, **kwargs)
+old_dir_exists = SDHandler.dir_exists
+old_file_exists = SDHandler.file_exists
 
 
-def new_remove(path, *args, **kwargs):
-    path = path.lstrip("/") if path.startswith("/sd") else path
-    return old_remove(path, *args, **kwargs)
+def new_dir_exists(filename, *args, **kwargs):
+    filename = filename.lstrip("/") if filename.startswith("/sd") else filename
+    return old_dir_exists(filename, *args, **kwargs)
 
 
-setattr(os, "listdir", new_listdir)
-setattr(os, "remove", new_remove)
+def new_file_exists(filename, *args, **kwargs):
+    filename = filename.lstrip("/") if filename.startswith("/sd") else filename
+    return old_file_exists(filename, *args, **kwargs)
+
+
+setattr(SDHandler, "dir_exists", new_dir_exists)
+setattr(SDHandler, "file_exists", new_file_exists)
