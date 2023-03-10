@@ -128,6 +128,8 @@ poetry run python simulator.py --device maixpy_m5stickv
 ```
 
 Simulator error troubleshooting:
+After some time running, the simulator may become slow. If that happens, just close and open again!
+
 ```bash
 # ImportError: Unable to find zbar shared library
 sudo apt install python3-zbar
