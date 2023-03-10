@@ -925,23 +925,28 @@ def test_scan_address(mocker, m5stickv, tdata):
 def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
 
     cases = [
         # Single-key, not loaded, no format => pmofn, sign, No print prompt
         (
-            tdata.SINGLEKEY_SIGNING_KEY,
-            None,
-            False,
-            tdata.P2WPKH_PSBT_B64,
-            FORMAT_NONE,
-            True,
-            tdata.SIGNED_P2WPKH_PSBT_B64,
-            FORMAT_PMOFN,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            None,
+            tdata.SINGLEKEY_SIGNING_KEY,  # 0 wallet
+            None,  # 1 wallet
+            False,  # 2 if True: wallet will be #1 instead
+            tdata.P2WPKH_PSBT_B64,  # 3 capture_qr_code return 1
+            FORMAT_NONE,  # 4 capture_qr_code return 2
+            True,  # 5 if was signed!
+            tdata.SIGNED_P2WPKH_PSBT_B64,  # 6
+            FORMAT_PMOFN,  # 7
+            None,  # 8 printer
+            # 9 btn_seq
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # Sign? (Or jump QR code)
+                BUTTON_ENTER,  # Save to SD (or Jump QR signed) (Or jump error msg end)
+            ],
+            None,  # 10 SD avaiable
         ),
         # Single-key, not loaded, pmofn, sign, No print prompt
         (
@@ -950,7 +955,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             None,
@@ -964,7 +969,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
@@ -978,7 +983,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
@@ -992,7 +997,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            False,
+            False,  # 5
             None,
             None,
             None,
@@ -1006,7 +1011,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             None,
             None,
-            False,
+            False,  # 5
             None,
             None,
             None,
@@ -1020,7 +1025,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             None,
             None,
-            False,
+            False,  # 5
             None,
             None,
             None,
@@ -1034,7 +1039,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             None,
@@ -1048,7 +1053,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
@@ -1062,7 +1067,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
@@ -1071,36 +1076,53 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-key, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
-            tdata.SINGLEKEY_SIGNING_KEY,
+            tdata.SINGLEKEY_SIGNING_KEY,  # 0 wallet
             None,
             False,
-            tdata.P2WPKH_PSBT,
-            FORMAT_NONE,
-            True,
+            tdata.P2WPKH_PSBT,  # 3 capture_qr_code return 1
+            FORMAT_NONE,  # 4 capture_qr_code return 2
+            True,  # 5 if was signed!
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            tdata.SIGNED_P2WPKH_PSBT,
+            None,  # 8 printer
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Save to SD (will open keypad)
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Select "Go"
+            ],
+            tdata.SIGNED_P2WPKH_PSBT,  # 10 SD avaiable
         ),
         # Multisig, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
-            tdata.MULTISIG_SIGNING_KEY,
+            tdata.MULTISIG_SIGNING_KEY,  # 0 wallet
             None,
             False,
-            tdata.P2WSH_PSBT,
-            FORMAT_NONE,
-            True,
+            tdata.P2WSH_PSBT,  # 3 capture_qr_code return 1
+            FORMAT_NONE,  # 4 capture_qr_code return 2
+            True,  # 5 if was signed!
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            tdata.SIGNED_P2WSH_PSBT,
+            None,  # 8 printer
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Save to SD (will open keypad)
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Select "Go"
+            ],
+            tdata.SIGNED_P2WSH_PSBT,  # 10 SD avaiable
         ),
     ]
+    num = 0
     for case in cases:
+        print("test_sign_psbt", num)
+        num += 1
         wallet = Wallet(case[0])
-        if case[2]:
+        if case[2]:  # always False
             wallet.load(case[1], FORMAT_PMOFN)
 
         ctx = create_ctx(mocker, case[9], wallet, case[8])
@@ -1111,9 +1133,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
+        mocker.spy(home, "print_qr_prompt")
+        # case SD available
         if case[10] is not None:
             mocker.patch("os.listdir", new=mocker.MagicMock(return_value=["test.psbt"]))
             mocker.patch(
@@ -1125,16 +1148,21 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                     }
                 ),
             )
-        else:
-            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=Exception))
-            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=Exception))
+        else:  # SD NOT available
+            mocker.patch(
+                "os.listdir", new=mocker.MagicMock(side_effect=FileNotFoundError)
+            )
+            mocker.patch(
+                "builtins.open", new=mocker.MagicMock(side_effect=FileNotFoundError)
+            )
 
         home.sign_psbt()
 
+        # there is no case[2] == True, so returns True every time btn_seq starts with ENTER
         if case[2] or (not case[2] and case[9][0] == BUTTON_ENTER):
-            if not case[10]:
+            if not case[10]:  # no SD
                 home.capture_qr_code.assert_called_once()
-            if case[5]:
+            if case[5]:  # signed!
                 home.display_qr_codes.assert_called_once()
                 home.print_qr_prompt.assert_called_once()
             else:

@@ -769,7 +769,7 @@ class Home(Page):
                 return MENU_CONTINUE
 
         # Try to read a PSBT from camera
-        psbt_filename = None
+        psbt_filename = ""
         data, qr_format = self.capture_qr_code()
 
         if data is None:
@@ -847,13 +847,13 @@ class Home(Page):
                         if self.prompt(
                             t("Save PSBT to SD card?"), self.ctx.display.height() // 2
                         ):
-                            # remove the extension ".psbt" from the name
+                            # remove the extension ".psbt" if exists
                             psbt_filename = (
                                 psbt_filename[: len(psbt_filename) - 5]
                                 if psbt_filename.endswith(PSBT_FILE_EXTENSION)
                                 else psbt_filename
                             )
-                            # remove the PSBT_FILE_SUFFIX, because we will add it
+                            # remove the PSBT_FILE_SUFFIX if exists (because we will add it)
                             psbt_filename = (
                                 psbt_filename[: len(psbt_filename) - 7]
                                 if psbt_filename.endswith(PSBT_FILE_SUFFIX)
@@ -874,7 +874,7 @@ class Home(Page):
                                 and psbt_filename != ESC_KEY
                                 and not all(c in "." for c in psbt_filename)
                             ):
-                                # return the extension .psbt
+                                # add the extension ".psbt"
                                 psbt_filename = (
                                     psbt_filename
                                     if psbt_filename.endswith(PSBT_FILE_EXTENSION)
