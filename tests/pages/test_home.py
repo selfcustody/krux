@@ -1149,12 +1149,8 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 ),
             )
         else:  # SD NOT available
-            mocker.patch(
-                "os.listdir", new=mocker.MagicMock(side_effect=FileNotFoundError)
-            )
-            mocker.patch(
-                "builtins.open", new=mocker.MagicMock(side_effect=FileNotFoundError)
-            )
+            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=OSError))
+            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=OSError))
 
         home.sign_psbt()
 

@@ -67,3 +67,19 @@ class SDHandler:
     def delete(self, filename):
         """Deletes the filename"""
         os.remove(SDHandler.SD_PATH % filename)
+
+    @staticmethod
+    def dir_exists(filename):
+        """Checks if the file exists and is a directory"""
+        try:
+            return (os.stat(filename)[0] & 0x4000) != 0
+        except OSError:
+            return False
+
+    @staticmethod
+    def file_exists(filename):
+        """Checks if the file exists and is a file"""
+        try:
+            return (os.stat(filename)[0] & 0x4000) == 0
+        except OSError:
+            return False

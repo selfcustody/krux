@@ -37,7 +37,7 @@ def get_mock_open(files: dict[str, str]):
                 if content == "Exception":
                     raise Exception()
                 return mock.mock_open(read_data=content).return_value
-        raise FileNotFoundError("(mock) Unable to open {filename}")
+        raise OSError("(mock) Unable to open {filename}")
 
     return mock.MagicMock(side_effect=open_mock)
 

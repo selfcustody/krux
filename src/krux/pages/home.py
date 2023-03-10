@@ -721,10 +721,11 @@ class Home(Page):
 
         path = SD_ROOT_PATH
         while True:
-            items = []
-            menu_items = []
             # if is a dir then list all files in it
-            if os.path.isdir(path):
+            if SDHandler.dir_exists(path):
+                items = []
+                menu_items = []
+
                 if path != SD_ROOT_PATH:
                     items.append("..")
                     menu_items.append(("..", lambda: MENU_EXIT))
@@ -759,11 +760,10 @@ class Home(Page):
                     path += "/" + items[index]
             # it is a file!
             else:
+                submenu, menu_items, items = (None, None, None)
                 del submenu, menu_items, items
                 gc.collect()
                 return path
-
-        return ""
 
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
@@ -802,7 +802,7 @@ class Home(Page):
                                 t("Load?"), self.ctx.display.bottom_prompt_line
                             ):
                                 data = sd.read_binary(psbt_filename)
-            except FileNotFoundError:
+            except OSError:
                 pass
 
         if data is None:
@@ -889,7 +889,7 @@ class Home(Page):
                                 )
                                 # check and warn for overwrite filename
                                 # add the "/sd/" prefix
-                                if os.path.isfile("/sd/" + psbt_filename):
+                                if SDHandler.file_exists("/sd/" + psbt_filename):
                                     self.ctx.display.clear()
                                     if self.prompt(
                                         t("Filename %s exists on SD card, overwrite?")
@@ -911,7 +911,7 @@ class Home(Page):
                                     )
                         else:
                             filename_undefined = False
-            except FileNotFoundError:
+            except OSError:
                 pass
 
         return MENU_CONTINUE

@@ -253,7 +253,7 @@ class FilePrinter(GCodeGenerator):
             with SDHandler():
                 self.file = open("/sd/qr.nc", "w")
                 super().print_qr_code(qr_code)
-        except FileNotFoundError:
+        except OSError:
             pass
         finally:
             if self.file:
