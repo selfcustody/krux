@@ -47,9 +47,7 @@ class Key:
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
-        self.derivation = (DER_MULTI if self.multisig else DER_SINGLE) % network[
-            "bip32"
-        ]
+        self.derivation = self.get_default_derivation(self.multisig, network)
         self.account = self.root.derive(self.derivation).to_public()
 
     def xpub(self, version=None):
@@ -87,17 +85,22 @@ class Key:
         """Signs a message with the extended master private key"""
         return self.root.derive(self.derivation).sign(message_hash)
 
+    @staticmethod
+    def pick_final_word(entropy, words):
+        """Returns a random final word with a valid checksum for the given list of
+        either 11 or 23 words
+        """
+        if len(words) != 11 and len(words) != 23:
+            raise ValueError("must provide 11 or 23 words")
 
-def pick_final_word(ctx, words):
-    """Returns a random final word with a valid checksum for the given list of
-    either 11 or 23 words
-    """
-    if len(words) != 11 and len(words) != 23:
-        raise ValueError("must provide 11 or 23 words")
+        random.seed(int(time.ticks_ms() + entropy))
+        while True:
+            word = random.choice(WORDLIST)
+            mnemonic = " ".join(words) + " " + word
+            if bip39.mnemonic_is_valid(mnemonic):
+                return word
 
-    random.seed(int(time.ticks_ms() + ctx.input.entropy))
-    while True:
-        word = random.choice(WORDLIST)
-        mnemonic = " ".join(words) + " " + word
-        if bip39.mnemonic_is_valid(mnemonic):
-            return word
+    @staticmethod
+    def get_default_derivation(multisig, network):
+        """Return the Krux default derivation path for single-key or multisig"""
+        return (DER_MULTI if multisig else DER_SINGLE) % network["bip32"]

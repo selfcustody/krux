@@ -32,7 +32,7 @@ from ..settings import CategorySetting, NumberSetting, DARKGREEN
 from ..krux_settings import Settings, LoggingSettings, BitcoinSettings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
-from ..key import Key, pick_final_word
+from ..key import Key
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..krux_settings import t
@@ -304,8 +304,22 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Single-key"), lambda: MENU_EXIT),
-                (t("Multisig"), lambda: MENU_EXIT),
+                (
+                    t("Single-key")
+                    + "\n"
+                    + Key.get_default_derivation(
+                        False, NETWORKS[Settings().bitcoin.network]
+                    ),
+                    lambda: MENU_EXIT,
+                ),
+                (
+                    t("Multisig")
+                    + "\n"
+                    + Key.get_default_derivation(
+                        True, NETWORKS[Settings().bitcoin.network]
+                    ),
+                    lambda: MENU_EXIT,
+                ),
             ],
         )
         index, _ = submenu.run_loop()
@@ -424,7 +438,7 @@ class Login(Page):
                         break
 
                     if word == "":
-                        word = pick_final_word(self.ctx, words)
+                        word = Key.pick_final_word(self.ctx.input.entropy, words)
 
                 self.ctx.display.clear()
                 if self.prompt(word, self.ctx.display.height() // 2):
