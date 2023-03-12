@@ -32,6 +32,10 @@ def tdata(mocker):
     P2WSH_PSBT_B64 = "cHNidP8BALICAAAAAq1DhxRK+mUH4T6uUNob8bUaZ7MP+44MW4+Y9bOxpjhZAAAAAAD9////aWclWQ+45HKrI07r878E2UrAupT2paT4QurbmtNjYNQBAAAAAP3///8CQEIPAAAAAAAiACCpkDPDhmIzPlkJrjw9A71xjbIUWf3VUB7ooFJhTVm04tjSIQEAAAAAIgAgjQKFDauIXsV5u23LBdYgOwX1FwGGrLiQfWzBtFKZ7dIAAAAATwEENYfPBD5i336AAAACQStJhNVJul7vHKbo83VdmuAW2m0WaXLKDlFANn7dUNoCNbhLMdw4Knz7Q7o6exdL6UFhQegW9nJb0SUStbLEpawUAgjLdzAAAIABAACAAAAAgAIAAIBPAQQ1h88EnbHQAIAAAAI/2Nc7x7iMpJNapTe/OJTV4oifqzQcYY9KV2+PGRjCdQJoww1WnSNqfcxXGyux0q1PqfmzUqgJNqKJCpmqI9t47BQmu4PEMAAAgAEAAIAAAACAAgAAgE8BBDWHzwS6wUg5gAAAAh1Pvr3ZZ+GvcUwJl9OPz2cLXOnTAcBEC7zDtqIOt3IcA1aOofNgUZFu0baQw54SqOcGA7KAvTDOXygfKRilU2OqFHPF2gowAACAAQAAgAAAAIACAACAAAEBK4CWmAAAAAAAIgAgiYAxcG7dnrEiZ4VHFVHOo18XCalvhZYuMqBr9n7HESQBBWlSIQJOjQgMfX26XEf+trHIEk3rYkEX5Y2NfrFKQARPcd2X8iEDBWHUgq25PfHvE+hlcBryJG7wo2y8jKUSPY7sd85OOMchA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHU64iBgJOjQgMfX26XEf+trHIEk3rYkEX5Y2NfrFKQARPcd2X8hwmu4PEMAAAgAEAAIAAAACAAgAAgAAAAAABAAAAIgYDBWHUgq25PfHvE+hlcBryJG7wo2y8jKUSPY7sd85OOMccAgjLdzAAAIABAACAAAAAgAIAAIAAAAAAAQAAACIGA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHHHPF2gowAACAAQAAgAAAAIACAACAAAAAAAEAAAAAAQErgJaYAAAAAAAiACAzd60wM9EFnPHSNbsSJfyipL8myVLVP2/vwzotVUSNxQEFaVIhAiKCMRLlzIhLkRbLIUIMx5KYJM0v6LcjW/mS6K7eFGwiIQKDzUflU23LeecRgzDo5IBCEvaWGfHW7JkNxzXvuc7FdCEDC5DtLoa61/Kk/pdpu0F9e6nKoRJIB9v7Ni377rZefgFTriIGAiKCMRLlzIhLkRbLIUIMx5KYJM0v6LcjW/mS6K7eFGwiHAIIy3cwAACAAQAAgAAAAIACAACAAAAAAAAAAAAiBgKDzUflU23LeecRgzDo5IBCEvaWGfHW7JkNxzXvuc7FdBwmu4PEMAAAgAEAAIAAAACAAgAAgAAAAAAAAAAAIgYDC5DtLoa61/Kk/pdpu0F9e6nKoRJIB9v7Ni377rZefgEcc8XaCjAAAIABAACAAAAAgAIAAIAAAAAAAAAAAAABAWlSIQKtIdmtKKuZrH7f2R4iIU8RWVOrCdHVWBCS+0e9pZJy/iEDoH074LrWPIA10hyXtBCJDT06GdLkA6+z/PxoJqomPHYhA6GoQ/otQdk71nUpYZFfbkSKdBkkSj4CuPTPYrzGp6JrU64iAgKtIdmtKKuZrH7f2R4iIU8RWVOrCdHVWBCS+0e9pZJy/hwCCMt3MAAAgAEAAIAAAACAAgAAgAEAAAAAAAAAIgIDoH074LrWPIA10hyXtBCJDT06GdLkA6+z/PxoJqomPHYcc8XaCjAAAIABAACAAAAAgAIAAIABAAAAAAAAACICA6GoQ/otQdk71nUpYZFfbkSKdBkkSj4CuPTPYrzGp6JrHCa7g8QwAACAAQAAgAAAAIACAACAAQAAAAAAAAAAAA=="
     SIGNED_P2WSH_PSBT_B64 = "cHNidP8BALICAAAAAq1DhxRK+mUH4T6uUNob8bUaZ7MP+44MW4+Y9bOxpjhZAAAAAAD9////aWclWQ+45HKrI07r878E2UrAupT2paT4QurbmtNjYNQBAAAAAP3///8CQEIPAAAAAAAiACCpkDPDhmIzPlkJrjw9A71xjbIUWf3VUB7ooFJhTVm04tjSIQEAAAAAIgAgjQKFDauIXsV5u23LBdYgOwX1FwGGrLiQfWzBtFKZ7dIAAAAAACICA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHRzBEAiBoP20ZBEOJlYu67bu6OCkJrl7jYBZHyItxnA68xbFqogIgBQ1QKOCcY10pceXiU5+vK+Rfqcb5DSIl9KIAO6KvMlcBACICAwuQ7S6GutfypP6XabtBfXupyqESSAfb+zYt++62Xn4BRzBEAiB+TxuMu4d4o7v/BNgQQ3HIWQ87TjaX2FP+dGmAsxLgPgIgbJM9Am20PJD0JflaJHu37E8ZFaOjU/JRgdxY+9UmnsUBAAAA"
 
+    # Use https://bip174.org/ to see the contents of the PSBT_B64
+    # Use the command below on linux to see the binary PSBT as BASE64
+    # base64 binary.psbt | tr -d '\n\r'
+
     return namedtuple(
         "TestData",
         [
@@ -943,6 +947,9 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # 9 btn_seq
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
                 BUTTON_ENTER,  # Sign? (Or jump QR code)
                 BUTTON_ENTER,  # Save to SD (or Jump QR signed) (Or jump error msg end)
             ],
@@ -959,7 +966,14 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+            ],
             None,
         ),
         # Single-key, not loaded, pmofn, sign, Print
@@ -973,7 +987,15 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Print Yes
+            ],
             None,
         ),
         # Single-key, not loaded, pmofn, sign, Decline to print
@@ -987,7 +1009,15 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_PAGE,  # Print No
+            ],
             None,
         ),
         # Single-key, not loaded, pmofn, decline to sign
@@ -1001,7 +1031,13 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,
             None,
             None,
-            [BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # Sign?
+            ],
             None,
         ),
         # Single-key, not loaded, failed to capture PSBT QR
@@ -1015,7 +1051,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,
             None,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER],  # Wallet not loaded, proceed?
             None,
         ),
         # Multisig, not loaded, decline to proceed after warning
@@ -1029,7 +1065,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,
             None,
             None,
-            [BUTTON_PAGE],
+            [BUTTON_PAGE],  # Wallet not loaded, proceed?
             None,
         ),
         # Multisig, not loaded, pmofn, sign, No print prompt
@@ -1043,7 +1079,14 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign? (Or jump QR code)
+                BUTTON_ENTER,  # Save to SD (or Jump QR signed) (Or jump error msg end)
+            ],
             None,
         ),
         # Multisig, not loaded, pmofn, sign, Print
@@ -1057,7 +1100,15 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Print Yes
+            ],
             None,
         ),
         # Multisig, not loaded, pmofn, sign, Decline to print
@@ -1071,7 +1122,15 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_PAGE,  # Print No
+            ],
             None,
         ),
         # Single-key, not loaded, load from microSD, sign, save to microSD, No print prompt
@@ -1087,6 +1146,9 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,  # 8 printer
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
                 BUTTON_ENTER,  # Sign?
                 BUTTON_ENTER,  # Jump QR signed
                 BUTTON_ENTER,  # Save to SD (will open keypad)
@@ -1108,6 +1170,9 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,  # 8 printer
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
                 BUTTON_ENTER,  # Sign?
                 BUTTON_ENTER,  # Jump QR signed
                 BUTTON_ENTER,  # Save to SD (will open keypad)

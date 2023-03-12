@@ -822,8 +822,10 @@ class Home(Page):
         self.ctx.log.debug("Received PSBT: %s" % signer.psbt)
 
         outputs = signer.outputs()
-        self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text("\n \n".join(outputs))
+        for message in outputs:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(message)
+            self.ctx.input.wait_for_button()
 
         # If user confirm, Krux will sign
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
