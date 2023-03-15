@@ -627,7 +627,7 @@ class Menu:
             color = lcd.MAGENTA
 
         # print the square at the top left
-        self.ctx.display.fill_rectangle(5, 5, 5, 5, color)
+        self.ctx.display.fill_rectangle(3, 3, 6, 6, color)
 
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
@@ -664,7 +664,7 @@ class Menu:
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if Settings().bitcoin.network == BitcoinSettings.TEST_TXT:
-            self.ctx.display.draw_string(18, 0, "test", lcd.GREEN)
+            self.ctx.display.draw_string(12, 0, "test", lcd.GREEN)
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
