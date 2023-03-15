@@ -627,7 +627,7 @@ class Menu:
             color = lcd.MAGENTA
 
         # print the square at the top left
-        self.ctx.display.fill_rectangle(5, 5, 3, 3, color)
+        self.ctx.display.fill_rectangle(5, 5, 5, 5, color)
 
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
