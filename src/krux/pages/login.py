@@ -28,7 +28,14 @@ from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
 from urtypes.crypto.bip39 import BIP39
 from ..metadata import VERSION
-from ..settings import CategorySetting, NumberSetting, DARKGREEN
+from ..settings import (
+    CategorySetting,
+    NumberSetting,
+    DARKGREEN,
+    SD_PATH,
+    FLASH_PATH,
+    Store,
+)
 from ..krux_settings import Settings, LoggingSettings, BitcoinSettings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR
@@ -47,6 +54,8 @@ from . import (
     ESC_KEY,
     DEFAULT_PADDING,
 )
+import os
+import uos
 
 SENTINEL_DIGITS = "11111"
 
@@ -90,6 +99,7 @@ class Login(Page):
                     (t("Load Mnemonic"), self.load_key),
                     (t("New Mnemonic"), self.new_key),
                     (t("Settings"), self.settings),
+                    (t("SD Check"), self.sd_check),
                     (t("About"), self.about),
                     (t("Shutdown"), self.shutdown),
                 ],
@@ -175,9 +185,13 @@ class Login(Page):
             [
                 (t("12 words"), lambda: MENU_EXIT),
                 (t("24 words"), lambda: MENU_EXIT),
+                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, _ = submenu.run_loop()
+        if index == 2:
+            return MENU_CONTINUE
+
         min_rolls = min_rolls_12w if index == 0 else min_rolls_24w
         self.ctx.display.clear()
 
@@ -739,23 +753,104 @@ class Login(Page):
             return BUTTON_ENTER
         return BUTTON_PAGE
 
-    def settings(self):
-        """Handler for the 'settings' menu item"""
+    def sd_check(self):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Checking for SD card.."))
         try:
             # Check for SD hot-plug
             with SDHandler():
-                self.display_centered_text(
-                    t("Your changes will be kept on the SD card."), duration=SD_MSG_TIME
+                sd_status = uos.statvfs("/sd")
+                sd_total = int(sd_status[2] * sd_status[1] / 1024 / 1024)
+                sd_free = int(sd_status[4] * sd_status[1] / 1024 / 1024)
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("SD card")
+                    + "\n\n"
+                    + t("Size: ")
+                    + f"{sd_total:,d}"
+                    + " MB"
+                    + "\n\n"
+                    + t("Used: ")
+                    + f"{sd_total - sd_free:,d}"
+                    + " MB"
+                    + "\n\n"
+                    + t("Free: ")
+                    + f"{sd_free:,d}"
+                    + " MB"
                 )
+                self.ctx.input.wait_for_button()
         except OSError:
-            self.display_centered_text(
-                t("SD card not detected.\n\nChanges will last until shutdown."),
-                duration=SD_MSG_TIME,
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("SD card not detected."),
             )
+            self.ctx.input.wait_for_button()
+
+        return MENU_CONTINUE
+
+    def settings(self):
+        """Handler for the 'settings' menu item"""
+        location = Settings().persist.location
+        if location == SD_PATH:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+            try:
+                # Check for SD hot-plug
+                with SDHandler():
+                    self.display_centered_text(
+                        t("Your changes will be kept on the SD card."),
+                        duration=SD_MSG_TIME,
+                    )
+            except OSError:
+                self.display_centered_text(
+                    t("SD card not detected.")
+                    + "\n\n"
+                    + t("Changes will last until shutdown."),
+                    duration=SD_MSG_TIME,
+                )
+        else:
+            try:
+                # Check for flash
+                os.listdir("/" + FLASH_PATH + "/.")
+                self.display_centered_text(
+                    t("Your changes will be kept on device flash storage."),
+                    duration=SD_MSG_TIME,
+                )
+            except OSError:
+                self.display_centered_text(
+                    t("Device flash storage not detected.")
+                    + "\n\n"
+                    + t("Changes will last until shutdown."),
+                    duration=SD_MSG_TIME,
+                )
 
         return self.namespace(Settings())()
+
+    def _settings_exit_check(self):
+        """Handler for the 'Back' on settings screen"""
+        # If user selected to persist on SD, we will try to remout and save
+        # flash is always mounted, so settings is always persisted
+        if Settings().persist.location == SD_PATH:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+            try:
+                # Check for SD hot-plug
+                with SDHandler():
+                    Store.save_settings()
+                    self.display_centered_text(
+                        t("Changes persisted to SD card!"),
+                        duration=SD_MSG_TIME,
+                    )
+            except OSError:
+                self.display_centered_text(
+                    t("SD card not detected.")
+                    + "\n\n"
+                    + t("Changes will last until shutdown."),
+                    duration=SD_MSG_TIME,
+                )
+
+        return MENU_EXIT
 
     def namespace(self, settings_namespace):
         """Handler for navigating a particular settings namespace"""
@@ -785,7 +880,11 @@ class Login(Page):
             if len(items) == 1:
                 return items[0][1]()
 
-            items.append((t("Back"), lambda: MENU_EXIT))
+            # Case for main Settings
+            if settings_namespace.namespace == Settings.namespace:
+                items.append((t("Back"), self._settings_exit_check))
+            else:
+                items.append((t("Back"), lambda: MENU_EXIT))
 
             submenu = Menu(self.ctx, items)
             index, status = submenu.run_loop()

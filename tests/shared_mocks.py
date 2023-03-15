@@ -42,6 +42,10 @@ def get_mock_open(files: dict[str, str]):
     return mock.MagicMock(side_effect=open_mock)
 
 
+def statvfs(_):
+    return (8192, 8192, 1896512, 1338303, 1338303, 0, 0, 0, 0, 255)
+
+
 class MockPrinter:
     def __init__(self):
         pass

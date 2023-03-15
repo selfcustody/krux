@@ -74,6 +74,8 @@ if args.sd:
     from kruxsim.mocks import uopen
     from kruxsim.mocks import uos
 
+from kruxsim.mocks import uos_functions
+
 from kruxsim.mocks import usys
 from kruxsim.mocks import utime
 from kruxsim.mocks import fpioa_manager

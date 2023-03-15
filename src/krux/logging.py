@@ -25,9 +25,11 @@ import os
 
 # from .krux_settings import t
 # from .settings import CategorySetting, SettingsNamespace
-from .krux_settings import Settings, LoggingSettings
 
-LOG_FILEPATH = "/sd/.krux.log"
+from .krux_settings import Settings, LoggingSettings
+from .settings import SD_PATH
+
+LOG_FILEPATH = "/" + SD_PATH + "/.krux.log"
 
 
 class Logger:

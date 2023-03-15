@@ -20,7 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .settings import SettingsNamespace, CategorySetting, NumberSetting
+from .settings import (
+    SettingsNamespace,
+    CategorySetting,
+    NumberSetting,
+    SD_PATH,
+    FLASH_PATH,
+)
 import board
 import binascii
 from .translations import translation_table
@@ -233,6 +239,19 @@ class PrinterSettings(SettingsNamespace):
         }[attr]
 
 
+class PersistSettings(SettingsNamespace):
+    """Persistent settings"""
+
+    namespace = "settings.persist"
+    location = CategorySetting("location", FLASH_PATH, [FLASH_PATH, SD_PATH])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "location": t("Location"),
+        }[attr]
+
+
 class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
 
@@ -243,6 +262,7 @@ class Settings(SettingsNamespace):
         self.i18n = I18nSettings()
         self.logging = LoggingSettings()
         self.printer = PrinterSettings()
+        self.persist = PersistSettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -251,5 +271,6 @@ class Settings(SettingsNamespace):
             "bitcoin": t("Bitcoin"),
             "i18n": t("Language"),
             "logging": t("Logging"),
+            "persist": t("Persist"),
             "printer": t("Printer"),
         }[attr]

@@ -1347,6 +1347,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Thermal
                 BUTTON_PAGE,
@@ -1404,6 +1405,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 # Leave Settings
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
@@ -1419,6 +1421,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         (
             (
                 # Printer
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
@@ -1520,7 +1523,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Leave Settings
-                4,
+                5,
             ),
             [
                 mocker.call("Network\nmain", lcd.ORANGE),
@@ -1532,7 +1535,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         (
             (
                 # Printer
-                3,
+                4,
                 # Thermal
                 1,
                 # Change Baudrate
@@ -1544,7 +1547,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 # Back to Printer
                 3,
                 # Leave Settings
-                4,
+                5,
             ),
             [
                 mocker.call("Baudrate\n9600", lcd.WHITE),
@@ -1579,7 +1582,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Leave Settings
-                4,
+                5,
             ),
             [
                 mocker.call("Log Level\nNONE", lcd.WHITE),
