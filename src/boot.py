@@ -47,6 +47,27 @@ SPLASH = """
     1:-1
 ]
 
+SPLASH_ALT = """
+          /|         
+         /_|         
+ ________| |         
+<_|_.'   " |         
+    | O . O \,--,    
+    | .---. |/ /     
+    |* \_/ *| /      
+ ____\     / /______ 
+/           / \     |
+'---.       |__\  __|
+    |       |\ __|   
+   /        \__\     
+   \        /        
+    ;-.--.-:_        
+   <__;   '__>       
+     Pikachu!        
+"""[
+    1:-1
+]
+
 from krux import firmware
 from krux.power import power_manager
 
@@ -65,6 +86,42 @@ from krux.context import Context
 
 ctx = Context()
 ctx.power_manager = power_manager
+
+# Check for the correct SPLASH
+try:
+    import ujson as json
+except ImportError:
+    import json
+
+settings = {}
+file_location = "/flash/"
+filename = "settings.json"
+
+# Check for the correct settings persist location
+try:
+    with open(file_location + filename, "r") as f:
+        settings = json.loads(f.read())
+except:
+    pass
+
+file_location = (
+    settings.get("settings", {}).get("persist", {}).get("location", "undefined")
+)
+
+# Settings file not found on flash, or key is missing
+if file_location != "flash":
+    file_location = "/sd/"
+    try:
+        with open(file_location + filename, "r") as f:
+            settings = json.loads(f.read())
+    except:
+        pass
+
+# Check if locale is set to pokemon to change SPLASH
+if settings.get("settings", {}).get("i18n", {}).get("locale", "undefined") == "pokemon":
+    SPLASH = SPLASH_ALT
+
+del settings, file_location, filename
 
 # Display splash while loading pages
 ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)

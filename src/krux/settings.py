@@ -119,7 +119,7 @@ class Store:
             .get("location", "undefined")
         )
 
-        # Settings file not found on flash, or config is missing
+        # Settings file not found on flash, or key is missing
         if self.file_location != FLASH_PATH:
             self.file_location = "/" + SD_PATH + "/"
             try:

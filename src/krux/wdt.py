@@ -38,9 +38,8 @@ wdt = machine.WDT(timeout=RESET_TIMEOUT)
 try:
     with open("/" + FLASH_PATH + "/" + CONF_FILE, "r") as f:
         conf_dict = json.loads(f.read())
-        if WDT_CONF_NAME in conf_dict.keys():
-            if conf_dict[WDT_CONF_NAME]:
-                wdt.stop()
+        if conf_dict.get(WDT_CONF_NAME, False):
+            wdt.stop()
         del conf_dict
 except:
     pass
