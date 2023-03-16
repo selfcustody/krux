@@ -754,6 +754,7 @@ class Login(Page):
         return BUTTON_PAGE
 
     def sd_check(self):
+        """Handler for the 'SD Check' menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Checking for SD card.."))
         try:
