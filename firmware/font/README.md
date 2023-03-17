@@ -1,5 +1,5 @@
 # Updating the built-in font
-Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of the [Terminus](http://terminus-font.sourceforge.net/) font for its glyphs that includes Vietnamese characters and the Bitcoin currency symbol, ₿.
+Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of the [Terminus](http://terminus-font.sourceforge.net/) font for its glyphs that includes Vietnamese characters, the Bitcoin currency symbol (₿) and the Pokémon Dollar symbol (₽ with 2 horizontal lines).
 
 To rebuild the font for all devices, run:
 ```
@@ -18,7 +18,7 @@ Krux font format is a sparse bitmap font format that is intended to minimize the
 
 ## Converting to kff
 
-To create a `.kff` file, you first need to find a font in `.bdf` format.
+To create a `.kff` file, you first need to find a font in `.bdf` format. You can edit and generate a `.bdf` file using [FontForge](https://fontforge.org)
 
 From there, you can run the `bdftohex.py` script which converts the bdf file to an intermediary `.hex` format mapping each character's unicode codepoint to a series of hex digits describing how to draw it.
 
