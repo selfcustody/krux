@@ -769,15 +769,15 @@ class Login(Page):
                     t("SD card")
                     + "\n\n"
                     + t("Size: ")
-                    + f"{sd_total:,d}"
+                    + "{:,}".format(sd_total)
                     + " MB"
                     + "\n\n"
                     + t("Used: ")
-                    + f"{sd_total - sd_free:,d}"
+                    + "{:,}".format(sd_total - sd_free)
                     + " MB"
                     + "\n\n"
                     + t("Free: ")
-                    + f"{sd_free:,d}"
+                    + "{:,}".format(sd_free)
                     + " MB"
                 )
                 self.ctx.input.wait_for_button()
