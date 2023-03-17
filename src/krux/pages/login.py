@@ -782,11 +782,7 @@ class Login(Page):
                 )
                 self.ctx.input.wait_for_button()
         except OSError:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("SD card not detected."),
-            )
-            self.ctx.input.wait_for_button()
+            self.ctx.display.flash_text(t("SD card not detected."), lcd.RED)
 
         return MENU_CONTINUE
 

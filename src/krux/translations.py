@@ -959,6 +959,7 @@ translation_table = {
         1303016265: "Yes",
         771968845: "Your changes will be kept on device flash storage.",
         2569054451: "Your changes will be kept on the SD card.",
+        1016812638: "₽%s",
     },
     "pt-BR": {
         1185266064: "%d da %d multisig",
