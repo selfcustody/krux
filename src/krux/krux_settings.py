@@ -268,7 +268,7 @@ class Settings(SettingsNamespace):
         """Returns a label for UI when given a setting name or namespace"""
 
         return {
-            "bitcoin": t("Bitcoin"),
+            "bitcoin": t("₿itcoin"),
             "i18n": t("Language"),
             "logging": t("Logging"),
             "persist": t("Persist"),
