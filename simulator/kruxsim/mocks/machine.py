@@ -22,7 +22,7 @@
 import sys
 from unittest import mock
 import pygame as pg
-from krux.krux_settings import Settings
+from krux.krux_settings import Settings, PrinterSettings
 
 simulating_printer = False
 
@@ -48,18 +48,20 @@ class UART:
 
     def read(self, num_bytes):
         if simulating_printer:
+            module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
             if (
-                Settings().printer.module == "thermal"
-                and Settings().printer.cls == "AdafruitPrinter"
+                module == "thermal"
+                and cls == "AdafruitPrinter"
             ):
                 return chr(0b00000000)
         return None
 
     def readline(self):
         if simulating_printer:
+            module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
             if (
-                Settings().printer.module == "cnc"
-                and Settings().printer.cls == "GRBLPrinter"
+                module == "cnc"
+                and cls == "FilePrinter"
             ):
                 return "ok\n".encode()
         return None

@@ -38,7 +38,7 @@ from ..settings import (
 )
 from ..krux_settings import Settings, LoggingSettings, BitcoinSettings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
-from ..qr import FORMAT_UR
+from ..qr import FORMAT_UR, FORMAT_NONE
 from ..key import Key
 from ..wallet import Wallet
 from ..printers import create_printer
@@ -99,7 +99,7 @@ class Login(Page):
                     (t("Load Mnemonic"), self.load_key),
                     (t("New Mnemonic"), self.new_key),
                     (t("Settings"), self.settings),
-                    (t("SD Check"), self.sd_check),
+                    (t("Tools"), self.tools),
                     (t("About"), self.about),
                     (t("Shutdown"), self.shutdown),
                 ],
@@ -753,6 +753,55 @@ class Login(Page):
             return BUTTON_ENTER
         return BUTTON_PAGE
 
+    def tools(self):
+        """Handler for the 'Tools' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Check SD Card"), self.sd_check),
+                (t("Print Test Page"), self.print_test),
+                (t("Create QR Code"), self.create_qr),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        self.ctx.display.clear()
+        if index == 3:
+            return MENU_CONTINUE
+        
+
+    def create_qr(self):
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Via Camera"), lambda: MENU_EXIT),
+                (t("Via Manual Input"), lambda: MENU_EXIT),
+                (t("Via SD File"), lambda: MENU_EXIT),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        self.ctx.display.clear()
+        if index == 3:
+            return MENU_CONTINUE
+        
+
+    def print_test(self):
+        try:
+            self.ctx.printer = create_printer()
+            if not self.ctx.printer:
+                self.ctx.display.flash_text(t("Printer Driver not set!"), lcd.RED)
+                return MENU_CONTINUE
+        except:
+            self.ctx.log.exception("Exception occurred connecting to printer")
+            return MENU_CONTINUE
+        
+        txt = "Krux Printer Test Page"
+        self.display_qr_codes(txt, FORMAT_NONE, txt, allow_any_btn=True)
+        self.print_qr_prompt(txt, FORMAT_NONE, txt)
+        return MENU_CONTINUE
+
+
     def sd_check(self):
         """Handler for the 'SD Check' menu item"""
         self.ctx.display.clear()
@@ -782,7 +831,7 @@ class Login(Page):
                 )
                 self.ctx.input.wait_for_button()
         except OSError:
-            self.ctx.display.flash_text(t("SD card not detected."), lcd.RED)
+            self.ctx.display.flash_text(t("SD card not detected"), lcd.RED)
 
         return MENU_CONTINUE
 
