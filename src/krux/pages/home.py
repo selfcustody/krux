@@ -155,10 +155,10 @@ class Home(Page):
 
     def display_standard_qr(self):
         """Displays regular words QR code"""
-        self.display_qr_codes(
-            self.ctx.wallet.key.mnemonic, FORMAT_NONE, None, allow_any_btn=True
-        )
-        self.print_qr_prompt(self.ctx.wallet.key.mnemonic, FORMAT_NONE)
+        title = t("Plaintext QR")
+        data = self.ctx.wallet.key.mnemonic
+        self.display_qr_codes(data, FORMAT_NONE, title, allow_any_btn=True)
+        self.print_qr_prompt(data, FORMAT_NONE, title)
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
@@ -393,8 +393,10 @@ class Home(Page):
         """Displays the seed in Tiny Seed format"""
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()
+
         if self.ctx.printer is None:
             return MENU_CONTINUE
+
         # Avoid printing text on a cnc
         if not isinstance(self.ctx.printer, FilePrinter):
             if self.prompt(
@@ -417,9 +419,12 @@ class Home(Page):
                 + self.ctx.wallet.key.account_pubkey_str(version)
             )
             self.ctx.input.wait_for_button()
+
+            # title receives first 4 chars (ex: XPUB)
+            title = self.ctx.wallet.key.account_pubkey_str(version)[:4].upper()
             xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, None, allow_any_btn=True)
-            self.print_qr_prompt(xpub, FORMAT_NONE)
+            self.display_qr_codes(xpub, FORMAT_NONE, title, allow_any_btn=True)
+            self.print_qr_prompt(xpub, FORMAT_NONE, title)
         return MENU_CONTINUE
 
     def wallet(self):
@@ -434,7 +439,7 @@ class Home(Page):
         else:
             self.display_wallet(self.ctx.wallet)
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
-            self.print_qr_prompt(wallet_data, qr_format)
+            self.print_qr_prompt(wallet_data, qr_format, t("Wallet output descriptor"))
         return MENU_CONTINUE
 
     def _seed_qr(self):
@@ -598,10 +603,10 @@ class Home(Page):
 
         return MENU_CONTINUE
 
-    def show_address(self, addr, title=None, qr_format=FORMAT_NONE):
+    def show_address(self, addr, title="", qr_format=FORMAT_NONE):
         """Show addr provided as a QRCode"""
-        self.display_qr_codes(addr, qr_format, title=title, allow_any_btn=True)
-        self.print_qr_prompt(addr, qr_format)
+        self.display_qr_codes(addr, qr_format, title, allow_any_btn=True)
+        self.print_qr_prompt(addr, qr_format, title)
         return MENU_CONTINUE
 
     def pre_scan_address(self):
@@ -841,7 +846,7 @@ class Home(Page):
 
             # Show the signed PSBT as a QRCode
             self.display_qr_codes(qr_signed_psbt, qr_format)
-            self.print_qr_prompt(qr_signed_psbt, qr_format, width=45)
+            self.print_qr_prompt(qr_signed_psbt, qr_format, t("Signed PSBT"), width=45)
 
             # memory management
             del qr_signed_psbt
@@ -959,8 +964,9 @@ class Home(Page):
         self.ctx.input.wait_for_button()
 
         # Show the base64 signed message as a QRCode
-        self.display_qr_codes(encoded_sig, qr_format)
-        self.print_qr_prompt(encoded_sig, qr_format)
+        title = t("Signed Message")
+        self.display_qr_codes(encoded_sig, qr_format, title)
+        self.print_qr_prompt(encoded_sig, qr_format, title)
 
         # memory management
         del encoded_sig
@@ -969,10 +975,14 @@ class Home(Page):
         # Show the public key as a QRCode
         pubkey = binascii.hexlify(self.ctx.wallet.key.account.sec()).decode()
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Public Key:\n\n%s") % pubkey)
+
+        title = t("Hex Public Key")
+        self.ctx.display.draw_centered_text(title + ":\n\n%s" % pubkey)
         self.ctx.input.wait_for_button()
-        self.display_qr_codes(pubkey, qr_format)
-        self.print_qr_prompt(pubkey, qr_format)
+
+        # Show the public key in hexadecimal format as a QRCode
+        self.display_qr_codes(pubkey, qr_format, title)
+        self.print_qr_prompt(pubkey, qr_format, title)
 
         # memory management
         del pubkey

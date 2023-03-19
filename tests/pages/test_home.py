@@ -241,10 +241,13 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         mocker.spy(home, "print_qr_prompt")
         home.mnemonic()
 
+        title = "Plaintext QR"
         home.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, None, allow_any_btn=True
+            ctx.wallet.key.mnemonic, FORMAT_NONE, title, allow_any_btn=True
         )
-        home.print_qr_prompt.assert_called_with(ctx.wallet.key.mnemonic, FORMAT_NONE)
+        home.print_qr_prompt.assert_called_with(
+            ctx.wallet.key.mnemonic, FORMAT_NONE, title
+        )
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -464,10 +467,13 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
 
         home.mnemonic()
 
+        title = "Plaintext QR"
         home.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, None, allow_any_btn=True
+            ctx.wallet.key.mnemonic, FORMAT_NONE, title, allow_any_btn=True
         )
-        home.print_qr_prompt.assert_called_with(ctx.wallet.key.mnemonic, FORMAT_NONE)
+        home.print_qr_prompt.assert_called_with(
+            ctx.wallet.key.mnemonic, FORMAT_NONE, title
+        )
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -555,21 +561,22 @@ def test_public_key(mocker, m5stickv, tdata):
             mocker.call(
                 ctx.wallet.key.key_expression(None),
                 FORMAT_NONE,
-                None,
+                "XPUB",
                 allow_any_btn=True,
             ),
             mocker.call(
                 ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
-                None,
+                "ZPUB",
                 allow_any_btn=True,
             ),
         ]
         print_qr_calls = [
-            mocker.call(ctx.wallet.key.key_expression(None), FORMAT_NONE),
+            mocker.call(ctx.wallet.key.key_expression(None), FORMAT_NONE, "XPUB"),
             mocker.call(
                 ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
+                "ZPUB",
             ),
         ]
         home.display_qr_codes.assert_has_calls(display_qr_calls)
@@ -1396,10 +1403,16 @@ def test_sign_message(mocker, m5stickv, tdata):
         home.capture_qr_code.assert_called_once()
         if case[0] and case[3][0] == BUTTON_ENTER:
             home.display_qr_codes.assert_has_calls(
-                [mocker.call(case[4], case[1]), mocker.call(case[5], case[1])]
+                [
+                    mocker.call(case[4], case[1], "Signed Message"),
+                    mocker.call(case[5], case[1], "Hex Public Key"),
+                ]
             )
             home.print_qr_prompt.assert_has_calls(
-                [mocker.call(case[4], case[1]), mocker.call(case[5], case[1])]
+                [
+                    mocker.call(case[4], case[1], "Signed Message"),
+                    mocker.call(case[5], case[1], "Hex Public Key"),
+                ]
             )
         else:
             home.display_qr_codes.assert_not_called()

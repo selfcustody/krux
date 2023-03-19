@@ -275,7 +275,7 @@ class Page:
                         lcd.WHITE,
                     )
 
-    def display_qr_codes(self, data, qr_format, title=None, allow_any_btn=False):
+    def display_qr_codes(self, data, qr_format, title="", allow_any_btn=False):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
@@ -294,11 +294,9 @@ class Page:
                 )
                 code, num_parts = next(code_generator)
             self.ctx.display.draw_qr_code(0, code)
-            subtitle = (
-                t("Part\n%d / %d") % (i + 1, num_parts) if title is None else title
-            )
+            subtitle = t("Part\n%d / %d") % (i + 1, num_parts) if not title else title
             offset_y = self.ctx.display.qr_offset()
-            if title is not None:
+            if title:
                 offset_y += self.ctx.display.font_height
             self.ctx.display.fill_rectangle(
                 0,

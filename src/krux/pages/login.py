@@ -764,12 +764,13 @@ class Login(Page):
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
-        index, _ = submenu.run_loop()
+        submenu.run_loop()
         self.ctx.display.clear()
-        if index == 3:
-            return MENU_CONTINUE
+
+        return MENU_CONTINUE
 
     def create_qr(self):
+        """Handler for the 'Create QR Code' menu item"""
         submenu = Menu(
             self.ctx,
             [
@@ -779,12 +780,13 @@ class Login(Page):
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
-        index, _ = submenu.run_loop()
+        submenu.run_loop()
         self.ctx.display.clear()
-        if index == 3:
-            return MENU_CONTINUE
+
+        return MENU_CONTINUE
 
     def print_test(self):
+        """Handler for the 'Print Test Page' menu item"""
         try:
             self.ctx.printer = create_printer()
             if not self.ctx.printer:
@@ -794,9 +796,10 @@ class Login(Page):
             self.ctx.log.exception("Exception occurred connecting to printer")
             return MENU_CONTINUE
 
-        txt = "Krux Printer Test Page"
-        self.display_qr_codes(txt, FORMAT_NONE, txt, allow_any_btn=True)
-        self.print_qr_prompt(txt, FORMAT_NONE, txt)
+        title = t("Krux Printer Test Page")
+        self.display_qr_codes(title, FORMAT_NONE, title, allow_any_btn=True)
+        self.print_qr_prompt(title, FORMAT_NONE, title)
+
         return MENU_CONTINUE
 
     def sd_check(self):
