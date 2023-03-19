@@ -768,7 +768,6 @@ class Login(Page):
         self.ctx.display.clear()
         if index == 3:
             return MENU_CONTINUE
-        
 
     def create_qr(self):
         submenu = Menu(
@@ -784,7 +783,6 @@ class Login(Page):
         self.ctx.display.clear()
         if index == 3:
             return MENU_CONTINUE
-        
 
     def print_test(self):
         try:
@@ -795,12 +793,11 @@ class Login(Page):
         except:
             self.ctx.log.exception("Exception occurred connecting to printer")
             return MENU_CONTINUE
-        
+
         txt = "Krux Printer Test Page"
         self.display_qr_codes(txt, FORMAT_NONE, txt, allow_any_btn=True)
         self.print_qr_prompt(txt, FORMAT_NONE, txt)
         return MENU_CONTINUE
-
 
     def sd_check(self):
         """Handler for the 'SD Check' menu item"""

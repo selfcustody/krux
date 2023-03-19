@@ -159,7 +159,8 @@ class Store:
         old_value = s.get(setting_name, None)
         s[setting_name] = setting_value
 
-        # if is a change in settings persist location, delete file from old location, and later it will save on the new location
+        # if is a change in settings persist location, delete file from old location,
+        # and later it will save on the new location
         if setting_name == "location" and old_value:
             # update the file location
             self.file_location = "/" + setting_value + "/"
