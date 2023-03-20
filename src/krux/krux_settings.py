@@ -256,7 +256,7 @@ class PersistSettings(SettingsNamespace):
     """Persistent settings"""
 
     namespace = "settings.persist"
-    location = CategorySetting("location", FLASH_PATH, [FLASH_PATH, SD_PATH])
+    location = CategorySetting("location", SD_PATH, [FLASH_PATH, SD_PATH])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
