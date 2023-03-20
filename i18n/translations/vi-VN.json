@@ -160,6 +160,8 @@
     "TOUCH or ENTER to capture": "TOUCH hoặc ENTER để chụp",
     "TX Pin": "TX Ghim",
     "Thermal": "Nhiệt",
+    "Touch Threshold": "Ngưỡng cảm ứng",
+    "Touchscreen": "Màn hình cảm ứng",
     "Try more?": "Thử thêm nữa?",
     "Unit": "Đơn vị",
     "Updating bootloader..\n\n%d%%": "Cập nhật bộ tải khởi động..\n\n%d%%",

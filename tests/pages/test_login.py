@@ -1587,7 +1587,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Leave Settings
-                5,
+                6,
             ),
             [
                 mocker.call("Network\nmain", lcd.ORANGE),
@@ -1611,7 +1611,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 # Back to Printer
                 3,
                 # Leave Settings
-                5,
+                6,
             ),
             [
                 mocker.call("Baudrate\n9600", lcd.WHITE),
@@ -1646,7 +1646,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Leave Settings
-                5,
+                6,
             ),
             [
                 mocker.call("Log Level\nNONE", lcd.WHITE),

@@ -24,6 +24,7 @@
 import time
 from .touchscreens.ft6x36 import FT6X36
 from .logging import logger as log
+from .krux_settings import Settings
 
 SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
@@ -55,6 +56,7 @@ class Touch:
         self.state = Touch.idle
         self.width, self.height = width, height
         self.touch_driver = FT6X36()
+        self.touch_driver.threshold(Settings().touch.threshold)
 
     def clear_regions(self):
         """Remove previously stored buttons map"""

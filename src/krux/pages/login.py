@@ -953,6 +953,11 @@ class Login(Page):
             submenu = Menu(self.ctx, items)
             index, status = submenu.run_loop()
             if index == len(submenu.menu) - 1:
+                if self.ctx.input.touch is not None:
+                    # Update touch detection threshold
+                    self.ctx.input.touch.touch_driver.threshold(
+                        Settings().touch.threshold
+                    )
                 return MENU_CONTINUE
             return status
 
