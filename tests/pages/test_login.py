@@ -43,7 +43,9 @@ def test_new_12w_from_d6(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm roll string,
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,  # 1 press to skip passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -79,7 +81,9 @@ def test_new_24w_from_d6(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to see the next 12 words (24 total)
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,  # 1 press to skip passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -114,8 +118,9 @@ def test_new_12w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm roll string,
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,  # 1 press change to btn 'No'
-            BUTTON_ENTER,  # 1 press to proceed (skip passphrase)
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -150,8 +155,9 @@ def test_new_24w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm roll string,
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,  # 1 press change to btn 'No'
-            BUTTON_ENTER,  # 1 press to proceed (skip passphrase)
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -212,7 +218,9 @@ def test_new_12w_from_d20(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm roll string,
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,  # 1 press to skip passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -250,7 +258,9 @@ def test_new_24w_from_d20(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 1 press to confirm SHA
             BUTTON_ENTER,  # 1 press to see the next 12 words (24 total)
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,  # 1 press to skip passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # 1 press to select single-key
         ]
@@ -315,8 +325,14 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to skip passphrase
+        # 1 press to move to Scan passphrase
         [BUTTON_PAGE]
+        +
+        # 1 press to move to No passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to skip passphrase
+        [BUTTON_ENTER]
         +
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
@@ -348,8 +364,14 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to skip passphrase
+        # 1 press to move to Scan passphrase
         [BUTTON_PAGE]
+        +
+        # 1 press to move to No passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to skip passphrase
+        [BUTTON_ENTER]
         +
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
@@ -384,8 +406,14 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to skip passphrase
+        # 1 press to move to Scan passphrase
         [BUTTON_PAGE]
+        +
+        # 1 press to move to No passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to skip passphrase
+        [BUTTON_ENTER]
         +
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
@@ -421,8 +449,14 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the next 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to skip passphrase
+        # 1 press to move to Scan passphrase
         [BUTTON_PAGE]
+        +
+        # 1 press to move to No passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to skip passphrase
+        [BUTTON_ENTER]
         +
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
@@ -455,8 +489,14 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the next 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to skip passphrase
+        # 1 press to move to Scan passphrase
         [BUTTON_PAGE]
+        +
+        # 1 press to move to No passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to skip passphrase
+        [BUTTON_ENTER]
         +
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
@@ -492,8 +532,14 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the next 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to skip passphrase
+        # 1 press to move to Scan passphrase
         [BUTTON_PAGE]
+        +
+        # 1 press to move to No passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to skip passphrase
+        [BUTTON_ENTER]
         +
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
@@ -528,8 +574,14 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to skip passphrase
+        # 1 press to move to Scan passphrase
         [BUTTON_PAGE]
+        +
+        # 1 press to move to No passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to skip passphrase
+        [BUTTON_ENTER]
         +
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
@@ -602,7 +654,9 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
             + [
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 word confirm
-                BUTTON_PAGE,  # No passphrase
+                BUTTON_PAGE,   # 1 press to move to Scan passphrase
+                BUTTON_PAGE,   # 1 press to move to No passphrase
+                BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
                 BUTTON_ENTER,  # Single-key
             ],
@@ -632,7 +686,9 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
             + [
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 word confirm
-                BUTTON_PAGE,  # No passphrase
+                BUTTON_PAGE,   # 1 press to move to Scan passphrase
+                BUTTON_PAGE,   # 1 press to move to No passphrase
+                BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
                 BUTTON_ENTER,  # Single-key
             ],
@@ -707,8 +763,9 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
+                BUTTON_PAGE,   # 1 press to move to Scan passphrase
+                BUTTON_PAGE,   # 1 press to move to No passphrase
+                BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
                 BUTTON_ENTER,
             ],
@@ -738,8 +795,9 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
+                BUTTON_PAGE,   # 1 press to move to Scan passphrase
+                BUTTON_PAGE,   # 1 press to move to No passphrase
+                BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
                 BUTTON_ENTER,
             ],
@@ -811,7 +869,9 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             + [
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 word confirm
-                BUTTON_PAGE,  # No passphrase
+                BUTTON_PAGE,   # 1 press to move to Scan passphrase
+                BUTTON_PAGE,   # 1 press to move to No passphrase
+                BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
                 BUTTON_ENTER,  # Single-key
             ],
@@ -836,7 +896,9 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             + [
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 word confirm
-                BUTTON_PAGE,  # No passphrase
+                BUTTON_PAGE,   # 1 press to move to Scan passphrase
+                BUTTON_PAGE,   # 1 press to move to No passphrase
+                BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
                 BUTTON_ENTER,  # Single-key
             ],
@@ -883,7 +945,9 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
         + [
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # No passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # Single-key
         ]
@@ -948,7 +1012,9 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
         + [
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # No passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # Single-key
         ]
@@ -991,7 +1057,9 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
         + [
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # No passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # Single-key
         ]
@@ -1049,7 +1117,9 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
         + [
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # No passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # Single-key
         ]
@@ -1125,18 +1195,6 @@ def test_passphrase_give_up_on_amigo(mocker, amigo_tft):
             BUTTON_ENTER,  # Press ESC
             BUTTON_ENTER,  # Confirm ESC
         ]
-        +
-        # Passphrase, cancel
-        [
-            BUTTON_PAGE_PREV,  # Move to NO passphrase
-            BUTTON_ENTER,  # Press NO
-        ]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # Single-key
-        [BUTTON_ENTER]
     )
 
     ctx = create_ctx(mocker, case)
@@ -1217,7 +1275,9 @@ def test_load_12w_from_tiny_seed(m5stickv, mocker, mocker_printer):
         + [BUTTON_ENTER]  # 1 press to select Go
         + [
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # No passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # Single-key
         ]
@@ -1247,7 +1307,9 @@ def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
         + [
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_ENTER,  # 24 word confirm
-            BUTTON_PAGE,  # No passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # Single-key
         ]
@@ -1284,7 +1346,9 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
         + [
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # No passphrase
+            BUTTON_PAGE,   # 1 press to move to Scan passphrase
+            BUTTON_PAGE,   # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
             BUTTON_ENTER,  # Single-key
         ]
