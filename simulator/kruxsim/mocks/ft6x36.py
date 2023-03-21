@@ -67,6 +67,9 @@ class FT6X36:
                 sequence_executor.touch_checks = 0
                 return None
         return to_screen_pos(pg.mouse.get_pos()) if pg.mouse.get_pressed()[0] else None
+    
+    def threshold(self, value):
+        pass
 
 
 if "krux.touchscreens.ft6x36" not in sys.modules:

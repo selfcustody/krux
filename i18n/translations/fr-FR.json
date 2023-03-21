@@ -160,6 +160,8 @@
     "TOUCH or ENTER to capture": "TOUCHEZ ou ENTER pour capturer",
     "TX Pin": "TX Fiche",
     "Thermal": "Thermique",
+    "Touch Threshold": "Seuil Tactile",
+    "Touchscreen": "Écran Tactile",
     "Try more?": "Réessayer?",
     "Unit": "Unité",
     "Updating bootloader..\n\n%d%%": "Mise à jour du chargeur de démarrage..\n\n%d%%",

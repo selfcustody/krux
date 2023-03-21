@@ -266,6 +266,13 @@ class Login(Page):
 
         return MENU_CONTINUE
 
+    def _load_qr_passphrase(self):
+        data, _ = self.capture_qr_code()
+        if data is None or len(data) > 50:
+            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
+            return MENU_CONTINUE
+        return data
+
     def _load_key_from_words(self, words):
         mnemonic = " ".join(words)
         self.display_mnemonic(mnemonic)
@@ -273,31 +280,24 @@ class Login(Page):
             return MENU_CONTINUE
         self.ctx.display.clear()
 
-        # Temporary key, Just to show the fingerprint
-        temp_key = Key(
-            mnemonic,
-            False,
-            NETWORKS[Settings().bitcoin.network],
-            "",
-        )
+        while True:
+            submenu = Menu(
+                self.ctx,
+                [
+                    (t("Type BIP39 passphrase"), self.load_passphrase),
+                    (t("Scan BIP39 passphrase"), self._load_qr_passphrase),
+                    (t("No BIP39 passphrase"), lambda: ""),
+                ],
+            )
+            _, passphrase = submenu.run_loop()
+            if passphrase == MENU_CONTINUE:
+                continue
+            if passphrase == ESC_KEY:
+                # User can proceed with even "blank"passphrase
+                # If ESC is used, it will abort seed loading workflow
+                return MENU_CONTINUE
+            break
 
-        # Wait until user defines a passphrase or select NO on the prompt
-        passphrase_undefined = True
-        while passphrase_undefined:
-            passphrase = ""
-            if self.prompt(
-                temp_key.fingerprint_hex_str(True)
-                + "\n\n"
-                + t("Add BIP39 passphrase?"),
-                self.ctx.display.height() // 2,
-            ):
-                passphrase = self.load_passphrase()
-                if passphrase == ESC_KEY:
-                    passphrase = ""
-                else:
-                    passphrase_undefined = False
-            else:
-                passphrase_undefined = False
         self.ctx.display.clear()
 
         # Temporary key, just to show the fingerprint
@@ -311,7 +311,12 @@ class Login(Page):
         # Show fingerprint again because password can change the fingerprint,
         # and user needs to confirm not just the words, but the fingerprint too
         if not self.prompt(
-            temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?"),
+            "Passphrase: "
+            + passphrase
+            + "\n\n"
+            + temp_key.fingerprint_hex_str(True)
+            + "\n\n"
+            + t("Continue?"),
             self.ctx.display.height() // 2,
         ):
             return MENU_CONTINUE
@@ -772,32 +777,24 @@ class Login(Page):
 
     def create_qr(self):
         """Handler for the 'Create QR Code' menu item"""
-        try:
-            self.ctx.printer = create_printer()
-        except:
-            self.ctx.log.exception("Exception occurred connecting to printer")
+        if self.prompt(
+            t("Create QR code from text?"),
+            self.ctx.display.height() // 2,
+        ):
+            text = self.load_passphrase()
+            if data == "" or data == ESC_KEY:
+                return MENU_CONTINUE
 
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("Via Manual Input"), self.read_qr_manual),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        submenu.run_loop()
-        self.ctx.display.clear()
+            self.display_qr_codes(text, FORMAT_NONE, text, allow_any_btn=True)
 
+            try:
+                self.ctx.printer = create_printer()
+            except:
+                self.ctx.log.exception("Exception occurred connecting to printer")
+
+            self.print_qr_prompt(text, FORMAT_NONE, text)
         return MENU_CONTINUE
 
-    def read_qr_manual(self):
-        """Handler for the 'Create QR Code > Via Manual Input' menu item"""
-        data = self.capture_from_keypad(
-            t("Data"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-        )
-
-        if data and data != ESC_KEY:
-            self.display_qr_codes(data, FORMAT_NONE)
-            self.print_qr_prompt(data, FORMAT_NONE, t("Manual Input QR Code"), width=45)
 
         return MENU_CONTINUE
 
@@ -891,6 +888,13 @@ class Login(Page):
 
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
+
+        # Update touch detection threshold
+        if self.ctx.input.touch is not None:
+            self.ctx.input.touch.touch_driver.threshold(
+            Settings().touch.threshold
+            )
+
         # If user selected to persist on SD, we will try to remout and save
         # flash is always mounted, so settings is always persisted
         if Settings().persist.location == SD_PATH:

@@ -239,11 +239,24 @@ class PrinterSettings(SettingsNamespace):
         }[attr]
 
 
+class TouchSettings(SettingsNamespace):
+    """Touch sensitivity settings"""
+
+    namespace = "settings.touchscreen"
+    threshold = NumberSetting(int, "threshold", 22, [10, 200])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "threshold": t("Touch Threshold"),
+        }[attr]
+
+
 class PersistSettings(SettingsNamespace):
     """Persistent settings"""
 
     namespace = "settings.persist"
-    location = CategorySetting("location", FLASH_PATH, [FLASH_PATH, SD_PATH])
+    location = CategorySetting("location", SD_PATH, [FLASH_PATH, SD_PATH])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -263,14 +276,18 @@ class Settings(SettingsNamespace):
         self.logging = LoggingSettings()
         self.printer = PrinterSettings()
         self.persist = PersistSettings()
+        if board.config["type"].startswith("amigo"):
+            self.touch = TouchSettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
-
-        return {
-            "bitcoin": t("₿itcoin"),
+        main_menu = {
+            "bitcoin": t("Bitcoin"),
             "i18n": t("Language"),
             "logging": t("Logging"),
             "persist": t("Persist"),
             "printer": t("Printer"),
-        }[attr]
+        }
+        if board.config["type"].startswith("amigo"):
+            main_menu["touchscreen"] = t("Touchscreen")
+        return main_menu[attr]
