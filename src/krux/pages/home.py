@@ -22,7 +22,6 @@
 import binascii
 import gc
 import hashlib
-import os
 import lcd
 from .stack_1248 import Stackbit
 from .tiny_seed import TinySeed
@@ -67,14 +66,9 @@ LIST_ADDRESS_DIGITS_SMALL = 4  # len on small devices per menu item
 
 SCAN_ADDRESS_LIMIT = 20
 
-LIST_FILE_DIGITS = LIST_ADDRESS_DIGITS + 1
-LIST_FILE_DIGITS_SMALL = LIST_ADDRESS_DIGITS_SMALL + 1
-
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789()-.[]_~"
-
-SD_ROOT_PATH = "/sd"
 
 PSBT_FILE_SUFFIX = "-signed"
 PSBT_FILE_EXTENSION = ".psbt"
@@ -719,60 +713,6 @@ class Home(Page):
             return MENU_CONTINUE
         return status
 
-    def _select_file(self):
-        """Starts a file explorer on the SD folder and returns the file selected"""
-        custom_start_digits = LIST_FILE_DIGITS
-        custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
-        if board.config["type"] == "m5stickv":
-            custom_start_digits = LIST_FILE_DIGITS_SMALL
-            custom_end_digts = LIST_FILE_DIGITS_SMALL + 4  # 3 more because of file type
-
-        path = SD_ROOT_PATH
-        while True:
-            # if is a dir then list all files in it
-            if SDHandler.dir_exists(path):
-                items = []
-                menu_items = []
-
-                if path != SD_ROOT_PATH:
-                    items.append("..")
-                    menu_items.append(("..", lambda: MENU_EXIT))
-
-                dir_files = os.listdir(path)
-                for filename in dir_files:
-                    items.append(filename)
-                    if len(filename) >= custom_start_digits + 2 + custom_end_digts:
-                        filename = (
-                            filename[:custom_start_digits]
-                            + ".."
-                            + filename[len(filename) - custom_end_digts :]
-                        )
-                    menu_items.append((filename, lambda: MENU_EXIT))
-
-                # We need to add this option because /sd can be empty!
-                items.append("Back")
-                menu_items.append((t("Back"), lambda: MENU_EXIT))
-
-                submenu = Menu(self.ctx, menu_items)
-                index, _ = submenu.run_loop()
-
-                # selected "Back"
-                if index == len(items) - 1:
-                    return ""
-                # selected ".."
-                if index == 0 and path != SD_ROOT_PATH:
-                    path = path.split("/")
-                    path.pop()
-                    path = "/".join(path)
-                else:
-                    path += "/" + items[index]
-            # it is a file!
-            else:
-                submenu, menu_items, items = (None, None, None)
-                del submenu, menu_items, items
-                gc.collect()
-                return path
-
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
         if not self.ctx.wallet.is_loaded():
@@ -798,7 +738,7 @@ class Home(Page):
                     if self.prompt(
                         t("Load PSBT from SD card?"), self.ctx.display.height() // 2
                     ):
-                        psbt_filename = self._select_file()
+                        psbt_filename = self.select_file()
 
                         if psbt_filename:
                             self.ctx.display.clear()
@@ -904,7 +844,7 @@ class Home(Page):
                     if self.prompt(
                         t("Load message from SD card?"), self.ctx.display.height() // 2
                     ):
-                        message_filename = self._select_file()
+                        message_filename = self.select_file()
 
                         if message_filename:
                             self.ctx.display.clear()

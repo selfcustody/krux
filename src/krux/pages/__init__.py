@@ -24,6 +24,7 @@ import math
 import time
 import lcd
 import board
+import os
 from ..camera import OV7740_ID
 from ur.ur import UR
 from ..input import (
@@ -42,6 +43,7 @@ from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, LoggingSettings, BitcoinSettings
 from ..settings import DARKGREEN
 from ..printers.cnc import FilePrinter
+from ..sd_card import SDHandler
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -54,6 +56,11 @@ WAIT_TO_CHECK_INPUT = 200
 ANTI_GLARE_WAIT_TIME = 500
 QR_CODE_STEP_TIME = 100
 CAMERA_INIT_TIME = 1000
+
+LIST_FILE_DIGITS = 9  # len on large devices per menu item
+LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
+
+SD_ROOT_PATH = "/sd"
 
 
 class Page:
@@ -71,8 +78,10 @@ class Page:
         self.y_keypad_map = []
         self.x_keypad_map = []
 
-    def wait_for_proceed(self, block=True):
+    def wait_for_proceed(self, block=True, any_btn=False):
         """Wrap acknowledgements which can be answared with multiple buttons"""
+        if any_btn:
+            return self.ctx.input.wait_for_button(block) is not None
         return self.ctx.input.wait_for_button(block) in (BUTTON_ENTER, BUTTON_TOUCH)
 
     def esc_prompt(self):
@@ -307,11 +316,8 @@ class Page:
             )
             self.ctx.display.draw_hcentered_text(subtitle, offset_y, color=lcd.WHITE)
             i = (i + 1) % num_parts
-            # In some cases we don't need to restrict the input to change the screen
-            if allow_any_btn:
-                self.ctx.input.wait_for_button()
-                done = True
-            elif self.wait_for_proceed(block=num_parts == 1):
+            # There are cases we can allow any btn to change the screen
+            if self.wait_for_proceed(block=num_parts == 1, any_btn=allow_any_btn):
                 done = True
             # interval done in input.py using timers
 
@@ -484,6 +490,60 @@ class Page:
         """Runs the page's menu loop"""
         _, status = self.menu.run_loop()
         return status != MENU_SHUTDOWN
+
+    def select_file(self):
+        """Starts a file explorer on the SD folder and returns the file selected"""
+        custom_start_digits = LIST_FILE_DIGITS
+        custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
+        if board.config["type"] == "m5stickv":
+            custom_start_digits = LIST_FILE_DIGITS_SMALL
+            custom_end_digts = LIST_FILE_DIGITS_SMALL + 4  # 3 more because of file type
+
+        path = SD_ROOT_PATH
+        while True:
+            # if is a dir then list all files in it
+            if SDHandler.dir_exists(path):
+                items = []
+                menu_items = []
+
+                if path != SD_ROOT_PATH:
+                    items.append("..")
+                    menu_items.append(("..", lambda: MENU_EXIT))
+
+                dir_files = os.listdir(path)
+                for filename in dir_files:
+                    items.append(filename)
+                    if len(filename) >= custom_start_digits + 2 + custom_end_digts:
+                        filename = (
+                            filename[:custom_start_digits]
+                            + ".."
+                            + filename[len(filename) - custom_end_digts :]
+                        )
+                    menu_items.append((filename, lambda: MENU_EXIT))
+
+                # We need to add this option because /sd can be empty!
+                items.append("Back")
+                menu_items.append((t("Back"), lambda: MENU_EXIT))
+
+                submenu = Menu(self.ctx, menu_items)
+                index, _ = submenu.run_loop()
+
+                # selected "Back"
+                if index == len(items) - 1:
+                    return ""
+                # selected ".."
+                if index == 0 and path != SD_ROOT_PATH:
+                    path = path.split("/")
+                    path.pop()
+                    path = "/".join(path)
+                else:
+                    path += "/" + items[index]
+            # it is a file!
+            else:
+                submenu, menu_items, items = (None, None, None)
+                del submenu, menu_items, items
+                gc.collect()
+                return path
 
 
 class ListView:

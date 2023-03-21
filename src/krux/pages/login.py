@@ -38,7 +38,7 @@ from ..settings import (
 )
 from ..krux_settings import Settings, LoggingSettings, BitcoinSettings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
-from ..qr import FORMAT_UR, FORMAT_NONE
+from ..qr import FORMAT_UR, FORMAT_NONE, FORMAT_PMOFN
 from ..key import Key
 from ..wallet import Wallet
 from ..printers import create_printer
@@ -53,9 +53,11 @@ from . import (
     MENU_EXIT,
     ESC_KEY,
     DEFAULT_PADDING,
+    SD_ROOT_PATH,
 )
 import os
 import uos
+from ..baseconv import base_encode
 
 SENTINEL_DIGITS = "11111"
 
@@ -771,17 +773,97 @@ class Login(Page):
 
     def create_qr(self):
         """Handler for the 'Create QR Code' menu item"""
+        try:
+            self.ctx.printer = create_printer()
+        except:
+            self.ctx.log.exception("Exception occurred connecting to printer")
+
         submenu = Menu(
             self.ctx,
             [
-                (t("Via Camera"), lambda: MENU_EXIT),
-                (t("Via Manual Input"), lambda: MENU_EXIT),
-                (t("Via SD File"), lambda: MENU_EXIT),
+                (t("Via Camera"), self.read_qr_camera),
+                (t("Via Manual Input"), self.read_qr_manual),
+                (t("Via SD File"), self.read_qr_sd),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()
         self.ctx.display.clear()
+
+        return MENU_CONTINUE
+
+    def read_qr_sd(self):
+        """Handler for the 'Create QR Code > Via SD File' menu item"""
+        try:
+            with SDHandler() as sd:
+                self.ctx.display.clear()
+                filename = self.select_file()
+
+                if filename:
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_hcentered_text(
+                        t("File selected:\n\n%s") % filename
+                    )
+                    if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
+                        data = sd.read_binary(filename[4:])  # remove "/sd/" prefix
+
+                        # Try to read as str
+                        decoded_data = ""
+                        try:
+                            decoded_data = data.decode()
+                        except:
+                            pass
+
+                        # Read binary as base64
+                        if not decoded_data:
+                            decoded_data = base_encode(data, 64).decode()
+
+                        if decoded_data:
+                            self.display_qr_codes(decoded_data, FORMAT_PMOFN)
+                            self.print_qr_prompt(
+                                decoded_data,
+                                FORMAT_PMOFN,
+                                t("Manual Input QR Code"),
+                                width=45,
+                            )
+                        else:
+                            self.ctx.display.flash_text(
+                                t("%s is empty!") % filename, lcd.RED
+                            )
+        except OSError:
+            self.ctx.display.flash_text(t("SD card not detected"), lcd.RED)
+        except Exception as e:
+            self.ctx.log.exception(
+                "Exception occurred creating QR by SD file: %s: %s"
+                % (type(e).__name__, e)
+            )
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Invalid file:\n%s") % e, lcd.RED)
+            self.ctx.input.wait_for_button()
+
+        return MENU_CONTINUE
+
+    def read_qr_manual(self):
+        """Handler for the 'Create QR Code > Via Manual Input' menu item"""
+        data = self.capture_from_keypad(
+            t("Data"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+        )
+
+        if data and data != ESC_KEY:
+            self.display_qr_codes(data, FORMAT_NONE)
+            self.print_qr_prompt(data, FORMAT_NONE, t("Manual Input QR Code"), width=45)
+
+        return MENU_CONTINUE
+
+    def read_qr_camera(self):
+        """Handler for the 'Create QR Code > Via Camera' menu item"""
+        data, qr_format = self.capture_qr_code()
+        if data is None:
+            self.ctx.display.flash_text(t("Failed to load data"), lcd.RED)
+            return MENU_CONTINUE
+
+        self.display_qr_codes(data, qr_format)
+        self.print_qr_prompt(data, qr_format, t("Camera QR Code"), width=45)
 
         return MENU_CONTINUE
 
@@ -794,7 +876,7 @@ class Login(Page):
                 return MENU_CONTINUE
         except:
             self.ctx.log.exception("Exception occurred connecting to printer")
-            return MENU_CONTINUE
+            raise
 
         title = t("Krux Printer Test Page")
         self.display_qr_codes(title, FORMAT_NONE, title, allow_any_btn=True)
@@ -809,7 +891,7 @@ class Login(Page):
         try:
             # Check for SD hot-plug
             with SDHandler():
-                sd_status = uos.statvfs("/sd")
+                sd_status = uos.statvfs(SD_ROOT_PATH)
                 sd_total = int(sd_status[2] * sd_status[1] / 1024 / 1024)
                 sd_free = int(sd_status[4] * sd_status[1] / 1024 / 1024)
 
@@ -926,7 +1008,7 @@ class Login(Page):
             if len(items) == 1:
                 return items[0][1]()
 
-            # Case for main Settings
+            # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
                 items.append((t("Back"), self._settings_exit_check))
             else:

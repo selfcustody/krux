@@ -153,7 +153,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         # No print prompt
         (
             Wallet(tdata.SINGLEKEY_12_WORD_KEY),
-            None,
+            None,  # printer
             [
                 BUTTON_PAGE,
                 BUTTON_ENTER,
@@ -165,7 +165,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         ),
         (
             Wallet(tdata.SINGLEKEY_24_WORD_KEY),
-            None,
+            None,  # printer
             [
                 BUTTON_PAGE,
                 BUTTON_ENTER,
