@@ -23,9 +23,7 @@ def test_init(mocker, m5stickv):
     )
     assert light.circuit is not None
     krux.light.GPIO.assert_called()
-    assert (
-        krux.light.GPIO.call_args.args[0]._extract_mock_name() == "mock.GPIO3"
-    )
+    assert krux.light.GPIO.call_args.args[0]._extract_mock_name() == "mock.GPIO3"
     light.turn_off.assert_called()
 
 

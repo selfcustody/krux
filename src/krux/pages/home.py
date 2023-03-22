@@ -80,7 +80,6 @@ class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
-        ctx.led_rgb.turn_on()
         super().__init__(
             ctx,
             Menu(

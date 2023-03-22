@@ -59,12 +59,3 @@ class Light(IOCircuit):
         super().__init__(
             board.config["krux"]["pins"]["LED_W"], fm.fpioa.GPIO3, GPIO.GPIO3
         )
-
-
-class LedRGB(IOCircuit):
-    """LedRGB is a singleton interface for interacting with the device's RGB Led"""
-
-    def __init__(self):
-        super().__init__(
-            board.config["board_info"]["LED_R"], fm.fpioa.GPIO0, GPIO.GPIO0
-        )

@@ -25,7 +25,7 @@ from .logging import logger
 from .display import Display
 from .input import Input
 from .camera import Camera
-from .light import Light, LedRGB
+from .light import Light
 
 
 class Context:
@@ -38,7 +38,6 @@ class Context:
         self.input = Input()
         self.camera = Camera()
         self.light = Light() if "LED_W" in board.config["krux"]["pins"] else None
-        self.led_rgb = LedRGB()
         self.power_manager = None
         self.printer = None
         self.wallet = None
