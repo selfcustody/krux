@@ -82,3 +82,7 @@ class FT6X36(Touchscreen):
         except Exception as e:
             return e  # debug
         return None
+
+    def threshold(self, value):
+        """Sets touch sensitivity threshold"""
+        self.write_reg(FT_ID_G_THGROUP, value)

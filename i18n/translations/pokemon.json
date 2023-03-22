@@ -25,6 +25,7 @@
     "Backing up bootloader..\n\n%d%%": "Backing up bootloader..\n\n%d%%",
     "Bad signature": "Bad enroll",
     "Baudrate": "Baudrate",
+    "Bitcoin": "Pokémon",
     "Border Padding": "Border Padding",
     "CNC": "CNC",
     "Change": "Change",
@@ -187,6 +188,5 @@
     "Yes": "Yes",
     "Your changes will be kept on device flash storage.": "Your changes will be kept on device flash storage.",
     "Your changes will be kept on the SD card.": "Your changes will be kept on the SD card.",
-    "₿ %s": "₽ %s",
-    "₿itcoin": "₽okémon"
+    "₿ %s": "₽ %s"
 }

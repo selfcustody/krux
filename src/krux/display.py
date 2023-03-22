@@ -319,7 +319,7 @@ class Display:
         self.clear()
 
     def add_qr_frame(self, qr_code):
-        """Add a 1px white border around the code before displaying"""
+        """Add a 1 block white border around the code before displaying"""
         qr_code = qr_code.strip()
         lines = qr_code.split("\n")
         size = len(lines)

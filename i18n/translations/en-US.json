@@ -160,6 +160,8 @@
     "TOUCH or ENTER to capture": "TOUCH or ENTER to capture",
     "TX Pin": "TX Pin",
     "Thermal": "Thermal",
+    "Touch Threshold": "Touch Threshold",
+    "Touchscreen": "Touchscreen",
     "Try more?": "Try more?",
     "Unit": "Unit",
     "Updating bootloader..\n\n%d%%": "Updating bootloader..\n\n%d%%",
