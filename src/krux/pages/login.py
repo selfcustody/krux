@@ -310,13 +310,13 @@ class Login(Page):
 
         # Show fingerprint again because password can change the fingerprint,
         # and user needs to confirm not just the words, but the fingerprint too
+        continue_string = ""
+        if passphrase:
+            continue_string += t("Passphrase: ") + passphrase + "\n\n"
+        continue_string += temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?")
+
         if not self.prompt(
-            "Passphrase: "
-            + passphrase
-            + "\n\n"
-            + temp_key.fingerprint_hex_str(True)
-            + "\n\n"
-            + t("Continue?"),
+            continue_string,
             self.ctx.display.height() // 2,
         ):
             return MENU_CONTINUE
