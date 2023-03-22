@@ -84,7 +84,7 @@ class GPIO:
     GPIO6 = 38
     GPIO7 = 39
 
-    def __init__(self, gpio_num, dir, val):
+    def __init__(self, gpio_num, dir=None, val=None):
         self.key = None
         pin = fm_map[gpio_num]
         if pin == BUTTON_A:
@@ -94,7 +94,7 @@ class GPIO:
         if pin == BUTTON_C:
             self.key = pg.K_UP
 
-    def value(self):
+    def value(self, val=1):
         if not self.key:
             return 1
         if (

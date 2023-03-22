@@ -21,9 +21,11 @@ def test_init(mocker, m5stickv):
         krux.light.fm.register.call_args.args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIO3"
     )
-    assert light.led_w is not None
+    assert light.circuit is not None
     krux.light.GPIO.assert_called()
-    assert krux.light.GPIO.call_args.args[0]._extract_mock_name() == "mock.GPIO3"
+    assert (
+        krux.light.GPIO.call_args.args[0]._extract_mock_name() == "mock.GPIO3"
+    )
     light.turn_off.assert_called()
 
 
@@ -32,12 +34,12 @@ def test_is_on(mocker, m5stickv):
     from krux.light import Light
 
     light = Light()
-    mocker.spy(light.led_w, "value")
+    mocker.spy(light.circuit, "value")
 
     on = light.is_on()
 
     assert isinstance(on, bool)
-    light.led_w.value.assert_called_with()
+    light.circuit.value.assert_called_with()
 
 
 def test_turn_on(mocker, m5stickv):
@@ -45,11 +47,11 @@ def test_turn_on(mocker, m5stickv):
     from krux.light import Light
 
     light = Light()
-    mocker.spy(light.led_w, "value")
+    mocker.spy(light.circuit, "value")
 
     light.turn_on()
 
-    light.led_w.value.assert_called_with(0)
+    light.circuit.value.assert_called_with(0)
 
 
 def test_turn_off(mocker, m5stickv):
@@ -57,11 +59,11 @@ def test_turn_off(mocker, m5stickv):
     from krux.light import Light
 
     light = Light()
-    mocker.spy(light.led_w, "value")
+    mocker.spy(light.circuit, "value")
 
     light.turn_off()
 
-    light.led_w.value.assert_called_with(1)
+    light.circuit.value.assert_called_with(1)
 
 
 def test_toggle_from_off(mocker, m5stickv):
