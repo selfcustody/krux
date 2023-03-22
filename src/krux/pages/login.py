@@ -36,7 +36,7 @@ from ..settings import (
     FLASH_PATH,
     Store,
 )
-from ..krux_settings import Settings, LoggingSettings, BitcoinSettings
+from ..krux_settings import Settings, LoggingSettings, BitcoinSettings, TouchSettings
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..qr import FORMAT_UR, FORMAT_NONE
 from ..key import Key
@@ -782,7 +782,7 @@ class Login(Page):
             self.ctx.display.height() // 2,
         ):
             text = self.load_passphrase()
-            if data == "" or data == ESC_KEY:
+            if text in ("", ESC_KEY):
                 return MENU_CONTINUE
 
             self.display_qr_codes(text, FORMAT_NONE, text, allow_any_btn=True)
@@ -793,9 +793,6 @@ class Login(Page):
                 self.ctx.log.exception("Exception occurred connecting to printer")
 
             self.print_qr_prompt(text, FORMAT_NONE, text)
-        return MENU_CONTINUE
-
-
         return MENU_CONTINUE
 
     def print_test(self):
@@ -889,12 +886,6 @@ class Login(Page):
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
 
-        # Update touch detection threshold
-        if self.ctx.input.touch is not None:
-            self.ctx.input.touch.touch_driver.threshold(
-            Settings().touch.threshold
-            )
-
         # If user selected to persist on SD, we will try to remout and save
         # flash is always mounted, so settings is always persisted
         if Settings().persist.location == SD_PATH:
@@ -966,11 +957,22 @@ class Login(Page):
         def handler():
             if isinstance(setting, CategorySetting):
                 return self.category_setting(settings_namespace, setting)
+
             if isinstance(setting, NumberSetting):
-                return self.number_setting(settings_namespace, setting)
+                self.number_setting(settings_namespace, setting)
+                if settings_namespace.namespace == TouchSettings.namespace:
+                    self._touch_threshold_exit_check()
+
             return MENU_CONTINUE
 
         return handler
+
+    def _touch_threshold_exit_check(self):
+        """Handler for the 'Back' on settings screen"""
+
+        # Update touch detection threshold
+        if self.ctx.input.touch is not None:
+            self.ctx.input.touch.touch_driver.threshold(Settings().touch.threshold)
 
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""
@@ -1010,9 +1012,15 @@ class Login(Page):
         """Handler for viewing and editing a NumberSetting"""
 
         starting_value = setting.numtype(setting.__get__(settings_namespace))
+
+        numerals = NUMERALS
+        # remove the dot symbol when number is int
+        if setting.numtype == int:
+            numerals = NUMERALS[:-1]
+
         new_value = self.capture_from_keypad(
             settings_namespace.label(setting.attr),
-            [NUMERALS],
+            [numerals],
             starting_buffer=str(starting_value),
             esc_prompt=False,
         )
@@ -1022,6 +1030,12 @@ class Login(Page):
         new_value = setting.numtype(new_value)
         if setting.value_range[0] <= new_value <= setting.value_range[1]:
             setting.__set__(settings_namespace, new_value)
+        else:
+            self.ctx.display.flash_text(
+                t("Value %s out of range: [%s, %s]")
+                % (new_value, setting.value_range[0], setting.value_range[1]),
+                lcd.RED,
+            )
 
         return MENU_CONTINUE
 

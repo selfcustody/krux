@@ -86,4 +86,3 @@ class FT6X36(Touchscreen):
     def threshold(self, value):
         """Sets touch sensitivity threshold"""
         self.write_reg(FT_ID_G_THGROUP, value)
-        return None
