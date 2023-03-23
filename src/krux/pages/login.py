@@ -78,6 +78,8 @@ D20_24W_MIN_ROLLS = 60
 
 SD_MSG_TIME = 2500
 
+PASSPHRASE_MAX_LEN = 200
+
 CATEGORY_SETTING_COLOR_DICT = {
     LoggingSettings.ERROR_TXT: lcd.RED,
     LoggingSettings.WARN_TXT: lcd.ORANGE,
@@ -268,8 +270,14 @@ class Login(Page):
 
     def _load_qr_passphrase(self):
         data, _ = self.capture_qr_code()
-        if data is None or len(data) > 50:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
+        if data is None:
+            self.ctx.display.flash_text(t("Failed to load passphrase"), lcd.RED)
+            return MENU_CONTINUE
+        if len(data) > PASSPHRASE_MAX_LEN:
+            self.ctx.display.flash_text(
+                t("Maximum passphrase length exceeded (%s)") % PASSPHRASE_MAX_LEN,
+                lcd.RED,
+            )
             return MENU_CONTINUE
         return data
 
@@ -290,36 +298,33 @@ class Login(Page):
                 ],
             )
             _, passphrase = submenu.run_loop()
-            if passphrase == MENU_CONTINUE:
+            if passphrase in (ESC_KEY, MENU_CONTINUE):
                 continue
-            if passphrase == ESC_KEY:
-                # User can proceed with even "blank"passphrase
-                # If ESC is used, it will abort seed loading workflow
-                return MENU_CONTINUE
-            break
 
-        self.ctx.display.clear()
+            self.ctx.display.clear()
 
-        # Temporary key, just to show the fingerprint
-        temp_key = Key(
-            mnemonic,
-            False,
-            NETWORKS[Settings().bitcoin.network],
-            passphrase,
-        )
+            # Temporary key, just to show the fingerprint
+            temp_key = Key(
+                mnemonic,
+                False,
+                NETWORKS[Settings().bitcoin.network],
+                passphrase,
+            )
 
-        # Show fingerprint again because password can change the fingerprint,
-        # and user needs to confirm not just the words, but the fingerprint too
-        continue_string = ""
-        if passphrase:
-            continue_string += t("Passphrase: ") + passphrase + "\n\n"
-        continue_string += temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?")
+            # Show fingerprint again because password can change the fingerprint,
+            # and user needs to confirm not just the words, but the fingerprint too
+            continue_string = ""
+            if passphrase:
+                continue_string += t("Passphrase: ") + passphrase + "\n\n"
+            continue_string += (
+                temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?")
+            )
 
-        if not self.prompt(
-            continue_string,
-            self.ctx.display.height() // 2,
-        ):
-            return MENU_CONTINUE
+            if self.prompt(
+                continue_string,
+                self.ctx.display.height() // 2,
+            ):
+                break
 
         submenu = Menu(
             self.ctx,

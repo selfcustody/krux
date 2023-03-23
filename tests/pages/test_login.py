@@ -1153,7 +1153,7 @@ def test_leaving_keypad(mocker, amigo_tft):
     assert ctx.input.wait_for_button.call_count == len(esc_keypad)
 
 
-def test_passphrase_give_up_on_amigo(mocker, amigo_tft):
+def test_no_passphrase_on_amigo(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -1185,15 +1185,13 @@ def test_passphrase_give_up_on_amigo(mocker, amigo_tft):
         # Words correct? Confirm
         [BUTTON_ENTER]
         +
-        # Passphrase, confirm
-        [BUTTON_ENTER]
+        # No BIP39 Passphrase menu
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
         +
-        # In passphrase keypad:
+        # Accept fingerprint and derivation
         [
-            BUTTON_PAGE_PREV,  # Move to Go
-            BUTTON_PAGE_PREV,  # Move to ESC
-            BUTTON_ENTER,  # Press ESC
-            BUTTON_ENTER,  # Confirm ESC
+            BUTTON_ENTER,  # Continue?
+            BUTTON_ENTER,  # Single-key
         ]
     )
 
