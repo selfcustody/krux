@@ -128,12 +128,12 @@ class Store:
             except:
                 pass
 
-        # Settings file location points to what is defined in SETTINGS_FILENAME or defaults to flash
+        # Settings file location points to what is defined in SETTINGS_FILENAME or defaults to SD
         self.file_location = (
             "/"
             + self.settings.get("settings", {})
             .get("persist", {})
-            .get("location", FLASH_PATH)
+            .get("location", SD_PATH)
             + "/"
         )
 
