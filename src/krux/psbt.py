@@ -125,6 +125,8 @@ class PSBTSigner:
         xpubs = self.xpubs()
         for i, out in enumerate(self.psbt.outputs):
             out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs)
+
+            address_from_my_wallet = False
             # if policy is the same - probably change
             if out_policy == self.policy:
                 # double-check that it's change
@@ -151,8 +153,10 @@ class PSBTSigner:
                         elif self.policy["type"] == "p2sh-p2wpkh":
                             sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
 
+                address_from_my_wallet = sc.data == self.psbt.tx.vout[i].script_pubkey.data
+
             # Address is from my wallet
-            if sc.data == self.psbt.tx.vout[i].script_pubkey.data:
+            if address_from_my_wallet:
                 # is addr_type change?
                 if (
                     len(list(out.bip32_derivations.values())) > 0
