@@ -153,7 +153,9 @@ class PSBTSigner:
                         elif self.policy["type"] == "p2sh-p2wpkh":
                             sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
 
-                address_from_my_wallet = sc.data == self.psbt.tx.vout[i].script_pubkey.data
+                address_from_my_wallet = (
+                    sc.data == self.psbt.tx.vout[i].script_pubkey.data
+                )
 
             # Address is from my wallet
             if address_from_my_wallet:
