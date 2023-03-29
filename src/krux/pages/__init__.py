@@ -491,7 +491,7 @@ class Page:
         _, status = self.menu.run_loop()
         return status != MENU_SHUTDOWN
 
-    def select_file(self):
+    def select_file(self, select_file_handler=lambda *args: MENU_EXIT):
         """Starts a file explorer on the SD folder and returns the file selected"""
         custom_start_digits = LIST_FILE_DIGITS
         custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
@@ -513,13 +513,16 @@ class Page:
                 dir_files = os.listdir(path)
                 for filename in dir_files:
                     items.append(filename)
+                    display_filename = filename
                     if len(filename) >= custom_start_digits + 2 + custom_end_digts:
-                        filename = (
+                        display_filename = (
                             filename[:custom_start_digits]
                             + ".."
                             + filename[len(filename) - custom_end_digts :]
                         )
-                    menu_items.append((filename, lambda: MENU_EXIT))
+                    menu_items.append(
+                        (display_filename, select_file_handler, [path + "/" + filename])
+                    )
 
                 # We need to add this option because /sd can be empty!
                 items.append("Back")

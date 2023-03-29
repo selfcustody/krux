@@ -57,6 +57,7 @@ from . import (
 )
 import os
 import uos
+import time
 
 SENTINEL_DIGITS = "11111"
 
@@ -829,7 +830,7 @@ class Login(Page):
                 sd_free = int(sd_status[4] * sd_status[1] / 1024 / 1024)
 
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
+                self.ctx.display.draw_hcentered_text(
                     t("SD card")
                     + "\n\n"
                     + t("Size: ")
@@ -844,10 +845,44 @@ class Login(Page):
                     + "{:,}".format(sd_free)
                     + " MB"
                 )
-                self.ctx.input.wait_for_button()
+                if self.prompt(
+                    t("Explore files?"), self.ctx.display.bottom_prompt_line
+                ):
+                    self.select_file(select_file_handler=self._show_file_details)
         except OSError:
             self.ctx.display.flash_text(t("SD card not detected"), lcd.RED)
 
+        return MENU_CONTINUE
+
+    def _show_file_details(self, file):
+        """Handler to print file info when selecting a file in the file explorer"""
+        if SDHandler.dir_exists(file):
+            return MENU_EXIT
+
+        stats = uos.stat(file)
+        size = stats[6] / 1024
+        size_deximal_places = str(int(size * 100))[-2:]
+        created = time.localtime(stats[9])
+        modified = time.localtime(stats[8])
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text(
+            file[4:]  # remove "/sd/" prefix
+            + "\n\n"
+            + t("Size: ")
+            + "{:,}".format(int(size))
+            + "."
+            + size_deximal_places
+            + " KB"
+            + "\n\n"
+            + t("Created: ")
+            + "%s-%s-%s %s:%s"
+            % (created[0], created[1], created[2], created[3], created[4])
+            + "\n\n"
+            + t("Modified: ")
+            + "%s-%s-%s %s:%s"
+            % (modified[0], modified[1], modified[2], modified[3], modified[4])
+        )
+        self.ctx.input.wait_for_button()
         return MENU_CONTINUE
 
     def settings(self):
