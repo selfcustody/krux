@@ -45,6 +45,7 @@ from ..input import (
     SWIPE_UP,
 )
 import qrcode
+from ..printers import create_printer
 from ..printers.cnc import FilePrinter
 import board
 
@@ -94,6 +95,13 @@ class Home(Page):
                 ],
             ),
         )
+
+        # Ensure that the printer was created
+        if self.ctx.printer is None:
+            try:
+                self.ctx.printer = create_printer()
+            except:
+                self.ctx.log.exception("Exception occurred connecting to printer")
 
     def mnemonic(self):
         """Handler for the 'mnemonic' menu item"""
@@ -762,7 +770,8 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
+        # We enforce FORMAT_PMOFN because FORMAT_UR increases QR Code data by a factor of 4.8 !!
+        qr_format = FORMAT_PMOFN  # if qr_format == FORMAT_NONE else qr_format
         signer = PSBTSigner(self.ctx.wallet, data, qr_format)
         self.ctx.log.debug("Received PSBT: %s" % signer.psbt)
 

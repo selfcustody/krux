@@ -46,6 +46,7 @@ class PSBTSigner:
                     urtypes.crypto.PSBT.from_cbor(psbt_data.cbor).data
                 )
                 self.ur_type = CRYPTO_PSBT
+                self.base_encoding = 64
             except:
                 raise ValueError("invalid PSBT")
         else:
@@ -264,14 +265,16 @@ class PSBTSigner:
         if self.base_encoding is not None:
             psbt_data = base_encode(psbt_data, self.base_encoding).decode()
 
-        if self.ur_type == CRYPTO_PSBT:
-            return (
-                UR(
-                    CRYPTO_PSBT.type,
-                    urtypes.crypto.PSBT(psbt_data).to_cbor(),
-                ),
-                self.qr_format,
-            )
+        # It is not necessary to show the data in the UR type. It increases the size
+        # of the data by a factor of 4.8 !!
+        # if self.ur_type == CRYPTO_PSBT:
+        #     return (
+        #         UR(
+        #             CRYPTO_PSBT.type,
+        #             urtypes.crypto.PSBT(psbt_data).to_cbor(),
+        #         ),
+        #         self.qr_format,
+        #     )
         return psbt_data, self.qr_format
 
     def xpubs(self):
