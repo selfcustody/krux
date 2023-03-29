@@ -133,7 +133,11 @@ class Camera:
             res = img.find_qrcodes()
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
-            lcd.display(img)
+                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
+            elif board.config["type"].startswith("amigo"):
+                lcd.display(img, oft=(40, 40))
+            else:
+                lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
             if len(res) > 0:
                 data = res[0].payload()
 

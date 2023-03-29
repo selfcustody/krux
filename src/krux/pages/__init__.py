@@ -217,13 +217,20 @@ class Page:
             # Indicate progress to the user that a new part was captured
             if new_part:
                 self.ctx.display.to_portrait()
-                filled = self.ctx.display.usable_width() * num_parts_captured
+                filled = self.ctx.display.width() * num_parts_captured
                 filled //= part_total
+                self.ctx.display.width()
+                if self.ctx.display.height() < 320:  # M5StickV
+                    height = 210
+                elif self.ctx.display.height() > 320:  # Amigo
+                    height = 380
+                else:
+                    height = 305
                 self.ctx.display.fill_rectangle(
-                    DEFAULT_PADDING,
-                    self.ctx.display.height() // 2 - self.ctx.display.font_height // 2,
+                    0,
+                    height,
                     filled,
-                    self.ctx.display.font_height,
+                    15,
                     lcd.WHITE,
                 )
                 time.sleep_ms(QR_CODE_STEP_TIME)
