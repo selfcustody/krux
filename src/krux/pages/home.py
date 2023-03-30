@@ -805,8 +805,8 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        # We enforce FORMAT_PMOFN because FORMAT_UR increases QR Code data by a factor of 4.8 !!
-        qr_format = FORMAT_PMOFN  # if qr_format == FORMAT_NONE else qr_format
+        # TODO: FIX, FORMAT_UR increases QR Code data by a factor of 4.8 compared to FORMAT_PMOFN!!
+        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
         signer = PSBTSigner(self.ctx.wallet, data, qr_format)
         self.ctx.log.debug("Received PSBT: %s" % signer.psbt)
 
