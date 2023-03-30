@@ -1082,13 +1082,6 @@ class Login(Page):
     def about(self):
         """Handler for the 'about' menu item"""
         self.ctx.display.clear()
-        message = "" # t("Krux\n\n\nVersion\n%s") % VERSION
-        message += " THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG\n"
-        message += " ₿₿0₿00₽₽0₽00₽₿₽₿\n"
-        message += " thequickbrownfoxjumpsoverthelazydog\n"
-        message += "\n₿\n"
-        message += "\n₽\n\n"
-        message += " ₽₽0₽00₿₿0₿00₿₽₿₽"
-        self.ctx.display.draw_centered_text(message)
+        self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
