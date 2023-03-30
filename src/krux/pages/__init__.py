@@ -62,6 +62,8 @@ LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
 
 SD_ROOT_PATH = "/sd"
 
+TOGGLE_BRIGHTNESS = 2
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -78,11 +80,14 @@ class Page:
         self.y_keypad_map = []
         self.x_keypad_map = []
 
-    def wait_for_proceed(self, block=True, any_btn=False):
+    def wait_for_proceed_qr(self, block=True, any_btn=False):
         """Wrap acknowledgements which can be answared with multiple buttons"""
         if any_btn:
             return self.ctx.input.wait_for_button(block) is not None
-        return self.ctx.input.wait_for_button(block) in (BUTTON_ENTER, BUTTON_TOUCH)
+        btn = self.ctx.input.wait_for_button(block)
+        if btn == BUTTON_PAGE:
+            return TOGGLE_BRIGHTNESS
+        return btn in (BUTTON_ENTER, BUTTON_TOUCH)
 
     def esc_prompt(self):
         """Prompts user for leaving"""
@@ -299,6 +304,7 @@ class Page:
         i = 0
         code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
         self.ctx.display.clear()
+        bright = False
         while not done:
             code = None
             num_parts = 0
@@ -309,7 +315,10 @@ class Page:
                     data, self.ctx.display.qr_data_width(), qr_format
                 )
                 code, num_parts = next(code_generator)
-            self.ctx.display.draw_qr_code(0, code)
+            if bright:
+                self.ctx.display.draw_qr_code(0, code, light_color=lcd.WHITE)
+            else:
+                self.ctx.display.draw_qr_code(0, code)
             subtitle = t("Part\n%d / %d") % (i + 1, num_parts) if not title else title
             offset_y = self.ctx.display.qr_offset()
             if title:
@@ -324,7 +333,10 @@ class Page:
             self.ctx.display.draw_hcentered_text(subtitle, offset_y, color=lcd.WHITE)
             i = (i + 1) % num_parts
             # There are cases we can allow any btn to change the screen
-            if self.wait_for_proceed(block=num_parts == 1, any_btn=allow_any_btn):
+            btn = self.wait_for_proceed_qr(block=num_parts == 1, any_btn=allow_any_btn)
+            if btn == TOGGLE_BRIGHTNESS:
+                bright = not bright
+            elif btn == True:
                 done = True
             # interval done in input.py using timers
 
