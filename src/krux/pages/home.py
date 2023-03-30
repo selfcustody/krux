@@ -48,6 +48,8 @@ import qrcode
 from ..printers import create_printer
 from ..printers.cnc import FilePrinter
 import board
+import uos
+import time
 
 STANDARD_MODE = 0
 LINE_MODE = 1
@@ -749,11 +751,44 @@ class Home(Page):
                         psbt_filename = self.select_file()
 
                         if psbt_filename:
+                            stats = uos.stat(psbt_filename)
+                            size = stats[6] / 1024
+                            size_deximal_places = str(int(size * 100))[-2:]
+                            created = time.localtime(stats[9])
+                            modified = time.localtime(stats[8])
+
+                            psbt_filename = psbt_filename[4:]  # remove "/sd/" prefix
                             self.ctx.display.clear()
                             self.ctx.display.draw_hcentered_text(
-                                t("PSBT selected:\n\n%s") % psbt_filename
+                                psbt_filename
+                                + "\n\n"
+                                + t("Size: ")
+                                + "{:,}".format(int(size))
+                                + "."
+                                + size_deximal_places
+                                + " KB"
+                                + "\n\n"
+                                + t("Created: ")
+                                + "%s-%s-%s %s:%s"
+                                % (
+                                    created[0],
+                                    created[1],
+                                    created[2],
+                                    created[3],
+                                    created[4],
+                                )
+                                + "\n\n"
+                                + t("Modified: ")
+                                + "%s-%s-%s %s:%s"
+                                % (
+                                    modified[0],
+                                    modified[1],
+                                    modified[2],
+                                    modified[3],
+                                    modified[4],
+                                )
                             )
-                            psbt_filename = psbt_filename[4:]  # remove "/sd/" prefix
+
                             if self.prompt(
                                 t("Load?"), self.ctx.display.bottom_prompt_line
                             ):
