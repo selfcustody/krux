@@ -62,7 +62,7 @@ def register(addr, val):
     pass
 
 
-def display(img, oft=None):
+def display(img, oft=None, roi=None):
     def run():
         frame = img.get_frame()
         frame = cv2.resize(
