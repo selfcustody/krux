@@ -108,7 +108,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ## Run the simulator
 This can be useful for testing a change to the krux code without having to run a full build and flash, visual regression testing,
-generating screenshots, or even just trying out Krux before purchasing a device.
+generating screenshots, or even just trying out Krux before purchasing a device. However, the simulator may not behave exactly as
+the HW device and may not have all features implemented (e.g. scanning via camera the Seed Signer currently only works on the HW device)
 
 Before executing the simulator, make sure you have installed the poetry extras:
 ```bash
