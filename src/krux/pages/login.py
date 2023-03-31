@@ -429,7 +429,9 @@ class Login(Page):
                         break
 
                 word = ""
+                word_num = ""
                 while True:
+                    word_num = ""
                     word = self.capture_from_keypad(
                         t("Word %d") % (len(words) + 1),
                         [charset],
@@ -451,6 +453,7 @@ class Login(Page):
                     ):
                         break
                     if word != "":
+                        word_num = word
                         word = to_word(word)
                     if word != "":
                         break
@@ -467,7 +470,14 @@ class Login(Page):
                         word = Key.pick_final_word(self.ctx.input.entropy, words)
 
                 self.ctx.display.clear()
-                if self.prompt(word, self.ctx.display.height() // 2):
+                if word_num == word:
+                    word_num = ""
+                else:
+                    word_num += ": "
+                if self.prompt(
+                    str(len(words) + 1) + ".\n\n" + word_num + word + "\n\n",
+                    self.ctx.display.height() // 2,
+                ):
                     words.append(word)
 
             return self._load_key_from_words(words)
