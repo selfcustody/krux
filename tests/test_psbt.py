@@ -324,17 +324,17 @@ def test_outputs_singlekey(mocker, m5stickv, tdata):
         (
             tdata.P2WPKH_PSBT,
             [
-                "Inputs (1): ₿ 1.00,000,000\n\nSpend (1): ₿ 0.10,000,000\n\nSelf-transfer or Change (1): ₿ 0.89,997,180\n\nFee: ₿ 0.00,002,820",
-                "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10,000,000",
-                "1. Change: \n\ntb1q9u62588spffmq4dzjxsr5l297znf3z6j5p2688\n\n₿ 0.89,997,180",
+                "Inputs (1): ₿ 1.00,000,000\n\nSpend (1): ₿ 0.10,000,000\n\nSelf-transfer or Change (1): ₿ 0.89,997,180\n\nFee: ₿ 0.00,002,820",
+                "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10,000,000",
+                "1. Change: \n\ntb1q9u62588spffmq4dzjxsr5l297znf3z6j5p2688\n\n₿ 0.89,997,180",
             ],
         ),
         (
             tdata.P2SH_P2WPKH_PSBT,
             [
-                "Inputs (1): ₿ 1.00,000,000\n\nSpend (1): ₿ 0.10,000,000\n\nSelf-transfer or Change (1): ₿ 0.89,996,700\n\nFee: ₿ 0.00,003,300",
-                "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10,000,000",
-                "1. Change: \n\n2MvdUi5o3f2tnEFh9yGvta6FzptTZtkPJC8\n\n₿ 0.89,996,700",
+                "Inputs (1): ₿ 1.00,000,000\n\nSpend (1): ₿ 0.10,000,000\n\nSelf-transfer or Change (1): ₿ 0.89,996,700\n\nFee: ₿ 0.00,003,300",
+                "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10,000,000",
+                "1. Change: \n\n2MvdUi5o3f2tnEFh9yGvta6FzptTZtkPJC8\n\n₿ 0.89,996,700",
             ],
         ),
     ]
@@ -357,17 +357,17 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         (
             tdata.P2WSH_PSBT,
             [
-                "Inputs (2): ₿ 0.20,000,000\n\nSpend (1): ₿ 0.18,993,880\n\nSelf-transfer or Change (1): ₿ 0.01,000,000\n\nFee: ₿ 0.00,006,120",
-                "1. Spend: \n\ntb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n\n\n₿ 0.18,993,880",
-                "1. Self-transfer: \n\ntb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t\n\n₿ 0.01,000,000",
+                "Inputs (2): ₿ 0.20,000,000\n\nSpend (1): ₿ 0.18,993,880\n\nSelf-transfer or Change (1): ₿ 0.01,000,000\n\nFee: ₿ 0.00,006,120",
+                "1. Spend: \n\ntb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n\n\n₿ 0.18,993,880",
+                "1. Self-transfer: \n\ntb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t\n\n₿ 0.01,000,000",
             ],
         ),
         (
             tdata.P2SH_P2WSH_PSBT,
             [
-                "Inputs (1): ₿ 1.00,000,000\n\nSpend (1): ₿ 0.10,000,000\n\nSelf-transfer or Change (1): ₿ 0.89,995,740\n\nFee: ₿ 0.00,004,260",
-                "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10,000,000",
-                "1. Self-transfer: \n\n2N3vYfcg14Axr4NN33ADUorE2kEGEchFJpC\n\n₿ 0.89,995,740",
+                "Inputs (1): ₿ 1.00,000,000\n\nSpend (1): ₿ 0.10,000,000\n\nSelf-transfer or Change (1): ₿ 0.89,995,740\n\nFee: ₿ 0.00,004,260",
+                "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10,000,000",
+                "1. Self-transfer: \n\n2N3vYfcg14Axr4NN33ADUorE2kEGEchFJpC\n\n₿ 0.89,995,740",
             ],
         ),
     ]
@@ -402,8 +402,8 @@ def test_sign_single_1_input_1_output_no_change(m5stickv):
     MNEMONIC = "action action action action action action action action action action action action"
     PSBT_B64 = "cHNidP8BAFMCAAAAAcfPlS2RvKvXxP/UxRmlAzMZcpLPKTOsBNbFM1JpT5Q7BwAAAAD9////AXAXAAAAAAAAF6kUK7ey9d8Pcw7ufsChrS3L5Ays13SHEgQlAE8BBDWHzwNOAaDGgAAAAA6sE2xHBRocbxB2m7sG3JvBy6PH2P+6FU8Xz26TLNf+Ax8/bmYn6gHZ6KY5opTh2Ajf+3sKBpZ40s59aYtcEnY+EODFlcVUAACAAQAAgAAAAIAAAQD9fQECAAAAAwZh04JGb3rJ3RJGINf/5lNG3RFk9DQyfqaKJK336OcaAQAAAAD9////pZE7Tecrp3E9O5JGSLma4D5TCG5N3uD4deLODBvkt4EAAAAAAP3///+lkTtN5yuncT07kkZIuZrgPlMIbk3e4Ph14s4MG+S3gQEAAAAA/f///wgsAQAAAAAAABYAFARbVWJaVJuYh2b3/HFtU3tQ9eoCLAEAAAAAAAAWABT4gSb5k7/g3ZrEXLyHFlP/C11NFCwBAAAAAAAAFgAU04NlSannloiWwZHvG1uf9aL0NPosAQAAAAAAABYAFNDJ5cj/6H72UNT95nAOLylXp/S5LAEAAAAAAAAWABTj8DqdkD3qZujRRRl4HlpWaADUBywBAAAAAAAAFgAUmPKKcthXsgBlI5AZbJtdEUrFe6gsAQAAAAAAABYAFF1lFcZm2E/gjALNKEfBtzGMsrsqmRgAAAAAAAAWABRk/PxLrogzR/Meytzu0v72RMgGh878JAABAR+ZGAAAAAAAABYAFGT8/EuuiDNH8x7K3O7S/vZEyAaHAQMEAQAAACIGAloQH2tjbm2ayZtJb2Gb0juSNIH9MIoEfX2UW0zE3l/SGODFlcVUAACAAQAAgAAAAIAAAAAAYwAAAAAA"
     OUTPUT = [
-        "Inputs (1): ₿ 0.00,006,297\n\nSpend (1): ₿ 0.00,006,000\n\nFee: ₿ 0.00,000,297",
-        "1. Spend: \n\n2MwEP7AfPt8NC65ACmcUhUtDZgGSxYiWUy4\n\n₿ 0.00,006,000",
+        "Inputs (1): ₿ 0.00,006,297\n\nSpend (1): ₿ 0.00,006,000\n\nFee: ₿ 0.00,000,297",
+        "1. Spend: \n\n2MwEP7AfPt8NC65ACmcUhUtDZgGSxYiWUy4\n\n₿ 0.00,006,000",
     ]
 
     wallet = Wallet(Key(MNEMONIC, False, NETWORKS["test"]))

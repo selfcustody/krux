@@ -336,7 +336,7 @@ class Page:
             btn = self.wait_for_proceed_qr(block=num_parts == 1, any_btn=allow_any_btn)
             if btn == TOGGLE_BRIGHTNESS:
                 bright = not bright
-            elif btn == True:
+            elif btn is True:
                 done = True
             # interval done in input.py using timers
 

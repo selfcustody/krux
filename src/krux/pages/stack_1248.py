@@ -354,20 +354,15 @@ class Stackbit(Page):
 
     def digits_to_word(self, digits):
         """Returns seed word respective to digits BIP39 dictionaty position"""
-        word_number = ""
-        for digit in digits:
-            word_number += str(digit)
-        word_number = int(word_number)
+        word_number = int("".join(str(num) for num in digits))
         if 0 < word_number <= 2048:
             return WORDLIST[word_number - 1]
         return None
 
     def preview_word(self, digits):
         """Draws word respective to current state"""
-        preview_string = ""
+        preview_string = "".join(str(num) for num in digits)
         color = lcd.RED
-        for digit in digits:
-            preview_string += str(digit)
         word = self.digits_to_word(digits)
         if word is not None:
             preview_string += ": " + word
@@ -444,10 +439,17 @@ class Stackbit(Page):
                 if index >= STACKBIT_GO_INDEX:  # go
                     word = self.digits_to_word(digits)
                     if word is not None:
+                        prompt_str = (
+                            str(word_index)
+                            + ".\n\n"
+                            + "".join(str(num) for num in digits)
+                            + ": "
+                            + str(word)
+                            + "\n\n"
+                        )
                         digits = [0, 0, 0, 0]
                         index = 0
                         self.ctx.display.clear()
-                        prompt_str = str(word_index) + ": " + str(word)
                         if self.prompt(prompt_str, self.ctx.display.height() // 2):
                             words.append(word)
                         else:
