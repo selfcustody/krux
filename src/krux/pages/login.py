@@ -1051,6 +1051,8 @@ class Login(Page):
                         new_category = categories[(i - 1) % len(categories)]
                     setting.__set__(settings_namespace, new_category)
                     break
+
+        # When changing locale, exit Login to force recreate with new locale
         if (
             setting.attr == "locale"
             and setting.__get__(settings_namespace) != starting_category

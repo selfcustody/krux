@@ -139,13 +139,14 @@ if preimport_ticks + MIN_LOGO_TIME > postimport_ticks:
     time.sleep_ms(preimport_ticks + MIN_LOGO_TIME - postimport_ticks)
 del preimport_ticks, postimport_ticks, MIN_LOGO_TIME
 
-ctx.display.clear()
-
+login_start_from = None
 while True:
-    if not Login(ctx).run():
+    if not Login(ctx).run(login_start_from):
         break
 
     if ctx.wallet is None:
+        # Login closed due to change of locale at Settings
+        login_start_from = 2  # will start Login again from Settings
         continue
 
     if not Home(ctx).run():
