@@ -505,9 +505,9 @@ class Page:
             return MENU_SHUTDOWN
         return MENU_CONTINUE
 
-    def run(self):
+    def run(self, start_from_index=None):
         """Runs the page's menu loop"""
-        _, status = self.menu.run_loop()
+        _, status = self.menu.run_loop(start_from_index)
         return status != MENU_SHUTDOWN
 
     def select_file(self, select_file_handler=lambda *args: MENU_EXIT):
@@ -627,11 +627,15 @@ class Menu:
         )
         self.menu_view = ListView(self.menu, max_viewable)
 
-    def run_loop(self):
+    def run_loop(self, start_from_index=None):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
         or MENU_SHUTDOWN status
         """
+        start_from_submenu = False
         selected_item_index = 0
+        if start_from_index is not None:
+            start_from_submenu = True
+            selected_item_index = start_from_index
         while True:
             gc.collect()
             self.ctx.display.clear()
@@ -642,48 +646,62 @@ class Menu:
 
             self.draw_status_bar()
 
-            btn = self.ctx.input.wait_for_button()
-            if self.ctx.input.touch is not None:
-                if btn == BUTTON_TOUCH:
-                    selected_item_index = self.ctx.input.touch.current_index()
-                    btn = BUTTON_ENTER
-                self.ctx.input.touch.clear_regions()
-            if btn == BUTTON_ENTER:
-                try:
-                    self.ctx.display.clear()
-                    try:
-                        status = self.menu_view[selected_item_index][1](
-                            *self.menu_view[selected_item_index][2]
-                        )
-                    except:
-                        status = self.menu_view[selected_item_index][1]()
+            if start_from_submenu:
+                status = self._clicked_item(selected_item_index)
+                if status != MENU_CONTINUE:
+                    return (self.menu_view.index(selected_item_index), status)
+                start_from_submenu = False
+            else:
+                btn = self.ctx.input.wait_for_button()
+                if self.ctx.input.touch is not None:
+                    if btn == BUTTON_TOUCH:
+                        selected_item_index = self.ctx.input.touch.current_index()
+                        btn = BUTTON_ENTER
+                    self.ctx.input.touch.clear_regions()
+                if btn == BUTTON_ENTER:
+                    status = self._clicked_item(selected_item_index)
                     if status != MENU_CONTINUE:
                         return (self.menu_view.index(selected_item_index), status)
-                except Exception as e:
-                    self.ctx.log.exception(
-                        'Exception occurred in menu item "%s"'
-                        % self.menu_view[selected_item_index][0]
+                elif btn == BUTTON_PAGE:
+                    selected_item_index = (selected_item_index + 1) % len(
+                        self.menu_view
                     )
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(
-                        t("Error:\n%s") % repr(e), lcd.RED
+                    if selected_item_index == 0:
+                        self.menu_view.move_forward()
+                elif btn == BUTTON_PAGE_PREV:
+                    selected_item_index = (selected_item_index - 1) % len(
+                        self.menu_view
                     )
-                    self.ctx.input.wait_for_button()
-            elif btn == BUTTON_PAGE:
-                selected_item_index = (selected_item_index + 1) % len(self.menu_view)
-                if selected_item_index == 0:
+                    if selected_item_index == len(self.menu_view) - 1:
+                        self.menu_view.move_backward()
+                        # Update selected item index to be the last viewable item,
+                        # which may be a different index than before we moved backward
+                        selected_item_index = len(self.menu_view) - 1
+                elif btn == SWIPE_UP:
                     self.menu_view.move_forward()
-            elif btn == BUTTON_PAGE_PREV:
-                selected_item_index = (selected_item_index - 1) % len(self.menu_view)
-                if selected_item_index == len(self.menu_view) - 1:
+                elif btn == SWIPE_DOWN:
                     self.menu_view.move_backward()
-                    # Update selected item index to be the last viewable item,
-                    # which may be a different index than before we moved backward
-                    selected_item_index = len(self.menu_view) - 1
-            elif btn == SWIPE_UP:
-                self.menu_view.move_forward()
-            elif btn == SWIPE_DOWN:
-                self.menu_view.move_backward()
+
+    def _clicked_item(self, selected_item_index):
+        try:
+            self.ctx.display.clear()
+            try:
+                status = self.menu_view[selected_item_index][1](
+                    *self.menu_view[selected_item_index][2]
+                )
+            except:
+                status = self.menu_view[selected_item_index][1]()
+            if status != MENU_CONTINUE:
+                return status
+        except Exception as e:
+            self.ctx.log.exception(
+                'Exception occurred in menu item "%s"'
+                % self.menu_view[selected_item_index][0]
+            )
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Error:\n%s") % repr(e), lcd.RED)
+            self.ctx.input.wait_for_button()
+        return MENU_CONTINUE
 
     def draw_status_bar(self):
         """Draws a status bar along the top of the UI"""
