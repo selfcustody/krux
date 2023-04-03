@@ -55,6 +55,7 @@ from . import (
     DEFAULT_PADDING,
     SD_ROOT_PATH,
 )
+from ..encryption import StoredSeeds
 import os
 import uos
 import time
@@ -117,6 +118,7 @@ class Login(Page):
             [
                 (t("Via Camera"), self.load_key_from_camera),
                 (t("Via Manual Input"), self.load_key_from_manual_input),
+                (t("From Storage"), self.load_key_from_storage),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -159,6 +161,36 @@ class Login(Page):
         if index == len(submenu.menu) - 1:
             return MENU_CONTINUE
         return status
+
+    def load_encrypted_seed(self, fingerprint):
+        key =  self.capture_from_keypad(
+            t("Encryption Key"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+        )
+        if key in ("", ESC_KEY):
+            raise ValueError("Decryption Failed")
+        stored_seeds = StoredSeeds()
+        try:
+            words = stored_seeds.decrypt(key, fingerprint).split()
+        except:
+            raise ValueError("Decryption Failed")
+        if len(words) not in (12,24):
+            raise ValueError("Decryption failed")
+        del stored_seeds
+        return self._load_key_from_words(words)
+
+    def load_key_from_storage(self):
+        fingerprints_menu = []
+        stored_seeds = StoredSeeds()
+        for fingerprint in stored_seeds.list_fingerprints():
+            fingerprints_menu.append((fingerprint, lambda f_print=fingerprint: self.load_encrypted_seed(f_print)))
+        del stored_seeds
+        fingerprints_menu.append((t("Back"), lambda: MENU_EXIT))
+        submenu = Menu(self.ctx, fingerprints_menu)
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return MENU_CONTINUE
+        return status
+
 
     def new_key(self):
         """Handler for the 'new mnemonic' menu item"""
