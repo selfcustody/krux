@@ -32,7 +32,17 @@ from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
 from ..krux_settings import t, Settings
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
+from . import (
+    Page,
+    Menu,
+    MENU_CONTINUE,
+    MENU_EXIT,
+    ESC_KEY,
+    LETTERS,
+    UPPERCASE_LETTERS,
+    NUM_SPECIAL_1,
+    NUM_SPECIAL_2,
+)
 from ..sd_card import SDHandler
 from ..input import (
     BUTTON_ENTER,
@@ -70,10 +80,6 @@ LIST_ADDRESS_DIGITS_SMALL = 4  # len on small devices per menu item
 
 SCAN_ADDRESS_LIMIT = 20
 
-LETTERS = "abcdefghijklmnopqrstuvwxyz"
-UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
-NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 FILE_SPECIAL = "0123456789()-.[]_~"
 
 PSBT_FILE_SUFFIX = "-signed"
@@ -432,7 +438,7 @@ class Home(Page):
                 del stored_seeds
                 return  # MENU_CONTINUE
             words = self.ctx.wallet.key.mnemonic
-            stored_seeds.sotore_encrypted(key, fingerprint, words)
+            stored_seeds.store_encrypted(key, fingerprint, words)
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Encrypted seed was stored with ID: %s" % fingerprint))
             self.ctx.input.wait_for_button()

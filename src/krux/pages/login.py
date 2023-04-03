@@ -54,6 +54,10 @@ from . import (
     ESC_KEY,
     DEFAULT_PADDING,
     SD_ROOT_PATH,
+    LETTERS,
+    UPPERCASE_LETTERS,
+    NUM_SPECIAL_1,
+    NUM_SPECIAL_2,
 )
 from ..encryption import StoredSeeds
 import os
@@ -67,11 +71,6 @@ D20_STATES = [str(i + 1) for i in range(20)]
 DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
-LETTERS = "abcdefghijklmnopqrstuvwxyz"
-UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
-NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
-NUMERALS = "0123456789."
 
 D6_12W_MIN_ROLLS = 50
 D6_24W_MIN_ROLLS = 99
@@ -1097,10 +1096,10 @@ class Login(Page):
 
         starting_value = setting.numtype(setting.__get__(settings_namespace))
 
-        numerals = NUMERALS
-        # remove the dot symbol when number is int
-        if setting.numtype == int:
-            numerals = NUMERALS[:-1]
+        numerals = DIGITS
+        # add the dot symbol when number type is float
+        if setting.numtype == float:
+            numerals += "."
 
         new_value = self.capture_from_keypad(
             settings_namespace.label(setting.attr),

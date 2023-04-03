@@ -27,8 +27,9 @@ except ImportError:
 import hashlib
 import ucryptolib
 from .baseconv import base_encode, base_decode
+from .sd_card import SDHandler
 
-STORE_FILE_PATH = "/flash/seeds.json"
+SEED_FILE = "seeds.json"
 
 class AESCipher(object):
 
@@ -47,19 +48,12 @@ class AESCipher(object):
         load = decryptor.decrypt(encrypted).decode('utf-8')
         return load.replace('\x00', '')
 
-    def _pad(self, s):
-        return s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs)
-
-    @staticmethod
-    def _unpad(s):
-        return s[:-ord(s[len(s)-1:])]
-    
 class StoredSeeds:
     def __init__(self) -> None:
         self.encrypted_store = {}
         try:
-            with open(STORE_FILE_PATH, "r") as f:
-                self.encrypted_store = json.loads(f.read())
+            with SDHandler() as sd:
+                self.encrypted_store = json.loads(sd.read(SEED_FILE))
         except:
             pass
 
@@ -78,28 +72,31 @@ class StoredSeeds:
             return None
         return words
     
-    def sotore_encrypted(self, key, fingerprint, seed):
+    def store_encrypted(self, key, fingerprint, seed):
         encryptor = AESCipher(key)
         encrypted = encryptor.encrypt(seed).decode('utf-8')
         seeds = {}
+
+        # load current SEED_FILE
         try:
-            # save the new SETTINGS_FILENAME
-            with open(STORE_FILE_PATH, "r") as f:
-                seeds = json.loads(f.read())
+            with SDHandler() as sd:
+                seeds = json.loads(sd.read(SEED_FILE))
         except:
             pass
+
+        # save the new SEED_FILE
         try:
-            with open(STORE_FILE_PATH, "w") as f:
+            with SDHandler() as sd:
                 seeds[fingerprint] = encrypted
-                f.write(json.dumps(seeds))
+                sd.write(SEED_FILE, json.dumps(seeds))
         except:
             pass
     
     def del_seed(self, fingerprint):
         self.encrypted_store.pop(fingerprint)
         try:
-            with open(STORE_FILE_PATH, "w") as f:
-                f.write(json.dumps(self.encrypted_store))
+            with SDHandler() as sd:
+                sd.write(SEED_FILE, json.dumps(self.encrypted_store))
         except:
             pass
 

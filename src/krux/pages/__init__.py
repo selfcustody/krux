@@ -64,6 +64,10 @@ SD_ROOT_PATH = "/sd"
 
 TOGGLE_BRIGHTNESS = 2
 
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
+NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
