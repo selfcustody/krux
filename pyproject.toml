@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "23.04 BETA_1"
+version = "23.04.beta1"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
@@ -44,6 +44,7 @@ opencv-python = { version = "^4.5.5", optional = true }
 Pillow = { version = "^9.0.1", optional = true }
 pygame = { version = "^2.1.2", optional = true }
 pyzbar = { version = "^0.1.9", optional = true }
+pycryptodome = { version = "^3.17.0", optional = true}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
@@ -55,4 +56,4 @@ PyQRCode = "^1.2.1"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
-simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
+simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar", "pycryptodome"]

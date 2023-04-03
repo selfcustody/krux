@@ -54,7 +54,7 @@ Otherwise, to run the commands on bare metal, remove the `vagrant ssh -c 'cd /va
 ```
 
 ## Install krux and dev tools
-The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/).
+The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/). To generate a new `poetry.lock` file use: `poetry lock --no-update`.
 ```bash
 pip install poetry
 poetry install

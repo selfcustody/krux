@@ -122,3 +122,10 @@ if "Maix" not in sys.modules:
     sys.modules["Maix"] = mock.MagicMock(
         GPIO=GPIO,
     )
+
+from Crypto.Cipher import AES
+
+if "ucryptolib" not in sys.modules:
+    sys.modules["ucryptolib"] = mock.MagicMock(
+        aes = AES.new,
+    )
