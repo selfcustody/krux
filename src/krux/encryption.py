@@ -74,7 +74,6 @@ class StoredSeeds:
         try:
             load = self.encrypted_store.get(fingerprint)
             words = decryptor.decrypt(load)
-            print(words)
         except:
             return None
         return words
@@ -87,13 +86,11 @@ class StoredSeeds:
             # save the new SETTINGS_FILENAME
             with open(STORE_FILE_PATH, "r") as f:
                 seeds = json.loads(f.read())
-                print("seeds1",seeds)
         except:
             pass
         try:
             with open(STORE_FILE_PATH, "w") as f:
                 seeds[fingerprint] = encrypted
-                print("seeds2",seeds)
                 f.write(json.dumps(seeds))
         except:
             pass
