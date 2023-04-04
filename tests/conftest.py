@@ -6,6 +6,7 @@ from .shared_mocks import (
     encode_to_string,
     statvfs,
 )
+from Crypto.Cipher import AES
 
 
 def reset_krux_modules():
@@ -41,11 +42,18 @@ def mp_modules(mocker, monkeypatch):
     monkeypatch.setattr(time, "sleep_ms", mocker.MagicMock(), raising=False)
     monkeypatch.setattr(time, "ticks_ms", mocker.MagicMock(), raising=False)
     monkeypatch.setattr(sys, "print_exception", mocker.MagicMock(), raising=False)
-
     monkeypatch.setitem(
         sys.modules,
         "uos",
         mocker.MagicMock(statvfs=statvfs),
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "ucryptolib",
+        mocker.MagicMock(
+            aes=AES.new,
+            MODE_ECB=AES.MODE_ECB,
+        ),
     )
 
 

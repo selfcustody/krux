@@ -31,24 +31,33 @@ from .sd_card import SDHandler
 
 SEED_FILE = "seeds.json"
 
-class AESCipher(object):
+
+class AESCipher:
+    """Helper for AES encrypt/decrypt"""
 
     def __init__(self, key):
         self.key = hashlib.sha256(key.encode()).digest()
 
     def encrypt(self, raw):
+        """Encrypt using AES MODE_ECB and return the value encoded as base64"""
         data_bytes = raw.encode()
-        encryptor = ucryptolib.aes(self.key, 1)
-        encrypted = encryptor.encrypt(data_bytes + b'\x00' * ((16 - (len(data_bytes) % 16)) % 16))
-        return base_encode(encrypted,64)
+        encryptor = ucryptolib.aes(self.key, ucryptolib.MODE_ECB)
+        encrypted = encryptor.encrypt(
+            data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
+        )
+        return base_encode(encrypted, 64)
 
     def decrypt(self, enc):
-        encrypted = base_decode(enc, 64) # test - decode 64
-        decryptor = ucryptolib.aes(self.key, 1)
-        load = decryptor.decrypt(encrypted).decode('utf-8')
-        return load.replace('\x00', '')
+        """Decrypt a base64 using AES MODE_ECB and return the value decoded as string"""
+        encrypted = base_decode(enc, 64)  # test - decode 64
+        decryptor = ucryptolib.aes(self.key, ucryptolib.MODE_ECB)
+        load = decryptor.decrypt(encrypted).decode("utf-8")
+        return load.replace("\x00", "")
+
 
 class StoredSeeds:
+    """Handler of stored encrypted seeds"""
+
     def __init__(self) -> None:
         self.encrypted_store = {}
         try:
@@ -58,12 +67,14 @@ class StoredSeeds:
             pass
 
     def list_fingerprints(self):
+        """List all seeds stored on a file"""
         fingerprints = []
         for fingerprint in self.encrypted_store:
             fingerprints.append(fingerprint)
         return fingerprints
-    
+
     def decrypt(self, key, fingerprint):
+        """Decrypt a selected seed from a file"""
         decryptor = AESCipher(key)
         try:
             load = self.encrypted_store.get(fingerprint)
@@ -71,10 +82,11 @@ class StoredSeeds:
         except:
             return None
         return words
-    
+
     def store_encrypted(self, key, fingerprint, seed):
+        """Saves the seed encrypted on a file"""
         encryptor = AESCipher(key)
-        encrypted = encryptor.encrypt(seed).decode('utf-8')
+        encrypted = encryptor.encrypt(seed).decode("utf-8")
         seeds = {}
 
         # load current SEED_FILE
@@ -91,13 +103,12 @@ class StoredSeeds:
                 sd.write(SEED_FILE, json.dumps(seeds))
         except:
             pass
-    
+
     def del_seed(self, fingerprint):
+        """Remove an entry from encrypted seeds file"""
         self.encrypted_store.pop(fingerprint)
         try:
             with SDHandler() as sd:
                 sd.write(SEED_FILE, json.dumps(self.encrypted_store))
         except:
             pass
-
-

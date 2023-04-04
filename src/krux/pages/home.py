@@ -419,19 +419,21 @@ class Home(Page):
             ):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
-    
+
     def store_encrypted_seed(self):
+        """Handler for Mnemonic > Store Encrypted Seed menu item"""
         fingerprint = self.ctx.wallet.key.fingerprint_hex_str()
         stored_seeds = StoredSeeds()
         if fingerprint in stored_seeds.list_fingerprints():
             if self.prompt(
-                    t("Seed already stored, would you like to delete it?"),
-                    self.ctx.display.height() // 2
-                ):
+                t("Seed already stored, would you like to delete it?"),
+                self.ctx.display.height() // 2,
+            ):
                 stored_seeds.del_seed(fingerprint)
         else:
-            key =  self.capture_from_keypad(
-                t("Encryption Key"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            key = self.capture_from_keypad(
+                t("Encryption Key"),
+                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
             )
             if key in ("", ESC_KEY):
                 self.ctx.display.flash_text(t("Encrypted seed was not stored"))
@@ -440,7 +442,9 @@ class Home(Page):
             words = self.ctx.wallet.key.mnemonic
             stored_seeds.store_encrypted(key, fingerprint, words)
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Encrypted seed was stored with ID: %s" % fingerprint))
+            self.ctx.display.draw_centered_text(
+                t("Encrypted seed was stored with ID: %s" % fingerprint)
+            )
             self.ctx.input.wait_for_button()
         del stored_seeds
 
