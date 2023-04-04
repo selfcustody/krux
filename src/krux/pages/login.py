@@ -819,7 +819,7 @@ class Login(Page):
             self.ctx,
             [
                 (t("Check SD Card"), self.sd_check),
-                (t("Print Test Page"), self.print_test),
+                (t("Print Test QR"), self.print_test),
                 (t("Create QR Code"), self.create_qr),
                 (t("Back"), lambda: MENU_EXIT),
             ],
@@ -850,7 +850,7 @@ class Login(Page):
         return MENU_CONTINUE
 
     def print_test(self):
-        """Handler for the 'Print Test Page' menu item"""
+        """Handler for the 'Print Test QR' menu item"""
         try:
             self.ctx.printer = create_printer()
             if not self.ctx.printer:
@@ -860,7 +860,7 @@ class Login(Page):
             self.ctx.log.exception("Exception occurred connecting to printer")
             raise
 
-        title = t("Krux Printer Test Page")
+        title = t("Krux Printer Test QR")
         self.display_qr_codes(title, FORMAT_NONE, title, allow_any_btn=True)
         self.print_qr_prompt(title, FORMAT_NONE, title)
 
@@ -912,9 +912,10 @@ class Login(Page):
         size_deximal_places = str(int(size * 100))[-2:]
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
+        file = file[4:] # remove "/sd/" prefix
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            file[4:]  # remove "/sd/" prefix
+            file
             + "\n\n"
             + t("Size: ")
             + "{:,}".format(int(size))
@@ -930,7 +931,10 @@ class Login(Page):
             + "%s-%s-%s %s:%s"
             % (modified[0], modified[1], modified[2], modified[3], modified[4])
         )
-        self.ctx.input.wait_for_button()
+        if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
+            with SDHandler() as sd:
+                sd.delete(file)
+            return MENU_EXIT
         return MENU_CONTINUE
 
     def settings(self):
