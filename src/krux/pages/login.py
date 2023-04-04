@@ -931,10 +931,11 @@ class Login(Page):
             + "%s-%s-%s %s:%s"
             % (modified[0], modified[1], modified[2], modified[3], modified[4])
         )
-        if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
-            with SDHandler() as sd:
-                sd.delete(file)
-            return MENU_EXIT
+        self.ctx.input.wait_for_button()
+        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
+        #     with SDHandler() as sd:
+        #         sd.delete(file)
+        #     return MENU_EXIT
         return MENU_CONTINUE
 
     def settings(self):
