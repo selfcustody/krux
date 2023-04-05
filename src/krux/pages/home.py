@@ -57,7 +57,7 @@ from ..input import (
 import qrcode
 from ..printers import create_printer
 from ..printers.cnc import FilePrinter
-from ..encryption import StoredSeeds
+from ..encryption import MnemonicStorage
 import board
 import uos
 import time
@@ -98,6 +98,7 @@ class Home(Page):
                 ctx,
                 [
                     (t("Mnemonic"), self.mnemonic),
+                    (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
                     (t("Extended Public Key"), self.public_key),
                     (t("Wallet Descriptor"), self.wallet),
                     (t("Address"), self.list_address),
@@ -125,7 +126,6 @@ class Home(Page):
                 (t("SeedQR"), self.display_seed_qr),
                 (t("Stackbit 1248"), self.stackbit),
                 (t("Tiny Seed"), self.tiny_seed),
-                (t("Store Encrypted Seed"), self.store_encrypted_seed),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -420,33 +420,56 @@ class Home(Page):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
 
-    def store_encrypted_seed(self):
-        """Handler for Mnemonic > Store Encrypted Seed menu item"""
-        fingerprint = self.ctx.wallet.key.fingerprint_hex_str()
-        stored_seeds = StoredSeeds()
-        if fingerprint in stored_seeds.list_seeds():
-            if self.prompt(
-                t("Seed already stored, would you like to delete it?"),
+    def store_mnemonic_on_memory(self, sd_card=False):
+        key = self.capture_from_keypad(
+            t("Encryption Key"),
+            [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
+        )
+        if key in ("", ESC_KEY):
+            self.ctx.display.flash_text(t("Encrypted mnemonic was not stored"))
+            return
+        self.ctx.display.clear()
+        if self.prompt(
+                t("Give this mnemonic a custom ID? Otherwise current fingerprint will be used"),
                 self.ctx.display.height() // 2,
             ):
-                stored_seeds.del_seed(fingerprint)
+            mnemonic_id = self.capture_from_keypad(
+                t("Mnemonic Storage ID"),
+                [LETTERS, UPPERCASE_LETTERS, FILE_SPECIAL],
+            )
         else:
-            key = self.capture_from_keypad(
-                t("Encryption Key"),
-                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
-            )
-            if key in ("", ESC_KEY):
-                self.ctx.display.flash_text(t("Encrypted seed was not stored"))
-                del stored_seeds
-                return  # MENU_CONTINUE
-            words = self.ctx.wallet.key.mnemonic
-            stored_seeds.store_encrypted(key, fingerprint, words)
-            self.ctx.display.clear()
+            mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
+        words = self.ctx.wallet.key.mnemonic
+        mnemonic_storage = MnemonicStorage()
+        self.ctx.display.clear()
+        if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card):
             self.ctx.display.draw_centered_text(
-                t("Encrypted seed was stored with ID: %s" % fingerprint)
+                t("Encrypted mnemonic was stored with ID: %s" % mnemonic_id)
             )
-            self.ctx.input.wait_for_button()
-        del stored_seeds
+        else:
+            self.ctx.display.draw_centered_text(
+                t("Failed to store mnemonic")
+            )
+        self.ctx.input.wait_for_button()
+        del mnemonic_storage
+
+    def encrypt_mnemonic(self):
+        """Handler for Mnemonic > Encrypt Mnemonic menu item"""
+        encrypt_outputs_menu = []
+        encrypt_outputs_menu.append(
+            (t("Store on Flash"), self.store_mnemonic_on_memory)
+        )
+        mnemonic_storage = MnemonicStorage()
+        if mnemonic_storage.has_sd_card:
+            encrypt_outputs_menu.append(
+            (t("Store on SD Card"), lambda: self.store_mnemonic_on_memory(sd_card=True))
+        )
+        del mnemonic_storage
+        encrypt_outputs_menu.append((t("Back"), lambda: MENU_EXIT))
+        submenu = Menu(self.ctx, encrypt_outputs_menu)
+        _, _ = submenu.run_loop()
+        return MENU_CONTINUE
+        
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""

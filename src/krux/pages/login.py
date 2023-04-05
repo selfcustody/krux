@@ -59,7 +59,7 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from ..encryption import StoredSeeds
+from ..encryption import MnemonicStorage
 import os
 import uos
 import time
@@ -117,7 +117,7 @@ class Login(Page):
             [
                 (t("Via Camera"), self.load_key_from_camera),
                 (t("Via Manual Input"), self.load_key_from_manual_input),
-                (t("From Storage"), self.load_key_from_storage),
+                (t("From Storage"), self.load_mnemonic_from_storage),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -161,47 +161,53 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def load_encrypted_seed(self, seed_id, sd_card=False):
+    def load_encrypted_seed(self, mnemonic_id, sd_card=False, delete=False):
         """Load a selected seed from the encrypted file"""
         key = self.capture_from_keypad(
             t("Encryption Key"),
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
         )
         if key in ("", ESC_KEY):
-            raise ValueError("Decryption Failed")
-        stored_seeds = StoredSeeds()
+            raise ValueError(t("Failed to decrypt"))
+        mnemonic_storage = MnemonicStorage()
         try:
-            words = stored_seeds.decrypt(key, seed_id, sd_card).split()
+            words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()
         except:
-            raise ValueError("Decryption Failed")
+            raise ValueError(t("Failed to decrypt"))
 
         if len(words) not in (12, 24):
-            raise ValueError("Decryption failed")
-        del stored_seeds
+            raise ValueError(t("Failed to decrypt"))
+        if delete:
+            self.ctx.display.clear()
+            if self.prompt( t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2):
+                mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
+        del mnemonic_storage
+        if delete:
+            return None
         return self._load_key_from_words(words)
 
-    def load_key_from_storage(self):
+    def load_mnemonic_from_storage(self, delete=False):
         """Lists all encrypted seeds stored on a file"""
-        seed_ids_menu = []
-        stored_seeds = StoredSeeds()
-        for seed_id in stored_seeds.list_seeds():
-            seed_ids_menu.append(
+        mnemonic_ids_menu = []
+        mnemonic_storage = MnemonicStorage()
+        for mnemonic_id in mnemonic_storage.list_mnemonics():
+            mnemonic_ids_menu.append(
                 (
-                    seed_id + "(flash)",
-                    lambda s_id=seed_id: self.load_encrypted_seed(s_id),
+                    mnemonic_id + "(flash)",
+                    lambda s_id=mnemonic_id: self.load_encrypted_seed(s_id, delete=delete),
                 )
             )
-        if stored_seeds.has_sd_card:
-            for seed_id in stored_seeds.list_seeds(sd_card=True):
-                seed_ids_menu.append(
+        if mnemonic_storage.has_sd_card:
+            for mnemonic_id in mnemonic_storage.list_mnemonics(sd_card=True):
+                mnemonic_ids_menu.append(
                     (
-                        seed_id + "(SD card)",
-                        lambda s_id=seed_id: self.load_encrypted_seed(s_id, sd_card=True),
+                        mnemonic_id + "(SD card)",
+                        lambda s_id=mnemonic_id: self.load_encrypted_seed(s_id, sd_card=True, delete=delete),
                     )
             )
-        del stored_seeds
-        seed_ids_menu.append((t("Back"), lambda: MENU_EXIT))
-        submenu = Menu(self.ctx, seed_ids_menu)
+        del mnemonic_storage
+        mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
+        submenu = Menu(self.ctx, mnemonic_ids_menu)
         index, status = submenu.run_loop()
         if index == len(submenu.menu) - 1:
             return MENU_CONTINUE
@@ -828,6 +834,7 @@ class Login(Page):
             self.ctx,
             [
                 (t("Check SD Card"), self.sd_check),
+                (t("Delete Mnemonic"), lambda: self.load_mnemonic_from_storage(delete=True)),
                 (t("Print Test QR"), self.print_test),
                 (t("Create QR Code"), self.create_qr),
                 (t("Back"), lambda: MENU_EXIT),
@@ -857,6 +864,7 @@ class Login(Page):
 
             self.print_qr_prompt(text, FORMAT_NONE, text)
         return MENU_CONTINUE
+    
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
