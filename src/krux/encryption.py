@@ -41,7 +41,7 @@ class AESCipher:
     def encrypt(self, raw):
         """Encrypt using AES MODE_ECB and return the value encoded as base64"""
         data_bytes = raw.encode()
-        encryptor = ucryptolib.aes(self.key, ucryptolib.MODE_ECB)
+        encryptor = ucryptolib.aes(self.key, 1)
         encrypted = encryptor.encrypt(
             data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
         )
@@ -50,7 +50,7 @@ class AESCipher:
     def decrypt(self, enc):
         """Decrypt a base64 using AES MODE_ECB and return the value decoded as string"""
         encrypted = base_decode(enc, 64)  # test - decode 64
-        decryptor = ucryptolib.aes(self.key, ucryptolib.MODE_ECB)
+        decryptor = ucryptolib.aes(self.key, 1)
         load = decryptor.decrypt(encrypted).decode("utf-8")
         return load.replace("\x00", "")
 
@@ -59,31 +59,45 @@ class StoredSeeds:
     """Handler of stored encrypted seeds"""
 
     def __init__(self) -> None:
-        self.encrypted_store = {}
+        self.stored = {}
+        self.stored_sd = {}
+        self.has_sd_card = False
         try:
             with SDHandler() as sd:
-                self.encrypted_store = json.loads(sd.read(SEED_FILE))
+                self.stored_sd = json.loads(sd.read(SEED_FILE))
+                self.has_sd_card = True
+        except:
+            pass
+        try:
+            with open("/flash/" + SEED_FILE, "r") as f:
+                self.stored = json.loads(f.read())
         except:
             pass
 
-    def list_fingerprints(self):
-        """List all seeds stored on a file"""
-        fingerprints = []
-        for fingerprint in self.encrypted_store:
-            fingerprints.append(fingerprint)
-        return fingerprints
 
-    def decrypt(self, key, fingerprint):
-        """Decrypt a selected seed from a file"""
+    def list_seeds(self, sd_card=False):
+        """List all seeds stored on a file"""
+        seed_ids = []
+        source = self.stored_sd if sd_card else self.stored
+        for seed_id in source:
+            seed_ids.append(seed_id)
+        return seed_ids
+
+    def decrypt(self, key, seed_id, sd_card=False):
+        """Decrypt a selected encrypted seed from a file"""
         decryptor = AESCipher(key)
         try:
-            load = self.encrypted_store.get(fingerprint)
+            if sd_card:
+                load = self.stored_sd.get(seed_id)
+            else:
+                load = self.stored.get(seed_id)
             words = decryptor.decrypt(load)
+            print(words)
         except:
             return None
         return words
 
-    def store_encrypted(self, key, fingerprint, seed):
+    def store_encrypted(self, key, seed_id, seed):
         """Saves the seed encrypted on a file"""
         encryptor = AESCipher(key)
         encrypted = encryptor.encrypt(seed).decode("utf-8")
@@ -99,16 +113,16 @@ class StoredSeeds:
         # save the new SEED_FILE
         try:
             with SDHandler() as sd:
-                seeds[fingerprint] = encrypted
+                seeds[seed_id] = encrypted
                 sd.write(SEED_FILE, json.dumps(seeds))
         except:
             pass
 
-    def del_seed(self, fingerprint):
+    def del_seed(self, seed_id):
         """Remove an entry from encrypted seeds file"""
-        self.encrypted_store.pop(fingerprint)
+        self.stored.pop(seed_id)
         try:
             with SDHandler() as sd:
-                sd.write(SEED_FILE, json.dumps(self.encrypted_store))
+                sd.write(SEED_FILE, json.dumps(self.stored))
         except:
             pass

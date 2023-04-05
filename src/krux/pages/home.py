@@ -424,7 +424,7 @@ class Home(Page):
         """Handler for Mnemonic > Store Encrypted Seed menu item"""
         fingerprint = self.ctx.wallet.key.fingerprint_hex_str()
         stored_seeds = StoredSeeds()
-        if fingerprint in stored_seeds.list_fingerprints():
+        if fingerprint in stored_seeds.list_seeds():
             if self.prompt(
                 t("Seed already stored, would you like to delete it?"),
                 self.ctx.display.height() // 2,

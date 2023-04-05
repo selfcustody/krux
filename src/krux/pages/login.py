@@ -161,7 +161,7 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def load_encrypted_seed(self, fingerprint):
+    def load_encrypted_seed(self, seed_id, sd_card=False):
         """Load a selected seed from the encrypted file"""
         key = self.capture_from_keypad(
             t("Encryption Key"),
@@ -171,9 +171,10 @@ class Login(Page):
             raise ValueError("Decryption Failed")
         stored_seeds = StoredSeeds()
         try:
-            words = stored_seeds.decrypt(key, fingerprint).split()
+            words = stored_seeds.decrypt(key, seed_id, sd_card).split()
         except:
             raise ValueError("Decryption Failed")
+
         if len(words) not in (12, 24):
             raise ValueError("Decryption failed")
         del stored_seeds
@@ -181,18 +182,26 @@ class Login(Page):
 
     def load_key_from_storage(self):
         """Lists all encrypted seeds stored on a file"""
-        fingerprints_menu = []
+        seed_ids_menu = []
         stored_seeds = StoredSeeds()
-        for fingerprint in stored_seeds.list_fingerprints():
-            fingerprints_menu.append(
+        for seed_id in stored_seeds.list_seeds():
+            seed_ids_menu.append(
                 (
-                    fingerprint,
-                    lambda f_print=fingerprint: self.load_encrypted_seed(f_print),
+                    seed_id + "(flash)",
+                    lambda s_id=seed_id: self.load_encrypted_seed(s_id),
                 )
             )
+        if stored_seeds.has_sd_card:
+            for seed_id in stored_seeds.list_seeds(sd_card=True):
+                seed_ids_menu.append(
+                    (
+                        seed_id + "(SD card)",
+                        lambda s_id=seed_id: self.load_encrypted_seed(s_id, sd_card=True),
+                    )
+            )
         del stored_seeds
-        fingerprints_menu.append((t("Back"), lambda: MENU_EXIT))
-        submenu = Menu(self.ctx, fingerprints_menu)
+        seed_ids_menu.append((t("Back"), lambda: MENU_EXIT))
+        submenu = Menu(self.ctx, seed_ids_menu)
         index, status = submenu.run_loop()
         if index == len(submenu.menu) - 1:
             return MENU_CONTINUE
