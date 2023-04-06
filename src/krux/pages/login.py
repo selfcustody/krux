@@ -167,6 +167,8 @@ class Login(Page):
             t("Encryption Key"),
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
         )
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text( t("Processing ..."))
         if key in ("", ESC_KEY):
             raise ValueError(t("Failed to decrypt"))
         mnemonic_storage = MnemonicStorage()

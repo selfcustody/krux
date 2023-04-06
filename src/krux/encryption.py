@@ -30,13 +30,18 @@ from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
 
 MNEMONICS_FILE = "seeds.json"
-MODE_ECB = 1
+MODE_ECB = 3
 
 class AESCipher:
     """Helper for AES encrypt/decrypt"""
 
-    def __init__(self, key):
-        self.key = hashlib.sha256(key.encode()).digest()
+    def __init__(self, key, salt):
+        self.key = hashlib.pbkdf2_hmac(
+            'sha256',
+            key.encode(),
+            salt.encode(),
+            100000
+        )
 
     def encrypt(self, raw):
         """Encrypt using AES MODE_ECB and return the value encoded as base64"""
@@ -85,7 +90,7 @@ class MnemonicStorage:
 
     def decrypt(self, key, mnemonic_id, sd_card=False):
         """Decrypt a selected encrypted mnemonic from a file"""
-        decryptor = AESCipher(key)
+        decryptor = AESCipher(key, mnemonic_id)
         try:
             if sd_card:
                 load = self.stored_sd.get(mnemonic_id)
@@ -98,7 +103,7 @@ class MnemonicStorage:
 
     def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False):
         """Saves the encrypted mnemonic on a file"""
-        encryptor = AESCipher(key)
+        encryptor = AESCipher(key, mnemonic_id)
         encrypted = encryptor.encrypt(mnemonic).decode("utf-8")
         mnemonics = {}
         success = True

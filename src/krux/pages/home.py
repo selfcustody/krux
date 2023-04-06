@@ -442,11 +442,14 @@ class Home(Page):
         words = self.ctx.wallet.key.mnemonic
         mnemonic_storage = MnemonicStorage()
         self.ctx.display.clear()
+        self.ctx.display.draw_centered_text( t("Processing ..."))
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card):
+            self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Encrypted mnemonic was stored with ID: %s" % mnemonic_id)
             )
         else:
+            self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Failed to store mnemonic")
             )
