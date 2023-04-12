@@ -765,7 +765,9 @@ class Home(Page):
         """Handler for the 'sign psbt' menu item"""
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(
-                t("WARNING:\nWallet not loaded.\n\nSome checks cannot be performed."),
+                t(
+                    "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+                ),
                 lcd.WHITE,
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
