@@ -64,8 +64,6 @@ import os
 import uos
 import time
 
-SENTINEL_DIGITS = "11111"
-
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
 DIGITS = "0123456789"
@@ -476,7 +474,6 @@ class Login(Page):
         title,
         charset,
         to_word,
-        test_phrase_sentinel=None,
         autocomplete_fn=None,
         possible_keys_fn=None,
     ):
@@ -501,37 +498,23 @@ class Login(Page):
                     )
                     if word == ESC_KEY:
                         return MENU_CONTINUE
+
                     # If the last 'word' is blank,
                     # pick a random final word that is a valid checksum
                     if (len(words) in (11, 23)) and word == "":
                         break
-                    # If the first 'word' is the test phrase sentinel,
-                    # we're testing and just want the test words
-                    if (
-                        len(words) == 0
-                        and test_phrase_sentinel is not None
-                        and word == test_phrase_sentinel
-                    ):
-                        break
+
                     if word != "":
                         word_num = word
                         word = to_word(word)
-                    if word != "":
-                        break
+                        if word != "":
+                            break
 
-                if word not in WORDLIST:
-                    if word == test_phrase_sentinel:
-                        words = [
-                            WORDLIST[0] if n + 1 < 12 else WORDLIST[1879]
-                            for n in range(12)
-                        ]
-                        break
-
-                    if word == "":
-                        word = Key.pick_final_word(self.ctx.input.entropy, words)
+                if word not in WORDLIST and word == "":
+                    word = Key.pick_final_word(self.ctx.input.entropy, words)
 
                 self.ctx.display.clear()
-                if word_num == word:
+                if word_num == word or word_num == "":
                     word_num = ""
                 else:
                     word_num += ": "
@@ -610,7 +593,7 @@ class Login(Page):
             }
 
         return self._load_key_from_keypad(
-            title, LETTERS, to_word, None, autocomplete, possible_letters
+            title, LETTERS, to_word, autocomplete, possible_letters
         )
 
     def pre_load_key_from_digits(self):
@@ -726,7 +709,6 @@ class Login(Page):
             title,
             DIGITS,
             to_word,
-            SENTINEL_DIGITS,
             autocomplete_fn=autocomplete,
             possible_keys_fn=possible_letters,
         )
