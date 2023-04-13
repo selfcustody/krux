@@ -429,6 +429,7 @@ class Home(Page):
             self.ctx.display.flash_text(t("Encrypted mnemonic was not stored"))
             return
         self.ctx.display.clear()
+        mnemonic_storage = MnemonicStorage()
         if self.prompt(
                 t("Give this mnemonic a custom ID? Otherwise current fingerprint will be used"),
                 self.ctx.display.height() // 2,
@@ -436,11 +437,16 @@ class Home(Page):
             mnemonic_id = self.capture_from_keypad(
                 t("Mnemonic Storage ID"),
                 [LETTERS, UPPERCASE_LETTERS, FILE_SPECIAL],
-            )
+            )   
+            if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
+                self.ctx.display.flash_text(
+                    t("ID already exists\n")
+                    + t("Encrypted mnemonic was not stored")
+                )
+                return
         else:
             mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
         words = self.ctx.wallet.key.mnemonic
-        mnemonic_storage = MnemonicStorage()
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text( t("Processing ..."))
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card):
