@@ -421,7 +421,7 @@ class Home(Page):
         return MENU_CONTINUE
 
     def store_mnemonic_on_memory(self, sd_card=False):
-        """Stores a mnemonic on flash or SD card"""
+        """Save encrypted mnemonic on flash or sd_card"""
         key = self.capture_from_keypad(
             t("Encryption Key"),
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
@@ -801,7 +801,9 @@ class Home(Page):
         """Handler for the 'sign psbt' menu item"""
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(
-                t("WARNING:\nWallet not loaded.\n\nSome checks cannot be performed."),
+                t(
+                    "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+                ),
                 lcd.WHITE,
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):

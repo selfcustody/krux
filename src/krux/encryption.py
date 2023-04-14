@@ -30,7 +30,8 @@ from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
 
 MNEMONICS_FILE = "seeds.json"
-MODE_ECB = 3
+MODE_ECB = ucryptolib.MODE_ECB
+
 
 
 class AESCipher:
