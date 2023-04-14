@@ -168,7 +168,7 @@ class Login(Page):
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
         )
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text( t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing ..."))
         if key in ("", ESC_KEY):
             raise ValueError(t("Failed to decrypt"))
         mnemonic_storage = MnemonicStorage()
@@ -181,7 +181,9 @@ class Login(Page):
             raise ValueError(t("Failed to decrypt"))
         if delete:
             self.ctx.display.clear()
-            if self.prompt( t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2):
+            if self.prompt(
+                t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2
+            ):
                 mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
         del mnemonic_storage
         if delete:
@@ -196,7 +198,9 @@ class Login(Page):
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(flash)",
-                    lambda s_id=mnemonic_id: self.load_encrypted_seed(s_id, delete=delete),
+                    lambda s_id=mnemonic_id: self.load_encrypted_seed(
+                        s_id, delete=delete
+                    ),
                 )
             )
         if mnemonic_storage.has_sd_card:
@@ -204,9 +208,11 @@ class Login(Page):
                 mnemonic_ids_menu.append(
                     (
                         mnemonic_id + "(SD card)",
-                        lambda s_id=mnemonic_id: self.load_encrypted_seed(s_id, sd_card=True, delete=delete),
+                        lambda s_id=mnemonic_id: self.load_encrypted_seed(
+                            s_id, sd_card=True, delete=delete
+                        ),
                     )
-            )
+                )
         del mnemonic_storage
         mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
         submenu = Menu(self.ctx, mnemonic_ids_menu)
@@ -836,7 +842,10 @@ class Login(Page):
             self.ctx,
             [
                 (t("Check SD Card"), self.sd_check),
-                (t("Delete Mnemonic"), lambda: self.load_mnemonic_from_storage(delete=True)),
+                (
+                    t("Delete Mnemonic"),
+                    lambda: self.load_mnemonic_from_storage(delete=True),
+                ),
                 (t("Print Test QR"), self.print_test),
                 (t("Create QR Code"), self.create_qr),
                 (t("Back"), lambda: MENU_EXIT),
@@ -866,7 +875,6 @@ class Login(Page):
 
             self.print_qr_prompt(text, FORMAT_NONE, text)
         return MENU_CONTINUE
-    
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
@@ -931,7 +939,7 @@ class Login(Page):
         size_deximal_places = str(int(size * 100))[-2:]
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
-        file = file[4:] # remove "/sd/" prefix
+        file = file[4:]  # remove "/sd/" prefix
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             file

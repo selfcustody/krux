@@ -421,6 +421,7 @@ class Home(Page):
         return MENU_CONTINUE
 
     def store_mnemonic_on_memory(self, sd_card=False):
+        """Stores a mnemonic on flash or SD card"""
         key = self.capture_from_keypad(
             t("Encryption Key"),
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
@@ -430,25 +431,28 @@ class Home(Page):
             return
         self.ctx.display.clear()
         mnemonic_storage = MnemonicStorage()
+        mnemonic_id = None
         if self.prompt(
-                t("Give this mnemonic a custom ID? Otherwise current fingerprint will be used"),
-                self.ctx.display.height() // 2,
-            ):
+            t(
+                "Give this mnemonic a custom ID? Otherwise current fingerprint will be used"
+            ),
+            self.ctx.display.height() // 2,
+        ):
             mnemonic_id = self.capture_from_keypad(
                 t("Mnemonic Storage ID"),
-                [LETTERS, UPPERCASE_LETTERS, FILE_SPECIAL],
-            )   
+                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
+            )
             if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
                 self.ctx.display.flash_text(
-                    t("ID already exists\n")
-                    + t("Encrypted mnemonic was not stored")
+                    t("ID already exists\n") + t("Encrypted mnemonic was not stored")
                 )
+                del mnemonic_storage
                 return
-        else:
+        if mnemonic_id in (None, ESC_KEY):
             mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
         words = self.ctx.wallet.key.mnemonic
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text( t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing ..."))
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
@@ -456,9 +460,7 @@ class Home(Page):
             )
         else:
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Failed to store mnemonic")
-            )
+            self.ctx.display.draw_centered_text(t("Failed to store mnemonic"))
         self.ctx.input.wait_for_button()
         del mnemonic_storage
 
@@ -471,14 +473,16 @@ class Home(Page):
         mnemonic_storage = MnemonicStorage()
         if mnemonic_storage.has_sd_card:
             encrypt_outputs_menu.append(
-            (t("Store on SD Card"), lambda: self.store_mnemonic_on_memory(sd_card=True))
-        )
+                (
+                    t("Store on SD Card"),
+                    lambda: self.store_mnemonic_on_memory(sd_card=True),
+                )
+            )
         del mnemonic_storage
         encrypt_outputs_menu.append((t("Back"), lambda: MENU_EXIT))
         submenu = Menu(self.ctx, encrypt_outputs_menu)
         _, _ = submenu.run_loop()
         return MENU_CONTINUE
-        
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
