@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import hashlib
 import gc
 import sensor
 import lcd
@@ -155,3 +156,32 @@ class Camera:
         if parser.is_complete():
             return (parser.result(), parser.format)
         return (None, None)
+
+    def capture_entropy(self, callback):
+        "Captures camera's entropy as the hash of image buffer"
+        self.initialize_sensor()
+        sensor.run(1)
+
+        while True:
+            wdt.feed()
+            img = sensor.snapshot()
+            if self.cam_id in (OV2640_ID, OV5642_ID):
+                img.lens_corr(strength=1.1, zoom=0.96)
+            if self.cam_id == OV2640_ID:
+                img.rotation_corr(z_rotation=180)
+            if callback():
+                break
+            if board.config["type"] == "m5stickv":
+                img.lens_corr(strength=1.0, zoom=0.56)
+            lcd.display(img)
+
+        gc.collect()
+        sensor.run(0)
+        img_bytes = img.to_bytes()
+        hasher = hashlib.sha256()
+        image_len = len(img_bytes)
+        hasher_index = 0
+        while hasher_index < image_len:
+            hasher.update(img_bytes[hasher_index : hasher_index + 128])
+            hasher_index += 128
+        return hasher.digest()

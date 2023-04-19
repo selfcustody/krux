@@ -33,7 +33,6 @@ MNEMONICS_FILE = "seeds.json"
 MODE_ECB = ucryptolib.MODE_ECB
 
 
-
 class AESCipher:
     """Helper for AES encrypt/decrypt"""
 

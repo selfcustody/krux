@@ -104,6 +104,7 @@ def snapshot():
         m.get_frame.return_value = frame
         m.get_histogram.return_value = Mockhistogram()
         m.find_qrcodes.return_value = find_qrcodes(img)
+        m.to_bytes.return_value = frame.tobytes()
     return m
 
 

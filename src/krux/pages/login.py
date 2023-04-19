@@ -226,6 +226,7 @@ class Login(Page):
             [
                 (t("Via D6"), self.new_key_from_d6),
                 (t("Via D20"), self.new_key_from_d20),
+                (t("Via Snapshot"), self.new_key_from_snapshot),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -241,6 +242,39 @@ class Login(Page):
     def new_key_from_d20(self):
         """Handler for the 'via D20' menu item"""
         return self._new_key_from_die(D20_STATES, D20_12W_MIN_ROLLS, D20_24W_MIN_ROLLS)
+
+    def new_key_from_snapshot(self):
+        """Use camera's entropy to create a new mnemonic"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("12 words"), lambda: MENU_EXIT),
+                (t("24 words"), lambda: MENU_EXIT),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, _ = submenu.run_loop()
+        if index == 2:
+            return MENU_CONTINUE
+
+        self.ctx.display.clear()
+
+        self.ctx.display.draw_hcentered_text(
+            t("Use camera's entropy to create a new mnemonic")
+        )
+        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+            entropy_bytes = self.capture_camera_entropy()
+            entropy_hash = binascii.hexlify(entropy_bytes).decode()
+            if entropy_bytes is not None:
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("SHA256 of snapshot:\n\n%s") % entropy_hash
+                )
+                self.ctx.input.wait_for_button()
+                num_bytes = 16 if index == 0 else 32
+                words = bip39.mnemonic_from_bytes(entropy_bytes[:num_bytes]).split()
+                return self._load_key_from_words(words)
+        return MENU_CONTINUE
 
     def _new_key_from_die(self, roll_states, min_rolls_12w, min_rolls_24w):
         submenu = Menu(

@@ -267,6 +267,26 @@ class Page:
             )
         return (code, qr_format)
 
+    def capture_camera_entropy(self):
+        "Helper to capture camera's entropy as the hash of image buffer"
+        self._time_frame = time.ticks_ms()
+        def callback():
+            if time.ticks_ms() > self._time_frame + 1000:
+                if 0 in (self.ctx.input.enter_value(), self.ctx.input.touch_value()):
+                    return True
+            return False
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))
+        self.ctx.display.to_landscape()
+        entropy_bytes = None
+        try:
+            entropy_bytes = self.ctx.camera.capture_entropy(callback)
+        except:
+            self.ctx.log.exception("Exception occurred capturing camera's entropy")
+        self.ctx.display.to_portrait()
+        return entropy_bytes
+
     def highlight_qr_region(self, code, region=(0, 0, 0, 0), zoom=False):
         """Draws in white a highlighted region of the QR code"""
         reg_x, reg_y, reg_width, reg_height = region
