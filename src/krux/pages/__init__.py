@@ -189,7 +189,7 @@ class Page:
 
         def callback(part_total, num_parts_captured, new_part):
             # Turn on the light as long as the enter button is held down (M5stickV and Amigo)
-            if time.ticks_ms() > self._time_frame + CAMERA_INIT_TIME:
+            if self._time_to_check_input():
                 if self.ctx.light:
                     if not self.ctx.input.enter_value():
                         self.ctx.light.turn_on()
@@ -267,14 +267,29 @@ class Page:
             )
         return (code, qr_format)
 
+    def _time_to_check_input(self):
+        return time.ticks_ms() > self._time_frame + CAMERA_INIT_TIME
+
     def capture_camera_entropy(self):
         "Helper to capture camera's entropy as the hash of image buffer"
         self._time_frame = time.ticks_ms()
+
         def callback():
-            if time.ticks_ms() > self._time_frame + 1000:
-                if 0 in (self.ctx.input.enter_value(), self.ctx.input.touch_value()):
-                    return True
-            return False
+            if self._time_to_check_input():
+                # Accepted
+                if (
+                    self.ctx.input.enter_value() == PRESSED
+                    or self.ctx.input.touch_value() == PRESSED
+                ):
+                    return 1
+
+                # Exited
+                if (
+                    self.ctx.input.page_value() == PRESSED
+                    or self.ctx.input.page_prev_value() == PRESSED
+                ):
+                    return 2
+            return 0
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))

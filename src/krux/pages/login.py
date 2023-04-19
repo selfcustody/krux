@@ -224,9 +224,9 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
+                (t("Via Camera"), self.new_key_from_snapshot),
                 (t("Via D6"), self.new_key_from_d6),
                 (t("Via D20"), self.new_key_from_d20),
-                (t("Via Snapshot"), self.new_key_from_snapshot),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -264,8 +264,8 @@ class Login(Page):
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             entropy_bytes = self.capture_camera_entropy()
-            entropy_hash = binascii.hexlify(entropy_bytes).decode()
             if entropy_bytes is not None:
+                entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
                     t("SHA256 of snapshot:\n\n%s") % entropy_hash
@@ -548,7 +548,7 @@ class Login(Page):
                     word = Key.pick_final_word(self.ctx.input.entropy, words)
 
                 self.ctx.display.clear()
-                if word_num == word or word_num == "":
+                if word_num in (word, ""):
                     word_num = ""
                 else:
                     word_num += ": "

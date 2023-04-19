@@ -107,6 +107,15 @@ class Camera:
             sensor.skip_frames()
             self.antiglare_enabled = False
 
+    def snapshot(self):
+        """Helper to take a customized snapshot from sensor"""
+        img = sensor.snapshot()
+        if self.cam_id in (OV2640_ID, OV5642_ID):
+            img.lens_corr(strength=1.1, zoom=0.96)
+        if self.cam_id == OV2640_ID:
+            img.rotation_corr(z_rotation=180)
+        return img
+
     def capture_qr_code_loop(self, callback):
         """Captures either singular or animated QRs and parses their contents until
         all parts of the message have been captured. The part data are then ordered
@@ -126,12 +135,10 @@ class Camera:
                 break
             new_part = False
 
-            img = sensor.snapshot()
-            if self.cam_id in (OV2640_ID, OV5642_ID):
-                img.lens_corr(strength=1.1, zoom=0.96)
-            if self.cam_id == OV2640_ID:
-                img.rotation_corr(z_rotation=180)
+            img = self.snapshot()
             res = img.find_qrcodes()
+
+            # different cases of lcd.display to show a progress bar on different devices!
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
                 lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
@@ -139,6 +146,7 @@ class Camera:
                 lcd.display(img, oft=(40, 40))
             else:
                 lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
+
             if len(res) > 0:
                 data = res[0].payload()
 
@@ -158,26 +166,33 @@ class Camera:
         return (None, None)
 
     def capture_entropy(self, callback):
-        "Captures camera's entropy as the hash of image buffer"
+        """Captures camera's entropy as the hash of image buffer"""
         self.initialize_sensor()
         sensor.run(1)
 
+        command = 0
         while True:
             wdt.feed()
-            img = sensor.snapshot()
-            if self.cam_id in (OV2640_ID, OV5642_ID):
-                img.lens_corr(strength=1.1, zoom=0.96)
-            if self.cam_id == OV2640_ID:
-                img.rotation_corr(z_rotation=180)
-            if callback():
+
+            img = self.snapshot()
+
+            command = callback()
+            if command > 0:
                 break
+
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
             lcd.display(img)
 
         gc.collect()
         sensor.run(0)
+
+        # User cancelled
+        if command == 2:
+            return None
+
         img_bytes = img.to_bytes()
+        del img
         hasher = hashlib.sha256()
         image_len = len(img_bytes)
         hasher_index = 0

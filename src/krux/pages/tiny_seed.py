@@ -953,9 +953,7 @@ class TinyScanner(Page):
             # clock.tick()
             wdt.feed()
             page_seed_numbers = None
-            img = sensor.snapshot()
-            if self.ctx.camera.cam_id == OV2640_ID:
-                img.rotation_corr(z_rotation=180)
+            img = self.ctx.camera.snapshot()
             rect = self._detect_tiny_seed(img)
             if rect:
                 self._gradient_corners(rect, img)
