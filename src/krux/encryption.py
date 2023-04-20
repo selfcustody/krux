@@ -137,7 +137,7 @@ class MnemonicStorage:
                 pass
             try:
                 # save the new MNEMONICS_FILE
-                with open(MNEMONICS_FILE, "w") as f:
+                with open("/flash/" + MNEMONICS_FILE, "w") as f:
                     mnemonics[mnemonic_id] = {}
                     mnemonics[mnemonic_id]["version"] = PBKDF2_HMAC_ECB
                     mnemonics[mnemonic_id]["key_iterations"] = PBKDF2_HMAC_ITERATIONS
