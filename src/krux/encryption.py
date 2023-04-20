@@ -32,12 +32,18 @@ from .sd_card import SDHandler
 MNEMONICS_FILE = "seeds.json"
 MODE_ECB = ucryptolib.MODE_ECB
 
+#version:
+PBKDF2_HMAC_ECB = 0
+PBKDF2_HMAC_CBC = 1
+PBKDF2_HMAC_CTR = 2
+PBKDF2_HMAC_ITERATIONS = 10*10000  #Change to cofigurable
+
 
 class AESCipher:
     """Helper for AES encrypt/decrypt"""
 
-    def __init__(self, key, salt):
-        self.key = hashlib.pbkdf2_hmac("sha256", key.encode(), salt.encode(), 100000)
+    def __init__(self, key, salt, iterations=PBKDF2_HMAC_ITERATIONS, iv=None):
+        self.key = hashlib.pbkdf2_hmac("sha256", key.encode(), salt.encode(), iterations)
 
     def encrypt(self, raw):
         """Encrypt using AES MODE_ECB and return the value encoded as base64"""
@@ -85,13 +91,15 @@ class MnemonicStorage:
 
     def decrypt(self, key, mnemonic_id, sd_card=False):
         """Decrypt a selected encrypted mnemonic from a file"""
-        decryptor = AESCipher(key, mnemonic_id)
         try:
             if sd_card:
-                load = self.stored_sd.get(mnemonic_id)
+                encrypted_data = self.stored_sd.get(mnemonic_id)["data"]
+                iterations = self.stored_sd.get(mnemonic_id)["key_iterations"]
             else:
-                load = self.stored.get(mnemonic_id)
-            words = decryptor.decrypt(load)
+                encrypted_data = self.stored.get(mnemonic_id)["data"]
+                iterations = self.stored.get(mnemonic_id)["key_iterations"]
+            decryptor = AESCipher(key, mnemonic_id, iterations)
+            words = decryptor.decrypt(encrypted_data)
         except:
             return None
         return words
@@ -108,25 +116,32 @@ class MnemonicStorage:
                 with SDHandler() as sd:
                     mnemonics = json.loads(sd.read(MNEMONICS_FILE))
             except:
-                success = False
+                pass
 
             # save the new MNEMONICS_FILE
             try:
                 with SDHandler() as sd:
-                    mnemonics[mnemonic_id] = encrypted
+                    mnemonics[mnemonic_id] = {}
+                    mnemonics[mnemonic_id]["version"] = PBKDF2_HMAC_ECB
+                    mnemonics[mnemonic_id]["key_iterations"] = PBKDF2_HMAC_ITERATIONS
+                    mnemonics[mnemonic_id]["data"] = encrypted
                     sd.write(MNEMONICS_FILE, json.dumps(mnemonics))
             except:
                 success = False
         else:
             try:
-                # save the new SETTINGS_FILENAME
+                # load current MNEMONICS_FILE
                 with open("/flash/" + MNEMONICS_FILE, "r") as f:
                     mnemonics = json.loads(f.read())
             except:
-                success = False
+                pass
             try:
-                with open("/flash/" + MNEMONICS_FILE, "w") as f:
-                    mnemonics[mnemonic_id] = encrypted
+                # save the new MNEMONICS_FILE
+                with open(MNEMONICS_FILE, "w") as f:
+                    mnemonics[mnemonic_id] = {}
+                    mnemonics[mnemonic_id]["version"] = PBKDF2_HMAC_ECB
+                    mnemonics[mnemonic_id]["key_iterations"] = PBKDF2_HMAC_ITERATIONS
+                    mnemonics[mnemonic_id]["data"] = encrypted
                     f.write(json.dumps(mnemonics))
             except:
                 success = False
