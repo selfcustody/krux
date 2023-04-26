@@ -28,36 +28,47 @@ import hashlib
 import ucryptolib
 from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
+from .krux_settings import Settings, PBKDF2_HMAC_ECB, PBKDF2_HMAC_CBC, AES_BLOCK_SIZE
+
 
 MNEMONICS_FILE = "seeds.json"
-MODE_ECB = ucryptolib.MODE_ECB
 
 #version:
-PBKDF2_HMAC_ECB = 0
-PBKDF2_HMAC_CBC = 1
-PBKDF2_HMAC_CTR = 2
+
 PBKDF2_HMAC_ITERATIONS = 10*10000  #Change to cofigurable
+
+
+VERSION_MODE = {
+    "AES-ECB": ucryptolib.MODE_ECB,
+    "AES-CBC": ucryptolib.MODE_CBC,
+    PBKDF2_HMAC_ECB: ucryptolib.MODE_ECB,
+    PBKDF2_HMAC_CBC: ucryptolib.MODE_CBC,
+}
+
+VERSION_NUMBER = {
+    "AES-ECB": PBKDF2_HMAC_ECB,
+    "AES-CBC": PBKDF2_HMAC_CBC,
+}
 
 
 class AESCipher:
     """Helper for AES encrypt/decrypt"""
 
-    def __init__(self, key, salt, iterations=PBKDF2_HMAC_ITERATIONS, iv=None):
+    def __init__(self, key, salt, iterations=PBKDF2_HMAC_ITERATIONS):
         self.key = hashlib.pbkdf2_hmac("sha256", key.encode(), salt.encode(), iterations)
 
-    def encrypt(self, raw):
+    def encrypt(self, raw, mode=ucryptolib.MODE_ECB, iv=None):
         """Encrypt using AES MODE_ECB and return the value encoded as base64"""
         data_bytes = raw.encode()
-        encryptor = ucryptolib.aes(self.key, MODE_ECB)
+        encryptor = ucryptolib.aes(self.key, mode, iv)
         encrypted = encryptor.encrypt(
-            data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
+            iv + data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
         )
         return base_encode(encrypted, 64)
 
-    def decrypt(self, enc):
+    def decrypt(self, encrypted, mode, iv=None):
         """Decrypt a base64 using AES MODE_ECB and return the value decoded as string"""
-        encrypted = base_decode(enc, 64)  # test - decode 64
-        decryptor = ucryptolib.aes(self.key, MODE_ECB)
+        decryptor = ucryptolib.aes(self.key, mode, iv)
         load = decryptor.decrypt(encrypted).decode("utf-8")
         return load.replace("\x00", "")
 
@@ -95,19 +106,30 @@ class MnemonicStorage:
             if sd_card:
                 encrypted_data = self.stored_sd.get(mnemonic_id)["data"]
                 iterations = self.stored_sd.get(mnemonic_id)["key_iterations"]
+                version = self.stored_sd.get(mnemonic_id)["version"]
             else:
                 encrypted_data = self.stored.get(mnemonic_id)["data"]
                 iterations = self.stored.get(mnemonic_id)["key_iterations"]
-            decryptor = AESCipher(key, mnemonic_id, iterations)
-            words = decryptor.decrypt(encrypted_data)
+                version = self.stored_sd.get(mnemonic_id)["version"]
         except:
             return None
+        data = base_decode(encrypted_data, 64)
+        mode = VERSION_MODE[version]
+        if mode == ucryptolib.MODE_ECB:
+            encrypted_mnemonic = data
+            iv = None
+        else:
+            encrypted_mnemonic = data[AES_BLOCK_SIZE:]
+            iv = data[:AES_BLOCK_SIZE]
+        decryptor = AESCipher(key, mnemonic_id, iterations)
+        words = decryptor.decrypt(encrypted_mnemonic, mode, iv)
         return words
 
-    def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False):
+    def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, iv=None):
         """Saves the encrypted mnemonic on a file"""
         encryptor = AESCipher(key, mnemonic_id)
-        encrypted = encryptor.encrypt(mnemonic).decode("utf-8")
+        mode = VERSION_MODE[Settings().encryption.version]
+        encrypted = encryptor.encrypt(mnemonic, mode, iv).decode("utf-8")
         mnemonics = {}
         success = True
         if sd_card:
@@ -122,7 +144,7 @@ class MnemonicStorage:
             try:
                 with SDHandler() as sd:
                     mnemonics[mnemonic_id] = {}
-                    mnemonics[mnemonic_id]["version"] = PBKDF2_HMAC_ECB
+                    mnemonics[mnemonic_id]["version"] = VERSION_NUMBER[Settings().encryption.version]
                     mnemonics[mnemonic_id]["key_iterations"] = PBKDF2_HMAC_ITERATIONS
                     mnemonics[mnemonic_id]["data"] = encrypted
                     sd.write(MNEMONICS_FILE, json.dumps(mnemonics))
@@ -139,7 +161,7 @@ class MnemonicStorage:
                 # save the new MNEMONICS_FILE
                 with open("/flash/" + MNEMONICS_FILE, "w") as f:
                     mnemonics[mnemonic_id] = {}
-                    mnemonics[mnemonic_id]["version"] = PBKDF2_HMAC_ECB
+                    mnemonics[mnemonic_id]["version"] = VERSION_NUMBER[Settings().encryption.version]
                     mnemonics[mnemonic_id]["key_iterations"] = PBKDF2_HMAC_ITERATIONS
                     mnemonics[mnemonic_id]["data"] = encrypted
                     f.write(json.dumps(mnemonics))

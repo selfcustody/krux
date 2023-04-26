@@ -31,7 +31,7 @@ from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..wallet import Wallet, parse_address
-from ..krux_settings import t, Settings
+from ..krux_settings import t, Settings, AES_BLOCK_SIZE
 from . import (
     Page,
     Menu,
@@ -429,6 +429,13 @@ class Home(Page):
         if key in ("", ESC_KEY):
             self.ctx.display.flash_text(t("Encrypted mnemonic was not stored"))
             return
+        version = Settings().encryption.version
+        iv = None
+        if version == "AES-CBC":
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Aditional entropy from camera required for AES-CBC mode"))
+            self.ctx.input.wait_for_button()
+            iv = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
         self.ctx.display.clear()
         mnemonic_storage = MnemonicStorage()
         mnemonic_id = None
@@ -453,7 +460,7 @@ class Home(Page):
         words = self.ctx.wallet.key.mnemonic
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
-        if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card):
+        if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, iv):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Encrypted mnemonic was stored with ID: %s" % mnemonic_id)

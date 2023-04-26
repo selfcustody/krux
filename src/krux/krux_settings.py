@@ -33,6 +33,7 @@ from .translations import translation_table
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
+
 DEFAULT_TX_PIN = (
     board.config["board_info"]["CONNEXT_A"]
     if "CONNEXT_A" in board.config["board_info"]
@@ -44,6 +45,10 @@ DEFAULT_RX_PIN = (
     else 34
 )
 
+# Encription Versions
+PBKDF2_HMAC_ECB = 0
+PBKDF2_HMAC_CBC = 1
+AES_BLOCK_SIZE = 16
 
 def translations(locale):
     """Returns the translations map for the given locale"""
@@ -264,6 +269,22 @@ class PersistSettings(SettingsNamespace):
             "location": t("Location"),
         }[attr]
 
+class EncryptionSettings(SettingsNamespace):
+    """Encryption settings"""
+    AES_ECB_NAME = "AES-ECB"
+    AES_CBC_NAME = "AES-CBC"
+    VERSION_NAMES = {
+        PBKDF2_HMAC_ECB: AES_ECB_NAME,
+        PBKDF2_HMAC_CBC: AES_CBC_NAME,
+    }
+    namespace = "settings.encryption"
+    version = CategorySetting("version", AES_ECB_NAME, list(VERSION_NAMES.values()))
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "version": t("Encryption mode"),
+        }[attr]
 
 class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
@@ -274,6 +295,7 @@ class Settings(SettingsNamespace):
         self.bitcoin = BitcoinSettings()
         self.i18n = I18nSettings()
         self.logging = LoggingSettings()
+        self.encryption = EncryptionSettings()
         self.printer = PrinterSettings()
         self.persist = PersistSettings()
         if board.config["type"].startswith("amigo"):
@@ -285,6 +307,7 @@ class Settings(SettingsNamespace):
             "bitcoin": t("Bitcoin"),
             "i18n": t("Language"),
             "logging": t("Logging"),
+            "encryption": t("Encryption"),
             "persist": t("Persist"),
             "printer": t("Printer"),
         }
