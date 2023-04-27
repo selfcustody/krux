@@ -433,8 +433,11 @@ class Home(Page):
         iv = None
         if version == "AES-CBC":
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Aditional entropy from camera required for AES-CBC mode"))
-            self.ctx.input.wait_for_button()
+            self.ctx.display.draw_centered_text(
+                t("Aditional entropy from camera required for AES-CBC mode")
+            )
+            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+                return
             iv = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
         self.ctx.display.clear()
         mnemonic_storage = MnemonicStorage()

@@ -50,6 +50,7 @@ PBKDF2_HMAC_ECB = 0
 PBKDF2_HMAC_CBC = 1
 AES_BLOCK_SIZE = 16
 
+
 def translations(locale):
     """Returns the translations map for the given locale"""
     if locale in translation_table:
@@ -269,8 +270,10 @@ class PersistSettings(SettingsNamespace):
             "location": t("Location"),
         }[attr]
 
+
 class EncryptionSettings(SettingsNamespace):
     """Encryption settings"""
+
     AES_ECB_NAME = "AES-ECB"
     AES_CBC_NAME = "AES-CBC"
     VERSION_NAMES = {
@@ -279,12 +282,15 @@ class EncryptionSettings(SettingsNamespace):
     }
     namespace = "settings.encryption"
     version = CategorySetting("version", AES_ECB_NAME, list(VERSION_NAMES.values()))
+    pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [1, 1000000])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "version": t("Encryption mode"),
+            "pbkdf2_iterations": t("PBKDF2 iterations"),
         }[attr]
+
 
 class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
