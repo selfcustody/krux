@@ -61,8 +61,10 @@ class AESCipher:
         """Encrypt using AES MODE_ECB and return the value encoded as base64"""
         data_bytes = raw.encode()
         encryptor = ucryptolib.aes(self.key, mode, iv)
+        if iv:
+            data_bytes = iv + data_bytes
         encrypted = encryptor.encrypt(
-            iv + data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
+            data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
         )
         return base_encode(encrypted, 64)
 
