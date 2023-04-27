@@ -109,7 +109,7 @@ class MnemonicStorage:
             else:
                 encrypted_data = self.stored.get(mnemonic_id)["data"]
                 iterations = self.stored.get(mnemonic_id)["key_iterations"]
-                version = self.stored_sd.get(mnemonic_id)["version"]
+                version = self.stored.get(mnemonic_id)["version"]
         except:
             return None
         data = base_decode(encrypted_data, 64)

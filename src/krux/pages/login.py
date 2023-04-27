@@ -192,26 +192,30 @@ class Login(Page):
         """Lists all encrypted seeds stored on a file"""
         mnemonic_ids_menu = []
         mnemonic_storage = MnemonicStorage()
-        for mnemonic_id in mnemonic_storage.list_mnemonics():
+        has_sd = mnemonic_storage.has_sd_card
+        mnemonics = mnemonic_storage.list_mnemonics()
+        sd_mnemonics = mnemonic_storage.list_mnemonics(sd_card=True)
+        del mnemonic_storage
+        
+        for mnemonic_id in mnemonics:
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(flash)",
-                    lambda s_id=mnemonic_id: self.load_encrypted_seed(
-                        s_id, delete=delete
+                    lambda m_id=mnemonic_id: self.load_encrypted_seed(
+                        m_id, delete=delete
                     ),
                 )
             )
-        if mnemonic_storage.has_sd_card:
-            for mnemonic_id in mnemonic_storage.list_mnemonics(sd_card=True):
+        if has_sd:
+            for mnemonic_id in sd_mnemonics:
                 mnemonic_ids_menu.append(
                     (
                         mnemonic_id + "(SD card)",
-                        lambda s_id=mnemonic_id: self.load_encrypted_seed(
-                            s_id, sd_card=True, delete=delete
+                        lambda m_id=mnemonic_id: self.load_encrypted_seed(
+                            m_id, sd_card=True, delete=delete
                         ),
                     )
                 )
-        del mnemonic_storage
         mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
         submenu = Menu(self.ctx, mnemonic_ids_menu)
         index, status = submenu.run_loop()
