@@ -902,6 +902,10 @@ class Home(Page):
             self.ctx.display.draw_centered_text(message)
             self.ctx.input.wait_for_button()
 
+        # memory management
+        del data, outputs
+        gc.collect()
+
         # If user confirm, Krux will sign
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             signer.sign()
@@ -911,7 +915,7 @@ class Home(Page):
             serialized_signed_psbt = signer.psbt.serialize()
 
             # memory management
-            del data, signer, outputs
+            del signer
             gc.collect()
 
             # Show the signed PSBT as a QRCode
