@@ -23,8 +23,6 @@ import binascii
 import gc
 import hashlib
 import lcd
-from .stack_1248 import Stackbit
-from .tiny_seed import TinySeed
 from embit.wordlists.bip39 import WORDLIST
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
@@ -57,7 +55,6 @@ from ..input import (
 import qrcode
 from ..printers import create_printer
 from ..printers.cnc import FilePrinter
-from ..encryption import MnemonicStorage
 import board
 import uos
 import time
@@ -379,6 +376,7 @@ class Home(Page):
 
     def stackbit(self):
         """Displays which numbers 1248 user should punch on 1248 steel card"""
+        from .stack_1248 import Stackbit
         stackbit = Stackbit(self.ctx)
         word_index = 1
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -405,6 +403,7 @@ class Home(Page):
 
     def tiny_seed(self):
         """Displays the seed in Tiny Seed format"""
+        from .tiny_seed import TinySeed
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()
 
@@ -422,6 +421,7 @@ class Home(Page):
 
     def store_mnemonic_on_memory(self, sd_card=False):
         """Save encrypted mnemonic on flash or sd_card"""
+        from ..encryption import MnemonicStorage
         key = self.capture_from_keypad(
             t("Encryption Key"),
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
@@ -475,6 +475,7 @@ class Home(Page):
         del mnemonic_storage
 
     def encrypt_mnemonic(self):
+        from ..encryption import MnemonicStorage
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
         encrypt_outputs_menu = []
         encrypt_outputs_menu.append(

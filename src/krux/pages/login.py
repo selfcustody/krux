@@ -43,8 +43,6 @@ from ..key import Key
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..krux_settings import t
-from .stack_1248 import Stackbit
-from .tiny_seed import TinySeed, TinyScanner
 from ..sd_card import SDHandler
 from . import (
     Page,
@@ -59,7 +57,6 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from ..encryption import MnemonicStorage
 import os
 import uos
 import time
@@ -160,6 +157,7 @@ class Login(Page):
         return status
 
     def load_encrypted_seed(self, mnemonic_id, sd_card=False, delete=False):
+        from ..encryption import MnemonicStorage
         """Load a selected seed from the encrypted file"""
         key = self.capture_from_keypad(
             t("Encryption Key"),
@@ -190,6 +188,7 @@ class Login(Page):
 
     def load_mnemonic_from_storage(self, delete=False):
         """Lists all encrypted seeds stored on a file"""
+        from ..encryption import MnemonicStorage
         mnemonic_ids_menu = []
         mnemonic_storage = MnemonicStorage()
         has_sd = mnemonic_storage.has_sd_card
@@ -753,6 +752,7 @@ class Login(Page):
 
     def load_key_from_1248(self):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
+        from .stack_1248 import Stackbit
         stackbit = Stackbit(self.ctx)
         words = stackbit.enter_1248()
         del stackbit
@@ -762,6 +762,7 @@ class Login(Page):
 
     def load_key_from_tiny_seed(self):
         """Menu handler to manually load key from Tiny Seed sheet metal storage method"""
+        from .tiny_seed import TinySeed
         submenu = Menu(
             self.ctx,
             [
@@ -785,6 +786,7 @@ class Login(Page):
 
     def load_key_from_tiny_seed_image(self):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
+        from .tiny_seed import TinyScanner
         submenu = Menu(
             self.ctx,
             [

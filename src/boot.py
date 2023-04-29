@@ -119,12 +119,14 @@ if file_location != "flash":
 
 # Check if locale is set to pokemon to change SPLASH
 if settings.get("settings", {}).get("i18n", {}).get("locale", "undefined") == "pokemon":
-    SPLASH = SPLASH_ALT
+    ctx.display.draw_centered_text(SPLASH_ALT.split("\n"), color=lcd.WHITE)
+else:
+    ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
 
 del settings, file_location, filename
 
 # Display splash while loading pages
-ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
+
 
 preimport_ticks = time.ticks_ms()
 from krux.pages.login import Login
@@ -144,11 +146,20 @@ while True:
     if not Login(ctx).run(login_start_from):
         break
 
-    if ctx.wallet is None:
+    if ctx.wallet is not None:
+        # Have a loaded wallet
+        break
+    else:
         # Login closed due to change of locale at Settings
         login_start_from = 2  # will start Login again from Settings
-        continue
 
+# TODO: Deeper study of the impact on RAM
+# Unimport Login
+sys.modules.pop("krux.pages.login")
+del sys.modules["krux"].pages.login
+del Login
+
+while True:
     if not Home(ctx).run():
         break
 from krux.krux_settings import t
