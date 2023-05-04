@@ -85,6 +85,36 @@ def validate_translation_files():
     if not passed:
         sys.exit(1)
 
+def remove_unnecessary():
+    """Remove unnecessary translations from files"""
+    code_slugs = find_translation_slugs()
+    translation_filenames = [
+        f
+        for f in listdir(TRANSLATION_FILES_DIR)
+        if isfile(join(TRANSLATION_FILES_DIR, f))
+    ]
+    for translation_filename in translation_filenames:
+        print("Cleaning %s..." % translation_filename)
+        clean = True
+        with open(
+            join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
+        ) as translation_file:
+            full_translations = json.load(translation_file)
+            translation_file.seek(0)
+            translations = load_translations(translation_file)
+            for translation_slug in translations:
+                if translation_slug not in code_slugs:
+                    print('Removing: "%s"' % translation_slug)
+                    clean = False
+                    del full_translations[translation_slug.replace("\\n", "\n")]
+        if clean:
+            print("Nothing removed")
+        else:
+            with open(
+                join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8"
+            ) as translation_file:
+                json.dump(full_translations, translation_file, ensure_ascii=False)
+                # run black after this
 
 def bake_translations():
     """Bakes all translations into a translations.py file inside the krux namespace"""
@@ -176,6 +206,8 @@ def main():
         validate_translation_files()
     elif sys.argv[1] == "new":
         create_translation_file(sys.argv[2])
+    elif sys.argv[1] == "clean":
+        remove_unnecessary()
     elif sys.argv[1] == "prettify":
         prettify_translation_files()
     elif sys.argv[1] == "bake":
