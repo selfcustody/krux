@@ -238,6 +238,12 @@ The project has lots of translations [here](i18n/translations), if you add new e
 # Enter i18n folder:
 cd i18n
 
+# Clean unused translations:
+python3 i18n.py clean
+
+# Use googletrans(4.0.0rc1) module to create missing translations, copy them to respective files, review one by one and add commas.
+python3 i18n.py fill
+
 # Make sure all files have this new translated message:
 python3 i18n.py validate
 
