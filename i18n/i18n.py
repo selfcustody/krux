@@ -87,6 +87,10 @@ def validate_translation_files():
 
 def fill_missing():
     """Uses googletrans==4.0.0rc1 to automaticalyy fill missing translations"""
+    if len(sys.argv) > 2:
+        force_target = sys.argv[2]
+    else:
+        force_target = None
     from googletrans import Translator
     translator = Translator()
     slugs = find_translation_slugs()
@@ -97,6 +101,9 @@ def fill_missing():
     ]
     for translation_filename in translation_filenames:
         target = translation_filename[:5].replace("-","_")
+        if force_target:
+            if force_target != translation_filename:
+                continue
         if translation_filename.startswith("poke"):
             continue
         print("Translating %s...\n" % translation_filename)
@@ -107,16 +114,18 @@ def fill_missing():
             translations = load_translations(translation_file)
             for slug in slugs:
                 if slug not in translations or translations[slug] == "":
-                    print(
-                        '"%s":' % slug,
-                        '"%s"' % translator.translate(slug, src='en', dest=target).text.replace(" \ n","\\n")
-                    )
+                    try:
+                        translated = '"%s",' % translator.translate(slug, src='en', dest=target).text.replace(" \ n","\\n")
+                    except:
+                        # some languages fail to translate with a space at end of string
+                        translated = '"%s",' % translator.translate(slug+"]", src='en', dest=target).text.replace(" \ n","\\n")[:-1]
+                    print('"%s":' % slug, translated)
                     complete = False
         if complete:
             print("Notthing to add")
         else:
             print("Please review and copy items above")
-            print('\n\n')
+        print('\n\n')
 
 def remove_unnecessary():
     """Remove unnecessary translations from files"""

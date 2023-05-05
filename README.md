@@ -241,8 +241,11 @@ cd i18n
 # Clean unused translations:
 python3 i18n.py clean
 
-# Use googletrans(4.0.0rc1) module to create missing translations, copy them to respective files, review one by one and add commas.
+# Use googletrans(4.0.0rc1) module to create missing translations, copy them to respective files, review phrases and commas.
 python3 i18n.py fill
+
+# Create missing translations for a single language. Ex: Brazilian Portuguese
+python3 i18n.py fill pt-BR.json
 
 # Make sure all files have this new translated message:
 python3 i18n.py validate

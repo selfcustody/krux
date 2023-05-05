@@ -14,7 +14,6 @@
     "ABC": "ABC",
     "About": "About",
     "Adafruit": "Adafruit",
-    "Add BIP39 passphrase?": "Add Pokédex passphrase?",
     "Address": "League",
     "Align camera and Tiny Seed properly.": "Align camera and Tiny Card properly.",
     "Anti-glare disabled": "Anti-glare disabled",
@@ -109,7 +108,6 @@
     "Not enough rolls!": "Not enough rolls!",
     "Octal": "Octal",
     "PSBT": "Creature",
-    "PSBT selected:\n\n%s": "Creature selected:\n\n%s",
     "Paint punched dots black so they can be detected.": "Paint punched dots black so they can be detected.",
     "Paper Width": "Paper Width",
     "Part\n%d / %d": "Part\n%d / %d",
@@ -125,7 +123,6 @@
     "Printing\n%d / %d": "Printing\n%d / %d",
     "Printing ...": "Printing ...",
     "Proceed?": "Proceed?",
-    "Public Key:\n\n%s": "Public Pokéball:\n\n%s",
     "RX Pin": "RX Pin",
     "Receive": "Receive",
     "Receive Addresses": "Receive Leagues",
@@ -134,7 +131,6 @@
     "Roll die at least %d times to generate a mnemonic.": "Roll die at least %d times to generate names.",
     "Rolls:\n\n%s": "Rolls:\n\n%s",
     "Rolls: %d\n": "Rolls: %d\n",
-    "SD Check": "SD Check",
     "SD card": "SD card",
     "SD card not detected.": "SD card not detected.",
     "SHA256 of rolls:\n\n%s": "SHA256 of rolls:\n\n%s",
@@ -187,6 +183,5 @@
     "Words": "Pokémons",
     "Yes": "Yes",
     "Your changes will be kept on device flash storage.": "Your changes will be kept on device flash storage.",
-    "Your changes will be kept on the SD card.": "Your changes will be kept on the SD card.",
-    "₿ %s": "₽ %s"
+    "Your changes will be kept on the SD card.": "Your changes will be kept on the SD card."
 }
