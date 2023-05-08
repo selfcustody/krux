@@ -153,11 +153,11 @@ while True:
         # Login closed due to change of locale at Settings
         login_start_from = 2  # will start Login again from Settings
 
-# TODO: Deeper study of the impact on RAM
 # Unimport Login
 sys.modules.pop("krux.pages.login")
 del sys.modules["krux"].pages.login
 del Login
+# TODO: gc.clloct(), do not load Home when shuting down from login, deeper study of the impact on RAM
 
 while True:
     if not Home(ctx).run():
