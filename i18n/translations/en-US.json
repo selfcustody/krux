@@ -56,6 +56,7 @@
     "Driver": "Driver",
     "Encrypt Mnemonic": "Encrypt Mnemonic",
     "Encrypted mnemonic was not stored": "Encrypted mnemonic was not stored",
+    "Encrypted mnemonic was stored with ID: ": "Encrypted mnemonic was stored with ID: ",
     "Encryption": "Encryption",
     "Encryption Key": "Encryption Key",
     "Encryption mode": "Encryption mode",

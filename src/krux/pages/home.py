@@ -469,7 +469,7 @@ class Home(Page):
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, iv):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Encrypted mnemonic was stored with ID: %s" % mnemonic_id)
+                t("Encrypted mnemonic was stored with ID: ") + mnemonic_id
             )
         else:
             self.ctx.display.clear()

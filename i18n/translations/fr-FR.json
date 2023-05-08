@@ -56,6 +56,7 @@
     "Driver": "Conducteur",
     "Encrypt Mnemonic": "Crypter mnémonique",
     "Encrypted mnemonic was not stored": "Le mnémonique crypté n'a pas été stocké",
+    "Encrypted mnemonic was stored with ID: ": "Mnémonique cryptée a été stockée avec ID:",
     "Encryption": "Chiffrement",
     "Encryption Key": "Clé de cryptage",
     "Encryption mode": "Mode de chiffrement",

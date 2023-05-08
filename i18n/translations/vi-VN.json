@@ -56,6 +56,7 @@
     "Driver": "Người cầm lái",
     "Encrypt Mnemonic": "Mã hóa Mnemonic",
     "Encrypted mnemonic was not stored": "MNemon được mã hóa không được lưu trữ",
+    "Encrypted mnemonic was stored with ID: ": "Mnemonic được mã hóa được lưu trữ với ID:",
     "Encryption": "Mã hóa",
     "Encryption Key": "Khóa mã hóa",
     "Encryption mode": "Chế độ mã hóa",
