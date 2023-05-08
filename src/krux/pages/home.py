@@ -455,14 +455,14 @@ class Home(Page):
                 t("Mnemonic Storage ID"),
                 [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
             )
-            if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
-                self.ctx.display.flash_text(
-                    t("ID already exists\n") + t("Encrypted mnemonic was not stored")
-                )
-                del mnemonic_storage
-                return
         if mnemonic_id in (None, ESC_KEY):
             mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
+        if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
+            self.ctx.display.flash_text(
+                t("ID already exists\n") + t("Encrypted mnemonic was not stored")
+            )
+            del mnemonic_storage
+            return
         words = self.ctx.wallet.key.mnemonic
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
