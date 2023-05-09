@@ -377,6 +377,7 @@ class Home(Page):
     def stackbit(self):
         """Displays which numbers 1248 user should punch on 1248 steel card"""
         from .stack_1248 import Stackbit
+
         stackbit = Stackbit(self.ctx)
         word_index = 1
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -404,6 +405,7 @@ class Home(Page):
     def tiny_seed(self):
         """Displays the seed in Tiny Seed format"""
         from .tiny_seed import TinySeed
+
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()
 
@@ -422,6 +424,7 @@ class Home(Page):
     def store_mnemonic_on_memory(self, sd_card=False):
         """Save encrypted mnemonic on flash or sd_card"""
         from ..encryption import MnemonicStorage
+
         key = self.capture_from_keypad(
             t("Encryption Key"),
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
@@ -452,21 +455,21 @@ class Home(Page):
                 t("Mnemonic Storage ID"),
                 [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
             )
-            if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
-                self.ctx.display.flash_text(
-                    t("ID already exists\n") + t("Encrypted mnemonic was not stored")
-                )
-                del mnemonic_storage
-                return
         if mnemonic_id in (None, ESC_KEY):
             mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
+        if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
+            self.ctx.display.flash_text(
+                t("ID already exists\n") + t("Encrypted mnemonic was not stored")
+            )
+            del mnemonic_storage
+            return
         words = self.ctx.wallet.key.mnemonic
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, iv):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Encrypted mnemonic was stored with ID: %s" % mnemonic_id)
+                t("Encrypted mnemonic was stored with ID: ") + mnemonic_id
             )
         else:
             self.ctx.display.clear()
@@ -476,6 +479,7 @@ class Home(Page):
 
     def encrypt_mnemonic(self):
         from ..encryption import MnemonicStorage
+
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
         encrypt_outputs_menu = []
         encrypt_outputs_menu.append(
