@@ -159,11 +159,12 @@ del sys.modules["krux"].pages.login
 del Login
 # TODO: gc.clloct(), do not load Home when shuting down from login, deeper study of the impact on RAM
 
-while True:
-    if not Home(ctx).run():
-        break
-from krux.krux_settings import t
+if ctx.wallet is not None:
+    while True:
+        if not Home(ctx).run():
+            break
 
+from krux.krux_settings import t
 ctx.display.flash_text(t("Shutting down.."))
 
 ctx.clear()
