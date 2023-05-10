@@ -160,7 +160,7 @@ class Page:
                     break
                 elif pad.cur_key_index == pad.more_index:
                     pad.next_keyset()
-                else:
+                elif pad.cur_key_index < len(pad.keys):
                     buffer += pad.keys[pad.cur_key_index]
                     changed = True
 
@@ -860,12 +860,14 @@ class Keypad:
     @property
     def more_index(self):
         """Returns the index of the "More" key"""
-        return len(self.keys)
+        if len(self.keysets) > 1:
+            return self.del_index - 1
+        return None
 
     @property
     def del_index(self):
         """Returns the index of the "Del" key"""
-        return len(self.keys) + (1 if len(self.keysets) > 1 else 0)
+        return len(self.keys) + self.empty_keys + (1 if len(self.keysets) > 1 else 0)
 
     @property
     def esc_index(self):
@@ -886,6 +888,16 @@ class Keypad:
     def height(self):
         """Returns the needed height for the current keyset"""
         return math.ceil((self.total_keys) / self.width)
+
+    @property
+    def max_index(self):
+        """Returns last possible key index"""
+        return self.width * self.height
+
+    @property
+    def empty_keys(self):
+        """Returns dummy keys space needed to always position fixed keys at bottom right"""
+        return self.max_index - self.total_keys
 
     def reset(self):
         """Reset parameters when switching a multi-keypad"""
@@ -929,16 +941,21 @@ class Keypad:
             offset_y = y + (self.key_v_spacing - self.ctx.display.font_height) // 2
             for x in self.x_keypad_map[:-1]:
                 key = None
+                custom_color = None
                 if key_index < len(self.keys):
                     key = self.keys[key_index]
                 elif key_index == self.del_index:
                     key = "<"
+                    custom_color = lcd.YELLOW
                 elif key_index == self.esc_index:
                     key = t("Esc")
+                    custom_color = lcd.RED
                 elif key_index == self.go_index:
                     key = t("Go")
+                    custom_color = lcd.GREEN
                 elif key_index == self.more_index and len(self.keysets) > 1:
                     key = t("ABC")
+                    custom_color = lcd.BLUE
                 if key is not None:
                     offset_x = x
                     key_offset_x = (
@@ -962,9 +979,14 @@ class Keypad:
                                 self.key_v_spacing - 2,
                                 lcd.DARKGREY,
                             )
-                        self.ctx.display.draw_string(
-                            key_offset_x, offset_y, key, lcd.WHITE
-                        )
+                        if custom_color:
+                            self.ctx.display.draw_string(
+                                key_offset_x, offset_y, key, custom_color
+                            )
+                        else:
+                            self.ctx.display.draw_string(
+                                key_offset_x, offset_y, key, lcd.WHITE
+                            )
                     if (
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active
@@ -1007,7 +1029,7 @@ class Keypad:
         if self.cur_key_index < len(self.keys):
             if self.keys[self.cur_key_index] in possible_keys:
                 actual_button = BUTTON_ENTER
-        elif self.cur_key_index < self.total_keys:
+        elif self.cur_key_index < self.max_index:
             actual_button = BUTTON_ENTER
         else:
             self.cur_key_index = 0
@@ -1030,12 +1052,17 @@ class Keypad:
     def _next_key(self):
         """Increments cursor when page button is pressed"""
         self.moving_forward = True
-        self.cur_key_index = (self.cur_key_index + 1) % self.total_keys
+        self.cur_key_index = (self.cur_key_index + 1) % self.max_index
+        if self.cur_key_index == len(self.keys):
+            self.cur_key_index += self.empty_keys
 
     def _previous_key(self):
         """Decrements cursor when page_prev button is pressed"""
         self.moving_forward = False
-        self.cur_key_index = (self.cur_key_index - 1) % self.total_keys
+        if self.cur_key_index == len(self.keys) + self.empty_keys:
+            self.cur_key_index = len(self.keys) - 1
+        else:
+            self.cur_key_index = (self.cur_key_index - 1) % self.max_index
 
     def next_keyset(self):
         """Change keys for the next keyset"""
