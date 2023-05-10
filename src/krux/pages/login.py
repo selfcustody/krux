@@ -156,10 +156,10 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def load_encrypted_seed(self, mnemonic_id, sd_card=False, delete=False):
+    def _load_encrypted_seed(self, mnemonic_id, sd_card=False, delete=False):
+        """Uses encryption module to load and decrypt a mnemonic"""
         from ..encryption import MnemonicStorage
 
-        """Load a selected seed from the encrypted file"""
         key = self.capture_from_keypad(
             t("Encryption Key"),
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
@@ -202,7 +202,7 @@ class Login(Page):
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(flash)",
-                    lambda m_id=mnemonic_id: self.load_encrypted_seed(
+                    lambda m_id=mnemonic_id: self._load_encrypted_seed(
                         m_id, delete=delete
                     ),
                 )
@@ -212,7 +212,7 @@ class Login(Page):
                 mnemonic_ids_menu.append(
                     (
                         mnemonic_id + "(SD card)",
-                        lambda m_id=mnemonic_id: self.load_encrypted_seed(
+                        lambda m_id=mnemonic_id: self._load_encrypted_seed(
                             m_id, sd_card=True, delete=delete
                         ),
                     )

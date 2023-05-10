@@ -19,8 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+
 import sys
-import time
+import gc
+import lcd
 
 sys.path.append("")
 sys.path.append(".")
@@ -47,124 +49,68 @@ SPLASH = """
     1:-1
 ]
 
-SPLASH_ALT = """
-          /|         
-         /_|         
- ________| |         
-<_|_.'   " |         
-    / O . O \,--,    
-    | .---. |/ /     
-    \* \_/ */ /      
- ____\     / /______ 
-/           / \     |
-'---.       |__\  __|
-    |       |\ __|   
-   /        \__\     
-   \        /        
-    ;-.--.-:_        
-   <__;   '__>       
-     Pokémon!        
-"""[
-    1:-1
-]
-
-from krux import firmware
 from krux.power import power_manager
 
-if firmware.upgrade():
-    power_manager.shutdown()
 
-# Unimport firware
-sys.modules.pop("krux.firmware")
-del sys.modules["krux"].firmware
-del firmware
+def check_for_updates():
+    """Checks SD card, if a valid firmware is found asks if user wants to update the device"""
+    from krux import firmware
 
-# Note: These imports come after the firmware upgrade check
-#       to allow it to have more memory to work with
-import lcd
+    if firmware.upgrade():
+        power_manager.shutdown()
+
+    # Unimport firware
+    sys.modules.pop("krux.firmware")
+    del sys.modules["krux"].firmware
+    del firmware
+
+
+def login(ctx_login):
+    """Loads and run the Login page"""
+    from krux.pages.login import Login
+
+    login_start_from = None
+    while True:
+        if not Login(ctx_login).run(login_start_from):
+            break
+
+        if ctx_login.wallet is not None:
+            # Have a loaded wallet
+            break
+        # Login closed due to change of locale at Settings
+        login_start_from = 2  # will start Login again from Settings
+
+    # Unimport Login the free memory
+    sys.modules.pop("krux.pages.login")
+    del sys.modules["krux"].pages.login
+    del Login
+
+
+def home(ctx_home):
+    """Loads and run the Login page"""
+    from krux.pages.home import Home
+
+    if ctx_home.wallet is not None:
+        while True:
+            if not Home(ctx_home).run():
+                break
+
+
+check_for_updates()
+gc.collect()
+
 from krux.context import Context
 
 ctx = Context()
 ctx.power_manager = power_manager
-
-# Check for the correct SPLASH
-try:
-    import ujson as json
-except ImportError:
-    import json
-
-settings = {}
-file_location = "/flash/"
-filename = "settings.json"
-
-# Check for the correct settings persist location
-try:
-    with open(file_location + filename, "r") as f:
-        settings = json.loads(f.read())
-except:
-    pass
-
-file_location = (
-    settings.get("settings", {}).get("persist", {}).get("location", "undefined")
-)
-
-# Settings file not found on flash, or key is missing
-if file_location != "flash":
-    file_location = "/sd/"
-    try:
-        with open(file_location + filename, "r") as f:
-            settings = json.loads(f.read())
-    except:
-        pass
-
-# Check if locale is set to pokemon to change SPLASH
-if settings.get("settings", {}).get("i18n", {}).get("locale", "undefined") == "pokemon":
-    ctx.display.draw_centered_text(SPLASH_ALT.split("\n"), color=lcd.WHITE)
-else:
-    ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
-
-del settings, file_location, filename
-
 # Display splash while loading pages
+ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
+login(ctx)
+gc.collect()
+home(ctx)
 
-
-preimport_ticks = time.ticks_ms()
-from krux.pages.login import Login
-from krux.pages.home import Home
-
-postimport_ticks = time.ticks_ms()
-
-# If importing happened in under 1s, sleep the difference so the logo
-# will be shown
-MIN_LOGO_TIME = 1000  # 1s
-if preimport_ticks + MIN_LOGO_TIME > postimport_ticks:
-    time.sleep_ms(preimport_ticks + MIN_LOGO_TIME - postimport_ticks)
-del preimport_ticks, postimport_ticks, MIN_LOGO_TIME
-
-login_start_from = None
-while True:
-    if not Login(ctx).run(login_start_from):
-        break
-
-    if ctx.wallet is not None:
-        # Have a loaded wallet
-        break
-    else:
-        # Login closed due to change of locale at Settings
-        login_start_from = 2  # will start Login again from Settings
-
-# Unimport Login
-sys.modules.pop("krux.pages.login")
-del sys.modules["krux"].pages.login
-del Login
-# TODO: gc.clloct(), do not load Home when shuting down from login, deeper study of the impact on RAM
-
-while True:
-    if not Home(ctx).run():
-        break
 from krux.krux_settings import t
 
 ctx.display.flash_text(t("Shutting down.."))
-
 ctx.clear()
 power_manager.shutdown()

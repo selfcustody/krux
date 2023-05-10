@@ -23,7 +23,6 @@ import binascii
 import gc
 import hashlib
 import lcd
-from embit.wordlists.bip39 import WORDLIST
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
@@ -42,17 +41,7 @@ from . import (
     NUM_SPECIAL_2,
 )
 from ..sd_card import SDHandler
-from ..input import (
-    BUTTON_ENTER,
-    BUTTON_PAGE,
-    BUTTON_PAGE_PREV,
-    BUTTON_TOUCH,
-    SWIPE_DOWN,
-    SWIPE_RIGHT,
-    SWIPE_LEFT,
-    SWIPE_UP,
-)
-import qrcode
+
 from ..printers import create_printer
 from ..printers.cnc import FilePrinter
 import board
@@ -173,206 +162,12 @@ class Home(Page):
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
-        """Disables touch and displays compact SeedQR code with grid to help
-        drawing"""
+        """Display Seed QR with with different view modes"""
 
-        def region_legend(row, column):
-            region_char = chr(65 + row)
-            self.ctx.display.draw_hcentered_text(
-                t("Region: ") + region_char + str(column + 1),
-                self.ctx.display.qr_offset(),
-                color=lcd.RED,
-            )
+        from .seed_qr_view import SeedQRView
 
-        def draw_grided_qr(mode, qr_size):
-            """Draws grided QR"""
-            self.ctx.display.clear()
-            if self.ctx.display.width() > 140:
-                grid_size = self.ctx.display.width() // 140
-            else:
-                grid_size = 1
-            grid_offset = self.ctx.display.width() % (qr_size + 2)
-            grid_offset //= 2
-            grid_pad = self.ctx.display.width() // (qr_size + 2)
-            grid_offset += grid_pad
-            if mode == STANDARD_MODE:
-                self.ctx.display.draw_qr_code(0, code)
-            elif mode == LINE_MODE:
-                self.ctx.display.draw_qr_code(0, code, light_color=lcd.DARKGREY)
-                self.highlight_qr_region(code, region=(0, lr_index, qr_size, 1))
-                line_offset = grid_pad * lr_index
-                for i in range(2):
-                    self.ctx.display.fill_rectangle(
-                        grid_offset,
-                        grid_offset + i * grid_pad + line_offset,
-                        qr_size * grid_pad + 1,
-                        grid_size,
-                        lcd.RED,
-                    )
-                for i in range(qr_size + 1):
-                    self.ctx.display.fill_rectangle(
-                        grid_offset + i * grid_pad,
-                        grid_offset + line_offset,
-                        grid_size,
-                        grid_pad + 1,
-                        lcd.RED,
-                    )
-                self.ctx.display.draw_hcentered_text(
-                    t("Line: ") + str(lr_index + 1),
-                    self.ctx.display.qr_offset(),
-                    color=lcd.RED,
-                )
-            elif mode == ZOOMED_R_MODE:
-                max_width = self.ctx.display.width() - DEFAULT_PADDING
-                zoomed_grid_pad = max_width // region_size
-                zoomed_grid_offset = (
-                    self.ctx.display.width() - region_size * zoomed_grid_pad
-                )
-                zoomed_grid_offset //= 2
-                row = lr_index // columns
-                column = lr_index % columns
-                self.highlight_qr_region(
-                    code,
-                    region=(
-                        column * region_size,
-                        (row) * region_size,
-                        region_size,
-                        region_size,
-                    ),
-                    zoom=True,
-                )
-                for i in range(region_size + 1):
-                    self.ctx.display.fill_rectangle(
-                        zoomed_grid_offset,
-                        zoomed_grid_offset + i * zoomed_grid_pad,
-                        region_size * zoomed_grid_pad + 1,
-                        grid_size,
-                        lcd.RED,
-                    )
-                for i in range(region_size + 1):
-                    self.ctx.display.fill_rectangle(
-                        zoomed_grid_offset + i * zoomed_grid_pad,
-                        zoomed_grid_offset,
-                        grid_size,
-                        region_size * zoomed_grid_pad + 1,
-                        lcd.RED,
-                    )
-                region_legend(row, column)
-            elif mode == REGION_MODE:
-                row = lr_index // columns
-                column = lr_index % columns
-                self.ctx.display.draw_qr_code(0, code, light_color=lcd.DARKGREY)
-                self.highlight_qr_region(
-                    code,
-                    region=(
-                        column * region_size,
-                        (row) * region_size,
-                        region_size,
-                        region_size,
-                    ),
-                )
-                line_offset = grid_pad * row * region_size
-                colunm_offset = grid_pad * column * region_size
-                for i in range(region_size + 1):
-                    self.ctx.display.fill_rectangle(
-                        grid_offset + colunm_offset,
-                        grid_offset + i * grid_pad + line_offset,
-                        region_size * grid_pad + 1,
-                        grid_size,
-                        lcd.RED,
-                    )
-                for i in range(region_size + 1):
-                    self.ctx.display.fill_rectangle(
-                        grid_offset + i * grid_pad + colunm_offset,
-                        grid_offset + line_offset,
-                        grid_size,
-                        region_size * grid_pad + 1,
-                        lcd.RED,
-                    )
-                region_legend(row, column)
-            else:  #  TRANSCRIBE_MODE
-                self.ctx.display.draw_qr_code(0, code, light_color=lcd.WHITE)
-                for i in range(qr_size + 1):
-                    self.ctx.display.fill_rectangle(
-                        grid_offset,
-                        grid_offset + i * grid_pad,
-                        qr_size * grid_pad + 1,
-                        grid_size,
-                        lcd.RED,
-                    )
-                    self.ctx.display.fill_rectangle(
-                        grid_offset + i * grid_pad,
-                        grid_offset,
-                        grid_size,
-                        qr_size * grid_pad + 1,
-                        lcd.RED,
-                    )
-
-        if binary:
-            code, qr_size = self._binary_seed_qr()
-            label = t("Compact SeedQR")
-        else:
-            code, qr_size = self._seed_qr()
-            label = t("SeedQR")
-        label += "\n" + t("Swipe to change mode")
-        mode = 0
-        lr_index = 0
-        region_size = 7 if qr_size == 21 else 5
-        columns = (qr_size + region_size - 1) // region_size
-        button = None
-        while button not in (SWIPE_DOWN, SWIPE_UP):
-            draw_grided_qr(mode, qr_size)
-            if self.ctx.input.touch is not None:
-                self.ctx.display.draw_hcentered_text(
-                    label,
-                    self.ctx.display.qr_offset() + self.ctx.display.font_height,
-                    color=lcd.WHITE,
-                )
-            # # Avoid the need of double click
-            # self.ctx.input.buttons_active = True
-            button = self.ctx.input.wait_for_button()
-            if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
-                mode += 1
-                mode %= 5
-                lr_index = 0
-                # draw_grided_qr(grid_size, qr_size)
-            elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
-                mode -= 1
-                mode %= 5
-                lr_index = 0
-            elif button in (BUTTON_ENTER, BUTTON_TOUCH):
-                if mode in (LINE_MODE, REGION_MODE, ZOOMED_R_MODE):
-                    lr_index += 1
-                else:
-                    if not (button == BUTTON_TOUCH and mode == TRANSCRIBE_MODE):
-                        button = SWIPE_DOWN  # leave
-            if mode == LINE_MODE:
-                lr_index %= qr_size
-            elif mode in (REGION_MODE, ZOOMED_R_MODE):
-                lr_index %= columns * columns
-        if self.ctx.printer is None:
-            return MENU_CONTINUE
-        self.ctx.display.clear()
-        if self.prompt(
-            t("Print to QR?\n\n%s\n\n") % Settings().printer.driver,
-            self.ctx.display.height() // 2,
-        ):
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(
-                t("Printing ..."), self.ctx.display.height() // 2
-            )
-            if binary:
-                self.ctx.printer.print_string("Compact SeedQR\n\n")
-            else:
-                self.ctx.printer.print_string("SeedQR\n\n")
-
-            # Warn of SD read here because Printer don't have access to display
-            if isinstance(self.ctx.printer, FilePrinter):
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-
-            self.ctx.printer.print_qr_code(code)
-        return MENU_CONTINUE
+        seed_qr_view = SeedQRView(self.ctx, binary)
+        return seed_qr_view.display_seed_qr()
 
     def stackbit(self):
         """Displays which numbers 1248 user should punch on 1248 steel card"""
@@ -433,7 +228,7 @@ class Home(Page):
             self.ctx.display.flash_text(t("Encrypted mnemonic was not stored"))
             return
         version = Settings().encryption.version
-        iv = None
+        i_vector = None
         if version == "AES-CBC":
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
@@ -441,7 +236,7 @@ class Home(Page):
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return
-            iv = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
+            i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
         self.ctx.display.clear()
         mnemonic_storage = MnemonicStorage()
         mnemonic_id = None
@@ -466,7 +261,7 @@ class Home(Page):
         words = self.ctx.wallet.key.mnemonic
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
-        if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, iv):
+        if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, i_vector):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Encrypted mnemonic was stored with ID: ") + mnemonic_id
@@ -478,9 +273,9 @@ class Home(Page):
         del mnemonic_storage
 
     def encrypt_mnemonic(self):
+        """Handler for Mnemonic > Encrypt Mnemonic menu item"""
         from ..encryption import MnemonicStorage
 
-        """Handler for Mnemonic > Encrypt Mnemonic menu item"""
         encrypt_outputs_menu = []
         encrypt_outputs_menu.append(
             (t("Store on Flash"), self.store_mnemonic_on_memory)
@@ -534,28 +329,6 @@ class Home(Page):
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             self.print_qr_prompt(wallet_data, qr_format, t("Wallet output descriptor"))
         return MENU_CONTINUE
-
-    def _seed_qr(self):
-        words = self.ctx.wallet.key.mnemonic.split(" ")
-        numbers = ""
-        for word in words:
-            numbers += str("%04d" % WORDLIST.index(word))
-        qr_size = 25 if len(words) == 12 else 29
-        return qrcode.encode_to_string(numbers), qr_size
-
-    def _binary_seed_qr(self):
-        binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
-        qr_size = 21 if len(binary_seed) == 16 else 25
-        return qrcode.encode_to_string(binary_seed), qr_size
-
-    def _to_compact_seed_qr(self, mnemonic):
-        mnemonic = mnemonic.split(" ")
-        checksum_bits = 8 if len(mnemonic) == 24 else 4
-        indexes = [WORDLIST.index(word) for word in mnemonic]
-        bitstring = "".join(["{:0>11}".format(bin(index)[2:]) for index in indexes])[
-            :-checksum_bits
-        ]
-        return int(bitstring, 2).to_bytes((len(bitstring) + 7) // 8, "big")
 
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
@@ -817,7 +590,8 @@ class Home(Page):
         if not self.ctx.wallet.is_loaded():
             self.ctx.display.draw_centered_text(
                 t(
-                    "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+                    """Warning:\nWallet output descriptor not found.\n\n
+                    Some checks cannot be performed."""
                 ),
                 lcd.WHITE,
             )

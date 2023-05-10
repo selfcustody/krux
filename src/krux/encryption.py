@@ -54,20 +54,20 @@ class AESCipher:
             "sha256", key.encode(), salt.encode(), iterations
         )
 
-    def encrypt(self, raw, mode=ucryptolib.MODE_ECB, iv=None):
+    def encrypt(self, raw, mode=ucryptolib.MODE_ECB, i_vector=None):
         """Encrypt using AES MODE_ECB and return the value encoded as base64"""
         data_bytes = raw.encode()
-        encryptor = ucryptolib.aes(self.key, mode, iv)
-        if iv:
-            data_bytes = iv + data_bytes
+        encryptor = ucryptolib.aes(self.key, mode, i_vector)
+        if i_vector:
+            data_bytes = i_vector + data_bytes
         encrypted = encryptor.encrypt(
             data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
         )
         return base_encode(encrypted, 64)
 
-    def decrypt(self, encrypted, mode, iv=None):
+    def decrypt(self, encrypted, mode, i_vector=None):
         """Decrypt a base64 using AES MODE_ECB and return the value decoded as string"""
-        decryptor = ucryptolib.aes(self.key, mode, iv)
+        decryptor = ucryptolib.aes(self.key, mode, i_vector)
         load = decryptor.decrypt(encrypted).decode("utf-8")
         return load.replace("\x00", "")
 
@@ -116,19 +116,19 @@ class MnemonicStorage:
         mode = VERSION_MODE[version]
         if mode == ucryptolib.MODE_ECB:
             encrypted_mnemonic = data
-            iv = None
+            i_vector = None
         else:
             encrypted_mnemonic = data[AES_BLOCK_SIZE:]
-            iv = data[:AES_BLOCK_SIZE]
+            i_vector = data[:AES_BLOCK_SIZE]
         decryptor = AESCipher(key, mnemonic_id, iterations)
-        words = decryptor.decrypt(encrypted_mnemonic, mode, iv)
+        words = decryptor.decrypt(encrypted_mnemonic, mode, i_vector)
         return words
 
-    def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, iv=None):
+    def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, i_vector=None):
         """Saves the encrypted mnemonic on a file"""
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
         mode = VERSION_MODE[Settings().encryption.version]
-        encrypted = encryptor.encrypt(mnemonic, mode, iv).decode("utf-8")
+        encrypted = encryptor.encrypt(mnemonic, mode, i_vector).decode("utf-8")
         mnemonics = {}
         success = True
         if sd_card:
