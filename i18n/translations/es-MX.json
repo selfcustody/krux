@@ -223,7 +223,6 @@
     "Wallet output descriptor loaded!": "¡Se ha cargado el descriptor de salida de la cartera!",
     "Wallet output descriptor not found.": "No se encontró el descriptor de salida de la cartera.",
     "Warning:\nIncomplete output descriptor": "Advertencia:\nDescriptor de salida incompleto",
-    "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed.": "Advertencia:\nNo se encontró el descriptor de salida de la cartera.\n\nNo se pueden realizar algunas comprobaciones.",
     "Word %d": "Palabra %d",
     "Word Numbers": "Números de palabra",
     "Words": "Palabras",

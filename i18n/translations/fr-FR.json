@@ -223,7 +223,6 @@
     "Wallet output descriptor loaded!": "Descripteur de sortie du portefeuille chargé!",
     "Wallet output descriptor not found.": "Descripteur de sortie du portefeuille introuvable.",
     "Warning:\nIncomplete output descriptor": "Attention:\nDescripteur de sortie incomplet",
-    "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed.": "Attention:\nDescripteur de sortie du portefeuille introuvable.\n\nLes vérifications ne peuvent pas être effectuées.",
     "Word %d": "Mot %d",
     "Word Numbers": "Numéros de mots",
     "Words": "Mots",

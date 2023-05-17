@@ -358,11 +358,11 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
         ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
-        mocker.spy(home, "_binary_seed_qr")
+        mocker.spy(home, "display_seed_qr")
         # mocker.spy(home, "print_qr_prompt")
         home.mnemonic()
 
-        home._binary_seed_qr.assert_called_once()
+        home.display_seed_qr.assert_called_once()
         # home.print_qr_prompt.assert_called_once()
 
         assert ctx.input.wait_for_button.call_count == len(case[2])

@@ -89,7 +89,7 @@ poetry run pytest --cache-clear --cov src/krux --cov-report html --show-capture 
 
 To run just a specific test from a specific file, run:
 ```bash
-poetry run pytest --cache-clear .\tests\pages\test_login.py -k 'test_load_key_from_hexadecimal'
+poetry run pytest --cache-clear ./tests/pages/test_login.py -k 'test_load_key_from_hexadecimal'
 ```
 
 ## Use the Python interpreter (REPL)

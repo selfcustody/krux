@@ -223,7 +223,6 @@
     "Wallet output descriptor loaded!": "Đã tải bộ mô tả đầu ra của ví!",
     "Wallet output descriptor not found.": "Không tìm thấy bộ mô tả đầu ra ví.",
     "Warning:\nIncomplete output descriptor": "Cảnh báo:\nBộ mô tả đầu ra chưa hoàn chỉnh",
-    "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed.": "Cảnh báo:\nKhông tìm thấy bộ mô tả đầu ra ví.\n\nMột số kiểm tra có thể chưa được thực hiện.",
     "Word %d": "Kí tự %d",
     "Word Numbers": "Từ số",
     "Words": "Từ ngữ",
