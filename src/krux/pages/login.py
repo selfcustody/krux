@@ -468,6 +468,31 @@ class Login(Page):
             self.ctx.log.exception("Exception occurred connecting to printer")
         return MENU_EXIT
 
+    def _encrypted_qr_code(self, data):
+        from ..encryption import EncryptedQRCode
+
+        encrypted_qr = EncryptedQRCode()
+        data_bytes = data.encode("latin-1") if isinstance(data, str) else data
+        public_data = encrypted_qr.public_data(data_bytes)
+        if public_data:
+            self.ctx.display.clear()
+            if self.prompt(
+                public_data + t("\n\nDecrypt?"), self.ctx.display.height() // 2
+            ):
+                key = self.capture_from_keypad(
+                    t("Encryption Key"),
+                    [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
+                )
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Processing ..."))
+                if key in ("", ESC_KEY):
+                    raise ValueError(t("Failed to decrypt"))
+                word_bytes = encrypted_qr.decrypt(key)
+                if word_bytes is None:
+                    raise ValueError(t("Failed to decrypt"))
+                return bip39.mnemonic_from_bytes(word_bytes).split()
+        return None
+
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
@@ -502,7 +527,8 @@ class Login(Page):
                         ]
                 except:
                     pass
-
+            if not words:
+                words = self._encrypted_qr_code(data)
         if not words or (len(words) != 12 and len(words) != 24):
             self.ctx.display.flash_text(t("Invalid mnemonic length"), lcd.RED)
             return MENU_CONTINUE

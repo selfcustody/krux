@@ -247,7 +247,7 @@ class Home(Page):
             self.ctx.display.height() // 2,
         ):
             mnemonic_id = self.capture_from_keypad(
-                t("Mnemonic Storage ID"),
+                t("Mnemonic ID"),
                 [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
             )
         if mnemonic_id in (None, ESC_KEY):
@@ -272,6 +272,61 @@ class Home(Page):
         self.ctx.input.wait_for_button()
         del mnemonic_storage
 
+    def encrypted_qr_code(self):
+        """Exports an encryprted mnemonic QR code """
+        key = self.capture_from_keypad(
+            t("Encryption Key"),
+            [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
+        )
+        if key in ("", ESC_KEY):
+            self.ctx.display.flash_text(t("Encrypted mnemonic was not stored"))
+            return
+        version = Settings().encryption.version
+        i_vector = None
+        if version == "AES-CBC":
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Aditional entropy from camera required for AES-CBC mode")
+            )
+            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+                return
+            i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
+        mnemonic_id = None
+        self.ctx.display.clear()
+        if self.prompt(
+            t(
+                "Give this mnemonic a custom ID? Otherwise current fingerprint will be used"
+            ),
+            self.ctx.display.height() // 2,
+        ):
+            mnemonic_id = self.capture_from_keypad(
+                t("Mnemonic Storage ID"),
+                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
+            )
+        if mnemonic_id in (None, ESC_KEY):
+            mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
+
+        words = self.ctx.wallet.key.mnemonic
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing ..."))
+
+        from ..encryption import EncryptedQRCode
+        import qrcode
+
+        encrypted_qr = EncryptedQRCode()
+        qr_data = encrypted_qr.create(key, mnemonic_id, words, i_vector)
+        title = "Encrypted Mnemonic"
+        code = qrcode.encode_to_string(qr_data)
+        self.ctx.display.clear()
+        self.ctx.display.draw_qr_code(0, code)
+        self.ctx.display.draw_hcentered_text(
+            t("Encrypted Mnemonic"),
+            self.ctx.display.qr_offset() + self.ctx.display.font_height,
+            color=lcd.WHITE,
+        )
+        self.ctx.input.wait_for_button()
+        self.print_qr_prompt(qr_data, FORMAT_NONE, title)
+
     def encrypt_mnemonic(self):
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
         from ..encryption import MnemonicStorage
@@ -289,6 +344,7 @@ class Home(Page):
                 )
             )
         del mnemonic_storage
+        encrypt_outputs_menu.append((t("Encrypted QR Code"), self.encrypted_qr_code))
         encrypt_outputs_menu.append((t("Back"), lambda: MENU_EXIT))
         submenu = Menu(self.ctx, encrypt_outputs_menu)
         _, _ = submenu.run_loop()
