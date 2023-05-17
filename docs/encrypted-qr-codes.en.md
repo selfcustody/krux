@@ -1,6 +1,6 @@
 ## Introduction
 
-There are many possible security layers one could add to protect a wallet’s private key, adding a passphrase to the mnemonic is the most common. To encrypt a mnemonic would have similar use as the passphrase, but, depending on how it is done, the user experience could be different. The main difference from passphrases to Krux’s encrypted mnemonic implementation is that when users type the wrong key, instead of loading a different wallet, encrypted mnemonic QR codes will return an error. This is not considered an advantage, but a difference, that may be desired or not. The implementation also has the convenience storing a mnemonic ID on the QR code. Mnemonic encryption, with its own key, can be used together with passphrases as an extra security layer.
+There are many possible security layers one could add to protect a wallet’s private key, adding a passphrase to the mnemonic is the most common. To encrypt a mnemonic would have similar use case as the passphrase, but, depending on how it is done, the user experience could be different. The main difference from passphrases to Krux’s encrypted mnemonic implementation is that when users type the wrong key, instead of loading a different wallet, encrypted mnemonic QR codes will return an error. This is not considered an advantage, but a difference, that may be desired or not. The implementation also has the convenience of storing a mnemonic ID on the QR code. Mnemonic encryption, with its own key, can be used together with passphrases as an extra security layer.
 
 ## QR Data and Parsing
 In search of efficiency and smaller QR codes, all data is converted to bytes and organized like a Bitcoin transaction, with variable and fixed length fields. The following data is present on the QR code:
@@ -29,6 +29,6 @@ In search of efficiency and smaller QR codes, all data is converted to bytes and
 
 (6) - Encrypted Mnemonic(16 Bytes - 12 words, 32 Bytes - 24 words): Mnemonic ciphertext.
 
-(7) - Validation block(16 Bytes): Currently using first 16 bytes os sha256 of the mnemonic bytes, could be used in future to store AES-AEX validation tag.
+(7) - Validation block(16 Bytes): Currently using first 16 bytes of sha256 of the mnemonic bytes as checksum, could be used in future to store AES-AEX validation tag.
 
 
