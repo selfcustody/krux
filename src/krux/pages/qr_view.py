@@ -25,6 +25,7 @@ import qrcode
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..krux_settings import t, Settings
+from ..qr import get_size
 from ..display import DEFAULT_PADDING
 from . import MENU_CONTINUE
 from ..printers.cnc import FilePrinter
@@ -49,14 +50,21 @@ TRANSCRIBE_MODE = 4
 class SeedQRView(Page):
     """Tools to visualize and transcript Seed QRs"""
 
-    def __init__(self, ctx, binary):
+    def __init__(self, ctx, binary=False, code=None, title=None):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.binary = binary
-        if self.binary:
-            self.code, self.qr_size = self._binary_seed_qr()
+        if code:
+            self.code = code
+            self.title = title
         else:
-            self.code, self.qr_size = self._seed_qr()
+            if self.binary:
+                self.title = t("Compact SeedQR")
+                self.code = self._binary_seed_qr()
+            else:
+                self.title = t("SeedQR")
+                self.code = self._seed_qr()
+        self.qr_size = get_size(self.code)
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
@@ -66,13 +74,13 @@ class SeedQRView(Page):
         numbers = ""
         for word in words:
             numbers += str("%04d" % WORDLIST.index(word))
-        qr_size = 25 if len(words) == 12 else 29
-        return qrcode.encode_to_string(numbers), qr_size
+        # qr_size = 25 if len(words) == 12 else 29
+        return qrcode.encode_to_string(numbers) #, qr_size
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
-        qr_size = 21 if len(binary_seed) == 16 else 25
-        return qrcode.encode_to_string(binary_seed), qr_size
+        # qr_size = 21 if len(binary_seed) == 16 else 25
+        return qrcode.encode_to_string(binary_seed) #, qr_size
 
     def _to_compact_seed_qr(self, mnemonic):
         mnemonic = mnemonic.split(" ")
@@ -217,16 +225,24 @@ class SeedQRView(Page):
             line_offset = grid_pad * row * self.region_size
             colunm_offset = grid_pad * column * self.region_size
             for i in range(self.region_size + 1):
+                x_position = grid_offset + colunm_offset
+                x_lenght = self.region_size * grid_pad + 1
+                display_transpose = x_position + x_lenght - self.ctx.display.width()
+                if  display_transpose > 0:
+                    x_lenght -= display_transpose
                 self.ctx.display.fill_rectangle(
-                    grid_offset + colunm_offset,
+                    x_position,
                     grid_offset + i * grid_pad + line_offset,
-                    self.region_size * grid_pad + 1,
+                    x_lenght,
                     grid_size,
                     lcd.RED,
                 )
             for i in range(self.region_size + 1):
+                x_position = grid_offset + i * grid_pad + colunm_offset
+                if x_position > self.ctx.display.width():
+                    break
                 self.ctx.display.fill_rectangle(
-                    grid_offset + i * grid_pad + colunm_offset,
+                    x_position,
                     grid_offset + line_offset,
                     grid_size,
                     self.region_size * grid_pad + 1,
@@ -254,11 +270,10 @@ class SeedQRView(Page):
     def display_seed_qr(self):
         """Disables touch and displays compact SeedQR code with grid to help
         drawing"""
-
-        if self.binary:
-            label = t("Compact SeedQR")
+        if self.title:
+            label = self.title
         else:
-            label = t("SeedQR")
+            label = ""
         label += "\n" + t("Swipe to change mode")
         mode = 0
         button = None
@@ -302,10 +317,8 @@ class SeedQRView(Page):
             self.ctx.display.draw_hcentered_text(
                 t("Printing ..."), self.ctx.display.height() // 2
             )
-            if self.binary:
-                self.ctx.printer.print_string("Compact SeedQR\n\n")
-            else:
-                self.ctx.printer.print_string("SeedQR\n\n")
+            if self.title:
+                self.ctx.printer.print_string(self.title + "\n\n")
 
             # Warn of SD read here because Printer don't have access to display
             if isinstance(self.ctx.printer, FilePrinter):

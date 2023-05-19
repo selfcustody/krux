@@ -915,18 +915,27 @@ class Login(Page):
             t("Create QR code from text?"),
             self.ctx.display.height() // 2,
         ):
-            text = self.load_passphrase()
+            text = self.capture_from_keypad(
+                t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            )
             if text in ("", ESC_KEY):
                 return MENU_CONTINUE
 
-            self.display_qr_codes(text, FORMAT_NONE, text, allow_any_btn=True)
+            # self.display_qr_codes(text, FORMAT_NONE, text, allow_any_btn=True)
 
             try:
                 self.ctx.printer = create_printer()
             except:
                 self.ctx.log.exception("Exception occurred connecting to printer")
 
-            self.print_qr_prompt(text, FORMAT_NONE, text)
+            # self.print_qr_prompt(text, FORMAT_NONE, text)
+
+            from .qr_view import SeedQRView
+            import qrcode
+
+            code = qrcode.encode_to_string(text)
+            seed_qr_view = SeedQRView(self.ctx, code=code, title="Custom QR Code")
+            return seed_qr_view.display_seed_qr()
         return MENU_CONTINUE
 
     def print_test(self):

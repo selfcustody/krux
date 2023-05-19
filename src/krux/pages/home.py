@@ -164,7 +164,7 @@ class Home(Page):
     def display_seed_qr(self, binary=False):
         """Display Seed QR with with different view modes"""
 
-        from .seed_qr_view import SeedQRView
+        from .qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, binary)
         return seed_qr_view.display_seed_qr()
@@ -315,17 +315,13 @@ class Home(Page):
 
         encrypted_qr = EncryptedQRCode()
         qr_data = encrypted_qr.create(key, mnemonic_id, words, i_vector)
-        title = "Encrypted Mnemonic"
         code = qrcode.encode_to_string(qr_data)
-        self.ctx.display.clear()
-        self.ctx.display.draw_qr_code(0, code)
-        self.ctx.display.draw_hcentered_text(
-            t("Encrypted Mnemonic"),
-            self.ctx.display.qr_offset() + self.ctx.display.font_height,
-            color=lcd.WHITE,
-        )
-        self.ctx.input.wait_for_button()
-        self.print_qr_prompt(qr_data, FORMAT_NONE, title)
+
+        from .qr_view import SeedQRView
+
+        seed_qr_view = SeedQRView(self.ctx, code=code, title=mnemonic_id)
+        return seed_qr_view.display_seed_qr()
+        
 
     def encrypt_mnemonic(self):
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
