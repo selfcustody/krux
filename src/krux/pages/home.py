@@ -220,13 +220,13 @@ class Home(Page):
         """Save encrypted mnemonic on flash or sd_card"""
         from ..encryption import MnemonicStorage
 
-        key = self.capture_from_keypad(
-            t("Encryption Key"),
-            [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
-        )
-        if key in ("", ESC_KEY):
-            self.ctx.display.flash_text(t("Encrypted mnemonic was not stored"))
+        from .encryption_key import EncryptionKey
+        key_capture = EncryptionKey(self.ctx)
+        key = key_capture.encryption_key()
+        if key is None:
+            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
             return
+        
         version = Settings().encryption.version
         i_vector = None
         if version == "AES-CBC":
@@ -274,12 +274,12 @@ class Home(Page):
 
     def encrypted_qr_code(self):
         """Exports an encryprted mnemonic QR code """
-        key = self.capture_from_keypad(
-            t("Encryption Key"),
-            [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
-        )
-        if key in ("", ESC_KEY):
-            self.ctx.display.flash_text(t("Encrypted mnemonic was not stored"))
+
+        from .encryption_key import EncryptionKey
+        key_capture = EncryptionKey(self.ctx)
+        key = key_capture.encryption_key()
+        if key is None:
+            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
             return
         version = Settings().encryption.version
         i_vector = None
