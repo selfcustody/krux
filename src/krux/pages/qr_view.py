@@ -24,6 +24,7 @@ import lcd
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
+from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t, Settings
 from ..qr import get_size
 from ..display import DEFAULT_PADDING
@@ -122,7 +123,15 @@ class SeedQRView(Page):
                         offset + (offset_y + y) * scale,
                         scale,
                         scale,
-                        lcd.WHITE,
+                        WHITE,
+                    )
+                else:
+                    self.ctx.display.fill_rectangle(
+                        offset + (offset_x + x) * scale,
+                        offset + (offset_y + y) * scale,
+                        scale,
+                        scale,
+                        BLACK,
                     )
 
     def _region_legend(self, row, column):
@@ -130,7 +139,7 @@ class SeedQRView(Page):
         self.ctx.display.draw_hcentered_text(
             t("Region: ") + region_char + str(column + 1),
             self.ctx.display.qr_offset(),
-            color=lcd.RED,
+            color=theme.highlight_color,
         )
 
     def draw_grided_qr(self, mode):
@@ -145,9 +154,12 @@ class SeedQRView(Page):
         grid_pad = self.ctx.display.width() // (self.qr_size + 2)
         grid_offset += grid_pad
         if mode == STANDARD_MODE:
-            self.ctx.display.draw_qr_code(0, self.code)
+            if theme.bg_color == WHITE:
+                self.ctx.display.draw_qr_code(0, self.code, light_color=WHITE)
+            else:                
+                self.ctx.display.draw_qr_code(0, self.code)
         elif mode == LINE_MODE:
-            self.ctx.display.draw_qr_code(0, self.code, light_color=lcd.DARKGREY)
+            self.ctx.display.draw_qr_code(0, self.code, light_color=theme.disabled_color)
             self.highlight_qr_region(
                 self.code, region=(0, self.lr_index, self.qr_size, 1)
             )
@@ -158,7 +170,7 @@ class SeedQRView(Page):
                     grid_offset + i * grid_pad + line_offset,
                     self.qr_size * grid_pad + 1,
                     grid_size,
-                    lcd.RED,
+                    theme.highlight_color,
                 )
             for i in range(self.qr_size + 1):
                 self.ctx.display.fill_rectangle(
@@ -166,12 +178,12 @@ class SeedQRView(Page):
                     grid_offset + line_offset,
                     grid_size,
                     grid_pad + 1,
-                    lcd.RED,
+                    theme.highlight_color,
                 )
             self.ctx.display.draw_hcentered_text(
                 t("Line: ") + str(self.lr_index + 1),
                 self.ctx.display.qr_offset(),
-                color=lcd.RED,
+                color=theme.highlight_color,
             )
         elif mode == ZOOMED_R_MODE:
             max_width = self.ctx.display.width() - DEFAULT_PADDING
@@ -198,7 +210,7 @@ class SeedQRView(Page):
                     zoomed_grid_offset + i * zoomed_grid_pad,
                     self.region_size * zoomed_grid_pad + 1,
                     grid_size,
-                    lcd.RED,
+                    theme.highlight_color,
                 )
             for i in range(self.region_size + 1):
                 self.ctx.display.fill_rectangle(
@@ -206,13 +218,13 @@ class SeedQRView(Page):
                     zoomed_grid_offset,
                     grid_size,
                     self.region_size * zoomed_grid_pad + 1,
-                    lcd.RED,
+                    theme.highlight_color,
                 )
             self._region_legend(row, column)
         elif mode == REGION_MODE:
             row = self.lr_index // self.columns
             column = self.lr_index % self.columns
-            self.ctx.display.draw_qr_code(0, self.code, light_color=lcd.DARKGREY)
+            self.ctx.display.draw_qr_code(0, self.code, light_color=theme.frame_color)
             self.highlight_qr_region(
                 self.code,
                 region=(
@@ -235,7 +247,7 @@ class SeedQRView(Page):
                     grid_offset + i * grid_pad + line_offset,
                     x_lenght,
                     grid_size,
-                    lcd.RED,
+                    theme.highlight_color,
                 )
             for i in range(self.region_size + 1):
                 x_position = grid_offset + i * grid_pad + colunm_offset
@@ -246,25 +258,25 @@ class SeedQRView(Page):
                     grid_offset + line_offset,
                     grid_size,
                     self.region_size * grid_pad + 1,
-                    lcd.RED,
+                    theme.highlight_color,
                 )
             self._region_legend(row, column)
         else:  #  TRANSCRIBE_MODE
-            self.ctx.display.draw_qr_code(0, self.code, light_color=lcd.WHITE)
+            self.ctx.display.draw_qr_code(0, self.code, light_color=WHITE)
             for i in range(self.qr_size + 1):
                 self.ctx.display.fill_rectangle(
                     grid_offset,
                     grid_offset + i * grid_pad,
                     self.qr_size * grid_pad + 1,
                     grid_size,
-                    lcd.RED,
+                    theme.highlight_color,
                 )
                 self.ctx.display.fill_rectangle(
                     grid_offset + i * grid_pad,
                     grid_offset,
                     grid_size,
                     self.qr_size * grid_pad + 1,
-                    lcd.RED,
+                    theme.highlight_color,
                 )
 
     def display_seed_qr(self):
@@ -283,7 +295,6 @@ class SeedQRView(Page):
                 self.ctx.display.draw_hcentered_text(
                     label,
                     self.ctx.display.qr_offset() + self.ctx.display.font_height,
-                    color=lcd.WHITE,
                 )
             # # Avoid the need of double click
             # self.ctx.input.buttons_active = True

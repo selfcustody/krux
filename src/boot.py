@@ -104,7 +104,8 @@ from krux.context import Context
 ctx = Context()
 ctx.power_manager = power_manager
 # Display splash while loading pages
-ctx.display.draw_centered_text(SPLASH.split("\n"), color=lcd.WHITE)
+ctx.display.clear()
+ctx.display.draw_centered_text(SPLASH.split("\n"))
 login(ctx)
 gc.collect()
 home(ctx)

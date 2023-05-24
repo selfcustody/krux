@@ -27,11 +27,11 @@ from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
 from urtypes.crypto.bip39 import BIP39
+from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
 from ..metadata import VERSION
 from ..settings import (
     CategorySetting,
     NumberSetting,
-    DARKGREEN,
     SD_PATH,
     FLASH_PATH,
     Store,
@@ -49,6 +49,7 @@ from . import (
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
+    MENU_SHUTDOWN,
     ESC_KEY,
     DEFAULT_PADDING,
     SD_ROOT_PATH,
@@ -77,12 +78,12 @@ SD_MSG_TIME = 2500
 PASSPHRASE_MAX_LEN = 200
 
 CATEGORY_SETTING_COLOR_DICT = {
-    LoggingSettings.ERROR_TXT: lcd.RED,
-    LoggingSettings.WARN_TXT: lcd.ORANGE,
-    LoggingSettings.INFO_TXT: DARKGREEN,
-    LoggingSettings.DEBUG_TXT: lcd.MAGENTA,
-    BitcoinSettings.MAIN_TXT: lcd.ORANGE,
-    BitcoinSettings.TEST_TXT: lcd.GREEN,
+    LoggingSettings.ERROR_TXT: RED,
+    LoggingSettings.WARN_TXT: ORANGE,
+    LoggingSettings.INFO_TXT: GREEN,
+    LoggingSettings.DEBUG_TXT: MAGENTA,
+    BitcoinSettings.MAIN_TXT: ORANGE,
+    BitcoinSettings.TEST_TXT: GREEN,
 }
 
 
@@ -372,12 +373,12 @@ class Login(Page):
     def _load_qr_passphrase(self):
         data, _ = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load passphrase"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load passphrase"), theme.error_color)
             return MENU_CONTINUE
         if len(data) > PASSPHRASE_MAX_LEN:
             self.ctx.display.flash_text(
                 t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN,
-                lcd.RED,
+                theme.error_color,
             )
             return MENU_CONTINUE
         return data
@@ -479,7 +480,7 @@ class Login(Page):
         if public_data:
             self.ctx.display.clear()
             if self.prompt(
-                public_data + t("\n\nDecrypt?"), self.ctx.display.height() // 2
+                public_data + "\n\n" + t("Decrypt?"), self.ctx.display.height() // 2
             ):
                 from .encryption_key import EncryptionKey
                 key_capture = EncryptionKey(self.ctx)
@@ -501,7 +502,7 @@ class Login(Page):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load mnemonic"), theme.error_color)
             return MENU_CONTINUE
 
         words = []
@@ -534,7 +535,7 @@ class Login(Page):
             if not words:
                 words = self._encrypted_qr_code(data)
         if not words or (len(words) != 12 and len(words) != 24):
-            self.ctx.display.flash_text(t("Invalid mnemonic length"), lcd.RED)
+            self.ctx.display.flash_text(t("Invalid mnemonic length"), theme.error_color)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -847,7 +848,7 @@ class Login(Page):
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
         if words is None:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load mnemonic"), theme.error_color)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -877,13 +878,13 @@ class Login(Page):
                     self.ctx.input.touch.y_regions[0],
                     button_width - 1,
                     self.ctx.display.font_height * 3,
-                    lcd.DARKGREY,
+                    theme.frame_color,
                 )
                 offset_x = x
                 offset_x += (
                     button_width - len(keys[i]) * self.ctx.display.font_width
                 ) // 2
-                self.ctx.display.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
+                self.ctx.display.draw_string(offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color)
 
     def _touch_to_physical(self, index):
         """Mimics touch presses into physical button presses"""
@@ -925,14 +926,11 @@ class Login(Page):
             if text in ("", ESC_KEY):
                 return MENU_CONTINUE
 
-            # self.display_qr_codes(text, FORMAT_NONE, text, allow_any_btn=True)
-
+            
             try:
                 self.ctx.printer = create_printer()
             except:
                 self.ctx.log.exception("Exception occurred connecting to printer")
-
-            # self.print_qr_prompt(text, FORMAT_NONE, text)
 
             from .qr_view import SeedQRView
             import qrcode
@@ -947,7 +945,7 @@ class Login(Page):
         try:
             self.ctx.printer = create_printer()
             if not self.ctx.printer:
-                self.ctx.display.flash_text(t("Printer Driver not set!"), lcd.RED)
+                self.ctx.display.flash_text(t("Printer Driver not set!"), theme.error_color)
                 return MENU_CONTINUE
         except:
             self.ctx.log.exception("Exception occurred connecting to printer")
@@ -991,7 +989,7 @@ class Login(Page):
                 ):
                     self.select_file(select_file_handler=self._show_file_details)
         except OSError:
-            self.ctx.display.flash_text(t("SD card not detected"), lcd.RED)
+            self.ctx.display.flash_text(t("SD card not detected"), theme.error_color)
 
         return MENU_CONTINUE
 
@@ -1167,11 +1165,11 @@ class Login(Page):
         starting_category = setting.__get__(settings_namespace)
         while True:
             current_category = setting.__get__(settings_namespace)
-            color = CATEGORY_SETTING_COLOR_DICT.get(current_category, lcd.WHITE)
+            color = CATEGORY_SETTING_COLOR_DICT.get(current_category, theme.fg_color)
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 settings_namespace.label(setting.attr) + "\n" + str(current_category),
-                color,
+                color, theme.bg_color
             )
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
@@ -1187,6 +1185,8 @@ class Login(Page):
                         new_category = categories[(i - 1) % len(categories)]
                     setting.__set__(settings_namespace, new_category)
                     break
+            if setting.attr == "theme":
+                theme.update()
 
         # When changing locale, exit Login to force recreate with new locale
         if (
@@ -1194,6 +1194,16 @@ class Login(Page):
             and setting.__get__(settings_namespace) != starting_category
         ):
             return MENU_EXIT
+        if setting.attr == "theme":
+            self.ctx.display.clear()
+            if self.prompt(
+                t("Shutdown to change the theme?"), self.ctx.display.height() // 2
+            ):
+                return MENU_SHUTDOWN
+            else:
+                setting.__set__(settings_namespace, starting_category)
+                theme.update()
+                
         return MENU_CONTINUE
 
     def number_setting(self, settings_namespace, setting):
@@ -1222,7 +1232,7 @@ class Login(Page):
             self.ctx.display.flash_text(
                 t("Value %s out of range: [%s, %s]")
                 % (new_value, setting.value_range[0], setting.value_range[1]),
-                lcd.RED,
+                theme.error_color,
             )
 
         return MENU_CONTINUE

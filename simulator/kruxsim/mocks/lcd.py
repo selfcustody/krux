@@ -47,11 +47,28 @@ portrait = True
 landscape = False
 
 
-def clear():
+def rgb565torgb888(color):
+    """convert from gggbbbbbrrrrrggg to tuple"""
+    MASK5 = 0b11111
+    MASK3 = 0b111
+
+    red = ((color >> 3) & MASK5)
+    red *= 255
+    red //= 31
+    green = color >> 13
+    green += (color & MASK3) << 3
+    green *= 255
+    green //= 63
+    blue = ((color >> 8) & MASK5)
+    blue *=255
+    blue //= 31
+    return (red, green, blue)
+
+def clear(color):
     def run():
         if screen:
-            screen.fill(COLOR_BLACK)
-
+            screen.fill(color)
+    color = rgb565torgb888(color)
     pg.event.post(pg.event.Event(events.LCD_CLEAR_EVENT, {"f": run}))
 
 
@@ -130,11 +147,12 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                     y,
                 ),
             )
-
+    color = rgb565torgb888(color)
+    bgcolor = rgb565torgb888(bgcolor)
     pg.event.post(pg.event.Event(events.LCD_DRAW_STRING_EVENT, {"f": run}))
 
 
-def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
+def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color, background):
     def run():
         starting_size = 0
         while code_str[starting_size] != "\n":
@@ -151,11 +169,12 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
                         og_yx_index = og_y * (starting_size + 1) + og_x
                         screen.set_at(
                             (offset + x, offset + offset_y + y),
-                            COLOR_BLACK
+                            dark_color
                             if code_str[og_yx_index] == "1"
-                            else COLOR_WHITE,
+                            else light_color,
                         )
-
+    dark_color = rgb565torgb888(dark_color)
+    light_color = rgb565torgb888(light_color)
     pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
 
 
@@ -173,7 +192,7 @@ def fill_rectangle(x, y, w, h, color):
                 h,
             ),
         )
-
+    color = rgb565torgb888(color)
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 
 

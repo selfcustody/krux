@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import lcd
 from ..krux_settings import t
+from ..themes import theme
 from . import (
     Page,
     Menu,
@@ -70,19 +70,19 @@ class EncryptionKey(Page):
     def load_key(self):
         """Loads and returns a key from keypad"""
         return self.capture_from_keypad(
-            t("key"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            t("Key"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
         )
 
     def load_qr_encryption_key(self):
         """Loads and returns a key from a QR code"""
         data, _ = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load key"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load key"), theme.error_color)
             return MENU_CONTINUE
         if len(data) > ENCRYPTION_KEY_MAX_LEN:
             self.ctx.display.flash_text(
                 t("Maximum length exceeded (%s)") % ENCRYPTION_KEY_MAX_LEN,
-                lcd.RED,
+                theme.error_color,
             )
             return MENU_CONTINUE
         return data

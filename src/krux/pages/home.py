@@ -23,6 +23,7 @@ import binascii
 import gc
 import hashlib
 import lcd
+from ..themes import theme
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
@@ -385,7 +386,7 @@ class Home(Page):
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
         if wallet_data is None:
-            self.ctx.display.flash_text(t("Failed to load output descriptor"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load output descriptor"), theme.error_color)
             return MENU_CONTINUE
 
         try:
@@ -404,7 +405,7 @@ class Home(Page):
             self.ctx.log.exception("Exception occurred loading wallet")
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Invalid wallet:\n%s") % repr(e), lcd.RED
+                t("Invalid wallet:\n%s") % repr(e), theme.error_color
             )
             self.ctx.input.wait_for_button()
         if self.ctx.wallet.descriptor.key:  # If single sig
@@ -412,7 +413,7 @@ class Home(Page):
                 # Blue exports descriptors without a fingerprint
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    t("Warning:\nIncomplete output descriptor"), lcd.RED
+                    t("Warning:\nIncomplete output descriptor"), theme.error_color
                 )
                 self.ctx.input.wait_for_button()
         return MENU_CONTINUE
@@ -422,7 +423,7 @@ class Home(Page):
         # only show address for single-key or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
             self.ctx.display.flash_text(
-                t("Please load a wallet output descriptor before"), lcd.RED
+                t("Please load a wallet output descriptor"), theme.error_color
             )
             return MENU_CONTINUE
 
@@ -532,7 +533,7 @@ class Home(Page):
         # only show address for single-key or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
             self.ctx.display.flash_text(
-                t("Please load a wallet output descriptor before"), lcd.RED
+                t("Please load a wallet output descriptor"), theme.error_color
             )
             return MENU_CONTINUE
 
@@ -551,14 +552,14 @@ class Home(Page):
         """Handler for the 'receive' or 'change' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None or qr_format != FORMAT_NONE:
-            self.ctx.display.flash_text(t("Failed to load address"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load address"), theme.error_color)
             return MENU_CONTINUE
 
         addr = None
         try:
             addr = parse_address(data)
         except:
-            self.ctx.display.flash_text(t("Invalid address"), lcd.RED)
+            self.ctx.display.flash_text(t("Invalid address"), theme.error_color)
             return MENU_CONTINUE
 
         self.show_address(data, title=addr, qr_format=qr_format)
@@ -644,8 +645,7 @@ class Home(Page):
                 t(
                     """Warning:\nWallet output descriptor not found.\n\n
                     Some checks cannot be performed."""
-                ),
-                lcd.WHITE,
+                )
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
@@ -715,7 +715,7 @@ class Home(Page):
 
         if data is None:
             # Both the camera and the file on SD card failed!
-            self.ctx.display.flash_text(t("Failed to load PSBT"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load PSBT"), theme.error_color)
             return MENU_CONTINUE
 
         # PSBT read OK! Will try to sign
@@ -827,7 +827,7 @@ class Home(Page):
                 pass
 
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load message"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load message"), theme.error_color)
             return MENU_CONTINUE
 
         # message read OK!
