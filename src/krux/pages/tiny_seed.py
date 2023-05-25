@@ -111,7 +111,7 @@ class TinySeed(Page):
                         y_offset + 3,
                         self.x_pad - 5,
                         self.y_pad - 5,
-                        theme.highlight_color,  # GREEN would be better
+                        theme.highlight_color,
                     )
             y_offset += self.y_pad
 
@@ -343,7 +343,7 @@ class TinySeed(Page):
                 self.y_offset + 11 * self.y_pad,
                 1 * self.x_pad,
                 self.y_pad,
-                theme.frame_color,
+                theme.disabled_color,
             )
         else:
             self.ctx.display.fill_rectangle(
@@ -358,7 +358,7 @@ class TinySeed(Page):
                 self.y_offset + 11 * self.y_pad,
                 1 * self.x_pad,
                 self.y_pad,
-                lcd.LIGHTGREY,
+                theme.disabled_color,
             )
 
     def check_sum(self, tiny_seed_numbers):
@@ -811,7 +811,7 @@ class TinyScanner(Page):
                 if dot_l < punch_threshold:
                     _ = img.draw_rectangle(
                         eval_rect, thickness=punch_thickness, color=lcd.WHITE
-                    )  # GREEN would be better, but img.format() == GRAYSCALE
+                    )
                     word_index = index // 12
                     bit = 11 - (index % 12)
                     page_seed_numbers[word_index] = self.tiny_seed.toggle_bit(

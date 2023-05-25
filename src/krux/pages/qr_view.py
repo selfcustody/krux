@@ -224,7 +224,7 @@ class SeedQRView(Page):
         elif mode == REGION_MODE:
             row = self.lr_index // self.columns
             column = self.lr_index % self.columns
-            self.ctx.display.draw_qr_code(0, self.code, light_color=theme.frame_color)
+            self.ctx.display.draw_qr_code(0, self.code, light_color=theme.disabled_color)
             self.highlight_qr_region(
                 self.code,
                 region=(

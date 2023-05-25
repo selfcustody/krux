@@ -926,7 +926,6 @@ class Login(Page):
             if text in ("", ESC_KEY):
                 return MENU_CONTINUE
 
-            
             try:
                 self.ctx.printer = create_printer()
             except:

@@ -157,20 +157,6 @@ class Stackbit(Page):
         outline_height = self.y_pad - 4
         outline_x_offset = self.x_offset + self.x_pad + 3
 
-        # print border around numbers only on touch devices
-        if not export and self.ctx.input.touch is not None:
-            # x for each col
-            for x in range(7):
-                # y for each line
-                for y in range(2):
-                    self.ctx.display.outline(
-                        outline_x_offset + x * self.x_pad,
-                        y_offset + y * self.y_pad + 1,
-                        outline_width,
-                        outline_height,
-                        theme.frame_color,
-                    )
-
         if digits[0] == 2:
             self.ctx.display.outline(
                 outline_x_offset,
