@@ -151,7 +151,7 @@ class Stackbit(Page):
             word_list_index_str = "0" + word_list_index_str
         return [int(x) for x in str(word_list_index_str)], word_list_index_str
 
-    def _draw_punched(self, digits, y_offset, export=False):
+    def _draw_punched(self, digits, y_offset):
         """Draws punched bits for import and export Stackbit UI"""
         outline_width = self.x_pad - 6
         outline_height = self.y_pad - 4
@@ -224,7 +224,7 @@ class Stackbit(Page):
         self._draw_grid(y_offset)
         self._draw_labels(y_offset, word_index)
         digits, digits_str = self._word_to_digits(word)
-        self._draw_punched(digits, y_offset, True)
+        self._draw_punched(digits, y_offset)
         if self.ctx.display.height() > 240:
             self.ctx.display.draw_string(
                 self.x_offset + 17 * self.ctx.display.font_width,
@@ -303,7 +303,10 @@ class Stackbit(Page):
         label_y_offset = (self.y_pad - self.ctx.display.font_height) // 2
         x_offset = self.x_offset + self.x_pad
         self.ctx.display.draw_string(
-            x_offset + 1 * self.x_pad, y_offset + label_y_offset, t("Esc"), theme.fg_color
+            x_offset + 1 * self.x_pad,
+            y_offset + label_y_offset,
+            t("Esc"),
+            theme.fg_color,
         )
         self.ctx.display.draw_string(
             round(x_offset + 4.2 * self.x_pad),

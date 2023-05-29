@@ -22,7 +22,6 @@
 import binascii
 import gc
 import hashlib
-import lcd
 from ..themes import theme
 from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
@@ -39,7 +38,6 @@ from . import (
     LETTERS,
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
-    NUM_SPECIAL_2,
 )
 from ..sd_card import SDHandler
 
@@ -222,12 +220,13 @@ class Home(Page):
         from ..encryption import MnemonicStorage
 
         from .encryption_key import EncryptionKey
+
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
             self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
             return
-        
+
         version = Settings().encryption.version
         i_vector = None
         if version == "AES-CBC":
@@ -274,14 +273,15 @@ class Home(Page):
         del mnemonic_storage
 
     def encrypted_qr_code(self):
-        """Exports an encryprted mnemonic QR code """
+        """Exports an encryprted mnemonic QR code"""
 
         from .encryption_key import EncryptionKey
+
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
             self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
-            return
+            return None
         version = Settings().encryption.version
         i_vector = None
         if version == "AES-CBC":
@@ -290,7 +290,8 @@ class Home(Page):
                 t("Aditional entropy from camera required for AES-CBC mode")
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-                return
+                self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
+                return None
             i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
         mnemonic_id = None
         self.ctx.display.clear()
@@ -317,12 +318,12 @@ class Home(Page):
         encrypted_qr = EncryptedQRCode()
         qr_data = encrypted_qr.create(key, mnemonic_id, words, i_vector)
         code = qrcode.encode_to_string(qr_data)
+        del encrypted_qr
 
         from .qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, code=code, title=mnemonic_id)
         return seed_qr_view.display_seed_qr()
-        
 
     def encrypt_mnemonic(self):
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
@@ -386,7 +387,9 @@ class Home(Page):
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
         if wallet_data is None:
-            self.ctx.display.flash_text(t("Failed to load output descriptor"), theme.error_color)
+            self.ctx.display.flash_text(
+                t("Failed to load output descriptor"), theme.error_color
+            )
             return MENU_CONTINUE
 
         try:

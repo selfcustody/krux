@@ -26,7 +26,6 @@ from . import (
     Page,
     Menu,
     MENU_CONTINUE,
-    MENU_EXIT,
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
@@ -36,13 +35,14 @@ from . import (
 
 ENCRYPTION_KEY_MAX_LEN = 200
 
+
 class EncryptionKey(Page):
     """Page to capture an encryption key"""
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
-        
+
     def encryption_key(self):
         """Loads and returns an ecnryption key from keypad or QR code"""
         submenu = Menu(
@@ -55,11 +55,11 @@ class EncryptionKey(Page):
         _, key = submenu.run_loop()
         if key in (ESC_KEY, MENU_CONTINUE):
             return None
-        
+
         if key:
             self.ctx.display.clear()
             continue_string = t("Key: ") + key + "\n\n"
-            continue_string +=  t("Continue?")
+            continue_string += t("Continue?")
             if self.prompt(
                 continue_string,
                 self.ctx.display.height() // 2,

@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import lcd
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
@@ -76,12 +75,12 @@ class SeedQRView(Page):
         for word in words:
             numbers += str("%04d" % WORDLIST.index(word))
         # qr_size = 25 if len(words) == 12 else 29
-        return qrcode.encode_to_string(numbers) #, qr_size
+        return qrcode.encode_to_string(numbers)  # , qr_size
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
         # qr_size = 21 if len(binary_seed) == 16 else 25
-        return qrcode.encode_to_string(binary_seed) #, qr_size
+        return qrcode.encode_to_string(binary_seed)  # , qr_size
 
     def _to_compact_seed_qr(self, mnemonic):
         mnemonic = mnemonic.split(" ")
@@ -156,10 +155,12 @@ class SeedQRView(Page):
         if mode == STANDARD_MODE:
             if theme.bg_color == WHITE:
                 self.ctx.display.draw_qr_code(0, self.code, light_color=WHITE)
-            else:                
+            else:
                 self.ctx.display.draw_qr_code(0, self.code)
         elif mode == LINE_MODE:
-            self.ctx.display.draw_qr_code(0, self.code, light_color=theme.disabled_color)
+            self.ctx.display.draw_qr_code(
+                0, self.code, light_color=theme.disabled_color
+            )
             self.highlight_qr_region(
                 self.code, region=(0, self.lr_index, self.qr_size, 1)
             )
@@ -224,7 +225,9 @@ class SeedQRView(Page):
         elif mode == REGION_MODE:
             row = self.lr_index // self.columns
             column = self.lr_index % self.columns
-            self.ctx.display.draw_qr_code(0, self.code, light_color=theme.disabled_color)
+            self.ctx.display.draw_qr_code(
+                0, self.code, light_color=theme.disabled_color
+            )
             self.highlight_qr_region(
                 self.code,
                 region=(
@@ -240,7 +243,7 @@ class SeedQRView(Page):
                 x_position = grid_offset + colunm_offset
                 x_lenght = self.region_size * grid_pad + 1
                 display_transpose = x_position + x_lenght - self.ctx.display.width()
-                if  display_transpose > 0:
+                if display_transpose > 0:
                     x_lenght -= display_transpose
                 self.ctx.display.fill_rectangle(
                     x_position,
@@ -288,35 +291,39 @@ class SeedQRView(Page):
             label = ""
         label += "\n" + t("Swipe to change mode")
         mode = 0
-        button = None
-        while button not in (SWIPE_DOWN, SWIPE_UP):
-            self.draw_grided_qr(mode)
-            if self.ctx.input.touch is not None:
-                self.ctx.display.draw_hcentered_text(
-                    label,
-                    self.ctx.display.qr_offset() + self.ctx.display.font_height,
-                )
-            # # Avoid the need of double click
-            # self.ctx.input.buttons_active = True
-            button = self.ctx.input.wait_for_button()
-            if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
-                mode += 1
-                mode %= 5
-                self.lr_index = 0
-            elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
-                mode -= 1
-                mode %= 5
-                self.lr_index = 0
-            elif button in (BUTTON_ENTER, BUTTON_TOUCH):
-                if mode in (LINE_MODE, REGION_MODE, ZOOMED_R_MODE):
-                    self.lr_index += 1
-                else:
-                    if not (button == BUTTON_TOUCH and mode == TRANSCRIBE_MODE):
-                        button = SWIPE_DOWN  # leave
-            if mode == LINE_MODE:
-                self.lr_index %= self.qr_size
-            elif mode in (REGION_MODE, ZOOMED_R_MODE):
-                self.lr_index %= self.columns * self.columns
+        while True:
+            button = None
+            while button not in (SWIPE_DOWN, SWIPE_UP):
+                self.draw_grided_qr(mode)
+                if self.ctx.input.touch is not None:
+                    self.ctx.display.draw_hcentered_text(
+                        label,
+                        self.ctx.display.qr_offset() + self.ctx.display.font_height,
+                    )
+                # # Avoid the need of double click
+                # self.ctx.input.buttons_active = True
+                button = self.ctx.input.wait_for_button()
+                if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
+                    mode += 1
+                    mode %= 5
+                    self.lr_index = 0
+                elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
+                    mode -= 1
+                    mode %= 5
+                    self.lr_index = 0
+                elif button in (BUTTON_ENTER, BUTTON_TOUCH):
+                    if mode in (LINE_MODE, REGION_MODE, ZOOMED_R_MODE):
+                        self.lr_index += 1
+                    else:
+                        if not (button == BUTTON_TOUCH and mode == TRANSCRIBE_MODE):
+                            button = SWIPE_DOWN  # leave
+                if mode == LINE_MODE:
+                    self.lr_index %= self.qr_size
+                elif mode in (REGION_MODE, ZOOMED_R_MODE):
+                    self.lr_index %= self.columns * self.columns
+            self.ctx.display.clear()
+            if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                break
         if self.ctx.printer is None:
             return MENU_CONTINUE
         self.ctx.display.clear()

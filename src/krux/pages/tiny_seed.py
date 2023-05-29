@@ -78,7 +78,7 @@ class TinySeed(Page):
                     self.ctx.display.width() - bit_offset,
                     str(bit_number),
                     theme.fg_color,
-                    theme.bg_color
+                    theme.bg_color,
                 )
                 bit_number //= 2
                 bit_offset += self.x_pad
@@ -89,9 +89,7 @@ class TinySeed(Page):
             line = str(page * 12 + x + 1)
             if (page * 12 + x + 1) < 10:
                 line = " " + line
-            self.ctx.display.draw_string(
-                DEFAULT_PADDING // 2, y_offset, line
-            )
+            self.ctx.display.draw_string(DEFAULT_PADDING // 2, y_offset, line)
             y_offset += self.y_pad
 
     def _draw_punched(self, words, page):
@@ -285,7 +283,9 @@ class TinySeed(Page):
         if self.ctx.display.width() > 135:
             esc_x_offset = round(x_offset + 2.3 * self.x_pad)
 
-        self.ctx.display.draw_string(esc_x_offset, y_offset + 1, t("Esc"), theme.no_esc_color)
+        self.ctx.display.draw_string(
+            esc_x_offset, y_offset + 1, t("Esc"), theme.no_esc_color
+        )
         self.ctx.display.draw_string(
             round(x_offset + 8.4 * self.x_pad), y_offset + 1, t("Go"), theme.go_color
         )

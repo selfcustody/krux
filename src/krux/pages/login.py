@@ -22,7 +22,6 @@
 # pylint: disable=C2801
 import binascii
 import hashlib
-import lcd
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
@@ -162,6 +161,7 @@ class Login(Page):
         from ..encryption import MnemonicStorage
 
         from .encryption_key import EncryptionKey
+
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
@@ -373,7 +373,9 @@ class Login(Page):
     def _load_qr_passphrase(self):
         data, _ = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load passphrase"), theme.error_color)
+            self.ctx.display.flash_text(
+                t("Failed to load passphrase"), theme.error_color
+            )
             return MENU_CONTINUE
         if len(data) > PASSPHRASE_MAX_LEN:
             self.ctx.display.flash_text(
@@ -483,6 +485,7 @@ class Login(Page):
                 public_data + "\n\n" + t("Decrypt?"), self.ctx.display.height() // 2
             ):
                 from .encryption_key import EncryptionKey
+
                 key_capture = EncryptionKey(self.ctx)
                 key = key_capture.encryption_key()
                 if key is None:
@@ -884,7 +887,9 @@ class Login(Page):
                 offset_x += (
                     button_width - len(keys[i]) * self.ctx.display.font_width
                 ) // 2
-                self.ctx.display.draw_string(offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color)
+                self.ctx.display.draw_string(
+                    offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
+                )
 
     def _touch_to_physical(self, index):
         """Mimics touch presses into physical button presses"""
@@ -944,7 +949,9 @@ class Login(Page):
         try:
             self.ctx.printer = create_printer()
             if not self.ctx.printer:
-                self.ctx.display.flash_text(t("Printer Driver not set!"), theme.error_color)
+                self.ctx.display.flash_text(
+                    t("Printer Driver not set!"), theme.error_color
+                )
                 return MENU_CONTINUE
         except:
             self.ctx.log.exception("Exception occurred connecting to printer")
@@ -1168,7 +1175,8 @@ class Login(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 settings_namespace.label(setting.attr) + "\n" + str(current_category),
-                color, theme.bg_color
+                color,
+                theme.bg_color,
             )
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
@@ -1199,10 +1207,9 @@ class Login(Page):
                 t("Shutdown to change the theme?"), self.ctx.display.height() // 2
             ):
                 return MENU_SHUTDOWN
-            else:
-                setting.__set__(settings_namespace, starting_category)
-                theme.update()
-                
+            setting.__set__(settings_namespace, starting_category)
+            theme.update()
+
         return MENU_CONTINUE
 
     def number_setting(self, settings_namespace, setting):

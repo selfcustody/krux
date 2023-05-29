@@ -292,7 +292,11 @@ class Display:
         lcd.draw_string(x, y, text, color, bg_color)
 
     def draw_hcentered_text(
-        self, text, offset_y=DEFAULT_PADDING, color=theme.fg_color, bg_color=theme.bg_color
+        self,
+        text,
+        offset_y=DEFAULT_PADDING,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
     ):
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
@@ -311,7 +315,11 @@ class Display:
         self.draw_hcentered_text(text, offset_y, color, bg_color)
 
     def flash_text(
-        self, text, color=theme.fg_color, bg_color=theme.bg_color, duration=FLASH_MSG_TIME
+        self,
+        text,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+        duration=FLASH_MSG_TIME,
     ):
         """Flashes text centered on the display for duration ms"""
         self.clear()
@@ -336,7 +344,9 @@ class Display:
     ):
         """Draws a QR code on the screen"""
         _, qr_code = self.add_qr_frame(qr_code)
-        lcd.draw_qr_code(offset_y, qr_code, self.width(), dark_color, light_color, theme.bg_color)
+        lcd.draw_qr_code(
+            offset_y, qr_code, self.width(), dark_color, light_color, theme.bg_color
+        )
 
     def set_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""

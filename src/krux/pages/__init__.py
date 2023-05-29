@@ -308,7 +308,7 @@ class Page:
         i = 0
         code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
         self.ctx.display.clear()
-        bright = True if theme.bg_color == WHITE else False
+        bright = theme.bg_color == WHITE
         while not done:
             code = None
             num_parts = 0
@@ -414,7 +414,9 @@ class Page:
         offset_y -= (
             len(self.ctx.display.to_lines(text)) - 1
         ) * self.ctx.display.font_height
-        self.ctx.display.draw_hcentered_text(text, offset_y, theme.fg_color, theme.bg_color)
+        self.ctx.display.draw_hcentered_text(
+            text, offset_y, theme.fg_color, theme.bg_color
+        )
         answer = True
         self.y_keypad_map = []
         self.x_keypad_map = []
@@ -439,10 +441,14 @@ class Page:
             while btn != BUTTON_ENTER:
                 offset_x = self.ctx.display.width() // 4
                 offset_x -= (len(t("Yes")) * self.ctx.display.font_width) // 2
-                self.ctx.display.draw_string(offset_x, offset_y, t("Yes"), theme.go_color, theme.bg_color)
+                self.ctx.display.draw_string(
+                    offset_x, offset_y, t("Yes"), theme.go_color, theme.bg_color
+                )
                 offset_x = (self.ctx.display.width() * 3) // 4
                 offset_x -= (len(t("No")) * self.ctx.display.font_width) // 2
-                self.ctx.display.draw_string(offset_x, offset_y, t("No"), theme.no_esc_color, theme.bg_color)
+                self.ctx.display.draw_string(
+                    offset_x, offset_y, t("No"), theme.no_esc_color, theme.bg_color
+                )
                 if self.ctx.input.buttons_active:
                     if answer:
                         self.ctx.display.outline(
@@ -490,7 +496,11 @@ class Page:
         return answer
 
     def display_centered_text(
-        self, message, duration=FLASH_MSG_TIME, color=theme.fg_color, bg_color=theme.bg_color
+        self,
+        message,
+        duration=FLASH_MSG_TIME,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
     ):
         """Display a text for duration ms or until you press a button"""
         self.ctx.display.clear()
@@ -700,7 +710,9 @@ class Menu:
                 % self.menu_view[selected_item_index][0]
             )
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Error:\n%s") % repr(e), theme.error_color)
+            self.ctx.display.draw_centered_text(
+                t("Error:\n%s") % repr(e), theme.error_color
+            )
             self.ctx.input.wait_for_button()
         return MENU_CONTINUE
 
@@ -789,11 +801,7 @@ class Menu:
             height = Page.y_keypad_map[i + 1] - y
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.fill_rectangle(
-                    0,
-                    y + 1,
-                    self.ctx.display.width(),
-                    height - 2,
-                    theme.fg_color
+                    0, y + 1, self.ctx.display.width(), height - 2, theme.fg_color
                 )
 
         # draw centralized strings in regions
@@ -806,8 +814,10 @@ class Menu:
             for j, text in enumerate(menu_item_lines):
                 if selected_item_index == i and self.ctx.input.buttons_active:
                     self.ctx.display.draw_hcentered_text(
-                        text, offset_y + self.ctx.display.font_height * j,
-                        theme.bg_color, theme.fg_color
+                        text,
+                        offset_y + self.ctx.display.font_height * j,
+                        theme.bg_color,
+                        theme.fg_color,
                     )
                 else:
                     self.ctx.display.draw_hcentered_text(
@@ -827,13 +837,14 @@ class Menu:
                     offset_y + 1 - self.ctx.display.font_height // 2,
                     self.ctx.display.usable_width() + DEFAULT_PADDING,
                     delta_y - 2,
-                    theme.fg_color
+                    theme.fg_color,
                 )
                 for j, text in enumerate(menu_item_lines):
                     self.ctx.display.draw_hcentered_text(
                         text,
                         offset_y + self.ctx.display.font_height * j,
-                        theme.bg_color, theme.fg_color
+                        theme.bg_color,
+                        theme.fg_color,
                     )
             else:
                 for j, text in enumerate(menu_item_lines):
@@ -994,9 +1005,7 @@ class Keypad:
                                 key_offset_x, offset_y, key, custom_color
                             )
                         else:
-                            self.ctx.display.draw_string(
-                                key_offset_x, offset_y, key
-                            )
+                            self.ctx.display.draw_string(key_offset_x, offset_y, key)
                     if (
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active

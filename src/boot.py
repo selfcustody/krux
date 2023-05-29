@@ -22,7 +22,6 @@
 
 import sys
 import gc
-import lcd
 
 sys.path.append("")
 sys.path.append(".")

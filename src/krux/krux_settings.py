@@ -291,6 +291,7 @@ class EncryptionSettings(SettingsNamespace):
             "pbkdf2_iterations": t("PBKDF2 iterations"),
         }[attr]
 
+
 class ThemeSettings(SettingsNamespace):
     """Theme settings"""
 
@@ -313,8 +314,6 @@ class ThemeSettings(SettingsNamespace):
         return {
             "theme": t("Theme"),
         }[attr]
-    
-
 
 
 class Settings(SettingsNamespace):
@@ -342,7 +341,7 @@ class Settings(SettingsNamespace):
             "encryption": t("Encryption"),
             "persist": t("Persist"),
             "printer": t("Printer"),
-            "appearance": t("Theme")
+            "appearance": t("Theme"),
         }
         if board.config["type"].startswith("amigo"):
             main_menu["touchscreen"] = t("Touchscreen")

@@ -22,12 +22,13 @@
 
 from .krux_settings import Settings, ThemeSettings
 
-# Colors: Ditiching firmware colors
+DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
+
+# Colors: Ditching firmware colors
 BLACK = 0x0000
 WHITE = 0xFFFF
 LIGHTBLACK = 0x0842
 DARKGREY = 0xEF7B
-# SLATEGRAY = 0x2E5B
 LIGHTGREY = 0x18C6
 GREEN = 0xE007
 DARKGREEN = 0x8005
@@ -39,19 +40,18 @@ BLUE = 0xF800
 CYAN = 0xFF07
 MAGENTA = 0x1FF8
 
-#define NAVY        0x0F00
-#define DARKGREEN   0xE003
-#define DARKCYAN    0xEF03
-#define MAROON      0x0078
-#define PURPLE      0x0F78
-#define OLIVE       0xE07B
-#define RED         0x00F8
-
-#define GREENYELLOW 0xE5AF
-#define PINK        0x1FF8
+# define NAVY        0x0F00
+# define DARKGREEN   0xE003
+# define DARKCYAN    0xEF03
+# define MAROON      0x0078
+# define PURPLE      0x0F78
+# define OLIVE       0xE07B
+# define RED         0x00F8
+# define GREENYELLOW 0xE5AF
+# define PINK        0x1FF8
 
 THEMES = {
-    ThemeSettings.DARK_THEME_NAME : {
+    ThemeSettings.DARK_THEME_NAME: {
         "background": BLACK,
         "foreground": WHITE,
         "frame": DARKGREY,
@@ -61,9 +61,9 @@ THEMES = {
         "del": YELLOW,
         "toggle": CYAN,
         "error": RED,
-        "highlight": BLUE
+        "highlight": BLUE,
     },
-    ThemeSettings.LIGHT_THEME_NAME : {
+    ThemeSettings.LIGHT_THEME_NAME: {
         "background": WHITE,
         "foreground": BLACK,
         "frame": DARKGREY,
@@ -73,9 +73,9 @@ THEMES = {
         "del": DARKORANGE,
         "toggle": BLUE,
         "error": RED,
-        "highlight": BLUE
+        "highlight": BLUE,
     },
-    ThemeSettings.ORANGE_THEME_NAME : {
+    ThemeSettings.ORANGE_THEME_NAME: {
         "background": LIGHTBLACK,
         "foreground": ORANGE,
         "frame": DARKORANGE,
@@ -85,26 +85,34 @@ THEMES = {
         "del": YELLOW,
         "toggle": CYAN,
         "error": RED,
-        "highlight": ORANGE
+        "highlight": ORANGE,
     },
 }
 
+
 class Theme:
+    """Themes handler"""
+
     def __init__(self) -> None:
         self.update()
 
     def update(self):
-        theme = Settings().appearance.theme
-        self.bg_color = THEMES[theme]["background"]
-        self.fg_color = THEMES[theme]["foreground"]
-        self.frame_color = THEMES[theme]["frame"]
-        self.disabled_color = THEMES[theme]["disabled"]
-        self.go_color = THEMES[theme]["go"]
-        self.no_esc_color = THEMES[theme]["esc_no"]
-        self.del_color = THEMES[theme]["del"]
-        self.toggle_color = THEMES[theme]["toggle"]
-        self.error_color = THEMES[theme]["error"]
-        self.highlight_color = THEMES[theme]["highlight"]
+        """Updates theme colors"""
+        current_theme = Settings().appearance.theme
+        if current_theme not in (list(ThemeSettings.THEME_NAMES.values())):
+            # In case old version theme in use was deleted
+            current_theme = ThemeSettings.DARK_THEME_NAME
+            Settings().appearance.theme = current_theme
+        self.bg_color = THEMES[current_theme]["background"]
+        self.fg_color = THEMES[current_theme]["foreground"]
+        self.frame_color = THEMES[current_theme]["frame"]
+        self.disabled_color = THEMES[current_theme]["disabled"]
+        self.go_color = THEMES[current_theme]["go"]
+        self.no_esc_color = THEMES[current_theme]["esc_no"]
+        self.del_color = THEMES[current_theme]["del"]
+        self.toggle_color = THEMES[current_theme]["toggle"]
+        self.error_color = THEMES[current_theme]["error"]
+        self.highlight_color = THEMES[current_theme]["highlight"]
 
 
 theme = Theme()
