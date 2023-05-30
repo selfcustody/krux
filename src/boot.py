@@ -109,8 +109,5 @@ login(ctx)
 gc.collect()
 home(ctx)
 
-from krux.krux_settings import t
-
-ctx.display.flash_text(t("Shutting down.."))
 ctx.clear()
 power_manager.shutdown()

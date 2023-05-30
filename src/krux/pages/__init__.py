@@ -513,6 +513,8 @@ class Page:
     def shutdown(self):
         """Handler for the 'shutdown' menu item"""
         if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Shutting down.."))
             return MENU_SHUTDOWN
         return MENU_CONTINUE
 

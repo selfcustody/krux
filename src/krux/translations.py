@@ -151,7 +151,7 @@ translation_table = {
         3928301843: "Arquivo de assinatura faltando",
         1948316555: "Mnemônico",
         2123991188: "ID do mnemônico",
-        3911073154: "ID de armazenamento mnemônico",
+        3911073154: "ID de armazenamento",
         570639842: "Mnemônico não foi descriptografado",
         1746030071: "Mnemônico não foi criptografado",
         1458925155: "Modificado:",

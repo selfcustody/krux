@@ -19,15 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import binascii
+
 import gc
-import hashlib
 from ..themes import theme
-from ..baseconv import base_encode
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
-from ..wallet import Wallet, parse_address
 from ..krux_settings import t, Settings, AES_BLOCK_SIZE
 from . import (
     Page,
@@ -393,6 +390,8 @@ class Home(Page):
             return MENU_CONTINUE
 
         try:
+            from ..wallet import Wallet
+
             wallet = Wallet(self.ctx.wallet.key)
             wallet.load(wallet_data, qr_format)
             self.ctx.display.clear()
@@ -560,6 +559,8 @@ class Home(Page):
 
         addr = None
         try:
+            from ..wallet import parse_address
+
             addr = parse_address(data)
         except:
             self.ctx.display.flash_text(t("Invalid address"), theme.error_color)
@@ -796,6 +797,10 @@ class Home(Page):
 
     def sign_message(self):
         """Handler for the 'sign message' menu item"""
+
+        import binascii
+        import hashlib
+        from ..baseconv import base_encode
 
         # Try to read a message from camera
         message_filename = ""

@@ -20,35 +20,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import binascii
-import hashlib
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
-from urtypes.crypto.bip39 import BIP39
-from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
-from ..metadata import VERSION
-from ..krux_settings import Settings, LoggingSettings, BitcoinSettings
+from ..themes import theme
+from ..krux_settings import Settings
 from ..qr import FORMAT_UR, FORMAT_NONE
 from ..key import Key
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..krux_settings import t
-from ..sd_card import SDHandler
 from . import (
     Page,
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
-    SD_ROOT_PATH,
     LETTERS,
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-import uos
-import time
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
@@ -64,15 +56,6 @@ D20_24W_MIN_ROLLS = 60
 SD_MSG_TIME = 2500
 
 PASSPHRASE_MAX_LEN = 200
-
-CATEGORY_SETTING_COLOR_DICT = {
-    LoggingSettings.ERROR_TXT: RED,
-    LoggingSettings.WARN_TXT: ORANGE,
-    LoggingSettings.INFO_TXT: GREEN,
-    LoggingSettings.DEBUG_TXT: MAGENTA,
-    BitcoinSettings.MAIN_TXT: ORANGE,
-    BitcoinSettings.TEST_TXT: GREEN,
-}
 
 
 class Login(Page):
@@ -262,6 +245,9 @@ class Login(Page):
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             entropy_bytes = self.capture_camera_entropy()
             if entropy_bytes is not None:
+
+                import binascii
+
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
@@ -340,8 +326,11 @@ class Login(Page):
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
-            self.ctx.input.wait_for_button()
 
+            import hashlib
+            import binascii
+
+            self.ctx.input.wait_for_button()
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
                 hashlib.sha256(entropy_bytes).digest()
@@ -499,6 +488,9 @@ class Login(Page):
 
         words = []
         if qr_format == FORMAT_UR:
+
+            from urtypes.crypto.bip39 import BIP39
+
             words = BIP39.from_cbor(data.cbor).words
         else:
             try:
@@ -916,84 +908,24 @@ class Login(Page):
 
     def sd_check(self):
         """Handler for the 'SD Check' menu item"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-        try:
-            # Check for SD hot-plug
-            with SDHandler():
-                sd_status = uos.statvfs(SD_ROOT_PATH)
-                sd_total = int(sd_status[2] * sd_status[1] / 1024 / 1024)
-                sd_free = int(sd_status[4] * sd_status[1] / 1024 / 1024)
 
-                self.ctx.display.clear()
-                self.ctx.display.draw_hcentered_text(
-                    t("SD card")
-                    + "\n\n"
-                    + t("Size: ")
-                    + "{:,}".format(sd_total)
-                    + " MB"
-                    + "\n\n"
-                    + t("Used: ")
-                    + "{:,}".format(sd_total - sd_free)
-                    + " MB"
-                    + "\n\n"
-                    + t("Free: ")
-                    + "{:,}".format(sd_free)
-                    + " MB"
-                )
-                if self.prompt(
-                    t("Explore files?"), self.ctx.display.bottom_prompt_line
-                ):
-                    self.select_file(select_file_handler=self._show_file_details)
-        except OSError:
-            self.ctx.display.flash_text(t("SD card not detected"), theme.error_color)
+        from .sd_tools import SDTools
 
-        return MENU_CONTINUE
-
-    def _show_file_details(self, file):
-        """Handler to print file info when selecting a file in the file explorer"""
-        if SDHandler.dir_exists(file):
-            return MENU_EXIT
-
-        stats = uos.stat(file)
-        size = stats[6] / 1024
-        size_deximal_places = str(int(size * 100))[-2:]
-        created = time.localtime(stats[9])
-        modified = time.localtime(stats[8])
-        file = file[4:]  # remove "/sd/" prefix
-        self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(
-            file
-            + "\n\n"
-            + t("Size: ")
-            + "{:,}".format(int(size))
-            + "."
-            + size_deximal_places
-            + " KB"
-            + "\n\n"
-            + t("Created: ")
-            + "%s-%s-%s %s:%s"
-            % (created[0], created[1], created[2], created[3], created[4])
-            + "\n\n"
-            + t("Modified: ")
-            + "%s-%s-%s %s:%s"
-            % (modified[0], modified[1], modified[2], modified[3], modified[4])
-        )
-        self.ctx.input.wait_for_button()
-        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
-        #     with SDHandler() as sd:
-        #         sd.delete(file)
-        #     return MENU_EXIT
-        return MENU_CONTINUE
+        sd_tools = SDTools(self.ctx)
+        return sd_tools.sd_check()
 
     def settings(self):
         """Handler for the 'settings' menu item"""
         from .settings_page import SettingsPage
+
         settings_page = SettingsPage(self.ctx)
         return settings_page.settings()
 
     def about(self):
         """Handler for the 'about' menu item"""
+
+        from ..metadata import VERSION
+
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
         self.ctx.input.wait_for_button()
