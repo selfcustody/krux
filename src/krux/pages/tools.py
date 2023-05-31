@@ -24,20 +24,40 @@ from ..sd_card import SDHandler
 import uos
 import time
 from ..krux_settings import t
+from ..printers import create_printer
 from ..themes import theme
+from ..qr import FORMAT_NONE
 from . import (
     Page,
+    Menu,
     MENU_CONTINUE,
     MENU_EXIT,
     SD_ROOT_PATH,
+    ESC_KEY,
+    LETTERS,
+    UPPERCASE_LETTERS,
+    NUM_SPECIAL_1,
+    NUM_SPECIAL_2,
 )
 
 
-class SDTools(Page):
-    """Toold to manage SD card"""
+class Tools(Page):
+    """Krux generic tools"""
 
     def __init__(self, ctx):
-        super().__init__(ctx, None)
+        super().__init__(
+            ctx,
+            Menu(
+                ctx,
+                [
+                    (t("Check SD Card"), self.sd_check),
+                    (t("Delete Mnemonic"), self.del_stored_mnemonic),
+                    (t("Print Test QR"), self.print_test),
+                    (t("Create QR Code"), self.create_qr),
+                    (t("Back"), lambda: MENU_EXIT),
+                ],
+            ),
+        )
         self.ctx = ctx
 
     def sd_check(self):
@@ -110,4 +130,93 @@ class SDTools(Page):
         #     with SDHandler() as sd:
         #         sd.delete(file)
         #     return MENU_EXIT
+        return MENU_CONTINUE
+
+    def del_stored_mnemonic(self):
+        """Lists and allow deletion of stored mnemonics"""
+        from ..encryption import MnemonicStorage
+
+        while True:
+            mnemonic_storage = MnemonicStorage()
+            mnemonic_ids_menu = []
+            has_sd = mnemonic_storage.has_sd_card
+            mnemonics = mnemonic_storage.list_mnemonics()
+            sd_mnemonics = mnemonic_storage.list_mnemonics(sd_card=True)
+            del mnemonic_storage
+
+            for mnemonic_id in mnemonics:
+                mnemonic_ids_menu.append(
+                    (
+                        mnemonic_id + "(flash)",
+                        lambda m_id=mnemonic_id: self._delete_encrypted_mnemonic(m_id),
+                    )
+                )
+            if has_sd:
+                for mnemonic_id in sd_mnemonics:
+                    mnemonic_ids_menu.append(
+                        (
+                            mnemonic_id + "(SD card)",
+                            lambda m_id=mnemonic_id: self._delete_encrypted_mnemonic(
+                                m_id, sd_card=True
+                            ),
+                        )
+                    )
+            mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
+            submenu = Menu(self.ctx, mnemonic_ids_menu)
+            index, _ = submenu.run_loop()
+            if index == len(submenu.menu) - 1:
+                return MENU_CONTINUE
+
+    def _delete_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
+        """Deletes a mnemonic"""
+        from ..encryption import MnemonicStorage
+
+        mnemonic_storage = MnemonicStorage()
+        self.ctx.display.clear()
+        if self.prompt(t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2):
+            mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
+        del mnemonic_storage
+
+    def print_test(self):
+        """Handler for the 'Print Test QR' menu item"""
+        try:
+            self.ctx.printer = create_printer()
+            if not self.ctx.printer:
+                self.ctx.display.flash_text(
+                    t("Printer Driver not set!"), theme.error_color
+                )
+                return MENU_CONTINUE
+        except:
+            self.ctx.log.exception("Exception occurred connecting to printer")
+            raise
+
+        title = t("Krux Printer Test QR")
+        self.display_qr_codes(title, FORMAT_NONE, title, allow_any_btn=True)
+        self.print_qr_prompt(title, FORMAT_NONE, title)
+
+        return MENU_CONTINUE
+
+    def create_qr(self):
+        """Handler for the 'Create QR Code' menu item"""
+        if self.prompt(
+            t("Create QR code from text?"),
+            self.ctx.display.height() // 2,
+        ):
+            text = self.capture_from_keypad(
+                t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            )
+            if text in ("", ESC_KEY):
+                return MENU_CONTINUE
+
+            try:
+                self.ctx.printer = create_printer()
+            except:
+                self.ctx.log.exception("Exception occurred connecting to printer")
+
+            from .qr_view import SeedQRView
+            import qrcode
+
+            code = qrcode.encode_to_string(text)
+            seed_qr_view = SeedQRView(self.ctx, code=code, title="Custom QR Code")
+            return seed_qr_view.display_seed_qr()
         return MENU_CONTINUE

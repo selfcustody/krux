@@ -25,7 +25,7 @@ from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
 from ..themes import theme
 from ..krux_settings import Settings
-from ..qr import FORMAT_UR, FORMAT_NONE
+from ..qr import FORMAT_UR
 from ..key import Key
 from ..wallet import Wallet
 from ..printers import create_printer
@@ -128,7 +128,7 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def _load_encrypted_seed(self, mnemonic_id, sd_card=False, delete=False):
+    def _load_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
         """Uses encryption module to load and decrypt a mnemonic"""
         from ..encryption import MnemonicStorage
 
@@ -151,18 +151,10 @@ class Login(Page):
 
         if len(words) not in (12, 24):
             raise ValueError(t("Failed to decrypt"))
-        if delete:
-            self.ctx.display.clear()
-            if self.prompt(
-                t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2
-            ):
-                mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
         del mnemonic_storage
-        if delete:
-            return None
         return self._load_key_from_words(words)
 
-    def load_mnemonic_from_storage(self, delete=False):
+    def load_mnemonic_from_storage(self):
         """Lists all encrypted seeds stored on a file"""
         from ..encryption import MnemonicStorage
 
@@ -177,9 +169,7 @@ class Login(Page):
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(flash)",
-                    lambda m_id=mnemonic_id: self._load_encrypted_seed(
-                        m_id, delete=delete
-                    ),
+                    lambda m_id=mnemonic_id: self._load_encrypted_mnemonic(m_id),
                 )
             )
         if has_sd:
@@ -187,8 +177,8 @@ class Login(Page):
                 mnemonic_ids_menu.append(
                     (
                         mnemonic_id + "(SD card)",
-                        lambda m_id=mnemonic_id: self._load_encrypted_seed(
-                            m_id, sd_card=True, delete=delete
+                        lambda m_id=mnemonic_id: self._load_encrypted_mnemonic(
+                            m_id, sd_card=True
                         ),
                     )
                 )
@@ -844,75 +834,12 @@ class Login(Page):
 
     def tools(self):
         """Handler for the 'Tools' menu item"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("Check SD Card"), self.sd_check),
-                (
-                    t("Delete Mnemonic"),
-                    lambda: self.load_mnemonic_from_storage(delete=True),
-                ),
-                (t("Print Test QR"), self.print_test),
-                (t("Create QR Code"), self.create_qr),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        submenu.run_loop()
-        self.ctx.display.clear()
+        from .tools import Tools
 
+        while True:
+            if Tools(self.ctx).run() == MENU_EXIT:
+                break
         return MENU_CONTINUE
-
-    def create_qr(self):
-        """Handler for the 'Create QR Code' menu item"""
-        if self.prompt(
-            t("Create QR code from text?"),
-            self.ctx.display.height() // 2,
-        ):
-            text = self.capture_from_keypad(
-                t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-            )
-            if text in ("", ESC_KEY):
-                return MENU_CONTINUE
-
-            try:
-                self.ctx.printer = create_printer()
-            except:
-                self.ctx.log.exception("Exception occurred connecting to printer")
-
-            from .qr_view import SeedQRView
-            import qrcode
-
-            code = qrcode.encode_to_string(text)
-            seed_qr_view = SeedQRView(self.ctx, code=code, title="Custom QR Code")
-            return seed_qr_view.display_seed_qr()
-        return MENU_CONTINUE
-
-    def print_test(self):
-        """Handler for the 'Print Test QR' menu item"""
-        try:
-            self.ctx.printer = create_printer()
-            if not self.ctx.printer:
-                self.ctx.display.flash_text(
-                    t("Printer Driver not set!"), theme.error_color
-                )
-                return MENU_CONTINUE
-        except:
-            self.ctx.log.exception("Exception occurred connecting to printer")
-            raise
-
-        title = t("Krux Printer Test QR")
-        self.display_qr_codes(title, FORMAT_NONE, title, allow_any_btn=True)
-        self.print_qr_prompt(title, FORMAT_NONE, title)
-
-        return MENU_CONTINUE
-
-    def sd_check(self):
-        """Handler for the 'SD Check' menu item"""
-
-        from .sd_tools import SDTools
-
-        sd_tools = SDTools(self.ctx)
-        return sd_tools.sd_check()
 
     def settings(self):
         """Handler for the 'settings' menu item"""
