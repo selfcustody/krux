@@ -1035,12 +1035,15 @@ class Keypad:
             and self.keys[self.cur_key_index] not in possible_keys
         ):
             if self.moving_forward:
-                self.cur_key_index = (self.cur_key_index + 1) % self.total_keys
+                self.cur_key_index = (self.cur_key_index + 1) % self.max_index
+                # Jump over empty keys
+                if 0 <= (self.cur_key_index - len(self.keys)) < self.empty_keys:
+                    self.cur_key_index += self.empty_keys
             else:
                 if self.cur_key_index:
                     self.cur_key_index -= 1
                 else:
-                    self.cur_key_index = self.total_keys - 1
+                    self.cur_key_index = self.max_index - 1
         return self.cur_key_index
 
     def touch_to_physical(self, possible_keys):

@@ -498,8 +498,6 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
     krux.input.wdt.feed.assert_called()
 
 
-""" TODO: FIX THESE 2 tests below (infinite execution)
-
 def test_touch_indexing(mocker, amigo_tft):
     import threading
     import krux
@@ -516,25 +514,25 @@ def test_touch_indexing(mocker, amigo_tft):
 
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         time.sleep(0.5)
-        elapsed_time += 100
+        elapsed_time += 500
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # touch on 3º quadrant
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: point1
         )
         time.sleep(0.5)
-        elapsed_time += 10
+        elapsed_time += 500
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # touch slightly sideways before release
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: point2
         )
         time.sleep(0.5)
-        elapsed_time += 100
+        elapsed_time += 500
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
         time.sleep(0.5)
-        elapsed_time += 100
+        elapsed_time += 500
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
 
     # full screen as single touch button
@@ -563,21 +561,6 @@ def test_touch_indexing(mocker, amigo_tft):
     assert btn == BUTTON_TOUCH
     assert input.touch.current_index() == 2  # (3º quadrant)
 
-    # Touch inside - 50 < x < 200
-    mocker.patch.object(input.touch, "state", input.touch.idle)
-    input.touch.extract_index((60, 60))
-    assert input.touch.state == input.touch.press
-
-    # Touch outside - x > 200
-    input.touch.state = input.touch.idle
-    input.touch.extract_index((250, 60))
-    assert input.touch.state == input.touch.release
-
-    # Touch outside - y > 200
-    input.touch.state = input.touch.idle
-    input.touch.extract_index((60, 250))
-    assert input.touch.state == input.touch.release
-
 
 def test_touch_gestures(mocker, amigo_tft):
     import threading
@@ -595,25 +578,25 @@ def test_touch_gestures(mocker, amigo_tft):
 
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         time.sleep(0.5)
-        elapsed_time += 100
+        elapsed_time += 500
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # touch on 3º quadrant
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: point1
         )
         time.sleep(0.5)
-        elapsed_time += 100
+        elapsed_time += 500
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # swipe
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: point2
         )
         time.sleep(0.5)
-        elapsed_time += 100
+        elapsed_time += 500
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
         time.sleep(0.5)
-        elapsed_time += 100
+        elapsed_time += 500
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
 
     # Swipe Right
@@ -651,9 +634,6 @@ def test_touch_gestures(mocker, amigo_tft):
     t.join()
     assert btn == SWIPE_DOWN
     krux.input.wdt.feed.assert_called()
-
-
-"""
 
 
 def test_invalid_touch_delimiter(mocker, amigo_tft):
