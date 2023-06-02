@@ -330,7 +330,6 @@ class TinySeed(Page):
     def _draw_disabled(self, w24=False):
         """Draws disabled section where checksum is automatically filled"""
         if not w24:
-
             self.ctx.display.fill_rectangle(
                 self.x_offset + 8 * self.x_pad,
                 self.y_offset + 11 * self.y_pad,
