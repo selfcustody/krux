@@ -35,7 +35,7 @@ def find_translation_slugs():
     by looking for matches of the pattern t("string")
     """
     slugs = {}
-    for (dirpath, _, filenames) in walk(SRC_DIR):
+    for dirpath, _, filenames in walk(SRC_DIR):
         for filename in filenames:
             if not filename.endswith(".py"):
                 continue
