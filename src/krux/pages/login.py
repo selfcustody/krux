@@ -235,7 +235,6 @@ class Login(Page):
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             entropy_bytes = self.capture_camera_entropy()
             if entropy_bytes is not None:
-
                 import binascii
 
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
@@ -478,7 +477,6 @@ class Login(Page):
 
         words = []
         if qr_format == FORMAT_UR:
-
             from urtypes.crypto.bip39 import BIP39
 
             words = BIP39.from_cbor(data.cbor).words

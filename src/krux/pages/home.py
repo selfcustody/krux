@@ -773,7 +773,6 @@ class Home(Page):
                         if self.prompt(
                             t("Save PSBT to SD card?"), self.ctx.display.height() // 2
                         ):
-
                             psbt_filename, filename_undefined = self._set_filename(
                                 psbt_filename,
                                 "QRCode",
