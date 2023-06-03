@@ -29,15 +29,6 @@ from kruxsim.mocks.board import BOARD_CONFIG
 
 COLOR_BLACK = (0, 0, 0)
 COLOR_WHITE = (255, 255, 255)
-COLOR_YELLOW = (255, 255, 0)
-COLOR_RED = (255, 0, 0)
-COLOR_BLUE = (0, 0, 255)
-COLOR_GREEN = (0, 255, 0)
-COLOR_DARKGREY = (100, 100, 100)
-COLOR_LIGHTGREY = (180, 180, 180)
-COLOR_LIGHTBLACK = (40, 40, 80)
-COLOR_ORANGE = (255,165,0)
-COLOR_MAGENTA = (255,0,255)
 
 WIDTH = BOARD_CONFIG["lcd"]["width"]
 HEIGHT = BOARD_CONFIG["lcd"]["height"]
@@ -210,13 +201,4 @@ if "lcd" not in sys.modules:
         fill_rectangle=fill_rectangle,
         BLACK=COLOR_BLACK,
         WHITE=COLOR_WHITE,
-        YELLOW=COLOR_YELLOW,
-        RED=COLOR_RED,
-        BLUE=COLOR_BLUE,
-        GREEN=COLOR_GREEN,
-        LIGHTGREY=COLOR_LIGHTGREY,
-        DARKGREY=COLOR_DARKGREY,
-        LIGHTBLACK=COLOR_LIGHTBLACK,
-        ORANGE=COLOR_ORANGE,
-        MAGENTA=COLOR_MAGENTA,
     )
