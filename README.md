@@ -128,6 +128,9 @@ poetry run python simulator.py --device maixpy_amigo_tft
 poetry run python simulator.py --device maixpy_m5stickv --sd
 ```
 
+To be able to emulate a SD card, first create a folder called `sd` inside `simulator` folder.
+With emulated SD card it is possible to store settings, encrypted mnemonics, also drop and sign PSBTs.
+
 Simulator error troubleshooting:
 After some time running, the simulator may become slow. If that happens, just close and open again!
 
