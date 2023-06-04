@@ -669,7 +669,7 @@ class Home(Page):
                     if self.prompt(
                         t("Load PSBT from SD card?"), self.ctx.display.height() // 2
                     ):
-                        psbt_filename = self.select_file()
+                        psbt_filename = self.select_file(file_extension=PSBT_FILE_EXTENSION)
 
                         if psbt_filename:
                             stats = uos.stat(psbt_filename)
