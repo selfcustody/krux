@@ -23,7 +23,6 @@ import gc
 import math
 import time
 import board
-import os
 from ..themes import theme, WHITE, RED, DARKGREEN, ORANGE, MAGENTA
 from ur.ur import UR
 from ..input import (
@@ -67,6 +66,7 @@ UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
+UOS_DIRECTORY_TYPE = 0x4000
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -525,6 +525,8 @@ class Page:
 
     def select_file(self, select_file_handler=lambda *args: MENU_EXIT, file_extension=""):
         """Starts a file explorer on the SD folder and returns the file selected"""
+        import uos
+
         custom_start_digits = LIST_FILE_DIGITS
         custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
         if board.config["type"] == "m5stickv":
@@ -542,10 +544,18 @@ class Page:
                     items.append("..")
                     menu_items.append(("..", lambda: MENU_EXIT))
 
-                dir_files = os.listdir(path)
-                for filename in dir_files:
-                    # only include files that match extension
-                    if filename.endswith(file_extension) or file_extension == "":
+                dir_files = uos.ilistdir(path)
+                for file in dir_files:
+                    filename = file[0]
+                    # only include files that match extension and directories
+                    if (
+                        # No extension filter
+                        file_extension == ""
+                        # Matches filter
+                        or filename.endswith(file_extension)
+                        # Is a directory
+                        or file[1] == UOS_DIRECTORY_TYPE
+                    ):
                         items.append(filename)
                         display_filename = filename
                         if len(filename) >= custom_start_digits + 2 + custom_end_digts:
