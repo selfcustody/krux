@@ -68,6 +68,7 @@ NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
 UOS_DIRECTORY_TYPE = 0x4000
 
+
 class Page:
     """Represents a page in the app, with helper methods for common display and
     input operations.
@@ -523,7 +524,9 @@ class Page:
         _, status = self.menu.run_loop(start_from_index)
         return status != MENU_SHUTDOWN
 
-    def select_file(self, select_file_handler=lambda *args: MENU_EXIT, file_extension=""):
+    def select_file(
+        self, select_file_handler=lambda *args: MENU_EXIT, file_extension=""
+    ):
         """Starts a file explorer on the SD folder and returns the file selected"""
         import uos
 
@@ -565,7 +568,11 @@ class Page:
                                 + filename[len(filename) - custom_end_digts :]
                             )
                         menu_items.append(
-                            (display_filename, select_file_handler, [path + "/" + filename])
+                            (
+                                display_filename,
+                                select_file_handler,
+                                [path + "/" + filename],
+                            )
                         )
 
                 # We need to add this option because /sd can be empty!
