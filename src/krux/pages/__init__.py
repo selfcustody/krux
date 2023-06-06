@@ -767,31 +767,40 @@ class Menu:
             return
 
         charge = self.ctx.power_manager.battery_charge_remaining()
-        battery_color = theme.error_color if charge < 0.3 else theme.fg_color
+        if charge < 0.3:
+            battery_color = theme.error_color
+        else:
+            battery_color = theme.frame_color
 
         # Draw (filled) outline of battery in top-right corner of display
-        padding = 5
-        cylinder_length = 20
-        cylinder_height = 5
-        self.ctx.display.fill_rectangle(
+        padding = 4
+        cylinder_length = 22
+        cylinder_height = 7
+        self.ctx.display.outline(
             self.ctx.display.width() - padding - cylinder_length,
             padding,
             cylinder_length,
             cylinder_height,
             battery_color,
         )
+        self.ctx.display.fill_rectangle(
+            self.ctx.display.width() - padding + 1,
+            padding + 2,
+            2,
+            cylinder_height - 3,
+            battery_color,
+        )
 
-        # If not fully charged, overlay rect to indicate how much battery is depleted
-        if charge < 1:
-            depleted_height = cylinder_height - 2
-            depleted_length = int((cylinder_length - 2) * (1 - charge))
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - padding - depleted_length - 1,
-                padding + 1,
-                depleted_length,
-                depleted_height,
-                theme.bg_color,
-            )
+
+        # Indicate how much battery is depleted
+        charge_length = int((cylinder_length - 3) * charge)
+        self.ctx.display.fill_rectangle(
+            self.ctx.display.width() - padding - cylinder_length + 2,
+            padding + 2,
+            charge_length,
+            cylinder_height - 3,
+            theme.go_color,
+        )
 
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
@@ -846,17 +855,25 @@ class Menu:
                     )
 
     def _draw_menu(self, selected_item_index):
-        offset_y = len(self.menu_view) * self.ctx.display.font_height * 2
+        offset_y = len(self.menu_view) * 2
+        extra_lines = 0
+        for menu_item in self.menu_view:
+            extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
+        print(extra_lines)
+        offset_y += extra_lines
+        offset_y *= self.ctx.display.font_height
         offset_y = self.ctx.display.height() - offset_y
         offset_y //= 2
+        offset_y += self.ctx.display.font_height//2
+        print(offset_y)
         for i, menu_item in enumerate(self.menu_view):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             delta_y = (len(menu_item_lines) + 1) * self.ctx.display.font_height
             if selected_item_index == i:
                 self.ctx.display.fill_rectangle(
-                    DEFAULT_PADDING // 2 - 1,
+                    0,
                     offset_y + 1 - self.ctx.display.font_height // 2,
-                    self.ctx.display.usable_width() + DEFAULT_PADDING,
+                    self.ctx.display.width(),
                     delta_y - 2,
                     theme.fg_color,
                 )

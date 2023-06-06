@@ -65,10 +65,13 @@ class PowerManager:
         """Returns the state of charge of the device's battery"""
         mv = int(self.pmu.getVbatVoltage())
         if board.config["type"].startswith("amigo"):
-            return max(0, (mv - 3394.102415024943) / 416.73204356)
-        if board.config["type"] == "m5stickv":
-            return max(0, (mv - 3131.427782118631) / 790.56172897)
-        return max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
+            charge = max(0, (mv - 3394.102415024943) / 416.73204356)
+        elif board.config["type"] == "m5stickv":
+            charge = max(0, (mv - 3131.427782118631) / 790.56172897)
+        else:
+            charge = max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
+        return min(1, charge)
+
 
     def shutdown(self):
         """Shuts down the device"""
