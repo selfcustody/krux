@@ -767,10 +767,13 @@ class Menu:
             return
 
         charge = self.ctx.power_manager.battery_charge_remaining()
-        if charge < 0.3:
-            battery_color = theme.error_color
+        if self.ctx.power_manager.charging():
+            battery_color = theme.go_color
         else:
-            battery_color = theme.frame_color
+            if charge < 0.3:
+                battery_color = theme.error_color
+            else:
+                battery_color = theme.frame_color
 
         # Draw (filled) outline of battery in top-right corner of display
         padding = 4
@@ -790,7 +793,6 @@ class Menu:
             cylinder_height - 3,
             battery_color,
         )
-
 
         # Indicate how much battery is depleted
         charge_length = int((cylinder_length - 3) * charge)
@@ -859,13 +861,11 @@ class Menu:
         extra_lines = 0
         for menu_item in self.menu_view:
             extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
-        print(extra_lines)
         offset_y += extra_lines
         offset_y *= self.ctx.display.font_height
         offset_y = self.ctx.display.height() - offset_y
         offset_y //= 2
-        offset_y += self.ctx.display.font_height//2
-        print(offset_y)
+        offset_y += self.ctx.display.font_height // 2
         for i, menu_item in enumerate(self.menu_view):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             delta_y = (len(menu_item_lines) + 1) * self.ctx.display.font_height

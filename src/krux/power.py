@@ -39,6 +39,7 @@ class PowerManager:
                 from pmu import axp173
 
                 self.pmu = axp173()
+                self.pmu.enableADCs(True)
                 self.pmu.enablePMICSleepMode(False)
                 # Amigo already have a dedicated reset button
                 # Will only enable button checking when in sleep mode
@@ -49,6 +50,7 @@ class PowerManager:
                 from pmu import axp192
 
                 self.pmu = axp192()
+                self.pmu.enableADCs(True)
                 self.pmu.enablePMICSleepMode(True)
             except:
                 pass
@@ -71,7 +73,9 @@ class PowerManager:
         else:
             charge = max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
         return min(1, charge)
-
+    
+    def charging(self):
+        return self.pmu.getUSBVoltage() > 4200
 
     def shutdown(self):
         """Shuts down the device"""
