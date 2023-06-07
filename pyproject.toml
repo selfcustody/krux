@@ -42,9 +42,8 @@ pymdown-extensions = { version = "^9.5", optional = true }
 numpy = { version = "^1.22.3", optional = true }
 opencv-python = { version = "^4.5.5", optional = true }
 Pillow = { version = "^9.0.1", optional = true }
-pygame = { version = "^2.1.2", optional = true }
+pygame = { version = "^2.4.0", optional = true }
 pyzbar = { version = "^0.1.9", optional = true }
-pycryptodome = { version = "^3.17.0", optional = true}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
@@ -53,7 +52,8 @@ pytest = "^6.2.5"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
 PyQRCode = "^1.2.1"
+pycryptodome = "^3.17.0"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
-simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar", "pycryptodome"]
+simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
