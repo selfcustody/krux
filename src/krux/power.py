@@ -73,8 +73,9 @@ class PowerManager:
         else:
             charge = max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
         return min(1, charge)
-    
+
     def charging(self):
+        """Returns true if device has power delivered through USB"""
         return self.pmu.getUSBVoltage() > 4200
 
     def shutdown(self):
