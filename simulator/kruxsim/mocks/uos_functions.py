@@ -15,23 +15,8 @@ def stat(path):
     return os.stat(path)
 
 
-def ilistdir(path):
-    path = path.lstrip("/") if path.startswith("/sd") else path
-    files = os.listdir(path)
-    ilist_files = []
-    for file in files:
-        type = (
-            UOS_DIRECTORY_TYPE
-            if os.path.isdir(os.path.join(path, file))
-            else UOS_FILE_TYPE
-        )
-        ilist_files.append((file, type))
-    return ilist_files
-
-
 if "uos" not in sys.modules:
     sys.modules["uos"] = mock.MagicMock(
         statvfs=statvfs,
         stat=stat,
-        ilistdir=ilistdir,
     )

@@ -139,19 +139,18 @@ class MnemonicStorage:
         return words
 
     def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, i_vector=None):
-        """Saves the encrypted mnemonic on a file"""
+        """Saves the encrypted mnemonic on a file, returns True if successful"""
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
         mode = VERSION_MODE[Settings().encryption.version]
         encrypted = encryptor.encrypt(mnemonic, mode, i_vector).decode("utf-8")
         mnemonics = {}
-        success = True
         if sd_card:
             # load current MNEMONICS_FILE
             try:
                 with SDHandler() as sd:
                     mnemonics = json.loads(sd.read(MNEMONICS_FILE))
             except:
-                pass
+                return False
 
             # save the new MNEMONICS_FILE
             try:
@@ -166,14 +165,14 @@ class MnemonicStorage:
                     mnemonics[mnemonic_id]["data"] = encrypted
                     sd.write(MNEMONICS_FILE, json.dumps(mnemonics))
             except:
-                success = False
+                return False
         else:
             try:
                 # load current MNEMONICS_FILE
                 with open("/flash/" + MNEMONICS_FILE, "r") as f:
                     mnemonics = json.loads(f.read())
             except:
-                pass
+                return False
             try:
                 # save the new MNEMONICS_FILE
                 with open("/flash/" + MNEMONICS_FILE, "w") as f:
@@ -187,8 +186,8 @@ class MnemonicStorage:
                     mnemonics[mnemonic_id]["data"] = encrypted
                     f.write(json.dumps(mnemonics))
             except:
-                success = False
-        return success
+                return False
+        return True
 
     def del_mnemonic(self, mnemonic_id, sd_card=False):
         """Remove an entry from encrypted mnemonics file"""

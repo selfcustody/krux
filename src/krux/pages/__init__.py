@@ -66,8 +66,6 @@ UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
-UOS_DIRECTORY_TYPE = 0x4000
-
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -528,7 +526,7 @@ class Page:
         self, select_file_handler=lambda *args: MENU_EXIT, file_extension=""
     ):
         """Starts a file explorer on the SD folder and returns the file selected"""
-        import uos
+        import os
 
         custom_start_digits = LIST_FILE_DIGITS
         custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
@@ -547,9 +545,8 @@ class Page:
                     items.append("..")
                     menu_items.append(("..", lambda: MENU_EXIT))
 
-                dir_files = uos.ilistdir(path)
-                for file in dir_files:
-                    filename = file[0]
+                dir_files = os.listdir(path)
+                for filename in dir_files:
                     # only include files that match extension and directories
                     if (
                         # No extension filter
@@ -557,7 +554,7 @@ class Page:
                         # Matches filter
                         or filename.endswith(file_extension)
                         # Is a directory
-                        or file[1] == UOS_DIRECTORY_TYPE
+                        or SDHandler.dir_exists(path + "/" + filename)
                     ):
                         items.append(filename)
                         display_filename = filename
