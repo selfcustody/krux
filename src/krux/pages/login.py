@@ -266,7 +266,7 @@ class Login(Page):
 
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
-            t("Roll die at least %d times to generate a mnemonic.") % (min_rolls)
+            t("Roll dice at least %d times to generate a mnemonic.") % (min_rolls)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
