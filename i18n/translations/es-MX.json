@@ -167,7 +167,7 @@
     "Receive Addresses": "Direcciones de Recepción",
     "Region: ": "Región: ",
     "Review scanned data, edit if necessary": "Revise los datos escaneados, edítelos si es necesario",
-    "Roll die at least %d times to generate a mnemonic.": "Tira el dado al menos %d veces para generar un mnemotécnico.",
+    "Roll dice at least %d times to generate a mnemonic.": "Tira el dado al menos %d veces para generar un mnemotécnico.",
     "Rolls:\n\n%s": "Rollos:\n\n%s",
     "Rolls: %d\n": "Rollos: %d\n",
     "SD card": "Tarjeta SD",

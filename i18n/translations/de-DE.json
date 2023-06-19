@@ -167,7 +167,7 @@
     "Receive Addresses": "Empfangsadresse",
     "Region: ": "Region: ",
     "Review scanned data, edit if necessary": "Überprüfen Sie gescannte Daten und bearbeiten Sie sie bei Bedarf",
-    "Roll die at least %d times to generate a mnemonic.": "Würfeln Sie mindestens %d Mal, um eine Eselsbrücke zu erzeugen.",
+    "Roll dice at least %d times to generate a mnemonic.": "Würfeln Sie mindestens %d Mal, um eine Eselsbrücke zu erzeugen.",
     "Rolls:\n\n%s": "Rollen:\n\n%s",
     "Rolls: %d\n": "Rollen: %d\n",
     "SD card": "SD-Karte",
