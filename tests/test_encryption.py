@@ -36,6 +36,8 @@ SEEDS_JSON = """{
 }"""
 
 ECB_ONLY_JSON = """{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}"""
+CBC_ONLY_JSON = """{"cbcID": {"version": 1, "key_iterations": 100000, "data": "GpNxj9kzdiTuIf1UYC6R0FHoUokBhiNLkxWgSOHBhmBHb0Ew8wk1M+VlsR4v/koCfSGOTkgjFshC36+n7mx0W0PI6NizAoPClO8DUVamd5hS6irS+Lfff0//VJWK1BcdvOJjzYw8TBiVaL1swAEEySjn5GsqF1RaJXzAMMgu03Kq32iDIDy7h/jHJTiIPCoVQAle/C9vXq2HQeVx43c0LhGXTZmIhhkHPMgDzFTsMGM="}}"""
+I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
 
 
 @pytest.fixture
@@ -103,7 +105,7 @@ def test_load_decrypt_cbc(m5stickv, mock_file_operations):
     assert words_sd == CBC_WORDS
 
 
-def test_encrypt_ecb(mocker):
+def test_encrypt_ecb_flash(mocker):
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -113,3 +115,43 @@ def test_encrypt_ecb(mocker):
         success = storage.store_encrypted(TEST_KEY, "ecbID", ECB_WORDS, sd_card=False)
     assert success is True
     m().write.assert_called_once_with(ECB_ONLY_JSON)
+
+
+def test_encrypt_cbc_flash(mocker):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage
+
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")) as m:
+        storage = MnemonicStorage()
+        Settings().encryption.version = "AES-CBC"
+        success = storage.store_encrypted(
+            TEST_KEY, "cbcID", CBC_WORDS, sd_card=False, i_vector=I_VECTOR
+        )
+    assert success is True
+    m().write.assert_called_once_with(CBC_ONLY_JSON)
+
+
+def test_encrypt_ecb_sd(mocker, mock_file_operations):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage
+
+    with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
+        storage = MnemonicStorage()
+        Settings().encryption.version = "AES-ECB"
+        success = storage.store_encrypted(TEST_KEY, "ecbID", ECB_WORDS, sd_card=True)
+    assert success is True
+    m().write.assert_called_once_with(ECB_ONLY_JSON)
+
+
+def test_encrypt_cbc_sd(mocker, mock_file_operations):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage
+
+    with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
+        storage = MnemonicStorage()
+        Settings().encryption.version = "AES-CBC"
+        success = storage.store_encrypted(
+            TEST_KEY, "cbcID", CBC_WORDS, sd_card=True, i_vector=I_VECTOR
+        )
+    assert success is True
+    m().write.assert_called_once_with(CBC_ONLY_JSON)
