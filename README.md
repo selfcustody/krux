@@ -242,22 +242,25 @@ The project has lots of translations [here](i18n/translations), if you add new e
 cd i18n
 
 # Clean unused translations:
-python3 i18n.py clean
+poetry run python i18n.py clean
 
-# Use googletrans(4.0.0rc1) module to create missing translations, copy them to respective files, review phrases and commas.
-python3 i18n.py fill
+# Create a new translation file in JSON:
+poetry run python i18n.py new tr-TR
+
+# Use Google translate to create missing translations, copy them to respective files, review phrases and commas.
+poetry run python i18n.py fill
 
 # Create missing translations for a single language. Ex: Brazilian Portuguese
-python3 i18n.py fill pt-BR.json
+poetry run python i18n.py fill pt-BR.json
 
 # Make sure all files have this new translated message:
-python3 i18n.py validate
+poetry run python i18n.py validate
 
 # Format translation files properly:
-python3 i18n.py prettify
+poetry run python i18n.py prettify
 
 # Create the compiled table for krux translations.py
-python3 i18n.py bake
+poetry run python i18n.py bake
 ```
 
 ## Fonts
