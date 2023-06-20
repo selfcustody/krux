@@ -23,6 +23,7 @@ import time
 import lcd
 import board
 from machine import I2C
+from .themes import theme
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
@@ -258,9 +259,9 @@ class Display:
 
     def clear(self):
         """Clears the display"""
-        lcd.clear()
+        lcd.clear(theme.bg_color)
 
-    def outline(self, x, y, width, height, color=lcd.WHITE):
+    def outline(self, x, y, width, height, color=theme.fg_color):
         """Draws an outline rectangle from given coordinates"""
         self.fill_rectangle(x, y, width + 1, 1, color)  # up
         self.fill_rectangle(x, y + height, width + 1, 1, color)  # bottom
@@ -283,7 +284,7 @@ class Display:
             other_img, offset_y, (img.height() - other_img.height()) // 2, alpha=alpha
         )
 
-    def draw_string(self, x, y, text, color, bg_color=lcd.BLACK):
+    def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
         if board.config["krux"]["display"]["inverted_coordinates"]:
             x = self.width() - x
@@ -291,7 +292,11 @@ class Display:
         lcd.draw_string(x, y, text, color, bg_color)
 
     def draw_hcentered_text(
-        self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE, bg_color=lcd.BLACK
+        self,
+        text,
+        offset_y=DEFAULT_PADDING,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
     ):
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
@@ -302,7 +307,7 @@ class Display:
                 offset_x, offset_y + (i * self.font_height), line, color, bg_color
             )
 
-    def draw_centered_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK):
+    def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""
         lines = text if isinstance(text, list) else self.to_lines(text)
         lines_height = len(lines) * self.font_height
@@ -310,7 +315,11 @@ class Display:
         self.draw_hcentered_text(text, offset_y, color, bg_color)
 
     def flash_text(
-        self, text, color=lcd.WHITE, bg_color=lcd.BLACK, duration=FLASH_MSG_TIME
+        self,
+        text,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+        duration=FLASH_MSG_TIME,
     ):
         """Flashes text centered on the display for duration ms"""
         self.clear()
@@ -335,7 +344,9 @@ class Display:
     ):
         """Draws a QR code on the screen"""
         _, qr_code = self.add_qr_frame(qr_code)
-        lcd.draw_qr_code(offset_y, qr_code, self.width(), dark_color, light_color)
+        lcd.draw_qr_code(
+            offset_y, qr_code, self.width(), dark_color, light_color, theme.bg_color
+        )
 
     def set_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""

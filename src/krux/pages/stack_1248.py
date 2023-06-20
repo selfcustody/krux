@@ -20,11 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import lcd
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
+from ..themes import theme
 from ..krux_settings import t
-from ..settings import SLATEGRAY
 from ..display import DEFAULT_PADDING
 from ..input import (
     BUTTON_ENTER,
@@ -59,8 +58,8 @@ class Stackbit(Page):
             index_x_offset,
             y_offset + self.y_pad // 2,
             str(word_index),
-            lcd.WHITE,
-            SLATEGRAY,
+            theme.fg_color,
+            theme.disabled_color,
         )
         numbers_offset = self.x_offset + self.x_pad
         numbers_offset += (self.x_pad - self.ctx.display.font_width) // 2
@@ -71,13 +70,13 @@ class Stackbit(Page):
                 numbers_offset,
                 y_offset,
                 str(upper_numbers[x]),
-                lcd.WHITE,
+                theme.fg_color,
             )
             self.ctx.display.draw_string(
                 numbers_offset,
                 y_offset + self.y_pad,
                 str(lower_numbers[x]),
-                lcd.WHITE,
+                theme.fg_color,
             )
             numbers_offset += self.x_pad
 
@@ -95,7 +94,7 @@ class Stackbit(Page):
             y_offset,
             self.x_pad + self.ctx.display.font_width // 2,
             height,
-            SLATEGRAY,
+            theme.disabled_color,
         )
 
         # top line
@@ -104,7 +103,7 @@ class Stackbit(Page):
             y_offset,
             width,
             1,
-            lcd.DARKGREY,
+            theme.frame_color,
         )
         # bottom line
         self.ctx.display.fill_rectangle(
@@ -112,7 +111,7 @@ class Stackbit(Page):
             y_offset + height,
             width,
             1,
-            lcd.DARKGREY,
+            theme.frame_color,
         )
         # Vertical lines
         # Left v line
@@ -121,7 +120,7 @@ class Stackbit(Page):
             y_offset,
             1,
             height,
-            lcd.DARKGREY,
+            theme.frame_color,
         )
         # Second left vertical line
         x_bar_offset += self.x_pad
@@ -130,7 +129,7 @@ class Stackbit(Page):
             y_offset,
             1,
             height,
-            lcd.DARKGREY,
+            theme.frame_color,
         )
         x_bar_offset += self.x_pad
         # Next 4 vertical lines
@@ -140,7 +139,7 @@ class Stackbit(Page):
                 y_offset,
                 1,
                 height,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             x_bar_offset += 2 * self.x_pad
 
@@ -152,25 +151,11 @@ class Stackbit(Page):
             word_list_index_str = "0" + word_list_index_str
         return [int(x) for x in str(word_list_index_str)], word_list_index_str
 
-    def _draw_punched(self, digits, y_offset, export=False):
+    def _draw_punched(self, digits, y_offset):
         """Draws punched bits for import and export Stackbit UI"""
         outline_width = self.x_pad - 6
         outline_height = self.y_pad - 4
         outline_x_offset = self.x_offset + self.x_pad + 3
-
-        # print border around numbers only on touch devices
-        if not export and self.ctx.input.touch is not None:
-            # x for each col
-            for x in range(7):
-                # y for each line
-                for y in range(2):
-                    self.ctx.display.outline(
-                        outline_x_offset + x * self.x_pad,
-                        y_offset + y * self.y_pad + 1,
-                        outline_width,
-                        outline_height,
-                        lcd.DARKGREY,
-                    )
 
         if digits[0] == 2:
             self.ctx.display.outline(
@@ -178,7 +163,7 @@ class Stackbit(Page):
                 y_offset + self.y_pad + 1,
                 outline_width,
                 outline_height,
-                lcd.GREEN,
+                theme.highlight_color,
             )
         elif digits[0] == 1:
             self.ctx.display.outline(
@@ -186,7 +171,7 @@ class Stackbit(Page):
                 y_offset + 1,
                 outline_width,
                 outline_height,
-                lcd.GREEN,
+                theme.highlight_color,
             )
         outline_x_offset += self.x_pad
         for x in range(3):
@@ -196,7 +181,7 @@ class Stackbit(Page):
                     y_offset + self.y_pad + 1,
                     outline_width,
                     outline_height,
-                    lcd.GREEN,
+                    theme.highlight_color,
                 )
             if (digits[x + 1] >> 2) & 1:
                 self.ctx.display.outline(
@@ -204,7 +189,7 @@ class Stackbit(Page):
                     y_offset + self.y_pad + 1,
                     outline_width,
                     outline_height,
-                    lcd.GREEN,
+                    theme.highlight_color,
                 )
             if (digits[x + 1] >> 1) & 1:
                 self.ctx.display.outline(
@@ -212,7 +197,7 @@ class Stackbit(Page):
                     y_offset + 1,
                     outline_width,
                     outline_height,
-                    lcd.GREEN,
+                    theme.highlight_color,
                 )
             if digits[x + 1] & 1:
                 self.ctx.display.outline(
@@ -220,7 +205,7 @@ class Stackbit(Page):
                     y_offset + 1,
                     outline_width,
                     outline_height,
-                    lcd.GREEN,
+                    theme.highlight_color,
                 )
             outline_x_offset += 2 * self.x_pad
 
@@ -239,19 +224,19 @@ class Stackbit(Page):
         self._draw_grid(y_offset)
         self._draw_labels(y_offset, word_index)
         digits, digits_str = self._word_to_digits(word)
-        self._draw_punched(digits, y_offset, True)
+        self._draw_punched(digits, y_offset)
         if self.ctx.display.height() > 240:
             self.ctx.display.draw_string(
                 self.x_offset + 17 * self.ctx.display.font_width,
                 y_offset,
                 digits_str,
-                lcd.LIGHTGREY,
+                theme.disabled_color,
             )
             self.ctx.display.draw_string(
                 self.x_offset + 17 * self.ctx.display.font_width,
                 y_offset + self.y_pad,
                 word,
-                lcd.LIGHTGREY,
+                theme.disabled_color,
             )
 
     def _toggle_bit(self, digits, index):
@@ -309,7 +294,7 @@ class Stackbit(Page):
             y_position,
             width,
             self.y_pad,
-            lcd.WHITE,
+            theme.fg_color,
         )
 
     def _draw_menu(self):
@@ -318,13 +303,16 @@ class Stackbit(Page):
         label_y_offset = (self.y_pad - self.ctx.display.font_height) // 2
         x_offset = self.x_offset + self.x_pad
         self.ctx.display.draw_string(
-            x_offset + 1 * self.x_pad, y_offset + label_y_offset, t("Esc"), lcd.WHITE
+            x_offset + 1 * self.x_pad,
+            y_offset + label_y_offset,
+            t("Esc"),
+            theme.fg_color,
         )
         self.ctx.display.draw_string(
             round(x_offset + 4.2 * self.x_pad),
             y_offset + label_y_offset,
             t("Go"),
-            lcd.WHITE,
+            theme.fg_color,
         )
         # print border around buttons only on touch devices
         if self.ctx.input.touch is not None:
@@ -333,14 +321,14 @@ class Stackbit(Page):
                 y_offset,
                 6 * self.x_pad,
                 1,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             self.ctx.display.fill_rectangle(
                 x_offset,
                 y_offset + self.y_pad,
                 6 * self.x_pad,
                 1,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             for _ in range(3):
                 self.ctx.display.fill_rectangle(
@@ -348,7 +336,7 @@ class Stackbit(Page):
                     y_offset,
                     1,
                     self.y_pad,
-                    lcd.DARKGREY,
+                    theme.frame_color,
                 )
                 x_offset += 3 * self.x_pad
 
@@ -362,11 +350,11 @@ class Stackbit(Page):
     def preview_word(self, digits):
         """Draws word respective to current state"""
         preview_string = "".join(str(num) for num in digits)
-        color = lcd.RED
+        color = theme.error_color
         word = self.digits_to_word(digits)
         if word is not None:
             preview_string += ": " + word
-            color = lcd.WHITE
+            color = theme.fg_color
         y_offset = self.y_offset + 3 * self.y_pad
         self.ctx.display.draw_hcentered_text(preview_string, y_offset, color=color)
 

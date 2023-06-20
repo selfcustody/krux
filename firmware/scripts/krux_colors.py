@@ -19,5 +19,43 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-VERSION = "23.04.beta11"
-SIGNER_PUBKEY = "03339e883157e45891e61ca9df4cd3bb895ef32d475b8e793559ea10a36766689b"
+
+"""
+Create Krux 16 bits colors from 8 bits RGB values
+Type r g b arguments as 0-255 numbers
+Ex: RED
+krux_colors.py 255 0 0
+Output: 0x00f8
+"""
+
+import sys
+
+
+def rgb888torgb565(color):
+    """convert to gggbbbbbrrrrrggg to tuple"""
+    red, green, blue = color
+    red *= 31
+    red //= 255
+    red = red << 3
+    green *= 63
+    green //= 255
+    green_a = green & 0b111
+    green_b = green & 0b111000
+    green_b = green_b << 10
+    green = green_a + green_b
+    blue *= 31
+    blue //= 255
+    blue = blue << 8
+    return format(red + green + blue, "04x")
+
+
+if len(sys.argv) == 4:
+    try:
+        red_byte = min(255, int(sys.argv[1]))
+        green_byte = min(255, int(sys.argv[2]))
+        blue_byte = min(255, int(sys.argv[3]))
+        print("0x" + rgb888torgb565((red_byte, green_byte, blue_byte)))
+    except:
+        print("Type r g b arguments as 0-255 numbers")
+else:
+    print("Type r g b arguments as 0-255 numbers")

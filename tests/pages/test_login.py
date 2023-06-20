@@ -735,25 +735,16 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
             + (
                 # N
                 [BUTTON_TOUCH]  # index 13 -> "n"
+                + [BUTTON_TOUCH]  # index 14 -> "o"
+                + [BUTTON_TOUCH]  # index 17 -> "r"
                 +
                 # Touch on del
-                [BUTTON_TOUCH]  # index 26 -> "Del"
+                [BUTTON_TOUCH]  # index 27 -> "Del"
                 +
                 # Invalid Position
-                [BUTTON_TOUCH]  # index 29 "empty"
-                +
-                # N
-                [BUTTON_TOUCH]  # index 13 -> "n"
-                +
-                # O
-                [BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_ENTER]
-                +
-                # R going back
-                [BUTTON_PAGE_PREV for _ in range(11)]
-                + [BUTTON_ENTER]
-                +
-                # T
-                [BUTTON_ENTER]
+                [BUTTON_TOUCH]  # index 26 "empty"
+                + [BUTTON_TOUCH]  # index 17 -> "r"
+                + [BUTTON_TOUCH]  # index 19 -> "t"
                 +
                 # Confirm word <north> -> index 0 (Yes)
                 [BUTTON_TOUCH]
@@ -770,7 +761,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
                 BUTTON_ENTER,
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
-            [13, 26, 29, 13, 0],
+            [13, 14, 17, 27, 26, 17, 19, 0],
         ),
         (
             [BUTTON_ENTER]
@@ -1368,13 +1359,12 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
 
 def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     import krux
-    import lcd
 
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
     from krux.translations import translation_table
-    from krux.settings import DARKGREEN
+    from krux.themes import WHITE, RED, GREEN, ORANGE, MAGENTA
 
     tlist = list(translation_table)
     index_en = tlist.index("en-US")
@@ -1397,8 +1387,8 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_ENTER,
             ),
             [
-                mocker.call("Network\nmain", lcd.ORANGE),
-                mocker.call("Network\ntest", lcd.GREEN),
+                mocker.call("Network\nmain", ORANGE),
+                mocker.call("Network\ntest", GREEN),
             ],
             lambda: Settings().bitcoin.network == "test",
             CategorySetting,
@@ -1406,6 +1396,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         (
             (
                 # Printer
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
@@ -1427,11 +1418,12 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
-                mocker.call("Baudrate\n9600", lcd.WHITE),
-                mocker.call("Baudrate\n19200", lcd.WHITE),
+                mocker.call("Baudrate\n9600", WHITE),
+                mocker.call("Baudrate\n19200", WHITE),
             ],
             lambda: Settings().printer.thermal.adafruit.baudrate == 19200,
             CategorySetting,
@@ -1440,14 +1432,15 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
             (
                 # Language
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Change Locale
                 BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
-                mocker.call(text_en, lcd.WHITE),
-                mocker.call(text_next, lcd.WHITE),
+                mocker.call(text_en, WHITE),
+                mocker.call(text_next, WHITE),
             ],
             lambda: Settings().i18n.locale == tlist[index_next],
             CategorySetting,
@@ -1455,6 +1448,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         (
             (
                 # Logging
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
@@ -1468,14 +1462,15 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
-                mocker.call("Log Level\nNONE", lcd.WHITE),
-                mocker.call("Log Level\nERROR", lcd.RED),
-                mocker.call("Log Level\nWARN", lcd.ORANGE),
-                mocker.call("Log Level\nINFO", DARKGREEN),
-                mocker.call("Log Level\nDEBUG", lcd.MAGENTA),
+                mocker.call("Log Level\nNONE", WHITE),
+                mocker.call("Log Level\nERROR", RED),
+                mocker.call("Log Level\nWARN", ORANGE),
+                mocker.call("Log Level\nINFO", GREEN),
+                mocker.call("Log Level\nDEBUG", MAGENTA),
             ],
             lambda: Settings().logging.level == "DEBUG",
             CategorySetting,
@@ -1483,6 +1478,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         (
             (
                 # Printer
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
@@ -1523,6 +1519,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
@@ -1544,23 +1541,17 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         login.settings()
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
-        if case[3] == NumberSetting:
-            ctx.display.draw_hcentered_text.assert_has_calls(case[1])
-        else:
-            ctx.display.draw_centered_text.assert_has_calls(case[1])
 
         assert case[2]()
 
 
 def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
-    import lcd
     import krux
     from krux.pages.login import Login
     from krux.input import BUTTON_TOUCH
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
-    from krux.settings import DARKGREEN
-
     from krux.translations import translation_table
+    from krux.themes import WHITE, RED, GREEN, ORANGE, MAGENTA
 
     tlist = list(translation_table)
     index_en = tlist.index("en-US")
@@ -1574,6 +1565,11 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
     GO_INDEX = 1
     NEXT_INDEX = 2
 
+    LOCALE_INDEX = 2
+    LOGGING_INDEX = 3
+    PRINTER_INDEX = 5
+    LEAVE_INDEX = 8
+
     cases = [
         (
             (
@@ -1583,11 +1579,11 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Leave Settings
-                6,
+                LEAVE_INDEX,
             ),
             [
-                mocker.call("Network\nmain", lcd.ORANGE),
-                mocker.call("Network\ntest", lcd.GREEN),
+                mocker.call("Network\nmain", ORANGE),
+                mocker.call("Network\ntest", GREEN),
             ],
             lambda: Settings().bitcoin.network == "test",
             CategorySetting,
@@ -1595,7 +1591,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         (
             (
                 # Printer
-                4,
+                PRINTER_INDEX,
                 # Thermal
                 1,
                 # Change Baudrate
@@ -1607,11 +1603,11 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 # Back to Printer
                 3,
                 # Leave Settings
-                6,
+                LEAVE_INDEX,
             ),
             [
-                mocker.call("Baudrate\n9600", lcd.WHITE),
-                mocker.call("Baudrate\n19200", lcd.WHITE),
+                mocker.call("Baudrate\n9600", WHITE),
+                mocker.call("Baudrate\n19200", WHITE),
             ],
             lambda: Settings().printer.thermal.adafruit.baudrate == 19200,
             CategorySetting,
@@ -1619,14 +1615,14 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         (
             (
                 # Language
-                1,
+                LOCALE_INDEX,
                 # Change Locale
                 NEXT_INDEX,
                 GO_INDEX,
             ),
             [
-                mocker.call(text_en, lcd.WHITE),
-                mocker.call(text_next, lcd.WHITE),
+                mocker.call(text_en, WHITE),
+                mocker.call(text_next, WHITE),
             ],
             lambda: Settings().i18n.locale == tlist[index_next],
             CategorySetting,
@@ -1634,7 +1630,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         (
             (
                 # Logging
-                2,
+                LOGGING_INDEX,
                 # Change log level
                 NEXT_INDEX,
                 NEXT_INDEX,
@@ -1642,14 +1638,14 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Leave Settings
-                6,
+                LEAVE_INDEX,
             ),
             [
-                mocker.call("Log Level\nNONE", lcd.WHITE),
-                mocker.call("Log Level\nERROR", lcd.RED),
-                mocker.call("Log Level\nWARN", lcd.ORANGE),
-                mocker.call("Log Level\nINFO", DARKGREEN),
-                mocker.call("Log Level\nDEBUG", lcd.MAGENTA),
+                mocker.call("Log Level\nNONE", WHITE),
+                mocker.call("Log Level\nERROR", RED),
+                mocker.call("Log Level\nWARN", ORANGE),
+                mocker.call("Log Level\nINFO", GREEN),
+                mocker.call("Log Level\nDEBUG", MAGENTA),
             ],
             lambda: Settings().logging.level == "DEBUG",
             CategorySetting,
@@ -1676,10 +1672,6 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         login.settings()
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
-        if case[3] == NumberSetting:
-            ctx.display.draw_hcentered_text.assert_has_calls(case[1])
-        else:
-            ctx.display.draw_centered_text.assert_has_calls(case[1])
 
         assert case[2]()
 

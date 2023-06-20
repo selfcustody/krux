@@ -89,7 +89,7 @@ poetry run pytest --cache-clear --cov src/krux --cov-report html --show-capture 
 
 To run just a specific test from a specific file, run:
 ```bash
-poetry run pytest --cache-clear .\tests\pages\test_login.py -k 'test_load_key_from_hexadecimal'
+poetry run pytest --cache-clear ./tests/pages/test_login.py -k 'test_load_key_from_hexadecimal'
 ```
 
 ## Use the Python interpreter (REPL)
@@ -109,7 +109,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## Run the simulator
 This can be useful for testing a change to the krux code without having to run a full build and flash, visual regression testing,
 generating screenshots, or even just trying out Krux before purchasing a device. However, the simulator may not behave exactly as
-the HW device and may not have all features implemented (e.g. scanning via camera the Seed Signer currently only works on the HW device)
+the HW device and may not have all features implemented (e.g. scanning via camera a TinySeed currently only works on the HW device)
 
 Before executing the simulator, make sure you have installed the poetry extras:
 ```bash
@@ -127,6 +127,9 @@ poetry run python simulator.py --device maixpy_amigo_tft
 # Run simulator with sd enabled and the small button-only m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
 poetry run python simulator.py --device maixpy_m5stickv --sd
 ```
+
+To be able to emulate a SD card, first create a folder called `sd` inside `simulator` folder.
+With emulated SD card it is possible to store settings, encrypted mnemonics, also drop and sign PSBTs.
 
 Simulator error troubleshooting:
 After some time running, the simulator may become slow. If that happens, just close and open again!
@@ -259,6 +262,14 @@ poetry run python i18n.py prettify
 # Create the compiled table for krux translations.py
 poetry run python i18n.py bake
 ```
+
+## Fonts
+
+Learn about how to setup fonts [here](firmware/font/README.md)
+
+## Colors
+
+Use [this script](firmware/scripts/krux_colors.py) to generate Maixpy compatible colors from RGB values to customize Krux
 
 ## Run mkdocs
 ```bash

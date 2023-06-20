@@ -29,14 +29,6 @@ from kruxsim.mocks.board import BOARD_CONFIG
 
 COLOR_BLACK = (0, 0, 0)
 COLOR_WHITE = (255, 255, 255)
-COLOR_RED = (255, 0, 0)
-COLOR_BLUE = (0, 0, 255)
-COLOR_GREEN = (0, 255, 0)
-COLOR_DARKGREY = (100, 100, 100)
-COLOR_LIGHTGREY = (180, 180, 180)
-COLOR_LIGHTBLACK = (40, 40, 80)
-COLOR_ORANGE = (255,165,0)
-COLOR_MAGENTA = (255,0,255)
 
 WIDTH = BOARD_CONFIG["lcd"]["width"]
 HEIGHT = BOARD_CONFIG["lcd"]["height"]
@@ -46,11 +38,28 @@ portrait = True
 landscape = False
 
 
-def clear():
+def rgb565torgb888(color):
+    """convert from gggbbbbbrrrrrggg to tuple"""
+    MASK5 = 0b11111
+    MASK3 = 0b111
+
+    red = ((color >> 3) & MASK5)
+    red *= 255
+    red //= 31
+    green = color >> 13
+    green += (color & MASK3) << 3
+    green *= 255
+    green //= 63
+    blue = ((color >> 8) & MASK5)
+    blue *=255
+    blue //= 31
+    return (red, green, blue)
+
+def clear(color):
     def run():
         if screen:
-            screen.fill(COLOR_BLACK)
-
+            screen.fill(color)
+    color = rgb565torgb888(color)
     pg.event.post(pg.event.Event(events.LCD_CLEAR_EVENT, {"f": run}))
 
 
@@ -129,11 +138,12 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                     y,
                 ),
             )
-
+    color = rgb565torgb888(color)
+    bgcolor = rgb565torgb888(bgcolor)
     pg.event.post(pg.event.Event(events.LCD_DRAW_STRING_EVENT, {"f": run}))
 
 
-def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
+def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color, background):
     def run():
         starting_size = 0
         while code_str[starting_size] != "\n":
@@ -150,11 +160,12 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color):
                         og_yx_index = og_y * (starting_size + 1) + og_x
                         screen.set_at(
                             (offset + x, offset + offset_y + y),
-                            COLOR_BLACK
+                            dark_color
                             if code_str[og_yx_index] == "1"
-                            else COLOR_WHITE,
+                            else light_color,
                         )
-
+    dark_color = rgb565torgb888(dark_color)
+    light_color = rgb565torgb888(light_color)
     pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
 
 
@@ -172,7 +183,7 @@ def fill_rectangle(x, y, w, h, color):
                 h,
             ),
         )
-
+    color = rgb565torgb888(color)
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 
 
@@ -190,12 +201,4 @@ if "lcd" not in sys.modules:
         fill_rectangle=fill_rectangle,
         BLACK=COLOR_BLACK,
         WHITE=COLOR_WHITE,
-        RED=COLOR_RED,
-        BLUE=COLOR_BLUE,
-        GREEN=COLOR_GREEN,
-        LIGHTGREY=COLOR_LIGHTGREY,
-        DARKGREY=COLOR_DARKGREY,
-        LIGHTBLACK=COLOR_LIGHTBLACK,
-        ORANGE=COLOR_ORANGE,
-        MAGENTA=COLOR_MAGENTA,
     )

@@ -6,6 +6,7 @@ import sensor
 import time
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
+from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
 from ..display import DEFAULT_PADDING, FLASH_MSG_TIME
@@ -49,7 +50,7 @@ class TinySeed(Page):
                 self.y_offset,
                 1,
                 12 * self.y_pad,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             x_offset += self.x_pad
             self.ctx.display.fill_rectangle(
@@ -57,7 +58,7 @@ class TinySeed(Page):
                 y_var,
                 12 * (self.x_pad),
                 1,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             y_var += self.y_pad
 
@@ -76,7 +77,8 @@ class TinySeed(Page):
                     - DEFAULT_PADDING // 2,
                     self.ctx.display.width() - bit_offset,
                     str(bit_number),
-                    lcd.WHITE,
+                    theme.fg_color,
+                    theme.bg_color,
                 )
                 bit_number //= 2
                 bit_offset += self.x_pad
@@ -87,9 +89,7 @@ class TinySeed(Page):
             line = str(page * 12 + x + 1)
             if (page * 12 + x + 1) < 10:
                 line = " " + line
-            self.ctx.display.draw_string(
-                DEFAULT_PADDING // 2, y_offset, line, lcd.WHITE
-            )
+            self.ctx.display.draw_string(DEFAULT_PADDING // 2, y_offset, line)
             y_offset += self.y_pad
 
     def _draw_punched(self, words, page):
@@ -109,7 +109,7 @@ class TinySeed(Page):
                         y_offset + 3,
                         self.x_pad - 5,
                         self.y_pad - 5,
-                        lcd.WHITE,  # GREEN would be better
+                        theme.highlight_color,
                     )
             y_offset += self.y_pad
 
@@ -270,7 +270,7 @@ class TinySeed(Page):
             y_position,
             width,
             height,
-            lcd.WHITE,
+            theme.fg_color,
         )
 
     def _draw_menu(self):
@@ -283,9 +283,11 @@ class TinySeed(Page):
         if self.ctx.display.width() > 135:
             esc_x_offset = round(x_offset + 2.3 * self.x_pad)
 
-        self.ctx.display.draw_string(esc_x_offset, y_offset + 1, t("Esc"), lcd.WHITE)
         self.ctx.display.draw_string(
-            round(x_offset + 8.4 * self.x_pad), y_offset + 1, t("Go"), lcd.WHITE
+            esc_x_offset, y_offset + 1, t("Esc"), theme.no_esc_color
+        )
+        self.ctx.display.draw_string(
+            round(x_offset + 8.4 * self.x_pad), y_offset + 1, t("Go"), theme.go_color
         )
         # print border around buttons only on touch devices
         if self.ctx.input.touch is not None:
@@ -294,14 +296,14 @@ class TinySeed(Page):
                 y_offset,
                 12 * self.x_pad,
                 1,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             self.ctx.display.fill_rectangle(
                 x_offset,
                 y_offset + self.y_pad,
                 12 * self.x_pad,
                 1,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             for _ in range(3):
                 self.ctx.display.fill_rectangle(
@@ -309,7 +311,7 @@ class TinySeed(Page):
                     y_offset,
                     1,
                     self.y_pad,
-                    lcd.DARKGREY,
+                    theme.frame_color,
                 )
                 x_offset += 6 * self.x_pad
 
@@ -328,20 +330,19 @@ class TinySeed(Page):
     def _draw_disabled(self, w24=False):
         """Draws disabled section where checksum is automatically filled"""
         if not w24:
-
             self.ctx.display.fill_rectangle(
                 self.x_offset + 8 * self.x_pad,
                 self.y_offset + 11 * self.y_pad,
                 4 * self.x_pad,
                 self.y_pad,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             self.ctx.display.fill_rectangle(
                 self.x_offset + 7 * self.x_pad,
                 self.y_offset + 11 * self.y_pad,
                 1 * self.x_pad,
                 self.y_pad,
-                lcd.LIGHTGREY,
+                theme.disabled_color,
             )
         else:
             self.ctx.display.fill_rectangle(
@@ -349,14 +350,14 @@ class TinySeed(Page):
                 self.y_offset + 11 * self.y_pad,
                 8 * self.x_pad,
                 self.y_pad,
-                lcd.DARKGREY,
+                theme.frame_color,
             )
             self.ctx.display.fill_rectangle(
                 self.x_offset + 3 * self.x_pad,
                 self.y_offset + 11 * self.y_pad,
                 1 * self.x_pad,
                 self.y_pad,
-                lcd.LIGHTGREY,
+                theme.disabled_color,
             )
 
     def check_sum(self, tiny_seed_numbers):
@@ -809,7 +810,7 @@ class TinyScanner(Page):
                 if dot_l < punch_threshold:
                     _ = img.draw_rectangle(
                         eval_rect, thickness=punch_thickness, color=lcd.WHITE
-                    )  # GREEN would be better, but img.format() == GRAYSCALE
+                    )
                     word_index = index // 12
                     bit = 11 - (index % 12)
                     page_seed_numbers[word_index] = self.tiny_seed.toggle_bit(

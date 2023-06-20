@@ -292,6 +292,30 @@ class EncryptionSettings(SettingsNamespace):
         }[attr]
 
 
+class ThemeSettings(SettingsNamespace):
+    """Theme settings"""
+
+    DARK_THEME = 0
+    LIGHT_THEME = 1
+    ORANGE_THEME = 3
+    DARK_THEME_NAME = "Dark"
+    LIGHT_THEME_NAME = "Light"
+    ORANGE_THEME_NAME = "Orange"
+    THEME_NAMES = {
+        DARK_THEME: DARK_THEME_NAME,
+        LIGHT_THEME: LIGHT_THEME_NAME,
+        ORANGE_THEME: ORANGE_THEME_NAME,
+    }
+    namespace = "settings.appearance"
+    theme = CategorySetting("theme", DARK_THEME_NAME, list(THEME_NAMES.values()))
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "theme": t("Theme"),
+        }[attr]
+
+
 class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
 
@@ -304,6 +328,7 @@ class Settings(SettingsNamespace):
         self.encryption = EncryptionSettings()
         self.printer = PrinterSettings()
         self.persist = PersistSettings()
+        self.appearance = ThemeSettings()
         if board.config["type"].startswith("amigo"):
             self.touch = TouchSettings()
 
@@ -316,6 +341,7 @@ class Settings(SettingsNamespace):
             "encryption": t("Encryption"),
             "persist": t("Persist"),
             "printer": t("Printer"),
+            "appearance": t("Theme"),
         }
         if board.config["type"].startswith("amigo"):
             main_menu["touchscreen"] = t("Touchscreen")

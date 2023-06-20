@@ -39,6 +39,7 @@ class PowerManager:
                 from pmu import axp173
 
                 self.pmu = axp173()
+                self.pmu.enableADCs(True)
                 self.pmu.enablePMICSleepMode(False)
                 # Amigo already have a dedicated reset button
                 # Will only enable button checking when in sleep mode
@@ -49,6 +50,7 @@ class PowerManager:
                 from pmu import axp192
 
                 self.pmu = axp192()
+                self.pmu.enableADCs(True)
                 self.pmu.enablePMICSleepMode(True)
             except:
                 pass
@@ -65,10 +67,16 @@ class PowerManager:
         """Returns the state of charge of the device's battery"""
         mv = int(self.pmu.getVbatVoltage())
         if board.config["type"].startswith("amigo"):
-            return max(0, (mv - 3394.102415024943) / 416.73204356)
-        if board.config["type"] == "m5stickv":
-            return max(0, (mv - 3131.427782118631) / 790.56172897)
-        return max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
+            charge = max(0, (mv - 3394.102415024943) / 416.73204356)
+        elif board.config["type"] == "m5stickv":
+            charge = max(0, (mv - 3131.427782118631) / 790.56172897)
+        else:
+            charge = max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
+        return min(1, charge)
+
+    def charging(self):
+        """Returns true if device has power delivered through USB"""
+        return self.pmu.getUSBVoltage() > 4200
 
     def shutdown(self):
         """Shuts down the device"""

@@ -72,6 +72,8 @@ TEST_QR_WITH_BORDER = """
 00000000000000000000000000000000000
 """.strip()
 
+DEFAULT_BG_COLOR = 0x0000  # Black
+
 
 def test_init(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
@@ -446,5 +448,5 @@ def test_draw_qr_code(mocker, m5stickv):
     d.draw_qr_code(0, TEST_QR)
 
     krux.display.lcd.draw_qr_code.assert_called_with(
-        0, TEST_QR_WITH_BORDER, 135, QR_DARK_COLOR, QR_LIGHT_COLOR
+        0, TEST_QR_WITH_BORDER, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, DEFAULT_BG_COLOR
     )

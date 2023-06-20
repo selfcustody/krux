@@ -19,47 +19,28 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# pylint: disable=C2801
-import binascii
-import hashlib
-import lcd
+
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
-from urtypes.crypto.bip39 import BIP39
-from ..metadata import VERSION
-from ..settings import (
-    CategorySetting,
-    NumberSetting,
-    DARKGREEN,
-    SD_PATH,
-    FLASH_PATH,
-    Store,
-)
-from ..krux_settings import Settings, LoggingSettings, BitcoinSettings, TouchSettings
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
-from ..qr import FORMAT_UR, FORMAT_NONE
+from ..themes import theme
+from ..krux_settings import Settings
+from ..qr import FORMAT_UR
 from ..key import Key
 from ..wallet import Wallet
 from ..printers import create_printer
 from ..krux_settings import t
-from ..sd_card import SDHandler
 from . import (
     Page,
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
-    DEFAULT_PADDING,
-    SD_ROOT_PATH,
     LETTERS,
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-import os
-import uos
-import time
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
@@ -75,15 +56,6 @@ D20_24W_MIN_ROLLS = 60
 SD_MSG_TIME = 2500
 
 PASSPHRASE_MAX_LEN = 200
-
-CATEGORY_SETTING_COLOR_DICT = {
-    LoggingSettings.ERROR_TXT: lcd.RED,
-    LoggingSettings.WARN_TXT: lcd.ORANGE,
-    LoggingSettings.INFO_TXT: DARKGREEN,
-    LoggingSettings.DEBUG_TXT: lcd.MAGENTA,
-    BitcoinSettings.MAIN_TXT: lcd.ORANGE,
-    BitcoinSettings.TEST_TXT: lcd.GREEN,
-}
 
 
 class Login(Page):
@@ -156,14 +128,17 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def load_encrypted_seed(self, mnemonic_id, sd_card=False, delete=False):
+    def _load_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
+        """Uses encryption module to load and decrypt a mnemonic"""
         from ..encryption import MnemonicStorage
 
-        """Load a selected seed from the encrypted file"""
-        key = self.capture_from_keypad(
-            t("Encryption Key"),
-            [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
-        )
+        from .encryption_key import EncryptionKey
+
+        key_capture = EncryptionKey(self.ctx)
+        key = key_capture.encryption_key()
+        if key is None:
+            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
+            raise ValueError(t("Failed to decrypt"))
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
         if key in ("", ESC_KEY):
@@ -176,18 +151,10 @@ class Login(Page):
 
         if len(words) not in (12, 24):
             raise ValueError(t("Failed to decrypt"))
-        if delete:
-            self.ctx.display.clear()
-            if self.prompt(
-                t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2
-            ):
-                mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
         del mnemonic_storage
-        if delete:
-            return None
         return self._load_key_from_words(words)
 
-    def load_mnemonic_from_storage(self, delete=False):
+    def load_mnemonic_from_storage(self):
         """Lists all encrypted seeds stored on a file"""
         from ..encryption import MnemonicStorage
 
@@ -202,9 +169,7 @@ class Login(Page):
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(flash)",
-                    lambda m_id=mnemonic_id: self.load_encrypted_seed(
-                        m_id, delete=delete
-                    ),
+                    lambda m_id=mnemonic_id: self._load_encrypted_mnemonic(m_id),
                 )
             )
         if has_sd:
@@ -212,8 +177,8 @@ class Login(Page):
                 mnemonic_ids_menu.append(
                     (
                         mnemonic_id + "(SD card)",
-                        lambda m_id=mnemonic_id: self.load_encrypted_seed(
-                            m_id, sd_card=True, delete=delete
+                        lambda m_id=mnemonic_id: self._load_encrypted_mnemonic(
+                            m_id, sd_card=True
                         ),
                     )
                 )
@@ -270,6 +235,8 @@ class Login(Page):
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             entropy_bytes = self.capture_camera_entropy()
             if entropy_bytes is not None:
+                import binascii
+
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
@@ -299,7 +266,7 @@ class Login(Page):
 
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
-            t("Roll die at least %d times to generate a mnemonic.") % (min_rolls)
+            t("Roll dice at least %d times to generate a mnemonic.") % (min_rolls)
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             rolls = []
@@ -348,8 +315,11 @@ class Login(Page):
 
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
-            self.ctx.input.wait_for_button()
 
+            import hashlib
+            import binascii
+
+            self.ctx.input.wait_for_button()
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
                 hashlib.sha256(entropy_bytes).digest()
@@ -370,12 +340,14 @@ class Login(Page):
     def _load_qr_passphrase(self):
         data, _ = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load passphrase"), lcd.RED)
+            self.ctx.display.flash_text(
+                t("Failed to load passphrase"), theme.error_color
+            )
             return MENU_CONTINUE
         if len(data) > PASSPHRASE_MAX_LEN:
             self.ctx.display.flash_text(
-                t("Maximum passphrase length exceeded (%s)") % PASSPHRASE_MAX_LEN,
-                lcd.RED,
+                t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN,
+                theme.error_color,
             )
             return MENU_CONTINUE
         return data
@@ -468,15 +440,45 @@ class Login(Page):
             self.ctx.log.exception("Exception occurred connecting to printer")
         return MENU_EXIT
 
+    def _encrypted_qr_code(self, data):
+        from ..encryption import EncryptedQRCode
+
+        encrypted_qr = EncryptedQRCode()
+        data_bytes = data.encode("latin-1") if isinstance(data, str) else data
+        public_data = encrypted_qr.public_data(data_bytes)
+        if public_data:
+            self.ctx.display.clear()
+            if self.prompt(
+                public_data + "\n\n" + t("Decrypt?"), self.ctx.display.height() // 2
+            ):
+                from .encryption_key import EncryptionKey
+
+                key_capture = EncryptionKey(self.ctx)
+                key = key_capture.encryption_key()
+                if key is None:
+                    self.ctx.display.flash_text(t("Mnemonic was not decrypted"))
+                    return None
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Processing ..."))
+                if key in ("", ESC_KEY):
+                    raise ValueError(t("Failed to decrypt"))
+                word_bytes = encrypted_qr.decrypt(key)
+                if word_bytes is None:
+                    raise ValueError(t("Failed to decrypt"))
+                return bip39.mnemonic_from_bytes(word_bytes).split()
+        return None
+
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load mnemonic"), theme.error_color)
             return MENU_CONTINUE
 
         words = []
         if qr_format == FORMAT_UR:
+            from urtypes.crypto.bip39 import BIP39
+
             words = BIP39.from_cbor(data.cbor).words
         else:
             try:
@@ -502,9 +504,10 @@ class Login(Page):
                         ]
                 except:
                     pass
-
+            if not words:
+                words = self._encrypted_qr_code(data)
         if not words or (len(words) != 12 and len(words) != 24):
-            self.ctx.display.flash_text(t("Invalid mnemonic length"), lcd.RED)
+            self.ctx.display.flash_text(t("Invalid mnemonic length"), theme.error_color)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -817,7 +820,7 @@ class Login(Page):
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
         if words is None:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), lcd.RED)
+            self.ctx.display.flash_text(t("Failed to load mnemonic"), theme.error_color)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -827,369 +830,27 @@ class Login(Page):
             t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
         )
 
-    def _draw_settings_pad(self):
-        """Draws buttons to change settings with touch"""
-        if self.ctx.input.touch is not None:
-            self.ctx.input.touch.clear_regions()
-            offset_y = self.ctx.display.height() * 2 // 3
-            self.ctx.input.touch.add_y_delimiter(offset_y)
-            self.ctx.input.touch.add_y_delimiter(
-                offset_y + self.ctx.display.font_height * 3
-            )
-            button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
-            for i in range(4):
-                self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
-            offset_y += self.ctx.display.font_height
-            keys = ["<", t("Go"), ">"]
-            for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
-                self.ctx.display.outline(
-                    x,
-                    self.ctx.input.touch.y_regions[0],
-                    button_width - 1,
-                    self.ctx.display.font_height * 3,
-                    lcd.DARKGREY,
-                )
-                offset_x = x
-                offset_x += (
-                    button_width - len(keys[i]) * self.ctx.display.font_width
-                ) // 2
-                self.ctx.display.draw_string(offset_x, offset_y, keys[i], lcd.WHITE)
-
-    def _touch_to_physical(self, index):
-        """Mimics touch presses into physical button presses"""
-        if index == 0:
-            return BUTTON_PAGE_PREV
-        if index == 1:
-            return BUTTON_ENTER
-        return BUTTON_PAGE
-
     def tools(self):
         """Handler for the 'Tools' menu item"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("Check SD Card"), self.sd_check),
-                (
-                    t("Delete Mnemonic"),
-                    lambda: self.load_mnemonic_from_storage(delete=True),
-                ),
-                (t("Print Test QR"), self.print_test),
-                (t("Create QR Code"), self.create_qr),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        submenu.run_loop()
-        self.ctx.display.clear()
+        from .tools import Tools
 
-        return MENU_CONTINUE
-
-    def create_qr(self):
-        """Handler for the 'Create QR Code' menu item"""
-        if self.prompt(
-            t("Create QR code from text?"),
-            self.ctx.display.height() // 2,
-        ):
-            text = self.load_passphrase()
-            if text in ("", ESC_KEY):
-                return MENU_CONTINUE
-
-            self.display_qr_codes(text, FORMAT_NONE, text, allow_any_btn=True)
-
-            try:
-                self.ctx.printer = create_printer()
-            except:
-                self.ctx.log.exception("Exception occurred connecting to printer")
-
-            self.print_qr_prompt(text, FORMAT_NONE, text)
-        return MENU_CONTINUE
-
-    def print_test(self):
-        """Handler for the 'Print Test QR' menu item"""
-        try:
-            self.ctx.printer = create_printer()
-            if not self.ctx.printer:
-                self.ctx.display.flash_text(t("Printer Driver not set!"), lcd.RED)
-                return MENU_CONTINUE
-        except:
-            self.ctx.log.exception("Exception occurred connecting to printer")
-            raise
-
-        title = t("Krux Printer Test QR")
-        self.display_qr_codes(title, FORMAT_NONE, title, allow_any_btn=True)
-        self.print_qr_prompt(title, FORMAT_NONE, title)
-
-        return MENU_CONTINUE
-
-    def sd_check(self):
-        """Handler for the 'SD Check' menu item"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-        try:
-            # Check for SD hot-plug
-            with SDHandler():
-                sd_status = uos.statvfs(SD_ROOT_PATH)
-                sd_total = int(sd_status[2] * sd_status[1] / 1024 / 1024)
-                sd_free = int(sd_status[4] * sd_status[1] / 1024 / 1024)
-
-                self.ctx.display.clear()
-                self.ctx.display.draw_hcentered_text(
-                    t("SD card")
-                    + "\n\n"
-                    + t("Size: ")
-                    + "{:,}".format(sd_total)
-                    + " MB"
-                    + "\n\n"
-                    + t("Used: ")
-                    + "{:,}".format(sd_total - sd_free)
-                    + " MB"
-                    + "\n\n"
-                    + t("Free: ")
-                    + "{:,}".format(sd_free)
-                    + " MB"
-                )
-                if self.prompt(
-                    t("Explore files?"), self.ctx.display.bottom_prompt_line
-                ):
-                    self.select_file(select_file_handler=self._show_file_details)
-        except OSError:
-            self.ctx.display.flash_text(t("SD card not detected"), lcd.RED)
-
-        return MENU_CONTINUE
-
-    def _show_file_details(self, file):
-        """Handler to print file info when selecting a file in the file explorer"""
-        if SDHandler.dir_exists(file):
-            return MENU_EXIT
-
-        stats = uos.stat(file)
-        size = stats[6] / 1024
-        size_deximal_places = str(int(size * 100))[-2:]
-        created = time.localtime(stats[9])
-        modified = time.localtime(stats[8])
-        file = file[4:]  # remove "/sd/" prefix
-        self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(
-            file
-            + "\n\n"
-            + t("Size: ")
-            + "{:,}".format(int(size))
-            + "."
-            + size_deximal_places
-            + " KB"
-            + "\n\n"
-            + t("Created: ")
-            + "%s-%s-%s %s:%s"
-            % (created[0], created[1], created[2], created[3], created[4])
-            + "\n\n"
-            + t("Modified: ")
-            + "%s-%s-%s %s:%s"
-            % (modified[0], modified[1], modified[2], modified[3], modified[4])
-        )
-        self.ctx.input.wait_for_button()
-        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
-        #     with SDHandler() as sd:
-        #         sd.delete(file)
-        #     return MENU_EXIT
+        while True:
+            if Tools(self.ctx).run() == MENU_EXIT:
+                break
         return MENU_CONTINUE
 
     def settings(self):
         """Handler for the 'settings' menu item"""
-        location = Settings().persist.location
-        if location == SD_PATH:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-            try:
-                # Check for SD hot-plug
-                with SDHandler():
-                    self.display_centered_text(
-                        t("Your changes will be kept on the SD card."),
-                        duration=SD_MSG_TIME,
-                    )
-            except OSError:
-                self.display_centered_text(
-                    t("SD card not detected.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
-                )
-        else:
-            try:
-                # Check for flash
-                os.listdir("/" + FLASH_PATH + "/.")
-                self.display_centered_text(
-                    t("Your changes will be kept on device flash storage."),
-                    duration=SD_MSG_TIME,
-                )
-            except OSError:
-                self.display_centered_text(
-                    t("Device flash storage not detected.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
-                )
+        from .settings_page import SettingsPage
 
-        return self.namespace(Settings())()
-
-    def _settings_exit_check(self):
-        """Handler for the 'Back' on settings screen"""
-
-        # If user selected to persist on SD, we will try to remout and save
-        # flash is always mounted, so settings is always persisted
-        if Settings().persist.location == SD_PATH:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-            try:
-                # Check for SD hot-plug
-                with SDHandler():
-                    Store.save_settings()
-                    self.display_centered_text(
-                        t("Changes persisted to SD card!"),
-                        duration=SD_MSG_TIME,
-                    )
-            except OSError:
-                self.display_centered_text(
-                    t("SD card not detected.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
-                )
-
-        return MENU_EXIT
-
-    def namespace(self, settings_namespace):
-        """Handler for navigating a particular settings namespace"""
-
-        def handler():
-            setting_list = settings_namespace.setting_list()
-            namespace_list = settings_namespace.namespace_list()
-            items = [
-                (
-                    settings_namespace.label(ns.namespace.split(".")[-1]),
-                    self.namespace(ns),
-                )
-                for ns in namespace_list
-            ]
-            items.extend(
-                [
-                    (
-                        settings_namespace.label(setting.attr),
-                        self.setting(settings_namespace, setting),
-                    )
-                    for setting in setting_list
-                ]
-            )
-
-            # If there is only one item in the namespace, don't show a submenu
-            # and instead jump straight to the item's menu
-            if len(items) == 1:
-                return items[0][1]()
-
-            # Case for "Back" on the main Settings
-            if settings_namespace.namespace == Settings.namespace:
-                items.append((t("Back"), self._settings_exit_check))
-            else:
-                items.append((t("Back"), lambda: MENU_EXIT))
-
-            submenu = Menu(self.ctx, items)
-            index, status = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
-                return MENU_CONTINUE
-            return status
-
-        return handler
-
-    def setting(self, settings_namespace, setting):
-        """Handler for viewing and editing a particular setting"""
-
-        def handler():
-            if isinstance(setting, CategorySetting):
-                return self.category_setting(settings_namespace, setting)
-
-            if isinstance(setting, NumberSetting):
-                self.number_setting(settings_namespace, setting)
-                if settings_namespace.namespace == TouchSettings.namespace:
-                    self._touch_threshold_exit_check()
-
-            return MENU_CONTINUE
-
-        return handler
-
-    def _touch_threshold_exit_check(self):
-        """Handler for the 'Back' on settings screen"""
-
-        # Update touch detection threshold
-        if self.ctx.input.touch is not None:
-            self.ctx.input.touch.touch_driver.threshold(Settings().touch.threshold)
-
-    def category_setting(self, settings_namespace, setting):
-        """Handler for viewing and editing a CategorySetting"""
-        categories = setting.categories
-
-        starting_category = setting.__get__(settings_namespace)
-        while True:
-            current_category = setting.__get__(settings_namespace)
-            color = CATEGORY_SETTING_COLOR_DICT.get(current_category, lcd.WHITE)
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                settings_namespace.label(setting.attr) + "\n" + str(current_category),
-                color,
-            )
-            self._draw_settings_pad()
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
-            if btn == BUTTON_ENTER:
-                break
-            for i, category in enumerate(categories):
-                if current_category == category:
-                    if btn in (BUTTON_PAGE, None):
-                        new_category = categories[(i + 1) % len(categories)]
-                    elif btn == BUTTON_PAGE_PREV:
-                        new_category = categories[(i - 1) % len(categories)]
-                    setting.__set__(settings_namespace, new_category)
-                    break
-
-        # When changing locale, exit Login to force recreate with new locale
-        if (
-            setting.attr == "locale"
-            and setting.__get__(settings_namespace) != starting_category
-        ):
-            return MENU_EXIT
-        return MENU_CONTINUE
-
-    def number_setting(self, settings_namespace, setting):
-        """Handler for viewing and editing a NumberSetting"""
-
-        starting_value = setting.numtype(setting.__get__(settings_namespace))
-
-        numerals = DIGITS
-        # add the dot symbol when number type is float
-        if setting.numtype == float:
-            numerals += "."
-
-        new_value = self.capture_from_keypad(
-            settings_namespace.label(setting.attr),
-            [numerals],
-            starting_buffer=str(starting_value),
-            esc_prompt=False,
-        )
-        if new_value in (ESC_KEY, ""):
-            return MENU_CONTINUE
-
-        new_value = setting.numtype(new_value)
-        if setting.value_range[0] <= new_value <= setting.value_range[1]:
-            setting.__set__(settings_namespace, new_value)
-        else:
-            self.ctx.display.flash_text(
-                t("Value %s out of range: [%s, %s]")
-                % (new_value, setting.value_range[0], setting.value_range[1]),
-                lcd.RED,
-            )
-
-        return MENU_CONTINUE
+        settings_page = SettingsPage(self.ctx)
+        return settings_page.settings()
 
     def about(self):
         """Handler for the 'about' menu item"""
+
+        from ..metadata import VERSION
+
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
         self.ctx.input.wait_for_button()
