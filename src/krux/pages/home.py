@@ -786,9 +786,10 @@ class Home(Page):
                             if not filename_undefined:
                                 sd.write_binary(psbt_filename, serialized_signed_psbt)
                                 self.ctx.display.clear()
-                                self.ctx.display.flash_text(
+                                self.ctx.display.draw_centered_text(
                                     t("Saved PSBT to SD card:\n%s") % psbt_filename
                                 )
+                                self.ctx.input.wait_for_button()
                         else:
                             filename_undefined = False
             except OSError:
