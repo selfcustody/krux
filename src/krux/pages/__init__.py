@@ -23,7 +23,7 @@ import gc
 import math
 import time
 import board
-from ..themes import theme, WHITE, RED, DARKGREEN, ORANGE, MAGENTA
+from ..themes import theme, WHITE, RED, GREEN, DARKGREEN, ORANGE, MAGENTA
 from ur.ur import UR
 from ..input import (
     BUTTON_ENTER,
@@ -804,7 +804,7 @@ class Menu:
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if Settings().bitcoin.network == BitcoinSettings.TEST_TXT:
-            self.ctx.display.draw_string(12, 0, "test", theme.go_color)
+            self.ctx.display.draw_string(12, 0, "test", GREEN)
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
