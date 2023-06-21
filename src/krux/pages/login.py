@@ -137,7 +137,6 @@ class Login(Page):
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
-            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
             raise ValueError(t("Failed to decrypt"))
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))

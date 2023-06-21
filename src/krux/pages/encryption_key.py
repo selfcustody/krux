@@ -78,11 +78,11 @@ class EncryptionKey(Page):
         data, _ = self.capture_qr_code()
         if data is None:
             self.ctx.display.flash_text(t("Failed to load key"), theme.error_color)
-            return MENU_CONTINUE
+            return None
         if len(data) > ENCRYPTION_KEY_MAX_LEN:
             self.ctx.display.flash_text(
                 t("Maximum length exceeded (%s)") % ENCRYPTION_KEY_MAX_LEN,
                 theme.error_color,
             )
-            return MENU_CONTINUE
+            return None
         return data
