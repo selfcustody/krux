@@ -116,6 +116,11 @@ Before executing the simulator, make sure you have installed the poetry extras:
 poetry install --extras simulator
 ```
 
+Depending on the OS, it may be necessary to install zbar-tools:
+```bash
+sudo apt install zbar-tools
+```
+
 Run the simulator:
 ```bash
 # Enter simulator folder
