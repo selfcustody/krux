@@ -25,7 +25,7 @@ from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t, Settings
-from ..qr import get_size
+from ..qr import get_size, add_qr_frame
 from ..display import DEFAULT_PADDING
 from . import MENU_CONTINUE
 from ..printers.cnc import FilePrinter
@@ -94,7 +94,7 @@ class SeedQRView(Page):
     def highlight_qr_region(self, code, region=(0, 0, 0, 0), zoom=False):
         """Draws in white a highlighted region of the QR code"""
         reg_x, reg_y, reg_width, reg_height = region
-        size, code = self.ctx.display.add_qr_frame(code)
+        size, code = add_qr_frame(code)
         max_width = self.ctx.display.width()
         if zoom:
             max_width -= DEFAULT_PADDING

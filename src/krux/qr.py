@@ -130,6 +130,19 @@ def to_qr_codes(data, max_width, qr_format):
                 yield (code, encoder.fountain_encoder.seq_len())
 
 
+def add_qr_frame(qr_code):
+    """Add a 1 block white border around the code before displaying"""
+    qr_code = qr_code.strip()
+    lines = qr_code.split("\n")
+    size = len(lines)
+    size += 2
+    new_lines = ["0" * size]
+    for line in lines:
+        new_lines.append("0" + line + "0")
+    new_lines.append("0" * size)
+    return size, "\n".join(new_lines)
+
+
 def get_size(qr_code):
     """Returns the size of the qr code as the number of chars until the first newline"""
     size = 0
