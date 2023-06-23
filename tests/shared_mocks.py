@@ -62,6 +62,16 @@ class MockPrinter:
     def print_string(self, string):
         pass
 
+    def set_bitmap_mode(self, x_size, y_size, mode):
+        pass
+
+    @mock.create_autospec
+    def print_bitmap_line(self, line):
+        pass
+
+    def feed(self, amount):
+        pass
+
 
 class MockQRPartParser:
     TOTAL = 10
