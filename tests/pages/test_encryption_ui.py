@@ -197,4 +197,18 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
 
     # TODO: Assertions
 
-# TODO: Load UI tests
+
+def test_load_encrypted_qr_code(m5stickv, mocker):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.pages.encryption_ui import LoadEncryptedMnemonic
+
+    BTN_SEQUENCE = [BUTTON_ENTER]  # First mnemonic
+    mocker.patch(
+        "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+        mocker.MagicMock(return_value=TEST_KEY),
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
+        encrypted_mnemonics = LoadEncryptedMnemonic(ctx)
+        words = encrypted_mnemonics.load_from_storage()
+    assert words == ECB_WORDS.split()
