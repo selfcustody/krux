@@ -252,7 +252,7 @@ def create_ctx(mocker, btn_seq, touch_seq=None):
 
 
 def test_load_key_from_keypad(m5stickv, mocker):
-    from krux.pages.encryption_key import EncryptionKey
+    from krux.pages.encryption_ui import EncryptionKey
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
@@ -270,7 +270,7 @@ def test_load_key_from_keypad(m5stickv, mocker):
 
 
 def test_load_key_from_qr_code(m5stickv, mocker):
-    from krux.pages.encryption_key import EncryptionKey, ENCRYPTION_KEY_MAX_LEN
+    from krux.pages.encryption_ui import EncryptionKey, ENCRYPTION_KEY_MAX_LEN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
