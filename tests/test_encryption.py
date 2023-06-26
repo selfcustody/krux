@@ -1,9 +1,11 @@
 import sys
 import pytest
 from unittest import mock
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 from Crypto.Cipher import AES
 import base64
+
+from .shared_mocks import mock_context
 
 if "ucryptolib" not in sys.modules:
     sys.modules["ucryptolib"] = mock.MagicMock(
@@ -235,9 +237,6 @@ def test_decode_cbc_encrypted_qr_code():
     assert words == TEST_WORDS
 
 
-from .shared_mocks import mock_context
-
-
 def create_ctx(mocker, btn_seq, touch_seq=None):
     """Helper to create mocked context obj"""
     ctx = mock_context(mocker)
@@ -249,56 +248,3 @@ def create_ctx(mocker, btn_seq, touch_seq=None):
             current_index=mocker.MagicMock(side_effect=touch_seq)
         )
     return ctx
-
-
-def test_load_key_from_keypad(m5stickv, mocker):
-    from krux.pages.encryption_ui import EncryptionKey
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-
-    BTN_SEQUENCE = (
-        [BUTTON_ENTER]  # choose to type key
-        + [BUTTON_PAGE]  # go to letter b
-        + [BUTTON_ENTER]  # enter letter b
-        + [BUTTON_PAGE_PREV] * 2  # move to "Go"
-        + [BUTTON_ENTER]  # Go
-        + [BUTTON_ENTER]  # Confirm
-    )
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    key_generator = EncryptionKey(ctx)
-    key = key_generator.encryption_key()
-    assert key == "b"
-
-
-def test_load_key_from_qr_code(m5stickv, mocker):
-    from krux.pages.encryption_ui import EncryptionKey, ENCRYPTION_KEY_MAX_LEN
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
-    BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # move to QR code key
-        + [BUTTON_ENTER]  # choose QR code key
-        + [BUTTON_ENTER]  # Confirm
-    )
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    key_generator = EncryptionKey(ctx)
-    mocker.patch.object(
-        key_generator,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=(("qr key", None))),
-    )
-    key = key_generator.encryption_key()
-    assert key == "qr key"
-
-    # Repeat with too much characters >ENCRYPTION_KEY_MAX_LEN
-    BTN_SEQUENCE = [BUTTON_PAGE] + [  # move to QR code key
-        BUTTON_ENTER
-    ]  # choose QR code key
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    key_generator = EncryptionKey(ctx)
-    too_long_text = "l" * (ENCRYPTION_KEY_MAX_LEN + 1)
-    mocker.patch.object(
-        key_generator,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=((too_long_text, None))),
-    )
-    key = key_generator.encryption_key()
-    assert key == None

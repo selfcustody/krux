@@ -129,7 +129,7 @@ class Login(Page):
         return status
 
     def load_mnemonic_from_storage(self):
-        """Handler to load mnemonic from storage """
+        """Handler to load mnemonic from storage"""
         from .encryption_ui import LoadEncryptedMnemonic
 
         encrypted_mnemonics = LoadEncryptedMnemonic(self.ctx)

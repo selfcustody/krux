@@ -47,7 +47,7 @@ pygame = { version = "^2.4.0", optional = true }
 pyzbar = { version = "^0.1.9", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.1.0"
+black = "^23.3.0"
 pylint = "^2.12.2"
 pytest = "^6.2.5"
 pytest-cov = "^3.0.0"

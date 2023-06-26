@@ -182,7 +182,7 @@ class EncryptMnemonic(Page):
         key = key_capture.encryption_key()
         if key is None:
             self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
-            return None
+            return
         version = Settings().encryption.version
         i_vector = None
         if version == "AES-CBC":
@@ -192,7 +192,7 @@ class EncryptMnemonic(Page):
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
-                return None
+                return
             i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
         mnemonic_id = None
         self.ctx.display.clear()
@@ -224,7 +224,7 @@ class EncryptMnemonic(Page):
         from .qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, code=code, title=mnemonic_id)
-        return seed_qr_view.display_seed_qr()
+        seed_qr_view.display_seed_qr()
 
 
 class LoadEncryptedMnemonic(Page):

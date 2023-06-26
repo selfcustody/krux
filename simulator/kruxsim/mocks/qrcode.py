@@ -25,11 +25,10 @@ import pyqrcode
 
 
 def encode_to_string(data):
-    #pre-decode if binary (SeedQR)
     try:
         code_str = pyqrcode.create(data, error="L", mode="binary").text()
     except:
-        # Try binary
+        #pre-decode if binary (SeedQR)
         data = data.decode('latin-1')
         code_str = pyqrcode.create(data, error="L", mode="binary").text()
     size = 0
