@@ -190,7 +190,7 @@
     "Self-transfer or Change (%d): ": "Self-transfer or Change (%d): ",
     "Settings": "Settings",
     "Shutdown": "Shutdown",
-    "Shutdown to change the theme?": "Shutdown to change the theme?",
+    "Shutdown required to change theme": "Shutdown required to change theme",
     "Shutting down..": "Shutting down..",
     "Sign": "Sign",
     "Sign?": "Sign?",
