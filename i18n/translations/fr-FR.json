@@ -190,7 +190,7 @@
     "Self-transfer or Change (%d): ": "Auto-transfert ou changement (%d): ",
     "Settings": "Paramètres",
     "Shutdown": "Fermer",
-    "Shutdown to change the theme?": "Arrêtez-vous pour changer le thème?",
+    "Shutdown required to change theme": "Arrêt nécessaire pour changer de thème",
     "Shutting down..": "Éteindre..",
     "Sign": "Signature",
     "Sign?": "Signature?",

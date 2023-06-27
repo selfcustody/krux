@@ -272,7 +272,7 @@ class SettingsPage(Page):
         if setting.attr == "theme":
             self.ctx.display.clear()
             if self.prompt(
-                t("Shutdown to change the theme?"), self.ctx.display.height() // 2
+                t("Shutdown required to change theme"), self.ctx.display.height() // 2
             ):
                 return MENU_SHUTDOWN
             setting.__set__(settings_namespace, starting_category)
