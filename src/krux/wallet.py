@@ -206,9 +206,7 @@ def parse_wallet(wallet_data, network):
                 )
             else:
                 # Single-sig
-                descriptor = Descriptor.from_string(
-                    "wpkh(%s/{0,1}/*)" % keys[0]
-                )
+                descriptor = Descriptor.from_string("wpkh(%s/{0,1}/*)" % keys[0])
             label = (
                 key_vals[key_vals.index("Name") + 1]
                 if key_vals.index("Name") >= 0
