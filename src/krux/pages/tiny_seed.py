@@ -17,7 +17,9 @@ from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH, P
 TS_LAST_BIT_NO_CS = 143
 TS_LAST_BIT_12W_CS = 139
 TS_LAST_BIT_24W_CS = 135
-TS_ESC_POSITION = 161
+
+TS_ESC_START_POSITION = 156
+TS_ESC_END_POSITION = 161
 TS_GO_POSITION = 167
 
 
@@ -241,16 +243,16 @@ class TinySeed(Page):
         self.ctx.display.clear()
 
     def _draw_index(self, index):
-        """Outline index respective"""
+        """Outline index postition"""
         width = 6 * self.x_pad - 2
         height = self.y_pad - 2
 
-        if index >= 162:
+        if index > TS_ESC_END_POSITION:
             x_position = self.x_offset + 6 * self.x_pad + 1
             # case for m5stickv
             if self.ctx.display.width() == 135:
                 height = self.y_pad
-        elif index >= 156:
+        elif index >= TS_ESC_START_POSITION:
             x_position = self.x_offset + 1
             # case for m5stickv
             if self.ctx.display.width() == 135:
@@ -441,10 +443,10 @@ class TinySeed(Page):
         if btn == BUTTON_PAGE:
             if index >= TS_GO_POSITION:
                 index = 0
-            elif index >= TS_ESC_POSITION:
+            elif index >= TS_ESC_END_POSITION:
                 index = TS_GO_POSITION
             elif index >= _last_editable_bit():
-                index = TS_ESC_POSITION
+                index = TS_ESC_END_POSITION
             else:
                 index += 1
         elif btn == BUTTON_PAGE_PREV:
@@ -452,7 +454,7 @@ class TinySeed(Page):
                 index = TS_GO_POSITION
             elif index <= _last_editable_bit():
                 index -= 1
-            elif index <= TS_ESC_POSITION:
+            elif index <= TS_ESC_END_POSITION:
                 if w24:
                     if not page:
                         index = TS_LAST_BIT_NO_CS
@@ -461,7 +463,7 @@ class TinySeed(Page):
                 else:
                     index = TS_LAST_BIT_12W_CS
             elif index <= TS_GO_POSITION:
-                index = TS_ESC_POSITION
+                index = TS_ESC_END_POSITION
         return index
 
     def enter_tiny_seed(self, w24=False, seed_numbers=None, scanning=False):
@@ -505,13 +507,13 @@ class TinySeed(Page):
                 btn = BUTTON_ENTER
                 index = self.ctx.input.touch.current_index()
             if btn == BUTTON_ENTER:
-                if index >= 162:  # go
+                if index > TS_ESC_END_POSITION:  # go
                     if not w24 or (w24 and (page or scanning)):
                         if scanning:
                             return tiny_seed_numbers
                         return self.to_words(tiny_seed_numbers)
                     page += 1
-                elif index >= 156:  # ESC
+                elif index >= TS_ESC_START_POSITION:  # ESC
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                         break

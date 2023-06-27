@@ -1254,7 +1254,7 @@ def test_passphrase(amigo_tft, mocker, mocker_printer):
 ############### load words from tiny seed (bits)
 
 
-def test_load_12w_from_tiny_seed(m5stickv, mocker, mocker_printer):
+def test_load_12w_from_tiny_seed(amigo_tft, mocker, mocker_printer):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 

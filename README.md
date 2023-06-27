@@ -116,6 +116,11 @@ Before executing the simulator, make sure you have installed the poetry extras:
 poetry install --extras simulator
 ```
 
+Depending on the OS, it may be necessary to install zbar-tools:
+```bash
+sudo apt install zbar-tools
+```
+
 Run the simulator:
 ```bash
 # Enter simulator folder
@@ -189,6 +194,10 @@ init i2c:2 freq:XXX
 [MAIXPY]: find ov7740
 [MAIXPY]: find ov sensor
 ```
+Some devices like Amigo have two serial ports, check the second one if you don't read data from first.
+
+To leave `screen` serial monitor press `Ctrl+a`, followed by `k`, then confirm with `y`.
+
 
 Krux makes use of MaixPy's [WDT watchdog module](https://wiki.sipeed.com/soft/maixpy/en/api_reference/machine/wdt.html), you can see it [here](src/krux/wdt.py). This will reset the device if not fed for some time. To stop the watchdog, when connected through the terminal, run the following:
 ```python

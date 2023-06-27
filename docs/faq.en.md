@@ -18,7 +18,7 @@ The level of detail that you see is what Krux sees. If the QR code shown on the 
 
 If you have adjusted the lens already, the device may be too far away or too close to the code to read it. Start by holding the device as close to the QR code as possible and pulling away slowly until all or most of the QR code is viewable within the screen. If the code on the screen looks crisp, Krux should read it quickly and give you immediate feedback.
 
-If you are in a dark setting, you can hold down the front button of the M5StickV to turn on its LED light to potentially increase visibility.
+If you are in a dark environment, you can hold down the ENTER button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility.
 
 ## Why am I getting an error when I try to scan a QR code?
 If Krux is recognizing that it sees a QR code but is displaying an error message after reading it, the likely reason is that the QR code is not in a format that Krux understands.

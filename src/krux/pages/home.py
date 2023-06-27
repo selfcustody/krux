@@ -25,7 +25,7 @@ from ..themes import theme
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
-from ..krux_settings import t, Settings, AES_BLOCK_SIZE
+from ..krux_settings import t, Settings
 from . import (
     Page,
     Menu,
@@ -34,7 +34,6 @@ from . import (
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
-    NUM_SPECIAL_1,
 )
 from ..sd_card import SDHandler
 
@@ -212,138 +211,12 @@ class Home(Page):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
 
-    def store_mnemonic_on_memory(self, sd_card=False):
-        """Save encrypted mnemonic on flash or sd_card"""
-        from ..encryption import MnemonicStorage
-
-        from .encryption_key import EncryptionKey
-
-        key_capture = EncryptionKey(self.ctx)
-        key = key_capture.encryption_key()
-        if key is None:
-            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
-            return
-
-        version = Settings().encryption.version
-        i_vector = None
-        if version == "AES-CBC":
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Aditional entropy from camera required for AES-CBC mode")
-            )
-            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-                return
-            i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
-        self.ctx.display.clear()
-        mnemonic_storage = MnemonicStorage()
-        mnemonic_id = None
-        if self.prompt(
-            t(
-                "Give this mnemonic a custom ID? Otherwise current fingerprint will be used"
-            ),
-            self.ctx.display.height() // 2,
-        ):
-            mnemonic_id = self.capture_from_keypad(
-                t("Mnemonic ID"),
-                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
-            )
-        if mnemonic_id in (None, ESC_KEY):
-            mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
-        if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
-            self.ctx.display.flash_text(
-                t("ID already exists\n") + t("Encrypted mnemonic was not stored")
-            )
-            del mnemonic_storage
-            return
-        words = self.ctx.wallet.key.mnemonic
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
-        if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, i_vector):
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Encrypted mnemonic was stored with ID: ") + mnemonic_id
-            )
-        else:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Failed to store mnemonic"))
-        self.ctx.input.wait_for_button()
-        del mnemonic_storage
-
-    def encrypted_qr_code(self):
-        """Exports an encryprted mnemonic QR code"""
-
-        from .encryption_key import EncryptionKey
-
-        key_capture = EncryptionKey(self.ctx)
-        key = key_capture.encryption_key()
-        if key is None:
-            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
-            return None
-        version = Settings().encryption.version
-        i_vector = None
-        if version == "AES-CBC":
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Aditional entropy from camera required for AES-CBC mode")
-            )
-            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-                self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
-                return None
-            i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
-        mnemonic_id = None
-        self.ctx.display.clear()
-        if self.prompt(
-            t(
-                "Give this mnemonic a custom ID? Otherwise current fingerprint will be used"
-            ),
-            self.ctx.display.height() // 2,
-        ):
-            mnemonic_id = self.capture_from_keypad(
-                t("Mnemonic Storage ID"),
-                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
-            )
-        if mnemonic_id in (None, ESC_KEY):
-            mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
-
-        words = self.ctx.wallet.key.mnemonic
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
-
-        from ..encryption import EncryptedQRCode
-        import qrcode
-
-        encrypted_qr = EncryptedQRCode()
-        qr_data = encrypted_qr.create(key, mnemonic_id, words, i_vector)
-        code = qrcode.encode_to_string(qr_data)
-        del encrypted_qr
-
-        from .qr_view import SeedQRView
-
-        seed_qr_view = SeedQRView(self.ctx, code=code, title=mnemonic_id)
-        return seed_qr_view.display_seed_qr()
-
     def encrypt_mnemonic(self):
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
-        from ..encryption import MnemonicStorage
+        from .encryption_ui import EncryptMnemonic
 
-        encrypt_outputs_menu = []
-        encrypt_outputs_menu.append(
-            (t("Store on Flash"), self.store_mnemonic_on_memory)
-        )
-        mnemonic_storage = MnemonicStorage()
-        if mnemonic_storage.has_sd_card:
-            encrypt_outputs_menu.append(
-                (
-                    t("Store on SD Card"),
-                    lambda: self.store_mnemonic_on_memory(sd_card=True),
-                )
-            )
-        del mnemonic_storage
-        encrypt_outputs_menu.append((t("Encrypted QR Code"), self.encrypted_qr_code))
-        encrypt_outputs_menu.append((t("Back"), lambda: MENU_EXIT))
-        submenu = Menu(self.ctx, encrypt_outputs_menu)
-        _, _ = submenu.run_loop()
-        return MENU_CONTINUE
+        encrypt_mnemonic_menu = EncryptMnemonic(self.ctx)
+        return encrypt_mnemonic_menu.encrypt_menu()
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
@@ -786,9 +659,10 @@ class Home(Page):
                             if not filename_undefined:
                                 sd.write_binary(psbt_filename, serialized_signed_psbt)
                                 self.ctx.display.clear()
-                                self.ctx.display.flash_text(
+                                self.ctx.display.draw_centered_text(
                                     t("Saved PSBT to SD card:\n%s") % psbt_filename
                                 )
+                                self.ctx.input.wait_for_button()
                         else:
                             filename_undefined = False
             except OSError:

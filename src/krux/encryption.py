@@ -193,18 +193,12 @@ class MnemonicStorage:
         """Remove an entry from encrypted mnemonics file"""
         if sd_card:
             self.stored_sd.pop(mnemonic_id)
-            try:
-                with SDHandler() as sd:
-                    sd.write(MNEMONICS_FILE, json.dumps(self.stored_sd))
-            except:
-                pass
+            with SDHandler() as sd:
+                sd.write(MNEMONICS_FILE, json.dumps(self.stored_sd))
         else:
             self.stored.pop(mnemonic_id)
-            try:
-                with open("/flash/" + MNEMONICS_FILE, "w") as f:
-                    f.write(json.dumps(self.stored))
-            except:
-                pass
+            with open("/flash/" + MNEMONICS_FILE, "w") as f:
+                f.write(json.dumps(self.stored))
 
 
 class EncryptedQRCode:

@@ -24,6 +24,7 @@ import lcd
 import board
 from machine import I2C
 from .themes import theme
+from .qr import add_qr_frame
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
@@ -327,23 +328,11 @@ class Display:
         time.sleep_ms(duration)
         self.clear()
 
-    def add_qr_frame(self, qr_code):
-        """Add a 1 block white border around the code before displaying"""
-        qr_code = qr_code.strip()
-        lines = qr_code.split("\n")
-        size = len(lines)
-        size += 2
-        new_lines = ["0" * size]
-        for line in lines:
-            new_lines.append("0" + line + "0")
-        new_lines.append("0" * size)
-        return size, "\n".join(new_lines)
-
     def draw_qr_code(
         self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
     ):
         """Draws a QR code on the screen"""
-        _, qr_code = self.add_qr_frame(qr_code)
+        _, qr_code = add_qr_frame(qr_code)
         lcd.draw_qr_code(
             offset_y, qr_code, self.width(), dark_color, light_color, theme.bg_color
         )

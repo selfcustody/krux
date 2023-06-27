@@ -128,66 +128,15 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def _load_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
-        """Uses encryption module to load and decrypt a mnemonic"""
-        from ..encryption import MnemonicStorage
-
-        from .encryption_key import EncryptionKey
-
-        key_capture = EncryptionKey(self.ctx)
-        key = key_capture.encryption_key()
-        if key is None:
-            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
-            raise ValueError(t("Failed to decrypt"))
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
-        if key in ("", ESC_KEY):
-            raise ValueError(t("Failed to decrypt"))
-        mnemonic_storage = MnemonicStorage()
-        try:
-            words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()
-        except:
-            raise ValueError(t("Failed to decrypt"))
-
-        if len(words) not in (12, 24):
-            raise ValueError(t("Failed to decrypt"))
-        del mnemonic_storage
-        return self._load_key_from_words(words)
-
     def load_mnemonic_from_storage(self):
-        """Lists all encrypted seeds stored on a file"""
-        from ..encryption import MnemonicStorage
+        """Handler to load mnemonic from storage"""
+        from .encryption_ui import LoadEncryptedMnemonic
 
-        mnemonic_ids_menu = []
-        mnemonic_storage = MnemonicStorage()
-        has_sd = mnemonic_storage.has_sd_card
-        mnemonics = mnemonic_storage.list_mnemonics()
-        sd_mnemonics = mnemonic_storage.list_mnemonics(sd_card=True)
-        del mnemonic_storage
-
-        for mnemonic_id in mnemonics:
-            mnemonic_ids_menu.append(
-                (
-                    mnemonic_id + "(flash)",
-                    lambda m_id=mnemonic_id: self._load_encrypted_mnemonic(m_id),
-                )
-            )
-        if has_sd:
-            for mnemonic_id in sd_mnemonics:
-                mnemonic_ids_menu.append(
-                    (
-                        mnemonic_id + "(SD card)",
-                        lambda m_id=mnemonic_id: self._load_encrypted_mnemonic(
-                            m_id, sd_card=True
-                        ),
-                    )
-                )
-        mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
-        submenu = Menu(self.ctx, mnemonic_ids_menu)
-        index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        encrypted_mnemonics = LoadEncryptedMnemonic(self.ctx)
+        words = encrypted_mnemonics.load_from_storage()
+        if words == MENU_CONTINUE:
             return MENU_CONTINUE
-        return status
+        return self._load_key_from_words(words)
 
     def new_key(self):
         """Handler for the 'new mnemonic' menu item"""
@@ -451,7 +400,7 @@ class Login(Page):
             if self.prompt(
                 public_data + "\n\n" + t("Decrypt?"), self.ctx.display.height() // 2
             ):
-                from .encryption_key import EncryptionKey
+                from .encryption_ui import EncryptionKey
 
                 key_capture = EncryptionKey(self.ctx)
                 key = key_capture.encryption_key()
