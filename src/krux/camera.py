@@ -43,7 +43,7 @@ class Camera:
 
     def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
-        sensor.reset(dual_buff=True)
+        sensor.reset(freq=20000000)
         self.cam_id = sensor.get_id()
         if grayscale:
             sensor.set_pixformat(sensor.GRAYSCALE)
