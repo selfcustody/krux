@@ -69,8 +69,6 @@ class Wallet:
             if not descriptor.key:
                 if len(descriptor.keys) > 1:
                     raise ValueError("not single-key")
-                # Nunchuk exports single sig as a "multi 1 of 1"
-                descriptor.key = descriptor.keys[0]
             if self.key.xpub() != descriptor.key.key.to_base58():
                 raise ValueError("xpub does not match")
 
@@ -202,10 +200,15 @@ def parse_wallet(wallet_data, network):
 
             keys.sort()
             keys = ["[%s/%s]%s" % (key[1], derivation[2:], key[0]) for key in keys]
-
-            descriptor = Descriptor.from_string(
-                ("wsh(sortedmulti(%d," % m) + ",".join(keys) + "))"
-            )
+            if len(keys) > 1:
+                descriptor = Descriptor.from_string(
+                    ("wsh(sortedmulti(%d," % m) + ",".join(keys) + "))"
+                )
+            else:
+                # Single-sig
+                descriptor = Descriptor.from_string(
+                    "wpkh(%s/{0,1}/*)" % keys[0]
+                )
             label = (
                 key_vals[key_vals.index("Name") + 1]
                 if key_vals.index("Name") >= 0
