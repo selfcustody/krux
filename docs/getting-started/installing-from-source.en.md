@@ -58,15 +58,23 @@ Connect the device to your computer via USB, power it on, and run the following,
 ```bash
 vagrant ssh -c 'cd /vagrant; ./krux flash maixpy_DEVICE'
 ```
-Note: Running `vagrant reload` prior to flashing may be necessary in order for the newly-inserted USB device to be detected and passed through to the VM on startup.
+If the flashing fails try one of the following common solutions:
 
-If this command fails, even after reloading, with the error `Failed to find device via USB. Is it connected and powered on?`, make sure that your user has been added to the `vboxusers` group. On Mac or Linux, run the following command:
-
-```bash
-sudo usermod -a -G vboxusers yourusername
-```
-
-If the flashing process fails midway through, check the connection, restart the device, and try the command again.
+- Running `vagrant reload` prior to flashing in order for the newly-inserted USB device to be detected and passed through to the VM on startup.
+- If this command fails, even after reloading, with the error `Failed to find device via USB. Is it connected and powered on?`, make sure that your user has been added to the `vboxusers` group. On Mac or Linux, run the following command:
+  ```bash
+  sudo usermod -a -G vboxusers yourusername
+  ```
+- If the flashing process fails midway through, check the connection, restart the device, and try the command again.
+- If it continues to fail midway through, you can try using an alternative method of flashing with `kflash` if you're using a Linux machine. To install klash:
+  ```bash
+  pip3 install kflash
+  ```
+  Then you can flash the device:
+  ```bash
+  kflash -p /dev/ttyUSB1 -b 1500000 -B goE build/firmware.bin
+  ```
+  If you get a `Greeting fail, check serial port` error, try replacing `/dev/ttyUSB1` with `/dev/ttyUSB0` in the `kflash` command above.
 
 When the flashing process completes, you should see the Krux logo:
 
