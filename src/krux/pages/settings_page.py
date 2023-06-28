@@ -38,7 +38,6 @@ from . import (
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
-    MENU_SHUTDOWN,
     ESC_KEY,
     DEFAULT_PADDING,
 )
@@ -272,11 +271,15 @@ class SettingsPage(Page):
         if setting.attr == "theme":
             self.ctx.display.clear()
             if self.prompt(
-                t("Shutdown required to change theme"), self.ctx.display.height() // 2
+                t("Change theme and reboot?"), self.ctx.display.height() // 2
             ):
-                return MENU_SHUTDOWN
-            setting.__set__(settings_namespace, starting_category)
-            theme.update()
+                self.ctx.display.clear()
+                self.ctx.power_manager.reboot()
+            else:
+                # Restore previous theme
+                setting.__set__(settings_namespace, starting_category)
+                theme.update()
+                Store.save_settings()
 
         return MENU_CONTINUE
 
