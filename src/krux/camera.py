@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import hashlib
 import gc
 import sensor
 import lcd
@@ -167,6 +166,8 @@ class Camera:
 
     def capture_entropy(self, callback):
         """Captures camera's entropy as the hash of image buffer"""
+        import hashlib
+
         self.initialize_sensor()
         sensor.run(1)
 

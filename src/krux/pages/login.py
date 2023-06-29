@@ -27,8 +27,6 @@ from ..themes import theme
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import Key
-from ..wallet import Wallet
-from ..printers import create_printer
 from ..krux_settings import t
 from . import (
     Page,
@@ -375,6 +373,9 @@ class Login(Page):
         del temp_key
 
         # Permanent wallet loaded
+        from ..wallet import Wallet
+        from ..printers import create_printer
+
         self.ctx.wallet = Wallet(
             Key(
                 mnemonic,

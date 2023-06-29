@@ -124,6 +124,8 @@ SNAP_HISTOGRAM_FAIL = 1
 SNAP_FIND_QRCODES_FAIL = 2
 SNAP_REPEAT_QRCODE = 3
 
+IMAGE_TO_HASH = b"\x12\x04"
+
 
 def snapshot_generator(outcome=SNAP_SUCCESS):
     count = 0
@@ -144,6 +146,7 @@ def snapshot_generator(outcome=SNAP_SUCCESS):
         else:
             m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = [Mockqrcode(str(count))]
+            m.to_bytes.return_value = IMAGE_TO_HASH
         return m
 
     return snapshot

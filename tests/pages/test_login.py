@@ -9,9 +9,13 @@ def mocker_printer(mocker):
 
 def create_ctx(mocker, btn_seq, touch_seq=None):
     """Helper to create mocked context obj"""
+
+    HASHED_IMAGE_BYTES = b"3\x0fr\x7fKY\x15\t\x83\xaab\x92\x0f&\x820\xb4\x14\x87\x19\xee\x95F\x9c\x8f\x0c\xbdo\xbc\x1d\xcbT"
+
     ctx = mock_context(mocker)
     ctx.power_manager.battery_charge_remaining.return_value = 1
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
+    ctx.camera.capture_entropy = mocker.MagicMock(return_value=HASHED_IMAGE_BYTES)
 
     if touch_seq:
         ctx.input.touch = mocker.MagicMock(
@@ -93,6 +97,47 @@ def test_new_24w_from_d6(m5stickv, mocker, mocker_printer):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     login.new_key_from_d6()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_new_12w_from_snapshot(m5stickv, mocker):
+    from ..shared_mocks import IMAGE_TO_HASH
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # SHA256
+        [BUTTON_ENTER]
+        +
+        # Words
+        [BUTTON_ENTER]
+        +
+        # Move to No passphrase
+        [BUTTON_PAGE_PREV]
+        +
+        # Confirm No passphrase
+        [BUTTON_ENTER]
+        +
+        # Confirm Fingerpint
+        [BUTTON_ENTER]
+        +
+        # Confirm Singlesig
+        [BUTTON_ENTER]
+    )
+    MNEMONIC = (
+        "credit knee panther note mule luggage attitude era must junior party general"
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login.new_key_from_snapshot()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.wallet.key.mnemonic == MNEMONIC
