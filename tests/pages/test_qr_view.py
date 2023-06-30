@@ -1,19 +1,6 @@
 from ..shared_mocks import mock_context
 
 
-def create_ctx(mocker, btn_seq, touch_seq=None):
-    """Helper to create mocked context obj"""
-    ctx = mock_context(mocker)
-    ctx.power_manager.battery_charge_remaining.return_value = 1
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
-
-    if touch_seq:
-        ctx.input.touch = mocker.MagicMock(
-            current_index=mocker.MagicMock(side_effect=touch_seq)
-        )
-    return ctx
-
-
 def test_load_qr_view(amigo_tft, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, SWIPE_LEFT, SWIPE_RIGHT
@@ -32,7 +19,9 @@ def test_load_qr_view(amigo_tft, mocker):
         BUTTON_ENTER,  # confirm
         BUTTON_ENTER,  # confirm
     ]
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+
+    ctx = mock_context(mocker)
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     code = qrcode.encode_to_string("test code")
     seed_qr_view = SeedQRView(ctx, code=code, title="Test QR Code")
     seed_qr_view.display_seed_qr()

@@ -22,7 +22,6 @@
 
 from ..sd_card import SDHandler
 import uos
-import time
 from ..krux_settings import t
 from ..printers import create_printer
 from ..themes import theme
@@ -32,13 +31,13 @@ from . import (
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
-    SD_ROOT_PATH,
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
+from .files_manager import SD_ROOT_PATH
 
 
 class Tools(Page):
@@ -90,46 +89,15 @@ class Tools(Page):
                 if self.prompt(
                     t("Explore files?"), self.ctx.display.bottom_prompt_line
                 ):
-                    self.select_file(select_file_handler=self._show_file_details)
+                    from .files_manager import FileManager
+
+                    file_manager = FileManager(self.ctx)
+                    file_manager.select_file(
+                        select_file_handler=file_manager.show_file_details
+                    )
         except OSError:
             self.ctx.display.flash_text(t("SD card not detected"), theme.error_color)
 
-        return MENU_CONTINUE
-
-    def _show_file_details(self, file):
-        """Handler to print file info when selecting a file in the file explorer"""
-        if SDHandler.dir_exists(file):
-            return MENU_EXIT
-
-        stats = uos.stat(file)
-        size = stats[6] / 1024
-        size_deximal_places = str(int(size * 100))[-2:]
-        created = time.localtime(stats[9])
-        modified = time.localtime(stats[8])
-        file = file[4:]  # remove "/sd/" prefix
-        self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(
-            file
-            + "\n\n"
-            + t("Size: ")
-            + "{:,}".format(int(size))
-            + "."
-            + size_deximal_places
-            + " KB"
-            + "\n\n"
-            + t("Created: ")
-            + "%s-%s-%s %s:%s"
-            % (created[0], created[1], created[2], created[3], created[4])
-            + "\n\n"
-            + t("Modified: ")
-            + "%s-%s-%s %s:%s"
-            % (modified[0], modified[1], modified[2], modified[3], modified[4])
-        )
-        self.ctx.input.wait_for_button()
-        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
-        #     with SDHandler() as sd:
-        #         sd.delete(file)
-        #     return MENU_EXIT
         return MENU_CONTINUE
 
     def del_stored_mnemonic(self):

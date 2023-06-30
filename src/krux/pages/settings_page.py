@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
+import time
 from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
 from ..settings import (
     CategorySetting,
@@ -33,6 +34,7 @@ from ..krux_settings import Settings, LoggingSettings, BitcoinSettings, TouchSet
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..krux_settings import t
 from ..sd_card import SDHandler
+from ..display import FLASH_MSG_TIME
 from . import (
     Page,
     Menu,
@@ -45,6 +47,7 @@ import os
 
 DIGITS = "0123456789"
 
+WAIT_TO_CHECK_INPUT = 200
 SD_MSG_TIME = 2500
 
 CATEGORY_SETTING_COLOR_DICT = {
@@ -73,12 +76,12 @@ class SettingsPage(Page):
             try:
                 # Check for SD hot-plug
                 with SDHandler():
-                    self.display_centered_text(
+                    self._display_centered_text(
                         t("Your changes will be kept on the SD card."),
                         duration=SD_MSG_TIME,
                     )
             except OSError:
-                self.display_centered_text(
+                self._display_centered_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -88,12 +91,12 @@ class SettingsPage(Page):
             try:
                 # Check for flash
                 os.listdir("/" + FLASH_PATH + "/.")
-                self.display_centered_text(
+                self._display_centered_text(
                     t("Your changes will be kept on device flash storage."),
                     duration=SD_MSG_TIME,
                 )
             except OSError:
-                self.display_centered_text(
+                self._display_centered_text(
                     t("Device flash storage not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -101,6 +104,21 @@ class SettingsPage(Page):
                 )
 
         return self.namespace(Settings())()
+
+    def _display_centered_text(
+        self,
+        message,
+        duration=FLASH_MSG_TIME,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+    ):
+        """Display a text for duration ms or until you press a button"""
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(message, color, bg_color)
+        # this sleep protect form a double input at the same time (ENTER + PAGE on a rotary encoder)
+        time.sleep_ms(WAIT_TO_CHECK_INPUT)
+        self.ctx.input.wait_for_press(block=False, wait_duration=duration)
+        self.ctx.display.clear()
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
@@ -152,12 +170,12 @@ class SettingsPage(Page):
                 # Check for SD hot-plug
                 with SDHandler():
                     Store.save_settings()
-                    self.display_centered_text(
+                    self._display_centered_text(
                         t("Changes persisted to SD card!"),
                         duration=SD_MSG_TIME,
                     )
             except OSError:
-                self.display_centered_text(
+                self._display_centered_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),

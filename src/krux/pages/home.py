@@ -542,7 +542,10 @@ class Home(Page):
                     if self.prompt(
                         t("Load PSBT from SD card?"), self.ctx.display.height() // 2
                     ):
-                        psbt_filename = self.select_file(
+                        from .files_manager import FileManager
+
+                        file_manager = FileManager(self.ctx)
+                        psbt_filename = file_manager.select_file(
                             file_extension=PSBT_FILE_EXTENSION
                         )
 
@@ -692,7 +695,10 @@ class Home(Page):
                     if self.prompt(
                         t("Load message from SD card?"), self.ctx.display.height() // 2
                     ):
-                        message_filename = self.select_file()
+                        from .files_manager import FileManager
+
+                        file_manager = FileManager(self.ctx)
+                        message_filename = file_manager.select_file()
 
                         if message_filename:
                             self.ctx.display.clear()

@@ -56,3 +56,45 @@ def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
     ctx.display.to_landscape.assert_has_calls([mocker.call() for _ in range(10)])
     ctx.display.to_portrait.assert_has_calls([mocker.call() for _ in range(10)])
     ctx.display.draw_centered_text.assert_has_calls([mocker.call("Loading Camera..")])
+
+
+def test_prompt_m5stickv(mocker, m5stickv, mock_page_cls):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    ctx = mock_context(mocker)
+    page = mock_page_cls(ctx)
+
+    # Enter pressed
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_ENTER])
+    assert page.prompt("test prompt") == True
+
+    # Page pressed
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_PAGE])
+    assert page.prompt("test prompt") == False
+
+
+def test_prompt_amigo(mocker, amigo_tft, mock_page_cls):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_TOUCH
+
+    ctx = mock_context(mocker)
+    page = mock_page_cls(ctx)
+
+    # Enter pressed
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_ENTER])
+    assert page.prompt("test prompt") == True
+
+    # Page, than Enter pressed
+    page_press = [BUTTON_PAGE, BUTTON_ENTER]
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=page_press)
+    assert page.prompt("test prompt") == False
+
+    ctx.input.buttons_active = False
+    # Index 0 = YES pressed
+    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[0]))
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
+    assert page.prompt("test prompt") == True
+
+    # Index 1 = No pressed
+    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[1]))
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
+    assert page.prompt("test prompt") == False
