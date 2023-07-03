@@ -24,11 +24,10 @@ import qrcode
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..themes import theme, WHITE, BLACK
-from ..krux_settings import t, Settings
+from ..krux_settings import t
 from ..qr import get_size, add_qr_frame
 from ..display import DEFAULT_PADDING
 from . import MENU_CONTINUE
-from ..printers.cnc import FilePrinter
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -324,24 +323,12 @@ class SeedQRView(Page):
             self.ctx.display.clear()
             if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                 break
-        if self.ctx.printer is None:
+        if not self.print_qr_prompt():
             return MENU_CONTINUE
-        self.ctx.display.clear()
-        if self.prompt(
-            t("Print to QR?\n\n%s\n\n") % Settings().printer.driver,
-            self.ctx.display.height() // 2,
-        ):
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(
-                t("Printing ..."), self.ctx.display.height() // 2
-            )
-            if self.title:
-                self.ctx.printer.print_string(self.title + "\n\n")
 
-            # Warn of SD read here because Printer don't have access to display
-            if isinstance(self.ctx.printer, FilePrinter):
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+        from .print_page import PrintPage
 
-            self.ctx.printer.print_qr_code(self.code)
+        print_page = PrintPage(self.ctx)
+        print_page.print_qr(self.code, title=self.title, is_qr=True)
+
         return MENU_CONTINUE

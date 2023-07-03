@@ -67,7 +67,6 @@ class MockPrinter:
     def set_bitmap_mode(self, x_size, y_size, mode):
         pass
 
-    @mock.create_autospec
     def print_bitmap_line(self, line):
         pass
 

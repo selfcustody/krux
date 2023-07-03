@@ -30,6 +30,7 @@ class TinySeed(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.x_offset = DEFAULT_PADDING // 2 + 2 * self.ctx.display.font_width
+        self.printer = None
         # case for non m5stickv
         if self.ctx.display.width() > 135:
             self.y_offset = DEFAULT_PADDING + 3 * self.ctx.display.font_height
@@ -128,6 +129,10 @@ class TinySeed(Page):
     def print_tiny_seed(self):
         """Creates a bitmap image of a punched Tiny Seed and sends it to a thermal printer"""
         # Scale from original: 1.5X
+
+        from ..printers import create_printer
+
+        self.printer = create_printer()
         words = self.ctx.wallet.key.mnemonic.split(" ")
         image_size = 156
         border_y = 8
@@ -140,7 +145,7 @@ class TinySeed(Page):
         self.ctx.display.draw_hcentered_text(
             t("Printing ..."), self.ctx.display.height() // 2
         )
-        self.ctx.printer.print_string("Tiny Seed\n\n")
+        self.printer.print_string("Tiny Seed\n\n")
         for page in range(len(words) // 12):
             # creates an image
             ts_image = image.Image(size=(image_size, image_size), copy_to_fb=True)
@@ -222,7 +227,7 @@ class TinySeed(Page):
             # self.ctx.input.wait_for_button()
 
             # Print
-            self.ctx.printer.set_bitmap_mode(image_size // 8, image_size, 3)
+            self.printer.set_bitmap_mode(image_size // 8, image_size, 3)
             for y in range(image_size):
                 line_bytes = bytes([])
                 x = 0
@@ -235,11 +240,11 @@ class TinySeed(Page):
                         x += 1
                     line_bytes += bytes([im_byte])
                 # send line by line to be printed
-                self.ctx.printer.print_bitmap_line(line_bytes)
+                self.printer.print_bitmap_line(line_bytes)
                 wdt.feed()
             grid_x_offset = border_x + 16  # 4,1mm*8px
             grid_y_offset = border_y + 25  # 6,2mm*8px
-        self.ctx.printer.feed(3)
+        self.printer.feed(3)
         self.ctx.display.clear()
 
     def _draw_index(self, index):

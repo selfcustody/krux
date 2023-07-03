@@ -37,8 +37,6 @@ from . import (
 )
 from ..sd_card import SDHandler
 
-from ..printers import create_printer
-from ..printers.cnc import FilePrinter
 import board
 import uos
 import time
@@ -89,13 +87,6 @@ class Home(Page):
             ),
         )
 
-        # Ensure that the printer was created
-        if self.ctx.printer is None:
-            try:
-                self.ctx.printer = create_printer()
-            except:
-                self.ctx.log.exception("Exception occurred connecting to printer")
-
     def mnemonic(self):
         """Handler for the 'mnemonic' menu item"""
         submenu = Menu(
@@ -117,35 +108,18 @@ class Home(Page):
         """Displays only the mnemonic words"""
         self.display_mnemonic(self.ctx.wallet.key.mnemonic)
         self.ctx.input.wait_for_button()
-        if self.ctx.printer is None:
-            return MENU_CONTINUE
-        self.ctx.display.clear()
+
         # Avoid printing text on a cnc
-        if not isinstance(self.ctx.printer, FilePrinter):
+        if Settings().printer.driver == "thermal/adafruit":
+            self.ctx.display.clear()
             if self.prompt(
                 t("Print?\n\n%s\n\n") % Settings().printer.driver,
                 self.ctx.display.height() // 2,
             ):
-                self.ctx.display.clear()
-                self.ctx.display.draw_hcentered_text(
-                    t("Printing ..."), self.ctx.display.height() // 2
-                )
-                self.ctx.printer.print_string("Seed Words\n")
-                words = self.ctx.wallet.key.mnemonic.split(" ")
-                lines = len(words) // 3
-                for i in range(lines):
-                    index = i + 1
-                    string = str(index) + ":" + words[index - 1] + " "
-                    while len(string) < 10:
-                        string += " "
-                    index += lines
-                    string += str(index) + ":" + words[index - 1] + " "
-                    while len(string) < 21:
-                        string += " "
-                    index += lines
-                    string += str(index) + ":" + words[index - 1] + "\n"
-                    self.ctx.printer.print_string(string)
-                self.ctx.printer.feed(3)
+                from .print_page import PrintPage
+
+                print_page = PrintPage(self.ctx)
+                print_page.print_mnemonic_text()
         return MENU_CONTINUE
 
     def display_standard_qr(self):
@@ -153,7 +127,7 @@ class Home(Page):
         title = t("Plaintext QR")
         data = self.ctx.wallet.key.mnemonic
         self.display_qr_codes(data, FORMAT_NONE, title, allow_any_btn=True)
-        self.print_qr_prompt(data, FORMAT_NONE, title)
+        self.print_standard_qr(data, FORMAT_NONE, title)
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
@@ -199,15 +173,9 @@ class Home(Page):
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()
 
-        if self.ctx.printer is None:
-            return MENU_CONTINUE
-
-        # Avoid printing text on a cnc
-        if not isinstance(self.ctx.printer, FilePrinter):
-            if self.prompt(
-                t("Print?\n\n%s\n\n") % Settings().printer.driver,
-                self.ctx.display.height() // 2,
-            ):
+        # Allow to print on thermal printer only
+        if Settings().printer.driver == "thermal/adafruit":
+            if self.print_qr_prompt():
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
 
@@ -236,7 +204,7 @@ class Home(Page):
             title = self.ctx.wallet.key.account_pubkey_str(version)[:4].upper()
             xpub = self.ctx.wallet.key.key_expression(version)
             self.display_qr_codes(xpub, FORMAT_NONE, title, allow_any_btn=True)
-            self.print_qr_prompt(xpub, FORMAT_NONE, title)
+            self.print_standard_qr(xpub, FORMAT_NONE, title)
         return MENU_CONTINUE
 
     def wallet(self):
@@ -251,7 +219,9 @@ class Home(Page):
         else:
             self.display_wallet(self.ctx.wallet)
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
-            self.print_qr_prompt(wallet_data, qr_format, t("Wallet output descriptor"))
+            self.print_standard_qr(
+                wallet_data, qr_format, t("Wallet output descriptor")
+            )
         return MENU_CONTINUE
 
     def _load_wallet(self):
@@ -400,7 +370,7 @@ class Home(Page):
     def show_address(self, addr, title="", qr_format=FORMAT_NONE):
         """Show addr provided as a QRCode"""
         self.display_qr_codes(addr, qr_format, title, allow_any_btn=True)
-        self.print_qr_prompt(addr, qr_format, title)
+        self.print_standard_qr(addr, qr_format, title)
         return MENU_CONTINUE
 
     def pre_scan_address(self):
@@ -633,7 +603,9 @@ class Home(Page):
 
             # Show the signed PSBT as a QRCode
             self.display_qr_codes(qr_signed_psbt, qr_format)
-            self.print_qr_prompt(qr_signed_psbt, qr_format, t("Signed PSBT"), width=45)
+            self.print_standard_qr(
+                qr_signed_psbt, qr_format, t("Signed PSBT"), width=45
+            )
 
             # memory management
             del qr_signed_psbt
@@ -760,7 +732,7 @@ class Home(Page):
         # Show the base64 signed message as a QRCode
         title = t("Signed Message")
         self.display_qr_codes(encoded_sig, qr_format, title)
-        self.print_qr_prompt(encoded_sig, qr_format, title)
+        self.print_standard_qr(encoded_sig, qr_format, title)
 
         # memory management
         del encoded_sig
@@ -776,7 +748,7 @@ class Home(Page):
 
         # Show the public key in hexadecimal format as a QRCode
         self.display_qr_codes(pubkey, qr_format, title)
-        self.print_qr_prompt(pubkey, qr_format, title)
+        self.print_standard_qr(pubkey, qr_format, title)
 
         # memory management
         del pubkey
@@ -903,3 +875,11 @@ class Home(Page):
             self.display_qr_codes(wallet_data, qr_format, title=about)
         else:
             self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+
+    def print_standard_qr(self, data, qr_format, title="", width=33):
+        """Loads printer driver and UI"""
+        if self.print_qr_prompt():
+            from .print_page import PrintPage
+
+            print_page = PrintPage(self.ctx)
+            print_page.print_qr(data, qr_format, title, width)

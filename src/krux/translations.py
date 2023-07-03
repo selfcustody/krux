@@ -264,6 +264,8 @@ translation_table = {
         1303016265: "Sim",
         771968845: "Suas alterações serão mantidas no armazenamento flash do dispositivo.",
         2569054451: "Suas alterações serão mantidas no cartão SD.",
+        336702608: "Carregando impressora..",
+        4170881190: "Exportando para o cartão SD..",
     },
     "en-US": {
         1185266064: "%d of %d multisig",
@@ -508,6 +510,8 @@ translation_table = {
         1303016265: "Yes",
         771968845: "Your changes will be kept on device flash storage.",
         2569054451: "Your changes will be kept on the SD card.",
+        336702608: "Loading printer..",
+        4170881190: "Exporting to SD card..",
     },
     "es-MX": {
         1185266064: "%d de %d multisig",
@@ -752,6 +756,8 @@ translation_table = {
         1303016265: "Sí",
         771968845: "Sus cambios se guardarán en el almacenamiento flash del dispositivo.",
         2569054451: "Sus cambios se guardarán en la tarjeta SD.",
+        336702608: "Cargando impresora..",
+        4170881190: "Exportando a la tarjeta SD..",
     },
     "de-DE": {
         1185266064: "%d von %d Multisig",
@@ -996,6 +1002,8 @@ translation_table = {
         1303016265: "Ja",
         771968845: "Änderungen werden im Flash-Speicher des Geräts gespeichert.",
         2569054451: "Ihre Änderungen werden auf der SD-Karte gespeichert.",
+        336702608: "Drucker laden..",
+        4170881190: "Exportieren nach SD-Karte..",
     },
     "vi-VN": {
         1185266064: "%d của %d đa chữ kí",
@@ -1240,6 +1248,8 @@ translation_table = {
         1303016265: "Đúng",
         771968845: "Thay đổi của bạn sẽ được lưu trên bộ nhớ flash của thiết bị.",
         2569054451: "Các thay đổi của bạn sẽ được lưu trên thẻ SD.",
+        336702608: "Tải máy in ..",
+        4170881190: "Xuất vào thẻ SD ..",
     },
     "fr-FR": {
         1185266064: "%d de %d multisignature",
@@ -1484,6 +1494,8 @@ translation_table = {
         1303016265: "Oui",
         771968845: "Vos modifications seront conservées sur le stockage flash de l'appareil.",
         2569054451: "Vos modifications seront conservées sur la carte SD.",
+        336702608: "Chargement de l'imprimante..",
+        4170881190: "Exportation vers la carte SD..",
     },
     "nl-NL": {
         1185266064: "%d van %d multisig",
@@ -1728,5 +1740,7 @@ translation_table = {
         1303016265: "Yes",
         771968845: "Veranderingen worden opgeslagen in opslag van apparaat.",
         2569054451: "Veranderingen worden opgeslagen op SD kaart.",
+        336702608: "Laadprinter..",
+        4170881190: "Exporteren naar SD-kaart..",
     },
 }

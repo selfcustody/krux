@@ -23,7 +23,6 @@
 from ..sd_card import SDHandler
 import uos
 from ..krux_settings import t
-from ..printers import create_printer
 from ..themes import theme
 from ..qr import FORMAT_NONE
 from . import (
@@ -147,21 +146,12 @@ class Tools(Page):
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
-        try:
-            self.ctx.printer = create_printer()
-            if not self.ctx.printer:
-                self.ctx.display.flash_text(
-                    t("Printer Driver not set!"), theme.error_color
-                )
-                return MENU_CONTINUE
-        except:
-            self.ctx.log.exception("Exception occurred connecting to printer")
-            raise
-
         title = t("Krux Printer Test QR")
         self.display_qr_codes(title, FORMAT_NONE, title, allow_any_btn=True)
-        self.print_qr_prompt(title, FORMAT_NONE, title)
+        from .print_page import PrintPage
 
+        print_page = PrintPage(self.ctx)
+        print_page.print_qr(title, title=title)
         return MENU_CONTINUE
 
     def create_qr(self):
@@ -175,11 +165,6 @@ class Tools(Page):
             )
             if text in ("", ESC_KEY):
                 return MENU_CONTINUE
-
-            try:
-                self.ctx.printer = create_printer()
-            except:
-                self.ctx.log.exception("Exception occurred connecting to printer")
 
             from .qr_view import SeedQRView
             import qrcode

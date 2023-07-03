@@ -240,5 +240,7 @@
     "Words": "Wörter",
     "Yes": "Ja",
     "Your changes will be kept on device flash storage.": "Änderungen werden im Flash-Speicher des Geräts gespeichert.",
-    "Your changes will be kept on the SD card.": "Ihre Änderungen werden auf der SD-Karte gespeichert."
+    "Your changes will be kept on the SD card.": "Ihre Änderungen werden auf der SD-Karte gespeichert.",
+    "Loading printer..": "Drucker laden..",
+    "Exporting to SD card..": "Exportieren nach SD-Karte.."
 }

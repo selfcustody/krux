@@ -374,7 +374,6 @@ class Login(Page):
 
         # Permanent wallet loaded
         from ..wallet import Wallet
-        from ..printers import create_printer
 
         self.ctx.wallet = Wallet(
             Key(
@@ -384,10 +383,6 @@ class Login(Page):
                 passphrase,
             )
         )
-        try:
-            self.ctx.printer = create_printer()
-        except:
-            self.ctx.log.exception("Exception occurred connecting to printer")
         return MENU_EXIT
 
     def _encrypted_qr_code(self, data):

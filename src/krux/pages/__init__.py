@@ -38,7 +38,6 @@ from ..input import (
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, LoggingSettings, BitcoinSettings
-from ..printers.cnc import FilePrinter
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -369,35 +368,20 @@ class Page:
                     offset_y = starting_y_offset + (i * self.ctx.display.font_height)
                     self.ctx.display.draw_string(offset_x, offset_y, word)
 
-    def print_qr_prompt(self, data, qr_format, title="", width=33):
+    def print_qr_prompt(self):
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
         """
-        if self.ctx.printer is None:
-            return
+        if Settings().printer.driver == "none":
+            return False
+
         self.ctx.display.clear()
         if self.prompt(
             t("Print to QR?\n\n%s\n\n") % Settings().printer.driver,
             self.ctx.display.height() // 2,
         ):
-            if title:
-                self.ctx.printer.print_string(title + "\n\n")
-            i = 0
-            for qr_code, count in to_qr_codes(data, width, qr_format):
-                if i == count:
-                    break
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    t("Printing\n%d / %d") % (i + 1, count)
-                )
-
-                # Warn of SD read here because Printer don't have access to display
-                if isinstance(self.ctx.printer, FilePrinter):
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-
-                self.ctx.printer.print_qr_code(qr_code)
-                i += 1
+            return True
+        return False
 
     def prompt(self, text, offset_y=0):
         """Prompts user to answer Yes or No"""
