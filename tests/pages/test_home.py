@@ -1029,6 +1029,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
     cases = [
         # Single-key, not loaded, no format => pmofn, sign, No print prompt
         (
+            # Case 0
             tdata.SINGLEKEY_SIGNING_KEY,  # 0 wallet
             None,  # 1 wallet
             False,  # 2 if True: wallet will be #1 instead
@@ -1040,7 +1041,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,  # 8 printer
             # 9 btn_seq
             [
-                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -1051,6 +1052,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-key, not loaded, pmofn, sign, No print prompt
         (
+            # Case 1
             tdata.SINGLEKEY_SIGNING_KEY,
             None,
             False,
@@ -1061,7 +1063,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             FORMAT_PMOFN,
             None,
             [
-                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -1072,6 +1074,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-key, not loaded, pmofn, sign, Print
         (
+            # Case 2
             tdata.SINGLEKEY_SIGNING_KEY,
             None,
             False,
@@ -1082,7 +1085,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             FORMAT_PMOFN,
             MockPrinter(),
             [
-                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -1094,6 +1097,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-key, not loaded, pmofn, sign, Decline to print
         (
+            # Case 3
             tdata.SINGLEKEY_SIGNING_KEY,
             None,
             False,
@@ -1104,7 +1108,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             FORMAT_PMOFN,
             MockPrinter(),
             [
-                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -1116,6 +1120,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-key, not loaded, pmofn, decline to sign
         (
+            # Case 4
             tdata.SINGLEKEY_SIGNING_KEY,
             None,
             False,
@@ -1126,7 +1131,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,
             None,
             [
-                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -1136,6 +1141,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-key, not loaded, failed to capture PSBT QR
         (
+            # Case 5
             tdata.SINGLEKEY_SIGNING_KEY,
             None,
             False,
@@ -1145,11 +1151,12 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,
             None,
             None,
-            [BUTTON_ENTER],  # Wallet not loaded, proceed?
+            [],  # [BUTTON_ENTER],  # Wallet not loaded, proceed?
             None,
         ),
         # Multisig, not loaded, decline to proceed after warning
         (
+            # Case 6
             tdata.MULTISIG_SIGNING_KEY,
             None,
             False,
@@ -1164,6 +1171,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Multisig, not loaded, pmofn, sign, No print prompt
         (
+            # Case 7
             tdata.MULTISIG_SIGNING_KEY,
             None,
             False,
@@ -1185,6 +1193,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Multisig, not loaded, pmofn, sign, Print
         (
+            # Case 8
             tdata.MULTISIG_SIGNING_KEY,
             None,
             False,
@@ -1207,6 +1216,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Multisig, not loaded, pmofn, sign, Decline to print
         (
+            # Case 9
             tdata.MULTISIG_SIGNING_KEY,
             None,
             False,
@@ -1229,6 +1239,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-key, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
+            # Case 10
             tdata.SINGLEKEY_SIGNING_KEY,  # 0 wallet
             None,
             False,
@@ -1239,7 +1250,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             FORMAT_PMOFN,
             None,  # 8 printer
             [
-                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -1253,6 +1264,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Multisig, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
+            # Case 11
             tdata.MULTISIG_SIGNING_KEY,  # 0 wallet
             None,
             False,
@@ -1285,7 +1297,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             wallet.load(case[1], FORMAT_PMOFN)
 
         ctx = create_ctx(mocker, case[9], wallet, case[8])
-        home = Home(ctx)
+        home = Home(ctx, ctx.wallet.is_multisig())
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], case[4]))
         mocker.patch.object(
             home,
@@ -1314,18 +1326,20 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         home.sign_psbt()
 
         # there is no case[2] == True, so returns True every time btn_seq starts with ENTER
-        if case[2] or (not case[2] and case[9][0] == BUTTON_ENTER):
-            if not case[10]:  # no SD
-                home.capture_qr_code.assert_called_once()
-            if case[5]:  # signed!
-                home.display_qr_codes.assert_called_once()
-                home.print_standard_qr.assert_called_once()
-            else:
-                home.display_qr_codes.assert_not_called()
-        else:
-            home.capture_qr_code.assert_not_called()
 
-        assert ctx.input.wait_for_button.call_count == len(case[9])
+        if len(case[9]) > 0:
+            if case[2] or (not case[2] and case[9][0] == BUTTON_ENTER):
+                if not case[10]:  # no SD
+                    home.capture_qr_code.assert_called_once()
+                if case[5]:  # signed!
+                    home.display_qr_codes.assert_called_once()
+                    home.print_standard_qr.assert_called_once()
+                else:
+                    home.display_qr_codes.assert_not_called()
+            else:
+                home.capture_qr_code.assert_not_called()
+
+            assert ctx.input.wait_for_button.call_count == len(case[9])
 
 
 def test_sign_message(mocker, m5stickv, tdata):

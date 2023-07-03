@@ -70,21 +70,22 @@ MESSAGE_SIG_FILE_SUFFIX = PSBT_FILE_SUFFIX
 class Home(Page):
     """Home is the main menu page of the app"""
 
-    def __init__(self, ctx):
+    def __init__(self, ctx, multisig=False):
+        main_menu = [
+            (t("Mnemonic"), self.mnemonic),
+            (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
+            (t("Extended Public Key"), self.public_key),
+            (t("Wallet Descriptor"), self.wallet),
+            (t("Address"), self.list_address),
+            (t("Sign"), self.sign),
+            (t("Shutdown"), self.shutdown),
+        ]
+        if not multisig:  # If single sig
+            # Removes wallet descriptor import option
+            del main_menu[3]
         super().__init__(
             ctx,
-            Menu(
-                ctx,
-                [
-                    (t("Mnemonic"), self.mnemonic),
-                    (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
-                    (t("Extended Public Key"), self.public_key),
-                    (t("Wallet Descriptor"), self.wallet),
-                    (t("Address"), self.list_address),
-                    (t("Sign"), self.sign),
-                    (t("Shutdown"), self.shutdown),
-                ],
-            ),
+            Menu(ctx, main_menu),
         )
 
     def mnemonic(self):
@@ -487,7 +488,9 @@ class Home(Page):
 
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
-        if not self.ctx.wallet.is_loaded():
+
+        # Warns in case multisig wallet descriptor is not loaded
+        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
             self.ctx.display.draw_centered_text(
                 t(
                     """Warning:\nWallet output descriptor not found.\n\n

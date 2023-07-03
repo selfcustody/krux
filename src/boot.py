@@ -91,7 +91,7 @@ def home(ctx_home):
 
     if ctx_home.wallet is not None:
         while True:
-            if not Home(ctx_home).run():
+            if not Home(ctx_home, ctx_home.wallet.is_multisig()).run():
                 break
 
 
