@@ -71,21 +71,20 @@ class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
-        main_menu = [
-            (t("Mnemonic"), self.mnemonic),
-            (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
-            (t("Extended Public Key"), self.public_key),
-            (t("Wallet Descriptor"), self.wallet),
-            (t("Address"), self.list_address),
-            (t("Sign"), self.sign),
-            (t("Shutdown"), self.shutdown),
-        ]
-        if not ctx.wallet.is_multisig():  # If single sig
-            # Removes wallet descriptor import option
-            del main_menu[3]
         super().__init__(
             ctx,
-            Menu(ctx, main_menu),
+            Menu(
+                ctx,
+                [
+                    (t("Mnemonic"), self.mnemonic),
+                    (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
+                    (t("Extended Public Key"), self.public_key),
+                    (t("Wallet Descriptor"), self.wallet),
+                    (t("Address"), self.list_address),
+                    (t("Sign"), self.sign),
+                    (t("Shutdown"), self.shutdown),
+                ],
+            ),
         )
 
     def mnemonic(self):
