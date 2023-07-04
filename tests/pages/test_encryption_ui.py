@@ -26,6 +26,11 @@ SEEDS_JSON = """{
         "data": "GpNxj9kzdiTuIf1UYC6R0FHoUokBhiNLkxWgSOHBhmBHb0Ew8wk1M+VlsR4v/koCfSGOTkgjFshC36+n7mx0W0PI6NizAoPClO8DUVamd5hS6irS+Lfff0//VJWK1BcdvOJjzYw8TBiVaL1swAEEySjn5GsqF1RaJXzAMMgu03Kq32iDIDy7h/jHJTiIPCoVQAle/C9vXq2HQeVx43c0LhGXTZmIhhkHPMgDzFTsMGM="
     }
 }"""
+ENCRYPTED_QR_TITLE_CBC = "353175d8"
+ENCRYPTED_QR_DATA_CBC = b"\x08353175d8\x01\x00\x00\n!\xa1\xf3\x8b\x9e\xa1^\x8d\xab\x08\xf7\t\xf3\x94\x06\x89Q\x15]\xe0\xc6\xabf\x9c\x12E\xbcw\xcaa\x14\xfc\xa5\x16\x15\x0f;\x88\xbc\xb4H\xbe_\xf3\xf1b\x1e\x02\xff\xea\x9a\xe9z\xfd\xc9\xef\xcd\xa0A\x0c\xd1:a\x08"
+
+ENCRYPTED_QR_TITLE_ECB = "06b79aa2"
+ENCRYPTED_QR_DATA_ECB = b"\x0806b79aa2\x00\x00\x00\n\xa4\xaaa\xb9h\x0c\xdc-i\x85\x83.9,\x91\xf1\x19E,\xc9\xf0'\xb1b7\x91mo\xa2-\xb6\x16\xac\x04-2F\x10\xda\xd1\xdb,\x85\x9fr\x1c\x8aH"
 
 
 @pytest.fixture
@@ -156,11 +161,16 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
         mocker.MagicMock(return_value=TEST_KEY),
     )
-    with patch("krux.sd_card.open", mocker.mock_open(read_data="{}")) as m:
+    with patch("krux.pages.qr_view.SeedQRView", mocker.MagicMock()) as qr_view:
         Settings().encryption.version = "AES-ECB"
         storage_ui.encrypt_menu()
-
-    # TODO: Assertions
+    qr_view.assert_has_calls(
+        [
+            mocker.call(
+                mocker.ANY, data=ENCRYPTED_QR_DATA_ECB, title=ENCRYPTED_QR_TITLE_ECB
+            )
+        ]
+    )
 
 
 def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
@@ -191,11 +201,17 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
         "krux.pages.encryption_ui.EncryptMnemonic.capture_camera_entropy",
         mocker.MagicMock(return_value=I_VECTOR),
     )
-    with patch("krux.sd_card.open", mocker.mock_open(read_data="{}")) as m:
+
+    with patch("krux.pages.qr_view.SeedQRView", mocker.MagicMock()) as qr_view:
         Settings().encryption.version = "AES-CBC"
         storage_ui.encrypt_menu()
-
-    # TODO: Assertions
+    qr_view.assert_has_calls(
+        [
+            mocker.call(
+                mocker.ANY, data=ENCRYPTED_QR_DATA_CBC, title=ENCRYPTED_QR_TITLE_CBC
+            )
+        ]
+    )
 
 
 def test_load_encrypted_from_flash(m5stickv, mocker):
@@ -250,3 +266,52 @@ def test_load_encrypted_from_flash_wrong_key(m5stickv, mocker):
         encrypted_mnemonics = LoadEncryptedMnemonic(ctx)
         words = encrypted_mnemonics.load_from_storage()
     assert words == MENU_CONTINUE
+
+
+def test_load_encrypted_qr_code(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+
+    BTN_SEQUENCE = (
+        # Decrypt? Yes
+        [BUTTON_ENTER]
+        +
+        # Key loading is mocked here
+        # 1 press to proceed with the 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to proceed with the 24 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to move to Scan passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to move to No passphrase
+        [BUTTON_PAGE]
+        +
+        # 1 press to skip passphrase
+        [BUTTON_ENTER]
+        +
+        # 1 press to confirm fingerprint
+        [BUTTON_ENTER]
+        +
+        # 1 press to select single-key
+        [BUTTON_ENTER]
+    )
+    QR_FORMAT = FORMAT_NONE
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    mocker.patch.object(
+        login,
+        "capture_qr_code",
+        mocker.MagicMock(return_value=(ENCRYPTED_QR_DATA_CBC, QR_FORMAT)),
+    )
+    mocker.patch(
+        "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+        mocker.MagicMock(return_value=TEST_KEY),
+    )
+    _ = login.load_key_from_qr_code()
+
+    assert ctx.wallet.key.mnemonic == CBC_WORDS

@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=C0103
 
 import sys
 import gc
@@ -26,7 +27,13 @@ import gc
 sys.path.append("")
 sys.path.append(".")
 
-SPLASH = """
+from krux.power import power_manager
+
+
+def splash():
+    """Display splash while loading modules"""
+    from krux.display import Display
+    SPLASH = """
                 
                 
                 
@@ -44,16 +51,7 @@ SPLASH = """
                 
                 
                 
-"""[
-    1:-1
-]
-
-from krux.power import power_manager
-
-
-def splash():
-    """Display splash while loading modules"""
-    from krux.display import Display
+"""[1:-1]
 
     disp = Display()
     disp.initialize_lcd()

@@ -214,16 +214,14 @@ class EncryptMnemonic(Page):
         self.ctx.display.draw_centered_text(t("Processing ..."))
 
         from ..encryption import EncryptedQRCode
-        import qrcode
 
         encrypted_qr = EncryptedQRCode()
         qr_data = encrypted_qr.create(key, mnemonic_id, words, i_vector)
-        code = qrcode.encode_to_string(qr_data)
         del encrypted_qr
 
         from .qr_view import SeedQRView
 
-        seed_qr_view = SeedQRView(self.ctx, code=code, title=mnemonic_id)
+        seed_qr_view = SeedQRView(self.ctx, data=qr_data, title=mnemonic_id)
         seed_qr_view.display_seed_qr()
 
 

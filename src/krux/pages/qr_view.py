@@ -49,12 +49,12 @@ TRANSCRIBE_MODE = 4
 class SeedQRView(Page):
     """Tools to visualize and transcript Seed QRs"""
 
-    def __init__(self, ctx, binary=False, code=None, title=None):
+    def __init__(self, ctx, binary=False, data=None, title=None):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.binary = binary
-        if code:
-            self.code = code
+        if data:
+            self.code = qrcode.encode_to_string(data)
             self.title = title
         else:
             if self.binary:
@@ -73,13 +73,11 @@ class SeedQRView(Page):
         numbers = ""
         for word in words:
             numbers += str("%04d" % WORDLIST.index(word))
-        # qr_size = 25 if len(words) == 12 else 29
-        return qrcode.encode_to_string(numbers)  # , qr_size
+        return qrcode.encode_to_string(numbers)
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
-        # qr_size = 21 if len(binary_seed) == 16 else 25
-        return qrcode.encode_to_string(binary_seed)  # , qr_size
+        return qrcode.encode_to_string(binary_seed)
 
     def _to_compact_seed_qr(self, mnemonic):
         mnemonic = mnemonic.split(" ")

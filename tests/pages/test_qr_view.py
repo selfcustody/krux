@@ -4,7 +4,6 @@ from ..shared_mocks import mock_context
 def test_load_qr_view(amigo_tft, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, SWIPE_LEFT, SWIPE_RIGHT
-    import qrcode
 
     BTN_SEQUENCE = [
         SWIPE_LEFT,  # lines mode
@@ -22,7 +21,7 @@ def test_load_qr_view(amigo_tft, mocker):
 
     ctx = mock_context(mocker)
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
-    code = qrcode.encode_to_string("test code")
-    seed_qr_view = SeedQRView(ctx, code=code, title="Test QR Code")
+    data = "test code"
+    seed_qr_view = SeedQRView(ctx, data=data, title="Test QR Code")
     seed_qr_view.display_seed_qr()
     assert ctx.display.draw_qr_code.call_count == 8

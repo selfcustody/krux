@@ -167,9 +167,7 @@ class Tools(Page):
                 return MENU_CONTINUE
 
             from .qr_view import SeedQRView
-            import qrcode
 
-            code = qrcode.encode_to_string(text)
-            seed_qr_view = SeedQRView(self.ctx, code=code, title="Custom QR Code")
+            seed_qr_view = SeedQRView(self.ctx, data=text, title="Custom QR Code")
             return seed_qr_view.display_seed_qr()
         return MENU_CONTINUE
