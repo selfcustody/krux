@@ -84,6 +84,7 @@ def test_init(mocker, m5stickv):
     mocker.spy(Display, "initialize_lcd")
 
     d = Display()
+    d.initialize_lcd()
 
     assert isinstance(d, Display)
     d.initialize_lcd.assert_called()
@@ -102,16 +103,17 @@ def test_width(mocker, m5stickv):
     from krux.display import Display
 
     d = Display()
+    d.initialize_lcd()
 
     d.to_portrait()
 
     assert d.width() == krux.display.lcd.width()
-    krux.display.lcd.height.assert_called()
+    krux.display.lcd.width.assert_called()
 
     d.to_landscape()
 
     assert d.width() == krux.display.lcd.height()
-    krux.display.lcd.width.assert_called()
+    krux.display.lcd.height.assert_called()
 
 
 def test_height(mocker, m5stickv):

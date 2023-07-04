@@ -1297,7 +1297,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             wallet.load(case[1], FORMAT_PMOFN)
 
         ctx = create_ctx(mocker, case[9], wallet, case[8])
-        home = Home(ctx, ctx.wallet.is_multisig())
+        home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], case[4]))
         mocker.patch.object(
             home,

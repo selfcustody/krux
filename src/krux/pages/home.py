@@ -70,7 +70,7 @@ MESSAGE_SIG_FILE_SUFFIX = PSBT_FILE_SUFFIX
 class Home(Page):
     """Home is the main menu page of the app"""
 
-    def __init__(self, ctx, multisig=False):
+    def __init__(self, ctx):
         main_menu = [
             (t("Mnemonic"), self.mnemonic),
             (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
@@ -80,7 +80,7 @@ class Home(Page):
             (t("Sign"), self.sign),
             (t("Shutdown"), self.shutdown),
         ]
-        if not multisig:  # If single sig
+        if not ctx.wallet.is_multisig():  # If single sig
             # Removes wallet descriptor import option
             del main_menu[3]
         super().__init__(

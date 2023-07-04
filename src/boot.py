@@ -51,6 +51,16 @@ SPLASH = """
 from krux.power import power_manager
 
 
+def splash():
+    """Display splash while loading modules"""
+    from krux.display import Display
+
+    disp = Display()
+    disp.initialize_lcd()
+    disp.clear()
+    disp.draw_centered_text(SPLASH.split("\n"))
+
+
 def check_for_updates():
     """Checks SD card, if a valid firmware is found asks if user wants to update the device"""
     from krux import firmware
@@ -91,10 +101,11 @@ def home(ctx_home):
 
     if ctx_home.wallet is not None:
         while True:
-            if not Home(ctx_home, ctx_home.wallet.is_multisig()).run():
+            if not Home(ctx_home).run():
                 break
 
 
+splash()
 check_for_updates()
 gc.collect()
 
@@ -102,9 +113,6 @@ from krux.context import Context
 
 ctx = Context()
 ctx.power_manager = power_manager
-# Display splash while loading pages
-ctx.display.clear()
-ctx.display.draw_centered_text(SPLASH.split("\n"))
 login(ctx)
 gc.collect()
 home(ctx)

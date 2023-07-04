@@ -43,11 +43,11 @@ class Display:
 
     def __init__(self):
         self.portrait = True
-        self.initialize_lcd()
+        # self.initialize_lcd()
         self.i2c = None
         self.font_width = FONT_WIDTH
         self.font_height = FONT_HEIGHT
-        self.bottom_line = self.height() // FONT_HEIGHT  # total lines
+        self.bottom_line = board.config["lcd"]["width"] // FONT_HEIGHT  # total lines
         self.bottom_line -= 1
         self.bottom_line *= FONT_HEIGHT
         if board.config["type"] == "m5stickv":
