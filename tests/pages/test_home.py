@@ -82,7 +82,7 @@ def tdata(mocker):
 
 def create_ctx(mocker, btn_seq, wallet, printer, touch_seq=None):
     """Helper to create mocked context obj"""
-    from krux.krux_settings import Settings
+    from krux.krux_settings import Settings, THERMAL_ADAFRUIT_TXT
 
     ctx = mock_context(mocker)
     ctx.power_manager.battery_charge_remaining.return_value = 1
@@ -94,7 +94,7 @@ def create_ctx(mocker, btn_seq, wallet, printer, touch_seq=None):
         Settings().printer.driver = "none"
     else:
         mocker.patch("krux.printers.create_printer", new=mocker.MagicMock())
-        Settings().printer.driver = "thermal/adafruit"
+        Settings().printer.driver = THERMAL_ADAFRUIT_TXT
 
     if touch_seq:
         ctx.input.touch = mocker.MagicMock(

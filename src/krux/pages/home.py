@@ -25,7 +25,7 @@ from ..themes import theme
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
-from ..krux_settings import t, Settings
+from ..krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
 from . import (
     Page,
     Menu,
@@ -100,7 +100,7 @@ class Home(Page):
         self.ctx.input.wait_for_button()
 
         # Avoid printing text on a cnc
-        if Settings().printer.driver == "thermal/adafruit":
+        if Settings().printer.driver == THERMAL_ADAFRUIT_TXT:
             self.ctx.display.clear()
             if self.prompt(
                 t("Print?\n\n%s\n\n") % Settings().printer.driver,
@@ -164,7 +164,7 @@ class Home(Page):
         tiny_seed.export()
 
         # Allow to print on thermal printer only
-        if Settings().printer.driver == "thermal/adafruit":
+        if Settings().printer.driver == THERMAL_ADAFRUIT_TXT:
             if self.print_qr_prompt():
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE

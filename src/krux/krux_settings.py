@@ -50,6 +50,8 @@ PBKDF2_HMAC_ECB = 0
 PBKDF2_HMAC_CBC = 1
 AES_BLOCK_SIZE = 16
 
+THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
+
 
 def translations(locale):
     """Returns the translations map for the given locale"""
@@ -226,7 +228,7 @@ class PrinterSettings(SettingsNamespace):
 
     PRINTERS = {
         "none": ("none", None),
-        "thermal/adafruit": ("thermal", "AdafruitPrinter"),
+        THERMAL_ADAFRUIT_TXT: ("thermal", "AdafruitPrinter"),
         "cnc/file": ("cnc", "FilePrinter"),
     }
     namespace = "settings.printer"
