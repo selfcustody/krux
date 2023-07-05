@@ -602,12 +602,7 @@ class Menu:
     def _clicked_item(self, selected_item_index):
         try:
             self.ctx.display.clear()
-            try:
-                status = self.menu_view[selected_item_index][1](
-                    *self.menu_view[selected_item_index][2]
-                )
-            except:
-                status = self.menu_view[selected_item_index][1]()
+            status = self.menu_view[selected_item_index][1]()
             if status != MENU_CONTINUE:
                 return status
         except Exception as e:

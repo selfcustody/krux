@@ -1358,6 +1358,37 @@ def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
     assert ctx.wallet.key.mnemonic == MNEMONIC
 
 
+def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # 12 words
+        + [BUTTON_ENTER]  # Confirm
+        + [
+            BUTTON_ENTER,  # 12 word confirm
+            BUTTON_PAGE,  # 1 press to move to Scan passphrase
+            BUTTON_PAGE,  # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
+            BUTTON_ENTER,  # 1 press to confirm fingerprint
+            BUTTON_ENTER,  # Single-key
+        ]
+    )
+    MNEMONIC = (
+        "idle item three donate heavy auto worry mass casual wrestle shock orphan"
+    )
+
+    mocker.patch(
+        "krux.pages.tiny_seed.TinyScanner.scanner",
+        new=mocker.MagicMock(return_value=MNEMONIC.split()),
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login.load_key_from_tiny_seed_image()
+
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
 def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV

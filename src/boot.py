@@ -33,6 +33,7 @@ from krux.power import power_manager
 def splash():
     """Display splash while loading modules"""
     from krux.display import Display
+
     SPLASH = """
                 
                 
@@ -51,7 +52,9 @@ def splash():
                 
                 
                 
-"""[1:-1]
+"""[
+        1:-1
+    ]
 
     disp = Display()
     disp.initialize_lcd()
