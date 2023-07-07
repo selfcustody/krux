@@ -56,7 +56,7 @@ class AESCipher:
         )
 
     def encrypt(self, raw, mode=ucryptolib.MODE_ECB, i_vector=None):
-        """Encrypt using AES MODE_ECB and return the value encoded as base64"""
+        """Encrypt using AES-ECB or AES-CBC and return the value encoded as base64"""
         data_bytes = raw.encode("latin-1") if isinstance(raw, str) else raw
         if i_vector:
             encryptor = ucryptolib.aes(self.key, mode, i_vector)
@@ -150,7 +150,7 @@ class MnemonicStorage:
                 with SDHandler() as sd:
                     mnemonics = json.loads(sd.read(MNEMONICS_FILE))
             except:
-                return False
+                pass
 
             # save the new MNEMONICS_FILE
             try:
@@ -172,7 +172,7 @@ class MnemonicStorage:
                 with open("/flash/" + MNEMONICS_FILE, "r") as f:
                     mnemonics = json.loads(f.read())
             except:
-                return False
+                pass
             try:
                 # save the new MNEMONICS_FILE
                 with open("/flash/" + MNEMONICS_FILE, "w") as f:
