@@ -66,27 +66,14 @@ def test_enter_tiny_seed_12w_m5stickv(m5stickv, mocker):
         + [BUTTON_PAGE_PREV]
         + [BUTTON_ENTER]
     )
-    TEST_12_WORDS = [
-        "zoo",
-        "divide",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "crouch",
-    ]
+    TEST_12_WORDS = "zoo divide zoo zoo zoo zoo zoo zoo zoo zoo zoo crouch"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tiny_seed = TinySeed(ctx)
     words = tiny_seed.enter_tiny_seed()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert words == TEST_12_WORDS
+    assert " ".join(words) == TEST_12_WORDS
 
 
 def test_enter_tiny_seed_24w_m5stickv(m5stickv, mocker):
@@ -116,39 +103,14 @@ def test_enter_tiny_seed_24w_m5stickv(m5stickv, mocker):
         + [BUTTON_PAGE] * 2
         + [BUTTON_ENTER]
     )
-    TEST_24_WORDS = [
-        "lend",
-        "divide",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "abandon",
-        "cable",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "core",
-    ]
+    TEST_24_WORDS = "lend divide zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon cable zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo core"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tiny_seed = TinySeed(ctx)
     words = tiny_seed.enter_tiny_seed(w24=True)
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert words == TEST_24_WORDS
+    assert " ".join(words) == TEST_24_WORDS
 
 
 def test_enter_tiny_seed_24w_amigo(amigo_tft, mocker):
@@ -179,39 +141,14 @@ def test_enter_tiny_seed_24w_amigo(amigo_tft, mocker):
     )
     BTN_SEQUENCE = [BUTTON_TOUCH] * len(TOUCH_SEQUENCE)
 
-    TEST_24_WORDS = [
-        "lend",
-        "divide",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "abandon",
-        "cable",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "zoo",
-        "core",
-    ]
+    TEST_24_WORDS = "lend divide zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon cable zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo core"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQUENCE)
     tiny_seed = TinySeed(ctx)
     words = tiny_seed.enter_tiny_seed(w24=True)
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert words == TEST_24_WORDS
+    assert " ".join(words) == TEST_24_WORDS
 
 
 def test_enter_tiny_seed_24w_pre_loaded_numbers(m5stickv, mocker):
@@ -277,24 +214,9 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     # Seed will be returned as its word index
     import time
     from krux.pages.tiny_seed import TinyScanner
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
-    BTN_SEQUENCE = (
-        [BUTTON_ENTER]
-        + [BUTTON_ENTER]
-        # # Toggle line 1 bit "1024"
-        # [BUTTON_ENTER] * 2
-        # + [BUTTON_ENTER]
-        # # Move to last editable bit from page 1 and togle
-        # + [BUTTON_PAGE_PREV] * 4
-        # + [BUTTON_ENTER]
-        # # Move to line 2 and toggle bit "512"
-        # + [BUTTON_PAGE] * 17
-        # + [BUTTON_ENTER]
-        # # Move to "Go" and proceed to scan second page
-        # + [BUTTON_PAGE_PREV] * 15
-        # + [BUTTON_ENTER]
-    )
+    BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
     TIME_STAMPS = (0, 1, 100)
     TINYSEED_RECTANGLE = (10, 10, 100, 100)
     TEST_12_WORDS_NUMBERS = [
@@ -311,20 +233,9 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
         794,
         1678,
     ]
-    TEST_12_WORDS = [
-        "clap",
-        "twin",
-        "source",
-        "time",
-        "noble",
-        "purse",
-        "pause",
-        "security",
-        "album",
-        "machine",
-        "glimpse",
-        "spider",
-    ]
+    TEST_12_WORDS = (
+        "clap twin source time noble purse pause security album machine glimpse spider"
+    )
     mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tiny_seed = TinyScanner(ctx)
@@ -338,4 +249,60 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     words = tiny_seed.scanner()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert words == TEST_12_WORDS
+    assert " ".join(words) == TEST_12_WORDS
+
+
+def test_scan_tiny_seed_24w(m5stickv, mocker):
+    # This will be used when scanning 24 TinySeed
+    # First scanned page will be loaded to be edited, then proceed to scan second page
+    # Seed will be returned as its word index
+    import time
+    from krux.pages.tiny_seed import TinyScanner
+    from krux.input import BUTTON_ENTER, PRESSED, RELEASED
+
+    BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
+    ENTER_SEQ = [RELEASED] + [PRESSED] + [RELEASED] * 3
+    TIME_STAMPS = (0, 1, 1000, 2000, 3000, 4000, 5000)
+    TINYSEED_RECTANGLE = (10, 10, 100, 100)
+    TEST_WORDS_NUMBERS_1_12 = [
+        1090,
+        792,
+        1005,
+        1978,
+        408,
+        569,
+        1498,
+        589,
+        192,
+        134,
+        617,
+        663,
+    ]
+    TEST_WORDS_NUMBERS_13_24 = [
+        1275,
+        1982,
+        1747,
+        978,
+        509,
+        1588,
+        1456,
+        15,
+        1592,
+        1612,
+        1056,
+        771,
+    ]
+    NUMBERS_SEQUENCE = [TEST_WORDS_NUMBERS_1_12] * 3 + [TEST_WORDS_NUMBERS_13_24] * 2
+    TEST_24_WORDS = "market glass laugh warm cream either robot end blood awful escape fan palm waste surge kick display shoe remove achieve shoulder siren loop gate"
+    mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.input.enter_value = mocker.MagicMock(side_effect=ENTER_SEQ)
+    tiny_seed = TinyScanner(ctx)
+    mocker.patch.object(
+        tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
+    )
+    tiny_seed._detect_and_draw_punches = mocker.MagicMock(side_effect=NUMBERS_SEQUENCE)
+    words = tiny_seed.scanner(w24=True)
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert " ".join(words) == TEST_24_WORDS

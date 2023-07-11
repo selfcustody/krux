@@ -709,7 +709,7 @@ class TinyScanner(Page):
 
         def _choose_rect(rects):
             for rect in rects:
-                aspect = blob[2] / blob[3]
+                aspect = rect[2] / rect[3]
                 if (
                     rect[0]
                     and rect[1]
