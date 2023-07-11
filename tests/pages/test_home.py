@@ -549,7 +549,7 @@ def test_mnemonic_tiny_Seed(mocker, m5stickv, tdata):
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_ENTER,  # Open TinySeed
-            BUTTON_ENTER,  # PG2
+            BUTTON_ENTER,  # go to page 2
             BUTTON_ENTER,  # Leave
             BUTTON_ENTER,  # Print
             BUTTON_PAGE,  # Go to "Back"
