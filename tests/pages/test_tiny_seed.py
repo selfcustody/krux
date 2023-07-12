@@ -215,10 +215,10 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     import time
     from krux.pages.tiny_seed import TinyScanner
     from krux.input import BUTTON_ENTER
+    from krux.camera import OV7740_ID
 
     BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
     TIME_STAMPS = (0, 1, 100)
-    TINYSEED_RECTANGLE = (10, 10, 100, 100)
     TEST_12_WORDS_NUMBERS = [
         335,
         1884,
@@ -233,18 +233,19 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
         794,
         1678,
     ]
-    TEST_12_WORDS = (
-        "clap twin source time noble purse pause security album machine glimpse spider"
-    )
+    TEST_12_WORDS = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tiny_seed = TinyScanner(ctx)
-    mocker.patch.object(
-        tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
-    )
-    mocker.patch.object(
-        tiny_seed, "_detect_and_draw_punches", new=lambda image: TEST_12_WORDS_NUMBERS
-    )
+    # mocker.patch.object(
+    #     tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
+    # )
+    ctx.camera.snapshot = snapshot_generator()
+    ctx.camera.cam_id = OV7740_ID
+    # mocker.patch.object(
+    #     tiny_seed, "_detect_and_draw_punches", new=lambda image, corners: TEST_12_WORDS_NUMBERS
+    # )
+    tiny_seed._gradient_corners = mocker.MagicMock(return_value=(50, 50, 50, 50))
     mocker.patch.object(tiny_seed, "_check_buttons", new=lambda w24, page: None)
     words = tiny_seed.scanner()
 
@@ -315,11 +316,11 @@ def test_scan_tiny_seed_24w_amigo(amigo_tft, mocker):
     import time
     from krux.pages.tiny_seed import TinyScanner
     from krux.input import BUTTON_ENTER, PRESSED, RELEASED
-    from krux.camera import OV7740_ID
 
     BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
     ENTER_SEQ = [RELEASED] + [PRESSED] + [RELEASED] * 3
     TIME_STAMPS = (0, 1, 1000, 2000, 3000, 4000, 5000)
+    TINYSEED_RECTANGLE = (10, 10, 100, 100)
     TEST_WORDS_NUMBERS_1_12 = [
         1090,
         792,
@@ -353,9 +354,10 @@ def test_scan_tiny_seed_24w_amigo(amigo_tft, mocker):
     mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.input.enter_value = mocker.MagicMock(side_effect=ENTER_SEQ)
-    ctx.camera.snapshot = snapshot_generator()
-    ctx.camera.cam_id = OV7740_ID
     tiny_seed = TinyScanner(ctx)
+    mocker.patch.object(
+        tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
+    )
     tiny_seed._detect_and_draw_punches = mocker.MagicMock(side_effect=NUMBERS_SEQUENCE)
     words = tiny_seed.scanner(w24=True)
 

@@ -3,7 +3,9 @@ from ..shared_mocks import (
     mock_context,
     snapshot_generator,
     MockQRPartParser,
+    TimeMocker,
     SNAP_SUCCESS,
+    DONT_FIND_ANYTHING,
 )
 
 
@@ -56,6 +58,43 @@ def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
     ctx.display.to_landscape.assert_has_calls([mocker.call() for _ in range(10)])
     ctx.display.to_portrait.assert_has_calls([mocker.call() for _ in range(10)])
     ctx.display.draw_centered_text.assert_has_calls([mocker.call("Loading Camera..")])
+
+
+def test_camera_antiglare_light(mocker, m5stickv, mock_page_cls):
+    from krux.camera import OV7740_ID
+    from krux.input import PRESSED, RELEASED
+
+    time_mocker = TimeMocker(1001)
+
+    mocker.patch(
+        "krux.camera.sensor.snapshot",
+        new=snapshot_generator(outcome=DONT_FIND_ANYTHING),
+    )
+    mocker.patch("krux.camera.sensor.get_id", lambda: OV7740_ID)
+    mocker.patch("krux.camera.QRPartParser", new=MockQRPartParser)
+    from krux.camera import Camera
+
+    ctx = mock_context(mocker)
+    ENTER_SEQ = [RELEASED] + [PRESSED] + [PRESSED] + [RELEASED]
+    PAGE_PREV_SEQ = [RELEASED] + [RELEASED] + [RELEASED] + [PRESSED]
+    mocker.patch("time.ticks_ms", time_mocker.tick)
+    ctx.input.enter_value = mocker.MagicMock(side_effect=ENTER_SEQ)
+    ctx.input.page_value = mocker.MagicMock(side_effect=ENTER_SEQ)
+    ctx.input.page_prev_value = mocker.MagicMock(side_effect=PAGE_PREV_SEQ)
+    ctx.camera = Camera()
+    ctx.camera.cam_id = OV7740_ID
+    mocker.spy(ctx.camera, "disable_antiglare")
+    mocker.spy(ctx.camera, "enable_antiglare")
+    mocker.spy(ctx.light, "turn_on")
+    mocker.spy(ctx.light, "turn_off")
+    page = mock_page_cls(ctx)
+
+    qr_code, _ = page.capture_qr_code()
+    assert qr_code == None
+    ctx.camera.disable_antiglare.assert_called_once()
+    ctx.camera.enable_antiglare.assert_called_once()
+    ctx.light.turn_on.call_count == 2
+    ctx.light.turn_off.call_count == 2
 
 
 def test_prompt_m5stickv(mocker, m5stickv, mock_page_cls):

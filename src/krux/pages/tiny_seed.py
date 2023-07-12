@@ -555,15 +555,6 @@ class TinyScanner(Page):
         # X, Y array map for punched area
         self.x_regions = []
         self.y_regions = []
-        # Gratdient corners:
-        # Upper left
-        self.gradient_bg_ul = 50
-        # Upper right
-        self.gradient_bg_ur = 50
-        # Lower left
-        self.gradient_bg_ll = 50
-        # Lower right
-        self.gradient_bg_lr = 50
         self.time_frame = time.ticks_ms()
         self.previous_seed_numbers = [1] * 12
         self.tiny_seed = TinySeed(self.ctx)
@@ -606,6 +597,9 @@ class TinyScanner(Page):
     def _gradient_corners(self, rect, img):
         """Calcule histogram for four corners of tinyseed to be later
         used as a gradient reference threshold"""
+
+        # Regions: Upper left, upper right, lower left and lower right
+        # are corner fractions of main TinySeed rectangle
         if not board.config["type"].startswith("amigo"):
             region_ul = (
                 rect[0] + rect[2] // 8,
@@ -664,27 +658,40 @@ class TinyScanner(Page):
         # img.draw_rectangle(region_ll, color=lcd.RED, thickness=2)
         # img.draw_rectangle(region_lr, color=lcd.MAGENTA, thickness=2)
 
-        self.gradient_bg_ul = img.get_statistics(roi=region_ul).median()
-        self.gradient_bg_ur = img.get_statistics(roi=region_ur).median()
-        self.gradient_bg_ll = img.get_statistics(roi=region_ll).median()
-        self.gradient_bg_lr = img.get_statistics(roi=region_lr).median()
-
         # # Debug corners luminosity
-        # img.draw_string(10,40,str(self.gradient_bg_ul))
-        # img.draw_string(70,40,str(self.gradient_bg_ur))
-        # img.draw_string(10,55,str(self.gradient_bg_ll))
-        # img.draw_string(70,55,str(self.gradient_bg_lr))
+        # gradient_bg_ul = img.get_statistics(roi=region_ul).median()
+        # gradient_bg_ur = img.get_statistics(roi=region_ur).median()
+        # gradient_bg_ll = img.get_statistics(roi=region_ll).median()
+        # gradient_bg_lr = img.get_statistics(roi=region_lr).median()
+        # img.draw_string(10,40,str(gradient_bg_ul))
+        # img.draw_string(70,40,str(gradient_bg_ur))
+        # img.draw_string(10,55,str(gradient_bg_ll))
+        # img.draw_string(70,55,str(gradient_bg_lr))
 
-    def _gradient_value(self, index):
-        """Calculates a reference threshold according to an interpolation
-        gradient of luminosity from 4 corners of Tiny Seed"""
+        return (
+            img.get_statistics(roi=region_ul).median(),
+            img.get_statistics(roi=region_ur).median(),
+            img.get_statistics(roi=region_ll).median(),
+            img.get_statistics(roi=region_lr).median(),
+        )
+
+    def _gradient_value(self, index, gradient_corners):
+        """Calculates a reference threshold according to a linear
+        interpolation gradient of luminosity from 4 corners of Tiny Seed"""
+        (
+            gradient_bg_ul,
+            gradient_bg_ur,
+            gradient_bg_ll,
+            gradient_bg_lr,
+        ) = gradient_corners
+
         y_position = index % 12
         x_position = index // 12
         gradient_upper_x = (
-            self.gradient_bg_ul * (11 - x_position) + self.gradient_bg_ur * x_position
+            gradient_bg_ul * (11 - x_position) + gradient_bg_ur * x_position
         ) // 11
         gradient_lower_x = (
-            self.gradient_bg_ll * (11 - x_position) + self.gradient_bg_lr * x_position
+            gradient_bg_ll * (11 - x_position) + gradient_bg_lr * x_position
         ) // 11
         gradient = (
             gradient_upper_x * (11 - y_position) + gradient_lower_x * y_position
@@ -693,10 +700,7 @@ class TinyScanner(Page):
         # Average filter
         # Here you can change the relevance of the gradient vs medium luminance as a reference
         filtered = (
-            self.gradient_bg_ul
-            + self.gradient_bg_ur
-            + self.gradient_bg_ll
-            + self.gradient_bg_lr
+            gradient_bg_ul + gradient_bg_ur + gradient_bg_ll + gradient_bg_lr
         )  # weight 4/6 - 67% average
         filtered += 2 * gradient  # weight 2/6 = 33% raw gradient
         filtered //= 6
@@ -789,7 +793,7 @@ class TinyScanner(Page):
                     lcd.WHITE,
                 )
 
-    def _detect_and_draw_punches(self, img):
+    def _detect_and_draw_punches(self, img, gradient_corners):
         """Applies gradient threshold to detect punched(black painted) bits"""
         page_seed_numbers = [0] * 12
         index = 0
@@ -804,9 +808,12 @@ class TinyScanner(Page):
         else:
             y_map.reverse()
         # Think in portrait mode, with Tiny Seed tilted 90 degrees
+        # Loop ahead will sweep TinySeed bits/dots and evaluate its luminosity
         for x in x_map:
             for y in y_map:
+                # Define the dot rectangle area to be evaluated
                 eval_rect = (x + 2, y + 2, pad_x - 3, pad_y - 3)
+                # Evaluate dot's median luminosity
                 dot_l = img.get_statistics(roi=eval_rect).median()
 
                 # # Debug gradient
@@ -819,9 +826,13 @@ class TinyScanner(Page):
                 # if index == 143:
                 #     img.draw_string(70,25,"143:"+str(gradient_ref))
 
-                punch_threshold = (self._gradient_value(index) * 4) // 5  # ~-20%
+                # Defines a threshold to evaluate if the dot is considered punched
+                punch_threshold = (
+                    self._gradient_value(index, gradient_corners) * 4
+                ) // 5  # ~-20%
                 # Sensor image will be downscaled on small displays
                 punch_thickness = 1 if self.ctx.display.height() > 240 else 2
+                # If the dot is punched, draws a rectangle and toggle respective bit
                 if dot_l < punch_threshold:
                     _ = img.draw_rectangle(
                         eval_rect, thickness=punch_thickness, color=lcd.WHITE
@@ -832,6 +843,7 @@ class TinyScanner(Page):
                         page_seed_numbers[word_index], bit
                     )
                 index += 1
+        print(page_seed_numbers)
         return page_seed_numbers
 
     def _set_camera_sensitivity(self):
@@ -970,11 +982,11 @@ class TinyScanner(Page):
             img = self.ctx.camera.snapshot()
             rect = self._detect_tiny_seed(img)
             if rect:
-                self._gradient_corners(rect, img)
-
+                gradient_corners = self._gradient_corners(rect, img)
+                print(gradient_corners)
                 # map_regions
                 self._map_punches_region(rect, page)
-                page_seed_numbers = self._detect_and_draw_punches(img)
+                page_seed_numbers = self._detect_and_draw_punches(img, gradient_corners)
                 self._draw_grid(img)
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)

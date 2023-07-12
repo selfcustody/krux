@@ -179,12 +179,12 @@ class Page:
             # Turn on the light as long as the enter button is held down (M5stickV and Amigo)
             if self._time_to_check_input():
                 if self.ctx.light:
-                    if not self.ctx.input.enter_value():
+                    if self.ctx.input.enter_value() == PRESSED:
                         self.ctx.light.turn_on()
                     else:
                         self.ctx.light.turn_off()
                 # If board don't have light, ENTER stops the capture
-                elif not self.ctx.input.enter_value():
+                elif self.ctx.input.enter_value() == PRESSED:
                     return 1
 
                 # Anti-glare mode (M5stickV and Amigo)
