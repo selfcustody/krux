@@ -118,12 +118,17 @@ class Mockqrcode:
         return self.data
 
 
+class MockBlob:
+    def rect(self):
+        return (10, 10, 125, 100)
+
+
 SNAP_SUCCESS = 0
 SNAP_HISTOGRAM_FAIL = 1
 SNAP_FIND_QRCODES_FAIL = 2
 SNAP_REPEAT_QRCODE = 3
 
-IMAGE_TO_HASH = b"\x12\x04"
+IMAGE_TO_HASH = b"\x12\x04"  # Dummy bytes
 
 
 def snapshot_generator(outcome=SNAP_SUCCESS):
@@ -146,6 +151,9 @@ def snapshot_generator(outcome=SNAP_SUCCESS):
             m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = [Mockqrcode(str(count))]
             m.to_bytes.return_value = IMAGE_TO_HASH
+            m.find_blobs.return_value = [MockBlob()]
+            m.width.return_value = 320
+            m.height.return_value = 240
         return m
 
     return snapshot

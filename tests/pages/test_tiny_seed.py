@@ -1,4 +1,4 @@
-from ..shared_mocks import MockPrinter, mock_context
+from ..shared_mocks import MockPrinter, mock_context, snapshot_generator
 
 
 def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
@@ -301,6 +301,61 @@ def test_scan_tiny_seed_24w(m5stickv, mocker):
     mocker.patch.object(
         tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
     )
+    tiny_seed._detect_and_draw_punches = mocker.MagicMock(side_effect=NUMBERS_SEQUENCE)
+    words = tiny_seed.scanner(w24=True)
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert " ".join(words) == TEST_24_WORDS
+
+
+def test_scan_tiny_seed_24w_amigo(amigo_tft, mocker):
+    # This will be used when scanning 24 TinySeed
+    # First scanned page will be loaded to be edited, then proceed to scan second page
+    # Seed will be returned as its word index
+    import time
+    from krux.pages.tiny_seed import TinyScanner
+    from krux.input import BUTTON_ENTER, PRESSED, RELEASED
+    from krux.camera import OV7740_ID
+
+    BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
+    ENTER_SEQ = [RELEASED] + [PRESSED] + [RELEASED] * 3
+    TIME_STAMPS = (0, 1, 1000, 2000, 3000, 4000, 5000)
+    TEST_WORDS_NUMBERS_1_12 = [
+        1090,
+        792,
+        1005,
+        1978,
+        408,
+        569,
+        1498,
+        589,
+        192,
+        134,
+        617,
+        663,
+    ]
+    TEST_WORDS_NUMBERS_13_24 = [
+        1275,
+        1982,
+        1747,
+        978,
+        509,
+        1588,
+        1456,
+        15,
+        1592,
+        1612,
+        1056,
+        771,
+    ]
+    NUMBERS_SEQUENCE = [TEST_WORDS_NUMBERS_1_12] * 3 + [TEST_WORDS_NUMBERS_13_24] * 2
+    TEST_24_WORDS = "market glass laugh warm cream either robot end blood awful escape fan palm waste surge kick display shoe remove achieve shoulder siren loop gate"
+    mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.input.enter_value = mocker.MagicMock(side_effect=ENTER_SEQ)
+    ctx.camera.snapshot = snapshot_generator()
+    ctx.camera.cam_id = OV7740_ID
+    tiny_seed = TinyScanner(ctx)
     tiny_seed._detect_and_draw_punches = mocker.MagicMock(side_effect=NUMBERS_SEQUENCE)
     words = tiny_seed.scanner(w24=True)
 
