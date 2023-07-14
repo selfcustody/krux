@@ -2,9 +2,8 @@ include _load-12-word-mnemonic.txt
 press BUTTON_A
 wait 1
 
-# Navigate to Mnemonic
-press BUTTON_A
-press BUTTON_A
+# Navigate to Mnemonic Words print promt
+x3 press BUTTON_A
 wait 1
 
 screenshot print-qr-prompt.png

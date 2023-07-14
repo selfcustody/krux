@@ -5,18 +5,22 @@ press BUTTON_B
 press BUTTON_B
 press BUTTON_A
 
+# Wait message debounce
+wait 0.3
+
+# Skip message
+press BUTTON_A
+
 # Navigate to Printer
-press BUTTON_B
-press BUTTON_B
-press BUTTON_B
+x5 press BUTTON_B
 press BUTTON_A
 
 screenshot printer-options.png
 
-screenshot printer-options-driver.png
+# screenshot printer-options-driver.png
 
 press BUTTON_B
-screenshot printer-options-thermal.png
+# screenshot printer-options-thermal.png
 
 press BUTTON_B
-screenshot printer-options-back.png
+# screenshot printer-options-back.png

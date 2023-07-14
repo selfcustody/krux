@@ -48,11 +48,18 @@ If you are using an M5StickV, the small screen makes it difficult for laptop web
 
 ## Why won't my (Linux) OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
+Make sure your is being detected and serial ports are being mounted by running:
+```bash
+ls /dev/ttyUSB*
+```
+Expect one port to be listed for devices like M5stickV and Dock `/dev/ttyUSB0`, and two ports for Amigo and Bit `/dev/ttyUSB0  /dev/ttyUSB1`.
 
-Your OS may not be loading the correct drivers to create the serial ports to connect to. Ubuntu has a known bug where the `brltty` driver "kidnaps" serial devices. You can solve this problem by removing it:
+If you don't see them, your OS may not be loading the correct drivers to create the serial ports to connect to. Ubuntu has a known bug where the `brltty` driver "kidnaps" serial devices. You can solve this problem by removing it:
 ```bash
 sudo apt-get remove brltty
 ```
+
+If you are using an Amigo, make sure you’re using bottom USB-C port, not the one on the left side.
 
 ## Why are the buttons on my Amigo in the wrong order?
 Some Amigo screens have inverted x coordinates while others don’t.

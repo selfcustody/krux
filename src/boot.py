@@ -22,12 +22,15 @@
 # pylint: disable=C0103
 
 import sys
+import time
 import gc
 
 sys.path.append("")
 sys.path.append(".")
 
 from krux.power import power_manager
+
+MIN_SPLASH_TIME = 1000
 
 
 def splash():
@@ -106,6 +109,7 @@ def home(ctx_home):
                 break
 
 
+preimport_ticks = time.ticks_ms()
 splash()
 check_for_updates()
 gc.collect()
@@ -114,6 +118,13 @@ from krux.context import Context
 
 ctx = Context()
 ctx.power_manager = power_manager
+postimport_ticks = time.ticks_ms()
+
+# If importing happened in under 1s, sleep the difference so the logo
+# will be shown
+if preimport_ticks + MIN_SPLASH_TIME > postimport_ticks:
+    time.sleep_ms(preimport_ticks + 1000 - postimport_ticks)
+
 login(ctx)
 gc.collect()
 home(ctx)

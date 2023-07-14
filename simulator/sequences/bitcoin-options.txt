@@ -5,14 +5,18 @@ press BUTTON_B
 press BUTTON_B
 press BUTTON_A
 
+# Wait message debounce
+wait 0.3
+
+# Skip message
+press BUTTON_A
+
 # Navigate to Bitcoin
 press BUTTON_A
 
-screenshot bitcoin-options.png
+# screenshot bitcoin-options.png
 
-screenshot bitcoin-options-mainnet.png
-
-press BUTTON_B
-screenshot bitcoin-options-testnet.png
+# screenshot bitcoin-options-mainnet.png
 
 press BUTTON_B
+# screenshot bitcoin-options-testnet.png

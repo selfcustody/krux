@@ -29,34 +29,34 @@ rm -rf screenshots && mkdir -p screenshots
 rm -rf sd && mkdir -p sd && rm -f sd/settings.json
 echo "{\"settings\": {\"i18n\": {\"locale\": \"$locale\"}}}" > sd/settings.json
 
-poetry run python simulator.py --sequence sequences/about.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/logging-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/extended-public-key-wpkh.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/extended-public-key-wsh.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/home-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/load-mnemonic-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/load-mnemonic-via-bits.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/load-mnemonic-via-numbers.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/load-mnemonic-via-qr.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/load-mnemonic-via-text.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/language-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/login-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/logo.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/mnemonic-12-word.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/mnemonic-24-word.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/bitcoin-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/new-mnemonic-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/new-mnemonic-via-d6.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/new-mnemonic-via-d20.txt --sd --device $device
+poetry run python simulator.py --sequence sequences/about.txt  --device $device
+poetry run python simulator.py --sequence sequences/bitcoin-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/logging-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/extended-public-key-wpkh.txt  --device $device
+poetry run python simulator.py --sequence sequences/extended-public-key-wsh.txt  --device $device
+poetry run python simulator.py --sequence sequences/home-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-via-numbers.txt  --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-via-qr.txt  --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-via-stackbit.txt  --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-via-text.txt  --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-via-tinyseed.txt  --device $device
+poetry run python simulator.py --sequence sequences/language-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/login-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/logo.txt  --device $device
+poetry run python simulator.py --sequence sequences/new-mnemonic-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/new-mnemonic-via-d6.txt  --device $device
+poetry run python simulator.py --sequence sequences/new-mnemonic-via-d20.txt  --device $device
+poetry run python simulator.py --sequence sequences/new-mnemonic-via-snapshot.txt  --device $device
 poetry run python simulator.py --sequence sequences/print-qr.txt --sd --printer --device $device
-poetry run python simulator.py --sequence sequences/printer-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/thermal-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/scan-address.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/settings-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/shutdown.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/sign-message.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/sign-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/sign-psbt.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/wallet-type-options.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/wallet-wpkh.txt --sd --device $device
-poetry run python simulator.py --sequence sequences/wallet-wsh.txt --sd --device $device
+poetry run python simulator.py --sequence sequences/printer-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/scan-address.txt --device $device
+poetry run python simulator.py --sequence sequences/settings-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/shutdown.txt  --device $device
+poetry run python simulator.py --sequence sequences/sign-message.txt  --device $device
+poetry run python simulator.py --sequence sequences/sign-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/sign-psbt.txt  --device $device
+poetry run python simulator.py --sequence sequences/thermal-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/wallet-type-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/wallet-wpkh.txt  --device $device
+poetry run python simulator.py --sequence sequences/wallet-wsh.txt  --device $device

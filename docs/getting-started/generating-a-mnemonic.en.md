@@ -1,17 +1,29 @@
-Krux has support for creating 12- and 24-word mnemonics. Because true entropy is difficult to produce, especially with an embedded device, Krux outsources entropy generation to the user.
-
-# Dice Rolls
-At the start screen, once you select `New Mnemonic`, you will be taken to a second menu where you can choose to create a mnemonic via rolls of a D6 (standard six-sided die) or D20 (20-sided die). The number of dice rolls you choose determines the amount of words in the final mnemonic.
+Krux has support for creating 12 and 24-word mnemonics. Because true entropy is difficult to produce, especially with an embedded device, Krux outsources entropy generation to the user.
+At the start screen, once you select `New Mnemonic`, you will be taken to a second menu where you can choose to create a mnemonic via camera, via rolls of a D6 (standard six-sided die) or D20 (20-sided die).
 
 <img src="../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-options-150.png">
 
+# Camera
+
+<img src="../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right">
+
+ Choose between 12 or 24 words than take a random picture and Krux will gereta a mnemonic from hash the of image bytes.
+
+<br><br><br><br>
+<br><br><br><br>
+
+# Dice Rolls
+ 
 ## Via D6
 
 <img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-1-150.png" align="right">
 
-The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore 50 rolls will result in 128 bits of entropy, enough to generate a 12-word mnemonic. Doubling the amount of rolls doubles the entropy to 256 bits, resulting in a 24-word mnemonic.
+Choose between 12 or 24 words.
+
+The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore a minimum of a 50 rolls will be required for 128 bits of entropy, enough to generate a 12-word mnemonic. For 24 words, or an entropy of 256 bits, a minimum of 99 rolls will be required.
 
 <br><br><br><br>
 

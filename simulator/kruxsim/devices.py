@@ -61,13 +61,13 @@ def load_font(device):
     if device not in fonts:
         if device == M5STICKV:
             fonts[device] = pg.freetype.Font(
-            os.path.join("..", "firmware", "font", "ter-u14n.bdf")
-        )
+                os.path.join("..", "firmware", "font", "ter-u14n.bdf")
+            )
         else:
             fonts[device] = pg.freetype.Font(
-            os.path.join("..", "firmware", "font", "ter-u24b.bdf")
-        )
-        
+                os.path.join("..", "firmware", "font", "ter-u24b.bdf")
+            )
+
     return fonts[device]
 
 

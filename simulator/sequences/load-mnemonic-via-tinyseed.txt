@@ -1,0 +1,115 @@
+include _wait-for-logo.txt
+
+# Navigate to tiny seed
+press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
+
+# 12 words
+press BUTTON_A
+
+# screenshot load-mnemonic-via-tinyseed-initial.png
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x6 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x8 press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x6 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x8 press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x6 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x8 press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x6 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x8 press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-via-tinyseed-filled.png
+
+x3 press BUTTON_B
+press BUTTON_A
+
+# screenshot load-mnemonic-via-tinyseed-mnemonic.png
+
+press BUTTON_A

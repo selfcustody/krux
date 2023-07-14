@@ -43,22 +43,24 @@ def rgb565torgb888(color):
     MASK5 = 0b11111
     MASK3 = 0b111
 
-    red = ((color >> 3) & MASK5)
+    red = (color >> 3) & MASK5
     red *= 255
     red //= 31
     green = color >> 13
     green += (color & MASK3) << 3
     green *= 255
     green //= 63
-    blue = ((color >> 8) & MASK5)
-    blue *=255
+    blue = (color >> 8) & MASK5
+    blue *= 255
     blue //= 31
     return (red, green, blue)
+
 
 def clear(color):
     def run():
         if screen:
             screen.fill(color)
+
     color = rgb565torgb888(color)
     pg.event.post(pg.event.Event(events.LCD_CLEAR_EVENT, {"f": run}))
 
@@ -73,13 +75,16 @@ def register(addr, val):
 
 def display(img, oft=None, roi=None):
     def run():
-        frame = img.get_frame()
-        frame = cv2.resize(
-            frame,
-            (screen.get_width(), screen.get_height()),
-            interpolation=cv2.INTER_AREA,
-        )
-        frame = frame.swapaxes(0, 1)
+        try:
+            frame = img.get_frame()
+            frame = cv2.resize(
+                frame,
+                (screen.get_width(), screen.get_height()),
+                interpolation=cv2.INTER_AREA,
+            )
+            frame = frame.swapaxes(0, 1)
+        except:
+            return
         pg.surfarray.blit_array(screen, frame)
 
     pg.event.post(pg.event.Event(events.LCD_DISPLAY_EVENT, {"f": run}))
@@ -116,6 +121,7 @@ def height():
 def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
     def run():
         from kruxsim import devices
+
         text, _ = devices.load_font(BOARD_CONFIG["type"]).render(s, color, bgcolor)
         if landscape:
             text = pg.transform.rotate(text, 90)
@@ -138,6 +144,7 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                     y,
                 ),
             )
+
     color = rgb565torgb888(color)
     bgcolor = rgb565torgb888(bgcolor)
     pg.event.post(pg.event.Event(events.LCD_DRAW_STRING_EVENT, {"f": run}))
@@ -160,10 +167,9 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color, backgro
                         og_yx_index = og_y * (starting_size + 1) + og_x
                         screen.set_at(
                             (offset + x, offset + offset_y + y),
-                            dark_color
-                            if code_str[og_yx_index] == "1"
-                            else light_color,
+                            dark_color if code_str[og_yx_index] == "1" else light_color,
                         )
+
     dark_color = rgb565torgb888(dark_color)
     light_color = rgb565torgb888(light_color)
     pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
@@ -183,6 +189,7 @@ def fill_rectangle(x, y, w, h, color):
                 h,
             ),
         )
+
     color = rgb565torgb888(color)
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 

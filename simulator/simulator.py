@@ -110,6 +110,7 @@ def run_krux():
     with open("../src/boot.py") as boot_file:
         exec(boot_file.read())
 
+
 # mock for SD
 if args.sd:
     from kruxsim.mocks import sd_card

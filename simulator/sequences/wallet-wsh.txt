@@ -4,8 +4,7 @@ press BUTTON_A
 wait 1
 
 # Navigate to Wallet
-press BUTTON_B
-press BUTTON_B
+x3 press BUTTON_B
 press BUTTON_A
 
 screenshot wallet-load-prompt.png
@@ -32,4 +31,4 @@ screenshot wallet-wsh-load-prompt.png
 
 press BUTTON_A
 
-screenshot wallet-loaded.png
+# screenshot wallet-loaded.png

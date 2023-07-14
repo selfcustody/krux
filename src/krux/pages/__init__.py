@@ -476,6 +476,7 @@ class Page:
         if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Shutting down.."))
+            time.sleep(0.3)
             return MENU_SHUTDOWN
         return MENU_CONTINUE
 

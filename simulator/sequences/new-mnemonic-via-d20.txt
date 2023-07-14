@@ -4,9 +4,15 @@ include _wait-for-logo.txt
 press BUTTON_B
 press BUTTON_A
 
+# Navigate to via D20
+press BUTTON_B
 press BUTTON_B
 press BUTTON_A
-screenshot new-mnemonic-via-d20-prompt.png
+
+# Chose 12 words
+press BUTTON_A
+
+# screenshot new-mnemonic-via-d20-prompt.png
 
 press BUTTON_A
 screenshot new-mnemonic-via-d20-roll-1.png
@@ -97,17 +103,17 @@ press BUTTON_A
 x1 press BUTTON_B
 press BUTTON_A
 
-screenshot new-mnemonic-via-d20-last-n-rolls.png
-
 x2 press BUTTON_B
 press BUTTON_A
 
-screenshot new-mnemonic-via-d20-done-rolling-prompt.png
+# screenshot new-mnemonic-via-d20-last-n-rolls.png
+
+# Navigate to "Go"
+press BUTTON_C
+press BUTTON_A
+
+# screenshot new-mnemonic-via-d20-roll-string.png
 
 press BUTTON_A
 
-screenshot new-mnemonic-via-d20-roll-string.png
-
-press BUTTON_A
-
-screenshot new-mnemonic-via-d20-roll-sha256.png
+# screenshot new-mnemonic-via-d20-roll-sha256.png

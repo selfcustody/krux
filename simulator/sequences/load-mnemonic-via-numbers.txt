@@ -1,66 +1,57 @@
 include _wait-for-logo.txt
 
-# Navigate to via text
+# Navigate to via numbers
 press BUTTON_A
-x2 press BUTTON_B
+press BUTTON_B
 press BUTTON_A
+press BUTTON_B
+x2 press BUTTON_A
 
-screenshot load-mnemonic-via-numbers-prompt.png
+# screenshot load-mnemonic-via-numbers-prompt.png
 
 press BUTTON_A
 screenshot load-mnemonic-via-numbers-word-1.png
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
 
-press BUTTON_B
 press BUTTON_A
 x2 press BUTTON_C
 x2 press BUTTON_A
@@ -69,9 +60,9 @@ press BUTTON_C
 press BUTTON_A
 
 press BUTTON_A
-screenshot load-mnemonic-via-numbers-done-entering-prompt.png
+# screenshot load-mnemonic-via-numbers-done-entering-prompt.png
 
 press BUTTON_A
-screenshot load-mnemonic-via-numbers-mnemonic.png
+# screenshot load-mnemonic-via-numbers-mnemonic.png
 
 press BUTTON_A

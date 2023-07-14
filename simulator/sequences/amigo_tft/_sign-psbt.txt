@@ -3,7 +3,7 @@ press BUTTON_A
 wait 1
 
 # Navigate to Sign
-x4 press BUTTON_B
+x2 press BUTTON_C
 press BUTTON_A
 
 press BUTTON_A
