@@ -129,9 +129,8 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
         "krux.pages.encryption_ui.EncryptMnemonic.capture_camera_entropy",
         mocker.MagicMock(return_value=I_VECTOR),
     )
-    with patch("krux.sd_card.open", mocker.mock_open(read_data="{}")) as m:
-        Settings().encryption.version = "AES-CBC"
-        storage_ui.encrypt_menu()
+    Settings().encryption.version = "AES-CBC"
+    storage_ui.encrypt_menu()
 
     ctx.display.draw_centered_text.assert_has_calls(
         [mocker.call("Encrypted mnemonic was stored with ID: 353175d8")], any_order=True
