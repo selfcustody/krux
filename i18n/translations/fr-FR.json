@@ -69,6 +69,7 @@
     "Error:\n%s": "Erreur:\n%s",
     "Esc": "Esc",
     "Explore files?": "Explorer des fichiers?",
+    "Exporting to SD card..": "Exportation vers la carte SD..",
     "Extended Public Key": "Clé publique",
     "Failed to decrypt": "Échec de décrypter",
     "Failed to load PSBT": "Erreur de chargement PSBT",
@@ -118,6 +119,7 @@
     "Load?": "Charger?",
     "Loading Camera..": "Caméra de Chargement..",
     "Loading change address %d..": "Chargement de l'adresse de changement %d..",
+    "Loading printer..": "Chargement de l'imprimante..",
     "Loading receive address %d..": "Chargement de l'adresse de réception %d..",
     "Loading..": "Chargement..",
     "Locale": "Paramètres régionaux",
@@ -141,7 +143,7 @@
     "No BIP39 passphrase": "Pas de phrase passante bip39",
     "Not enough rolls!": "Pas assez de rouleaux !",
     "Octal": "Octale",
-    "PBKDF2 iterations": "Itérations pbkdf2",
+    "PBKDF2 Iterations": "Itérations pbkdf2",
     "PSBT": "PSBT",
     "Paint punched dots black so they can be detected.": "Peignez les points perforés en noir afin qu'ils puissent être détectés.",
     "Paper Width": "Largeur du papier",
@@ -240,7 +242,5 @@
     "Words": "Mots",
     "Yes": "Oui",
     "Your changes will be kept on device flash storage.": "Vos modifications seront conservées sur le stockage flash de l'appareil.",
-    "Your changes will be kept on the SD card.": "Vos modifications seront conservées sur la carte SD.",
-    "Loading printer..": "Chargement de l'imprimante..",
-    "Exporting to SD card..": "Exportation vers la carte SD.."
+    "Your changes will be kept on the SD card.": "Vos modifications seront conservées sur la carte SD."
 }

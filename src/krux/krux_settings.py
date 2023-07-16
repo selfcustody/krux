@@ -290,7 +290,7 @@ class EncryptionSettings(SettingsNamespace):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "version": t("Encryption mode"),
-            "pbkdf2_iterations": t("PBKDF2 iterations"),
+            "pbkdf2_iterations": t("PBKDF2 Iterations"),
         }[attr]
 
 

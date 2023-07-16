@@ -69,6 +69,7 @@
     "Error:\n%s": "Fehler:\n%s",
     "Esc": "Esc",
     "Explore files?": "Dateien durchsuchen?",
+    "Exporting to SD card..": "Auf SD-Karte exportieren..",
     "Extended Public Key": "Öffentlicher Schlüssel",
     "Failed to decrypt": "Entschlüsselung fehlgeschlagen",
     "Failed to load PSBT": "PSBT konnte nicht geladen werden",
@@ -118,6 +119,7 @@
     "Load?": "Laden?",
     "Loading Camera..": "Lade Kamera..",
     "Loading change address %d..": "Lade Change Adresse %d..",
+    "Loading printer..": "Drucker wird geladen..",
     "Loading receive address %d..": "Lade Empfangsadresse %d..",
     "Loading..": "Wird geladen..",
     "Locale": "Spracheinstellung",
@@ -141,7 +143,7 @@
     "No BIP39 passphrase": "Keine BIP39 Passphrase",
     "Not enough rolls!": "Nicht genug Würfe!",
     "Octal": "Oktal",
-    "PBKDF2 iterations": "PBKDF2-Iterationen",
+    "PBKDF2 Iterations": "PBKDF2-Iterationen",
     "PSBT": "PSBT",
     "Paint punched dots black so they can be detected.": "Male gestanzte Punkte schwarz an, damit sie erkannt werden können.",
     "Paper Width": "Papierbreite",
@@ -240,7 +242,5 @@
     "Words": "Wörter",
     "Yes": "Ja",
     "Your changes will be kept on device flash storage.": "Änderungen werden im Flash-Speicher des Geräts gespeichert.",
-    "Your changes will be kept on the SD card.": "Änderungen werden auf der SD-Karte gespeichert.",
-    "Loading printer..": "Drucker wird geladen..",
-    "Exporting to SD card..": "Auf SD-Karte exportieren.."
+    "Your changes will be kept on the SD card.": "Änderungen werden auf der SD-Karte gespeichert."
 }

@@ -69,6 +69,7 @@
     "Error:\n%s": "Lỗi:\n%s",
     "Esc": "Esc",
     "Explore files?": "Khám phá các tập tin?",
+    "Exporting to SD card..": "Xuất vào thẻ SD ..",
     "Extended Public Key": "Khóa công cộng",
     "Failed to decrypt": "Không giải mã được",
     "Failed to load PSBT": "Tải PSBT thất bại",
@@ -118,6 +119,7 @@
     "Load?": "Tải?",
     "Loading Camera..": "Đang tải máy ảnh..",
     "Loading change address %d..": "Đang tải thay đổi địa chỉ %d..",
+    "Loading printer..": "Tải máy in ..",
     "Loading receive address %d..": "Đang tải địa chỉ nhận %d..",
     "Loading..": "Đang tải..",
     "Locale": "Ngôn ngữ",
@@ -141,7 +143,7 @@
     "No BIP39 passphrase": "Không có cụm mật khẩu BIP39",
     "Not enough rolls!": "Không đủ cuộn!",
     "Octal": "Bát phân",
-    "PBKDF2 iterations": "Lặp lại PBKDF2",
+    "PBKDF2 Iterations": "Lặp lại PBKDF2",
     "PSBT": "PSBT",
     "Paint punched dots black so they can be detected.": "Sơn các chấm đục lỗ màu đen để chúng có thể được phát hiện.",
     "Paper Width": "Chiều rộng giấy",
@@ -240,7 +242,5 @@
     "Words": "Từ ngữ",
     "Yes": "Đúng",
     "Your changes will be kept on device flash storage.": "Thay đổi của bạn sẽ được lưu trên bộ nhớ flash của thiết bị.",
-    "Your changes will be kept on the SD card.": "Các thay đổi của bạn sẽ được lưu trên thẻ SD.",
-    "Loading printer..": "Tải máy in ..",
-    "Exporting to SD card..": "Xuất vào thẻ SD .."
+    "Your changes will be kept on the SD card.": "Các thay đổi của bạn sẽ được lưu trên thẻ SD."
 }

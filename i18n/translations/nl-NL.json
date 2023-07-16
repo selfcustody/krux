@@ -69,6 +69,7 @@
     "Error:\n%s": "Fout:\n%s",
     "Esc": "Esc",
     "Explore files?": "Bestanden verkennen?",
+    "Exporting to SD card..": "Exporteren naar SD-kaart..",
     "Extended Public Key": "Uitgebreide publieke sleutel",
     "Failed to decrypt": "Ontsleutelen is niet gelukt",
     "Failed to load PSBT": "PSBT laden is niet gelukt",
@@ -118,6 +119,7 @@
     "Load?": "Laden?",
     "Loading Camera..": "Camera laden...",
     "Loading change address %d..": "Wisselgeldadres %d laden...",
+    "Loading printer..": "Laadprinter..",
     "Loading receive address %d..": "Ontvangstadres %d laden...",
     "Loading..": "Laden...",
     "Locale": "Taal",
@@ -141,7 +143,7 @@
     "No BIP39 passphrase": "Geen BIP-39 wachtwoord",
     "Not enough rolls!": "Niet genoeg gedobbeld!",
     "Octal": "Octaal",
-    "PBKDF2 iterations": "PBKDF2 iteraties",
+    "PBKDF2 Iterations": "PBKDF2 iteraties",
     "PSBT": "PSBT",
     "Paint punched dots black so they can be detected.": "Maak geperforeerde stippen zwart zodat ze worden gedetecteerd.",
     "Paper Width": "Papier breedte",
@@ -240,7 +242,5 @@
     "Words": "Woorden",
     "Yes": "Yes",
     "Your changes will be kept on device flash storage.": "Veranderingen worden opgeslagen in opslag van apparaat.",
-    "Your changes will be kept on the SD card.": "Veranderingen worden opgeslagen op SD kaart.",
-    "Loading printer..": "Laadprinter..",
-    "Exporting to SD card..": "Exporteren naar SD-kaart.."
+    "Your changes will be kept on the SD card.": "Veranderingen worden opgeslagen op SD kaart."
 }
