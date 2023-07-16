@@ -86,8 +86,9 @@ class FileManager(Page):
                         menu_items.append(
                             (
                                 display_filename,
-                                select_file_handler,
-                                [path + "/" + filename],
+                                lambda file=filename: select_file_handler(
+                                    path + "/" + file
+                                ),
                             )
                         )
 
