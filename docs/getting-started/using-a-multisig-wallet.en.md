@@ -1,6 +1,6 @@
 This guide assumes you have already created a mnemonic for each cosigner that will be in your multisig wallet. If that is not the case, head over to the [Generating a Mnemonic](../generating-a-mnemonic) page and complete those steps first.
 
-When entering your mnemonics into Krux, make sure to select *Multisig* for all keys in your multisig. The choice of single-key vs. multisig at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
+When entering your mnemonics into Krux, make sure to select *Multisig* for all keys in your multisig. The choice of single-sig vs. multisig at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
 
 <img src="../../img/maixpy_m5stickv/wallet-type-options-multisig-125.png">
 <img src="../../img/maixpy_amigo_tft/wallet-type-options-multisig-150.png">

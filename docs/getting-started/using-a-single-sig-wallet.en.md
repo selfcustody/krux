@@ -1,11 +1,11 @@
 This guide assumes you have already created a mnemonic. If that is not the case, head over to the [Generating a Mnemonic](../generating-a-mnemonic) page and complete those steps first.
 
-When entering your mnemonic into Krux, make sure to select *Single-key* before proceeding. The choice of single-key vs. multisig at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
+When entering your mnemonic into Krux, make sure to select *single-sig* before proceeding. The choice of single-sig vs. multisig at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
 
-<img src="../../img/maixpy_m5stickv/wallet-type-options-single-key-125.png">
-<img src="../../img/maixpy_amigo_tft/wallet-type-options-single-key-150.png">
+<img src="../../img/maixpy_m5stickv/wallet-type-options-single-sig-125.png">
+<img src="../../img/maixpy_amigo_tft/wallet-type-options-single-sig-150.png">
 
-Selecting `Single-key` will derive an xpub using the derivation path `m/84'/0'/0'` on mainnet and `m/84'/1'/0'` on testnet, which indicates to wallet software that a [Segregated Witness (Segwit) script type](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) should be used. For single-key wallets, this script is `P2WPKH`, or just `wpkh`.
+Selecting `single-sig` will derive an xpub using the derivation path `m/84'/0'/0'` on mainnet and `m/84'/1'/0'` on testnet, which indicates to wallet software that a [Segregated Witness (Segwit) script type](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) should be used. For single-sig wallets, this script is `P2WPKH`, or just `wpkh`.
 
 ## Create the wallet
 
@@ -34,7 +34,7 @@ Selecting `Single-key` will derive an xpub using the derivation path `m/84'/0'/0
 
     Give the device a name and press *Continue*. You should see the new device in the devices list on the left side of the app.
 
-    <img src="../../img/specter/single-key-demo-device-400.png">
+    <img src="../../img/specter/single-sig-demo-device-400.png">
 
     After you've added a device with your key to Specter Desktop, you can make a wallet using it. Press the *Add new wallet* button on the left side of the app.
 
@@ -52,7 +52,7 @@ Selecting `Single-key` will derive an xpub using the derivation path `m/84'/0'/0
 
     <img src="../../img/specter/create-singlekey-wallet-screen-600.png">
 
-    Congrats, you just created a single-key wallet with your key!
+    Congrats, you just created a single-sig wallet with your key!
     
 === "Sparrow"
 
@@ -79,7 +79,7 @@ Selecting `Single-key` will derive an xpub using the derivation path `m/84'/0'/0
 
     If everything looks right, click the blue *Apply* button to create your wallet.
 
-    Congrats, you just created a single-key wallet with your key!
+    Congrats, you just created a single-sig wallet with your key!
 
 === "BlueWallet"
 
@@ -104,11 +104,11 @@ Selecting `Single-key` will derive an xpub using the derivation path `m/84'/0'/0
 
     <img src="../../img/blue/singlekey-wallet-home-400.png">
 
-    Congrats, you just created a single-key wallet with your key!
+    Congrats, you just created a single-sig wallet with your key!
 
 ## Load the wallet into Krux
 
-**Note:** This step is unnecessary for signing PSBTs with single-key wallets since the script type (`wpkh`) and key are already known. However, this can be useful if you wish to [print a backup](../printing) of the wallet or want an additional sanity check.
+**Note:** This step is unnecessary for signing PSBTs with single-sig wallets since the script type (`wpkh`) and key are already known. However, this can be useful if you wish to [print a backup](../printing) of the wallet or want an additional sanity check.
 
 === "Specter Desktop"
 

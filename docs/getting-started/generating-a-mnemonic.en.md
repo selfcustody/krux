@@ -1,4 +1,4 @@
-Krux has support for creating 12 and 24-word mnemonics. Because true entropy is difficult to produce, especially with an embedded device, Krux outsources entropy generation to the user.
+Krux has support for creating 12 and 24-word mnemonic seed phrases. Since true entropy is difficult to produce, especially with an embedded device, Krux outsources entropy generation to the user.
 At the start screen, once you select `New Mnemonic`, you will be taken to a second menu where you can choose to create a mnemonic via camera, via rolls of a D6 (standard six-sided die) or D20 (20-sided die).
 
 <img src="../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
@@ -9,7 +9,7 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 <img src="../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right">
 
- Choose between 12 or 24 words than take a random picture and Krux will gereta a mnemonic from hash the of image bytes.
+ Choose between 12 or 24 words than take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
 
 <br><br><br><br>
 <br><br><br><br>
