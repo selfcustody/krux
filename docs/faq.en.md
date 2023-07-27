@@ -9,9 +9,9 @@ However, in practice not all wallet software supports this extended format, so K
 For more information, check out [https://outputdescriptors.org/](https://outputdescriptors.org/).
 
 ## Why am I unable to sign a PSBT from BlueWallet?
-As mentioned above, some wallet software does not support the descriptor key expression format. In this case, BlueWallet will ignore the key origin and derivation info when importing the xpub to create a single-key wallet. This will result in the wrong derivation being used in BlueWallet and thus the inability to sign an outbound transaction in Krux.
+As mentioned above, some wallet software does not support the descriptor key expression format. In this case, BlueWallet will ignore the key origin and derivation info when importing the xpub to create a single-sig wallet. This will result in the wrong derivation being used in BlueWallet and thus the inability to sign an outbound transaction in Krux.
 
-Currently, the way to properly create a single-key wallet in BlueWallet is to export the second QR code that Krux displays which contains the zpub. BlueWallet can then correctly infer the derivation path when creating the wallet.
+Currently, the way to properly create a single-sig wallet in BlueWallet is to export the second QR code that Krux displays which contains the zpub. BlueWallet can then correctly infer the derivation path when creating the wallet.
 
 ## Why isn't Krux scanning my QR code?
 The level of detail that you see is what Krux sees. If the QR code shown on the device's screen is blurry, the camera lens of the device may be out of focus. It can be adjusted by rotating it (with your fingertip) clockwise or counter-clockwise to achieve a clearer result. 

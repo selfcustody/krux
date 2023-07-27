@@ -115,13 +115,13 @@ Add image
 
 The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase(optional) and will load the expected wallet.
 
-### Single-key or Multisig
+### Single-sig or Multisig
 
 <img src="../../img/maixpy_m5stickv/wallet-type-options-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/wallet-type-options-150.png" align="right">
 
-After loading your mnemonic and passphrase(optional), you will be asked if you want to use it as part of a `Single-key` or `Multisig` wallet.
+After loading your mnemonic and passphrase(optional), you will be asked if you want to use it as part of a `Single-sig` or `Multisig` wallet.
 
-Your choice here will subtly change the generated xpub that is used to set up your device in your wallet coordinator software. You can learn more about the difference in the following guides for using [single-key](../using-a-single-key-wallet) and [multisig](../using-a-multisig-wallet) wallets.
+Your choice here will subtly change the generated xpub that is used to set up your device in your wallet coordinator software. You can learn more about the difference in the following guides for using [single-sig](../using-a-single-sig-wallet) and [multisig](../using-a-multisig-wallet) wallets.
 
 Now, onto the main menu...

@@ -19,7 +19,7 @@ This option allows you to view your mnemonic words and, if you have a thermal pr
 
 This option displays your master extended public key (xpub) as text as well as a QR code.
 
-After the xpub, a zpub or Zpub is shown depending on if a single-key or multisig wallet was chosen. This z/Zpub is usually not necessary unless you are using a wallet coordinator that either cannot parse or ignores [key origin information in key expressions](https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#Key_Expressions).
+After the xpub, a zpub or Zpub is shown depending on if a single-sig or multisig wallet was chosen. This z/Zpub is usually not necessary unless you are using a wallet coordinator that either cannot parse or ignores [key origin information in key expressions](https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#Key_Expressions).
 
 If a thermal printer is attached, you can print both QR codes.
 
