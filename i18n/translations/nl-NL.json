@@ -199,7 +199,7 @@
     "Signature:\n\n%s": "Handtekening:\n\n%s",
     "Signed Message": "Bericht ondertekend",
     "Signed PSBT": "PSBT ondertekend",
-    "Single-key": "Enkele sleutel",
+    "Single-sig": "Enkele sleutel",
     "Size: ": "Grootte: ",
     "Spend (%d): ": "Uitgaven (%d): ",
     "Stackbit 1248": "Stackbit 1248",

@@ -199,7 +199,7 @@
     "Signature:\n\n%s": "Chữ ký:\n\n%s",
     "Signed Message": "Tin nhắn đã ký",
     "Signed PSBT": "Đã ký PSBT",
-    "Single-key": "Khóa đơn",
+    "Single-sig": "Khóa đơn",
     "Size: ": "Dung lượng: ",
     "Spend (%d): ": "Chi tiêu (%d): ",
     "Stackbit 1248": "Stackbit 1248",

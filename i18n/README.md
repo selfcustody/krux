@@ -60,7 +60,7 @@ Now, you will add the following `lo` entries to `plugins.i18n.nav_translations` 
 - Generating a Mnemonic: `translation`;
 - Loading a Mnemonic: `translation`;
 - Navigating the Main Menu: `translation`;
-- Using a Single-key Wallet: `translation`;
+- Using a Single-sig Wallet: `translation`;
 - Using a Multisig Wallet: `translation`; 
 - Printing: `translation`;
 - Settings: `translation`;
@@ -83,7 +83,7 @@ plugins:
         Generating a Mnemonic: Ex ea
         Loading a Mnemonic: Consequat
         Navigating the Main Menu: Duis aute irure dolor
-        Using a Single-key Wallet: In reprehenderit in voluptate
+        Using a Single-sig Wallet: In reprehenderit in voluptate
         Using a Multisig Wallet: Velit esse cillum dolore 
         Printing: Eu fugiat
         Settings: Nulla pariatur
@@ -109,7 +109,7 @@ nav:
     - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
     - Loading a Mnemonic: getting-started/loading-a-mnemonic.en.md
     - Navigating the Main Menu: getting-started/navigating-the-main-menu.en.md
-    - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.en.md
+    - Using a Single-sig Wallet: getting-started/using-a-single-sig-wallet.en.md
     - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.en.md
     - Printing: getting-started/printing.en.md
     - Settings: getting-started/settings.en.md

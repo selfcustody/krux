@@ -6,7 +6,7 @@ wait 1
 x4 press BUTTON_B
 x3 press BUTTON_A
 
-qrcode specter-desktop-singlekey-wallet-receive-address.png
+qrcode specter-desktop-singlesig-wallet-receive-address.png
 wait 0.5
 
 screenshot scan-address-scanned-address.png

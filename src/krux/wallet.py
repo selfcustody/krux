@@ -45,7 +45,7 @@ class Wallet:
             self.descriptor = Descriptor.from_string(
                 "wpkh(%s/{0,1}/*)" % self.key.key_expression()
             )
-            self.label = t("Single-key")
+            self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
 
     def is_multisig(self):
@@ -68,7 +68,7 @@ class Wallet:
         else:
             if not descriptor.key:
                 if len(descriptor.keys) > 1:
-                    raise ValueError("not single-key")
+                    raise ValueError("not single-sig")
             if self.key.xpub() != descriptor.key.key.to_base58():
                 raise ValueError("xpub does not match")
 
@@ -79,7 +79,7 @@ class Wallet:
 
         if self.descriptor.key:
             if not self.label:
-                self.label = t("Single-key")
+                self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
         else:
             m = int(str(self.descriptor.miniscript.args[0]))

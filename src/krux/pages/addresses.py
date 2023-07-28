@@ -48,7 +48,7 @@ class Addresses(Page):
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
-        # only show address for single-key or multisig with wallet output descriptor loaded
+        # only show address for single-sig or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
             self.ctx.display.flash_text(
                 t("Please load a wallet output descriptor"), theme.error_color
@@ -69,7 +69,7 @@ class Addresses(Page):
 
     def list_address_type(self, addr_type=0):
         """Handler for the 'receive addresses' or 'change addresses' menu item"""
-        # only show address for single-key or multisig with wallet output descriptor loaded
+        # only show address for single-sig or multisig with wallet output descriptor loaded
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
             custom_start_digits = (
                 LIST_ADDRESS_DIGITS + 3
@@ -164,7 +164,7 @@ class Addresses(Page):
 
     def pre_scan_address(self):
         """Handler for the 'scan address' menu item"""
-        # only show address for single-key or multisig with wallet output descriptor loaded
+        # only show address for single-sig or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
             self.ctx.display.flash_text(
                 t("Please load a wallet output descriptor"), theme.error_color

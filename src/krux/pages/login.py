@@ -348,7 +348,7 @@ class Login(Page):
             self.ctx,
             [
                 (
-                    t("Single-key")
+                    t("Single-sig")
                     + "\n"
                     + Key.get_default_derivation(
                         False, NETWORKS[Settings().bitcoin.network]

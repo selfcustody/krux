@@ -779,7 +779,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
 
     cases = [
-        # Single-key, not loaded, no format => pmofn, sign, No print prompt
+        # Single-sig, not loaded, no format => pmofn, sign, No print prompt
         (
             # Case 0
             tdata.SINGLEKEY_SIGNING_KEY,  # 0 wallet
@@ -802,7 +802,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             ],
             None,  # 10 SD avaiable
         ),
-        # Single-key, not loaded, pmofn, sign, No print prompt
+        # Single-sig, not loaded, pmofn, sign, No print prompt
         (
             # Case 1
             tdata.SINGLEKEY_SIGNING_KEY,
@@ -824,7 +824,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             ],
             None,
         ),
-        # Single-key, not loaded, pmofn, sign, Print
+        # Single-sig, not loaded, pmofn, sign, Print
         (
             # Case 2
             tdata.SINGLEKEY_SIGNING_KEY,
@@ -847,7 +847,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             ],
             None,
         ),
-        # Single-key, not loaded, pmofn, sign, Decline to print
+        # Single-sig, not loaded, pmofn, sign, Decline to print
         (
             # Case 3
             tdata.SINGLEKEY_SIGNING_KEY,
@@ -870,7 +870,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             ],
             None,
         ),
-        # Single-key, not loaded, pmofn, decline to sign
+        # Single-sig, not loaded, pmofn, decline to sign
         (
             # Case 4
             tdata.SINGLEKEY_SIGNING_KEY,
@@ -891,7 +891,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             ],
             None,
         ),
-        # Single-key, not loaded, failed to capture PSBT QR
+        # Single-sig, not loaded, failed to capture PSBT QR
         (
             # Case 5
             tdata.SINGLEKEY_SIGNING_KEY,
@@ -989,7 +989,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             ],
             None,
         ),
-        # Single-key, not loaded, load from microSD, sign, save to microSD, No print prompt
+        # Single-sig, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
             # Case 10
             tdata.SINGLEKEY_SIGNING_KEY,  # 0 wallet

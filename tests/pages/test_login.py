@@ -51,7 +51,7 @@ def test_new_12w_from_d6(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # 1 press to select single-key
+            BUTTON_ENTER,  # 1 press to select single-sig
         ]
     )
     MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
@@ -89,7 +89,7 @@ def test_new_24w_from_d6(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # 1 press to select single-key
+            BUTTON_ENTER,  # 1 press to select single-sig
         ]
     )
     MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
@@ -167,7 +167,7 @@ def test_new_12w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # 1 press to select single-key
+            BUTTON_ENTER,  # 1 press to select single-sig
         ]
     )
     MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
@@ -204,7 +204,7 @@ def test_new_24w_from_d6_on_amigo_device(amigo_tft, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # 1 press to select single-key
+            BUTTON_ENTER,  # 1 press to select single-sig
         ]
     )
     MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
@@ -267,7 +267,7 @@ def test_new_12w_from_d20(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # 1 press to select single-key
+            BUTTON_ENTER,  # 1 press to select single-sig
         ]
     )
     MNEMONIC = (
@@ -307,7 +307,7 @@ def test_new_24w_from_d20(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # 1 press to select single-key
+            BUTTON_ENTER,  # 1 press to select single-sig
         ]
     )
     MNEMONIC = "fun island vivid slide cable pyramid device tuition only essence thought gain silk jealous eternal anger response virus couple faculty ozone test key vocal"
@@ -382,7 +382,7 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
         +
-        # 1 press to select single-key
+        # 1 press to select single-sig
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -421,7 +421,7 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
         +
-        # 1 press to select single-key
+        # 1 press to select single-sig
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -463,7 +463,7 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
         +
-        # 1 press to select single-key
+        # 1 press to select single-sig
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -506,7 +506,7 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
         +
-        # 1 press to select single-key
+        # 1 press to select single-sig
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -546,7 +546,7 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
         +
-        # 1 press to select single-key
+        # 1 press to select single-sig
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -589,7 +589,7 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
         +
-        # 1 press to select single-key
+        # 1 press to select single-sig
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -631,7 +631,7 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
         +
-        # 1 press to select single-key
+        # 1 press to select single-sig
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_UR
@@ -703,7 +703,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,  # 1 press to move to No passphrase
                 BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,  # Single-key
+                BUTTON_ENTER,  # Single-sig
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
@@ -735,7 +735,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,  # 1 press to move to No passphrase
                 BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,  # Single-key
+                BUTTON_ENTER,  # Single-sig
             ],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
@@ -795,7 +795,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
                 [BUTTON_TOUCH]
             )
             +
-            # Done? Confirm, Words correct? Confirm, No passphrase, Single-key
+            # Done? Confirm, Words correct? Confirm, No passphrase, Single-sig
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
@@ -827,7 +827,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
             +
             # Move to Go, press Go, confirm word
             [BUTTON_PAGE_PREV] + [BUTTON_ENTER] + [BUTTON_ENTER] +
-            # Done? Confirm, Words correct? Confirm, No passphrase, Single-key
+            # Done? Confirm, Words correct? Confirm, No passphrase, Single-sig
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
@@ -909,7 +909,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,  # 1 press to move to No passphrase
                 BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,  # Single-key
+                BUTTON_ENTER,  # Single-sig
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
@@ -936,7 +936,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,  # 1 press to move to No passphrase
                 BUTTON_ENTER,  # 1 press to skip passphrase
                 BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,  # Single-key
+                BUTTON_ENTER,  # Single-sig
             ],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
@@ -985,7 +985,7 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
     MNEMONIC = "cabin cabin cabin cabin cabin cabin cabin cabin cabin cabin cabin card"
@@ -1052,7 +1052,7 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
     MNEMONIC = "avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado "
@@ -1097,7 +1097,7 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
     MNEMONIC = "divert divert divert divert divert divert divert divert divert divert divert heavy"
@@ -1157,7 +1157,7 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
     MNEMONIC = "cable cable cable cable cable cable cable cable cable cable cable "
@@ -1227,7 +1227,7 @@ def test_no_passphrase_on_amigo(mocker, amigo_tft):
         # Accept fingerprint and derivation
         [
             BUTTON_ENTER,  # Continue?
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
 
@@ -1313,7 +1313,7 @@ def test_load_12w_from_tiny_seed(amigo_tft, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
     MNEMONIC = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo daring"
@@ -1345,7 +1345,7 @@ def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
     MNEMONIC = "lend zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo blossom"
@@ -1371,7 +1371,7 @@ def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
     MNEMONIC = (
@@ -1415,7 +1415,7 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
             BUTTON_PAGE,  # 1 press to move to No passphrase
             BUTTON_ENTER,  # 1 press to skip passphrase
             BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-key
+            BUTTON_ENTER,  # Single-sig
         ]
     )
     MNEMONIC = "language language language language language language language language language language language auction"

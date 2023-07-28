@@ -295,7 +295,7 @@ def test_load_encrypted_qr_code(m5stickv, mocker):
         # 1 press to confirm fingerprint
         [BUTTON_ENTER]
         +
-        # 1 press to select single-key
+        # 1 press to select single-sig
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE

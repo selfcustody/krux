@@ -102,5 +102,5 @@ class Key:
 
     @staticmethod
     def get_default_derivation(multisig, network):
-        """Return the Krux default derivation path for single-key or multisig"""
+        """Return the Krux default derivation path for single-sig or multisig"""
         return (DER_MULTI if multisig else DER_SINGLE) % network["bip32"]

@@ -9,7 +9,7 @@ press BUTTON_A
 screenshot wallet-load-prompt.png
 
 press BUTTON_A
-qrcode specter-desktop-singlekey-wallet.png
+qrcode specter-desktop-singlesig-wallet.png
 wait 0.5
 
 screenshot wallet-wpkh-load-prompt.png

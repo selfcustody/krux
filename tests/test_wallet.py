@@ -202,7 +202,7 @@ def test_init_singlekey(mocker, m5stickv, tdata):
 
     assert isinstance(wallet, Wallet)
     assert wallet.descriptor.to_string() == tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR
-    assert wallet.label == "Single-key"
+    assert wallet.label == "Single-sig"
     assert wallet.policy == {"type": "p2wpkh"}
 
 
@@ -414,7 +414,7 @@ def test_load_singlekey(mocker, m5stickv, tdata):
             tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
             FORMAT_NONE,
             tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
-            "Single-key",
+            "Single-sig",
             {"type": "p2wpkh"},
         ),
     ]

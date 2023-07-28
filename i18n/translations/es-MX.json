@@ -199,7 +199,7 @@
     "Signature:\n\n%s": "Firma:\n\n%s",
     "Signed Message": "Mensaje firmado",
     "Signed PSBT": "PSBT firmado",
-    "Single-key": "Single-key",
+    "Single-sig": "Single-sig",
     "Size: ": "Espacio: ",
     "Spend (%d): ": "Gastos (%d): ",
     "Stackbit 1248": "Stackbit 1248",
