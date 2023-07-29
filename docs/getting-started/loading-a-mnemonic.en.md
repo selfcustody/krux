@@ -25,7 +25,7 @@ You can also use [an offline QR code generator for this](https://iancoleman.io/b
 #### Tiny Seed
 
 [Tiny Seed](https://tinyseed.io/) is a compact metal plate mnemonic backup method.
-Krux devices have machine vision capabilities that allow users to use the camera to scan these metal plates and instantly load mnemonics engraved on them. To properly scan them place the Tiny Seed over a black background and paint the punched bits black to increase contrast.
+Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them. To properly scan them place the Tiny Seed over a black background and paint the punched bits black to increase contrast.
 
 <br>
 

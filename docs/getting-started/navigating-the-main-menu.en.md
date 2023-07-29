@@ -9,7 +9,53 @@ Below is a breakdown of the options:
 <img src="../../img/maixpy_m5stickv/mnemonic-24-word-1-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/mnemonic-24-word-1-150.png" align="right">
 
-This option allows you to view your mnemonic words and, if you have a thermal printer attached, print out the mnemonic as a QR code. The data in this code will be a plaintext space-separated string of the (English) words. This QR code can then be read by Krux for faster loads in the future.
+This will open a new submenu with several options to backup your mnemonic.
+
+#### Words
+
+Display the mnemonic words as text so you can write them down.
+
+#### Plaintext QR
+
+Generate a QR containing the mnemonic words as regular text, where words are separated by spaces.
+
+#### Compact SeedQR
+
+A QR code is created from a binary representation of mnemonic words. Format created by SeedSigner
+
+#### SeedQR
+
+Words are converted to their BIP39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner
+
+#### Stackbit 1248
+
+Words are converted to their BIP39 numeric indexes, then each of the four digits is converted to a sum of 1,2,4 or 8.
+
+#### Tiny Seed
+
+This metal backup format represent BIP39 mnemonic word numbers index on its binary form on a metal plate, where 1's are marked(punched) and 0's are left intact
+
+<br><br><br><br>
+
+### Encrypt Mnemonic
+
+Here you can backup your mnemonic by storing them encrypted on a device's flash, on a SD card, or QR code format.
+The encryption method and parameters can be modified in settings.
+Use flash or SD card storage for convenience but never as your only backup method, there are many ways flash storage and the information it contains can degrade and be permanently damaged.
+
+On all below methods you'll be prompted to enter a encryption key, which can be in text or QR code format. You can also define a custom ID to help you manage your mnemonics. In case a custom key is not set, the current fingerprint will be used as ID.
+
+#### Store on Flash
+
+The encrypted mnemonic will be stored on device's flash memory, and will be available to be decrypted and loaded via "Load Mnemonic"->"From Storage".
+
+#### Store on SD Card
+
+The encrypted mnemonic will be stored on a SD card, if available, and will be available to be decrypted and loaded via "Load Mnemonic"->"From Storage".
+
+#### Encrypted QR Code
+
+The encrypted mnemonic will be converted to a QR code. When you scan this QR code via "Load Mnemonic"->"Via Camera"->"QR Code", you'll be prompted to enter decryption key to load the mnemonic.
 
 <br><br><br><br>
 
@@ -25,7 +71,7 @@ If a thermal printer is attached, you can print both QR codes.
 
 <br>
 
-### Wallet
+### Wallet Descriptor
 <img src="../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/wallet-wsh-load-prompt-150.png" align="right">
 
@@ -37,7 +83,9 @@ Note that you currently can't change the wallet once one has been loaded. To do 
 
 <br>
 
-### Scan Address
+### Address
+
+#### Scan Address
 <img src="../../img/maixpy_m5stickv/scan-address-scanned-address-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/scan-address-scanned-address-150.png" align="right">
 
@@ -50,6 +98,14 @@ After proceeding through this screen, you will be asked if you want to check tha
 This option exists as an extra security check to verify that the address your wallet coordinator has generated is authentic and belongs to your wallet.
 
 <br>
+
+#### Receive Addresses
+
+List your wallet's receive addresses
+
+#### Change Addresses
+
+List your wallet's change addresses
 
 ### Sign
 

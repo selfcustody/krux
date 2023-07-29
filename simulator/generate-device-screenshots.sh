@@ -35,7 +35,7 @@ poetry run python simulator.py --sequence sequences/logging-options.txt  --devic
 poetry run python simulator.py --sequence sequences/extended-public-key-wpkh.txt  --device $device
 poetry run python simulator.py --sequence sequences/extended-public-key-wsh.txt  --device $device
 poetry run python simulator.py --sequence sequences/home-options.txt  --device $device
-poetry run python simulator.py --sequence sequences/load-mnemonic-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-options.txt --sd --device $device
 poetry run python simulator.py --sequence sequences/load-mnemonic-via-numbers.txt  --device $device
 poetry run python simulator.py --sequence sequences/load-mnemonic-via-qr.txt  --device $device
 poetry run python simulator.py --sequence sequences/load-mnemonic-via-stackbit.txt  --device $device
