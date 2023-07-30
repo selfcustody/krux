@@ -61,7 +61,7 @@
     "Encrypted mnemonic was not stored": "MNemon được mã hóa không được lưu trữ",
     "Encrypted mnemonic was stored with ID: ": "Mnemonic được mã hóa được lưu trữ với ID:",
     "Encryption": "Mã hóa",
-    "Encryption mode": "Chế độ mã hóa",
+    "Encryption Mode": "Chế độ mã hóa",
     "Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.": "Nhập từng kí tự của mã mnemonic BIP-39 của bạn dưới dạng số từ 1 đến 2048.",
     "Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800.": "Nhập từng từ trong bản ghi nhớ BIP-39 của bạn dưới dạng số thập lục phân từ 1 đến 800.",
     "Enter each word of your BIP-39 mnemonic as a number in octal from 1 to 4000.": "Nhập từng từ trong bản ghi nhớ BIP-39 của bạn dưới dạng số bát phân từ 1 đến 4000.",

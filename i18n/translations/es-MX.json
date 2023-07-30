@@ -61,7 +61,7 @@
     "Encrypted mnemonic was not stored": "Mnemonic cifrado no se almacenó",
     "Encrypted mnemonic was stored with ID: ": "Mnemónica cifrada fue almacenada con ID:",
     "Encryption": "Encriptación",
-    "Encryption mode": "Modo de encriptación",
+    "Encryption Mode": "Modo de encriptación",
     "Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.": "Ingrese cada palabra de su mnemónico BIP-39 como un número del 1 al 2048.",
     "Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800.": "Ingrese cada palabra de su mnemónico BIP-39 como un número en hexadecimal del 1 al 800.",
     "Enter each word of your BIP-39 mnemonic as a number in octal from 1 to 4000.": "Ingrese cada palabra de su mnemónico BIP-39 como un número en octal del 1 al 4000.",

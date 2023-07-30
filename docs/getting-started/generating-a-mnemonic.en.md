@@ -1,4 +1,4 @@
-Krux has support for creating 12 and 24-word mnemonic seed phrases. Since true entropy is difficult to produce, especially with an embedded device, we recommend to outsources entropy generation using dice rolls, but it is also possible to use camera as source of entropy to quickly create a mnemonic.
+Krux has support for creating 12 and 24-word mnemonic seed phrases. Since true entropy is difficult to produce, especially with an embedded device, we recommend to outsource entropy generation using dice rolls, but it is also possible to use camera as a source of entropy to quickly create a mnemonic.
 At the start screen, once you select `New Mnemonic`, you will be taken to a second menu where you can choose to create a mnemonic via camera, via rolls of a D6 (standard six-sided die) or D20 (20-sided die).
 
 <img src="../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
@@ -51,7 +51,7 @@ For dice rolls, Krux keeps track of every roll you enter and displays the cumula
 
 When you have entered your final roll, Krux will hash this string using SHA256 and output the resulting hash to the screen so that you can verify it for yourself.
 
-In the case a camera snapshot is used as source, the image bytes, which contain each pixel color information, will be hashed just like it is done with the dice rolls string.
+In the case a camera snapshot is used as source, image bytes, which contain pixels data in RGB565 format, will be hashed just like it is done with the dice rolls string.
 
 Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/binascii.html#binascii.unhexlify) on it to encode it as bytes, and deterministically converts it into a mnemonic according to the [BIP-39 Reference Implementation](https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207).
 
