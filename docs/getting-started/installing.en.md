@@ -1,4 +1,8 @@
-This page explains how to install Krux from an official, pre-built release. If you would like to build and install Krux from source, please read the [Installing from source](../installing-from-source) guide.
+This page explains how to install Krux from an official, pre-built release.
+
+If command-line is not your thing and you want to install with few mouse clicks, please read [Installing from GUI](./installing-from-gui.en.md) guide.
+
+If you would like to build and install Krux from source, please read the [Installing from source](../installing-from-source) guide.
 
 ### Requirements
 #### Hardware

@@ -280,7 +280,20 @@ Learn about how to setup fonts [here](firmware/font/README.md)
 
 Use [this script](firmware/scripts/krux_colors.py) to generate Maixpy compatible colors from RGB values to customize Krux
 
-## Run mkdocs
+## Documentation
+
+Before change documentation, and run the mkdocs server, make sure you have installed the poetry extras:
+
+```bash
+poetry install --extras docs
+```
+
+To change lateral and upper menus on generated documentation, see `mkdocs.yml` file on `nav` section. 
+
+To create or edit translations on documentation (TODO: need help!), read more [translations](il8n/README.md).
+
+Once changes are made, you can run:
+
 ```bash
 poetry run mkdocs serve
 ```

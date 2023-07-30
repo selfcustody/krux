@@ -53,7 +53,10 @@ nav:
   - Home: index.en.md
   - Getting Started:
     - About: getting-started/index.en.md
-    - Installing: getting-started/installing.en.md
+    - Installing: 
+      - Installing from pre-built release: getting-started/installing.en.md
+      - Installing from GUI: getting-started/installing-from-gui.en.md
+      - Installing from source: getting-started/installing-from-source.en.md
     - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
     - Loading a Mnemonic: getting-started/loading-a-mnemonic.en.md
     - Navigating the Main Menu: getting-started/navigating-the-main-menu.en.md
@@ -63,6 +66,7 @@ nav:
     - Settings: getting-started/settings.en.md
     - Tools: getting-started/tools.en.md
   - Part List: parts.en.md
+  - Encrypted QRCodes: encrypted-qr-codes.en.md
   - FAQ: faq.en.md
   - Support the Project: support.en.md
 
