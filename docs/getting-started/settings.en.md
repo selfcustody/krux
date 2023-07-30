@@ -19,9 +19,9 @@ Modify the encryption method and parameters to fit your needs. The encryption se
 
 #### PBKDF2 Iterations
 
-When you enter a encryption key it is not directly used to encrypt your data. As a feature to increase safety, specially against brute force attacks, the keys is derived multiple times using hashing functions. PBKDF2(Password-Based Key Derivation Function) iterations stands for the amount of derivations that will be performed over your key prior to encrypt/decrypt your mnemonic.
+When you enter a encryption key it is not directly used to encrypt your data. As a feature to increase safety, specially against brute force attacks, the key is derived multiple times using hashing functions. PBKDF2(Password-Based Key Derivation Function) iterations stands for the amount of derivations that will be performed over your key prior to encrypt/decrypt your mnemonic.
 
-If increase this value to make your encryption harder at the cost of taking longer to encrypt and decrypt your mnemonics
+If you increase this value it will make the encryption harder, at the cost of taking longer to encrypt and decrypt your mnemonics
 
 #### Encryption Mode
 
@@ -29,12 +29,12 @@ Choose between well known and widely used AES(Advanced Encryption Standard) mode
 
 ##### AES-ECB
 
-ECB(Electronic Codebook), its a simpler method where encryption data blocks are encrypted individually. It will be faster and simpler to encrypt, QR codes will have a lower density of information and will be easier to transcribe.
+ECB(Electronic Codebook), its a simpler method where encryption data blocks are encrypted individually. It will be faster and simpler to encrypt, QR codes will have a lower density and will be easier to transcribe.
 
 ##### AES-CBC
 
-CBC(Cipher-block Chaining) is considered safer, because at the first data block an initial vector(IV) is used to add random data to the encryption and from subsequent blocks depends on data from the previous block, giving its chaining feature.
-It will take longer to encrypt, because it will be required to take a snapshot to generate a random initial vector. This initial vector must be stored together with encrypted data, making encrypted QR codes denser and harder to transcript.
+CBC(Cipher-block Chaining) is considered safer, because at the first data block an initial vector(IV) is used to add random data to the encryption. Subsequent blocks encryption depend on data from the previous blocks, giving its chaining feature.
+It will take longer to encrypt, because a snapshot will be required to generate a random initial vector. This initial vector will be stored together with encrypted data, making encrypted QR codes denser and harder to transcript.
 
 <br><br><br><br><br>
 
@@ -90,12 +90,12 @@ Here you choose between Thermal, CNC or none(default). Leave this setting to "no
 
 ### Theme
 
-Choose your color theme according to your preference. Some themes may be more suitable for some devices, coordinator cameras and environments. Light theme, for example, may be easier to scan QR codes from in brighter environments.
+Choose your color theme according to your preference. Some themes may be more suitable for some devices, coordinator cameras and environments. As an example, it may be easier to scan QR codes from Krux devices using light theme in brighter environments.
 
 <br><br><br><br><br>
 
 ### Touchscreen
 
-If your device has a touchscreen you can change the touch detection threshold. If it is too sensitive or detecting false (ghost) touches, you should increase the threshold value, making it less sensitive. The other way also valid, reduce the threshold to make the screen more sensitive to touches.
+If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false (ghost) touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
 
 <br><br><br><br><br>

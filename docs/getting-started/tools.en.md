@@ -2,15 +2,15 @@ Here some handy tools are offered to complement your device's and wallets manage
 
 ### Check SD Card
 
-You can check if your device is reading your SD card and explore its content
+You can check if a SD card can be detected and read by your device and explore its content.
 
 ### Delete Mnemonic
 
-Delete any stored encrypted mnemonic, on device's internal flash memory or SD card
+Delete any stored encrypted mnemonic, on device's internal memory or SD card.
 
 ### Print Test QR
 
-Quickly print a test QR to check and optimize your printer setup
+Quickly print a test QR code to check and optimize your printer setup.
 
 ### Create QR Code
 
