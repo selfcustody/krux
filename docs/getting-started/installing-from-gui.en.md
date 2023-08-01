@@ -2,7 +2,7 @@
 
 You can install krux onto your K210-based device using our official desktop application, which we named [KruxInstaller](https://github.com/selfcustody/krux-installer), available for Linux and Windows.
 
-It use the same methods described in [Installing from pre-build release](./installing.en.md), i.e. download, verify and flash the latest official release, without typing any command. Additionally you can install, through this application, [experimental compiled Krux binaries](https://github.com/odudex/krux_binaries).
+It uses the same methods described in [Installing from pre-build release](./installing.en.md), i.e. download, verify and flash the latest official release, without typing any command. Additionally you can install, through this application, [experimental compiled Krux binaries](https://github.com/odudex/krux_binaries).
 
 Keep in mind that this is software under development in the alpha stage and may be buggy. If you find any bugs or want to contribute to the project, please go to [issues](https://github.com/selfcustody/krux-installer/issues) or [fork it](https://github.com/selfcustody/krux-installer/fork).
 
@@ -12,17 +12,42 @@ You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, o
 
 #### Download the latest release
 
-Head over to the [releases](https://github.com/selfcustody/krux-installer/releases) page and download the latest release.
+The primary way to download the binary is via [releases](https://github.com/selfcustody/krux-installer/releases) page on Github, search for `Assets` and click the dropdown arrow:
+
+![release-page](../img/krux-installer/download_release.gif "KruxInstaller download release page")
+
+##### Archlinux users
+
+There is a package named [`krux-installer-bin`](https://aur.archlinux.org/packages/krux-installer-bin) for Archlinux in the [AUR](https://aur.archlinux.org/). To install `krux-installer-bin`, You need to have the [yay](https://github.com/Jguer/yay) package manager installed. Then run on your terminal:
+
+```bash
+yay -Sy krux-installer-bin
+```
 
 #### Verify the files
-Before installing the release, it's a good idea to check that:
+Before installing the release, it's a good idea to check if the hash sum matches the one defined in the file `*.sha256.txt`:
 
-1. The SHA256 hash of `KruxInstaller-0.0.1-alpha-4.AppImage` matches the hash in `KruxInstaller-0.0.1-alpha-4.AppImage.sha256.txt` if you're using linux;
-2. The SHA256 hash of `KruxInstaller.Setup.0.0.1-alpha-4.exe` matches the hash in `KruxInstaller.Setup.0.0.1-alpha-4.exe.sha256.txt` if you're using windows.
+##### On Linux
+
+```bash
+sha256sum --check KruxInstaller-0.0.1-alpha-4.AppImage.sha256.txt KruxInstaller-0.0.1-alpha-4.AppImage
+```
+
+##### On Windows with `powershell`
+
+```pwsh
+(Get-FileHash '.\KruxInstaller.Setup.0.0.1-alpha-4.exe').Hash -eq (Get-Content '.\KruxInstaller.Setup.0.0.1-alpha-4.exe.sha256.txt')
+```
 
 #### Modify permissions
 
-If you use Linux, you will need to add an execute permission. If you use Windows, the first time the system will ask you if you trust the application.
+If you use Linux, you will need to add permission to allow execution of the `.AppImage` file:
+
+```bash
+chown +x ./KruxInstaller-0.0.1-alpha-4.AppImage
+```
+
+If you use Windows, the first time you run the `.exe` file the system will ask you if you trust the application.
 
 ### Openssl
 
@@ -84,8 +109,9 @@ If they are already present on your computer, the application will give you the 
 
 ##### Test binaries
 
-The software will present the latest test version released in the form `odudex/krux_binaries`, so you will always be given the option to download the latest commit from it's repository.
+As the name suggests, these binaries are intended for test purposes, contain experimental features, and are more likely to contain bugs. Use with caution.
 
+`KruxInstaller` will present the latest tested version released in the form `odudex/krux_binaries`, so you will always be given the option to download the latest commit from its repository.
 ![select-version-not-downloaded-odudex](../img/krux-installer/select_version_not_downloaded_odudex.gif "KruxInstaller Select Odudex version Menu")
 
 - `<device>/firmware.bin`: is the unsigned firmware's binary of the choosen device;
