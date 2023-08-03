@@ -31,7 +31,7 @@ Open `mkdocs.yml` and edit the `plugins` section with the following premises:
 
 ### Example
 
-Supose you translated to a fake locale [Lorem ipsum](https://pt.wikipedia.org/wiki/Lorem_ipsum). So, you can call the locale extension as `lo`. Now, you will add the following `lo` entries to `plugins.i18n.languages` in [mkdocs.yml](../mkdocs.yml):
+Suppose you translated to a fake locale [Lorem ipsum](https://pt.wikipedia.org/wiki/Lorem_ipsum). So, you can call the locale extension as `lo`. Now, you will add the following `lo` entries to `plugins.i18n.languages` in [mkdocs.yml](../mkdocs.yml):
 
 - name: name of the language that will be shown in the web interface
 - site_name: translated website title
