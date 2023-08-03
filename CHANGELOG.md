@@ -1,4 +1,4 @@
-# Version 23.08.0 - August, 2022
+# Version 23.08.0 - August, 2023
 After a long year, new features are being brought from beta versions to stable release.
 
 ## Changes
@@ -11,7 +11,7 @@ Use camera as a source of entropy to quickly create a mnemonic.
 
 ### Tiny Seed - Export, Print, Punch, Manually Load or Scan
 Import and export a binary representation of your mnemonic, in a format popularized by Tiny Seed metal plates. BIP39 mnemonic words number indexes, ranging from 1 to 2048 are punched in binary format on a rectangular grid.
-Krux will automatically convert a mnemonic to Tiny Seed format allowing to print or transcript it. You can also load a tiny seed toggling word bits on screen, or making use of machine vision capabilities of K210 chip to directly scan a Tiny Seed mnemonic backup stored on metal or paper.
+Krux will automatically convert a mnemonic to Tiny Seed format allowing to print or transcript it. You can also load a tiny seed toggling word bits on screen, or make use of machine vision capabilities of K210 chip to directly scan a Tiny Seed mnemonic backup stored on metal or paper.
 
 ### Stackbit - Import and Export
 Without needing tools, guides or dictionaries, import and export another metal plate backup format, where each of the four digits of the word's number is a sum of marked (punched) numbers 1,2,4 and 8.
@@ -38,20 +38,20 @@ When signing a transaction more pages of information are presented, all details 
 #### Check SD Card
 Check if a SD card can be detected and read by your device and explore its content
 
-### Delete Mnemonic
+#### Delete Mnemonic
 Delete any stored encrypted mnemonic, on device's internal memory or SD card.
 
-### Print Test QR
+#### Print Test QR
 Quickly print a test QR code to check and optimize your printer setup.
 
-### Create QR Code
+#### Create QR Code
 Enter a text input to create, print or transcript a QR code that can be later used as an encryption key or as a passphrase.
 
 ### Themes
 Choose your color theme according to your preference.
 
 ### Thermal Printing and CNC
-More mnemonic export formats and tools to create and print generic QR codes to be used as passphrases or encryption keys. You can also export QR codes to gcode files and save them in SD cards, allowing you to machine QR codes without the need of computers and CAD tools.
+More mnemonic export formats and tools to create and print generic QR codes to be used as passphrases or encryption keys. You can also export QR codes to gcode files and save them in SD cards, allowing you to machine them GRBL compatible CNCs, without the need of computers and CAD tools.
 
 ### More Settings
 #### Persist
