@@ -119,8 +119,8 @@ After confirming the mnemonic words, you can optionally choose to type or scan a
 
 ### Fingerprint
 
-<img src="../../img/maixpy_m5stickv/load-mnemonic-via-qr-fingerptint-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/load-mnemonic-via-qr-fingerptint-150.png" align="right">
+<img src="../../img/maixpy_m5stickv/load-mnemonic-via-qr-fingerprint-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/load-mnemonic-via-qr-fingerprint-150.png" align="right">
 
 The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase(optional) and will load the expected wallet.
 
