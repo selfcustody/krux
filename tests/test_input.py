@@ -437,7 +437,7 @@ def test_long_press_page_simulates_swipe_left(mocker, m5stickv):
         mocker.patch.object(time, "ticks_ms", new=lambda: 100)
         mocker.patch.object(input, "page_value", new=lambda: PRESSED)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100 + LONG_PRESS_PERIOD + 100)
+        mocker.patch.object(time, "ticks_ms", new=lambda: LONG_PRESS_PERIOD + 500)
         mocker.patch.object(input, "page_value", new=lambda: RELEASED)
 
     assert input.entropy == 0
@@ -466,7 +466,7 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
         mocker.patch.object(time, "ticks_ms", new=lambda: 100)
         mocker.patch.object(input, "page_prev_value", new=lambda: PRESSED)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100 + LONG_PRESS_PERIOD + 100)
+        mocker.patch.object(time, "ticks_ms", new=lambda: LONG_PRESS_PERIOD + 500)
         mocker.patch.object(input, "page_prev_value", new=lambda: RELEASED)
 
     assert input.entropy == 0

@@ -26,7 +26,7 @@ device=$1
 locale=$2
 
 rm -rf screenshots && mkdir -p screenshots
-rm -rf sd && mkdir -p sd && rm -f sd/settings.json
+mkdir -p sd && rm -f sd/settings.json
 echo "{\"settings\": {\"i18n\": {\"locale\": \"$locale\"}}}" > sd/settings.json
 
 poetry run python simulator.py --sequence sequences/about.txt  --device $device
@@ -44,12 +44,13 @@ poetry run python simulator.py --sequence sequences/load-mnemonic-via-tinyseed.t
 poetry run python simulator.py --sequence sequences/language-options.txt  --device $device
 poetry run python simulator.py --sequence sequences/login-options.txt  --device $device
 poetry run python simulator.py --sequence sequences/logo.txt  --device $device
-poetry run python simulator.py --sequence sequences/new-mnemonic-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/new-mnemonic-options.txt  --sd --device $device
 poetry run python simulator.py --sequence sequences/new-mnemonic-via-d6.txt  --device $device
 poetry run python simulator.py --sequence sequences/new-mnemonic-via-d20.txt  --device $device
 poetry run python simulator.py --sequence sequences/new-mnemonic-via-snapshot.txt  --device $device
 poetry run python simulator.py --sequence sequences/print-qr.txt --sd --printer --device $device
 poetry run python simulator.py --sequence sequences/printer-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/qr-transcript.txt  --device $device
 poetry run python simulator.py --sequence sequences/scan-address.txt --device $device
 poetry run python simulator.py --sequence sequences/settings-options.txt  --device $device
 poetry run python simulator.py --sequence sequences/shutdown.txt  --device $device

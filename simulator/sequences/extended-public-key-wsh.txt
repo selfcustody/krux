@@ -10,6 +10,8 @@ press BUTTON_A
 screenshot extended-public-key-wsh-xpub-text.png
 
 press BUTTON_A
+# Give time to render QR code - slow computer?
+wait 0.1
 screenshot extended-public-key-wsh-xpub-qr.png
 
 press BUTTON_A

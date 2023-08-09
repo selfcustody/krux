@@ -47,8 +47,8 @@ Here you can change the language that Krux uses.
 <br><br><br><br><br>
 
 ### Logging
-<img src="../../img/maixpy_m5stickv/debug-options-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/debug-options-150.png" align="right">
+<img src="../../img/maixpy_m5stickv/logging-options-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/logging-options-150.png" align="right">
 
 Krux is capable of logging out information as it runs to a `.krux.log` file on the root of an inserted microSD card. **By default, it logs nothing**.
 

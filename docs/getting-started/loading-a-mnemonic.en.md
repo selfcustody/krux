@@ -98,10 +98,14 @@ You can retrieve mnemonics previously stored on device's internal flash or exter
 
 ### Confirm Mnemonic Words
 
+<img src="../../img/maixpy_m5stickv/load-mnemonic-via-qr-mnemonic-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/load-mnemonic-via-qr-mnemonic-150.png" align="right">
+
 Once you have entered your mnemonic, you will be presented with the full list of words to confirm.
 
-<img src="../../img/maixpy_m5stickv/load-mnemonic-via-qr-mnemonic-125.png">
-<img src="../../img/maixpy_amigo_tft/load-mnemonic-via-qr-mnemonic-150.png">
+
+<br><br><br><br>
+<br><br><br><br>
 
 ### Passphrase
 
