@@ -1,8 +1,4 @@
-### Requirements
-#### Hardware
-You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, or Maix Bit and a USB-C cable to continue. Consult the [part list](../../parts) for more information.
-
-If you wish to perform airgapped firmware updates or want persistent settings, you will also need a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test).
+This page explains how to install Krux from source.
 
 #### Software
 You will need a computer with [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [`vagrant`](https://www.vagrantup.com/downloads) installed.

@@ -1,8 +1,10 @@
+This page explains how to install Krux from electron GUI desktop application.
+
 ### Installing from a GUI
 
 You can install krux onto your K210-based device using our official desktop application, which we named [KruxInstaller](https://github.com/selfcustody/krux-installer), available for Linux and Windows.
 
-It uses the same methods described in [Installing from pre-build release](./installing.en.md), i.e. download, verify and flash the latest official release, without typing any command. Additionally you can install, through this application, [experimental compiled Krux binaries](https://github.com/odudex/krux_binaries).
+It uses the same methods described in [Installing from pre-build release](../installing/index.en.md), i.e. download, verify and flash the latest official release, without typing any command. Additionally you can install, through this application, [experimental compiled Krux binaries](https://github.com/odudex/krux_binaries).
 
 Keep in mind that this is software under development in the alpha stage and may be buggy. If you find any bugs or want to contribute to the project, please go to [issues](https://github.com/selfcustody/krux-installer/issues) or [fork it](https://github.com/selfcustody/krux-installer/fork).
 
@@ -14,7 +16,7 @@ You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, o
 
 The primary way to download the binary is via [releases](https://github.com/selfcustody/krux-installer/releases) page on Github, search for `Assets` and click the dropdown arrow:
 
-![release-page](../img/krux-installer/download_release.gif "KruxInstaller download release page")
+![release-page](../../img/krux-installer/download_release.gif "KruxInstaller download release page")
 
 ##### Archlinux users
 
@@ -68,7 +70,7 @@ When running Krux Installer, you will be presented with a menu of three items:
 - Select version;
 - Flash;
 
-![main-menu](../img/krux-installer/main.png "KruxInstaller Main Menu")
+![main-menu](../../img/krux-installer/main.png "KruxInstaller Main Menu")
 
 #### Select device
 
@@ -78,7 +80,7 @@ The window features three things: a dropdown arrow, a select button, and a back 
 
 Clicking on the dropdown arrow brings up a list of officially supported K210 devices. By clicking on one of them we will be selecting a different firmware flavor that we will still choose. Then we can click on the select button.
 
-![select-device](../img/krux-installer/select_device.gif "KruxInstaller Select Device Menu with choosen device")
+![select-device](../../img/krux-installer/select_device.gif "KruxInstaller Select Device Menu with choosen device")
 
 #### Select version
 
@@ -101,18 +103,18 @@ Once selected, the application will check if the entry exists in the system. If 
 
 - `selfcustody.pem`: is the public digital certificate that attests to the veracity of the public digital signature.
 
-![select-version-not-downloaded-selfcustody](../img/krux-installer/select_version_not_downloaded_selfcustody.gif "KruxInstaller Select Selfcustody Version not downloaded Menu")
+![select-version-not-downloaded-selfcustody](../../img/krux-installer/select_version_not_downloaded_selfcustody.gif "KruxInstaller Select Selfcustody Version not downloaded Menu")
 
 If they are already present on your computer, the application will give you the option to download them again or continue with the files already downloaded.
 
-![select-version-downloaded-selfcustody](../img/krux-installer/select_version_downloaded_selfcustody.gif "KruxInstaller Select Selfcustody version downloaded Menu")
+![select-version-downloaded-selfcustody](../../img/krux-installer/select_version_downloaded_selfcustody.gif "KruxInstaller Select Selfcustody version downloaded Menu")
 
 ##### Test binaries
 
 As the name suggests, these binaries are intended for test purposes, contain experimental features, and are more likely to contain bugs. Use with caution.
 
 `KruxInstaller` will present the latest tested version released in the form `odudex/krux_binaries`, so you will always be given the option to download the latest commit from its repository.
-![select-version-not-downloaded-odudex](../img/krux-installer/select_version_not_downloaded_odudex.gif "KruxInstaller Select Odudex version Menu")
+![select-version-not-downloaded-odudex](../../img/krux-installer/select_version_not_downloaded_odudex.gif "KruxInstaller Select Odudex version Menu")
 
 - `<device>/firmware.bin`: is the unsigned firmware's binary of the choosen device;
 - `<device>/kboot.kfpkg`: is the unsigned and compressed bootloader of the choosen device;
@@ -122,7 +124,7 @@ As the name suggests, these binaries are intended for test purposes, contain exp
 
 If they are already present on your computer, the application will give you the option to download them again or continue with the files already downloaded.
 
-![select-version-downloaded-odudex](../img/krux-installer/select_version_downloaded_odudex.gif "KruxInstaller Select Odudex version downloaded Menu")
+![select-version-downloaded-odudex](../../img/krux-installer/select_version_downloaded_odudex.gif "KruxInstaller Select Odudex version downloaded Menu")
 
 #### Flash
 

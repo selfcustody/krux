@@ -1,15 +1,5 @@
 This page explains how to install Krux from an official, pre-built release.
 
-If command-line is not your thing and you want to install with few mouse clicks, please read [Installing from GUI](./installing-from-gui.en.md) guide.
-
-If you would like to build and install Krux from source, please read the [Installing from source](../installing-from-source) guide.
-
-### Requirements
-#### Hardware
-You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, or Maix Bit and a USB-C cable to continue. Consult the [part list](../../parts) for more information.
-
-If you wish to perform airgapped firmware updates or want persistent settings, you will also need a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test).
-
 ### Download the latest release
 Head over to the [releases](https://github.com/selfcustody/krux/releases) page and download the latest signed release.
 
@@ -49,8 +39,8 @@ If the flashing process fails midway through, check the connection, restart the 
 
 When the flashing process completes, you should see the Krux logo:
 
-<img src="../../img/maixpy_m5stickv/logo-125.png">
-<img src="../../img/maixpy_amigo_tft/logo-150.png">
+<img src="../../../img/maixpy_m5stickv/logo-125.png">
+<img src="../../../img/maixpy_amigo_tft/logo-150.png">
 
 If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
 
