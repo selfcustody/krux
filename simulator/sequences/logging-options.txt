@@ -15,7 +15,7 @@ press BUTTON_A
 x3 press BUTTON_B
 press BUTTON_A
 
-# screenshot logging-options.png
+screenshot logging-options.png
 
 # screenshot logging-options-none.png
 

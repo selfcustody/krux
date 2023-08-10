@@ -1,0 +1,26 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Wait message debounce
+wait 0.3
+
+# Skip message
+press BUTTON_A
+
+# Navigate to Themes
+x6 press BUTTON_B
+press BUTTON_A
+
+screenshot theme-1.png
+
+press BUTTON_B
+
+screenshot theme-2.png
+
+press BUTTON_B
+
+screenshot theme-3.png

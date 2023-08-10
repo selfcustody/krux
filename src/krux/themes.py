@@ -25,6 +25,8 @@ from .krux_settings import Settings, ThemeSettings
 DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
 
 # Colors: Ditching firmware colors
+# To create new colors from RGB values use firmware/scripts/krux_colors.py script
+
 BLACK = 0x0000
 WHITE = 0xFFFF
 LIGHTBLACK = 0x0842
@@ -37,6 +39,7 @@ ORANGE = 0x20FD
 DARKORANGE = 0x40C3
 YELLOW = 0xE0FF
 BLUE = 0xF800
+LIGHTBLUE = 0xBD0E
 CYAN = 0xFF07
 MAGENTA = 0x1FF8
 
@@ -61,7 +64,7 @@ THEMES = {
         "del": YELLOW,
         "toggle": CYAN,
         "error": RED,
-        "highlight": BLUE,
+        "highlight": LIGHTBLUE,
     },
     ThemeSettings.LIGHT_THEME_NAME: {
         "background": WHITE,

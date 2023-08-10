@@ -624,6 +624,13 @@ class Menu:
         self.draw_battery_indicator()
         self.draw_network_indicator()
 
+    #     self.draw_ram_indicator()
+
+    # def draw_ram_indicator(self):
+    #     gc.collect()
+    #     ram_text = "RAM: " + str(gc.mem_free())
+    #     self.ctx.display.draw_string(12, 0, ram_text, GREEN)
+
     def draw_logging_indicator(self):
         """Draws a square mark if logging is enabled"""
         log_level = Settings().logging.level

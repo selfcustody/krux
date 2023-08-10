@@ -15,15 +15,27 @@ This option allows you to switch between `mainnet` (the default) and `testnet`. 
 
 ### Encryption
 
+<img src="../../img/maixpy_m5stickv/encryption-options-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/encryption-options-150.png" align="right">
+
 Modify the encryption method and parameters to fit your needs. The encryption settings will be used both to store mnemonics and create encrypted QR codes.
 
-#### PBKDF2 Iterations
+<br><br><br><br><br>
+
+#### PBKDF2 Iter. (Iterations)
+
+<img src="../../img/maixpy_m5stickv/encryption-options-pbkdf2-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/encryption-options-pbkdf2-150.png" align="right">
 
 When you enter a encryption key it is not directly used to encrypt your data. As a feature to increase safety, specially against brute force attacks, the key is derived multiple times using hashing functions. PBKDF2(Password-Based Key Derivation Function) iterations stands for the amount of derivations that will be performed over your key prior to encrypt/decrypt your mnemonic.
 
 If you increase this value it will make the encryption harder, at the cost of taking longer to encrypt and decrypt your mnemonics
 
+
 #### Encryption Mode
+
+<img src="../../img/maixpy_m5stickv/encryption-options-mode-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/encryption-options-mode-150.png" align="right">
 
 Choose between well known and widely used AES(Advanced Encryption Standard) modes:
 
@@ -36,7 +48,6 @@ ECB(Electronic Codebook), its a simpler method where encryption data blocks are 
 CBC(Cipher-block Chaining) is considered safer, because at the first data block an initial vector(IV) is used to add random data to the encryption. Subsequent blocks encryption depend on data from the previous blocks, giving its chaining feature.
 It will take longer to encrypt, because a snapshot will be required to generate a random initial vector. This initial vector will be stored together with encrypted data, making encrypted QR codes denser and harder to transcript.
 
-<br><br><br><br><br>
 
 ### Language - Locale
 <img src="../../img/maixpy_m5stickv/locale-options-125.png" align="right">
@@ -47,8 +58,8 @@ Here you can change the language that Krux uses.
 <br><br><br><br><br>
 
 ### Logging
-<img src="../../img/maixpy_m5stickv/debug-options-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/debug-options-150.png" align="right">
+<img src="../../img/maixpy_m5stickv/logging-options-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/logging-options-150.png" align="right">
 
 Krux is capable of logging out information as it runs to a `.krux.log` file on the root of an inserted microSD card. **By default, it logs nothing**.
 
@@ -58,9 +69,10 @@ If you experience an error and want to see more information about it, including 
 
 Note that *DEBUG* could inadvertently write your private keys to the log file if you have it enabled when entering your mnemonic, so set it with care. To help prevent an accident like this from happening, Krux will display a colored rectangle on the upper left corner of the screen, of which the color is relative to the logging level, being green the DEBUG color.
 
-<br><br><br><br><br>
 
 ### Persist
+<img src="../../img/maixpy_m5stickv/persist-options-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/persist-options-150.png" align="right">
 
 Choose between flash(device's internal memory) or SD card for the place where your settings will be stored.
 
@@ -86,13 +98,18 @@ Also setup the IOs you'll use and tweak parameters according to your printer rec
 
 Here you choose between Thermal, CNC or none(default). Leave this setting to "none" if you won't use a printer and don't want to be bothered by print prompts.
 
-<br><br><br><br><br>
 
 ### Theme
 
+<img src="../../img/maixpy_amigo_tft/theme-1-150.png">
+<img src="../../img/maixpy_amigo_tft/theme-2-150.png">
+<img src="../../img/maixpy_amigo_tft/theme-3-150.png">
+<img src="../../img/maixpy_m5stickv/theme-1-125.png">
+<img src="../../img/maixpy_m5stickv/theme-2-125.png">
+<img src="../../img/maixpy_m5stickv/theme-3-125.png">
+
 Choose your color theme according to your preference. Some themes may be more suitable for some devices, coordinator cameras and environments. As an example, it may be easier to scan QR codes from Krux devices using light theme in brighter environments.
 
-<br><br><br><br><br>
 
 ### Touchscreen
 

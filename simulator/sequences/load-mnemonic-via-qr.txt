@@ -10,3 +10,11 @@ screenshot load-mnemonic-via-qr-mnemonic.png
 
 press BUTTON_A
 
+screenshot load-mnemonic-via-qr-passphrase.png
+
+# No passphrase
+press BUTTON_C
+press BUTTON_A
+
+screenshot load-mnemonic-via-qr-fingerprint.png
+
