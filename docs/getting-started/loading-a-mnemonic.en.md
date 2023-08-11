@@ -19,7 +19,7 @@ It's unpleasant having to manually enter 12 or 24 words each time you want to us
 - Compact SeedQR: word's bits concatenated as bytes.
 - Encrypted Mnemonic: word's bits encrypted, encryption ID and configuration encoded as bytes.
 
-After opening your wallet via one of the manual methods you can use Krux to create QR codes of all above types, transcript them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic. Check out the [Printing section](../printing) for more information.
+After opening your wallet via one of the manual methods you can use Krux to create QR codes of all above types, transcript them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic. Check out the [Printing section](printing.md) for more information.
 You can also use [an offline QR code generator for this](https://iancoleman.io/bip39/) (ideally on an airgapped device).
 
 #### Tiny Seed
@@ -112,7 +112,7 @@ Once you have entered your mnemonic, you will be presented with the full list of
 <img src="../../img/maixpy_m5stickv/load-mnemonic-via-qr-passphrase-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/load-mnemonic-via-qr-passphrase-150.png" align="right">
 
-After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. You can create a QR code from your passphrase offline in [Tools](../tools/#create-qr-code) section.
+After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. You can create a QR code from your passphrase offline in [Tools](tools.md#create-qr-code) section.
 
 <br><br><br><br>
 <br><br><br><br>

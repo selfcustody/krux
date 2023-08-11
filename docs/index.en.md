@@ -12,4 +12,4 @@ Krux is open-source firmware that enables anyone to build their own Bitcoin sign
 
 You can even attach a thermal printer and print out the QR codes that it generates.
 
-To learn more about how Krux works, check out [Getting Started](getting-started).
+To learn more about how Krux works, check out [Getting Started](getting-started/index.en.md).

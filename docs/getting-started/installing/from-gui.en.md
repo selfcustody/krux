@@ -129,3 +129,5 @@ If they are already present on your computer, the application will give you the 
 #### Flash
 
 Once we choose the device and firmware, we can flash. Before start the flash process itself, you be warned that you must plug and power on your device (for m5stickV and amigo devices); if you are using dock or bit devices, maybe the device itself will power on.
+
+![flash-device](../../img/krux-installer/flash-device.gif "KruxInstaller Flash to device")
