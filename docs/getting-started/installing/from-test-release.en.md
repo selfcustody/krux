@@ -2,16 +2,10 @@ This page explains how to install Krux from an test, pre-built release.
 
 ### Warning
 
-Keep in mind that these are unsigned binaries, experimental compiled [Krux binaries](https://github.com/odudex/krux_binaries)
+Keep in mind that these are unsigned binaries
 
-### Download the choosed firmware
-
-- [Android](https://github.com/odudex/krux_binaries/tree/main/Android)
-- [Sipeed Amigo IPS](https://github.com/odudex/krux_binaries/tree/main/)
-- [Sipeed Amigo TFT]()
-- [Sipeed Bit]()
-- [Sipeed Dock]()
-- [Aimotion Yahboom]()
+### Download
+Download experimental compiled firmware or Android app: [Krux binaries](https://github.com/odudex/krux_binaries)
 
 #### Android
 
@@ -114,23 +108,6 @@ To Flash Yahboom Aimotion you'll have to manually specify the port, on this exam
 
 ```bash
 ./ktool-linux -B goE -b 1500000 -p /dev/ttyUSB0 yahboom/kboot.kfpkg
-```
-
-#### Wiring
-
-For Maix Bit connect Buttons between pins 22, 21 and GND.
-
-22 is for "Enter ", 21 is for "Page"
-
-For Maix Dock connect a rotary encoder:
-
-```
-Encoder - Maix Dock
-   GND <->  GND
-     + <->  3V3e
-    SW <-> Pin 9
-    DT <-> Pin 10
-   CLK <-> Pin 11
 ```
 
 

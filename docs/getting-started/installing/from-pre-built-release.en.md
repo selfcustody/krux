@@ -33,9 +33,7 @@ For `dock` the `-b` parameter changes, so run:
 ./ktool -B dan -b 1500000 maixpy_dock/kboot.kfpkg
 ```
 
-If `ktool` fails to run, you may need to give it executable permissions with `chmod +x ./ktool`, or you might need to use "sudo" if your user don't have access to serial port. In Windows or Mac you may need to explicitly allow the tool to run by adding an exception for it.
 
-If the flashing process fails midway through, check the connection, restart the device, and try the command again.
 
 When the flashing process completes, you should see the Krux logo:
 
@@ -45,6 +43,30 @@ When the flashing process completes, you should see the Krux logo:
 If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
 
 Congrats, you're now running Krux!
+
+#### Troubleshooting
+If `ktool` fails to run, you may need to give it executable permissions with `chmod +x ./ktool`, or you might need to use "sudo" if your user don't have access to serial port. In Windows or Mac you may need to explicitly allow the tool to run by adding an exception for it.
+
+If the flashing process fails midway through, check the connection, restart the device, and try the command again.
+
+Two serial ports are created when `Amigo` and `Bit` are connected to a PC. Sometimes Ktool will pick the wrong and flash will fail. Manually specify the serial port to overcome this issue using `-p` argument. Ex:
+
+```bash
+./ktool-linux -B goE -b 1500000 maixpy_amigo_tft/kboot.kfpkg -p /dev/ttyUSB1
+```
+
+Check por names of devices manager on Windows (ex: COM1, COM9), or list the ports on linux
+
+```bash
+ls /dev/ttyUSB*
+```
+
+List ports on Mac
+
+```bash
+ls /dev/cu.usbserial*
+```
+Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue.
 
 #### A note about the Amigo
 Some Amigo screens have inverted x coordinates while others don’t.

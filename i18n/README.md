@@ -52,7 +52,7 @@ Now, you will add the following `lo` entries to `plugins.i18n.nav_translations` 
 
 - Home: `translation`;
 - Getting Started: `translation`;
-- Part List: `translation`;
+- Devices and Part List: `translation`;
 - FAQ: `translation`;
 - Support the Project: `translation`;
 - About: `translation`;
@@ -75,7 +75,7 @@ plugins:
       lo:
         Home: Ut enim
         Getting Started: Ad minim
-        Part List: Veniam
+        Devices and Part List: Veniam
         FAQ: Quis nostrud 
         Support the Project: Exercitation ullamco laboris
         About: Nisi
@@ -113,7 +113,7 @@ nav:
     - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.en.md
     - Printing: getting-started/printing.en.md
     - Settings: getting-started/settings.en.md
-  - Part List: parts.en.md
+  - Devices and Part List: parts.en.md
   - FAQ: faq.en.md
   - Support the Project: support.en.md
 # ..configurations...

@@ -4,7 +4,7 @@ This page explains how to install Krux from electron GUI desktop application.
 
 You can install krux onto your K210-based device using our official desktop application, which we named [KruxInstaller](https://github.com/selfcustody/krux-installer), available for Linux and Windows.
 
-It uses the same methods described in [Installing from pre-build release](../installing/index.en.md), i.e. download, verify and flash the latest official release, without typing any command. Additionally you can install, through this application, [experimental compiled Krux binaries](https://github.com/odudex/krux_binaries).
+Under the hood the GUI uses the same methods described in [Installing from pre-build release](../installing/index.en.md), i.e. download, verify and flash the latest official release, but user won't need to type any command. Additionally you can install, through this application, [experimental compiled Krux binaries](https://github.com/odudex/krux_binaries).
 
 Keep in mind that this is software under development in the alpha stage and may be buggy. If you find any bugs or want to contribute to the project, please go to [issues](https://github.com/selfcustody/krux-installer/issues) or [fork it](https://github.com/selfcustody/krux-installer/fork).
 
