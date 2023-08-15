@@ -4,8 +4,8 @@ Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of
 To rebuild the font for all devices, run:
 ```
 ./bdftokff.sh ter-u14n 8 14 > m5stickv.kff
-./bdftokff.sh ter-u16n 8 16 > bit.kff
-./bdftokff.sh ter-u24n 12 24 > amigo.kff
+./bdftokff.sh ter-u16n 8 16 > bit_dock.kff
+./bdftokff.sh ter-u24b 12 24 > amigo.kff
 ```
 
 Once you have a `.kff` file, locate the project that you want to use the updated font under `firmware/MaixPy/projects/` (`maixpy_amigo_tft/` for ex.), open its `compile/overrides/components/micropython/port/src/omv/img/font.c` file and replace the array contents in the `unicode` variable with the byte array found within the `.kff` file, then rebuild the firmware.
