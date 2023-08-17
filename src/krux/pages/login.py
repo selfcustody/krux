@@ -588,21 +588,17 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Decimal"), lambda: MENU_EXIT),
-                (t("Hexadecimal"), lambda: MENU_EXIT),
-                (t("Octal"), lambda: MENU_EXIT),
+                (t("Decimal"), self.load_key_from_digits),
+                (t("Hexadecimal"), self.load_key_from_hexadecimal),
+                (t("Octal"), self.load_key_from_octal),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
-        index, _ = submenu.run_loop()
-        self.ctx.display.clear()
-        if index == 0:
-            return self.load_key_from_digits()
-        if index == 1:
-            return self.load_key_from_hexadecimal()
-        if index == 2:
-            return self.load_key_from_octal()
-        return MENU_CONTINUE
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return MENU_CONTINUE
+        return status
+
 
     def load_key_from_octal(self):
         """Handler for the 'via numbers'>'Octal' submenu item"""

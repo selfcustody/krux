@@ -282,13 +282,11 @@ class Stackbit(Page):
         elif index >= STACKBIT_ESC_INDEX:
             x_position = x_offset
             y_position += 1
-        elif index < 14:
+        else:
             x_position = index % 7
             x_position *= self.x_pad
             x_position += x_offset
             width = self.x_pad - 2
-        else:
-            return
         self.ctx.display.outline(
             x_position,
             y_position,

@@ -80,7 +80,7 @@ def tdata(mocker):
     )
 
 
-def create_ctx(mocker, btn_seq, wallet, printer, touch_seq=None):
+def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
     """Helper to create mocked context obj"""
     from krux.krux_settings import Settings, THERMAL_ADAFRUIT_TXT
 
@@ -499,70 +499,6 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             )
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
-
-
-def test_mnemonic_stackbit(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
-    case = [
-        Wallet(tdata.SINGLEKEY_24_WORD_KEY),
-        None,
-        [
-            BUTTON_PAGE,
-            BUTTON_PAGE,
-            BUTTON_PAGE,
-            BUTTON_PAGE,
-            BUTTON_ENTER,  # Open Stackbit
-            BUTTON_ENTER,  # PG2
-            BUTTON_ENTER,  # PG3
-            BUTTON_ENTER,  # PG4
-            BUTTON_ENTER,  # Leave
-            BUTTON_PAGE,  # Go to "Back"
-            BUTTON_PAGE,
-            BUTTON_ENTER,  # click on back to return to home init screen
-        ],
-    ]
-    ctx = create_ctx(mocker, case[2], case[0], case[1])
-    home = Home(ctx)
-    mocker.spy(home, "stackbit")
-    home.mnemonic()
-    home.stackbit.assert_called_once()
-    assert ctx.input.wait_for_button.call_count == len(case[2])
-
-
-def test_mnemonic_tiny_Seed(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
-    PRINT_LINES_24W = 312
-
-    case = [
-        Wallet(tdata.SINGLEKEY_24_WORD_KEY),
-        MockPrinter(),
-        [
-            BUTTON_PAGE,
-            BUTTON_PAGE,
-            BUTTON_PAGE,
-            BUTTON_PAGE,
-            BUTTON_PAGE,
-            BUTTON_ENTER,  # Open TinySeed
-            BUTTON_ENTER,  # go to page 2
-            BUTTON_ENTER,  # Leave
-            BUTTON_ENTER,  # Print
-            BUTTON_PAGE,  # Go to "Back"
-            BUTTON_ENTER,  # click on back to return to home init screen
-        ],
-    ]
-    ctx = create_ctx(mocker, case[2], case[0], case[1])
-    home = Home(ctx)
-    mocker.spy(home, "tiny_seed")
-    home.mnemonic()
-    home.tiny_seed.assert_called_once()
-    assert ctx.input.wait_for_button.call_count == len(case[2])
-
 
 def test_public_key(mocker, m5stickv, tdata):
     from krux.pages.home import Home

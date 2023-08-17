@@ -1,21 +1,37 @@
 from ..shared_mocks import MockPrinter, mock_context, snapshot_generator
+from .test_home import tdata, create_ctx
 
 
-def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
-    """Helper to create mocked context obj"""
-    ctx = mock_context(mocker)
-    ctx.power_manager.battery_charge_remaining.return_value = 1
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
+def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
+    from krux.pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
-    ctx.wallet = wallet
-    ctx.printer = printer
+    PRINT_LINES_24W = 312
 
-    if touch_seq:
-        ctx.input.touch = mocker.MagicMock(
-            current_index=mocker.MagicMock(side_effect=touch_seq)
-        )
-    return ctx
-
+    case = [
+        Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+        MockPrinter(),
+        [
+            BUTTON_PAGE,
+            BUTTON_PAGE,
+            BUTTON_PAGE,
+            BUTTON_PAGE,
+            BUTTON_PAGE,
+            BUTTON_ENTER,  # Open TinySeed
+            BUTTON_ENTER,  # go to page 2
+            BUTTON_ENTER,  # Leave
+            BUTTON_ENTER,  # Print
+            BUTTON_PAGE,  # Go to "Back"
+            BUTTON_ENTER,  # click on back to return to home init screen
+        ],
+    ]
+    ctx = create_ctx(mocker, case[2], case[0], case[1])
+    home = Home(ctx)
+    mocker.spy(home, "tiny_seed")
+    home.mnemonic()
+    home.tiny_seed.assert_called_once()
+    assert ctx.input.wait_for_button.call_count == len(case[2])
 
 def test_export_tiny_seed(m5stickv, mocker):
     from krux.pages.tiny_seed import TinySeed
