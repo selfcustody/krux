@@ -24,7 +24,183 @@ def create_ctx(mocker, btn_seq, touch_seq=None):
     return ctx
 
 
-################### new words from dice tests
+################### Test menus
+
+
+def test_menu_load_from_camera(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # Load Key from Camera
+        [BUTTON_ENTER]
+        +
+        # QR code
+        [BUTTON_ENTER]
+    )
+
+    TEST_VALUE = "Test value"
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    mocker.patch.object(
+        login, "load_key_from_qr_code", mocker.MagicMock(return_value=TEST_VALUE)
+    )
+    test_status = login.load_key()
+
+    assert test_status == TEST_VALUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_menu_load_from_manual(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # Load Key from Manual
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # Load from Numbers
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # Decimal
+        [BUTTON_ENTER]
+    )
+
+    TEST_VALUE = "Test value"
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    mocker.patch.object(
+        login, "load_key_from_digits", mocker.MagicMock(return_value=TEST_VALUE)
+    )
+    test_status = login.load_key()
+
+    assert test_status == TEST_VALUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_menu_new_key(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = (
+        # New Key from Snapshot
+        [BUTTON_ENTER]
+    )
+
+    TEST_VALUE = "Test value"
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    mocker.patch.object(
+        login, "new_key_from_snapshot", mocker.MagicMock(return_value=TEST_VALUE)
+    )
+    test_status = login.new_key()
+
+    assert test_status == TEST_VALUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_tools_menu(m5stickv, mocker):
+    from krux.pages.login import Login, MENU_CONTINUE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # Back
+        [BUTTON_PAGE] * 4
+        + [BUTTON_ENTER]
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    test_tools = login.tools()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert test_tools == MENU_CONTINUE
+
+
+################### Test load from storage menu
+
+
+def test_load_from_storage(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # Load Key from Storage
+        [BUTTON_PAGE] * 2
+        + [BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # 1 press to continue loading key
+            BUTTON_PAGE,  # 1 press to move to Scan passphrase
+            BUTTON_PAGE,  # 1 press to move to No passphrase
+            BUTTON_ENTER,  # 1 press to skip passphrase
+            BUTTON_ENTER,  # 1 press to confirm fingerprint
+            BUTTON_ENTER,  # 1 press to select single-sig
+        ]
+    )
+
+    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    mocker.patch(
+        "krux.pages.encryption_ui.LoadEncryptedMnemonic.load_from_storage",
+        mocker.MagicMock(return_value=MNEMONIC.split(" ")),
+    )
+    login.load_key()
+    print(ctx.wallet.key.mnemonic)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+################### QR Passphrase
+
+
+def test_qr_passphrase(m5stickv, mocker):
+    from krux.pages.login import Login
+
+    TEST_VALUE = "Test value"
+    QR_DATA = (TEST_VALUE, None)
+    ctx = create_ctx(mocker, None)
+    login = Login(ctx)
+    mocker.patch.object(
+        login, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
+    )
+    test_passphrase = login._load_qr_passphrase()
+
+    assert test_passphrase == TEST_VALUE
+
+
+def test_qr_passphrase_too_long(m5stickv, mocker):
+    from krux.pages.login import Login, MENU_CONTINUE
+
+    TEST_VALUE = "Test value" * 25
+    QR_DATA = (TEST_VALUE, None)
+    ctx = create_ctx(mocker, None)
+    login = Login(ctx)
+    mocker.patch.object(
+        login, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
+    )
+    test_passphrase = login._load_qr_passphrase()
+
+    assert test_passphrase == MENU_CONTINUE
+
+
+def test_qr_passphrase_fail(m5stickv, mocker):
+    from krux.pages.login import Login, MENU_CONTINUE
+
+    TEST_VALUE = None
+    QR_DATA = (TEST_VALUE, None)
+    ctx = create_ctx(mocker, None)
+    login = Login(ctx)
+    mocker.patch.object(
+        login, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
+    )
+    test_passphrase = login._load_qr_passphrase()
+
+    assert test_passphrase == MENU_CONTINUE
+
+
+################### New words from dice tests
 
 
 def test_new_12w_from_d6(m5stickv, mocker, mocker_printer):
@@ -64,7 +240,7 @@ def test_new_12w_from_d6(m5stickv, mocker, mocker_printer):
     assert ctx.wallet.key.mnemonic == MNEMONIC
 
 
-def test_new_24w_from_d6(m5stickv, mocker, mocker_printer):
+def test_new_24w_from_d6(m5stickv, mocker):
     from krux.pages.login import Login, D6_24W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 

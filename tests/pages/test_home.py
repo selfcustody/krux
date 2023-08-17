@@ -500,6 +500,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
+
 def test_public_key(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet

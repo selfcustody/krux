@@ -33,6 +33,7 @@ def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
     home.tiny_seed.assert_called_once()
     assert ctx.input.wait_for_button.call_count == len(case[2])
 
+
 def test_export_tiny_seed(m5stickv, mocker):
     from krux.pages.tiny_seed import TinySeed
     from krux.input import BUTTON_ENTER

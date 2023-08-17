@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
@@ -599,7 +600,6 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-
     def load_key_from_octal(self):
         """Handler for the 'via numbers'>'Octal' submenu item"""
         title = t(
@@ -778,6 +778,11 @@ class Login(Page):
         while True:
             if Tools(self.ctx).run() == MENU_EXIT:
                 break
+
+        # Unimport tools
+        sys.modules.pop("krux.pages.tools")
+        del sys.modules["krux.pages"].tools
+
         return MENU_CONTINUE
 
     def settings(self):
