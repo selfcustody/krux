@@ -290,7 +290,7 @@ poetry install --extras docs
 
 To change lateral and upper menus on generated documentation, see `mkdocs.yml` file on `nav` section. 
 
-To create or edit translations on documentation (TODO: need help!), read more [translations](il8n/README.md).
+To create or edit translations on documentation (TODO: need help!), read more [here](i18n/README.md).
 
 Once changes are made, you can run:
 

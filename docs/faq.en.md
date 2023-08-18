@@ -48,7 +48,7 @@ If you are using an M5StickV, the small screen makes it difficult for laptop web
 
 ## Why won't my (Linux) OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
-Make sure your is being detected and serial ports are being mounted by running:
+Make sure your device is being detected and serial ports are being mounted by running:
 ```bash
 ls /dev/ttyUSB*
 ```

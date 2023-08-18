@@ -1,5 +1,5 @@
 # Version 23.08.0 - August, 2023
-After a long year, new features are being brought from beta versions to stable release.
+After a long year, new features are finally coming out of beta and making their way into a stable release. Also @jreesun appointed @odudex as the new lead maintainer of the project.
 
 ## Changes
 
@@ -10,14 +10,14 @@ Check battery status of M5stickV or Maix Amigo on top right of the screen.
 Use camera as a source of entropy to quickly create a mnemonic.
 
 ### Tiny Seed - Export, Print, Punch, Manually Load or Scan
-Import and export a binary representation of your mnemonic, in a format popularized by Tiny Seed metal plates. BIP39 mnemonic words number indexes, ranging from 1 to 2048 are punched in binary format on a rectangular grid.
+Import and export a binary representation of your mnemonic, in a format popularized by Tiny Seed metal plates. BIP39 mnemonic words number, ranging from 1 to 2048 are punched in binary format on a rectangular grid.
 Krux will automatically convert a mnemonic to Tiny Seed format allowing to print or transcript it. You can also load a tiny seed toggling word bits on screen, or make use of machine vision capabilities of K210 chip to directly scan a Tiny Seed mnemonic backup stored on metal or paper.
 
 ### Stackbit - Import and Export
 Without needing tools, guides or dictionaries, import and export another metal plate backup format, where each of the four digits of the word's number is a sum of marked (punched) numbers 1,2,4 and 8.
 
 ### Enter Mnemonic as Word Numbers - Hex and Octal formats
-Also available in some metal plate backup formats, you could load your mnemonic words from its decimal BIP39 word index (1-2048), now can also load from its hexadecimal(0x1-0x800) or octal(01-04000) index.
+Also available in some metal plate backup formats, you could load your mnemonic words from its decimal BIP39 word number (1-2048), now you can also load from its hexadecimal(0x1-0x800) or octal(01-04000) word number.
 
 ### Encryption and Storage
 Conveniently store your mnemonics on device's internal flash memory or removable SD card, protecting them with encryption. It is now possible to export encrypted QR codes too.
@@ -61,7 +61,7 @@ Choose where you want to store your settings, on internal flash memory or SD car
 If your device has touchscreen you can change the touch detection threshold.
 
 ### Languages
-Dutch translations was added.
+Dutch translations were added.
 
 ### UI Tweaks
 Small changes to optimize user experience.

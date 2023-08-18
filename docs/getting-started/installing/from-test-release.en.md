@@ -1,4 +1,4 @@
-This page explains how to install Krux from an test, pre-built release.
+This page explains how to install Krux from a test, pre-built release.
 
 ### Warning
 
