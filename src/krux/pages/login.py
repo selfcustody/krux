@@ -60,6 +60,9 @@ PASSPHRASE_MAX_LEN = 200
 class Login(Page):
     """Represents the login page of the app"""
 
+    # Used on boot.py when changing the locale on Settings
+    SETTINGS_MENU_INDEX = 2 
+
     def __init__(self, ctx):
         super().__init__(
             ctx,

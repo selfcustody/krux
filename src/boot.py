@@ -91,7 +91,7 @@ def login(ctx_login):
             # Have a loaded wallet
             break
         # Login closed due to change of locale at Settings
-        login_start_from = 2  # will start Login again from Settings
+        login_start_from = Login.SETTINGS_MENU_INDEX  # will start Login again from Settings index
 
     # Unimport Login the free memory
     sys.modules.pop("krux.pages.login")
