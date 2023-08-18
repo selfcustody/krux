@@ -50,7 +50,7 @@ This will take around an hour or so to complete the first time. Subsequent build
 If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
 ### Flash the firmware onto the device
-Connect the device to your computer via USB, power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, `dock`, or `bit`:
+Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, `dock`, or `bit`:
 ```bash
 vagrant ssh -c 'cd /vagrant; ./krux flash maixpy_DEVICE'
 ```

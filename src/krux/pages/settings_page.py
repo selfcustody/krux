@@ -61,7 +61,7 @@ CATEGORY_SETTING_COLOR_DICT = {
 
 
 class SettingsPage(Page):
-    """Class to mange settings interface"""
+    """Class to manage settings interface"""
 
     def __init__(self, ctx):
         super().__init__(ctx, None)

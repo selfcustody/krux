@@ -1,4 +1,4 @@
-Krux is open-source Bitcoin signing firmware for devices that runs on the K210 chipset.
+Krux is open-source Bitcoin signing firmware for devices with the K210 chipset.
 
 Signing operations in Krux are done offline via QR code or via SD card. You can create/load your BIP-39 mnemonic, or import a wallet descriptor, and sign transactions all without having to plug the device into your computer (except to initially flash the firmware). It reads QR codes with its camera and outputs QR codes to its screen, or to paper via an optional [thermal printer attachment](../getting-started/printing.en.md). 
 
