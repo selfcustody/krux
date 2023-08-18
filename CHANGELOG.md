@@ -4,7 +4,7 @@ After a long year, new features are being brought from beta versions to stable r
 ## Changes
 
 ### Battery Indicator
-Check battery status of M5stickV or Maix Amigo on top right of the screen
+Check battery status of M5stickV or Maix Amigo on top right of the screen.
 
 ### New Mnemonic From Camera
 Use camera as a source of entropy to quickly create a mnemonic.
@@ -20,26 +20,26 @@ Without needing tools, guides or dictionaries, import and export another metal p
 Also available in some metal plate backup formats, you could load your mnemonic words from its decimal BIP39 word index (1-2048), now can also load from its hexadecimal(0x1-0x800) or octal(01-04000) index.
 
 ### Encryption and Storage
-Conveniently store your mnemonics on device's internal flash or removable SD card, protecting them with encryption. If you feel uncomfortable storing your mnemonic in an unprotected QR code, you now also have the option to export encrypted QR codes, from which mnemonic content will only be accessible with a decryption key.
+Conveniently store your mnemonics on device's internal flash memory or removable SD card, protecting them with encryption. It is now possible to export encrypted QR codes too.
 
 ### Addresses
 Beyond verifying your wallet's receive addresses, you can now also list, export and print receive and change addresses.
 
-### SD Card Optimizations
-SD cards can now be inserted and removed at any time, making it easier to use it for signing transactions, messages and storing mnemonics.
+### SD Card Hot plugging
+SD cards can now be inserted and removed at any time, making it easier to use it for signing transactions, messages and storing encrypted mnemonics.
 
 ### Transcript Tools for QR codes
 Different visualization modes which make it easier to transcript QR codes.
 
 ### Transaction Details
-When signing a transaction more pages of information are presented, all details are shown before signature.
+When signing a transaction, more information is presented, ensuring that the user sees all details before signing.
 
 ### Tools
 #### Check SD Card
-Check if a SD card can be detected and read by your device and explore its content
+Check if the SD card is detected and explore its content.
 
 #### Delete Mnemonic
-Delete any stored encrypted mnemonic, on device's internal memory or SD card.
+Delete any stored encrypted mnemonic, on device's internal flash memory or SD card.
 
 #### Print Test QR
 Quickly print a test QR code to check and optimize your printer setup.
@@ -51,11 +51,11 @@ Enter a text input to create, print or transcript a QR code that can be later us
 Choose your color theme according to your preference.
 
 ### Thermal Printing and CNC
-More mnemonic export formats and tools to create and print generic QR codes to be used as passphrases or encryption keys. You can also export QR codes to gcode files and save them in SD cards, allowing you to machine them GRBL compatible CNCs, without the need of computers and CAD tools.
+More mnemonic export formats and tools to create and print generic QR codes to be used as passphrases or encryption keys. You can also export QR codes to gcode files and save them in SD cards, allowing you to machine them GRBL compatible CNCs without the need of computers and CAD tools.
 
 ### More Settings
 #### Persist
-Choose where you want to store your settings, on internal flash or SD card.
+Choose where you want to store your settings, on internal flash memory or SD card.
 
 #### Touchscreen
 If your device has touchscreen you can change the touch detection threshold.
@@ -64,7 +64,7 @@ If your device has touchscreen you can change the touch detection threshold.
 Dutch translations was added.
 
 ### UI Tweaks
-Small changes to optimize user experience
+Small changes to optimize user experience.
 
 ### Under the Hood
 Small bugfixes, optimizations and code refactoring, targeting better compatibility with coordinator softwares, faster boot and better RAM management.
