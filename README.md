@@ -114,6 +114,9 @@ the HW device and may not have all features implemented (e.g. scanning via camer
 Before executing the simulator, make sure you have installed the poetry extras:
 ```bash
 poetry install --extras simulator
+
+# To install alongside docs extras, use:
+poetry install --extras "simulator docs"
 ```
 
 Depending on the OS, it may be necessary to install zbar-tools:
@@ -286,6 +289,9 @@ Before change documentation, and run the mkdocs server, make sure you have insta
 
 ```bash
 poetry install --extras docs
+
+# To install alongside simulator extras, use:
+poetry install --extras "docs simulator"
 ```
 
 To change lateral and upper menus on generated documentation, see `mkdocs.yml` file on `nav` section. 
