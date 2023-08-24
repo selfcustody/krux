@@ -1,4 +1,4 @@
-This page explains how to install Krux from electron GUI desktop application.
+This page explains how to install Krux with KruxInstaller (GUI).
 
 ### Installing from a GUI
 

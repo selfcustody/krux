@@ -23,7 +23,7 @@ Extract the latest version of Krux you downloaded and enter the folder:
 unzip krux-vX.Y.Z.zip && cd krux-vX.Y.Z
 ```
 
-Connect the device to your computer via USB, power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, or `bit`:
+Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, or `bit`:
 ```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```

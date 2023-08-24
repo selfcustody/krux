@@ -91,7 +91,9 @@ def login(ctx_login):
             # Have a loaded wallet
             break
         # Login closed due to change of locale at Settings
-        login_start_from = 2  # will start Login again from Settings
+        login_start_from = (
+            Login.SETTINGS_MENU_INDEX
+        )  # will start Login again from Settings index
 
     # Unimport Login the free memory
     sys.modules.pop("krux.pages.login")
@@ -120,10 +122,10 @@ ctx = Context()
 ctx.power_manager = power_manager
 postimport_ticks = time.ticks_ms()
 
-# If importing happened in under 1s, sleep the difference so the logo
+# If importing happened too fast, sleep the difference so the logo
 # will be shown
 if preimport_ticks + MIN_SPLASH_TIME > postimport_ticks:
-    time.sleep_ms(preimport_ticks + 1000 - postimport_ticks)
+    time.sleep_ms(preimport_ticks + MIN_SPLASH_TIME - postimport_ticks)
 
 login(ctx)
 gc.collect()

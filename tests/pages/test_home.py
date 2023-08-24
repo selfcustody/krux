@@ -261,7 +261,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
 
         title = "Plaintext QR"
         home.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, title, allow_any_btn=True
+            ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
         if case[1] is not None:
             home.print_standard_qr.assert_called_with(
@@ -491,7 +491,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
 
         title = "Plaintext QR"
         home.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, title, allow_any_btn=True
+            ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
         if case[1] is not None:
             home.print_standard_qr.assert_called_with(
@@ -585,13 +585,11 @@ def test_public_key(mocker, m5stickv, tdata):
                 ctx.wallet.key.key_expression(None),
                 FORMAT_NONE,
                 "XPUB",
-                allow_any_btn=True,
             ),
             mocker.call(
                 ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
                 "ZPUB",
-                allow_any_btn=True,
             ),
         ]
         print_qr_calls = [

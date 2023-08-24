@@ -35,7 +35,7 @@ SD_ROOT_PATH = "/sd"
 
 
 class FileManager(Page):
-    """Class to mange settings interface"""
+    """Helper class to handle files interface"""
 
     def __init__(self, ctx):
         super().__init__(ctx, None)

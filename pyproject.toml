@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "23.07.beta15"
+version = "23.08.beta15"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
@@ -34,16 +34,16 @@ ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
 
 # Docs site dependencies. Optional extras
-mkdocs = { version = "^1.2.3", optional = true }
-mkdocs-material = { version = "^8.3.9", optional = true }
+mkdocs = { version = "^1.5.2", optional = true }
+mkdocs-material = { version = "^8.5.11", optional = true }
 mkdocs-static-i18n = { version = "^0.46", optional = true }
-pymdown-extensions = { version = "^9.5", optional = true }
+pymdown-extensions = { version = "^9.11", optional = true }
 
 # Simulator dependencies. Optional extras
-numpy = { version = "^1.22.3", optional = true }
-opencv-python = { version = "^4.5.5", optional = true }
+numpy = { version = "^1.25.2", optional = true }
+opencv-python = { version = "^4.8.0.74", optional = true }
 Pillow = { version = "^9.0.1", optional = true }
-pygame = { version = "^2.4.0", optional = true }
+pygame = { version = "^2.5.0", optional = true }
 pyzbar = { version = "^0.1.9", optional = true }
 
 [tool.poetry.group.dev.dependencies]
