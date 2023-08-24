@@ -32,21 +32,7 @@ from ..input import (
 )
 from ..display import DEFAULT_PADDING
 
-MENU_CONTINUE = 0
-MENU_EXIT = 1
-MENU_SHUTDOWN = 2
-
-ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
-
-ANTI_GLARE_WAIT_TIME = 500
-QR_CODE_STEP_TIME = 100
-CAMERA_INIT_TIME = 1000
-
-LETTERS = "abcdefghijklmnopqrstuvwxyz"
-UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
-NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
 
 class Keypad:

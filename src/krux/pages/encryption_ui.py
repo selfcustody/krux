@@ -232,7 +232,7 @@ class LoadEncryptedMnemonic(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def load_from_storage(self):
+    def load_from_storage(self, delete_opt=False):
         """Lists all encrypted mnemonics stored is flash and SD card"""
         from ..encryption import MnemonicStorage
 
@@ -247,7 +247,9 @@ class LoadEncryptedMnemonic(Page):
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(flash)",
-                    lambda m_id=mnemonic_id: self._load_encrypted_mnemonic(m_id),
+                    lambda m_id=mnemonic_id: self._delete_encrypted_mnemonic(m_id)
+                    if delete_opt
+                    else self._load_encrypted_mnemonic(m_id),
                 )
             )
         if has_sd:
@@ -255,9 +257,11 @@ class LoadEncryptedMnemonic(Page):
                 mnemonic_ids_menu.append(
                     (
                         mnemonic_id + "(SD card)",
-                        lambda m_id=mnemonic_id: self._load_encrypted_mnemonic(
+                        lambda m_id=mnemonic_id: self._delete_encrypted_mnemonic(
                             m_id, sd_card=True
-                        ),
+                        )
+                        if delete_opt
+                        else self._load_encrypted_mnemonic(m_id, sd_card=True),
                     )
                 )
         mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
@@ -289,3 +293,13 @@ class LoadEncryptedMnemonic(Page):
             raise ValueError(t("Failed to decrypt"))
         del mnemonic_storage
         return words
+
+    def _delete_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
+        """Deletes a mnemonic"""
+        from ..encryption import MnemonicStorage
+
+        mnemonic_storage = MnemonicStorage()
+        self.ctx.display.clear()
+        if self.prompt(t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2):
+            mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
+        del mnemonic_storage

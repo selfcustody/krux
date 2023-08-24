@@ -101,48 +101,14 @@ class Tools(Page):
 
     def del_stored_mnemonic(self):
         """Lists and allow deletion of stored mnemonics"""
-        from ..encryption import MnemonicStorage
+        from .encryption_ui import LoadEncryptedMnemonic
 
+        encrypted_mnemonics = LoadEncryptedMnemonic(self.ctx)
         while True:
-            mnemonic_storage = MnemonicStorage()
-            mnemonic_ids_menu = []
-            has_sd = mnemonic_storage.has_sd_card
-            mnemonics = mnemonic_storage.list_mnemonics()
-            sd_mnemonics = mnemonic_storage.list_mnemonics(sd_card=True)
-            del mnemonic_storage
-
-            for mnemonic_id in mnemonics:
-                mnemonic_ids_menu.append(
-                    (
-                        mnemonic_id + "(flash)",
-                        lambda m_id=mnemonic_id: self._delete_encrypted_mnemonic(m_id),
-                    )
-                )
-            if has_sd:
-                for mnemonic_id in sd_mnemonics:
-                    mnemonic_ids_menu.append(
-                        (
-                            mnemonic_id + "(SD card)",
-                            lambda m_id=mnemonic_id: self._delete_encrypted_mnemonic(
-                                m_id, sd_card=True
-                            ),
-                        )
-                    )
-            mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
-            submenu = Menu(self.ctx, mnemonic_ids_menu)
-            index, _ = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
-                return MENU_CONTINUE
-
-    def _delete_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
-        """Deletes a mnemonic"""
-        from ..encryption import MnemonicStorage
-
-        mnemonic_storage = MnemonicStorage()
-        self.ctx.display.clear()
-        if self.prompt(t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2):
-            mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
-        del mnemonic_storage
+            ret = encrypted_mnemonics.load_from_storage(delete_opt=True)
+            if ret == MENU_CONTINUE:
+                del encrypted_mnemonics
+                return ret
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
