@@ -116,7 +116,7 @@ class Home(Page):
         """Displays regular words QR code"""
         title = t("Plaintext QR")
         data = self.ctx.wallet.key.mnemonic
-        self.display_qr_codes(data, FORMAT_NONE, title, allow_any_btn=True)
+        self.display_qr_codes(data, FORMAT_NONE, title)
         self.print_standard_qr(data, FORMAT_NONE, title)
         return MENU_CONTINUE
 
@@ -193,7 +193,7 @@ class Home(Page):
             # title receives first 4 chars (ex: XPUB)
             title = self.ctx.wallet.key.account_pubkey_str(version)[:4].upper()
             xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, title, allow_any_btn=True)
+            self.display_qr_codes(xpub, FORMAT_NONE, title)
             self.print_standard_qr(xpub, FORMAT_NONE, title)
         return MENU_CONTINUE
 

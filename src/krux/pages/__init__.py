@@ -50,7 +50,8 @@ ANTI_GLARE_WAIT_TIME = 500
 QR_CODE_STEP_TIME = 100
 CAMERA_INIT_TIME = 1000
 
-TOGGLE_BRIGHTNESS = 2
+TOGGLE_BRIGHTNESS = (BUTTON_PAGE, BUTTON_PAGE_PREV)
+PROCEED = (BUTTON_ENTER, BUTTON_TOUCH)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -72,15 +73,6 @@ class Page:
         # context has its own keypad mapping in case touch is not used
         self.y_keypad_map = []
         self.x_keypad_map = []
-
-    def wait_for_proceed_qr(self, block=True, any_btn=False):
-        """Wrap acknowledgements which can be answared with multiple buttons"""
-        if any_btn:
-            return self.ctx.input.wait_for_button(block) is not None
-        btn = self.ctx.input.wait_for_button(block)
-        if btn == BUTTON_PAGE:
-            return TOGGLE_BRIGHTNESS
-        return btn in (BUTTON_ENTER, BUTTON_TOUCH)
 
     def esc_prompt(self):
         """Prompts user for leaving"""
@@ -290,7 +282,7 @@ class Page:
         self.ctx.display.to_portrait()
         return entropy_bytes
 
-    def display_qr_codes(self, data, qr_format, title="", allow_any_btn=False):
+    def display_qr_codes(self, data, qr_format, title=""):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
@@ -328,10 +320,10 @@ class Page:
             self.ctx.display.draw_hcentered_text(subtitle, offset_y)
             i = (i + 1) % num_parts
             # There are cases we can allow any btn to change the screen
-            btn = self.wait_for_proceed_qr(block=num_parts == 1, any_btn=allow_any_btn)
-            if btn == TOGGLE_BRIGHTNESS:
+            btn = self.ctx.input.wait_for_button(num_parts == 1)
+            if btn in TOGGLE_BRIGHTNESS:
                 bright = not bright
-            elif btn is True:
+            elif btn in PROCEED:
                 done = True
             # interval done in input.py using timers
 

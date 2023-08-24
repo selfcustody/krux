@@ -147,7 +147,7 @@ class Tools(Page):
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
         title = t("Krux Printer Test QR")
-        self.display_qr_codes(title, FORMAT_NONE, title, allow_any_btn=True)
+        self.display_qr_codes(title, FORMAT_NONE, title)
         from .print_page import PrintPage
 
         print_page = PrintPage(self.ctx)

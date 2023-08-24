@@ -154,7 +154,7 @@ class Addresses(Page):
 
     def show_address(self, addr, title="", qr_format=FORMAT_NONE):
         """Show addr provided as a QRCode"""
-        self.display_qr_codes(addr, qr_format, title, allow_any_btn=True)
+        self.display_qr_codes(addr, qr_format, title)
         if self.print_qr_prompt():
             from .print_page import PrintPage
 
