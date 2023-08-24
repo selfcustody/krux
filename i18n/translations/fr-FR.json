@@ -82,7 +82,6 @@
     "Failed to store mnemonic": "Échec de stocker mnémonique",
     "Fee: ": "Frais: ",
     "Feed Rate": "Taux d'alimentation",
-    "File selected:\n\n%s": "Fichier sélectionné :\n\n%s",
     "Filename": "Nom de fichier",
     "Filename %s exists on SD card, overwrite?": "Le nom de fichier %s existe sur la carte SD, écraser ?",
     "Fingerprint: %s": "Empreinte Digitale: %s",
