@@ -37,13 +37,6 @@ from . import (
 )
 from ..sd_card import SDHandler
 
-
-STANDARD_MODE = 0
-LINE_MODE = 1
-ZOOMED_R_MODE = 2
-REGION_MODE = 3
-TRANSCRIBE_MODE = 4
-
 # to start xpub value without the xpub/zpub/ypub prefix
 WALLET_XPUB_START = 4
 # len of the xpub to show
@@ -304,8 +297,6 @@ class Home(Page):
                     if self.prompt(
                         t("Load PSBT from SD card?"), self.ctx.display.height() // 2
                     ):
-                        import uos
-                        import time
                         from .files_manager import FileManager
 
                         file_manager = FileManager(self.ctx)
@@ -314,43 +305,7 @@ class Home(Page):
                         )
 
                         if psbt_filename:
-                            stats = uos.stat(psbt_filename)
-                            size = stats[6] / 1024
-                            size_deximal_places = str(int(size * 100))[-2:]
-                            created = time.localtime(stats[9])
-                            modified = time.localtime(stats[8])
-
-                            psbt_filename = psbt_filename[4:]  # remove "/sd/" prefix
-                            self.ctx.display.clear()
-                            self.ctx.display.draw_hcentered_text(
-                                psbt_filename
-                                + "\n\n"
-                                + t("Size: ")
-                                + "{:,}".format(int(size))
-                                + "."
-                                + size_deximal_places
-                                + " KB"
-                                + "\n\n"
-                                + t("Created: ")
-                                + "%s-%s-%s %s:%s"
-                                % (
-                                    created[0],
-                                    created[1],
-                                    created[2],
-                                    created[3],
-                                    created[4],
-                                )
-                                + "\n\n"
-                                + t("Modified: ")
-                                + "%s-%s-%s %s:%s"
-                                % (
-                                    modified[0],
-                                    modified[1],
-                                    modified[2],
-                                    modified[3],
-                                    modified[4],
-                                )
-                            )
+                            psbt_filename = file_manager.display_file(psbt_filename)
 
                             if self.prompt(
                                 t("Load?"), self.ctx.display.bottom_prompt_line
@@ -467,13 +422,10 @@ class Home(Page):
                         message_filename = file_manager.select_file()
 
                         if message_filename:
-                            self.ctx.display.clear()
-                            self.ctx.display.draw_hcentered_text(
-                                t("File selected:\n\n%s") % message_filename
+                            message_filename = file_manager.display_file(
+                                message_filename
                             )
-                            message_filename = message_filename[
-                                4:
-                            ]  # remove "/sd/" prefix
+
                             if self.prompt(
                                 t("Load?"), self.ctx.display.bottom_prompt_line
                             ):

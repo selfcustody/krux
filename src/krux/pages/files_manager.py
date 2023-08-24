@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import time
-import uos
 import board
 import gc
 from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
@@ -121,6 +119,19 @@ class FileManager(Page):
         if SDHandler.dir_exists(file):
             return MENU_EXIT
 
+        self.display_file(file)
+        self.ctx.input.wait_for_button()
+        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
+        #     with SDHandler() as sd:
+        #         sd.delete(file)
+        #     return MENU_EXIT
+        return MENU_CONTINUE
+
+    def display_file(self, file):
+        """Display the file details on the device's screen"""
+        import uos
+        import time
+
         stats = uos.stat(file)
         size = stats[6] / 1024
         size_deximal_places = str(int(size * 100))[-2:]
@@ -145,9 +156,5 @@ class FileManager(Page):
             + "%s-%s-%s %s:%s"
             % (modified[0], modified[1], modified[2], modified[3], modified[4])
         )
-        self.ctx.input.wait_for_button()
-        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
-        #     with SDHandler() as sd:
-        #         sd.delete(file)
-        #     return MENU_EXIT
-        return MENU_CONTINUE
+
+        return file
