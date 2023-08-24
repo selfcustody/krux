@@ -138,12 +138,15 @@ class Input:
 
     def wait_for_release(self):
         """Loop until all buttons are released (if currently pressed)"""
-        while (
-            self.enter_value() == PRESSED
-            or self.page_value() == PRESSED
-            or self.page_prev_value() == PRESSED
-            or self.touch_value() == PRESSED
-        ):
+        while True:
+            if self.enter_value() == RELEASED and self.touch_value() == RELEASED:
+                if "ENCODER" in board.config["krux"]["pins"]:
+                    # Encoder is event based, this check may disable event flag unintentionally
+                    break
+                # TODO: Change standard buttons to be event(interrupt) based too
+                # So presses during high processing time(camera and animated QR) won't be lost
+                if self.page_value() == RELEASED and self.page_prev_value() == RELEASED:
+                    break
             self.entropy += 1
             wdt.feed()
 
