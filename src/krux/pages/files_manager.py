@@ -30,6 +30,7 @@ LIST_FILE_DIGITS = 9  # len on large devices per menu item
 LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
 
 SD_ROOT_PATH = "/sd"
+THOUSANDS_SEPARATOR = " "
 
 
 class FileManager(Page):
@@ -138,7 +139,6 @@ class FileManager(Page):
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
         file = file[4:]  # remove "/sd/" prefix
-        thousand_separator = " "
         decimal_separator = ","
         if Settings().i18n.locale == "en-US":
             decimal_separator = "."
@@ -148,7 +148,7 @@ class FileManager(Page):
             file
             + "\n\n"
             + t("Size: ")
-            + "{:,}".format(int(size)).replace(",", thousand_separator)
+            + "{:,}".format(int(size)).replace(",", THOUSANDS_SEPARATOR)
             + decimal_separator
             + size_deximal_places
             + " KB"

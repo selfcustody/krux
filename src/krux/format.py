@@ -19,9 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from .krux_settings import t
+from .krux_settings import Settings
 
 SATS_PER_BTC = 100000000
+THOUSANDS_SEPARATOR = " "
 
 
 def satcomma(amount):
@@ -31,7 +32,14 @@ def satcomma(amount):
     amount_str = "%.8f" % round(amount / SATS_PER_BTC, 8)
     msb = amount_str[:-9]  # most significant bitcoin heh heh heh
     lsb = amount_str[len(msb) + 1 :]
-    return _add_commas(msb, t(",")) + t(".") + _add_commas(lsb, t(","))
+    decimal_separator = ","
+    if Settings().i18n.locale == "en-US":
+        decimal_separator = "."
+    return (
+        _add_commas(msb, THOUSANDS_SEPARATOR)
+        + decimal_separator
+        + _add_commas(lsb, THOUSANDS_SEPARATOR)
+    )
 
 
 def _add_commas(number, comma_sep=","):

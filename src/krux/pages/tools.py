@@ -36,7 +36,7 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from .files_manager import SD_ROOT_PATH
+from .files_manager import SD_ROOT_PATH, THOUSANDS_SEPARATOR
 
 
 class Tools(Page):
@@ -68,22 +68,23 @@ class Tools(Page):
                 sd_status = uos.statvfs(SD_ROOT_PATH)
                 sd_total = int(sd_status[2] * sd_status[1] / 1024 / 1024)
                 sd_free = int(sd_status[4] * sd_status[1] / 1024 / 1024)
-                thousand_separator = " "
 
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(
                     t("SD card")
                     + "\n\n"
                     + t("Size: ")
-                    + "{:,}".format(sd_total).replace(",", thousand_separator)
+                    + "{:,}".format(sd_total).replace(",", THOUSANDS_SEPARATOR)
                     + " MB"
                     + "\n\n"
                     + t("Used: ")
-                    + "{:,}".format(sd_total - sd_free).replace(",", thousand_separator)
+                    + "{:,}".format(sd_total - sd_free).replace(
+                        ",", THOUSANDS_SEPARATOR
+                    )
                     + " MB"
                     + "\n\n"
                     + t("Free: ")
-                    + "{:,}".format(sd_free).replace(",", thousand_separator)
+                    + "{:,}".format(sd_free).replace(",", THOUSANDS_SEPARATOR)
                     + " MB"
                 )
                 if self.prompt(
