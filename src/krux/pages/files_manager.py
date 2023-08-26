@@ -134,8 +134,8 @@ class FileManager(Page):
         import time
 
         stats = uos.stat(file)
-        size = stats[6] / 1024
-        size_deximal_places = str(int(size * 100))[-2:]
+        size_KB = stats[6] / 1024
+        size_KB_fraction = str(int(size_KB * 100))[-2:]
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
         file = file[4:]  # remove "/sd/" prefix
@@ -148,9 +148,9 @@ class FileManager(Page):
             file
             + "\n\n"
             + t("Size: ")
-            + "{:,}".format(int(size)).replace(",", THOUSANDS_SEPARATOR)
+            + "{:,}".format(int(size_KB)).replace(",", THOUSANDS_SEPARATOR)
             + decimal_separator
-            + size_deximal_places
+            + size_KB_fraction
             + " KB"
             + "\n\n"
             + t("Created: ")
