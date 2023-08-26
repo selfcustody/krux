@@ -7,8 +7,6 @@
     "%s\n\nis a valid receive address!": "%s\n\nis a valid receive address!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nwas NOT FOUND in the first %d change addresses",
     "%s\n\nwas NOT FOUND in the first %d receive addresses": "%s\n\nwas NOT FOUND in the first %d receive addresses",
-    ",": ",",
-    ".": ".",
     "12 words": "12 words",
     "24 words": "24 words",
     "ABC": "ABC",

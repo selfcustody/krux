@@ -24,12 +24,13 @@ import board
 import gc
 from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
 from ..sd_card import SDHandler
-from ..krux_settings import t
+from ..krux_settings import t, Settings
 
 LIST_FILE_DIGITS = 9  # len on large devices per menu item
 LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
 
 SD_ROOT_PATH = "/sd"
+THOUSANDS_SEPARATOR = " "
 
 
 class FileManager(Page):
@@ -133,19 +134,23 @@ class FileManager(Page):
         import time
 
         stats = uos.stat(file)
-        size = stats[6] / 1024
-        size_deximal_places = str(int(size * 100))[-2:]
+        size_KB = stats[6] / 1024
+        size_KB_fraction = str(int(size_KB * 100))[-2:]
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
         file = file[4:]  # remove "/sd/" prefix
+        decimal_separator = ","
+        if Settings().i18n.locale == "en-US":
+            decimal_separator = "."
+
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             file
             + "\n\n"
             + t("Size: ")
-            + "{:,}".format(int(size))
-            + "."
-            + size_deximal_places
+            + "{:,}".format(int(size_KB)).replace(",", THOUSANDS_SEPARATOR)
+            + decimal_separator
+            + size_KB_fraction
             + " KB"
             + "\n\n"
             + t("Created: ")

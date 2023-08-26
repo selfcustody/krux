@@ -26,7 +26,7 @@ from ur.ur import UR
 import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_encode, base_decode
-from .format import satcomma
+from .format import format_btc
 from .krux_settings import t
 from .qr import FORMAT_PMOFN
 
@@ -109,7 +109,7 @@ class PSBTSigner:
             inp_amount += inp.witness_utxo.value
         resume_inputs_str = (
             (t("Inputs (%d): ") % len(self.psbt.inputs))
-            + ("₿ %s" % satcomma(inp_amount))
+            + ("₿ %s" % format_btc(inp_amount))
             + "\n\n"
         )
 
@@ -198,7 +198,7 @@ class PSBTSigner:
         if len(spend_list) > 0:
             resume_spend_str = (
                 (t("Spend (%d): ") % len(spend_list))
-                + ("₿ %s" % satcomma(spend_amount))
+                + ("₿ %s" % format_btc(spend_amount))
                 + "\n\n"
             )
 
@@ -208,12 +208,12 @@ class PSBTSigner:
                     t("Self-transfer or Change (%d): ")
                     % (len(self_transfer_list) + len(change_list))
                 )
-                + ("₿ %s" % satcomma(self_amount + change_amount))
+                + ("₿ %s" % format_btc(self_amount + change_amount))
                 + "\n\n"
             )
 
         fee = inp_amount - spend_amount - self_amount - change_amount
-        resume_fee_str = t("Fee: ") + ("₿ %s" % satcomma(fee))
+        resume_fee_str = t("Fee: ") + ("₿ %s" % format_btc(fee))
 
         messages = []
         # first screen - resume
@@ -228,21 +228,21 @@ class PSBTSigner:
         for i, out in enumerate(spend_list):
             messages.append(
                 (t("%d. Spend: \n\n%s\n\n") % (i + 1, out[0]))
-                + ("₿ %s" % satcomma(out[1]))
+                + ("₿ %s" % format_btc(out[1]))
             )
 
         # sequence of self_transfer
         for i, out in enumerate(self_transfer_list):
             messages.append(
                 (t("%d. Self-transfer: \n\n%s\n\n") % (i + 1, out[0]))
-                + ("₿ %s" % satcomma(out[1]))
+                + ("₿ %s" % format_btc(out[1]))
             )
 
         # sequence of change
         for i, out in enumerate(change_list):
             messages.append(
                 (t("%d. Change: \n\n%s\n\n") % (i + 1, out[0]))
-                + ("₿ %s" % satcomma(out[1]))
+                + ("₿ %s" % format_btc(out[1]))
             )
 
         return messages

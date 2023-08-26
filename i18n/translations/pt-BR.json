@@ -7,8 +7,6 @@
     "%s\n\nis a valid receive address!": "%s\n\né um endereço de recepção válido!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nNÃO FOI ENCONTRADO nos primeiros %d endereços de troco",
     "%s\n\nwas NOT FOUND in the first %d receive addresses": "%s\n\nNÃO FOI ENCONTRADO nos primeiros %d endereços de recepção",
-    ",": ",",
-    ".": ".",
     "12 words": "12 palavras",
     "24 words": "24 palavras",
     "ABC": "ABC",
