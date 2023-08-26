@@ -40,6 +40,8 @@ FIRMWARE_SLOT_2 = 0x00280000
 MAIN_BOOT_CONFIG_SECTOR_ADDRESS = 0x00004000
 BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = 0x00005000
 
+FLASH_IO_WAIT_TIME = 100
+
 
 def find_active_firmware(sector):
     """Returns a tuple of the active firmware's configuration"""
@@ -128,12 +130,12 @@ def write_data(
 
         cur_address = i * chunk_size + address
         flash.erase(cur_address, chunk_size)
-        time.sleep_ms(100)
+        time.sleep_ms(FLASH_IO_WAIT_TIME)
         if header and i == 0:
             flash.write(cur_address, b"\x00" + data_size.to_bytes(4, "little"))
-            time.sleep_ms(100)
+            time.sleep_ms(FLASH_IO_WAIT_TIME)
         flash.write(cur_address + header_offset, buffer[:chunk_size_after_header])
-        time.sleep_ms(100)
+        time.sleep_ms(FLASH_IO_WAIT_TIME)
         i += 1
         num_read = 0
         chunk_read = 0

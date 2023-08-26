@@ -41,6 +41,8 @@ LONG_PRESS_PERIOD = 1000  # milliseconds
 PRESSED = 0
 RELEASED = 1
 
+BUTTON_WAIT_PRESS_DELAY = 10
+
 
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
@@ -167,7 +169,7 @@ class Input:
             wdt.feed()  # here is where krux spends most of its time
             if not block and time.ticks_ms() > start_time + wait_duration:
                 return None
-            time.sleep_ms(10)
+            time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
     def wait_for_button(self, block=True):
         """Waits for any button to release, optionally blocking if block=True.

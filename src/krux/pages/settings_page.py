@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
-import time
 from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
 from ..settings import (
     CategorySetting,
@@ -115,8 +114,6 @@ class SettingsPage(Page):
         """Display a text for duration ms or until you press a button"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(message, color, bg_color)
-        # this sleep protect form a double input at the same time (ENTER + PAGE on a rotary encoder)
-        time.sleep_ms(WAIT_TO_CHECK_INPUT)
         self.ctx.input.wait_for_press(block=False, wait_duration=duration)
         self.ctx.display.clear()
 

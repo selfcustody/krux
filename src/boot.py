@@ -30,7 +30,7 @@ sys.path.append(".")
 
 from krux.power import power_manager
 
-MIN_SPLASH_TIME = 1000
+MIN_SPLASH_WAIT_TIME = 1000
 
 
 def splash():
@@ -124,8 +124,8 @@ postimport_ticks = time.ticks_ms()
 
 # If importing happened too fast, sleep the difference so the logo
 # will be shown
-if preimport_ticks + MIN_SPLASH_TIME > postimport_ticks:
-    time.sleep_ms(preimport_ticks + MIN_SPLASH_TIME - postimport_ticks)
+if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
+    time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
 login(ctx)
 gc.collect()
