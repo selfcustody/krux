@@ -310,6 +310,13 @@ class Login(Page):
             return MENU_CONTINUE
         self.ctx.display.clear()
 
+        # Test mnemonic Checksum verification before asking for passphrase
+        temp_key = Key(
+            mnemonic,
+            False,
+            NETWORKS[Settings().bitcoin.network],
+        )
+
         while True:
             submenu = Menu(
                 self.ctx,
