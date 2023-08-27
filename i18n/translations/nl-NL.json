@@ -54,6 +54,8 @@
     "Device flash storage not detected.": "Opslag op apparaat is niet gedetecteerd.",
     "Done?": "Klaar?",
     "Driver": "Driver",
+    "Encoder": "Encoder",
+    "Encoder Debounce": "Encoder-debounce",
     "Encrypt Mnemonic": "Geheugensteun versleutelen",
     "Encrypted QR Code": "Versleutelde QR code",
     "Encrypted mnemonic was not stored": "Versleutelde geheugensteun was niet opgeslagen",
