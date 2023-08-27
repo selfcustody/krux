@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
-import time
 from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
 from ..settings import (
     CategorySetting,
@@ -30,7 +29,13 @@ from ..settings import (
     FLASH_PATH,
     Store,
 )
-from ..krux_settings import Settings, LoggingSettings, BitcoinSettings, TouchSettings
+from ..krux_settings import (
+    Settings,
+    LoggingSettings,
+    BitcoinSettings,
+    TouchSettings,
+    EncoderSettings,
+)
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..krux_settings import t
 from ..sd_card import SDHandler
@@ -115,8 +120,6 @@ class SettingsPage(Page):
         """Display a text for duration ms or until you press a button"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(message, color, bg_color)
-        # this sleep protect form a double input at the same time (ENTER + PAGE on a rotary encoder)
-        time.sleep_ms(WAIT_TO_CHECK_INPUT)
         self.ctx.input.wait_for_press(block=False, wait_duration=duration)
         self.ctx.display.clear()
 
@@ -237,17 +240,26 @@ class SettingsPage(Page):
                 self.number_setting(settings_namespace, setting)
                 if settings_namespace.namespace == TouchSettings.namespace:
                     self._touch_threshold_exit_check()
+                elif settings_namespace.namespace == EncoderSettings.namespace:
+                    self._encoder_threshold_exit_check()
 
             return MENU_CONTINUE
 
         return handler
 
     def _touch_threshold_exit_check(self):
-        """Handler for the 'Back' on settings screen"""
+        """Handler for the 'Back' on touch settings screen"""
 
         # Update touch detection threshold
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.touch_driver.threshold(Settings().touch.threshold)
+
+    def _encoder_threshold_exit_check(self):
+        """Handler for the 'Back' on encoder settings screen"""
+        from ..rotary import encoder
+
+        # Update rotary encoder debounce time
+        encoder.debounce = Settings().encoder.debounce
 
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""

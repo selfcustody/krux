@@ -54,6 +54,8 @@
     "Device flash storage not detected.": "Almacenamiento flash del dispositivo no detectado.",
     "Done?": "¿Listo?",
     "Driver": "Operador",
+    "Encoder": "Codificador",
+    "Encoder Debounce": "Antirrebote del codificador",
     "Encrypt Mnemonic": "Cifrado mnemónico",
     "Encrypted QR Code": "Código QR cifrado",
     "Encrypted mnemonic was not stored": "Mnemonic cifrado no se almacenó",

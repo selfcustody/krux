@@ -46,6 +46,8 @@ from ..krux_settings import Settings
 from ..wdt import wdt
 from . import Printer
 
+INITIALIZE_WAIT_TIME = 500
+
 
 class AdafruitPrinter(Printer):
     """AdafruitPrinter is a minimal wrapper around a serial connection to
@@ -78,7 +80,7 @@ class AdafruitPrinter(Printer):
         # upon power up -- it needs a moment to cold boot
         # and initialize.  Allow at least 1/2 sec of uptime
         # before printer can receive data.
-        time.sleep_ms(500)
+        time.sleep_ms(INITIALIZE_WAIT_TIME)
 
         # Wake up the printer to get ready for printing
         self.write_bytes(255)

@@ -49,6 +49,7 @@ FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 ANTI_GLARE_WAIT_TIME = 500
 QR_CODE_STEP_TIME = 100
 CAMERA_INIT_TIME = 1000
+SHUTDOWN_WAIT_TIME = 300
 
 TOGGLE_BRIGHTNESS = (BUTTON_PAGE, BUTTON_PAGE_PREV)
 PROCEED = (BUTTON_ENTER, BUTTON_TOUCH)
@@ -468,7 +469,7 @@ class Page:
         if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Shutting down.."))
-            time.sleep(0.3)
+            time.sleep_ms(SHUTDOWN_WAIT_TIME)
             return MENU_SHUTDOWN
         return MENU_CONTINUE
 

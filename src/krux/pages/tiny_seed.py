@@ -967,7 +967,7 @@ class TinyScanner(Page):
         self._set_camera_sensitivity()
         full_screen = self._run_camera()
         postcamera_ticks = time.ticks_ms()
-        # check how much ms camera took to retain message on the screen
+        # check how much time camera took to retain message on the screen
         if precamera_ticks + FLASH_MSG_TIME > postcamera_ticks:
             time.sleep_ms(precamera_ticks + FLASH_MSG_TIME - postcamera_ticks)
         del message, precamera_ticks, postcamera_ticks

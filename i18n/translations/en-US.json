@@ -54,6 +54,8 @@
     "Device flash storage not detected.": "Device flash storage not detected.",
     "Done?": "Done?",
     "Driver": "Driver",
+    "Encoder": "Encoder",
+    "Encoder Debounce": "Encoder Debounce",
     "Encrypt Mnemonic": "Encrypt Mnemonic",
     "Encrypted QR Code": "Encrypted QR Code",
     "Encrypted mnemonic was not stored": "Encrypted mnemonic was not stored",

@@ -54,6 +54,8 @@
     "Device flash storage not detected.": "Không phát hiện bộ lưu trữ flash của thiết bị.",
     "Done?": "Hoàn tất?",
     "Driver": "Người cầm lái",
+    "Encoder": "Mã hoá",
+    "Encoder Debounce": "Gỡ lỗi bộ mã hóa",
     "Encrypt Mnemonic": "Mã hóa Mnemonic",
     "Encrypted QR Code": "Mã QR được mã hóa",
     "Encrypted mnemonic was not stored": "MNemon được mã hóa không được lưu trữ",

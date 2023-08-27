@@ -134,6 +134,9 @@ poetry run python simulator.py --device maixpy_amigo_tft
 
 # Run simulator with sd enabled and the small button-only m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
 poetry run python simulator.py --device maixpy_m5stickv --sd
+
+# Run simulator with the rotary encoder device dock, then use keyboard (arrow keys UP or DOWN and ENTER)
+poetry run python simulator.py --device maixpy_dock
 ```
 
 To be able to emulate a SD card, first create a folder called `sd` inside `simulator` folder.
