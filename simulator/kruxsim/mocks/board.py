@@ -57,6 +57,9 @@ def register_device(device):
     sys.modules["board"] = mock.MagicMock(config=BOARD_CONFIG)
 
     BUTTON_A = BOARD_CONFIG["krux"]["pins"]["BUTTON_A"]
+    if "ENCODER" in BOARD_CONFIG["krux"]["pins"]:
+        del BOARD_CONFIG["krux"]["pins"]["ENCODER"]
+        BOARD_CONFIG["krux"]["pins"]["BUTTON_B"] = 37
     BUTTON_B = BOARD_CONFIG["krux"]["pins"]["BUTTON_B"]
     if "BUTTON_C" in BOARD_CONFIG["krux"]["pins"]:
         BUTTON_C = BOARD_CONFIG["krux"]["pins"]["BUTTON_C"]

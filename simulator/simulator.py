@@ -96,6 +96,8 @@ from kruxsim.mocks import sensor
 from kruxsim.mocks import ft6x36
 from kruxsim.sequence import SequenceExecutor
 
+from kruxsim.mocks import rotary
+
 sequence_executor = None
 if args.sequence:
     sequence_executor = SequenceExecutor(args.sequence)
@@ -125,6 +127,10 @@ buffer_image = screen.copy().convert()
 pg.display.set_caption("Krux Simulator")
 
 device_image = devices.load_image(args.device)
+
+if(args.device == devices.PC):
+    from kruxsim.mocks.board import BOARD_CONFIG
+    BOARD_CONFIG["type"] = "amigo_type"
 
 t.start()
 

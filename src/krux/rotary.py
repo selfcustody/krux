@@ -24,11 +24,11 @@ import board
 from Maix import GPIO
 from fpioa_manager import fm
 import time
+from .krux_settings import Settings
 from .logging import logger as log
 
 RIGHT = 1
 LEFT = 0
-DEBOUNCE = 50  # milliseconds
 
 
 def __handler__(pin_num=None):
@@ -55,6 +55,8 @@ class RotaryEncoder:
         self.value = 0
         self.time_frame = 0
 
+        self.debounce = Settings().encoder.debounce
+
         log.info("Encoder Initiated Pins: %d and %d" % (pins[0], pins[1]))
 
     def process(self, new_state):
@@ -62,14 +64,14 @@ class RotaryEncoder:
 
         def _right():
             if self.direction:
-                if time.ticks_ms() > self.time_frame + DEBOUNCE:
+                if time.ticks_ms() > self.time_frame + self.debounce:
                     self.value += 1
                     self.time_frame = time.ticks_ms()
             self.direction = RIGHT
 
         def _left():
             if not self.direction:
-                if time.ticks_ms() > self.time_frame + DEBOUNCE:
+                if time.ticks_ms() > self.time_frame + self.debounce:
                     self.value -= 1
                     self.time_frame = time.ticks_ms()
             self.direction = LEFT
