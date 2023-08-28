@@ -361,7 +361,7 @@ class Login(Page):
                 (
                     t("Single-sig")
                     + "\n"
-                    + Key.get_default_derivation(
+                    + Key.get_default_derivation_str(
                         False, NETWORKS[Settings().bitcoin.network]
                     ),
                     lambda: MENU_EXIT,
@@ -369,7 +369,7 @@ class Login(Page):
                 (
                     t("Multisig")
                     + "\n"
-                    + Key.get_default_derivation(
+                    + Key.get_default_derivation_str(
                         True, NETWORKS[Settings().bitcoin.network]
                     ),
                     lambda: MENU_EXIT,
