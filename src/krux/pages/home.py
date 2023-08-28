@@ -230,16 +230,17 @@ class Home(Page):
                 )
                 self.ctx.display.flash_text(t("Wallet output descriptor loaded!"))
 
-            # BlueWallet single sig descriptor without fingerprint
-            if (
-                self.ctx.wallet.descriptor.key
-                and not self.ctx.wallet.descriptor.key.origin
-            ):
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    t("Warning:\nIncomplete output descriptor"), theme.error_color
-                )
-                self.ctx.input.wait_for_button()
+                # BlueWallet single sig descriptor without fingerprint
+                if (
+                    self.ctx.wallet.descriptor.key
+                    and not self.ctx.wallet.descriptor.key.origin
+                ):
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(
+                        t("Warning:\nIncomplete output descriptor"), theme.error_color
+                    )
+                    self.ctx.input.wait_for_button()
+
         except Exception as e:
             self.ctx.log.exception("Exception occurred loading wallet")
             self.ctx.display.clear()
