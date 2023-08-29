@@ -34,6 +34,7 @@ from .krux_settings import t
 
 DER_SINGLE = "m/84h/%dh/0h"
 DER_MULTI = "m/48h/%dh/0h/2h"
+HARDENED_STR_REPLACE = "'"
 
 
 class Key:
@@ -77,9 +78,11 @@ class Key:
         return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
 
     def derivation_str(self, pretty=False):
-        """Returns the derivation path for the Hierarchical Deterministic Wallet"""
+        """Returns the derivation path for the Hierarchical Deterministic Wallet to
+        be displayed as string
+        """
         formatted_txt = t("Derivation: %s") if pretty else "%s"
-        return formatted_txt % self.derivation
+        return (formatted_txt % self.derivation).replace("h", HARDENED_STR_REPLACE)
 
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
@@ -104,3 +107,12 @@ class Key:
     def get_default_derivation(multisig, network):
         """Return the Krux default derivation path for single-sig or multisig"""
         return (DER_MULTI if multisig else DER_SINGLE) % network["bip32"]
+
+    @staticmethod
+    def get_default_derivation_str(multisig, network):
+        """Return the Krux default derivation path for single-sig or multisig to
+        be displayd as string
+        """
+        return Key.get_default_derivation(multisig, network).replace(
+            "h", HARDENED_STR_REPLACE
+        )
