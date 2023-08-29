@@ -296,28 +296,8 @@ class Home(Page):
         if data is None:
             # Try to read a PSBT from a file on the SD card
             qr_format = FORMAT_NONE
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
             try:
-                with SDHandler() as sd:
-                    self.ctx.display.clear()
-                    if self.prompt(
-                        t("Load PSBT from SD card?"), self.ctx.display.height() // 2
-                    ):
-                        from .files_manager import FileManager
-
-                        file_manager = FileManager(self.ctx)
-                        psbt_filename = file_manager.select_file(
-                            file_extension=PSBT_FILE_EXTENSION
-                        )
-
-                        if psbt_filename:
-                            psbt_filename = file_manager.display_file(psbt_filename)
-
-                            if self.prompt(
-                                t("Load?"), self.ctx.display.bottom_prompt_line
-                            ):
-                                data = sd.read_binary(psbt_filename)
+                psbt_filename, data = self._load_file(PSBT_FILE_EXTENSION)
             except OSError:
                 pass
 
@@ -357,11 +337,20 @@ class Home(Page):
             del signer
             gc.collect()
 
-            # Show the signed PSBT as a QRCode
-            self.display_qr_codes(qr_signed_psbt, qr_format)
-            self.print_standard_qr(
-                qr_signed_psbt, qr_format, t("Signed PSBT"), width=45
-            )
+            # Try to show the signed PSBT as a QRCode
+            title = t("Signed PSBT")
+            try:
+                self.display_qr_codes(qr_signed_psbt, qr_format)
+                self.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
+            except Exception as e:
+                self.ctx.log.exception(
+                    "Exception occurred in sign_psbt when trying to show the qr_signed_psbt"
+                )
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("Error:\n%s") % repr(e), theme.error_color
+                )
+                self.ctx.input.wait_for_button()
 
             # memory management
             del qr_signed_psbt
@@ -371,37 +360,20 @@ class Home(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Checking for SD card.."))
             try:
-                with SDHandler() as sd:
-                    # Wait until user defines a filename or select NO on the prompt
-                    filename_undefined = True
-                    while filename_undefined:
-                        self.ctx.display.clear()
-                        if self.prompt(
-                            t("Save PSBT to SD card?"), self.ctx.display.height() // 2
-                        ):
-                            psbt_filename, filename_undefined = self._set_filename(
-                                psbt_filename,
-                                "QRCode",
-                                PSBT_FILE_SUFFIX,
-                                PSBT_FILE_EXTENSION,
-                            )
-
-                            # if user defined a filename and it is ok, save!
-                            if not filename_undefined:
-                                sd.write_binary(psbt_filename, serialized_signed_psbt)
-                                self.ctx.display.clear()
-                                self.ctx.display.draw_centered_text(
-                                    t("Saved PSBT to SD card:\n%s") % psbt_filename
-                                )
-                                self.ctx.input.wait_for_button()
-                        else:
-                            filename_undefined = False
+                self._save_file(
+                    serialized_signed_psbt,
+                    "QRCode",
+                    psbt_filename,
+                    title + ":",
+                    PSBT_FILE_EXTENSION,
+                    PSBT_FILE_SUFFIX,
+                )
             except OSError:
                 pass
 
         return MENU_CONTINUE
 
-    def _load_file(self):
+    def _load_file(self, file_ext=""):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Checking for SD card.."))
         with SDHandler() as sd:
@@ -410,7 +382,7 @@ class Home(Page):
                 from .files_manager import FileManager
 
                 file_manager = FileManager(self.ctx)
-                filename = file_manager.select_file()
+                filename = file_manager.select_file(file_extension=file_ext)
 
                 if filename:
                     filename = file_manager.display_file(filename)
