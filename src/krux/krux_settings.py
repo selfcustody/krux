@@ -120,7 +120,10 @@ class I18nSettings(SettingsNamespace):
     """I18n-specific settings"""
 
     namespace = "settings.i18n"
-    locale = CategorySetting("locale", "en-US", list(translation_table.keys()))
+    DEFAULT_LOCALE = "en-US"
+    locale = CategorySetting(
+        "locale", DEFAULT_LOCALE, list(translation_table.keys()) + [DEFAULT_LOCALE]
+    )
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
