@@ -1619,15 +1619,15 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     from krux.themes import WHITE, RED, GREEN, ORANGE, MAGENTA
 
     tlist = list(translation_table)
-    index_en = tlist.index("en-US")
-    index_next = (index_en + 1) % (len(tlist))
-    text_en = translation_table[tlist[index_en]][1177338798] + "\n" + tlist[index_en]
+    index_pt = tlist.index("pt-BR")
+    index_next = (index_pt + 1) % (len(tlist))
+    text_pt = translation_table[tlist[index_pt]][1177338798] + "\n" + tlist[index_pt]
     text_next = (
         translation_table[tlist[index_next]][1177338798] + "\n" + tlist[index_next]
     )
 
     cases = [
-        (
+        (  # 0
             (
                 # Bitcoin
                 BUTTON_ENTER,
@@ -1645,7 +1645,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
             lambda: Settings().bitcoin.network == "test",
             CategorySetting,
         ),
-        (
+        (  # 1
             (
                 # Printer
                 BUTTON_PAGE,
@@ -1680,7 +1680,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
             lambda: Settings().printer.thermal.adafruit.baudrate == 19200,
             CategorySetting,
         ),
-        (
+        (  # 2
             (
                 # Language
                 BUTTON_PAGE,
@@ -1691,13 +1691,13 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_ENTER,
             ),
             [
-                mocker.call(text_en, WHITE),
+                mocker.call(text_pt, WHITE),
                 mocker.call(text_next, WHITE),
             ],
             lambda: Settings().i18n.locale == tlist[index_next],
             CategorySetting,
         ),
-        (
+        (  # 3
             (
                 # Logging
                 BUTTON_PAGE,
@@ -1727,7 +1727,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
             lambda: Settings().logging.level == "DEBUG",
             CategorySetting,
         ),
-        (
+        (  # 4
             (
                 # Printer
                 BUTTON_PAGE,
@@ -1789,7 +1789,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         ctx = create_ctx(mocker, case[0])
         login = Login(ctx)
 
-        Settings().i18n.locale = "en-US"
+        Settings().i18n.locale = "pt-BR"
         login.settings()
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
@@ -1806,9 +1806,9 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
     from krux.themes import WHITE, RED, GREEN, ORANGE, MAGENTA
 
     tlist = list(translation_table)
-    index_en = tlist.index("en-US")
-    index_next = (index_en + 1) % (len(tlist))
-    text_en = translation_table[tlist[index_en]][1177338798] + "\n" + tlist[index_en]
+    index_pt = tlist.index("pt-BR")
+    index_next = (index_pt + 1) % (len(tlist))
+    text_pt = translation_table[tlist[index_pt]][1177338798] + "\n" + tlist[index_pt]
     text_next = (
         translation_table[tlist[index_next]][1177338798] + "\n" + tlist[index_next]
     )
@@ -1873,7 +1873,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 GO_INDEX,
             ),
             [
-                mocker.call(text_en, WHITE),
+                mocker.call(text_pt, WHITE),
                 mocker.call(text_next, WHITE),
             ],
             lambda: Settings().i18n.locale == tlist[index_next],
@@ -1920,7 +1920,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
 
         login = Login(ctx)
 
-        Settings().i18n.locale = "en-US"
+        Settings().i18n.locale = "pt-BR"
         login.settings()
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
