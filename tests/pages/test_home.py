@@ -1037,7 +1037,7 @@ def test_sign_message(mocker, m5stickv, tdata):
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # Hex-encoded hash, Sign, No print prompt
+        # 0 Hex-encoded hash, Sign, No print prompt
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",  # 0 data for capture_qr_code
             FORMAT_NONE,  # 1 qr_format for capture_qr_code
@@ -1048,7 +1048,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
             None,  # 6 SD file
         ),
-        # Hash, Sign, No print prompt
+        # 1 Hash, Sign, No print prompt
         (
             binascii.unhexlify(
                 "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7"
@@ -1060,7 +1060,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Message, Sign, No print prompt
+        # 2 Message, Sign, No print prompt
         (
             "hello world",
             FORMAT_NONE,
@@ -1070,7 +1070,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # 64-byte message, Sign, No print prompt
+        # 3 64-byte message, Sign, No print prompt
         (
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
             FORMAT_NONE,
@@ -1080,7 +1080,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Sign, Print
+        # 4 Hex-encoded hash, Sign, Print
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -1098,7 +1098,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Sign, Decline to print
+        # 5 Hex-encoded hash, Sign, Decline to print
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -1116,7 +1116,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Decline to sign
+        # 6 Hex-encoded hash, Decline to sign
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -1126,9 +1126,9 @@ def test_sign_message(mocker, m5stickv, tdata):
             None,
             None,
         ),
-        # Failed to capture message QR
+        # 7 Failed to capture message QR
         (None, FORMAT_NONE, None, [], None, None, None),
-        # Message, Sign, Save to SD, No print prompt
+        # 8 Message, Sign, Save to SD, No print prompt
         (
             "hello world",  # 0 data for capture_qr_code
             FORMAT_NONE,  # 1 qr_format for capture_qr_code
@@ -1140,7 +1140,10 @@ def test_sign_message(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # QRCode pass
                 BUTTON_ENTER,  # Public Key pass
                 BUTTON_ENTER,  # QRCode pass
-                BUTTON_ENTER,  # Yes save SD
+                BUTTON_ENTER,  # Yes save signed on SD
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Press "Go"
+                BUTTON_ENTER,  # Yes save pubkey on SD
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Press "Go"
             ],
