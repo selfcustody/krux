@@ -50,7 +50,7 @@ class Addresses(Page):
         """Handler for the 'address' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Please load a wallet output descriptor"), theme.error_color
             )
             return MENU_CONTINUE
@@ -166,7 +166,7 @@ class Addresses(Page):
         """Handler for the 'scan address' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Please load a wallet output descriptor"), theme.error_color
             )
             return MENU_CONTINUE
@@ -186,7 +186,7 @@ class Addresses(Page):
         """Handler for the 'receive' or 'change' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None or qr_format != FORMAT_NONE:
-            self.ctx.display.flash_text(t("Failed to load address"), theme.error_color)
+            self.flash_text(t("Failed to load address"), theme.error_color)
             return MENU_CONTINUE
 
         addr = None
@@ -195,7 +195,7 @@ class Addresses(Page):
 
             addr = parse_address(data)
         except:
-            self.ctx.display.flash_text(t("Invalid address"), theme.error_color)
+            self.flash_text(t("Invalid address"), theme.error_color)
             return MENU_CONTINUE
 
         self.show_address(data, title=addr, qr_format=qr_format)

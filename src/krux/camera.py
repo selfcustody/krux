@@ -36,13 +36,15 @@ class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
     def __init__(self):
+        self.initialized = False
         self.cam_id = None
         self.antiglare_enabled = False
         self.initialize_sensor()
 
     def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
-        sensor.reset(freq=16000000)
+        self.initialized = False
+        self.antiglare_enabled = False
         self.cam_id = sensor.get_id()
         if grayscale:
             sensor.set_pixformat(sensor.GRAYSCALE)
@@ -115,13 +117,20 @@ class Camera:
             img.rotation_corr(z_rotation=180)
         return img
 
+    def initialize_run(self):
+        self.initialize_sensor()
+        sensor.run(1)
+
+    def stop_sensor(self):
+        gc.collect()
+        sensor.run(0)
+
     def capture_qr_code_loop(self, callback):
         """Captures either singular or animated QRs and parses their contents until
         all parts of the message have been captured. The part data are then ordered
         and assembled into one message and returned.
         """
-        self.initialize_sensor()
-        sensor.run(1)
+        self.initialize_run()
 
         parser = QRPartParser()
 
@@ -130,6 +139,10 @@ class Camera:
         while True:
             wdt.feed()
             command = callback(parser.total_count(), parser.parsed_count(), new_part)
+            if not self.initialized:
+                # Ignores first callback as it may contain unintentional events
+                self.initialized = True
+                command = 0
             if command == 1:
                 break
             new_part = False
@@ -157,8 +170,7 @@ class Camera:
 
             if parser.is_complete():
                 break
-        gc.collect()
-        sensor.run(0)
+        self.stop_sensor()
 
         if parser.is_complete():
             return (parser.result(), parser.format)
@@ -168,8 +180,7 @@ class Camera:
         """Captures camera's entropy as the hash of image buffer"""
         import hashlib
 
-        self.initialize_sensor()
-        sensor.run(1)
+        self.initialize_run()
 
         command = 0
         while True:
@@ -178,6 +189,10 @@ class Camera:
             img = self.snapshot()
 
             command = callback()
+            if not self.initialized:
+                # Ignores first callback as it may contain unintentional events
+                self.initialized = True
+                command = 0
             if command > 0:
                 break
 
@@ -185,8 +200,7 @@ class Camera:
                 img.lens_corr(strength=1.0, zoom=0.56)
             lcd.display(img)
 
-        gc.collect()
-        sensor.run(0)
+        self.stop_sensor()
 
         # User cancelled
         if command == 2:

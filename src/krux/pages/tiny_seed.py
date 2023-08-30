@@ -5,13 +5,13 @@ import image
 import sensor
 import time
 from embit.wordlists.bip39 import WORDLIST
-from . import Page
+from . import Page, FLASH_MSG_TIME
 from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING, FLASH_MSG_TIME
+from ..display import DEFAULT_PADDING
 from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH, PRESSED
+from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
 # Tiny Seed last bit index positions according to checksums
 TS_LAST_BIT_NO_CS = 143
@@ -880,21 +880,14 @@ class TinyScanner(Page):
         self.ctx.display.clear()
 
     def _check_buttons(self, w24, page):
-        if time.ticks_ms() > self.time_frame + 1000:
-            enter_or_touch = (
-                self.ctx.input.enter_value() == PRESSED
-                or self.ctx.input.touch_value() == PRESSED
-            )
-            if w24:
-                if page == 0 and enter_or_touch:
-                    self.capturing = True
-            elif enter_or_touch:
-                return True
-            if (
-                self.ctx.input.page_value() == PRESSED
-                or self.ctx.input.page_prev_value() == PRESSED
-            ):
-                return True
+        enter_or_touch = self.ctx.input.enter_event() or self.ctx.input.touch_event()
+        if w24:
+            if page == 0 and enter_or_touch:
+                self.capturing = True
+        elif enter_or_touch:
+            return True
+        if self.ctx.input.page_event() or self.ctx.input.page_prev_event():
+            return True
         return False
 
     def _process_12w_scan(self, page_seed_numbers):
@@ -914,7 +907,7 @@ class TinyScanner(Page):
                     return words
                 # Else esc command was given, turn camera on again and reset words
                 self.ctx.display.clear()
-                self.ctx.display.flash_text(
+                self.flash_text(
                     t("Scanning words 1-12 again") + "\n\n" + t("Wait for the capture")
                 )
                 self._run_camera()
@@ -935,14 +928,14 @@ class TinyScanner(Page):
             self.capturing = False
             if words is not None:  # Fisrt 12 words confirmed, moving to 13-24
                 self.ctx.display.clear()
-                self.ctx.display.flash_text(
+                self.flash_text(
                     t("Scanning words 13-24") + "\n\n" + t("Wait for the capture")
                 )
                 self._run_camera()
                 return words
             # Esc command was given
             self.ctx.display.clear()
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Scanning words 1-12 again") + "\n\n" + t("TOUCH or ENTER to capture")
             )
             self._run_camera()  # Run camera and rotate screen after message was given
@@ -971,6 +964,7 @@ class TinyScanner(Page):
         if precamera_ticks + FLASH_MSG_TIME > postcamera_ticks:
             time.sleep_ms(precamera_ticks + FLASH_MSG_TIME - postcamera_ticks)
         del message, precamera_ticks, postcamera_ticks
+        self.ctx.input.flush_events()
         # # Debug FPS 1/4
         # clock = time.clock()
         # fps = 0

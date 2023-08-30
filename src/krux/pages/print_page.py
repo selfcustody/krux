@@ -52,7 +52,7 @@ class PrintPage(Page):
         if a printer is connected
         """
         if self.printer is None:
-            self.ctx.display.flash_text(t("Printer Driver not set!"), theme.error_color)
+            self.flash_text(t("Printer Driver not set!"), theme.error_color)
             return
         self.ctx.display.clear()
         if title:

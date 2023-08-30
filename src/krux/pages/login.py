@@ -260,7 +260,7 @@ class Login(Page):
                         if len(rolls) > 0:
                             rolls.pop()
                     elif len(rolls) < min_rolls:  # Not enough to Go
-                        self.ctx.display.flash_text(t("Not enough rolls!"))
+                        self.flash_text(t("Not enough rolls!"))
                     else:  # Go
                         break
 
@@ -293,12 +293,10 @@ class Login(Page):
     def _load_qr_passphrase(self):
         data, _ = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(
-                t("Failed to load passphrase"), theme.error_color
-            )
+            self.flash_text(t("Failed to load passphrase"), theme.error_color)
             return MENU_CONTINUE
         if len(data) > PASSPHRASE_MAX_LEN:
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN,
                 theme.error_color,
             )
@@ -414,7 +412,7 @@ class Login(Page):
                 key_capture = EncryptionKey(self.ctx)
                 key = key_capture.encryption_key()
                 if key is None:
-                    self.ctx.display.flash_text(t("Mnemonic was not decrypted"))
+                    self.flash_text(t("Mnemonic was not decrypted"))
                     return None
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(t("Processing ..."))
@@ -430,7 +428,7 @@ class Login(Page):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
             return MENU_CONTINUE
 
         words = []
@@ -465,7 +463,7 @@ class Login(Page):
             if not words:
                 words = self._encrypted_qr_code(data)
         if not words or (len(words) != 12 and len(words) != 24):
-            self.ctx.display.flash_text(t("Invalid mnemonic length"), theme.error_color)
+            self.flash_text(t("Invalid mnemonic length"), theme.error_color)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -773,7 +771,7 @@ class Login(Page):
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
         if words is None:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 

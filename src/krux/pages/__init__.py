@@ -43,12 +43,13 @@ MENU_CONTINUE = 0
 MENU_EXIT = 1
 MENU_SHUTDOWN = 2
 
+FLASH_MSG_TIME = 2000
+
 ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
 ANTI_GLARE_WAIT_TIME = 500
 QR_CODE_STEP_TIME = 100
-CAMERA_INIT_TIME = 1000
 SHUTDOWN_WAIT_TIME = 300
 
 TOGGLE_BRIGHTNESS = (BUTTON_PAGE, BUTTON_PAGE_PREV)
@@ -84,6 +85,20 @@ class Page:
         if answer:
             return ESC_KEY
         return None
+
+    def flash_text(
+        self,
+        text,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+        duration=FLASH_MSG_TIME,
+    ):
+        """Flashes text centered on the display for duration ms"""
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(text, color, bg_color)
+        time.sleep_ms(duration)
+        self.ctx.display.clear()
+        self.ctx.input.flush_events()
 
     def capture_from_keypad(
         self,
@@ -170,40 +185,35 @@ class Page:
 
         def callback(part_total, num_parts_captured, new_part):
             # Turn on the light as long as the enter button is held down (M5stickV and Amigo)
-            if self._time_to_check_input():
-                if self.ctx.light:
-                    if self.ctx.input.enter_value() == PRESSED:
-                        self.ctx.light.turn_on()
+            if self.ctx.light:
+                if self.ctx.input.enter_value() == PRESSED:
+                    self.ctx.light.turn_on()
+                else:
+                    self.ctx.light.turn_off()
+            # If board don't have light, ENTER stops the capture
+            elif self.ctx.input.enter_event():
+                return 1
+
+            # Anti-glare mode (M5stickV and Amigo)
+            if self.ctx.input.page_event():
+                if self.ctx.camera.has_antiglare():
+                    self._time_frame = time.ticks_ms()
+                    self.ctx.display.to_portrait()
+                    if not self.ctx.camera.antiglare_enabled:
+                        self.ctx.camera.enable_antiglare()
+                        self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
                     else:
-                        self.ctx.light.turn_off()
-                # If board don't have light, ENTER stops the capture
-                elif self.ctx.input.enter_value() == PRESSED:
-                    return 1
+                        self.ctx.camera.disable_antiglare()
+                        self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
+                    time.sleep_ms(ANTI_GLARE_WAIT_TIME)
+                    self.ctx.display.to_landscape()
+                    self.ctx.input.flush_events()
+                    return 0
+                return 1
 
-                # Anti-glare mode (M5stickV and Amigo)
-                if self.ctx.input.page_value() == PRESSED:
-                    if self.ctx.camera.has_antiglare():
-                        self._time_frame = time.ticks_ms()
-                        self.ctx.display.to_portrait()
-                        if not self.ctx.camera.antiglare_enabled:
-                            self.ctx.camera.enable_antiglare()
-                            self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
-                        else:
-                            self.ctx.camera.disable_antiglare()
-                            self.ctx.display.draw_centered_text(
-                                t("Anti-glare disabled")
-                            )
-                        time.sleep_ms(ANTI_GLARE_WAIT_TIME)
-                        self.ctx.display.to_landscape()
-                        return 0
-                    return 1
-
-                # Exit the capture loop with PAGE_PREV or TOUCH
-                if (
-                    self.ctx.input.page_prev_value() == PRESSED
-                    or self.ctx.input.touch_value() == PRESSED
-                ):
-                    return 1
+            # Exit the capture loop with PAGE_PREV or TOUCH
+            if self.ctx.input.page_prev_event() or self.ctx.input.touch_event():
+                return 1
 
             # Indicate progress to the user that a new part was captured
             if new_part:
@@ -248,28 +258,18 @@ class Page:
             )
         return (code, qr_format)
 
-    def _time_to_check_input(self):
-        return time.ticks_ms() > self._time_frame + CAMERA_INIT_TIME
-
     def capture_camera_entropy(self):
         "Helper to capture camera's entropy as the hash of image buffer"
         self._time_frame = time.ticks_ms()
 
         def callback():
-            if self._time_to_check_input():
-                # Accepted
-                if (
-                    self.ctx.input.enter_value() == PRESSED
-                    or self.ctx.input.touch_value() == PRESSED
-                ):
-                    return 1
+            # Accepted
+            if self.ctx.input.enter_event() or self.ctx.input.touch_event():
+                return 1
 
-                # Exited
-                if (
-                    self.ctx.input.page_value() == PRESSED
-                    or self.ctx.input.page_prev_value() == PRESSED
-                ):
-                    return 2
+            # Exited
+            if self.ctx.input.page_event() or self.ctx.input.page_prev_event():
+                return 2
             return 0
 
         self.ctx.display.clear()
@@ -320,11 +320,13 @@ class Page:
             )
             self.ctx.display.draw_hcentered_text(subtitle, offset_y)
             i = (i + 1) % num_parts
-            # There are cases we can allow any btn to change the screen
+            self.ctx.input.buttons_active = True
             btn = self.ctx.input.wait_for_button(num_parts == 1)
             if btn in TOGGLE_BRIGHTNESS:
                 bright = not bright
             elif btn in PROCEED:
+                if self.ctx.input.touch is not None:
+                    self.ctx.input.buttons_active = False
                 done = True
             # interval done in input.py using timers
 
@@ -556,6 +558,7 @@ class Menu:
                 self._draw_menu(selected_item_index)
 
             self.draw_status_bar()
+            self.ctx.input.flush_events()
 
             if start_from_submenu:
                 status = self._clicked_item(selected_item_index)

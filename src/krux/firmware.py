@@ -32,6 +32,8 @@ from .display import Display
 from .krux_settings import t
 from .wdt import wdt
 
+FLASH_MSG_TIME = 2000
+
 MAX_FIRMWARE_SIZE = 0x300000
 
 FIRMWARE_SLOT_1 = 0x00080000
@@ -171,6 +173,13 @@ def sha256(firmware_filename, firmware_size=None):
 def upgrade():
     """Installs new firmware from SD card"""
 
+    def flash_text(text):
+        """Flashes text centered on the display for duration ms"""
+        display.clear()
+        display.draw_centered_text(text)
+        time.sleep_ms(FLASH_MSG_TIME)
+        display.clear()
+
     firmware_path = ""
     try:
         firmware_filenames = list(
@@ -204,21 +213,21 @@ def upgrade():
         return False
 
     if new_size > MAX_FIRMWARE_SIZE:
-        display.flash_text(t("Firmware exceeds max size: %d") % MAX_FIRMWARE_SIZE)
+        flash_text(t("Firmware exceeds max size: %d") % MAX_FIRMWARE_SIZE)
         return False
 
     pubkey = None
     try:
         pubkey = ec.PublicKey.from_string(SIGNER_PUBKEY)
     except:
-        display.flash_text(t("Invalid public key"))
+        flash_text(t("Invalid public key"))
         return False
-
+    
     sig = None
     try:
         sig = open(firmware_path + ".sig", "rb").read()
     except:
-        display.flash_text(t("Missing signature file"))
+        flash_text(t("Missing signature file"))
         return False
 
     try:
@@ -237,7 +246,7 @@ def upgrade():
         boot_config_sector = flash.read(BACKUP_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
         address, _, entry_index = find_active_firmware(boot_config_sector)
         if address is None:
-            display.flash_text(t("Invalid bootloader"))
+            flash_text(t("Invalid bootloader"))
             return False
 
     # Write new firmware to the opposite slot
@@ -276,5 +285,5 @@ def upgrade():
         4096,
     )
 
-    display.flash_text(t("Upgrade complete.\n\nShutting down.."))
+    flash_text(t("Upgrade complete.\n\nShutting down.."))
     return True

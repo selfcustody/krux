@@ -227,7 +227,7 @@ class Home(Page):
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
         if wallet_data is None:
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Failed to load output descriptor"), theme.error_color
             )
             return MENU_CONTINUE
@@ -245,7 +245,7 @@ class Home(Page):
                     "Wallet output descriptor: %s"
                     % self.ctx.wallet.descriptor.to_string()
                 )
-                self.ctx.display.flash_text(t("Wallet output descriptor loaded!"))
+                self.flash_text(t("Wallet output descriptor loaded!"))
 
                 # BlueWallet single sig descriptor without fingerprint
                 if (
@@ -318,7 +318,7 @@ class Home(Page):
 
         if data is None:
             # Both the camera and the file on SD card failed!
-            self.ctx.display.flash_text(t("Failed to load PSBT"), theme.error_color)
+            self.flash_text(t("Failed to load PSBT"), theme.error_color)
             return MENU_CONTINUE
 
         # PSBT read OK! Will try to sign
@@ -428,7 +428,7 @@ class Home(Page):
                 pass
 
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load message"), theme.error_color)
+            self.flash_text(t("Failed to load message"), theme.error_color)
             return MENU_CONTINUE
 
         # message read OK!
@@ -551,7 +551,7 @@ class Home(Page):
                         else:
                             sd.write(filename, data)
                         self.ctx.display.clear()
-                        self.ctx.display.flash_text(
+                        self.flash_text(
                             t("Saved to SD card:\n%s") % filename
                         )
                 else:

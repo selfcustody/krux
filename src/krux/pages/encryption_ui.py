@@ -78,10 +78,10 @@ class EncryptionKey(Page):
         """Loads and returns a key from a QR code"""
         data, _ = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load key"), theme.error_color)
+            self.flash_text(t("Failed to load key"), theme.error_color)
             return None
         if len(data) > ENCRYPTION_KEY_MAX_LEN:
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Maximum length exceeded (%s)") % ENCRYPTION_KEY_MAX_LEN,
                 theme.error_color,
             )
@@ -127,7 +127,7 @@ class EncryptMnemonic(Page):
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
-            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
+            self.flash_text(t("Mnemonic was not encrypted"))
             return
 
         version = Settings().encryption.version
@@ -156,7 +156,7 @@ class EncryptMnemonic(Page):
         if mnemonic_id in (None, ESC_KEY):
             mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
         if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("ID already exists\n") + t("Encrypted mnemonic was not stored")
             )
             del mnemonic_storage
@@ -181,7 +181,7 @@ class EncryptMnemonic(Page):
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
-            self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
+            self.flash_text(t("Mnemonic was not encrypted"))
             return
         version = Settings().encryption.version
         i_vector = None
@@ -191,7 +191,7 @@ class EncryptMnemonic(Page):
                 t("Aditional entropy from camera required for AES-CBC mode")
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-                self.ctx.display.flash_text(t("Mnemonic was not encrypted"))
+                self.flash_text(t("Mnemonic was not encrypted"))
                 return
             i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
         mnemonic_id = None
