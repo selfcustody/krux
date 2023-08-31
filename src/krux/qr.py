@@ -195,8 +195,11 @@ def parse_pmofn_qr_part(data):
 def detect_format(data):
     """Detects the QR format of the given data"""
     qr_format = FORMAT_NONE
-    if data.startswith("p") and data.index("of") <= 5:
-        qr_format = FORMAT_PMOFN
-    elif data.lower().startswith("ur:"):
-        qr_format = FORMAT_UR
+    try:
+        if data.startswith("p") and data.index("of") <= 5:
+            qr_format = FORMAT_PMOFN
+        elif data.lower().startswith("ur:"):
+            qr_format = FORMAT_UR
+    except:
+        pass
     return qr_format
