@@ -145,3 +145,13 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
                 break
             i += 1
         assert len(codes) == expected_parts
+
+
+def test_detect_plaintext_qr(mocker, m5stickv):
+    from krux.qr import detect_format
+
+    PLAINTEXT_QR_DATA = (
+        "process swim repair fit artist rebuild remove vanish city opinion hawk coconut"
+    )
+
+    detect_format(PLAINTEXT_QR_DATA)
