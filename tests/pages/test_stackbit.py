@@ -7,7 +7,7 @@ def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     case = [
-        Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+        Wallet(tdata.SINGLESIG_24_WORD_KEY),
         None,
         [
             BUTTON_PAGE,
@@ -38,7 +38,7 @@ def test_export_mnemonic_stackbit_amigo(mocker, amigo_tft, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     case = [
-        Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+        Wallet(tdata.SINGLESIG_24_WORD_KEY),
         None,
         [
             BUTTON_PAGE,

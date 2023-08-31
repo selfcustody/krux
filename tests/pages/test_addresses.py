@@ -11,8 +11,8 @@ def test_scan_address(mocker, m5stickv, tdata):
     cases = [
         # Single-sig, loaded, owned address, No print prompt, search successful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
             None,
@@ -21,8 +21,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, not loaded, owned address, No print prompt, search successful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             False,
             "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
             None,
@@ -31,8 +31,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, owned address, Print, search successful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
             MockPrinter(),
@@ -41,8 +41,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, owned address, Decline to print, search successful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
             MockPrinter(),
@@ -91,8 +91,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned address, No print prompt, search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
             None,
@@ -111,8 +111,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/44 address, No print prompt, skip search
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ",
             None,
@@ -121,8 +121,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/44 address, No print prompt, search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ",
             None,
@@ -131,8 +131,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/44 address, No print prompt, 2x search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ",
             None,
@@ -141,8 +141,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/48/0/0/2 address, No print prompt, search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k",
             None,
@@ -151,8 +151,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/84 address, No print prompt, search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn",
             None,
@@ -161,8 +161,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/49 address, No print prompt, search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg",
             None,
@@ -171,8 +171,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/0 address, No print prompt, search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw",
             None,
@@ -181,8 +181,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/0 address, Print, search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw",
             MockPrinter(),
@@ -191,8 +191,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, unowned m/0 address, Decline to print, search unsuccessful
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw",
             MockPrinter(),
@@ -201,8 +201,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, fail to capture QR of address, No print prompt, can't search
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             None,
             None,
@@ -211,8 +211,8 @@ def test_scan_address(mocker, m5stickv, tdata):
         ),
         # Single-sig, loaded, invalid address, No print prompt, can't search
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             True,
             "invalidaddress",
             None,
@@ -258,8 +258,8 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
     cases = [
         # Single-sig, loaded, No print prompt, show address nº1
         (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             False,
             "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
             None,

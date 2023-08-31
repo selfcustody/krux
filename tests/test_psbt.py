@@ -156,7 +156,7 @@ def tdata(mocker):
     )
 
 
-def test_init_singlekey(mocker, m5stickv, tdata):
+def test_init_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
     from krux.key import Key
@@ -227,7 +227,7 @@ def test_init_fails_on_invalid_psbt(mocker, m5stickv, tdata):
             PSBTSigner(wallet, case[0], case[1])
 
 
-def test_sign_singlekey(mocker, m5stickv, tdata):
+def test_sign_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
     from krux.key import Key
@@ -256,7 +256,7 @@ def test_sign_singlekey(mocker, m5stickv, tdata):
 
     num = 0
     for case in cases:
-        print("test_sign_singlekey case: ", num)
+        print("test_sign_singlesig case: ", num)
         num += 1
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
@@ -312,7 +312,7 @@ def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
     signer.psbt.sign_with.assert_called_with(wallet.key.root)
 
 
-def test_outputs_singlekey(mocker, m5stickv, tdata):
+def test_outputs_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
     from krux.key import Key
