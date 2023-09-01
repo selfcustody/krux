@@ -96,15 +96,18 @@ class Input:
 
     def enter_value(self):
         """Intermediary method to pull button ENTER state"""
-        return self.enter.value()
+        if self.enter is not None:
+            return self.enter.value()
 
     def page_value(self):
         """Intermediary method to pull button PAGE state"""
-        return self.page.value()
+        if self.page is not None:
+            return self.page.value()
 
     def page_prev_value(self):
         """Intermediary method to pull button PAGE_PREV state"""
-        return self.page_prev.value()
+        if self.page_prev is not None:
+            return self.page_prev.value()
 
     def touch_value(self):
         """Intermediary method to pull touch state, if touch available"""
@@ -114,15 +117,18 @@ class Input:
 
     def enter_event(self):
         """Intermediary method to pull button ENTER event"""
-        return self.enter.event()
+        if self.enter is not None:
+            return self.enter.event()
 
     def page_event(self):
         """Intermediary method to pull button PAGE state"""
-        return self.page.event()
+        if self.page is not None:
+            return self.page.event()
 
     def page_prev_event(self):
         """Intermediary method to pull button PAGE_PREV state"""
-        return self.page_prev.event()
+        if self.page_prev is not None:
+            return self.page_prev.event()
 
     def touch_event(self):
         if self.touch is not None:
@@ -229,7 +235,7 @@ class Input:
 
     def flush_events(self):
         """Clean eventual event flags unintentionally collected"""
-        _ = self.enter_event()
-        _ = self.page_event()
-        _ = self.page_prev_event()
-        _ = self.touch_event()
+        self.enter_event()
+        self.page_event()
+        self.page_prev_event()
+        self.touch_event()

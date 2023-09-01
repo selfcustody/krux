@@ -55,12 +55,12 @@ class Camera:
         else:
             sensor.set_pixformat(sensor.RGB565)
         if self.cam_id == OV5642_ID:
+            sensor.set_hmirror(1)
+        if self.cam_id == OV2640_ID:
+            sensor.set_vflip(1)
+        if board.config["type"] == "bit":
             # CIF mode will use central pixels and discard darker periphery
             sensor.set_framesize(sensor.CIF)
-            sensor.set_hmirror(1)
-        elif self.cam_id == OV2640_ID:
-            sensor.set_framesize(sensor.CIF)
-            sensor.set_vflip(1)
         else:
             sensor.set_framesize(sensor.QVGA)
         if self.cam_id == OV7740_ID:
@@ -151,9 +151,8 @@ class Camera:
     def snapshot(self):
         """Helper to take a customized snapshot from sensor"""
         img = sensor.snapshot()
-        if self.cam_id in (OV2640_ID, OV5642_ID):
+        if board.config["type"] == "bit":
             img.lens_corr(strength=1.1)
-        if self.cam_id == OV2640_ID:
             img.rotation_corr(z_rotation=180)
         return img
 

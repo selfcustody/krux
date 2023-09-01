@@ -347,7 +347,7 @@ class Settings(SettingsNamespace):
         self.printer = PrinterSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
-        if board.config["type"].startswith("amigo"):
+        if board.config["type"].startswith("amigo") or board.config["type"] == "yahboom":
             self.touch = TouchSettings()
         if board.config["type"] == "dock":
             self.encoder = EncoderSettings()
@@ -363,7 +363,7 @@ class Settings(SettingsNamespace):
             "printer": t("Printer"),
             "appearance": t("Theme"),
         }
-        if board.config["type"].startswith("amigo"):
+        if board.config["type"].startswith("amigo") or board.config["type"] == "yahboom":
             main_menu["touchscreen"] = t("Touchscreen")
         if board.config["type"] == "dock":
             main_menu["encoder"] = t("Encoder")
