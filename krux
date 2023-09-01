@@ -74,7 +74,7 @@ elif [ "$1" == "flash" ]; then
     elif [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_amigo_tft" ]||[ "$device" == "maixpy_bit" ]; then
         # https://devicehunt.com/view/type/usb/vendor/0403/device/6010
         device_vendor_product_id="0403:6010"
-    elif [ "$device" == "maixpy_dock" ]; then
+    elif [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]; then
         # https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
         device_vendor_product_id="1a86:7523"
     fi
@@ -191,7 +191,7 @@ elif [ "$1" == "build-release" ]; then
     cp -f ktool-win.exe ../$release_dir/ktool-win.exe
     cd ..
 
-    devices=("maixpy_m5stickv" "maixpy_amigo_ips" "maixpy_amigo_tft" "maixpy_bit" "maixpy_dock")
+    devices=("maixpy_m5stickv" "maixpy_amigo_ips" "maixpy_amigo_tft" "maixpy_bit" "maixpy_dock" "maixpy_yahboom")
     for device in ${devices[@]}; do
         ./krux build $device
         mkdir -p $release_dir/$device
