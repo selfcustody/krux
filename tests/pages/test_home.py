@@ -14,13 +14,13 @@ def tdata(mocker):
     TEST_24_WORD_MNEMONIC = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     SIGNING_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
-    SINGLEKEY_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, False, NETWORKS["main"])
-    SINGLEKEY_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, False, NETWORKS["main"])
+    SINGLESIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, False, NETWORKS["main"])
+    SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, False, NETWORKS["main"])
     MULTISIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, True, NETWORKS["main"])
-    SINGLEKEY_SIGNING_KEY = Key(SIGNING_MNEMONIC, False, NETWORKS["main"])
+    SINGLESIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, False, NETWORKS["main"])
     MULTISIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, True, NETWORKS["main"])
 
-    SPECTER_SINGLEKEY_WALLET_DATA = '{"label": "Specter Singlekey Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
+    SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
     SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
 
     P2WPKH_PSBT = b'psbt\xff\x01\x00q\x02\x00\x00\x00\x01\xcf<X\xc3)\x82\xae P\x88\xd9\xbdI\xeb\x9b\x02\xac\xdfM=\xaev\xa5\x16\xc6\xb3\x06\xb1]\xe3\xa1N\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x02|?]\x05\x00\x00\x00\x00\x16\x00\x14/4\xaa\x1c\xf0\nS\xb0U\xa2\x91\xa0:}E\xf0\xa6\x98\x8bR\x80\x96\x98\x00\x00\x00\x00\x00\x16\x00\x14\xe6j\xfe\xff\xc3\x83\x8eq\xf0\xa2{\x07\xe3\xb0\x0e\xdej\xe8\xe1`\x00\x00\x00\x00\x00\x01\x01\x1f\x00\xe1\xf5\x05\x00\x00\x00\x00\x16\x00\x14\xd0\xc4\xa3\xef\t\xe9\x97\xb6\xe9\x9e9~Q\x8f\xe3\xe4\x1a\x11\x8c\xa1"\x06\x02\xe7\xab%7\xb5\xd4\x9e\x97\x03\t\xaa\xe0n\x9eI\xf3l\xe1\xc9\xfe\xbb\xd4N\xc8\xe0\xd1\xcc\xa0\xb4\xf9\xc3\x19\x18s\xc5\xda\nT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00"\x02\x03]I\xec\xcdT\xd0\t\x9eCgbw\xc7\xa6\xd4b]a\x1d\xa8\x8a]\xf4\x9b\xf9Qzw\x91\xa7w\xa5\x18s\xc5\xda\nT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00'
@@ -42,12 +42,12 @@ def tdata(mocker):
             "TEST_12_WORD_MNEMONIC",
             "TEST_24_WORD_MNEMONIC",
             "SIGNING_MNEMONIC",
-            "SINGLEKEY_12_WORD_KEY",
-            "SINGLEKEY_24_WORD_KEY",
+            "SINGLESIG_12_WORD_KEY",
+            "SINGLESIG_24_WORD_KEY",
             "MULTISIG_12_WORD_KEY",
-            "SINGLEKEY_SIGNING_KEY",
+            "SINGLESIG_SIGNING_KEY",
             "MULTISIG_SIGNING_KEY",
-            "SPECTER_SINGLEKEY_WALLET_DATA",
+            "SPECTER_SINGLESIG_WALLET_DATA",
             "SPECTER_MULTISIG_WALLET_DATA",
             "P2WPKH_PSBT",
             "SIGNED_P2WPKH_PSBT",
@@ -62,12 +62,12 @@ def tdata(mocker):
         TEST_12_WORD_MNEMONIC,
         TEST_24_WORD_MNEMONIC,
         SIGNING_MNEMONIC,
-        SINGLEKEY_12_WORD_KEY,
-        SINGLEKEY_24_WORD_KEY,
+        SINGLESIG_12_WORD_KEY,
+        SINGLESIG_24_WORD_KEY,
         MULTISIG_12_WORD_KEY,
-        SINGLEKEY_SIGNING_KEY,
+        SINGLESIG_SIGNING_KEY,
         MULTISIG_SIGNING_KEY,
-        SPECTER_SINGLEKEY_WALLET_DATA,
+        SPECTER_SINGLESIG_WALLET_DATA,
         SPECTER_MULTISIG_WALLET_DATA,
         P2WPKH_PSBT,
         SIGNED_P2WPKH_PSBT,
@@ -112,7 +112,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
     cases = [
         # See 12 Words
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
             [
                 BUTTON_ENTER,
@@ -123,7 +123,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
         ),
         # See 24 Words
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             None,
             [
                 BUTTON_ENTER,
@@ -135,7 +135,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
         ),
         # See and print 24 Words
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Words
@@ -170,7 +170,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
     cases = [
         # No print prompt
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,  # printer
             [
                 BUTTON_PAGE,
@@ -182,7 +182,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             ],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             None,  # printer
             [
                 BUTTON_PAGE,
@@ -195,7 +195,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         ),
         # Print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
@@ -208,7 +208,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             ],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
@@ -222,7 +222,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         ),
         # Decline to print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
@@ -235,7 +235,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             ],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
@@ -279,7 +279,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
     cases = [
         # No print prompt
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
             [
                 BUTTON_PAGE,
@@ -294,7 +294,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             ],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             None,
             [
                 BUTTON_PAGE,
@@ -310,7 +310,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
         ),
         # Print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
@@ -326,7 +326,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             ],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
@@ -343,7 +343,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
         ),
         # Decline to print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
@@ -359,7 +359,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             ],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
@@ -399,7 +399,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
     cases = [
         # No print prompt
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
             [
                 BUTTON_TOUCH,
@@ -411,7 +411,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             [1, 0],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             None,
             [
                 BUTTON_TOUCH,
@@ -424,7 +424,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
         ),
         # Print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_TOUCH,
@@ -437,7 +437,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             [1, 0, 0],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_TOUCH,
@@ -451,7 +451,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
         ),
         # Decline to print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_TOUCH,
@@ -464,7 +464,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             [1, 0, 1],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_TOUCH,
@@ -510,7 +510,7 @@ def test_public_key(mocker, m5stickv, tdata):
     cases = [
         # No print prompt
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
@@ -521,7 +521,7 @@ def test_public_key(mocker, m5stickv, tdata):
         ),
         # Print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_ENTER,
@@ -546,7 +546,7 @@ def test_public_key(mocker, m5stickv, tdata):
         ),
         # Decline to print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_ENTER,
@@ -617,52 +617,52 @@ def test_wallet(mocker, m5stickv, tdata):
         # Don't load
         (
             False,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
             [BUTTON_PAGE],
         ),
         # Load, good data, accept
         (
             False,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # Load, good data, decline
         (
             False,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
             [BUTTON_ENTER, BUTTON_PAGE],
         ),
         # Load, bad capture
-        (False, tdata.SINGLEKEY_12_WORD_KEY, None, None, [BUTTON_ENTER]),
+        (False, tdata.SINGLESIG_12_WORD_KEY, None, None, [BUTTON_ENTER]),
         # Load, bad wallet data
-        (False, tdata.SINGLEKEY_12_WORD_KEY, "{}", None, [BUTTON_ENTER, BUTTON_ENTER]),
+        (False, tdata.SINGLESIG_12_WORD_KEY, "{}", None, [BUTTON_ENTER, BUTTON_ENTER]),
         # No print prompt
         (
             True,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
             [BUTTON_ENTER],
         ),
         # Print
         (
             True,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # Decline to print
         (
             True,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
             [BUTTON_ENTER, BUTTON_PAGE],
         ),
@@ -717,7 +717,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         # Single-sig, not loaded, no format => pmofn, sign, No print prompt
         (
             # Case 0
-            tdata.SINGLEKEY_SIGNING_KEY,  # 0 wallet
+            tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
             None,  # 1 wallet
             False,  # 2 if True: wallet will be #1 instead
             tdata.P2WPKH_PSBT_B64,  # 3 capture_qr_code return 1
@@ -740,7 +740,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         # Single-sig, not loaded, pmofn, sign, No print prompt
         (
             # Case 1
-            tdata.SINGLEKEY_SIGNING_KEY,
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WPKH_PSBT_B64,
@@ -762,7 +762,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         # Single-sig, not loaded, pmofn, sign, Print
         (
             # Case 2
-            tdata.SINGLEKEY_SIGNING_KEY,
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WPKH_PSBT_B64,
@@ -785,7 +785,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         # Single-sig, not loaded, pmofn, sign, Decline to print
         (
             # Case 3
-            tdata.SINGLEKEY_SIGNING_KEY,
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WPKH_PSBT_B64,
@@ -808,7 +808,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         # Single-sig, not loaded, pmofn, decline to sign
         (
             # Case 4
-            tdata.SINGLEKEY_SIGNING_KEY,
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WPKH_PSBT_B64,
@@ -829,7 +829,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         # Single-sig, not loaded, failed to capture PSBT QR
         (
             # Case 5
-            tdata.SINGLEKEY_SIGNING_KEY,
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             None,
@@ -927,7 +927,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         # Single-sig, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
             # Case 10
-            tdata.SINGLEKEY_SIGNING_KEY,  # 0 wallet
+            tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
             None,
             False,
             tdata.P2WPKH_PSBT,  # 3 capture_qr_code return 1
@@ -1037,7 +1037,7 @@ def test_sign_message(mocker, m5stickv, tdata):
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # Hex-encoded hash, Sign, No print prompt
+        # 0 Hex-encoded hash, Sign, No print prompt
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",  # 0 data for capture_qr_code
             FORMAT_NONE,  # 1 qr_format for capture_qr_code
@@ -1048,7 +1048,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
             None,  # 6 SD file
         ),
-        # Hash, Sign, No print prompt
+        # 1 Hash, Sign, No print prompt
         (
             binascii.unhexlify(
                 "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7"
@@ -1060,7 +1060,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Message, Sign, No print prompt
+        # 2 Message, Sign, No print prompt
         (
             "hello world",
             FORMAT_NONE,
@@ -1070,7 +1070,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # 64-byte message, Sign, No print prompt
+        # 3 64-byte message, Sign, No print prompt
         (
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
             FORMAT_NONE,
@@ -1080,7 +1080,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Sign, Print
+        # 4 Hex-encoded hash, Sign, Print
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -1098,7 +1098,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Sign, Decline to print
+        # 5 Hex-encoded hash, Sign, Decline to print
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -1116,7 +1116,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Decline to sign
+        # 6 Hex-encoded hash, Decline to sign
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -1126,9 +1126,9 @@ def test_sign_message(mocker, m5stickv, tdata):
             None,
             None,
         ),
-        # Failed to capture message QR
+        # 7 Failed to capture message QR
         (None, FORMAT_NONE, None, [], None, None, None),
-        # Message, Sign, Save to SD, No print prompt
+        # 8 Message, Sign, Save to SD, No print prompt
         (
             "hello world",  # 0 data for capture_qr_code
             FORMAT_NONE,  # 1 qr_format for capture_qr_code
@@ -1140,7 +1140,10 @@ def test_sign_message(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # QRCode pass
                 BUTTON_ENTER,  # Public Key pass
                 BUTTON_ENTER,  # QRCode pass
-                BUTTON_ENTER,  # Yes save SD
+                BUTTON_ENTER,  # Yes save signed on SD
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Press "Go"
+                BUTTON_ENTER,  # Yes save pubkey on SD
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Press "Go"
             ],
@@ -1159,7 +1162,7 @@ def test_sign_message(mocker, m5stickv, tdata):
     for case in cases:
         print("test_sign_message case: ", num)
         num += 1
-        wallet = Wallet(tdata.SINGLEKEY_SIGNING_KEY)
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
 
         ctx = create_ctx(mocker, case[3], wallet, case[2])
         home = Home(ctx)

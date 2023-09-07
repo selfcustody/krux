@@ -42,15 +42,15 @@ Selecting `single-sig` will derive an xpub using the derivation path `m/84'/0'/0
 
     Choose to create a *Single key wallet* when it asks which type of wallet you want on the following screen.
 
-    <img src="../../img/specter/select-wallet-type-screen-singlekey-400.png">
+    <img src="../../img/specter/select-wallet-type-screen-singlesig-400.png">
 
     Select the device you just added.
 
-    <img src="../../img/specter/pick-device-screen-singlekey-400.png">
+    <img src="../../img/specter/pick-device-screen-singlesig-400.png">
 
     Give your wallet a name and make sure to select *Segwit* for the wallet type, then press *Create wallet*.
 
-    <img src="../../img/specter/create-singlekey-wallet-screen-600.png">
+    <img src="../../img/specter/create-singlesig-wallet-screen-600.png">
 
     Congrats, you just created a single-sig wallet with your key!
     
@@ -58,11 +58,11 @@ Selecting `single-sig` will derive an xpub using the derivation path `m/84'/0'/0
 
     In Sparrow, create a new wallet by going to *File > New Wallet* and give it a name.
     
-    <img src="../../img/sparrow/new-singlekey-wallet-400.png">
+    <img src="../../img/sparrow/new-singlesig-wallet-400.png">
 
     On the wallet screen, make sure to select a *Single Signature* policy type with the *Native Segwit (P2WPKH)* script type.
 
-    <img src="../../img/sparrow/singlekey-wallet-settings-400.png">
+    <img src="../../img/sparrow/singlesig-wallet-settings-400.png">
 
     Now, you will need to import your public key. To do so, press the *Airgapped Hardware Wallet* button under *Keystores*. On the screen that pops up, Krux is not listed as one of the available device types, so look for the *Specter DIY* option and click its *Scan...* button.
 
@@ -75,7 +75,7 @@ Selecting `single-sig` will derive an xpub using the derivation path `m/84'/0'/0
 
     It should import the xpub and show a key under *Keystores* like the following:
 
-    <img src="../../img/sparrow/keystore-singlekey-key-settings-600.png">
+    <img src="../../img/sparrow/keystore-singlesig-key-settings-600.png">
 
     If everything looks right, click the blue *Apply* button to create your wallet.
 
@@ -102,7 +102,7 @@ Selecting `single-sig` will derive an xpub using the derivation path `m/84'/0'/0
 
     It should import the key and create a watch-only wallet. From here, you can send or receive.
 
-    <img src="../../img/blue/singlekey-wallet-home-400.png">
+    <img src="../../img/blue/singlesig-wallet-home-400.png">
 
     Congrats, you just created a single-sig wallet with your key!
 
@@ -146,11 +146,11 @@ Selecting `single-sig` will derive an xpub using the derivation path `m/84'/0'/0
 
     Load the wallet into Krux by tapping the ellipsis in the top-right to see the wallet settings.
     
-    <img src="../../img/blue/singlekey-wallet-home-400.png">
+    <img src="../../img/blue/singlesig-wallet-home-400.png">
 
     From here, tap *Export/Backup* in order to display a QR code of your wallet.
 
-    <img src="../../img/blue/export-singlekey-wallet-400.png">
+    <img src="../../img/blue/export-singlesig-wallet-400.png">
 
     In Krux, select the *Wallet* menu item option and scan the QR code.
 
@@ -174,7 +174,7 @@ Selecting `single-sig` will derive an xpub using the derivation path `m/84'/0'/0
 
     Navigate to the *Receive* screen where you should see a receive address that you can send funds to.
 
-    <img src="../../img/sparrow/singlekey-receive-address-600.png">
+    <img src="../../img/sparrow/singlesig-receive-address-600.png">
 
 === "BlueWallet"
 
