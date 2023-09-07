@@ -136,6 +136,7 @@ class Tools(Page):
 
             from .qr_view import SeedQRView
 
-            seed_qr_view = SeedQRView(self.ctx, data=text, title="Custom QR Code")
+            title = t("Custom QR Code")
+            seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
             return seed_qr_view.display_seed_qr()
         return MENU_CONTINUE
