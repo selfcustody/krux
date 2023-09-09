@@ -10,7 +10,7 @@ def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
     PRINT_LINES_24W = 312
 
     case = [
-        Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+        Wallet(tdata.SINGLESIG_24_WORD_KEY),
         MockPrinter(),
         [
             BUTTON_PAGE,
@@ -49,8 +49,8 @@ def test_export_tiny_seed(m5stickv, mocker):
     TEST_24_WORD_MNEMONIC = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     # Amount of rectangles filled for this mnemonic + menus
     FILLED_RECTANGLES = 189
-    SINGLEKEY_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, False, NETWORKS["main"])
-    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(SINGLEKEY_24_WORD_KEY), MockPrinter())
+    SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, False, NETWORKS["main"])
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(SINGLESIG_24_WORD_KEY), MockPrinter())
     tiny_seed = TinySeed(ctx)
     tiny_seed.export()
 
