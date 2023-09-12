@@ -74,11 +74,14 @@ if args.sd:
     from kruxsim.mocks import uopen
     from kruxsim.mocks import uos
 
+from kruxsim.mocks import uos_functions
+
 from kruxsim.mocks import usys
 from kruxsim.mocks import utime
 from kruxsim.mocks import fpioa_manager
 from kruxsim.mocks import Maix
 from kruxsim.mocks import flash
+from kruxsim.mocks import lcd
 from kruxsim.mocks import machine
 from kruxsim.mocks import image
 from kruxsim.mocks import pmu
@@ -89,9 +92,11 @@ if args.printer:
 from kruxsim.mocks import secp256k1
 from kruxsim.mocks import qrcode
 from kruxsim.mocks import sensor
-from kruxsim.mocks import lcd
+
 from kruxsim.mocks import ft6x36
 from kruxsim.sequence import SequenceExecutor
+
+from kruxsim.mocks import rotary
 
 sequence_executor = None
 if args.sequence:
@@ -108,6 +113,10 @@ def run_krux():
         exec(boot_file.read())
 
 
+# mock for SD
+if args.sd:
+    from kruxsim.mocks import sd_card
+
 t = threading.Thread(target=run_krux)
 t.daemon = True
 
@@ -118,6 +127,10 @@ buffer_image = screen.copy().convert()
 pg.display.set_caption("Krux Simulator")
 
 device_image = devices.load_image(args.device)
+
+if(args.device == devices.PC):
+    from kruxsim.mocks.board import BOARD_CONFIG
+    BOARD_CONFIG["type"] = "amigo_type"
 
 t.start()
 

@@ -23,7 +23,7 @@ def test_init(mocker, m5stickv, tdata):
 def test_log(mocker, m5stickv, tdata):
     m = mocker.mock_open()
     mocker.patch("builtins.open", m)
-    from krux.logging import Logger #
+    from krux.logging import Logger
     from krux.krux_settings import Settings
     from krux.krux_settings import LoggingSettings
 
@@ -47,7 +47,7 @@ def test_log(mocker, m5stickv, tdata):
 
 
 def test_log_fails_quietly_if_file_unavailable(mocker, m5stickv, tdata):
-    m = mocker.mock_open().side_effect = IOError()
+    m = mocker.mock_open().side_effect = OSError()
     mocker.patch("builtins.open", m)
     from krux.logging import Logger
     from krux.krux_settings import LoggingSettings

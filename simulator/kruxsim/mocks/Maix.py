@@ -84,7 +84,7 @@ class GPIO:
     GPIO6 = 38
     GPIO7 = 39
 
-    def __init__(self, gpio_num, dir, val):
+    def __init__(self, gpio_num, dir=None, val=None):
         self.key = None
         pin = fm_map[gpio_num]
         if pin == BUTTON_A:
@@ -94,7 +94,7 @@ class GPIO:
         if pin == BUTTON_C:
             self.key = pg.K_UP
 
-    def value(self):
+    def value(self, val=1):
         if not self.key:
             return 1
         if (
@@ -121,4 +121,11 @@ class GPIO:
 if "Maix" not in sys.modules:
     sys.modules["Maix"] = mock.MagicMock(
         GPIO=GPIO,
+    )
+
+from Crypto.Cipher import AES
+
+if "ucryptolib" not in sys.modules:
+    sys.modules["ucryptolib"] = mock.MagicMock(
+        aes=AES.new, MODE_ECB=AES.MODE_ECB, MODE_CBC=AES.MODE_CBC
     )

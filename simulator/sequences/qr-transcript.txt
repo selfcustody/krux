@@ -1,0 +1,37 @@
+include _wait-for-logo.txt
+
+# Navigate to Tools
+x3 press BUTTON_B
+press BUTTON_A
+
+# Navigate to Create QR Code
+x3 press BUTTON_B
+press BUTTON_A
+
+# Confirm
+press BUTTON_A
+
+# Enter letter a
+press BUTTON_A
+
+# Navigate to Go and proceed
+press BUTTON_C
+press BUTTON_A
+
+screenshot standard-qr-code.png
+
+press BUTTON_B
+
+screenshot lines-qr-code.png
+
+press BUTTON_B
+
+screenshot zoomed-qr-code.png
+
+press BUTTON_B
+
+screenshot regions-qr-code.png
+
+press BUTTON_B
+
+screenshot grided-qr-code.png

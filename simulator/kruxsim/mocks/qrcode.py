@@ -25,10 +25,12 @@ import pyqrcode
 
 
 def encode_to_string(data):
-    #pre-decode if binary (SeedQR)
-    if len(data) in (16, 32):
-        data = data.decode('latin-1')
-    code_str = pyqrcode.create(data, error="L", mode="binary").text()
+    try:
+        code_str = pyqrcode.create(data, error="L", mode="binary").text()
+    except:
+        # pre-decode if binary (SeedQR)
+        data = data.decode("latin-1")
+        code_str = pyqrcode.create(data, error="L", mode="binary").text()
     size = 0
     while code_str[size] != "\n":
         size += 1

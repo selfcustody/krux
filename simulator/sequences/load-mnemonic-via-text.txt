@@ -4,41 +4,43 @@ include _wait-for-logo.txt
 press BUTTON_A
 press BUTTON_B
 press BUTTON_A
+press BUTTON_A
 
-screenshot load-mnemonic-via-text-prompt.png
+# screenshot load-mnemonic-via-text-prompt.png
 
 press BUTTON_A
 screenshot load-mnemonic-via-text-word-1.png
 
 press BUTTON_A
-screenshot load-mnemonic-via-text-word-1-impossible-letters.png
+# screenshot load-mnemonic-via-text-word-1-impossible-letters.png
 
 press BUTTON_A
-screenshot load-mnemonic-via-text-word-1-impossible-letters-2.png
+# screenshot load-mnemonic-via-text-word-1-impossible-letters-2.png
 
 press BUTTON_A
-screenshot load-mnemonic-via-text-word-1-autocomplete.png
+# screenshot load-mnemonic-via-text-word-1-autocomplete.png
 
-x2 press BUTTON_A
+press BUTTON_A
 
-x5 press BUTTON_A
-x5 press BUTTON_A
-x5 press BUTTON_A
-x5 press BUTTON_A
-x5 press BUTTON_A
-x5 press BUTTON_A
-x5 press BUTTON_A
-x5 press BUTTON_A
-x5 press BUTTON_A
-x5 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
+x4 press BUTTON_A
 
+# Navigate to "Go" to autocomplete word 12
 press BUTTON_C
 press BUTTON_A
 
+# Confirm word
 press BUTTON_A
-screenshot load-mnemonic-via-text-done-entering-prompt.png
 
+# Confirm done
 press BUTTON_A
-screenshot load-mnemonic-via-text-mnemonic.png
 
-press BUTTON_A
+# screenshot load-mnemonic-via-text-mnemonic.png

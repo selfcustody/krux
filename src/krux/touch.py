@@ -24,6 +24,7 @@
 import time
 from .touchscreens.ft6x36 import FT6X36
 from .logging import logger as log
+from .krux_settings import Settings
 
 SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
@@ -55,6 +56,7 @@ class Touch:
         self.state = Touch.idle
         self.width, self.height = width, height
         self.touch_driver = FT6X36()
+        self.touch_driver.threshold(Settings().touch.threshold)
 
     def clear_regions(self):
         """Remove previously stored buttons map"""
@@ -137,18 +139,21 @@ class Touch:
                     self.state = self.idle
                     self.debounce = time.ticks_ms()
                 elif self.state == self.press:
-                    if self.release_point[0] - self.press_point[0][0] > SWIPE_THRESHOLD:
+                    lateral_lenght = self.release_point[0] - self.press_point[0][0]
+                    if lateral_lenght > SWIPE_THRESHOLD:
                         self.gesture = SWIPE_RIGHT
-                    elif (
-                        self.press_point[0][0] - self.release_point[0] > SWIPE_THRESHOLD
-                    ):
+                    elif -lateral_lenght > SWIPE_THRESHOLD:
                         self.gesture = SWIPE_LEFT
-                    elif (
-                        self.release_point[1] - self.press_point[0][1] > SWIPE_THRESHOLD
+                        lateral_lenght *= -1  # make it positive value
+                    vertical_lenght = self.release_point[1] - self.press_point[0][1]
+                    if (
+                        vertical_lenght > SWIPE_THRESHOLD
+                        and vertical_lenght > lateral_lenght
                     ):
                         self.gesture = SWIPE_DOWN
                     elif (
-                        self.press_point[0][1] - self.release_point[1] > SWIPE_THRESHOLD
+                        -vertical_lenght > SWIPE_THRESHOLD
+                        and -vertical_lenght > lateral_lenght
                     ):
                         self.gesture = SWIPE_UP
                     self.state = self.release

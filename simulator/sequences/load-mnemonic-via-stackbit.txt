@@ -1,0 +1,26 @@
+include _wait-for-logo.txt
+
+# Navigate to tiny seed
+press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+x3 press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-via-stackbit-initial.png
+
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-via-stackbit-filled.png

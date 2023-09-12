@@ -3,10 +3,12 @@ import pyqrcode
 
 
 def encode_to_string(data):
-    # pre-decode if binary (SeedQR)
-    if len(data) in (16, 32):
+    try:
+        code_str = pyqrcode.create(data, error="L", mode="binary").text()
+    except:
+        # pre-decode if binary (SeedQR)
         data = data.decode("latin-1")
-    code_str = pyqrcode.create(data, error="L", mode="binary").text()
+        code_str = pyqrcode.create(data, error="L", mode="binary").text()
     size = 0
     while code_str[size] != "\n":
         size += 1
@@ -37,9 +39,23 @@ def get_mock_open(files: dict[str, str]):
                 if content == "Exception":
                     raise Exception()
                 return mock.mock_open(read_data=content).return_value
-        raise FileNotFoundError("(mock) Unable to open {filename}")
+        raise OSError("(mock) Unable to open {filename}")
 
     return mock.MagicMock(side_effect=open_mock)
+
+
+def statvfs(_):
+    return (8192, 8192, 1896512, 1338303, 1338303, 0, 0, 0, 0, 255)
+
+
+class TimeMocker:
+    def __init__(self, increment) -> None:
+        self.increment = increment
+        self.time = 0
+
+    def tick(self):
+        self.time += self.increment
+        return self.time
 
 
 class MockPrinter:
@@ -56,6 +72,15 @@ class MockPrinter:
         pass
 
     def print_string(self, string):
+        pass
+
+    def set_bitmap_mode(self, x_size, y_size, mode):
+        pass
+
+    def print_bitmap_line(self, line):
+        pass
+
+    def feed(self, amount):
         pass
 
 
@@ -103,10 +128,43 @@ class Mockqrcode:
         return self.data
 
 
+class MockBlob:
+    def rect(self):
+        return (10, 10, 125, 100)
+
+
+class MockStats:
+    """Mock the luminosity of dots of a TinySeed on which the words
+    abandon...(x11) + about mnemonic is punched"""
+
+    def __init__(self) -> None:
+        self.counter = 0
+        self.word_counter = 0
+
+    def median(self):
+        if self.word_counter == 0:
+            self.word_counter += 1
+            return 50
+        self.counter += 1
+        if self.word_counter == 12 and self.counter == 10:
+            return 20
+        if self.counter == 12:
+            self.counter = 0
+            self.word_counter += 1
+            if self.word_counter > 12:
+                self.word_counter = 0
+                return 60
+            return 20
+        return 60
+
+
 SNAP_SUCCESS = 0
 SNAP_HISTOGRAM_FAIL = 1
 SNAP_FIND_QRCODES_FAIL = 2
 SNAP_REPEAT_QRCODE = 3
+DONT_FIND_ANYTHING = 4
+
+IMAGE_TO_HASH = b"\x12\x04"  # Dummy bytes
 
 
 def snapshot_generator(outcome=SNAP_SUCCESS):
@@ -125,9 +183,17 @@ def snapshot_generator(outcome=SNAP_SUCCESS):
         elif outcome == SNAP_REPEAT_QRCODE and count == 2:
             m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = [Mockqrcode(str(count - 1))]
+        elif outcome == DONT_FIND_ANYTHING:
+            m.get_histogram.return_value = Mockhistogram()
+            m.find_qrcodes.return_value = []
         else:
             m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = [Mockqrcode(str(count))]
+            m.to_bytes.return_value = IMAGE_TO_HASH
+            m.find_blobs.return_value = [MockBlob()]
+            m.width.return_value = 320
+            m.height.return_value = 240
+            m.get_statistics.return_value = MockStats()
         return m
 
     return snapshot

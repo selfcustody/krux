@@ -15,24 +15,24 @@ def tdata(mocker):
     TEST_MNEMONIC2 = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
-    SINGLEKEY_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"])
+    SINGLESIG_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"])
     MULTISIG_KEY1 = Key(TEST_MNEMONIC1, True, NETWORKS["main"])
     MULTISIG_KEY2 = Key(TEST_MNEMONIC2, True, NETWORKS["main"])
     MULTISIG_KEY3 = Key(TEST_MNEMONIC3, True, NETWORKS["main"])
 
-    # SINGLEKEY_KEY [55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA
+    # SINGLESIG_KEY [55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA
     # MULTISIG_KEY1 [55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
     # MULTISIG_KEY2 [3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
     # MULTISIG_KEY3 [d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
 
-    SPECTER_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)"
-    SPECTER_SINGLEKEY_WALLET_DATA = '{"label": "Specter Singlekey Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
+    SPECTER_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)"
+    SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
 
     SPECTER_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))"
     SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
 
-    BLUEWALLET_SINGLEKEY_DESCRIPTOR = "wpkh(xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
-    BLUEWALLET_SINGLEKEY_WALLET_DATA = "zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw"
+    BLUEWALLET_SINGLESIG_DESCRIPTOR = "wpkh(xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
+    BLUEWALLET_SINGLESIG_WALLET_DATA = "zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw"
 
     BLUEWALLET_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
     BLUEWALLET_MULTISIG_WALLET_DATA = """
@@ -118,13 +118,13 @@ def tdata(mocker):
         ),
     )
 
-    UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/{0,1}/*)"
-    AMBIGUOUS_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
+    UNAMBIGUOUS_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/{0,1}/*)"
+    AMBIGUOUS_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
 
     UNAMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/{0,1}/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/{0,1}/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/{0,1}/*))"
     AMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
 
-    UNRELATED_SINGLEKEY_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB)"
+    UNRELATED_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB)"
     UNRELATED_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
 
     UNSORTED_MULTISIG_DESCRIPTOR = "wsh(multi(2,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/{0,1}/*,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/{0,1}/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/{0,1}/*))"
@@ -135,16 +135,16 @@ def tdata(mocker):
             "TEST_MNEMONIC1",
             "TEST_MNEMONIC2",
             "TEST_MNEMONIC3",
-            "SINGLEKEY_KEY",
+            "SINGLESIG_KEY",
             "MULTISIG_KEY1",
             "MULTISIG_KEY2",
             "MULTISIG_KEY3",
-            "SPECTER_SINGLEKEY_DESCRIPTOR",
-            "SPECTER_SINGLEKEY_WALLET_DATA",
+            "SPECTER_SINGLESIG_DESCRIPTOR",
+            "SPECTER_SINGLESIG_WALLET_DATA",
             "SPECTER_MULTISIG_DESCRIPTOR",
             "SPECTER_MULTISIG_WALLET_DATA",
-            "BLUEWALLET_SINGLEKEY_DESCRIPTOR",
-            "BLUEWALLET_SINGLEKEY_WALLET_DATA",
+            "BLUEWALLET_SINGLESIG_DESCRIPTOR",
+            "BLUEWALLET_SINGLESIG_WALLET_DATA",
             "BLUEWALLET_MULTISIG_DESCRIPTOR",
             "BLUEWALLET_MULTISIG_WALLET_DATA",
             "BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT",
@@ -154,11 +154,11 @@ def tdata(mocker):
             "UR_OUTPUT_MULTISIG_WALLET_DATA",
             "UR_BYTES_MULTISIG_DESCRIPTOR",
             "UR_BYTES_MULTISIG_WALLET_DATA",
-            "UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR",
-            "AMBIGUOUS_SINGLEKEY_DESCRIPTOR",
+            "UNAMBIGUOUS_SINGLESIG_DESCRIPTOR",
+            "AMBIGUOUS_SINGLESIG_DESCRIPTOR",
             "UNAMBIGUOUS_MULTISIG_DESCRIPTOR",
             "AMBIGUOUS_MULTISIG_DESCRIPTOR",
-            "UNRELATED_SINGLEKEY_DESCRIPTOR",
+            "UNRELATED_SINGLESIG_DESCRIPTOR",
             "UNRELATED_MULTISIG_DESCRIPTOR",
             "UNSORTED_MULTISIG_DESCRIPTOR",
         ],
@@ -166,16 +166,16 @@ def tdata(mocker):
         TEST_MNEMONIC1,
         TEST_MNEMONIC2,
         TEST_MNEMONIC3,
-        SINGLEKEY_KEY,
+        SINGLESIG_KEY,
         MULTISIG_KEY1,
         MULTISIG_KEY2,
         MULTISIG_KEY3,
-        SPECTER_SINGLEKEY_DESCRIPTOR,
-        SPECTER_SINGLEKEY_WALLET_DATA,
+        SPECTER_SINGLESIG_DESCRIPTOR,
+        SPECTER_SINGLESIG_WALLET_DATA,
         SPECTER_MULTISIG_DESCRIPTOR,
         SPECTER_MULTISIG_WALLET_DATA,
-        BLUEWALLET_SINGLEKEY_DESCRIPTOR,
-        BLUEWALLET_SINGLEKEY_WALLET_DATA,
+        BLUEWALLET_SINGLESIG_DESCRIPTOR,
+        BLUEWALLET_SINGLESIG_WALLET_DATA,
         BLUEWALLET_MULTISIG_DESCRIPTOR,
         BLUEWALLET_MULTISIG_WALLET_DATA,
         BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT,
@@ -185,24 +185,24 @@ def tdata(mocker):
         UR_OUTPUT_MULTISIG_WALLET_DATA,
         UR_BYTES_MULTISIG_DESCRIPTOR,
         UR_BYTES_MULTISIG_WALLET_DATA,
-        UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
-        AMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+        UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
+        AMBIGUOUS_SINGLESIG_DESCRIPTOR,
         UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
         AMBIGUOUS_MULTISIG_DESCRIPTOR,
-        UNRELATED_SINGLEKEY_DESCRIPTOR,
+        UNRELATED_SINGLESIG_DESCRIPTOR,
         UNRELATED_MULTISIG_DESCRIPTOR,
         UNSORTED_MULTISIG_DESCRIPTOR,
     )
 
 
-def test_init_singlekey(mocker, m5stickv, tdata):
+def test_init_singlesig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
-    wallet = Wallet(tdata.SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLESIG_KEY)
 
     assert isinstance(wallet, Wallet)
-    assert wallet.descriptor.to_string() == tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR
-    assert wallet.label == "Single-key"
+    assert wallet.descriptor.to_string() == tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR
+    assert wallet.label == "Single-sig"
     assert wallet.policy == {"type": "p2wpkh"}
 
 
@@ -220,7 +220,7 @@ def test_init_multisig(mocker, m5stickv, tdata):
 def test_is_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
-    wallet = Wallet(tdata.SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLESIG_KEY)
 
     assert not wallet.is_multisig()
 
@@ -232,7 +232,7 @@ def test_is_multisig(mocker, m5stickv, tdata):
 def test_is_loaded(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
-    wallet = Wallet(tdata.SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLESIG_KEY)
 
     assert not wallet.is_loaded()
 
@@ -265,8 +265,8 @@ def test_receive_addresses(mocker, m5stickv, tdata):
 
     cases = [
         (
-            tdata.SINGLEKEY_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             FORMAT_PMOFN,
             [
                 "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
@@ -304,7 +304,7 @@ def test_receive_addresses(mocker, m5stickv, tdata):
         wallet = Wallet(case[0])
         wallet.load(case[1], case[2])
 
-        assert [addr for addr in wallet.receive_addresses(0, limit=10)] == case[3]
+        assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 
 
 def test_load_multisig(mocker, m5stickv, tdata):
@@ -396,25 +396,25 @@ def test_load_multisig(mocker, m5stickv, tdata):
         assert wallet.policy == case[4]
 
 
-def test_load_singlekey(mocker, m5stickv, tdata):
+def test_load_singlesig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN
 
-    wallet = Wallet(tdata.SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLESIG_KEY)
 
     cases = [
         (
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             FORMAT_PMOFN,
-            tdata.SPECTER_SINGLEKEY_DESCRIPTOR,
-            "Specter Singlekey Wallet",
+            tdata.SPECTER_SINGLESIG_DESCRIPTOR,
+            "Specter Singlesig Wallet",
             {"type": "p2wpkh"},
         ),
         (
-            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
             FORMAT_NONE,
-            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
-            "Single-key",
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
+            "Single-sig",
             {"type": "p2wpkh"},
         ),
     ]
@@ -427,11 +427,11 @@ def test_load_singlekey(mocker, m5stickv, tdata):
         assert wallet.policy == case[4]
 
 
-def test_load_singlekey_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
+def test_load_singlesig_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
-    wallet = Wallet(tdata.SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLESIG_KEY)
 
     cases = [
         (tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN),
@@ -445,29 +445,29 @@ def test_load_singlekey_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
             wallet.load(case[0], case[1])
 
 
-def test_load_multisig_fails_with_singlekey_descriptor(mocker, m5stickv, tdata):
+def test_load_multisig_fails_with_singlesig_descriptor(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN
 
     wallet = Wallet(tdata.MULTISIG_KEY1)
 
     cases = [
-        (tdata.SPECTER_SINGLEKEY_WALLET_DATA, FORMAT_PMOFN),
-        (tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR, FORMAT_NONE),
+        (tdata.SPECTER_SINGLESIG_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE),
     ]
     for case in cases:
         with pytest.raises(ValueError):
             wallet.load(case[0], case[1])
 
 
-def test_load_singlekey_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
+def test_load_singlesig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(tdata.SINGLEKEY_KEY)
+    wallet = Wallet(tdata.SINGLESIG_KEY)
 
     with pytest.raises(ValueError):
-        wallet.load(tdata.UNRELATED_SINGLEKEY_DESCRIPTOR, FORMAT_NONE)
+        wallet.load(tdata.UNRELATED_SINGLESIG_DESCRIPTOR, FORMAT_NONE)
 
 
 def test_load_multisig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
@@ -486,9 +486,9 @@ def test_parse_wallet(mocker, m5stickv, tdata):
 
     cases = [
         (
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            tdata.SPECTER_SINGLEKEY_DESCRIPTOR,
-            "Specter Singlekey Wallet",
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
+            tdata.SPECTER_SINGLESIG_DESCRIPTOR,
+            "Specter Singlesig Wallet",
         ),
         (
             tdata.SPECTER_MULTISIG_WALLET_DATA,
@@ -496,8 +496,8 @@ def test_parse_wallet(mocker, m5stickv, tdata):
             "Specter Multisig Wallet",
         ),
         (
-            tdata.BLUEWALLET_SINGLEKEY_WALLET_DATA,
-            tdata.BLUEWALLET_SINGLEKEY_DESCRIPTOR,
+            tdata.BLUEWALLET_SINGLESIG_WALLET_DATA,
+            tdata.BLUEWALLET_SINGLESIG_DESCRIPTOR,
             None,
         ),
         (
@@ -526,13 +526,13 @@ def test_parse_wallet(mocker, m5stickv, tdata):
             None,
         ),
         (
-            tdata.AMBIGUOUS_SINGLEKEY_DESCRIPTOR,
-            tdata.AMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.AMBIGUOUS_SINGLESIG_DESCRIPTOR,
+            tdata.AMBIGUOUS_SINGLESIG_DESCRIPTOR,
             None,
         ),
         (
-            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
-            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
             None,
         ),
     ]
@@ -643,16 +643,16 @@ def test_to_unambiguous_descriptor(mocker, m5stickv, tdata):
 
     cases = [
         (
-            tdata.AMBIGUOUS_SINGLEKEY_DESCRIPTOR,
-            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.AMBIGUOUS_SINGLESIG_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
         ),
         (
             tdata.AMBIGUOUS_MULTISIG_DESCRIPTOR,
             tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
         ),
         (
-            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
-            tdata.UNAMBIGUOUS_SINGLEKEY_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
         ),
         (
             tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,

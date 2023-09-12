@@ -45,7 +45,7 @@ class Wallet:
             self.descriptor = Descriptor.from_string(
                 "wpkh(%s/{0,1}/*)" % self.key.key_expression()
             )
-            self.label = t("Single-key")
+            self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
 
     def is_multisig(self):
@@ -68,9 +68,7 @@ class Wallet:
         else:
             if not descriptor.key:
                 if len(descriptor.keys) > 1:
-                    raise ValueError("not single-key")
-                # Nunchuk exports single sig as a "multi 1 of 1"
-                descriptor.key = descriptor.keys[0]
+                    raise ValueError("not single-sig")
             if self.key.xpub() != descriptor.key.key.to_base58():
                 raise ValueError("xpub does not match")
 
@@ -81,7 +79,7 @@ class Wallet:
 
         if self.descriptor.key:
             if not self.label:
-                self.label = t("Single-key")
+                self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
         else:
             m = int(str(self.descriptor.miniscript.args[0]))
@@ -102,11 +100,12 @@ class Wallet:
         """Returns the original wallet data and qr format for display back as a QR code"""
         return (self.wallet_data, self.wallet_qr_format)
 
-    def receive_addresses(self, i=0, limit=None):
-        """Returns an iterator deriving receive addresses for the wallet up to the provided limit"""
+    def obtain_addresses(self, i=0, limit=None, branch_index=0):
+        """Returns an iterator deriving addresses (default branch_index is receive)
+        for the wallet up to the provided limit"""
         starting_index = i
         while limit is None or i < starting_index + limit:
-            yield self.descriptor.derive(i, branch_index=0).address(
+            yield self.descriptor.derive(i, branch_index=branch_index).address(
                 network=self.key.network
             )
             i += 1
@@ -201,10 +200,13 @@ def parse_wallet(wallet_data, network):
 
             keys.sort()
             keys = ["[%s/%s]%s" % (key[1], derivation[2:], key[0]) for key in keys]
-
-            descriptor = Descriptor.from_string(
-                ("wsh(sortedmulti(%d," % m) + ",".join(keys) + "))"
-            )
+            if len(keys) > 1:
+                descriptor = Descriptor.from_string(
+                    ("wsh(sortedmulti(%d," % m) + ",".join(keys) + "))"
+                )
+            else:
+                # Single-sig
+                descriptor = Descriptor.from_string("wpkh(%s/{0,1}/*)" % keys[0])
             label = (
                 key_vals[key_vals.index("Name") + 1]
                 if key_vals.index("Name") >= 0

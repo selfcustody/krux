@@ -41,6 +41,8 @@ LONG_PRESS_PERIOD = 1000  # milliseconds
 PRESSED = 0
 RELEASED = 1
 
+BUTTON_WAIT_PRESS_DELAY = 10
+
 
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
@@ -138,17 +140,21 @@ class Input:
 
     def wait_for_release(self):
         """Loop until all buttons are released (if currently pressed)"""
-        while (
-            self.enter_value() == PRESSED
-            or self.page_value() == PRESSED
-            or self.page_prev_value() == PRESSED
-            or self.touch_value() == PRESSED
-        ):
+        while True:
+            if self.enter_value() == RELEASED and self.touch_value() == RELEASED:
+                if "ENCODER" in board.config["krux"]["pins"]:
+                    # Encoder is event based, this check may disable event flag unintentionally
+                    break
+                # TODO: Change standard buttons to be event(interrupt) based too
+                # So presses during high processing time(camera and animated QR) won't be lost
+                if self.page_value() == RELEASED and self.page_prev_value() == RELEASED:
+                    break
             self.entropy += 1
             wdt.feed()
 
-    def wait_for_press(self, block=True):
-        """Wait for first button press"""
+    def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
+        """Wait for first button press or for wait_duration ms.
+        Use block to wait indefinitely"""
         start_time = time.ticks_ms()
         while True:
             if self.enter_value() == PRESSED:
@@ -161,9 +167,9 @@ class Input:
                 return BUTTON_TOUCH
             self.entropy += 1
             wdt.feed()  # here is where krux spends most of its time
-            if not block and time.ticks_ms() > start_time + QR_ANIM_PERIOD:
+            if not block and time.ticks_ms() > start_time + wait_duration:
                 return None
-            time.sleep_ms(10)
+            time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
     def wait_for_button(self, block=True):
         """Waits for any button to release, optionally blocking if block=True.

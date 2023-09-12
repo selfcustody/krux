@@ -3,12 +3,12 @@ press BUTTON_A
 wait 1
 
 # Navigate to Sign
-x4 press BUTTON_B
+x2 press BUTTON_C
 press BUTTON_A
 
 screenshot sign-options.png
 
-screenshot sign-options-psbt.png
+# screenshot sign-options-psbt.png
 
 press BUTTON_B
-screenshot sign-options-message.png
+# screenshot sign-options-message.png

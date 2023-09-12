@@ -37,11 +37,12 @@ class Camera:
 
     def __init__(self):
         self.cam_id = None
+        self.antiglare_enabled = False
         self.initialize_sensor()
 
     def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
-        sensor.reset(dual_buff=True)
+        sensor.reset(freq=16000000)
         self.cam_id = sensor.get_id()
         if grayscale:
             sensor.set_pixformat(sensor.GRAYSCALE)
@@ -79,7 +80,42 @@ class Camera:
         # Regions 13,14,15,16
         sensor.__write_reg(0x59, 0x0)  # pylint: disable=W0212
 
-    def capture_qr_code_loop(self, callback, x_offset=False):
+    def has_antiglare(self):
+        """Returns whether the camera has anti-glare functionality"""
+        return self.cam_id == OV7740_ID
+
+    def enable_antiglare(self):
+        """Enables anti-glare mode"""
+        if self.cam_id == OV7740_ID:
+            # luminance high level, default=0x78
+            sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
+            # luminance low level, default=0x68
+            sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
+            # Disable frame integrtation (night mode)
+            sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
+            sensor.skip_frames()
+            self.antiglare_enabled = True
+
+    def disable_antiglare(self):
+        """Disables anti-glare mode"""
+        if self.cam_id == OV7740_ID:
+            # luminance high level, default=0x78
+            sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+            # luminance low level, default=0x68
+            sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+            sensor.skip_frames()
+            self.antiglare_enabled = False
+
+    def snapshot(self):
+        """Helper to take a customized snapshot from sensor"""
+        img = sensor.snapshot()
+        if self.cam_id in (OV2640_ID, OV5642_ID):
+            img.lens_corr(strength=1.1, zoom=0.96)
+        if self.cam_id == OV2640_ID:
+            img.rotation_corr(z_rotation=180)
+        return img
+
+    def capture_qr_code_loop(self, callback):
         """Captures either singular or animated QRs and parses their contents until
         all parts of the message have been captured. The part data are then ordered
         and assembled into one message and returned.
@@ -96,35 +132,20 @@ class Camera:
             command = callback(parser.total_count(), parser.parsed_count(), new_part)
             if command == 1:
                 break
-            if command == 2:
-                # luminance high level, default=0x78
-                sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
-                # luminance low level, default=0x68
-                sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
-                # Disable frame integrtation (night mode)
-                sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
-                sensor.skip_frames()
-            elif command == 3:
-                # luminance high level, default=0x78
-                sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
-                # luminance low level, default=0x68
-                sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
-                sensor.skip_frames()
-
             new_part = False
 
-            img = sensor.snapshot()
-            if self.cam_id in (OV2640_ID, OV5642_ID):
-                img.lens_corr(strength=1.1, zoom=0.96)
-            if self.cam_id == OV2640_ID:
-                img.rotation_corr(z_rotation=180)
+            img = self.snapshot()
             res = img.find_qrcodes()
+
+            # different cases of lcd.display to show a progress bar on different devices!
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
-            if x_offset:
-                lcd.display(img, oft=(2, 40))  # 40 will centralize image in Amigo
+                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
+            elif board.config["type"].startswith("amigo"):
+                lcd.display(img, oft=(40, 40))
             else:
-                lcd.display(img)
+                lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
+
             if len(res) > 0:
                 data = res[0].payload()
 
@@ -142,3 +163,41 @@ class Camera:
         if parser.is_complete():
             return (parser.result(), parser.format)
         return (None, None)
+
+    def capture_entropy(self, callback):
+        """Captures camera's entropy as the hash of image buffer"""
+        import hashlib
+
+        self.initialize_sensor()
+        sensor.run(1)
+
+        command = 0
+        while True:
+            wdt.feed()
+
+            img = self.snapshot()
+
+            command = callback()
+            if command > 0:
+                break
+
+            if board.config["type"] == "m5stickv":
+                img.lens_corr(strength=1.0, zoom=0.56)
+            lcd.display(img)
+
+        gc.collect()
+        sensor.run(0)
+
+        # User cancelled
+        if command == 2:
+            return None
+
+        img_bytes = img.to_bytes()
+        del img
+        hasher = hashlib.sha256()
+        image_len = len(img_bytes)
+        hasher_index = 0
+        while hasher_index < image_len:
+            hasher.update(img_bytes[hasher_index : hasher_index + 128])
+            hasher_index += 128
+        return hasher.digest()

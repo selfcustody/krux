@@ -1,7 +1,7 @@
 include _wait-for-logo.txt
 
 # Navigate to via QR
-press BUTTON_A
+x2 press BUTTON_A
 
 press BUTTON_A
 qrcode 12-word-mnemonic.png
@@ -9,16 +9,11 @@ wait 0.5
 
 press BUTTON_A
 
-screenshot passphrase-add-prompt.png
+# screenshot passphrase-add-prompt.png
 
 press BUTTON_A
 
-screenshot passphrase-keypad.png
-
-press BUTTON_A
-
-x4 press BUTTON_C
-press BUTTON_A
+# screenshot passphrase-keypad.png
 
 press BUTTON_A
 
@@ -32,7 +27,12 @@ press BUTTON_A
 
 press BUTTON_A
 
-screenshot passphrase-string.png
+x4 press BUTTON_C
+press BUTTON_A
+
+press BUTTON_A
+
+# screenshot passphrase-string.png
 
 press BUTTON_C
 press BUTTON_A

@@ -9,16 +9,16 @@ However, in practice not all wallet software supports this extended format, so K
 For more information, check out [https://outputdescriptors.org/](https://outputdescriptors.org/).
 
 ## Why am I unable to sign a PSBT from BlueWallet?
-As mentioned above, some wallet software does not support the descriptor key expression format. In this case, BlueWallet will ignore the key origin and derivation info when importing the xpub to create a single-key wallet. This will result in the wrong derivation being used in BlueWallet and thus the inability to sign an outbound transaction in Krux.
+As mentioned above, some wallet software does not support the descriptor key expression format. In this case, BlueWallet will ignore the key origin and derivation info when importing the xpub to create a single-sig wallet. This will result in the wrong derivation being used in BlueWallet and thus the inability to sign an outbound transaction in Krux.
 
-Currently, the way to properly create a single-key wallet in BlueWallet is to export the second QR code that Krux displays which contains the zpub. BlueWallet can then correctly infer the derivation path when creating the wallet.
+Currently, the way to properly create a single-sig wallet in BlueWallet is to export the second QR code that Krux displays which contains the zpub. BlueWallet can then correctly infer the derivation path when creating the wallet.
 
 ## Why isn't Krux scanning my QR code?
 The level of detail that you see is what Krux sees. If the QR code shown on the device's screen is blurry, the camera lens of the device may be out of focus. It can be adjusted by rotating it (with your fingertip) clockwise or counter-clockwise to achieve a clearer result. 
 
 If you have adjusted the lens already, the device may be too far away or too close to the code to read it. Start by holding the device as close to the QR code as possible and pulling away slowly until all or most of the QR code is viewable within the screen. If the code on the screen looks crisp, Krux should read it quickly and give you immediate feedback.
 
-If you are in a dark setting, you can hold down the front button of the M5StickV to turn on its LED light to potentially increase visibility.
+If you are in a dark environment, you can hold down the ENTER button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility.
 
 ## Why am I getting an error when I try to scan a QR code?
 If Krux is recognizing that it sees a QR code but is displaying an error message after reading it, the likely reason is that the QR code is not in a format that Krux understands.
@@ -48,11 +48,18 @@ If you are using an M5StickV, the small screen makes it difficult for laptop web
 
 ## Why won't my (Linux) OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
+Make sure your device is being detected and serial ports are being mounted by running:
+```bash
+ls /dev/ttyUSB*
+```
+Expect one port to be listed for devices like M5stickV and Dock `/dev/ttyUSB0`, and two ports for Amigo and Bit `/dev/ttyUSB0  /dev/ttyUSB1`.
 
-Your OS may not be loading the correct drivers to create the serial ports to connect to. Ubuntu has a known bug where the `brltty` driver "kidnaps" serial devices. You can solve this problem by removing it:
+If you don't see them, your OS may not be loading the correct drivers to create the serial ports to connect to. Ubuntu has a known bug where the `brltty` driver "kidnaps" serial devices. You can solve this problem by removing it:
 ```bash
 sudo apt-get remove brltty
 ```
+
+If you are using an Amigo, make sure you’re using bottom USB-C port, not the one on the left side.
 
 ## Why are the buttons on my Amigo in the wrong order?
 Some Amigo screens have inverted x coordinates while others don’t.

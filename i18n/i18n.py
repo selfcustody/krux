@@ -35,7 +35,7 @@ def find_translation_slugs():
     by looking for matches of the pattern t("string")
     """
     slugs = {}
-    for (dirpath, _, filenames) in walk(SRC_DIR):
+    for dirpath, _, filenames in walk(SRC_DIR):
         for filename in filenames:
             if not filename.endswith(".py"):
                 continue
@@ -86,6 +86,89 @@ def validate_translation_files():
         sys.exit(1)
 
 
+def fill_missing():
+    """Uses googletrans==4.0.0rc1 to automaticalyy fill missing translations"""
+    if len(sys.argv) > 2:
+        force_target = sys.argv[2]
+    else:
+        force_target = None
+    from googletrans import Translator
+
+    translator = Translator()
+    slugs = find_translation_slugs()
+    translation_filenames = [
+        f
+        for f in listdir(TRANSLATION_FILES_DIR)
+        if isfile(join(TRANSLATION_FILES_DIR, f))
+    ]
+    for translation_filename in translation_filenames:
+        target = translation_filename[:5].replace("-", "_")
+        if force_target:
+            if force_target != translation_filename:
+                continue
+        if translation_filename.startswith("poke"):
+            continue
+        print("Translating %s...\n" % translation_filename)
+        complete = True
+        with open(
+            join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
+        ) as translation_file:
+            translations = load_translations(translation_file)
+            for slug in slugs:
+                if slug not in translations or translations[slug] == "":
+                    try:
+                        translated = '"%s",' % translator.translate(
+                            slug, src="en", dest=target
+                        ).text.replace(" \ n", "\\n")
+                    except:
+                        # some languages fail to translate with a space at end of string
+                        translated = (
+                            '"%s",'
+                            % translator.translate(
+                                slug + "]", src="en", dest=target
+                            ).text.replace(" \ n", "\\n")[:-1]
+                        )
+                    print('"%s":' % slug, translated)
+                    complete = False
+        if complete:
+            print("Notthing to add")
+        else:
+            print("Please review and copy items above")
+        print("\n\n")
+
+
+def remove_unnecessary():
+    """Remove unnecessary translations from files"""
+    code_slugs = find_translation_slugs()
+    translation_filenames = [
+        f
+        for f in listdir(TRANSLATION_FILES_DIR)
+        if isfile(join(TRANSLATION_FILES_DIR, f))
+    ]
+    for translation_filename in translation_filenames:
+        print("Cleaning %s..." % translation_filename)
+        clean = True
+        with open(
+            join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
+        ) as translation_file:
+            full_translations = json.load(translation_file)
+            translation_file.seek(0)
+            translations = load_translations(translation_file)
+            for translation_slug in translations:
+                if translation_slug not in code_slugs:
+                    print('Removing: "%s"' % translation_slug)
+                    clean = False
+                    del full_translations[translation_slug.replace("\\n", "\n")]
+        if clean:
+            print("Nothing removed")
+        else:
+            with open(
+                join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8"
+            ) as translation_file:
+                json.dump(full_translations, translation_file, ensure_ascii=False)
+                # run black after this
+
+
 def bake_translations():
     """Bakes all translations into a translations.py file inside the krux namespace"""
     translation_table = {}
@@ -104,7 +187,9 @@ def bake_translations():
                 lookup[binascii.crc32(slug.encode("utf-8"))] = translation
             translation_table[basename(translation_filename).split(".")[0]] = lookup
 
-    with open(join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8") as translations:
+    with open(
+        join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8"
+    ) as translations:
         translations.write(
             """# The MIT License (MIT)
 
@@ -176,6 +261,10 @@ def main():
         validate_translation_files()
     elif sys.argv[1] == "new":
         create_translation_file(sys.argv[2])
+    elif sys.argv[1] == "fill":
+        fill_missing()
+    elif sys.argv[1] == "clean":
+        remove_unnecessary()
     elif sys.argv[1] == "prettify":
         prettify_translation_files()
     elif sys.argv[1] == "bake":

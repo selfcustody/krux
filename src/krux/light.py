@@ -24,29 +24,38 @@ from Maix import GPIO
 from fpioa_manager import fm
 
 
-class Light:
-    """Light is a singleton interface for interacting with the device's LED light"""
+class IOCircuit:
+    """Implements the protocol for Multifunctional IO"""
 
-    def __init__(self):
-        fm.register(board.config["krux"]["pins"]["LED_W"], fm.fpioa.GPIO3)
-        self.led_w = GPIO(GPIO.GPIO3, GPIO.OUT)
+    def __init__(self, board_io_pin, kendryte_gpio, maixpy_gpio):
+        fm.register(board_io_pin, kendryte_gpio)
+        self.circuit = GPIO(maixpy_gpio, GPIO.OUT)
         self.turn_off()
 
     def is_on(self):
-        """Returns a boolean indicating if the light is currently on"""
-        return self.led_w.value() == 0
+        """Returns a boolean indicating if the circuit is currently on"""
+        return self.circuit.value() == 0
 
     def turn_on(self):
-        """Turns on the light"""
-        self.led_w.value(0)
+        """Turns on the circuit"""
+        self.circuit.value(0)
 
     def turn_off(self):
-        """Turns off the light"""
-        self.led_w.value(1)
+        """Turns off the circuit"""
+        self.circuit.value(1)
 
     def toggle(self):
-        """Toggles the light on or off"""
+        """Toggles the circuit on or off"""
         if self.is_on():
             self.turn_off()
         else:
             self.turn_on()
+
+
+class Light(IOCircuit):
+    """Light is a singleton interface for interacting with the device's LED light"""
+
+    def __init__(self):
+        super().__init__(
+            board.config["krux"]["pins"]["LED_W"], fm.fpioa.GPIO3, GPIO.GPIO3
+        )

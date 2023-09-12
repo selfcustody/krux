@@ -253,11 +253,15 @@ class FilePrinter(GCodeGenerator):
             with SDHandler():
                 self.file = open("/sd/qr.nc", "w")
                 super().print_qr_code(qr_code)
-        except:
+        except OSError:
             pass
         finally:
-            self.file.flush()
-            self.file.close()
+            if self.file:
+                self.file.flush()
+                self.file.close()
+
+    def print_string(self, text):
+        """Print a text string. Avoided on CNC"""
 
     def clear(self):
         """Clears the printer's memory, resetting it"""

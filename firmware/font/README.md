@@ -1,14 +1,14 @@
 # Updating the built-in font
-Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of the [Terminus](http://terminus-font.sourceforge.net/) font for its glyphs that includes Vietnamese characters and the Bitcoin currency symbol, ₿.
+Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of the [Terminus](http://terminus-font.sourceforge.net/) font for its glyphs that includes Vietnamese characters, the Bitcoin currency symbol (₿) and the Pokémon Dollar symbol (₽ with 2 horizontal lines).
 
 To rebuild the font for all devices, run:
 ```
 ./bdftokff.sh ter-u14n 8 14 > m5stickv.kff
-./bdftokff.sh ter-u16n 8 16 > bit.kff
-./bdftokff.sh ter-u24n 12 24 > amigo.kff
+./bdftokff.sh ter-u16n 8 16 > bit_dock.kff
+./bdftokff.sh ter-u24b 12 24 > amigo.kff
 ```
 
-Once you have a `.kff` file, locate the project that you want to use the updated font under `firmware/MaixPy/projects`, open its `overrides/components/micropython/port/src/omv/img/font.c` file and replace the array contents in the `unicode` variable with the byte array found within the `.kff` file, then rebuild the firmware.
+Once you have a `.kff` file, locate the project that you want to use the updated font under `firmware/MaixPy/projects/` (`maixpy_amigo_tft/` for ex.), open its `compile/overrides/components/micropython/port/src/omv/img/font.c` file and replace the array contents in the `unicode` variable with the byte array found within the `.kff` file, then rebuild the firmware.
 
 # How it works
 Krux uses bitmap fonts that are custom-built for each device it runs on. The format that the firmware expects fonts to be in is a custom format referred to as "krux font format," or `.kff`. 
@@ -18,7 +18,7 @@ Krux font format is a sparse bitmap font format that is intended to minimize the
 
 ## Converting to kff
 
-To create a `.kff` file, you first need to find a font in `.bdf` format.
+To create a `.kff` file, you first need to find a font in `.bdf` format. You can edit and generate a `.bdf` file using [FontForge](https://fontforge.org)
 
 From there, you can run the `bdftohex.py` script which converts the bdf file to an intermediary `.hex` format mapping each character's unicode codepoint to a series of hex digits describing how to draw it.
 

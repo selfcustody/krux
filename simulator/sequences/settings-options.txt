@@ -5,18 +5,30 @@ press BUTTON_B
 press BUTTON_B
 press BUTTON_A
 
+# Wait message debounce
+wait 0.3
+
+# Skip message
+press BUTTON_A
+
 screenshot settings-options.png
 
-screenshot settings-options-bitcoin.png
+# screenshot settings-options-bitcoin.png
 
 press BUTTON_B
-screenshot settings-options-language.png
+# screenshot settings-options-encryption.png
 
 press BUTTON_B
-screenshot settings-options-logging.png
+# screenshot settings-options-language.png
 
 press BUTTON_B
-screenshot settings-options-printer.png
+# screenshot settings-options-logging.png
 
 press BUTTON_B
-screenshot settings-options-back.png
+# screenshot settings-options-persist.png
+
+press BUTTON_B
+# screenshot settings-options-printer.png
+
+press BUTTON_B
+# screenshot settings-options-theme.png

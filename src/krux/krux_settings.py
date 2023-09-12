@@ -20,12 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .settings import SettingsNamespace, CategorySetting, NumberSetting
+from .settings import (
+    SettingsNamespace,
+    CategorySetting,
+    NumberSetting,
+    SD_PATH,
+    FLASH_PATH,
+)
 import board
 import binascii
 from .translations import translation_table
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
+
 
 DEFAULT_TX_PIN = (
     board.config["board_info"]["CONNEXT_A"]
@@ -37,6 +44,13 @@ DEFAULT_RX_PIN = (
     if "CONNEXT_B" in board.config["board_info"]
     else 34
 )
+
+# Encription Versions
+PBKDF2_HMAC_ECB = 0
+PBKDF2_HMAC_CBC = 1
+AES_BLOCK_SIZE = 16
+
+THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 
 
 def translations(locale):
@@ -58,8 +72,11 @@ def t(slug):
 class BitcoinSettings(SettingsNamespace):
     """Bitcoin-specific settings"""
 
+    MAIN_TXT = "main"
+    TEST_TXT = "test"
+
     namespace = "settings.bitcoin"
-    network = CategorySetting("network", "main", ["main", "test"])
+    network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -76,16 +93,21 @@ class LoggingSettings(SettingsNamespace):
     WARN = 30
     INFO = 20
     DEBUG = 10
+    NONE_TXT = "NONE"
+    ERROR_TXT = "ERROR"
+    WARN_TXT = "WARN"
+    INFO_TXT = "INFO"
+    DEBUG_TXT = "DEBUG"
     LEVEL_NAMES = {
-        NONE: "NONE",
-        ERROR: "ERROR",
-        WARN: "WARN",
-        INFO: "INFO",
-        DEBUG: "DEBUG",
+        NONE: NONE_TXT,
+        ERROR: ERROR_TXT,
+        WARN: WARN_TXT,
+        INFO: INFO_TXT,
+        DEBUG: DEBUG_TXT,
     }
 
     namespace = "settings.logging"
-    level = CategorySetting("level", "NONE", list(LEVEL_NAMES.values()))
+    level = CategorySetting("level", NONE_TXT, list(LEVEL_NAMES.values()))
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -98,7 +120,10 @@ class I18nSettings(SettingsNamespace):
     """I18n-specific settings"""
 
     namespace = "settings.i18n"
-    locale = CategorySetting("locale", "en-US", list(translation_table.keys()))
+    DEFAULT_LOCALE = "en-US"
+    locale = CategorySetting(
+        "locale", DEFAULT_LOCALE, list(translation_table.keys()) + [DEFAULT_LOCALE]
+    )
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -130,9 +155,10 @@ class AdafruitPrinterSettings(SettingsNamespace):
     paper_width = NumberSetting(int, "paper_width", 384, [100, 1000])
     tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
     rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])
-    heat_dots = NumberSetting(int, "heat_dots", 11, [0, 255])
     heat_time = NumberSetting(int, "heat_time", 120, [3, 255])
     heat_interval = NumberSetting(int, "heat_interval", 40, [0, 255])
+    line_delay = NumberSetting(int, "line_delay", 20, [0, 255])
+    scale = NumberSetting(int, "scale", 75, [25, 100])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -141,9 +167,10 @@ class AdafruitPrinterSettings(SettingsNamespace):
             "paper_width": t("Paper Width"),
             "tx_pin": t("TX Pin"),
             "rx_pin": t("RX Pin"),
-            "heat_dots": t("Heat Dots"),
             "heat_time": t("Heat Time"),
             "heat_interval": t("Heat Interval"),
+            "line_delay": t("Line Delay"),
+            "scale": t("Scale"),
         }[attr]
 
 
@@ -203,11 +230,12 @@ class PrinterSettings(SettingsNamespace):
     """Printer-specific settings"""
 
     PRINTERS = {
-        "thermal/adafruit": ("thermal", "AdafruitPrinter"),
+        "none": ("none", None),
+        THERMAL_ADAFRUIT_TXT: ("thermal", "AdafruitPrinter"),
         "cnc/file": ("cnc", "FilePrinter"),
     }
     namespace = "settings.printer"
-    driver = CategorySetting("driver", "thermal/adafruit", list(PRINTERS.keys()))
+    driver = CategorySetting("driver", "none", list(PRINTERS.keys()))
 
     def __init__(self):
         self.thermal = ThermalSettings()
@@ -222,6 +250,90 @@ class PrinterSettings(SettingsNamespace):
         }[attr]
 
 
+class EncoderSettings(SettingsNamespace):
+    """Encoder debounce settings"""
+
+    namespace = "settings.encoder"
+    debounce = NumberSetting(int, "debounce", 50, [25, 250])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "debounce": t("Encoder Debounce"),
+        }[attr]
+
+
+class TouchSettings(SettingsNamespace):
+    """Touch sensitivity settings"""
+
+    namespace = "settings.touchscreen"
+    threshold = NumberSetting(int, "threshold", 22, [10, 200])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "threshold": t("Touch Threshold"),
+        }[attr]
+
+
+class PersistSettings(SettingsNamespace):
+    """Persistent settings"""
+
+    namespace = "settings.persist"
+    location = CategorySetting("location", FLASH_PATH, [FLASH_PATH, SD_PATH])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "location": t("Location"),
+        }[attr]
+
+
+class EncryptionSettings(SettingsNamespace):
+    """Encryption settings"""
+
+    AES_ECB_NAME = "AES-ECB"
+    AES_CBC_NAME = "AES-CBC"
+    VERSION_NAMES = {
+        PBKDF2_HMAC_ECB: AES_ECB_NAME,
+        PBKDF2_HMAC_CBC: AES_CBC_NAME,
+    }
+    namespace = "settings.encryption"
+    version = CategorySetting("version", AES_ECB_NAME, list(VERSION_NAMES.values()))
+    pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [1, 500000])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "version": t("Encryption Mode"),
+            "pbkdf2_iterations": t("PBKDF2 Iter."),
+        }[attr]
+
+
+class ThemeSettings(SettingsNamespace):
+    """Theme settings"""
+
+    DARK_THEME = 0
+    LIGHT_THEME = 1
+    ORANGE_THEME = 3
+    DARK_THEME_NAME = "Dark"
+    LIGHT_THEME_NAME = "Light"
+    ORANGE_THEME_NAME = "Orange"
+    THEME_NAMES = {
+        DARK_THEME: DARK_THEME_NAME,
+        LIGHT_THEME: LIGHT_THEME_NAME,
+        ORANGE_THEME: ORANGE_THEME_NAME,
+    }
+    namespace = "settings.appearance"
+    theme = CategorySetting("theme", DARK_THEME_NAME, list(THEME_NAMES.values()))
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "theme": t("Theme"),
+        }[attr]
+
+
 class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
 
@@ -231,14 +343,28 @@ class Settings(SettingsNamespace):
         self.bitcoin = BitcoinSettings()
         self.i18n = I18nSettings()
         self.logging = LoggingSettings()
+        self.encryption = EncryptionSettings()
         self.printer = PrinterSettings()
+        self.persist = PersistSettings()
+        self.appearance = ThemeSettings()
+        if board.config["type"].startswith("amigo"):
+            self.touch = TouchSettings()
+        if board.config["type"] == "dock":
+            self.encoder = EncoderSettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
-
-        return {
+        main_menu = {
             "bitcoin": t("Bitcoin"),
             "i18n": t("Language"),
             "logging": t("Logging"),
+            "encryption": t("Encryption"),
+            "persist": t("Persist"),
             "printer": t("Printer"),
-        }[attr]
+            "appearance": t("Theme"),
+        }
+        if board.config["type"].startswith("amigo"):
+            main_menu["touchscreen"] = t("Touchscreen")
+        if board.config["type"] == "dock":
+            main_menu["encoder"] = t("Encoder")
+        return main_menu[attr]

@@ -46,6 +46,8 @@ from ..krux_settings import Settings
 from ..wdt import wdt
 from . import Printer
 
+INITIALIZE_WAIT_TIME = 500
+
 
 class AdafruitPrinter(Printer):
     """AdafruitPrinter is a minimal wrapper around a serial connection to
@@ -64,7 +66,7 @@ class AdafruitPrinter(Printer):
 
         self.character_height = 24
         self.byte_time = 1  # miliseconds
-        self.dot_print_time = 10  # miliseconds
+        self.dot_print_time = Settings().printer.thermal.adafruit.line_delay
         self.dot_feed_time = 2  # miliseconds
 
         self.setup()
@@ -78,7 +80,7 @@ class AdafruitPrinter(Printer):
         # upon power up -- it needs a moment to cold boot
         # and initialize.  Allow at least 1/2 sec of uptime
         # before printer can receive data.
-        time.sleep_ms(500)
+        time.sleep_ms(INITIALIZE_WAIT_TIME)
 
         # Wake up the printer to get ready for printing
         self.write_bytes(255)
@@ -108,7 +110,7 @@ class AdafruitPrinter(Printer):
         self.write_bytes(
             27,  # Esc
             55,  # 7 (print settings)
-            Settings().printer.thermal.adafruit.heat_dots,
+            11,  # Heat dots
             Settings().printer.thermal.adafruit.heat_time,
             Settings().printer.thermal.adafruit.heat_interval,
         )
@@ -184,8 +186,8 @@ class AdafruitPrinter(Printer):
             size += 1
 
         scale = Settings().printer.thermal.adafruit.paper_width // size
-        scale //= 3
-        # Maximum size is //2 Command will scale up by 2x later
+        scale *= Settings().printer.thermal.adafruit.scale
+        scale //= 200  # 100*2 because printer will scale 2X later to save data
         # Being at full size sometimes makes prints more faded (can't apply too much heat?)
 
         line_bytes_size = (size * scale + 7) // 8  # amount of bytes per line
@@ -211,7 +213,7 @@ class AdafruitPrinter(Printer):
         """Set image format to be printed"""
         # width in bytes, height in pixels
         # scale_mode=1-> unchanged scale. scale_mode=3-> 2x scale
-        command = b"\x1D\x76\x00"
+        command = b"\x1D\x76\x30"
         command += bytes([scale_mode])
         command += bytes([width])
         command += b"\x00"

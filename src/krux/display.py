@@ -23,6 +23,8 @@ import time
 import lcd
 import board
 from machine import I2C
+from .themes import theme
+from .qr import add_qr_frame
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
@@ -33,17 +35,19 @@ QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
 
+FLASH_MSG_TIME = 2000
+
 
 class Display:
     """Display is a singleton interface for interacting with the device's display"""
 
     def __init__(self):
         self.portrait = True
-        self.initialize_lcd()
+        # self.initialize_lcd()
         self.i2c = None
         self.font_width = FONT_WIDTH
         self.font_height = FONT_HEIGHT
-        self.bottom_line = self.height() // FONT_HEIGHT  # total lines
+        self.bottom_line = board.config["lcd"]["width"] // FONT_HEIGHT  # total lines
         self.bottom_line -= 1
         self.bottom_line *= FONT_HEIGHT
         if board.config["type"] == "m5stickv":
@@ -256,9 +260,9 @@ class Display:
 
     def clear(self):
         """Clears the display"""
-        lcd.clear()
+        lcd.clear(theme.bg_color)
 
-    def outline(self, x, y, width, height, color=lcd.WHITE):
+    def outline(self, x, y, width, height, color=theme.fg_color):
         """Draws an outline rectangle from given coordinates"""
         self.fill_rectangle(x, y, width + 1, 1, color)  # up
         self.fill_rectangle(x, y + height, width + 1, 1, color)  # bottom
@@ -272,7 +276,16 @@ class Display:
             x -= width
         lcd.fill_rectangle(x, y, width, height, color)
 
-    def draw_string(self, x, y, text, color, bg_color=lcd.BLACK):
+    def draw_img_hcentered_other_img(
+        self, img, other_img, offset_y=DEFAULT_PADDING, alpha=255
+    ):
+        """Draws other_img horizontally-centered on the img, at the given offset_y.
+        Alpha value is used, so any value less than 256 makes black pixels invisible"""
+        img.draw_image(
+            other_img, offset_y, (img.height() - other_img.height()) // 2, alpha=alpha
+        )
+
+    def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
         if board.config["krux"]["display"]["inverted_coordinates"]:
             x = self.width() - x
@@ -280,7 +293,11 @@ class Display:
         lcd.draw_string(x, y, text, color, bg_color)
 
     def draw_hcentered_text(
-        self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE, bg_color=lcd.BLACK
+        self,
+        text,
+        offset_y=DEFAULT_PADDING,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
     ):
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
@@ -291,37 +308,34 @@ class Display:
                 offset_x, offset_y + (i * self.font_height), line, color, bg_color
             )
 
-    def draw_centered_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK):
+    def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""
         lines = text if isinstance(text, list) else self.to_lines(text)
         lines_height = len(lines) * self.font_height
         offset_y = max(0, (self.height() - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, bg_color)
 
-    def flash_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK, duration=3000):
+    def flash_text(
+        self,
+        text,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+        duration=FLASH_MSG_TIME,
+    ):
         """Flashes text centered on the display for duration ms"""
         self.clear()
         self.draw_centered_text(text, color, bg_color)
         time.sleep_ms(duration)
         self.clear()
 
-    def draw_qr_code(self, offset_y, qr_code, bright=False):
+    def draw_qr_code(
+        self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
+    ):
         """Draws a QR code on the screen"""
-        # Add a 1px white border around the code before displaying
-        qr_code = qr_code.strip()
-        lines = qr_code.split("\n")
-        size = len(lines)
-        new_lines = ["0" * (size + 2)]
-        for line in lines:
-            new_lines.append("0" + line + "0")
-        new_lines.append("0" * (size + 2))
-        qr_code = "\n".join(new_lines)
-        if bright:
-            lcd.draw_qr_code(offset_y, qr_code, self.width(), lcd.BLACK, lcd.WHITE)
-        else:
-            lcd.draw_qr_code(
-                offset_y, qr_code, self.width(), QR_DARK_COLOR, QR_LIGHT_COLOR
-            )
+        _, qr_code = add_qr_frame(qr_code)
+        lcd.draw_qr_code(
+            offset_y, qr_code, self.width(), dark_color, light_color, theme.bg_color
+        )
 
     def set_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""
