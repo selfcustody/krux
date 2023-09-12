@@ -182,6 +182,8 @@ class Login(Page):
 
         self.ctx.display.draw_hcentered_text(
             t("Use camera's entropy to create a new mnemonic")
+            + ". "
+            + t("(Experimental)")
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             entropy_bytes = self.capture_camera_entropy()

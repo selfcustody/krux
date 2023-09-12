@@ -9,7 +9,7 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 <img src="../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right">
 
- Choose between 12 or 24 words, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
+ (Experimental!) Choose between 12 or 24 words, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
 
 <br><br><br><br>
 <br><br><br><br>

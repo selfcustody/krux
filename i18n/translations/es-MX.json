@@ -7,6 +7,7 @@
     "%s\n\nis a valid receive address!": "%s\n\nes un dirección de depósito válido!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nNO FUE ENCONTRADO en las primeras %d direcciones de cambio",
     "%s\n\nwas NOT FOUND in the first %d receive addresses": "%s\n\nNO FUE ENCONTRADO en las primeras %d direcciones de depósito",
+    "(Experimental)": "(Experimental)",
     "12 words": "12 palabras",
     "24 words": "24 palabras",
     "ABC": "ABC",

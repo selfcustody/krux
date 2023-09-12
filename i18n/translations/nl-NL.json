@@ -7,6 +7,7 @@
     "%s\n\nis a valid receive address!": "%s\n\nis een valide ontvangst adres!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nwerd NIET GEVONDEN in de eerste %d wisselgeld adressen",
     "%s\n\nwas NOT FOUND in the first %d receive addresses": "%s\n\nwerd NIET GEVONDEN in de eerste %d ontvangst adressen",
+    "(Experimental)": "(Experimenteel)",
     "12 words": "12 woorden",
     "24 words": "24 woorden",
     "ABC": "ABC",

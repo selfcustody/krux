@@ -7,6 +7,7 @@
     "%s\n\nis a valid receive address!": "%s\n\nist eine gültige Empfangsadresse!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "  %s\n\nwurde in den ersten %d Change Adressen NICHT GEFUNDEN",
     "%s\n\nwas NOT FOUND in the first %d receive addresses": "%s\n\nwurde in den ersten %d Empfangsadressen NICHT GEFUNDEN",
+    "(Experimental)": "(Experimental)",
     "12 words": "12 Wörter",
     "24 words": "24 Wörter",
     "ABC": "ABC",
