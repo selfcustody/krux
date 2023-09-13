@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -67,6 +67,9 @@ class FT6X36:
                 sequence_executor.touch_checks = 0
                 return None
         return to_screen_pos(pg.mouse.get_pos()) if pg.mouse.get_pressed()[0] else None
+
+    def threshold(self, value):
+        pass
 
 
 if "krux.touchscreens.ft6x36" not in sys.modules:

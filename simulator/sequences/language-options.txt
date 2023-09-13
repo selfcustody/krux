@@ -1,0 +1,37 @@
+include _wait-for-logo.txt
+
+# Navigate to Settings
+press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+
+# Wait message debounce
+wait 0.3
+
+# Skip message
+press BUTTON_A
+
+# Navigate to Language
+x2 press BUTTON_B
+press BUTTON_A
+
+screenshot locale-options.png
+
+# screenshot language-options-1.png
+
+press BUTTON_B
+# screenshot language-options-2.png
+
+press BUTTON_B
+# screenshot language-options-3.png
+
+press BUTTON_B
+# screenshot language-options-4.png
+
+press BUTTON_B
+# screenshot language-options-5.png
+
+press BUTTON_B
+# screenshot language-options-6.png
+
+press BUTTON_B

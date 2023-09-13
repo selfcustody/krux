@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=E1101
 import io
 import math
 import qrcode
@@ -129,6 +130,19 @@ def to_qr_codes(data, max_width, qr_format):
                 yield (code, encoder.fountain_encoder.seq_len())
 
 
+def add_qr_frame(qr_code):
+    """Add a 1 block white border around the code before displaying"""
+    qr_code = qr_code.strip()
+    lines = qr_code.split("\n")
+    size = len(lines)
+    size += 2
+    new_lines = ["0" * size]
+    for line in lines:
+        new_lines.append("0" + line + "0")
+    new_lines.append("0" * size)
+    return size, "\n".join(new_lines)
+
+
 def get_size(qr_code):
     """Returns the size of the qr code as the number of chars until the first newline"""
     size = 0
@@ -181,8 +195,11 @@ def parse_pmofn_qr_part(data):
 def detect_format(data):
     """Detects the QR format of the given data"""
     qr_format = FORMAT_NONE
-    if data.startswith("p") and data.index("of") <= 5:
-        qr_format = FORMAT_PMOFN
-    elif data.lower().startswith("ur:"):
-        qr_format = FORMAT_UR
+    try:
+        if data.startswith("p") and data.index("of") <= 5:
+            qr_format = FORMAT_PMOFN
+        elif data.lower().startswith("ur:"):
+            qr_format = FORMAT_UR
+    except:
+        pass
     return qr_format

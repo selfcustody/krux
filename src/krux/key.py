@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # pylint: disable=W0102
-import hashlib
 import time
 
 try:
@@ -31,10 +30,11 @@ from binascii import hexlify
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
-from .i18n import t
+from .krux_settings import t
 
 DER_SINGLE = "m/84h/%dh/0h"
 DER_MULTI = "m/48h/%dh/0h/2h"
+HARDENED_STR_REPLACE = "'"
 
 
 class Key:
@@ -48,58 +48,71 @@ class Key:
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
-        self.derivation = (DER_MULTI if self.multisig else DER_SINGLE) % network[
-            "bip32"
-        ]
+        self.derivation = self.get_default_derivation(self.multisig, network)
         self.account = self.root.derive(self.derivation).to_public()
 
     def xpub(self, version=None):
         """Returns the xpub representation of the extended master public key"""
         return self.account.to_base58(version)
 
-    def key_expression(self, version=None, pretty=False):
-        """Returns the extended master public key in key expression format
+    def key_expression(self, version=None):
+        """Returns the extended master public key (xpub/ypub/zpub) in key expression format
         per https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#key-expressions,
         prefixed with fingerprint and derivation.
         """
-        key_str = (
-            t("Fingerprint: %s\n\nDerivation: m%s\n\n%s") if pretty else "[%s%s]%s"
+        return "[%s%s]%s" % (
+            self.fingerprint_hex_str(False),
+            self.derivation[
+                1:
+            ],  # remove leading m, necessary for creating a descriptor
+            self.account_pubkey_str(version),
         )
-        return key_str % (
-            hexlify(self.fingerprint).decode("utf-8"),
-            self.derivation[1:],  # remove leading m
-            self.account.to_base58(version),
-        )
+
+    def account_pubkey_str(self, version=None):
+        """Returns the account extended public key (xpub/ypub/zpub)"""
+        return self.account.to_base58(version)
+
+    def fingerprint_hex_str(self, pretty=False):
+        """Returns the master key fingerprint in hex format"""
+        formatted_txt = t("Fingerprint: %s") if pretty else "%s"
+        return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
+
+    def derivation_str(self, pretty=False):
+        """Returns the derivation path for the Hierarchical Deterministic Wallet to
+        be displayed as string
+        """
+        formatted_txt = t("Derivation: %s") if pretty else "%s"
+        return (formatted_txt % self.derivation).replace("h", HARDENED_STR_REPLACE)
 
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
         return self.root.derive(self.derivation).sign(message_hash)
 
+    @staticmethod
+    def pick_final_word(entropy, words):
+        """Returns a random final word with a valid checksum for the given list of
+        either 11 or 23 words
+        """
+        if len(words) != 11 and len(words) != 23:
+            raise ValueError("must provide 11 or 23 words")
 
-# Adapted from: https://github.com/trezor/python-mnemonic
-def to_mnemonic_words(entropy):
-    """Turns entropy into a mnemonic"""
-    entropy_hash = hexlify(hashlib.sha256(entropy).digest()).decode()
-    bits = ("{:0>%d}" % (len(entropy) * 8)).format(
-        bin(int.from_bytes(entropy, "big"))[2:]
-    ) + ("{:0>256}".format(bin(int(entropy_hash, 16))[2:])[: len(entropy) * 8 // 32])
-    words = []
-    for i in range(len(bits) // 11):
-        idx = int(bits[i * 11 : (i + 1) * 11], 2)
-        words.append(WORDLIST[idx])
-    return words
+        random.seed(int(time.ticks_ms() + entropy))
+        while True:
+            word = random.choice(WORDLIST)
+            mnemonic = " ".join(words) + " " + word
+            if bip39.mnemonic_is_valid(mnemonic):
+                return word
 
+    @staticmethod
+    def get_default_derivation(multisig, network):
+        """Return the Krux default derivation path for single-sig or multisig"""
+        return (DER_MULTI if multisig else DER_SINGLE) % network["bip32"]
 
-def pick_final_word(ctx, words):
-    """Returns a random final word with a valid checksum for the given list of
-    either 11 or 23 words
-    """
-    if len(words) != 11 and len(words) != 23:
-        raise ValueError("must provide 11 or 23 words")
-
-    random.seed(int(time.ticks_ms() + ctx.input.entropy))
-    while True:
-        word = random.choice(WORDLIST)
-        mnemonic = " ".join(words) + " " + word
-        if bip39.mnemonic_is_valid(mnemonic):
-            return word
+    @staticmethod
+    def get_default_derivation_str(multisig, network):
+        """Return the Krux default derivation path for single-sig or multisig to
+        be displayd as string
+        """
+        return Key.get_default_derivation(multisig, network).replace(
+            "h", HARDENED_STR_REPLACE
+        )

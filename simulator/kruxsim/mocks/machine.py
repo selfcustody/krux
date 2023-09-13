@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 import sys
 from unittest import mock
 import pygame as pg
+from krux.krux_settings import Settings, PrinterSettings
 
 simulating_printer = False
 
@@ -29,6 +30,7 @@ simulating_printer = False
 def simulate_printer():
     global simulating_printer
     simulating_printer = True
+    Settings().printer.driver = "thermal/adafruit"
 
 
 def reset():
@@ -47,14 +49,28 @@ class UART:
 
     def read(self, num_bytes):
         if simulating_printer:
-            return chr(0b00000000)
+            module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
+            if module == "thermal" and cls == "AdafruitPrinter":
+                return chr(0b00000000)
         return None
 
-    def write(self, bytes):
+    def readline(self):
+        if simulating_printer:
+            module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
+            if module == "cnc" and cls == "FilePrinter":
+                return "ok\n".encode()
+        return None
+
+    def write(self, data):
+        pass
+
+
+class SDCard:
+    def remount():
         pass
 
 
 if "machine" not in sys.modules:
     sys.modules["machine"] = mock.MagicMock(
-        reset=reset, UART=mock.MagicMock(wraps=UART)
+        reset=reset, UART=mock.MagicMock(wraps=UART), SDCard=SDCard
     )

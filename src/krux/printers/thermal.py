@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -36,13 +36,17 @@
 # *************************************************************************
 # pylint: disable=W0231
 import time
-import math
-import board
 from fpioa_manager import fm
 from machine import UART
-from ..settings import settings
+
+# from ..settings import CategorySetting, NumberSetting, SettingsNamespace
+from ..krux_settings import Settings
+
+# from ..krux_settings import t
 from ..wdt import wdt
 from . import Printer
+
+INITIALIZE_WAIT_TIME = 500
 
 
 class AdafruitPrinter(Printer):
@@ -51,23 +55,19 @@ class AdafruitPrinter(Printer):
     """
 
     def __init__(self):
-        if ("UART2_TX" not in board.config["krux"]["pins"]) or (
-            "UART2_RX" not in board.config["krux"]["pins"]
-        ):
-            raise ValueError("missing required ports")
         fm.register(
-            board.config["krux"]["pins"]["UART2_TX"], fm.fpioa.UART2_TX, force=False
+            Settings().printer.thermal.adafruit.tx_pin, fm.fpioa.UART2_TX, force=False
         )
         fm.register(
-            board.config["krux"]["pins"]["UART2_RX"], fm.fpioa.UART2_RX, force=False
+            Settings().printer.thermal.adafruit.rx_pin, fm.fpioa.UART2_RX, force=False
         )
 
-        self.uart_conn = UART(UART.UART2, settings.printer.thermal.baudrate)
+        self.uart_conn = UART(UART.UART2, Settings().printer.thermal.adafruit.baudrate)
 
         self.character_height = 24
-        self.byte_time = 11.0 / float(settings.printer.thermal.baudrate)
-        self.dot_print_time = 0.03
-        self.dot_feed_time = 0.0021
+        self.byte_time = 1  # miliseconds
+        self.dot_print_time = Settings().printer.thermal.adafruit.line_delay
+        self.dot_feed_time = 2  # miliseconds
 
         self.setup()
 
@@ -80,7 +80,7 @@ class AdafruitPrinter(Printer):
         # upon power up -- it needs a moment to cold boot
         # and initialize.  Allow at least 1/2 sec of uptime
         # before printer can receive data.
-        time.sleep_ms(500)
+        time.sleep_ms(INITIALIZE_WAIT_TIME)
 
         # Wake up the printer to get ready for printing
         self.write_bytes(255)
@@ -111,8 +111,8 @@ class AdafruitPrinter(Printer):
             27,  # Esc
             55,  # 7 (print settings)
             11,  # Heat dots
-            255,  # Heat time
-            40,  # Heat interval
+            Settings().printer.thermal.adafruit.heat_time,
+            Settings().printer.thermal.adafruit.heat_interval,
         )
 
         # Description of print density from p. 23 of manual:
@@ -139,13 +139,13 @@ class AdafruitPrinter(Printer):
             # 11 bits (not 8) to accommodate idle, start and
             # stop bits.  Idle time might be unnecessary, but
             # erring on side of caution here.
-            time.sleep_ms(math.floor(self.byte_time * 1000))
+            time.sleep_ms(self.byte_time)
 
     def feed(self, x=1):
         """Feeds paper through the machine x times"""
         self.write_bytes(27, 100, x)
         # Wait for the paper to feed
-        time.sleep_ms(math.floor(self.dot_feed_time * self.character_height * 1000))
+        time.sleep_ms(self.dot_feed_time * self.character_height)
 
     def has_paper(self):
         """Returns a boolean indicating if the printer has paper or not"""
@@ -153,7 +153,7 @@ class AdafruitPrinter(Printer):
         # Bit 2 of response seems to be paper status
         res = self.uart_conn.read(1)
         if res is None:
-            return False
+            return True  # If not set, won't raise value error
         stat = ord(res) & 0b00000100
         # If set, we have paper; if clear, no paper
         return stat == 0
@@ -185,7 +185,13 @@ class AdafruitPrinter(Printer):
         while qr_code[size] != "\n":
             size += 1
 
-        scale = settings.printer.thermal.paper_width // size
+        scale = Settings().printer.thermal.adafruit.paper_width // size
+        scale *= Settings().printer.thermal.adafruit.scale
+        scale //= 200  # 100*2 because printer will scale 2X later to save data
+        # Being at full size sometimes makes prints more faded (can't apply too much heat?)
+
+        line_bytes_size = (size * scale + 7) // 8  # amount of bytes per line
+        self.set_bitmap_mode(line_bytes_size, scale * size, 3)
         for y in range(size):
             # Scale the line (width) by scaling factor
             line = 0
@@ -194,10 +200,33 @@ class AdafruitPrinter(Printer):
                 for _ in range(scale):
                     line <<= 1
                     line |= bit
-            line_bytes = line.to_bytes((size * scale + 7) // 8, "big")
+            line_bytes = line.to_bytes(line_bytes_size, "big")
             # Print height * scale lines out to scale by
+
             for _ in range(scale):
-                self.write_bytes(18, 42, 1, len(line_bytes))
-                self.write_bytes(*line_bytes)
-                time.sleep_ms(math.floor(self.dot_print_time * 1000))
+                # command += line_bytes
+                self.uart_conn.write(line_bytes)
+                time.sleep_ms(self.dot_print_time)
         self.feed(3)
+
+    def set_bitmap_mode(self, width, height, scale_mode=1):
+        """Set image format to be printed"""
+        # width in bytes, height in pixels
+        # scale_mode=1-> unchanged scale. scale_mode=3-> 2x scale
+        command = b"\x1D\x76\x30"
+        command += bytes([scale_mode])
+        command += bytes([width])
+        command += b"\x00"
+        command += bytes([height])
+        command += b"\x00"
+        self.uart_conn.write(command)
+
+    def print_bitmap_line(self, data):
+        """Print a bitmap line"""
+        self.uart_conn.write(data)
+        time.sleep_ms(self.dot_print_time)
+
+    def print_string(self, text):
+        """Print a text string"""
+        self.uart_conn.write(text)
+        time.sleep_ms(self.dot_print_time)

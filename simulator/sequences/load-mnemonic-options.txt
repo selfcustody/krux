@@ -5,16 +5,23 @@ press BUTTON_A
 
 screenshot load-mnemonic-options.png
 
-screenshot load-mnemonic-options-via-qr.png
+# Navigate to camera options
+press BUTTON_A
 
-press BUTTON_B
-screenshot load-mnemonic-options-via-text.png
+screenshot load-mnemonic-camera-options.png
 
+# Navigate to manual options
+press BUTTON_C
+press BUTTON_A
 press BUTTON_B
-screenshot load-mnemonic-options-via-numbers.png
+press BUTTON_A
 
-press BUTTON_B
-screenshot load-mnemonic-options-via-bits.png
+screenshot load-mnemonic-manual-options.png
 
+# Navigate to storage options
+press BUTTON_C
+press BUTTON_A
 press BUTTON_B
-screenshot load-mnemonic-options-back.png
+press BUTTON_A
+
+screenshot load-mnemonic-storage-options.png

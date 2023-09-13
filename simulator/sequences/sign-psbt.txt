@@ -3,23 +3,32 @@ press BUTTON_A
 wait 1
 
 # Navigate to Sign
-x4 press BUTTON_B
+x2 press BUTTON_C
 press BUTTON_A
 
 press BUTTON_A
-screenshot sign-psbt-wallet-not-loaded-warning.png
+qrcode singlesig-psbt-p1of5.png
+wait 0.5
+qrcode singlesig-psbt-p2of5.png
+wait 0.5
+qrcode singlesig-psbt-p3of5.png
+wait 0.5
+qrcode singlesig-psbt-p4of5.png
+wait 0.5
+qrcode singlesig-psbt-p5of5.png
+wait 0.5
+
+# screenshot sign-psbt-info-1.png
 
 press BUTTON_A
-qrcode singlekey-psbt-p1of5.png
-wait 0.5
-qrcode singlekey-psbt-p2of5.png
-wait 0.5
-qrcode singlekey-psbt-p3of5.png
-wait 0.5
-qrcode singlekey-psbt-p4of5.png
-wait 0.5
-qrcode singlekey-psbt-p5of5.png
-wait 0.5
+
+# screenshot sign-psbt-info-2.png
+
+press BUTTON_A
+
+# screenshot sign-psbt-info-3.png
+
+press BUTTON_A
 
 screenshot sign-psbt-sign-prompt.png
 
@@ -27,12 +36,12 @@ press BUTTON_A
 
 press BUTTON_B
 
-wait 0.5
+wait 0.1
 screenshot sign-psbt-signed-qr.png
-wait 0.5
-screenshot sign-psbt-signed-qr-2.png
-wait 0.5
-screenshot sign-psbt-signed-qr-3.png
-wait 0.5
+wait 0.1
+# screenshot sign-psbt-signed-qr-2.png
+wait 0.1
+# screenshot sign-psbt-signed-qr-3.png
+wait 0.1
 
 press BUTTON_A

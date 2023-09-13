@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -82,3 +82,7 @@ class FT6X36(Touchscreen):
         except Exception as e:
             return e  # debug
         return None
+
+    def threshold(self, value):
+        """Sets touch sensitivity threshold"""
+        self.write_reg(FT_ID_G_THGROUP, value)

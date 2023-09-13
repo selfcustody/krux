@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,34 +22,18 @@
 import sys
 import io
 import os
-from .settings import settings
 
-NONE = 99
-ERROR = 40
-WARN = 30
-INFO = 20
-DEBUG = 10
+from .krux_settings import Settings, LoggingSettings
+from .settings import SD_PATH
 
-LEVEL_NAMES = {
-    NONE: "NONE",
-    ERROR: "ERROR",
-    WARN: "WARN",
-    INFO: "INFO",
-    DEBUG: "DEBUG",
-}
-
-
-def level_name(level):
-    """Returns the string name for the log level"""
-    return LEVEL_NAMES[level]
+LOG_FILEPATH = "/" + SD_PATH + "/.krux.log"
 
 
 class Logger:
     """Logger logs"""
 
-    def __init__(self, filepath, level):
+    def __init__(self, filepath):
         self.filepath = filepath
-        self.level = level
         self.file = None
         try:
             os.remove(self.filepath)
@@ -58,9 +42,9 @@ class Logger:
 
     def log(self, level, msg):
         """Logs a message if the given level is equal to or higher than the logger's level"""
-        if level < self.level:
+        if level < level_id(Settings().logging.level):
             return
-        self._write("%s:%s" % (level_name(level), msg))
+        self._write("%s:%s" % (LoggingSettings.LEVEL_NAMES[level], msg))
 
     def _write(self, msg):
         print(msg)
@@ -74,19 +58,19 @@ class Logger:
 
     def debug(self, msg):
         """Logs a message at DEBUG level"""
-        self.log(DEBUG, msg)
+        self.log(LoggingSettings.DEBUG, msg)
 
     def info(self, msg):
         """Logs a message at INFO level"""
-        self.log(INFO, msg)
+        self.log(LoggingSettings.INFO, msg)
 
     def warn(self, msg):
         """Logs a message at WARN level"""
-        self.log(WARN, msg)
+        self.log(LoggingSettings.WARN, msg)
 
     def error(self, msg):
         """Logs a message at ERROR level"""
-        self.log(ERROR, msg)
+        self.log(LoggingSettings.ERROR, msg)
 
     def exception(self, msg):
         """Logs a message including exception at ERROR level"""
@@ -95,7 +79,15 @@ class Logger:
     def _exc(self, e, msg):
         buf = io.StringIO()
         sys.print_exception(e, buf)
-        self.log(ERROR, msg + "\n" + buf.getvalue())
+        self.log(LoggingSettings.ERROR, msg + "\n" + buf.getvalue())
 
 
-logger = Logger(settings.log.path, settings.log.level)
+def level_id(level_name):
+    """Returns the log level for the string name"""
+    for lvl_id, name in LoggingSettings.LEVEL_NAMES.items():
+        if name == level_name:
+            return lvl_id
+    return LoggingSettings.NONE
+
+
+logger = Logger(LOG_FILEPATH)

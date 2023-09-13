@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,27 +19,32 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from .i18n import t
+from .krux_settings import Settings
 
 SATS_PER_BTC = 100000000
+BTC_SATS_LEN = "8"
+THOUSANDS_SEPARATOR = " "
 
 
-def satcomma(amount):
-    """Formats a BTC amount according to the Satcomma standard:
-    https://medium.com/coinmonks/the-satcomma-standard-89f1e7c2aede
+def format_btc(amount):
+    """Formats a BTC value according to the locale and
+    the International Bureau of Weights and Measures,
+    while still using the idea behind the Satcomma standard
     """
-    amount_str = "%.8f" % round(amount / SATS_PER_BTC, 8)
-    msb = amount_str[:-9]  # most significant bitcoin heh heh heh
-    lsb = amount_str[len(msb) + 1 :]
-    return _add_commas(msb, t(",")) + t(".") + _add_commas(lsb, t(","))
 
+    btc_without_decimal = amount // SATS_PER_BTC
+    btc_decimal_only = amount % SATS_PER_BTC
+    btc_decimal_8char = ("{:0>" + BTC_SATS_LEN + "}").format(btc_decimal_only)
 
-def _add_commas(number, comma_sep=","):
-    """Returns a number separated with commas"""
-    triplets_num = len(number) // 3
-    remainder = len(number) % 3
-    triplets = [number[:remainder]] if remainder else []
-    triplets += [
-        number[remainder + i * 3 : remainder + 3 + i * 3] for i in range(triplets_num)
-    ]
-    return comma_sep.join(triplets)
+    decimal_separator = ","
+    if Settings().i18n.locale == "en-US":
+        decimal_separator = "."
+    return (
+        "{:,}".format(btc_without_decimal).replace(",", THOUSANDS_SEPARATOR)
+        + decimal_separator
+        + btc_decimal_8char[:2]
+        + THOUSANDS_SEPARATOR
+        + btc_decimal_8char[2:5]
+        + THOUSANDS_SEPARATOR
+        + btc_decimal_8char[5:]
+    )

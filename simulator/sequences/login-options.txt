@@ -1,17 +1,18 @@
 include _wait-for-logo.txt
 
-screenshot login-options.png
-
-screenshot login-options-load-mnemonic.png
+# screenshot login-options.png
 
 press BUTTON_B
-screenshot login-options-new-mnemonic.png
+# screenshot login-options-new-mnemonic.png
 
 press BUTTON_B
-screenshot login-options-settings.png
+# screenshot login-options-settings.png
 
 press BUTTON_B
-screenshot login-options-about.png
+# screenshot login-options-tools.png
 
 press BUTTON_B
-screenshot login-options-shutdown.png
+# screenshot login-options-about.png
+
+press BUTTON_B
+# screenshot login-options-shutdown.png

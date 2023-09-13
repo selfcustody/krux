@@ -11,11 +11,11 @@ jobs:
   lint-black:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
       - uses: psf/black@stable
         with:
           options: "--check --verbose"
@@ -40,11 +40,11 @@ jobs:
   lint-pylint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -59,24 +59,24 @@ jobs:
   check-translations:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
       - name: Validate translations
         run: cd i18n && python3 i18n.py validate
 
   run-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -89,13 +89,13 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -105,4 +105,4 @@ jobs:
       - name: Build coverage file
         run: poetry run pytest --cache-clear --cov src/krux --cov-report xml tests
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3

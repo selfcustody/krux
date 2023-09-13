@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,40 @@ import pygame as pg
 from kruxsim import devices, events
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--device", type=str, default=devices.PC, required=False)
-parser.add_argument("--with-printer", type=bool, default=False, required=False)
-parser.add_argument("--with-sd", type=bool, default=False, required=False)
-parser.add_argument("--sequence", type=str, default="", required=False)
-parser.add_argument("--exit-after-sequence", type=bool, default=True, required=False)
+parser.add_argument(
+    "--device",
+    type=str,
+    default=devices.PC,
+    required=False,
+)
+parser.add_argument(
+    "--sequence",
+    type=str,
+    default="",
+    required=False,
+)
+parser.add_argument(
+    "--printer",
+    type=bool,
+    default=False,
+    required=False,
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--sd",
+    type=bool,
+    default=False,
+    required=False,
+    action=argparse.BooleanOptionalAction,
+)
+parser.add_argument(
+    "--exit-after-sequence",
+    type=bool,
+    default=True,
+    required=False,
+    action=argparse.BooleanOptionalAction,
+)
+
 args = parser.parse_args()
 
 pg.init()
@@ -41,27 +70,33 @@ from kruxsim.mocks import board
 
 board.register_device(args.device)
 
-if args.with_sd:
+if args.sd:
     from kruxsim.mocks import uopen
     from kruxsim.mocks import uos
+
+from kruxsim.mocks import uos_functions
 
 from kruxsim.mocks import usys
 from kruxsim.mocks import utime
 from kruxsim.mocks import fpioa_manager
 from kruxsim.mocks import Maix
 from kruxsim.mocks import flash
+from kruxsim.mocks import lcd
 from kruxsim.mocks import machine
+from kruxsim.mocks import image
 from kruxsim.mocks import pmu
 
-if args.with_printer:
+if args.printer:
     machine.simulate_printer()
 
 from kruxsim.mocks import secp256k1
 from kruxsim.mocks import qrcode
 from kruxsim.mocks import sensor
-from kruxsim.mocks import lcd
+
 from kruxsim.mocks import ft6x36
 from kruxsim.sequence import SequenceExecutor
+
+from kruxsim.mocks import rotary
 
 sequence_executor = None
 if args.sequence:
@@ -78,6 +113,10 @@ def run_krux():
         exec(boot_file.read())
 
 
+# mock for SD
+if args.sd:
+    from kruxsim.mocks import sd_card
+
 t = threading.Thread(target=run_krux)
 t.daemon = True
 
@@ -88,6 +127,10 @@ buffer_image = screen.copy().convert()
 pg.display.set_caption("Krux Simulator")
 
 device_image = devices.load_image(args.device)
+
+if(args.device == devices.PC):
+    from kruxsim.mocks.board import BOARD_CONFIG
+    BOARD_CONFIG["type"] = "amigo_type"
 
 t.start()
 

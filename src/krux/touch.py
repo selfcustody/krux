@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,16 +19,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=R0902
 
 import time
 from .touchscreens.ft6x36 import FT6X36
 from .logging import logger as log
+from .krux_settings import Settings
 
 SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
+SWIPE_UP = 3
+SWIPE_DOWN = 4
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
+TOUCH_DEBOUNCE = 200  # Time to wait before sampling touch again after a release
 
 
 class Touch:
@@ -40,16 +45,18 @@ class Touch:
         """Touch API init - width and height are in Landscape mode
         For Krux width = max_y, height = max_x
         """
-        self.last_time = 0
+        self.sample_time = 0
+        self.debounce = 0
         self.y_regions = []
         self.x_regions = []
         self.index = 0
-        self.x_press_point = 0
-        self.x_release_point = 0
+        self.press_point = []
+        self.release_point = (0, 0)
         self.gesture = None
         self.state = Touch.idle
         self.width, self.height = width, height
         self.touch_driver = FT6X36()
+        self.touch_driver.threshold(Settings().touch.threshold)
 
     def clear_regions(self):
         """Remove previously stored buttons map"""
@@ -68,58 +75,87 @@ class Touch:
             raise ValueError("Touch region added outside display area")
         self.x_regions.append(region)
 
-    def extract_index(self, data):
+    def _extract_index(self, data):
         """Gets an index from touched points, x and y delimiters"""
+        index = 0
+        if self.y_regions:
+            for region in self.y_regions:
+                if data[1] > region:
+                    index += 1
+            if index == 0 or index >= len(self.y_regions):  # outside y areas
+                self.state = self.release
+            else:
+                index -= 1
+                if self.x_regions:  # if 2D array
+                    index *= len(self.x_regions) - 1
+                    x_index = 0
+                    for x_region in self.x_regions:
+                        if data[0] > x_region:
+                            x_index += 1
+                    if x_index == 0 or x_index >= len(
+                        self.x_regions
+                    ):  # outside x areas
+                        self.state = self.release
+                    else:
+                        x_index -= 1
+                    index += x_index
+        else:
+            index = 0
+        return index
+
+    def _store_points(self, data):
+        """Store pressed points and calculare an average pressed point"""
         if self.state == self.idle:
             self.state = self.press
-            self.x_press_point = data[0]
-            self.index = 0
-            if self.y_regions:
-                for region in self.y_regions:
-                    if data[1] > region:
-                        self.index += 1
-                if self.index == 0 or self.index >= len(
-                    self.y_regions
-                ):  # outside y areas
-                    self.state = self.release
-                else:
-                    self.index -= 1
-                    if self.x_regions:  # if 2D array
-                        self.index *= len(self.x_regions) - 1
-                        x_index = 0
-                        for x_region in self.x_regions:
-                            if data[0] > x_region:
-                                x_index += 1
-                        if x_index == 0 or x_index >= len(
-                            self.x_regions
-                        ):  # outside x areas
-                            self.state = self.release
-                        else:
-                            x_index -= 1
-                        self.index += x_index
-            else:
-                self.index = 0
-        self.x_release_point = data[0]
-
-    def h_gesture(self, press, release):
-        """Detects touch gestures"""
-        if release - press > SWIPE_THRESHOLD:
-            self.gesture = SWIPE_RIGHT
-        if press - release > SWIPE_THRESHOLD:
-            self.gesture = SWIPE_LEFT
+            self.press_point = [data]
+            self.index = self._extract_index(self.press_point[0])
+        # Calculare an average (max. 10 samples) pressed point to increase precision
+        elif self.state == self.press and len(self.press_point) < 10:
+            self.press_point.append(data)
+            len_press = len(self.press_point)
+            x = 0
+            y = 0
+            for n in range(len_press):
+                x += self.press_point[n][0]
+                y += self.press_point[n][1]
+            x //= len_press
+            y //= len_press
+            self.index = self._extract_index((x, y))
+        self.release_point = data
 
     def current_state(self):
         """Returns the touchscreen state"""
-        if time.ticks_ms() > self.last_time + TOUCH_S_PERIOD:
-            self.last_time = time.ticks_ms()
+        current_time = time.ticks_ms()
+        if (
+            current_time > self.sample_time + TOUCH_S_PERIOD
+            and current_time > self.debounce + TOUCH_DEBOUNCE
+        ):
+            self.sample_time = time.ticks_ms()
             data = self.touch_driver.current_point()
             if isinstance(data, tuple):
-                self.extract_index(data)
+                self._store_points(data)
             elif data is None:  # gets release then return to idle.
                 if self.state == self.release:
                     self.state = self.idle
+                    self.debounce = time.ticks_ms()
                 elif self.state == self.press:
-                    self.h_gesture(self.x_press_point, self.x_release_point)
+                    lateral_lenght = self.release_point[0] - self.press_point[0][0]
+                    if lateral_lenght > SWIPE_THRESHOLD:
+                        self.gesture = SWIPE_RIGHT
+                    elif -lateral_lenght > SWIPE_THRESHOLD:
+                        self.gesture = SWIPE_LEFT
+                        lateral_lenght *= -1  # make it positive value
+                    vertical_lenght = self.release_point[1] - self.press_point[0][1]
+                    if (
+                        vertical_lenght > SWIPE_THRESHOLD
+                        and vertical_lenght > lateral_lenght
+                    ):
+                        self.gesture = SWIPE_DOWN
+                    elif (
+                        -vertical_lenght > SWIPE_THRESHOLD
+                        and -vertical_lenght > lateral_lenght
+                    ):
+                        self.gesture = SWIPE_UP
                     self.state = self.release
             else:
                 log.warn("Touch error: " + str(data))
@@ -139,6 +175,20 @@ class Touch:
     def swipe_left_value(self):
         """Returns detected gestures and clean respective variable"""
         if self.gesture == SWIPE_LEFT:
+            self.gesture = None
+            return 0
+        return 1
+
+    def swipe_up_value(self):
+        """Returns detected gestures and clean respective variable"""
+        if self.gesture == SWIPE_UP:
+            self.gesture = None
+            return 0
+        return 1
+
+    def swipe_down_value(self):
+        """Returns detected gestures and clean respective variable"""
+        if self.gesture == SWIPE_DOWN:
             self.gesture = None
             return 0
         return 1

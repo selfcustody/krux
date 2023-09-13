@@ -1,5 +1,11 @@
 import pytest
-from .shared_mocks import board_amigo_tft, board_dock, board_m5stickv, encode_to_string
+from .shared_mocks import (
+    board_amigo_tft,
+    board_dock,
+    board_m5stickv,
+    encode_to_string,
+    statvfs,
+)
 
 
 def reset_krux_modules():
@@ -31,9 +37,15 @@ def mp_modules(mocker, monkeypatch):
     monkeypatch.setitem(sys.modules, "Maix", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "fpioa_manager", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "pmu", mocker.MagicMock())
+    monkeypatch.setitem(sys.modules, "image", mocker.MagicMock())
     monkeypatch.setattr(time, "sleep_ms", mocker.MagicMock(), raising=False)
     monkeypatch.setattr(time, "ticks_ms", mocker.MagicMock(), raising=False)
     monkeypatch.setattr(sys, "print_exception", mocker.MagicMock(), raising=False)
+    monkeypatch.setitem(
+        sys.modules,
+        "uos",
+        mocker.MagicMock(statvfs=statvfs),
+    )
 
 
 @pytest.fixture

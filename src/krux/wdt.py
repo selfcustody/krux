@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import machine
+from .settings import FLASH_PATH
+
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 RESET_TIMEOUT = 30000
+WDT_CONF_NAME = "WATCHDOG_DISABLE"
+CONF_FILE = "config.json"
 
 # Create a watchdog timer that resets the device if not fed for 30s
 wdt = machine.WDT(timeout=RESET_TIMEOUT)
+
+# Check if user wanted to disable the watchdog!
+try:
+    with open("/" + FLASH_PATH + "/" + CONF_FILE, "r") as f:
+        conf_dict = json.loads(f.read())
+        if conf_dict.get(WDT_CONF_NAME, False):
+            wdt.stop()
+        del conf_dict
+except:
+    pass

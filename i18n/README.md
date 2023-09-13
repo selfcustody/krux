@@ -31,7 +31,7 @@ Open `mkdocs.yml` and edit the `plugins` section with the following premises:
 
 ### Example
 
-Supose you translated to a fake locale [Lorem ipsum](https://pt.wikipedia.org/wiki/Lorem_ipsum). So, you can call the locale extension as `lo`. Now, you will add the following `lo` entries to `plugins.i18n.languages` in [mkdocs.yml](../mkdocs.yml):
+Suppose you translated to a fake locale [Lorem ipsum](https://pt.wikipedia.org/wiki/Lorem_ipsum). So, you can call the locale extension as `lo`. Now, you will add the following `lo` entries to `plugins.i18n.languages` in [mkdocs.yml](../mkdocs.yml):
 
 - name: name of the language that will be shown in the web interface
 - site_name: translated website title
@@ -52,7 +52,7 @@ Now, you will add the following `lo` entries to `plugins.i18n.nav_translations` 
 
 - Home: `translation`;
 - Getting Started: `translation`;
-- Part List: `translation`;
+- Devices and Part List: `translation`;
 - FAQ: `translation`;
 - Support the Project: `translation`;
 - About: `translation`;
@@ -60,7 +60,7 @@ Now, you will add the following `lo` entries to `plugins.i18n.nav_translations` 
 - Generating a Mnemonic: `translation`;
 - Loading a Mnemonic: `translation`;
 - Navigating the Main Menu: `translation`;
-- Using a Single-key Wallet: `translation`;
+- Using a Single-sig Wallet: `translation`;
 - Using a Multisig Wallet: `translation`; 
 - Printing: `translation`;
 - Settings: `translation`;
@@ -75,7 +75,7 @@ plugins:
       lo:
         Home: Ut enim
         Getting Started: Ad minim
-        Part List: Veniam
+        Devices and Part List: Veniam
         FAQ: Quis nostrud 
         Support the Project: Exercitation ullamco laboris
         About: Nisi
@@ -83,7 +83,7 @@ plugins:
         Generating a Mnemonic: Ex ea
         Loading a Mnemonic: Consequat
         Navigating the Main Menu: Duis aute irure dolor
-        Using a Single-key Wallet: In reprehenderit in voluptate
+        Using a Single-sig Wallet: In reprehenderit in voluptate
         Using a Multisig Wallet: Velit esse cillum dolore 
         Printing: Eu fugiat
         Settings: Nulla pariatur
@@ -109,11 +109,11 @@ nav:
     - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
     - Loading a Mnemonic: getting-started/loading-a-mnemonic.en.md
     - Navigating the Main Menu: getting-started/navigating-the-main-menu.en.md
-    - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.en.md
+    - Using a Single-sig Wallet: getting-started/using-a-single-sig-wallet.en.md
     - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.en.md
     - Printing: getting-started/printing.en.md
     - Settings: getting-started/settings.en.md
-  - Part List: parts.en.md
+  - Devices and Part List: parts.en.md
   - FAQ: faq.en.md
   - Support the Project: support.en.md
 # ..configurations...

@@ -1,5 +1,5 @@
 import pytest
-from ..shared_mocks import MockPrinter, get_mock_open
+from ..shared_mocks import MockPrinter, get_mock_open, mock_context
 
 
 @pytest.fixture
@@ -14,13 +14,13 @@ def tdata(mocker):
     TEST_24_WORD_MNEMONIC = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     SIGNING_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
-    SINGLEKEY_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, False, NETWORKS["main"])
-    SINGLEKEY_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, False, NETWORKS["main"])
+    SINGLESIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, False, NETWORKS["main"])
+    SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, False, NETWORKS["main"])
     MULTISIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, True, NETWORKS["main"])
-    SINGLEKEY_SIGNING_KEY = Key(SIGNING_MNEMONIC, False, NETWORKS["main"])
+    SINGLESIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, False, NETWORKS["main"])
     MULTISIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, True, NETWORKS["main"])
 
-    SPECTER_SINGLEKEY_WALLET_DATA = '{"label": "Specter Singlekey Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
+    SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
     SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
 
     P2WPKH_PSBT = b'psbt\xff\x01\x00q\x02\x00\x00\x00\x01\xcf<X\xc3)\x82\xae P\x88\xd9\xbdI\xeb\x9b\x02\xac\xdfM=\xaev\xa5\x16\xc6\xb3\x06\xb1]\xe3\xa1N\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x02|?]\x05\x00\x00\x00\x00\x16\x00\x14/4\xaa\x1c\xf0\nS\xb0U\xa2\x91\xa0:}E\xf0\xa6\x98\x8bR\x80\x96\x98\x00\x00\x00\x00\x00\x16\x00\x14\xe6j\xfe\xff\xc3\x83\x8eq\xf0\xa2{\x07\xe3\xb0\x0e\xdej\xe8\xe1`\x00\x00\x00\x00\x00\x01\x01\x1f\x00\xe1\xf5\x05\x00\x00\x00\x00\x16\x00\x14\xd0\xc4\xa3\xef\t\xe9\x97\xb6\xe9\x9e9~Q\x8f\xe3\xe4\x1a\x11\x8c\xa1"\x06\x02\xe7\xab%7\xb5\xd4\x9e\x97\x03\t\xaa\xe0n\x9eI\xf3l\xe1\xc9\xfe\xbb\xd4N\xc8\xe0\xd1\xcc\xa0\xb4\xf9\xc3\x19\x18s\xc5\xda\nT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00"\x02\x03]I\xec\xcdT\xd0\t\x9eCgbw\xc7\xa6\xd4b]a\x1d\xa8\x8a]\xf4\x9b\xf9Qzw\x91\xa7w\xa5\x18s\xc5\xda\nT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00'
@@ -32,18 +32,22 @@ def tdata(mocker):
     P2WSH_PSBT_B64 = "cHNidP8BALICAAAAAq1DhxRK+mUH4T6uUNob8bUaZ7MP+44MW4+Y9bOxpjhZAAAAAAD9////aWclWQ+45HKrI07r878E2UrAupT2paT4QurbmtNjYNQBAAAAAP3///8CQEIPAAAAAAAiACCpkDPDhmIzPlkJrjw9A71xjbIUWf3VUB7ooFJhTVm04tjSIQEAAAAAIgAgjQKFDauIXsV5u23LBdYgOwX1FwGGrLiQfWzBtFKZ7dIAAAAATwEENYfPBD5i336AAAACQStJhNVJul7vHKbo83VdmuAW2m0WaXLKDlFANn7dUNoCNbhLMdw4Knz7Q7o6exdL6UFhQegW9nJb0SUStbLEpawUAgjLdzAAAIABAACAAAAAgAIAAIBPAQQ1h88EnbHQAIAAAAI/2Nc7x7iMpJNapTe/OJTV4oifqzQcYY9KV2+PGRjCdQJoww1WnSNqfcxXGyux0q1PqfmzUqgJNqKJCpmqI9t47BQmu4PEMAAAgAEAAIAAAACAAgAAgE8BBDWHzwS6wUg5gAAAAh1Pvr3ZZ+GvcUwJl9OPz2cLXOnTAcBEC7zDtqIOt3IcA1aOofNgUZFu0baQw54SqOcGA7KAvTDOXygfKRilU2OqFHPF2gowAACAAQAAgAAAAIACAACAAAEBK4CWmAAAAAAAIgAgiYAxcG7dnrEiZ4VHFVHOo18XCalvhZYuMqBr9n7HESQBBWlSIQJOjQgMfX26XEf+trHIEk3rYkEX5Y2NfrFKQARPcd2X8iEDBWHUgq25PfHvE+hlcBryJG7wo2y8jKUSPY7sd85OOMchA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHU64iBgJOjQgMfX26XEf+trHIEk3rYkEX5Y2NfrFKQARPcd2X8hwmu4PEMAAAgAEAAIAAAACAAgAAgAAAAAABAAAAIgYDBWHUgq25PfHvE+hlcBryJG7wo2y8jKUSPY7sd85OOMccAgjLdzAAAIABAACAAAAAgAIAAIAAAAAAAQAAACIGA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHHHPF2gowAACAAQAAgAAAAIACAACAAAAAAAEAAAAAAQErgJaYAAAAAAAiACAzd60wM9EFnPHSNbsSJfyipL8myVLVP2/vwzotVUSNxQEFaVIhAiKCMRLlzIhLkRbLIUIMx5KYJM0v6LcjW/mS6K7eFGwiIQKDzUflU23LeecRgzDo5IBCEvaWGfHW7JkNxzXvuc7FdCEDC5DtLoa61/Kk/pdpu0F9e6nKoRJIB9v7Ni377rZefgFTriIGAiKCMRLlzIhLkRbLIUIMx5KYJM0v6LcjW/mS6K7eFGwiHAIIy3cwAACAAQAAgAAAAIACAACAAAAAAAAAAAAiBgKDzUflU23LeecRgzDo5IBCEvaWGfHW7JkNxzXvuc7FdBwmu4PEMAAAgAEAAIAAAACAAgAAgAAAAAAAAAAAIgYDC5DtLoa61/Kk/pdpu0F9e6nKoRJIB9v7Ni377rZefgEcc8XaCjAAAIABAACAAAAAgAIAAIAAAAAAAAAAAAABAWlSIQKtIdmtKKuZrH7f2R4iIU8RWVOrCdHVWBCS+0e9pZJy/iEDoH074LrWPIA10hyXtBCJDT06GdLkA6+z/PxoJqomPHYhA6GoQ/otQdk71nUpYZFfbkSKdBkkSj4CuPTPYrzGp6JrU64iAgKtIdmtKKuZrH7f2R4iIU8RWVOrCdHVWBCS+0e9pZJy/hwCCMt3MAAAgAEAAIAAAACAAgAAgAEAAAAAAAAAIgIDoH074LrWPIA10hyXtBCJDT06GdLkA6+z/PxoJqomPHYcc8XaCjAAAIABAACAAAAAgAIAAIABAAAAAAAAACICA6GoQ/otQdk71nUpYZFfbkSKdBkkSj4CuPTPYrzGp6JrHCa7g8QwAACAAQAAgAAAAIACAACAAQAAAAAAAAAAAA=="
     SIGNED_P2WSH_PSBT_B64 = "cHNidP8BALICAAAAAq1DhxRK+mUH4T6uUNob8bUaZ7MP+44MW4+Y9bOxpjhZAAAAAAD9////aWclWQ+45HKrI07r878E2UrAupT2paT4QurbmtNjYNQBAAAAAP3///8CQEIPAAAAAAAiACCpkDPDhmIzPlkJrjw9A71xjbIUWf3VUB7ooFJhTVm04tjSIQEAAAAAIgAgjQKFDauIXsV5u23LBdYgOwX1FwGGrLiQfWzBtFKZ7dIAAAAAACICA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHRzBEAiBoP20ZBEOJlYu67bu6OCkJrl7jYBZHyItxnA68xbFqogIgBQ1QKOCcY10pceXiU5+vK+Rfqcb5DSIl9KIAO6KvMlcBACICAwuQ7S6GutfypP6XabtBfXupyqESSAfb+zYt++62Xn4BRzBEAiB+TxuMu4d4o7v/BNgQQ3HIWQ87TjaX2FP+dGmAsxLgPgIgbJM9Am20PJD0JflaJHu37E8ZFaOjU/JRgdxY+9UmnsUBAAAA"
 
+    # Use https://bip174.org/ to see the contents of the PSBT_B64
+    # Use the command below on linux to see the binary PSBT as BASE64
+    # base64 binary.psbt | tr -d '\n\r'
+
     return namedtuple(
         "TestData",
         [
             "TEST_12_WORD_MNEMONIC",
             "TEST_24_WORD_MNEMONIC",
             "SIGNING_MNEMONIC",
-            "SINGLEKEY_12_WORD_KEY",
-            "SINGLEKEY_24_WORD_KEY",
+            "SINGLESIG_12_WORD_KEY",
+            "SINGLESIG_24_WORD_KEY",
             "MULTISIG_12_WORD_KEY",
-            "SINGLEKEY_SIGNING_KEY",
+            "SINGLESIG_SIGNING_KEY",
             "MULTISIG_SIGNING_KEY",
-            "SPECTER_SINGLEKEY_WALLET_DATA",
+            "SPECTER_SINGLESIG_WALLET_DATA",
             "SPECTER_MULTISIG_WALLET_DATA",
             "P2WPKH_PSBT",
             "SIGNED_P2WPKH_PSBT",
@@ -58,12 +62,12 @@ def tdata(mocker):
         TEST_12_WORD_MNEMONIC,
         TEST_24_WORD_MNEMONIC,
         SIGNING_MNEMONIC,
-        SINGLEKEY_12_WORD_KEY,
-        SINGLEKEY_24_WORD_KEY,
+        SINGLESIG_12_WORD_KEY,
+        SINGLESIG_24_WORD_KEY,
         MULTISIG_12_WORD_KEY,
-        SINGLEKEY_SIGNING_KEY,
+        SINGLESIG_SIGNING_KEY,
         MULTISIG_SIGNING_KEY,
-        SPECTER_SINGLEKEY_WALLET_DATA,
+        SPECTER_SINGLESIG_WALLET_DATA,
         SPECTER_MULTISIG_WALLET_DATA,
         P2WPKH_PSBT,
         SIGNED_P2WPKH_PSBT,
@@ -76,121 +80,423 @@ def tdata(mocker):
     )
 
 
-def test_mnemonic(mocker, m5stickv, tdata):
+def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
+    """Helper to create mocked context obj"""
+    from krux.krux_settings import Settings, THERMAL_ADAFRUIT_TXT
+
+    ctx = mock_context(mocker)
+    ctx.power_manager.battery_charge_remaining.return_value = 1
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
+
+    ctx.wallet = wallet
+    ctx.printer = printer
+    if printer is None:
+        Settings().printer.driver = "none"
+    else:
+        mocker.patch("krux.printers.create_printer", new=mocker.MagicMock())
+        Settings().printer.driver = THERMAL_ADAFRUIT_TXT
+
+    if touch_seq:
+        ctx.input.touch = mocker.MagicMock(
+            current_index=mocker.MagicMock(side_effect=touch_seq)
+        )
+    return ctx
+
+
+def test_mnemonic_words(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        # See 12 Words
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            None,
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        # See 24 Words
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            None,
+            [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        # See and print 24 Words
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # Words
+                BUTTON_ENTER,  # Page 1
+                BUTTON_ENTER,  # Page 2
+                BUTTON_ENTER,  # Print
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+    ]
+    num = 0
+    for case in cases:
+        print(num)
+        num = num + 1
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
+        home = Home(ctx)
+
+        mocker.spy(home, "display_mnemonic")
+        home.mnemonic()
+
+        home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic)
+        assert ctx.input.wait_for_button.call_count == len(case[2])
+
+
+def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
+    from krux.pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
         # No print prompt
-        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_ENTER, BUTTON_ENTER]),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            None,  # printer
+            [
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            None,  # printer
+            [
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
         ),
         # Print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
         ),
         # Decline to print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_PAGE,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
         ),
     ]
+    num = 0
     for case in cases:
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[2])
-            ),
-            wallet=case[0],
-            printer=case[1],
-        )
+        print(num)
+        num = num + 1
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
-        mocker.spy(home, "display_mnemonic")
         mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_qr_prompt")
+        mocker.spy(home, "print_standard_qr")
         home.mnemonic()
 
-        home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic)
+        title = "Plaintext QR"
         home.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, None
+            ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
-        home.print_qr_prompt.assert_called_with(ctx.wallet.key.mnemonic, FORMAT_NONE)
+        if case[1] is not None:
+            home.print_standard_qr.assert_called_with(
+                ctx.wallet.key.mnemonic, FORMAT_NONE, title
+            )
+        assert ctx.input.wait_for_button.call_count == len(case[2])
+
+
+def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
+    from krux.pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        # No print prompt
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            None,
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            None,
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        # Print
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_ENTER,  # say yes to print prompt
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_ENTER,  # say yes to print prompt
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        # Decline to print
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_PAGE,  # say no to print prompt
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_PAGE,  # say no to print prompt
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+    ]
+    num = 0
+    for case in cases:
+        print(num)
+        num = num + 1
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
+        home = Home(ctx)
+
+        mocker.spy(home, "display_seed_qr")
+        home.mnemonic()
+
+        home.display_seed_qr.assert_called_once()
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
-def test_mnemonic_touch(mocker, amigo_tft, tdata):
+def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_TOUCH, BUTTON_PAGE
+    from krux.input import BUTTON_TOUCH, BUTTON_PAGE_PREV, BUTTON_ENTER
     from krux.qr import FORMAT_NONE
 
     cases = [
         # No print prompt
-        (Wallet(tdata.SINGLEKEY_12_WORD_KEY), None, [BUTTON_TOUCH, BUTTON_TOUCH]),
-        (Wallet(tdata.SINGLEKEY_24_WORD_KEY), None, [BUTTON_TOUCH, BUTTON_TOUCH]),
-        # Print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
-            MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            None,
+            [
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+            [1, 0],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            None,
+            [
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+            [1, 0],
+        ),
+        # Print
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+            [1, 0, 0],
+        ),
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+            [1, 0, 0],
         ),
         # Decline to print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_PAGE],
+            [
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+            [1, 0, 1],
         ),
         (
-            Wallet(tdata.SINGLEKEY_24_WORD_KEY),
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
-            [BUTTON_TOUCH, BUTTON_TOUCH, BUTTON_TOUCH],
+            [
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_TOUCH,
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+            [1, 0, 1],
         ),
     ]
+    num = 0
     for case in cases:
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[2])
-            ),
-            wallet=case[0],
-            printer=case[1],
-        )
+        print(num)
+        num = num + 1
+        ctx = create_ctx(mocker, case[2], case[0], case[1], touch_seq=case[3])
         home = Home(ctx)
 
-        mocker.spy(home, "display_mnemonic")
         mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_qr_prompt")
+        mocker.spy(home, "print_standard_qr")
 
         home.mnemonic()
 
-        home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic)
+        title = "Plaintext QR"
         home.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, None
+            ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
-        home.print_qr_prompt.assert_called_with(ctx.wallet.key.mnemonic, FORMAT_NONE)
+        if case[1] is not None:
+            home.print_standard_qr.assert_called_with(
+                ctx.wallet.key.mnemonic, FORMAT_NONE, title
+            )
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -204,7 +510,7 @@ def test_public_key(mocker, m5stickv, tdata):
     cases = [
         # No print prompt
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
@@ -215,7 +521,7 @@ def test_public_key(mocker, m5stickv, tdata):
         ),
         # Print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_ENTER,
@@ -240,7 +546,7 @@ def test_public_key(mocker, m5stickv, tdata):
         ),
         # Decline to print
         (
-            Wallet(tdata.SINGLEKEY_12_WORD_KEY),
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_ENTER,
@@ -265,17 +571,11 @@ def test_public_key(mocker, m5stickv, tdata):
         ),
     ]
     for case in cases:
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[2])
-            ),
-            wallet=case[0],
-            printer=case[1],
-        )
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
         mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_qr_prompt")
+        mocker.spy(home, "print_standard_qr")
 
         home.public_key()
 
@@ -284,23 +584,25 @@ def test_public_key(mocker, m5stickv, tdata):
             mocker.call(
                 ctx.wallet.key.key_expression(None),
                 FORMAT_NONE,
-                None,
+                "XPUB",
             ),
             mocker.call(
                 ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
-                None,
+                "ZPUB",
             ),
         ]
         print_qr_calls = [
-            mocker.call(ctx.wallet.key.key_expression(None), FORMAT_NONE),
+            mocker.call(ctx.wallet.key.key_expression(None), FORMAT_NONE, "XPUB"),
             mocker.call(
                 ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
                 FORMAT_NONE,
+                "ZPUB",
             ),
         ]
         home.display_qr_codes.assert_has_calls(display_qr_calls)
-        home.print_qr_prompt.assert_has_calls(print_qr_calls)
+        if case[1] is not None:
+            home.print_standard_qr.assert_has_calls(print_qr_calls)
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -315,52 +617,52 @@ def test_wallet(mocker, m5stickv, tdata):
         # Don't load
         (
             False,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
             [BUTTON_PAGE],
         ),
         # Load, good data, accept
         (
             False,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # Load, good data, decline
         (
             False,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
             [BUTTON_ENTER, BUTTON_PAGE],
         ),
         # Load, bad capture
-        (False, tdata.SINGLEKEY_12_WORD_KEY, None, None, [BUTTON_ENTER]),
+        (False, tdata.SINGLESIG_12_WORD_KEY, None, None, [BUTTON_ENTER]),
         # Load, bad wallet data
-        (False, tdata.SINGLEKEY_12_WORD_KEY, "{}", None, [BUTTON_ENTER, BUTTON_ENTER]),
+        (False, tdata.SINGLESIG_12_WORD_KEY, "{}", None, [BUTTON_ENTER, BUTTON_ENTER]),
         # No print prompt
         (
             True,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
             [BUTTON_ENTER],
         ),
         # Print
         (
             True,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # Decline to print
         (
             True,
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
             [BUTTON_ENTER, BUTTON_PAGE],
         ),
@@ -378,14 +680,7 @@ def test_wallet(mocker, m5stickv, tdata):
         if case[0]:
             wallet.load(case[2], FORMAT_PMOFN)
 
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[4])
-            ),
-            wallet=wallet,
-            printer=case[3],
-        )
-
+        ctx = create_ctx(mocker, case[4], wallet, case[3])
         home = Home(ctx)
         mocker.patch.object(
             home, "capture_qr_code", new=lambda: (case[2], FORMAT_PMOFN)
@@ -395,7 +690,7 @@ def test_wallet(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "print_qr_prompt")
+        mocker.spy(home, "print_standard_qr")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_wallet")
 
@@ -403,7 +698,7 @@ def test_wallet(mocker, m5stickv, tdata):
 
         if case[0]:
             home.display_wallet.assert_called_once()
-            home.print_qr_prompt.assert_called_once()
+            home.print_standard_qr.assert_called_once()
         else:
             if case[4][0] == BUTTON_ENTER:
                 home.capture_qr_code.assert_called_once()
@@ -412,451 +707,283 @@ def test_wallet(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[4])
 
 
-def test_scan_address(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-    from krux.qr import FORMAT_PMOFN, FORMAT_NONE
-
-    cases = [
-        # Single-key, loaded, owned address, No print prompt, search successful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Single-key, not loaded, owned address, No print prompt, search successful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            False,
-            "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, owned address, Print, search successful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
-            MockPrinter(),
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, owned address, Decline to print, search successful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
-            MockPrinter(),
-            True,
-            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Multisig, loaded, owned address, No print prompt, search successful
-        (
-            tdata.MULTISIG_12_WORD_KEY,
-            tdata.SPECTER_MULTISIG_WALLET_DATA,
-            True,
-            "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Multisig, not loaded, owned address, No print prompt, can't search
-        (
-            tdata.MULTISIG_12_WORD_KEY,
-            tdata.SPECTER_MULTISIG_WALLET_DATA,
-            False,
-            "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
-            None,
-            True,
-            [BUTTON_ENTER],
-        ),
-        # Multisig, loaded, owned address, Print, search successful
-        (
-            tdata.MULTISIG_12_WORD_KEY,
-            tdata.SPECTER_MULTISIG_WALLET_DATA,
-            True,
-            "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
-            MockPrinter(),
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Multisig, loaded, owned address, Decline to print, search successful
-        (
-            tdata.MULTISIG_12_WORD_KEY,
-            tdata.SPECTER_MULTISIG_WALLET_DATA,
-            True,
-            "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
-            MockPrinter(),
-            True,
-            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned address, No print prompt, search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Multisig, loaded, unowned address, No print prompt, search unsuccessful
-        (
-            tdata.MULTISIG_12_WORD_KEY,
-            tdata.SPECTER_MULTISIG_WALLET_DATA,
-            True,
-            "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned m/44 address, No print prompt, skip search
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_PAGE],
-        ),
-        # Single-key, loaded, unowned m/44 address, No print prompt, search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned m/44 address, No print prompt, 2x search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "14ihRbmxbgZ6JN9HdDDo6u6nGradHDy4GJ",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned m/48/0/0/2 address, No print prompt, search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "1BRwWQ3GHabCV5DP6MfnCpr6dF6GBAwQ7k",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned m/84 address, No print prompt, search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned m/49 address, No print prompt, search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned m/0 address, No print prompt, search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw",
-            None,
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned m/0 address, Print, search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw",
-            MockPrinter(),
-            True,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, unowned m/0 address, Decline to print, search unsuccessful
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "3KLoUhwLihgC5aPQPFHakWUtJ4QoBkT7Aw",
-            MockPrinter(),
-            True,
-            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
-        ),
-        # Single-key, loaded, fail to capture QR of address, No print prompt, can't search
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            None,
-            None,
-            False,
-            [],
-        ),
-        # Single-key, loaded, invalid address, No print prompt, can't search
-        (
-            tdata.SINGLEKEY_12_WORD_KEY,
-            tdata.SPECTER_SINGLEKEY_WALLET_DATA,
-            True,
-            "invalidaddress",
-            None,
-            False,
-            [],
-        ),
-    ]
-    for case in cases:
-        wallet = Wallet(case[0])
-        if case[2]:
-            wallet.load(case[1], FORMAT_PMOFN)
-
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[6])
-            ),
-            wallet=wallet,
-            printer=case[4],
-        )
-
-        home = Home(ctx)
-        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], FORMAT_NONE))
-        mocker.patch.object(
-            home,
-            "display_qr_codes",
-            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
-        )
-        mocker.spy(home, "print_qr_prompt")
-        mocker.spy(home, "capture_qr_code")
-        mocker.spy(home, "display_qr_codes")
-
-        home.scan_address()
-
-        home.capture_qr_code.assert_called_once()
-        if case[5]:
-            home.display_qr_codes.assert_called_once()
-            home.print_qr_prompt.assert_called_once()
-        else:
-            home.display_qr_codes.assert_not_called()
-            home.print_qr_prompt.assert_not_called()
-
-        assert ctx.input.wait_for_button.call_count == len(case[6])
-
-
 def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
 
     cases = [
-        # Single-key, not loaded, no format => pmofn, sign, No print prompt
+        # Single-sig, not loaded, no format => pmofn, sign, No print prompt
         (
-            tdata.SINGLEKEY_SIGNING_KEY,
+            # Case 0
+            tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
+            None,  # 1 wallet
+            False,  # 2 if True: wallet will be #1 instead
+            tdata.P2WPKH_PSBT_B64,  # 3 capture_qr_code return 1
+            FORMAT_NONE,  # 4 capture_qr_code return 2
+            True,  # 5 if was signed!
+            tdata.SIGNED_P2WPKH_PSBT_B64,  # 6
+            FORMAT_PMOFN,  # 7
+            None,  # 8 printer
+            # 9 btn_seq
+            [
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign? (Or jump QR code)
+                BUTTON_ENTER,  # Save to SD (or Jump QR signed) (Or jump error msg end)
+            ],
+            None,  # 10 SD avaiable
+        ),
+        # Single-sig, not loaded, pmofn, sign, No print prompt
+        (
+            # Case 1
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WPKH_PSBT_B64,
-            FORMAT_NONE,
-            True,
+            FORMAT_PMOFN,
+            True,  # 5
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+            ],
             None,
         ),
-        # Single-key, not loaded, pmofn, sign, No print prompt
+        # Single-sig, not loaded, pmofn, sign, Print
         (
-            tdata.SINGLEKEY_SIGNING_KEY,
+            # Case 2
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
-            tdata.SIGNED_P2WPKH_PSBT_B64,
-            FORMAT_PMOFN,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            None,
-        ),
-        # Single-key, not loaded, pmofn, sign, Print
-        (
-            tdata.SINGLEKEY_SIGNING_KEY,
-            None,
-            False,
-            tdata.P2WPKH_PSBT_B64,
-            FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Print Yes
+            ],
             None,
         ),
-        # Single-key, not loaded, pmofn, sign, Decline to print
+        # Single-sig, not loaded, pmofn, sign, Decline to print
         (
-            tdata.SINGLEKEY_SIGNING_KEY,
+            # Case 3
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_PAGE,  # Print No
+            ],
             None,
         ),
-        # Single-key, not loaded, pmofn, decline to sign
+        # Single-sig, not loaded, pmofn, decline to sign
         (
-            tdata.SINGLEKEY_SIGNING_KEY,
+            # Case 4
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            False,
+            False,  # 5
             None,
             None,
             None,
-            [BUTTON_ENTER, BUTTON_PAGE],
+            [
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # Sign?
+            ],
             None,
         ),
-        # Single-key, not loaded, failed to capture PSBT QR
+        # Single-sig, not loaded, failed to capture PSBT QR
         (
-            tdata.SINGLEKEY_SIGNING_KEY,
+            # Case 5
+            tdata.SINGLESIG_SIGNING_KEY,
             None,
             False,
             None,
             None,
-            False,
+            False,  # 5
             None,
             None,
             None,
-            [BUTTON_ENTER],
+            [],  # [BUTTON_ENTER],  # Wallet not loaded, proceed?
             None,
         ),
         # Multisig, not loaded, decline to proceed after warning
         (
+            # Case 6
             tdata.MULTISIG_SIGNING_KEY,
             None,
             False,
             None,
             None,
-            False,
+            False,  # 5
             None,
             None,
             None,
-            [BUTTON_PAGE],
+            [BUTTON_PAGE],  # Wallet not loaded, proceed?
             None,
         ),
         # Multisig, not loaded, pmofn, sign, No print prompt
         (
+            # Case 7
             tdata.MULTISIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign? (Or jump QR code)
+                BUTTON_ENTER,  # Save to SD (or Jump QR signed) (Or jump error msg end)
+            ],
             None,
         ),
         # Multisig, not loaded, pmofn, sign, Print
         (
+            # Case 8
             tdata.MULTISIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Print Yes
+            ],
             None,
         ),
         # Multisig, not loaded, pmofn, sign, Decline to print
         (
+            # Case 9
             tdata.MULTISIG_SIGNING_KEY,
             None,
             False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,
+            True,  # 5
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_PAGE,  # Print No
+            ],
             None,
         ),
-        # Single-key, not loaded, load from microSD, sign, save to microSD, No print prompt
+        # Single-sig, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
-            tdata.SINGLEKEY_SIGNING_KEY,
+            # Case 10
+            tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
             None,
             False,
-            tdata.P2WPKH_PSBT,
-            FORMAT_NONE,
-            True,
+            tdata.P2WPKH_PSBT,  # 3 capture_qr_code return 1
+            FORMAT_NONE,  # 4 capture_qr_code return 2
+            True,  # 5 if was signed!
             tdata.SIGNED_P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            tdata.SIGNED_P2WPKH_PSBT,
+            None,  # 8 printer
+            [
+                # BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Save to SD (will open keypad)
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Select "Go"
+            ],
+            tdata.SIGNED_P2WPKH_PSBT,  # 10 SD avaiable
         ),
         # Multisig, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
-            tdata.MULTISIG_SIGNING_KEY,
+            # Case 11
+            tdata.MULTISIG_SIGNING_KEY,  # 0 wallet
             None,
             False,
-            tdata.P2WSH_PSBT,
-            FORMAT_NONE,
-            True,
+            tdata.P2WSH_PSBT,  # 3 capture_qr_code return 1
+            FORMAT_NONE,  # 4 capture_qr_code return 2
+            True,  # 5 if was signed!
             tdata.SIGNED_P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            tdata.SIGNED_P2WSH_PSBT,
+            None,  # 8 printer
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_ENTER,  # Sign?
+                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Save to SD (will open keypad)
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Select "Go"
+            ],
+            tdata.SIGNED_P2WSH_PSBT,  # 10 SD avaiable
         ),
     ]
+    num = 0
     for case in cases:
+        print("test_sign_psbt", num)
+        num += 1
         wallet = Wallet(case[0])
-        if case[2]:
+        if case[2]:  # always False
             wallet.load(case[1], FORMAT_PMOFN)
 
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[9])
-            ),
-            wallet=wallet,
-            printer=case[8],
-            sd_card=case[10],
-        )
-
+        ctx = create_ctx(mocker, case[9], wallet, case[8])
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], case[4]))
         mocker.patch.object(
@@ -864,9 +991,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "print_qr_prompt")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
+        mocker.spy(home, "print_standard_qr")
+        # case SD available
         if case[10] is not None:
             mocker.patch("os.listdir", new=mocker.MagicMock(return_value=["test.psbt"]))
             mocker.patch(
@@ -878,45 +1006,49 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                     }
                 ),
             )
-        else:
-            mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
-            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=Exception))
+        else:  # SD NOT available
+            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=OSError))
+            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=OSError))
 
         home.sign_psbt()
 
-        if case[2] or (not case[2] and case[9][0] == BUTTON_ENTER):
-            if not case[10]:
-                home.capture_qr_code.assert_called_once()
-            if case[5]:
-                home.display_qr_codes.assert_called_once()
-                home.print_qr_prompt.assert_called_once()
-            else:
-                home.display_qr_codes.assert_not_called()
-        else:
-            home.capture_qr_code.assert_not_called()
+        # there is no case[2] == True, so returns True every time btn_seq starts with ENTER
 
-        assert ctx.input.wait_for_button.call_count == len(case[9])
+        if len(case[9]) > 0:
+            if case[2] or (not case[2] and case[9][0] == BUTTON_ENTER):
+                if not case[10]:  # no SD
+                    home.capture_qr_code.assert_called_once()
+                if case[5]:  # signed!
+                    home.display_qr_codes.assert_called_once()
+                    home.print_standard_qr.assert_called_once()
+                else:
+                    home.display_qr_codes.assert_not_called()
+            else:
+                home.capture_qr_code.assert_not_called()
+
+            assert ctx.input.wait_for_button.call_count == len(case[9])
 
 
 def test_sign_message(mocker, m5stickv, tdata):
     import binascii
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # Hex-encoded hash, Sign, No print prompt
+        # 0 Hex-encoded hash, Sign, No print prompt
         (
-            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
-            FORMAT_NONE,
-            None,
+            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",  # 0 data for capture_qr_code
+            FORMAT_NONE,  # 1 qr_format for capture_qr_code
+            None,  # 2 printer
+            # 3 btn_seq
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
-            None,
+            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",  # 4 base64 for display_qr_codes / print_qr_prompt
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
+            None,  # 6 SD file
         ),
-        # Hash, Sign, No print prompt
+        # 1 Hash, Sign, No print prompt
         (
             binascii.unhexlify(
                 "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7"
@@ -928,7 +1060,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Message, Sign, No print prompt
+        # 2 Message, Sign, No print prompt
         (
             "hello world",
             FORMAT_NONE,
@@ -938,7 +1070,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # 64-byte message, Sign, No print prompt
+        # 3 64-byte message, Sign, No print prompt
         (
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
             FORMAT_NONE,
@@ -948,7 +1080,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Sign, Print
+        # 4 Hex-encoded hash, Sign, Print
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -966,7 +1098,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Sign, Decline to print
+        # 5 Hex-encoded hash, Sign, Decline to print
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -984,7 +1116,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # Hex-encoded hash, Decline to sign
+        # 6 Hex-encoded hash, Decline to sign
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
@@ -994,23 +1126,30 @@ def test_sign_message(mocker, m5stickv, tdata):
             None,
             None,
         ),
-        # Failed to capture message QR
+        # 7 Failed to capture message QR
         (None, FORMAT_NONE, None, [], None, None, None),
-        # Message, Sign, Save to SD, No print prompt
+        # 8 Message, Sign, Save to SD, No print prompt
         (
-            "hello world",
-            FORMAT_NONE,
-            None,
+            "hello world",  # 0 data for capture_qr_code
+            FORMAT_NONE,  # 1 qr_format for capture_qr_code
+            None,  # 2 printer
+            # 3 btn_seq
             [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
+                BUTTON_ENTER,  # SHA256 sign confirm
+                BUTTON_ENTER,  # Signature pass
+                BUTTON_ENTER,  # QRCode pass
+                BUTTON_ENTER,  # Public Key pass
+                BUTTON_ENTER,  # QRCode pass
+                BUTTON_ENTER,  # Yes save signed on SD
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Press "Go"
+                BUTTON_ENTER,  # Yes save pubkey on SD
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Press "Go"
             ],
-            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",  # 4 base64 for display_qr_codes / print_qr_prompt
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
+            # 6 SD file
             binascii.b2a_base64(
                 "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==".encode(
                     "utf-8"
@@ -1019,18 +1158,13 @@ def test_sign_message(mocker, m5stickv, tdata):
             ),
         ),
     ]
+    num = 0
     for case in cases:
-        wallet = Wallet(tdata.SINGLEKEY_SIGNING_KEY)
+        print("test_sign_message case: ", num)
+        num += 1
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
 
-        ctx = mocker.MagicMock(
-            input=mocker.MagicMock(
-                wait_for_button=mocker.MagicMock(side_effect=case[3])
-            ),
-            wallet=wallet,
-            printer=case[2],
-            sd_card=case[6],
-        )
-
+        ctx = create_ctx(mocker, case[3], wallet, case[2])
         home = Home(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
         mocker.patch.object(
@@ -1038,11 +1172,11 @@ def test_sign_message(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "print_qr_prompt")
+        mocker.spy(home, "print_standard_qr")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
-        mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
         if case[6] is not None:
+            mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
             mocker.patch(
                 "builtins.open",
                 new=get_mock_open(
@@ -1052,20 +1186,27 @@ def test_sign_message(mocker, m5stickv, tdata):
                 ),
             )
         else:
-            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=Exception))
+            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=OSError))
+            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=OSError))
 
         home.sign_message()
 
         home.capture_qr_code.assert_called_once()
         if case[0] and case[3][0] == BUTTON_ENTER:
             home.display_qr_codes.assert_has_calls(
-                [mocker.call(case[4], case[1]), mocker.call(case[5], case[1])]
+                [
+                    mocker.call(case[4], case[1], "Signed Message"),
+                    mocker.call(case[5], case[1], "Hex Public Key"),
+                ]
             )
-            home.print_qr_prompt.assert_has_calls(
-                [mocker.call(case[4], case[1]), mocker.call(case[5], case[1])]
+            home.print_standard_qr.assert_has_calls(
+                [
+                    mocker.call(case[4], case[1], "Signed Message"),
+                    mocker.call(case[5], case[1], "Hex Public Key"),
+                ]
             )
         else:
             home.display_qr_codes.assert_not_called()
-            home.print_qr_prompt.assert_not_called()
+            home.print_standard_qr.assert_not_called()
 
         assert ctx.input.wait_for_button.call_count == len(case[3])

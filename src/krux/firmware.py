@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,10 @@ import hashlib
 import time
 import flash
 from embit import ec
-from .input import Input, BUTTON_ENTER
+from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
 from .metadata import SIGNER_PUBKEY
 from .display import Display
-from .i18n import t
+from .krux_settings import t
 from .wdt import wdt
 
 MAX_FIRMWARE_SIZE = 0x300000
@@ -39,6 +39,8 @@ FIRMWARE_SLOT_2 = 0x00280000
 
 MAIN_BOOT_CONFIG_SECTOR_ADDRESS = 0x00004000
 BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = 0x00005000
+
+FLASH_IO_WAIT_TIME = 100
 
 
 def find_active_firmware(sector):
@@ -128,12 +130,12 @@ def write_data(
 
         cur_address = i * chunk_size + address
         flash.erase(cur_address, chunk_size)
-        time.sleep_ms(100)
+        time.sleep_ms(FLASH_IO_WAIT_TIME)
         if header and i == 0:
             flash.write(cur_address, b"\x00" + data_size.to_bytes(4, "little"))
-            time.sleep_ms(100)
+            time.sleep_ms(FLASH_IO_WAIT_TIME)
         flash.write(cur_address + header_offset, buffer[:chunk_size_after_header])
-        time.sleep_ms(100)
+        time.sleep_ms(FLASH_IO_WAIT_TIME)
         i += 1
         num_read = 0
         chunk_read = 0
@@ -198,7 +200,7 @@ def upgrade():
         % binascii.hexlify(firmware_hash).decode()
     )
     inp.buttons_active = True
-    if inp.wait_for_button() != BUTTON_ENTER:
+    if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
         return False
 
     if new_size > MAX_FIRMWARE_SIZE:

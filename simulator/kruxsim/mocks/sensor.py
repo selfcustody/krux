@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,7 @@ class Mockqrcode:
 capturer = None
 
 
-def reset():
+def reset(freq=None, dual_buff=False):
     pass
 
 
@@ -104,6 +104,7 @@ def snapshot():
         m.get_frame.return_value = frame
         m.get_histogram.return_value = Mockhistogram()
         m.find_qrcodes.return_value = find_qrcodes(img)
+        m.to_bytes.return_value = frame.tobytes()
     return m
 
 

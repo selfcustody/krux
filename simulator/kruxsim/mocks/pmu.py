@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,23 @@ class PMU_Button:
         return 0 if pg.key.get_pressed()[self.key] else 1
 
 
+class Battery:
+    def getVbatVoltage(self):
+        return 3400
+
+    def getUSBVoltage(self):
+        return 0
+
+    def enablePMICSleepMode(self, val):
+        pass
+
+    def setEnterSleepMode(self):
+        pass
+
+
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
         PMU_Button=PMU_Button,
+        axp192=Battery,
+        axp173=Battery,
     )

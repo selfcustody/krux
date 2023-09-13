@@ -1,3 +1,21 @@
+# Krux compatible devices comparative table
+
+| Device | M5stickV | Maix Amigo | Maix Dock | Maix Bit |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| Price | US$50 | US$47-63 | US$35 | US$35 |
+| Screen size  | 1.14" | 3.5" | 2.4" | 2.4" |
+| Screen resolution  | 135*240 | 320*480 | 240*320 | 240*320 |
+| Touchscreen  |  | Capacitive |  |  |
+| Camera  | OV7740 | OV7740 rear<br>GC0328 front | GC0328 | OV2640 or<br>OV5642 |
+| Battery  | 200mAh | 520mAh |  |  |
+| Requirements |  |  | Rotary encoder<br> 3D printed case<br> Soldering<br>Assembly | Buttons<br> 3D printed case<br> Soldering<br>Assembly |
+| Warnings  |  |  | *1 |  |
+
+*1: Some shops ship Maix Dock with soldered pin headers that do not fit in 3D printed enclosure
+
+All devices feature Kendryte K210 chip:
+28nm process, dual-core RISC-V 64bit @400MHz, 8 MB high-speed SRAM, DVP camera and MCU LCD interface, AES Accelerator, SHA256 Accelerator, FFT Accelerator
+
 # Part List
 
 ## M5StickV
@@ -29,7 +47,7 @@ You can expect to pay around $70 for one depending on which distributor you choo
 ## Maix Dock and Maix Bit
 For the DIYers, the Maix Dock and Bit are also supported but will require sourcing the parts individually and building the device yourself.
 
-Below are example implementations created by [odudex](https://twitter.com/odudex) with instructions on how to recreate them:
+Below are example implementations with instructions on how to recreate them:
 
 - [https://github.com/selfcustody/DockEncoderCase](https://github.com/selfcustody/DockEncoderCase)
 - [https://github.com/selfcustody/MaixBitCase](https://github.com/selfcustody/MaixBitCase)
