@@ -1,4 +1,4 @@
-# Version 23.08.0 - August, 2023
+# Version 23.09.0 - September 12, 2023
 After a long year, new features are finally coming out of beta and making their way into a stable release. Also @jreesun appointed @odudex as the new lead maintainer of the project.
 
 ## Changes
