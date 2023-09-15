@@ -886,13 +886,6 @@ If the flashing fails try one of the following common solutions:</p>
   <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>usermod<span class="w"> </span>-a<span class="w"> </span>-G<span class="w"> </span>vboxusers<span class="w"> </span>yourusername
 </code></pre></div></li>
 <li>If the flashing process fails midway through, check the connection, restart the device, and try the command again.</li>
-<li>If it continues to fail midway through, you can try using an alternative method of flashing with <code>kflash</code> if you're using a Linux machine. To install klash:
-  <div class="highlight"><pre><span></span><code>pip3<span class="w"> </span>install<span class="w"> </span>kflash
-</code></pre></div>
-  Then you can flash the device:
-  <div class="highlight"><pre><span></span><code>kflash<span class="w"> </span>-p<span class="w"> </span>/dev/ttyUSB1<span class="w"> </span>-b<span class="w"> </span><span class="m">1500000</span><span class="w"> </span>-B<span class="w"> </span>goE<span class="w"> </span>build/firmware.bin
-</code></pre></div>
-  If you get a <code>Greeting fail, check serial port</code> error, try replacing <code>/dev/ttyUSB1</code> with <code>/dev/ttyUSB0</code> in the <code>kflash</code> command above.</li>
 </ul>
 <p>When the flashing process completes, you should see the Krux logo:</p>
 <p><img src="../../../img/maixpy_m5stickv/logo-125.png">

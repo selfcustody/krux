@@ -721,8 +721,22 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#why-isnt-my-amigo-device-being-recognized" class="md-nav__link">
+    Why isn't my Amigo device being recognized?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why-wont-my-linux-os-list-a-serial-port-after-connecting-my-device" class="md-nav__link">
     Why won't my (Linux) OS list a serial port after connecting my device?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-wont-my-apple-os-list-a-serial-port-after-connecting-my-device" class="md-nav__link">
+    Why won't my (Apple) OS list a serial port after connecting my device?
   </a>
   
 </li>
@@ -831,6 +845,8 @@
 <p>Additionally, Krux recognizes animated QR codes that use either the plaintext <code>pMofN</code> or binary <a href="https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md"><code>UR</code></a> encodings.</p>
 <h2 id="why-cant-my-computer-read-the-qr-code-that-krux-displays">Why can't my computer read the QR code that Krux displays?<a class="headerlink" href="#why-cant-my-computer-read-the-qr-code-that-krux-displays" title="Permanent link">&para;</a></h2>
 <p>If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays. In the future, more work will be done to support displaying lower density QR codes. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes.</p>
+<h2 id="why-isnt-my-amigo-device-being-recognized">Why isn't my Amigo device being recognized?<a class="headerlink" href="#why-isnt-my-amigo-device-being-recognized" title="Permanent link">&para;</a></h2>
+<p>Make sure you’re using the bottom USB-C port, not the one on the left side.</p>
 <h2 id="why-wont-my-linux-os-list-a-serial-port-after-connecting-my-device">Why won't my (Linux) OS list a serial port after connecting my device?<a class="headerlink" href="#why-wont-my-linux-os-list-a-serial-port-after-connecting-my-device" title="Permanent link">&para;</a></h2>
 <p>If you get the following error when trying to flash your device: <code>Failed to find device via USB. Is it connected and powered on?</code>
 Make sure your device is being detected and serial ports are being mounted by running:
@@ -840,7 +856,8 @@ Expect one port to be listed for devices like M5stickV and Dock <code>/dev/ttyUS
 <p>If you don't see them, your OS may not be loading the correct drivers to create the serial ports to connect to. Ubuntu has a known bug where the <code>brltty</code> driver "kidnaps" serial devices. You can solve this problem by removing it:
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>brltty
 </code></pre></div></p>
-<p>If you are using an Amigo, make sure you’re using bottom USB-C port, not the one on the left side.</p>
+<h2 id="why-wont-my-apple-os-list-a-serial-port-after-connecting-my-device">Why won't my (Apple) OS list a serial port after connecting my device?<a class="headerlink" href="#why-wont-my-apple-os-list-a-serial-port-after-connecting-my-device" title="Permanent link">&para;</a></h2>
+<p>Some users reported that they were able to make their Apple devices recognize Krux devices only after they connected them through an USB dock instead of connecting them directly.</p>
 <h2 id="why-are-the-buttons-on-my-amigo-in-the-wrong-order">Why are the buttons on my Amigo in the wrong order?<a class="headerlink" href="#why-are-the-buttons-on-my-amigo-in-the-wrong-order" title="Permanent link">&para;</a></h2>
 <p>Some Amigo screens have inverted x coordinates while others don’t.</p>
 <p>If after flashing <code>maixpy_amigo_tft</code> to your device you notice that the buttons on keypad input screens appear to be in the wrong order, please try flashing <code>maixpy_amigo_ips</code> instead (or vice versa) which should correct the issue. </p>
