@@ -62,6 +62,9 @@ If you don't see them, your OS may not be loading the correct drivers to create 
 sudo apt-get remove brltty
 ```
 
+## Why won't my (Apple) OS list a serial port after connecting my device?
+Some users reported that they were able to make their Apple devices recognize Krux devices only after they connected them through an USB dock instead of connecting them directly.
+
 ## Why are the buttons on my Amigo in the wrong order?
 Some Amigo screens have inverted x coordinates while others don’t.
 
