@@ -46,6 +46,9 @@ Additionally, Krux recognizes animated QR codes that use either the plaintext `p
 ## Why can't my computer read the QR code that Krux displays?
 If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays. In the future, more work will be done to support displaying lower density QR codes. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes.
 
+## Why isn't my Amigo device being recognized?
+Make sure you’re using the bottom USB-C port, not the one on the left side.
+
 ## Why won't my (Linux) OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
 Make sure your device is being detected and serial ports are being mounted by running:
@@ -59,7 +62,8 @@ If you don't see them, your OS may not be loading the correct drivers to create 
 sudo apt-get remove brltty
 ```
 
-If you are using an Amigo, make sure you’re using bottom USB-C port, not the one on the left side.
+## Why won't my (Apple) OS list a serial port after connecting my device?
+Some users reported that they were able to make their Apple devices recognize Krux devices only after they connected them through an USB dock instead of connecting them directly.
 
 ## Why are the buttons on my Amigo in the wrong order?
 Some Amigo screens have inverted x coordinates while others don’t.
