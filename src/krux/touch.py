@@ -40,7 +40,6 @@ SWIPE_UP = 3
 SWIPE_DOWN = 4
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
-TOUCH_DEBOUNCE = 200  # Time to wait before sampling touch again after a release
 
 event_flag = False
 
@@ -59,7 +58,6 @@ class Touch:
         For Krux width = max_y, height = max_x
         """
         self.sample_time = 0
-        self.debounce = 0
         self.y_regions = []
         self.x_regions = []
         self.index = 0
@@ -151,7 +149,6 @@ class Touch:
             if self.state == RELEASED:  # On touch release
                 self.state = IDLE
                 event_flag = False  # Clears event flag
-                self.debounce = time.ticks_ms()  # Sets debounce
             elif self.state == PRESSED:
                 lateral_lenght = self.release_point[0] - self.press_point[0][0]
                 if lateral_lenght > SWIPE_THRESHOLD:
@@ -180,14 +177,11 @@ class Touch:
         check_event = event_flag
         event_flag = False  # Always clean event flag
         current_time = time.ticks_ms()
-        if (
-            current_time > self.sample_time + TOUCH_S_PERIOD
-            and current_time > self.debounce + TOUCH_DEBOUNCE
-        ):
+        if current_time > self.sample_time + TOUCH_S_PERIOD:
             # Checks and updates index
             if self.current_state() == PRESSED or check_event:
                 return True
-            return False
+        return False
 
     def value(self):
         """Wraps touch states to behave like a regular button"""

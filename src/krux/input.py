@@ -37,6 +37,7 @@ QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
 
 BUTTON_WAIT_PRESS_DELAY = 10
+DEBOUNCE = 100
 
 
 class Input:
@@ -44,6 +45,7 @@ class Input:
 
     def __init__(self):
         self.entropy = 0
+        self.debounce_time = 0
 
         self.enter = None
         if "BUTTON_A" in board.config["krux"]["pins"]:
@@ -98,16 +100,19 @@ class Input:
         """Intermediary method to pull button ENTER state"""
         if self.enter is not None:
             return self.enter.value()
+        return RELEASED
 
     def page_value(self):
         """Intermediary method to pull button PAGE state"""
         if self.page is not None:
             return self.page.value()
+        return RELEASED
 
     def page_prev_value(self):
         """Intermediary method to pull button PAGE_PREV state"""
         if self.page_prev is not None:
             return self.page_prev.value()
+        return RELEASED
 
     def touch_value(self):
         """Intermediary method to pull touch state, if touch available"""
@@ -119,18 +124,22 @@ class Input:
         """Intermediary method to pull button ENTER event"""
         if self.enter is not None:
             return self.enter.event()
+        return False
 
     def page_event(self):
-        """Intermediary method to pull button PAGE state"""
+        """Intermediary method to pull button PAGE event"""
         if self.page is not None:
             return self.page.event()
+        return False
 
     def page_prev_event(self):
-        """Intermediary method to pull button PAGE_PREV state"""
+        """Intermediary method to pull button PAGE_PREV event"""
         if self.page_prev is not None:
             return self.page_prev.event()
+        return False
 
     def touch_event(self):
+        """Intermediary method to pull button TOUCH event"""
         if self.touch is not None:
             return self.touch.event()
         return False
@@ -163,6 +172,8 @@ class Input:
         """Wait for first button press or for wait_duration ms.
         Use block to wait indefinitely"""
         start_time = time.ticks_ms()
+        while time.ticks_ms() < self.debounce_time + DEBOUNCE:
+            self.flush_events()
         while True:
             if self.enter_event():
                 return BUTTON_ENTER
@@ -183,15 +194,15 @@ class Input:
         Returns the button that was released, or None if non blocking.
         """
         btn = self.wait_for_press(block)
-
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-            if self.buttons_active:
-                return BUTTON_ENTER
-            self.buttons_active = True
+            if not self.buttons_active:
+                self.buttons_active = True
+                btn = None
+
         elif btn == BUTTON_PAGE:
             start_time = time.ticks_ms()
             # Wait for release
@@ -199,10 +210,11 @@ class Input:
                 self.entropy += 1
                 wdt.feed()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
-                    return SWIPE_LEFT
-            if self.buttons_active:
-                return BUTTON_PAGE
-            self.buttons_active = True
+                    btn = SWIPE_LEFT
+                    break
+            if not self.buttons_active:
+                self.buttons_active = True
+                btn = None
         elif btn == BUTTON_PAGE_PREV:
             start_time = time.ticks_ms()
             # Wait for release
@@ -210,28 +222,27 @@ class Input:
                 self.entropy += 1
                 wdt.feed()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
-                    return SWIPE_RIGHT
-            if self.buttons_active:
-                return BUTTON_PAGE_PREV
-            self.buttons_active = True
+                    btn = SWIPE_RIGHT
+                    break
+            if not self.buttons_active:
+                self.buttons_active = True
+                btn = None
         elif btn == BUTTON_TOUCH:
             # Wait for release
             while self.touch_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-            # Flush intermediary touch interrupt events
-            _ = self.touch_event()
             self.buttons_active = False
             if self.swipe_right_value() == PRESSED:
-                return SWIPE_RIGHT
+                btn = SWIPE_RIGHT
             if self.swipe_left_value() == PRESSED:
-                return SWIPE_LEFT
+                btn = SWIPE_LEFT
             if self.swipe_up_value() == PRESSED:
-                return SWIPE_UP
+                btn = SWIPE_UP
             if self.swipe_down_value() == PRESSED:
-                return SWIPE_DOWN
-            return BUTTON_TOUCH
-        return None
+                btn = SWIPE_DOWN
+        self.debounce_time = time.ticks_ms()
+        return btn
 
     def flush_events(self):
         """Clean eventual event flags unintentionally collected"""

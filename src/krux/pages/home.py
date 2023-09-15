@@ -227,9 +227,7 @@ class Home(Page):
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
         if wallet_data is None:
-            self.flash_text(
-                t("Failed to load output descriptor"), theme.error_color
-            )
+            self.flash_text(t("Failed to load output descriptor"), theme.error_color)
             return MENU_CONTINUE
 
         try:
@@ -551,9 +549,7 @@ class Home(Page):
                         else:
                             sd.write(filename, data)
                         self.ctx.display.clear()
-                        self.flash_text(
-                            t("Saved to SD card:\n%s") % filename
-                        )
+                        self.flash_text(t("Saved to SD card:\n%s") % filename)
                 else:
                     filename_undefined = False
 

@@ -222,7 +222,7 @@ def upgrade():
     except:
         flash_text(t("Invalid public key"))
         return False
-    
+
     sig = None
     try:
         sig = open(firmware_path + ".sig", "rb").read()
@@ -234,10 +234,10 @@ def upgrade():
         # Parse, serialize, and reparse to ensure signature is compact prior to verification
         sig = ec.Signature.parse(ec.Signature.parse(sig).serialize())
         if not pubkey.verify(sig, firmware_hash):
-            display.flash_text(t("Bad signature"))
+            flash_text(t("Bad signature"))
             return False
     except:
-        display.flash_text(t("Bad signature"))
+        flash_text(t("Bad signature"))
         return False
 
     boot_config_sector = flash.read(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)

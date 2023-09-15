@@ -22,9 +22,6 @@
 
 from Maix import GPIO
 from fpioa_manager import fm
-import time
-
-DEBOUNCE = 250  # milliseconds
 
 PRESSED = 0
 RELEASED = 1
@@ -45,18 +42,15 @@ class TactileButtons:
         self.enter_event_flag = False
         self.page_event_flag = False
         self.page_prev_event_flag = False
-        self.time_frame = 0
 
     def event_handler(self, pin_num):
         """Set up a button event flag according to interruption source"""
-        if time.ticks_ms() > self.time_frame + DEBOUNCE:
-            if pin_num == buttons_control.enter:
-                self.enter_event_flag = True
-            elif pin_num == buttons_control.page:
-                self.page_event_flag = True
-            elif pin_num == buttons_control.page_prev:
-                self.page_prev_event_flag = True
-            self.time_frame = time.ticks_ms()
+        if pin_num == buttons_control.enter:
+            self.enter_event_flag = True
+        elif pin_num == buttons_control.page:
+            self.page_event_flag = True
+        elif pin_num == buttons_control.page_prev:
+            self.page_prev_event_flag = True
 
     def init_enter(self, pin):
         """Register ENTER button IO"""

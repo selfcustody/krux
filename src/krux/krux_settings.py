@@ -250,7 +250,7 @@ class EncoderSettings(SettingsNamespace):
     """Encoder debounce settings"""
 
     namespace = "settings.encoder"
-    debounce = NumberSetting(int, "debounce", 50, [25, 250])
+    debounce = NumberSetting(int, "debounce", 100, [100, 250])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -343,7 +343,10 @@ class Settings(SettingsNamespace):
         self.printer = PrinterSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
-        if board.config["type"].startswith("amigo") or board.config["type"] == "yahboom":
+        if (
+            board.config["type"].startswith("amigo")
+            or board.config["type"] == "yahboom"
+        ):
             self.touch = TouchSettings()
         if board.config["type"] == "dock":
             self.encoder = EncoderSettings()
@@ -359,7 +362,10 @@ class Settings(SettingsNamespace):
             "printer": t("Printer"),
             "appearance": t("Theme"),
         }
-        if board.config["type"].startswith("amigo") or board.config["type"] == "yahboom":
+        if (
+            board.config["type"].startswith("amigo")
+            or board.config["type"] == "yahboom"
+        ):
             main_menu["touchscreen"] = t("Touchscreen")
         if board.config["type"] == "dock":
             main_menu["encoder"] = t("Encoder")
