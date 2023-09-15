@@ -11,7 +11,7 @@ Below is a breakdown of the settings you can change:
 
 This option allows you to switch between `mainnet` (the default) and `testnet`. This is mostly useful for development. 
 
-<br><br><br><br><br>
+<div style="clear: both"></div>
 
 ### Encryption
 
@@ -20,7 +20,7 @@ This option allows you to switch between `mainnet` (the default) and `testnet`. 
 
 Modify the encryption method and parameters to fit your needs. The encryption settings will be used both to store mnemonics and create encrypted QR codes.
 
-<br><br><br><br><br>
+<div style="clear: both"></div>
 
 #### PBKDF2 Iter. (Iterations)
 
@@ -31,6 +31,7 @@ When you enter a encryption key it is not directly used to encrypt your data. As
 
 If you increase this value it will make the encryption harder, at the cost of taking longer to encrypt and decrypt your mnemonics
 
+<div style="clear: both"></div>
 
 #### Encryption Mode
 
@@ -48,6 +49,7 @@ ECB(Electronic Codebook), its a simpler method where encryption data blocks are 
 CBC(Cipher-block Chaining) is considered safer, because at the first data block an initial vector(IV) is used to add random data to the encryption. Subsequent blocks encryption depend on data from the previous blocks, giving its chaining feature.
 It will take longer to encrypt, because a snapshot will be required to generate a random initial vector. This initial vector will be stored together with encrypted data, making encrypted QR codes denser and harder to transcript.
 
+<div style="clear: both"></div>
 
 ### Language - Locale
 <img src="../../img/maixpy_m5stickv/locale-options-125.png" align="right">
@@ -55,7 +57,7 @@ It will take longer to encrypt, because a snapshot will be required to generate 
 
 Here you can change the language that Krux uses.
 
-<br><br><br><br><br>
+<div style="clear: both"></div>
 
 ### Logging
 <img src="../../img/maixpy_m5stickv/logging-options-125.png" align="right">
@@ -69,6 +71,7 @@ If you experience an error and want to see more information about it, including 
 
 Note that *DEBUG* could inadvertently write your private keys to the log file if you have it enabled when entering your mnemonic, so set it with care. To help prevent an accident like this from happening, Krux will display a colored rectangle on the upper left corner of the screen, of which the color is relative to the logging level, being green the DEBUG color.
 
+<div style="clear: both"></div>
 
 ### Persist
 <img src="../../img/maixpy_m5stickv/persist-options-125.png" align="right">
@@ -76,7 +79,7 @@ Note that *DEBUG* could inadvertently write your private keys to the log file if
 
 Choose between flash(device's internal memory) or SD card for the place where your settings will be stored.
 
-<br><br><br><br><br>
+<div style="clear: both"></div>
 
 ### Printer
 
@@ -98,6 +101,7 @@ Also setup the IOs you'll use and tweak parameters according to your printer rec
 
 Here you choose between Thermal, CNC or none(default). Leave this setting to "none" if you won't use a printer and don't want to be bothered by print prompts.
 
+<div style="clear: both"></div>
 
 ### Theme
 
@@ -113,6 +117,14 @@ Choose your color theme according to your preference. Some themes may be more su
 
 ### Touchscreen
 
+<img src="../../img/maixpy_amigo_tft/touchscreen-150.png" align="right">
+
 If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false (ghost) touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
 
-<br><br><br><br><br>
+<div style="clear: both"></div>
+
+### Encoder
+
+If your device has a rotary encoder, you can change the debounce threshold in milliseconds. The lower the value, the faster it detects wheel rotation. Increase the value if it is difficult to get a single input from the wheel rotation.
+
+<div style="clear: both"></div>

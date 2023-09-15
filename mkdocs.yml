@@ -12,6 +12,9 @@ markdown_extensions:
 extra_javascript:
   - js/tabsync.js
 
+extra_css:
+  - css/custom.css
+
 theme:
   name: material
   logo: img/favicon.png
