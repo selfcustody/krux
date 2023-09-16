@@ -1,9 +1,7 @@
-On Krux's start menu, there is a *Settings* option.
+In the Krux home menu, there is a `Settings` entry. Below is a breakdown of the options you can change:
 
 <img src="../../img/maixpy_m5stickv/settings-options-125.png">
 <img src="../../img/maixpy_amigo_tft/settings-options-150.png">
-
-Below is a breakdown of the settings you can change:
 
 ### Bitcoin - Network
 <img src="../../img/maixpy_m5stickv/network-options-125.png" align="right">
