@@ -2,8 +2,8 @@ This guide assumes you have already created a mnemonic. If that is not the case,
 
 When entering your mnemonic into Krux, make sure to select *single-sig* before proceeding. The choice of single-sig vs. multisig at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
 
-<img src="../../img/maixpy_m5stickv/wallet-type-options-single-sig-125.png">
-<img src="../../img/maixpy_amigo_tft/wallet-type-options-single-sig-150.png">
+<img src="../../img/maixpy_m5stickv/wallet-type-options-125.png">
+<img src="../../img/maixpy_amigo_tft/wallet-type-options-150.png">
 
 Selecting `single-sig` will derive an xpub using the derivation path `m/84'/0'/0'` on mainnet and `m/84'/1'/0'` on testnet, which indicates to wallet software that a [Segregated Witness (Segwit) script type](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) should be used. For single-sig wallets, this script is `P2WPKH`, or just `wpkh`.
 
