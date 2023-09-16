@@ -11,8 +11,7 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 
  (Experimental!) Choose between 12 or 24 words, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
 
-<br><br><br><br>
-<br><br><br><br>
+<div style="clear: both"></div>
 
 # Dice Rolls
  
@@ -25,7 +24,7 @@ Choose between 12 or 24 words.
 
 The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore a minimum of a 50 rolls will be required for 128 bits of entropy, enough to generate a 12-word mnemonic. For 24 words, or an entropy of 256 bits, a minimum of 99 rolls will be required.
 
-<br><br><br><br>
+<div style="clear: both"></div>
 
 ## Via D20
 
@@ -34,7 +33,7 @@ The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); there
 
 Since a D20 has more possible outcomes, the entropy is increased per roll to 4.322 bits ( log<sub>2</sub>(20) ). This means that only 30 rolls are necessary to create a 12-word mnemonic and 60 rolls for a 24-word mnemonic.
 
-<br><br><br><br>
+<div style="clear: both"></div>
 
 ## How it works
 
@@ -43,8 +42,7 @@ Since a D20 has more possible outcomes, the entropy is increased per roll to 4.3
 
 For dice rolls, Krux keeps track of every roll you enter and displays the cumulative string of outcomes after each roll. 
 
-<br><br><br><br>
-<br><br><br><br>
+<div style="clear: both"></div>
 
 <img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-sha256-150.png" align="right">
@@ -57,7 +55,7 @@ Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/
 
 Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).
 
-<br><br><br><br>
+<div style="clear: both"></div>
 
 # Alternatives
 See [here](https://vault12.com/securemycrypto/cryptocurrency-security-how-to/seed-phrase-creation/) for good methods to generate a mnemonic manually, or visit [Ian Coleman's BIP-39 Tool](https://iancoleman.io/bip39/) offline or on an airgapped device to generate one automatically. 
