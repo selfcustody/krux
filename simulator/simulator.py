@@ -60,6 +60,13 @@ parser.add_argument(
     required=False,
     action=argparse.BooleanOptionalAction,
 )
+parser.add_argument(
+    "--screenshot-scale",
+    type=bool,
+    default=True,
+    required=False,
+    action=argparse.BooleanOptionalAction,
+)
 
 args = parser.parse_args()
 
@@ -120,13 +127,41 @@ if args.sd:
 t = threading.Thread(target=run_krux)
 t.daemon = True
 
-screen = pg.display.set_mode(devices.WINDOW_SIZES[args.device], pg.SCALED)
+screen = pg.display.set_mode(devices.WINDOW_SIZES[args.device], pg.SCALED, 32)
 screen.fill(lcd.COLOR_BLACK)
 buffer_image = screen.copy().convert()
 
 pg.display.set_caption("Krux Simulator")
 
 device_image = devices.load_image(args.device)
+
+# Handle screenshots for docs scale
+AMIGO_SIZE = (150, 252)
+M5STICKV_SIZE = (125, 247)
+
+device_screenshot_size = AMIGO_SIZE
+if (args.device == devices.M5STICKV):
+    device_screenshot_size = M5STICKV_SIZE
+
+# Handle screenshots alpha bg
+mask_img = pg.image.load(
+    os.path.join("assets", "maixpy_amigo_mask.png")
+    ).convert_alpha()
+if (args.device == devices.M5STICKV):
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_m5stickv_mask.png")
+        ).convert_alpha()
+    
+# Handle screenshots filename suffix
+from krux.krux_settings import Settings
+screenshot_suffix = ""
+if (args.screenshot_scale):
+    screenshot_suffix = "." + Settings().i18n.locale.split("-")[0]
+    if (args.device == devices.AMIGO_IPS or args.device == devices.AMIGO_TFT):
+        screenshot_suffix = "-150" + screenshot_suffix
+    elif (args.device == devices.M5STICKV):
+        screenshot_suffix = "-125" + screenshot_suffix
+
 
 if(args.device == devices.PC):
     from kruxsim.mocks.board import BOARD_CONFIG
@@ -158,9 +193,12 @@ try:
                 shutdown()
             elif event.type >= pg.USEREVENT:
                 if event.type == events.SCREENSHOT_EVENT:
-                    sub = screen.subsurface(devices.screenshot_rect(args.device))
+                    sub = screen.subsurface(devices.screenshot_rect(args.device)).convert_alpha()
+                    sub.blit(mask_img, sub.get_rect(), None, pg.BLEND_RGBA_SUB)
+                    if (args.screenshot_scale):
+                        sub = pg.transform.smoothscale(sub, device_screenshot_size)
                     pg.image.save(
-                        sub, os.path.join("screenshots", event.dict["filename"])
+                        sub, os.path.join("screenshots", event.dict["filename"].replace(".png", screenshot_suffix + ".png"))
                     )
                 else:
                     event.dict["f"]()

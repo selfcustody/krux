@@ -115,7 +115,7 @@ Choose your color theme according to your preference. Some themes may be more su
 
 ### Touchscreen
 
-<img src="../../img/maixpy_amigo_tft/touchscreen-150.png" align="right">
+<img src="../../img/maixpy_amigo_tft/touchscreen-150.en.png" align="right">
 
 If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false (ghost) touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
 

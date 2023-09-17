@@ -1,19 +1,14 @@
-After entering your mnemonic, you will find yourself on Krux's main menu.
+After entering your mnemonic, you will find yourself on Krux's main menu. Below is a breakdown of the entries available:
 
 <img src="../../img/maixpy_m5stickv/home-options-125.png">
 <img src="../../img/maixpy_amigo_tft/home-options-150.png">
 
-Below is a breakdown of the options:
-
 ### Mnemonic
-<img src="../../img/maixpy_m5stickv/mnemonic-24-word-1-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/mnemonic-24-word-1-150.png" align="right">
-
 This will open a new submenu with several options to backup your mnemonic.
 
-<div style="clear: both"></div>
-
 #### Words
+<img src="../../img/maixpy_m5stickv/mnemonic-options-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/mnemonic-options-150.png" align="right">
 
 Display the mnemonic words as text so you can write them down.
 
@@ -37,7 +32,11 @@ Words are converted to their BIP39 numeric indexes, then each of the four digits
 
 This metal backup format represent BIP39 mnemonic word numbers index on its binary form on a metal plate, where 1's are marked(punched) and 0's are left intact
 
+<div style="clear: both"></div>
+
 ### Encrypt Mnemonic
+<img src="../../img/maixpy_m5stickv/home-encrypt-options-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/home-encrypt-options-150.png" align="right">
 
 Here you can backup your mnemonic by storing them encrypted on a device's flash, on a SD card, or QR code format.
 The encryption method and parameters can be modified in settings.
@@ -56,6 +55,8 @@ The encrypted mnemonic will be stored on a SD card, if available, and will be av
 #### Encrypted QR Code
 
 The encrypted mnemonic will be converted to a QR code. When you scan this QR code via "Load Mnemonic"->"Via Camera"->"QR Code", you'll be prompted to enter decryption key to load the mnemonic.
+
+<div style="clear: both"></div>
 
 ### Extended Public Key
 <img src="../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-125.png" align="right">
@@ -98,10 +99,20 @@ This option exists as an extra security check to verify that the address your wa
 <div style="clear: both"></div>
 
 #### Receive Addresses
-List your wallet's receive addresses
+<img src="../../img/maixpy_m5stickv/list-address-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/list-address-150.png" align="right">
+
+List your wallet receiving addresses, you can browse to select an arbitrary address to show your QRCode and print if you want
+
+<div style="clear: both"></div>
 
 #### Change Addresses
-List your wallet's change addresses
+<img src="../../img/maixpy_m5stickv/list-address-receive-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/list-address-receive-150.png" align="right">
+
+List your wallet change addresses, you can browse to select an arbitrary address to show your QRCode and print if you want
+
+<div style="clear: both"></div>
 
 ### Sign
 <img src="../../img/maixpy_m5stickv/sign-options-125.png" align="right">
