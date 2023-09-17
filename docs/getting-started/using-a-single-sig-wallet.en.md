@@ -7,7 +7,7 @@ When entering your mnemonic into Krux, make sure to select `Single-sig` before p
 
 Selecting `Single-sig` will derive an xpub using the derivation path `m/84'/0'/0'` on mainnet and `m/84'/1'/0'` on testnet, which indicates to wallet software that a [Segregated Witness (Segwit) script type](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) should be used. For single-sig wallets, this script is `P2WPKH`, or just `wpkh`.
 
-**Note:** The *Load the wallet into Krux* step is unnecessary for signing PSBTs with Single-sig wallets since the script type (`wpkh`) and key are already known. However, this can be useful if you wish to [print a backup](../printing) of the wallet or want an additional sanity check.
+**Note:** The load of the `Wallet Descriptor` step is unnecessary for signing PSBTs with Single-sig wallets since the script type (`wpkh`) and key are already known. However, this can be useful if you wish to [print a backup](../printing) of the wallet or want an additional sanity check.
 
 ## Specter Desktop
 ### Create the wallet
@@ -249,4 +249,4 @@ Once you have confirmed, Krux will begin animating a QR code of the signed trans
 
 Once all parts of the QR code have been read, you can then choose to broadcast the transaction, sending it to the network!
 
-Congratulations, you have learned how to send a transaction using BlueWallet🎉
+Congratulations, you have learned how to send a transaction using BlueWallet 🎉

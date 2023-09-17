@@ -63,7 +63,9 @@ poetry run python simulator.py --sequence sequences/sign-options.txt  --device $
 poetry run python simulator.py --sequence sequences/sign-psbt.txt  --device $device
 poetry run python simulator.py --sequence sequences/themes.txt  --device $device
 poetry run python simulator.py --sequence sequences/thermal-options.txt  --device $device
-poetry run python simulator.py --sequence sequences/tools.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/tools-check-sd.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/tools-create-QR.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/tools-mnemonic.txt  --sd --device $device
 poetry run python simulator.py --sequence sequences/wallet-type-options.txt  --device $device
 poetry run python simulator.py --sequence sequences/wallet-wpkh.txt  --device $device
 poetry run python simulator.py --sequence sequences/wallet-wsh.txt  --device $device

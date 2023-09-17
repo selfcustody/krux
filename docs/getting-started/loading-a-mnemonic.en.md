@@ -1,7 +1,7 @@
 Once you have either a 12- or 24-word mnemonic, choose `Load Mnemonic` on Krux's start menu, and you will be presented with several input methods:
 
-<img src="../../img/maixpy_m5stickv/load-mnemonic-options-125.png">
 <img src="../../img/maixpy_amigo_tft/load-mnemonic-options-150.png">
+<img src="../../img/maixpy_m5stickv/load-mnemonic-options-125.png">
 
 ## Input Methods
 <img src="../../img/maixpy_m5stickv/load-mnemonic-camera-options-125.png" align="right">

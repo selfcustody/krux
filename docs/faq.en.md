@@ -70,9 +70,7 @@ Some Amigo screens have inverted x coordinates while others don’t.
 
 If after flashing `maixpy_amigo_tft` to your device you notice that the buttons on keypad input screens appear to be in the wrong order, please try flashing `maixpy_amigo_ips` instead (or vice versa) which should correct the issue. 
 
+## Why isn't Krux detecting my microSD card or presenting an error?
+Starting from version 23.09.0 Krux supports SD Card Hot plugging. If you are using older versions, it can only detect the SD card on boot, so make sure that Krux is powered off when you insert your microSD into the device.
 
-## Why isn't Krux detecting my microSD card?
-## Why does the option to save to SD not appear?
-First, make sure you are using a [supported microSD card](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test). We hope to add support for more cards in the future.
-
-Second, make sure that Krux is powered off when you insert your microSD into the device. The firmware does not have support for hot plugging and can only detect the card on boot.
+Here is some [supported microSD cards](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test), and here is the MaixPy FAQ explaining [Why my micro SD card cannot be read](https://wiki.sipeed.com/soft/maixpy/en/others/maixpy_faq.html#Micro-SD-card-cannot-be-read). In summary, make sure the to format the card in MBR/DOS FAT32, and test the card a few times usign the Krux [Tools>Check SD Card](../getting-started/tools/#check-sd-card)

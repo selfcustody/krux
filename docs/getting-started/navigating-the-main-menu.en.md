@@ -1,7 +1,7 @@
 After entering your mnemonic, you will find yourself on Krux's main menu. Below is a breakdown of the entries available:
 
-<img src="../../img/maixpy_m5stickv/home-options-125.png">
 <img src="../../img/maixpy_amigo_tft/home-options-150.png">
+<img src="../../img/maixpy_m5stickv/home-options-125.png">
 
 ### Mnemonic
 This will open a new submenu with several options to backup your mnemonic.

@@ -1,7 +1,7 @@
 In the Krux home menu, there is a `Settings` entry. Below is a breakdown of the options you can change:
 
-<img src="../../img/maixpy_m5stickv/settings-options-125.png">
 <img src="../../img/maixpy_amigo_tft/settings-options-150.png">
+<img src="../../img/maixpy_m5stickv/settings-options-125.png">
 
 ### Bitcoin - Network
 <img src="../../img/maixpy_m5stickv/network-options-125.png" align="right">
@@ -12,7 +12,6 @@ This option allows you to switch between `mainnet` (the default) and `testnet`. 
 <div style="clear: both"></div>
 
 ### Encryption
-
 <img src="../../img/maixpy_m5stickv/encryption-options-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/encryption-options-150.png" align="right">
 
@@ -21,7 +20,6 @@ Modify the encryption method and parameters to fit your needs. The encryption se
 <div style="clear: both"></div>
 
 #### PBKDF2 Iter. (Iterations)
-
 <img src="../../img/maixpy_m5stickv/encryption-options-pbkdf2-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/encryption-options-pbkdf2-150.png" align="right">
 
@@ -32,7 +30,6 @@ If you increase this value it will make the encryption harder, at the cost of ta
 <div style="clear: both"></div>
 
 #### Encryption Mode
-
 <img src="../../img/maixpy_m5stickv/encryption-options-mode-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/encryption-options-mode-150.png" align="right">
 
@@ -80,7 +77,6 @@ Choose between flash(device's internal memory) or SD card for the place where yo
 <div style="clear: both"></div>
 
 ### Printer
-
 <img src="../../img/maixpy_m5stickv/printer-options-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/printer-options-150.png" align="right">
 
@@ -102,7 +98,6 @@ Here you choose between Thermal, CNC or none(default). Leave this setting to "no
 <div style="clear: both"></div>
 
 ### Theme
-
 <img src="../../img/maixpy_amigo_tft/theme-1-150.png">
 <img src="../../img/maixpy_amigo_tft/theme-2-150.png">
 <img src="../../img/maixpy_amigo_tft/theme-3-150.png">
@@ -114,8 +109,7 @@ Choose your color theme according to your preference. Some themes may be more su
 
 
 ### Touchscreen
-
-<img src="../../img/maixpy_amigo_tft/touchscreen-150.en.png" align="right">
+<img src="../../img/maixpy_amigo_tft/touchscreen-150.png" align="right">
 
 If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false (ghost) touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
 
@@ -125,4 +119,3 @@ If your device has touchscreen you can change the touch detection threshold. If 
 
 If your device has a rotary encoder, you can change the debounce threshold in milliseconds. The lower the value, the faster it detects wheel rotation. Increase the value if it is difficult to get a single input from the wheel rotation.
 
-<div style="clear: both"></div>
