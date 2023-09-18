@@ -31,7 +31,7 @@ echo "{\"settings\": {\"i18n\": {\"locale\": \"$locale\"}}}" > sd/settings.json
 
 poetry run python simulator.py --sequence sequences/about.txt  --device $device
 poetry run python simulator.py --sequence sequences/bitcoin-options.txt  --device $device
-poetry run python simulator.py --sequence sequences/encryptions-options.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/encryption-options.txt  --sd --device $device
 poetry run python simulator.py --sequence sequences/extended-public-key-wpkh.txt  --device $device
 poetry run python simulator.py --sequence sequences/extended-public-key-wsh.txt  --device $device
 poetry run python simulator.py --sequence sequences/home-options.txt  --device $device
@@ -53,7 +53,9 @@ poetry run python simulator.py --sequence sequences/persist-options.txt  --devic
 poetry run python simulator.py --sequence sequences/print-qr.txt --sd --printer --device $device
 poetry run python simulator.py --sequence sequences/printer-options.txt  --device $device
 poetry run python simulator.py --sequence sequences/qr-transcript.txt  --device $device
+poetry run python simulator.py --sequence sequences/encrypt-mnemonic.txt --device $device
 poetry run python simulator.py --sequence sequences/scan-address.txt --device $device
+poetry run python simulator.py --sequence sequences/list-address.txt --device $device
 poetry run python simulator.py --sequence sequences/settings-options.txt  --device $device
 poetry run python simulator.py --sequence sequences/shutdown.txt  --device $device
 poetry run python simulator.py --sequence sequences/sign-message.txt  --device $device
@@ -61,7 +63,9 @@ poetry run python simulator.py --sequence sequences/sign-options.txt  --device $
 poetry run python simulator.py --sequence sequences/sign-psbt.txt  --device $device
 poetry run python simulator.py --sequence sequences/themes.txt  --device $device
 poetry run python simulator.py --sequence sequences/thermal-options.txt  --device $device
-poetry run python simulator.py --sequence sequences/tools.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/tools-check-sd.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/tools-create-QR.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/tools-mnemonic.txt  --sd --device $device
 poetry run python simulator.py --sequence sequences/wallet-type-options.txt  --device $device
 poetry run python simulator.py --sequence sequences/wallet-wpkh.txt  --device $device
 poetry run python simulator.py --sequence sequences/wallet-wsh.txt  --device $device

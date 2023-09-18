@@ -1,0 +1,11 @@
+include _wait-for-logo.txt
+
+# Navigate to Tools
+x3 press BUTTON_B
+press BUTTON_A
+
+# Create QR Code
+x3 press BUTTON_B
+press BUTTON_A
+
+screenshot create-qr-code.png
