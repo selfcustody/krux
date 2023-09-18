@@ -45,6 +45,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../css/custom.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -70,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#create-the-wallet" class="md-skip">
+        <a href="#specter-desktop" class="md-skip">
           Skip to content
         </a>
       
@@ -580,30 +582,125 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#specter-desktop" class="md-nav__link">
+    Specter Desktop
+  </a>
+  
+    <nav class="md-nav" aria-label="Specter Desktop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#create-the-wallet" class="md-nav__link">
     Create the wallet
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#load-the-wallet-into-krux" class="md-nav__link">
     Load the wallet into Krux
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#receive-coins" class="md-nav__link">
     Receive coins
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#send-coins" class="md-nav__link">
     Send coins
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sparrow" class="md-nav__link">
+    Sparrow
+  </a>
+  
+    <nav class="md-nav" aria-label="Sparrow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-the-wallet_1" class="md-nav__link">
+    Create the wallet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-the-wallet-into-krux_1" class="md-nav__link">
+    Load the wallet into Krux
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receive-coins_1" class="md-nav__link">
+    Receive coins
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send-coins_1" class="md-nav__link">
+    Send coins
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bluewallet" class="md-nav__link">
+    BlueWallet
+  </a>
+  
+    <nav class="md-nav" aria-label="BlueWallet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-the-wallet_2" class="md-nav__link">
+    Create the wallet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-the-wallet-into-krux_2" class="md-nav__link">
+    Load the wallet into Krux
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receive-coins_2" class="md-nav__link">
+    Receive coins
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send-coins_2" class="md-nav__link">
+    Send coins
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -761,14 +858,13 @@
   <h1>Using a Multisig Wallet</h1>
 
 <p>This guide assumes you have already created a mnemonic for each cosigner that will be in your multisig wallet. If that is not the case, head over to the <a href="../generating-a-mnemonic">Generating a Mnemonic</a> page and complete those steps first.</p>
-<p>When entering your mnemonics into Krux, make sure to select <em>Multisig</em> for all keys in your multisig. The choice of single-sig vs. multisig at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.</p>
+<p>When entering your mnemonics into Krux, make sure to select <code>Multisig</code> for all keys in your multisignature scheme. The choice of <code>Single-sig</code> vs. <code>Multisig</code> at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.</p>
 <p><img src="../../img/maixpy_m5stickv/wallet-type-options-multisig-125.png">
 <img src="../../img/maixpy_amigo_tft/wallet-type-options-multisig-150.png"></p>
 <p>Selecting <code>Multisig</code> will derive an xpub using the derivation path <code>m/48'/0'/0'/2'</code> on mainnet and <code>m/48'/1'/0'/2'</code> on testnet, which indicates to wallet software that a <a href="https://github.com/bitcoin/bips/blob/master/bip-0048.mediawiki">Multisig Wallet script type</a> should be used, specifically the Native Segwit script <code>P2WSH</code>, or just <code>wsh</code>.</p>
-<h2 id="create-the-wallet">Create the wallet<a class="headerlink" href="#create-the-wallet" title="Permanent link">&para;</a></h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Specter Desktop</label><label for="__tabbed_1_2">Sparrow</label><label for="__tabbed_1_3">BlueWallet</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
+<p><strong>Note:</strong> While not required, the load of the <code>Wallet Descriptor</code> is strongly recommended to load your multisig wallet into Krux before signing a PSBT as it will allow the device to verify that the transaction it is signing has the correct list of cosigners as defined in the wallet. It is also useful if you wish to <a href="../printing">print a backup</a> of the wallet or visually inspect the list of cosigners being output by your wallet coordinator.</p>
+<h2 id="specter-desktop">Specter Desktop<a class="headerlink" href="#specter-desktop" title="Permanent link">&para;</a></h2>
+<h3 id="create-the-wallet">Create the wallet<a class="headerlink" href="#create-the-wallet" title="Permanent link">&para;</a></h3>
 <p>In Specter Desktop, you will need to import your public key by adding a new device. Press the <em>Add new device</em> button on the left side of the app.</p>
 <p><img src="../../img/specter/add-new-device-button-400.png"></p>
 <p>Krux is not listed as one of the available device types on the <em>Add Device</em> screen, so you will need to select the <em>Other</em> option.</p>
@@ -792,54 +888,7 @@
 <p>Give your wallet a name, make sure to select <em>Segwit</em> for the wallet type, and decide how many of your keys are required to sign a transaction, then press <em>Create wallet</em>.</p>
 <p><img src="../../img/specter/create-multisig-wallet-screen-600.png"></p>
 <p>Congrats, you just created a multisig wallet!</p>
-</div>
-<div class="tabbed-block">
-<p>In Sparrow, create a new wallet by going to <em>File &gt; New Wallet</em> and give it a name.</p>
-<p><img src="../../img/sparrow/new-multisig-wallet-400.png"></p>
-<p>On the wallet screen, make sure to select a <em>Multi Signature</em> policy type with the <em>Native Segwit (P2WSH)</em> script type. Here you can decide how many keys will be in your multisig and how many should be required to sign a transaction.</p>
-<p><img src="../../img/sparrow/multisig-wallet-settings-600.png"></p>
-<p>Now, you will need to import your public key. To do so, press the <em>Airgapped Hardware Wallet</em> button under <em>Keystores</em>. On the screen that pops up, Krux is not listed as one of the available device types, so look for the <em>Specter DIY</em> option and click its <em>Scan...</em> button.</p>
-<p><img src="../../img/sparrow/specter-diy-scan-qr-400.png"></p>
-<p>On your Krux, navigate to the <em>Extended Public Key</em> option under the main menu and show the <strong>first</strong> QR code to Sparrow.</p>
-<p><img src="../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-125.png">
-<img src="../../img/maixpy_amigo_tft/extended-public-key-wsh-xpub-qr-150.png"></p>
-<p>It should import the xpub and show a key under <em>Keystores</em> like the following:</p>
-<p><img src="../../img/sparrow/keystore-multisig-key-settings-600.png"></p>
-<p>Repeat this process for every key that will be in your multisig wallet.</p>
-<p>Once all keys have been added, click the blue <em>Apply</em> button to create your wallet.</p>
-<p>Congrats, you just created a multisig wallet!</p>
-</div>
-<div class="tabbed-block">
-<p>In BlueWallet, create a new wallet by either pressing the <em>+</em> button or scrolling to the right until you see the <em>Add now</em> button.</p>
-<p><img src="../../img/blue/add-wallet-button-400.png"></p>
-<p>On the screen that pops up, add a name for your wallet, tap on <em>Vault</em>, and tap <em>Create</em> to begin creating a multisig wallet. </p>
-<p><img src="../../img/blue/add-wallet-vault-400.png"></p>
-<p>On the following screen, you can proceed with the defaults or adjust the number of cosigners (default is 2-of-3) as needed by going into the Vault Settings. Make sure to leave the script type as <code>p2wsh</code>. </p>
-<p><img src="../../img/blue/new-vault-lets-start-400.png"></p>
-<p><img src="../../img/blue/new-vault-settings-400.png"></p>
-<p>Continue and you will be taken to a screen where you can import your keys.</p>
-<p>Tap <em>Import</em> under the first <em>Vault Key</em>.</p>
-<p><img src="../../img/blue/new-vault-scan-key-400.png"></p>
-<p>Tap again on <em>Scan or import a file</em> to begin scanning a QR code.</p>
-<p>On your Krux, navigate to the <em>Extended Public Key</em> option under the main menu and show the <strong>first</strong> QR code to BlueWallet.</p>
-<p><img src="../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-125.png">
-<img src="../../img/maixpy_amigo_tft/extended-public-key-wsh-xpub-qr-150.png"></p>
-<p>You should see a green checkmark next to the key if successful.</p>
-<p><img src="../../img/blue/new-vault-add-key-success-400.png"></p>
-<p>Repeat this process for every key that will be in your multisig wallet.</p>
-<p>Once all keys have been added, tap <em>Create</em>.</p>
-<p><img src="../../img/blue/new-vault-create-400.png"></p>
-<p>From here, you can send or receive.</p>
-<p><img src="../../img/blue/multisig-wallet-home-400.png"></p>
-<p>Congrats, you just created a multisig wallet!</p>
-</div>
-</div>
-</div>
-<h2 id="load-the-wallet-into-krux">Load the wallet into Krux<a class="headerlink" href="#load-the-wallet-into-krux" title="Permanent link">&para;</a></h2>
-<p><strong>Note:</strong> While not required, it is strongly recommended to load your multisig wallet into Krux before signing a PSBT as it will allow the device to verify that the transaction it is signing has the correct list of cosigners as defined in the wallet. It is also useful if you wish to <a href="../printing">print a backup</a> of the wallet or visually inspect the list of cosigners being output by your wallet coordinator.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Specter Desktop</label><label for="__tabbed_2_2">Sparrow</label><label for="__tabbed_2_3">BlueWallet</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
+<h3 id="load-the-wallet-into-krux">Load the wallet into Krux<a class="headerlink" href="#load-the-wallet-into-krux" title="Permanent link">&para;</a></h3>
 <p>Load the wallet into Krux by going to the <em>Settings</em> page in Specter Desktop, then click the <em>Export</em> tab. There, press the <em>Export</em> button to display a QR code of your wallet.</p>
 <p><img src="../../img/specter/export-wallet-screen-600.png"></p>
 <p>In Krux, select the <em>Wallet</em> menu item option and scan the QR code.</p>
@@ -848,52 +897,10 @@
 <p>If it worked, Krux should display the wallet information that it loaded:</p>
 <p><img src="../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png">
 <img src="../../img/maixpy_amigo_tft/wallet-wsh-load-prompt-150.png"></p>
-</div>
-<div class="tabbed-block">
-<p>Load the wallet into Krux by going back to the <em>Settings</em> page in Sparrow, then click the <em>Export...</em> button at the bottom of the screen and find <em>Specter Desktop</em> in the options list that pops up. Click its <em>Show...</em> button to display a QR code that you can import into Krux.</p>
-<p><img src="../../img/sparrow/export-specter-wallet-600.png"></p>
-<p>In Krux, select the <em>Wallet</em> menu item option and scan the QR code.</p>
-<p><img src="../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../img/maixpy_amigo_tft/wallet-load-prompt-150.png"></p>
-<p>If it worked, Krux should display the wallet information that it loaded:</p>
-<p><img src="../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png">
-<img src="../../img/maixpy_amigo_tft/wallet-wsh-load-prompt-150.png"></p>
-</div>
-<div class="tabbed-block">
-<p>Load the wallet into Krux by tapping the ellipsis in the top-right to see the wallet settings.</p>
-<p><img src="../../img/blue/multisig-wallet-home-400.png"></p>
-<p>From here, tap <em>Export Coordination Setup</em> in order to display a QR code of your wallet.</p>
-<p><img src="../../img/blue/export-multisig-wallet-400.png"></p>
-<p>In Krux, select the <em>Wallet</em> menu item option and scan the QR code.</p>
-<p><img src="../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../img/maixpy_amigo_tft/wallet-load-prompt-150.png"></p>
-<p>If it worked, Krux should display the wallet information that it loaded:</p>
-<p><img src="../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png">
-<img src="../../img/maixpy_amigo_tft/wallet-wsh-load-prompt-150.png"></p>
-</div>
-</div>
-</div>
-<h2 id="receive-coins">Receive coins<a class="headerlink" href="#receive-coins" title="Permanent link">&para;</a></h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Specter Desktop</label><label for="__tabbed_3_2">Sparrow</label><label for="__tabbed_3_3">BlueWallet</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
+<h3 id="receive-coins">Receive coins<a class="headerlink" href="#receive-coins" title="Permanent link">&para;</a></h3>
 <p>The <em>Receive</em> screen should show your first receive address that you can send funds to.</p>
 <p><img src="../../img/specter/receive-address-screen-400.png"></p>
-</div>
-<div class="tabbed-block">
-<p>Navigate to the <em>Receive</em> screen where you should see your first receive address that you can send funds to.</p>
-<p><img src="../../img/sparrow/multisig-receive-address-600.png"></p>
-</div>
-<div class="tabbed-block">
-<p>Navigate to the <em>Receive</em> screen where you should see your first receive address that you can send funds to.</p>
-<p><img src="../../img/blue/receive-address-400.png"></p>
-</div>
-</div>
-</div>
-<h2 id="send-coins">Send coins<a class="headerlink" href="#send-coins" title="Permanent link">&para;</a></h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Specter Desktop</label><label for="__tabbed_4_2">Sparrow</label><label for="__tabbed_4_3">BlueWallet</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
+<h3 id="send-coins">Send coins<a class="headerlink" href="#send-coins" title="Permanent link">&para;</a></h3>
 <p>Go to <em>Send</em> in Specter Desktop, fill in the recipient address, amount, and any extra information you wish to supply, and click <em>Create unsigned transaction</em>.</p>
 <p><img src="../../img/specter/create-transaction-screen-600.png"></p>
 <p>You will now see a screen listing the devices in your wallet. Select the device you want to sign the transaction (PSBT) with.</p>
@@ -909,9 +916,36 @@
 <p>Repeat this process for the remaining keys in your wallet until you have a quorum of signatures. </p>
 <p>After the final signature, a window will popup asking you to broadcast the transaction. Click <em>Send transaction</em> and your transaction should be broadcasted to the network!</p>
 <p><img src="../../img/specter/broadcast-transaction-screen-400.png"></p>
-<p>🎉</p>
-</div>
-<div class="tabbed-block">
+<p>Congratulations, you have learned how to send a transaction using Specter Desktop 🎉</p>
+<h2 id="sparrow">Sparrow<a class="headerlink" href="#sparrow" title="Permanent link">&para;</a></h2>
+<h3 id="create-the-wallet_1">Create the wallet<a class="headerlink" href="#create-the-wallet_1" title="Permanent link">&para;</a></h3>
+<p>In Sparrow, create a new wallet by going to <em>File &gt; New Wallet</em> and give it a name.</p>
+<p><img src="../../img/sparrow/new-multisig-wallet-400.png"></p>
+<p>On the wallet screen, make sure to select a <em>Multi Signature</em> policy type with the <em>Native Segwit (P2WSH)</em> script type. Here you can decide how many keys will be in your multisig and how many should be required to sign a transaction.</p>
+<p><img src="../../img/sparrow/multisig-wallet-settings-600.png"></p>
+<p>Now, you will need to import your public key. To do so, press the <em>Airgapped Hardware Wallet</em> button under <em>Keystores</em>. On the screen that pops up, Krux is not listed as one of the available device types, so look for the <em>Specter DIY</em> option and click its <em>Scan...</em> button.</p>
+<p><img src="../../img/sparrow/specter-diy-scan-qr-400.png" style="border: 1px solid;"></p>
+<p>On your Krux, navigate to the <em>Extended Public Key</em> option under the main menu and show the <strong>first</strong> QR code to Sparrow.</p>
+<p><img src="../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-125.png">
+<img src="../../img/maixpy_amigo_tft/extended-public-key-wsh-xpub-qr-150.png"></p>
+<p>It should import the xpub and show a key under <em>Keystores</em> like the following:</p>
+<p><img src="../../img/sparrow/keystore-multisig-key-settings-600.png" style="border: 1px solid;"></p>
+<p>Repeat this process for every key that will be in your multisig wallet.</p>
+<p>Once all keys have been added, click the blue <em>Apply</em> button to create your wallet.</p>
+<p>Congrats, you just created a multisig wallet!</p>
+<h3 id="load-the-wallet-into-krux_1">Load the wallet into Krux<a class="headerlink" href="#load-the-wallet-into-krux_1" title="Permanent link">&para;</a></h3>
+<p>Load the wallet into Krux by going back to the <em>Settings</em> page in Sparrow, then click the <em>Export...</em> button at the bottom of the screen and find <em>Specter Desktop</em> in the options list that pops up. Click its <em>Show...</em> button to display a QR code that you can import into Krux.</p>
+<p><img src="../../img/sparrow/export-specter-wallet-600.png" style="border: 1px solid;"></p>
+<p>In Krux, select the <em>Wallet</em> menu item option and scan the QR code.</p>
+<p><img src="../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
+<img src="../../img/maixpy_amigo_tft/wallet-load-prompt-150.png"></p>
+<p>If it worked, Krux should display the wallet information that it loaded:</p>
+<p><img src="../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png">
+<img src="../../img/maixpy_amigo_tft/wallet-wsh-load-prompt-150.png"></p>
+<h3 id="receive-coins_1">Receive coins<a class="headerlink" href="#receive-coins_1" title="Permanent link">&para;</a></h3>
+<p>Navigate to the <em>Receive</em> screen where you should see your first receive address that you can send funds to.</p>
+<p><img src="../../img/sparrow/multisig-receive-address-600.png"></p>
+<h3 id="send-coins_1">Send coins<a class="headerlink" href="#send-coins_1" title="Permanent link">&para;</a></h3>
 <p>Go to the <em>Send</em> screen, fill in the recipient address, amount, and any extra information you wish to supply, and click the blue <em>Create Transaction</em> button.</p>
 <p><img src="../../img/sparrow/create-transaction-screen-600.png"></p>
 <p>On the next screen, make sure that the <em>Signing Wallet</em> is the one you created and that the <em>Sighash</em> is set to <em>All</em>. Click the blue <em>Finalize Transaction for Signing</em> button.</p>
@@ -929,11 +963,48 @@
 <p>Repeat this process for the remaining keys in your wallet until you have a quorum of signatures. </p>
 <p>After the final signature, the bar will fill and two new buttons appear. Click the blue <em>Broadcast Transaction</em> button and your transaction should be broadcasted to the network!</p>
 <p><img src="../../img/sparrow/broadcast-transaction-600.png"></p>
-<p>🎉</p>
-</div>
-<div class="tabbed-block">
+<p>Congratulations, you have learned how to send a transaction using Sparrow 🎉</p>
+<h2 id="bluewallet">BlueWallet<a class="headerlink" href="#bluewallet" title="Permanent link">&para;</a></h2>
+<h3 id="create-the-wallet_2">Create the wallet<a class="headerlink" href="#create-the-wallet_2" title="Permanent link">&para;</a></h3>
+<p>In BlueWallet, create a new wallet by either pressing the <em>+</em> button or scrolling to the right until you see the <em>Add now</em> button.</p>
+<p><img src="../../img/blue/add-wallet-button-400.png" style="border: 1px solid;"></p>
+<p>On the screen that pops up, add a name for your wallet, tap on <em>Vault</em>, and tap <em>Create</em> to begin creating a multisig wallet. </p>
+<p><img src="../../img/blue/add-wallet-vault-400.png" style="border: 1px solid;"></p>
+<p>On the following screen, you can proceed with the defaults or adjust the number of cosigners (default is 2-of-3) as needed by going into the Vault Settings. Make sure to leave the script type as <code>p2wsh</code>. </p>
+<p><img src="../../img/blue/new-vault-lets-start-400.png" style="border: 1px solid;"></p>
+<p><img src="../../img/blue/new-vault-settings-400.png" style="border: 1px solid;"></p>
+<p>Continue and you will be taken to a screen where you can import your keys.</p>
+<p>Tap <em>Import</em> under the first <em>Vault Key</em>.</p>
+<p><img src="../../img/blue/new-vault-scan-key-400.png" style="border: 1px solid;"></p>
+<p>Tap again on <em>Scan or import a file</em> to begin scanning a QR code.</p>
+<p>On your Krux, navigate to the <em>Extended Public Key</em> option under the main menu and show the <strong>first</strong> QR code to BlueWallet.</p>
+<p><img src="../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-125.png">
+<img src="../../img/maixpy_amigo_tft/extended-public-key-wsh-xpub-qr-150.png"></p>
+<p>You should see a green checkmark next to the key if successful.</p>
+<p><img src="../../img/blue/new-vault-add-key-success-400.png" style="border: 1px solid;"></p>
+<p>Repeat this process for every key that will be in your multisig wallet.</p>
+<p>Once all keys have been added, tap <em>Create</em>.</p>
+<p><img src="../../img/blue/new-vault-create-400.png" style="border: 1px solid;"></p>
+<p>From here, you can send or receive.</p>
+<p><img src="../../img/blue/multisig-wallet-home-400.png" style="border: 1px solid;"></p>
+<p>Congrats, you just created a multisig wallet!</p>
+<h3 id="load-the-wallet-into-krux_2">Load the wallet into Krux<a class="headerlink" href="#load-the-wallet-into-krux_2" title="Permanent link">&para;</a></h3>
+<p>Load the wallet into Krux by tapping the ellipsis in the top-right to see the wallet settings.</p>
+<p><img src="../../img/blue/multisig-wallet-home-400.png" style="border: 1px solid;"></p>
+<p>From here, tap <em>Export Coordination Setup</em> in order to display a QR code of your wallet.</p>
+<p><img src="../../img/blue/export-multisig-wallet-400.png" style="border: 1px solid;"></p>
+<p>In Krux, select the <em>Wallet</em> menu item option and scan the QR code.</p>
+<p><img src="../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
+<img src="../../img/maixpy_amigo_tft/wallet-load-prompt-150.png"></p>
+<p>If it worked, Krux should display the wallet information that it loaded:</p>
+<p><img src="../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png">
+<img src="../../img/maixpy_amigo_tft/wallet-wsh-load-prompt-150.png"></p>
+<h3 id="receive-coins_2">Receive coins<a class="headerlink" href="#receive-coins_2" title="Permanent link">&para;</a></h3>
+<p>Navigate to the <em>Receive</em> screen where you should see your first receive address that you can send funds to.</p>
+<p><img src="../../img/blue/receive-address-400.png" style="border: 1px solid;"></p>
+<h3 id="send-coins_2">Send coins<a class="headerlink" href="#send-coins_2" title="Permanent link">&para;</a></h3>
 <p>Go to the <em>Send</em> screen, fill in the recipient address, amount, and any extra information you wish to supply, and tap <em>Next</em>.</p>
-<p><img src="../../img/blue/send-400.png"></p>
+<p><img src="../../img/blue/send-400.png" style="border: 1px solid;"></p>
 <p>You should see an animated QR code of the PSBT that you can scan with Krux by going to <em>Sign &gt; PSBT</em> in its main menu.</p>
 <p>After scanning, Krux should display info about the transaction for you to confirm before signing.</p>
 <p><img src="../../img/maixpy_m5stickv/sign-psbt-sign-prompt-125.png">
@@ -942,10 +1013,7 @@
 <p><img src="../../img/maixpy_m5stickv/sign-psbt-signed-qr-125.png">
 <img src="../../img/maixpy_amigo_tft/sign-psbt-signed-qr-150.png"></p>
 <p>Once all parts of the QR code have been read, you can then choose to broadcast the transaction, sending it to the network!</p>
-<p>🎉</p>
-</div>
-</div>
-</div>
+<p>Congratulations, you have learned how to send a transaction using BlueWallet 🎉</p>
 
 
 
@@ -1029,16 +1097,25 @@
   
     
     
+    <a href="https://bitcointalk.org/index.php?topic=5350905.0" target="_blank" rel="noopener" title="Send a message to the Bitcoin Forum" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M480 32c0-12.9-7.8-24.6-19.8-29.6S434.5.2 425.3 9.3L381.7 53c-48 48-113.1 75-181 75H64c-35.3 0-64 28.7-64 64v96c0 35.3 28.7 64 64 64v128c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V352h8.7c67.9 0 133 27 181 75l43.6 43.6c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V300.4c18.6-8.8 32-32.5 32-60.4s-13.4-51.6-32-60.4V32zm-64 76.7v262.6C357.2 317.8 280.5 288 200.7 288H192v-96h8.7c79.8 0 156.5-29.8 215.3-83.3z"/></svg>
+    </a>
+  
+    
+    
     <a href="https://t.me/SC_Krux" target="_blank" rel="noopener" title="Join our community-led Telegram" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M248 8C111.033 8 0 119.033 0 256s111.033 248 248 248 248-111.033 248-248S384.967 8 248 8Zm114.952 168.66c-3.732 39.215-19.881 134.378-28.1 178.3-3.476 18.584-10.322 24.816-16.948 25.425-14.4 1.326-25.338-9.517-39.287-18.661-21.827-14.308-34.158-23.215-55.346-37.177-24.485-16.135-8.612-25 5.342-39.5 3.652-3.793 67.107-61.51 68.335-66.746.153-.655.3-3.1-1.154-4.384s-3.59-.849-5.135-.5q-3.283.746-104.608 69.142-14.845 10.194-26.894 9.934c-8.855-.191-25.888-5.006-38.551-9.123-15.531-5.048-27.875-7.717-26.8-16.291q.84-6.7 18.45-13.7 108.446-47.248 144.628-62.3c68.872-28.647 83.183-33.623 92.511-33.789 2.052-.034 6.639.474 9.61 2.885a10.452 10.452 0 0 1 3.53 6.716 43.765 43.765 0 0 1 .417 9.769Z"/></svg>
     </a>
   
     
     
-      
-      
+    <a href="https://twitter.com/selfcustodykrux" target="_blank" rel="noopener" title="Follow us on Twitter" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
     
-    <a href="https://github.com/selfcustody/krux" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+    
+    <a href="https://github.com/selfcustody/krux" target="_blank" rel="noopener" title="Our code on Github" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
     </a>
   
@@ -1057,8 +1134,6 @@
     
     
       <script src="../../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
-      
-        <script src="../../../js/tabsync.js"></script>
       
     
     
