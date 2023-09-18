@@ -2,7 +2,7 @@ include _load-12-word-mnemonic.txt
 
 screenshot wallet-type-options.png
 
-screenshot wallet-type-options-single-sig.png
+# screenshot wallet-type-options-single-sig.png
 
 press BUTTON_B
 

@@ -1,0 +1,17 @@
+include _load-12-word-mnemonic.txt
+press BUTTON_A
+wait 1
+
+# Navigate to Scan Address
+x4 press BUTTON_B
+press BUTTON_A
+
+# highlight Receive Address
+press BUTTON_B
+
+screenshot list-address.png
+
+# show the list
+press BUTTON_A
+
+screenshot list-address-receive.png

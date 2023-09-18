@@ -9,8 +9,8 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 
-extra_javascript:
-  - js/tabsync.js
+extra_css:
+  - css/custom.css
 
 theme:
   name: material
@@ -40,11 +40,18 @@ extra:
     - icon: material/chat
       link: https://matrix.to/#/#krux:matrix.org
       name: Join our Matrix server
+    - icon: fontawesome/solid/bullhorn
+      link: https://bitcointalk.org/index.php?topic=5350905.0
+      name: Send a message to the Bitcoin Forum
     - icon: fontawesome/brands/telegram
       link: https://t.me/SC_Krux
       name: Join our community-led Telegram
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/selfcustodykrux
+      name: Follow us on Twitter
     - icon: fontawesome/brands/github
       link: https://github.com/selfcustody/krux
+      name: Our code on Github
   generator: true
 copyright: 
   Powered by <a href="https://embit.rocks/">embit</a>, the Bitcoin library for Python 3 and Micropython
