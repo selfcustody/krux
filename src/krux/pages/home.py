@@ -252,7 +252,8 @@ class Home(Page):
                 ):
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(
-                        t("Warning:\nIncomplete output descriptor"), theme.error_color
+                        t("Warning:") + "\n" + t("Incomplete output descriptor"),
+                        theme.error_color,
                     )
                     self.ctx.input.wait_for_button()
 
@@ -294,10 +295,11 @@ class Home(Page):
         # Warns in case multisig wallet descriptor is not loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
             self.ctx.display.draw_centered_text(
-                t(
-                    """Warning:\nWallet output descriptor not found.\n\n
-                    Some checks cannot be performed."""
-                )
+                t("Warning:")
+                + "\n"
+                + t("Wallet output descriptor not found.")
+                + "\n\n"
+                + t("Some checks cannot be performed.")
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE

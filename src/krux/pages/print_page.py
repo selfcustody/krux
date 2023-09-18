@@ -88,4 +88,4 @@ class PrintPage(Page):
             index += lines
             string += str(index) + ":" + words[index - 1] + "\n"
             self.printer.print_string(string)
-        self.printer.feed(3)
+        self.printer.feed(4)
