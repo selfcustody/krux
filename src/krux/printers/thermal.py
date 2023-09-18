@@ -85,9 +85,11 @@ class AdafruitPrinter(Printer):
 
     def feed(self, x=1):
         """Feeds paper through the machine x times"""
-        self.write_bytes(27, 100, x)
-        # Wait for the paper to feed
-        time.sleep_ms(self.dot_feed_time * self.character_height)
+        while x > 0:
+            x -= 1
+            self.write_bytes(10)
+            # Wait for the paper to feed
+            time.sleep_ms(self.dot_feed_time * self.character_height)
 
     def has_paper(self):
         """Returns a boolean indicating if the printer has paper or not"""
@@ -149,7 +151,7 @@ class AdafruitPrinter(Printer):
                 # command += line_bytes
                 self.uart_conn.write(line_bytes)
                 time.sleep_ms(self.dot_print_time)
-        self.feed(3)
+        self.feed(4)
 
     def set_bitmap_mode(self, width, height, scale_mode=1):
         """Set image format to be printed"""

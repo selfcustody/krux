@@ -240,7 +240,7 @@ class TinySeed(Page):
                 wdt.feed()
             grid_x_offset = border_x + 16  # 4,1mm*8px
             grid_y_offset = border_y + 25  # 6,2mm*8px
-        self.printer.feed(3)
+        self.printer.feed(4)
         self.ctx.display.clear()
 
     def _draw_index(self, index):
