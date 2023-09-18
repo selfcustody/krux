@@ -132,7 +132,7 @@ cd simulator
 # Run simulator with the touch device amigo, then use mouse to navigate
 poetry run python simulator.py --device maixpy_amigo_tft
 
-# Run simulator with sd enabled and the small button-only m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
+# Run simulator with sd enabled (you need the folder `simulator/sd`) on the small button-only device m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
 poetry run python simulator.py --device maixpy_m5stickv --sd
 
 # Run simulator with the rotary encoder device dock, then use keyboard (arrow keys UP or DOWN and ENTER)
@@ -164,8 +164,11 @@ cd simulator
 # Run all sequences of commands on all devices and in all locales (languages)
 ./generate-all-screenshots.sh
 
-# Run a specific sequence for a specific device (need to have the screenshots and the sd folder with the file settings.json inside)
+# Run a specific sequence for a specific device's with sd enabled (you need the folder `simulator/sd`)
 poetry run python simulator.py --sequence sequences/about.txt --sd --device maixpy_m5stickv
+
+# Sequence screenshots are scaled to fit in docs. Use --no-screenshot-scale to get full size
+poetry run python simulator.py --sequence sequences/home-options.txt --device maixpy_amigo_tft --no-screenshot-scale
 ```
 
 ## Live debug a device

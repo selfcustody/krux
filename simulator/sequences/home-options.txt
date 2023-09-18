@@ -4,6 +4,9 @@ wait 1
 
 screenshot home-options.png
 
+press BUTTON_A
+screenshot mnemonic-options.png
+
 press BUTTON_B
 # screenshot home-options-encrypt-mnemonic.png
 
