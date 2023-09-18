@@ -278,19 +278,23 @@ class LoadEncryptedMnemonic(Page):
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
-            raise ValueError(t("Failed to decrypt"))
+            self.flash_text(t("Failed to decrypt"), theme.error_color)
+            return MENU_CONTINUE
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
         if key in ("", ESC_KEY):
-            raise ValueError(t("Failed to decrypt"))
+            self.flash_text(t("Failed to decrypt"), theme.error_color)
+            return MENU_CONTINUE
         mnemonic_storage = MnemonicStorage()
         try:
             words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()
         except:
-            raise ValueError(t("Failed to decrypt"))
+            self.flash_text(t("Failed to decrypt"), theme.error_color)
+            return MENU_CONTINUE
 
         if len(words) not in (12, 24):
-            raise ValueError(t("Failed to decrypt"))
+            self.flash_text(t("Failed to decrypt"), theme.error_color)
+            return MENU_CONTINUE
         del mnemonic_storage
         return words
 

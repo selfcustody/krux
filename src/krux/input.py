@@ -173,7 +173,8 @@ class Input:
         Use block to wait indefinitely"""
         start_time = time.ticks_ms()
         while time.ticks_ms() < self.debounce_time + DEBOUNCE:
-            self.flush_events()
+            pass
+        self.flush_events()
         while True:
             if self.enter_event():
                 return BUTTON_ENTER

@@ -417,10 +417,12 @@ class Login(Page):
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(t("Processing ..."))
                 if key in ("", ESC_KEY):
-                    raise ValueError(t("Failed to decrypt"))
+                    self.flash_text(t("Failed to decrypt"), theme.error_color)
+                    return None
                 word_bytes = encrypted_qr.decrypt(key)
                 if word_bytes is None:
-                    raise ValueError(t("Failed to decrypt"))
+                    self.flash_text(t("Failed to decrypt"), theme.error_color)
+                    return None
                 return bip39.mnemonic_from_bytes(word_bytes).split()
         return None
 
