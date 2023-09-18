@@ -1,0 +1,9 @@
+include _load-12-word-mnemonic.txt
+press BUTTON_A
+wait 1
+
+# Navigate to Encrypt Mnemonic
+press BUTTON_B
+press BUTTON_A
+
+screenshot home-encrypt-options.png

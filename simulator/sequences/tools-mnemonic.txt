@@ -22,24 +22,3 @@ screenshot print-test-qr.png
 
 #Leave Print test QR
 press BUTTON_A
-
-wait 2
-
-# Create QR Code
-press BUTTON_B
-x2 press BUTTON_A
-
-screenshot create-qr-code.png
-
-x2 press BUTTON_C
-x2 press BUTTON_A
-
-# Check SD card
-x3 press BUTTON_C
-press BUTTON_A
-
-screenshot check-sd-card.png
-
-# Leave SD card
-press BUTTON_B
-press BUTTON_A
