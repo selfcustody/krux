@@ -94,7 +94,7 @@ class Key:
         either 11 or 23 words
         """
         if len(words) != 11 and len(words) != 23:
-            raise ValueError(t("must provide 11 or 23 words"))
+            raise ValueError("must provide 11 or 23 words")
 
         random.seed(int(time.ticks_ms() + entropy))
         while True:

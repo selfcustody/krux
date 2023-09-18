@@ -27,7 +27,7 @@ from fpioa_manager import fm
 
 from .touchscreens.ft6x36 import FT6X36
 from .logging import logger as log
-from .krux_settings import Settings, t
+from .krux_settings import Settings
 
 IDLE = 0
 PRESSED = 1
@@ -81,13 +81,13 @@ class Touch:
     def add_y_delimiter(self, region):
         """Adds a y button delimiter to be mapped as a array by touchscreen"""
         if region > self.width:
-            raise ValueError(t("Touch region added outside display area"))
+            raise ValueError("Touch region added outside display area")
         self.y_regions.append(region)
 
     def add_x_delimiter(self, region):
         """Adds a x button delimiter to be mapped as a array by touchscreen"""
         if region > self.height:
-            raise ValueError(t("Touch region added outside display area"))
+            raise ValueError("Touch region added outside display area")
         self.x_regions.append(region)
 
     def _extract_index(self, data):

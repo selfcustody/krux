@@ -40,8 +40,9 @@ from fpioa_manager import fm
 from machine import UART
 
 # from ..settings import CategorySetting, NumberSetting, SettingsNamespace
-from ..krux_settings import Settings, t
+from ..krux_settings import Settings
 
+# from ..krux_settings import t
 from ..wdt import wdt
 from . import Printer
 
@@ -69,7 +70,7 @@ class AdafruitPrinter(Printer):
         self.dot_feed_time = 2  # miliseconds
 
         if not self.has_paper():
-            raise ValueError(t("missing paper"))
+            raise ValueError("missing paper")
 
     def write_bytes(self, *args):
         """Writes bytes to the printer at a stable speed"""

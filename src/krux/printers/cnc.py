@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 # pylint: disable=W0231
 import math
-from ..krux_settings import Settings, t
+from ..krux_settings import Settings
 from ..wdt import wdt
 from . import Printer
 from ..sd_card import SDHandler
@@ -49,12 +49,10 @@ class GCodeGenerator(Printer):
         self.invert = Settings().printer.cnc.invert
 
         if self.plunge_rate > self.feed_rate / 2:
-            raise ValueError(t("plunge rate must be less than half of feed rate"))
+            raise ValueError("plunge rate must be less than half of feed rate")
 
         if self.pass_depth > self.cut_depth:
-            raise ValueError(
-                t("depth per pass must be less than or equal to cut depth")
-            )
+            raise ValueError("depth per pass must be less than or equal to cut depth")
 
     def on_gcode(self, gcode):
         """Receives gcode"""
