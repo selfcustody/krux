@@ -57,7 +57,7 @@ class FT6X36(Touchscreen):
         self.write_reg(FT_DEVICE_MODE, 0)
         # Threshold for touch detection
         self.write_reg(FT_ID_G_THGROUP, TOUCH_THRESHOLD)
-        # Mode = 0 = polling mode
+        # Mode = 0 = polling mode | Mode = 1 = trigger mode
         self.write_reg(FT_ID_G_MODE, 0)
 
     def write_reg(self, reg_addr, buf):

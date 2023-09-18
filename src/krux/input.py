@@ -21,10 +21,8 @@
 # THE SOFTWARE.
 import time
 import board
-from Maix import GPIO
-from fpioa_manager import fm
 from .wdt import wdt
-from .touch import Touch
+from .buttons import PRESSED, RELEASED
 
 BUTTON_ENTER = 0
 BUTTON_PAGE = 1
@@ -38,10 +36,8 @@ SWIPE_DOWN = 7
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
 
-PRESSED = 0
-RELEASED = 1
-
 BUTTON_WAIT_PRESS_DELAY = 10
+DEBOUNCE = 100
 
 
 class Input:
@@ -49,11 +45,13 @@ class Input:
 
     def __init__(self):
         self.entropy = 0
+        self.debounce_time = 0
 
         self.enter = None
         if "BUTTON_A" in board.config["krux"]["pins"]:
-            fm.register(board.config["krux"]["pins"]["BUTTON_A"], fm.fpioa.GPIOHS21)
-            self.enter = GPIO(GPIO.GPIOHS21, GPIO.IN, GPIO.PULL_UP)
+            from .buttons import ButtonEnter
+
+            self.enter = ButtonEnter(board.config["krux"]["pins"]["BUTTON_A"])
 
         self.page = None
         self.page_prev = None
@@ -64,12 +62,16 @@ class Input:
             self.page_prev = EncoderPagePrev()
         else:
             if "BUTTON_B" in board.config["krux"]["pins"]:
-                fm.register(board.config["krux"]["pins"]["BUTTON_B"], fm.fpioa.GPIOHS22)
-                self.page = GPIO(GPIO.GPIOHS22, GPIO.IN, GPIO.PULL_UP)
+                from .buttons import ButtonPage
+
+                self.page = ButtonPage(board.config["krux"]["pins"]["BUTTON_B"])
 
             if "BUTTON_C" in board.config["krux"]["pins"]:
-                fm.register(board.config["krux"]["pins"]["BUTTON_C"], fm.fpioa.GPIOHS0)
-                self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
+                from .buttons import ButtonPagePrev
+
+                self.page_prev = ButtonPagePrev(
+                    board.config["krux"]["pins"]["BUTTON_C"]
+                )
             else:
                 try:
                     from pmu import PMU_Button
@@ -85,25 +87,29 @@ class Input:
             "touch" in board.config["krux"]["display"]
             and board.config["krux"]["display"]["touch"]
         ):
+            from .touch import Touch
+
             self.touch = Touch(
-                board.config["lcd"]["width"], board.config["lcd"]["height"]
+                board.config["lcd"]["width"],
+                board.config["lcd"]["height"],
+                board.config["krux"]["pins"]["TOUCH_IRQ"],
             )
             self.buttons_active = False
 
     def enter_value(self):
-        """Intermediary method to pull button A state, if available"""
+        """Intermediary method to pull button ENTER state"""
         if self.enter is not None:
             return self.enter.value()
         return RELEASED
 
     def page_value(self):
-        """Intermediary method to pull button B state, if available"""
+        """Intermediary method to pull button PAGE state"""
         if self.page is not None:
             return self.page.value()
         return RELEASED
 
     def page_prev_value(self):
-        """Intermediary method to pull button C state, if available"""
+        """Intermediary method to pull button PAGE_PREV state"""
         if self.page_prev is not None:
             return self.page_prev.value()
         return RELEASED
@@ -113,6 +119,30 @@ class Input:
         if self.touch is not None:
             return self.touch.value()
         return RELEASED
+
+    def enter_event(self):
+        """Intermediary method to pull button ENTER event"""
+        if self.enter is not None:
+            return self.enter.event()
+        return False
+
+    def page_event(self):
+        """Intermediary method to pull button PAGE event"""
+        if self.page is not None:
+            return self.page.event()
+        return False
+
+    def page_prev_event(self):
+        """Intermediary method to pull button PAGE_PREV event"""
+        if self.page_prev is not None:
+            return self.page_prev.event()
+        return False
+
+    def touch_event(self):
+        """Intermediary method to pull button TOUCH event"""
+        if self.touch is not None:
+            return self.touch.event()
+        return False
 
     def swipe_right_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
@@ -138,32 +168,21 @@ class Input:
             return self.touch.swipe_down_value()
         return RELEASED
 
-    def wait_for_release(self):
-        """Loop until all buttons are released (if currently pressed)"""
-        while True:
-            if self.enter_value() == RELEASED and self.touch_value() == RELEASED:
-                if "ENCODER" in board.config["krux"]["pins"]:
-                    # Encoder is event based, this check may disable event flag unintentionally
-                    break
-                # TODO: Change standard buttons to be event(interrupt) based too
-                # So presses during high processing time(camera and animated QR) won't be lost
-                if self.page_value() == RELEASED and self.page_prev_value() == RELEASED:
-                    break
-            self.entropy += 1
-            wdt.feed()
-
     def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
         """Wait for first button press or for wait_duration ms.
         Use block to wait indefinitely"""
         start_time = time.ticks_ms()
+        while time.ticks_ms() < self.debounce_time + DEBOUNCE:
+            pass
+        self.flush_events()
         while True:
-            if self.enter_value() == PRESSED:
+            if self.enter_event():
                 return BUTTON_ENTER
-            if self.page_value() == PRESSED:
+            if self.page_event():
                 return BUTTON_PAGE
-            if self.page_prev_value() == PRESSED:
+            if self.page_prev_event():
                 return BUTTON_PAGE_PREV
-            if self.touch_value() == PRESSED:
+            if self.touch_event():
                 return BUTTON_TOUCH
             self.entropy += 1
             wdt.feed()  # here is where krux spends most of its time
@@ -173,19 +192,18 @@ class Input:
 
     def wait_for_button(self, block=True):
         """Waits for any button to release, optionally blocking if block=True.
-        Returns the button that was released, or None if nonblocking.
+        Returns the button that was released, or None if non blocking.
         """
-        self.wait_for_release()
         btn = self.wait_for_press(block)
-
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:
                 self.entropy += 1
                 wdt.feed()
-            if self.buttons_active:
-                return BUTTON_ENTER
-            self.buttons_active = True
+            if not self.buttons_active:
+                self.buttons_active = True
+                btn = None
+
         elif btn == BUTTON_PAGE:
             start_time = time.ticks_ms()
             # Wait for release
@@ -193,10 +211,11 @@ class Input:
                 self.entropy += 1
                 wdt.feed()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
-                    return SWIPE_LEFT
-            if self.buttons_active:
-                return BUTTON_PAGE
-            self.buttons_active = True
+                    btn = SWIPE_LEFT
+                    break
+            if not self.buttons_active:
+                self.buttons_active = True
+                btn = None
         elif btn == BUTTON_PAGE_PREV:
             start_time = time.ticks_ms()
             # Wait for release
@@ -204,10 +223,11 @@ class Input:
                 self.entropy += 1
                 wdt.feed()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
-                    return SWIPE_RIGHT
-            if self.buttons_active:
-                return BUTTON_PAGE_PREV
-            self.buttons_active = True
+                    btn = SWIPE_RIGHT
+                    break
+            if not self.buttons_active:
+                self.buttons_active = True
+                btn = None
         elif btn == BUTTON_TOUCH:
             # Wait for release
             while self.touch_value() == PRESSED:
@@ -215,13 +235,19 @@ class Input:
                 wdt.feed()
             self.buttons_active = False
             if self.swipe_right_value() == PRESSED:
-                return SWIPE_RIGHT
+                btn = SWIPE_RIGHT
             if self.swipe_left_value() == PRESSED:
-                return SWIPE_LEFT
+                btn = SWIPE_LEFT
             if self.swipe_up_value() == PRESSED:
-                return SWIPE_UP
+                btn = SWIPE_UP
             if self.swipe_down_value() == PRESSED:
-                return SWIPE_DOWN
-            return BUTTON_TOUCH
+                btn = SWIPE_DOWN
+        self.debounce_time = time.ticks_ms()
+        return btn
 
-        return None
+    def flush_events(self):
+        """Clean eventual event flags unintentionally collected"""
+        self.enter_event()
+        self.page_event()
+        self.page_prev_event()
+        self.touch_event()

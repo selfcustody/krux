@@ -68,66 +68,8 @@ class AdafruitPrinter(Printer):
         self.dot_print_time = Settings().printer.thermal.adafruit.line_delay
         self.dot_feed_time = 2  # miliseconds
 
-        self.setup()
-
         if not self.has_paper():
             raise ValueError(t("missing paper"))
-
-    def setup(self):
-        """Sets up the connection to the printer and sets default settings"""
-        # The printer can't start receiving data immediately
-        # upon power up -- it needs a moment to cold boot
-        # and initialize.  Allow at least 1/2 sec of uptime
-        # before printer can receive data.
-        time.sleep_ms(INITIALIZE_WAIT_TIME)
-
-        # Wake up the printer to get ready for printing
-        self.write_bytes(255)
-        self.write_bytes(27, 118, 0)  # Sleep off (important!)
-
-        # Reset the printer
-        self.write_bytes(27, 64)  # Esc @ = init command
-        # Configure tab stops on recent printers
-        self.write_bytes(27, 68)  # Set tab stops
-        self.write_bytes(4, 8, 12, 16)  # every 4 columns,
-        self.write_bytes(20, 24, 28, 0)  # 0 is end-of-list.
-
-        # Description of print settings from p. 23 of manual:
-        # ESC 7 n1 n2 n3 Setting Control Parameter Command
-        # Decimal: 27 55 n1 n2 n3
-        # max heating dots, heating time, heating interval
-        # n1 = 0-255 Max heat dots, Unit (8dots), Default: 7 (64 dots)
-        # n2 = 3-255 Heating time, Unit (10us), Default: 80 (800us)
-        # n3 = 0-255 Heating interval, Unit (10us), Default: 2 (20us)
-        # The more max heating dots, the more peak current
-        # will cost when printing, the faster printing speed.
-        # The max heating dots is 8*(n1+1).  The more heating
-        # time, the more density, but the slower printing
-        # speed.  If heating time is too short, blank page
-        # may occur.  The more heating interval, the more
-        # clear, but the slower printing speed.
-        self.write_bytes(
-            27,  # Esc
-            55,  # 7 (print settings)
-            11,  # Heat dots
-            Settings().printer.thermal.adafruit.heat_time,
-            Settings().printer.thermal.adafruit.heat_interval,
-        )
-
-        # Description of print density from p. 23 of manual:
-        # DC2 # n Set printing density
-        # Decimal: 18 35 n
-        # D4..D0 of n is used to set the printing density.
-        # Density is 50% + 5% * n(D4-D0) printing density.
-        # D7..D5 of n is used to set the printing break time.
-        # Break time is n(D7-D5)*250us.
-        # (Unsure of default values -- not documented)
-        print_density = 10  # 100%
-        print_break_time = 2  # 500 uS
-
-        self.write_bytes(
-            18, 35, (print_break_time << 5) | print_density  # DC2  # Print density
-        )
 
     def write_bytes(self, *args):
         """Writes bytes to the printer at a stable speed"""
@@ -142,9 +84,11 @@ class AdafruitPrinter(Printer):
 
     def feed(self, x=1):
         """Feeds paper through the machine x times"""
-        self.write_bytes(27, 100, x)
-        # Wait for the paper to feed
-        time.sleep_ms(self.dot_feed_time * self.character_height)
+        while x > 0:
+            x -= 1
+            self.write_bytes(10)
+            # Wait for the paper to feed
+            time.sleep_ms(self.dot_feed_time * self.character_height)
 
     def has_paper(self):
         """Returns a boolean indicating if the printer has paper or not"""
@@ -206,7 +150,7 @@ class AdafruitPrinter(Printer):
                 # command += line_bytes
                 self.uart_conn.write(line_bytes)
                 time.sleep_ms(self.dot_print_time)
-        self.feed(3)
+        self.feed(4)
 
     def set_bitmap_mode(self, width, height, scale_mode=1):
         """Set image format to be printed"""
