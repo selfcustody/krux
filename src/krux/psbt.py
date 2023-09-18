@@ -48,7 +48,7 @@ class PSBTSigner:
                 self.ur_type = CRYPTO_PSBT
                 # self.base_encoding = 64
             except:
-                raise ValueError("invalid PSBT")
+                raise ValueError(t("invalid PSBT"))
         else:
             # Process as bytes
             psbt_data = psbt_data.encode() if isinstance(psbt_data, str) else psbt_data
@@ -71,7 +71,7 @@ class PSBTSigner:
                             self.psbt = PSBT.parse(base_decode(psbt_data, 43))
                             self.base_encoding = 43
                         except:
-                            raise ValueError("invalid PSBT")
+                            raise ValueError(t("invalid PSBT"))
         # Validate the PSBT
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
         xpubs = self.xpubs()
@@ -81,7 +81,7 @@ class PSBTSigner:
             try:
                 inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, xpubs)
             except:
-                raise ValueError("Unable to get policy")
+                raise ValueError(t("Unable to get policy"))
             # if policy is None - assign current
             if self.policy is None:
                 self.policy = inp_policy
@@ -89,18 +89,18 @@ class PSBTSigner:
             else:
                 # check policy is the same
                 if self.policy != inp_policy:
-                    raise ValueError("mixed inputs in the tx")
+                    raise ValueError(t("mixed inputs in the tx"))
 
         if is_multisig(self.policy) and not self.wallet.is_multisig():
-            raise ValueError("multisig tx")
+            raise ValueError(t("multisig tx"))
         if not is_multisig(self.policy) and self.wallet.is_multisig():
-            raise ValueError("not multisig tx")
+            raise ValueError(t("not multisig tx"))
 
         # If a wallet descriptor has been loaded, verify that the wallet
         # policy matches the PSBT policy
         if self.wallet.is_loaded():
             if self.wallet.policy != self.policy:
-                raise ValueError("policy mismatch")
+                raise ValueError(t("policy mismatch"))
 
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
@@ -251,7 +251,7 @@ class PSBTSigner:
         """Signs the PSBT"""
         sigs_added = self.psbt.sign_with(self.wallet.key.root)
         if sigs_added == 0:
-            raise ValueError("cannot sign")
+            raise ValueError(t("cannot sign"))
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
@@ -284,7 +284,7 @@ class PSBTSigner:
             return self.psbt.xpubs
 
         if not self.wallet.descriptor:
-            raise ValueError("missing xpubs")
+            raise ValueError(t("missing xpubs"))
 
         descriptor_keys = (
             [self.wallet.descriptor.key]
@@ -318,7 +318,7 @@ def get_cosigners(pubkeys, derivations, xpubs):
     cosigners = []
     for _, pubkey in enumerate(pubkeys):
         if pubkey not in derivations:
-            raise ValueError("missing derivation")
+            raise ValueError(t("missing derivation"))
         der = derivations[pubkey]
         for xpub in xpubs:
             origin_der = xpubs[xpub]
@@ -332,7 +332,7 @@ def get_cosigners(pubkeys, derivations, xpubs):
                         cosigners.append(xpub.to_base58())
                         break
     if len(cosigners) != len(pubkeys):
-        raise ValueError("cannot get all cosigners")
+        raise ValueError(t("cannot get all cosigners"))
     return sorted(cosigners)
 
 

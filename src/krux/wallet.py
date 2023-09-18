@@ -62,15 +62,15 @@ class Wallet:
 
         if self.is_multisig():
             if not descriptor.is_basic_multisig:
-                raise ValueError("not multisig")
+                raise ValueError(t("not multisig"))
             if self.key.xpub() not in [key.key.to_base58() for key in descriptor.keys]:
-                raise ValueError("xpub not a cosigner")
+                raise ValueError(t("xpub not a cosigner"))
         else:
             if not descriptor.key:
                 if len(descriptor.keys) > 1:
-                    raise ValueError("not single-sig")
+                    raise ValueError(t("not single-sig"))
             if self.key.xpub() != descriptor.key.key.to_base58():
-                raise ValueError("xpub does not match")
+                raise ValueError(t("xpub does not match"))
 
         self.wallet_data = wallet_data
         self.wallet_qr_format = qr_format
@@ -156,9 +156,9 @@ def parse_wallet(wallet_data, network):
             descriptor = Descriptor.from_string(wallet_json["descriptor"])
             label = wallet_json["label"] if "label" in wallet_json else None
             return descriptor, label
-        raise KeyError('"descriptor" key not found in JSON')
+        raise KeyError(t('"descriptor" key not found in JSON'))
     except KeyError:
-        raise ValueError("invalid wallet format")
+        raise ValueError(t("invalid wallet format"))
     except:
         pass
 
@@ -175,12 +175,12 @@ def parse_wallet(wallet_data, network):
         if any(keys_present):
             if not all(keys_present):
                 raise KeyError(
-                    '"Format", "Policy", and "Derivation" keys not found in INI file'
+                    t('"Format", "Policy", and "Derivation" keys not found in INI file')
                 )
 
             script = key_vals[key_vals.index("Format") + 1].lower()
             if script != "p2wsh":
-                raise ValueError("invalid script type: %s" % script)
+                raise ValueError(t("invalid script type: %s") % script)
 
             policy = key_vals[key_vals.index("Policy") + 1]
             m = int(policy[: policy.index("of")].strip())
@@ -194,7 +194,7 @@ def parse_wallet(wallet_data, network):
                     keys.append((xpub, fingerprint))
 
             if len(keys) != n:
-                raise ValueError("expected %d keys, found %d" % (n, len(keys)))
+                raise ValueError(t("expected %d keys, found %d") % (n, len(keys)))
 
             derivation = key_vals[key_vals.index("Derivation") + 1]
 
@@ -214,7 +214,7 @@ def parse_wallet(wallet_data, network):
             )
             return descriptor, label
     except:
-        raise ValueError("invalid wallet format")
+        raise ValueError(t("invalid wallet format"))
 
     # Try to parse directly as a descriptor
     try:
@@ -231,7 +231,7 @@ def parse_wallet(wallet_data, network):
         except:
             pass
 
-    raise ValueError("invalid wallet format")
+    raise ValueError(t("invalid wallet format"))
 
 
 def parse_address(address_data):
@@ -251,6 +251,6 @@ def parse_address(address_data):
         sc = address_to_scriptpubkey(addr)
         assert isinstance(sc, Script)
     except:
-        raise ValueError("invalid address")
+        raise ValueError(t("invalid address"))
 
     return addr

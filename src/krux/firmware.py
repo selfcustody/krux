@@ -108,7 +108,7 @@ def write_data(
             if read_attempts < 5:
                 read_attempts += 1
                 continue
-            raise ValueError("failed to read")
+            raise ValueError(t("failed to read"))
 
         chunk_read += num_read
         if num_read and chunk_read < chunk_size_after_header and total_read < data_size:

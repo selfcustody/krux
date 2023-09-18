@@ -40,9 +40,8 @@ from fpioa_manager import fm
 from machine import UART
 
 # from ..settings import CategorySetting, NumberSetting, SettingsNamespace
-from ..krux_settings import Settings
+from ..krux_settings import Settings, t
 
-# from ..krux_settings import t
 from ..wdt import wdt
 from . import Printer
 
@@ -72,7 +71,7 @@ class AdafruitPrinter(Printer):
         self.setup()
 
         if not self.has_paper():
-            raise ValueError("missing paper")
+            raise ValueError(t("missing paper"))
 
     def setup(self):
         """Sets up the connection to the printer and sets default settings"""
