@@ -119,5 +119,5 @@ If your device has touchscreen you can change the touch detection threshold. If 
 
 If your device has a rotary encoder, you can change the debounce threshold in milliseconds. With lower values, faster movements and navigation will be allowed.
 
-The caveat is low values can cause issues, such as double step and unexpected movements, speccially with lower quality encoders. If this is the case increase the value to make navigation more stable.
+The caveat is low values can cause issues, such as double step and unexpected movements, especially with lower quality encoders. If this is the case increase the value to make navigation more stable.
 
