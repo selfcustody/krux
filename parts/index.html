@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#krux-compatible-devices-comparative-table" class="md-skip">
+        <a href="#devices" class="md-skip">
           Skip to content
         </a>
       
@@ -634,12 +634,107 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
-        
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Devices and Part List
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Devices and Part List
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#devices" class="md-nav__link">
+    Devices
+  </a>
+  
+    <nav class="md-nav" aria-label="Devices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#m5stickv" class="md-nav__link">
+    M5StickV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maix-amigo" class="md-nav__link">
+    Maix Amigo
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maix-dock-and-maix-bit" class="md-nav__link">
+    Maix Dock and Maix Bit
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ohter-parts" class="md-nav__link">
+    Ohter parts
+  </a>
+  
+    <nav class="md-nav" aria-label="Ohter parts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usb-c-charge-cable" class="md-nav__link">
+    USB-C Charge Cable
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-microsd-card" class="md-nav__link">
+    (Optional) MicroSD Card
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-thermal-printer" class="md-nav__link">
+    (Optional) Thermal Printer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-conversion-cable-for-thermal-printer" class="md-nav__link">
+    (Optional) Conversion Cable for Thermal Printer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -710,7 +805,9 @@
   </a>
 
 
-<h1 id="krux-compatible-devices-comparative-table">Krux compatible devices comparative table<a class="headerlink" href="#krux-compatible-devices-comparative-table" title="Permanent link">&para;</a></h1>
+  <h1>Devices and Part List</h1>
+
+<p><strong>Krux compatible devices comparative table</strong></p>
 <table>
 <thead>
 <tr>
@@ -783,8 +880,8 @@
 <p>*1: Some shops ship Maix Dock with soldered pin headers that do not fit in 3D printed enclosure</p>
 <p>All devices feature Kendryte K210 chip:
 28nm process, dual-core RISC-V 64bit @400MHz, 8 MB high-speed SRAM, DVP camera and MCU LCD interface, AES Accelerator, SHA256 Accelerator, FFT Accelerator</p>
-<h1 id="part-list">Part List<a class="headerlink" href="#part-list" title="Permanent link">&para;</a></h1>
-<h2 id="m5stickv">M5StickV<a class="headerlink" href="#m5stickv" title="Permanent link">&para;</a></h2>
+<h2 id="devices">Devices<a class="headerlink" href="#devices" title="Permanent link">&para;</a></h2>
+<h3 id="m5stickv">M5StickV<a class="headerlink" href="#m5stickv" title="Permanent link">&para;</a></h3>
 <p>Available from many distributors, including:</p>
 <ul>
 <li><a href="https://shop.m5stack.com/products/stickv">M5Stack</a></li>
@@ -797,7 +894,7 @@
 <li><a href="https://www.okdo.com/p/m5stickv-k210-ai-camera-without-wifi/">OKDO</a></li>
 </ul>
 <p>You can expect to pay around $50 for one depending on which distributor you choose.</p>
-<h2 id="maix-amigo">Maix Amigo<a class="headerlink" href="#maix-amigo" title="Permanent link">&para;</a></h2>
+<h3 id="maix-amigo">Maix Amigo<a class="headerlink" href="#maix-amigo" title="Permanent link">&para;</a></h3>
 <p>Available from many distributors, including:</p>
 <ul>
 <li><a href="https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html">Seeed Studio</a></li>
@@ -808,21 +905,22 @@
 <li><a href="https://www.aliexpress.com/">AliExpress</a></li>
 </ul>
 <p>You can expect to pay around $70 for one depending on which distributor you choose.</p>
-<h2 id="maix-dock-and-maix-bit">Maix Dock and Maix Bit<a class="headerlink" href="#maix-dock-and-maix-bit" title="Permanent link">&para;</a></h2>
+<h3 id="maix-dock-and-maix-bit">Maix Dock and Maix Bit<a class="headerlink" href="#maix-dock-and-maix-bit" title="Permanent link">&para;</a></h3>
 <p>For the DIYers, the Maix Dock and Bit are also supported but will require sourcing the parts individually and building the device yourself.</p>
 <p>Below are example implementations with instructions on how to recreate them:</p>
 <ul>
 <li><a href="https://github.com/selfcustody/DockEncoderCase">https://github.com/selfcustody/DockEncoderCase</a></li>
 <li><a href="https://github.com/selfcustody/MaixBitCase">https://github.com/selfcustody/MaixBitCase</a></li>
 </ul>
-<h2 id="usb-c-charge-cable">USB-C Charge Cable<a class="headerlink" href="#usb-c-charge-cable" title="Permanent link">&para;</a></h2>
+<h2 id="ohter-parts">Ohter parts<a class="headerlink" href="#ohter-parts" title="Permanent link">&para;</a></h2>
+<h3 id="usb-c-charge-cable">USB-C Charge Cable<a class="headerlink" href="#usb-c-charge-cable" title="Permanent link">&para;</a></h3>
 <p>This will be included with the M5StickV and Maix Amigo that you purchase from one of the distributors above. It will be necessary to power and charge the device and to initially flash the firmware.</p>
-<h2 id="optional-microsd-card">(Optional) MicroSD Card<a class="headerlink" href="#optional-microsd-card" title="Permanent link">&para;</a></h2>
+<h3 id="optional-microsd-card">(Optional) MicroSD Card<a class="headerlink" href="#optional-microsd-card" title="Permanent link">&para;</a></h3>
 <p>Not all microSD cards will work with the devices. Make sure to use one that has been <a href="https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test">tested and shown to work</a> with the devices already. The size of the SD card isn't important; anything over a few megabytes will be plenty.</p>
-<h2 id="optional-thermal-printer">(Optional) Thermal Printer<a class="headerlink" href="#optional-thermal-printer" title="Permanent link">&para;</a></h2>
+<h3 id="optional-thermal-printer">(Optional) Thermal Printer<a class="headerlink" href="#optional-thermal-printer" title="Permanent link">&para;</a></h3>
 <p>Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected <a href="https://www.adafruit.com/?q=thermal+printer">thermal printer from Adafruit</a> over its serial port.</p>
 <p>Any of their thermal printers will work, but the <a href="https://www.adafruit.com/product/600">starter pack</a> would be the easiest way to get started since it includes all the parts (except the one below) you will need to begin printing.</p>
-<h2 id="optional-conversion-cable-for-thermal-printer">(Optional) Conversion Cable for Thermal Printer<a class="headerlink" href="#optional-conversion-cable-for-thermal-printer" title="Permanent link">&para;</a></h2>
+<h3 id="optional-conversion-cable-for-thermal-printer">(Optional) Conversion Cable for Thermal Printer<a class="headerlink" href="#optional-conversion-cable-for-thermal-printer" title="Permanent link">&para;</a></h3>
 <p>To connect the printer to the device, you will need a <a href="https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs">conversion cable</a> with a 4-pin female Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). You can find them at one of the distributors above or from Amazon.</p>
 
 

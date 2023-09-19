@@ -695,13 +695,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-am-i-unable-to-sign-a-psbt-from-bluewallet" class="md-nav__link">
-    Why am I unable to sign a PSBT from BlueWallet?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#why-isnt-krux-scanning-my-qr-code" class="md-nav__link">
     Why isn't Krux scanning my QR code?
   </a>
@@ -810,13 +803,10 @@
 </blockquote>
 <p>However, in practice not all wallet software supports this extended format, so Krux still provides a zpub as a fallback.</p>
 <p>For more information, check out <a href="https://outputdescriptors.org/">https://outputdescriptors.org/</a>.</p>
-<h2 id="why-am-i-unable-to-sign-a-psbt-from-bluewallet">Why am I unable to sign a PSBT from BlueWallet?<a class="headerlink" href="#why-am-i-unable-to-sign-a-psbt-from-bluewallet" title="Permanent link">&para;</a></h2>
-<p>As mentioned above, some wallet software does not support the descriptor key expression format. In this case, BlueWallet will ignore the key origin and derivation info when importing the xpub to create a single-sig wallet. This will result in the wrong derivation being used in BlueWallet and thus the inability to sign an outbound transaction in Krux.</p>
-<p>Currently, the way to properly create a single-sig wallet in BlueWallet is to export the second QR code that Krux displays which contains the zpub. BlueWallet can then correctly infer the derivation path when creating the wallet.</p>
 <h2 id="why-isnt-krux-scanning-my-qr-code">Why isn't Krux scanning my QR code?<a class="headerlink" href="#why-isnt-krux-scanning-my-qr-code" title="Permanent link">&para;</a></h2>
-<p>The level of detail that you see is what Krux sees. If the QR code shown on the device's screen is blurry, the camera lens of the device may be out of focus. It can be adjusted by rotating it (with your fingertip or a tweezers) clockwise or counter-clockwise to achieve a clearer result. </p>
+<p>The level of detail that you see is what Krux sees. If the QR code shown on the device's screen is blurry, the camera lens of the device may be out of focus. It can be adjusted by rotating it clockwise or counter-clockwise to achieve a clearer result. The lenses usually comes with a drop of glue that makes id harder to adjust for the first time. You can use your fingertip, tweezers or small precision pliers to help, being careful to don't damage the fragile lenses.</p>
 <p>If you have adjusted the lens already, the device may be too far away or too close to the code to read it. Start by holding the device as close to the QR code as possible and pulling away slowly until all or most of the QR code is viewable within the screen. If the code on the screen looks crisp, Krux should read it quickly and give you immediate feedback.</p>
-<p>If you are in a dark environment, you can hold down the ENTER button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility. M5stickV and Amigo also has an anti-glare mode to better capture images with incident light, to enable/disable the anti-glare just push the PAGE button.</p>
+<p>If you are in a dark environment, you can hold down the ENTER button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility. M5stickV and Amigo also has an anti-glare mode to better capture images from high brightness screens or with incident light, to enable/disable the anti-glare just press the PAGE button.</p>
 <h2 id="why-am-i-getting-an-error-when-i-try-to-scan-a-qr-code">Why am I getting an error when I try to scan a QR code?<a class="headerlink" href="#why-am-i-getting-an-error-when-i-try-to-scan-a-qr-code" title="Permanent link">&para;</a></h2>
 <p>If Krux is recognizing that it sees a QR code but is displaying an error message after reading it, the likely reason is that the QR code is not in a format that Krux understands.</p>
 <p>For mnemonics, Krux recognizes:</p>
@@ -840,7 +830,9 @@
 </ol>
 <p>Additionally, Krux recognizes animated QR codes that use either the plaintext <code>pMofN</code> or binary <a href="https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md"><code>UR</code></a> encodings.</p>
 <h2 id="why-cant-my-computer-read-the-qr-code-that-krux-displays">Why can't my computer read the QR code that Krux displays?<a class="headerlink" href="#why-cant-my-computer-read-the-qr-code-that-krux-displays" title="Permanent link">&para;</a></h2>
-<p>If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays. In the future, more work will be done to support displaying lower density QR codes. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes. You can also save the PSBT on a microSD card for Krux to sign and then save the signed transaction to the microSD card to transfer the file to the computer or phone.</p>
+<p>If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays.
+You can toggle brightness of QR codes from public keys and PSBTs by pressing PAGE button.
+In the future, more work will be done to support displaying lower density QR codes. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes. You can also save the PSBT on a microSD card for Krux to sign and then save the signed transaction to the microSD card to transfer the file to the computer or phone.</p>
 <h2 id="why-isnt-my-amigo-device-being-recognized-when-connected-to-the-computer-usb">Why isn't my Amigo device being recognized when connected to the computer USB?<a class="headerlink" href="#why-isnt-my-amigo-device-being-recognized-when-connected-to-the-computer-usb" title="Permanent link">&para;</a></h2>
 <p>Make sure you’re using the bottom USB-C port, not the one on the left side. It is also possible that there is some incompatibility with the cable used, try a few before investigating further.</p>
 <h2 id="why-wont-my-linux-os-list-a-serial-port-after-connecting-my-device">Why won't my Linux OS list a serial port after connecting my device?<a class="headerlink" href="#why-wont-my-linux-os-list-a-serial-port-after-connecting-my-device" title="Permanent link">&para;</a></h2>

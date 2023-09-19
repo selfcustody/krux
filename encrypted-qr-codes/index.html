@@ -684,26 +684,6 @@
     QR Data and Parsing
   </a>
   
-    <nav class="md-nav" aria-label="QR Data and Parsing">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#public" class="md-nav__link">
-    Public:
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cipher" class="md-nav__link">
-    Cipher:
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -773,13 +753,13 @@
 <table>
 <thead>
 <tr>
-<th style="text-align: center;">ID length</th>
-<th style="text-align: center;">ID</th>
-<th style="text-align: center;">Version</th>
-<th style="text-align: center;">Key Derivations</th>
-<th style="text-align: center;">IV</th>
-<th style="text-align: center;">Encrypted Mnemonic</th>
-<th style="text-align: center;">Validation Block</th>
+<th style="text-align: center;">ID length (1)</th>
+<th style="text-align: center;">ID (2)</th>
+<th style="text-align: center;">Version (3)</th>
+<th style="text-align: center;">Key Derivations (4)</th>
+<th style="text-align: center;">IV (5)</th>
+<th style="text-align: center;">Encrypted Mnemonic (6)</th>
+<th style="text-align: center;">Validation Block (7)</th>
 </tr>
 </thead>
 <tbody>
@@ -794,17 +774,25 @@
 </tr>
 </tbody>
 </table>
-<h3 id="public">Public:<a class="headerlink" href="#public" title="Permanent link">&para;</a></h3>
-<p>(1) - Mnemonic ID length (1 Byte).</p>
-<p>(2) - Mnemonic ID(variable lenght): Custom ID or wallet fingerprint.</p>
-<p>(3) - Version(1 Byte): Version of encryption method, currently two are available:</p>
-<p>0: AES-ECB-PBKDF2: Electronic Codebook with PBKDF2 key derivation.</p>
-<p>1: AES-CBC-PBKDF2: Cypher Block Chaining with PBKDF2 key derivation.</p>
-<p>(4) - Key derivation iterations(3 Bytes): Number of PBKDF2 key derivations times 10,000.</p>
-<h3 id="cipher">Cipher:<a class="headerlink" href="#cipher" title="Permanent link">&para;</a></h3>
-<p>(5) - IV(16 Bytes-optional): Initial vector for AES-CBC encryption, possibility to be nonce for future  AES-CTR or other encryption methods.</p>
-<p>(6) - Encrypted Mnemonic(16 Bytes - 12 words, 32 Bytes - 24 words): Mnemonic ciphertext.</p>
-<p>(7) - Validation block(16 Bytes): Currently using first 16 bytes of sha256 of the mnemonic bytes as checksum, could be used in future to store AES-AEX validation tag.</p>
+<ul>
+<li><strong>Visible data</strong> (1 to 4):<ul>
+<li><strong>(1)</strong> Mnemonic ID length (1 Byte).</li>
+<li><strong>(2)</strong> Mnemonic ID (variable lenght): Custom ID or wallet fingerprint.</li>
+<li><strong>(3)</strong> Version (1 Byte): Version of encryption method, currently two are available:<ul>
+<li>0: AES-ECB-PBKDF2: Electronic Codebook with PBKDF2 key derivation.</li>
+<li>1: AES-CBC-PBKDF2: Cypher Block Chaining with PBKDF2 key derivation.</li>
+</ul>
+</li>
+<li><strong>(4)</strong> Key derivation iterations (3 Bytes): Number of PBKDF2 key derivations times 10,000.</li>
+</ul>
+</li>
+<li><strong>Cipher data</strong> (5 to 7):<ul>
+<li><strong>(5)</strong> IV (16 Bytes-optional): Initial vector for AES-CBC encryption, possibility to be nonce for future     AES-CTR or other encryption methods.</li>
+<li><strong>(6)</strong> Encrypted Mnemonic (16 Bytes - 12 words, 32 Bytes - 24 words): Mnemonic ciphertext.</li>
+<li><strong>(7)</strong> Validation block (16 Bytes): Currently using first 16 bytes of sha256 of the mnemonic bytes as checksum, could be used in future to store AES-AEX validation tag.</li>
+</ul>
+</li>
+</ul>
 
 
 

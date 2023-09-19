@@ -502,12 +502,80 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
-        
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Generating a Mnemonic
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Generating a Mnemonic
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#camera" class="md-nav__link">
+    Camera
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dice-rolls" class="md-nav__link">
+    Dice Rolls
+  </a>
+  
+    <nav class="md-nav" aria-label="Dice Rolls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#via-d6" class="md-nav__link">
+    Via D6
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#via-d20" class="md-nav__link">
+    Via D20
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    How it works
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives" class="md-nav__link">
+    Alternatives
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -712,31 +780,33 @@
   </a>
 
 
+  <h1>Generating a Mnemonic</h1>
+
 <p>Krux has support for creating 12 and 24-word mnemonic seed phrases. Since true entropy is difficult to produce, especially with an embedded device, we recommend to outsource entropy generation using dice rolls, but it is also possible to use camera as a source of entropy to quickly create a mnemonic.
 At the start screen, once you select <code>New Mnemonic</code>, you will be taken to a second menu where you can choose to create a mnemonic via camera, via rolls of a D6 (standard six-sided die) or D20 (20-sided die).</p>
 <p><img src="../../img/maixpy_amigo_tft/new-mnemonic-options-150.png">
 <img src="../../img/maixpy_m5stickv/new-mnemonic-options-125.png"></p>
-<h1 id="camera">Camera<a class="headerlink" href="#camera" title="Permanent link">&para;</a></h1>
+<h2 id="camera">Camera<a class="headerlink" href="#camera" title="Permanent link">&para;</a></h2>
 <p><img src="../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right"></p>
 <p>(Experimental!) Choose between 12 or 24 words, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.</p>
 <div style="clear: both"></div>
 
-<h1 id="dice-rolls">Dice Rolls<a class="headerlink" href="#dice-rolls" title="Permanent link">&para;</a></h1>
-<h2 id="via-d6">Via D6<a class="headerlink" href="#via-d6" title="Permanent link">&para;</a></h2>
+<h2 id="dice-rolls">Dice Rolls<a class="headerlink" href="#dice-rolls" title="Permanent link">&para;</a></h2>
+<h3 id="via-d6">Via D6<a class="headerlink" href="#via-d6" title="Permanent link">&para;</a></h3>
 <p><img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-1-150.png" align="right"></p>
 <p>Choose between 12 or 24 words.</p>
 <p>The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore a minimum of a 50 rolls will be required for 128 bits of entropy, enough to generate a 12-word mnemonic. For 24 words, or an entropy of 256 bits, a minimum of 99 rolls will be required.</p>
 <div style="clear: both"></div>
 
-<h2 id="via-d20">Via D20<a class="headerlink" href="#via-d20" title="Permanent link">&para;</a></h2>
+<h3 id="via-d20">Via D20<a class="headerlink" href="#via-d20" title="Permanent link">&para;</a></h3>
 <p><img src="../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d20-roll-1-150.png" align="right"></p>
 <p>Since a D20 has more possible outcomes, the entropy is increased per roll to 4.322 bits ( log<sub>2</sub>(20) ). This means that only 30 rolls are necessary to create a 12-word mnemonic and 60 rolls for a 24-word mnemonic.</p>
 <div style="clear: both"></div>
 
-<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<h3 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h3>
 <p><img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-string-150.png" align="right"></p>
 <p>For dice rolls, Krux keeps track of every roll you enter and displays the cumulative string of outcomes after each roll. </p>
@@ -750,7 +820,7 @@ At the start screen, once you select <code>New Mnemonic</code>, you will be take
 <p>Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).</p>
 <div style="clear: both"></div>
 
-<h1 id="alternatives">Alternatives<a class="headerlink" href="#alternatives" title="Permanent link">&para;</a></h1>
+<h2 id="alternatives">Alternatives<a class="headerlink" href="#alternatives" title="Permanent link">&para;</a></h2>
 <p>See <a href="https://vault12.com/securemycrypto/cryptocurrency-security-how-to/seed-phrase-creation/">here</a> for good methods to generate a mnemonic manually, or visit <a href="https://iancoleman.io/bip39/">Ian Coleman's BIP-39 Tool</a> offline or on an airgapped device to generate one automatically. </p>
 <p>It's worth noting that Ian's tool is able to take a mnemonic and generate a QR code that Krux can read in via the QR input method mentioned on the next page.</p>
 
