@@ -2,7 +2,7 @@
 hide:
   - navigation
 ---
-# Support the Project
+
 ## Ways you can help
 ### Development
 Audit the code, file an issue, make a pull request, or do all three. :)
