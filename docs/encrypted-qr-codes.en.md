@@ -5,30 +5,20 @@ There are many possible security layers one could add to protect a wallet’s pr
 ## QR Data and Parsing
 In search of efficiency and smaller QR codes, all data is converted to bytes and organized like a Bitcoin transaction, with variable and fixed length fields. The following data is present on the QR code:
 
-| ID length | ID | Version | Key Derivations | IV | Encrypted Mnemonic | Validation Block |
+| ID length (1) | ID (2) | Version (3) | Key Derivations (4) | IV (5) | Encrypted Mnemonic (6) | Validation Block (7) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | 1 Byte | Variable | 1 Byte | 3 Bytes | 16 Bytes <br>(optional) | 16 Bytes (12 words) <br>32 Bytes (24 words) | 16 Bytes |
 
-### Public:
-
-(1) - Mnemonic ID length (1 Byte).
-
-(2) - Mnemonic ID(variable lenght): Custom ID or wallet fingerprint.
-
-(3) - Version(1 Byte): Version of encryption method, currently two are available:
-
- 0: AES-ECB-PBKDF2: Electronic Codebook with PBKDF2 key derivation.
-
- 1: AES-CBC-PBKDF2: Cypher Block Chaining with PBKDF2 key derivation.
-
-(4) - Key derivation iterations(3 Bytes): Number of PBKDF2 key derivations times 10,000.
-
-### Cipher:
-
-(5) - IV(16 Bytes-optional): Initial vector for AES-CBC encryption, possibility to be nonce for future 	AES-CTR or other encryption methods.
-
-(6) - Encrypted Mnemonic(16 Bytes - 12 words, 32 Bytes - 24 words): Mnemonic ciphertext.
-
-(7) - Validation block(16 Bytes): Currently using first 16 bytes of sha256 of the mnemonic bytes as checksum, could be used in future to store AES-AEX validation tag.
+* **Visible data** (1 to 4):
+    * **(1)** Mnemonic ID length (1 Byte).
+    * **(2)** Mnemonic ID (variable lenght): Custom ID or wallet fingerprint.
+    * **(3)** Version (1 Byte): Version of encryption method, currently two are available:
+        - 0: AES-ECB-PBKDF2: Electronic Codebook with PBKDF2 key derivation.
+        - 1: AES-CBC-PBKDF2: Cypher Block Chaining with PBKDF2 key derivation.
+    * **(4)** Key derivation iterations (3 Bytes): Number of PBKDF2 key derivations times 10,000.
+* **Cipher data** (5 to 7):
+    * **(5)** IV (16 Bytes-optional): Initial vector for AES-CBC encryption, possibility to be nonce for future 	AES-CTR or other encryption methods.
+    * **(6)** Encrypted Mnemonic (16 Bytes - 12 words, 32 Bytes - 24 words): Mnemonic ciphertext.
+    * **(7)** Validation block (16 Bytes): Currently using first 16 bytes of sha256 of the mnemonic bytes as checksum, could be used in future to store AES-AEX validation tag.
 
 
