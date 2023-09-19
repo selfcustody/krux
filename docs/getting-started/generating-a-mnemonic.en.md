@@ -4,7 +4,7 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-options-150.png">
 <img src="../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
 
-# Camera
+## Camera
 <img src="../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right">
 
@@ -12,9 +12,9 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 
 <div style="clear: both"></div>
 
-# Dice Rolls
+## Dice Rolls
  
-## Via D6
+### Via D6
 <img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-1-150.png" align="right">
 
@@ -24,7 +24,7 @@ The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); there
 
 <div style="clear: both"></div>
 
-## Via D20
+### Via D20
 <img src="../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d20-roll-1-150.png" align="right">
 
@@ -32,7 +32,7 @@ Since a D20 has more possible outcomes, the entropy is increased per roll to 4.3
 
 <div style="clear: both"></div>
 
-## How it works
+### How it works
 <img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-string-150.png" align="right">
 
@@ -53,7 +53,7 @@ Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128
 
 <div style="clear: both"></div>
 
-# Alternatives
+## Alternatives
 See [here](https://vault12.com/securemycrypto/cryptocurrency-security-how-to/seed-phrase-creation/) for good methods to generate a mnemonic manually, or visit [Ian Coleman's BIP-39 Tool](https://iancoleman.io/bip39/) offline or on an airgapped device to generate one automatically. 
 
 It's worth noting that Ian's tool is able to take a mnemonic and generate a QR code that Krux can read in via the QR input method mentioned on the next page.
