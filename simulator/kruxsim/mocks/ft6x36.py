@@ -34,18 +34,20 @@ def register_sequence_executor(s):
     sequence_executor = s
 
 
-def to_screen_pos(pos):
-    if lcd.screen:
-        rect = lcd.screen.get_rect()
-        rect.center = pg.display.get_surface().get_rect().center
-        if rect.collidepoint(pos):
-            out = pos[0] - rect.left, pos[1] - rect.top
-            return out
-    return None
-
-
 class FT6X36:
     def __init__(self):
+        self.event_flag = False
+
+    def to_screen_pos(self, pos):
+        if lcd.screen:
+            rect = lcd.screen.get_rect()
+            rect.center = pg.display.get_surface().get_rect().center
+            if rect.collidepoint(pos):
+                out = pos[0] - rect.left, pos[1] - rect.top
+                return out
+        return None
+
+    def activate_irq(self, irq_pin):
         pass
 
     def current_point(self):
@@ -66,13 +68,30 @@ class FT6X36:
                 sequence_executor.touch_pos = None
                 sequence_executor.touch_checks = 0
                 return None
-        return to_screen_pos(pg.mouse.get_pos()) if pg.mouse.get_pressed()[0] else None
+        return (
+            self.to_screen_pos(pg.mouse.get_pos())
+            if pg.mouse.get_pressed()[0]
+            else None
+        )
+
+    def trigger_event(self):
+        self.event_flag = True
+        self.irq_point = self.current_point()
+
+    def event(self):
+        flag = self.event_flag
+        self.event_flag = False  # Always clean event flag
+        return flag
 
     def threshold(self, value):
         pass
 
 
+touch_control = FT6X36()
+
+
 if "krux.touchscreens.ft6x36" not in sys.modules:
     sys.modules["krux.touchscreens.ft6x36"] = mock.MagicMock(
         FT6X36=FT6X36,
+        touch_control=touch_control,
     )

@@ -22,10 +22,8 @@
 # pylint: disable=R0902
 
 import time
-from Maix import GPIO
-from fpioa_manager import fm
 
-from .touchscreens.ft6x36 import FT6X36
+from .touchscreens.ft6x36 import touch_control
 from .logging import logger as log
 from .krux_settings import Settings
 
@@ -40,14 +38,6 @@ SWIPE_UP = 3
 SWIPE_DOWN = 4
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
-
-event_flag = False
-
-
-def __handler__(pin_num=None):
-    """GPIO interrupt handler"""
-    global event_flag
-    event_flag = True
 
 
 class Touch:
@@ -66,12 +56,8 @@ class Touch:
         self.gesture = None
         self.state = IDLE
         self.width, self.height = width, height
-        self.touch_driver = FT6X36()
-        self.touch_driver.threshold(Settings().touch.threshold)
-        if irq_pin:
-            fm.register(irq_pin, fm.fpioa.GPIOHS1)
-            self.enter = GPIO(GPIO.GPIOHS1, GPIO.IN, GPIO.PULL_UP)
-            self.enter.irq(__handler__, GPIO.IRQ_FALLING)
+        touch_control.activate_irq(irq_pin)
+        touch_control.threshold(Settings().touch.threshold)
 
     def clear_regions(self):
         """Remove previously stored buttons map"""
@@ -140,15 +126,13 @@ class Touch:
 
     def current_state(self):
         """Returns the touchscreen state"""
-        global event_flag
         self.sample_time = time.ticks_ms()
-        data = self.touch_driver.current_point()
+        data = touch_control.current_point()
         if isinstance(data, tuple):
             self._store_points(data)
         elif data is None:  # gets release then return to idle.
             if self.state == RELEASED:  # On touch release
                 self.state = IDLE
-                event_flag = False  # Clears event flag
             elif self.state == PRESSED:
                 lateral_lenght = self.release_point[0] - self.press_point[0][0]
                 if lateral_lenght > SWIPE_THRESHOLD:
@@ -173,13 +157,14 @@ class Touch:
         return self.state
 
     def event(self):
-        global event_flag
-        check_event = event_flag
-        event_flag = False  # Always clean event flag
+        """Checks if a touch happened and stores the point"""
         current_time = time.ticks_ms()
         if current_time > self.sample_time + TOUCH_S_PERIOD:
-            # Checks and updates index
-            if self.current_state() == PRESSED or check_event:
+            self.current_state()  # Update state
+            if touch_control.event():
+                # Resets touch and gets irq point
+                self.state = IDLE
+                self._store_points(touch_control.irq_point)
                 return True
         return False
 

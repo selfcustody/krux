@@ -28,6 +28,7 @@ RELEASED = 1
 
 
 def __handler__(pin_num=None):
+    # pylint: disable=unused-argument
     """GPIO interrupt handler"""
     buttons_control.event_handler(pin_num)
 

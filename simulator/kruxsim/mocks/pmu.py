@@ -60,7 +60,7 @@ class PMU_Button:
                 sequence_executor.key_checks = 0
                 return RELEASED
         return PRESSED if pg.key.get_pressed()[self.key] else RELEASED
-    
+
     def event(self):
         if self.state == RELEASED:
             if self.value() == PRESSED:

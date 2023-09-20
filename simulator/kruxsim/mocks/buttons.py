@@ -28,6 +28,7 @@ import pygame as pg
 PRESSED = 0
 RELEASED = 1
 
+
 class TactileButtons:
     """Interface with Buttons"""
 
@@ -38,7 +39,6 @@ class TactileButtons:
         self.enter_event_flag = False
         self.page_event_flag = False
         self.page_prev_event_flag = False
-
 
     def init_enter(self, pin):
         """Register ENTER button IO"""
@@ -54,6 +54,7 @@ class TactileButtons:
         """Register PAGE_PREV button IO"""
         fm.register(pin, fm.fpioa.GPIOHS0)
         self.page_prev = GPIO(GPIO.GPIOHS0, GPIO.IN, GPIO.PULL_UP)
+
 
 buttons_control = TactileButtons()  # Singleton
 
@@ -135,10 +136,11 @@ class ButtonPagePrev:
                 return True
         return False
 
+
 if "krux.buttons" not in sys.modules:
     sys.modules["krux.buttons"] = mock.MagicMock(
         TactileButtons=TactileButtons,
         ButtonEnter=ButtonEnter,
         ButtonPage=ButtonPage,
-        ButtonPagePrev=ButtonPagePrev
+        ButtonPagePrev=ButtonPagePrev,
     )

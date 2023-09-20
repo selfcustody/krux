@@ -96,7 +96,7 @@ class Camera:
         sensor.__write_reg(0xC2, 0x8C)  # pylint: disable=W0212
         # Set register bank 1
         sensor.__write_reg(0xFF, 0x01)  # pylint: disable=W0212
-        sensor.__write_reg(0x03, 0xCF)
+        sensor.__write_reg(0x03, 0xCF)  # pylint: disable=W0212
         # Allowed luminance thresholds:
         # luminance high threshold, default=0x78
         sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
@@ -157,10 +157,12 @@ class Camera:
         return img
 
     def initialize_run(self):
+        """Initializes and runs sensor"""
         self.initialize_sensor()
         sensor.run(1)
 
     def stop_sensor(self):
+        """Stops capturing from sensor"""
         gc.collect()
         sensor.run(0)
 

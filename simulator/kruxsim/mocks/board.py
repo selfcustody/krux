@@ -58,7 +58,7 @@ def register_device(device):
 
     BUTTON_A = BOARD_CONFIG["krux"]["pins"]["BUTTON_A"]
     if "ENCODER" in BOARD_CONFIG["krux"]["pins"]:
-        #replace encoder with regular buttons in simulator
+        # replace encoder with regular buttons in simulator
         del BOARD_CONFIG["krux"]["pins"]["ENCODER"]
         BOARD_CONFIG["krux"]["pins"]["BUTTON_B"] = 37
         BOARD_CONFIG["krux"]["pins"]["BUTTON_C"] = 38
