@@ -134,23 +134,24 @@ class Touch:
             if self.state == RELEASED:  # On touch release
                 self.state = IDLE
             elif self.state == PRESSED:
-                lateral_lenght = self.release_point[0] - self.press_point[0][0]
-                if lateral_lenght > SWIPE_THRESHOLD:
-                    self.gesture = SWIPE_RIGHT
-                elif -lateral_lenght > SWIPE_THRESHOLD:
-                    self.gesture = SWIPE_LEFT
-                    lateral_lenght *= -1  # make it positive value
-                vertical_lenght = self.release_point[1] - self.press_point[0][1]
-                if (
-                    vertical_lenght > SWIPE_THRESHOLD
-                    and vertical_lenght > lateral_lenght
-                ):
-                    self.gesture = SWIPE_DOWN
-                elif (
-                    -vertical_lenght > SWIPE_THRESHOLD
-                    and -vertical_lenght > lateral_lenght
-                ):
-                    self.gesture = SWIPE_UP
+                if self.release_point is not None:
+                    lateral_lenght = self.release_point[0] - self.press_point[0][0]
+                    if lateral_lenght > SWIPE_THRESHOLD:
+                        self.gesture = SWIPE_RIGHT
+                    elif -lateral_lenght > SWIPE_THRESHOLD:
+                        self.gesture = SWIPE_LEFT
+                        lateral_lenght *= -1  # make it positive value
+                    vertical_lenght = self.release_point[1] - self.press_point[0][1]
+                    if (
+                        vertical_lenght > SWIPE_THRESHOLD
+                        and vertical_lenght > lateral_lenght
+                    ):
+                        self.gesture = SWIPE_DOWN
+                    elif (
+                        -vertical_lenght > SWIPE_THRESHOLD
+                        and -vertical_lenght > lateral_lenght
+                    ):
+                        self.gesture = SWIPE_UP
                 self.state = RELEASED
         else:
             log.warn("Touch error: " + str(data))
