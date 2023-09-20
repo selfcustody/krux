@@ -103,6 +103,7 @@ from kruxsim.mocks import sensor
 from kruxsim.mocks import ft6x36
 from kruxsim.sequence import SequenceExecutor
 
+from kruxsim.mocks import buttons
 from kruxsim.mocks import rotary
 
 sequence_executor = None
@@ -202,6 +203,13 @@ try:
                     )
                 else:
                     event.dict["f"]()
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:
+                    buttons.buttons_control.enter_event_flag = True
+                if event.key == pg.K_DOWN:
+                    buttons.buttons_control.page_event_flag = True
+                if event.key == pg.K_UP:
+                    buttons.buttons_control.page_prev_event_flag = True
 
         if lcd.screen:
             lcd_rect = lcd.screen.get_rect()

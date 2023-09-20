@@ -38,12 +38,13 @@ def register_sequence_executor(s):
 class PMU_Button:
     def __init__(self):
         self.key = pg.K_UP
+        self.state = RELEASED
 
     def value(self):
         if (
             sequence_executor
             and sequence_executor.key is not None
-            and sequence_executor.key == self.key
+            and sequence_executor.key == pg.K_UP
         ):
             sequence_executor.key_checks += 1
             # wait for release
@@ -58,7 +59,15 @@ class PMU_Button:
                 sequence_executor.key = None
                 sequence_executor.key_checks = 0
                 return RELEASED
-        return 0 if pg.key.get_pressed()[self.key] else 1
+        return PRESSED if pg.key.get_pressed()[self.key] else RELEASED
+    
+    def event(self):
+        if self.state == RELEASED:
+            if self.value() == PRESSED:
+                self.state = PRESSED
+                return True
+        self.state = self.value()
+        return False
 
 
 class Battery:

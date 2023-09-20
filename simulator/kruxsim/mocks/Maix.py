@@ -83,6 +83,7 @@ class GPIO:
     GPIO5 = 37
     GPIO6 = 38
     GPIO7 = 39
+    IRQ_FALLING = 0
 
     def __init__(self, gpio_num, dir=None, val=None):
         self.key = None
@@ -116,7 +117,9 @@ class GPIO:
                 sequence_executor.key_checks = 0
                 return RELEASED
         return PRESSED if pg.key.get_pressed()[self.key] else RELEASED
-
+    
+    def irq(self, pin, mode):
+        pass
 
 if "Maix" not in sys.modules:
     sys.modules["Maix"] = mock.MagicMock(
