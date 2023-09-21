@@ -143,4 +143,6 @@ if "krux.buttons" not in sys.modules:
         ButtonEnter=ButtonEnter,
         ButtonPage=ButtonPage,
         ButtonPagePrev=ButtonPagePrev,
+        PRESSED=PRESSED,
+        RELEASED=RELEASED,
     )
