@@ -42,12 +42,16 @@ PRESSED = 0
 RELEASED = 1
 
 BUTTON_WAIT_PRESS_DELAY = 10
+SCREENSAVER_IDLE_TIME = 5000
 
 
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
-    def __init__(self):
+    def __init__(self, screensaver_fallback = None):
+        self.screensaver_fallback = screensaver_fallback
+        self.screensaver_time = 0
+        self.screensaver_active = False
         self.entropy = 0
 
         self.enter = None
@@ -140,6 +144,7 @@ class Input:
 
     def wait_for_release(self):
         """Loop until all buttons are released (if currently pressed)"""
+        print("wait_for_release...")
         while True:
             if self.enter_value() == RELEASED and self.touch_value() == RELEASED:
                 if "ENCODER" in board.config["krux"]["pins"]:
@@ -152,10 +157,12 @@ class Input:
             self.entropy += 1
             wdt.feed()
 
-    def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
+    def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD, enable_screensaver=False):
         """Wait for first button press or for wait_duration ms.
         Use block to wait indefinitely"""
+        # print("wait_for_press...")
         start_time = time.ticks_ms()
+        self.screensaver_time = start_time
         while True:
             if self.enter_value() == PRESSED:
                 return BUTTON_ENTER
@@ -165,19 +172,35 @@ class Input:
                 return BUTTON_PAGE_PREV
             if self.touch_value() == PRESSED:
                 return BUTTON_TOUCH
+            
             self.entropy += 1
             wdt.feed()  # here is where krux spends most of its time
+
             if not block and time.ticks_ms() > start_time + wait_duration:
                 return None
+
+            # Check for screensaver
+            if (block and enable_screensaver and not self.screensaver_active and self.screensaver_fallback and self.screensaver_time + SCREENSAVER_IDLE_TIME < time.ticks_ms()):
+                print("show screen saver!!!")
+                self.screensaver_active = True
+                self.screensaver_fallback()
+                self.screensaver_time = time.ticks_ms()
+
             time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
-    def wait_for_button(self, block=True):
+    def wait_for_button(self, block=True, enable_screensaver=False):
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if nonblocking.
         """
-        self.wait_for_release()
-        btn = self.wait_for_press(block)
+        print("wait_for_button...")
 
+        self.wait_for_release()
+        btn = self.wait_for_press(block, enable_screensaver=enable_screensaver)
+        if (enable_screensaver and self.screensaver_active):
+            self.screensaver_active = False
+            btn = None
+
+        print("passed wait_for_press")
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:
