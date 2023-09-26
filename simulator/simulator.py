@@ -108,7 +108,7 @@ sequence_executor = None
 if args.sequence:
     sequence_executor = SequenceExecutor(args.sequence)
 
-Maix.register_sequence_executor(sequence_executor)
+buttons.register_sequence_executor(sequence_executor)
 pmu.register_sequence_executor(sequence_executor)
 sensor.register_sequence_executor(sequence_executor)
 ft6x36.register_sequence_executor(sequence_executor)

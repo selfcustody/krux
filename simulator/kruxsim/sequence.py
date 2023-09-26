@@ -28,6 +28,7 @@ from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
 
 COMMANDS = ["press", "touch", "qrcode", "screenshot", "wait", "include", "x"]
+THREAD_PERIOD = 0.1
 
 
 class SequenceExecutor:
@@ -50,9 +51,9 @@ class SequenceExecutor:
 
     def execute(self):
         if self.command_fn:
-            if time.time() - self.command_timer > 0.1:
+            if time.time() > self.command_timer + THREAD_PERIOD:
                 print("Executing (%s, %r)" % (self.command, self.command_params))
-                self.command_timer = 0
+                self.command_timer = time.time()
                 self.command_fn()
                 self.command_fn = None
                 self.command_params = []

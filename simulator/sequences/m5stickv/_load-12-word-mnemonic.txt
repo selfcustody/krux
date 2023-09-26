@@ -3,9 +3,6 @@ include _wait-for-logo.txt
 # Navigate to via QR
 x3 press BUTTON_A
 
-# Prompt
-press BUTTON_A
-
 qrcode 12-word-mnemonic.png
 wait 0.5
 

@@ -58,6 +58,11 @@ class TactileButtons:
 
 buttons_control = TactileButtons()  # Singleton
 
+sequence_executor = None
+
+def register_sequence_executor(s):
+    global sequence_executor
+    sequence_executor = s
 
 class Button:
     """Generic button handler format"""
@@ -89,6 +94,14 @@ class ButtonEnter:
     def event(self):
         """Returns the ENTER event state"""
         if buttons_control.enter is not None:
+
+            if (
+                sequence_executor
+                and sequence_executor.key is not None
+                and sequence_executor.key == pg.K_RETURN
+                ):
+                sequence_executor.key = None
+                return True
             if buttons_control.enter_event_flag:
                 buttons_control.enter_event_flag = False
                 return True
@@ -110,6 +123,13 @@ class ButtonPage:
     def event(self):
         """Returns the PAGE event state"""
         if buttons_control.page is not None:
+            if (
+                sequence_executor
+                and sequence_executor.key is not None
+                and sequence_executor.key == pg.K_DOWN
+                ):
+                sequence_executor.key = None
+                return True
             if buttons_control.page_event_flag:
                 buttons_control.page_event_flag = False
                 return True
@@ -131,6 +151,13 @@ class ButtonPagePrev:
     def event(self):
         """Returns the PAGE_PREV event state"""
         if buttons_control.page_prev is not None:
+            if (
+                sequence_executor
+                and sequence_executor.key is not None
+                and sequence_executor.key == pg.K_UP
+                ):
+                sequence_executor.key = None
+                return True
             if buttons_control.page_prev_event_flag:
                 buttons_control.page_prev_event_flag = False
                 return True
