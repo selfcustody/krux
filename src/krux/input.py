@@ -144,7 +144,6 @@ class Input:
 
     def wait_for_release(self):
         """Loop until all buttons are released (if currently pressed)"""
-        print("wait_for_release...")
         while True:
             if self.enter_value() == RELEASED and self.touch_value() == RELEASED:
                 if "ENCODER" in board.config["krux"]["pins"]:
@@ -160,7 +159,6 @@ class Input:
     def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD, enable_screensaver=False):
         """Wait for first button press or for wait_duration ms.
         Use block to wait indefinitely"""
-        # print("wait_for_press...")
         start_time = time.ticks_ms()
         self.screensaver_time = start_time
         while True:
@@ -181,10 +179,11 @@ class Input:
 
             # Check for screensaver
             if (block and enable_screensaver and not self.screensaver_active and self.screensaver_fallback and self.screensaver_time + SCREENSAVER_IDLE_TIME < time.ticks_ms()):
-                print("show screen saver!!!")
                 self.screensaver_active = True
                 self.screensaver_fallback()
+                self.screensaver_active = False
                 self.screensaver_time = time.ticks_ms()
+                return None
 
             time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
@@ -192,15 +191,10 @@ class Input:
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if nonblocking.
         """
-        print("wait_for_button...")
 
         self.wait_for_release()
         btn = self.wait_for_press(block, enable_screensaver=enable_screensaver)
-        if (enable_screensaver and self.screensaver_active):
-            self.screensaver_active = False
-            btn = None
 
-        print("passed wait_for_press")
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:

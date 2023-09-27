@@ -109,7 +109,7 @@ gc.collect()
 
 from krux.context import Context
 
-ctx = Context()
+ctx = Context(SPLASH)
 ctx.power_manager = power_manager
 postimport_ticks = time.ticks_ms()
 

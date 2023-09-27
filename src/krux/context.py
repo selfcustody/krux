@@ -29,25 +29,7 @@ from .camera import Camera
 from .light import Light
 from .themes import theme
 
-SCREENSAVER_ANIMATION_TIME = 50
-# adicionei 12 espaços nas primeiras linhas
-# adicionei 3 linhas abaixo
-SCREENSAVER_BLANK_LINE = "                                 "
-SCREENSAVER = """
-      ██                  
-      ██                  
-      ██                  
-    ██████                
-      ██                  
-      ██  ██              
-      ██ ██               
-      ████                
-      ██ ██               
-      ██  ██              
-      ██   ██             
-"""[1:-1].split("\n")
-SCREENSAVER_SIZE = len(SCREENSAVER)
-SCREENSAVER = [SCREENSAVER_BLANK_LINE, SCREENSAVER_BLANK_LINE, SCREENSAVER_BLANK_LINE] + SCREENSAVER + [SCREENSAVER_BLANK_LINE, SCREENSAVER_BLANK_LINE, SCREENSAVER_BLANK_LINE, SCREENSAVER_BLANK_LINE, SCREENSAVER_BLANK_LINE, SCREENSAVER_BLANK_LINE]
+SCREENSAVER_ANIMATION_TIME = 150
 
 
 class Context:
@@ -55,7 +37,12 @@ class Context:
     duration of the program, including references to all device interfaces.
     """
 
-    def __init__(self):
+    def __init__(self, logo=[]):
+        self.logo = logo
+        for i in range(3):
+            self.logo.insert(0,"")
+            self.logo.append("")
+            self.logo.append("")
         self.display = Display()
         self.input = Input(screensaver_fallback=self.screensaver)
         self.camera = Camera()
@@ -80,7 +67,7 @@ class Context:
         print("screensaver context!")
 
         anim_curr_text = ""
-        anim_frame = 0
+        anim_frame = 1
         screensaver_time = 0
 
         fg_color = theme.fg_color
@@ -90,22 +77,21 @@ class Context:
 
         while True:            
             if (screensaver_time + SCREENSAVER_ANIMATION_TIME < time.ticks_ms()):
-                if (anim_frame < SCREENSAVER_SIZE*2):
-                    anim_frame = anim_frame + 1
-                else:
+                screensaver_time = time.ticks_ms()
+
+                # show animation on the screeen
+                if (anim_frame <= len(self.logo)):
+                    anim_curr_text = self.logo[0:anim_frame]
+                    self.display.draw_hcentered_text_with_full_bg(anim_curr_text, color=fg_color, bg_color=bg_color)
+
+                anim_frame = anim_frame + 1
+                if (anim_frame > len(self.logo)*1.4):
                     anim_frame = 1
                     tmp_color = bg_color
                     bg_color = fg_color
                     fg_color = tmp_color
 
-                # show animation on the screeen
-                anim_curr_text = SCREENSAVER[0:anim_frame]
-                self.display.draw_hcentered_text(anim_curr_text, color=fg_color, bg_color=bg_color)
-                
-                screensaver_time = time.ticks_ms()
-            
             if (self.input.wait_for_press(block=False) != None):
-                print("break screensaver")
                 break
             
 

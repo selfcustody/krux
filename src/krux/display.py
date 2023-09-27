@@ -302,11 +302,23 @@ class Display:
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
         for i, line in enumerate(lines):
-            offset_x = (self.width() - self.font_width * len(line)) // 2
-            offset_x = max(0, offset_x)
-            self.draw_string(
-                offset_x, offset_y + (i * self.font_height), line, color, bg_color
-            )
+            if (len(line) > 0):
+                offset_x = (self.width() - self.font_width * len(line)) // 2
+                offset_x = max(0, offset_x)
+                self.draw_string(
+                    offset_x, offset_y + (i * self.font_height), line, color, bg_color
+                )
+
+    def draw_hcentered_text_with_full_bg(
+        self,
+        text,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+    ):
+        """Draws text with full screen bg_color on the display"""
+        lines = text if isinstance(text, list) else self.to_lines(text)
+        lcd.fill_rectangle(0, 0, self.width(), len(lines) * self.font_height, bg_color)
+        self.draw_hcentered_text(lines, 0, color, bg_color)
 
     def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""
