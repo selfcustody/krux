@@ -67,8 +67,7 @@ class Context:
 
     def screensaver(self):
         """Displays a screensaver until user input"""
-        anim_curr_text = ""
-        anim_frame = 1
+        anim_frame = 0
         screensaver_time = 0
 
         fg_color = theme.fg_color
@@ -81,15 +80,12 @@ class Context:
                 screensaver_time = time.ticks_ms()
 
                 # show animation on the screeen
-                if anim_frame <= len(self.logo):
-                    anim_curr_text = self.logo[0:anim_frame]
-                    self.display.draw_hcentered_text_with_full_bg(
-                        anim_curr_text, color=fg_color, bg_color=bg_color
-                    )
+                if anim_frame < len(self.logo):
+                    self.display.draw_hcentered_text_with_bg(self.logo[anim_frame], anim_frame, fg_color, bg_color)
 
                 anim_frame = anim_frame + 1
                 if anim_frame > len(self.logo) * 1.4:
-                    anim_frame = 1
+                    anim_frame = 0
                     bg_color, fg_color = fg_color, bg_color
 
             if self.input.wait_for_press(block=False) is not None:
