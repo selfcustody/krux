@@ -548,7 +548,6 @@ class Menu:
             start_from_submenu = True
             selected_item_index = start_from_index
         while True:
-            print("Menu > run_loop: (while True)")
             gc.collect()
             self.ctx.display.clear()
             if self.ctx.input.touch is not None:

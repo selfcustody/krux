@@ -43,7 +43,11 @@ SPLASH = """
 ██ ██
  ██  ██
   ██   ██
-"""[1:-1].split("\n")
+"""[
+    1:-1
+].split(
+    "\n"
+)
 
 
 def splash(logo):

@@ -302,7 +302,7 @@ class Display:
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
         for i, line in enumerate(lines):
-            if (len(line) > 0):
+            if len(line) > 0:
                 offset_x = (self.width() - self.font_width * len(line)) // 2
                 offset_x = max(0, offset_x)
                 self.draw_string(

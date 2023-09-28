@@ -48,7 +48,7 @@ SCREENSAVER_IDLE_TIME = 5000
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
-    def __init__(self, screensaver_fallback = None):
+    def __init__(self, screensaver_fallback=None):
         self.screensaver_fallback = screensaver_fallback
         self.screensaver_time = 0
         self.screensaver_active = False
@@ -156,7 +156,9 @@ class Input:
             self.entropy += 1
             wdt.feed()
 
-    def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD, enable_screensaver=False):
+    def wait_for_press(
+        self, block=True, wait_duration=QR_ANIM_PERIOD, enable_screensaver=False
+    ):
         """Wait for first button press or for wait_duration ms.
         Use block to wait indefinitely"""
         start_time = time.ticks_ms()
@@ -170,7 +172,7 @@ class Input:
                 return BUTTON_PAGE_PREV
             if self.touch_value() == PRESSED:
                 return BUTTON_TOUCH
-            
+
             self.entropy += 1
             wdt.feed()  # here is where krux spends most of its time
 
@@ -178,7 +180,13 @@ class Input:
                 return None
 
             # Check for screensaver
-            if (block and enable_screensaver and not self.screensaver_active and self.screensaver_fallback and self.screensaver_time + SCREENSAVER_IDLE_TIME < time.ticks_ms()):
+            if (
+                block
+                and enable_screensaver
+                and not self.screensaver_active
+                and self.screensaver_fallback
+                and self.screensaver_time + SCREENSAVER_IDLE_TIME < time.ticks_ms()
+            ):
                 self.screensaver_active = True
                 self.screensaver_fallback()
                 self.screensaver_active = False

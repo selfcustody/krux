@@ -37,10 +37,12 @@ class Context:
     duration of the program, including references to all device interfaces.
     """
 
-    def __init__(self, logo=[]):
+    def __init__(self, logo=None):
+        if logo is None:
+            logo = []
         self.logo = logo
-        for i in range(3):
-            self.logo.insert(0,"")
+        for _ in range(3):
+            self.logo.insert(0, "")
             self.logo.append("")
             self.logo.append("")
         self.display = Display()
@@ -50,7 +52,7 @@ class Context:
         self.power_manager = None
         self.printer = None
         self.wallet = None
-        
+
     @property
     def log(self):
         """Returns the default logger"""
@@ -64,8 +66,7 @@ class Context:
         gc.collect()
 
     def screensaver(self):
-        print("screensaver context!")
-
+        """Displays a screensaver until user input"""
         anim_curr_text = ""
         anim_frame = 1
         screensaver_time = 0
@@ -75,24 +76,21 @@ class Context:
 
         self.display.clear()
 
-        while True:            
-            if (screensaver_time + SCREENSAVER_ANIMATION_TIME < time.ticks_ms()):
+        while True:
+            if screensaver_time + SCREENSAVER_ANIMATION_TIME < time.ticks_ms():
                 screensaver_time = time.ticks_ms()
 
                 # show animation on the screeen
-                if (anim_frame <= len(self.logo)):
+                if anim_frame <= len(self.logo):
                     anim_curr_text = self.logo[0:anim_frame]
-                    self.display.draw_hcentered_text_with_full_bg(anim_curr_text, color=fg_color, bg_color=bg_color)
+                    self.display.draw_hcentered_text_with_full_bg(
+                        anim_curr_text, color=fg_color, bg_color=bg_color
+                    )
 
                 anim_frame = anim_frame + 1
-                if (anim_frame > len(self.logo)*1.4):
+                if anim_frame > len(self.logo) * 1.4:
                     anim_frame = 1
-                    tmp_color = bg_color
-                    bg_color = fg_color
-                    fg_color = tmp_color
+                    bg_color, fg_color = fg_color, bg_color
 
-            if (self.input.wait_for_press(block=False) != None):
+            if self.input.wait_for_press(block=False) is not None:
                 break
-            
-
-            
