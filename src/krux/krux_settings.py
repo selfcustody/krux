@@ -334,6 +334,19 @@ class ThemeSettings(SettingsNamespace):
         }[attr]
 
 
+class ScreensaverSettings(SettingsNamespace):
+    """Screensaver settings"""
+
+    namespace = "settings.screensaver"
+    time = NumberSetting(int, "time", 5, [0, 30])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "time": t("Wait time"),
+        }[attr]
+
+
 class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
 
@@ -347,6 +360,7 @@ class Settings(SettingsNamespace):
         self.printer = PrinterSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
+        self.screensaver = ScreensaverSettings()
         if board.config["type"].startswith("amigo"):
             self.touch = TouchSettings()
         if board.config["type"] == "dock":
@@ -362,6 +376,7 @@ class Settings(SettingsNamespace):
             "persist": t("Persist"),
             "printer": t("Printer"),
             "appearance": t("Theme"),
+            "screensaver": t("Screensaver")
         }
         if board.config["type"].startswith("amigo"):
             main_menu["touchscreen"] = t("Touchscreen")

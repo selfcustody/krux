@@ -25,6 +25,7 @@ from Maix import GPIO
 from fpioa_manager import fm
 from .wdt import wdt
 from .touch import Touch
+from .krux_settings import Settings
 
 BUTTON_ENTER = 0
 BUTTON_PAGE = 1
@@ -42,8 +43,6 @@ PRESSED = 0
 RELEASED = 1
 
 BUTTON_WAIT_PRESS_DELAY = 10
-SCREENSAVER_IDLE_TIME = 5000
-
 
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
@@ -185,7 +184,7 @@ class Input:
                 and enable_screensaver
                 and not self.screensaver_active
                 and self.screensaver_fallback
-                and self.screensaver_time + SCREENSAVER_IDLE_TIME < time.ticks_ms()
+                and self.screensaver_time + (Settings().screensaver.time * 60000) < time.ticks_ms()
             ):
                 self.screensaver_active = True
                 self.screensaver_fallback()
@@ -201,6 +200,8 @@ class Input:
         """
 
         self.wait_for_release()
+        if Settings().screensaver.time == 0:
+            enable_screensaver = False
         btn = self.wait_for_press(block, enable_screensaver=enable_screensaver)
 
         if btn == BUTTON_ENTER:
