@@ -44,6 +44,7 @@ RELEASED = 1
 
 BUTTON_WAIT_PRESS_DELAY = 10
 
+
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
@@ -184,7 +185,8 @@ class Input:
                 and enable_screensaver
                 and not self.screensaver_active
                 and self.screensaver_fallback
-                and self.screensaver_time + (Settings().screensaver.time * 60000) < time.ticks_ms()
+                and self.screensaver_time + (Settings().screensaver.time * 60000)
+                < time.ticks_ms()
             ):
                 self.screensaver_active = True
                 self.screensaver_fallback()

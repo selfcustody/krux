@@ -376,7 +376,7 @@ class Settings(SettingsNamespace):
             "persist": t("Persist"),
             "printer": t("Printer"),
             "appearance": t("Theme"),
-            "screensaver": t("Screensaver")
+            "screensaver": t("Screensaver"),
         }
         if board.config["type"].startswith("amigo"):
             main_menu["touchscreen"] = t("Touchscreen")
