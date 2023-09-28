@@ -320,7 +320,9 @@ class Display:
         bg_color=theme.bg_color,
     ):
         """Draw a line_str horizontally-centered on the display, at qtd_offset_y times font_height, useful for screensaver"""
-        lcd.fill_rectangle(0, qtd_offset_y * self.font_height, self.width(), self.font_height, bg_color)
+        lcd.fill_rectangle(
+            0, qtd_offset_y * self.font_height, self.width(), self.font_height, bg_color
+        )
         offset_x = self._obtain_hcentered_offset(line_str)
         self.draw_string(
             offset_x, (qtd_offset_y * self.font_height), line_str, color, bg_color

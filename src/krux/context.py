@@ -81,7 +81,9 @@ class Context:
 
                 # show animation on the screeen
                 if anim_frame < len(self.logo):
-                    self.display.draw_hcentered_text_with_bg(self.logo[anim_frame], anim_frame, fg_color, bg_color)
+                    self.display.draw_hcentered_text_with_bg(
+                        self.logo[anim_frame], anim_frame, fg_color, bg_color
+                    )
 
                 anim_frame = anim_frame + 1
                 if anim_frame > len(self.logo) * 1.4:
