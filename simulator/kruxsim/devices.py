@@ -33,7 +33,7 @@ WINDOW_SIZES = {
     AMIGO_IPS: (480, 768),
     AMIGO_TFT: (480, 768),
     PC: (480, 640),
-    DOCK: (440, 800),
+    DOCK: (440, 820),
 }
 
 
