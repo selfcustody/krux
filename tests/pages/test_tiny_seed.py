@@ -276,10 +276,10 @@ def test_scan_tiny_seed_24w(m5stickv, mocker):
     # Seed will be returned as its word index
     import time
     from krux.pages.tiny_seed import TinyScanner
-    from krux.input import BUTTON_ENTER, PRESSED, RELEASED
+    from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
-    ENTER_SEQ = [RELEASED] + [PRESSED] + [RELEASED] * 3
+    ENTER_SEQ = [False] + [True] + [False] * 3
     TIME_STAMPS = (0, 1, 1000, 2000, 3000, 4000, 5000)
     TINYSEED_RECTANGLE = (10, 10, 100, 100)
     TEST_WORDS_NUMBERS_1_12 = [
@@ -314,7 +314,9 @@ def test_scan_tiny_seed_24w(m5stickv, mocker):
     TEST_24_WORDS = "market glass laugh warm cream either robot end blood awful escape fan palm waste surge kick display shoe remove achieve shoulder siren loop gate"
     mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
     ctx = create_ctx(mocker, BTN_SEQUENCE)
-    ctx.input.enter_value = mocker.MagicMock(side_effect=ENTER_SEQ)
+    mocker.patch.object(ctx.input, "page_event", new=lambda: False)
+    mocker.patch.object(ctx.input, "page_prev_event", new=lambda: False)
+    ctx.input.enter_event = mocker.MagicMock(side_effect=ENTER_SEQ)
     tiny_seed = TinyScanner(ctx)
     mocker.patch.object(
         tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
@@ -335,7 +337,7 @@ def test_scan_tiny_seed_24w_amigo(amigo_tft, mocker):
     from krux.input import BUTTON_ENTER, PRESSED, RELEASED
 
     BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
-    ENTER_SEQ = [RELEASED] + [PRESSED] + [RELEASED] * 3
+    ENTER_SEQ = [False] + [True] + [False] * 3
     TIME_STAMPS = (0, 1, 1000, 2000, 3000, 4000, 5000)
     TINYSEED_RECTANGLE = (10, 10, 100, 100)
     TEST_WORDS_NUMBERS_1_12 = [
@@ -370,7 +372,10 @@ def test_scan_tiny_seed_24w_amigo(amigo_tft, mocker):
     TEST_24_WORDS = "market glass laugh warm cream either robot end blood awful escape fan palm waste surge kick display shoe remove achieve shoulder siren loop gate"
     mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
     ctx = create_ctx(mocker, BTN_SEQUENCE)
-    ctx.input.enter_value = mocker.MagicMock(side_effect=ENTER_SEQ)
+    mocker.patch.object(ctx.input, "page_event", new=lambda: False)
+    mocker.patch.object(ctx.input, "page_prev_event", new=lambda: False)
+    mocker.patch.object(ctx.input, "touch_event", new=lambda: False)
+    ctx.input.enter_event = mocker.MagicMock(side_effect=ENTER_SEQ)
     tiny_seed = TinyScanner(ctx)
     mocker.patch.object(
         tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE

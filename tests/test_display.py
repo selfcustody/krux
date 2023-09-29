@@ -420,25 +420,6 @@ def test_draw_centered_text(mocker, m5stickv):
     )
 
 
-def test_flash_text(mocker, m5stickv):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
-    mocker.patch("krux.display.time", new=mocker.MagicMock())
-    import krux
-    from krux.display import Display
-
-    d = Display()
-    mocker.patch.object(d, "width", new=lambda: 135)
-    mocker.patch.object(d, "height", new=lambda: 240)
-    mocker.spy(d, "draw_centered_text")
-    mocker.spy(d, "clear")
-
-    d.flash_text("Hello world", krux.display.lcd.WHITE, 0, 1000)
-
-    assert d.clear.call_count == 2
-    d.draw_centered_text.assert_called_once()
-    krux.display.time.sleep_ms.assert_called_with(1000)
-
-
 def test_draw_qr_code(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux

@@ -56,8 +56,9 @@ class Touch:
         self.gesture = None
         self.state = IDLE
         self.width, self.height = width, height
-        touch_control.activate_irq(irq_pin)
-        touch_control.threshold(Settings().touch.threshold)
+        self.touch_driver = touch_control
+        self.touch_driver.activate_irq(irq_pin)
+        self.touch_driver.threshold(Settings().touch.threshold)
 
     def clear_regions(self):
         """Remove previously stored buttons map"""
@@ -127,7 +128,7 @@ class Touch:
     def current_state(self):
         """Returns the touchscreen state"""
         self.sample_time = time.ticks_ms()
-        data = touch_control.current_point()
+        data = self.touch_driver.current_point()
         if isinstance(data, tuple):
             self._store_points(data)
         elif data is None:  # gets release then return to idle.
@@ -162,10 +163,11 @@ class Touch:
         current_time = time.ticks_ms()
         if current_time > self.sample_time + TOUCH_S_PERIOD:
             self.current_state()  # Update state
-            if touch_control.event():
+            if self.touch_driver.event():
                 # Resets touch and gets irq point
                 self.state = IDLE
-                self._store_points(touch_control.irq_point)
+                if isinstance(self.touch_driver.irq_point, tuple):
+                    self._store_points(self.touch_driver.irq_point)
                 return True
         return False
 

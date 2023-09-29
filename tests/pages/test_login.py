@@ -1744,8 +1744,6 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 # Paper Width
                 BUTTON_PAGE,
                 BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Change width
                 # Remove digit
@@ -1827,6 +1825,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
 
     cases = [
         (
+            # Case 0
             (
                 # Bitcoin
                 0,
@@ -1844,6 +1843,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
             CategorySetting,
         ),
         (
+            # Case 1
             (
                 # Printer
                 PRINTER_INDEX,
@@ -1854,7 +1854,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Back to Thermal
-                8,
+                6,
                 # Back to Printer
                 3,
                 # Leave Settings
@@ -1868,6 +1868,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
             CategorySetting,
         ),
         (
+            # Case 2
             (
                 # Language
                 LOCALE_INDEX,
@@ -1883,6 +1884,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
             CategorySetting,
         ),
         (
+            # Case 3
             (
                 # Logging
                 LOGGING_INDEX,

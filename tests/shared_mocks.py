@@ -285,6 +285,7 @@ def board_amigo_tft():
                     "BUTTON_A": 16,
                     "BUTTON_B": 20,
                     "BUTTON_C": 23,
+                    "TOUCH_IRQ": 33,
                     "LED_W": 32,
                     "I2C_SDA": 27,
                     "I2C_SCL": 24,
@@ -333,7 +334,13 @@ def mock_context(mocker):
 
     if board.config["type"] == "m5stickv":
         return mocker.MagicMock(
-            input=mocker.MagicMock(touch=None),
+            input=mocker.MagicMock(
+                touch=None,
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
             display=mocker.MagicMock(
                 font_width=8,
                 font_height=14,
@@ -344,7 +351,13 @@ def mock_context(mocker):
         )
     elif board.config["type"] == "dock":
         return mocker.MagicMock(
-            input=mocker.MagicMock(touch=None),
+            input=mocker.MagicMock(
+                touch=None,
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
             display=mocker.MagicMock(
                 font_width=8,
                 font_height=16,
