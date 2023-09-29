@@ -38,14 +38,17 @@ class Context:
     """
 
     def __init__(self, logo=None):
+        self.display = Display()
+
         if logo is None:
             logo = []
-        self.logo = logo
-        for _ in range(3):
+        self.logo = logo    
+        for _ in range((self.display.total_lines - len(logo))//2):
             self.logo.insert(0, "")
             self.logo.append("")
-            self.logo.append("")
-        self.display = Display()
+        self.logo.append("")
+        self.logo.append("")
+
         self.input = Input(screensaver_fallback=self.screensaver)
         self.camera = Camera()
         self.light = Light() if "LED_W" in board.config["krux"]["pins"] else None

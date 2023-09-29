@@ -47,9 +47,8 @@ class Display:
         self.i2c = None
         self.font_width = FONT_WIDTH
         self.font_height = FONT_HEIGHT
-        self.bottom_line = board.config["lcd"]["width"] // FONT_HEIGHT  # total lines
-        self.bottom_line -= 1
-        self.bottom_line *= FONT_HEIGHT
+        self.total_lines = board.config["lcd"]["width"] // FONT_HEIGHT
+        self.bottom_line = (self.total_lines - 1) * FONT_HEIGHT
         if board.config["type"] == "m5stickv":
             self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
         else:
