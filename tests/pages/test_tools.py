@@ -89,9 +89,9 @@ def test_sd_check_no_sd(m5stickv, mocker):
     ctx = mock_context(mocker)
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     tool = Tools(ctx)
+    tool.flash_text = mocker.MagicMock()
     tool.sd_check()
-
-    ctx.display.flash_text.assert_has_calls([mocker.call("SD card not detected", ANY)])
+    tool.flash_text.assert_has_calls([mocker.call("SD card not detected", ANY)])
 
 
 def test_sd_check(m5stickv, mocker, mock_file_operations):
