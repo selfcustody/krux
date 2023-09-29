@@ -22,6 +22,7 @@
 import sys
 from unittest import mock
 
+
 class RotaryEncoder:
     def __init__(self):
         self.debounce = 0

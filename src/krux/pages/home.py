@@ -227,9 +227,7 @@ class Home(Page):
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
         if wallet_data is None:
-            self.ctx.display.flash_text(
-                t("Failed to load output descriptor"), theme.error_color
-            )
+            self.flash_text(t("Failed to load output descriptor"), theme.error_color)
             return MENU_CONTINUE
 
         try:
@@ -245,7 +243,7 @@ class Home(Page):
                     "Wallet output descriptor: %s"
                     % self.ctx.wallet.descriptor.to_string()
                 )
-                self.ctx.display.flash_text(t("Wallet output descriptor loaded!"))
+                self.flash_text(t("Wallet output descriptor loaded!"))
 
                 # BlueWallet single sig descriptor without fingerprint
                 if (
@@ -254,7 +252,8 @@ class Home(Page):
                 ):
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(
-                        t("Warning:\nIncomplete output descriptor"), theme.error_color
+                        t("Warning:") + "\n" + t("Incomplete output descriptor"),
+                        theme.error_color,
                     )
                     self.ctx.input.wait_for_button()
 
@@ -296,10 +295,11 @@ class Home(Page):
         # Warns in case multisig wallet descriptor is not loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
             self.ctx.display.draw_centered_text(
-                t(
-                    """Warning:\nWallet output descriptor not found.\n\n
-                    Some checks cannot be performed."""
-                )
+                t("Warning:")
+                + "\n"
+                + t("Wallet output descriptor not found.")
+                + "\n\n"
+                + t("Some checks cannot be performed.")
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
@@ -318,7 +318,7 @@ class Home(Page):
 
         if data is None:
             # Both the camera and the file on SD card failed!
-            self.ctx.display.flash_text(t("Failed to load PSBT"), theme.error_color)
+            self.flash_text(t("Failed to load PSBT"), theme.error_color)
             return MENU_CONTINUE
 
         # PSBT read OK! Will try to sign
@@ -428,7 +428,7 @@ class Home(Page):
                 pass
 
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load message"), theme.error_color)
+            self.flash_text(t("Failed to load message"), theme.error_color)
             return MENU_CONTINUE
 
         # message read OK!
@@ -551,9 +551,7 @@ class Home(Page):
                         else:
                             sd.write(filename, data)
                         self.ctx.display.clear()
-                        self.ctx.display.flash_text(
-                            t("Saved to SD card:\n%s") % filename
-                        )
+                        self.flash_text(t("Saved to SD card:\n%s") % filename)
                 else:
                     filename_undefined = False
 

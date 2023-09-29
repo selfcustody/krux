@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import time
 import lcd
 import board
 from machine import I2C
@@ -34,8 +33,6 @@ QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
-
-FLASH_MSG_TIME = 2000
 
 
 class Display:
@@ -333,19 +330,6 @@ class Display:
         lines_height = len(lines) * self.font_height
         offset_y = max(0, (self.height() - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, bg_color)
-
-    def flash_text(
-        self,
-        text,
-        color=theme.fg_color,
-        bg_color=theme.bg_color,
-        duration=FLASH_MSG_TIME,
-    ):
-        """Flashes text centered on the display for duration ms"""
-        self.clear()
-        self.draw_centered_text(text, color, bg_color)
-        time.sleep_ms(duration)
-        self.clear()
 
     def draw_qr_code(
         self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR

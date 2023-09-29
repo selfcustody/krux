@@ -39,10 +39,10 @@ from ..krux_settings import (
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..krux_settings import t
 from ..sd_card import SDHandler
-from ..display import FLASH_MSG_TIME
 from . import (
     Page,
     Menu,
+    FLASH_MSG_TIME,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -336,7 +336,7 @@ class SettingsPage(Page):
         if setting.value_range[0] <= new_value <= setting.value_range[1]:
             setting.__set__(settings_namespace, new_value)
         else:
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Value %s out of range: [%s, %s]")
                 % (new_value, setting.value_range[0], setting.value_range[1]),
                 theme.error_color,
