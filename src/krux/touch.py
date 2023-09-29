@@ -168,6 +168,8 @@ class Touch:
                 self.state = IDLE
                 if isinstance(self.touch_driver.irq_point, tuple):
                     self._store_points(self.touch_driver.irq_point)
+                if self.state == RELEASED:  # Invalid press point detected
+                    return False
                 return True
         return False
 
