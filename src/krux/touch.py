@@ -77,6 +77,17 @@ class Touch:
             raise ValueError("Touch region added outside display area")
         self.x_regions.append(region)
 
+    def valid_position(self, data):
+        if self.x_regions and data[0] < self.x_regions[0]:
+            return False
+        if self.x_regions and data[0] > self.x_regions[-1]:
+            return False
+        if self.y_regions and data[1] < self.y_regions[0]:
+            return False
+        if self.y_regions and data[1] > self.y_regions[-1]:
+            return False
+        return True
+
     def _extract_index(self, data):
         """Gets an index from touched points, x and y delimiters"""
         index = 0
@@ -84,26 +95,17 @@ class Touch:
             for region in self.y_regions:
                 if data[1] > region:
                     index += 1
-            if index == 0 or index >= len(self.y_regions):  # outside y areas
-                self.state = RELEASED
-            else:
-                index -= 1
-                if self.x_regions:  # if 2D array
-                    index *= len(self.x_regions) - 1
-                    x_index = 0
-                    for x_region in self.x_regions:
-                        if data[0] > x_region:
-                            x_index += 1
-                    if x_index == 0 or x_index >= len(
-                        self.x_regions
-                    ):  # outside x areas
-                        self.state = RELEASED
-                    else:
-                        x_index -= 1
-                    index += x_index
-        else:
-            index = 0
-        return index
+            index -= 1
+            if self.x_regions:  # if 2D array
+                index *= len(self.x_regions) - 1
+                x_index = 0
+                for x_region in self.x_regions:
+                    if data[0] > x_region:
+                        x_index += 1
+                x_index -= 1
+                index += x_index
+            return index
+        return 0
 
     def _store_points(self, data):
         """Store pressed points and calculare an average pressed point"""
@@ -162,20 +164,18 @@ class Touch:
         """Checks if a touch happened and stores the point"""
         current_time = time.ticks_ms()
         if current_time > self.sample_time + TOUCH_S_PERIOD:
-            self.current_state()  # Update state
             if self.touch_driver.event():
                 # Resets touch and gets irq point
                 self.state = IDLE
                 if isinstance(self.touch_driver.irq_point, tuple):
-                    self._store_points(self.touch_driver.irq_point)
-                if self.state == RELEASED:  # Invalid press point detected
-                    return False
-                return True
+                    if self.valid_position(self.touch_driver.irq_point):
+                        self._store_points(self.touch_driver.irq_point)
+                        return True
         return False
 
     def value(self):
         """Wraps touch states to behave like a regular button"""
-        return 0 if self.current_state() == PRESSED else 1
+        return 1 if self.current_state() == IDLE else 0
 
     def swipe_right_value(self):
         """Returns detected gestures and clean respective variable"""
