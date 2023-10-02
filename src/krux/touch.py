@@ -78,6 +78,7 @@ class Touch:
         self.x_regions.append(region)
 
     def valid_position(self, data):
+        """Checks if touch position is within buttons area"""
         if self.x_regions and data[0] < self.x_regions[0]:
             return False
         if self.x_regions and data[0] > self.x_regions[-1]:
