@@ -49,6 +49,7 @@
     "Cut Method": "Метод Резки",
     "Decimal": "Десятичный",
     "Decrypt?": "Расшифровать?",
+    "Delete %s?": "Удалить %s?",
     "Delete File?": "Удалить Файл?",
     "Delete Mnemonic": "Удалить Мнемонику",
     "Depth Per Pass": "Глубина За Проход",
@@ -61,7 +62,7 @@
     "Encrypt Mnemonic": "Зашифровать Мнемонику",
     "Encrypted QR Code": "Зашифрованный QR Код",
     "Encrypted mnemonic was not stored": "Зашифрованная мнемоника не была сохранена",
-    "Encrypted mnemonic was stored with ID: ": "Зашифрованная мнемоника была сохранена с ID",
+    "Encrypted mnemonic was stored with ID: ": "Зашифрованная мнемоника была сохранена с ID: ",
     "Encryption": "Шифрование",
     "Encryption Mode": "Метод шифрования",
     "Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.": "Введите каждое слово вашей мнемоники BIP-39 в виде числа от 1 до 2048.",
@@ -162,7 +163,7 @@
     "Printing\n%d / %d": "Идет печать\n%d / %d",
     "Printing ...": "Идет печать ...",
     "Proceed?": "Продолжить?",
-    "Processing ...": "Обрабатываю ...",
+    "Processing ...": "Обработка ...",
     "QR Code": "QR Код",
     "RX Pin": "RX Пин",
     "Receive": "Получить",
@@ -239,6 +240,6 @@
     "Word Numbers": "Числа Слов",
     "Words": "Слова",
     "Yes": "Да",
-    "Your changes will be kept on device flash storage.": "Ваши изменения буду храниться на флэш памяти устройства.",
-    "Your changes will be kept on the SD card.": "Ваши изменения будут храниться на SD карте."
+    "Your changes will be kept on device flash storage.": "Ваши изменения будут сохранены на флэш памяти устройства.",
+    "Your changes will be kept on the SD card.": "Ваши изменения будут сохранены на SD карте."
 }
