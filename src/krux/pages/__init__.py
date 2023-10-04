@@ -367,12 +367,12 @@ class Page:
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
         """
-        if Settings().printer.driver == "none":
+        if Settings().hardware.printer.driver == "none":
             return False
 
         self.ctx.display.clear()
         if self.prompt(
-            t("Print to QR?\n\n%s\n\n") % Settings().printer.driver,
+            t("Print to QR?\n\n%s\n\n") % Settings().hardware.printer.driver,
             self.ctx.display.height() // 2,
         ):
             return True

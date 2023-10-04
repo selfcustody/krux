@@ -272,6 +272,38 @@ class TouchSettings(SettingsNamespace):
         }[attr]
 
 
+class HardwareSettings(SettingsNamespace):
+    """Hardware Related Settings"""
+
+    namespace = "settings.hardware"
+
+    def __init__(self):
+        self.printer = PrinterSettings()
+        if (
+            board.config["type"].startswith("amigo")
+            or board.config["type"] == "yahboom"
+        ):
+            self.touch = TouchSettings()
+        if board.config["type"] == "dock":
+            self.encoder = EncoderSettings()
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+
+        hardware_menu = {
+            "printer": t("Printer"),
+        }
+        if (
+            board.config["type"].startswith("amigo")
+            or board.config["type"] == "yahboom"
+        ):
+            hardware_menu["touchscreen"] = t("Touchscreen")
+        if board.config["type"] == "dock":
+            hardware_menu["encoder"] = t("Encoder")
+
+        return hardware_menu[attr]
+
+
 class PersistSettings(SettingsNamespace):
     """Persistent settings"""
 
@@ -315,10 +347,19 @@ class ThemeSettings(SettingsNamespace):
     DARK_THEME_NAME = "Dark"
     LIGHT_THEME_NAME = "Light"
     ORANGE_THEME_NAME = "Orange"
+    GREEN_THEME = 4
+    PINK_THEME = 5
+    DARK_THEME_NAME = "Dark"
+    LIGHT_THEME_NAME = "Light"
+    ORANGE_THEME_NAME = "Orange"
+    GREEN_THEME_NAME = "CypherPunk"
+    PINK_THEME_NAME = "CypherPink"
     THEME_NAMES = {
         DARK_THEME: DARK_THEME_NAME,
         LIGHT_THEME: LIGHT_THEME_NAME,
         ORANGE_THEME: ORANGE_THEME_NAME,
+        GREEN_THEME: GREEN_THEME_NAME,
+        PINK_THEME: PINK_THEME_NAME,
     }
     namespace = "settings.appearance"
     theme = CategorySetting("theme", DARK_THEME_NAME, list(THEME_NAMES.values()))
@@ -337,36 +378,23 @@ class Settings(SettingsNamespace):
 
     def __init__(self):
         self.bitcoin = BitcoinSettings()
+        self.hardware = HardwareSettings()
         self.i18n = I18nSettings()
         self.logging = LoggingSettings()
         self.encryption = EncryptionSettings()
-        self.printer = PrinterSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
-        if (
-            board.config["type"].startswith("amigo")
-            or board.config["type"] == "yahboom"
-        ):
-            self.touch = TouchSettings()
-        if board.config["type"] == "dock":
-            self.encoder = EncoderSettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         main_menu = {
             "bitcoin": t("Bitcoin"),
+            "hardware": t("Hardware"),
             "i18n": t("Language"),
             "logging": t("Logging"),
             "encryption": t("Encryption"),
             "persist": t("Persist"),
-            "printer": t("Printer"),
             "appearance": t("Theme"),
         }
-        if (
-            board.config["type"].startswith("amigo")
-            or board.config["type"] == "yahboom"
-        ):
-            main_menu["touchscreen"] = t("Touchscreen")
-        if board.config["type"] == "dock":
-            main_menu["encoder"] = t("Encoder")
+
         return main_menu[attr]

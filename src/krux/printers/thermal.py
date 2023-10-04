@@ -56,17 +56,23 @@ class AdafruitPrinter(Printer):
 
     def __init__(self):
         fm.register(
-            Settings().printer.thermal.adafruit.tx_pin, fm.fpioa.UART2_TX, force=False
+            Settings().hardware.printer.thermal.adafruit.tx_pin,
+            fm.fpioa.UART2_TX,
+            force=False,
         )
         fm.register(
-            Settings().printer.thermal.adafruit.rx_pin, fm.fpioa.UART2_RX, force=False
+            Settings().hardware.printer.thermal.adafruit.rx_pin,
+            fm.fpioa.UART2_RX,
+            force=False,
         )
 
-        self.uart_conn = UART(UART.UART2, Settings().printer.thermal.adafruit.baudrate)
+        self.uart_conn = UART(
+            UART.UART2, Settings().hardware.printer.thermal.adafruit.baudrate
+        )
 
         self.character_height = 24
         self.byte_time = 1  # miliseconds
-        self.dot_print_time = Settings().printer.thermal.adafruit.line_delay
+        self.dot_print_time = Settings().hardware.printer.thermal.adafruit.line_delay
         self.dot_feed_time = 2  # miliseconds
 
         if not self.has_paper():
@@ -129,8 +135,8 @@ class AdafruitPrinter(Printer):
         while qr_code[size] != "\n":
             size += 1
 
-        scale = Settings().printer.thermal.adafruit.paper_width // size
-        scale *= Settings().printer.thermal.adafruit.scale
+        scale = Settings().hardware.printer.thermal.adafruit.paper_width // size
+        scale *= Settings().hardware.printer.thermal.adafruit.scale
         scale //= 200  # 100*2 because printer will scale 2X later to save data
         # Being at full size sometimes makes prints more faded (can't apply too much heat?)
 
