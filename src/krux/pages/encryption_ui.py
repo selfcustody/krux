@@ -304,6 +304,6 @@ class LoadEncryptedMnemonic(Page):
 
         mnemonic_storage = MnemonicStorage()
         self.ctx.display.clear()
-        if self.prompt(t("Delete %s?" % mnemonic_id), self.ctx.display.height() // 2):
+        if self.prompt(t("Delete %s?") % mnemonic_id, self.ctx.display.height() // 2):
             mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
         del mnemonic_storage
