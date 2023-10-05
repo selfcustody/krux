@@ -16,7 +16,7 @@ def reset_input_states(mocker, input):
         mocker.patch.object(input, "page_prev_event", new=lambda: False)
     if input.touch:
         mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
-        mocker.patch.object(input.touch.touch_driver, "event", new=lambda: False)
+        mocker.patch.object(input.touch, "event", new=lambda: False)
     return input
 
 
@@ -345,7 +345,7 @@ def test_wait_for_button_blocks_until_touch_released(mocker, amigo_tft):
     input = Input()
     input = reset_input_states(mocker, input)
 
-    mocker.patch.object(input.touch.touch_driver, "event", new=lambda: True)
+    mocker.patch.object(input.touch, "event", new=lambda: True)
     mocker.patch.object(input, "touch_value", new=lambda: PRESSED)
 
     def release():
@@ -461,7 +461,7 @@ def test_touch_indexing(mocker, amigo_tft):
     input = reset_input_states(mocker, input)
 
     elapsed_time = 0
-    mocker.patch.object(input.touch.touch_driver, "event", new=lambda: True)
+    mocker.patch.object(input.touch, "event", new=lambda: True)
 
     def time_control(point1, point2):
         nonlocal elapsed_time
@@ -475,7 +475,7 @@ def test_touch_indexing(mocker, amigo_tft):
             input.touch.touch_driver, "current_point", new=lambda: point1
         )
         time.sleep(0.1)
-        # mocker.patch.object(input.touch.touch_driver, "event", new=lambda: False)
+        # mocker.patch.object(input.touch, "event", new=lambda: False)
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # touch slightly sideways before release
@@ -533,7 +533,7 @@ def test_touch_gestures(mocker, amigo_tft):
 
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
-        mocker.patch.object(input.touch.touch_driver, "event", new=lambda: True)
+        mocker.patch.object(input.touch, "event", new=lambda: True)
         mocker.patch.object(input.touch.touch_driver, "irq_point", new=lambda: point1)
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: point1
