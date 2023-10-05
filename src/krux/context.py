@@ -42,8 +42,8 @@ class Context:
 
         if logo is None:
             logo = []
-        self.logo = logo    
-        for _ in range((self.display.total_lines - len(logo))//2):
+        self.logo = logo
+        for _ in range((self.display.total_lines - len(logo)) // 2):
             self.logo.insert(0, "")
             self.logo.append("")
         self.logo.append("")
@@ -84,7 +84,7 @@ class Context:
 
                 # show animation on the screeen
                 if anim_frame < len(self.logo):
-                    self.display.draw_hcentered_text_with_bg(
+                    self.display.draw_line_hcentered_with_fullw_bg(
                         self.logo[anim_frame], anim_frame, fg_color, bg_color
                     )
 

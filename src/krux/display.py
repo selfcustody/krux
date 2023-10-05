@@ -308,7 +308,7 @@ class Display:
         """Return the offset_x to the horizontally-centered line_str"""
         return max(0, (self.width() - self.font_width * len(line_str)) // 2)
 
-    def draw_hcentered_text_with_bg(
+    def draw_line_hcentered_with_fullw_bg(
         self,
         line_str,
         qtd_offset_y,

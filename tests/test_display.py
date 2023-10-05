@@ -402,6 +402,25 @@ def test_draw_hcentered_text(mocker, m5stickv):
         23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 
+def test_draw_line_hcentered_with_fullw_bg(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.spy(d, "draw_string")
+    
+
+    d.draw_line_hcentered_with_fullw_bg(
+        "Hello world", 10, krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+    d.draw_string.assert_called_with(
+        23, d.font_height * 10, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+    krux.display.lcd.fill_rectangle.assert_called()
+
 
 def test_draw_centered_text(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
