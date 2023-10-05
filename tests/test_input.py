@@ -461,8 +461,7 @@ def test_touch_indexing(mocker, amigo_tft):
     input = reset_input_states(mocker, input)
 
     elapsed_time = 0
-    mocker.patch.object(input.touch, "event", new=lambda: True)
-
+    
     def time_control(point1, point2):
         nonlocal elapsed_time
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
@@ -470,12 +469,14 @@ def test_touch_indexing(mocker, amigo_tft):
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # touch on 3º quadrant
+        mocker.patch.object(input.touch, "event", new=lambda: True)
         mocker.patch.object(input.touch.touch_driver, "irq_point", new=lambda: point1)
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: point1
         )
         time.sleep(0.1)
-        # mocker.patch.object(input.touch, "event", new=lambda: False)
+        mocker.patch.object(input.touch, "event", new=lambda: False)
+        time.sleep(0.1)
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # touch slightly sideways before release
