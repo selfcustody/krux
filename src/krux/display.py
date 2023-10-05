@@ -44,9 +44,8 @@ class Display:
         self.i2c = None
         self.font_width = FONT_WIDTH
         self.font_height = FONT_HEIGHT
-        self.bottom_line = board.config["lcd"]["width"] // FONT_HEIGHT  # total lines
-        self.bottom_line -= 1
-        self.bottom_line *= FONT_HEIGHT
+        self.total_lines = board.config["lcd"]["width"] // FONT_HEIGHT
+        self.bottom_line = (self.total_lines - 1) * FONT_HEIGHT
         if board.config["type"] == "m5stickv":
             self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
         else:
@@ -299,11 +298,31 @@ class Display:
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
         for i, line in enumerate(lines):
-            offset_x = (self.width() - self.font_width * len(line)) // 2
-            offset_x = max(0, offset_x)
-            self.draw_string(
-                offset_x, offset_y + (i * self.font_height), line, color, bg_color
-            )
+            if len(line) > 0:
+                offset_x = self._obtain_hcentered_offset(line)
+                self.draw_string(
+                    offset_x, offset_y + (i * self.font_height), line, color, bg_color
+                )
+
+    def _obtain_hcentered_offset(self, line_str):
+        """Return the offset_x to the horizontally-centered line_str"""
+        return max(0, (self.width() - self.font_width * len(line_str)) // 2)
+
+    def draw_line_hcentered_with_fullw_bg(
+        self,
+        line_str,
+        qtd_offset_y,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+    ):
+        """Draw a line_str horizontally-centered on the display, at qtd_offset_y times font_height, useful for screensaver"""
+        lcd.fill_rectangle(
+            0, qtd_offset_y * self.font_height, self.width(), self.font_height, bg_color
+        )
+        offset_x = self._obtain_hcentered_offset(line_str)
+        self.draw_string(
+            offset_x, (qtd_offset_y * self.font_height), line_str, color, bg_color
+        )
 
     def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""
