@@ -91,13 +91,14 @@ def test_setting(mocker, m5stickv):
     t.some_setting = 2
     assert t.some_setting == 2
 
+
 def test_all_labels(mocker, m5stickv):
     from krux.krux_settings import (
-        BitcoinSettings, 
-        I18nSettings, 
-        LoggingSettings, 
-        EncryptionSettings, 
-        PrinterSettings, 
+        BitcoinSettings,
+        I18nSettings,
+        LoggingSettings,
+        EncryptionSettings,
+        PrinterSettings,
         ThermalSettings,
         AdafruitPrinterSettings,
         CNCSettings,
@@ -107,7 +108,7 @@ def test_all_labels(mocker, m5stickv):
         ScreensaverSettings,
         TouchSettings,
         EncoderSettings,
-        )
+    )
 
     bitcoin = BitcoinSettings()
     i18n = I18nSettings()
@@ -138,5 +139,3 @@ def test_all_labels(mocker, m5stickv):
     assert screensaver.label("time")
     assert touch.label("threshold")
     assert encoder.label("debounce")
-
-

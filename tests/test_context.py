@@ -52,6 +52,7 @@ def test_clear_clears_printer(mocker, m5stickv):
     assert c.wallet is None
     c.printer.clear.assert_called()
 
+
 def test_screensaver(mocker, m5stickv):
     """Test whether the screensaver is animating and changing color over time"""
     mock_modules(mocker)
@@ -73,22 +74,22 @@ def test_screensaver(mocker, m5stickv):
         ██  ██
         ██   ██
         """[
-            1:-1
-        ].split(
-            "\n"
-        )
+        1:-1
+    ].split(
+        "\n"
+    )
     c = Context(logo)
 
     # a sequence of events to simulate users waiting and after some time press BUTTON_ENTER
     btn_seq = []
     time_seq = []
-    tmp = SCREENSAVER_ANIMATION_TIME +1
+    tmp = SCREENSAVER_ANIMATION_TIME + 1
     for _ in range(28):
         time_seq.append(tmp)
         time_seq.append(tmp)
-        tmp += SCREENSAVER_ANIMATION_TIME +1
+        tmp += SCREENSAVER_ANIMATION_TIME + 1
         btn_seq.append(None)
-    
+
     time_seq.append(tmp)
     time_seq.append(tmp)
     btn_seq.append(BUTTON_ENTER)
@@ -96,9 +97,12 @@ def test_screensaver(mocker, m5stickv):
     c.input.wait_for_press = mocker.MagicMock(side_effect=btn_seq)
     time.ticks_ms = mocker.MagicMock(side_effect=time_seq)
 
-
     c.screensaver()
 
-    c.display.draw_line_hcentered_with_fullw_bg.assert_any_call(logo[10], 10, theme.fg_color, theme.bg_color)
-    c.display.draw_line_hcentered_with_fullw_bg.assert_any_call(logo[5], 5, theme.bg_color, theme.fg_color)
+    c.display.draw_line_hcentered_with_fullw_bg.assert_any_call(
+        logo[10], 10, theme.fg_color, theme.bg_color
+    )
+    c.display.draw_line_hcentered_with_fullw_bg.assert_any_call(
+        logo[5], 5, theme.bg_color, theme.fg_color
+    )
     c.input.wait_for_press.assert_called()

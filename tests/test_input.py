@@ -786,6 +786,7 @@ def test_page_prev_button_press_when_buttons_not_active_returns_none(mocker, ami
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
 
+
 def test_wait_for_press_screensaver(mocker, m5stickv):
     from krux.input import Input
     from krux.krux_settings import Settings
@@ -803,13 +804,12 @@ def test_wait_for_press_screensaver(mocker, m5stickv):
     for _ in range(10):
         time_seq.append(tmp)
         tmp += 100
-    
+
     time.ticks_ms = mocker.MagicMock(side_effect=time_seq)
 
     input.wait_for_press(True, enable_screensaver=True)
     input.screensaver_fallback.assert_called()
-    
+
     Settings().screensaver.time = 0
     input.wait_for_button(block=False)
     input.screensaver_fallback.assert_called_once()
-
