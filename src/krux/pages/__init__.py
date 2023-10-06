@@ -566,7 +566,7 @@ class Menu:
                     return (self.menu_view.index(selected_item_index), status)
                 start_from_submenu = False
             else:
-                btn = self.ctx.input.wait_for_button()
+                btn = self.ctx.input.wait_for_button(enable_screensaver=True)
                 if self.ctx.input.touch is not None:
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()

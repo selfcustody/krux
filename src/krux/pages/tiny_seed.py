@@ -843,7 +843,7 @@ class TinyScanner(Page):
                         page_seed_numbers[word_index], bit
                     )
                 index += 1
-        print(page_seed_numbers)
+        # print(page_seed_numbers)
         return page_seed_numbers
 
     def _set_camera_sensitivity(self):
@@ -977,7 +977,7 @@ class TinyScanner(Page):
             rect = self._detect_tiny_seed(img)
             if rect:
                 gradient_corners = self._gradient_corners(rect, img)
-                print(gradient_corners)
+                # print(gradient_corners)
                 # map_regions
                 self._map_punches_region(rect, page)
                 page_seed_numbers = self._detect_and_draw_punches(img, gradient_corners)

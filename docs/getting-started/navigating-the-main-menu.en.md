@@ -62,7 +62,7 @@ The encrypted mnemonic will be converted to a QR code. When you scan this QR cod
 <img src="../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/extended-public-key-wsh-xpub-text-150.png" align="right">
 
-This option displays your master extended public key (xpub) as text as well as a QR code.
+This option displays your master extended public key (xpub) as text as well as a QR code. The extended public key (xpub) can also be stored on a SD card if available.
 
 After the xpub, a zpub or Zpub is shown depending on if a single-sig or multisig wallet was chosen. This z/Zpub is usually not necessary unless you are using a wallet coordinator that either cannot parse or ignores [key origin information in key expressions](https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#Key_Expressions).
 

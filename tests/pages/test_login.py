@@ -1671,6 +1671,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 # Leave Settings
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
@@ -1711,6 +1712,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Leave Settings
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
@@ -1770,6 +1772,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 # Leave Settings
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
@@ -1818,7 +1821,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
     LOCALE_INDEX = 2
     LOGGING_INDEX = 3
     PRINTER_INDEX = 5
-    LEAVE_INDEX = 8
+    LEAVE_INDEX = 9
 
     cases = [
         (

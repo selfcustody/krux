@@ -16,7 +16,7 @@ def reset_input_states(mocker, input):
         mocker.patch.object(input, "page_prev_event", new=lambda: False)
     if input.touch:
         mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
-        mocker.patch.object(input.touch.touch_driver, "event", new=lambda: False)
+        mocker.patch.object(input.touch, "event", new=lambda: False)
     return input
 
 
@@ -345,7 +345,7 @@ def test_wait_for_button_blocks_until_touch_released(mocker, amigo_tft):
     input = Input()
     input = reset_input_states(mocker, input)
 
-    mocker.patch.object(input.touch.touch_driver, "event", new=lambda: True)
+    mocker.patch.object(input.touch, "event", new=lambda: True)
     mocker.patch.object(input, "touch_value", new=lambda: PRESSED)
 
     def release():
@@ -461,8 +461,7 @@ def test_touch_indexing(mocker, amigo_tft):
     input = reset_input_states(mocker, input)
 
     elapsed_time = 0
-    mocker.patch.object(input.touch.touch_driver, "event", new=lambda: True)
-
+    
     def time_control(point1, point2):
         nonlocal elapsed_time
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
@@ -470,12 +469,14 @@ def test_touch_indexing(mocker, amigo_tft):
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # touch on 3º quadrant
+        mocker.patch.object(input.touch, "event", new=lambda: True)
         mocker.patch.object(input.touch.touch_driver, "irq_point", new=lambda: point1)
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: point1
         )
         time.sleep(0.1)
-        # mocker.patch.object(input.touch.touch_driver, "event", new=lambda: False)
+        mocker.patch.object(input.touch, "event", new=lambda: False)
+        time.sleep(0.1)
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
         # touch slightly sideways before release
@@ -533,7 +534,7 @@ def test_touch_gestures(mocker, amigo_tft):
 
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
-        mocker.patch.object(input.touch.touch_driver, "event", new=lambda: True)
+        mocker.patch.object(input.touch, "event", new=lambda: True)
         mocker.patch.object(input.touch.touch_driver, "irq_point", new=lambda: point1)
         mocker.patch.object(
             input.touch.touch_driver, "current_point", new=lambda: point1
@@ -785,3 +786,31 @@ def test_page_prev_button_press_when_buttons_not_active_returns_none(mocker, ami
     assert btn is None
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
+
+
+def test_wait_for_press_screensaver(mocker, m5stickv):
+    from krux.input import Input
+    from krux.krux_settings import Settings
+    import krux
+
+    input = Input(screensaver_fallback=mocker.MagicMock())
+    input = reset_input_states(mocker, input)
+    input.buttons_active = False
+
+    # Make test faster
+    Settings().screensaver.time = 0.0001
+
+    time_seq = []
+    tmp = 100
+    for _ in range(10):
+        time_seq.append(tmp)
+        tmp += 100
+
+    time.ticks_ms = mocker.MagicMock(side_effect=time_seq)
+
+    input.wait_for_press(True, enable_screensaver=True)
+    input.screensaver_fallback.assert_called()
+
+    Settings().screensaver.time = 0
+    input.wait_for_button(block=False)
+    input.screensaver_fallback.assert_called_once()

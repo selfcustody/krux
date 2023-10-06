@@ -115,7 +115,7 @@ ft6x36.register_sequence_executor(sequence_executor)
 
 
 def run_krux():
-    with open("../src/boot.py") as boot_file:
+    with open("../src/boot.py", "r", encoding='utf-8') as boot_file:
         exec(boot_file.read())
 
 
