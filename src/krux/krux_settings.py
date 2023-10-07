@@ -363,25 +363,16 @@ class ThemeSettings(SettingsNamespace):
     }
     namespace = "settings.appearance"
     theme = CategorySetting("theme", DARK_THEME_NAME, list(THEME_NAMES.values()))
+    screensaver_time = NumberSetting(int, "screensaver_time", 5, [0, 30])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "theme": t("Theme"),
+            "screensaver_time": t("Screensaver time"),
+
         }[attr]
 
-
-class ScreensaverSettings(SettingsNamespace):
-    """Screensaver settings"""
-
-    namespace = "settings.screensaver"
-    time = NumberSetting(int, "time", 5, [0, 30])
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "time": t("Wait time"),
-        }[attr]
 
 
 class Settings(SettingsNamespace):
@@ -397,7 +388,6 @@ class Settings(SettingsNamespace):
         self.encryption = EncryptionSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
-        self.screensaver = ScreensaverSettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -408,8 +398,7 @@ class Settings(SettingsNamespace):
             "logging": t("Logging"),
             "encryption": t("Encryption"),
             "persist": t("Persist"),
-            "appearance": t("Theme"),
-            "screensaver": t("Screensaver"),
+            "appearance": t("Appearance"),
         }
 
         return main_menu[attr]

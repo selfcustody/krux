@@ -204,7 +204,7 @@ class Input:
                 and enable_screensaver
                 and not self.screensaver_active
                 and self.screensaver_fallback
-                and self.screensaver_time + (Settings().screensaver.time * 60000)
+                and self.screensaver_time + (Settings().appearance.screensaver_time * 60000)
                 < time.ticks_ms()
             ):
                 self.screensaver_active = True
@@ -219,7 +219,7 @@ class Input:
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if non blocking.
         """
-        if Settings().screensaver.time == 0:
+        if Settings().appearance.screensaver_time == 0:
             enable_screensaver = False
         btn = self.wait_for_press(block, enable_screensaver=enable_screensaver)
 
