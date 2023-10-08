@@ -315,7 +315,8 @@ class Display:
         color=theme.fg_color,
         bg_color=theme.bg_color,
     ):
-        """Draw a line_str horizontally-centered on the display, at qtd_offset_y times font_height, useful for screensaver"""
+        """Draw a line_str horizontally-centered on the display, at qtd_offset_y times font_height,
+        useful for screensaver"""
         lcd.fill_rectangle(
             0, qtd_offset_y * self.font_height, self.width(), self.font_height, bg_color
         )

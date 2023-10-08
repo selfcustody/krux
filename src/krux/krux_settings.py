@@ -370,9 +370,7 @@ class ThemeSettings(SettingsNamespace):
         return {
             "theme": t("Theme"),
             "screensaver_time": t("Screensaver time"),
-
         }[attr]
-
 
 
 class Settings(SettingsNamespace):

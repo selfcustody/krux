@@ -180,7 +180,8 @@ class Input:
         start_time = time.ticks_ms()
         while time.ticks_ms() < self.debounce_time + DEBOUNCE:
             pass
-        self.flush_events()
+        if block:
+            self.flush_events()
         self.screensaver_time = start_time
         while True:
             if self.enter_event():
@@ -204,7 +205,8 @@ class Input:
                 and enable_screensaver
                 and not self.screensaver_active
                 and self.screensaver_fallback
-                and self.screensaver_time + (Settings().appearance.screensaver_time * 60000)
+                and self.screensaver_time
+                + (Settings().appearance.screensaver_time * 60000)
                 < time.ticks_ms()
             ):
                 self.screensaver_active = True
