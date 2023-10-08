@@ -65,11 +65,6 @@ CATEGORY_SETTING_COLOR_DICT = {
     BitcoinSettings.TEST_TXT: GREEN,
 }
 
-# SPIFFS erase parameters
-FLASH_SIZE = 2**24
-SPIFFS_ADDR = 0xD00000
-BLOCK_SIZE = 0x10000
-
 
 class SettingsPage(Page):
     """Class to manage settings interface"""
@@ -191,15 +186,16 @@ class SettingsPage(Page):
         """Erase all SPIFFS, removing all saved configs and mnemonics"""
 
         import flash
+        from ..firmware import FLASH_SIZE, SPIFFS_ADDR, ERASE_BLOCK_SIZE
 
-        empty_buf = b"\xff" * BLOCK_SIZE
-        for address in range(SPIFFS_ADDR, FLASH_SIZE, BLOCK_SIZE):
-            if flash.read(address, BLOCK_SIZE) == empty_buf:
+        empty_buf = b"\xff" * ERASE_BLOCK_SIZE
+        for address in range(SPIFFS_ADDR, FLASH_SIZE, ERASE_BLOCK_SIZE):
+            if flash.read(address, ERASE_BLOCK_SIZE) == empty_buf:
                 continue
-            flash.erase(address, BLOCK_SIZE)
+            flash.erase(address, ERASE_BLOCK_SIZE)
 
     def wipe_device(self):
-        """Fullyu formatts SPIFFS memory"""
+        """Fully formats SPIFFS memory"""
         self.ctx.display.clear()
         if self.prompt(
             t(
