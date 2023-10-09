@@ -1,3 +1,23 @@
+# Changelog 24.04.beta3 - October 9, 2023
+
+## Changes
+
+### IRQ Interfaces
+Button and touch presses will be detected by the application through IO interrupts. Meaning inputs events will be registered even if other tasks are being executed by the processor, resulting in a better UX.
+
+### Restore default settings
+Option to restore the device's settings to its factory state.
+
+### Wipe device
+Option on settings to wipe the device, permanently removing settings and stored encrypted mnemonics by erasing every single bit of user's flash space.
+
+### Screensaver
+Optional screensaver to reduce pixels' burn-in and grab attention of the user when the device is left powered on.
+
+### Update Embit to version 0.7
+Use latest Embit release
+
+
 # Version 23.09.0 - September 12, 2023
 After a long year, new features are finally coming out of beta and making their way into a stable release. Also @jreesun appointed @odudex as the new lead maintainer of the project.
 
