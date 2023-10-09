@@ -798,7 +798,7 @@ def test_wait_for_press_screensaver(mocker, m5stickv):
     input.buttons_active = False
 
     # Make test faster
-    Settings().screensaver.time = 0.0001
+    Settings().appearance.screensaver_time = 0.0001
 
     time_seq = []
     tmp = 100
@@ -811,6 +811,6 @@ def test_wait_for_press_screensaver(mocker, m5stickv):
     input.wait_for_press(True, enable_screensaver=True)
     input.screensaver_fallback.assert_called()
 
-    Settings().screensaver.time = 0
+    Settings().appearance.screensaver_time = 0
     input.wait_for_button(block=False)
     input.screensaver_fallback.assert_called_once()

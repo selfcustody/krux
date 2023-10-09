@@ -9,14 +9,6 @@ def test_init(mocker, m5stickv):
     assert isinstance(s, Settings)
 
 
-# @pytest.fixture
-# def mocker_sd_card(mocker):
-#     mocker.patch(
-#         "os.listdir",
-#         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
-#     )
-
-
 def test_store_init(mocker, m5stickv):
     from krux.settings import Store, SETTINGS_FILENAME, SD_PATH
 
@@ -105,7 +97,6 @@ def test_all_labels(mocker, m5stickv):
         GRBLSettings,
         PersistSettings,
         ThemeSettings,
-        ScreensaverSettings,
         TouchSettings,
         EncoderSettings,
     )
@@ -121,7 +112,6 @@ def test_all_labels(mocker, m5stickv):
     gbrl = GRBLSettings()
     persist = PersistSettings()
     appearance = ThemeSettings()
-    screensaver = ScreensaverSettings()
     touch = TouchSettings()
     encoder = EncoderSettings()
 
@@ -136,6 +126,6 @@ def test_all_labels(mocker, m5stickv):
     assert gbrl.label("tx_pin")
     assert persist.label("location")
     assert appearance.label("theme")
-    assert screensaver.label("time")
+    assert appearance.label("screensaver_time")
     assert touch.label("threshold")
     assert encoder.label("debounce")
