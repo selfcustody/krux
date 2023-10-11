@@ -408,6 +408,70 @@ class Home(Page):
                         return filename, sd.read_binary(filename)
         return "", None
 
+    def sign_at_address(self, data, qr_format):
+        """Message signed at a derived Bitcoin address - Sparrow/Specter"""
+        if data.startswith(b"signmessage"):
+            from embit import bip32, compact
+            import hashlib
+            from ..baseconv import base_encode
+
+            data_blocks = data.split(b" ")
+            if len(data_blocks) >= 3:
+                derivation = data_blocks[1].decode()
+                message = b" ".join(data_blocks[2:])
+                message = message.split(b":")
+                if len(message) >= 2 and message[0] == b"ascii":
+                    message = b" ".join(message[1:])
+                    derivation = bip32.parse_path(derivation)
+                    self.ctx.display.clear()
+                    address = self.ctx.wallet.descriptor.derive(
+                        derivation[4], branch_index=0
+                    ).address(network=self.ctx.wallet.key.network)
+                    add_chars_amount = (
+                        self.ctx.display.width() // self.ctx.display.font_width
+                    )
+                    add_chars_amount -= 10
+                    add_chars_amount //= 2
+                    short_address = (
+                        str(derivation[4])
+                        + ". "
+                        + address[: add_chars_amount + 3]
+                        + ".."
+                        + address[-add_chars_amount:]
+                    )
+                    self.ctx.display.draw_centered_text(
+                        t("Message:")
+                        + "\n"
+                        + message.decode()
+                        + "\n\n"
+                        + "Address:"
+                        + "\n"
+                        + short_address
+                    )
+                    if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
+                        return MENU_CONTINUE
+                    message_hash = hashlib.sha256(
+                        hashlib.sha256(
+                            b"\x18Bitcoin Signed Message:\n"
+                            + compact.to_bytes(len(message))
+                            + message
+                        ).digest()
+                    ).digest()
+                    sig = self.ctx.wallet.key.sign_at(derivation, message_hash)
+
+                    # Encode sig as base64 string
+                    encoded_sig = base_encode(sig, 64).strip().decode()
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(
+                        t("Signature") + ":\n\n%s" % encoded_sig
+                    )
+                    self.ctx.input.wait_for_button()
+                    title = t("Signed Message")
+                    self.display_qr_codes(encoded_sig, qr_format, title)
+                    self.print_standard_qr(encoded_sig, qr_format, title)
+                    return True
+        return False
+
     def sign_message(self):
         """Handler for the 'sign message' menu item"""
 
@@ -433,6 +497,9 @@ class Home(Page):
 
         # message read OK!
         data = data.encode() if isinstance(data, str) else data
+
+        if self.sign_at_address(data, qr_format):
+            return MENU_CONTINUE
 
         message_hash = None
         if len(data) == 32:
