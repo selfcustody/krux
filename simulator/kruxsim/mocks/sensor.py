@@ -75,7 +75,13 @@ def find_qrcodes(img):
     codes = []
     data = pyzbar.pyzbar.decode(img)
     if data:
-        codes.append(Mockqrcode(data[0].data.decode()))
+        try:
+            test_encoding = data[0].data.decode().encode('shift-jis').decode()
+            # Send data as string
+            codes.append(Mockqrcode(data[0].data.decode()))
+        except:
+            # If fails re-decode test send re-encoded bytes
+            codes.append(Mockqrcode(data[0].data.decode().encode('shift-jis')))
     return codes
 
 
