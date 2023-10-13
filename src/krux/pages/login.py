@@ -447,21 +447,28 @@ class Login(Page):
                 pass
 
             if not words:
+                data_bytes = ""
                 try:
                     data_bytes = (
                         data.encode("latin-1") if isinstance(data, str) else data
                     )
-                    # CompactSeedQR format
-                    if len(data_bytes) in (16, 32):
-                        words = bip39.mnemonic_from_bytes(data_bytes).split()
-                    # SeedQR format
-                    elif len(data_bytes) in (48, 96):
-                        words = [
-                            WORDLIST[int(data_bytes[i : i + 4])]
-                            for i in range(0, len(data_bytes), 4)
-                        ]
                 except:
-                    pass
+                    try:
+                        data_bytes = (
+                            data.encode("shift-jis") if isinstance(data, str) else data
+                        )
+                    except:
+                        pass
+
+                if len(data_bytes) in (16, 32):
+                    # CompactSeedQR format
+                    words = bip39.mnemonic_from_bytes(data_bytes).split()
+                # SeedQR format
+                elif len(data_bytes) in (48, 96):
+                    words = [
+                        WORDLIST[int(data_bytes[i : i + 4])]
+                        for i in range(0, len(data_bytes), 4)
+                    ]
             if not words:
                 words = self._encrypted_qr_code(data)
         if not words or (len(words) != 12 and len(words) != 24):

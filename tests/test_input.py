@@ -461,7 +461,7 @@ def test_touch_indexing(mocker, amigo_tft):
     input = reset_input_states(mocker, input)
 
     elapsed_time = 0
-    
+
     def time_control(point1, point2):
         nonlocal elapsed_time
         mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
