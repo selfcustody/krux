@@ -66,16 +66,18 @@ nav:
       - From pre-built test release: getting-started/installing/from-test-release.en.md
       - From GUI application: getting-started/installing/from-gui.en.md
       - From source: getting-started/installing/from-source.en.md
-    - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
-    - Loading a Mnemonic: getting-started/loading-a-mnemonic.en.md
-    - Navigating the Main Menu: getting-started/navigating-the-main-menu.en.md
-    - Using a Single-sig Wallet: getting-started/using-a-single-sig-wallet.en.md
-    - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.en.md
-    - Encrypted Mnemonics: getting-started/encrypted-mnemonics.en.md
-    - Printing: getting-started/printing.en.md
-    - Transcribing QR codes: getting-started/QR-transcript-tools.en.md
+    - Basic Usage:
+      - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
+      - Loading a Mnemonic: getting-started/loading-a-mnemonic.en.md
+      - Navigating the Main Menu: getting-started/navigating-the-main-menu.en.md
+      - Using a Single-sig Wallet: getting-started/using-a-single-sig-wallet.en.md
+      - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.en.md
+    - Features:
+      - Encrypted Mnemonics: getting-started/encrypted-mnemonics.en.md
+      - Printing: getting-started/printing.en.md
+      - Tools: getting-started/tools.en.md
+      - Transcribing QR codes: getting-started/QR-transcript-tools.en.md
     - Settings: getting-started/settings.en.md
-    - Tools: getting-started/tools.en.md
   - Devices and Part List: parts.en.md
   - FAQ: faq.en.md
   - Development: development.md
