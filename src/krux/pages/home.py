@@ -410,6 +410,7 @@ class Home(Page):
 
     def sign_at_address(self, data, qr_format):
         """Message signed at a derived Bitcoin address - Sparrow/Specter"""
+
         if data.startswith(b"signmessage"):
             from embit import bip32, compact
             import hashlib
@@ -439,17 +440,28 @@ class Home(Page):
                         + ".."
                         + address[-add_chars_amount:]
                     )
-                    self.ctx.display.draw_centered_text(
+                    message_to_display = self.ctx.display.to_lines(message.decode())
+                    if len(message_to_display) > self.ctx.display.total_lines - 10:
+                        # 5 lines are used for prompt and constant texts
+                        message_cut = (self.ctx.display.total_lines - 10) // 2
+                        message_to_display = (
+                            message_to_display[:message_cut]
+                            + ["..."]
+                            + message_to_display[-message_cut:]
+                        )
+                    message_to_display = "\n".join(message_to_display)
+
+                    self.ctx.display.draw_hcentered_text(
                         t("Message:")
                         + "\n"
-                        + message.decode()
+                        + message_to_display
                         + "\n\n"
                         + "Address:"
                         + "\n"
                         + short_address
                     )
                     if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
-                        return MENU_CONTINUE
+                        return True
                     message_hash = hashlib.sha256(
                         hashlib.sha256(
                             b"\x18Bitcoin Signed Message:\n"
