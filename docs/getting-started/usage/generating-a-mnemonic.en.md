@@ -1,12 +1,12 @@
 Krux has support for creating 12 and 24-word mnemonic seed phrases. Since true entropy is difficult to produce, especially with an embedded device, we recommend to outsource entropy generation using dice rolls, but it is also possible to use camera as a source of entropy to quickly create a mnemonic.
 At the start screen, once you select `New Mnemonic`, you will be taken to a second menu where you can choose to create a mnemonic via camera, via rolls of a D6 (standard six-sided die) or D20 (20-sided die).
 
-<img src="../../img/maixpy_amigo_tft/new-mnemonic-options-150.png">
-<img src="../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-options-150.png">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
 
 ## Camera
-<img src="../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right">
 
  (Experimental!) Choose between 12 or 24 words, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
 
@@ -15,8 +15,8 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 ## Dice Rolls
  
 ### Via D6
-<img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-1-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-1-150.png" align="right">
 
 Choose between 12 or 24 words.
 
@@ -25,23 +25,23 @@ The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); there
 <div style="clear: both"></div>
 
 ### Via D20
-<img src="../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d20-roll-1-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d20-roll-1-150.png" align="right">
 
 Since a D20 has more possible outcomes, the entropy is increased per roll to 4.322 bits ( log<sub>2</sub>(20) ). This means that only 30 rolls are necessary to create a 12-word mnemonic and 60 rolls for a 24-word mnemonic.
 
 <div style="clear: both"></div>
 
 ### How it works
-<img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-string-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-string-150.png" align="right">
 
 For dice rolls, Krux keeps track of every roll you enter and displays the cumulative string of outcomes after each roll. 
 
 <div style="clear: both"></div>
 
-<img src="../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-sha256-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-sha256-150.png" align="right">
 
 When you have entered your final roll, Krux will hash this string using SHA256 and output the resulting hash to the screen so that you can verify it for yourself.
 

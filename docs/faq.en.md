@@ -23,7 +23,7 @@ For mnemonics, Krux recognizes:
 1. BIP-39 Plaintext (Used by Krux and [https://iancoleman.io/bip39/](https://iancoleman.io/bip39/))
 2. SeedSigner [SeedQR and CompactSeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md) Formats
 3. [UR Type `crypto-bip39`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md)
-4. Encrypted QR Code (Format created by Krux, [more info here](../encrypted-qr-codes))
+4. Encrypted QR Code (Format created by Krux, [more info here](getting-started/features/encrypted-mnemonics.md))
 
 For loading wallets, Krux recognizes:
 
@@ -69,6 +69,7 @@ Some Amigo screens have inverted x coordinates while others don’t.
 If after flashing `maixpy_amigo_tft` to your device you notice that the buttons on keypad input screens appear to be in the wrong order, please try flashing `maixpy_amigo_ips` instead (or vice versa) which should correct the issue. 
 
 ## Why isn't Krux detecting my microSD card or presenting an error?
-Starting from version 23.09.0, Krux supports SD card hot plugging. If you are using older versions, it may only detect the SD card at boot, so make sure Krux is turned off when inserting the microSD into it. Also check if the SD card is in MBR/DOS FAT32 format, you can also test the card a few times using Krux [Tools>Check SD Card](../getting-started/tools/#check-sd-card) to see if it worked.
+Starting from version 23.09.0, Krux supports SD card hot plugging. If you are using older versions, it may only detect the SD card at boot, so make sure Krux is turned off when inserting the microSD into it. To test the card compatibility use Krux [Tools>Check SD Card](getting-started/features/tools.md/#check-sd-card).
+Make sure the SD card is using MBR/DOS partition table and FAT32 format.
 
 Here is some [supported microSD cards](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test), and here is the MaixPy FAQ explaining [Why my micro SD card cannot be read](https://wiki.sipeed.com/soft/maixpy/en/others/maixpy_faq.html#Micro-SD-card-cannot-be-read).

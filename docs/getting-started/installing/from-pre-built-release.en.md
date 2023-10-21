@@ -77,8 +77,4 @@ If after flashing `maixpy_amigo_tft` to your device you notice that the buttons 
 Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use. If you have a microSD card inserted into the device, your preference will be automatically saved to a `settings.json` file at the root of the card.
 
 ### Upgrade via microSD card
-Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades via microSD card to keep the device airgapped.
-
-To perform an upgrade, simply copy the `firmware.bin` and `firmware.bin.sig` files to the root of a FAT-32 formatted microSD card, insert the card into your device, and reboot the device. If it detects the new firmware file and is able to verify the signature, you will be prompted to install it.
-
-Once installation is complete, eject the microSD card and delete the firmware files before reinserting and rebooting.
+Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades [via microSD](../features/sd-card-update.md) card to keep the device airgapped.
