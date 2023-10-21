@@ -698,7 +698,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../generating-a-mnemonic/" class="md-nav__link">
+      <a href="../../usage/generating-a-mnemonic/" class="md-nav__link">
         Generating a Mnemonic
       </a>
     </li>
@@ -712,7 +712,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../loading-a-mnemonic/" class="md-nav__link">
+      <a href="../../usage/loading-a-mnemonic/" class="md-nav__link">
         Loading a Mnemonic
       </a>
     </li>
@@ -726,7 +726,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../navigating-the-main-menu/" class="md-nav__link">
+      <a href="../../usage/navigating-the-main-menu/" class="md-nav__link">
         Navigating the Main Menu
       </a>
     </li>
@@ -740,7 +740,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../using-a-single-sig-wallet/" class="md-nav__link">
+      <a href="../../usage/using-a-single-sig-wallet/" class="md-nav__link">
         Using a Single-sig Wallet
       </a>
     </li>
@@ -754,7 +754,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../using-a-multisig-wallet/" class="md-nav__link">
+      <a href="../../usage/using-a-multisig-wallet/" class="md-nav__link">
         Using a Multisig Wallet
       </a>
     </li>
@@ -793,6 +793,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2_4">
@@ -813,7 +815,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../encrypted-mnemonics/" class="md-nav__link">
+      <a href="../../features/encrypted-mnemonics/" class="md-nav__link">
         Encrypted Mnemonics
       </a>
     </li>
@@ -827,7 +829,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../printing/" class="md-nav__link">
+      <a href="../../features/printing/" class="md-nav__link">
         Printing
       </a>
     </li>
@@ -841,7 +843,21 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/" class="md-nav__link">
+      <a href="../../features/sd-card-update/" class="md-nav__link">
+        SD Card Updates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/tools/" class="md-nav__link">
         Tools
       </a>
     </li>
@@ -855,8 +871,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../QR-transcript-tools/" class="md-nav__link">
-        Transcribing QR codes
+      <a href="../../features/QR-transcript-tools/" class="md-nav__link">
+        Transcribing QR Codes
       </a>
     </li>
   
@@ -979,7 +995,7 @@
 <p>Keep in mind that this is software under development in the alpha stage and may be buggy. If you find any bugs or want to contribute to the project, please go to <a href="https://github.com/selfcustody/krux-installer/issues">issues</a> or <a href="https://github.com/selfcustody/krux-installer/fork">fork it</a>.</p>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <h4 id="hardware">Hardware<a class="headerlink" href="#hardware" title="Permanent link">&para;</a></h4>
-<p>You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, or Maix Bit and a USB-C cable to continue. Consult the <a href="../../parts">part list</a> for more information.</p>
+<p>You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, or Maix Bit and a USB-C cable to continue. Consult the <a href="../../../parts/">part list</a> for more information.</p>
 <h4 id="download-the-latest-release">Download the latest release<a class="headerlink" href="#download-the-latest-release" title="Permanent link">&para;</a></h4>
 <p>The primary way to download the binary is via <a href="https://github.com/selfcustody/krux-installer/releases">releases</a> page on Github, search for <code>Assets</code> and click the dropdown arrow:</p>
 <p><img alt="release-page" src="../../../img/krux-installer/download_release.gif" title="KruxInstaller download release page" /></p>
@@ -1020,7 +1036,7 @@
 <p><img alt="select-device" src="../../../img/krux-installer/select_device.gif" title="KruxInstaller Select Device Menu with choosen device" /></p>
 <h4 id="select-version">Select version<a class="headerlink" href="#select-version" title="Permanent link">&para;</a></h4>
 <p>Now we will select which firmware we want to flash, i.e. the <a href="https://github.com/selfcustody/krux/releases">latest official release</a> or the <a href="https://github.com/odudex/krux_binaries">test binaries</a>. </p>
-<p>The difference between the two releases is that, while in the first one we can <a href="/krux/getting-started/installing/#verify-the-files">verify its integrity and authenticity</a>, in the second one we will have no means of verifying it. However, the test binaries will contain the newest features that are being developed and discussed by the kruxer community.</p>
+<p>The difference between the two releases is that, while in the first one we can <a href="../from-pre-built-release/#verify-the-files">verify its integrity and authenticity</a>, in the second one we will have no means of verifying it. However, the test binaries will contain the newest features that are being developed and discussed by the kruxer community.</p>
 <h5 id="official-release">Official release<a class="headerlink" href="#official-release" title="Permanent link">&para;</a></h5>
 <p>The software will display the latest officially released version in the form <code>selfcustody/tags/vXX.YY.Z</code>, where XX means the year of release, YY the month of release and Z a subversion of this release.</p>
 <p>Once selected, the application will check if the entry exists in the system. If not, it will download the following files: <code>krux-vXX.YY.Z.zip</code>, <code>krux-vXX.YY.Z.zip.sha256.txt</code>, <code>krux-vXX.YY.Z.zip .sig</code> and <code>selfcustody.pem</code>.</p>
