@@ -31,6 +31,7 @@ from ..sd_card import SDHandler
 
 FILE_SPECIAL = "0123456789()-.[]_~"
 
+
 class SaveFile(Page):
     """File saver user interface"""
 
