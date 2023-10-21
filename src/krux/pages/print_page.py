@@ -31,7 +31,6 @@ class PrintPage(Page):
     """Printing user interface"""
 
     def __init__(self, ctx):
-        # Returns True if printer successfully created
         super().__init__(ctx, None)
         self.ctx = ctx
         self.ctx.display.clear()

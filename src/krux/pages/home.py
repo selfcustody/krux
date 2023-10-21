@@ -31,9 +31,6 @@ from . import (
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
-    ESC_KEY,
-    LETTERS,
-    UPPERCASE_LETTERS,
 )
 from ..sd_card import SDHandler
 
@@ -41,8 +38,6 @@ from ..sd_card import SDHandler
 WALLET_XPUB_START = 4
 # len of the xpub to show
 WALLET_XPUB_DIGITS = 4
-
-FILE_SPECIAL = "0123456789()-.[]_~"
 
 PSBT_FILE_SUFFIX = "-signed"
 PSBT_FILE_EXTENSION = ".psbt"
@@ -193,8 +188,11 @@ class Home(Page):
             self.print_standard_qr(xpub, FORMAT_NONE, title)
 
             # Try to save the XPUB file on the SD card
-            try:
-                self._save_file(
+            if self.has_sd_card():
+                from .files_operations import SaveFile
+
+                save_page = SaveFile(self.ctx)
+                save_page.save_file(
                     xpub,
                     title,
                     title,
@@ -202,8 +200,6 @@ class Home(Page):
                     PUBKEY_FILE_EXTENSION,
                     save_as_binary=False,
                 )
-            except OSError:
-                pass
 
         return MENU_CONTINUE
 
@@ -372,10 +368,11 @@ class Home(Page):
             gc.collect()
 
             # Try to save the signed PSBT file on the SD card
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-            try:
-                self._save_file(
+            if self.has_sd_card():
+                from .files_operations import SaveFile
+
+                save_page = SaveFile(self.ctx)
+                save_page.save_file(
                     serialized_signed_psbt,
                     "QRCode",
                     psbt_filename,
@@ -383,29 +380,25 @@ class Home(Page):
                     PSBT_FILE_EXTENSION,
                     PSBT_FILE_SUFFIX,
                 )
-            except OSError:
-                pass
-
         return MENU_CONTINUE
 
     def _load_file(self, file_ext=""):
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-        with SDHandler() as sd:
-            self.ctx.display.clear()
-            if self.prompt(
-                t("Load from SD card?") + "\n\n", self.ctx.display.height() // 2
-            ):
-                from .files_manager import FileManager
+        if self.has_sd_card():
+            with SDHandler() as sd:
+                self.ctx.display.clear()
+                if self.prompt(
+                    t("Load from SD card?") + "\n\n", self.ctx.display.height() // 2
+                ):
+                    from .files_manager import FileManager
 
-                file_manager = FileManager(self.ctx)
-                filename = file_manager.select_file(file_extension=file_ext)
+                    file_manager = FileManager(self.ctx)
+                    filename = file_manager.select_file(file_extension=file_ext)
 
-                if filename:
-                    filename = file_manager.display_file(filename)
+                    if filename:
+                        filename = file_manager.display_file(filename)
 
-                    if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
-                        return filename, sd.read_binary(filename)
+                        if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
+                            return filename, sd.read_binary(filename)
         return "", None
 
     def sign_at_address(self, data, qr_format):
@@ -573,8 +566,11 @@ class Home(Page):
         gc.collect()
 
         # Try to save the signature file on the SD card
-        try:
-            self._save_file(
+        if self.has_sd_card():
+            from .files_operations import SaveFile
+
+            save_page = SaveFile(self.ctx)
+            save_page.save_file(
                 sig,
                 "message",
                 message_filename,
@@ -582,116 +578,13 @@ class Home(Page):
                 SIGNATURE_FILE_EXTENSION,
                 SIGNATURE_FILE_SUFFIX,
             )
-        except OSError:
-            pass
 
-        # Try to save the public key on the SD card
-        try:
-            self._save_file(
+            # Try to save the public key on the SD card
+            save_page.save_file(
                 pubkey, "pubkey", "", title + ":", PUBKEY_FILE_EXTENSION, "", False
             )
-        except OSError:
-            pass
 
         return MENU_CONTINUE
-
-    def _save_file(
-        self,
-        data,
-        empty_name,
-        filename="",
-        file_description="",
-        file_extension="",
-        file_suffix="",
-        save_as_binary=True,
-    ):
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-        with SDHandler() as sd:
-            # Wait until user defines a filename or select NO on the prompt
-            filename_undefined = True
-            while filename_undefined:
-                self.ctx.display.clear()
-                if self.prompt(
-                    file_description + "\n" + t("Save to SD card?") + "\n\n",
-                    self.ctx.display.height() // 2,
-                ):
-                    filename, filename_undefined = self._set_filename(
-                        filename,
-                        empty_name,
-                        file_suffix,
-                        file_extension,
-                    )
-
-                    # if user defined a filename and it is ok, save!
-                    if not filename_undefined:
-                        if save_as_binary:
-                            sd.write_binary(filename, data)
-                        else:
-                            sd.write(filename, data)
-                        self.ctx.display.clear()
-                        self.flash_text(t("Saved to SD card:\n%s") % filename)
-                else:
-                    filename_undefined = False
-
-    def _set_filename(
-        self, curr_filename="", empty_filename="some_file", suffix="", file_extension=""
-    ):
-        """Helper to set the filename based on a suggestion and the user input"""
-        started_filename = curr_filename
-        filename_undefined = True
-
-        # remove the file_extension if exists
-        curr_filename = (
-            curr_filename[: len(curr_filename) - len(file_extension)]
-            if curr_filename.endswith(file_extension)
-            else curr_filename
-        )
-
-        # remove the suffix if exists (because we will add it later)
-        curr_filename = (
-            curr_filename[: len(curr_filename) - len(suffix)]
-            if curr_filename.endswith(suffix)
-            else curr_filename
-        )
-
-        curr_filename = self.capture_from_keypad(
-            t("Filename"),
-            [LETTERS, UPPERCASE_LETTERS, FILE_SPECIAL],
-            starting_buffer=("%s" + suffix) % curr_filename
-            if curr_filename
-            else empty_filename + suffix,
-        )
-
-        # Verify if user defined a filename and it is not just dots
-        if (
-            curr_filename
-            and curr_filename != ESC_KEY
-            and not all(c in "." for c in curr_filename)
-        ):
-            # add the extension ".psbt"
-            curr_filename = (
-                curr_filename
-                if curr_filename.endswith(file_extension)
-                else curr_filename + file_extension
-            )
-            # check and warn for overwrite filename
-            # add the "/sd/" prefix
-            if SDHandler.file_exists("/sd/" + curr_filename):
-                self.ctx.display.clear()
-                if self.prompt(
-                    t("Filename %s exists on SD card, overwrite?") % curr_filename
-                    + "\n\n",
-                    self.ctx.display.height() // 2,
-                ):
-                    filename_undefined = False
-            else:
-                filename_undefined = False
-
-        if curr_filename == ESC_KEY:
-            curr_filename = started_filename
-
-        return (curr_filename, filename_undefined)
 
     def display_wallet(self, wallet, include_qr=True):
         """Displays a wallet, including its label and abbreviated xpubs.

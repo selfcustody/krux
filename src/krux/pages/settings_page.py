@@ -77,16 +77,12 @@ class SettingsPage(Page):
         """Handler for the settings"""
         location = Settings().persist.location
         if location == SD_PATH:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-            try:
-                # Check for SD hot-plug
-                with SDHandler():
-                    self._display_centered_text(
-                        t("Your changes will be kept on the SD card."),
-                        duration=SD_MSG_TIME,
-                    )
-            except OSError:
+            if self.has_sd_card():
+                self._display_centered_text(
+                    t("Your changes will be kept on the SD card."),
+                    duration=SD_MSG_TIME,
+                )
+            else:
                 self._display_centered_text(
                     t("SD card not detected.")
                     + "\n\n"
