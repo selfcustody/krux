@@ -31,7 +31,6 @@ class PrintPage(Page):
     """Printing user interface"""
 
     def __init__(self, ctx):
-        # Returns True if printer successfully created
         super().__init__(ctx, None)
         self.ctx = ctx
         self.ctx.display.clear()
@@ -40,7 +39,7 @@ class PrintPage(Page):
 
     def _send_qr_to_printer(self, qr_code, i=0, count=1):
         self.ctx.display.clear()
-        if Settings().printer.driver == "cnc/file":
+        if Settings().hardware.printer.driver == "cnc/file":
             self.ctx.display.draw_centered_text(t("Exporting to SD card.."))
         else:
             self.ctx.display.draw_centered_text(t("Printing\n%d / %d") % (i + 1, count))

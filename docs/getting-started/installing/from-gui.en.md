@@ -10,7 +10,7 @@ Keep in mind that this is software under development in the alpha stage and may 
 
 ### Requirements
 #### Hardware
-You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, or Maix Bit and a USB-C cable to continue. Consult the [part list](../../parts) for more information.
+You will need a K210-based device such as the M5StickV, Maix Amigo, Maix Dock, or Maix Bit and a USB-C cable to continue. Consult the [part list](../../parts.md) for more information.
 
 #### Download the latest release
 
@@ -86,7 +86,7 @@ Clicking on the dropdown arrow brings up a list of officially supported K210 dev
 
 Now we will select which firmware we want to flash, i.e. the [latest official release](https://github.com/selfcustody/krux/releases) or the [test binaries](https://github.com/odudex/krux_binaries). 
 
-The difference between the two releases is that, while in the first one we can [verify its integrity and authenticity](/krux/getting-started/installing/#verify-the-files), in the second one we will have no means of verifying it. However, the test binaries will contain the newest features that are being developed and discussed by the kruxer community.
+The difference between the two releases is that, while in the first one we can [verify its integrity and authenticity](from-pre-built-release.md/#verify-the-files), in the second one we will have no means of verifying it. However, the test binaries will contain the newest features that are being developed and discussed by the kruxer community.
 
 
 ##### Official release

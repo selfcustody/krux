@@ -93,6 +93,9 @@ class QRPartParser:
             return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
         code_buffer = io.StringIO("")
         for _, part in sorted(self.parts.items()):
+            if isinstance(part, bytes):
+                # Encoded data won't write on StringIO
+                return part
             code_buffer.write(part)
         code = code_buffer.getvalue()
         code_buffer.close()

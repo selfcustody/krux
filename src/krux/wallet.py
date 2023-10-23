@@ -43,7 +43,7 @@ class Wallet:
         self.policy = None
         if not self.key.multisig:
             self.descriptor = Descriptor.from_string(
-                "wpkh(%s/{0,1}/*)" % self.key.key_expression()
+                "wpkh(%s/<0;1>/*)" % self.key.key_expression()
             )
             self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
@@ -206,7 +206,7 @@ def parse_wallet(wallet_data, network):
                 )
             else:
                 # Single-sig
-                descriptor = Descriptor.from_string("wpkh(%s/{0,1}/*)" % keys[0])
+                descriptor = Descriptor.from_string("wpkh(%s/<0;1>/*)" % keys[0])
             label = (
                 key_vals[key_vals.index("Name") + 1]
                 if key_vals.index("Name") >= 0

@@ -38,6 +38,7 @@ from ..input import (
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, LoggingSettings, BitcoinSettings
+from ..sd_card import SDHandler
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -367,12 +368,12 @@ class Page:
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
         """
-        if Settings().printer.driver == "none":
+        if Settings().hardware.printer.driver == "none":
             return False
 
         self.ctx.display.clear()
         if self.prompt(
-            t("Print to QR?\n\n%s\n\n") % Settings().printer.driver,
+            t("Print to QR?\n\n%s\n\n") % Settings().hardware.printer.driver,
             self.ctx.display.height() // 2,
         ):
             return True
@@ -465,6 +466,17 @@ class Page:
                 return True
         # BUTTON_ENTER
         return answer
+
+    def has_sd_card(self):
+        """Checks if the device has a SD card inserted"""
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+        try:
+            # Check for SD hot-plug
+            with SDHandler():
+                return True
+        except:
+            return False
 
     def shutdown(self):
         """Handler for the 'shutdown' menu item"""

@@ -58,7 +58,7 @@ class Printer:
 def create_printer():
     """Instantiates a new printer dynamically based on the default in Settings"""
 
-    module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
+    module, cls = PrinterSettings.PRINTERS[Settings().hardware.printer.driver]
     if not cls:
         return None
     return getattr(
