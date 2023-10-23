@@ -93,5 +93,5 @@ class Context:
                     anim_frame = 0
                     bg_color, fg_color = fg_color, bg_color
 
-            if self.input.wait_for_press(block=False) is not None:
+            if self.input.wait_for_button(block=False) is not None:
                 break
