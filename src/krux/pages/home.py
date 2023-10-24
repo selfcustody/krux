@@ -457,7 +457,7 @@ class Home(Page):
                 + xpub[len(xpub) - WALLET_XPUB_DIGITS :]
             )
 
-        if include_qr:
+        if not wallet.is_multisig() and include_qr:
             wallet_data, qr_format = wallet.wallet_qr()
             self.display_qr_codes(wallet_data, qr_format, title=about)
         else:
@@ -478,8 +478,12 @@ class Home(Page):
             about += "\n".join(xpubs)
 
             if include_qr:
+                self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
+                self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+                self.ctx.input.wait_for_button()
                 wallet_data, qr_format = wallet.wallet_qr()
-                self.display_qr_codes(wallet_data, qr_format, title=about)
+                self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
             else:
                 self.ctx.input.wait_for_button()
                 self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
