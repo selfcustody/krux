@@ -38,6 +38,7 @@ from ..sd_card import (
     PSBT_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
     DESCRIPTOR_FILE_EXTENSION,
+    JSON_FILE_EXTENSION,
 )
 
 # to start xpub value without the xpub/zpub/ypub prefix
@@ -239,7 +240,7 @@ class Home(Page):
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE
             try:
-                _, wallet_data = self._load_file()  # Allow any extension
+                _, wallet_data = self._load_file((DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION))
             except OSError:
                 pass
 
