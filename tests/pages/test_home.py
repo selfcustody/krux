@@ -614,7 +614,7 @@ def test_wallet(mocker, m5stickv, tdata):
     from krux.qr import FORMAT_PMOFN
 
     cases = [
-        # Don't load
+        # 0 Don't load
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -622,7 +622,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_PAGE],
         ),
-        # Load, good data, accept
+        # 1 Load, good data, accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -630,7 +630,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # Load, good data, decline
+        # 2 Load, good data, decline
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -638,11 +638,11 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_PAGE],
         ),
-        # Load, bad capture
+        # 3 Load, bad capture
         (False, tdata.SINGLESIG_12_WORD_KEY, None, None, [BUTTON_ENTER]),
-        # Load, bad wallet data
+        # 4 Load, bad wallet data
         (False, tdata.SINGLESIG_12_WORD_KEY, "{}", None, [BUTTON_ENTER, BUTTON_ENTER]),
-        # No print prompt
+        # 5 No print prompt
         (
             True,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -650,7 +650,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER],
         ),
-        # Print
+        # 6 Print
         (
             True,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -658,7 +658,7 @@ def test_wallet(mocker, m5stickv, tdata):
             MockPrinter(),
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # Decline to print
+        # 7 Decline to print
         (
             True,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -666,16 +666,20 @@ def test_wallet(mocker, m5stickv, tdata):
             MockPrinter(),
             [BUTTON_ENTER, BUTTON_PAGE],
         ),
-        # Multisig wallet, no print prompt
+        # 8 Multisig wallet, no print prompt
         (
             True,
             tdata.MULTISIG_12_WORD_KEY,
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER],
         ),
     ]
+
+    num = 0
     for case in cases:
+        print("case: %d" % num)
+        num = num + 1
         wallet = Wallet(case[1])
         if case[0]:
             wallet.load(case[2], FORMAT_PMOFN)
@@ -1031,7 +1035,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
 
 def test_sign_message(mocker, m5stickv, tdata):
     import binascii
-    from krux.pages.home import Home
+    from krux.pages.sign_message_ui import SignMessage
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -1165,7 +1169,7 @@ def test_sign_message(mocker, m5stickv, tdata):
         wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
 
         ctx = create_ctx(mocker, case[3], wallet, case[2])
-        home = Home(ctx)
+        home = SignMessage(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
         mocker.patch.object(
             home,
