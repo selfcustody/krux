@@ -38,7 +38,6 @@ from ..sd_card import (
     PSBT_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
     DESCRIPTOR_FILE_EXTENSION,
-    DESCRIPTOR_FILE_EXTENSION_ALT,
 )
 
 # to start xpub value without the xpub/zpub/ypub prefix
@@ -217,9 +216,7 @@ class Home(Page):
             self.display_wallet(self.ctx.wallet)
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             title = t("Wallet output descriptor")
-            self.print_standard_qr(
-                wallet_data, qr_format, title
-            )
+            self.print_standard_qr(wallet_data, qr_format, title)
 
             # Try to save the Wallet output descriptor on the SD card
             if self.has_sd_card():
@@ -232,7 +229,7 @@ class Home(Page):
                     self.ctx.wallet.label,
                     title + ":",
                     DESCRIPTOR_FILE_EXTENSION,
-                    save_as_binary=False
+                    save_as_binary=False,
                 )
         return MENU_CONTINUE
 
@@ -242,7 +239,7 @@ class Home(Page):
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE
             try:
-                _, wallet_data = self._load_file((DESCRIPTOR_FILE_EXTENSION, DESCRIPTOR_FILE_EXTENSION_ALT))
+                _, wallet_data = self._load_file()  # Allow any extension
             except OSError:
                 pass
 
