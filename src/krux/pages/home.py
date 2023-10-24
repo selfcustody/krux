@@ -482,8 +482,17 @@ class Home(Page):
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
                 self.ctx.input.wait_for_button()
-                wallet_data, qr_format = wallet.wallet_qr()
-                self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
+                
+                # Try to show the wallet output descriptor as a QRCode
+                try:
+                    wallet_data, qr_format = wallet.wallet_qr()
+                    self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
+                except Exception as e:
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(
+                        t("Error:\n%s") % repr(e), theme.error_color
+                    )
+                    self.ctx.input.wait_for_button()         
             else:
                 self.ctx.input.wait_for_button()
                 self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
