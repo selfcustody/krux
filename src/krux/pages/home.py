@@ -37,6 +37,7 @@ from ..sd_card import (
     PUBKEY_FILE_EXTENSION,
     PSBT_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
+    JSON_FILE_EXTENSION,
 )
 
 # to start xpub value without the xpub/zpub/ypub prefix
@@ -214,14 +215,37 @@ class Home(Page):
         else:
             self.display_wallet(self.ctx.wallet)
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
+            title = t("Wallet output descriptor")
             self.print_standard_qr(
-                wallet_data, qr_format, t("Wallet output descriptor")
+                wallet_data, qr_format, title
             )
+
+            # Try to save the Wallet output descriptor on the SD card
+            if self.has_sd_card():
+                from .files_operations import SaveFile
+
+                save_page = SaveFile(self.ctx)
+                save_page.save_file(
+                    self.ctx.wallet.wallet_data,
+                    self.ctx.wallet.label,
+                    self.ctx.wallet.label,
+                    title + ":",
+                    JSON_FILE_EXTENSION,
+                )
         return MENU_CONTINUE
 
     def _load_wallet(self):
         wallet_data, qr_format = self.capture_qr_code()
         if wallet_data is None:
+            # Try to read the wallet output descriptor from a file on the SD card
+            qr_format = FORMAT_NONE
+            try:
+                _, wallet_data = self._load_file(JSON_FILE_EXTENSION)
+            except OSError:
+                pass
+
+        if wallet_data is None:
+            # Both the camera and the file on SD card failed!
             self.flash_text(t("Failed to load output descriptor"), theme.error_color)
             return MENU_CONTINUE
 
@@ -415,6 +439,33 @@ class Home(Page):
         """
         about = wallet.label + "\n"
         if wallet.is_multisig():
+            import binascii
+
+            fingerprints = []
+            for i, key in enumerate(wallet.descriptor.keys):
+                fingerprints.append(
+                    str(i + 1) + ". " + binascii.hexlify(key.fingerprint).decode()
+                )
+            about += "\n".join(fingerprints)
+        else:
+            about += wallet.key.fingerprint_hex_str()
+            xpub = wallet.key.xpub()
+            about += (
+                "\n"
+                + xpub[WALLET_XPUB_START : WALLET_XPUB_START + WALLET_XPUB_DIGITS]
+                + ".."
+                + xpub[len(xpub) - WALLET_XPUB_DIGITS :]
+            )
+
+        if include_qr:
+            wallet_data, qr_format = wallet.wallet_qr()
+            self.display_qr_codes(wallet_data, qr_format, title=about)
+        else:
+            self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+
+        # If multisig, show loaded wallet again with all XPUB
+        if wallet.is_multisig():
+            about = wallet.label + "\n"
             xpubs = []
             for i, xpub in enumerate(wallet.policy["cosigners"]):
                 xpubs.append(
@@ -425,18 +476,13 @@ class Home(Page):
                     + xpub[len(xpub) - WALLET_XPUB_DIGITS :]
                 )
             about += "\n".join(xpubs)
-        else:
-            xpub = wallet.key.xpub()
-            about += (
-                xpub[WALLET_XPUB_START : WALLET_XPUB_START + WALLET_XPUB_DIGITS]
-                + ".."
-                + xpub[len(xpub) - WALLET_XPUB_DIGITS :]
-            )
-        if include_qr:
-            wallet_data, qr_format = wallet.wallet_qr()
-            self.display_qr_codes(wallet_data, qr_format, title=about)
-        else:
-            self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+
+            if include_qr:
+                wallet_data, qr_format = wallet.wallet_qr()
+                self.display_qr_codes(wallet_data, qr_format, title=about)
+            else:
+                self.ctx.input.wait_for_button()
+                self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
 
     def print_standard_qr(self, data, qr_format, title="", width=33):
         """Loads printer driver and UI"""

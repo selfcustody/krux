@@ -25,6 +25,7 @@ from .settings import SD_PATH
 
 SIGNED_FILE_SUFFIX = "-signed"
 PSBT_FILE_EXTENSION = ".psbt"
+JSON_FILE_EXTENSION = ".json"
 SIGNATURE_FILE_EXTENSION = ".sig"
 PUBKEY_FILE_EXTENSION = ".pub"
 
