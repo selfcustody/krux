@@ -72,12 +72,10 @@ class SaveFile(Page):
                                 sd.write_binary(filename, data)
                             else:
                                 sd.write(filename, data)
-                            self.ctx.display.clear()
                             self.flash_text(t("Saved to SD card:\n%s") % filename)
                     else:
                         filename_undefined = False
         except:
-            self.ctx.display.clear()
             self.flash_text(t("SD card not detected."))
 
     def _set_filename(
