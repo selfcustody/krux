@@ -65,9 +65,8 @@ class FileManager(Page):
 
                 dir_files = os.listdir(path)
                 for filename in dir_files:
-
-                    extension_match = False 
-                    if type(file_extension) == str:
+                    extension_match = False
+                    if isinstance(file_extension, str):
                         # No extension filter or matches
                         extension_match = filename.endswith(file_extension)
                     else:
@@ -77,7 +76,7 @@ class FileManager(Page):
                                 extension_match = True
                                 break
 
-                    if (                        
+                    if (
                         extension_match
                         # Is a directory
                         or SDHandler.dir_exists(path + "/" + filename)

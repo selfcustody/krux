@@ -467,6 +467,21 @@ class Page:
         # BUTTON_ENTER
         return answer
 
+    def fit_to_line(self, text, prefix="", fixed_chars=0):
+        """Fits text into a line, removing central content and leaving ends"""
+
+        add_chars_amount = (
+            self.ctx.display.usable_width() // self.ctx.display.font_width
+        )
+        add_chars_amount -= len(prefix) + fixed_chars + 2
+        add_chars_amount //= 2
+        return (
+            prefix
+            + text[: add_chars_amount + fixed_chars]
+            + ".."
+            + text[-add_chars_amount:]
+        )
+
     def has_sd_card(self):
         """Checks if the device has a SD card inserted"""
         self.ctx.display.clear()

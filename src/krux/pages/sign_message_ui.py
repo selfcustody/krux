@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import board
 import gc
 from embit import bip32, compact
 import hashlib
@@ -59,28 +60,28 @@ class SignMessage(Page):
                     address = self.ctx.wallet.descriptor.derive(
                         derivation[4], branch_index=0
                     ).address(network=self.ctx.wallet.key.network)
-                    add_chars_amount = (
-                        self.ctx.display.width() // self.ctx.display.font_width
+                    short_address = self.fit_to_line(
+                        address, str(derivation[4]) + ". ", fixed_chars=3
                     )
-                    add_chars_amount -= 10
-                    add_chars_amount //= 2
-                    short_address = (
-                        str(derivation[4])
-                        + ". "
-                        + address[: add_chars_amount + 3]
-                        + ".."
-                        + address[-add_chars_amount:]
-                    )
+                    # Amount of lines to subtract for free room for message
+                    subtract_lines = 6 if board.config["type"] == "m5stickv" else 10
+
                     message_to_display = self.ctx.display.to_lines(message.decode())
-                    if len(message_to_display) > self.ctx.display.total_lines - 10:
-                        # 5 lines are used for prompt and constant texts
-                        message_cut = (self.ctx.display.total_lines - 10) // 2
+                    if (
+                        len(message_to_display)
+                        > self.ctx.display.total_lines - subtract_lines
+                    ):
+                        message_cut = (
+                            self.ctx.display.total_lines - subtract_lines
+                        ) // 2
                         message_to_display = (
                             message_to_display[:message_cut]
-                            + ["..."]
+                            + ["\n...\n"]
                             + message_to_display[-message_cut:]
                         )
-                    message_to_display = "\n".join(message_to_display)
+                        message_to_display = "".join(message_to_display)
+                    else:
+                        message_to_display = message.decode()
 
                     self.ctx.display.draw_hcentered_text(
                         t("Message:")

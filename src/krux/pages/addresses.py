@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 import gc
-import board
 from ..krux_settings import t
 from ..themes import theme
 from ..qr import FORMAT_NONE
@@ -33,9 +32,6 @@ from . import (
 )
 
 LIST_ADDRESS_QTD = 4  # qtd of address per page
-LIST_ADDRESS_DIGITS = 8  # len on large devices per menu item
-LIST_ADDRESS_DIGITS_SMALL = 4  # len on small devices per menu item
-
 SCAN_ADDRESS_LIMIT = 20
 
 
@@ -71,19 +67,6 @@ class Addresses(Page):
         """Handler for the 'receive addresses' or 'change addresses' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
-            custom_start_digits = (
-                LIST_ADDRESS_DIGITS + 3
-            )  # 3 more because of bc1 address
-            custom_end_digts = LIST_ADDRESS_DIGITS
-            custom_separator = ". "
-            if board.config["type"] == "m5stickv":
-                custom_start_digits = (
-                    LIST_ADDRESS_DIGITS_SMALL + 3
-                )  # 3 more because of bc1 address
-                custom_end_digts = LIST_ADDRESS_DIGITS_SMALL
-                custom_separator = " "
-            start_digits = custom_start_digits
-
             loading_txt = t("Loading receive address %d..")
             if addr_type == 1:
                 loading_txt = t("Loading change address %d..")
@@ -105,17 +88,11 @@ class Addresses(Page):
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(loading_txt % (num_checked + 1))
 
-                    if num_checked + 1 > 99:
-                        start_digits = custom_start_digits - 1
-                    pos_str = str(num_checked + 1)
-                    qr_title = pos_str + ". " + addr
+                    pos_str = str(num_checked + 1) + ". "
+                    qr_title = pos_str + addr
                     items.append(
                         (
-                            pos_str
-                            + custom_separator
-                            + addr[:start_digits]
-                            + ".."
-                            + addr[len(addr) - custom_end_digts :],
+                            self.fit_to_line(addr, pos_str, fixed_chars=3),
                             lambda address=addr, title=qr_title: self.show_address(
                                 address, title
                             ),

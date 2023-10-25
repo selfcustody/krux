@@ -43,8 +43,6 @@ from ..sd_card import (
 
 # to start xpub value without the xpub/zpub/ypub prefix
 WALLET_XPUB_START = 4
-# len of the xpub to show
-WALLET_XPUB_DIGITS = 4
 
 
 class Home(Page):
@@ -240,7 +238,9 @@ class Home(Page):
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE
             try:
-                _, wallet_data = self._load_file((DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION))
+                _, wallet_data = self._load_file(
+                    (DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION)
+                )
             except OSError:
                 pass
 
@@ -450,12 +450,7 @@ class Home(Page):
         else:
             about += wallet.key.fingerprint_hex_str()
             xpub = wallet.key.xpub()
-            about += (
-                "\n"
-                + xpub[WALLET_XPUB_START : WALLET_XPUB_START + WALLET_XPUB_DIGITS]
-                + ".."
-                + xpub[len(xpub) - WALLET_XPUB_DIGITS :]
-            )
+            about += "\n" + self.fit_to_line(xpub)
 
         if not wallet.is_multisig() and include_qr:
             wallet_data, qr_format = wallet.wallet_qr()
@@ -468,13 +463,7 @@ class Home(Page):
             about = wallet.label + "\n"
             xpubs = []
             for i, xpub in enumerate(wallet.policy["cosigners"]):
-                xpubs.append(
-                    str(i + 1)
-                    + ". "
-                    + xpub[WALLET_XPUB_START : WALLET_XPUB_START + WALLET_XPUB_DIGITS]
-                    + ".."
-                    + xpub[len(xpub) - WALLET_XPUB_DIGITS :]
-                )
+                xpubs.append(self.fit_to_line(xpub, str(i + 1) + ". "))
             about += "\n".join(xpubs)
 
             if include_qr:
@@ -482,7 +471,7 @@ class Home(Page):
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
                 self.ctx.input.wait_for_button()
-                
+
                 # Try to show the wallet output descriptor as a QRCode
                 try:
                     wallet_data, qr_format = wallet.wallet_qr()
@@ -492,7 +481,7 @@ class Home(Page):
                     self.ctx.display.draw_centered_text(
                         t("Error:\n%s") % repr(e), theme.error_color
                     )
-                    self.ctx.input.wait_for_button()         
+                    self.ctx.input.wait_for_button()
             else:
                 self.ctx.input.wait_for_button()
                 self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
