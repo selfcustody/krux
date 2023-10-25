@@ -31,11 +31,11 @@ from ..baseconv import base_encode
 from ..krux_settings import t
 from ..qr import FORMAT_NONE
 from ..sd_card import (
-    SDHandler,
     SIGNATURE_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
     PUBKEY_FILE_EXTENSION,
 )
+from .utils import Utils
 
 
 class SignMessage(Page):
@@ -43,6 +43,7 @@ class SignMessage(Page):
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
+        self.utils = Utils(self.ctx)
 
     def sign_at_address(self, data, qr_format):
         """Message signed at a derived Bitcoin address - Sparrow/Specter"""
@@ -112,40 +113,9 @@ class SignMessage(Page):
                     self.ctx.input.wait_for_button()
                     title = t("Signed Message")
                     self.display_qr_codes(encoded_sig, qr_format, title)
-                    self.print_standard_qr(encoded_sig, qr_format, title)
+                    self.utils.print_standard_qr(encoded_sig, qr_format, title)
                     return True
         return False
-
-    def print_standard_qr(self, data, qr_format, title="", width=33):
-        """Loads printer driver and UI"""
-        # Duplicated in Home, is there a way to share?
-        # Can be put into __init__ page because contains a Page inside
-        if self.print_qr_prompt():
-            from .print_page import PrintPage
-
-            print_page = PrintPage(self.ctx)
-            print_page.print_qr(data, qr_format, title, width)
-
-    def _load_file(self, file_ext=""):
-        # Duplicated in Home, is there a way to share?
-        # Can be put into __init__ page because contains a Page inside
-        if self.has_sd_card():
-            with SDHandler() as sd:
-                self.ctx.display.clear()
-                if self.prompt(
-                    t("Load from SD card?") + "\n\n", self.ctx.display.height() // 2
-                ):
-                    from .files_manager import FileManager
-
-                    file_manager = FileManager(self.ctx)
-                    filename = file_manager.select_file(file_extension=file_ext)
-
-                    if filename:
-                        filename = file_manager.display_file(filename)
-
-                        if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
-                            return filename, sd.read_binary(filename)
-        return "", None
 
     def sign_message(self):
         """Sign message user interface"""
@@ -158,7 +128,7 @@ class SignMessage(Page):
             # Try to read a message from a file on the SD card
             qr_format = FORMAT_NONE
             try:
-                message_filename, data = self._load_file()
+                message_filename, data = self.utils.load_file()
             except OSError:
                 pass
 
@@ -210,7 +180,7 @@ class SignMessage(Page):
         # Show the base64 signed message as a QRCode
         title = t("Signed Message")
         self.display_qr_codes(encoded_sig, qr_format, title)
-        self.print_standard_qr(encoded_sig, qr_format, title)
+        self.utils.print_standard_qr(encoded_sig, qr_format, title)
 
         # memory management
         del encoded_sig
@@ -226,7 +196,7 @@ class SignMessage(Page):
 
         # Show the public key in hexadecimal format as a QRCode
         self.display_qr_codes(pubkey, qr_format, title)
-        self.print_standard_qr(pubkey, qr_format, title)
+        self.utils.print_standard_qr(pubkey, qr_format, title)
 
         # memory management
         gc.collect()

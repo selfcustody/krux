@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 import gc
+from .utils import Utils
 from ..themes import theme
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
@@ -33,7 +34,6 @@ from . import (
     MENU_EXIT,
 )
 from ..sd_card import (
-    SDHandler,
     PUBKEY_FILE_EXTENSION,
     PSBT_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
@@ -64,6 +64,7 @@ class Home(Page):
                 ],
             ),
         )
+        self.utils = Utils(self.ctx)
 
     def mnemonic(self):
         """Handler for the 'mnemonic' menu item"""
@@ -105,7 +106,7 @@ class Home(Page):
         title = t("Plaintext QR")
         data = self.ctx.wallet.key.mnemonic
         self.display_qr_codes(data, FORMAT_NONE, title)
-        self.print_standard_qr(data, FORMAT_NONE, title)
+        self.utils.print_standard_qr(data, FORMAT_NONE, title)
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
@@ -184,7 +185,7 @@ class Home(Page):
             ].upper()
             xpub = self.ctx.wallet.key.key_expression(version)
             self.display_qr_codes(xpub, FORMAT_NONE, title)
-            self.print_standard_qr(xpub, FORMAT_NONE, title)
+            self.utils.print_standard_qr(xpub, FORMAT_NONE, title)
 
             # Try to save the XPUB file on the SD card
             if self.has_sd_card():
@@ -215,7 +216,7 @@ class Home(Page):
             self.display_wallet(self.ctx.wallet)
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             title = t("Wallet output descriptor")
-            self.print_standard_qr(wallet_data, qr_format, title)
+            self.utils.print_standard_qr(wallet_data, qr_format, title)
 
             # Try to save the Wallet output descriptor on the SD card
             if self.has_sd_card():
@@ -238,7 +239,7 @@ class Home(Page):
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE
             try:
-                _, wallet_data = self._load_file(
+                _, wallet_data = self.utils.load_file(
                     (DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION)
                 )
             except OSError:
@@ -331,7 +332,7 @@ class Home(Page):
             # Try to read a PSBT from a file on the SD card
             qr_format = FORMAT_NONE
             try:
-                psbt_filename, data = self._load_file(PSBT_FILE_EXTENSION)
+                psbt_filename, data = self.utils.load_file(PSBT_FILE_EXTENSION)
             except OSError:
                 pass
 
@@ -375,7 +376,7 @@ class Home(Page):
             title = t("Signed PSBT")
             try:
                 self.display_qr_codes(qr_signed_psbt, qr_format)
-                self.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
+                self.utils.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
             except Exception as e:
                 self.ctx.log.exception(
                     "Exception occurred in sign_psbt when trying to show the qr_signed_psbt"
@@ -404,25 +405,6 @@ class Home(Page):
                     SIGNED_FILE_SUFFIX,
                 )
         return MENU_CONTINUE
-
-    def _load_file(self, file_ext=""):
-        if self.has_sd_card():
-            with SDHandler() as sd:
-                self.ctx.display.clear()
-                if self.prompt(
-                    t("Load from SD card?") + "\n\n", self.ctx.display.height() // 2
-                ):
-                    from .files_manager import FileManager
-
-                    file_manager = FileManager(self.ctx)
-                    filename = file_manager.select_file(file_extension=file_ext)
-
-                    if filename:
-                        filename = file_manager.display_file(filename)
-
-                        if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
-                            return filename, sd.read_binary(filename)
-        return "", None
 
     def sign_message(self):
         """Handler for the 'sign message' menu item"""
@@ -485,11 +467,3 @@ class Home(Page):
             else:
                 self.ctx.input.wait_for_button()
                 self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
-
-    def print_standard_qr(self, data, qr_format, title="", width=33):
-        """Loads printer driver and UI"""
-        if self.print_qr_prompt():
-            from .print_page import PrintPage
-
-            print_page = PrintPage(self.ctx)
-            print_page.print_qr(data, qr_format, title, width)
