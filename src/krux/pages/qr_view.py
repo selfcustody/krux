@@ -22,12 +22,12 @@
 
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
-from . import Page
+from . import Page, MENU_CONTINUE
+from .utils import Utils
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
 from ..qr import get_size, add_qr_frame
 from ..display import DEFAULT_PADDING
-from . import MENU_CONTINUE
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -67,6 +67,7 @@ class SeedQRView(Page):
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
+        self.utils = Utils(self.ctx)
 
     def _seed_qr(self):
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -321,12 +322,6 @@ class SeedQRView(Page):
             self.ctx.display.clear()
             if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                 break
-        if not self.print_qr_prompt():
-            return MENU_CONTINUE
-
-        from .print_page import PrintPage
-
-        print_page = PrintPage(self.ctx)
-        print_page.print_qr(self.code, title=self.title, is_qr=True)
+        self.utils.print_standard_qr(self.code, title=self.title, is_qr=True)
 
         return MENU_CONTINUE

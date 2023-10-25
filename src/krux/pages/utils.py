@@ -31,14 +31,14 @@ class Utils(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
 
-    def print_standard_qr(self, data, qr_format, title="", width=33):
+    def print_standard_qr(self, data, qr_format=None, title="", width=33, is_qr=False):
         """Loads printer driver and UI"""
         # Only loads printer related modules if needed
         if self.print_qr_prompt():
             from .print_page import PrintPage
 
             print_page = PrintPage(self.ctx)
-            print_page.print_qr(data, qr_format, title, width)
+            print_page.print_qr(data, qr_format, title, width, is_qr)
 
     def load_file(self, file_ext=""):
         """Load a file from SD card"""

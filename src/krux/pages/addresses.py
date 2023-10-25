@@ -24,6 +24,7 @@ import gc
 from ..krux_settings import t
 from ..themes import theme
 from ..qr import FORMAT_NONE
+from .utils import Utils
 from . import (
     Page,
     Menu,
@@ -41,6 +42,7 @@ class Addresses(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.utils = Utils(self.ctx)
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
@@ -132,11 +134,7 @@ class Addresses(Page):
     def show_address(self, addr, title="", qr_format=FORMAT_NONE):
         """Show addr provided as a QRCode"""
         self.display_qr_codes(addr, qr_format, title)
-        if self.print_qr_prompt():
-            from .print_page import PrintPage
-
-            print_page = PrintPage(self.ctx)
-            print_page.print_qr(addr, qr_format, title)
+        self.utils.print_standard_qr(addr, qr_format, title)
         return MENU_CONTINUE
 
     def pre_scan_address(self):
