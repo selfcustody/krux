@@ -256,7 +256,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         home = Home(ctx)
 
         mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
         home.mnemonic()
 
         title = "Plaintext QR"
@@ -264,7 +264,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
         if case[1] is not None:
-            home.print_standard_qr.assert_called_with(
+            home.utils.print_standard_qr.assert_called_with(
                 ctx.wallet.key.mnemonic, FORMAT_NONE, title
             )
         assert ctx.input.wait_for_button.call_count == len(case[2])
@@ -485,7 +485,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
         home = Home(ctx)
 
         mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
 
         home.mnemonic()
 
@@ -494,7 +494,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
             ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
         if case[1] is not None:
-            home.print_standard_qr.assert_called_with(
+            home.utils.print_standard_qr.assert_called_with(
                 ctx.wallet.key.mnemonic, FORMAT_NONE, title
             )
 
@@ -575,7 +575,7 @@ def test_public_key(mocker, m5stickv, tdata):
         home = Home(ctx)
 
         mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
 
         home.public_key()
 
@@ -602,7 +602,7 @@ def test_public_key(mocker, m5stickv, tdata):
         ]
         home.display_qr_codes.assert_has_calls(display_qr_calls)
         if case[1] is not None:
-            home.print_standard_qr.assert_has_calls(print_qr_calls)
+            home.utils.print_standard_qr.assert_has_calls(print_qr_calls)
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -694,7 +694,7 @@ def test_wallet(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_wallet")
 
@@ -702,7 +702,7 @@ def test_wallet(mocker, m5stickv, tdata):
 
         if case[0]:
             home.display_wallet.assert_called_once()
-            home.print_standard_qr.assert_called_once()
+            home.utils.print_standard_qr.assert_called_once()
         else:
             if case[4][0] == BUTTON_ENTER:
                 home.capture_qr_code.assert_called_once()
@@ -997,7 +997,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         )
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
         # case SD available
         if case[10] is not None:
             mocker.patch("os.listdir", new=mocker.MagicMock(return_value=["test.psbt"]))
@@ -1024,7 +1024,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                     home.capture_qr_code.assert_called_once()
                 if case[5]:  # signed!
                     home.display_qr_codes.assert_called_once()
-                    home.print_standard_qr.assert_called_once()
+                    home.utils.print_standard_qr.assert_called_once()
                 else:
                     home.display_qr_codes.assert_not_called()
             else:
@@ -1176,7 +1176,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
         if case[6] is not None:
@@ -1203,7 +1203,7 @@ def test_sign_message(mocker, m5stickv, tdata):
                     mocker.call(case[5], case[1], "Hex Public Key"),
                 ]
             )
-            home.print_standard_qr.assert_has_calls(
+            home.utils.print_standard_qr.assert_has_calls(
                 [
                     mocker.call(case[4], case[1], "Signed Message"),
                     mocker.call(case[5], case[1], "Hex Public Key"),
@@ -1211,6 +1211,6 @@ def test_sign_message(mocker, m5stickv, tdata):
             )
         else:
             home.display_qr_codes.assert_not_called()
-            home.print_standard_qr.assert_not_called()
+            home.utils.print_standard_qr.assert_not_called()
 
         assert ctx.input.wait_for_button.call_count == len(case[3])
