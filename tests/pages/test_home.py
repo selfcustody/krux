@@ -672,7 +672,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.MULTISIG_12_WORD_KEY,
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
     ]
 
