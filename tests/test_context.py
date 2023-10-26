@@ -73,7 +73,7 @@ def test_screensaver(mocker, m5stickv):
         ██ ██
         ██  ██
         ██   ██
-        """[
+"""[
         1:-1
     ].split(
         "\n"
@@ -94,7 +94,7 @@ def test_screensaver(mocker, m5stickv):
     time_seq.append(tmp)
     btn_seq.append(BUTTON_ENTER)
 
-    c.input.wait_for_press = mocker.MagicMock(side_effect=btn_seq)
+    c.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
     time.ticks_ms = mocker.MagicMock(side_effect=time_seq)
 
     c.screensaver()
@@ -105,4 +105,4 @@ def test_screensaver(mocker, m5stickv):
     c.display.draw_line_hcentered_with_fullw_bg.assert_any_call(
         logo[5], 5, theme.bg_color, theme.fg_color
     )
-    c.input.wait_for_press.assert_called()
+    c.input.wait_for_button.assert_called()
