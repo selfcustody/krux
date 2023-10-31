@@ -368,7 +368,7 @@ class Page:
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
         """
-        if Settings().hardware.printer.driver == "none":
+        if not self.has_printer():
             return False
 
         self.ctx.display.clear()
@@ -481,6 +481,9 @@ class Page:
             + ".."
             + text[-add_chars_amount:]
         )
+
+    def has_printer(self):
+        return Settings().hardware.printer.driver != "none"
 
     def has_sd_card(self):
         """Checks if the device has a SD card inserted"""

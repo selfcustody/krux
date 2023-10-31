@@ -222,7 +222,7 @@ class EncryptMnemonic(Page):
         from .qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, data=qr_data, title=mnemonic_id)
-        seed_qr_view.display_seed_qr()
+        seed_qr_view.display_qr()
 
 
 class LoadEncryptedMnemonic(Page):

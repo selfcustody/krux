@@ -115,7 +115,7 @@ class Home(Page):
         from .qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, binary)
-        return seed_qr_view.display_seed_qr()
+        return seed_qr_view.display_qr()
 
     def stackbit(self):
         """Displays which numbers 1248 user should punch on 1248 steel card"""

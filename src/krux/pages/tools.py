@@ -138,5 +138,5 @@ class Tools(Page):
 
             title = t("Custom QR Code")
             seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
-            return seed_qr_view.display_seed_qr()
+            return seed_qr_view.display_qr()
         return MENU_CONTINUE
