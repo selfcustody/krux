@@ -107,7 +107,7 @@ class EncoderPage(Button):
     def event(self):
         """Returns encoder events while mimics Krux GPIO Buttons behavior"""
         if encoder.value > 0:
-            encoder.value -= 1
+            encoder.value = 0
             return True
         return False
 
@@ -118,6 +118,6 @@ class EncoderPagePrev(Button):
     def event(self):
         """Returns encoder events while mimics Krux GPIO Buttons behavior"""
         if encoder.value < 0:
-            encoder.value += 1
+            encoder.value = 0
             return True
         return False

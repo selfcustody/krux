@@ -50,6 +50,7 @@ class Input:
         self.screensaver_active = False
         self.entropy = 0
         self.debounce_time = 0
+        self.flushed_flag = False
 
         self.enter = None
         if "BUTTON_A" in board.config["krux"]["pins"]:
@@ -178,10 +179,16 @@ class Input:
         """Wait for first button press or for wait_duration ms.
         Use block to wait indefinitely"""
         start_time = time.ticks_ms()
+        self.debounce_time = time.ticks_ms() if not self.flushed_flag else 0
         while time.ticks_ms() < self.debounce_time + DEBOUNCE:
-            pass
-        if block:
             self.flush_events()
+        if not self.flushed_flag or block:
+            # Makes sure events that happened between pages load are cleared.
+            # On animated pages, where block=False, intermediary events must be checked,
+            # so events won't be cleared after flushed_flag is set
+            self.flush_events()
+            self.flushed_flag = not block
+
         self.screensaver_time = start_time
         while True:
             if self.enter_event():
@@ -273,7 +280,6 @@ class Input:
             if self.swipe_down_value() == PRESSED:
                 btn = SWIPE_DOWN
 
-        self.debounce_time = time.ticks_ms()
         return btn
 
     def flush_events(self):
