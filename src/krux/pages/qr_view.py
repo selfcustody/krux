@@ -278,7 +278,7 @@ class SeedQRView(Page):
                     self.qr_size * grid_pad + 1,
                     theme.highlight_color,
                 )
-    def save_bpm_image(self):
+    def save_pbm_image(self):
         """Saves QR code image as compact B&W bitmap format file"""
         size, code = add_qr_frame(self.code)
         qr_image_file = (
@@ -294,8 +294,10 @@ class SeedQRView(Page):
                 bit_string_line += "0"*(8-size%8)
             line = int(bit_string_line, 2).to_bytes((self.qr_size+7)//8, "big")
             qr_image_file += line
+        filename = "QR_Code.pbm"
         with SDHandler() as sd:
-            sd.write_binary("QR_Code.bpm", qr_image_file)
+            sd.write_binary(filename, qr_image_file)
+        self.flash_text(t("Saved to SD card:\n%s") % filename)
 
     def save_bmp_image(self, resolution):
         """Save QR code image as .bmp file"""
@@ -329,7 +331,9 @@ class SeedQRView(Page):
             x_scale=scale,
             y_scale=scale,
         )
-        bmp_img.save("/sd/QR_Code.bmp")
+        filename = "QR_Code.bmp"
+        bmp_img.save("/sd/" + filename)
+        self.flash_text(t("Saved to SD card:\n%s") % filename)
         
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
@@ -342,13 +346,19 @@ class SeedQRView(Page):
             resolution *= 2
             if resolution <= 480:
                 resolutions.append(resolution)
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text(
+            t("Resolution - Format"),
+            self.ctx.display.font_height,
+            info_box=True
+        )
         qr_menu = []
-        qr_menu.append(("%dx%d - PBM" % (size, size), self.save_bpm_image))
+        qr_menu.append(("%dx%d - PBM" % (size, size), self.save_pbm_image))
         for resolution in resolutions:
             qr_menu.append(("%dx%d - BMP" % (resolution, resolution), lambda res=resolution: self.save_bmp_image(res)))
-        submenu = Menu( self.ctx, qr_menu)
+        submenu = Menu( self.ctx, qr_menu, offset=2*self.ctx.display.font_height)
         _, status = submenu.run_loop()
-        return MENU_EXIT
+        # return MENU_EXIT  # Uncomment to exit QR Viewer after saving
     
     def print_qr(self):
         "Printer handler"
@@ -356,7 +366,7 @@ class SeedQRView(Page):
 
         utils = Utils(self.ctx)
         utils.print_standard_qr(self.code, title=self.title, is_qr=True)
-        return MENU_EXIT
+        # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
     def display_qr(self):
         """Displays QR codes in multiple modes"""
