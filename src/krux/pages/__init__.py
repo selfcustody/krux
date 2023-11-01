@@ -560,11 +560,12 @@ class Menu:
     and invoke menu item callbacks that return a status
     """
 
-    def __init__(self, ctx, menu):
+    def __init__(self, ctx, menu, offset=0):
         self.ctx = ctx
         self.menu = menu
+        self.menu_offset = offset
         max_viewable = min(
-            (self.ctx.display.height() - 2 * DEFAULT_PADDING)
+            (self.ctx.display.height() - 2 * DEFAULT_PADDING - self.menu_offset)
             // (2 * self.ctx.display.font_height),
             len(self.menu),
         )
@@ -581,7 +582,16 @@ class Menu:
             selected_item_index = start_from_index
         while True:
             gc.collect()
-            self.ctx.display.clear()
+            if self.menu_offset:
+                self.ctx.display.fill_rectangle(
+                    0,
+                    self.menu_offset,
+                    self.ctx.display.width(),
+                    self.ctx.display.height() - self.menu_offset,
+                    theme.bg_color,
+                )
+            else:
+                self.ctx.display.clear()
             if self.ctx.input.touch is not None:
                 self._draw_touch_menu(selected_item_index)
             else:
@@ -731,10 +741,13 @@ class Menu:
         for menu_item in self.menu_view:
             offset_y += len(self.ctx.display.to_lines(menu_item[0])) + 1
             Page.y_keypad_map.append(offset_y)
-        height_multiplier = self.ctx.display.height() - 2 * DEFAULT_PADDING
+        height_multiplier = (
+            self.ctx.display.height() - 2 * DEFAULT_PADDING - self.menu_offset
+        )
         height_multiplier //= offset_y
         Page.y_keypad_map = [
-            n * height_multiplier + DEFAULT_PADDING for n in Page.y_keypad_map
+            n * height_multiplier + DEFAULT_PADDING + self.menu_offset
+            for n in Page.y_keypad_map
         ]
         self.ctx.input.touch.y_regions = Page.y_keypad_map
 
@@ -745,10 +758,6 @@ class Menu:
                     0, y, self.ctx.display.width(), 1, theme.frame_color
                 )
             height = Page.y_keypad_map[i + 1] - y
-            if selected_item_index == i and self.ctx.input.buttons_active:
-                self.ctx.display.fill_rectangle(
-                    0, y + 1, self.ctx.display.width(), height - 2, theme.fg_color
-                )
 
         # draw centralized strings in regions
         for i, menu_item in enumerate(self.menu_view):
@@ -759,6 +768,13 @@ class Menu:
             offset_y += Page.y_keypad_map[i]
             for j, text in enumerate(menu_item_lines):
                 if selected_item_index == i and self.ctx.input.buttons_active:
+                    self.ctx.display.fill_rectangle(
+                        0,
+                        offset_y + 1 - self.ctx.display.font_height // 2,
+                        self.ctx.display.width(),
+                        (len(menu_item_lines) + 1) * self.ctx.display.font_height,
+                        theme.fg_color,
+                    )
                     self.ctx.display.draw_hcentered_text(
                         text,
                         offset_y + self.ctx.display.font_height * j,
