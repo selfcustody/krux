@@ -278,6 +278,7 @@ class SeedQRView(Page):
                     self.qr_size * grid_pad + 1,
                     theme.highlight_color,
                 )
+
     def save_pbm_image(self):
         """Saves QR code image as compact B&W bitmap format file"""
         size, code = add_qr_frame(self.code)
@@ -290,9 +291,9 @@ class SeedQRView(Page):
         )
         lines = code.strip().split("\n")
         for bit_string_line in lines:
-            if size%8:
-                bit_string_line += "0"*(8-size%8)
-            line = int(bit_string_line, 2).to_bytes((self.qr_size+7)//8, "big")
+            if size % 8:
+                bit_string_line += "0" * (8 - size % 8)
+            line = int(bit_string_line, 2).to_bytes((self.qr_size + 7) // 8, "big")
             qr_image_file += line
         filename = "QR_Code.pbm"
         with SDHandler() as sd:
@@ -312,7 +313,7 @@ class SeedQRView(Page):
         x_index = 0
         y_index = 0
         for qr_char in code:
-            if qr_char in ("0","1"):
+            if qr_char in ("0", "1"):
                 if qr_char == "0":
                     raw_image.set_pixel((x_index, y_index), lcd.WHITE)
                 if qr_char == "1":
@@ -323,7 +324,7 @@ class SeedQRView(Page):
                 else:
                     x_index += 1
         bmp_img = image.Image(size=(resolution, resolution), copy_to_fb=True)
-        scale = resolution//size
+        scale = resolution // size
         bmp_img.draw_image(
             raw_image,
             0,
@@ -334,7 +335,7 @@ class SeedQRView(Page):
         filename = "QR_Code.bmp"
         bmp_img.save("/sd/" + filename)
         self.flash_text(t("Saved to SD card:\n%s") % filename)
-        
+
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
         # TODO: Block raw mnemonics saving
@@ -348,18 +349,21 @@ class SeedQRView(Page):
                 resolutions.append(resolution)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Resolution - Format"),
-            self.ctx.display.font_height,
-            info_box=True
+            t("Resolution - Format"), self.ctx.display.font_height, info_box=True
         )
         qr_menu = []
         qr_menu.append(("%dx%d - PBM" % (size, size), self.save_pbm_image))
         for resolution in resolutions:
-            qr_menu.append(("%dx%d - BMP" % (resolution, resolution), lambda res=resolution: self.save_bmp_image(res)))
-        submenu = Menu( self.ctx, qr_menu, offset=2*self.ctx.display.font_height)
-        _, status = submenu.run_loop()
+            qr_menu.append(
+                (
+                    "%dx%d - BMP" % (resolution, resolution),
+                    lambda res=resolution: self.save_bmp_image(res),
+                )
+            )
+        submenu = Menu(self.ctx, qr_menu, offset=2 * self.ctx.display.font_height)
+        submenu.run_loop()
         # return MENU_EXIT  # Uncomment to exit QR Viewer after saving
-    
+
     def print_qr(self):
         "Printer handler"
         from .utils import Utils
@@ -368,7 +372,7 @@ class SeedQRView(Page):
         utils.print_standard_qr(self.code, title=self.title, is_qr=True)
         # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
-    def display_qr(self):
+    def display_qr(self, allow_export=False):
         """Displays QR codes in multiple modes"""
 
         if self.title:
@@ -407,12 +411,12 @@ class SeedQRView(Page):
                     self.lr_index %= self.columns * self.columns
             qr_menu = []
             qr_menu.append((t("Leave QR Viewer"), lambda: MENU_EXIT))
-            if self.has_sd_card():
+            if self.has_sd_card() and allow_export:
                 qr_menu.append((t("Save QR Image to SD Card"), self.save_qr_image_menu))
             if self.has_printer():
                 qr_menu.append((t("Print to QR"), self.print_qr))
             qr_menu.append((t("Back"), lambda: None))
-            submenu = Menu( self.ctx, qr_menu)
+            submenu = Menu(self.ctx, qr_menu)
             _, status = submenu.run_loop()
             if status == MENU_EXIT:
                 return MENU_CONTINUE

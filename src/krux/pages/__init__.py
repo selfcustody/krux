@@ -483,6 +483,7 @@ class Page:
         )
 
     def has_printer(self):
+        """Checks if the device has a printer setup"""
         return Settings().hardware.printer.driver != "none"
 
     def has_sd_card(self):
@@ -757,7 +758,6 @@ class Menu:
                 self.ctx.display.fill_rectangle(
                     0, y, self.ctx.display.width(), 1, theme.frame_color
                 )
-            height = Page.y_keypad_map[i + 1] - y
 
         # draw centralized strings in regions
         for i, menu_item in enumerate(self.menu_view):
