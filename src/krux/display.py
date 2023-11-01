@@ -294,9 +294,20 @@ class Display:
         offset_y=DEFAULT_PADDING,
         color=theme.fg_color,
         bg_color=theme.bg_color,
+        info_box = False
     ):
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
+        if info_box:
+            bg_color = theme.disabled_color
+            self.fill_rectangle(
+                DEFAULT_PADDING -1,
+                offset_y - 1,
+                self.usable_width() + 2,
+                (len(lines)+1)*self.font_height + 2,
+                bg_color
+            )
+            
         for i, line in enumerate(lines):
             if len(line) > 0:
                 offset_x = self._obtain_hcentered_offset(line)
