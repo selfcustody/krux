@@ -167,19 +167,49 @@ class Home(Page):
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
-        zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
-        for version in [None, self.ctx.wallet.key.network[zpub]]:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                self.ctx.wallet.key.fingerprint_hex_str(True)
-                + "\n\n"
-                + self.ctx.wallet.key.derivation_str(True)
-                + "\n\n"
-                + self.ctx.wallet.key.account_pubkey_str(version)
-            )
-            self.ctx.input.wait_for_button()
 
-            # title receives first 4 chars (ex: XPUB)
+        def _save_xpub_to_sd(version):
+            from .files_operations import SaveFile
+
+            save_page = SaveFile(self.ctx)
+            xpub = self.ctx.wallet.key.key_expression(version)
+            title = self.ctx.wallet.key.account_pubkey_str(version)[
+                :WALLET_XPUB_START
+            ].upper()
+            save_page.save_file(
+                xpub,
+                title,
+                title,
+                title + ":",
+                PUBKEY_FILE_EXTENSION,
+                save_as_binary=False,
+            )
+
+        def _pub_key_text(version):
+            pub_text_menu_items = []
+            if self.has_sd_card():
+                pub_text_menu_items.append(
+                    (t("Save to SD card?"), lambda ver=version: _save_xpub_to_sd(ver))
+                )
+            pub_text_menu_items.append((t("Back"), lambda: MENU_EXIT))
+            full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
+            menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
+            menu_offset *= self.ctx.display.font_height
+            pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                self.ctx.wallet.key.fingerprint_hex_str()
+                + "\n\n"
+                + self.ctx.wallet.key.derivation_str()
+                + "\n\n"
+                + full_pub_key,
+                offset_y=self.ctx.display.font_height,
+                info_box=True,
+            )
+            pub_key_menu.run_loop()
+
+        def _pub_key_qr(version):
+            # TODO: Add menu to offer print and export as image
             title = self.ctx.wallet.key.account_pubkey_str(version)[
                 :WALLET_XPUB_START
             ].upper()
@@ -187,19 +217,24 @@ class Home(Page):
             self.display_qr_codes(xpub, FORMAT_NONE, title)
             self.utils.print_standard_qr(xpub, FORMAT_NONE, title)
 
-            # Try to save the XPUB file on the SD card
-            if self.has_sd_card():
-                from .files_operations import SaveFile
-
-                save_page = SaveFile(self.ctx)
-                save_page.save_file(
-                    xpub,
-                    title,
-                    title,
-                    title + ":",
-                    PUBKEY_FILE_EXTENSION,
-                    save_as_binary=False,
-                )
+        zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
+        pub_key_menu_items = []
+        for version in [None, self.ctx.wallet.key.network[zpub]]:
+            title = self.ctx.wallet.key.account_pubkey_str(version)[
+                :WALLET_XPUB_START
+            ].upper()
+            pub_key_menu_items.append(
+                (title + " - " + t("Text"), lambda ver=version: _pub_key_text(ver))
+            )
+            pub_key_menu_items.append(
+                (title + " - " + t("QR Code"), lambda ver=version: _pub_key_qr(ver))
+            )
+        pub_key_menu_items.append((t("Back"), lambda: MENU_EXIT))
+        pub_key_menu = Menu(self.ctx, pub_key_menu_items)
+        while True:
+            _, status = pub_key_menu.run_loop()
+            if status == MENU_EXIT:
+                break
 
         return MENU_CONTINUE
 

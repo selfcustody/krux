@@ -787,15 +787,18 @@ class Menu:
                     )
 
     def _draw_menu(self, selected_item_index):
-        offset_y = len(self.menu_view) * 2
-        extra_lines = 0
-        for menu_item in self.menu_view:
-            extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
-        offset_y += extra_lines
-        offset_y *= self.ctx.display.font_height
-        offset_y = self.ctx.display.height() - offset_y
-        offset_y //= 2
-        offset_y += self.ctx.display.font_height // 2
+        if self.menu_offset:
+            offset_y = self.menu_offset + self.ctx.display.font_height // 2
+        else:
+            offset_y = len(self.menu_view) * 2
+            extra_lines = 0
+            for menu_item in self.menu_view:
+                extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
+            offset_y += extra_lines
+            offset_y *= self.ctx.display.font_height
+            offset_y = self.ctx.display.height() - offset_y
+            offset_y //= 2
+            offset_y += self.ctx.display.font_height // 2
         for i, menu_item in enumerate(self.menu_view):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             delta_y = (len(menu_item_lines) + 1) * self.ctx.display.font_height

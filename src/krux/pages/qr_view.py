@@ -338,7 +338,6 @@ class SeedQRView(Page):
 
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
-        # TODO: Block raw mnemonics saving
         # TODO: Allow custom file name
         size = self.qr_size + 2
         resolutions = []
