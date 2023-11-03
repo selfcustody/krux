@@ -512,11 +512,11 @@ def test_public_key(mocker, m5stickv, tdata):
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
             [
-                BUTTON_ENTER, # XPUB - Text
-                BUTTON_PAGE, # move Back - child
-                BUTTON_ENTER, # Press Back - child
-                BUTTON_PAGE_PREV, # Move Back - father
-                BUTTON_ENTER # Press Back - father
+                BUTTON_ENTER,  # XPUB - Text
+                BUTTON_PAGE,  # move Back - child
+                BUTTON_ENTER,  # Press Back - child
+                BUTTON_PAGE_PREV,  # Move Back - father
+                BUTTON_ENTER,  # Press Back - father
             ],
         ),
         # 1
