@@ -303,7 +303,30 @@ class Login(Page):
             return MENU_CONTINUE
         return data
 
-    def _load_key_from_words(self, words):
+    def _get_words_numbers(self, words, charset):
+        word_numbers = []
+        for word in words:
+            word_numbers.append(WORDLIST.index(word) + 1)
+
+        if charset == DIGITS_HEX:
+            for i, number in enumerate(word_numbers):
+                word_numbers[i] = hex(number)[2:].upper()
+
+        if charset == DIGITS_OCT:
+            for i, number in enumerate(word_numbers):
+                word_numbers[i] = oct(number)[2:]
+
+        numbers_str = [str(value) for value in word_numbers]
+        return " ".join(numbers_str)
+
+    def _load_key_from_words(self, words, charset=LETTERS):
+        if charset != LETTERS:
+            numbers_str = self._get_words_numbers(words, charset)
+            self.display_mnemonic(numbers_str)
+            if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
+                return MENU_CONTINUE
+            self.ctx.display.clear()
+
         mnemonic = " ".join(words)
         self.display_mnemonic(mnemonic)
         if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
@@ -531,7 +554,7 @@ class Login(Page):
                 ):
                     words.append(word)
 
-            return self._load_key_from_words(words)
+            return self._load_key_from_words(words, charset)
 
         return MENU_CONTINUE
 
