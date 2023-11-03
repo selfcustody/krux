@@ -454,7 +454,7 @@ class Home(Page):
         which will contain the same data as was originally loaded, in
         the same QR format
         """
-        about = wallet.label + "\n"
+        about = [wallet.label]
         if wallet.is_multisig():
             import binascii
 
@@ -463,11 +463,11 @@ class Home(Page):
                 fingerprints.append(
                     str(i + 1) + ". " + binascii.hexlify(key.fingerprint).decode()
                 )
-            about += "\n".join(fingerprints)
+            about.extend(fingerprints)
         else:
-            about += wallet.key.fingerprint_hex_str()
+            about.append(wallet.key.fingerprint_hex_str())
             xpub = wallet.key.xpub()
-            about += "\n" + self.fit_to_line(xpub)
+            about.append(self.fit_to_line(xpub))
 
         if not wallet.is_multisig() and include_qr:
             wallet_data, qr_format = wallet.wallet_qr()
@@ -477,11 +477,11 @@ class Home(Page):
 
         # If multisig, show loaded wallet again with all XPUB
         if wallet.is_multisig():
-            about = wallet.label + "\n"
+            about = [wallet.label]
             xpubs = []
             for i, xpub in enumerate(wallet.policy["cosigners"]):
                 xpubs.append(self.fit_to_line(xpub, str(i + 1) + ". "))
-            about += "\n".join(xpubs)
+            about.extend(xpubs)
 
             if include_qr:
                 self.ctx.input.wait_for_button()
