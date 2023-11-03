@@ -277,7 +277,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # No print prompt
+        # 0 - No print prompt
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
@@ -286,13 +286,14 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
+        # 1
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
             None,
@@ -301,14 +302,14 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # Print
+        # 2 - Print
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
@@ -317,14 +318,14 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
-                BUTTON_ENTER,  # say yes to print prompt
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
+        # 3
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
@@ -333,15 +334,14 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
-                BUTTON_ENTER,  # say yes to print prompt
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # Decline to print
+        # 4 - Decline to print
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
@@ -350,14 +350,14 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
-                BUTTON_PAGE,  # say no to print prompt
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
+        # 5
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
@@ -366,8 +366,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
-                BUTTON_PAGE,  # say no to print prompt
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
