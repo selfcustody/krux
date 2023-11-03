@@ -182,6 +182,9 @@ def test_to_lines(mocker, m5stickv):
 
     cases = [
         (135, "Two Words", ["Two Words"]),
+        (135, "Two  Words", ["Two  Words"]),
+        (135, "Two   Words", ["Two   Words"]),
+        (135, "Two        Words", ["Two        Words"]),
         (135, "Two\nWords", ["Two", "Words"]),
         (135, "Two\n\nWords", ["Two", "", "Words"]),
         (135, "Two\n\n\nWords", ["Two", "", "", "Words"]),
@@ -304,6 +307,40 @@ def test_to_lines(mocker, m5stickv):
         )
         d = Display()
         lines = d.to_lines(case[1])
+        assert lines == case[2]
+
+
+def test_to_lines_exact_match_amigo(mocker, amigo_tft):
+    from krux.display import Display
+
+    cases = [
+        (320, "01234 0123456789012345678", ["01234 0123456789012345678"]),
+        (320, "0123456789 01234567890 01234", ["0123456789", "01234567890 01234"]),
+        (320, "01234567890123456789012345", ["0123456789012345678901234", "5"]),
+        (
+            320,
+            "01234 0123456789012345678\n01234 0123456789012345678",
+            ["01234 0123456789012345678", "01234 0123456789012345678"],
+        ),
+        (
+            320,
+            "01 34 0123456789012345678\n01234 0123456789012345678",
+            ["01 34 0123456789012345678", "01234 0123456789012345678"],
+        ),
+        (
+            320,
+            "01 345 0123456789012345678\n01234 0123456789012345678",
+            ["01 345", "0123456789012345678", "01234 0123456789012345678"],
+        ),
+    ]
+    for case in cases:
+        mocker.patch(
+            "krux.display.lcd",
+            new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
+        )
+        d = Display()
+        lines = d.to_lines(case[1])
+        print(lines)
         assert lines == case[2]
 
 

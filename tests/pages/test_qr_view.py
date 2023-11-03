@@ -23,5 +23,5 @@ def test_load_qr_view(amigo_tft, mocker):
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     data = "test code"
     seed_qr_view = SeedQRView(ctx, data=data, title="Test QR Code")
-    seed_qr_view.display_seed_qr()
+    seed_qr_view.display_qr()
     assert ctx.display.draw_qr_code.call_count == 8

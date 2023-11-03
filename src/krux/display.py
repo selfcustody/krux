@@ -198,7 +198,22 @@ class Display:
                     # is less than the amount of columns. If it's exactly equal,
                     # a newline will be implicit.
                     if len(words[-1]) < columns:
-                        words[-1] += "\n"
+                        add_new_line = True
+                        # check for exact match with 2 words
+                        if (
+                            len(words) > 1
+                            and len(words[-1]) + len(words[-2]) + 1 == columns
+                        ):
+                            add_new_line = False
+                        # check for exact match with 3 words
+                        if (
+                            len(words) > 2
+                            and len(words[-1]) + len(words[-2]) + len(words[-3]) + 2
+                            == columns
+                        ):
+                            add_new_line = False
+                        if add_new_line:
+                            words[-1] += "\n"
 
         num_words = len(words)
 
