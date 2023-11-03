@@ -503,22 +503,29 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
 def test_public_key(mocker, m5stickv, tdata):
     from krux.pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # No print prompt
+        # 0 - No print prompt
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_ENTER, # XPUB - Text
+                BUTTON_PAGE, # move Back - child
+                BUTTON_ENTER, # Press Back - child
+                BUTTON_PAGE_PREV, # Move Back - father
+                BUTTON_ENTER # Press Back - father
+            ],
         ),
+        # 1
         (
             Wallet(tdata.MULTISIG_12_WORD_KEY),
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # Print
+        # 2 - Print
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
@@ -531,6 +538,7 @@ def test_public_key(mocker, m5stickv, tdata):
                 BUTTON_ENTER,
             ],
         ),
+        # 3
         (
             Wallet(tdata.MULTISIG_12_WORD_KEY),
             MockPrinter(),
@@ -543,7 +551,7 @@ def test_public_key(mocker, m5stickv, tdata):
                 BUTTON_ENTER,
             ],
         ),
-        # Decline to print
+        # 4 - Decline to print
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
@@ -556,6 +564,7 @@ def test_public_key(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
             ],
         ),
+        # 5
         (
             Wallet(tdata.MULTISIG_12_WORD_KEY),
             MockPrinter(),
@@ -569,7 +578,10 @@ def test_public_key(mocker, m5stickv, tdata):
             ],
         ),
     ]
+    num = 0
     for case in cases:
+        print(num)
+        num += 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
         home = Home(ctx)
 
