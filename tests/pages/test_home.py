@@ -87,6 +87,7 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
     ctx = mock_context(mocker)
     ctx.power_manager.battery_charge_remaining.return_value = 1
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
+    ctx.display.max_lines = mocker.MagicMock(return_value=7)
 
     ctx.wallet = wallet
     ctx.printer = printer
@@ -611,6 +612,7 @@ def test_public_key(mocker, m5stickv, tdata):
                 "ZPUB",
             ),
         ]
+        # TODO: Fix here to match the changes on XPUB screen
         home.display_qr_codes.assert_has_calls(display_qr_calls)
         if case[1] is not None:
             home.utils.print_standard_qr.assert_has_calls(print_qr_calls)

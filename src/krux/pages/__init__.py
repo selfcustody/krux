@@ -566,8 +566,7 @@ class Menu:
         self.menu = menu
         self.menu_offset = offset
         max_viewable = min(
-            (self.ctx.display.height() - 2 * DEFAULT_PADDING - self.menu_offset)
-            // (2 * self.ctx.display.font_height),
+            self.ctx.display.max_lines(self.menu_offset),
             len(self.menu),
         )
         self.menu_view = ListView(self.menu, max_viewable)

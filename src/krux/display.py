@@ -375,3 +375,9 @@ class Display:
         level = max(0, min(level, 8))
         val = (level + 7) << 4
         self.i2c.writeto_mem(0x34, 0x91, int(val))
+
+    def max_lines(self, line_offset=0):
+        """The max lines of text supported by the display"""
+        return (self.height() - 2 * DEFAULT_PADDING - line_offset) // (
+            2 * self.font_height
+        )

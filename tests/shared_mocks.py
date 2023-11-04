@@ -347,6 +347,7 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=135),
                 height=mocker.MagicMock(return_value=240),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_lines=mocker.MagicMock(return_value=7),
             ),
         )
     elif board.config["type"] == "dock":
@@ -364,6 +365,7 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_lines=mocker.MagicMock(return_value=9),
             ),
         )
     elif board.config["type"].startswith("amigo"):
@@ -374,5 +376,6 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=320),
                 height=mocker.MagicMock(return_value=480),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_lines=mocker.MagicMock(return_value=9),
             ),
         )
