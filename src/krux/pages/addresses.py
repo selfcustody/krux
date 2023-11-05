@@ -32,7 +32,6 @@ from . import (
     MENU_EXIT,
 )
 
-LIST_ADDRESS_QTD = 4  # qtd of address per page
 SCAN_ADDRESS_LIMIT = 20
 
 
@@ -73,19 +72,21 @@ class Addresses(Page):
             if addr_type == 1:
                 loading_txt = t("Loading change address %d..")
 
+            max_addresses = self.ctx.display.max_lines() - 3
+
             num_checked = 0
             while True:
                 items = []
-                if num_checked + 1 > LIST_ADDRESS_QTD:
+                if num_checked + 1 > max_addresses:
                     items.append(
                         (
-                            "%d..%d" % (num_checked - LIST_ADDRESS_QTD, num_checked),
+                            "%d..%d" % (num_checked - max_addresses, num_checked),
                             lambda: MENU_EXIT,
                         )
                     )
 
                 for addr in self.ctx.wallet.obtain_addresses(
-                    num_checked, limit=LIST_ADDRESS_QTD, branch_index=addr_type
+                    num_checked, limit=max_addresses, branch_index=addr_type
                 ):
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(loading_txt % (num_checked + 1))
@@ -105,7 +106,7 @@ class Addresses(Page):
 
                 items.append(
                     (
-                        "%d..%d" % (num_checked + 1, num_checked + LIST_ADDRESS_QTD),
+                        "%d..%d" % (num_checked + 1, num_checked + max_addresses),
                         lambda: MENU_EXIT,
                     )
                 )
@@ -125,9 +126,9 @@ class Addresses(Page):
                     if index == len(submenu.menu) - 2:
                         stay_on_this_addr_menu = False
                     # Prev
-                    if index == 0 and num_checked > LIST_ADDRESS_QTD:
+                    if index == 0 and num_checked > max_addresses:
                         stay_on_this_addr_menu = False
-                        num_checked -= 2 * LIST_ADDRESS_QTD
+                        num_checked -= 2 * max_addresses
 
         return MENU_CONTINUE
 

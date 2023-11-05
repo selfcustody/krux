@@ -198,7 +198,22 @@ class Display:
                     # is less than the amount of columns. If it's exactly equal,
                     # a newline will be implicit.
                     if len(words[-1]) < columns:
-                        words[-1] += "\n"
+                        add_new_line = True
+                        # check for exact match with 2 words
+                        if (
+                            len(words) > 1
+                            and len(words[-1]) + len(words[-2]) + 1 == columns
+                        ):
+                            add_new_line = False
+                        # check for exact match with 3 words
+                        if (
+                            len(words) > 2
+                            and len(words[-1]) + len(words[-2]) + len(words[-3]) + 2
+                            == columns
+                        ):
+                            add_new_line = False
+                        if add_new_line:
+                            words[-1] += "\n"
 
         num_words = len(words)
 
@@ -360,3 +375,9 @@ class Display:
         level = max(0, min(level, 8))
         val = (level + 7) << 4
         self.i2c.writeto_mem(0x34, 0x91, int(val))
+
+    def max_lines(self, line_offset=0):
+        """The max lines of text supported by the display"""
+        return (self.height() - 2 * DEFAULT_PADDING - line_offset) // (
+            2 * self.font_height
+        )

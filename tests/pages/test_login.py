@@ -1080,6 +1080,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             )
             + [
                 BUTTON_ENTER,  # Done?
+                BUTTON_ENTER,  # 12 numbers confirm
                 BUTTON_ENTER,  # 12 word confirm
                 BUTTON_PAGE,  # 1 press to move to Scan passphrase
                 BUTTON_PAGE,  # 1 press to move to No passphrase
@@ -1107,6 +1108,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]
             + [
                 BUTTON_ENTER,  # Done?
+                BUTTON_ENTER,  # 12 numbers confirm
                 BUTTON_ENTER,  # 12 word confirm
                 BUTTON_PAGE,  # 1 press to move to Scan passphrase
                 BUTTON_PAGE,  # 1 press to move to No passphrase
@@ -1119,7 +1121,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
     ]
     num = 0
     for case in cases:
-        print(num)
+        print("case:", num)
         num = num + 1
         ctx = create_ctx(mocker, case[0])
         login = Login(ctx)
@@ -1156,6 +1158,7 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
         )
         + [
             BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_PAGE,  # 1 press to move to Scan passphrase
             BUTTON_PAGE,  # 1 press to move to No passphrase
@@ -1223,6 +1226,7 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
         )
         + [
             BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_PAGE,  # 1 press to move to Scan passphrase
             BUTTON_PAGE,  # 1 press to move to No passphrase
@@ -1268,6 +1272,7 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
         )
         + [
             BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_PAGE,  # 1 press to move to Scan passphrase
             BUTTON_PAGE,  # 1 press to move to No passphrase
@@ -1328,6 +1333,7 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
         )
         + [
             BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_PAGE,  # 1 press to move to Scan passphrase
             BUTTON_PAGE,  # 1 press to move to No passphrase
