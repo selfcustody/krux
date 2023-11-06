@@ -59,7 +59,7 @@ class SaveFile(Page):
                         file_description + "\n" + t("Save to SD card?") + "\n\n",
                         self.ctx.display.height() // 2,
                     ):
-                        filename, filename_undefined = self._set_filename(
+                        filename, filename_undefined = self.set_filename(
                             filename,
                             empty_name,
                             file_suffix,
@@ -78,7 +78,7 @@ class SaveFile(Page):
         except:
             self.flash_text(t("SD card not detected."))
 
-    def _set_filename(
+    def set_filename(
         self, curr_filename="", empty_filename="some_file", suffix="", file_extension=""
     ):
         """Helper to set the filename based on a suggestion and the user input"""

@@ -279,8 +279,10 @@ class SeedQRView(Page):
                     theme.highlight_color,
                 )
 
-    def save_pbm_image(self):
+    def save_pbm_image(self, file_name):
         """Saves QR code image as compact B&W bitmap format file"""
+        from ..sd_card import PBM_IMAGE_EXTENSION
+
         size, code = add_qr_frame(self.code)
         qr_image_file = (
             "P4\n# Krux\n".encode()
@@ -295,13 +297,15 @@ class SeedQRView(Page):
                 bit_string_line += "0" * (8 - size % 8)
             line = int(bit_string_line, 2).to_bytes((self.qr_size + 7) // 8, "big")
             qr_image_file += line
-        filename = "QR_Code.pbm"
+        file_name += PBM_IMAGE_EXTENSION
         with SDHandler() as sd:
-            sd.write_binary(filename, qr_image_file)
-        self.flash_text(t("Saved to SD card:\n%s") % filename)
+            sd.write_binary(file_name, qr_image_file)
+        self.flash_text(t("Saved to SD card:\n%s") % file_name)
 
-    def save_bmp_image(self, resolution):
+    def save_bmp_image(self, file_name, resolution):
         """Save QR code image as .bmp file"""
+        from ..sd_card import BMP_IMAGE_EXTENSION
+
         # TODO: Try Compression?
         import image
         import lcd
@@ -332,31 +336,41 @@ class SeedQRView(Page):
             x_scale=scale,
             y_scale=scale,
         )
-        filename = "QR_Code.bmp"
-        bmp_img.save("/sd/" + filename)
-        self.flash_text(t("Saved to SD card:\n%s") % filename)
+        file_name += BMP_IMAGE_EXTENSION
+        bmp_img.save("/sd/" + file_name)
+        self.flash_text(t("Saved to SD card:\n%s") % file_name)
 
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
         # TODO: Allow custom file name
+        from .files_operations import SaveFile
+
+        file_saver = SaveFile(self.ctx)
+        file_name, filename_undefined = file_saver.set_filename(
+            self.title.replace(" ", "_"),
+        )
+        if filename_undefined:
+            return
         size = self.qr_size + 2
-        resolutions = []
+        bmp_resolutions = []
         resolution = size
         for _ in range(4):
             resolution *= 2
             if resolution <= 480:
-                resolutions.append(resolution)
+                bmp_resolutions.append(resolution)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             t("Resolution - Format"), self.ctx.display.font_height, info_box=True
         )
         qr_menu = []
-        qr_menu.append(("%dx%d - PBM" % (size, size), self.save_pbm_image))
-        for resolution in resolutions:
+        qr_menu.append(
+            ("%dx%d - PBM" % (size, size), lambda: self.save_pbm_image(file_name))
+        )
+        for bmp_resolution in bmp_resolutions:
             qr_menu.append(
                 (
-                    "%dx%d - BMP" % (resolution, resolution),
-                    lambda res=resolution: self.save_bmp_image(res),
+                    "%dx%d - BMP" % (bmp_resolution, bmp_resolution),
+                    lambda res=bmp_resolution: self.save_bmp_image(file_name, res),
                 )
             )
         submenu = Menu(self.ctx, qr_menu, offset=2 * self.ctx.display.font_height)
