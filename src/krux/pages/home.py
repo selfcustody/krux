@@ -327,7 +327,7 @@ class Home(Page):
         from .addresses import Addresses
 
         adresses = Addresses(self.ctx)
-        adresses.addresses_menu()
+        return adresses.addresses_menu()
 
     def sign(self):
         """Handler for the 'sign' menu item"""

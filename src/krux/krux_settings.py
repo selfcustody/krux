@@ -344,9 +344,6 @@ class ThemeSettings(SettingsNamespace):
     DARK_THEME = 0
     LIGHT_THEME = 1
     ORANGE_THEME = 3
-    DARK_THEME_NAME = "Dark"
-    LIGHT_THEME_NAME = "Light"
-    ORANGE_THEME_NAME = "Orange"
     GREEN_THEME = 4
     PINK_THEME = 5
     DARK_THEME_NAME = "Dark"

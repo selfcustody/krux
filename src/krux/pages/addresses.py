@@ -58,7 +58,7 @@ class Addresses(Page):
                 (t("Scan Address"), self.pre_scan_address),
                 (t("Receive Addresses"), self.list_address_type),
                 (t("Change Addresses"), lambda: self.list_address_type(1)),
-                (t("Back"), lambda: MENU_EXIT),
+                (t("Back"), lambda: None),
             ],
         )
         submenu.run_loop()
