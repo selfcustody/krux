@@ -278,7 +278,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # 0 - No print prompt
+        # 0 - 12W
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
@@ -294,7 +294,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # 1
+        # 1 - 24W
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
             None,
@@ -310,7 +310,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # 2 - Print
+        # 2 - 12W Print
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
@@ -319,21 +319,9 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Leave QR Viewer
-                BUTTON_PAGE_PREV,  # change to btn Back
-                BUTTON_PAGE_PREV,
-                BUTTON_PAGE_PREV,
-                BUTTON_ENTER,  # click on back to return to home init screen
-            ],
-        ),
-        # 3
-        (
-            Wallet(tdata.SINGLESIG_24_WORD_KEY),
-            MockPrinter(),
-            [
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_PAGE,  # change to Print
+                BUTTON_ENTER,  # Print
+                BUTTON_ENTER,  # Print confirm
                 BUTTON_ENTER,  # Leave
                 BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
@@ -342,7 +330,27 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # 4 - Decline to print
+        # 3 - 24W Print
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE,  # change to Print
+                BUTTON_ENTER,  # Print
+                BUTTON_ENTER,  # Print confirm
+                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Leave QR Viewer
+                BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,  # click on back to return to home init screen
+            ],
+        ),
+        # 4 - 12W Print, Decline to print
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
@@ -351,6 +359,10 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
                 BUTTON_ENTER,  # Leave
+                BUTTON_PAGE,  # change to Print
+                BUTTON_ENTER,  # Print
+                BUTTON_PAGE,  # Print decline
+                BUTTON_ENTER,  # Leave
                 BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
@@ -358,7 +370,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # 5
+        # 5 - 24W Print, Decline to print
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
@@ -366,6 +378,10 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE,  # change to Print
+                BUTTON_ENTER,  # Print
+                BUTTON_PAGE,  # Print decline
                 BUTTON_ENTER,  # Leave
                 BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
