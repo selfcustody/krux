@@ -468,7 +468,8 @@ class Page:
         return answer
 
     def fit_to_line(self, text, prefix="", fixed_chars=0):
-        """Fits text with prefix plus fixed_chars at the beginning into one line, removing the central content and leaving the ends"""
+        """Fits text with prefix plus fixed_chars at the beginning into one line,
+        removing the central content and leaving the ends"""
 
         add_chars_amount = (
             self.ctx.display.usable_width() // self.ctx.display.font_width
