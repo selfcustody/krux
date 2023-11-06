@@ -53,8 +53,13 @@ Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128
 
 <div style="clear: both"></div>
 
-## Alternatives
-See [here](https://vault12.com/securemycrypto/cryptocurrency-security-how-to/seed-phrase-creation/) for good methods to generate a mnemonic manually, or visit [Ian Coleman's BIP-39 Tool](https://iancoleman.io/bip39/) offline or on an airgapped device to generate one automatically. 
+### How to verify
 
-It's worth noting that Ian's tool is able to take a mnemonic and generate a QR code that Krux can read in via the QR input method mentioned on the next page.
+Don't trust, verify.  We encourage you not to trust any claim you cannot verify yourself. Therefore, there are wallets that use compatible algorithms to calculate the entropy derived from dice rolls. You can use the [SeedSigner](https://seedsigner.com/) or Coldcard hardware wallets, or even the [Bitcoiner Guide website](https://bitcoiner.guide/seed/), they share the same logic that Krux uses and will give the same mnemonic.
+
+## Alternatives
+
+You can use any other offline airgapped devices to generate your mnemonic. If you want to use a regular PC, a common strategy is to boot the PC using [Tails](https://tails.boum.org/) from a USB stick, without connecting the device to the internet, and then use a copy of the the [Bitcoiner Guide website](https://bitcoiner.guide/seed/) or even [Ian Coleman's BIP-39 Tool](https://iancoleman.io/bip39/). It's worth noting that both generate a QR code that Krux can read via the QR input method mentioned on the next page (Loading a Mnemonic).
+
+See [here](https://vault12.com/securemycrypto/cryptocurrency-security-how-to/seed-phrase-creation/) for other good methods to generate a mnemonic manually.
 
