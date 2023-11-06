@@ -71,7 +71,13 @@ class Home(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Words"), self.display_mnemonic_words),
+                (
+                    t("Words"),
+                    lambda: self.show_mnemonic(
+                        self.ctx.wallet.key.mnemonic, t("Mnemonic")
+                    ),
+                ),
+                (t("Numbers"), self.display_mnemonic_numbers),
                 (t("Plaintext QR"), self.display_standard_qr),
                 (t("Compact SeedQR"), lambda: self.display_seed_qr(True)),
                 (t("SeedQR"), self.display_seed_qr),
@@ -83,9 +89,9 @@ class Home(Page):
         submenu.run_loop()
         return MENU_CONTINUE
 
-    def display_mnemonic_words(self):
-        """Displays only the mnemonic words"""
-        self.display_mnemonic(self.ctx.wallet.key.mnemonic)
+    def show_mnemonic(self, mnemonic, suffix=""):
+        """Displays only the mnemonic words or indices"""
+        self.display_mnemonic(mnemonic, suffix)
         self.ctx.input.wait_for_button()
 
         # Avoid printing text on a cnc
@@ -98,7 +104,45 @@ class Home(Page):
                 from .print_page import PrintPage
 
                 print_page = PrintPage(self.ctx)
-                print_page.print_mnemonic_text()
+                print_page.print_mnemonic_text(mnemonic, suffix)
+        return MENU_CONTINUE
+
+    def display_mnemonic_numbers(self):
+        """Handler for the 'numbers' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (
+                    t("Decimal"),
+                    lambda: self.show_mnemonic(
+                        Utils.get_mnemonic_numbers(
+                            self.ctx.wallet.key.mnemonic, Utils.BASE_DEC
+                        ),
+                        Utils.BASE_DEC_SUFFIX,
+                    ),
+                ),
+                (
+                    t("Hexadecimal"),
+                    lambda: self.show_mnemonic(
+                        Utils.get_mnemonic_numbers(
+                            self.ctx.wallet.key.mnemonic, Utils.BASE_HEX
+                        ),
+                        Utils.BASE_HEX_SUFFIX,
+                    ),
+                ),
+                (
+                    t("Octal"),
+                    lambda: self.show_mnemonic(
+                        Utils.get_mnemonic_numbers(
+                            self.ctx.wallet.key.mnemonic, Utils.BASE_OCT
+                        ),
+                        Utils.BASE_OCT_SUFFIX,
+                    ),
+                ),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        submenu.run_loop()
         return MENU_CONTINUE
 
     def display_standard_qr(self):

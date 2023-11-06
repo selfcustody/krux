@@ -24,6 +24,7 @@ import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
+from .utils import Utils
 from ..themes import theme
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
@@ -303,32 +304,27 @@ class Login(Page):
             return MENU_CONTINUE
         return data
 
-    def _get_words_numbers(self, words, charset):
-        word_numbers = []
-        for word in words:
-            word_numbers.append(WORDLIST.index(word) + 1)
-
-        if charset == DIGITS_HEX:
-            for i, number in enumerate(word_numbers):
-                word_numbers[i] = hex(number)[2:].upper()
-
-        if charset == DIGITS_OCT:
-            for i, number in enumerate(word_numbers):
-                word_numbers[i] = oct(number)[2:]
-
-        numbers_str = [str(value) for value in word_numbers]
-        return " ".join(numbers_str)
-
     def _load_key_from_words(self, words, charset=LETTERS):
+        mnemonic = " ".join(words)
+
         if charset != LETTERS:
-            numbers_str = self._get_words_numbers(words, charset)
-            self.display_mnemonic(numbers_str)
+            charset_type = {
+                DIGITS: Utils.BASE_DEC,
+                DIGITS_HEX: Utils.BASE_HEX,
+                DIGITS_OCT: Utils.BASE_OCT,
+            }
+            suffix_dict = {
+                DIGITS: Utils.BASE_DEC_SUFFIX,
+                DIGITS_HEX: Utils.BASE_HEX_SUFFIX,
+                DIGITS_OCT: Utils.BASE_OCT_SUFFIX,
+            }
+            numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
+            self.display_mnemonic(numbers_str, suffix_dict[charset])
             if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
             self.ctx.display.clear()
 
-        mnemonic = " ".join(words)
-        self.display_mnemonic(mnemonic)
+        self.display_mnemonic(mnemonic, t("Mnemonic"))
         if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
             return MENU_CONTINUE
         self.ctx.display.clear()

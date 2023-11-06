@@ -14,6 +14,7 @@ def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
+            BUTTON_PAGE,
             BUTTON_ENTER,  # Open Stackbit
             BUTTON_ENTER,  # PG2
             BUTTON_ENTER,  # PG3
@@ -41,6 +42,7 @@ def test_export_mnemonic_stackbit_amigo(mocker, amigo_tft, tdata):
         Wallet(tdata.SINGLESIG_24_WORD_KEY),
         None,
         [
+            BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
