@@ -331,18 +331,18 @@ class Page:
                 done = True
             # interval done in input.py using timers
 
-    def display_mnemonic(self, mnemonic):
+    def display_mnemonic(self, mnemonic, suffix=""):
         """Displays the 12 or 24-word list of words to the user"""
         words = mnemonic.split(" ")
         word_list = [
             str(i + 1) + "." + ("  " if i + 1 < 10 else " ") + word
             for i, word in enumerate(words)
         ]
+        header = t("BIP39") + " " + suffix
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("BIP39 Mnemonic"))
+        self.ctx.display.draw_hcentered_text(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (
-            len(self.ctx.display.to_lines(t("BIP39 Mnemonic")))
-            * self.ctx.display.font_height
+            len(self.ctx.display.to_lines(header)) * self.ctx.display.font_height
             + self.ctx.display.font_height
         )
         for i, word in enumerate(word_list[:12]):
@@ -353,7 +353,7 @@ class Page:
             if board.config["type"] == "m5stickv":
                 self.ctx.input.wait_for_button()
                 self.ctx.display.clear()
-                self.ctx.display.draw_hcentered_text(t("BIP39 Mnemonic"))
+                self.ctx.display.draw_hcentered_text(header)
                 for i, word in enumerate(word_list[12:]):
                     offset_x = DEFAULT_PADDING
                     offset_y = starting_y_offset + (i * self.ctx.display.font_height)

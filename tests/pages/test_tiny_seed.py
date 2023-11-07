@@ -18,6 +18,7 @@ def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
+            BUTTON_PAGE,
             BUTTON_ENTER,  # Open TinySeed
             BUTTON_ENTER,  # go to page 2
             BUTTON_ENTER,  # Leave

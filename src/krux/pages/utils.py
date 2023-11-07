@@ -23,10 +23,19 @@
 from . import Page
 from ..krux_settings import t
 from ..sd_card import SDHandler
+from embit.wordlists.bip39 import WORDLIST
 
 
 class Utils(Page):
     """Methods as subpages, shared by other pages"""
+
+    BASE_DEC = 10
+    BASE_HEX = 16
+    BASE_OCT = 8
+
+    BASE_DEC_SUFFIX = "DEC"
+    BASE_HEX_SUFFIX = "HEX"
+    BASE_OCT_SUFFIX = "OCT"
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
@@ -59,3 +68,21 @@ class Utils(Page):
                         if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
                             return filename, sd.read_binary(filename)
         return "", None
+
+    @staticmethod
+    def get_mnemonic_numbers(words, base=BASE_DEC):
+        """Returns the mnemonic as indices in decimal, hexadecimal, or octal"""
+        word_numbers = []
+        for word in words.split(" "):
+            word_numbers.append(WORDLIST.index(word) + 1)
+
+        if base == Utils.BASE_HEX:
+            for i, number in enumerate(word_numbers):
+                word_numbers[i] = hex(number)[2:].upper()
+
+        if base == Utils.BASE_OCT:
+            for i, number in enumerate(word_numbers):
+                word_numbers[i] = oct(number)[2:]
+
+        numbers_str = [str(value) for value in word_numbers]
+        return " ".join(numbers_str)
