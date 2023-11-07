@@ -26,7 +26,7 @@ from ..themes import theme
 from ..display import DEFAULT_PADDING
 from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
-from ..krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
+from ..krux_settings import t
 from . import (
     Page,
     Menu,
@@ -34,15 +34,11 @@ from . import (
     MENU_EXIT,
 )
 from ..sd_card import (
-    PUBKEY_FILE_EXTENSION,
     PSBT_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
     DESCRIPTOR_FILE_EXTENSION,
     JSON_FILE_EXTENSION,
 )
-
-# to start xpub value without the xpub/zpub/ypub prefix
-WALLET_XPUB_START = 4
 
 
 class Home(Page):
@@ -68,139 +64,10 @@ class Home(Page):
 
     def mnemonic(self):
         """Handler for the 'mnemonic' menu item"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (
-                    t("Words"),
-                    lambda: self.show_mnemonic(
-                        self.ctx.wallet.key.mnemonic, t("Mnemonic")
-                    ),
-                ),
-                (t("Numbers"), self.display_mnemonic_numbers),
-                (t("Plaintext QR"), self.display_standard_qr),
-                (t("Compact SeedQR"), lambda: self.display_seed_qr(True)),
-                (t("SeedQR"), self.display_seed_qr),
-                (t("Stackbit 1248"), self.stackbit),
-                (t("Tiny Seed"), self.tiny_seed),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        submenu.run_loop()
-        return MENU_CONTINUE
+        from .mnemonic_view import MnemonicsView
 
-    def show_mnemonic(self, mnemonic, suffix=""):
-        """Displays only the mnemonic words or indices"""
-        self.display_mnemonic(mnemonic, suffix)
-        self.ctx.input.wait_for_button()
-
-        # Avoid printing text on a cnc
-        if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
-            self.ctx.display.clear()
-            if self.prompt(
-                t("Print?\n\n%s\n\n") % Settings().hardware.printer.driver,
-                self.ctx.display.height() // 2,
-            ):
-                from .print_page import PrintPage
-
-                print_page = PrintPage(self.ctx)
-                print_page.print_mnemonic_text(mnemonic, suffix)
-        return MENU_CONTINUE
-
-    def display_mnemonic_numbers(self):
-        """Handler for the 'numbers' menu item"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (
-                    t("Decimal"),
-                    lambda: self.show_mnemonic(
-                        Utils.get_mnemonic_numbers(
-                            self.ctx.wallet.key.mnemonic, Utils.BASE_DEC
-                        ),
-                        Utils.BASE_DEC_SUFFIX,
-                    ),
-                ),
-                (
-                    t("Hexadecimal"),
-                    lambda: self.show_mnemonic(
-                        Utils.get_mnemonic_numbers(
-                            self.ctx.wallet.key.mnemonic, Utils.BASE_HEX
-                        ),
-                        Utils.BASE_HEX_SUFFIX,
-                    ),
-                ),
-                (
-                    t("Octal"),
-                    lambda: self.show_mnemonic(
-                        Utils.get_mnemonic_numbers(
-                            self.ctx.wallet.key.mnemonic, Utils.BASE_OCT
-                        ),
-                        Utils.BASE_OCT_SUFFIX,
-                    ),
-                ),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        submenu.run_loop()
-        return MENU_CONTINUE
-
-    def display_standard_qr(self):
-        """Displays regular words QR code"""
-        title = t("Plaintext QR")
-        data = self.ctx.wallet.key.mnemonic
-        self.display_qr_codes(data, FORMAT_NONE, title)
-        self.utils.print_standard_qr(data, FORMAT_NONE, title)
-        return MENU_CONTINUE
-
-    def display_seed_qr(self, binary=False):
-        """Display Seed QR with with different view modes"""
-
-        from .qr_view import SeedQRView
-
-        seed_qr_view = SeedQRView(self.ctx, binary)
-        return seed_qr_view.display_qr()
-
-    def stackbit(self):
-        """Displays which numbers 1248 user should punch on 1248 steel card"""
-        from .stack_1248 import Stackbit
-
-        stackbit = Stackbit(self.ctx)
-        word_index = 1
-        words = self.ctx.wallet.key.mnemonic.split(" ")
-
-        while word_index < len(words):
-            y_offset = 2 * self.ctx.display.font_height
-            for _ in range(6):
-                stackbit.export_1248(word_index, y_offset, words[word_index - 1])
-                if self.ctx.display.height() > 240:
-                    y_offset += 3 * self.ctx.display.font_height
-                else:
-                    y_offset += 5 + 2 * self.ctx.display.font_height
-                word_index += 1
-            self.ctx.input.wait_for_button()
-
-            # removed the hability to go back in favor or the Krux UI patter (always move forward)
-            # if self.ctx.input.wait_for_button() == BUTTON_PAGE_PREV:
-            #     if word_index > 12:
-            #         word_index -= 12
-            #     else:
-            #         word_index = 1
-            self.ctx.display.clear()
-        return MENU_CONTINUE
-
-    def tiny_seed(self):
-        """Displays the seed in Tiny Seed format"""
-        from .tiny_seed import TinySeed
-
-        tiny_seed = TinySeed(self.ctx)
-        tiny_seed.export()
-
-        # Allow to print on thermal printer only
-        if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
-            if self.print_qr_prompt():
-                tiny_seed.print_tiny_seed()
-        return MENU_CONTINUE
+        mnemonics_viewer = MnemonicsView(self.ctx)
+        return mnemonics_viewer.mnemonic()
 
     def encrypt_mnemonic(self):
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
@@ -211,76 +78,10 @@ class Home(Page):
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
+        from .pub_key_view import PubkeyView
 
-        def _save_xpub_to_sd(version):
-            from .files_operations import SaveFile
-
-            save_page = SaveFile(self.ctx)
-            xpub = self.ctx.wallet.key.key_expression(version)
-            title = self.ctx.wallet.key.account_pubkey_str(version)[
-                :WALLET_XPUB_START
-            ].upper()
-            save_page.save_file(
-                xpub,
-                title,
-                title,
-                title + ":",
-                PUBKEY_FILE_EXTENSION,
-                save_as_binary=False,
-            )
-
-        def _pub_key_text(version):
-            pub_text_menu_items = []
-            if self.has_sd_card():
-                pub_text_menu_items.append(
-                    (t("Save to SD card?"), lambda ver=version: _save_xpub_to_sd(ver))
-                )
-            pub_text_menu_items.append((t("Back"), lambda: MENU_EXIT))
-            full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
-            menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
-            menu_offset *= self.ctx.display.font_height
-            pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(
-                self.ctx.wallet.key.fingerprint_hex_str()
-                + "\n\n"
-                + self.ctx.wallet.key.derivation_str()
-                + "\n\n"
-                + full_pub_key,
-                offset_y=self.ctx.display.font_height,
-                info_box=True,
-            )
-            pub_key_menu.run_loop()
-
-        def _pub_key_qr(version):
-            # TODO: Add menu to offer print and export as image
-            title = self.ctx.wallet.key.account_pubkey_str(version)[
-                :WALLET_XPUB_START
-            ].upper()
-            xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, title)
-            self.utils.print_standard_qr(xpub, FORMAT_NONE, title)
-
-        zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
-        pub_key_menu_items = []
-        for version in [None, self.ctx.wallet.key.network[zpub]]:
-            title = self.ctx.wallet.key.account_pubkey_str(version)[
-                :WALLET_XPUB_START
-            ].upper()
-            pub_key_menu_items.append(
-                (title + " - " + t("Text"), lambda ver=version: _pub_key_text(ver))
-            )
-            pub_key_menu_items.append(
-                (title + " - " + t("QR Code"), lambda ver=version: _pub_key_qr(ver))
-            )
-        pub_key_menu_items.append((t("Back"), lambda: MENU_EXIT))
-        pub_key_menu = Menu(self.ctx, pub_key_menu_items)
-        while True:
-            _, status = pub_key_menu.run_loop()
-            if status == MENU_EXIT:
-                break
-
-        return MENU_CONTINUE
+        pubkey_viewer = PubkeyView(self.ctx)
+        return pubkey_viewer.public_key()
 
     def wallet(self):
         """Handler for the 'wallet' menu item"""

@@ -237,6 +237,7 @@ def test_wait_for_release(mocker, m5stickv):
         mocker.patch.object(time, "ticks_ms", new=lambda: 1000)
         time.sleep(0.1)
         mocker.patch.object(time, "ticks_ms", new=lambda: 2000)
+        time.sleep(0.1)
         mocker.patch.object(input, "enter_value", new=lambda: RELEASED)
 
     assert input.entropy == 0
@@ -265,6 +266,7 @@ def test_wait_for_button_blocks_until_enter_released(mocker, m5stickv):
         mocker.patch.object(time, "ticks_ms", new=lambda: 1000)
         time.sleep(0.1)
         mocker.patch.object(time, "ticks_ms", new=lambda: 1100)
+        time.sleep(0.1)
         mocker.patch.object(input, "enter_value", new=lambda: RELEASED)
 
     assert input.entropy == 0
@@ -294,6 +296,7 @@ def test_wait_for_button_blocks_until_page_released(mocker, m5stickv):
         mocker.patch.object(time, "ticks_ms", new=lambda: 1000)
         time.sleep(0.1)
         mocker.patch.object(time, "ticks_ms", new=lambda: 1100)
+        time.sleep(0.1)
         mocker.patch.object(input, "page_value", new=lambda: RELEASED)
 
     assert input.entropy == 0
@@ -323,6 +326,7 @@ def test_wait_for_button_blocks_until_page_prev_released(mocker, m5stickv):
         mocker.patch.object(time, "ticks_ms", new=lambda: 1000)
         time.sleep(0.1)
         mocker.patch.object(time, "ticks_ms", new=lambda: 1100)
+        time.sleep(0.1)
         mocker.patch.object(input, "page_prev_value", new=lambda: RELEASED)
 
     assert input.entropy == 0
@@ -352,6 +356,7 @@ def test_wait_for_button_blocks_until_touch_released(mocker, amigo_tft):
         mocker.patch.object(time, "ticks_ms", new=lambda: 1000)
         time.sleep(0.1)
         mocker.patch.object(time, "ticks_ms", new=lambda: 1100)
+        time.sleep(0.1)
         mocker.patch.object(input, "touch_value", new=lambda: RELEASED)
 
     assert input.entropy == 0
@@ -707,6 +712,7 @@ def test_enter_button_press_when_buttons_not_active_returns_none(mocker, amigo_t
         time.sleep(0.1)
         mocker.patch.object(time, "ticks_ms", new=lambda: 200)
         mocker.patch.object(input, "enter_event", new=lambda: False)
+        time.sleep(0.1)
         mocker.patch.object(input, "enter_value", new=lambda: RELEASED)
 
     assert input.entropy == 0

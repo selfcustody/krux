@@ -105,7 +105,7 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
 
 
 def test_mnemonic_words(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -153,17 +153,17 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
         print(num)
         num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
-        home = Home(ctx)
+        mnemonics = MnemonicsView(ctx)
 
-        mocker.spy(home, "display_mnemonic")
-        home.mnemonic()
+        mocker.spy(mnemonics, "display_mnemonic")
+        mnemonics.mnemonic()
 
-        home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic, "Mnemonic")
+        mnemonics.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic, "Mnemonic")
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
 def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -266,25 +266,25 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         print(num)
         num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
-        home = Home(ctx)
+        mnemonics = MnemonicsView(ctx)
 
-        mocker.spy(home, "display_qr_codes")
-        mocker.spy(home.utils, "print_standard_qr")
-        home.mnemonic()
+        mocker.spy(mnemonics, "display_qr_codes")
+        mocker.spy(mnemonics.utils, "print_standard_qr")
+        mnemonics.mnemonic()
 
         title = "Plaintext QR"
-        home.display_qr_codes.assert_called_with(
+        mnemonics.display_qr_codes.assert_called_with(
             ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
         if case[1] is not None:
-            home.utils.print_standard_qr.assert_called_with(
+            mnemonics.utils.print_standard_qr.assert_called_with(
                 ctx.wallet.key.mnemonic, FORMAT_NONE, title
             )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
 def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -420,18 +420,18 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
         print(num)
         num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
-        home = Home(ctx)
+        mnemonics = MnemonicsView(ctx)
 
-        mocker.spy(home, "display_seed_qr")
-        home.mnemonic()
+        mocker.spy(mnemonics, "display_seed_qr")
+        mnemonics.mnemonic()
 
-        home.display_seed_qr.assert_called_once()
+        mnemonics.display_seed_qr.assert_called_once()
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
 def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_TOUCH, BUTTON_PAGE_PREV, BUTTON_ENTER
     from krux.qr import FORMAT_NONE
@@ -530,19 +530,19 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
         print(num)
         num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1], touch_seq=case[3])
-        home = Home(ctx)
+        mnemonics = MnemonicsView(ctx)
 
-        mocker.spy(home, "display_qr_codes")
-        mocker.spy(home.utils, "print_standard_qr")
+        mocker.spy(mnemonics, "display_qr_codes")
+        mocker.spy(mnemonics.utils, "print_standard_qr")
 
-        home.mnemonic()
+        mnemonics.mnemonic()
 
         title = "Plaintext QR"
-        home.display_qr_codes.assert_called_with(
+        mnemonics.display_qr_codes.assert_called_with(
             ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
         if case[1] is not None:
-            home.utils.print_standard_qr.assert_called_with(
+            mnemonics.utils.print_standard_qr.assert_called_with(
                 ctx.wallet.key.mnemonic, FORMAT_NONE, title
             )
 
@@ -550,7 +550,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
 
 
 def test_public_key(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.pub_key_view import PubkeyView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -632,12 +632,12 @@ def test_public_key(mocker, m5stickv, tdata):
         print(num)
         num += 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
-        home = Home(ctx)
+        pub_key_viewer = PubkeyView(ctx)
 
-        mocker.spy(home, "display_qr_codes")
-        mocker.spy(home.utils, "print_standard_qr")
+        mocker.spy(pub_key_viewer, "display_qr_codes")
+        mocker.spy(pub_key_viewer.utils, "print_standard_qr")
 
-        home.public_key()
+        pub_key_viewer.public_key()
 
         version = "Zpub" if ctx.wallet.key.multisig else "zpub"
         display_qr_calls = [
@@ -662,9 +662,9 @@ def test_public_key(mocker, m5stickv, tdata):
         ]
 
         # TODO: Fix here to match the changes on XPUB screen
-        home.display_qr_codes.assert_has_calls(display_qr_calls)
+        pub_key_viewer.display_qr_codes.assert_has_calls(display_qr_calls)
         if case[1] is not None:
-            home.utils.print_standard_qr.assert_has_calls(print_qr_calls)
+            pub_key_viewer.utils.print_standard_qr.assert_has_calls(print_qr_calls)
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
