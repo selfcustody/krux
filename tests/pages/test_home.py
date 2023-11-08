@@ -158,7 +158,9 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
         mocker.spy(mnemonics, "display_mnemonic")
         mnemonics.mnemonic()
 
-        mnemonics.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic, "Mnemonic")
+        mnemonics.display_mnemonic.assert_called_with(
+            ctx.wallet.key.mnemonic, "Mnemonic"
+        )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
