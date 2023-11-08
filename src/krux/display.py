@@ -181,36 +181,27 @@ class Display:
             columns = self.usable_width() // self.font_width
         else:
             columns = self.width() // self.font_width
-        words = []
+
+        # Processing the words and maintaining newline characters
+        processed_text = []
         for word in text.split(" "):
             subwords = word.split("\n")
             for i, subword in enumerate(subwords):
                 if len(subword) > columns:
                     j = 0
                     while j < len(subword):
-                        words.append(subword[j : j + columns])
+                        processed_text.append(subword[j : j + columns])
                         j += columns
                 else:
-                    words.append(subword)
+                    processed_text.append(subword)
 
                 if len(subwords) > 1 and i < len(subwords) - 1:
-                    # Only add newline to the end of the last word of the slug if its length
-                    # is less than the amount of columns.
-                    # If it's exactly equal, a newline will be implicit.
-                    slug_len = len(words[-1])
-                    for x_index in range(1, len(words)):
-                        # Length of maximum words that fit the line
-                        if (
-                            slug_len + len(words[-x_index - 1]) + 1 <= columns
-                            and "\n" not in words[-x_index - 1]
-                        ):
-                            slug_len += len(words[-x_index - 1]) + 1
-                        else:
-                            break
-                    if slug_len < columns:
-                        words[-1] += "\n"
+                    # Ensure proper handling of newline characters at the end of lines
+                    if not processed_text[-1].endswith("\n"):
+                        processed_text.append("\n")
 
-        num_words = len(words)
+        num_words = len(processed_text)
+        words = processed_text
 
         # calculate cost of all pairs of words
         cost_between = [[0 for _ in range(num_words + 1)] for _ in range(num_words + 1)]
