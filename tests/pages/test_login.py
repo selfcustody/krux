@@ -1,5 +1,13 @@
+import sys
 import pytest
+from Crypto.Cipher import AES
 from ..shared_mocks import mock_context
+from unittest import mock
+
+if "ucryptolib" not in sys.modules:
+    sys.modules["ucryptolib"] = mock.MagicMock(
+        aes=AES.new, MODE_ECB=AES.MODE_ECB, MODE_CBC=AES.MODE_CBC
+    )
 
 
 @pytest.fixture
@@ -1926,6 +1934,108 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         assert ctx.input.wait_for_button.call_count == len(case[0])
 
         assert case[2]()
+
+
+def test_encryption_pbkdf2_setting(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+
+    cases = [
+        (  # 0
+            (
+                BUTTON_PAGE,
+                # Encryption
+                BUTTON_ENTER,
+                # pbkdf2
+                BUTTON_ENTER,
+                # go to "<" keypad position
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                # delete last 0
+                BUTTON_ENTER,
+                # go to "1" keypad
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                # Enter "1"
+                BUTTON_ENTER,
+                # go to "Go" keypad position
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                # Go
+                BUTTON_ENTER,
+                # Leave Encryption settings
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+                # Leave Settings
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+            ),
+            # Assert iterations didn't change to 100,001 (not multiple of 10,000)
+            lambda: Settings().encryption.pbkdf2_iterations == 100000,
+            NumberSetting,
+        ),
+        (  # 0
+            (
+                BUTTON_PAGE,
+                # Encryption
+                BUTTON_ENTER,
+                # pbkdf2
+                BUTTON_ENTER,
+                # go to "<" keypad position
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                # delete last 5 zeros
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                # go to "1" keypad
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                # Enter "1"
+                BUTTON_ENTER,
+                # Go to Zero
+                BUTTON_PAGE_PREV,
+                # Enter 4 zeros
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                # go to "Go" keypad position
+                BUTTON_PAGE_PREV,
+                # Go
+                BUTTON_ENTER,
+                # Leave Encryption settings
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+                # Leave Settings
+                BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+            ),
+            # Assert iterations changed to a multiple of 10,000
+            lambda: Settings().encryption.pbkdf2_iterations == 110000,
+            NumberSetting,
+        ),
+    ]
+    for case in cases:
+        ctx = create_ctx(mocker, case[0])
+        login = Login(ctx)
+
+        login.settings()
+
+        assert ctx.input.wait_for_button.call_count == len(case[0])
+
+        assert case[1]()
 
 
 def test_about(mocker, m5stickv):
