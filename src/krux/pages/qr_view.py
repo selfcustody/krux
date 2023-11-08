@@ -111,24 +111,27 @@ class SeedQRView(Page):
         offset = (self.ctx.display.width() - qr_width) // 2
         for y in range(reg_height):  # vertical blocks loop
             for x in range(reg_width):  # horizontal blocks loop
-                xy_index = (reg_y + y + 1) * (size + 1)
-                xy_index += reg_x + x + 1
-                if code[xy_index] == "0":
-                    self.ctx.display.fill_rectangle(
-                        offset + (offset_x + x) * scale,
-                        offset + (offset_y + y) * scale,
-                        scale,
-                        scale,
-                        WHITE,
-                    )
-                else:
-                    self.ctx.display.fill_rectangle(
-                        offset + (offset_x + x) * scale,
-                        offset + (offset_y + y) * scale,
-                        scale,
-                        scale,
-                        BLACK,
-                    )
+                y_index = reg_y + y + 1
+                x_index = reg_x + x + 1
+                xy_index = y_index * (size + 1)
+                xy_index += x_index
+                if y_index < size and x_index < size:
+                    if code[xy_index] == "0":
+                        self.ctx.display.fill_rectangle(
+                            offset + (offset_x + x) * scale,
+                            offset + (offset_y + y) * scale,
+                            scale,
+                            scale,
+                            WHITE,
+                        )
+                    else:
+                        self.ctx.display.fill_rectangle(
+                            offset + (offset_x + x) * scale,
+                            offset + (offset_y + y) * scale,
+                            scale,
+                            scale,
+                            BLACK,
+                        )
 
     def _region_legend(self, row, column):
         region_char = chr(65 + row)
@@ -235,29 +238,38 @@ class SeedQRView(Page):
                 ),
             )
             line_offset = grid_pad * row * self.region_size
-            colunm_offset = grid_pad * column * self.region_size
+            column_offset = grid_pad * column * self.region_size
+            draw_limit = grid_offset + self.qr_size * grid_pad
             for i in range(self.region_size + 1):
-                x_position = grid_offset + colunm_offset
-                x_lenght = self.region_size * grid_pad + 1
-                display_transpose = x_position + x_lenght - self.ctx.display.width()
-                if display_transpose > 0:
-                    x_lenght -= display_transpose
+                x_position = grid_offset + column_offset
+                x_length = self.region_size * grid_pad + 1
+                transposed = x_position + x_length - draw_limit
+                if transposed > 0:
+                    x_length -= transposed
+                y_position = grid_offset + i * grid_pad + line_offset
+                if y_position > draw_limit:
+                    break
                 self.ctx.display.fill_rectangle(
                     x_position,
-                    grid_offset + i * grid_pad + line_offset,
-                    x_lenght,
+                    y_position,
+                    x_length,
                     grid_size,
                     theme.highlight_color,
                 )
             for i in range(self.region_size + 1):
-                x_position = grid_offset + i * grid_pad + colunm_offset
-                if x_position > self.ctx.display.width():
+                x_position = grid_offset + i * grid_pad + column_offset
+                if x_position > draw_limit:
                     break
+                y_position = grid_offset + line_offset
+                y_length = self.region_size * grid_pad + 1
+                transposed = y_position + y_length - draw_limit
+                if transposed > 0:
+                    y_length -= transposed
                 self.ctx.display.fill_rectangle(
                     x_position,
-                    grid_offset + line_offset,
+                    y_position,
                     grid_size,
-                    self.region_size * grid_pad + 1,
+                    y_length,
                     theme.highlight_color,
                 )
             self._region_legend(row, column)
@@ -360,7 +372,7 @@ class SeedQRView(Page):
                 bmp_resolutions.append(resolution)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Resolution - Format"), self.ctx.display.font_height, info_box=True
+            t("Res. - Format"), self.ctx.display.font_height, info_box=True
         )
         qr_menu = []
         qr_menu.append(
