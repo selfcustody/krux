@@ -302,10 +302,10 @@ class Display:
         if info_box:
             bg_color = theme.disabled_color
             self.fill_rectangle(
-                DEFAULT_PADDING - 1,
+                DEFAULT_PADDING - 3,
                 offset_y - 1,
-                self.usable_width() + 2,
-                (len(lines) + 1) * self.font_height + 2,
+                self.usable_width() + 6,
+                (len(lines)) * self.font_height + 2,
                 bg_color,
             )
 
@@ -364,6 +364,5 @@ class Display:
 
     def max_lines(self, line_offset=0):
         """The max lines of text supported by the display"""
-        return (self.height() - 2 * DEFAULT_PADDING - line_offset) // (
-            2 * self.font_height
-        )
+        pad = DEFAULT_PADDING if line_offset else 2 * DEFAULT_PADDING
+        return (self.height() - pad - line_offset) // (2 * self.font_height)

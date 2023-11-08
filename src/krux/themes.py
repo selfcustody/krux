@@ -59,7 +59,7 @@ THEMES = {
         "background": BLACK,
         "foreground": WHITE,
         "frame": DARKGREY,
-        "disabled": LIGHTBLACK,
+        "disabled": DARKGREY,
         "go": GREEN,
         "esc_no": RED,
         "del": YELLOW,

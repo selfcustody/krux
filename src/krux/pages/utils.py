@@ -71,7 +71,7 @@ class Utils(Page):
 
     @staticmethod
     def get_mnemonic_numbers(words, base=BASE_DEC):
-        """Returns the mnemonic as indices in decimal, hexadecimal, or octal"""
+        """Returns the mnemonic as indexes in decimal, hexadecimal, or octal"""
         word_numbers = []
         for word in words.split(" "):
             word_numbers.append(WORDLIST.index(word) + 1)

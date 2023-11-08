@@ -63,7 +63,7 @@ class MnemonicsView(Page):
         return MENU_CONTINUE
 
     def show_mnemonic(self, mnemonic, suffix=""):
-        """Displays only the mnemonic words or indices"""
+        """Displays only the mnemonic words or indexes"""
         self.display_mnemonic(mnemonic, suffix)
         self.ctx.input.wait_for_button()
 
