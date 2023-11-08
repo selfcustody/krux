@@ -241,6 +241,7 @@ def test_to_lines(mocker, m5stickv):
                 "52aad7bd7dcce121",
                 "",
                 "",
+                "",
                 "Install?",
             ],
         ),
