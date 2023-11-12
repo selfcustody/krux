@@ -26,7 +26,7 @@ from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
 from ..sd_card import SDHandler
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
-from ..qr import get_size, add_qr_frame
+from ..qr import get_size
 from ..display import DEFAULT_PADDING
 from ..input import (
     BUTTON_ENTER,
@@ -54,7 +54,7 @@ class SeedQRView(Page):
         self.ctx = ctx
         self.binary = binary
         if data:
-            self.code = qrcode.encode_to_string(data)
+            self.code = qrcode.encode(data)
             self.title = title
         else:
             if self.binary:
@@ -73,11 +73,11 @@ class SeedQRView(Page):
         numbers = ""
         for word in words:
             numbers += str("%04d" % WORDLIST.index(word))
-        return qrcode.encode_to_string(numbers)
+        return qrcode.encode(numbers)
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
-        return qrcode.encode_to_string(binary_seed)
+        return qrcode.encode(binary_seed)
 
     def _to_compact_seed_qr(self, mnemonic):
         mnemonic = mnemonic.split(" ")
@@ -91,38 +91,38 @@ class SeedQRView(Page):
     def highlight_qr_region(self, code, region=(0, 0, 0, 0), zoom=False):
         """Draws in white a highlighted region of the QR code"""
         reg_x, reg_y, reg_width, reg_height = region
-        size, code = add_qr_frame(code)
         max_width = self.ctx.display.width()
         if zoom:
             max_width -= DEFAULT_PADDING
-            if size == 23:  # 21 + 2(frame)
+            if self.qr_size == 21:
                 qr_size = 7
             else:
                 qr_size = 5
             offset_x = 0
             offset_y = 0
+            scale = max_width // qr_size
         else:
-            qr_size = size
-            offset_x = reg_x + 1
-            offset_y = reg_y + 1
-
-        scale = max_width // qr_size
+            qr_size = self.qr_size
+            offset_x = reg_x
+            offset_y = reg_y
+            scale = max_width // (qr_size + 2)
         qr_width = qr_size * scale
         offset = (self.ctx.display.width() - qr_width) // 2
         for y in range(reg_height):  # vertical blocks loop
             for x in range(reg_width):  # horizontal blocks loop
-                y_index = reg_y + y + 1
-                x_index = reg_x + x + 1
-                xy_index = y_index * (size + 1)
+                y_index = reg_y + y
+                x_index = reg_x + x
+                xy_index = y_index * self.qr_size
                 xy_index += x_index
-                if y_index < size and x_index < size:
-                    if code[xy_index] == "0":
+                if y_index < self.qr_size and x_index < self.qr_size:
+                    bit_value = code[xy_index >> 3] & (1 << (xy_index % 8))
+                    if bit_value:
                         self.ctx.display.fill_rectangle(
                             offset + (offset_x + x) * scale,
                             offset + (offset_y + y) * scale,
                             scale,
                             scale,
-                            WHITE,
+                            BLACK,
                         )
                     else:
                         self.ctx.display.fill_rectangle(
@@ -130,7 +130,7 @@ class SeedQRView(Page):
                             offset + (offset_y + y) * scale,
                             scale,
                             scale,
-                            BLACK,
+                            WHITE,
                         )
 
     def _region_legend(self, row, column):
@@ -291,27 +291,46 @@ class SeedQRView(Page):
                     theme.highlight_color,
                 )
 
+    def add_frame(self, binary_image, size):
+        """Adds a 1 block frame to QR codes"""
+        new_size = size + 2
+        # Create a new bytearray to store the framed image
+        framed_image = bytearray(b"\x00" * ((new_size * new_size + 7) >> 3))
+        # Copy the original image into the center of the framed image
+        for y in range(0, size):
+            for x in range(0, size):
+                original_index = y * size + x
+                original_bit = (
+                    binary_image[original_index >> 3] >> (original_index % 8)
+                ) & 1
+                if original_bit:
+                    framed_index = (y + 1) * new_size + x + 1
+                    framed_image[framed_index >> 3] |= 1 << (framed_index % 8)
+
+        return framed_image, new_size
+
     def save_pbm_image(self, file_name):
         """Saves QR code image as compact B&W bitmap format file"""
         from ..sd_card import PBM_IMAGE_EXTENSION
 
-        size, code = add_qr_frame(self.code)
-        qr_image_file = (
-            "P4\n# Krux\n".encode()
-            + str(size).encode()
-            + (" ").encode()
-            + str(size).encode()
-            + ("\n").encode()
-        )
-        lines = code.strip().split("\n")
-        for bit_string_line in lines:
-            if size % 8:
-                bit_string_line += "0" * (8 - size % 8)
-            line = int(bit_string_line, 2).to_bytes((self.qr_size + 7) // 8, "big")
-            qr_image_file += line
+        code, size = self.add_frame(self.code, self.qr_size)
+        pbm_data = bytearray()
+        pbm_data.extend(("P4\n{0} {0}\n".format(size)).encode())
+        for row in range(size):
+            byte = 0
+            for col in range(size):
+                bit_index = row * size + col
+                if code[bit_index >> 3] & (1 << (bit_index % 8)):
+                    byte |= 1 << (7 - (col % 8))
+
+                # If we filled a byte or reached the end of the row, append it
+                if col % 8 == 7 or col == size - 1:
+                    pbm_data.append(byte)
+                    byte = 0
+
         file_name += PBM_IMAGE_EXTENSION
         with SDHandler() as sd:
-            sd.write_binary(file_name, qr_image_file)
+            sd.write_binary(file_name, pbm_data)
         self.flash_text(t("Saved to SD card:\n%s") % file_name)
 
     def save_bmp_image(self, file_name, resolution):
@@ -324,21 +343,16 @@ class SeedQRView(Page):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Saving ..."))
-        size, code = add_qr_frame(self.code)
+        code, size = self.add_frame(self.code, self.qr_size)
         raw_image = image.Image(size=(size, size))
-        x_index = 0
-        y_index = 0
-        for qr_char in code:
-            if qr_char in ("0", "1"):
-                if qr_char == "0":
-                    raw_image.set_pixel((x_index, y_index), lcd.WHITE)
-                if qr_char == "1":
+        for y_index in range(0, size):
+            for x_index in range(0, size):
+                index = y_index * size + x_index
+                bit_value = (code[index >> 3] >> (index % 8)) & 1
+                if bit_value:
                     raw_image.set_pixel((x_index, y_index), lcd.BLACK)
-                if x_index == size - 1:
-                    x_index = 0
-                    y_index += 1
                 else:
-                    x_index += 1
+                    raw_image.set_pixel((x_index, y_index), lcd.WHITE)
         bmp_img = image.Image(size=(resolution, resolution), copy_to_fb=True)
         scale = resolution // size
         bmp_img.draw_image(
