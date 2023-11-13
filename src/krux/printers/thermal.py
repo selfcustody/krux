@@ -131,30 +131,37 @@ class AdafruitPrinter(Printer):
 
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
-        size = 0
-        while qr_code[size] != "\n":
-            size += 1
+        from ..qr import get_size
+
+        size = get_size(qr_code)
 
         scale = Settings().hardware.printer.thermal.adafruit.paper_width // size
-        scale *= Settings().hardware.printer.thermal.adafruit.scale
-        scale //= 200  # 100*2 because printer will scale 2X later to save data
+        scale *= Settings().hardware.printer.thermal.adafruit.scale  # Scale in %
+        scale //= 200  # 100% * 2 because printer will scale 2X later to save data
         # Being at full size sometimes makes prints more faded (can't apply too much heat?)
 
         line_bytes_size = (size * scale + 7) // 8  # amount of bytes per line
-        self.set_bitmap_mode(line_bytes_size, scale * size, 3)
-        for y in range(size):
-            # Scale the line (width) by scaling factor
-            line = 0
-            for char in qr_code[y * (size + 1) : y * (size + 1) + size]:
-                bit = int(char)
-                for _ in range(scale):
-                    line <<= 1
-                    line |= bit
-            line_bytes = line.to_bytes(line_bytes_size, "big")
-            # Print height * scale lines out to scale by
-
+        self.set_bitmap_mode(line_bytes_size, size * scale, 3)
+        for row in range(size):
+            byte = 0
+            line_bytes = bytearray()
+            for col in range(size):
+                bit_index = row * size + col
+                bit = qr_code[bit_index >> 3] & (1 << (bit_index % 8))
+                for i in range(scale):
+                    byte <<= 1
+                    if bit:
+                        byte |= 1
+                    end_line = col == size - 1 and i == scale - 1
+                    shift_index = (col * scale + i) % 8
+                    # If we filled a byte or reached the end of the row, append it
+                    if shift_index == 7 or end_line:
+                        if end_line:
+                            # Shift pending bits if on last byte of row
+                            byte <<= 7 - shift_index
+                        line_bytes.append(byte)
+                        byte = 0
             for _ in range(scale):
-                # command += line_bytes
                 self.uart_conn.write(line_bytes)
                 time.sleep_ms(self.dot_print_time)
         self.feed(4)
