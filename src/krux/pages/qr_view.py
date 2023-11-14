@@ -449,12 +449,12 @@ class SeedQRView(Page):
                 elif mode in (REGION_MODE, ZOOMED_R_MODE):
                     self.lr_index %= self.columns * self.columns
             qr_menu = []
-            qr_menu.append((t("Leave QR Viewer"), lambda: MENU_EXIT))
+            qr_menu.append((t("Return to QR Viewer"), lambda: None))
             if self.has_sd_card() and allow_export:
                 qr_menu.append((t("Save QR Image to SD Card"), self.save_qr_image_menu))
             if self.has_printer():
                 qr_menu.append((t("Print to QR"), self.print_qr))
-            qr_menu.append((t("Back"), lambda: None))
+            qr_menu.append((t("Back to Main Menu"), lambda: MENU_EXIT))
             submenu = Menu(self.ctx, qr_menu)
             _, status = submenu.run_loop()
             if status == MENU_EXIT:
