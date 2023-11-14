@@ -3,7 +3,7 @@ from ..shared_mocks import mock_context
 
 def test_load_qr_view(amigo_tft, mocker):
     from krux.pages.qr_view import SeedQRView
-    from krux.input import BUTTON_ENTER, SWIPE_LEFT, SWIPE_RIGHT
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
 
     BTN_SEQUENCE = [
         SWIPE_LEFT,  # lines mode
@@ -15,7 +15,7 @@ def test_load_qr_view(amigo_tft, mocker):
         SWIPE_LEFT,  # lines mode again
         SWIPE_RIGHT,  # back to standard mode
         BUTTON_ENTER,  # leave
-        BUTTON_ENTER,  # confirm
+        BUTTON_PAGE_PREV, # move to Back to Main Menu
         BUTTON_ENTER,  # confirm
     ]
 
@@ -29,7 +29,7 @@ def test_load_qr_view(amigo_tft, mocker):
 
 def test_loop_through_regions(amigo_tft, mocker):
     from krux.pages.qr_view import SeedQRView
-    from krux.input import BUTTON_ENTER, SWIPE_LEFT, SWIPE_RIGHT
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
     from ..test_encryption import CBC_ENCRYPTED_QR
 
     BTN_SEQUENCE = (
@@ -46,7 +46,7 @@ def test_loop_through_regions(amigo_tft, mocker):
             SWIPE_LEFT,  # lines mode again
             SWIPE_RIGHT,  # back to standard mode
             BUTTON_ENTER,  # leave
-            BUTTON_ENTER,  # confirm
+            BUTTON_PAGE_PREV, # move to Back to Main Menu
             BUTTON_ENTER,  # confirm
         ]
     )
