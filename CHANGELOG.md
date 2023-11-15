@@ -17,6 +17,12 @@ Optional screensaver to reduce pixels' burn-in and grab attention of the user wh
 ### Update Embit to version 0.7
 Use latest Embit release
 
+### Optimized QR codes
+QR codes rendering is faster and uses less RAM
+
+### Export Mnemonic Numbers
+To match the input options, export mnemonics as decimnal, hexadecimal or octal numbers
+
 
 # Version 23.09.0 - September 12, 2023
 After a long year, new features are finally coming out of beta and making their way into a stable release. Also @jreesun appointed @odudex as the new lead maintainer of the project.

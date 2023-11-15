@@ -107,7 +107,7 @@ def to_qr_codes(data, max_width, qr_format):
     the max_width constraint
     """
     if qr_format == FORMAT_NONE:
-        code = qrcode.encode_to_string(data)
+        code = qrcode.encode(data)
         yield (code, 1)
     else:
         num_parts = find_min_num_parts(data, max_width, qr_format)
@@ -123,35 +123,20 @@ def to_qr_codes(data, max_width, qr_format):
                     part = part_number + data[i * part_size :]
                 else:
                     part = part_number + data[i * part_size : i * part_size + part_size]
-                code = qrcode.encode_to_string(part)
+                code = qrcode.encode(part)
                 yield (code, num_parts)
         elif qr_format == FORMAT_UR:
             encoder = UREncoder(data, part_size, 0)
             while True:
                 part = encoder.next_part()
-                code = qrcode.encode_to_string(part)
+                code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
-
-
-def add_qr_frame(qr_code):
-    """Add a 1 block white border around the code before displaying"""
-    qr_code = qr_code.strip()
-    lines = qr_code.split("\n")
-    size = len(lines)
-    size += 2
-    new_lines = ["0" * size]
-    for line in lines:
-        new_lines.append("0" + line + "0")
-    new_lines.append("0" * size)
-    return size, "\n".join(new_lines)
 
 
 def get_size(qr_code):
     """Returns the size of the qr code as the number of chars until the first newline"""
-    size = 0
-    while qr_code[size] != "\n":
-        size += 1
-    return size
+    size = math.sqrt(len(qr_code) * 8)
+    return int(size)
 
 
 def data_len(data):
@@ -178,7 +163,7 @@ def find_min_num_parts(data, max_width, qr_format):
         # The worst-case number of bytes needed to store one QR Code, up to and including
         # version 40. This value equals 3918, which is just under 4 kilobytes.
         if len(part) < 3918:
-            code = qrcode.encode_to_string(part)
+            code = qrcode.encode(part)
             if get_size(code) <= max_width:
                 break
         num_parts += 1

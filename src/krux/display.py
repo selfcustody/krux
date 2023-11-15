@@ -23,7 +23,6 @@ import lcd
 import board
 from machine import I2C
 from .themes import theme
-from .qr import add_qr_frame
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
@@ -348,9 +347,8 @@ class Display:
         self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
     ):
         """Draws a QR code on the screen"""
-        _, qr_code = add_qr_frame(qr_code)
-        lcd.draw_qr_code(
-            offset_y, qr_code, self.width(), dark_color, light_color, theme.bg_color
+        lcd.draw_qr_code_binary(
+            offset_y, qr_code, self.width(), dark_color, light_color, light_color
         )
 
     def set_backlight(self, level):

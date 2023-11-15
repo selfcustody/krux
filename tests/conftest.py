@@ -4,6 +4,7 @@ from .shared_mocks import (
     board_dock,
     board_m5stickv,
     encode_to_string,
+    encode,
     statvfs,
 )
 
@@ -26,7 +27,7 @@ def mp_modules(mocker, monkeypatch):
     monkeypatch.setitem(
         sys.modules,
         "qrcode",
-        mocker.MagicMock(encode_to_string=encode_to_string),
+        mocker.MagicMock(encode_to_string=encode_to_string, encode=encode),
     )
     monkeypatch.setitem(sys.modules, "secp256k1", mocker.MagicMock(wraps=secp256k1))
     monkeypatch.setitem(sys.modules, "urandom", random)
