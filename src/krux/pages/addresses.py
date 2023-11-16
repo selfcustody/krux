@@ -80,7 +80,7 @@ class Addresses(Page):
                 if num_checked + 1 > max_addresses:
                     items.append(
                         (
-                            "%d..%d" % (num_checked - max_addresses, num_checked),
+                            "%d..%d" % (num_checked - max_addresses + 1, num_checked),
                             lambda: MENU_EXIT,
                         )
                     )
