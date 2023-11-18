@@ -27,6 +27,8 @@ When you enter a encryption key it is not directly used to encrypt your data. As
 
 If you increase this value it will make the encryption harder, at the cost of taking longer to encrypt and decrypt your mnemonics
 
+Values must be multiple of 10,000. This was done to save data space on QR codes, also, intermediary values wouldn't significantly affect safety or computation time.
+
 <div style="clear: both"></div>
 
 #### Encryption Mode
