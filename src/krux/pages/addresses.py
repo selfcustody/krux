@@ -94,7 +94,7 @@ class Addresses(Page):
                 if num_checked + 1 > LIST_ADDRESS_QTD:
                     items.append(
                         (
-                            "%d..%d" % (num_checked - LIST_ADDRESS_QTD, num_checked),
+                            "%d..%d" % (num_checked - LIST_ADDRESS_QTD + 1, num_checked),
                             lambda: MENU_EXIT,
                         )
                     )
