@@ -5,7 +5,7 @@ Encrypted Mnemonic QR codes would fail to decrypt if PBKDF2 iterations settings 
 
 QR code transcription helpers that highlight regions could crash on edges of some QR code sizes.
 
-Address navigation index menus wouldn't show correct number indexes for "previous" option.
+Address navigation "previous" menu option wouldn't show correct number.
 
 # Version 23.09.0 - September 12, 2023
 After a long year, new features are finally coming out of beta and making their way into a stable release. Also @jreesun appointed @odudex as the new lead maintainer of the project.

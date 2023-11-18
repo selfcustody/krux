@@ -225,6 +225,7 @@
     "Use camera's entropy to create a new mnemonic": "Sử dụng entropy của máy ảnh để tạo ra một bản ghi âm mới",
     "Used: ": "Đã sử dụng: ",
     "Value %s out of range: [%s, %s]": "Giá trị %s ngoài phạm vi: [ %s, %s]",
+    "Value must be multiple of %s": "Giá trị phải là bội của %s",
     "Via Camera": "Qua máy ảnh",
     "Via D20": "Qua D20",
     "Via D6": "Qua D6",
