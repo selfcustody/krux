@@ -227,6 +227,7 @@
     "Use camera's entropy to create a new mnemonic": "Gebruik de camera als entropie voor het aanmaken van een nieuwe geheugensteun",
     "Used: ": "Gebruikt: ",
     "Value %s out of range: [%s, %s]": "Waarde %s is buiten bereik: [%s, %s]",
+    "Value must be multiple of %s": "Waarde moet meerdere van %s zijn",
     "Via Camera": "Via camera",
     "Via D20": "Via D20",
     "Via D6": "Via D6",

@@ -24,6 +24,15 @@ QR codes rendering is faster and uses less RAM
 To match the input options, export mnemonics as decimnal, hexadecimal or octal numbers
 
 
+# Version 23.09.1 - November 18, 2023
+This release contain bugfixes:
+
+Encrypted Mnemonic QR codes would fail to decrypt if PBKDF2 iterations settings was changed to non multiple of 10,000.
+
+QR code transcription helpers that highlight regions could crash on edges of some QR code sizes.
+
+Address navigation "previous" menu option wouldn't show correct number.
+
 # Version 23.09.0 - September 12, 2023
 After a long year, new features are finally coming out of beta and making their way into a stable release. Also @jreesun appointed @odudex as the new lead maintainer of the project.
 

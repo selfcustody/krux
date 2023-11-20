@@ -250,6 +250,7 @@ translation_table = {
         2402455261: "Verwende die Entropie der Kamera, um eine neue Mnemonic zu erstellen",
         236075140: "Belegt: ",
         4003084591: "Wert %S außerhalb  des Bereichs: [ %s, %s]",
+        989428076: "Der Wert muss ein Vielfaches von %s sein",
         4191058607: "Via Kamera",
         1254681955: "Via D20",
         525309547: "Via D6",
