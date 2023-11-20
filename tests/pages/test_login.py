@@ -1605,13 +1605,9 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
 
 def test_about(mocker, m5stickv):
     import krux
-
     from krux.pages.login import Login
     from krux.metadata import VERSION
     from krux.input import BUTTON_ENTER
-
-    import sys
-    sys.modules['ucryptolib'] = mocker.MagicMock()
 
     ctx = mock_context(mocker)
     ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_ENTER)
