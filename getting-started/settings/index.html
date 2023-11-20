@@ -994,6 +994,7 @@
 <img src="../../img/maixpy_amigo_tft/encryption-options-pbkdf2-150.png" align="right"></p>
 <p>When you enter a encryption key it is not directly used to encrypt your data. As a feature to increase safety, specially against brute force attacks, the key is derived multiple times using hashing functions. PBKDF2(Password-Based Key Derivation Function) iterations stands for the amount of derivations that will be performed over your key prior to encrypt/decrypt your mnemonic.</p>
 <p>If you increase this value it will make the encryption harder, at the cost of taking longer to encrypt and decrypt your mnemonics</p>
+<p>Values must be multiple of 10,000. This was done to save data space on QR codes, also, intermediary values wouldn't significantly affect safety or computation time.</p>
 <div style="clear: both"></div>
 
 <h4 id="encryption-mode">Encryption Mode<a class="headerlink" href="#encryption-mode" title="Permanent link">&para;</a></h4>
