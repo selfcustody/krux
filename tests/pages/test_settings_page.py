@@ -5,11 +5,12 @@ import sys
 
 @pytest.fixture
 def mocker_printer(mocker):
-    mocker.patch('krux.printers.thermal.AdafruitPrinter', new=mocker.MagicMock())
+    mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
+
 
 @pytest.fixture
 def mocker_ucryptolib(mocker):
-    sys.modules['ucryptolib'] = mocker.MagicMock()
+    sys.modules["ucryptolib"] = mocker.MagicMock()
 
 
 def create_ctx(mocker, btn_seq, touch_seq=None):
@@ -353,7 +354,7 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker, mocker_ucryptolib):
 
     ctx = mock_context(mocker)
     settings_page = SettingsPage(ctx)
-    
+
     enc_setting = EncryptionSettings()
 
     # pbkdf2_iterations has default value
@@ -361,14 +362,18 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker, mocker_ucryptolib):
 
     # try to change the value
     settings_page.capture_from_keypad = mocker.MagicMock(return_value=100001)
-    settings_page.number_setting(EncryptionSettings(), EncryptionSettings.pbkdf2_iterations)
+    settings_page.number_setting(
+        EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
+    )
 
     # continue with default value because it must be multiple of 10000
     assert Settings().encryption.pbkdf2_iterations == 100000
 
     # try to changhe the value to a multiple of 10000
     settings_page.capture_from_keypad = mocker.MagicMock(return_value=110000)
-    settings_page.number_setting(EncryptionSettings(), EncryptionSettings.pbkdf2_iterations)
+    settings_page.number_setting(
+        EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
+    )
 
     # value changed!
     assert Settings().encryption.pbkdf2_iterations == 110000

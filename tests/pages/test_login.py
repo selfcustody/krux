@@ -1,6 +1,7 @@
 import pytest
 from ..shared_mocks import mock_context
 
+
 @pytest.fixture
 def mocker_printer(mocker):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
