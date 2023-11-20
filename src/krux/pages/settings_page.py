@@ -25,9 +25,10 @@ from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
 from ..settings import (
     CategorySetting,
     NumberSetting,
+    Store,
     SD_PATH,
     FLASH_PATH,
-    Store,
+    SETTINGS_FILENAME,
 )
 from ..krux_settings import (
     Settings,
@@ -40,10 +41,10 @@ from ..krux_settings import (
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..sd_card import SDHandler
 from ..encryption import QR_CODE_ITER_MULTIPLE
-from ..display import FLASH_MSG_TIME
 from . import (
     Page,
     Menu,
+    FLASH_MSG_TIME,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -77,16 +78,12 @@ class SettingsPage(Page):
         """Handler for the settings"""
         location = Settings().persist.location
         if location == SD_PATH:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-            try:
-                # Check for SD hot-plug
-                with SDHandler():
-                    self._display_centered_text(
-                        t("Your changes will be kept on the SD card."),
-                        duration=SD_MSG_TIME,
-                    )
-            except OSError:
+            if self.has_sd_card():
+                self._display_centered_text(
+                    t("Your changes will be kept on the SD card."),
+                    duration=SD_MSG_TIME,
+                )
+            else:
                 self._display_centered_text(
                     t("SD card not detected.")
                     + "\n\n"
@@ -162,6 +159,66 @@ class SettingsPage(Page):
             return BUTTON_ENTER
         return BUTTON_PAGE
 
+    def restore_settings(self):
+        """Restore default settings by deleting the settings files"""
+        self.ctx.display.clear()
+        if self.prompt(
+            t("Restore factory settings and reboot?"), self.ctx.display.height() // 2
+        ):
+            self.ctx.display.clear()
+            try:
+                # Delete settings from SD
+                with SDHandler() as sd:
+                    sd.delete(SETTINGS_FILENAME)
+            except:
+                pass
+            try:
+                # Delete settings from flash
+                os.remove("/%s/%s" % (FLASH_PATH, SETTINGS_FILENAME))
+            except:
+                pass
+            self.ctx.power_manager.reboot()
+
+    def erase_spiffs(self):
+        """Erase all SPIFFS, removing all saved configs and mnemonics"""
+
+        import flash
+        from ..firmware import FLASH_SIZE, SPIFFS_ADDR, ERASE_BLOCK_SIZE
+
+        empty_buf = b"\xff" * ERASE_BLOCK_SIZE
+        for address in range(SPIFFS_ADDR, FLASH_SIZE, ERASE_BLOCK_SIZE):
+            if flash.read(address, ERASE_BLOCK_SIZE) == empty_buf:
+                continue
+            flash.erase(address, ERASE_BLOCK_SIZE)
+
+    def wipe_device(self):
+        """Fully formats SPIFFS memory"""
+        self.ctx.display.clear()
+        if self.prompt(
+            t(
+                "Permanently remove all stored encrypted mnemonics and settings from flash?"
+            ),
+            self.ctx.display.height() // 2,
+        ):
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Wiping Device.."))
+            self.erase_spiffs()
+            # Reboot so default settings take place and SPIFFS is formatted.
+            self.ctx.power_manager.reboot()
+
+    def restore_menu(self):
+        """Option to restore settings and wipe device"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Restore Default Settings"), self.restore_settings),
+                (t("Wipe Device"), self.wipe_device),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        submenu.run_loop()
+        return MENU_CONTINUE
+
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
 
@@ -218,6 +275,7 @@ class SettingsPage(Page):
 
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
+                items.append((t("Factory Settings"), self.restore_menu))
                 items.append((t("Back"), self._settings_exit_check))
             else:
                 items.append((t("Back"), lambda: MENU_EXIT))
@@ -253,14 +311,16 @@ class SettingsPage(Page):
 
         # Update touch detection threshold
         if self.ctx.input.touch is not None:
-            self.ctx.input.touch.touch_driver.threshold(Settings().touch.threshold)
+            self.ctx.input.touch.touch_driver.threshold(
+                Settings().hardware.touch.threshold
+            )
 
     def _encoder_threshold_exit_check(self):
         """Handler for the 'Back' on encoder settings screen"""
         from ..rotary import encoder
 
         # Update rotary encoder debounce time
-        encoder.debounce = Settings().encoder.debounce
+        encoder.debounce = Settings().hardware.encoder.debounce
 
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""
@@ -339,14 +399,14 @@ class SettingsPage(Page):
                 setting.attr == "pbkdf2_iterations"
                 and (new_value % QR_CODE_ITER_MULTIPLE) != 0
             ):
-                self.ctx.display.flash_text(
+                self.flash_text(
                     t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE,
                     theme.error_color,
                 )
             else:
                 setting.__set__(settings_namespace, new_value)
         else:
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Value %s out of range: [%s, %s]")
                 % (new_value, setting.value_range[0], setting.value_range[1]),
                 theme.error_color,

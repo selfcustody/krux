@@ -73,3 +73,6 @@ Starting from version 23.09.0, Krux supports SD card hot plugging. If you are us
 Make sure the SD card is using MBR/DOS partition table and FAT32 format.
 
 Here is some [supported microSD cards](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test), and here is the MaixPy FAQ explaining [Why my micro SD card cannot be read](https://wiki.sipeed.com/soft/maixpy/en/others/maixpy_faq.html#Micro-SD-card-cannot-be-read).
+
+## Why insert an SD card into my device? What is it for? Does it save something?
+SD card use is optional, most people use Krux only with QR codes. But you can use SD card to to upgrade the firmware, save settings, cnc/file, QR codes, XPUBs, encrypted mnemonics, and to save and load PSBTs, messages and wallet output descriptors.

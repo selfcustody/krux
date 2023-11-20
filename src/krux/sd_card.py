@@ -23,6 +23,15 @@ import os
 from machine import SDCard
 from .settings import SD_PATH
 
+SIGNED_FILE_SUFFIX = "-signed"
+PSBT_FILE_EXTENSION = ".psbt"
+DESCRIPTOR_FILE_EXTENSION = ".txt"
+JSON_FILE_EXTENSION = ".json"
+SIGNATURE_FILE_EXTENSION = ".sig"
+PUBKEY_FILE_EXTENSION = ".pub"
+BMP_IMAGE_EXTENSION = ".bmp"
+PBM_IMAGE_EXTENSION = ".pbm"
+
 
 class SDHandler:
     """A simple handler to work with files on SDCard"""

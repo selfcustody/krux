@@ -97,7 +97,7 @@ class Tools(Page):
                         select_file_handler=file_manager.show_file_details
                     )
         except OSError:
-            self.ctx.display.flash_text(t("SD card not detected"), theme.error_color)
+            self.flash_text(t("SD card not detected"), theme.error_color)
 
         return MENU_CONTINUE
 
@@ -138,5 +138,5 @@ class Tools(Page):
 
             title = t("Custom QR Code")
             seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
-            return seed_qr_view.display_seed_qr()
+            return seed_qr_view.display_qr(allow_export=True)
         return MENU_CONTINUE

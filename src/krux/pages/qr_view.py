@@ -22,12 +22,12 @@
 
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
-from . import Page
+from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
+from ..sd_card import SDHandler
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
-from ..qr import get_size, add_qr_frame
+from ..qr import get_size
 from ..display import DEFAULT_PADDING
-from . import MENU_CONTINUE
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -54,7 +54,7 @@ class SeedQRView(Page):
         self.ctx = ctx
         self.binary = binary
         if data:
-            self.code = qrcode.encode_to_string(data)
+            self.code = qrcode.encode(data)
             self.title = title
         else:
             if self.binary:
@@ -73,11 +73,11 @@ class SeedQRView(Page):
         numbers = ""
         for word in words:
             numbers += str("%04d" % WORDLIST.index(word))
-        return qrcode.encode_to_string(numbers)
+        return qrcode.encode(numbers)
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
-        return qrcode.encode_to_string(binary_seed)
+        return qrcode.encode(binary_seed)
 
     def _to_compact_seed_qr(self, mnemonic):
         mnemonic = mnemonic.split(" ")
@@ -91,38 +91,38 @@ class SeedQRView(Page):
     def highlight_qr_region(self, code, region=(0, 0, 0, 0), zoom=False):
         """Draws in white a highlighted region of the QR code"""
         reg_x, reg_y, reg_width, reg_height = region
-        size, code = add_qr_frame(code)
         max_width = self.ctx.display.width()
         if zoom:
             max_width -= DEFAULT_PADDING
-            if size == 23:  # 21 + 2(frame)
+            if self.qr_size == 21:
                 qr_size = 7
             else:
                 qr_size = 5
             offset_x = 0
             offset_y = 0
+            scale = max_width // qr_size
         else:
-            qr_size = size
-            offset_x = reg_x + 1
-            offset_y = reg_y + 1
-
-        scale = max_width // qr_size
+            qr_size = self.qr_size
+            offset_x = reg_x
+            offset_y = reg_y
+            scale = max_width // (qr_size + 2)
         qr_width = qr_size * scale
         offset = (self.ctx.display.width() - qr_width) // 2
         for y in range(reg_height):  # vertical blocks loop
             for x in range(reg_width):  # horizontal blocks loop
-                y_index = reg_y + y + 1
-                x_index = reg_x + x + 1
-                xy_index = y_index * (size + 1)
+                y_index = reg_y + y
+                x_index = reg_x + x
+                xy_index = y_index * self.qr_size
                 xy_index += x_index
-                if y_index < size and x_index < size:
-                    if code[xy_index] == "0":
+                if y_index < self.qr_size and x_index < self.qr_size:
+                    bit_value = code[xy_index >> 3] & (1 << (xy_index % 8))
+                    if bit_value:
                         self.ctx.display.fill_rectangle(
                             offset + (offset_x + x) * scale,
                             offset + (offset_y + y) * scale,
                             scale,
                             scale,
-                            WHITE,
+                            BLACK,
                         )
                     else:
                         self.ctx.display.fill_rectangle(
@@ -130,7 +130,7 @@ class SeedQRView(Page):
                             offset + (offset_y + y) * scale,
                             scale,
                             scale,
-                            BLACK,
+                            WHITE,
                         )
 
     def _region_legend(self, row, column):
@@ -291,9 +291,129 @@ class SeedQRView(Page):
                     theme.highlight_color,
                 )
 
-    def display_seed_qr(self):
-        """Disables touch and displays compact SeedQR code with grid to help
-        drawing"""
+    def add_frame(self, binary_image, size):
+        """Adds a 1 block frame to QR codes"""
+        new_size = size + 2
+        # Create a new bytearray to store the framed image
+        framed_image = bytearray(b"\x00" * ((new_size * new_size + 7) >> 3))
+        # Copy the original image into the center of the framed image
+        for y in range(0, size):
+            for x in range(0, size):
+                original_index = y * size + x
+                original_bit = (
+                    binary_image[original_index >> 3] >> (original_index % 8)
+                ) & 1
+                if original_bit:
+                    framed_index = (y + 1) * new_size + x + 1
+                    framed_image[framed_index >> 3] |= 1 << (framed_index % 8)
+
+        return framed_image, new_size
+
+    def save_pbm_image(self, file_name):
+        """Saves QR code image as compact B&W bitmap format file"""
+        from ..sd_card import PBM_IMAGE_EXTENSION
+
+        code, size = self.add_frame(self.code, self.qr_size)
+        pbm_data = bytearray()
+        pbm_data.extend(("P4\n{0} {0}\n".format(size)).encode())
+        for row in range(size):
+            byte = 0
+            for col in range(size):
+                bit_index = row * size + col
+                if code[bit_index >> 3] & (1 << (bit_index % 8)):
+                    byte |= 1 << (7 - (col % 8))
+
+                # If we filled a byte or reached the end of the row, append it
+                if col % 8 == 7 or col == size - 1:
+                    pbm_data.append(byte)
+                    byte = 0
+
+        file_name += PBM_IMAGE_EXTENSION
+        with SDHandler() as sd:
+            sd.write_binary(file_name, pbm_data)
+        self.flash_text(t("Saved to SD card:\n%s") % file_name)
+
+    def save_bmp_image(self, file_name, resolution):
+        """Save QR code image as .bmp file"""
+        from ..sd_card import BMP_IMAGE_EXTENSION
+
+        # TODO: Try Compression?
+        import image
+        import lcd
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Saving ..."))
+        code, size = self.add_frame(self.code, self.qr_size)
+        raw_image = image.Image(size=(size, size))
+        for y_index in range(0, size):
+            for x_index in range(0, size):
+                index = y_index * size + x_index
+                bit_value = (code[index >> 3] >> (index % 8)) & 1
+                if bit_value:
+                    raw_image.set_pixel((x_index, y_index), lcd.BLACK)
+                else:
+                    raw_image.set_pixel((x_index, y_index), lcd.WHITE)
+        bmp_img = image.Image(size=(resolution, resolution), copy_to_fb=True)
+        scale = resolution // size
+        bmp_img.draw_image(
+            raw_image,
+            0,
+            0,
+            x_scale=scale,
+            y_scale=scale,
+        )
+        file_name += BMP_IMAGE_EXTENSION
+        bmp_img.save("/sd/" + file_name)
+        self.flash_text(t("Saved to SD card:\n%s") % file_name)
+
+    def save_qr_image_menu(self):
+        """Options to save QR codes as images on SD card"""
+        # TODO: Allow custom file name
+        from .files_operations import SaveFile
+
+        file_saver = SaveFile(self.ctx)
+        file_name, filename_undefined = file_saver.set_filename(
+            self.title.replace(" ", "_"),
+        )
+        if filename_undefined:
+            return
+        size = self.qr_size + 2
+        bmp_resolutions = []
+        resolution = size
+        for _ in range(4):
+            resolution *= 2
+            if resolution <= 480:
+                bmp_resolutions.append(resolution)
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text(
+            t("Res. - Format"), self.ctx.display.font_height, info_box=True
+        )
+        qr_menu = []
+        qr_menu.append(
+            ("%dx%d - PBM" % (size, size), lambda: self.save_pbm_image(file_name))
+        )
+        for bmp_resolution in bmp_resolutions:
+            qr_menu.append(
+                (
+                    "%dx%d - BMP" % (bmp_resolution, bmp_resolution),
+                    lambda res=bmp_resolution: self.save_bmp_image(file_name, res),
+                )
+            )
+        submenu = Menu(self.ctx, qr_menu, offset=2 * self.ctx.display.font_height)
+        submenu.run_loop()
+        # return MENU_EXIT  # Uncomment to exit QR Viewer after saving
+
+    def print_qr(self):
+        "Printer handler"
+        from .utils import Utils
+
+        utils = Utils(self.ctx)
+        utils.print_standard_qr(self.code, title=self.title, is_qr=True)
+        # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
+
+    def display_qr(self, allow_export=False):
+        """Displays QR codes in multiple modes"""
+
         if self.title:
             label = self.title
         else:
@@ -309,8 +429,6 @@ class SeedQRView(Page):
                         label,
                         self.ctx.display.qr_offset() + self.ctx.display.font_height,
                     )
-                # # Avoid the need of double click
-                # self.ctx.input.buttons_active = True
                 button = self.ctx.input.wait_for_button()
                 if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
                     mode += 1
@@ -330,15 +448,14 @@ class SeedQRView(Page):
                     self.lr_index %= self.qr_size
                 elif mode in (REGION_MODE, ZOOMED_R_MODE):
                     self.lr_index %= self.columns * self.columns
-            self.ctx.display.clear()
-            if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
-                break
-        if not self.print_qr_prompt():
-            return MENU_CONTINUE
-
-        from .print_page import PrintPage
-
-        print_page = PrintPage(self.ctx)
-        print_page.print_qr(self.code, title=self.title, is_qr=True)
-
-        return MENU_CONTINUE
+            qr_menu = []
+            qr_menu.append((t("Return to QR Viewer"), lambda: None))
+            if self.has_sd_card() and allow_export:
+                qr_menu.append((t("Save QR Image to SD Card"), self.save_qr_image_menu))
+            if self.has_printer():
+                qr_menu.append((t("Print to QR"), self.print_qr))
+            qr_menu.append((t("Back to Main Menu"), lambda: MENU_EXIT))
+            submenu = Menu(self.ctx, qr_menu)
+            _, status = submenu.run_loop()
+            if status == MENU_EXIT:
+                return MENU_CONTINUE

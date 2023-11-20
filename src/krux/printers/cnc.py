@@ -38,15 +38,15 @@ class GCodeGenerator(Printer):
     """
 
     def __init__(self):
-        self.unit = Settings().printer.cnc.unit
-        self.flute_diameter = Settings().printer.cnc.flute_diameter
-        self.plunge_rate = Settings().printer.cnc.plunge_rate
-        self.feed_rate = Settings().printer.cnc.feed_rate
-        self.cut_depth = Settings().printer.cnc.cut_depth
-        self.pass_depth = Settings().printer.cnc.depth_per_pass
-        self.part_size = Settings().printer.cnc.part_size
-        self.border_padding = Settings().printer.cnc.border_padding
-        self.invert = Settings().printer.cnc.invert
+        self.unit = Settings().hardware.printer.cnc.unit
+        self.flute_diameter = Settings().hardware.printer.cnc.flute_diameter
+        self.plunge_rate = Settings().hardware.printer.cnc.plunge_rate
+        self.feed_rate = Settings().hardware.printer.cnc.feed_rate
+        self.cut_depth = Settings().hardware.printer.cnc.cut_depth
+        self.pass_depth = Settings().hardware.printer.cnc.depth_per_pass
+        self.part_size = Settings().hardware.printer.cnc.part_size
+        self.border_padding = Settings().hardware.printer.cnc.border_padding
+        self.invert = Settings().hardware.printer.cnc.invert
 
         if self.plunge_rate > self.feed_rate / 2:
             raise ValueError("plunge rate must be less than half of feed rate")
@@ -103,7 +103,7 @@ class GCodeGenerator(Printer):
 
     def cut_cell(self, x, y, cell_size, plunge_depth):
         """Hollows out the specified cell using a cutting method defined in settings"""
-        if Settings().printer.cnc.cut_method == "spiral":
+        if Settings().hardware.printer.cnc.cut_method == "spiral":
             self.spiral_cut_cell(x, y, cell_size, plunge_depth)
         else:
             self.row_cut_cell(x, y, cell_size, plunge_depth)
@@ -281,10 +281,10 @@ class FilePrinter(GCodeGenerator):
 
 #     def __init__(self):
 #         super().__init__()
-#         fm.register(Settings().printer.cnc.grbl.tx_pin, fm.fpioa.UART2_TX, force=False)
-#         fm.register(Settings().printer.cnc.grbl.rx_pin, fm.fpioa.UART2_RX, force=False)
-#         self.uart_conn = UART(UART.UART2, Settings().printer.cnc.grbl.baudrate)
-#         self.byte_time = 11.0 / float(Settings().printer.cnc.grbl.baudrate)
+#         fm.register(Settings().hardware.printer.cnc.grbl.tx_pin, fm.fpioa.UART2_TX, force=False)
+#         fm.register(Settings().hardware.printer.cnc.grbl.rx_pin, fm.fpioa.UART2_RX, force=False)
+#         self.uart_conn = UART(UART.UART2, Settings().hardware.printer.cnc.grbl.baudrate)
+#         self.byte_time = 11.0 / float(Settings().hardware.printer.cnc.grbl.baudrate)
 #         res = self.uart_conn.readline()
 #         if res is None or not res.decode().lower().startswith("grbl"):
 #             raise ValueError("not connected")

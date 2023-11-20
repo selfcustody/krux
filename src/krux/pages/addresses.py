@@ -21,20 +21,16 @@
 # THE SOFTWARE.
 
 import gc
-import board
 from ..krux_settings import t
 from ..themes import theme
 from ..qr import FORMAT_NONE
+from .utils import Utils
 from . import (
     Page,
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
 )
-
-LIST_ADDRESS_QTD = 4  # qtd of address per page
-LIST_ADDRESS_DIGITS = 8  # len on large devices per menu item
-LIST_ADDRESS_DIGITS_SMALL = 4  # len on small devices per menu item
 
 SCAN_ADDRESS_LIMIT = 20
 
@@ -45,12 +41,13 @@ class Addresses(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.utils = Utils(self.ctx)
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Please load a wallet output descriptor"), theme.error_color
             )
             return MENU_CONTINUE
@@ -58,10 +55,10 @@ class Addresses(Page):
         submenu = Menu(
             self.ctx,
             [
-                ((t("Scan Address"), self.pre_scan_address)),
+                (t("Scan Address"), self.pre_scan_address),
                 (t("Receive Addresses"), self.list_address_type),
                 (t("Change Addresses"), lambda: self.list_address_type(1)),
-                (t("Back"), lambda: MENU_EXIT),
+                (t("Back"), lambda: None),
             ],
         )
         submenu.run_loop()
@@ -71,52 +68,34 @@ class Addresses(Page):
         """Handler for the 'receive addresses' or 'change addresses' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
-            custom_start_digits = (
-                LIST_ADDRESS_DIGITS + 3
-            )  # 3 more because of bc1 address
-            custom_end_digts = LIST_ADDRESS_DIGITS
-            custom_separator = ". "
-            if board.config["type"] == "m5stickv":
-                custom_start_digits = (
-                    LIST_ADDRESS_DIGITS_SMALL + 3
-                )  # 3 more because of bc1 address
-                custom_end_digts = LIST_ADDRESS_DIGITS_SMALL
-                custom_separator = " "
-            start_digits = custom_start_digits
-
             loading_txt = t("Loading receive address %d..")
             if addr_type == 1:
                 loading_txt = t("Loading change address %d..")
 
+            max_addresses = self.ctx.display.max_lines() - 3
+
             num_checked = 0
             while True:
                 items = []
-                if num_checked + 1 > LIST_ADDRESS_QTD:
+                if num_checked + 1 > max_addresses:
                     items.append(
                         (
-                            "%d..%d"
-                            % (num_checked - LIST_ADDRESS_QTD + 1, num_checked),
+                            "%d..%d" % (num_checked - max_addresses + 1, num_checked),
                             lambda: MENU_EXIT,
                         )
                     )
 
                 for addr in self.ctx.wallet.obtain_addresses(
-                    num_checked, limit=LIST_ADDRESS_QTD, branch_index=addr_type
+                    num_checked, limit=max_addresses, branch_index=addr_type
                 ):
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(loading_txt % (num_checked + 1))
 
-                    if num_checked + 1 > 99:
-                        start_digits = custom_start_digits - 1
-                    pos_str = str(num_checked + 1)
-                    qr_title = pos_str + ". " + addr
+                    pos_str = str(num_checked + 1) + ". "
+                    qr_title = pos_str + addr
                     items.append(
                         (
-                            pos_str
-                            + custom_separator
-                            + addr[:start_digits]
-                            + ".."
-                            + addr[len(addr) - custom_end_digts :],
+                            self.fit_to_line(addr, pos_str, fixed_chars=3),
                             lambda address=addr, title=qr_title: self.show_address(
                                 address, title
                             ),
@@ -127,7 +106,7 @@ class Addresses(Page):
 
                 items.append(
                     (
-                        "%d..%d" % (num_checked + 1, num_checked + LIST_ADDRESS_QTD),
+                        "%d..%d" % (num_checked + 1, num_checked + max_addresses),
                         lambda: MENU_EXIT,
                     )
                 )
@@ -147,27 +126,23 @@ class Addresses(Page):
                     if index == len(submenu.menu) - 2:
                         stay_on_this_addr_menu = False
                     # Prev
-                    if index == 0 and num_checked > LIST_ADDRESS_QTD:
+                    if index == 0 and num_checked > max_addresses:
                         stay_on_this_addr_menu = False
-                        num_checked -= 2 * LIST_ADDRESS_QTD
+                        num_checked -= 2 * max_addresses
 
         return MENU_CONTINUE
 
     def show_address(self, addr, title="", qr_format=FORMAT_NONE):
         """Show addr provided as a QRCode"""
         self.display_qr_codes(addr, qr_format, title)
-        if self.print_qr_prompt():
-            from .print_page import PrintPage
-
-            print_page = PrintPage(self.ctx)
-            print_page.print_qr(addr, qr_format, title)
+        self.utils.print_standard_qr(addr, qr_format, title)
         return MENU_CONTINUE
 
     def pre_scan_address(self):
         """Handler for the 'scan address' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Please load a wallet output descriptor"), theme.error_color
             )
             return MENU_CONTINUE
@@ -187,7 +162,7 @@ class Addresses(Page):
         """Handler for the 'receive' or 'change' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None or qr_format != FORMAT_NONE:
-            self.ctx.display.flash_text(t("Failed to load address"), theme.error_color)
+            self.flash_text(t("Failed to load address"), theme.error_color)
             return MENU_CONTINUE
 
         addr = None
@@ -196,7 +171,7 @@ class Addresses(Page):
 
             addr = parse_address(data)
         except:
-            self.ctx.display.flash_text(t("Invalid address"), theme.error_color)
+            self.flash_text(t("Invalid address"), theme.error_color)
             return MENU_CONTINUE
 
         self.show_address(data, title=addr, qr_format=qr_format)

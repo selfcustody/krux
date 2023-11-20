@@ -31,7 +31,6 @@ class PrintPage(Page):
     """Printing user interface"""
 
     def __init__(self, ctx):
-        # Returns True if printer successfully created
         super().__init__(ctx, None)
         self.ctx = ctx
         self.ctx.display.clear()
@@ -40,7 +39,7 @@ class PrintPage(Page):
 
     def _send_qr_to_printer(self, qr_code, i=0, count=1):
         self.ctx.display.clear()
-        if Settings().printer.driver == "cnc/file":
+        if Settings().hardware.printer.driver == "cnc/file":
             self.ctx.display.draw_centered_text(t("Exporting to SD card.."))
         else:
             self.ctx.display.draw_centered_text(t("Printing\n%d / %d") % (i + 1, count))
@@ -52,7 +51,7 @@ class PrintPage(Page):
         if a printer is connected
         """
         if self.printer is None:
-            self.ctx.display.flash_text(t("Printer Driver not set!"), theme.error_color)
+            self.flash_text(t("Printer Driver not set!"), theme.error_color)
             return
         self.ctx.display.clear()
         if title:
@@ -67,14 +66,14 @@ class PrintPage(Page):
                 self._send_qr_to_printer(qr_code, i, count)
                 i += 1
 
-    def print_mnemonic_text(self):
+    def print_mnemonic_text(self, mnemonic, suffix=""):
         """Prints Mnemonics words as text"""
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             t("Printing ..."), self.ctx.display.height() // 2
         )
-        self.printer.print_string(t("Mnemonic") + "\n\n")
-        words = self.ctx.wallet.key.mnemonic.split(" ")
+        self.printer.print_string(t("BIP39") + " " + suffix + "\n\n")
+        words = mnemonic.split(" ")
         lines = len(words) // 3
         for i in range(lines):
             index = i + 1
@@ -88,4 +87,4 @@ class PrintPage(Page):
             index += lines
             string += str(index) + ":" + words[index - 1] + "\n"
             self.printer.print_string(string)
-        self.printer.feed(3)
+        self.printer.feed(4)

@@ -22,9 +22,14 @@
 # pylint: disable=R0902
 
 import time
-from .touchscreens.ft6x36 import FT6X36
+
+from .touchscreens.ft6x36 import touch_control
 from .logging import logger as log
 from .krux_settings import Settings
+
+IDLE = 0
+PRESSED = 1
+RELEASED = 2
 
 SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
@@ -33,30 +38,27 @@ SWIPE_UP = 3
 SWIPE_DOWN = 4
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
-TOUCH_DEBOUNCE = 200  # Time to wait before sampling touch again after a release
 
 
 class Touch:
     """Touch is a singleton API to interact with touchscreen driver"""
 
-    idle, press, release = 0, 1, 2
-
-    def __init__(self, width, height):
+    def __init__(self, width, height, irq_pin=None):
         """Touch API init - width and height are in Landscape mode
         For Krux width = max_y, height = max_x
         """
         self.sample_time = 0
-        self.debounce = 0
         self.y_regions = []
         self.x_regions = []
         self.index = 0
         self.press_point = []
         self.release_point = (0, 0)
         self.gesture = None
-        self.state = Touch.idle
+        self.state = IDLE
         self.width, self.height = width, height
-        self.touch_driver = FT6X36()
-        self.touch_driver.threshold(Settings().touch.threshold)
+        self.touch_driver = touch_control
+        self.touch_driver.activate_irq(irq_pin)
+        self.touch_driver.threshold(Settings().hardware.touch.threshold)
 
     def clear_regions(self):
         """Remove previously stored buttons map"""
@@ -75,6 +77,18 @@ class Touch:
             raise ValueError("Touch region added outside display area")
         self.x_regions.append(region)
 
+    def valid_position(self, data):
+        """Checks if touch position is within buttons area"""
+        if self.x_regions and data[0] < self.x_regions[0]:
+            return False
+        if self.x_regions and data[0] > self.x_regions[-1]:
+            return False
+        if self.y_regions and data[1] < self.y_regions[0]:
+            return False
+        if self.y_regions and data[1] > self.y_regions[-1]:
+            return False
+        return True
+
     def _extract_index(self, data):
         """Gets an index from touched points, x and y delimiters"""
         index = 0
@@ -82,35 +96,26 @@ class Touch:
             for region in self.y_regions:
                 if data[1] > region:
                     index += 1
-            if index == 0 or index >= len(self.y_regions):  # outside y areas
-                self.state = self.release
-            else:
-                index -= 1
-                if self.x_regions:  # if 2D array
-                    index *= len(self.x_regions) - 1
-                    x_index = 0
-                    for x_region in self.x_regions:
-                        if data[0] > x_region:
-                            x_index += 1
-                    if x_index == 0 or x_index >= len(
-                        self.x_regions
-                    ):  # outside x areas
-                        self.state = self.release
-                    else:
-                        x_index -= 1
-                    index += x_index
-        else:
-            index = 0
-        return index
+            index -= 1
+            if self.x_regions:  # if 2D array
+                index *= len(self.x_regions) - 1
+                x_index = 0
+                for x_region in self.x_regions:
+                    if data[0] > x_region:
+                        x_index += 1
+                x_index -= 1
+                index += x_index
+            return index
+        return 0
 
     def _store_points(self, data):
         """Store pressed points and calculare an average pressed point"""
-        if self.state == self.idle:
-            self.state = self.press
+        if self.state == IDLE:
+            self.state = PRESSED
             self.press_point = [data]
             self.index = self._extract_index(self.press_point[0])
         # Calculare an average (max. 10 samples) pressed point to increase precision
-        elif self.state == self.press and len(self.press_point) < 10:
+        elif self.state == PRESSED and len(self.press_point) < 10:
             self.press_point.append(data)
             len_press = len(self.press_point)
             x = 0
@@ -125,20 +130,15 @@ class Touch:
 
     def current_state(self):
         """Returns the touchscreen state"""
-        current_time = time.ticks_ms()
-        if (
-            current_time > self.sample_time + TOUCH_S_PERIOD
-            and current_time > self.debounce + TOUCH_DEBOUNCE
-        ):
-            self.sample_time = time.ticks_ms()
-            data = self.touch_driver.current_point()
-            if isinstance(data, tuple):
-                self._store_points(data)
-            elif data is None:  # gets release then return to idle.
-                if self.state == self.release:
-                    self.state = self.idle
-                    self.debounce = time.ticks_ms()
-                elif self.state == self.press:
+        self.sample_time = time.ticks_ms()
+        data = self.touch_driver.current_point()
+        if isinstance(data, tuple):
+            self._store_points(data)
+        elif data is None:  # gets release then return to idle.
+            if self.state == RELEASED:  # On touch release
+                self.state = IDLE
+            elif self.state == PRESSED:
+                if self.release_point is not None:
                     lateral_lenght = self.release_point[0] - self.press_point[0][0]
                     if lateral_lenght > SWIPE_THRESHOLD:
                         self.gesture = SWIPE_RIGHT
@@ -156,14 +156,27 @@ class Touch:
                         and -vertical_lenght > lateral_lenght
                     ):
                         self.gesture = SWIPE_UP
-                    self.state = self.release
-            else:
-                log.warn("Touch error: " + str(data))
+                self.state = RELEASED
+        else:
+            log.warn("Touch error: " + str(data))
         return self.state
+
+    def event(self):
+        """Checks if a touch happened and stores the point"""
+        current_time = time.ticks_ms()
+        if current_time > self.sample_time + TOUCH_S_PERIOD:
+            if self.touch_driver.event():
+                # Resets touch and gets irq point
+                self.state = IDLE
+                if isinstance(self.touch_driver.irq_point, tuple):
+                    if self.valid_position(self.touch_driver.irq_point):
+                        self._store_points(self.touch_driver.irq_point)
+                        return True
+        return False
 
     def value(self):
         """Wraps touch states to behave like a regular button"""
-        return 0 if self.current_state() == self.press else 1
+        return 1 if self.current_state() == IDLE else 0
 
     def swipe_right_value(self):
         """Returns detected gestures and clean respective variable"""

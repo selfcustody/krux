@@ -19,12 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import time
 import lcd
 import board
 from machine import I2C
 from .themes import theme
-from .qr import add_qr_frame
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
@@ -34,8 +32,6 @@ QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
 MAX_BACKLIGHT = 8
 MIN_BACKLIGHT = 1
-
-FLASH_MSG_TIME = 2000
 
 
 class Display:
@@ -47,9 +43,8 @@ class Display:
         self.i2c = None
         self.font_width = FONT_WIDTH
         self.font_height = FONT_HEIGHT
-        self.bottom_line = board.config["lcd"]["width"] // FONT_HEIGHT  # total lines
-        self.bottom_line -= 1
-        self.bottom_line *= FONT_HEIGHT
+        self.total_lines = board.config["lcd"]["width"] // FONT_HEIGHT
+        self.bottom_line = (self.total_lines - 1) * FONT_HEIGHT
         if board.config["type"] == "m5stickv":
             self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
         else:
@@ -185,26 +180,27 @@ class Display:
             columns = self.usable_width() // self.font_width
         else:
             columns = self.width() // self.font_width
-        words = []
+
+        # Processing the words and maintaining newline characters
+        processed_text = []
         for word in text.split(" "):
             subwords = word.split("\n")
             for i, subword in enumerate(subwords):
                 if len(subword) > columns:
                     j = 0
                     while j < len(subword):
-                        words.append(subword[j : j + columns])
+                        processed_text.append(subword[j : j + columns])
                         j += columns
                 else:
-                    words.append(subword)
+                    processed_text.append(subword)
 
                 if len(subwords) > 1 and i < len(subwords) - 1:
-                    # Only add newline to the end of the word if the word
-                    # is less than the amount of columns. If it's exactly equal,
-                    # a newline will be implicit.
-                    if len(words[-1]) < columns:
-                        words[-1] += "\n"
+                    # Ensure proper handling of newline characters at the end of lines
+                    if not processed_text[-1].endswith("\n"):
+                        processed_text.append("\n")
 
-        num_words = len(words)
+        num_words = len(processed_text)
+        words = processed_text
 
         # calculate cost of all pairs of words
         cost_between = [[0 for _ in range(num_words + 1)] for _ in range(num_words + 1)]
@@ -298,15 +294,47 @@ class Display:
         offset_y=DEFAULT_PADDING,
         color=theme.fg_color,
         bg_color=theme.bg_color,
+        info_box=False,
     ):
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
-        for i, line in enumerate(lines):
-            offset_x = (self.width() - self.font_width * len(line)) // 2
-            offset_x = max(0, offset_x)
-            self.draw_string(
-                offset_x, offset_y + (i * self.font_height), line, color, bg_color
+        if info_box:
+            bg_color = theme.disabled_color
+            self.fill_rectangle(
+                DEFAULT_PADDING - 3,
+                offset_y - 1,
+                self.usable_width() + 6,
+                (len(lines)) * self.font_height + 2,
+                bg_color,
             )
+
+        for i, line in enumerate(lines):
+            if len(line) > 0:
+                offset_x = self._obtain_hcentered_offset(line)
+                self.draw_string(
+                    offset_x, offset_y + (i * self.font_height), line, color, bg_color
+                )
+
+    def _obtain_hcentered_offset(self, line_str):
+        """Return the offset_x to the horizontally-centered line_str"""
+        return max(0, (self.width() - self.font_width * len(line_str)) // 2)
+
+    def draw_line_hcentered_with_fullw_bg(
+        self,
+        line_str,
+        qtd_offset_y,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+    ):
+        """Draw a line_str horizontally-centered on the display, at qtd_offset_y times font_height,
+        useful for screensaver"""
+        lcd.fill_rectangle(
+            0, qtd_offset_y * self.font_height, self.width(), self.font_height, bg_color
+        )
+        offset_x = self._obtain_hcentered_offset(line_str)
+        self.draw_string(
+            offset_x, (qtd_offset_y * self.font_height), line_str, color, bg_color
+        )
 
     def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""
@@ -315,26 +343,12 @@ class Display:
         offset_y = max(0, (self.height() - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, bg_color)
 
-    def flash_text(
-        self,
-        text,
-        color=theme.fg_color,
-        bg_color=theme.bg_color,
-        duration=FLASH_MSG_TIME,
-    ):
-        """Flashes text centered on the display for duration ms"""
-        self.clear()
-        self.draw_centered_text(text, color, bg_color)
-        time.sleep_ms(duration)
-        self.clear()
-
     def draw_qr_code(
         self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
     ):
         """Draws a QR code on the screen"""
-        _, qr_code = add_qr_frame(qr_code)
-        lcd.draw_qr_code(
-            offset_y, qr_code, self.width(), dark_color, light_color, theme.bg_color
+        lcd.draw_qr_code_binary(
+            offset_y, qr_code, self.width(), dark_color, light_color, light_color
         )
 
     def set_backlight(self, level):
@@ -345,3 +359,8 @@ class Display:
         level = max(0, min(level, 8))
         val = (level + 7) << 4
         self.i2c.writeto_mem(0x34, 0x91, int(val))
+
+    def max_lines(self, line_offset=0):
+        """The max lines of text supported by the display"""
+        pad = DEFAULT_PADDING if line_offset else 2 * DEFAULT_PADDING
+        return (self.height() - pad - line_offset) // (2 * self.font_height)

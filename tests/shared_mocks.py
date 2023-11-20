@@ -32,6 +32,24 @@ def encode_to_string(data):
     return new_code_str
 
 
+def encode(data):
+    # Uses string encoded qr as it already cleaned up the frames
+    # PyQRcode also doesn't offer any binary output
+
+    frame_less_qr = encode_to_string(data)
+    size = 0
+    while frame_less_qr[size] != "\n":
+        size += 1
+    binary_qr = bytearray(b"\x00" * ((size * size + 7) // 8))
+    for y in range(size):
+        for x in range(size):
+            bit_index = y * size + x
+            bit_string_index = y * (size + 1) + x
+            if frame_less_qr[bit_string_index] == "1":
+                binary_qr[bit_index >> 3] |= 1 << (bit_index % 8)
+    return binary_qr
+
+
 def get_mock_open(files: dict[str, str]):
     def open_mock(filename, *args, **kwargs):
         for expected_filename, content in files.items():
@@ -285,6 +303,7 @@ def board_amigo_tft():
                     "BUTTON_A": 16,
                     "BUTTON_B": 20,
                     "BUTTON_C": 23,
+                    "TOUCH_IRQ": 33,
                     "LED_W": 32,
                     "I2C_SDA": 27,
                     "I2C_SCL": 24,
@@ -333,24 +352,38 @@ def mock_context(mocker):
 
     if board.config["type"] == "m5stickv":
         return mocker.MagicMock(
-            input=mocker.MagicMock(touch=None),
+            input=mocker.MagicMock(
+                touch=None,
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
             display=mocker.MagicMock(
                 font_width=8,
                 font_height=14,
                 width=mocker.MagicMock(return_value=135),
                 height=mocker.MagicMock(return_value=240),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_lines=mocker.MagicMock(return_value=7),
             ),
         )
     elif board.config["type"] == "dock":
         return mocker.MagicMock(
-            input=mocker.MagicMock(touch=None),
+            input=mocker.MagicMock(
+                touch=None,
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
             display=mocker.MagicMock(
                 font_width=8,
                 font_height=16,
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_lines=mocker.MagicMock(return_value=9),
             ),
         )
     elif board.config["type"].startswith("amigo"):
@@ -361,5 +394,6 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=320),
                 height=mocker.MagicMock(return_value=480),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_lines=mocker.MagicMock(return_value=9),
             ),
         )

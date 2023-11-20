@@ -2,7 +2,7 @@ from .test_home import tdata, create_ctx
 
 
 def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -10,6 +10,7 @@ def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
         Wallet(tdata.SINGLESIG_24_WORD_KEY),
         None,
         [
+            BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
@@ -25,15 +26,15 @@ def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
         ],
     ]
     ctx = create_ctx(mocker, case[2], case[0], case[1])
-    home = Home(ctx)
-    mocker.spy(home, "stackbit")
-    home.mnemonic()
-    home.stackbit.assert_called_once()
+    mnemonics = MnemonicsView(ctx)
+    mocker.spy(mnemonics, "stackbit")
+    mnemonics.mnemonic()
+    mnemonics.stackbit.assert_called_once()
     assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
 def test_export_mnemonic_stackbit_amigo(mocker, amigo_tft, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -41,6 +42,7 @@ def test_export_mnemonic_stackbit_amigo(mocker, amigo_tft, tdata):
         Wallet(tdata.SINGLESIG_24_WORD_KEY),
         None,
         [
+            BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
@@ -56,10 +58,10 @@ def test_export_mnemonic_stackbit_amigo(mocker, amigo_tft, tdata):
         ],
     ]
     ctx = create_ctx(mocker, case[2], case[0], case[1])
-    home = Home(ctx)
-    mocker.spy(home, "stackbit")
-    home.mnemonic()
-    home.stackbit.assert_called_once()
+    mnemonics = MnemonicsView(ctx)
+    mocker.spy(mnemonics, "stackbit")
+    mnemonics.mnemonic()
+    mnemonics.stackbit.assert_called_once()
     assert ctx.input.wait_for_button.call_count == len(case[2])
 
 

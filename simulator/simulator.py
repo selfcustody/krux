@@ -99,24 +99,23 @@ if args.printer:
 from kruxsim.mocks import secp256k1
 from kruxsim.mocks import qrcode
 from kruxsim.mocks import sensor
-
 from kruxsim.mocks import ft6x36
-from kruxsim.sequence import SequenceExecutor
-
+from kruxsim.mocks import buttons
 from kruxsim.mocks import rotary
+from kruxsim.sequence import SequenceExecutor
 
 sequence_executor = None
 if args.sequence:
     sequence_executor = SequenceExecutor(args.sequence)
 
-Maix.register_sequence_executor(sequence_executor)
+buttons.register_sequence_executor(sequence_executor)
 pmu.register_sequence_executor(sequence_executor)
 sensor.register_sequence_executor(sequence_executor)
 ft6x36.register_sequence_executor(sequence_executor)
 
 
 def run_krux():
-    with open("../src/boot.py") as boot_file:
+    with open("../src/boot.py", "r", encoding='utf-8') as boot_file:
         exec(boot_file.read())
 
 
@@ -202,6 +201,16 @@ try:
                     )
                 else:
                     event.dict["f"]()
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:
+                    buttons.buttons_control.enter_event_flag = True
+                if event.key == pg.K_DOWN:
+                    buttons.buttons_control.page_event_flag = True
+                if event.key == pg.K_UP:
+                    buttons.buttons_control.page_prev_event_flag = True
+            if event.type == pg.MOUSEBUTTONDOWN:
+                ft6x36.touch_control.trigger_event()
+
 
         if lcd.screen:
             lcd_rect = lcd.screen.get_rect()

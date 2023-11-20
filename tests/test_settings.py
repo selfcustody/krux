@@ -18,14 +18,6 @@ def test_init(mocker, m5stickv):
     assert isinstance(s, Settings)
 
 
-# @pytest.fixture
-# def mocker_sd_card(mocker):
-#     mocker.patch(
-#         "os.listdir",
-#         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
-#     )
-
-
 def test_store_init(mocker, m5stickv):
     from krux.settings import Store, SETTINGS_FILENAME, SD_PATH
 
@@ -99,3 +91,49 @@ def test_setting(mocker, m5stickv):
     assert t.some_setting == 1
     t.some_setting = 2
     assert t.some_setting == 2
+
+def test_all_labels(mocker, m5stickv):
+    from krux.krux_settings import (
+        BitcoinSettings,
+        I18nSettings,
+        LoggingSettings,
+        EncryptionSettings,
+        PrinterSettings,
+        ThermalSettings,
+        AdafruitPrinterSettings,
+        CNCSettings,
+        GRBLSettings,
+        PersistSettings,
+        ThemeSettings,
+        TouchSettings,
+        EncoderSettings,
+    )
+
+    bitcoin = BitcoinSettings()
+    i18n = I18nSettings()
+    logging = LoggingSettings()
+    encryption = EncryptionSettings()
+    printer = PrinterSettings()
+    thermal = ThermalSettings()
+    adafruit = AdafruitPrinterSettings()
+    cnc = CNCSettings()
+    gbrl = GRBLSettings()
+    persist = PersistSettings()
+    appearance = ThemeSettings()
+    touch = TouchSettings()
+    encoder = EncoderSettings()
+
+    assert bitcoin.label("network")
+    assert i18n.label("locale")
+    assert logging.label("level")
+    assert encryption.label("version")
+    assert printer.label("thermal")
+    assert thermal.label("adafruit")
+    assert adafruit.label("tx_pin")
+    assert cnc.label("invert")
+    assert gbrl.label("tx_pin")
+    assert persist.label("location")
+    assert appearance.label("theme")
+    assert appearance.label("screensaver_time")
+    assert touch.label("threshold")
+    assert encoder.label("debounce")

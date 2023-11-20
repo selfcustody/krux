@@ -65,12 +65,19 @@ class FileManager(Page):
 
                 dir_files = os.listdir(path)
                 for filename in dir_files:
-                    # only include files that match extension and directories
+                    extension_match = False
+                    if isinstance(file_extension, str):
+                        # No extension filter or matches
+                        extension_match = filename.endswith(file_extension)
+                    else:
+                        # Check for any matches for tuple / list
+                        for ext in file_extension:
+                            if filename.endswith(ext):
+                                extension_match = True
+                                break
+
                     if (
-                        # No extension filter
-                        file_extension == ""
-                        # Matches filter
-                        or filename.endswith(file_extension)
+                        extension_match
                         # Is a directory
                         or SDHandler.dir_exists(path + "/" + filename)
                     ):
