@@ -369,7 +369,7 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker, mocker_ucryptolib):
     # continue with default value because it must be multiple of 10000
     assert Settings().encryption.pbkdf2_iterations == 100000
 
-    # try to changhe the value to a multiple of 10000
+    # try to change the value to a multiple of 10000
     settings_page.capture_from_keypad = mocker.MagicMock(return_value=110000)
     settings_page.number_setting(
         EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
