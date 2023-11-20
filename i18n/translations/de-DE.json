@@ -225,6 +225,7 @@
     "Use camera's entropy to create a new mnemonic": "Verwende die Entropie der Kamera, um eine neue Mnemonic zu erstellen",
     "Used: ": "Belegt: ",
     "Value %s out of range: [%s, %s]": "Wert %S außerhalb  des Bereichs: [ %s, %s]",
+    "Value must be multiple of %s": "Der Wert muss ein Vielfaches von %s sein",
     "Via Camera": "Via Kamera",
     "Via D20": "Via D20",
     "Via D6": "Via D6",

@@ -46,6 +46,8 @@ VERSION_NUMBER = {
     "AES-CBC": PBKDF2_HMAC_CBC,
 }
 
+QR_CODE_ITER_MULTIPLE = 10000
+
 
 class AESCipher:
     """Helper for AES encrypt/decrypt"""
@@ -214,12 +216,22 @@ class EncryptedQRCode:
         """Joins necessary data and creates encrypted mnemonic QR codes"""
         name_lenght = len(mnemonic_id.encode())
         version = VERSION_NUMBER[Settings().encryption.version]
-        key_iterations = Settings().encryption.pbkdf2_iterations
+        ten_k_iterations = Settings().encryption.pbkdf2_iterations
+
+        # Divide iterations by a Multiple(10,000) to save space
+        ten_k_iterations //= QR_CODE_ITER_MULTIPLE
+
+        # Add public data bytes
         qr_code_data = name_lenght.to_bytes(1, "big")
         qr_code_data += mnemonic_id.encode()
         qr_code_data += version.to_bytes(1, "big")
-        qr_code_data += (key_iterations // 10000).to_bytes(3, "big")
-        encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
+        qr_code_data += ten_k_iterations.to_bytes(3, "big")
+
+        # Restore the iterations value assuring is a multiple of 10,000
+        ten_k_iterations *= QR_CODE_ITER_MULTIPLE
+
+        # Encrypted data
+        encryptor = AESCipher(key, mnemonic_id, ten_k_iterations)
         mode = VERSION_MODE[Settings().encryption.version]
         words = mnemonic.split(" ")
         checksum_bits = 8 if len(words) == 24 else 4
@@ -231,7 +243,10 @@ class EncryptedQRCode:
         bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
         base64_encrypted = encryptor.encrypt(bytes_to_encrypt, mode, i_vector)
         bytes_encrypted = base_decode(base64_encrypted, 64)
+
+        # Add encrypted data bytes
         qr_code_data += bytes_encrypted
+
         return qr_code_data
 
     def public_data(self, data):

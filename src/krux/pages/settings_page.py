@@ -35,10 +35,11 @@ from ..krux_settings import (
     BitcoinSettings,
     TouchSettings,
     EncoderSettings,
+    t,
 )
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
-from ..krux_settings import t
 from ..sd_card import SDHandler
+from ..encryption import QR_CODE_ITER_MULTIPLE
 from ..display import FLASH_MSG_TIME
 from . import (
     Page,
@@ -334,7 +335,16 @@ class SettingsPage(Page):
 
         new_value = setting.numtype(new_value)
         if setting.value_range[0] <= new_value <= setting.value_range[1]:
-            setting.__set__(settings_namespace, new_value)
+            if (
+                setting.attr == "pbkdf2_iterations"
+                and (new_value % QR_CODE_ITER_MULTIPLE) != 0
+            ):
+                self.ctx.display.flash_text(
+                    t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE,
+                    theme.error_color,
+                )
+            else:
+                setting.__set__(settings_namespace, new_value)
         else:
             self.ctx.display.flash_text(
                 t("Value %s out of range: [%s, %s]")
