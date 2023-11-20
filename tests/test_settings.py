@@ -92,6 +92,7 @@ def test_setting(mocker, m5stickv):
     t.some_setting = 2
     assert t.some_setting == 2
 
+
 def test_all_labels(mocker, m5stickv):
     from krux.krux_settings import (
         BitcoinSettings,

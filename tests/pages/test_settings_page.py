@@ -66,13 +66,11 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
         ),
         (  # 1
             (
-                # Printer
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
+                # Hardware
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
+                # TODO: Identify it's printer settings
                 # Thermal
                 BUTTON_PAGE,
                 BUTTON_ENTER,
@@ -90,18 +88,23 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
                 # Leave Settings
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
                 mocker.call("Baudrate\n9600", WHITE),
                 mocker.call("Baudrate\n19200", WHITE),
             ],
-            lambda: Settings().printer.thermal.adafruit.baudrate == 19200,
+            lambda: Settings().hardware.printer.thermal.adafruit.baudrate == 19200,
             CategorySetting,
         ),
         (  # 2
             (
                 # Language
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
@@ -119,6 +122,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
         (  # 3
             (
                 # Logging
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
@@ -151,16 +155,11 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
                 # Printer
                 BUTTON_PAGE,
                 BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Thermal
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Paper Width
-                BUTTON_PAGE,
-                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
@@ -191,12 +190,16 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
                 # Leave Settings
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
                 mocker.call("Paper Width", 10),
             ],
-            lambda: Settings().printer.thermal.adafruit.paper_width == 389,
+            lambda: Settings().hardware.printer.thermal.adafruit.paper_width == 389,
             NumberSetting,
         ),
     ]
@@ -216,7 +219,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
         assert case[2]()
 
 
-def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer, mocker_ucryptolib):
+def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
     import krux
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_TOUCH
@@ -236,13 +239,15 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer, mocker_ucrypto
     GO_INDEX = 1
     NEXT_INDEX = 2
 
-    LOCALE_INDEX = 2
-    LOGGING_INDEX = 3
-    PRINTER_INDEX = 5
+    HARDWARE_INDEX = 2
+    LOCALE_INDEX = 3
+    LOGGING_INDEX = 4
+    PRINTER_INDEX = 0
     LEAVE_INDEX = 8
 
     cases = [
         (
+            # Case 0
             (
                 # Bitcoin
                 0,
@@ -260,7 +265,10 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer, mocker_ucrypto
             CategorySetting,
         ),
         (
+            # Case 1
             (
+                # Hardware
+                HARDWARE_INDEX,
                 # Printer
                 PRINTER_INDEX,
                 # Thermal
@@ -269,10 +277,12 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer, mocker_ucrypto
                 0,
                 NEXT_INDEX,
                 GO_INDEX,
-                # Back to Thermal
-                8,
-                # Back to Printer
+                # Back from Thermal
+                6,
+                # Back from Printer
                 3,
+                # Back from Hardware
+                2,
                 # Leave Settings
                 LEAVE_INDEX,
             ),
@@ -280,10 +290,11 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer, mocker_ucrypto
                 mocker.call("Baudrate\n9600", WHITE),
                 mocker.call("Baudrate\n19200", WHITE),
             ],
-            lambda: Settings().printer.thermal.adafruit.baudrate == 19200,
+            lambda: Settings().hardware.printer.thermal.adafruit.baudrate == 19200,
             CategorySetting,
         ),
         (
+            # Case 2
             (
                 # Language
                 LOCALE_INDEX,
@@ -299,6 +310,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer, mocker_ucrypto
             CategorySetting,
         ),
         (
+            # Case 3
             (
                 # Logging
                 LOGGING_INDEX,
