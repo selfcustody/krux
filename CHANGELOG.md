@@ -1,4 +1,4 @@
-# Changelog 24.04.beta3 - October 9, 2023
+# Changelog 24.04.beta8 - November 20, 2023
 
 ## Changes
 
@@ -21,7 +21,10 @@ Use latest Embit release
 QR codes rendering is faster and uses less RAM
 
 ### Export Mnemonic Numbers
-To match the input options, export mnemonics as decimnal, hexadecimal or octal numbers
+To match the input options, export mnemonics as decimal, hexadecimal or octal numbers
+
+### Export QR codes as images to SD Card
+Some QR codes can be exported as images to SD card
 
 
 # Version 23.09.1 - November 18, 2023

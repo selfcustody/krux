@@ -15,7 +15,7 @@ def test_load_qr_view(amigo_tft, mocker):
         SWIPE_LEFT,  # lines mode again
         SWIPE_RIGHT,  # back to standard mode
         BUTTON_ENTER,  # leave
-        BUTTON_PAGE_PREV, # move to Back to Main Menu
+        BUTTON_PAGE_PREV,  # move to Back to Main Menu
         BUTTON_ENTER,  # confirm
     ]
 
@@ -46,7 +46,7 @@ def test_loop_through_regions(amigo_tft, mocker):
             SWIPE_LEFT,  # lines mode again
             SWIPE_RIGHT,  # back to standard mode
             BUTTON_ENTER,  # leave
-            BUTTON_PAGE_PREV, # move to Back to Main Menu
+            BUTTON_PAGE_PREV,  # move to Back to Main Menu
             BUTTON_ENTER,  # confirm
         ]
     )
