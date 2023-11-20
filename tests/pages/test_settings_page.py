@@ -344,3 +344,31 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer, mocker_ucrypto
         assert ctx.input.wait_for_button.call_count == len(case[0])
 
         assert case[2]()
+
+
+def test_encryption_pbkdf2_setting(m5stickv, mocker, mocker_ucryptolib):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, EncryptionSettings
+    from krux.settings import NumberSetting
+
+    ctx = mock_context(mocker)
+    settings_page = SettingsPage(ctx)
+    
+    enc_setting = EncryptionSettings()
+
+    # pbkdf2_iterations has default value
+    assert Settings().encryption.pbkdf2_iterations == 100000
+
+    # try to change the value
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=100001)
+    settings_page.number_setting(EncryptionSettings(), EncryptionSettings.pbkdf2_iterations)
+
+    # continue with default value because it must be multiple of 10000
+    assert Settings().encryption.pbkdf2_iterations == 100000
+
+    # try to changhe the value to a multiple of 10000
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=110000)
+    settings_page.number_setting(EncryptionSettings(), EncryptionSettings.pbkdf2_iterations)
+
+    # value changed!
+    assert Settings().encryption.pbkdf2_iterations == 110000
