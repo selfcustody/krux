@@ -72,6 +72,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     from krux.pages.encryption_ui import EncryptionKey, ENCRYPTION_KEY_MAX_LEN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
+    print("case 1: load_key_from_qr_code")
     BTN_SEQUENCE = (
         [BUTTON_PAGE]  # move to QR code key
         + [BUTTON_ENTER]  # choose QR code key
@@ -87,6 +88,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     key = key_generator.encryption_key()
     assert key == "qr key"
 
+    print("case 2: load_key_from_qr_code")
     # Repeat with too much characters >ENCRYPTION_KEY_MAX_LEN
     BTN_SEQUENCE = [BUTTON_PAGE] + [  # move to QR code key
         BUTTON_ENTER
