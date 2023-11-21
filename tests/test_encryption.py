@@ -61,6 +61,9 @@ def mock_file_operations(mocker):
     mocker.patch("builtins.open", mocker.mock_open(read_data=SEEDS_JSON))
 
 
+# -------------------------
+
+
 def test_ecb_encryption(m5stickv):
     from krux.encryption import AESCipher
 
@@ -117,7 +120,7 @@ def test_load_decrypt_cbc(m5stickv, mock_file_operations):
     assert words_sd == CBC_WORDS
 
 
-def test_encrypt_ecb_flash(mocker):
+def test_encrypt_ecb_flash(m5stickv, mocker):
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -129,7 +132,7 @@ def test_encrypt_ecb_flash(mocker):
     m().write.assert_called_once_with(ECB_ONLY_JSON)
 
 
-def test_encrypt_cbc_flash(mocker):
+def test_encrypt_cbc_flash(m5stickv, mocker):
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -143,7 +146,7 @@ def test_encrypt_cbc_flash(mocker):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
-def test_encrypt_ecb_sd(mocker, mock_file_operations):
+def test_encrypt_ecb_sd(m5stickv, mocker, mock_file_operations):
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -155,7 +158,7 @@ def test_encrypt_ecb_sd(mocker, mock_file_operations):
     m().write.assert_called_once_with(ECB_ONLY_JSON)
 
 
-def test_encrypt_cbc_sd(mocker, mock_file_operations):
+def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -169,7 +172,7 @@ def test_encrypt_cbc_sd(mocker, mock_file_operations):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
-def test_delet_from_flash(mocker):
+def test_delet_from_flash(m5stickv, mocker):
     from krux.encryption import MnemonicStorage
 
     # Loads a file with 2 mnemonics, one with ID="ecbID", other with ID="cbcID"
@@ -180,7 +183,7 @@ def test_delet_from_flash(mocker):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
-def test_delet_from_sd(mocker, mock_file_operations):
+def test_delet_from_sd(m5stickv, mocker, mock_file_operations):
     from krux.encryption import MnemonicStorage
 
     # Loads a file with 2 mnemonics, one with ID="ecbID", other with ID="cbcID"
@@ -191,7 +194,7 @@ def test_delet_from_sd(mocker, mock_file_operations):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
-def test_create_ecb_encrypted_qr_code():
+def test_create_ecb_encrypted_qr_code(m5stickv):
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings
 
@@ -201,7 +204,7 @@ def test_create_ecb_encrypted_qr_code():
     assert qr_data == ECB_ENCRYPTED_QR
 
 
-def test_create_cbc_encrypted_qr_code():
+def test_create_cbc_encrypted_qr_code(m5stickv):
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings
 
@@ -212,7 +215,7 @@ def test_create_cbc_encrypted_qr_code():
     assert qr_data == CBC_ENCRYPTED_QR
 
 
-def test_decode_ecb_encrypted_qr_code():
+def test_decode_ecb_encrypted_qr_code(m5stickv):
     from krux.encryption import EncryptedQRCode
     from embit import bip39
 
@@ -224,7 +227,7 @@ def test_decode_ecb_encrypted_qr_code():
     assert words == TEST_WORDS
 
 
-def test_decode_cbc_encrypted_qr_code():
+def test_decode_cbc_encrypted_qr_code(m5stickv):
     from krux.encryption import EncryptedQRCode
     from embit import bip39
 
@@ -237,14 +240,24 @@ def test_decode_cbc_encrypted_qr_code():
     assert words == TEST_WORDS
 
 
-def create_ctx(mocker, btn_seq, touch_seq=None):
-    """Helper to create mocked context obj"""
-    ctx = mock_context(mocker)
-    ctx.power_manager.battery_charge_remaining.return_value = 1
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
+def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
+    from krux.encryption import EncryptedQRCode
+    from krux.krux_settings import Settings
+    from embit import bip39
 
-    if touch_seq:
-        ctx.input.touch = mocker.MagicMock(
-            current_index=mocker.MagicMock(side_effect=touch_seq)
-        )
-    return ctx
+    print("case Encode: customize_pbkdf2_iterations")
+    Settings().encryption.version = "AES-ECB"
+    Settings().encryption.pbkdf2_iterations = 99999
+    encrypted_qr = EncryptedQRCode()
+    qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS)
+    print(qr_data)
+    print(ECB_ENCRYPTED_QR)
+
+    print("case Decode: customize_pbkdf2_iterations")
+    public_data = encrypted_qr.public_data(qr_data)
+    assert public_data == (
+        "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 90000"
+    )
+    word_bytes = encrypted_qr.decrypt(TEST_KEY)
+    words = bip39.mnemonic_from_bytes(word_bytes)
+    assert words == TEST_WORDS
