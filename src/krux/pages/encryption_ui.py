@@ -55,7 +55,7 @@ class EncryptionKey(Page):
         )
         _, key = submenu.run_loop()
         if key in (ESC_KEY, MENU_CONTINUE):
-            return None
+            return ""
 
         if key:
             self.ctx.display.clear()
@@ -277,14 +277,11 @@ class LoadEncryptedMnemonic(Page):
 
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
-        if key is None:
-            self.flash_text(t("Failed to decrypt"), theme.error_color)
+        if key in (None, "", ESC_KEY):
+            self.flash_text(t("Key was not provided"), theme.error_color)
             return MENU_CONTINUE
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
-        if key in ("", ESC_KEY):
-            self.flash_text(t("Failed to decrypt"), theme.error_color)
-            return MENU_CONTINUE
         mnemonic_storage = MnemonicStorage()
         try:
             words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()
