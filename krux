@@ -52,153 +52,201 @@ filesize() {
 
 if [ "$1" == "build" ]; then
     device="$2"
+    if [ -z "$device" ]; then
+        echo "Missing device"
+    else
+        declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
+        sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
 
-    declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
-    sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
+        mkdir -p build
+        docker build . -t krux-builder --build-arg DEVICE=$device
 
-    mkdir -p build
-    docker build . -t krux-builder --build-arg DEVICE=$device
-
-    # Create a container to extract the built firmware
-    docker create --name extract-firmware krux-builder
-    docker cp extract-firmware:$BUILD_DIR/firmware.bin build/firmware.bin
-    docker cp extract-firmware:$BUILD_DIR/kboot.kfpkg build/kboot.kfpkg
-    docker rm extract-firmware
+        # Create a container to extract the built firmware
+        docker create --name extract-firmware krux-builder
+        docker cp extract-firmware:$BUILD_DIR/firmware.bin build/firmware.bin
+        docker cp extract-firmware:$BUILD_DIR/kboot.kfpkg build/kboot.kfpkg
+        docker rm extract-firmware
+    fi
 elif [ "$1" == "flash" ]; then
     device="$2"
-
-    device_vendor_product_id=""
-    if [ "$device" == "maixpy_m5stickv" ]; then
-        # https://devicehunt.com/view/type/usb/vendor/0403/device/6001
-        device_vendor_product_id="0403:6001"
-    elif [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_amigo_tft" ]||[ "$device" == "maixpy_bit" ]; then
-        # https://devicehunt.com/view/type/usb/vendor/0403/device/6010
-        device_vendor_product_id="0403:6010"
-    elif [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]; then
-        # https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
-        device_vendor_product_id="1a86:7523"
-    fi
-    if [ -z "$device_vendor_product_id" ]; then
-        panic "Unknown device"
-    fi
-
-    usb_device_name_cmd="getdevice $device_vendor_product_id 1"
-    usb_device_name=$($usb_device_name_cmd)
-    if [ -z "$usb_device_name" ]; then
-        panic "Failed to find device via USB. Is it connected and powered on?"
-    fi
-
-    if [ "$device" == "maixpy_dock" ]; then
-        BOARD="dan"
+    if [ -z "$device" ]; then
+        echo "Missing device"
     else
-        BOARD="goE"
-    fi
+        device_vendor_product_id=""
+        if [ "$device" == "maixpy_m5stickv" ]; then
+            # https://devicehunt.com/view/type/usb/vendor/0403/device/6001
+            device_vendor_product_id="0403:6001"
+        elif [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_amigo_tft" ]||[ "$device" == "maixpy_bit" ]; then
+            # https://devicehunt.com/view/type/usb/vendor/0403/device/6010
+            device_vendor_product_id="0403:6010"
+        elif [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]; then
+            # https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
+            device_vendor_product_id="1a86:7523"
+        fi
+        if [ -z "$device_vendor_product_id" ]; then
+            panic "Unknown device"
+        fi
 
-    if ! docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg; then
-        # M5stickV has only one serial port
-        # Bit has two serial ports and uses first for flash
-        # Amigo has two ports and uses second port to flash
-        if [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_amigo_tft" ]||[ "$device" == "maixpy_bit" ]; then
-            usb_device_name_cmd="getdevice $device_vendor_product_id 2"
-            usb_device_name=$($usb_device_name_cmd)
-            if [ -z "$usb_device_name" ]; then
-                panic "Failed to find device via USB. Is it connected and powered on?"
+        usb_device_name_cmd="getdevice $device_vendor_product_id 1"
+        usb_device_name=$($usb_device_name_cmd)
+        if [ -z "$usb_device_name" ]; then
+            panic "Failed to find device via USB. Is it connected and powered on?"
+        fi
+
+        if [ "$device" == "maixpy_dock" ]; then
+            BOARD="dan"
+        else
+            BOARD="goE"
+        fi
+
+        if ! docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg; then
+            # M5stickV has only one serial port
+            # Bit has two serial ports and uses first for flash
+            # Amigo has two ports and uses second port to flash
+            if [ "$device" == "maixpy_amigo_ips" ]||[ "$device" == "maixpy_amigo_tft" ]||[ "$device" == "maixpy_bit" ]; then
+                usb_device_name_cmd="getdevice $device_vendor_product_id 2"
+                usb_device_name=$($usb_device_name_cmd)
+                if [ -z "$usb_device_name" ]; then
+                    panic "Failed to find device via USB. Is it connected and powered on?"
+                fi
+                docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
             fi
-            docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
         fi
     fi
 elif [ "$1" == "sha256" ]; then
     file="$2"
-    hash=$(openssl dgst -sha256 $file)
-    hash=($hash)
-    echo ${hash[1]}
+    if [ -z "$file" ]; then
+        echo "Missing filename"
+    else
+        hash=$(openssl dgst -sha256 $file)
+        hash=($hash)
+        echo ${hash[1]}
+    fi
 elif [ "$1" == "sha256-with-header" ]; then
     firmware="$2"
-    # Get size of firmware
-    fsize=$(filesize $firmware)
-    # Convert size to little endian
-    fsize_byte1=`printf '%02x' "$((fsize & 255))"`
-    fsize_byte2=`printf '%02x' "$((fsize >> 8 & 255))"`
-    fsize_byte3=`printf '%02x' "$((fsize >> 16 & 255))"`
-    fsize_byte4=`printf '%02x' "$((fsize >> 24 & 255))"`
-    # Header is leading 0 byte followed by 4-byte little-endian fsize
-    header="\x00\x$fsize_byte1\x$fsize_byte2\x$fsize_byte3\x$fsize_byte4"
-    # Copy firmware binary and increase copy's size by 5 bytes
-    xxd $firmware | xxd -r -s 5 > $firmware.withheader
-    # Prepend copy with header bytes
-    printf "%b" $header | xxd -p | xxd -r -p - $firmware.withheader
-    # Output sha256 of copy with header bytes
-    ./krux sha256 $firmware.withheader
-    rm -f $firmware.withheader
+    if [ -z "$firmware" ]; then
+        echo "Missing firmware"
+    else
+        # Get size of firmware
+        fsize=$(filesize $firmware)
+        # Convert size to little endian
+        fsize_byte1=`printf '%02x' "$((fsize & 255))"`
+        fsize_byte2=`printf '%02x' "$((fsize >> 8 & 255))"`
+        fsize_byte3=`printf '%02x' "$((fsize >> 16 & 255))"`
+        fsize_byte4=`printf '%02x' "$((fsize >> 24 & 255))"`
+        # Header is leading 0 byte followed by 4-byte little-endian fsize
+        header="\x00\x$fsize_byte1\x$fsize_byte2\x$fsize_byte3\x$fsize_byte4"
+        # Copy firmware binary and increase copy's size by 5 bytes
+        xxd $firmware | xxd -r -s 5 > $firmware.withheader
+        # Prepend copy with header bytes
+        printf "%b" $header | xxd -p | xxd -r -p - $firmware.withheader
+        # Output sha256 of copy with header bytes
+        ./krux sha256 $firmware.withheader
+        rm -f $firmware.withheader
+    fi
 elif [ "$1" == "b64decode" ]; then
     b64="$2"
-    echo "$b64" | openssl base64 -d
+    if [ -z "$b64" ]; then
+        echo "Missing base64"
+    else
+        echo "$b64" | openssl base64 -d
+    fi
 elif [ "$1" == "generate-keypair" ]; then
     openssl ecparam -name secp256k1 -conv_form compressed -genkey -noout -out privkey.pem
     openssl ec -in privkey.pem -pubout -out pubkey.pem
 elif [ "$1" == "pubkey-to-pem" ]; then
     pubkey="$2"
-    # https://github.com/pebwindkraft/trx_cl_suite/blob/master/tcls_key2pem.sh#L134
-    pem="3036301006072a8648ce3d020106052b8104000a032200$pubkey"
-    pem=$( echo $pem | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-    echo "-----BEGIN PUBLIC KEY-----"
-    printf $pem | openssl enc -base64
-    echo "-----END PUBLIC KEY-----"
+    if [ -z "$pubkey" ]; then
+        echo "Missing pubkey"
+    else
+        # https://github.com/pebwindkraft/trx_cl_suite/blob/master/tcls_key2pem.sh#L134
+        pem="3036301006072a8648ce3d020106052b8104000a032200$pubkey"
+        pem=$( echo $pem | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+        echo "-----BEGIN PUBLIC KEY-----"
+        printf $pem | openssl enc -base64
+        echo "-----END PUBLIC KEY-----"
+    fi
 elif [ "$1" == "pem-to-pubkey" ]; then
     pem="$2"
-    pubkey=$(openssl ec -noout -text -inform PEM -in $pem -pubin | tr -d '\n')
-    pubkey=$( echo $pubkey | sed 's/Public-Key: (256 bit)pub://g' )
-    pubkey=$( echo $pubkey | sed 's/ASN1 OID: secp256k1//g' )
-    pubkey=$( echo $pubkey | sed 's/://g' )
-    pubkey=$( echo $pubkey | sed 's/ //g' )
-    echo $pubkey
+    if [ -z "$pem" ]; then
+        echo "Missing pem"
+    else
+        pubkey=$(openssl ec -noout -text -inform PEM -in $pem -pubin | tr -d '\n')
+        pubkey=$( echo $pubkey | sed 's/Public-Key: (256 bit)pub://g' )
+        pubkey=$( echo $pubkey | sed 's/ASN1 OID: secp256k1//g' )
+        pubkey=$( echo $pubkey | sed 's/://g' )
+        pubkey=$( echo $pubkey | sed 's/ //g' )
+        echo $pubkey
+    fi
 elif [ "$1" == "sign" ]; then
     file="$2"
-    privkey_pem="$3"
-    sig_bin=$file.sig
-    openssl dgst -sign $privkey_pem -keyform PEM -sha256 -out $sig_bin -binary $file
+    if [ -z "$file" ]; then
+        echo "Missing file"
+    else
+        privkey_pem="$3"
+        if [ -z "$privkey_pem" ]; then
+            echo "Missing private_key"
+        else
+            sig_bin=$file.sig
+            openssl dgst -sign $privkey_pem -keyform PEM -sha256 -out $sig_bin -binary $file
+        fi
+    fi
 elif [ "$1" == "verify" ]; then
     file="$2"
-    pubkey="$3"
-    sig_bin=$file.sig
-    openssl sha256 <$file -binary | openssl pkeyutl -verify -pubin -inkey $pubkey -sigfile $sig_bin
+    if [ -z "$file" ]; then
+        echo "Missing file"
+    else
+        pubkey="$3"
+        if [ -z "$pubkey" ]; then
+            echo "Missing pubkey"
+        else
+            sig_bin=$file.sig
+            openssl sha256 <$file -binary | openssl pkeyutl -verify -pubin -inkey $pubkey -sigfile $sig_bin
+        fi
+    fi
 elif [ "$1" == "build-release" ]; then
-    declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
+    if [ -z "$version" ]; then
+        echo "Missing version"
+    else
+        declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
 
-    release_dir="krux-v$version"
-    mkdir -p $release_dir
+        release_dir="krux-v$version"
+        mkdir -p $release_dir
 
-    cd build
-    if [ ! -f "ktool-linux" ]; then
-        wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-linux
-        echo "2b8be0c95abe9f0ff7016e9a5b343ff8d3df9751783bc4d6a4b4df775693fb57  ktool-linux" | sha256sum -c
-    fi
-    if [ ! -f "ktool-mac" ]; then
-        wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac
-        echo "008bbcfb81da7921510c73e09b46771677d013dc5d148de4d2205b901a2cc892  ktool-mac" | sha256sum -c
-    fi
-    if [ ! -f "ktool-mac-10" ]; then
-        wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac-10
-        echo "fc386abbde4a1b1b35f8ffad2df429786a737756063f137f69f0e080b190cb4c  ktool-mac-10" | sha256sum -c
-    fi
-    if [ ! -f "ktool-win.exe" ]; then
-        wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-win.exe
-        echo "5fca13023de5bfbf349bc898e046b4858217644bf60381b2af5c2649d9384c39  ktool-win.exe" | sha256sum -c
-    fi
-    cp -f ktool-linux ../$release_dir/ktool-linux
-    cp -f ktool-mac ../$release_dir/ktool-mac
-    cp -f ktool-mac-10 ../$release_dir/ktool-mac-10
-    cp -f ktool-win.exe ../$release_dir/ktool-win.exe
-    cd ..
+        cd build
+        if [ ! -f "ktool-linux" ]; then
+            wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-linux
+            echo "2b8be0c95abe9f0ff7016e9a5b343ff8d3df9751783bc4d6a4b4df775693fb57  ktool-linux" | sha256sum -c
+        fi
+        if [ ! -f "ktool-mac" ]; then
+            wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac
+            echo "008bbcfb81da7921510c73e09b46771677d013dc5d148de4d2205b901a2cc892  ktool-mac" | sha256sum -c
+        fi
+        if [ ! -f "ktool-mac-10" ]; then
+            wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac-10
+            echo "fc386abbde4a1b1b35f8ffad2df429786a737756063f137f69f0e080b190cb4c  ktool-mac-10" | sha256sum -c
+        fi
+        if [ ! -f "ktool-win.exe" ]; then
+            wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-win.exe
+            echo "5fca13023de5bfbf349bc898e046b4858217644bf60381b2af5c2649d9384c39  ktool-win.exe" | sha256sum -c
+        fi
+        cp -f ktool-linux ../$release_dir/ktool-linux
+        cp -f ktool-mac ../$release_dir/ktool-mac
+        cp -f ktool-mac-10 ../$release_dir/ktool-mac-10
+        cp -f ktool-win.exe ../$release_dir/ktool-win.exe
+        cd ..
 
-    devices=("maixpy_m5stickv" "maixpy_amigo_ips" "maixpy_amigo_tft" "maixpy_bit" "maixpy_dock" "maixpy_yahboom")
-    for device in ${devices[@]}; do
-        ./krux build $device
-        mkdir -p $release_dir/$device
-        cp -f build/firmware.bin $release_dir/$device/firmware.bin
-        cp -f build/kboot.kfpkg $release_dir/$device/kboot.kfpkg
-    done
+        devices=("maixpy_m5stickv" "maixpy_amigo_ips" "maixpy_amigo_tft" "maixpy_bit" "maixpy_dock" "maixpy_yahboom")
+        for device in ${devices[@]}; do
+            ./krux build $device
+            mkdir -p $release_dir/$device
+            cp -f build/firmware.bin $release_dir/$device/firmware.bin
+            cp -f build/kboot.kfpkg $release_dir/$device/kboot.kfpkg
+        done
+    fi
 elif [ "$1" == "clean" ]; then
     rm -rf build
     docker system prune
+else
+    echo "Missing argument"
 fi
