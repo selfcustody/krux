@@ -23,13 +23,42 @@
 import io
 import math
 import qrcode
-from ur.ur_encoder import UREncoder
 from ur.ur_decoder import URDecoder
 from ur.ur import UR
 
 FORMAT_NONE = 0
 FORMAT_PMOFN = 1
 FORMAT_UR = 2
+
+PMOFN_PREFIX_LENGTH_1D = 6
+PMOFN_PREFIX_LENGTH_2D = 8
+UR_GENERIC_PREFIX_LENGTH = 22
+UR_CHECKSUM_SIZE = 32
+UR_MIN_FRAGMENT_LENGTH = 10
+# List of capacities, based on versions
+# Version 1(index 0)=21x21px = 17 bytes, version 2=25x25px = 32 bytes ...
+QR_CAPACITY = [
+    17,
+    32,
+    53,
+    78,
+    106,
+    134,
+    154,
+    192,
+    230,
+    271,
+    321,
+    367,
+    425,
+    458,
+    520,
+    586,
+    644,
+    718,
+    792,
+    858,
+]
 
 
 class QRPartParser:
@@ -110,22 +139,26 @@ def to_qr_codes(data, max_width, qr_format):
         code = qrcode.encode(data)
         yield (code, 1)
     else:
-        num_parts = find_min_num_parts(data, max_width, qr_format)
-        while math.ceil(data_len(data) / num_parts) > 128:
-            num_parts += 1
-        part_size = math.ceil(data_len(data) / num_parts)
-
+        num_parts, part_size = find_min_num_parts(data, max_width, qr_format)
         if qr_format == FORMAT_PMOFN:
-            for i in range(num_parts):
-                part_number = "p%dof%d " % (i + 1, num_parts)
+            part_index = 0
+            while True:
+                part_number = "p%dof%d " % (part_index + 1, num_parts)
                 part = None
-                if i == num_parts - 1:
-                    part = part_number + data[i * part_size :]
+                if part_index == num_parts - 1:
+                    part = part_number + data[part_index * part_size :]
+                    part_index = 0
                 else:
-                    part = part_number + data[i * part_size : i * part_size + part_size]
+                    part = (
+                        part_number
+                        + data[part_index * part_size : (part_index + 1) * part_size]
+                    )
+                    part_index += 1
                 code = qrcode.encode(part)
                 yield (code, num_parts)
         elif qr_format == FORMAT_UR:
+            from ur.ur_encoder import UREncoder
+
             encoder = UREncoder(data, part_size, 0)
             while True:
                 part = encoder.next_part()
@@ -146,29 +179,50 @@ def data_len(data):
     return len(data)
 
 
+def max_qr_bytes(max_width):
+    """Calculates the maximum length, in bytes, a QR code of a given size can store"""
+    # Given qr_size =  17 + 4 * version + 2 * frame_size
+    max_width -= 2  # Subtract frame width
+    qr_version = (max_width - 17) // 4
+    try:
+        capacity = QR_CAPACITY[qr_version - 1]
+    except:
+        capacity = QR_CAPACITY[-1]
+    return capacity
+
+
 def find_min_num_parts(data, max_width, qr_format):
     """Finds the minimum number of QR parts necessary to encode the data in
     the specified format within the max_width constraint
     """
-    num_parts = 1
-    part_size = math.ceil(data_len(data) / num_parts)
-    while True:
-        part = ""
-        if qr_format == FORMAT_PMOFN:
-            part_number = "p1of%d " % num_parts
-            part = part_number + data[0:part_size]
-        elif qr_format == FORMAT_UR:
-            encoder = UREncoder(data, part_size, 0)
-            part = encoder.next_part()
-        # The worst-case number of bytes needed to store one QR Code, up to and including
-        # version 40. This value equals 3918, which is just under 4 kilobytes.
-        if len(part) < 3918:
-            code = qrcode.encode(part)
-            if get_size(code) <= max_width:
-                break
-        num_parts += 1
-        part_size = math.ceil(data_len(data) / num_parts)
-    return num_parts
+    qr_capacity = max_qr_bytes(max_width)
+    if qr_format == FORMAT_PMOFN:
+        data_length = len(data)
+        part_size = qr_capacity - PMOFN_PREFIX_LENGTH_1D
+        # where prefix = "pXofY " where Y < 9
+        num_parts = (data_length + part_size - 1) // part_size
+        if num_parts > 9:  # Prefix has 2 digits numbers, so re-calculate
+            part_size = qr_capacity - PMOFN_PREFIX_LENGTH_2D
+            # where prefix = "pXXofYY " where max YY = 99
+            num_parts = (data_length + part_size - 1) // part_size
+        part_size = (data_length + num_parts - 1) // num_parts
+    elif qr_format == FORMAT_UR:
+        qr_capacity -= (
+            UR_GENERIC_PREFIX_LENGTH  # index: ~ "ur:crypto-psbt/xxx-xx/"UR index grows
+        )
+        data_length = len(data.cbor)
+        data_length += UR_CHECKSUM_SIZE  # UR 32 bits Checksum
+        # This help make UR QRs huge:
+        data_length *= 2  # UR will Bytewords.encode, which is 2 chars per byte
+        num_parts = (data_length + qr_capacity - 1) // qr_capacity
+        # For UR, part size will be the input for "max_fragment_len"
+        part_size = len(data.cbor) // num_parts
+        part_size = max(
+            part_size, UR_MIN_FRAGMENT_LENGTH
+        )
+    else:
+        raise ValueError("Invalid format type")
+    return num_parts, part_size
 
 
 def parse_pmofn_qr_part(data):

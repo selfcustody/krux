@@ -120,19 +120,31 @@ def test_parser(mocker, m5stickv, tdata):
 
 def test_to_qr_codes(mocker, m5stickv, tdata):
     from krux.qr import to_qr_codes, FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+    from krux.display import Display
 
     cases = [
-        (FORMAT_NONE, tdata.TEST_DATA_B58, 1),
-        (FORMAT_PMOFN, tdata.TEST_DATA_B58, 3),
-        (FORMAT_UR, tdata.TEST_DATA_UR, 3),
+        # Test 135 pixels wide display
+        (FORMAT_NONE, tdata.TEST_DATA_B58, 135, 1),
+        (FORMAT_PMOFN, tdata.TEST_DATA_B58, 135, 9),
+        (FORMAT_UR, tdata.TEST_DATA_UR, 135, 22),
+        # Test 320 pixels wide display
+        (FORMAT_NONE, tdata.TEST_DATA_B58, 320, 1),
+        (FORMAT_PMOFN, tdata.TEST_DATA_B58, 320, 3),
+        (FORMAT_UR, tdata.TEST_DATA_UR, 320, 5),
     ]
     for case in cases:
+        mocker.patch(
+            "krux.display.lcd",
+            new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[2]))
+        )
+        display = Display()
+        qr_data_width = display.qr_data_width()
         fmt = case[0]
         data = case[1]
-        expected_parts = case[2]
+        expected_parts = case[3]
 
         codes = []
-        code_generator = to_qr_codes(data, 135, fmt)
+        code_generator = to_qr_codes(data, qr_data_width, fmt)
         i = 0
         while True:
             try:
@@ -141,7 +153,8 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
                 assert total == expected_parts
                 if i == total - 1:
                     break
-            except:
+            except Exception as e:
+                print("Error:",e)
                 break
             i += 1
         assert len(codes) == expected_parts
