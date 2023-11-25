@@ -135,7 +135,7 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
     for case in cases:
         mocker.patch(
             "krux.display.lcd",
-            new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[2]))
+            new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[2])),
         )
         display = Display()
         qr_data_width = display.qr_data_width()
@@ -154,7 +154,7 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
                 if i == total - 1:
                     break
             except Exception as e:
-                print("Error:",e)
+                print("Error:", e)
                 break
             i += 1
         assert len(codes) == expected_parts
@@ -168,3 +168,13 @@ def test_detect_plaintext_qr(mocker, m5stickv):
     )
 
     detect_format(PLAINTEXT_QR_DATA)
+
+
+def test_find_min_num_parts(m5stickv):
+    from krux.qr import find_min_num_parts
+
+    with pytest.raises(ValueError) as raised_ex:
+        find_min_num_parts("", 10, "format unknown")
+
+    assert raised_ex.type is ValueError
+    assert raised_ex.value.args[0] == "Invalid format type"

@@ -185,10 +185,9 @@ def max_qr_bytes(max_width):
     max_width -= 2  # Subtract frame width
     qr_version = (max_width - 17) // 4
     try:
-        capacity = QR_CAPACITY[qr_version - 1]
+        return QR_CAPACITY[qr_version - 1]
     except:
-        capacity = QR_CAPACITY[-1]
-    return capacity
+        return QR_CAPACITY[-1]
 
 
 def find_min_num_parts(data, max_width, qr_format):
@@ -217,9 +216,7 @@ def find_min_num_parts(data, max_width, qr_format):
         num_parts = (data_length + qr_capacity - 1) // qr_capacity
         # For UR, part size will be the input for "max_fragment_len"
         part_size = len(data.cbor) // num_parts
-        part_size = max(
-            part_size, UR_MIN_FRAGMENT_LENGTH
-        )
+        part_size = max(part_size, UR_MIN_FRAGMENT_LENGTH)
     else:
         raise ValueError("Invalid format type")
     return num_parts, part_size
