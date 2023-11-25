@@ -1,10 +1,10 @@
 ---
 name: 🥺 Help wanted
-about: Confuse about the use of ksigner
+about: Confuse about some krux usage
 title: "[Help] the title of help wanted report"
 labels: help wanted
 assignees: ''
 
 ---
 
-#### Describe the problem you confuse
+#### Describe the problem you need help
