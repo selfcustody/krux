@@ -77,7 +77,10 @@ class Setting:
     def __set__(self, obj, value):
         if self.attr == "location":
             store.update_file_location(value)
-        store.set(obj.namespace, self.attr, value)
+        if value == self.default_value:
+            store.delete(obj.namespace, self.attr)  # do not store defaults
+        else:
+            store.set(obj.namespace, self.attr, value)  # do store custom settings
 
 
 class CategorySetting(Setting):
@@ -137,13 +140,15 @@ class Store:
         )
 
     def get(self, namespace, setting_name, default_value):
-        """Loads a setting under the given namespace, returning the default value if not set"""
-        s = self.settings
+        """Returns a setting value under the given namespace, or default value if not set"""
+        s = json.loads(
+            json.dumps(self.settings)
+        )  # deepcopy to avoid building out namespaces
         for level in namespace.split("."):
             s[level] = s.get(level, {})
             s = s[level]
         if setting_name not in s:
-            self.set(namespace, setting_name, default_value)
+            return default_value
         return s[setting_name]
 
     def set(self, namespace, setting_name, setting_value):
@@ -158,6 +163,24 @@ class Store:
         if old_value != setting_value:
             s[setting_name] = setting_value
             self.dirty = True
+
+    def delete(self, namespace, setting_name):
+        """Deletes dict storage in self.settings for namespace.setting_name,
+        also deletes storage for setting_name's parent namespace nodes, if empty.
+        """
+        s = self.settings
+        levels = []
+        for level in namespace.split("."):
+            s[level] = s.get(level, {})
+            levels.append([s, level])
+            s = s[level]
+        if setting_name in s:
+            del s[setting_name]
+            self.dirty = True
+        for s, level in reversed(levels):
+            if not s[level]:
+                del s[level]
+                self.dirty = True
 
     def update_file_location(self, location):
         """Assumes settings.persist.location will be changed to location:

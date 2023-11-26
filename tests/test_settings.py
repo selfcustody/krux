@@ -35,9 +35,7 @@ def test_store_init(mocker, m5stickv):
         assert s.settings == case[1]
 
 
-def test_store_get(mocker, m5stickv):
-    mo = mocker.mock_open()
-    mocker.patch("builtins.open", mo)
+def test_store_get():
     from krux.settings import Store
 
     s = Store()
@@ -47,16 +45,20 @@ def test_store_get(mocker, m5stickv):
         ("ns1.ns2", "setting", "call1_defaultvalue2", "call2_defaultvalue2"),
         ("ns1.ns2.ns3", "setting", "call1_defaultvalue3", "call2_defaultvalue3"),
     ]
-    for case in cases:
+    for i, case in enumerate(cases):
         # First call, setting does not exist, so default value becomes the value
         assert s.get(case[0], case[1], case[2]) == case[2]
+
+        # Getter does not populate settings dict. if nothing is set then settings is empty
+        if i == 0:
+            assert s.settings == {}
+
         # Second call, setting does exist, so default value is ignored
+        s.set(case[0], case[1], case[2])
         assert s.get(case[0], case[1], case[3]) == case[2]
 
 
-def test_store_set(mocker, m5stickv):
-    mo = mocker.mock_open()
-    mocker.patch("builtins.open", mo)
+def test_store_set():
     from krux.settings import Store
 
     s = Store()
@@ -78,6 +80,34 @@ def test_store_set(mocker, m5stickv):
 
         s.set(case[0], case[1], case[4])
         assert s.get(case[0], case[1], "default") == case[4]
+
+    assert s.dirty == True
+
+
+def test_store_delete():
+    from krux.settings import Store
+
+    s = Store()
+
+    cases = [
+        ("ns1", "setting1", "value1"),
+        ("ns1.ns2", "setting2", "value2"),
+    ]
+
+    assert s.dirty == False
+
+    for case in cases:
+        s.set(case[0], case[1], case[2])
+
+    for i, case in enumerate(cases):
+        s.delete(case[0], case[1])
+
+        # value of deleted setting is its default
+        assert s.get(case[0], case[1], "default") == "default"
+
+        # when deleting a setting, its empty namespaces are deleted too
+        if i == len(cases) - 1:
+            assert s.settings == {}
 
     assert s.dirty == True
 
