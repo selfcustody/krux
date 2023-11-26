@@ -75,6 +75,8 @@ class Setting:
         return store.get(obj.namespace, self.attr, self.default_value)
 
     def __set__(self, obj, value):
+        if self.attr == "location":
+            store.update_file_location(value)
         store.set(obj.namespace, self.attr, value)
 
 
@@ -101,6 +103,7 @@ class Store:
     def __init__(self):
         self.settings = {}
         self.file_location = "/" + FLASH_PATH + "/"
+        self.dirty = False
 
         # Check for the correct settings persist location
         try:
@@ -144,39 +147,54 @@ class Store:
         return s[setting_name]
 
     def set(self, namespace, setting_name, setting_value):
-        """Stores a setting value under the given namespace. We don't use SDHandler
-        here because set is called too many times every time the user changes a setting
-        and SDHandler remount causes a small delay
+        """Stores a setting value under the given namespace if new/changed.
+        Does NOT automatically save settings to flash or sd!
         """
         s = self.settings
         for level in namespace.split("."):
             s[level] = s.get(level, {})
             s = s[level]
         old_value = s.get(setting_name, None)
-        s[setting_name] = setting_value
+        if old_value != setting_value:
+            s[setting_name] = setting_value
+            self.dirty = True
 
-        # if is a change in settings persist location, delete file from old location,
-        # and later it will save on the new location
-        if setting_name == "location" and old_value:
-            # update the file location
-            self.file_location = "/" + setting_value + "/"
+    def update_file_location(self, location):
+        """Assumes settings.persist.location will be changed to location:
+        tries to delete current persistent settings file
+        then updates file_location attribute
+        """
+        if "/" + location + "/" != self.file_location:
             try:
-                # remove old SETTINGS_FILENAME
-                os.remove("/" + old_value + "/" + SETTINGS_FILENAME)
+                if os.stat(self.file_location + SETTINGS_FILENAME):
+                    os.remove(self.file_location + SETTINGS_FILENAME)
             except:
                 pass
+            self.file_location = "/" + location + "/"
 
-        Store.save_settings()
-
-    @staticmethod
-    def save_settings():
+    def save_settings(self):
         """Helper to persist SETTINGS_FILENAME where user selected"""
-        try:
-            # save the new SETTINGS_FILENAME
-            with open(store.file_location + SETTINGS_FILENAME, "w") as f:
-                f.write(json.dumps(store.settings))
-        except:
-            pass
+        persisted = False
+
+        if self.dirty:
+            settings_filename = self.file_location + SETTINGS_FILENAME
+            new_contents = json.dumps(self.settings)
+            try:
+                with open(settings_filename, "r") as f:
+                    old_contents = f.read()
+            except:
+                old_contents = None
+
+            if new_contents != old_contents:
+                try:
+                    with open(settings_filename, "w") as f:
+                        f.write(new_contents)
+                    persisted = True
+                except:
+                    pass
+            self.dirty = False
+
+        return persisted
 
 
 # Initialize singleton

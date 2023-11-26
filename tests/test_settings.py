@@ -66,6 +66,9 @@ def test_store_set(mocker, m5stickv):
         ("ns1.ns2", "setting", "call1_value2", 2, "call3_value2"),
         ("ns1.ns2.ns3", "setting", "call1_value3", 3, "call3_value3"),
     ]
+
+    assert s.dirty == False
+
     for case in cases:
         s.set(case[0], case[1], case[2])
         assert s.get(case[0], case[1], "default") == case[2]
@@ -75,6 +78,73 @@ def test_store_set(mocker, m5stickv):
 
         s.set(case[0], case[1], case[4])
         assert s.get(case[0], case[1], "default") == case[4]
+
+    assert s.dirty == True
+
+
+def test_store_update_file_location(mocker):
+    ms, mr = mocker.Mock(), mocker.Mock()
+    mocker.patch("os.stat", ms)
+    mocker.patch("os.remove", mr)
+    from krux.settings import Store, SD_PATH, FLASH_PATH, SETTINGS_FILENAME
+
+    s = Store()
+
+    # default is /flash/
+    assert s.file_location == "/" + FLASH_PATH + "/"
+
+    # from flash to sd removes /flash/settings.json
+    s.update_file_location(SD_PATH)
+    assert s.file_location == "/" + SD_PATH + "/"
+    ms.assert_called_once_with("/" + FLASH_PATH + "/" + SETTINGS_FILENAME)
+    mr.assert_called_once_with("/" + FLASH_PATH + "/" + SETTINGS_FILENAME)
+    ms.reset_mock()
+    mr.reset_mock()
+
+    # from sd to flash removes /sd/settings.json
+    s.update_file_location(FLASH_PATH)
+    assert s.file_location == "/" + FLASH_PATH + "/"
+    ms.assert_called_once_with("/" + SD_PATH + "/" + SETTINGS_FILENAME)
+    mr.assert_called_once_with("/" + SD_PATH + "/" + SETTINGS_FILENAME)
+    ms.reset_mock()
+    mr.reset_mock()
+
+    # updating with existing file_location does nothing
+    s.update_file_location(FLASH_PATH)
+    assert s.file_location == "/" + FLASH_PATH + "/"
+    ms.assert_not_called()
+    mr.assert_not_called()
+
+
+def test_store_save_settings(mocker):
+    mo = mocker.mock_open()
+    mocker.patch("builtins.open", mo)
+    from krux.settings import Store, SETTINGS_FILENAME
+
+    s = Store()
+    filename = s.file_location + SETTINGS_FILENAME
+
+    # new setting change: is dirty, save_settings() persists, file written
+    s.set("name.space", "setting", "custom_value")
+    assert s.dirty == True
+    assert s.save_settings() == True
+    mo.assert_called_with(filename, "w")
+
+    # no setting change: not dirty, save_settings() doesn't persist, file not even read
+    mo.reset_mock()
+    assert s.dirty == False
+    assert s.save_settings() == False
+    mo.assert_not_called()
+
+    # settings changed to original: dirty but save_settings() doesn't persist, file read -- not written
+    mo = mocker.mock_open(read_data='{"name": {"space": {"setting": "custom_value"}}}')
+    mocker.patch("builtins.open", mo)
+    s.set("name.space", "setting", "new_custom_value")
+    s.set("name.space", "setting", "custom_value")
+    assert s.dirty == True
+    assert s.save_settings() == False
+    mo.assert_called_once()
+    assert s.dirty == False
 
 
 def test_setting(mocker, m5stickv):
