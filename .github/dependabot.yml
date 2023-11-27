@@ -1,0 +1,26 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+
+updates:
+  
+  # Maintain dependencies for GitHub Actions.
+  # Dependabot will raise pull requests
+  # for version updates for any outdated actions that it finds.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      
+  # Maintain dependencies for python packages.
+  # Dependabot will raise pull requests
+  # for version updates for any outdated package that it finds.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  
