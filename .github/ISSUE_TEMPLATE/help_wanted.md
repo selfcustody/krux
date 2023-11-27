@@ -1,6 +1,6 @@
 ---
 name: 🥺 Help wanted
-about: Confuse about some krux usage
+about: Help needed to use a feature, perform or understand a procedure
 title: "[Help] the title of help wanted report"
 labels: help wanted
 assignees: ''
