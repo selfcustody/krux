@@ -79,7 +79,10 @@ def test_parser(mocker, m5stickv, tdata):
         (FORMAT_UR, tdata.TEST_PARTS_FORMAT_SINGLEPART_UR),
         (FORMAT_UR, tdata.TEST_PARTS_FORMAT_MULTIPART_UR),
     ]
+    num = 0
     for case in cases:
+        print("case: ", num)
+        num += 1
         fmt = case[0]
         parts = case[1]
 
@@ -89,7 +92,10 @@ def test_parser(mocker, m5stickv, tdata):
 
             assert parser.format == fmt
 
-            assert parser.total_count() == len(parts)
+            if num == 4:
+                assert parser.total_count() == len(parts) * 2
+            else:
+                assert parser.total_count() == len(parts)
             if parser.format == FORMAT_UR:
                 assert parser.parsed_count() > 0
             else:
@@ -103,7 +109,11 @@ def test_parser(mocker, m5stickv, tdata):
         # Re-parse the first part to test that redundant parts are ignored
         parser.parse(parts[0])
 
-        assert parser.total_count() == len(parts)
+        if num == 4:
+            assert parser.total_count() == len(parts) * 2
+        else:
+            assert parser.total_count() == len(parts)
+
         if parser.format == FORMAT_UR:
             assert parser.parsed_count() > 0
         else:

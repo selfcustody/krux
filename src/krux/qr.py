@@ -79,7 +79,14 @@ class QRPartParser:
             if self.decoder.fountain_decoder.expected_part_indexes is None:
                 return 1 if self.decoder.result is not None else 0
             completion_pct = self.decoder.estimated_percent_complete()
-            return math.ceil(completion_pct * self.total_count())
+            return math.ceil(completion_pct * self.total_count() / 2) + len(
+                self.decoder.fountain_decoder.received_part_indexes
+            )
+        return len(self.parts)
+
+    def processed_parts_count(self):
+        if self.format == FORMAT_UR:
+            return self.decoder.fountain_decoder.processed_parts_count
         return len(self.parts)
 
     def total_count(self):
@@ -88,7 +95,7 @@ class QRPartParser:
             # Single-part URs have no expected part indexes
             if self.decoder.fountain_decoder.expected_part_indexes is None:
                 return 1
-            return self.decoder.expected_part_count()
+            return self.decoder.expected_part_count() * 2
         return self.total
 
     def parse(self, data):
