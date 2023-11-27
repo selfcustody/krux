@@ -79,7 +79,14 @@ class QRPartParser:
             if self.decoder.fountain_decoder.expected_part_indexes is None:
                 return 1 if self.decoder.result is not None else 0
             completion_pct = self.decoder.estimated_percent_complete()
-            return math.ceil(completion_pct * self.total_count())
+            return math.ceil(completion_pct * self.total_count() / 2) + len(
+                self.decoder.fountain_decoder.received_part_indexes
+            )
+        return len(self.parts)
+
+    def processed_parts_count(self):
+        if self.format == FORMAT_UR:
+            return self.decoder.fountain_decoder.processed_parts_count
         return len(self.parts)
 
     def total_count(self):
@@ -88,7 +95,7 @@ class QRPartParser:
             # Single-part URs have no expected part indexes
             if self.decoder.fountain_decoder.expected_part_indexes is None:
                 return 1
-            return self.decoder.expected_part_count()
+            return self.decoder.expected_part_count() * 2
         return self.total
 
     def parse(self, data):
@@ -185,10 +192,9 @@ def max_qr_bytes(max_width):
     max_width -= 2  # Subtract frame width
     qr_version = (max_width - 17) // 4
     try:
-        capacity = QR_CAPACITY[qr_version - 1]
+        return QR_CAPACITY[qr_version - 1]
     except:
-        capacity = QR_CAPACITY[-1]
-    return capacity
+        return QR_CAPACITY[-1]
 
 
 def find_min_num_parts(data, max_width, qr_format):
@@ -217,9 +223,7 @@ def find_min_num_parts(data, max_width, qr_format):
         num_parts = (data_length + qr_capacity - 1) // qr_capacity
         # For UR, part size will be the input for "max_fragment_len"
         part_size = len(data.cbor) // num_parts
-        part_size = max(
-            part_size, UR_MIN_FRAGMENT_LENGTH
-        )
+        part_size = max(part_size, UR_MIN_FRAGMENT_LENGTH)
     else:
         raise ValueError("Invalid format type")
     return num_parts, part_size

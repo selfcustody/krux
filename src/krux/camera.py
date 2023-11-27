@@ -205,8 +205,8 @@ class Camera:
 
                 parser.parse(data)
 
-                if parser.parsed_count() > prev_parsed_count:
-                    prev_parsed_count = parser.parsed_count()
+                if parser.processed_parts_count() > prev_parsed_count:
+                    prev_parsed_count = parser.processed_parts_count()
                     new_part = True
 
             if parser.is_complete():

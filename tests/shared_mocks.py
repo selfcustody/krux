@@ -117,6 +117,9 @@ class MockQRPartParser:
     def parsed_count(self):
         return len(self.parts)
 
+    def processed_parts_count(self):
+        return self.parsed_count()
+
     def parse(self, part):
         if part not in self.parts:
             self.parts.append(part)
