@@ -160,6 +160,8 @@ class Display:
         """
         if self.width() > 300:
             return self.width() // 6  # reduce density even more on larger screens
+        if self.width() > 200:
+            return self.width() // 5
         return self.width() // 4
 
     def to_landscape(self):

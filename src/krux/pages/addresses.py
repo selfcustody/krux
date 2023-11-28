@@ -91,7 +91,7 @@ class Addresses(Page):
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(loading_txt % (num_checked + 1))
 
-                    pos_str = str(num_checked + 1) + ". "
+                    pos_str = str(num_checked + 1) + "." + " "  # thin space
                     qr_title = pos_str + addr
                     items.append(
                         (
