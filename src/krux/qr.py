@@ -92,6 +92,7 @@ class QRPartParser:
         return len(self.parts)
 
     def processed_parts_count(self):
+        """Returns quantity of processed QR code parts"""
         if self.format == FORMAT_UR:
             return self.decoder.fountain_decoder.processed_parts_count
         return len(self.parts)
