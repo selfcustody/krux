@@ -25,7 +25,7 @@ from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
 from ..settings import (
     CategorySetting,
     NumberSetting,
-    Store,
+    store,
     SD_PATH,
     FLASH_PATH,
     SETTINGS_FILENAME,
@@ -230,14 +230,29 @@ class SettingsPage(Page):
             try:
                 # Check for SD hot-plug
                 with SDHandler():
-                    Store.save_settings()
-                    self._display_centered_text(
-                        t("Changes persisted to SD card!"),
-                        duration=SD_MSG_TIME,
-                    )
+                    if store.save_settings():
+                        self._display_centered_text(
+                            t("Changes persisted to SD card!"),
+                            duration=SD_MSG_TIME,
+                        )
             except OSError:
                 self._display_centered_text(
                     t("SD card not detected.")
+                    + "\n\n"
+                    + t("Changes will last until shutdown."),
+                    duration=SD_MSG_TIME,
+                )
+        else:
+            self.ctx.display.clear()
+            try:
+                if store.save_settings():
+                    self._display_centered_text(
+                        t("Changes persisted to Flash!"),
+                        duration=SD_MSG_TIME,
+                    )
+            except:
+                self._display_centered_text(
+                    t("Unexpected error saving to Flash.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
                     duration=SD_MSG_TIME,
@@ -370,7 +385,7 @@ class SettingsPage(Page):
                 # Restore previous theme
                 setting.__set__(settings_namespace, starting_category)
                 theme.update()
-                Store.save_settings()
+                store.save_settings()
 
         return MENU_CONTINUE
 
