@@ -87,14 +87,13 @@ def validate_translation_files():
 
 
 def fill_missing():
-    """Uses googletrans==4.0.0rc1 to automaticalyy fill missing translations"""
+    """Uses translate 3.6.1 to automaticalyy fill missing translations"""
     if len(sys.argv) > 2:
         force_target = sys.argv[2]
     else:
         force_target = None
-    from googletrans import Translator
+    from translate import Translator
 
-    translator = Translator()
     slugs = find_translation_slugs()
     translation_filenames = [
         f
@@ -102,12 +101,11 @@ def fill_missing():
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
     for translation_filename in translation_filenames:
-        target = translation_filename[:5].replace("-", "_")
+        target = translation_filename[:5]
         if force_target:
             if force_target != translation_filename:
                 continue
-        if translation_filename.startswith("poke"):
-            continue
+        translator = Translator(to_lang=target)
         print("Translating %s...\n" % translation_filename)
         complete = True
         with open(
@@ -117,21 +115,17 @@ def fill_missing():
             for slug in slugs:
                 if slug not in translations or translations[slug] == "":
                     try:
-                        translated = '"%s",' % translator.translate(
-                            slug, src="en", dest=target
-                        ).text.replace(" \ n", "\\n")
-                    except:
-                        # some languages fail to translate with a space at end of string
-                        translated = (
-                            '"%s",'
-                            % translator.translate(
-                                slug + "]", src="en", dest=target
-                            ).text.replace(" \ n", "\\n")[:-1]
+                        translated = '"%s",' % translator.translate(slug).replace(
+                            " \ n", "\\n"
                         )
-                    print('"%s":' % slug, translated)
+                        print('"%s":' % slug, translated)
+                    except Exception as e:
+                        print("Error:", e)
+                        print("Failed to translate:", slug)
+                        break
                     complete = False
         if complete:
-            print("Notthing to add")
+            print("Nothing to add")
         else:
             print("Please review and copy items above")
         print("\n\n")

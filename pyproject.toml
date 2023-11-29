@@ -28,28 +28,29 @@ authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9.1"
-googletrans = "^4.0.0rc1"
+translate = "^3.6.1"
 embit = { path = "./vendor/embit/", develop = true }
 ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
 
 # Docs site dependencies. Optional extras
 mkdocs = { version = "^1.5.2", optional = true }
-mkdocs-material = { version = "^8.5.11", optional = true }
+mkdocs-material = { version = "^9.4.14", optional = true }
+urllib3 = "^2.1.0"  # Used by mkdocs-material, forces updated secure version
 mkdocs-static-i18n = { version = "^0.46", optional = true }
-pymdown-extensions = { version = "^9.11", optional = true }
+pymdown-extensions = { version = "^10.0", optional = true }
 
 # Simulator dependencies. Optional extras
 numpy = { version = "^1.25.2", optional = true }
 opencv-python = { version = "^4.8.0.74", optional = true }
-Pillow = { version = "^9.0.1", optional = true }
+Pillow = { version = "^10.0.1", optional = true }
 pygame = { version = "^2.5.0", optional = true }
 pyzbar = { version = "^0.1.9", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 pylint = "^2.12.2"
-pytest = "^6.2.5"
+pytest = "^7.4.3"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
 PyQRCode = "^1.2.1"
