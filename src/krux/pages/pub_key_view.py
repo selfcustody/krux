@@ -77,9 +77,9 @@ class PubkeyView(Page):
             pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
-                self.ctx.wallet.key.fingerprint_hex_str()
+                self.ctx.wallet.key.fingerprint_hex_str(pretty=True)
                 + "\n\n"
-                + self.ctx.wallet.key.derivation_str()
+                + self.ctx.wallet.key.derivation_str(pretty=True)
                 + "\n\n"
                 + full_pub_key,
                 offset_y=self.ctx.display.font_height,
