@@ -3,16 +3,22 @@
 ## Changes
 
 ### IRQ Interfaces
-Button and touch presses will be detected by the application through IO interrupts. Meaning inputs events will be registered even if other tasks are being executed by the processor, resulting in a better UX.
+Button and touch presses are now detected by the application through IO interrupts. Meaning inputs events will be registered and handled even if they happened when other tasks were being executed by the processor, resulting in a better UX.
 
-### Restore default settings
+### Save and Load Wallet Output Descriptor from SD card
+Create or load from a wallet output descriptor file on a SD card. The backup file format is compatible with most coordinators.
+
+### Restore Default Settings
 Option to restore the device's settings to its factory state.
 
-### Wipe device
+### Wipe Device
 Option on settings to wipe the device, permanently removing settings and stored encrypted mnemonics by erasing every single bit of user's flash space.
 
 ### Screensaver
 Optional screensaver to reduce pixels' burn-in and grab attention of the user when the device is left powered on.
+
+### Maix Dock Simulator
+Now Krux PC simulator can also run in Maix Dock mode, mimetizing appearance and characteristics of the most DIY Krux device
 
 ### Update Embit to version 0.7
 Use latest Embit release
@@ -20,11 +26,21 @@ Use latest Embit release
 ### Optimized QR codes
 QR codes rendering is faster and uses less RAM
 
-### Export Mnemonic Numbers
+### Mnemonic Numbers
 To match the input options, export mnemonics as decimal, hexadecimal or octal numbers
+When loading from numbers, a new numbers confirmation screen was added.
 
-### Export QR codes as images to SD Card
+### Addresses Exploring
+More receive and change addresses per page are shown on bigger screens
+
+### Export QR Codes as Images to SD Card
 Some QR codes can be exported as images to SD card
+
+### Optimized Settings Storage
+Device's storage is now used more efficiently, data is stored less frequently, only in case a setting is changed from defaults.
+
+### Other Small Fixes and Code Optimizations
+Many other small fixes and optimizations under the hood
 
 
 # Version 23.09.1 - November 18, 2023
