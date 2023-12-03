@@ -379,6 +379,7 @@ class SettingsPage(Page):
             if self.prompt(
                 t("Change theme and reboot?"), self.ctx.display.height() // 2
             ):
+                self._settings_exit_check()
                 self.ctx.display.clear()
                 self.ctx.power_manager.reboot()
             else:
