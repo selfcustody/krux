@@ -130,6 +130,6 @@ class Key:
         """Return the Krux default derivation path for single-sig or multisig to
         be displayd as string
         """
-        return Key.get_default_derivation(multisig, network).replace(
+        return "↳ " + Key.get_default_derivation(multisig, network).replace(
             "h", HARDENED_STR_REPLACE
         )

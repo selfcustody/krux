@@ -386,7 +386,6 @@ class SettingsPage(Page):
                 # Restore previous theme
                 setting.__set__(settings_namespace, starting_category)
                 theme.update()
-                store.save_settings()
 
         return MENU_CONTINUE
 
