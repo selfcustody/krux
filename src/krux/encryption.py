@@ -150,8 +150,11 @@ class MnemonicStorage:
             # load current MNEMONICS_FILE
             try:
                 with SDHandler() as sd:
-                    mnemonics = json.loads(sd.read(MNEMONICS_FILE))
+                    contents = sd.read(MNEMONICS_FILE)
+                    orig_len = len(contents)
+                    mnemonics = json.loads(contents)
             except:
+                orig_len = 0
                 pass
 
             # save the new MNEMONICS_FILE
@@ -165,7 +168,11 @@ class MnemonicStorage:
                         "key_iterations"
                     ] = Settings().encryption.pbkdf2_iterations
                     mnemonics[mnemonic_id]["data"] = encrypted
-                    sd.write(MNEMONICS_FILE, json.dumps(mnemonics))
+                    contents = json.dumps(mnemonics)
+                    # pad contents to orig_len to avoid abandoned bytes on sdcard
+                    if len(contents) < orig_len:
+                        contents += " " * (orig_len - len(contents))
+                    sd.write(MNEMONICS_FILE, contents)
             except:
                 return False
         else:
@@ -196,7 +203,12 @@ class MnemonicStorage:
         if sd_card:
             self.stored_sd.pop(mnemonic_id)
             with SDHandler() as sd:
-                sd.write(MNEMONICS_FILE, json.dumps(self.stored_sd))
+                orig_len = len(sd.read(MNEMONICS_FILE))
+                contents = json.dumps(self.stored_sd)
+                # pad contents to orig_len to avoid abandoned bytes on sdcard
+                if len(contents) < orig_len:
+                    contents += " " * (orig_len - len(contents))
+                sd.write(MNEMONICS_FILE, contents)
         else:
             self.stored.pop(mnemonic_id)
             with open("/flash/" + MNEMONICS_FILE, "w") as f:
