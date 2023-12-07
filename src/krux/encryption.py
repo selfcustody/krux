@@ -155,7 +155,6 @@ class MnemonicStorage:
                     mnemonics = json.loads(contents)
             except:
                 orig_len = 0
-                pass
 
             # save the new MNEMONICS_FILE
             try:
