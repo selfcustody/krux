@@ -507,6 +507,10 @@ class Login(Page):
         self.ctx.display.draw_hcentered_text(title)
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             while len(words) < 24:
+                if len(words) in (11, 23):
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(t("Leave blank if you'd like Krux to pick a valid final word"))
+                    self.ctx.input.wait_for_button()
                 if len(words) == 12:
                     self.ctx.display.clear()
                     if self.prompt(t("Done?"), self.ctx.display.height() // 2):

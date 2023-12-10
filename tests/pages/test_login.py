@@ -855,6 +855,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
                 [BUTTON_ENTER]
             )
             * 11
+            + [BUTTON_ENTER]  # Pick valid checksum final word message
             + (
                 # N
                 [BUTTON_PAGE for _ in range(13)]
@@ -899,6 +900,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
                 [BUTTON_ENTER]
             )
             * 11
+            + [BUTTON_ENTER]  # Pick valid checksum final word message
             +
             # Go + Confirm word
             [BUTTON_PAGE for _ in range(28)]
@@ -953,6 +955,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
                 [BUTTON_ENTER]
             )
             * 11
+            + [BUTTON_ENTER]  # Pick valid checksum final word message
             + (
                 # N
                 [BUTTON_TOUCH]  # index 13 -> "n"
@@ -1000,6 +1003,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
                 [BUTTON_ENTER]
             )
             * 11
+            + [BUTTON_ENTER]  # Pick valid checksum final word message
             +
             # Move to Go, press Go, confirm word
             [BUTTON_PAGE_PREV] + [BUTTON_ENTER] + [BUTTON_ENTER] +
@@ -1057,6 +1061,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 ]  # 1 press to select and 1 press to confirm
             )
             * 11  # repeat selection of word=2 (ability) eleven times
+            + [BUTTON_ENTER]  # Pick valid checksum final word message
             + (
                 # 1
                 [BUTTON_ENTER]
@@ -1101,6 +1106,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 + [BUTTON_ENTER, BUTTON_ENTER]
             )
             * 11
+            + [BUTTON_ENTER]  # Pick valid checksum final word message
             +
             # Go + Confirm
             [BUTTON_PAGE for _ in range(11)]
@@ -1149,6 +1155,7 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]  # 1 press to confirm word=FF(255 decimal) cabin
         )
         * 11  # repeat selection of word=FF(255, cabin) eleven times
+        + [BUTTON_ENTER]  # Pick valid checksum final word message
         + (
             [BUTTON_ENTER]  # 1 press to number 1
             + [BUTTON_ENTER]  # 1 press to number 1
@@ -1219,6 +1226,7 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]  # 1 press to confirm word=80(128 decimal) avocado
         )
         * 11  # repeat selection of word=80(128, avocado) eleven times
+        + [BUTTON_ENTER]  # Pick valid checksum final word message
         + (
             [BUTTON_PAGE_PREV]  # 1 press change to btn Go
             + [BUTTON_ENTER]  # 1 press to select Go
@@ -1260,6 +1268,7 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]  # 1 press to confirm word=777(511 decimal) divert
         )
         * 11  # repeat selection of word=777(511, divert) eleven times
+        + [BUTTON_ENTER]  # Pick valid checksum final word message
         + (
             [BUTTON_ENTER]  # 1 press to number 1
             + [BUTTON_PAGE for _ in range(4)]  # 4 press change to number 5
@@ -1326,6 +1335,7 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]  # 1 press to confirm word=400(256 decimal) cable
         )
         * 11  # repeat selection of word=400(256, cable) eleven times
+        + [BUTTON_ENTER]  # Pick valid checksum final word message
         + (
             [BUTTON_PAGE_PREV]  # 1 press change to btn Go
             + [BUTTON_ENTER]  # 1 press to select Go
@@ -1391,6 +1401,7 @@ def test_no_passphrase_on_amigo(mocker, amigo_tft):
             [BUTTON_ENTER]
         )
         * 11
+        + [BUTTON_ENTER]  # Pick valid checksum final word message
         +
         # Move to Go, press Go, confirm word
         [BUTTON_PAGE_PREV]
@@ -1444,6 +1455,7 @@ def test_passphrase(amigo_tft, mocker, mocker_printer):
             [BUTTON_ENTER]
         )
         * 11
+        + [BUTTON_ENTER]  # Pick valid checksum final word message
         +
         # Move to Go, press Go, confirm word
         [BUTTON_PAGE_PREV]
