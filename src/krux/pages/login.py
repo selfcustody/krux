@@ -509,7 +509,9 @@ class Login(Page):
             while len(words) < 24:
                 if len(words) in (11, 23):
                     self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(t("Leave blank if you'd like Krux to pick a valid final word"))
+                    self.ctx.display.draw_centered_text(
+                        t("Leave blank if you'd like Krux to pick a valid final word")
+                    )
                     self.ctx.input.wait_for_button()
                 if len(words) == 12:
                     self.ctx.display.clear()

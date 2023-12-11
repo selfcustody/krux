@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 from .utils import Utils
-from ..qr import FORMAT_NONE
 from ..krux_settings import t
 from . import (
     Page,
@@ -88,13 +87,14 @@ class PubkeyView(Page):
             pub_key_menu.run_loop()
 
         def _pub_key_qr(version):
-            # TODO: Add menu to offer print and export as image
             title = self.ctx.wallet.key.account_pubkey_str(version)[
                 :WALLET_XPUB_START
             ].upper()
             xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, title)
-            self.utils.print_standard_qr(xpub, FORMAT_NONE, title)
+            from .qr_view import SeedQRView
+
+            seed_qr_view = SeedQRView(self.ctx, data=xpub, title=title)
+            seed_qr_view.display_qr(allow_export=True, transcript_tools=False)
 
         zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
         pub_key_menu_items = []
