@@ -40,7 +40,6 @@ class PowerManager:
 
                 self.pmu = axp173()
                 self.pmu.enableADCs(True)
-                self.pmu.enablePMICSleepMode(False)
                 # Amigo already have a dedicated reset button
                 # Will only enable button checking when in sleep mode
             except:
