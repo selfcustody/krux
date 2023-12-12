@@ -99,23 +99,16 @@ class EncryptMnemonic(Page):
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
 
-        from ..encryption import MnemonicStorage
-
-        encrypt_outputs_menu = []
-        encrypt_outputs_menu.append(
-            (t("Store on Flash"), self.store_mnemonic_on_memory)
-        )
-        mnemonic_storage = MnemonicStorage()
-        if mnemonic_storage.has_sd_card:
-            encrypt_outputs_menu.append(
-                (
-                    t("Store on SD Card"),
-                    lambda: self.store_mnemonic_on_memory(sd_card=True),
-                )
-            )
-        del mnemonic_storage
-        encrypt_outputs_menu.append((t("Encrypted QR Code"), self.encrypted_qr_code))
-        encrypt_outputs_menu.append((t("Back"), lambda: MENU_EXIT))
+        if self.has_sd_card():
+            sd_store_func = lambda: self.store_mnemonic_on_memory(sd_card=True)
+        else:
+            sd_store_func = None
+        encrypt_outputs_menu = [
+            (t("Store on Flash"), self.store_mnemonic_on_memory),
+            (t("Store on SD Card"), sd_store_func),
+            (t("Encrypted QR Code"), self.encrypted_qr_code),
+            (t("Back"), lambda: MENU_EXIT),
+        ]
         submenu = Menu(self.ctx, encrypt_outputs_menu)
         _, _ = submenu.run_loop()
         return MENU_CONTINUE
@@ -135,7 +128,7 @@ class EncryptMnemonic(Page):
         if version == "AES-CBC":
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Aditional entropy from camera required for AES-CBC mode")
+                t("Additional entropy from camera required for AES-CBC mode")
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return

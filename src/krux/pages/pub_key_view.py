@@ -64,12 +64,15 @@ class PubkeyView(Page):
             )
 
         def _pub_key_text(version):
-            pub_text_menu_items = []
             if self.has_sd_card():
-                pub_text_menu_items.append(
-                    (t("Save to SD card?"), lambda ver=version: _save_xpub_to_sd(ver))
-                )
-            pub_text_menu_items.append((t("Back"), lambda: MENU_EXIT))
+                save_sd_pubk_func = lambda ver=version: _save_xpub_to_sd(ver)
+            else:
+                save_sd_pubk_func = None
+
+            pub_text_menu_items = [
+                (t("Save to SD card"), save_sd_pubk_func),
+                (t("Back"), lambda: MENU_EXIT),
+            ]
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
             menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
             menu_offset *= self.ctx.display.font_height
