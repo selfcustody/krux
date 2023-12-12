@@ -67,6 +67,7 @@ class SeedQRView(Page):
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
+        self.bright = True if theme.bg_color == WHITE else False
 
     def _seed_qr(self):
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -153,7 +154,7 @@ class SeedQRView(Page):
         grid_pad = self.ctx.display.width() // (self.qr_size + 2)
         grid_offset += grid_pad
         if mode == STANDARD_MODE:
-            if theme.bg_color == WHITE:
+            if self.bright:
                 self.ctx.display.draw_qr_code(0, self.code, light_color=WHITE)
             else:
                 self.ctx.display.draw_qr_code(0, self.code)
@@ -430,6 +431,9 @@ class SeedQRView(Page):
         while True:
             button = None
             while button not in (SWIPE_DOWN, SWIPE_UP):
+                def toggle_brightness():
+                    self.bright = not self.bright
+
                 self.draw_grided_qr(mode)
                 if self.ctx.input.touch is not None:
                     self.ctx.display.draw_hcentered_text(
@@ -462,6 +466,7 @@ class SeedQRView(Page):
             printer_func = self.print_qr if self.has_printer() else None
             qr_menu = [
                 (t("Return to QR Viewer"), lambda: None),
+                (t("Toggle Brightness"), toggle_brightness),
                 (t("Save QR Image to SD Card"), sd_func),
                 (t("Print to QR"), printer_func),
                 (t("Back to Menu"), lambda: MENU_EXIT),
