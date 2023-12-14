@@ -47,7 +47,7 @@ class Camera:
         self.antiglare_enabled = False
         self.cam_id = sensor.get_id()
         if self.cam_id == OV7740_ID:
-            sensor.reset(freq=13000000)
+            sensor.reset(freq=18200000)
         else:
             sensor.reset()
         if grayscale:

@@ -27,8 +27,7 @@
 from Maix import GPIO
 from fpioa_manager import fm
 from . import Touchscreen
-import board
-from machine import I2C
+from ..i2c import i2c_bus
 
 FT_DEVICE_MODE = 0x00
 GEST_ID = 0x01
@@ -57,12 +56,6 @@ class FT6X36(Touchscreen):
         self.event_flag = False
         self.irq_point = None
         self.addr = FT6X36_ADDR
-        self.i2c = I2C(
-            I2C.I2C0,
-            freq=100000,
-            scl=board.config["krux"]["pins"]["I2C_SCL"],
-            sda=board.config["krux"]["pins"]["I2C_SDA"],
-        )
         """Setup registers"""
         # Device mode
         self.write_reg(FT_DEVICE_MODE, 0)
@@ -79,11 +72,14 @@ class FT6X36(Touchscreen):
 
     def write_reg(self, reg_addr, buf):
         """Writes buffer content to a register address"""
-        self.i2c.writeto_mem(self.addr, reg_addr, buf, mem_size=8)
+        if i2c_bus is not None:
+            i2c_bus.writeto_mem(self.addr, reg_addr, buf, mem_size=8)
 
     def read_reg(self, reg_addr, buf_len):
         """Reads from a register address"""
-        return self.i2c.readfrom_mem(self.addr, reg_addr, buf_len, mem_size=8)
+        if i2c_bus is not None:
+            return i2c_bus.readfrom_mem(self.addr, reg_addr, buf_len, mem_size=8)
+        return None
 
     def current_point(self):
         """If touch is pressed, returns x and y points"""

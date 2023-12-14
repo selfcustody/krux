@@ -22,6 +22,7 @@
 import machine
 import sys
 import board
+from .i2c import i2c_bus
 
 # https://github.com/m5stack/M5StickC/blob/0527606d9e56c956ab17b278c25e3d07d7664f5e/src/AXP192.cpp#L20
 MAX_BATTERY_MV = 4200
@@ -34,37 +35,27 @@ class PowerManager:
 
     def __init__(self):
         self.pmu = None
-        if board.config["type"].startswith("amigo"):
-            try:
-                from pmu import axp173
+        try:
+            from pmu import PMUController
 
-                self.pmu = axp173()
-                self.pmu.enableADCs(True)
-                # Amigo already have a dedicated reset button
-                # Will only enable button checking when in sleep mode
-            except:
-                pass
-        else:
-            try:
-                from pmu import axp192
-
-                self.pmu = axp192()
-                self.pmu.enableADCs(True)
-                self.pmu.enablePMICSleepMode(True)
-            except:
-                pass
+            self.pmu = PMUController(i2c_bus)
+            self.pmu.enable_adcs(True)
+            if board.config["type"] == "m5stickv":
+                self.pmu.enable_pek_button_monitor()
+        except Exception as e:
+            print(e)
 
     def has_battery(self):
         """Returns if the device has a battery"""
         try:
-            assert int(self.pmu.getVbatVoltage()) > 0
+            assert int(self.pmu.get_battery_voltage()) > 0
         except:
             return False
         return True
 
     def battery_charge_remaining(self):
         """Returns the state of charge of the device's battery"""
-        mv = int(self.pmu.getVbatVoltage())
+        mv = int(self.pmu.get_battery_voltage())
         if board.config["type"].startswith("amigo"):
             charge = max(0, (mv - 3394.102415024943) / 416.73204356)
         elif board.config["type"] == "m5stickv":
@@ -75,21 +66,25 @@ class PowerManager:
 
     def charging(self):
         """Returns true if device has power delivered through USB"""
-        return self.pmu.getUSBVoltage() > 4200
+        return self.pmu.get_usb_voltage() > 4200
+
+    def set_screen_brightness(self, value):
+        """Sets the screen brightness by modifying the backlight voltage"""
+        # Accpeted values range from 0 to 8
+        # pmu register allow values from 0 to 15, but values below 7 result in no backlight
+        value += 7
+        self.pmu.set_screen_brightness(value)
 
     def shutdown(self):
         """Shuts down the device"""
         if self.pmu is not None:
-            # Enable button checking before shutdown
-            self.pmu.enablePMICSleepMode(True)
-            self.pmu.setEnterSleepMode()
+            self.pmu.enable_adcs(False)
+            self.pmu.enter_sleep_mode()
         machine.reset()
         sys.exit()
 
     def reboot(self):
         """Reboots the device"""
-        if self.pmu is not None:
-            self.pmu.enablePMICSleepMode(False)
         machine.reset()
         sys.exit()
 

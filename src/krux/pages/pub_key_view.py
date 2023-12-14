@@ -64,8 +64,11 @@ class PubkeyView(Page):
             )
 
         def _pub_key_text(version):
+            def _save_sd_pubk_function():
+                return _save_xpub_to_sd(version)
+
             if self.has_sd_card():
-                save_sd_pubk_func = lambda ver=version: _save_xpub_to_sd(ver)
+                save_sd_pubk_func = _save_sd_pubk_function
             else:
                 save_sd_pubk_func = None
 

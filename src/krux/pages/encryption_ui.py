@@ -99,8 +99,11 @@ class EncryptMnemonic(Page):
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
 
+        def _sd_store_function():
+            return self.store_mnemonic_on_memory(sd_card=True)
+
         if self.has_sd_card():
-            sd_store_func = lambda: self.store_mnemonic_on_memory(sd_card=True)
+            sd_store_func = _sd_store_function
         else:
             sd_store_func = None
         encrypt_outputs_menu = [

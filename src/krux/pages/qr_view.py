@@ -67,7 +67,7 @@ class SeedQRView(Page):
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
-        self.bright = True if theme.bg_color == WHITE else False
+        self.bright = theme.bg_color == WHITE
 
     def _seed_qr(self):
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -431,6 +431,7 @@ class SeedQRView(Page):
         while True:
             button = None
             while button not in (SWIPE_DOWN, SWIPE_UP):
+
                 def toggle_brightness():
                     self.bright = not self.bright
 
@@ -462,7 +463,10 @@ class SeedQRView(Page):
                     self.lr_index %= self.columns * self.columns
             if quick_exit:
                 return MENU_CONTINUE
-            sd_func = self.save_qr_image_menu if self.has_sd_card() else None
+            if self.has_sd_card() and allow_export:
+                sd_func = self.save_qr_image_menu
+            else:
+                sd_func = None
             printer_func = self.print_qr if self.has_printer() else None
             qr_menu = [
                 (t("Return to QR Viewer"), lambda: None),
