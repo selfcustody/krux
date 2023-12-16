@@ -187,7 +187,10 @@ class Login(Page):
             + t("(Experimental)")
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            entropy_bytes = self.capture_camera_entropy()
+            from .capture_entropy import CameraEntropy
+
+            camera_entropy = CameraEntropy(self.ctx)
+            entropy_bytes = camera_entropy.capture()
             if entropy_bytes is not None:
                 import binascii
 
