@@ -59,23 +59,27 @@ class PMU_Button:
         return False
 
 
-class Battery:
-    def getVbatVoltage(self):
+class PMUController:
+    def __init__(self, i2c_bus):
+        pass
+
+    def get_battery_voltage(self):
         return 3400
 
-    def getUSBVoltage(self):
+    def get_usb_voltage(self):
         return 0
 
-    def enablePMICSleepMode(self, val):
+    def enable_pek_button_monitor(self, val):
         pass
 
-    def setEnterSleepMode(self):
+    def enter_sleep_mode(self):
         pass
 
+    def enable_adcs(self, on_off):
+        pass
 
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
         PMU_Button=PMU_Button,
-        axp192=Battery,
-        axp173=Battery,
+        PMUController=PMUController,
     )
