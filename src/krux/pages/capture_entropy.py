@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,6 @@
 
 import math
 from . import Page
-from ..input import PRESSED
 
 LABEL_Y_POSITION = 400
 POOR_VARIANCE_TH = 10
@@ -48,35 +47,6 @@ class CameraEntropy(Page):
             return 2
         return 0
 
-    def shannons_entropy_16bit(self, image_bytes):
-        """Function to calculate Shannon's entropy.
-        Will return average number of bits required to encode each pixel,
-        based on the probability distribution of the pixel values, ranging from 0 to 16.
-        The entropy value is a theoretical lower bound on the number of bits needed to
-        encode the image without loss, under an ideal compression algorithm.
-        This means that in the best-case scenario, you can't compress the image to
-        fewer bits per pixel than the entropy value without losing information"""
-
-        # Calculate frequency of each pixel value
-        pixel_counts = {}
-        for i in range(0, len(image_bytes), 2):
-            pixel_value = int.from_bytes(image_bytes[i : i + 2], "little")
-            if pixel_value in pixel_counts:
-                pixel_counts[pixel_value] += 1
-            else:
-                pixel_counts[pixel_value] = 1
-
-        # Total number of pixels (half the number of bytes)
-        total_pixels = len(image_bytes) // 2
-
-        # Calculate entropy
-        entropy = 0
-        for count in pixel_counts.values():
-            probability = count / total_pixels
-            entropy -= probability * (probability and math.log2(probability))
-
-        return entropy
-
     def capture(self):
         """Captures camera's entropy as the hash of image buffer"""
         import hashlib
@@ -87,6 +57,7 @@ class CameraEntropy(Page):
         from ..wdt import wdt
         from ..krux_settings import t
         from ..themes import theme
+        import shannon
 
         def rms_value(data):
             if not data:
@@ -109,7 +80,7 @@ class CameraEntropy(Page):
             l_stdev = img.get_statistics().l_stdev()
             a_stdev = img.get_statistics().a_stdev()
             b_stdev = img.get_statistics().b_stdev()
-            variance_index = rms_value([l_stdev, a_stdev, b_stdev])
+            stdev_index = rms_value([l_stdev, a_stdev, b_stdev])
             if self.ctx.display.height() > 320:
                 self.ctx.display.to_portrait()
                 self.ctx.display.fill_rectangle(
@@ -119,11 +90,11 @@ class CameraEntropy(Page):
                     self.ctx.display.font_height,
                     theme.bg_color,
                 )
-                if variance_index > POOR_VARIANCE_TH:
+                if stdev_index > POOR_VARIANCE_TH:
                     self.ctx.display.draw_hcentered_text(
                         "Good entropy", LABEL_Y_POSITION, theme.go_color
                     )
-                elif variance_index > INSUFFICIENT_VARIANCE_TH:
+                elif stdev_index > INSUFFICIENT_VARIANCE_TH:
                     self.ctx.display.draw_hcentered_text(
                         "Poor entropy", LABEL_Y_POSITION, theme.del_color
                     )
@@ -151,33 +122,25 @@ class CameraEntropy(Page):
         if command == 2:
             self.flash_text(t("Capture cancelled"))
             return None
-        
+
         self.ctx.display.draw_centered_text(t("Calculating Shannon's entropy"))
 
         img_bytes = img.to_bytes()
         del img
 
         # Calculate Shannon's entropy:
-        # Ideally Shannon's entropy should be calculated at once,
-        # but as we don't have enough RAM let's calculate it in blocks and do the average.
-        # 320px * 240px * 2 Bytes = 153600 Bytes
-        shannon_16b = 0.0
-        blocks = 0
-        for s_index in range(0, len(img_bytes), SHANNONS_BLOCK_SIZE):
-            shannon_16b += self.shannons_entropy_16bit(
-                img_bytes[s_index : s_index + SHANNONS_BLOCK_SIZE]
-            )
-            blocks += 1
-        shannon_16b /= blocks
+        shannon_16b = shannon.entropy_img16b(img_bytes)
+        shannon_16b_total = shannon_16b * 320 * 240
 
         entropy_msg = "Shannon's entropy: "
-        entropy_msg += str(round(shannon_16b, 2)) + " bits per pixel\n\n"
-        entropy_msg += "Pixels variance: "
-        entropy_msg += str(variance_index) + "%"
+        entropy_msg += str(round(shannon_16b, 2)) + " bits per pixel\n"
+        entropy_msg += str(int(shannon_16b_total)) + " bits total\n\n"
+        entropy_msg += "Pixels deviation index: "
+        entropy_msg += str(stdev_index)
         self.ctx.display.clear()
         if (
             shannon_16b < INSUFFICIENT_SHANNONS_ENTROPY_TH
-            or variance_index < INSUFFICIENT_VARIANCE_TH
+            or stdev_index < INSUFFICIENT_VARIANCE_TH
         ):
             error_msg = t("Insufficient Entropy!")
             error_msg += "\n\n"
