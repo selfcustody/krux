@@ -30,6 +30,7 @@ from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import Key
 from ..krux_settings import t
+from ..display import DEFAULT_PADDING
 from . import (
     Page,
     Menu,
@@ -205,7 +206,53 @@ class Login(Page):
                 return self._load_key_from_words(words)
         return MENU_CONTINUE
 
+    def shannons_entropy_rolls(self, roll_counts):
+        import math
+
+        # Total number of pixels (equal to the number of bytes)
+        total_pixels = sum(roll_counts)
+
+        # Calculate entropy
+        entropy = 0
+        for count in roll_counts:
+            probability = count / total_pixels
+            entropy -= probability * (probability and math.log2(probability))
+
+        return entropy * total_pixels
+
     def _new_key_from_die(self, roll_states, min_rolls_12w, min_rolls_24w):
+        def _stats_for_nerds(rolls, dice_states_count):
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                t("Rolls distribution:"), DEFAULT_PADDING
+            )
+            roll_counts = [0] * dice_states_count
+            for roll in rolls:
+                roll_counts[int(roll) - 1] += 1
+            max_count = roll_counts.index(max(roll_counts))
+            scale_factor = (4 * self.ctx.display.font_height) / roll_counts[max_count]
+            bar_graph = []
+            for count in roll_counts:
+                bar_graph.append(count * scale_factor)
+            bar_pad = self.ctx.display.width() // (dice_states_count + 2)
+            offset_x = bar_pad
+            for bar in bar_graph:
+                offset_y = (
+                    6 * self.ctx.display.font_height
+                )  # 2 from tittle 4 from max bar height
+                offset_y -= int(bar)
+                self.ctx.display.fill_rectangle(
+                    offset_x + 1, offset_y, bar_pad - 2, int(bar), theme.highlight_color
+                )
+                offset_x += bar_pad
+            shannons_entropy = self.shannons_entropy_rolls(roll_counts)
+            self.ctx.display.draw_hcentered_text(
+                t("Shannon's Entropy: ") + str(int(shannons_entropy)) + "bits",
+                8 * self.ctx.display.font_height,
+            )
+
+            self.ctx.input.wait_for_button()
+
         submenu = Menu(
             self.ctx,
             [
@@ -269,14 +316,26 @@ class Login(Page):
                         break
 
             entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
-
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
+            rolls_str = t("Rolls:\n\n%s") % entropy
+            self.ctx.display.draw_hcentered_text(rolls_str, info_box=True)
+
+            submenu = Menu(
+                self.ctx,
+                [
+                    (t("Stats for Nerds"), lambda: MENU_EXIT),
+                    (t("Generate Words"), lambda: MENU_EXIT),
+                ],
+                offset=(len(self.ctx.display.to_lines(rolls_str)) + 1)
+                * self.ctx.display.font_height,
+            )
+            index, _ = submenu.run_loop()
+            if index == 0:
+                _stats_for_nerds(rolls, len(roll_states))
 
             import hashlib
             import binascii
 
-            self.ctx.input.wait_for_button()
             entropy_bytes = entropy.encode()
             entropy_hash = binascii.hexlify(
                 hashlib.sha256(entropy_bytes).digest()
