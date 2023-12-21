@@ -78,6 +78,9 @@ class PMUController:
     def enable_adcs(self, on_off):
         pass
 
+    def set_screen_brightness(self, level):
+        pass
+
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
         PMU_Button=PMU_Button,

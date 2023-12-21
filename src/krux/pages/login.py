@@ -30,7 +30,6 @@ from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import Key
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING
 from . import (
     Page,
     Menu,
@@ -207,24 +206,25 @@ class Login(Page):
         return MENU_CONTINUE
 
     def shannons_entropy_rolls(self, roll_counts):
+        """Calculates Shannon's entropy of a given list"""
         import math
 
         # Total number of pixels (equal to the number of bytes)
-        total_pixels = sum(roll_counts)
+        total_rolls = sum(roll_counts)
 
         # Calculate entropy
         entropy = 0
         for count in roll_counts:
-            probability = count / total_pixels
+            probability = count / total_rolls
             entropy -= probability * (probability and math.log2(probability))
 
-        return entropy * total_pixels
+        return entropy * total_rolls
 
     def _new_key_from_die(self, roll_states, min_rolls_12w, min_rolls_24w):
         def _stats_for_nerds(rolls, dice_states_count):
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
-                t("Rolls distribution:"), DEFAULT_PADDING
+                t("Rolls distribution:"), self.ctx.display.font_height
             )
             roll_counts = [0] * dice_states_count
             for roll in rolls:
@@ -236,19 +236,23 @@ class Login(Page):
                 bar_graph.append(count * scale_factor)
             bar_pad = self.ctx.display.width() // (dice_states_count + 2)
             offset_x = bar_pad
-            for bar in bar_graph:
+            for individual_bar in bar_graph:
                 offset_y = (
-                    6 * self.ctx.display.font_height
+                    8 * self.ctx.display.font_height
                 )  # 2 from tittle 4 from max bar height
-                offset_y -= int(bar)
+                offset_y -= int(individual_bar)
                 self.ctx.display.fill_rectangle(
-                    offset_x + 1, offset_y, bar_pad - 2, int(bar), theme.highlight_color
+                    offset_x + 1,
+                    offset_y,
+                    bar_pad - 2,
+                    int(individual_bar),
+                    theme.highlight_color,
                 )
                 offset_x += bar_pad
             shannons_entropy = self.shannons_entropy_rolls(roll_counts)
             self.ctx.display.draw_hcentered_text(
                 t("Shannon's Entropy: ") + str(int(shannons_entropy)) + "bits",
-                8 * self.ctx.display.font_height,
+                10 * self.ctx.display.font_height,
             )
 
             self.ctx.input.wait_for_button()

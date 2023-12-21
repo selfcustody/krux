@@ -23,7 +23,6 @@
 import math
 from . import Page
 
-LABEL_Y_POSITION = 400
 POOR_VARIANCE_TH = 10
 INSUFFICIENT_VARIANCE_TH = 5  # %
 INSUFFICIENT_SHANNONS_ENTROPY_TH = 3  # bits per pixel
@@ -74,41 +73,47 @@ class CameraEntropy(Page):
         sensor.run(1)
         self.ctx.display.clear()
         command = 0
+        y_label_offset = self.ctx.display.bottom_line
+        if board.config["type"].startswith("amigo"):
+            y_label_offset = self.ctx.display.bottom_prompt_line
         while True:
             wdt.feed()
             img = sensor.snapshot()
-            l_stdev = img.get_statistics().l_stdev()
-            a_stdev = img.get_statistics().a_stdev()
-            b_stdev = img.get_statistics().b_stdev()
-            stdev_index = rms_value([l_stdev, a_stdev, b_stdev])
-            if self.ctx.display.height() > 320:
-                self.ctx.display.to_portrait()
-                self.ctx.display.fill_rectangle(
-                    0,
-                    LABEL_Y_POSITION,
-                    320,
-                    self.ctx.display.font_height,
-                    theme.bg_color,
+            stdev_index = rms_value(
+                [
+                    img.get_statistics().l_stdev(),
+                    img.get_statistics().a_stdev(),
+                    img.get_statistics().b_stdev(),
+                ]
+            )
+            self.ctx.display.to_portrait()
+            self.ctx.display.fill_rectangle(
+                0,
+                y_label_offset,
+                self.ctx.display.width(),
+                self.ctx.display.font_height,
+                theme.bg_color,
+            )
+            if stdev_index > POOR_VARIANCE_TH:
+                self.ctx.display.draw_hcentered_text(
+                    "Good entropy", y_label_offset, theme.go_color
                 )
-                if stdev_index > POOR_VARIANCE_TH:
-                    self.ctx.display.draw_hcentered_text(
-                        "Good entropy", LABEL_Y_POSITION, theme.go_color
-                    )
-                elif stdev_index > INSUFFICIENT_VARIANCE_TH:
-                    self.ctx.display.draw_hcentered_text(
-                        "Poor entropy", LABEL_Y_POSITION, theme.del_color
-                    )
-                else:
-                    self.ctx.display.draw_hcentered_text(
-                        "Insufficient entropy", LABEL_Y_POSITION, theme.error_color
-                    )
-                self.ctx.display.to_landscape()
+            elif stdev_index > INSUFFICIENT_VARIANCE_TH:
+                self.ctx.display.draw_hcentered_text(
+                    "Poor entropy", y_label_offset, theme.del_color
+                )
+            else:
+                self.ctx.display.draw_hcentered_text(
+                    "Insufficient entropy", y_label_offset, theme.error_color
+                )
+            self.ctx.display.to_landscape()
             command = self._callback()
             if command > 0:
                 break
 
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
+                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
             elif board.config["type"].startswith("amigo"):
                 lcd.display(img, oft=(40, 40))
             else:
@@ -132,9 +137,9 @@ class CameraEntropy(Page):
         shannon_16b = shannon.entropy_img16b(img_bytes)
         shannon_16b_total = shannon_16b * 320 * 240
 
-        entropy_msg = "Shannon's entropy: "
-        entropy_msg += str(round(shannon_16b, 2)) + " bits per pixel\n"
-        entropy_msg += str(int(shannon_16b_total)) + " bits total\n\n"
+        entropy_msg = "Shannon's entropy:\n"
+        entropy_msg += str(round(shannon_16b, 2)) + " bits/px\n"
+        entropy_msg += "(" + str(int(shannon_16b_total)) + " total)\n\n"
         entropy_msg += "Pixels deviation index: "
         entropy_msg += str(stdev_index)
         self.ctx.display.clear()
