@@ -4,9 +4,10 @@
 
 from binascii import hexlify, unhexlify
 
-def rgb24_to_rgb16(rgb):
+def rgb24_to_rgb16(rgb, big=False):
     """
         convert 3 bytes of rgb888 into 2 bytes of rgb565
+        default to little-endian, so rgb565 becomes gbrg3553
     """
     assert type(rgb) == bytes and len(rgb) == 3
 
@@ -19,19 +20,20 @@ def rgb24_to_rgb16(rgb):
     # 5 significant bits of blue on the right
     blue = rgb[2] >> 3
 
-    return int(red + green + blue).to_bytes(2, 'big')
+    return int(red + green + blue).to_bytes(2, "big" if big else "little")
 
 
-def rgb16_to_rgb24(rgb):
+def rgb16_to_rgb24(rgb, big=False):
     """
-       convert 2 bytes of rgb565 into 3 bytes of rgb888
+        convert 2 bytes of rgb565 into 3 bytes of rgb888
+        default from little-endian, so rgb565 becomes gbrg3553
     """
     def maxv(number_of_bits): 
         return (2 ** number_of_bits) -1
 
     assert type(rgb) == bytes and len(rgb) == 2
 
-    rgb_int = int.from_bytes(rgb, "big")
+    rgb_int = int.from_bytes(rgb, "big" if big else "little")
 
     # left 5 bits of red multiplied to fill 8 bit space
     red = round((rgb_int >> 11) * maxv(8) / maxv(5))
@@ -42,7 +44,7 @@ def rgb16_to_rgb24(rgb):
     # right 5 bits of blue multiplied to fill 8 bit space
     blue = round((rgb_int & maxv(5)) * maxv(8) / maxv(5))
 
-    return b''.join([x.to_bytes(1, 'big') for x in [red, green, blue]])
+    return b''.join([x.to_bytes(1, "big") for x in [red, green, blue]])
 
 
 def main(*args):
