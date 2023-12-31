@@ -9,6 +9,10 @@ from .shared_mocks import (
 
 
 def reset_krux_modules():
+    """
+    Delete all related krux modules that
+    the current shell has imported
+    """
     import sys
 
     for name in list(sys.modules.keys()):
@@ -18,6 +22,13 @@ def reset_krux_modules():
 
 @pytest.fixture
 def mp_modules(mocker, monkeypatch):
+    """
+    Suppress the default behavior of some modules
+    without changing its original source code.
+
+    :param mocker: the mocker
+    :param monkeypatch: the monkey patcher
+    """
     from embit.util import secp256k1
     import random
     import time
@@ -49,7 +60,15 @@ def mp_modules(mocker, monkeypatch):
 
 
 @pytest.fixture
-def m5stickv(monkeypatch, mp_modules):
+# pylint: disable=unused-argument
+def m5stickv(monkeypatch, mp_modules): # pylint: disable=redefined-outer-name
+    """
+    Suppress the default behavior of :module:`board`
+    for m5stickV device
+
+    :param monkeypatch: the monkey patcher
+    :param mp_modules: the mp_modules function
+    """
     import sys
 
     monkeypatch.setitem(sys.modules, "board", board_m5stickv())
@@ -57,7 +76,15 @@ def m5stickv(monkeypatch, mp_modules):
 
 
 @pytest.fixture
-def amigo_tft(monkeypatch, mp_modules):
+# pylint: disable=unused-argument
+def amigo_tft(monkeypatch, mp_modules): # pylint: disable=redefined-outer-name
+    """
+    Suppress the default behavior of :module:`board`
+    for amigo_tft device
+
+    :param monkeypatch: the monkey patcher
+    :param mp_modules: the mp_modules function
+    """
     import sys
 
     monkeypatch.setitem(sys.modules, "board", board_amigo_tft())
@@ -65,7 +92,15 @@ def amigo_tft(monkeypatch, mp_modules):
 
 
 @pytest.fixture
-def dock(monkeypatch, mp_modules):
+# pylint: disable=unused-argument
+def dock(monkeypatch, mp_modules): # pylint: disable=redefined-outer-name
+    """
+    Suppress the default behavior of :module:`board`
+    for dock device
+
+    :param monkeypatch: the monkey patcher
+    :param mp_modules: the mp_modules function
+    """
     import sys
 
     monkeypatch.setitem(sys.modules, "board", board_dock())
