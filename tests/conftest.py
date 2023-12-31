@@ -62,7 +62,7 @@ def mp_modules(mocker, monkeypatch):
 
 @pytest.fixture
 # pylint: disable=unused-argument
-def m5stickv(monkeypatch, mp_modules): # pylint: disable=redefined-outer-name
+def m5stickv(monkeypatch, mp_modules):  # pylint: disable=redefined-outer-name
     """
     Suppress the default behavior of :module:`board`
     for m5stickV device
@@ -78,7 +78,7 @@ def m5stickv(monkeypatch, mp_modules): # pylint: disable=redefined-outer-name
 
 @pytest.fixture
 # pylint: disable=unused-argument
-def amigo_tft(monkeypatch, mp_modules): # pylint: disable=redefined-outer-name
+def amigo_tft(monkeypatch, mp_modules):  # pylint: disable=redefined-outer-name
     """
     Suppress the default behavior of :module:`board`
     for amigo_tft device
@@ -94,7 +94,7 @@ def amigo_tft(monkeypatch, mp_modules): # pylint: disable=redefined-outer-name
 
 @pytest.fixture
 # pylint: disable=unused-argument
-def dock(monkeypatch, mp_modules): # pylint: disable=redefined-outer-name
+def dock(monkeypatch, mp_modules):  # pylint: disable=redefined-outer-name
     """
     Suppress the default behavior of :module:`board`
     for dock device
