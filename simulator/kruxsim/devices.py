@@ -51,9 +51,10 @@ def load_image(device):
     if device == DOCK:
         return None
     if device not in images:
-        images[device] = pg.image.load(
-            os.path.join("assets", "%s.png" % device)
-        ).convert_alpha()
+        # Get absolute path of asset
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        asset_path = os.path.abspath(f"{dirname}/../assets/{device}.png")
+        images[device] = pg.image.load(asset_path).convert_alpha()
     return images[device]
 
 
@@ -63,18 +64,20 @@ fonts = {}
 def load_font(device):
     device = with_prefix(device)
     if device not in fonts:
+        # Get the current dir of current file
+        # to dynamically get the absolute path of bdf font
+        dirname = os.path.dirname(os.path.abspath(__file__))
+
+        # now get the bdf font
         if device == M5STICKV:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u14n.bdf")
-            )
+            ter_u14n_path = os.path.abspath(f"{dirname}/../../firmware/font/ter-u14n.bdf")
+            fonts[device] = pg.freetype.Font(ter_u14n_path)
         elif device == DOCK:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u16n.bdf")
-            )
+            ter_u16n_path = os.path.abspath(f"{dirname}/../../firmware/font/ter-u16n.bdf")
+            fonts[device] = pg.freetype.Font(ter_u16n_path)
         else:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u24b.bdf")
-            )
+            ter_u24b_path = os.path.abspath(f"{dirname}/../../firmware/font/ter-u24b.bdf")
+            fonts[device] = pg.freetype.Font(ter_u24b_path)
 
     return fonts[device]
 
