@@ -55,7 +55,124 @@ pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.17.0"
+poethepoet = "^0.24.4"
+pymarkdownlnt = "^0.9.15"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
 simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
+
+[tool.poe.tasks]
+# tasks for update repository
+# all tasks that start with `_` are'nt callable
+_update-pull = "git pull origin main"
+_update-submodules = "git submodule update --init --recursive"
+update-repo = ["_update-pull", "_update-submodules"]
+
+# tasks for format code with black
+# all tasks that start with `_` are'nt callable
+_format-firmware-font = "black ./firmware/font"
+_format-firmware-scripts = "black ./firmware/scripts"
+_format-firmware = ["_format-firmware-font", "_format-firmware-scripts"]
+_format-i18n = "black ./i18n/i18n.py"
+_format-simulator = "black ./simulator/simulator.py"
+_format-src = "black ./src"
+_format-tests = "black ./tests"
+format = ["_format-firmware", "_format-i18n", "_format-simulator", "_format-src", "_format-tests"]
+
+# tasks for lint code with pylint
+# all tasks that start with `_` are'nt callable
+_lint-firmware-font = "pylint ./firmware/font"
+_lint-firmware-scripts = "pylint ./firmware/scripts"
+lint-firmware = ["_lint-firmware-font", "_lint-firmware-scripts"]
+lint-i18n = "pylint ./i18n/i18n.py"
+_lint-simulator-kruxsim = "pylint ./simulator/kruxsim"
+_lint-simulator-src = "pylint ./simulator/simulator.py"
+lint-simulator = ["_lint-simulator-kruxsim", "_lint-simulator-src"]
+lint-src = "pylint ./src"
+lint-tests = "pylint ./tests"
+
+# tasks for lint markdown texts code with pymarkdownlnt
+# all tasks that start with `_` are'nt callable
+_lint-md-readme = "pymarkdown scan README.md"
+_lint-md-changelog = "pymarkdown scan CHANGELOG.md"
+_lint-md-docs = "pymarkdown scan docs"
+lint-markdown = ["_lint-md-readme","_lint-md-changelog", "_lint-md-docs"]
+
+# Lint all
+lint = ["lint-firmware", "lint-i18n", "lint-simulator", "lint-src", "lint-tests", "lint-markdown"]
+
+# tasks for test code
+test = "poetry run pytest --cache-clear --cov src/krux --cov-report html ./tests"
+test-verbose = "poetry run pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests"
+test-specific = "poetry run pytest --cache-clear" # Need extra arguments
+
+# tasks for simulation
+# put --sd if you want to simulate sd
+simulate-m5stickv = "python simulator/simulator.py --device maixpy_m5stickv" 
+simulate-amigo-tft = "python simulator/simulator.py --device maixpy_amigo_tft"
+simulate-amigo-ips = "python simulator/simulator.py --device maixpy_amigo_ips"
+simulate-dock = "python simulator/simulator.py --device maixpy_dock"
+simulate-pc = "python simulator/simulator.py --device maixpy_pc"
+
+
+# tasks for live debug
+live-debug = "screen /dev/tty.usbserial-device-name 115200"
+
+# tasks for build docs
+docs-serve = "mkdocs serve"
+docs-build = "mkdocs build --output" # Need an extra argument
+
+# tasks for generate screenshots
+_rmdir-screenshot = "rm -rf simulator/screenshots"
+_mkdir-screenshot = "mkdir -p simulator/screenshots"
+_rmdir-sd = "rm -rf simulator/sd"
+_mkdir-sd = "mkdir -p simulator/sd"
+_make-cfg = "echo \"{\\\"settings\\\": {\\\"i18n\\\": {\\\"locale\\\": \\\"en_US\\\"}}}\" > simulator/sd/settings.json"
+simulate-prepare = [
+  "_rmdir-screenshot",
+  "_mkdir-screenshot",
+  "_rmdir-sd",
+  "_mkdir-sd",
+  "_make-cfg",
+]
+simulate-sequence-m5stickv-about = "python simulator/simulator.py --sequence simulator/sequences/about.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-bitcoin-options = "python simulator/simulator.py --sequence simulator/sequences/bitcoin-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-encryption-options = "python simulator/simulator.py --sequence simulator/sequences/encryption-options.txt  --sd --device maixpy_m5stickv"
+simulate-sequence-m5stickv-extended-public-key-wpkh = "python simulator/simulator.py --sequence simulator/sequences/extended-public-key-wpkh.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-extended-public-key-wsh = "python simulator/simulator.py --sequence simulator/sequences/extended-public-key-wsh.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-home-options = "python simulator/simulator.py --sequence simulator/sequences/home-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-load-mnemonic-options = "python simulator/simulator.py --sequence simulator/sequences/load-mnemonic-options.txt --sd --device maixpy_m5stickv"
+simulate-sequence-m5stickv-load-mnemonic-via-numbers = "python simulator/simulator.py --sequence simulator/sequences/load-mnemonic-via-numbers.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-load-mnemonic-via-qr = "python simulator/simulator.py --sequence simulator/sequences/load-mnemonic-via-qr.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-load-mnemonic-via-stackbit = "python simulator/simulator.py --sequence simulator/sequences/load-mnemonic-via-stackbit.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-load-mnemonic-via-text = "python simulator/simulator.py --sequence simulator/sequences/load-mnemonic-via-text.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-load-mnemonic-via-tinyseed = "python simulator/simulator.py --sequence simulator/sequences/load-mnemonic-via-tinyseed.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-language-options = "python simulator/simulator.py --sequence simulator/sequences/language-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-logging-options = "python simulator/simulator.py --sequence simulator/sequences/logging-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-login-options = "python simulator/simulator.py --sequence simulator/sequences/login-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-logo = "python simulator/simulator.py --sequence simulator/sequences/logo.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-new-mnemonic-options = "python simulator/simulator.py --sequence simulator/sequences/new-mnemonic-options.txt  --sd --device maixpy_m5stickv"
+simulate-sequence-m5stickv-new-mnemonic-via-d6 = "python simulator/simulator.py --sequence simulator/sequences/new-mnemonic-via-d6.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-new-mnemonic-via-d20 = "python simulator/simulator.py --sequence simulator/sequences/new-mnemonic-via-d20.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-new-mnemonic-via-snapshot = "python simulator/simulator.py --sequence simulator/sequences/new-mnemonic-via-snapshot.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-persist-options = "python simulator/simulator.py --sequence simulator/sequences/persist-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-print-qr = "python simulator/simulator.py --sequence simulator/sequences/print-qr.txt --sd --printer --device maixpy_m5stickv"
+simulate-sequence-m5stickv-printer-options = "python simulator/simulator.py --sequence simulator/sequences/printer-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-qr-transcript = "python simulator/simulator.py --sequence simulator/sequences/qr-transcript.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-encrypt-mnemonic = "python simulator/simulator.py --sequence simulator/sequences/encrypt-mnemonic.txt --device maixpy_m5stickv"
+simulate-sequence-m5stickv-scan-address = "python simulator/simulator.py --sequence simulator/sequences/scan-address.txt --device maixpy_m5stickv"
+simulate-sequence-m5stickv-list-address = "python simulator/simulator.py --sequence simulator/sequences/list-address.txt --device maixpy_m5stickv"
+simulate-sequence-m5stickv-settings-options = "python simulator/simulator.py --sequence simulator/sequences/settings-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-shutdown = "python simulator/simulator.py --sequence simulator/sequences/shutdown.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-sign-message = "python simulator/simulator.py --sequence simulator/sequences/sign-message.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-sign-options = "python simulator/simulator.py --sequence simulator/sequences/sign-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-sign-psbt = "python simulator/simulator.py --sequence simulator/sequences/sign-psbt.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-themes = "python simulator/simulator.py --sequence simulator/sequences/themes.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-thermal-options = "python simulator/simulator.py --sequence simulator/sequences/thermal-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-tools-check-sd = "python simulator/simulator.py --sequ%ence sequences/tools-check-sd.txt  --sd --device maixpy_m5stickv"
+simulate-sequence-m5stickv-tools-create-QR = "python simulator/simulator.py --sequence simulator/sequences/tools-create-QR.txt  --sd --device maixpy_m5stickv"
+simulate-sequence-m5stickv-tools-mnemonic = "python simulator/simulator.py --sequence simulator/sequences/tools-mnemonic.txt  --sd --device maixpy_m5stickv"
+simulate-sequence-m5stickv-wallet-type-options = "python simulator/simulator.py --sequence simulator/sequences/wallet-type-options.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-wallet-wpkh = "python simulator/simulator.py --sequence simulator/sequences/wallet-wpkh.txt  --device maixpy_m5stickv"
+simulate-sequence-m5stickv-wallet-wsh = "python simulator/simulator.py --sequence simulator/sequences/wallet-wsh.txt  --device maixpy_m5stickv"

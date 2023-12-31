@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import os
 import sys
 from importlib import util
 from unittest import mock
@@ -44,9 +45,14 @@ def register_device(device):
     global BUTTON_B
     global BUTTON_C
     project = devices.AMIGO_TFT if device == devices.PC else device
-    BOARD_CONFIG = load_file_as_module(
-        "board", "../firmware/MaixPy/projects/%s/builtin_py/board.py" % project
-    ).config
+    
+    # Absolute path of board file
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    board_path = os.path.abspath(f"{dirname}/../../../firmware/MaixPy/projects/{project}/builtin_py/board.py")
+
+    # Dynamic board configuration
+    BOARD_CONFIG = load_file_as_module("board", board_path).config
+    
     if "LED_W" in BOARD_CONFIG["krux"]["pins"]:
         del BOARD_CONFIG["krux"]["pins"]["LED_W"]
     if device == devices.PC:

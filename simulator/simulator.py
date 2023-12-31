@@ -70,6 +70,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+# pylint: disable=no-member
 pg.init()
 pg.freetype.init()
 
@@ -78,32 +79,51 @@ from kruxsim.mocks import board
 board.register_device(args.device)
 
 if args.sd:
+    # pylint: disable=unused-import
     from kruxsim.mocks import uopen
+
+    # pylint: disable=unused-import
     from kruxsim.mocks import uos
 
+# pylint: disable=unused-import
 from kruxsim.mocks import uos_functions
 
+# pylint: disable=unused-import
 from kruxsim.mocks import usys
+
+# pylint: disable=unused-import
 from kruxsim.mocks import utime
+
+# pylint: disable=unused-import
 from kruxsim.mocks import fpioa_manager
 from kruxsim.mocks import Maix
+
+# pylint: disable=unused-import
 from kruxsim.mocks import flash
 from kruxsim.mocks import lcd
 from kruxsim.mocks import machine
+
+# pylint: disable=unused-import
 from kruxsim.mocks import image
 from kruxsim.mocks import pmu
 
 if args.printer:
     machine.simulate_printer()
 
+# pylint: disable=unused-import
 from kruxsim.mocks import secp256k1
+
+# pylint: disable=unused-import
 from kruxsim.mocks import qrcode
 from kruxsim.mocks import sensor
 from kruxsim.mocks import ft6x36
 from kruxsim.mocks import buttons
+
+# pylint: disable=unused-import
 from kruxsim.mocks import rotary
 from kruxsim.sequence import SequenceExecutor
 
+# pylint: disable=invalid-name
 sequence_executor = None
 if args.sequence:
     sequence_executor = SequenceExecutor(args.sequence)
@@ -113,14 +133,25 @@ pmu.register_sequence_executor(sequence_executor)
 sensor.register_sequence_executor(sequence_executor)
 ft6x36.register_sequence_executor(sequence_executor)
 
+##################################
+# Handle absolute path for files #
+##################################
+dirname = os.path.dirname(os.path.abspath(__file__))
+
 
 def run_krux():
-    with open("../src/boot.py", "r", encoding='utf-8') as boot_file:
+    """
+    Runs krux firmware from src/boot.py
+    to simulate a properly krux device
+    """
+    boot_path = os.path.abspath(f"{dirname}/../src/boot.py")
+    with open(boot_path, "r", encoding="utf-8") as boot_file:
         exec(boot_file.read())
 
 
 # mock for SD
 if args.sd:
+    # pylint: disable=unused-import
     from kruxsim.mocks import sd_card
 
 t = threading.Thread(target=run_krux)
@@ -139,37 +170,47 @@ AMIGO_SIZE = (150, 252)
 M5STICKV_SIZE = (125, 247)
 
 device_screenshot_size = AMIGO_SIZE
-if (args.device == devices.M5STICKV):
+if args.device == devices.M5STICKV:
     device_screenshot_size = M5STICKV_SIZE
 
-# Handle screenshots alpha bg
-mask_img = pg.image.load(
-    os.path.join("assets", "maixpy_amigo_mask.png")
-    ).convert_alpha()
-if (args.device == devices.M5STICKV):
-    mask_img = pg.image.load(
-        os.path.join("assets", "maixpy_m5stickv_mask.png")
-        ).convert_alpha()
-    
+###############################
+# Handle screenshots alpha bg #
+###############################
+maixpy_amigo_mask_path = os.path.abspath(f"{dirname}/assets/maixpy_amigo_mask.png")
+mask_img = pg.image.load(maixpy_amigo_mask_path).convert_alpha()
+
+
+if args.device == devices.M5STICKV:
+    maixpy_m5stickv_mask_path = os.path.abspath(
+        f"{dirname}/assets/maixpy_m5stickv_mask.png"
+    )
+    mask_img = pg.image.load(maixpy_m5stickv_mask_path).convert_alpha()
+
 # Handle screenshots filename suffix
 from krux.krux_settings import Settings
+
+# pylint: disable=invalid-name
 screenshot_suffix = ""
-if (args.screenshot_scale):
+if args.screenshot_scale:
     screenshot_suffix = "." + Settings().i18n.locale.split("-")[0]
-    if (args.device == devices.AMIGO_IPS or args.device == devices.AMIGO_TFT):
+    if args.device in (devices.AMIGO_IPS, devices.AMIGO_TFT):
         screenshot_suffix = "-150" + screenshot_suffix
-    elif (args.device == devices.M5STICKV):
+    elif args.device == devices.M5STICKV:
         screenshot_suffix = "-125" + screenshot_suffix
 
 
-if(args.device == devices.PC):
+if args.device == devices.PC:
     from kruxsim.mocks.board import BOARD_CONFIG
+
     BOARD_CONFIG["type"] = "amigo_type"
 
 t.start()
 
 
 def shutdown():
+    """
+    Shutdown device simulator
+    """
     if t.is_alive():
         t.alive = False
 
@@ -192,12 +233,21 @@ try:
                 shutdown()
             elif event.type >= pg.USEREVENT:
                 if event.type == events.SCREENSHOT_EVENT:
-                    sub = screen.subsurface(devices.screenshot_rect(args.device)).convert_alpha()
+                    sub = screen.subsurface(
+                        devices.screenshot_rect(args.device)
+                    ).convert_alpha()
                     sub.blit(mask_img, sub.get_rect(), None, pg.BLEND_RGBA_SUB)
-                    if (args.screenshot_scale):
+                    if args.screenshot_scale:
                         sub = pg.transform.smoothscale(sub, device_screenshot_size)
                     pg.image.save(
-                        sub, os.path.join("screenshots", event.dict["filename"].replace(".png", screenshot_suffix + ".png"))
+                        sub,
+                        os.path.join(
+                            dirname,
+                            "screenshots",
+                            event.dict["filename"].replace(
+                                ".png", screenshot_suffix + ".png"
+                            ),
+                        ),
                     )
                 else:
                     event.dict["f"]()
@@ -210,7 +260,6 @@ try:
                     buttons.buttons_control.page_prev_event_flag = True
             if event.type == pg.MOUSEBUTTONDOWN:
                 ft6x36.touch_control.trigger_event()
-
 
         if lcd.screen:
             lcd_rect = lcd.screen.get_rect()

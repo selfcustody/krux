@@ -36,48 +36,76 @@ WINDOW_SIZES = {
     DOCK: (440, 820),
 }
 
+##################################
+# Handle absolute path of assets #
+##################################
+dirname = os.path.dirname(os.path.abspath(__file__))
 
-def with_prefix(device):
+def with_prefix(device: str):
+    """
+    Add prefix to device name. If its a maixpy one, add `maixpy_` string.
+    
+    :param device
+    :return str
+    """
     return device if device.startswith("maixpy_") else "maixpy_" + device
 
 
 images = {}
 
+def load_image(device: str):
+    """
+    Load an image asset as :mod:`pygame.Surface`
 
-def load_image(device):
+    :param device
+    :return pygame.Surface
+    """
     device = with_prefix(device)
     if device == PC:
         return None
     if device not in images:
-        images[device] = pg.image.load(
-            os.path.join("assets", "%s.png" % device)
-        ).convert_alpha()
+        asset_path = os.path.abspath(f"{dirname}/../assets/{device}.png")
+        images[device] = pg.image.load(asset_path).convert_alpha()
     return images[device]
 
 
 fonts = {}
 
 
-def load_font(device):
+def load_font(device: str):
+    """
+    Load a :mod:`pygame.freetype.Font`
+
+    :param device: str
+    :return pygame.freetype.Font
+    """
     device = with_prefix(device)
     if device not in fonts:
+        # Get the current dir of current file
+        # to dynamically get the absolute path of bdf font
+        dirname = os.path.dirname(os.path.abspath(__file__))
+
+        # now get the bdf font
         if device == M5STICKV:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u14n.bdf")
-            )
+            ter_u14n_path = os.path.abspath(f"{dirname}/../../firmware/font/ter-u14n.bdf")
+            fonts[device] = pg.freetype.Font(ter_u14n_path)
         elif device == DOCK:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u16n.bdf")
-            )
+            ter_u16n_path = os.path.abspath(f"{dirname}/../../firmware/font/ter-u16n.bdf")
+            fonts[device] = pg.freetype.Font(ter_u16n_path)
         else:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u24b.bdf")
-            )
+            ter_u24b_path = os.path.abspath(f"{dirname}/../../firmware/font/ter-u24b.bdf")
+            fonts[device] = pg.freetype.Font(ter_u24b_path)
 
     return fonts[device]
 
 
-def screenshot_rect(device):
+def screenshot_rect(device: str):
+    """
+    Make a :class:`pygame.Surface` screenshot
+
+    :param device: str
+    :return pygame.Surface  
+    """
     screen = pg.display.get_surface()
     if device == PC:
         return screen.get_rect()
