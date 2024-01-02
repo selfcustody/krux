@@ -3,6 +3,12 @@ import pyqrcode
 
 
 def encode_to_string(data):
+    """
+    Properly encode some qrcode data
+    to a string
+
+    :param data: data to be encoded
+    """
     try:
         code_str = pyqrcode.create(data, error="L", mode="binary").text()
     except:
@@ -33,11 +39,18 @@ def encode_to_string(data):
 
 
 def get_mock_open(files: dict[str, str]):
+    """
+    Mock the process of open a files
+
+    :return the mocked files
+    """
+
+    # pylint: disable=unused-argument
     def open_mock(filename, *args, **kwargs):
         for expected_filename, content in files.items():
             if filename == expected_filename:
                 if content == "Exception":
-                    raise Exception()
+                    raise Exception()  # pylint: disable=broad-exception-raised
                 return mock.mock_open(read_data=content).return_value
         raise OSError("(mock) Unable to open {filename}")
 
@@ -45,46 +58,74 @@ def get_mock_open(files: dict[str, str]):
 
 
 def statvfs(_):
+    """
+    TODO: proper documentation
+    """
     return (8192, 8192, 1896512, 1338303, 1338303, 0, 0, 0, 0, 255)
 
 
 class TimeMocker:
+    """
+    A simple mocked timer
+    """
+
     def __init__(self, increment) -> None:
         self.increment = increment
         self.time = 0
 
     def tick(self):
+        """
+        Increment the mocked timer
+        """
         self.time += self.increment
         return self.time
 
 
 class MockPrinter:
+    """
+    A simple mocked printer
+    """
+
     def __init__(self):
         pass
 
     def qr_data_width(self):
+        """
+        Default size of a qrcode data
+        """
         return 33
 
+    # pylint: disable=missing-function-docstring
     def clear(self):
         pass
 
+    # pylint: disable=missing-function-docstring
     def print_qr_code(self, qr_code):
         pass
 
+    # pylint: disable=missing-function-docstring
     def print_string(self, string):
         pass
 
+    # pylint: disable=missing-function-docstring
     def set_bitmap_mode(self, x_size, y_size, mode):
         pass
 
+    # pylint: disable=missing-function-docstring
     def print_bitmap_line(self, line):
         pass
 
+    # pylint: disable=missing-function-docstring
     def feed(self, amount):
         pass
 
 
 class MockQRPartParser:
+    """
+    A simple mocked parser of
+    a qrcode's part
+    """
+
     TOTAL = 10
     FORMAT = 0
 
@@ -94,42 +135,97 @@ class MockQRPartParser:
         self.format = MockQRPartParser.FORMAT
 
     def total_count(self):
+        """
+        Get the total data count of QRPart
+
+        :return MockQRPartParser.TOTAL
+        """
         return MockQRPartParser.TOTAL
 
     def parsed_count(self):
+        """
+        Get the total length of parts on QRPart
+        """
         return len(self.parts)
 
     def parse(self, part):
+        """
+        If can be parsed, append a part on QRPart
+        """
         if part not in self.parts:
             self.parts.append(part)
 
     def is_complete(self):
+        """
+        The part is complete
+
+        :return boolean
+        """
         return len(self.parts) == self.total_count()
 
     def result(self):
+        """
+        Get the joined parts of QRPart
+        """
         return "".join(self.parts)
 
 
-class Mockhistogram_threshold:
+class MockhistogramThreshold:
+    """
+    A simple mocked threshold's histogram
+    """
+
     def value(self):
+        """
+        Get 1 as threshold
+
+        :return int
+        """
         return 1
 
 
 class Mockhistogram:
+    """
+    A simple mocked histogram
+    """
+
     def get_threshold(self):
-        return Mockhistogram_threshold()
+        """
+        Get the :class:`MockhistogramThreshold`
+
+        :return Mockhistogram_threshold
+        """
+        return MockhistogramThreshold()
 
 
 class Mockqrcode:
+    """
+    A simple mocked qrcode
+    """
+
     def __init__(self, data):
         self.data = data
 
     def payload(self):
+        """
+        Get the mocked qrcode's associated data
+
+        :return some data
+        """
         return self.data
 
 
 class MockBlob:
+    """
+    A simple mocked blob data
+    """
+
     def rect(self):
+        """
+        Return a tuple with len(4)
+
+        :return tuple[4]
+        """
         return (10, 10, 125, 100)
 
 
@@ -142,6 +238,12 @@ class MockStats:
         self.word_counter = 0
 
     def median(self):
+        """
+        Get a mocked median
+        (20, 50 or 60)
+
+        :return int
+        """
         if self.word_counter == 0:
             self.word_counter += 1
             return 50
@@ -168,6 +270,13 @@ IMAGE_TO_HASH = b"\x12\x04"  # Dummy bytes
 
 
 def snapshot_generator(outcome=SNAP_SUCCESS):
+    """
+    Generate a function that create a set of mocked
+    histogram, qrcode and/or blobs/stats
+
+    :param outcome: int
+    :return function<mock.MagicMock>
+    """
     count = 0
 
     def snapshot():
@@ -200,6 +309,11 @@ def snapshot_generator(outcome=SNAP_SUCCESS):
 
 
 def board_m5stickv():
+    """
+    Return a mocked m5stack m5stickv device
+
+    :return mockMagicMock
+    """
     return mock.MagicMock(
         config={
             "type": "m5stickv",
@@ -251,6 +365,11 @@ def board_m5stickv():
 
 
 def board_amigo_tft():
+    """
+    Return a mocked sipeed amigo-tft device
+
+    :return mockMagicMock
+    """
     return mock.MagicMock(
         config={
             "type": "amigo_tft",
@@ -301,6 +420,11 @@ def board_amigo_tft():
 
 
 def board_dock():
+    """
+    Return a mocked sipeed dock device
+
+    :return mockMagicMock
+    """
     return mock.MagicMock(
         config={
             "type": "dock",
@@ -329,10 +453,23 @@ def board_dock():
 
 
 def mock_context(mocker):
+    """
+    Create a mocked context to return a properly krux device
+
+    :param mocker: the mocker
+    :return mocker.MagicMock of device
+    :raise ValueError
+    """
     import board
 
+    # Avoid pylint `inconsistent-return-statments`:
+    # (Either all return statements in a function should return
+    # an expression, or none of them should).
+    # assign a variable to mocked device
+    device = None
+
     if board.config["type"] == "m5stickv":
-        return mocker.MagicMock(
+        device = mocker.MagicMock(
             input=mocker.MagicMock(touch=None),
             display=mocker.MagicMock(
                 font_width=8,
@@ -343,7 +480,7 @@ def mock_context(mocker):
             ),
         )
     elif board.config["type"] == "dock":
-        return mocker.MagicMock(
+        device = mocker.MagicMock(
             input=mocker.MagicMock(touch=None),
             display=mocker.MagicMock(
                 font_width=8,
@@ -354,7 +491,7 @@ def mock_context(mocker):
             ),
         )
     elif board.config["type"].startswith("amigo"):
-        return mocker.MagicMock(
+        device = mocker.MagicMock(
             display=mocker.MagicMock(
                 font_width=12,
                 font_height=24,
@@ -363,3 +500,8 @@ def mock_context(mocker):
                 to_lines=mocker.MagicMock(return_value=[""]),
             ),
         )
+    else:
+        type_device = board.config["type"]
+        raise ValueError(f"Invalid board.config['type'] == {type_device}")
+
+    return device
