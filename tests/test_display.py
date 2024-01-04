@@ -75,7 +75,12 @@ TEST_QR_WITH_BORDER = """
 DEFAULT_BG_COLOR = 0x0000  # Black
 
 
+# pylint: disable=unused-argument
 def test_init(mocker, m5stickv):
+    """
+    Test initialization of :class:`krux.display.Display`
+    in a mocked :mod:`krux.display.lcd`
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -87,6 +92,10 @@ def test_init(mocker, m5stickv):
     d.initialize_lcd()
 
     assert isinstance(d, Display)
+
+    # :func:`assert_called` is a mocked method
+    # added by mocker. It needs a pylint disable call
+    # pylint: disable=no-member
     d.initialize_lcd.assert_called()
 
     krux.display.lcd.init.assert_called_once()
@@ -97,7 +106,12 @@ def test_init(mocker, m5stickv):
     )
 
 
+# pylint: disable=unused-argument
 def test_width(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.width`
+    in a mocked :module:`krux.display.lcd`
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -116,7 +130,12 @@ def test_width(mocker, m5stickv):
     krux.display.lcd.height.assert_called()
 
 
+# pylint: disable=unused-argument
 def test_height(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.height`
+    in a mocked :module:`krux.display.lcd`
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -134,7 +153,12 @@ def test_height(mocker, m5stickv):
     krux.display.lcd.width.assert_called()
 
 
+# pylint: disable=unused-argument
 def test_qr_data_width(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.qr_data_width`
+    in a mocked :module:`krux.display.lcd`
+    """
     from krux.display import Display
 
     d = Display()
@@ -150,10 +174,18 @@ def test_qr_data_width(mocker, m5stickv):
     mocker.spy(d, "width")
     assert d.qr_data_width() == width // 6
 
+    # :func:`assert_called` is a mocked method
+    # added by mocker. It needs a pylint disable call
+    # pylint: disable=no-member
     d.width.assert_called()
 
 
+# pylint: disable=unused-argument
 def test_to_landscape(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.to_landscape`
+    in a mocked :module:`krux.display.lcd`
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -165,7 +197,12 @@ def test_to_landscape(mocker, m5stickv):
     krux.display.lcd.rotation.assert_called()
 
 
+# pylint: disable=unused-argument
 def test_to_portrait(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.to_portrait`
+    in a mocked :module:`krux.display.lcd`
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -177,7 +214,12 @@ def test_to_portrait(mocker, m5stickv):
     krux.display.lcd.rotation.assert_called()
 
 
+# pylint: disable=unused-argument
 def test_to_lines(mocker, m5stickv):
+    """
+    Test many cases of calling :func:`krux.display.Display.to_lines`
+    in a mocked :module:`krux.display.lcd`:
+    """
     from krux.display import Display
 
     cases = [
@@ -198,6 +240,7 @@ def test_to_lines(mocker, m5stickv):
         ),
         (
             135,
+            # pylint: disable=line-too-long
             "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
             [
                 "tpubDCDuqu5HtBX2",
@@ -211,6 +254,7 @@ def test_to_lines(mocker, m5stickv):
         ),
         (
             135,
+            # pylint: disable=line-too-long
             "xpub: tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
             [
                 "xpub:",
@@ -226,6 +270,7 @@ def test_to_lines(mocker, m5stickv):
         (135, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             135,
+            # pylint: disable=line-too-long
             "New firmware detected.\n\nSHA256:\n1621f9c0e9ccb7995a29327066566adfd134e19109d7ce8e52aad7bd7dcce121\n\n\n\nInstall?",
             [
                 "New firmware",
@@ -258,6 +303,7 @@ def test_to_lines(mocker, m5stickv):
         ),
         (
             240,
+            # pylint: disable=line-too-long
             "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
             [
                 "tpubDCDuqu5HtBX2aD7wxvnHcj1",
@@ -269,6 +315,7 @@ def test_to_lines(mocker, m5stickv):
         ),
         (
             240,
+            # pylint: disable=line-too-long
             "xpub: tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
             [
                 "xpub:",
@@ -282,6 +329,7 @@ def test_to_lines(mocker, m5stickv):
         (240, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             240,
+            # pylint: disable=line-too-long
             "New firmware detected.\n\nSHA256:\n1621f9c0e9ccb7995a29327066566adfd134e19109d7ce8e52aad7bd7dcce121\n\n\n\nInstall?",
             [
                 "New firmware detected.",
@@ -307,7 +355,13 @@ def test_to_lines(mocker, m5stickv):
         assert lines == case[2]
 
 
+# pylint: disable=unused-argument
 def test_outline(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.to_outline` call
+    in a mocked :module:`krux.display.lcd` resulting
+    in :const:`krux.display.lcd.WHITE` in some positions
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -317,6 +371,9 @@ def test_outline(mocker, m5stickv):
 
     d.outline(0, 0, 100, 100, krux.display.lcd.WHITE)
 
+    # :func:`assert_has_calls` is a mocked method
+    # added by mocker. It needs a pylint disable call
+    # pylint: disable=no-member
     d.fill_rectangle.assert_has_calls(
         [
             mocker.call(0, 0, 101, 1, krux.display.lcd.WHITE),
@@ -327,7 +384,13 @@ def test_outline(mocker, m5stickv):
     )
 
 
+# pylint: disable=unused-argument
 def test_fill_rectangle(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.fill_rectangle`
+    in a mocked :module:`krux.display.lcd` resulting
+    in :const:`krux.display.lcd.WHITE` in "normal" display
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -341,7 +404,13 @@ def test_fill_rectangle(mocker, m5stickv):
     )
 
 
+# pylint: disable=unused-argument
 def test_fill_rectangle_on_inverted_display(mocker, amigo_tft):
+    """
+    Test :func:`krux.display.Display.fill_rectangle`
+    in a mocked :module:`krux.display.lcd` resulting
+    in :const:`krux.display.lcd.WHITE` in inverted display
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -356,7 +425,14 @@ def test_fill_rectangle_on_inverted_display(mocker, amigo_tft):
     )
 
 
+# pylint: disable=unused-argument
 def test_draw_string(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.draw_string`
+    in a mocked :module:`krux.display.lcd` resulting
+    in a :const:`krux.display.lcd.WHITE` text within
+    a :const:`krux.display.lcd.BLACK` background
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -370,7 +446,15 @@ def test_draw_string(mocker, m5stickv):
     )
 
 
+# pylint: disable=unused-argument
 def test_draw_string_on_inverted_display(mocker, amigo_tft):
+    """
+    Test :func:`krux.display.Display.draw_string`
+    in a mocked :module:`krux.display.lcd` resulting
+    in a :const:`krux.display.lcd.WHITE` text within
+    a :const:`krux.display.lcd.BLACK` background in a
+    inverted display
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -385,7 +469,14 @@ def test_draw_string_on_inverted_display(mocker, amigo_tft):
     )
 
 
+# pylint: disable=unused-argument
 def test_draw_hcentered_text(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.draw_hcentered_text` in
+    a mocked :module:`krux.display.lcd` resulting in a horizontal
+    centered :const:`krux.display.lcd.WHITE` text within a
+    :const:`krux.display.lcd.BLACK` background
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -398,12 +489,22 @@ def test_draw_hcentered_text(mocker, m5stickv):
         "Hello world", 50, krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 
+    # :func:`assert_called_with` is a mocked method
+    # added by mocker. It needs a pylint disable call
+    # pylint: disable=no-member
     d.draw_string.assert_called_with(
         23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 
 
+# pylint: disable=unused-argument
 def test_draw_centered_text(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.draw_centered_text` in
+    a mocked :module:`krux.display.lcd` resulting in a
+    centered :const:`krux.display.lcd.WHITE` text within a
+    :const:`krux.display.lcd.BLACK` background
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -415,12 +516,21 @@ def test_draw_centered_text(mocker, m5stickv):
 
     d.draw_centered_text("Hello world", krux.display.lcd.WHITE, 0)
 
+    # :func:`assert_called_with` is a mocked method
+    # added by mocker. It needs a pylint disable call
+    # pylint: disable=no-member
     d.draw_hcentered_text.assert_called_with(
         "Hello world", 113, krux.display.lcd.WHITE, 0
     )
 
 
+# pylint: disable=unused-argument
 def test_flash_text(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.flash_text` in
+    a mocked :module:`krux.display.lcd` resulting in a
+    :const:`krux.display.lcd.WHITE` text
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     mocker.patch("krux.display.time", new=mocker.MagicMock())
     import krux
@@ -434,12 +544,24 @@ def test_flash_text(mocker, m5stickv):
 
     d.flash_text("Hello world", krux.display.lcd.WHITE, 0, 1000)
 
+    # :attr:`call_count` is a mocked attribute
+    # added by mocker. It needs a pylint disable call
+    # pylint: disable=no-member
     assert d.clear.call_count == 2
+
+    # :func:`assert_called_once` is a mocked method
+    # added by mocker. It needs a pylint disable call
+    # pylint: disable=no-member
     d.draw_centered_text.assert_called_once()
     krux.display.time.sleep_ms.assert_called_with(1000)
 
 
+# pylint: disable=unused-argument
 def test_draw_qr_code(mocker, m5stickv):
+    """
+    Test :func:`krux.display.Display.draw_qr_code` in
+    a mocked :module:`krux.display.lcd`
+    """
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display, QR_DARK_COLOR, QR_LIGHT_COLOR
