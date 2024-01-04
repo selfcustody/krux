@@ -1,7 +1,22 @@
-from .shared_mocks import get_mock_open
+# TODO: cleanup .shared_mocks.get_mock_open?
+# tests go well without calling it
+# pylint calls warning `unused-import`
+# W0611: Unused get_mock_open imported from shared_mocks (unused-import)
+# from .shared_mocks import get_mock_open
 
 
 def mock_modules(mocker):
+    """
+    Utility method to patch :module:`krux.context` classes:
+
+    - :class:`krux.context.logger`
+    - :class:`krux.context.Display`
+    - :class:`krux.context.Input`
+    - :class:`krux.context.Camera`
+    - :class:`krux.context.Light`
+
+    :param mocker
+    """
     mocker.patch("krux.context.logger", new=mocker.MagicMock())
     mocker.patch("krux.context.Display", new=mocker.MagicMock())
     mocker.patch("krux.context.Camera", new=mocker.MagicMock())
@@ -9,52 +24,103 @@ def mock_modules(mocker):
     mocker.patch("krux.context.Input", new=mocker.MagicMock())
 
 
+# pylint: disable=unused-argument
 def test_init(mocker, m5stickv):
+    """
+    Test the initialization of :class:`krux.context.Context`
+    
+    :param mocker: the mocker
+    :param m5stickv: the device
+    """
     mock_modules(mocker)
     from krux.context import Context
 
-    c = Context()
+    # Avoid pylint `invalid-name` warning
+    # 0103: Variable name "c" doesn't conform to snake_case naming style
+    context = Context()
 
-    assert isinstance(c, Context)
+    assert isinstance(context, Context)
 
 
+# pylint: disable=unused-argument
 def test_clear(mocker, m5stickv):
+    """
+    Test the cleanup of :class:`krux.context.Context`
+    
+    :param mocker: the mocker
+    :param m5stickv: the device
+    """
     mock_modules(mocker)
     from krux.context import Context
 
-    c = Context()
+    # Avoid pylint `invalid-name` warning
+    # 0103: Variable name "c" doesn't conform to snake_case naming style
+    context = Context()
 
-    c.clear()
+    context.clear()
 
-    assert c.wallet is None
+    assert context.wallet is None
 
 
+# pylint: disable=unused-argument
 def test_log(mocker, m5stickv):
+    """
+    Test the initialization of :class:`krux.context.logger`
+    inside the :class:`krux.context.Context`
+    
+    :param mocker: the mocker
+    :param m5stickv: the device
+    """
     mock_modules(mocker)
     import krux
     from krux.context import Context
 
-    c = Context()
+    # Avoid pylint `invalid-name` warning
+    # 0103: Variable name "c" doesn't conform to snake_case naming style
+    context = Context()
 
-    assert c.log == krux.context.logger
+    assert context.log == krux.context.logger
 
 
+# pylint: disable=unused-argument
 def test_clear_clears_printer(mocker, m5stickv):
+    """
+    Test the initialization and cleanup of :class:`krux.context.Printer`
+    inside the :class:`krux.context.Context`
+
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    """
     mock_modules(mocker)
     from krux.context import Context
-    from krux.printers import Printer
 
-    c = Context()
-    c.printer = mocker.MagicMock(clear=mocker.MagicMock())
+    # TODO: cleanup krux.printer.Printer?
+    # tests go well without calling it
+    # pylint calls warning `unused-import`
+    # W0611: Unused Printer imported from krux.printers (unused-import)
+    # from krux.printers import Printer
 
-    c.clear()
+    # Avoid pylint `invalid-name` warning
+    # 0103: Variable name "c" doesn't conform to snake_case naming style
+    context = Context()
+    context.printer = mocker.MagicMock(clear=mocker.MagicMock())
 
-    assert c.wallet is None
-    c.printer.clear.assert_called()
+    context.clear()
+
+    assert context.wallet is None
+    context.printer.clear.assert_called()
 
 
+# pylint: disable=unused-argument
 def test_screensaver(mocker, m5stickv):
-    """Test whether the screensaver is animating and changing color over time"""
+    """
+    Test whether the screensaver is animating and changing color over time
+    inside the :class:`krux.context.Context`
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    """
     mock_modules(mocker)
     from krux.context import Context, SCREENSAVER_ANIMATION_TIME
     from krux.themes import theme
@@ -78,7 +144,10 @@ def test_screensaver(mocker, m5stickv):
     ].split(
         "\n"
     )
-    c = Context(logo)
+
+    # Avoid pylint `invalid-name` warning
+    # 0103: Variable name "c" doesn't conform to snake_case naming style
+    context = Context(logo)
 
     # a sequence of events to simulate users waiting and after some time press BUTTON_ENTER
     btn_seq = []
@@ -94,15 +163,23 @@ def test_screensaver(mocker, m5stickv):
     time_seq.append(tmp)
     btn_seq.append(BUTTON_ENTER)
 
-    c.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
+    context.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
     time.ticks_ms = mocker.MagicMock(side_effect=time_seq)
 
-    c.screensaver()
+    context.screensaver()
 
-    c.display.draw_line_hcentered_with_fullw_bg.assert_any_call(
+    # TODO: check if the pylint warn is because the method is mocked
+    # pylint throws
+    # E1101: Method 'draw_line_hcentered_with_fullw_bg' has no 'assert_any_call' member (no-member)
+    # pylint: disable=no-member
+    context.display.draw_line_hcentered_with_fullw_bg.assert_any_call(
         logo[10], 10, theme.fg_color, theme.bg_color
     )
-    c.display.draw_line_hcentered_with_fullw_bg.assert_any_call(
+
+    # pylint: disable=no-member
+    context.display.draw_line_hcentered_with_fullw_bg.assert_any_call(
         logo[5], 5, theme.bg_color, theme.fg_color
     )
-    c.input.wait_for_button.assert_called()
+
+    # pylint: disable=no-member
+    context.input.wait_for_button.assert_called()
