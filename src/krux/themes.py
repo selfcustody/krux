@@ -24,35 +24,28 @@ from .krux_settings import Settings, ThemeSettings
 
 DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
 
-# Colors: Ditching firmware colors
-# To create new colors from RGB values use firmware/scripts/krux_colors.py script
+# To create new colors from RGB values use firmware/scripts/rgbconv.py script
 
 BLACK = 0x0000
-WHITE = 0xFFFF
+WHITE = 0xffff
 LIGHTBLACK = 0x0842
-DARKGREY = 0xEF7B
-LIGHTGREY = 0x18C6
-LIGHT_GREEN = 0xEC67
-GREEN = 0xE007
+DARKGREY = 0xef7b
+LIGHTGREY = 0x38c6
+LIGHT_GREEN = 0xec9f
+GREEN = 0xe007
 DARKGREEN = 0x8005
-RED = 0x00F8
-LIGHT_PINK = 0x3FFC
-PINK = 0x1FF8
-PURPLE = 0x0F78
-ORANGE = 0x20FD
-DARKORANGE = 0x40C3
-YELLOW = 0xE0FF
-BLUE = 0xF800
-LIGHTBLUE = 0xBD0E
-CYAN = 0xFF07
-MAGENTA = 0x1FF8
+RED = 0x00f8
+LIGHT_PINK = 0xdffc
+PINK = 0x1ff8
+PURPLE = 0x0f78
+ORANGE = 0x20fd
+DARKORANGE = 0xa0ca
+YELLOW = 0x85f6
+BLUE = 0xf800
+LIGHTBLUE = 0xbd0e
+CYAN = 0xff07
+MAGENTA = 0x1ff8  # Remove this color after logger is removed
 
-# define NAVY        0x0F00
-# define DARKCYAN    0xEF03
-# define MAROON      0x0078
-# define PURPLE      0x0F78
-# define OLIVE       0xE07B
-# define GREENYELLOW 0xE5AF
 
 THEMES = {
     ThemeSettings.DARK_THEME_NAME: {
