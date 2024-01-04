@@ -69,6 +69,10 @@ _update-pull = "git pull origin main"
 _update-submodules = "git submodule update --init --recursive"
 update-repo = ["_update-pull", "_update-submodules"]
 
+# List all todos
+list-todos-firmware-font = "grep -ne \"TODO\" firmware/font/*.py" 
+list-todos-firmware-scripts = "grep -ne \"TODO\" firmware/scripts/*.py" 
+
 # tasks for format code with black
 # all tasks that start with `_` are'nt callable
 _format-firmware-font = "black ./firmware/font"
@@ -82,8 +86,8 @@ format = ["_format-firmware", "_format-i18n", "_format-simulator", "_format-src"
 
 # tasks for lint code with pylint
 # all tasks that start with `_` are'nt callable
-_lint-firmware-font = "pylint ./firmware/font"
-_lint-firmware-scripts = "pylint ./firmware/scripts"
+_lint-firmware-font = "pylint ./firmware/font/*.py"
+_lint-firmware-scripts = "pylint ./firmware/scripts/*.py"
 lint-firmware = ["_lint-firmware-font", "_lint-firmware-scripts"]
 lint-i18n = "pylint ./i18n/i18n.py"
 _lint-simulator-kruxsim = "pylint ./simulator/kruxsim"
