@@ -70,8 +70,11 @@ _update-submodules = "git submodule update --init --recursive"
 update-repo = ["_update-pull", "_update-submodules"]
 
 # List all todos
-list-todos-firmware-font = "grep -ne \"TODO\" firmware/font/*.py" 
-list-todos-firmware-scripts = "grep -ne \"TODO\" firmware/scripts/*.py" 
+list-todos-firmware = "grep -ne \"TODO\" ./fimrware/fonts*.py ./firmware/scripts/*.py"
+list-todos-i18n = "grep -ne \"TODO\" ./i18n/i18n.py"
+list-todos-simulator = "grep -ne \"TODO\" ./simulator/**/*.py" 
+list-todos-src = "grep -ne \"TODO\" ./src/**/*.py" 
+list-todos-tests = "grep -ne \"TODO\" ./tests/**/*.py"
 
 # tasks for format code with black
 # all tasks that start with `_` are'nt callable

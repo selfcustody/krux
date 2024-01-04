@@ -4,6 +4,7 @@
 
 from binascii import unhexlify
 
+
 def rgb24_to_rgb16(rgb, big=False):
     """
     convert 3 bytes of rgb888 into 2 bytes of rgb565
@@ -11,7 +12,7 @@ def rgb24_to_rgb16(rgb, big=False):
 
     :param rgb: bytes
     :param big: boolean flag to assert big or little-endian format
-    :returns int 
+    :returns int
     """
 
     # TODO: this throw a pylint warn C0123: Use isinstance() rather than type() for a typecheck.
@@ -44,7 +45,7 @@ def rgb16_to_rgb24(rgb, big=False):
     def maxv(number_of_bits):
         """
         Return 2^number_of_bits - 1
-        
+
         :returns int
         """
         return (2**number_of_bits) - 1
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     # W0622: Redefining built-in 'help' (redefined-builtin)
     def rgb_convert_help():
         """
-        Simple print help 
+        Simple print help
         """
         print("syntax: {} integer-bytes-or-0xhex-color".format(sys.argv[0]))
 
