@@ -28,7 +28,7 @@ def mock_modules(mocker):
 def test_init(mocker, m5stickv):
     """
     Test the initialization of :class:`krux.context.Context`
-    
+
     :param mocker: the mocker
     :param m5stickv: the device
     """
@@ -46,7 +46,7 @@ def test_init(mocker, m5stickv):
 def test_clear(mocker, m5stickv):
     """
     Test the cleanup of :class:`krux.context.Context`
-    
+
     :param mocker: the mocker
     :param m5stickv: the device
     """
@@ -67,7 +67,7 @@ def test_log(mocker, m5stickv):
     """
     Test the initialization of :class:`krux.context.logger`
     inside the :class:`krux.context.Context`
-    
+
     :param mocker: the mocker
     :param m5stickv: the device
     """
