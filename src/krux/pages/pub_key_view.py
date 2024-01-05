@@ -36,17 +36,28 @@ WALLET_XPUB_START = 4
 
 
 class PubkeyView(Page):
-    """UI to show and export extended public key"""
+    """
+    UI to show and export extended public key
+
+    :param ctx: :class:`krux.pages.Page`
+    """
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.utils = Utils(self.ctx)
 
+    # TODO: Is it worth to define the functions inside as protected members of PubkeyView?
+    # (to aim a better readability)
     def public_key(self):
         """Handler for the 'xpub' menu item"""
 
         def _save_xpub_to_sd(version):
+            """
+            Save xpub to sd card
+
+            :param version: str
+            """
             from .files_operations import SaveFile
 
             save_page = SaveFile(self.ctx)
@@ -63,12 +74,38 @@ class PubkeyView(Page):
                 save_as_binary=False,
             )
 
-        def _pub_key_text(version):
-            if self.has_sd_card():
-                save_sd_pubk_func = lambda ver=version: _save_xpub_to_sd(ver)
-            else:
-                save_sd_pubk_func = None
+        def _generate_save_xpub_to_sd_func(version):
+            """
+            Generate function to define assign
+            :data:`save_sd_pubk_func` in :func:`public_key::_pub_key_text`
 
+            :param version: str
+            """
+            if self.has_sd_card():
+
+                def _func(ver=version):
+                    return _save_xpub_to_sd(ver)
+
+                return _func
+
+            return None
+
+        def _pub_key_text(version):
+            """
+            Create the public key in a text format
+
+            :param version: str
+            """
+            # TODO: these statements throw an pylint warning
+            # C3001: Lambda expression assigned to a variable.
+            # Define a function using the "def" keyword instead.
+            # (unnecessary-lambda-assignment)
+            # if self.has_sd_card():
+            #   save_sd_pubk_func = lambda ver=version: _save_xpub_to_sd(ver)
+            # else:
+            #    save_sd_pubk_func = None
+
+            save_sd_pubk_func = _generate_save_xpub_to_sd_func(version)
             pub_text_menu_items = [
                 (t("Save to SD card"), save_sd_pubk_func),
                 (t("Back"), lambda: MENU_EXIT),
@@ -90,6 +127,11 @@ class PubkeyView(Page):
             pub_key_menu.run_loop()
 
         def _pub_key_qr(version):
+            """
+            Create a public key in QRCode format
+
+            :param version: str
+            """
             title = self.ctx.wallet.key.account_pubkey_str(version)[
                 :WALLET_XPUB_START
             ].upper()
