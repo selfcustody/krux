@@ -31,8 +31,13 @@ Output: 0x00f8
 import sys
 
 
+# TODO: create typings for color param and return step
 def rgb888torgb565(color):
-    """convert to gggbbbbbrrrrrggg to tuple"""
+    """
+    Convert to gggbbbbbrrrrrggg to tuple
+
+    :param color: tuple
+    """
     red, green, blue = color
     red *= 31
     red //= 255
