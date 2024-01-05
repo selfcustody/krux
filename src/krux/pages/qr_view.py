@@ -47,7 +47,14 @@ TRANSCRIBE_MODE = 4
 
 
 class SeedQRView(Page):
-    """Tools to visualize and transcript Seed QRs"""
+    """
+    Tools to visualize and transcript Seed QRs
+
+    :param ctx: :class:`krux.context.Context`
+    :param binary: bool
+    :param data: str | bytes
+    :param title: str
+    """
 
     def __init__(self, ctx, binary=False, data=None, title=None):
         super().__init__(ctx, None)
@@ -67,20 +74,45 @@ class SeedQRView(Page):
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
+
+        # TODO: ternary operation here throw a pylint warning
+        # R1719: The if expression can be replaced with 'test'
+        # (simplifiable-if-expression)
+        # pylint: disable=simplifiable-if-expression
         self.bright = True if theme.bg_color == WHITE else False
 
+    # TODO: add python typings
     def _seed_qr(self):
+        """
+        Convert mnemonic to seedQR format
+
+        :returns <return type?>
+        """
         words = self.ctx.wallet.key.mnemonic.split(" ")
         numbers = ""
         for word in words:
             numbers += str("%04d" % WORDLIST.index(word))
         return qrcode.encode(numbers)
 
+    # TODO: add python typings
     def _binary_seed_qr(self):
+        """
+        Convert binary seed to seedQR format
+
+        :returns <return type?>
+        """
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
         return qrcode.encode(binary_seed)
 
+    # TODO: add python typings
+    # TODO: add properly docstrings
     def _to_compact_seed_qr(self, mnemonic):
+        """
+        Convert mnemonic to compact seedQR format
+
+        :param mnemonic: str
+        :returns <return type?>
+        """
         mnemonic = mnemonic.split(" ")
         checksum_bits = 8 if len(mnemonic) == 24 else 4
         indexes = [WORDLIST.index(word) for word in mnemonic]
@@ -89,8 +121,16 @@ class SeedQRView(Page):
         ]
         return int(bitstring, 2).to_bytes((len(bitstring) + 7) // 8, "big")
 
+    # TODO: add python typings
+    # TODO: add properly docstrings
     def highlight_qr_region(self, code, region=(0, 0, 0, 0), zoom=False):
-        """Draws in white a highlighted region of the QR code"""
+        """
+        Draws in white a highlighted region of the QR code
+
+        :param code: <type?>
+        :param region: tuple[4]
+        :param zoom: bool
+        """
         reg_x, reg_y, reg_width, reg_height = region
         max_width = self.ctx.display.width()
         if zoom:
@@ -134,7 +174,15 @@ class SeedQRView(Page):
                             WHITE,
                         )
 
+    # TODO: add python typings
+    # TODO: add properly docstrings
     def _region_legend(self, row, column):
+        """
+        <DOCUMENTATION HERE>
+
+        :param row: int
+        :param column: int
+        """
         region_char = chr(65 + row)
         self.ctx.display.draw_hcentered_text(
             t("Region: ") + region_char + str(column + 1),
@@ -142,8 +190,18 @@ class SeedQRView(Page):
             color=theme.highlight_color,
         )
 
+    # TODO: add python typings
+    # TODO: add properly docstrings
     def draw_grided_qr(self, mode):
-        """Draws grided QR"""
+        """
+        Draws grided QR
+
+        :param mode: one of
+            - :attr:`krux.pages.qr_view.STANDARD_MODE`
+            - :attr:`krux.pages.qr_view.LINE_MODE`
+            - :attr:`krux.pages.qr_view.ZOOMED_R_MODE`
+            - :attr:`krux.pages.qr_view.REGION_MODE`
+        """
         self.ctx.display.clear()
         if self.ctx.display.width() > 140:
             grid_size = self.ctx.display.width() // 140
@@ -292,8 +350,15 @@ class SeedQRView(Page):
                     theme.highlight_color,
                 )
 
+    # TODO: add python typings
+    # TODO: add properly docstrings
     def add_frame(self, binary_image, size):
-        """Adds a 1 block frame to QR codes"""
+        """
+        Adds a 1 block frame to QR codes
+
+        :param binary_image: <type?>
+        :param size: int
+        """
         new_size = size + 2
         # Create a new bytearray to store the framed image
         framed_image = bytearray(b"\x00" * ((new_size * new_size + 7) >> 3))
@@ -310,8 +375,13 @@ class SeedQRView(Page):
 
         return framed_image, new_size
 
+    # TODO: add python typings
     def save_pbm_image(self, file_name):
-        """Saves QR code image as compact B&W bitmap format file"""
+        """
+        Saves QR code image as compact B&W bitmap format file
+
+        :param file_name: str
+        """
         from ..sd_card import PBM_IMAGE_EXTENSION
 
         code, size = self.add_frame(self.code, self.qr_size)
@@ -334,8 +404,14 @@ class SeedQRView(Page):
             sd.write_binary(file_name, pbm_data)
         self.flash_text(t("Saved to SD card:\n%s") % file_name)
 
+    # TODO: add python typings
     def save_bmp_image(self, file_name, resolution):
-        """Save QR code image as .bmp file"""
+        """
+        Save QR code image as .bmp file
+
+        :param file_name: str
+        :param resolution: int
+        """
         from ..sd_card import BMP_IMAGE_EXTENSION
 
         # TODO: Try Compression?
@@ -418,8 +494,17 @@ class SeedQRView(Page):
         utils.print_standard_qr(self.code, title=self.title, is_qr=True)
         # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
+    # TODO: add python typings
+    # TODO: W0613: Unused argument 'allow_export' (unused-argument)
+    # pylint: disable=unused-argument
     def display_qr(self, allow_export=False, transcript_tools=True, quick_exit=False):
-        """Displays QR codes in multiple modes"""
+        """
+        Displays QR codes in multiple modes
+
+        :param allow_export: bool
+        :param transcript_tools: bool
+        :param quick_exit: bool
+        """
 
         if self.title:
             label = self.title
@@ -431,6 +516,7 @@ class SeedQRView(Page):
         while True:
             button = None
             while button not in (SWIPE_DOWN, SWIPE_UP):
+
                 def toggle_brightness():
                     self.bright = not self.bright
 
