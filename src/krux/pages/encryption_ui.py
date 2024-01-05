@@ -38,8 +38,13 @@ ENCRYPTION_KEY_MAX_LEN = 200
 
 
 class EncryptionKey(Page):
-    """UI to capture an encryption key"""
+    """
+    UI to capture an encryption key
 
+    :param ctx: :class:`krux.context.Context`
+    """
+
+    # TODO: add typings for mnemonic_id and return type
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
@@ -90,19 +95,51 @@ class EncryptionKey(Page):
 
 
 class EncryptMnemonic(Page):
-    """UI with mnemonic encryption output options"""
+    """
+    UI with mnemonic encryption output options
 
+    :param ctx: :class:`krux.context.Context`
+    """
+
+    # TODO: add typings for mnemonic_id and return type
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
 
+    def _sd_store_func(self):
+        """
+        Setup device to store mnemonic on memory,
+        either on sd-card (if sd_card == True)
+        or in flash memory (if sd_card == False)
+
+        :param sd_card: boolean
+        :returns function
+        """
+        if self.has_sd_card():
+
+            def _func():
+                self.store_mnemonic_on_memory(sd_card=True)
+
+            return _func
+
+        # R1705: Unnecessary "else" after "return",
+        # remove the "else" and de-indent the code inside it (no-else-return)
+        return None
+
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
 
-        if self.has_sd_card():
-            sd_store_func = lambda: self.store_mnemonic_on_memory(sd_card=True)
-        else:
-            sd_store_func = None
+        # TODO: The code below generate a pylint warning C3001:
+        # Lambda expression assigned to a variable.
+        # Define a function using the "def" keyword instead.
+        # (unnecessary-lambda-assignment)
+        # could be self._sd_store_func be an option?
+        # if self.has_sd_card():
+        #    sd_store_func = lambda: self.store_mnemonic_on_memory(sd_card=True)
+        # else:
+        #    sd_store_func = None
+        sd_store_func = self._sd_store_func()
+
         encrypt_outputs_menu = [
             (t("Store on Flash"), self.store_mnemonic_on_memory),
             (t("Store on SD Card"), sd_store_func),
@@ -113,8 +150,13 @@ class EncryptMnemonic(Page):
         _, _ = submenu.run_loop()
         return MENU_CONTINUE
 
+    # TODO: add typings for mnemonic_id and return type
     def store_mnemonic_on_memory(self, sd_card=False):
-        """Save encrypted mnemonic on flash or sd_card"""
+        """
+        Save encrypted mnemonic on flash or sd_card
+
+        :params sd_card: boolean
+        """
         from ..encryption import MnemonicStorage
 
         key_capture = EncryptionKey(self.ctx)
@@ -219,14 +261,24 @@ class EncryptMnemonic(Page):
 
 
 class LoadEncryptedMnemonic(Page):
-    """UI to load encrypted mnemonics stored on flash and Sd card"""
+    """
+    UI to load encrypted mnemonics stored on flash and Sd card
 
+    :param ctx: `class`:krux.context.Context
+    """
+
+    # TODO: add typings for mnemonic_id and return type
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
 
+    # TODO: add typings for mnemonic_id and return type
     def load_from_storage(self, delete_opt=False):
-        """Lists all encrypted mnemonics stored is flash and SD card"""
+        """
+        Lists all encrypted mnemonics stored is flash and SD card
+
+        :param delete_opt: boolean
+        """
         from ..encryption import MnemonicStorage
 
         mnemonic_ids_menu = []
@@ -264,8 +316,14 @@ class LoadEncryptedMnemonic(Page):
             return MENU_CONTINUE
         return status
 
+    # TODO: add typings for mnemonic_id and return type
     def _load_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
-        """Uses encryption module to load and decrypt a mnemonic"""
+        """
+        Uses encryption module to load and decrypt a mnemonic
+
+        :param mnemonic_id: <which type?>
+        :param sd_card: boolean
+        """
         from ..encryption import MnemonicStorage
 
         key_capture = EncryptionKey(self.ctx)
@@ -288,8 +346,14 @@ class LoadEncryptedMnemonic(Page):
         del mnemonic_storage
         return words
 
+    # TODO: add typings for mnemonic_id and return type
     def _delete_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
-        """Deletes a mnemonic"""
+        """
+        Deletes a mnemonic
+
+        :param mnemonic
+        :param sd_card: boolean
+        """
         from ..encryption import MnemonicStorage
 
         mnemonic_storage = MnemonicStorage()

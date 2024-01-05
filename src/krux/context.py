@@ -33,8 +33,11 @@ SCREENSAVER_ANIMATION_TIME = 150
 
 
 class Context:
-    """Context is a singleton containing all 'global' state that lives throughout the
+    """
+    Context is a singleton containing all 'global' state that lives throughout the
     duration of the program, including references to all device interfaces.
+
+    :param logo: str
     """
 
     def __init__(self, logo=None):
@@ -58,7 +61,11 @@ class Context:
 
     @property
     def log(self):
-        """Returns the default logger"""
+        """
+        Returns the default logger
+
+        :returns :class:`krux.logging.Logger`
+        """
         return logger
 
     def clear(self):
