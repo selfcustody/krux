@@ -27,24 +27,24 @@ DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
 # To create new colors from RGB values use firmware/scripts/rgbconv.py script
 
 BLACK = 0x0000
-WHITE = 0xffff
+WHITE = 0xFFFF
 LIGHTBLACK = 0x0842
-DARKGREY = 0xef7b
-LIGHTGREY = 0x38c6
-LIGHT_GREEN = 0xec9f
-GREEN = 0xe007
+DARKGREY = 0xEF7B
+LIGHTGREY = 0x38C6
+LIGHT_GREEN = 0xEC9F
+GREEN = 0xE007
 DARKGREEN = 0x8005
-RED = 0x00f8
-LIGHT_PINK = 0xdffc
-PINK = 0x1ff8
-PURPLE = 0x0f78
-ORANGE = 0x20fd
-DARKORANGE = 0xa0ca
-YELLOW = 0x85f6
-BLUE = 0xf800
-LIGHTBLUE = 0xbd0e
-CYAN = 0xff07
-MAGENTA = 0x1ff8  # Remove this color after logger is removed
+RED = 0x00F8
+LIGHT_PINK = 0xDFFC
+PINK = 0x1FF8
+PURPLE = 0x0F78
+ORANGE = 0x20FD
+DARKORANGE = 0xA0CA
+YELLOW = 0x85F6
+BLUE = 0xF800
+LIGHTBLUE = 0xBD0E
+CYAN = 0xFF07
+MAGENTA = 0x1FF8  # Remove this color after logger is removed
 
 
 THEMES = {
@@ -82,7 +82,7 @@ THEMES = {
         "del": YELLOW,
         "toggle": CYAN,
         "error": RED,
-        "highlight": ORANGE,
+        "highlight": YELLOW,
     },
     ThemeSettings.PINK_THEME_NAME: {
         "background": BLACK,

@@ -108,6 +108,7 @@ class Page:
         autocomplete_fn=None,
         possible_keys_fn=None,
         delete_key_fn=None,
+        progress_bar_fn=None,
         go_on_change=False,
         starting_buffer="",
         esc_prompt=True,
@@ -126,7 +127,10 @@ class Page:
                 self.ctx.display.draw_hcentered_text(title, offset_y)
                 offset_y += self.ctx.display.font_height * 3 // 2
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
-            offset_y = pad.keypad_offset()
+
+            # offset_y = pad.keypad_offset()  # Dead code?
+            if progress_bar_fn:
+                progress_bar_fn()
             possible_keys = pad.keys
             if possible_keys_fn is not None:
                 possible_keys = possible_keys_fn(buffer)

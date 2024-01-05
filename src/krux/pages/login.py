@@ -42,16 +42,9 @@ from . import (
     NUM_SPECIAL_2,
 )
 
-D6_STATES = [str(i + 1) for i in range(6)]
-D20_STATES = [str(i + 1) for i in range(20)]
 DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
-
-D6_12W_MIN_ROLLS = 50
-D6_24W_MIN_ROLLS = 99
-D20_12W_MIN_ROLLS = 30
-D20_24W_MIN_ROLLS = 60
 
 SD_MSG_TIME = 2500
 
@@ -147,8 +140,8 @@ class Login(Page):
             self.ctx,
             [
                 (t("Via Camera"), self.new_key_from_snapshot),
-                (t("Via D6"), self.new_key_from_d6),
-                (t("Via D20"), self.new_key_from_d20),
+                (t("Via D6"), self.new_key_from_dice),
+                (t("Via D20"), lambda: self.new_key_from_dice(True)),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -157,13 +150,16 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def new_key_from_d6(self):
-        """Handler for the 'via D6' menu item"""
-        return self._new_key_from_die(D6_STATES, D6_12W_MIN_ROLLS, D6_24W_MIN_ROLLS)
+    def new_key_from_dice(self, d_20=False):
+        """Handler for the 'via DX' menu item. Default is D6"""
+        from .new_mnemonic.dice_rolls import DiceEntropy
 
-    def new_key_from_d20(self):
-        """Handler for the 'via D20' menu item"""
-        return self._new_key_from_die(D20_STATES, D20_12W_MIN_ROLLS, D20_24W_MIN_ROLLS)
+        dice_entropy = DiceEntropy(self.ctx, d_20)
+        captured_entropy = dice_entropy.new_key()
+        if captured_entropy is not None:
+            words = bip39.mnemonic_from_bytes(captured_entropy).split()
+            return self._load_key_from_words(words)
+        return MENU_CONTINUE
 
     def new_key_from_snapshot(self):
         """Use camera's entropy to create a new mnemonic"""
@@ -203,158 +199,6 @@ class Login(Page):
                 num_bytes = 16 if index == 0 else 32
                 words = bip39.mnemonic_from_bytes(entropy_bytes[:num_bytes]).split()
                 return self._load_key_from_words(words)
-        return MENU_CONTINUE
-
-    def shannons_entropy_rolls(self, roll_counts):
-        """Calculates Shannon's entropy of a given list"""
-        import math
-
-        # Total number of pixels (equal to the number of bytes)
-        total_rolls = sum(roll_counts)
-
-        # Calculate entropy
-        entropy = 0
-        for count in roll_counts:
-            probability = count / total_rolls
-            entropy -= probability * (probability and math.log2(probability))
-
-        return entropy * total_rolls
-
-    def _new_key_from_die(self, roll_states, min_rolls_12w, min_rolls_24w):
-        def _stats_for_nerds(rolls, dice_states_count):
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(
-                t("Rolls distribution:"), self.ctx.display.font_height
-            )
-            roll_counts = [0] * dice_states_count
-            for roll in rolls:
-                roll_counts[int(roll) - 1] += 1
-            max_count = roll_counts.index(max(roll_counts))
-            scale_factor = (4 * self.ctx.display.font_height) / roll_counts[max_count]
-            bar_graph = []
-            for count in roll_counts:
-                bar_graph.append(count * scale_factor)
-            bar_pad = self.ctx.display.width() // (dice_states_count + 2)
-            offset_x = bar_pad
-            for individual_bar in bar_graph:
-                offset_y = (
-                    8 * self.ctx.display.font_height
-                )  # 2 from tittle 4 from max bar height
-                offset_y -= int(individual_bar)
-                self.ctx.display.fill_rectangle(
-                    offset_x + 1,
-                    offset_y,
-                    bar_pad - 2,
-                    int(individual_bar),
-                    theme.highlight_color,
-                )
-                offset_x += bar_pad
-            shannons_entropy = self.shannons_entropy_rolls(roll_counts)
-            self.ctx.display.draw_hcentered_text(
-                t("Shannon's Entropy: ") + str(int(shannons_entropy)) + "bits",
-                10 * self.ctx.display.font_height,
-            )
-
-            self.ctx.input.wait_for_button()
-
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        if index == 2:
-            return MENU_CONTINUE
-
-        min_rolls = min_rolls_12w if index == 0 else min_rolls_24w
-        self.ctx.display.clear()
-
-        delete_flag = False
-        self.ctx.display.draw_hcentered_text(
-            t("Roll dice at least %d times to generate a mnemonic.") % (min_rolls)
-        )
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            rolls = []
-
-            def delete_roll(buffer):
-                # buffer not used here
-                nonlocal delete_flag
-                delete_flag = True
-                return buffer
-
-            while True:
-                roll = ""
-                while True:
-                    dice_title = t("Rolls: %d\n") % len(rolls)
-                    entropy = (
-                        "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
-                    )
-                    if len(entropy) <= 10:
-                        dice_title += entropy
-                    else:
-                        dice_title += "..." + entropy[-10:]
-                    roll = self.capture_from_keypad(
-                        dice_title,
-                        [roll_states],
-                        delete_key_fn=delete_roll,
-                        go_on_change=True,
-                    )
-                    if roll == ESC_KEY:
-                        return MENU_CONTINUE
-                    break
-
-                if roll != "":
-                    rolls.append(roll)
-                else:
-                    # If its not a roll it is Del or Go
-                    if delete_flag:  # Del
-                        delete_flag = False
-                        if len(rolls) > 0:
-                            rolls.pop()
-                    elif len(rolls) < min_rolls:  # Not enough to Go
-                        self.flash_text(t("Not enough rolls!"))
-                    else:  # Go
-                        break
-
-            entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
-            self.ctx.display.clear()
-            rolls_str = t("Rolls:\n\n%s") % entropy
-            self.ctx.display.draw_hcentered_text(rolls_str, info_box=True)
-
-            submenu = Menu(
-                self.ctx,
-                [
-                    (t("Stats for Nerds"), lambda: MENU_EXIT),
-                    (t("Generate Words"), lambda: MENU_EXIT),
-                ],
-                offset=(len(self.ctx.display.to_lines(rolls_str)) + 1)
-                * self.ctx.display.font_height,
-            )
-            index, _ = submenu.run_loop()
-            if index == 0:
-                _stats_for_nerds(rolls, len(roll_states))
-
-            import hashlib
-            import binascii
-
-            entropy_bytes = entropy.encode()
-            entropy_hash = binascii.hexlify(
-                hashlib.sha256(entropy_bytes).digest()
-            ).decode()
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("SHA256 of rolls:\n\n%s") % entropy_hash
-            )
-            self.ctx.input.wait_for_button()
-            num_bytes = 16 if min_rolls == min_rolls_12w else 32
-            words = bip39.mnemonic_from_bytes(
-                hashlib.sha256(entropy_bytes).digest()[:num_bytes]
-            ).split()
-            return self._load_key_from_words(words)
-
         return MENU_CONTINUE
 
     def _load_qr_passphrase(self):
