@@ -5,7 +5,12 @@ from unittest.mock import patch
 from Crypto.Cipher import AES
 import base64
 
-from .shared_mocks import mock_context
+# TODO: remove mock_context?
+# this statement throw a pylint warn
+# W0611: Unused mock_context imported from shared_mocks
+# the deletion of it statement do not affect the tests
+# pylint: disable=unused-import
+# from .shared_mocks import mock_context
 
 if "ucryptolib" not in sys.modules:
     sys.modules["ucryptolib"] = mock.MagicMock(
@@ -18,14 +23,38 @@ ITERATIONS = 1000
 TEST_WORDS = (
     "crush inherit small egg include title slogan mom remain blouse boost bonus"
 )
-ECB_WORDS = "brass creek fuel snack era success impulse dirt caution purity lottery lizard boil festival neither case swift smooth range mail gravity sample never ivory"
-CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
 
-ECB_ENCRYPTED_WORDS = "1NV55l0ny9vkFV6s4MnDvDlpiWUJo35sv5hs6ZKp4T0zVrOxXft8E/RLX9unZJJwii2/crVgr+XE/lAgWhL7YoKYtimDmbpdOFK9U84+3bE="
-CBC_ENCRYPTED_WORDS = "pJy/goOD11Nulfzd07PPKCOuPWsy2/tONwHrpY/AihVDcGxmIgzasyhs3fY90E0khrCqqgCvzjukMCdxif2OljKDxZQPGoVNeJKqE4nu5fq5023WhO1yKtAcPt3mML6Q"
+ECB_WORDS = " ".join([
+    "brass creek fuel snack era success impulse dirt caution purity lottery lizard",
+    "boil festival neither case swift smooth range mail gravity sample never ivory"
+])
 
-ECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
-CBC_ENCRYPTED_QR = b"\x07test ID\x01\x00\x00\n\xf3<k\xc1Qn\x95`hrs],^R\x9b\xfa\xec\xfe4\x9e\xf1\xaaT\x8f\xdan<,\xa7\x87Pm\xd8\x80\xd7\x15@\x95\xeb\xc1\xdb\xcd\xb2\xfc\xf7 \x8e"
+CBC_WORDS = " ".join([
+    "dog guitar hotel random owner gadget salute riot patrol work advice panic",
+    "erode leader pass cross section laundry elder asset soul scale immune scatter"
+])
+
+ECB_ENCRYPTED_WORDS = "".join([
+    "1NV55l0ny9vkFV6s4MnDvDlpiWUJo35sv5hs6ZKp4T0zVrOxXft8E/",
+    "RLX9unZJJwii2/crVgr+XE/lAgWhL7YoKYtimDmbpdOFK9U84+3bE="
+])
+
+CBC_ENCRYPTED_WORDS = "".join([
+    "pJy/goOD11Nulfzd07PPKCOuPWsy2/tONwHrpY/AihVDcGxmIgzasy",
+    "hs3fY90E0khrCqqgCvzjukMCdxif2OljKDxZQPGoVNeJKqE4nu5fq5",
+    "023WhO1yKtAcPt3mML6Q"
+])
+
+ECB_ENCRYPTED_QR = b"".join([
+    b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&",
+    b"\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
+])
+
+CBC_ENCRYPTED_QR = b"".join([
+    b"\x07test ID\x01\x00\x00\n\xf3<k\xc1Qn\x95`hrs],^R\x9b\xfa\xec\xfe4",
+    b"\x9e\xf1\xaaT\x8f\xdan<,\xa7\x87Pm\xd8\x80\xd7\x15@\x95\xeb\xc1\xdb",
+    b"\xcd\xb2\xfc\xf7 \x8e"
+])
 
 ECB_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 100000"
@@ -47,13 +76,24 @@ SEEDS_JSON = """{
     }
 }"""
 
+# TODO: there's a way to avoid pylint
+# C0301: Line too long (301/100)?
+# pylint: disable=line-too-long
 ECB_ONLY_JSON = """{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}"""
+
+# pylint: disable=line-too-long
 CBC_ONLY_JSON = """{"cbcID": {"version": 1, "key_iterations": 100000, "data": "GpNxj9kzdiTuIf1UYC6R0FHoUokBhiNLkxWgSOHBhmBHb0Ew8wk1M+VlsR4v/koCfSGOTkgjFshC36+n7mx0W0PI6NizAoPClO8DUVamd5hS6irS+Lfff0//VJWK1BcdvOJjzYw8TBiVaL1swAEEySjn5GsqF1RaJXzAMMgu03Kq32iDIDy7h/jHJTiIPCoVQAle/C9vXq2HQeVx43c0LhGXTZmIhhkHPMgDzFTsMGM="}}"""
 I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
 
 
 @pytest.fixture
 def mock_file_operations(mocker):
+    """
+    Fixture to mock the opening of Json files
+    (acctually they are the constants :data:`SEEDS_JSON`)
+    
+    :param mocker: the mocker
+    """
     mocker.patch(
         "os.listdir",
         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
@@ -63,8 +103,17 @@ def mock_file_operations(mocker):
 
 # -------------------------
 
-
+# pylint: disable=unused-argument
 def test_ecb_encryption(m5stickv):
+    """
+    Test the encryption named as :data:`TEST_KEY`
+    identified by mnemonic-id :data:`TEST_MNEMONIC_ID`
+    configured with :data:`ITERATIONS` iterations,
+    with a mnemonic words :data:`TEST_WORDS` in a
+    :data:`AES.MODE_ECB`
+
+    :param m5stickv: the device
+    """
     from krux.encryption import AESCipher
 
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
@@ -74,13 +123,23 @@ def test_ecb_encryption(m5stickv):
     assert decrypted == TEST_WORDS
 
 
+# pylint: disable=unused-argument
 def test_cbc_encryption(m5stickv):
+    """
+    Test the encryption named as :data:`TEST_KEY`
+    identified by mnemonic-id :data:`TEST_MNEMONIC_ID`
+    configured with :data:`ITERATIONS` iterations,
+    with a mnemonic words :data:`TEST_WORDS` in a
+    :data:`AES.MODE_CBC` 
+
+    :param m5stickv: the device
+    """
     from krux.encryption import AESCipher
     from Crypto.Random import get_random_bytes
 
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
-    iv = get_random_bytes(AES.block_size)
-    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, iv).decode("utf-8")
+    initialization_vector = get_random_bytes(AES.block_size)
+    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, initialization_vector).decode("utf-8")
     assert encrypted == CBC_ENCRYPTED_WORDS
     data = base64.b64decode(encrypted)
     encrypted_mnemonic = data[AES.block_size :]
@@ -89,18 +148,40 @@ def test_cbc_encryption(m5stickv):
     assert decrypted == TEST_WORDS
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_list_mnemonic_storage(m5stickv, mock_file_operations):
+    """
+    Test the listing action of stored encrypted mnemonics on sdcard
+    that has either keys in ECB and CBC mode
+
+    :param m5stickv: the device
+    :param mock_file_operations: the preconfigured fixture
+    """
     from krux.encryption import MnemonicStorage
 
     storage = MnemonicStorage()
     assert storage.has_sd_card is True
     flash_list = storage.list_mnemonics(sd_card=False)
     sd_list = storage.list_mnemonics(sd_card=True)
-    assert "ecbID" and "cbcID" in flash_list
-    assert "ecbID" and "cbcID" in sd_list
+
+    # Avoid R1726: Boolean condition
+    # ''ecbID' and 'cbcID' in flash_list'
+    # may be simplified to ''cbcID' in flash_list' (simplifiable-condition)
+    assert "ecbID" in flash_list
+    assert "cbcID" in flash_list
+    assert "ecbID" in sd_list
+    assert "cbcID" in sd_list
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_load_decrypt_ecb(m5stickv, mock_file_operations):
+    """
+    Test the decryption of a previous loaded encrypted
+    mnemonic in ECB mode from sdcard
+
+    :param m5stickv: the device
+    :param mock_file_operation: the preconfigured fixture
+    """
     from krux.encryption import MnemonicStorage
 
     storage = MnemonicStorage()
@@ -110,7 +191,15 @@ def test_load_decrypt_ecb(m5stickv, mock_file_operations):
     assert words_sd == ECB_WORDS
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_load_decrypt_cbc(m5stickv, mock_file_operations):
+    """
+    Test the decryption of an previous loaded encrypted
+    mnemonic in CBC mode from sdcard
+
+    :param m5stickv: the device
+    :param mock_file_operation: the preconfigured fixture
+    """
     from krux.encryption import MnemonicStorage
 
     storage = MnemonicStorage()
@@ -120,7 +209,15 @@ def test_load_decrypt_cbc(m5stickv, mock_file_operations):
     assert words_sd == CBC_WORDS
 
 
+# pylint: disable=unused-argument
 def test_encrypt_ecb_flash(m5stickv, mocker):
+    """
+    Test the storing action of an encrypted mnemonic
+    in ECB mode to flash memory
+
+    :param m5stickv: the device
+    :param mocker: the mocker
+    """
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -132,7 +229,15 @@ def test_encrypt_ecb_flash(m5stickv, mocker):
     m().write.assert_called_once_with(ECB_ONLY_JSON)
 
 
+# pylint: disable=unused-argument
 def test_encrypt_cbc_flash(m5stickv, mocker):
+    """
+    Test the storing action of an encrypted mnemonic
+    in CBC mode to flash memory
+
+    :param m5stickv: the device
+    :param mocker: the mocker
+    """
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -146,7 +251,16 @@ def test_encrypt_cbc_flash(m5stickv, mocker):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_encrypt_ecb_sd(m5stickv, mocker, mock_file_operations):
+    """
+    Test the storing action of an encrypted mnemonic
+    in ECB mode to sdcard
+
+    :param m5stickv: the device
+    :param mocker: the mocker
+    :param mock_file_operations: the preconfigured fixture
+    """
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -158,7 +272,16 @@ def test_encrypt_ecb_sd(m5stickv, mocker, mock_file_operations):
     m().write.assert_called_once_with(ECB_ONLY_JSON)
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
+    """
+    Test the storing action of an encrypted mnemonic
+    in CBC mode to sdcard
+
+    :param m5stickv: the device
+    :param mocker: the mocker
+    :param mock_file_operations: the preconfigured fixture
+    """
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
 
@@ -172,7 +295,15 @@ def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
-def test_delet_from_flash(m5stickv, mocker):
+# pylint: disable=unused-argument
+def test_delete_from_flash(m5stickv, mocker):
+    """
+    Test the delete action of an encrypted mnemonic
+    in ECB mode from flash memory
+
+    :param m5stickv: the device
+    :param mocker: the mocker
+    """
     from krux.encryption import MnemonicStorage
 
     # Loads a file with 2 mnemonics, one with ID="ecbID", other with ID="cbcID"
@@ -183,7 +314,16 @@ def test_delet_from_flash(m5stickv, mocker):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
-def test_delet_from_sd(m5stickv, mocker, mock_file_operations):
+# pylint: disable=unused-argument, redefined-outer-name
+def test_delete_from_sd(m5stickv, mocker, mock_file_operations):
+    """
+    Test the delete action of an encrypted mnemonic
+    in ECB mode from sdcard
+
+    :param m5stickv: the device
+    :param mocker: the mocker
+    :param mock_file_operations: the preconfigured fixture
+    """
     from krux.encryption import MnemonicStorage
 
     # Loads a file with 2 mnemonics, one with ID="ecbID", other with ID="cbcID"
@@ -194,7 +334,14 @@ def test_delet_from_sd(m5stickv, mocker, mock_file_operations):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
+# pylint: disable=unused-argument
 def test_create_ecb_encrypted_qr_code(m5stickv):
+    """
+    Test the QRCode creation action of an encrypted mnemonic
+    in ECB mode
+
+    :param m5stickv: the device
+    """
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings
 
@@ -204,7 +351,14 @@ def test_create_ecb_encrypted_qr_code(m5stickv):
     assert qr_data == ECB_ENCRYPTED_QR
 
 
+# pylint: disable=unused-argument
 def test_create_cbc_encrypted_qr_code(m5stickv):
+    """
+    Test the QRCode creation action of an encrypted mnemonic
+    in CBC mode
+
+    :param m5stickv: the device
+    """
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings
 
@@ -215,7 +369,15 @@ def test_create_cbc_encrypted_qr_code(m5stickv):
     assert qr_data == CBC_ENCRYPTED_QR
 
 
+# pylint: disable=unused-argument
 def test_decode_ecb_encrypted_qr_code(m5stickv):
+    """
+    Test the QRCode decodification action of a
+    public key data from an encrypted mnemonic
+    in ECB mode
+
+    :param m5stickv: the device
+    """
     from krux.encryption import EncryptedQRCode
     from embit import bip39
 
@@ -227,7 +389,15 @@ def test_decode_ecb_encrypted_qr_code(m5stickv):
     assert words == TEST_WORDS
 
 
+# pylint: disable=unused-argument
 def test_decode_cbc_encrypted_qr_code(m5stickv):
+    """
+    Test the QRCode decodification action of a
+    public key data from an encrypted mnemonic
+    in CBC mode
+
+    :param m5stickv: the device
+    """
     from krux.encryption import EncryptedQRCode
     from embit import bip39
 
@@ -240,7 +410,15 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
     assert words == TEST_WORDS
 
 
+# pylint: disable=unused-argument
 def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
+    """
+    Test the customization of encription, where user can
+    customize its pbkdf2 iterations and the subsequent
+    creation and decodification
+
+    :param m5stickv: the device
+    """
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings
     from embit import bip39
