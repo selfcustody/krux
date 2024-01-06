@@ -40,15 +40,18 @@ D20_24W_MIN_ROLLS = 60
 MIN_ENTROPY_12W = 128
 MIN_ENTROPY_24W = 256
 
+BAR_GRAPH_POSITION = 20   # % of screen (top of the graph)
+BAR_GRAPH_SIZE = 60  # % of screen
+
 
 class DiceEntropy(Page):
     """Capture and analise entropy from dice rolls"""
 
-    def __init__(self, ctx, d_20=False):
+    def __init__(self, ctx, is_d20=False):
         super().__init__(ctx, None)
         self.ctx = ctx
-        self.d_20 = d_20
-        self.roll_states = D20_STATES if d_20 else D6_STATES
+        self.is_d20 = is_d20
+        self.roll_states = D20_STATES if is_d20 else D6_STATES
         self.len_states = len(self.roll_states)
         self.min_rolls = 0
         self.min_entropy = 0
@@ -56,11 +59,12 @@ class DiceEntropy(Page):
         self.roll_counts = [0] * self.len_states
 
     def _count_rolls(self):
+        """Recompute rolls count every time entropy is calculated"""
         self.roll_counts = [0] * self.len_states
         for roll in self.rolls:
             self.roll_counts[int(roll) - 1] += 1
 
-    def shannons_entropy_rolls(self):
+    def calculate_entropy(self):
         """Calculates Shannon's entropy of a given list"""
         import math
 
@@ -76,50 +80,68 @@ class DiceEntropy(Page):
             probability = count / total_rolls
             entropy -= probability * (probability and math.log2(probability))
 
-        return entropy * total_rolls
+        total_entropy = entropy * total_rolls
+        return int(total_entropy)
 
-    def _stats_for_nerds(self):
+    def stats_for_nerds(self):
+        """
+        Displays statistical information and a graphical representation of dice roll outcomes.
+        This method provides a deeper insight into the entropy collection process by showing:
+        1. Distribution of dice rolls as a bar graph.
+        2. The calculated Shannon's entropy in bits.
+        It's intended for users interested in the quality and distribution of their entropy source.
+        """
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             t("Rolls distribution:"), self.ctx.display.font_height
         )
-        self._count_rolls()
-        max_count = self.roll_counts.index(max(self.roll_counts))
-        scale_factor = (4 * self.ctx.display.font_height) / self.roll_counts[max_count]
+        shannons_entropy = self.calculate_entropy()
+        max_count = max(self.roll_counts)
+
+        scale_factor = (self.ctx.display.height() * BAR_GRAPH_SIZE) // 100
+        scale_factor //= max_count
         bar_graph = []
         for count in self.roll_counts:
-            bar_graph.append(count * scale_factor)
+            bar_graph.append(int(count * scale_factor))
         bar_pad = self.ctx.display.width() // (self.len_states + 2)
         offset_x = bar_pad
+        # Bar graph offset (bottom of the graph)
+        offset_y = BAR_GRAPH_POSITION + BAR_GRAPH_SIZE
+        offset_y *= self.ctx.display.height()
+        offset_y //= 100
+       
         for individual_bar in bar_graph:
-            offset_y = (
-                8 * self.ctx.display.font_height
-            )  # 2 from tittle 4 from max bar height
-            offset_y -= int(individual_bar)
+            bar_offset = offset_y - individual_bar
             self.ctx.display.fill_rectangle(
                 offset_x + 1,
-                offset_y,
+                bar_offset,
                 bar_pad - 2,
-                int(individual_bar),
+                individual_bar,
                 theme.highlight_color,
             )
             offset_x += bar_pad
-        shannons_entropy = self.shannons_entropy_rolls()
+        offset_y += self.ctx.display.font_height
         self.ctx.display.draw_hcentered_text(
-            t("Shannon's Entropy: ") + str(int(shannons_entropy)) + "bits",
-            10 * self.ctx.display.font_height,
+            t("Shannon's Entropy: ") + str(shannons_entropy) + "bits",
+            offset_y,
         )
 
         self.ctx.input.wait_for_button()
 
-    def _draw_progress_bar(self):
+    def draw_progress_bar(self):
+        """
+        Draws a progress bar on the display to show the current progress of dice rolls.
+        The progress bar consists of two sections: one indicating the number of rolls
+        made relative to the minimum required, and the other indicating the Shannon's
+        entropy of the rolls relative to the minimum required entropy. It changes color
+        to indicate when the minimum criteria have been met.
+        """
         offset_y = DEFAULT_PADDING + 2 * self.ctx.display.font_height
         pb_height = self.ctx.display.font_height - 4
         if len(self.rolls) > 0:  # Only draws if rolls > 0
             progress = min(self.min_rolls, len(self.rolls))
-            progress *= self.ctx.display.usable_width()
+            progress *= self.ctx.display.usable_width() - 3
             progress //= self.min_rolls
-            progress -= 3
             self.ctx.display.fill_rectangle(
                 DEFAULT_PADDING + 2,
                 offset_y + 2,
@@ -128,12 +150,11 @@ class DiceEntropy(Page):
                 theme.fg_color,
             )
 
-        shannon_entropy = int(self.shannons_entropy_rolls())
+        shannon_entropy = self.calculate_entropy()
         if shannon_entropy:  # Only draws if Shannon's > 0
             shannon_progress = min(self.min_entropy, shannon_entropy)
-            shannon_progress *= self.ctx.display.usable_width()
+            shannon_progress *= self.ctx.display.usable_width() - 3
             shannon_progress //= self.min_entropy
-            shannon_progress -= 3
             self.ctx.display.fill_rectangle(
                 DEFAULT_PADDING + 2,
                 offset_y + (pb_height // 2) + 1,
@@ -167,12 +188,12 @@ class DiceEntropy(Page):
         if index == 2:
             return None
 
-        if index == 0:
+        if index == 0:  # 12 words
             self.min_entropy = MIN_ENTROPY_12W
-            self.min_rolls = D20_12W_MIN_ROLLS if self.d_20 else D6_12W_MIN_ROLLS
-        else:
+            self.min_rolls = D20_12W_MIN_ROLLS if self.is_d20 else D6_12W_MIN_ROLLS
+        else:  # 24 words
             self.min_entropy = MIN_ENTROPY_24W
-            self.min_rolls = D20_24W_MIN_ROLLS if self.d_20 else D6_24W_MIN_ROLLS
+            self.min_rolls = D20_24W_MIN_ROLLS if self.is_d20 else D6_24W_MIN_ROLLS
         self.ctx.display.clear()
 
         delete_flag = False
@@ -204,7 +225,7 @@ class DiceEntropy(Page):
                         dice_title,
                         [self.roll_states],
                         delete_key_fn=delete_roll,
-                        progress_bar_fn=self._draw_progress_bar,
+                        progress_bar_fn=self.draw_progress_bar,
                         go_on_change=True,
                     )
                     if roll == ESC_KEY:
@@ -221,7 +242,7 @@ class DiceEntropy(Page):
                             self.rolls.pop()
                     elif len(self.rolls) < self.min_rolls:  # Not enough to Go
                         self.flash_text(t("Not enough rolls!"))
-                    elif self.shannons_entropy_rolls() < self.min_entropy:
+                    elif self.calculate_entropy() < self.min_entropy:
                         self.ctx.display.clear()
                         self.ctx.display.draw_hcentered_text(
                             t("Poor entropy detected. More rolls are recommended")
@@ -251,7 +272,7 @@ class DiceEntropy(Page):
             )
             index, _ = submenu.run_loop()
             if index == 0:
-                self._stats_for_nerds()
+                self.stats_for_nerds()
 
             import hashlib
             import binascii
