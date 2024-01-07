@@ -1,4 +1,11 @@
+# pylint: disable=unused-argument
 def test_format_btc(m5stickv):
+    """
+    Test many cases where the format of a BTC value
+    can be shown on device according :function:`krux.format.format_btc`
+
+    :param m5stickv: the device
+    """
     from krux.format import format_btc
 
     cases = [

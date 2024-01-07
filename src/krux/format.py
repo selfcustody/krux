@@ -27,9 +27,12 @@ THOUSANDS_SEPARATOR = " "
 
 
 def format_btc(amount):
-    """Formats a BTC value according to the locale and
+    """
+    Formats a BTC value according to the locale and
     the International Bureau of Weights and Measures,
     while still using the idea behind the Satcomma standard
+
+    :param amount: int
     """
 
     btc_without_decimal = amount // SATS_PER_BTC
