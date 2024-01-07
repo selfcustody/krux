@@ -24,37 +24,49 @@ TEST_WORDS = (
     "crush inherit small egg include title slogan mom remain blouse boost bonus"
 )
 
-ECB_WORDS = " ".join([
-    "brass creek fuel snack era success impulse dirt caution purity lottery lizard",
-    "boil festival neither case swift smooth range mail gravity sample never ivory"
-])
+ECB_WORDS = " ".join(
+    [
+        "brass creek fuel snack era success impulse dirt caution purity lottery lizard",
+        "boil festival neither case swift smooth range mail gravity sample never ivory",
+    ]
+)
 
-CBC_WORDS = " ".join([
-    "dog guitar hotel random owner gadget salute riot patrol work advice panic",
-    "erode leader pass cross section laundry elder asset soul scale immune scatter"
-])
+CBC_WORDS = " ".join(
+    [
+        "dog guitar hotel random owner gadget salute riot patrol work advice panic",
+        "erode leader pass cross section laundry elder asset soul scale immune scatter",
+    ]
+)
 
-ECB_ENCRYPTED_WORDS = "".join([
-    "1NV55l0ny9vkFV6s4MnDvDlpiWUJo35sv5hs6ZKp4T0zVrOxXft8E/",
-    "RLX9unZJJwii2/crVgr+XE/lAgWhL7YoKYtimDmbpdOFK9U84+3bE="
-])
+ECB_ENCRYPTED_WORDS = "".join(
+    [
+        "1NV55l0ny9vkFV6s4MnDvDlpiWUJo35sv5hs6ZKp4T0zVrOxXft8E/",
+        "RLX9unZJJwii2/crVgr+XE/lAgWhL7YoKYtimDmbpdOFK9U84+3bE=",
+    ]
+)
 
-CBC_ENCRYPTED_WORDS = "".join([
-    "pJy/goOD11Nulfzd07PPKCOuPWsy2/tONwHrpY/AihVDcGxmIgzasy",
-    "hs3fY90E0khrCqqgCvzjukMCdxif2OljKDxZQPGoVNeJKqE4nu5fq5",
-    "023WhO1yKtAcPt3mML6Q"
-])
+CBC_ENCRYPTED_WORDS = "".join(
+    [
+        "pJy/goOD11Nulfzd07PPKCOuPWsy2/tONwHrpY/AihVDcGxmIgzasy",
+        "hs3fY90E0khrCqqgCvzjukMCdxif2OljKDxZQPGoVNeJKqE4nu5fq5",
+        "023WhO1yKtAcPt3mML6Q",
+    ]
+)
 
-ECB_ENCRYPTED_QR = b"".join([
-    b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&",
-    b"\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
-])
+ECB_ENCRYPTED_QR = b"".join(
+    [
+        b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&",
+        b"\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf",
+    ]
+)
 
-CBC_ENCRYPTED_QR = b"".join([
-    b"\x07test ID\x01\x00\x00\n\xf3<k\xc1Qn\x95`hrs],^R\x9b\xfa\xec\xfe4",
-    b"\x9e\xf1\xaaT\x8f\xdan<,\xa7\x87Pm\xd8\x80\xd7\x15@\x95\xeb\xc1\xdb",
-    b"\xcd\xb2\xfc\xf7 \x8e"
-])
+CBC_ENCRYPTED_QR = b"".join(
+    [
+        b"\x07test ID\x01\x00\x00\n\xf3<k\xc1Qn\x95`hrs],^R\x9b\xfa\xec\xfe4",
+        b"\x9e\xf1\xaaT\x8f\xdan<,\xa7\x87Pm\xd8\x80\xd7\x15@\x95\xeb\xc1\xdb",
+        b"\xcd\xb2\xfc\xf7 \x8e",
+    ]
+)
 
 ECB_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 100000"
@@ -91,7 +103,7 @@ def mock_file_operations(mocker):
     """
     Fixture to mock the opening of Json files
     (acctually they are the constants :data:`SEEDS_JSON`)
-    
+
     :param mocker: the mocker
     """
     mocker.patch(
@@ -102,6 +114,7 @@ def mock_file_operations(mocker):
 
 
 # -------------------------
+
 
 # pylint: disable=unused-argument
 def test_ecb_encryption(m5stickv):
@@ -130,7 +143,7 @@ def test_cbc_encryption(m5stickv):
     identified by mnemonic-id :data:`TEST_MNEMONIC_ID`
     configured with :data:`ITERATIONS` iterations,
     with a mnemonic words :data:`TEST_WORDS` in a
-    :data:`AES.MODE_CBC` 
+    :data:`AES.MODE_CBC`
 
     :param m5stickv: the device
     """
@@ -139,7 +152,9 @@ def test_cbc_encryption(m5stickv):
 
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
     initialization_vector = get_random_bytes(AES.block_size)
-    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, initialization_vector).decode("utf-8")
+    encrypted = encryptor.encrypt(
+        TEST_WORDS, AES.MODE_CBC, initialization_vector
+    ).decode("utf-8")
     assert encrypted == CBC_ENCRYPTED_WORDS
     data = base64.b64decode(encrypted)
     encrypted_mnemonic = data[AES.block_size :]

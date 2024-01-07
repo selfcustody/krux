@@ -1,34 +1,98 @@
+# TODO: maybe its worth to transform `SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1`?
+# it throws a C0302: Too many lines in module (13543/1200)
+# pylint: disable=too-many-lines
 import pytest
 from .shared_mocks import get_mock_open
 
 
 @pytest.fixture
+# pylint: disable=unused-argument
 def tdata(mocker):
+    """
+    Fixture to mock firmware sectors while test
+    its sha256sum, signature and public key certificate
+
+    :param mocker: the mocker
+    """
     import os
     from collections import namedtuple
     from embit import ec
     from krux.firmware import FIRMWARE_SLOT_1, FIRMWARE_SLOT_2
 
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_SIGNER_PUBKEY" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_SIGNER_PUBKEY = (
         "03dc8ffc42845af7a30be30e7fc342363f43bc6d11a6c1d833e4e2fc339a1d0491"
     )
+
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_SIGNER_PUBLIC_KEY" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_SIGNER_PUBLIC_KEY = ec.PublicKey.from_string(TEST_SIGNER_PUBKEY)
 
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_FIRMWARE_FILENAME" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_FIRMWARE_FILENAME = os.path.join(
         os.path.dirname(__file__), "firmware-v0.0.0.bin"
     )
+
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_FIRMWARE" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_FIRMWARE = open(TEST_FIRMWARE_FILENAME, "rb").read()
+
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_FIRMWARE_SHA256" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_FIRMWARE_SHA256 = open(TEST_FIRMWARE_FILENAME + ".sha256.txt", "r").read()
+
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_FIRMWAREW_WITH_HEADER_SHA256" doesn't
+    # conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_FIRMWARE_WITH_HEADER_SHA256 = open(
         TEST_FIRMWARE_FILENAME + ".withheader.sha256.txt", "r"
     ).read()
+
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_FIRMWARE_SIG" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_FIRMWARE_SIG = open(TEST_FIRMWARE_FILENAME + ".sig", "rb").read()
+
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_FIRMWARE_SIGNATURE" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_FIRMWARE_SIGNATURE = ec.Signature.parse(TEST_FIRMWARE_SIG)
+
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_FIRMWARE_MALFORMED_SIG" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_FIRMWARE_MALFORMED_SIG = open(
         TEST_FIRMWARE_FILENAME + ".malformed.sig", "rb"
     ).read()
+
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "TEST_FIRMWARE_BAD_SIG" doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     TEST_FIRMWARE_BAD_SIG = open(TEST_FIRMWARE_FILENAME + ".bad.sig", "rb").read()
 
+    # TODO: change to a valid snake_case?
+    # pylint throw a warning
+    # C0103: Variable name "SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1"
+    # doesn't conform to snake_case naming style
+    # pylint: disable=invalid-name
     SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1 = [
         0x5A,
         0xA5,
@@ -12370,7 +12434,15 @@ def tdata(mocker):
 
 @pytest.fixture
 def mock_success_input_cls(mocker):
+    """
+    Fixture to mock an enter input
+
+    :param mocker: the mocker
+    """
+
+    # pylint: disable=missing-class-docstring
     class MockSuccessInput(mocker.MagicMock):
+        # pylint: disable=missing-function-docstring
         def wait_for_button(self):
             from krux.input import BUTTON_ENTER
 
@@ -12381,8 +12453,16 @@ def mock_success_input_cls(mocker):
 
 @pytest.fixture
 def mock_fail_input_cls(mocker):
+    """
+    Fixture to mock the failure of page button
+
+    :param mocker: the mocker
+    """
+
+    # pylint: disable=missing-class-docstring
     class MockFailInput(mocker.MagicMock):
         def wait_for_button(self):
+            # pylint: disable=missing-function-docstring
             from krux.input import BUTTON_PAGE
 
             return BUTTON_PAGE
@@ -12390,7 +12470,15 @@ def mock_fail_input_cls(mocker):
     return MockFailInput
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_find_active_firmware(mocker, m5stickv, tdata):
+    """
+    Test some addresses and sizes in sectors of a active firmware
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     from krux.firmware import find_active_firmware
 
     for test_sector_case in tdata.TEST_SECTOR_CASES:
@@ -12400,7 +12488,16 @@ def test_find_active_firmware(mocker, m5stickv, tdata):
         assert i == test_sector_case[0][2]
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_update_boot_config_sector(mocker, m5stickv, tdata):
+    """
+    Test the update process of a sector that in its initial state
+    have no active firmware to a sector that holds a boot configuration
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     from krux.firmware import update_boot_config_sector, FIRMWARE_SLOT_2
 
     before_sector = tdata.SECTOR_WITH_NO_ACTIVE_FIRMWARE
@@ -12426,14 +12523,30 @@ def test_update_boot_config_sector(mocker, m5stickv, tdata):
         assert after_sector[i * 32 + 8 : i * 32 + 8 + 4] == (1653985).to_bytes(4, "big")
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_fsize(mocker, m5stickv, tdata):
+    """
+    Test the firmware size
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predfined fixture
+    """
     from krux.firmware import fsize
 
     expected_size = len(open(tdata.TEST_FIRMWARE_FILENAME, "rb").read())
     assert fsize(tdata.TEST_FIRMWARE_FILENAME) == expected_size
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_sha256(mocker, m5stickv, tdata):
+    """
+    Test the firmware's sha256sum
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predfined fixture
+    """
     import hashlib
     from krux.firmware import sha256
 
@@ -12443,7 +12556,17 @@ def test_sha256(mocker, m5stickv, tdata):
     assert sha256(tdata.TEST_FIRMWARE_FILENAME, size) == expected_hash.digest()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_write_data_with_header_and_sha_suffix(mocker, m5stickv, tdata):
+    """
+    Test the action to write (flash)
+    some data in the sector with no active firmware
+    with a header and a suffix that contain a sha256sum
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
     import hashlib
     import io
@@ -12459,7 +12582,11 @@ def test_write_data_with_header_and_sha_suffix(mocker, m5stickv, tdata):
     data = bytes(tdata.SECTOR_WITH_NO_ACTIVE_FIRMWARE)
     size = len(data)
     header = b"\x00" + size.to_bytes(4, "little")
-    hash = hashlib.sha256(header + data).digest()
+
+    # Calling the variable below as `hash`
+    # throw a pylint warning
+    # W0622: Redefining built-in 'hash' (redefined-builtin)
+    header_data_hash = hashlib.sha256(header + data).digest()
 
     write_data(
         percent_callback,
@@ -12468,7 +12595,7 @@ def test_write_data_with_header_and_sha_suffix(mocker, m5stickv, tdata):
         size,
         1024,
         header=True,
-        sha_suffix=hash,
+        sha_suffix=header_data_hash,
     )
 
     assert num_callbacks == 6
@@ -12494,13 +12621,26 @@ def test_write_data_with_header_and_sha_suffix(mocker, m5stickv, tdata):
             ),
             mocker.call(
                 FIRMWARE_SLOT_1 + 4096,
-                data[1024 - 5 + 3 * 1024 :] + hash + (b"\x00" * (1024 - 5 - len(hash))),
+                data[1024 - 5 + 3 * 1024 :]
+                + header_data_hash
+                + (b"\x00" * (1024 - 5 - len(header_data_hash))),
             ),
         ]
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_write_data_with_header_and_no_sha_suffix(mocker, m5stickv, tdata):
+    """
+    Test the action to write (flash)
+    some data in the sector with no active firmware
+    with a header and without a suffix that could
+    contain a sha256sum
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
     import io
     import krux
@@ -12555,7 +12695,17 @@ def test_write_data_with_header_and_no_sha_suffix(mocker, m5stickv, tdata):
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_write_data_with_no_header_and_sha_suffix(mocker, m5stickv, tdata):
+    """
+    Test the action to write (flash)
+    some data in the sector with no active firmware
+    without a header and a suffix that contains a sha256sum
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
     import hashlib
     import io
@@ -12571,7 +12721,7 @@ def test_write_data_with_no_header_and_sha_suffix(mocker, m5stickv, tdata):
     data = bytes(tdata.SECTOR_WITH_NO_ACTIVE_FIRMWARE)
     size = len(data)
     header = b"\x00" + size.to_bytes(4, "little")
-    hash = hashlib.sha256(header + data).digest()
+    header_data_hash = hashlib.sha256(header + data).digest()
 
     write_data(
         percent_callback,
@@ -12580,7 +12730,7 @@ def test_write_data_with_no_header_and_sha_suffix(mocker, m5stickv, tdata):
         size,
         1024,
         header=False,
-        sha_suffix=hash,
+        sha_suffix=header_data_hash,
     )
 
     assert num_callbacks == 6
@@ -12603,13 +12753,26 @@ def test_write_data_with_no_header_and_sha_suffix(mocker, m5stickv, tdata):
             ),
             mocker.call(
                 FIRMWARE_SLOT_1 + 4096,
-                data[1024 + 3 * 1024 :] + hash + (b"\x00" * (1024 - len(hash))),
+                data[1024 + 3 * 1024 :]
+                + header_data_hash
+                + (b"\x00" * (1024 - len(header_data_hash))),
             ),
         ]
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_write_data_with_no_header_and_no_sha_suffix(mocker, m5stickv, tdata):
+    """
+    Test the action to write (flash)
+    some data in the sector with no active firmware
+    without a header and withour suffix that could
+    contains a sha256sum
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
     import io
     import krux
@@ -12655,7 +12818,17 @@ def test_write_data_with_no_header_and_no_sha_suffix(mocker, m5stickv, tdata):
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_write_data_with_1_small_read(mocker, m5stickv, tdata):
+    """
+    Test the action to write (flash)
+    some data in the sector with no active firmware
+    with a bad action of reading one byte
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
     import io
     import krux
@@ -12667,6 +12840,7 @@ def test_write_data_with_1_small_read(mocker, m5stickv, tdata):
         nonlocal num_callbacks
         num_callbacks += 1
 
+    # pylint: disable=missing-class-docstring
     class BadReader(io.BytesIO):
         calls = 0
 
@@ -12710,7 +12884,17 @@ def test_write_data_with_1_small_read(mocker, m5stickv, tdata):
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_write_data_with_1_failed_read(mocker, m5stickv, tdata):
+    """
+    Test the action to write (flash)
+    some data in the sector with no active firmware
+    with a failed action of reading bytes
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
     import io
     import krux
@@ -12722,6 +12906,7 @@ def test_write_data_with_1_failed_read(mocker, m5stickv, tdata):
         nonlocal num_callbacks
         num_callbacks += 1
 
+    # pylint: disable=missing-class-docstring
     class BadReader(io.BytesIO):
         calls = 0
 
@@ -12765,7 +12950,17 @@ def test_write_data_with_1_failed_read(mocker, m5stickv, tdata):
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_write_data_with_5_failed_read(mocker, m5stickv, tdata):
+    """
+    Test the action to write (flash)
+    some data in the sector with no active firmware
+    with 5 failed actions of reading bytes
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param tdata: the predefined fixture
+    """
     import io
     from krux.firmware import write_data, FIRMWARE_SLOT_1
 
@@ -12775,6 +12970,7 @@ def test_write_data_with_5_failed_read(mocker, m5stickv, tdata):
         nonlocal num_callbacks
         num_callbacks += 1
 
+    # pylint: disable=missing-class-docstring
     class BadReader(io.BytesIO):
         calls = 0
 
@@ -12801,7 +12997,17 @@ def test_write_data_with_5_failed_read(mocker, m5stickv, tdata):
     assert num_callbacks == 6
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
+    """
+    Test the action to write (flash) a new firmware
+    to device and check it against its expected sha256sum and signature
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     import binascii
     from embit import ec
 
@@ -12844,7 +13050,14 @@ def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
 
     assert firmware.upgrade()
 
+    # TODO: check if this warn is called beacause that is a mocked one
+    # E1101: Method 'from_string' has no 'assert_called_with' member (no-member)
+    # pylint: disable=no-member
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
+
+    # TODO: check if this warn is called beacause that is a mocked one
+    # E1101: Method 'parse' has no 'assert_called_with' member (no-member)
+    # pylint: disable=no-member
     krux.firmware.ec.Signature.parse.assert_called_with(tdata.TEST_FIRMWARE_SIG)
     tdata.TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
         tdata.TEST_FIRMWARE_SIGNATURE,
@@ -12895,9 +13108,20 @@ def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
     mocker, m5stickv, mock_success_input_cls, tdata
 ):
+    """
+    Test the action to write (flash) a new firmware in a backup sector
+    to device and check it against its expected sha256sum and signature
+    when the main sector is missing an active firmware
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     import binascii
     from embit import ec
 
@@ -12943,7 +13167,14 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
 
     assert firmware.upgrade()
 
+    # TODO: check if this warn is called beacause that is a mocked one
+    # E1101: Method 'from_string' has no 'assert_called_with' member (no-member)
+    # pylint: disable=no-member
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
+
+    # TODO: check if this warn is called beacause that is a mocked one
+    # E1101: Method 'parse' has no 'assert_called_with' member (no-member)
+    # pylint: disable=no-member
     krux.firmware.ec.Signature.parse.assert_called_with(tdata.TEST_FIRMWARE_SIG)
     tdata.TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
         tdata.TEST_FIRMWARE_SIGNATURE,
@@ -12997,9 +13228,20 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
     mocker, m5stickv, mock_success_input_cls, tdata
 ):
+    """
+    Test the action to write (flash) a new firmware to device's slot 1
+    and check it against its expected sha256sum and signature when
+    when firmware isnt present in slot 2
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     import binascii
     from embit import ec
 
@@ -13042,7 +13284,14 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
 
     assert firmware.upgrade()
 
+    # TODO: check if this warn is called beacause that is a mocked one
+    # E1101: Method 'from_string' has no 'assert_called_with' member (no-member)
+    # pylint: disable=no-member
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
+
+    # TODO: check if this warn is called beacause that is a mocked one
+    # E1101: Method 'parse' has no 'assert_called_with' member (no-member)
+    # pylint: disable=no-member
     krux.firmware.ec.Signature.parse.assert_called_with(tdata.TEST_FIRMWARE_SIG)
     tdata.TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
         tdata.TEST_FIRMWARE_SIGNATURE,
@@ -13093,21 +13342,45 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
     )
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_sd_card_not_present(mocker, m5stickv):
+    """
+    Test a failure on upgrade to a new firmware
+    when a sdcard isnt present
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    """
     mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=Exception))
     from krux import firmware
 
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_firmware_files_not_present(mocker, m5stickv):
+    """
+    Test a failure on upgrade to a new firmware
+    when necessary files isnt present
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    """
     mocker.patch("os.listdir", new=mocker.MagicMock(return_value=["file1"]))
     from krux import firmware
 
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_user_declines(mocker, m5stickv, mock_fail_input_cls, tdata):
+    """
+    Test a failure on upgrade to a new firmware
+    when the user choose to decline the upgrade
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    """
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -13130,9 +13403,19 @@ def test_upgrade_fails_when_user_declines(mocker, m5stickv, mock_fail_input_cls,
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_firmware_too_big(
     mocker, m5stickv, mock_success_input_cls, tdata
 ):
+    """
+    Test a failure on upgrade to a new firmware
+    when it's too big
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -13156,9 +13439,20 @@ def test_upgrade_fails_when_firmware_too_big(
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_pubkey_is_invalid(
     mocker, m5stickv, mock_success_input_cls, tdata
 ):
+    """
+    Test a failure on upgrade to a new firmware
+    when its public key certificate is invalid
+    (authenticity error)
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -13182,9 +13476,20 @@ def test_upgrade_fails_when_pubkey_is_invalid(
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_sig_file_missing(
     mocker, m5stickv, mock_success_input_cls, tdata
 ):
+    """
+    Test a failure on upgrade to a new firmware
+    when its signature file isnt found or missing
+    (unable to check its authenticity)
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -13208,9 +13513,20 @@ def test_upgrade_fails_when_sig_file_missing(
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_sig_is_invalid(
     mocker, m5stickv, mock_success_input_cls, tdata
 ):
+    """
+    Test a failure on upgrade to a new firmware
+    when its signature file is invalid
+    (authenticity error)
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -13234,9 +13550,20 @@ def test_upgrade_fails_when_sig_is_invalid(
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_sig_is_malformed(
     mocker, m5stickv, mock_success_input_cls, tdata
 ):
+    """
+    Test a failure on upgrade to a new firmware
+    when its signature file is malformed
+    (unable to check its authenticity)
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -13260,7 +13587,18 @@ def test_upgrade_fails_when_sig_is_malformed(
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_sig_is_bad(mocker, m5stickv, mock_success_input_cls, tdata):
+    """
+    Test a failure on upgrade to a new firmware
+    when its signature file is wrong
+    (firmware not authentic)
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     mocker.patch(
         "builtins.open",
         new=get_mock_open(
@@ -13284,9 +13622,19 @@ def test_upgrade_fails_when_sig_is_bad(mocker, m5stickv, mock_success_input_cls,
     assert not firmware.upgrade()
 
 
+# pylint: disable=unused-argument, redefined-outer-name
 def test_upgrade_fails_when_both_sectors_missing_active_firmware(
     mocker, m5stickv, mock_success_input_cls, tdata
 ):
+    """
+    Test a failure on upgrade to a new firmware
+    when no active sectors have the firmware
+
+    :param mocker: the mocker
+    :param m5stickv: the device
+    :param mock_success_input_cls: a predefined input class
+    :param tdata: the predefined fixture
+    """
     mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
     mocker.patch(
         "builtins.open",
