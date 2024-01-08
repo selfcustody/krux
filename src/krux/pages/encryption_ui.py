@@ -95,50 +95,23 @@ class EncryptionKey(Page):
 
 
 class EncryptMnemonic(Page):
-    """
-    UI with mnemonic encryption output options
-
-    :param ctx: :class:`krux.context.Context`
-    """
+    """UI with mnemonic encryption output options"""
 
     # TODO: add typings for mnemonic_id and return type
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def _sd_store_func(self):
-        """
-        Setup device to store mnemonic on memory,
-        either on sd-card (if sd_card == True)
-        or in flash memory (if sd_card == False)
-
-        :param sd_card: boolean
-        :returns function
-        """
-        if self.has_sd_card():
-
-            def _func():
-                self.store_mnemonic_on_memory(sd_card=True)
-
-            return _func
-
-        # R1705: Unnecessary "else" after "return",
-        # remove the "else" and de-indent the code inside it (no-else-return)
-        return None
-
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
 
-        # TODO: The code below generate a pylint warning C3001:
-        # Lambda expression assigned to a variable.
-        # Define a function using the "def" keyword instead.
-        # (unnecessary-lambda-assignment)
-        # could be self._sd_store_func be an option?
-        # if self.has_sd_card():
-        #    sd_store_func = lambda: self.store_mnemonic_on_memory(sd_card=True)
-        # else:
-        #    sd_store_func = None
-        sd_store_func = self._sd_store_func()
+        def _sd_store_function():
+            return self.store_mnemonic_on_memory(sd_card=True)
+
+        if self.has_sd_card():
+            sd_store_func = _sd_store_function
+        else:
+            sd_store_func = None
 
         encrypt_outputs_menu = [
             (t("Store on Flash"), self.store_mnemonic_on_memory),

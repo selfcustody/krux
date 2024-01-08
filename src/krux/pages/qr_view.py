@@ -49,11 +49,6 @@ TRANSCRIBE_MODE = 4
 class SeedQRView(Page):
     """
     Tools to visualize and transcript Seed QRs
-
-    :param ctx: :class:`krux.context.Context`
-    :param binary: bool
-    :param data: str | bytes
-    :param title: str
     """
 
     def __init__(self, ctx, binary=False, data=None, title=None):
@@ -74,19 +69,12 @@ class SeedQRView(Page):
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
-
-        # TODO: ternary operation here throw a pylint warning
-        # R1719: The if expression can be replaced with 'test'
-        # (simplifiable-if-expression)
-        # pylint: disable=simplifiable-if-expression
-        self.bright = True if theme.bg_color == WHITE else False
+        self.bright = theme.bg_color == WHITE
 
     # TODO: add python typings
     def _seed_qr(self):
         """
         Convert mnemonic to seedQR format
-
-        :returns <return type?>
         """
         words = self.ctx.wallet.key.mnemonic.split(" ")
         numbers = ""
@@ -98,20 +86,14 @@ class SeedQRView(Page):
     def _binary_seed_qr(self):
         """
         Convert binary seed to seedQR format
-
-        :returns <return type?>
         """
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
         return qrcode.encode(binary_seed)
 
     # TODO: add python typings
-    # TODO: add properly docstrings
     def _to_compact_seed_qr(self, mnemonic):
         """
         Convert mnemonic to compact seedQR format
-
-        :param mnemonic: str
-        :returns <return type?>
         """
         mnemonic = mnemonic.split(" ")
         checksum_bits = 8 if len(mnemonic) == 24 else 4
@@ -122,14 +104,9 @@ class SeedQRView(Page):
         return int(bitstring, 2).to_bytes((len(bitstring) + 7) // 8, "big")
 
     # TODO: add python typings
-    # TODO: add properly docstrings
     def highlight_qr_region(self, code, region=(0, 0, 0, 0), zoom=False):
         """
         Draws in white a highlighted region of the QR code
-
-        :param code: <type?>
-        :param region: tuple[4]
-        :param zoom: bool
         """
         reg_x, reg_y, reg_width, reg_height = region
         max_width = self.ctx.display.width()
@@ -175,13 +152,9 @@ class SeedQRView(Page):
                         )
 
     # TODO: add python typings
-    # TODO: add properly docstrings
     def _region_legend(self, row, column):
         """
         <DOCUMENTATION HERE>
-
-        :param row: int
-        :param column: int
         """
         region_char = chr(65 + row)
         self.ctx.display.draw_hcentered_text(
@@ -191,16 +164,9 @@ class SeedQRView(Page):
         )
 
     # TODO: add python typings
-    # TODO: add properly docstrings
     def draw_grided_qr(self, mode):
         """
         Draws grided QR
-
-        :param mode: one of
-            - :attr:`krux.pages.qr_view.STANDARD_MODE`
-            - :attr:`krux.pages.qr_view.LINE_MODE`
-            - :attr:`krux.pages.qr_view.ZOOMED_R_MODE`
-            - :attr:`krux.pages.qr_view.REGION_MODE`
         """
         self.ctx.display.clear()
         if self.ctx.display.width() > 140:
@@ -355,9 +321,6 @@ class SeedQRView(Page):
     def add_frame(self, binary_image, size):
         """
         Adds a 1 block frame to QR codes
-
-        :param binary_image: <type?>
-        :param size: int
         """
         new_size = size + 2
         # Create a new bytearray to store the framed image
@@ -379,8 +342,6 @@ class SeedQRView(Page):
     def save_pbm_image(self, file_name):
         """
         Saves QR code image as compact B&W bitmap format file
-
-        :param file_name: str
         """
         from ..sd_card import PBM_IMAGE_EXTENSION
 
@@ -408,9 +369,6 @@ class SeedQRView(Page):
     def save_bmp_image(self, file_name, resolution):
         """
         Save QR code image as .bmp file
-
-        :param file_name: str
-        :param resolution: int
         """
         from ..sd_card import BMP_IMAGE_EXTENSION
 
@@ -500,10 +458,6 @@ class SeedQRView(Page):
     def display_qr(self, allow_export=False, transcript_tools=True, quick_exit=False):
         """
         Displays QR codes in multiple modes
-
-        :param allow_export: bool
-        :param transcript_tools: bool
-        :param quick_exit: bool
         """
 
         if self.title:
@@ -548,7 +502,10 @@ class SeedQRView(Page):
                     self.lr_index %= self.columns * self.columns
             if quick_exit:
                 return MENU_CONTINUE
-            sd_func = self.save_qr_image_menu if self.has_sd_card() else None
+            if self.has_sd_card() and allow_export:
+                sd_func = self.save_qr_image_menu
+            else:
+                sd_func = None
             printer_func = self.print_qr if self.has_printer() else None
             qr_menu = [
                 (t("Return to QR Viewer"), lambda: None),

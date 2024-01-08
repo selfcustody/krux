@@ -55,8 +55,6 @@ class PubkeyView(Page):
         def _save_xpub_to_sd(version):
             """
             Save xpub to sd card
-
-            :param version: str
             """
             from .files_operations import SaveFile
 
@@ -74,38 +72,15 @@ class PubkeyView(Page):
                 save_as_binary=False,
             )
 
-        def _generate_save_xpub_to_sd_func(version):
-            """
-            Generate function to define assign
-            :data:`save_sd_pubk_func` in :func:`public_key::_pub_key_text`
-
-            :param version: str
-            """
-            if self.has_sd_card():
-
-                def _func(ver=version):
-                    return _save_xpub_to_sd(ver)
-
-                return _func
-
-            return None
-
         def _pub_key_text(version):
-            """
-            Create the public key in a text format
+            def _save_sd_pubk_function():
+                return _save_xpub_to_sd(version)
 
-            :param version: str
-            """
-            # TODO: these statements throw an pylint warning
-            # C3001: Lambda expression assigned to a variable.
-            # Define a function using the "def" keyword instead.
-            # (unnecessary-lambda-assignment)
-            # if self.has_sd_card():
-            #   save_sd_pubk_func = lambda ver=version: _save_xpub_to_sd(ver)
-            # else:
-            #    save_sd_pubk_func = None
+            if self.has_sd_card():
+                save_sd_pubk_func = _save_sd_pubk_function
+            else:
+                save_sd_pubk_func = None
 
-            save_sd_pubk_func = _generate_save_xpub_to_sd_func(version)
             pub_text_menu_items = [
                 (t("Save to SD card"), save_sd_pubk_func),
                 (t("Back"), lambda: MENU_EXIT),
@@ -125,6 +100,7 @@ class PubkeyView(Page):
                 info_box=True,
             )
             pub_key_menu.run_loop()
+
 
         def _pub_key_qr(version):
             """

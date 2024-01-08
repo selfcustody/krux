@@ -88,8 +88,6 @@ SEEDS_JSON = """{
     }
 }"""
 
-# TODO: there's a way to avoid pylint
-# C0301: Line too long (301/100)?
 # pylint: disable=line-too-long
 ECB_ONLY_JSON = """{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}"""
 
@@ -103,8 +101,6 @@ def mock_file_operations(mocker):
     """
     Fixture to mock the opening of Json files
     (acctually they are the constants :data:`SEEDS_JSON`)
-
-    :param mocker: the mocker
     """
     mocker.patch(
         "os.listdir",
@@ -124,8 +120,6 @@ def test_ecb_encryption(m5stickv):
     configured with :data:`ITERATIONS` iterations,
     with a mnemonic words :data:`TEST_WORDS` in a
     :data:`AES.MODE_ECB`
-
-    :param m5stickv: the device
     """
     from krux.encryption import AESCipher
 
@@ -144,8 +138,6 @@ def test_cbc_encryption(m5stickv):
     configured with :data:`ITERATIONS` iterations,
     with a mnemonic words :data:`TEST_WORDS` in a
     :data:`AES.MODE_CBC`
-
-    :param m5stickv: the device
     """
     from krux.encryption import AESCipher
     from Crypto.Random import get_random_bytes
@@ -168,9 +160,6 @@ def test_list_mnemonic_storage(m5stickv, mock_file_operations):
     """
     Test the listing action of stored encrypted mnemonics on sdcard
     that has either keys in ECB and CBC mode
-
-    :param m5stickv: the device
-    :param mock_file_operations: the preconfigured fixture
     """
     from krux.encryption import MnemonicStorage
 
@@ -193,9 +182,6 @@ def test_load_decrypt_ecb(m5stickv, mock_file_operations):
     """
     Test the decryption of a previous loaded encrypted
     mnemonic in ECB mode from sdcard
-
-    :param m5stickv: the device
-    :param mock_file_operation: the preconfigured fixture
     """
     from krux.encryption import MnemonicStorage
 
@@ -211,9 +197,6 @@ def test_load_decrypt_cbc(m5stickv, mock_file_operations):
     """
     Test the decryption of an previous loaded encrypted
     mnemonic in CBC mode from sdcard
-
-    :param m5stickv: the device
-    :param mock_file_operation: the preconfigured fixture
     """
     from krux.encryption import MnemonicStorage
 
@@ -229,9 +212,6 @@ def test_encrypt_ecb_flash(m5stickv, mocker):
     """
     Test the storing action of an encrypted mnemonic
     in ECB mode to flash memory
-
-    :param m5stickv: the device
-    :param mocker: the mocker
     """
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
@@ -249,9 +229,6 @@ def test_encrypt_cbc_flash(m5stickv, mocker):
     """
     Test the storing action of an encrypted mnemonic
     in CBC mode to flash memory
-
-    :param m5stickv: the device
-    :param mocker: the mocker
     """
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
@@ -271,10 +248,6 @@ def test_encrypt_ecb_sd(m5stickv, mocker, mock_file_operations):
     """
     Test the storing action of an encrypted mnemonic
     in ECB mode to sdcard
-
-    :param m5stickv: the device
-    :param mocker: the mocker
-    :param mock_file_operations: the preconfigured fixture
     """
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
@@ -292,10 +265,6 @@ def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
     """
     Test the storing action of an encrypted mnemonic
     in CBC mode to sdcard
-
-    :param m5stickv: the device
-    :param mocker: the mocker
-    :param mock_file_operations: the preconfigured fixture
     """
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
@@ -315,9 +284,6 @@ def test_delete_from_flash(m5stickv, mocker):
     """
     Test the delete action of an encrypted mnemonic
     in ECB mode from flash memory
-
-    :param m5stickv: the device
-    :param mocker: the mocker
     """
     from krux.encryption import MnemonicStorage
 
@@ -334,10 +300,6 @@ def test_delete_from_sd(m5stickv, mocker, mock_file_operations):
     """
     Test the delete action of an encrypted mnemonic
     in ECB mode from sdcard
-
-    :param m5stickv: the device
-    :param mocker: the mocker
-    :param mock_file_operations: the preconfigured fixture
     """
     from krux.encryption import MnemonicStorage
 
@@ -346,7 +308,9 @@ def test_delete_from_sd(m5stickv, mocker, mock_file_operations):
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         storage = MnemonicStorage()
         storage.del_mnemonic("ecbID", sd_card=True)
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+    # Calculate padding size
+    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
+    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
 
 
 # pylint: disable=unused-argument
@@ -354,8 +318,6 @@ def test_create_ecb_encrypted_qr_code(m5stickv):
     """
     Test the QRCode creation action of an encrypted mnemonic
     in ECB mode
-
-    :param m5stickv: the device
     """
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings
@@ -371,8 +333,6 @@ def test_create_cbc_encrypted_qr_code(m5stickv):
     """
     Test the QRCode creation action of an encrypted mnemonic
     in CBC mode
-
-    :param m5stickv: the device
     """
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings
@@ -390,8 +350,6 @@ def test_decode_ecb_encrypted_qr_code(m5stickv):
     Test the QRCode decodification action of a
     public key data from an encrypted mnemonic
     in ECB mode
-
-    :param m5stickv: the device
     """
     from krux.encryption import EncryptedQRCode
     from embit import bip39
@@ -410,8 +368,6 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
     Test the QRCode decodification action of a
     public key data from an encrypted mnemonic
     in CBC mode
-
-    :param m5stickv: the device
     """
     from krux.encryption import EncryptedQRCode
     from embit import bip39
@@ -431,8 +387,6 @@ def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
     Test the customization of encription, where user can
     customize its pbkdf2 iterations and the subsequent
     creation and decodification
-
-    :param m5stickv: the device
     """
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings

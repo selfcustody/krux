@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 import lcd
 import board
-from machine import I2C
 from .themes import theme
 
 DEFAULT_PADDING = 10
@@ -30,8 +29,7 @@ PORTRAIT, LANDSCAPE = [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
 
-MAX_BACKLIGHT = 8
-MIN_BACKLIGHT = 1
+DEFAULT_BACKLIGHT = 1
 
 
 class Display:
@@ -39,8 +37,6 @@ class Display:
 
     def __init__(self):
         self.portrait = True
-        # self.initialize_lcd()
-        self.i2c = None
         self.font_width = FONT_WIDTH
         self.font_height = FONT_HEIGHT
         self.total_lines = board.config["lcd"]["width"] // FONT_HEIGHT
@@ -105,7 +101,7 @@ class Display:
                     0x2C,
                 ],
             )
-            self.initialize_backlight()
+            self.set_backlight(DEFAULT_BACKLIGHT)
         else:
             invert = (
                 board.config["type"].startswith("amigo")
@@ -116,21 +112,6 @@ class Display:
         self.to_portrait()
         if board.config["type"].startswith("amigo"):
             lcd.mirror(True)
-
-    def initialize_backlight(self):
-        """Initializes the backlight"""
-        if (
-            "I2C_SCL" not in board.config["krux"]["pins"]
-            or "I2C_SDA" not in board.config["krux"]["pins"]
-        ):
-            return
-        self.i2c = I2C(
-            I2C.I2C0,
-            freq=400000,
-            scl=board.config["krux"]["pins"]["I2C_SCL"],
-            sda=board.config["krux"]["pins"]["I2C_SDA"],
-        )
-        self.set_backlight(MIN_BACKLIGHT)
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
@@ -355,12 +336,10 @@ class Display:
 
     def set_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""
-        if not self.i2c:
-            return
-        # Ranges from 0 to 8
-        level = max(0, min(level, 8))
-        val = (level + 7) << 4
-        self.i2c.writeto_mem(0x34, 0x91, int(val))
+
+        from .power import power_manager
+
+        power_manager.set_screen_brightness(level)
 
     def max_lines(self, line_offset=0):
         """The max lines of text supported by the display"""
