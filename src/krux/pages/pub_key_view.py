@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .utils import Utils
 from ..krux_settings import t
 from . import (
     Page,
@@ -41,7 +40,6 @@ class PubkeyView(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
-        self.utils = Utils(self.ctx)
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""

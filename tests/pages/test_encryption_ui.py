@@ -148,7 +148,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
     from embit.networks import NETWORKS
 
     BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # Move to store on Encrypted QR
+        [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
         + [BUTTON_ENTER]  # Confirm Encrypted QR
         + [BUTTON_PAGE]  # add custom ID - No
         + [BUTTON_ENTER]  # Confirm and leave
@@ -183,7 +183,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
     from embit.networks import NETWORKS
 
     BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # Move to store on Encrypted QR
+        [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
         + [BUTTON_ENTER]  # Confirm Encrypted QR
         + [BUTTON_ENTER]  # Confirm add CBC cam entropy
         + [BUTTON_PAGE]  # add custom ID - No
