@@ -172,7 +172,7 @@ def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
-def test_delet_from_flash(m5stickv, mocker):
+def test_delete_from_flash(m5stickv, mocker):
     from krux.encryption import MnemonicStorage
 
     # Loads a file with 2 mnemonics, one with ID="ecbID", other with ID="cbcID"
@@ -183,7 +183,7 @@ def test_delet_from_flash(m5stickv, mocker):
     m().write.assert_called_once_with(CBC_ONLY_JSON)
 
 
-def test_delet_from_sd(m5stickv, mocker, mock_file_operations):
+def test_delete_from_sd(m5stickv, mocker, mock_file_operations):
     from krux.encryption import MnemonicStorage
 
     # Loads a file with 2 mnemonics, one with ID="ecbID", other with ID="cbcID"
@@ -191,7 +191,9 @@ def test_delet_from_sd(m5stickv, mocker, mock_file_operations):
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         storage = MnemonicStorage()
         storage.del_mnemonic("ecbID", sd_card=True)
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+    # Calculate padding size
+    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
+    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
 
 
 def test_create_ecb_encrypted_qr_code(m5stickv):
