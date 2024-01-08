@@ -40,7 +40,7 @@ D20_24W_MIN_ROLLS = 60
 MIN_ENTROPY_12W = 128
 MIN_ENTROPY_24W = 256
 
-BAR_GRAPH_POSITION = 20   # % of screen (top of the graph)
+BAR_GRAPH_POSITION = 20  # % of screen (top of the graph)
 BAR_GRAPH_SIZE = 60  # % of screen
 
 
@@ -109,7 +109,7 @@ class DiceEntropy(Page):
         offset_y = BAR_GRAPH_POSITION + BAR_GRAPH_SIZE
         offset_y *= self.ctx.display.height()
         offset_y //= 100
-       
+
         for individual_bar in bar_graph:
             bar_offset = offset_y - individual_bar
             self.ctx.display.fill_rectangle(
