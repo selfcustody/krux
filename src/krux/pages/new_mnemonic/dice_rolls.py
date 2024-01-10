@@ -185,15 +185,15 @@ class DiceEntropy(Page):
             ],
         )
         index, _ = submenu.run_loop()
+        is_24_words = index == 1
         if index == 2:
             return None
-
-        if index == 0:  # 12 words
-            self.min_entropy = MIN_ENTROPY_12W
-            self.min_rolls = D20_12W_MIN_ROLLS if self.is_d20 else D6_12W_MIN_ROLLS
-        else:  # 24 words
+        elif index == 1:  # 24 words
             self.min_entropy = MIN_ENTROPY_24W
             self.min_rolls = D20_24W_MIN_ROLLS if self.is_d20 else D6_24W_MIN_ROLLS
+        else:  # 12 words
+            self.min_entropy = MIN_ENTROPY_12W
+            self.min_rolls = D20_12W_MIN_ROLLS if self.is_d20 else D6_12W_MIN_ROLLS
         self.ctx.display.clear()
 
         delete_flag = False
@@ -286,7 +286,7 @@ class DiceEntropy(Page):
                 t("SHA256 of rolls:\n\n%s") % entropy_hash
             )
             self.ctx.input.wait_for_button()
-            num_bytes = 16 if self.min_rolls == D20_12W_MIN_ROLLS else 32
+            num_bytes = 32 if is_24_words else 16
             return hashlib.sha256(entropy_bytes).digest()[:num_bytes]
 
         return None
