@@ -55,7 +55,26 @@ pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.17.0"
+poethepoet = "^0.24.4"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
 simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
+
+[tool.poe.tasks]
+# tasks for format code with black
+# all tasks that start with `_` are'nt callable
+format-src = "black ./src"
+format-tests = "black ./tests"
+format = ["format-src", "format-tests"]
+
+# tasks for lint code with pylint
+# all tasks that start with `_` are'nt callable
+lint = "pylint ./src"
+
+# tasks for test code
+test = "poetry run pytest --cache-clear --cov src/krux --cov-report html ./tests"
+test-verbose = "poetry run pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests"
+
+# pre commit (do formatting, linting and tests)
+pre-commit = ["format", "lint", "test"]
