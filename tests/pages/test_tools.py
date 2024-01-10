@@ -136,4 +136,5 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         tool.del_stored_mnemonic()
     # First mnemonic in the list (ECB) will be deleted
     # Assert only CBC remains
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
+    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
