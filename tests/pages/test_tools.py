@@ -60,6 +60,7 @@ def test_delete_mnemonic_from_flash(m5stickv, mocker):
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Select first mnemonic
         BUTTON_ENTER,  # Confirm deletion
+        BUTTON_ENTER,  # Read remove message
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
@@ -125,6 +126,7 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         BUTTON_PAGE,
         BUTTON_ENTER,  # Select first mnemonic
         BUTTON_ENTER,  # Confirm deletion
+        BUTTON_ENTER,  # Read remove message
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]

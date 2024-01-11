@@ -103,11 +103,11 @@ def test_menu_new_key(m5stickv, mocker):
 
 def test_tools_menu(m5stickv, mocker):
     from krux.pages.login import Login, MENU_CONTINUE
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
         # Back
-        [BUTTON_PAGE] * 4
+        [BUTTON_PAGE] * 5
         + [BUTTON_ENTER]
     )
 

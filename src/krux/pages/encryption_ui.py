@@ -299,4 +299,17 @@ class LoadEncryptedMnemonic(Page):
         self.ctx.display.clear()
         if self.prompt(t("Delete %s?") % mnemonic_id, self.ctx.display.height() // 2):
             mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
+            self.ctx.display.clear()
+            if sd_card:
+                message = t("%s was deleted from SD card") % mnemonic_id
+                message += "\n\n"
+                message += t(
+                    "Fully erase your SD card in another device to ensure data is unrecoverable"
+                )
+            else:
+                message = t("%s was deleted from flash") % mnemonic_id
+                message += "\n\n"
+                message += t("To ensure data is unrecoverable use Wipe Device feature")
+            self.ctx.display.draw_centered_text(message)
+            self.ctx.input.wait_for_button()
         del mnemonic_storage
