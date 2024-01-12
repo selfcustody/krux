@@ -178,6 +178,15 @@ class MockStats:
             return 20
         return 60
 
+    def l_stdev(self):
+        return 0
+
+    def a_stdev(self):
+        return 0
+
+    def b_stdev(self):
+        return 0
+
 
 SNAP_SUCCESS = 0
 SNAP_HISTOGRAM_FAIL = 1
@@ -185,7 +194,7 @@ SNAP_FIND_QRCODES_FAIL = 2
 SNAP_REPEAT_QRCODE = 3
 DONT_FIND_ANYTHING = 4
 
-IMAGE_TO_HASH = b"\x12\x04"  # Dummy bytes
+IMAGE_TO_HASH = b"\x12" * 1024  # Dummy bytes
 
 
 def snapshot_generator(outcome=SNAP_SUCCESS):

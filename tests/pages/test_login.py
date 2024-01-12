@@ -201,14 +201,14 @@ def test_qr_passphrase_fail(m5stickv, mocker):
 
     assert test_passphrase == MENU_CONTINUE
 
+
 def test_new_12w_from_snapshot(m5stickv, mocker):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     # mocks a result of a hashed image
     mock_capture_entropy = mocker.patch(
-        "krux.pages.capture_entropy.CameraEntropy.capture",
-        return_value = b'\x01' * 32
+        "krux.pages.capture_entropy.CameraEntropy.capture", return_value=b"\x01" * 32
     )
 
     BTN_SEQUENCE = (
@@ -236,15 +236,14 @@ def test_new_12w_from_snapshot(m5stickv, mocker):
         # Confirm Singlesig
         [BUTTON_ENTER]
     )
-    MNEMONIC = (
-        "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
-    )
+    MNEMONIC = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     login.new_key_from_snapshot()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.wallet.key.mnemonic == MNEMONIC
+
 
 ########## load words from qrcode tests
 

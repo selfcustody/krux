@@ -68,6 +68,22 @@ def test_load_key_from_keypad(m5stickv, mocker):
     assert key == "b"
 
 
+def test_esc_loading_key_from_keypad_is_none(m5stickv, mocker):
+    from krux.pages.encryption_ui import EncryptionKey
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # choose to type key
+        + [BUTTON_PAGE_PREV] * 2  # go to ESC
+        + [BUTTON_ENTER]  # ESC
+        + [BUTTON_ENTER]  # Confirm
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    key_generator = EncryptionKey(ctx)
+    key = key_generator.encryption_key()
+    assert key is None
+
+
 def test_load_key_from_qr_code(m5stickv, mocker):
     from krux.pages.encryption_ui import EncryptionKey, ENCRYPTION_KEY_MAX_LEN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
@@ -108,7 +124,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
 def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
     from krux.wallet import Wallet
     from krux.krux_settings import Settings
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.pages.encryption_ui import EncryptMnemonic
     from krux.key import Key
     from embit.networks import NETWORKS
@@ -128,7 +144,7 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
         mocker.MagicMock(return_value=TEST_KEY),
     )
     mocker.patch(
-        "krux.pages.encryption_ui.EncryptMnemonic.capture_camera_entropy",
+        "krux.pages.capture_entropy.CameraEntropy.capture",
         mocker.MagicMock(return_value=I_VECTOR),
     )
     Settings().encryption.version = "AES-CBC"
@@ -199,7 +215,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
         mocker.MagicMock(return_value=TEST_KEY),
     )
     mocker.patch(
-        "krux.pages.encryption_ui.EncryptMnemonic.capture_camera_entropy",
+        "krux.pages.capture_entropy.CameraEntropy.capture",
         mocker.MagicMock(return_value=I_VECTOR),
     )
 

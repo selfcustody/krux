@@ -15,7 +15,9 @@ def reset_input_states(mocker, input):
         mocker.patch.object(input, "page_prev_value", return_value=RELEASED)
         mocker.patch.object(input, "page_prev_event", return_value=False)
     if input.touch:
-        mocker.patch.object(input.touch.touch_driver, "current_point", return_value=None)
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", return_value=None
+        )
         mocker.patch.object(input.touch, "event", return_value=False)
     return input
 
@@ -426,7 +428,9 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
     # Create a table of states for button events, values and time ticks
     mocker.patch.object(time, "ticks_ms", side_effect=[0, 100, 200, 300, 400, 1400])
     mocker.patch.object(input, "page_prev_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "page_prev_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "page_prev_value", side_effect=[PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 
@@ -472,7 +476,9 @@ def test_touch_indexing(mocker, amigo_tft):
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
         # release touch
-        mocker.patch.object(input.touch.touch_driver, "current_point", return_value=None)
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", return_value=None
+        )
         time.sleep(0.1)
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
@@ -539,7 +545,9 @@ def test_touch_gestures(mocker, amigo_tft):
         # Release
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
-        mocker.patch.object(input.touch.touch_driver, "current_point", return_value=None)
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", return_value=None
+        )
         time.sleep(0.1)
         elapsed_time += 200
         mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)

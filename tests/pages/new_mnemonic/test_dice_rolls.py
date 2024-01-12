@@ -2,7 +2,6 @@ from ..test_login import create_ctx
 from embit import bip39
 
 
-
 def test_new_12w_from_d6(m5stickv, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -71,7 +70,6 @@ def test_new_24w_from_d6(m5stickv, mocker):
     assert words == MNEMONIC
 
 
-
 def test_new_12w_from_d6_on_amigo_device(amigo_tft, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -132,7 +130,9 @@ def test_new_24w_from_d6_on_amigo_device(amigo_tft, mocker):
     MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
-    dice_entropy = DiceEntropy(ctx, )
+    dice_entropy = DiceEntropy(
+        ctx,
+    )
     entropy = dice_entropy.new_key()
     words = bip39.mnemonic_from_bytes(entropy)
 
@@ -164,6 +164,7 @@ def test_cancel_new_12w_from_d6_on_amigo_device(amigo_tft, mocker):
     dice_entropy.new_key()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_new_12w_from_d20(m5stickv, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D20_12W_MIN_ROLLS
@@ -233,6 +234,7 @@ def test_new_24w_from_d20(m5stickv, mocker):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert words == MNEMONIC
+
 
 def test_cancel_new_12w_from_d20(m5stickv, mocker):
     "Will test the Deletion button and the minimum roll on the roll screen"
