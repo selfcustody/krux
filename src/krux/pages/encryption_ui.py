@@ -55,7 +55,7 @@ class EncryptionKey(Page):
         )
         _, key = submenu.run_loop()
         if key in (ESC_KEY, MENU_CONTINUE):
-            return ""
+            return None
 
         if key:
             self.ctx.display.clear()
@@ -135,7 +135,10 @@ class EncryptMnemonic(Page):
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return
-            i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
+            from .capture_entropy import CameraEntropy
+
+            camera_entropy = CameraEntropy(self.ctx)
+            i_vector = camera_entropy.capture()[:AES_BLOCK_SIZE]
         self.ctx.display.clear()
         mnemonic_storage = MnemonicStorage()
         mnemonic_id = None
@@ -189,7 +192,10 @@ class EncryptMnemonic(Page):
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 self.flash_text(t("Mnemonic was not encrypted"))
                 return
-            i_vector = self.capture_camera_entropy()[:AES_BLOCK_SIZE]
+            from .capture_entropy import CameraEntropy
+
+            camera_entropy = CameraEntropy(self.ctx)
+            i_vector = camera_entropy.capture()[:AES_BLOCK_SIZE]
         mnemonic_id = None
         self.ctx.display.clear()
         if self.prompt(

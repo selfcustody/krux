@@ -20,13 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import lcd
+import board
 import math
 from . import Page
 
-POOR_VARIANCE_TH = 10
-INSUFFICIENT_VARIANCE_TH = 5  # %
+POOR_VARIANCE_TH = 10  # RMS value of L, A, B channels considered poor
+INSUFFICIENT_VARIANCE_TH = 5  # RMS value of L, A, B channels considered insufficient
 INSUFFICIENT_SHANNONS_ENTROPY_TH = 3  # bits per pixel
-SHANNONS_BLOCK_SIZE = 0x4000  # 16384B, result in ~10 blocks for a QVGA img
+NOT_PRESSED = 0
+PROCEED_PRESSED = 1
+CANCEL_PRESSED = 2
 
 
 class CameraEntropy(Page):
@@ -36,35 +40,47 @@ class CameraEntropy(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def _callback(self):
-        # Accepted
-        if self.ctx.input.enter_event() or self.ctx.input.touch_event():
-            return 1
+    def display_image(self, img):
+        """Displays the image based on the board type."""
+        board_type = board.config["type"]
 
-        # Exited
+        if board_type == "m5stickv":
+            img.lens_corr(strength=1.0, zoom=0.56)
+            lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
+        elif board_type.startswith("amigo"):
+            lcd.display(img, oft=(40, 40))
+        else:
+            lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
+
+    def _callback(self):
+        """
+        Returns PROCEED if user pressed ENTER or touched the screen,
+        CANCEL if user pressed PAGE or PAGE_PREV, 0 otherwise
+        """
+        if self.ctx.input.enter_event() or self.ctx.input.touch_event():
+            return PROCEED_PRESSED
         if self.ctx.input.page_event() or self.ctx.input.page_prev_event():
-            return 2
-        return 0
+            return CANCEL_PRESSED
+        return NOT_PRESSED
+
+    def rms_value(self, data):
+        """Calculates the RMS value of a list of numbers"""
+        if not data:
+            return 0
+        square_sum = sum(x**2 for x in data)
+        mean_square = square_sum / len(data)
+        rms = math.sqrt(mean_square)
+        return int(rms)
 
     def capture(self):
         """Captures camera's entropy as the hash of image buffer"""
         import hashlib
-        import board
         import gc
         import sensor
-        import lcd
+        import shannon
         from ..wdt import wdt
         from ..krux_settings import t
         from ..themes import theme
-        import shannon
-
-        def rms_value(data):
-            if not data:
-                return 0
-            square_sum = sum(x**2 for x in data)
-            mean_square = square_sum / len(data)
-            rms = math.sqrt(mean_square)
-            return int(rms)
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))
@@ -79,7 +95,7 @@ class CameraEntropy(Page):
         while True:
             wdt.feed()
             img = sensor.snapshot()
-            stdev_index = rms_value(
+            stdev_index = self.rms_value(
                 [
                     img.get_statistics().l_stdev(),
                     img.get_statistics().a_stdev(),
@@ -108,23 +124,17 @@ class CameraEntropy(Page):
                 )
             self.ctx.display.to_landscape()
             command = self._callback()
-            if command > 0:
+            if command != NOT_PRESSED:
                 break
 
-            if board.config["type"] == "m5stickv":
-                img.lens_corr(strength=1.0, zoom=0.56)
-                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
-            elif board.config["type"].startswith("amigo"):
-                lcd.display(img, oft=(40, 40))
-            else:
-                lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
+            self.display_image(img)
 
         self.ctx.display.to_portrait()
         gc.collect()
         sensor.run(0)
 
         # User cancelled
-        if command == 2:
+        if command == CANCEL_PRESSED:
             self.flash_text(t("Capture cancelled"))
             return None
 

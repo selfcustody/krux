@@ -263,31 +263,6 @@ class Page:
             )
         return (code, qr_format)
 
-    def capture_camera_entropy(self):
-        "Helper to capture camera's entropy as the hash of image buffer"
-        self._time_frame = time.ticks_ms()
-
-        def callback():
-            # Accepted
-            if self.ctx.input.enter_event() or self.ctx.input.touch_event():
-                return 1
-
-            # Exited
-            if self.ctx.input.page_event() or self.ctx.input.page_prev_event():
-                return 2
-            return 0
-
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))
-        self.ctx.display.to_landscape()
-        entropy_bytes = None
-        try:
-            entropy_bytes = self.ctx.camera.capture_entropy(callback)
-        except:
-            self.ctx.log.exception("Exception occurred capturing camera's entropy")
-        self.ctx.display.to_portrait()
-        return entropy_bytes
-
     def display_qr_codes(self, data, qr_format, title=""):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
