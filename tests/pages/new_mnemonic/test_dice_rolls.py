@@ -1,6 +1,26 @@
 from ..test_login import create_ctx
 from embit import bip39
 
+# rolls which will result in good entropy
+GOOD_ROLLS_TOUCH_SEQUENCE = (
+    [0] * 9  # 9 number 1 presses
+    + [1] * 9  # 9 number 2 presses
+    + [2] * 6  # 6 number 3 presses
+    + [3] * 10  # 10 number 4 presses
+    + [4] * 7  # 7 number 5 presses
+    + [5] * 9  # 9 number 6 presses
+)
+
+# rolls which will result in poor entropy
+POOR_ROLLS_TOUCH_SEQUENCE = (
+    [0] * 10  # 10 number 1 presses
+    + [1] * 10  # 10 number 2 presses
+    + [2] * 10  # 10 number 3 presses
+    + [3] * 10  # 16 number 4 presses
+    + [4] * 6  # 2 number 5 presses
+    + [5] * 4  # 2 number 6 presses
+)
+
 
 def test_new_12w_from_d6(m5stickv, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
@@ -272,3 +292,111 @@ def test_cancel_new_12w_from_d20(m5stickv, mocker):
     dice_entropy.new_key()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+# Test low entropy warning
+def test_low_shannon_entropy_warning(amigo_tft, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # 10 number 1 presses
+        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        +
+        # 1 press prev and 1 press on btn Go
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # proceed with poor entropy,
+            BUTTON_PAGE,  # move to Generate Words, while seeing rolls
+            BUTTON_ENTER,  # generate words
+            BUTTON_ENTER,  # 1 press to confirm SHA
+        ]
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=POOR_ROLLS_TOUCH_SEQUENCE)
+    dice_entropy = DiceEntropy(ctx)
+    dice_entropy.new_key()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Assert ctx.display.draw_centered_text was called with poor entropy warning"
+    call_message = mocker.call("Poor entropy detected. More rolls are recommended")
+    ctx.display.draw_hcentered_text.assert_has_calls([call_message])
+
+
+# Test low entropy warning is not shown when Shannon's entropy is good
+def test_rolls_with_good_shannon_entropy(amigo_tft, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # 10 number 1 presses
+        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        +
+        # 1 press prev and 1 press on btn Go
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            # No warning should be shown here
+            BUTTON_PAGE,  # move to Generate Words, while seeing rolls
+            BUTTON_ENTER,  # generate words
+            BUTTON_ENTER,  # 1 press to confirm SHA
+        ]
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_TOUCH_SEQUENCE)
+    dice_entropy = DiceEntropy(ctx)
+    dice_entropy.new_key()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Assert ctx.display.draw_centered_text was not called with poor entropy warning"
+    call_message = mocker.call("Poor entropy detected. More rolls are recommended")
+    for args in ctx.display.draw_hcentered_text.call_args_list:
+        assert args != call_message
+
+
+# Test stats for nerds
+def test_stats_for_nerds(amigo_tft, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # 10 number 1 presses
+        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        +
+        # 1 press prev and 1 press on btn Go
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # show stats for nerds
+            BUTTON_ENTER,  # generate words
+            BUTTON_ENTER,  # 1 press to confirm SHA
+        ]
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_TOUCH_SEQUENCE)
+    dice_entropy = DiceEntropy(ctx)
+    mocker.spy(dice_entropy, "stats_for_nerds")
+    dice_entropy.new_key()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Assert stats for nerds was called
+    dice_entropy.stats_for_nerds.assert_called_once()

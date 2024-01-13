@@ -142,8 +142,7 @@ class EncryptMnemonic(Page):
             if entropy is None:
                 self.flash_text(t("Mnemonic was not encrypted"))
                 return
-            else:
-                i_vector = entropy[:AES_BLOCK_SIZE]
+            i_vector = entropy[:AES_BLOCK_SIZE]
         self.ctx.display.clear()
         mnemonic_storage = MnemonicStorage()
         mnemonic_id = None
@@ -204,8 +203,7 @@ class EncryptMnemonic(Page):
             if entropy is None:
                 self.flash_text(t("Mnemonic was not encrypted"))
                 return
-            else:
-                i_vector = entropy[:AES_BLOCK_SIZE]
+            i_vector = entropy[:AES_BLOCK_SIZE]
         mnemonic_id = None
         self.ctx.display.clear()
         if self.prompt(
