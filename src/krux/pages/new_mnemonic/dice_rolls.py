@@ -40,6 +40,10 @@ D20_24W_MIN_ROLLS = 60
 MIN_ENTROPY_12W = 128
 MIN_ENTROPY_24W = 256
 
+# Min. rolls hardly will reach min. entropy according to Shannon's index
+# With a small tolerance, excessive low entropy warnings won't pop up when min. rolls are used.
+ENTROPY_TOLERANCE = 2  # bits
+
 BAR_GRAPH_POSITION = 20  # % of screen (top of the graph)
 BAR_GRAPH_SIZE = 60  # % of screen
 
@@ -95,7 +99,7 @@ class DiceEntropy(Page):
         self.ctx.display.draw_hcentered_text(
             t("Rolls distribution:"), self.ctx.display.font_height
         )
-        shannons_entropy = self.calculate_entropy()
+        shannon_entropy = self.calculate_entropy()
         max_count = max(self.roll_counts)
 
         scale_factor = (self.ctx.display.height() * BAR_GRAPH_SIZE) // 100
@@ -122,7 +126,7 @@ class DiceEntropy(Page):
             offset_x += bar_pad
         offset_y += self.ctx.display.font_height
         self.ctx.display.draw_hcentered_text(
-            t("Shannon's Entropy: ") + str(shannons_entropy) + "bits",
+            t("Shannon's Entropy: ") + str(shannon_entropy) + " bits",
             offset_y,
         )
 
@@ -162,7 +166,10 @@ class DiceEntropy(Page):
                 (pb_height // 2) - 2,
                 theme.highlight_color,
             )
-        if shannon_entropy >= self.min_entropy and len(self.rolls) >= self.min_rolls:
+        if (
+            shannon_entropy >= (self.min_entropy - ENTROPY_TOLERANCE)
+            and len(self.rolls) >= self.min_rolls
+        ):
             outline_color = theme.go_color
         else:
             outline_color = theme.no_esc_color
@@ -242,7 +249,9 @@ class DiceEntropy(Page):
                             self.rolls.pop()
                     elif len(self.rolls) < self.min_rolls:  # Not enough to Go
                         self.flash_text(t("Not enough rolls!"))
-                    elif self.calculate_entropy() < self.min_entropy:
+                    elif self.calculate_entropy() < (
+                        self.min_entropy - ENTROPY_TOLERANCE
+                    ):
                         self.ctx.display.clear()
                         self.ctx.display.draw_hcentered_text(
                             t("Poor entropy detected. More rolls are recommended")
