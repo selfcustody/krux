@@ -138,7 +138,7 @@ class EncryptMnemonic(Page):
             from .capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
-            entropy = camera_entropy.capture()
+            entropy = camera_entropy.capture(show_entropy_details=False)
             if entropy is None:
                 self.flash_text(t("Mnemonic was not encrypted"))
                 return
@@ -199,7 +199,7 @@ class EncryptMnemonic(Page):
             from .capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
-            entropy = camera_entropy.capture()
+            entropy = camera_entropy.capture(show_entropy_details=False)
             if entropy is None:
                 self.flash_text(t("Mnemonic was not encrypted"))
                 return

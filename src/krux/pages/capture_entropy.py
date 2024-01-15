@@ -72,7 +72,7 @@ class CameraEntropy(Page):
         rms = math.sqrt(mean_square)
         return int(rms)
 
-    def capture(self):
+    def capture(self, show_entropy_details=True):
         """Captures camera's entropy as the hash of image buffer"""
         import hashlib
         import gc
@@ -163,8 +163,9 @@ class CameraEntropy(Page):
             self.ctx.display.draw_centered_text(error_msg, theme.error_color)
             self.ctx.input.wait_for_button()
             return None
-        self.ctx.display.draw_centered_text(entropy_msg)
-        self.ctx.input.wait_for_button()
+        if show_entropy_details:
+            self.ctx.display.draw_centered_text(entropy_msg)
+            self.ctx.input.wait_for_button()
         hasher = hashlib.sha256()
         image_len = len(img_bytes)
         hasher_index = 0
