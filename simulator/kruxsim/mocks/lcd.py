@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
-import os
 import math
 from unittest import mock
 import pygame as pg
@@ -74,19 +73,32 @@ def register(addr, val):
     pass
 
 
-def display(img, oft=None, roi=None):
+def display(img, oft=(0, 0), roi=None):
+    if roi:
+        image_width = roi[3]
+        image_height = roi[2]
+    else:
+        image_width = 240
+        image_height = 320
+    
+
     def run():
         try:
             frame = img.get_frame()
             frame = cv2.resize(
                 frame,
-                (screen.get_width(), screen.get_height()),
+                (image_width, image_height),
                 interpolation=cv2.INTER_AREA,
             )
             frame = frame.swapaxes(0, 1)
         except:
             return
-        pg.surfarray.blit_array(screen, frame)
+
+        # Create a surface for the frame
+        frame_surface = pg.surfarray.make_surface(frame)
+
+        # Blit this surface onto the screen at the specified offset
+        screen.blit(frame_surface, oft)
 
     pg.event.post(pg.event.Event(events.LCD_DISPLAY_EVENT, {"f": run}))
 
