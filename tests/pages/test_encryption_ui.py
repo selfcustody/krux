@@ -193,6 +193,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
     )
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
+
 def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
     from krux.wallet import Wallet
     from krux.krux_settings import Settings

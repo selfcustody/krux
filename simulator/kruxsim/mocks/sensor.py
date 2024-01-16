@@ -100,13 +100,9 @@ def snapshot():
             frame = sequence_executor.camera_image
             frame = cvtColor(frame, COLOR_BGR2RGB)
             img = sequence_executor.camera_image
-
             m.get_frame.return_value = frame
             m.find_qrcodes.return_value = find_qrcodes(img)
-
             sequence_executor.camera_image = None
-        else:
-            m.get_histogram.return_value = "failed"
     else:
         _, frame = capturer.read()
         rgb_frame = cvtColor(frame, COLOR_BGR2RGB)
@@ -117,6 +113,9 @@ def snapshot():
         m.find_qrcodes.return_value = find_qrcodes(img)
         m.to_bytes.return_value = frame.tobytes()
         m.get_statistics.return_value = MockStatistics(lab_frame)
+        m.width.return_value = frame.shape[1]
+        m.height.return_value = frame.shape[0]
+
     return m
 
 

@@ -26,6 +26,8 @@ import sys
 import math
 from unittest import mock
 
+BYTES_PER_PIXEL = 3
+
 def entropy_img16b(img_bytes):
     """Function to calculate Shannon's entropy.
     Will return average number of bits required to encode each pixel,
@@ -35,17 +37,23 @@ def entropy_img16b(img_bytes):
     This means that in the best-case scenario, you can't compress the image to
     fewer bits per pixel than the entropy value without losing information"""
 
+    """
+    As on the simulator 24 bits are used to encode each pixel, we need to refactor the
+    entropy calculation to take into account the 24 bits(3 bytes) per pixel.
+    The function name will be kept the same for compatibility with the original
+    """
+
     # Calculate frequency of each pixel value
     pixel_counts = {}
-    for i in range(0, len(img_bytes), 2):
-        pixel_value = int.from_bytes(img_bytes[i : i + 2], "little")
+    for i in range(0, len(img_bytes), BYTES_PER_PIXEL):
+        pixel_value = int.from_bytes(img_bytes[i : i + BYTES_PER_PIXEL], "little")
         if pixel_value in pixel_counts:
             pixel_counts[pixel_value] += 1
         else:
             pixel_counts[pixel_value] = 1
 
     # Total number of pixels (half the number of bytes)
-    total_pixels = len(img_bytes) // 2
+    total_pixels = len(img_bytes) // BYTES_PER_PIXEL
 
     # Calculate entropy
     entropy = 0

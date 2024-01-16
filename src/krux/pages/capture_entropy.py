@@ -141,11 +141,12 @@ class CameraEntropy(Page):
         self.ctx.display.draw_centered_text(t("Calculating Shannon's entropy"))
 
         img_bytes = img.to_bytes()
+        img_pixels = img.width() * img.height()
         del img
 
         # Calculate Shannon's entropy:
         shannon_16b = shannon.entropy_img16b(img_bytes)
-        shannon_16b_total = shannon_16b * 320 * 240
+        shannon_16b_total = shannon_16b * img_pixels
 
         entropy_msg = "Shannon's entropy:\n"
         entropy_msg += str(round(shannon_16b, 2)) + " bits/px\n"
