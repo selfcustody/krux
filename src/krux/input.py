@@ -205,11 +205,11 @@ class Input:
 
             time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
-    def wait_for_button(self, block=True):
+    def wait_for_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if non blocking.
         """
-        btn = self.wait_for_press(block)
+        btn = self.wait_for_press(block, wait_duration)
 
         if btn == BUTTON_ENTER:
             # Wait for release
