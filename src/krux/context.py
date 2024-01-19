@@ -22,11 +22,10 @@
 import gc
 import board
 from .logging import logger
-from .display import Display, SPLASH
+from .display import Display
 from .input import Input
 from .camera import Camera
 from .light import Light
-from .themes import theme
 
 
 class Context:
@@ -36,7 +35,7 @@ class Context:
 
     def __init__(self):
         self.display = Display()
-        self.input = Input(screensaver_fallback=self.screensaver)
+        self.input = Input()
         self.camera = Camera()
         self.light = Light() if "LED_W" in board.config["krux"]["pins"] else None
         self.power_manager = None
@@ -54,28 +53,3 @@ class Context:
         if self.printer is not None:
             self.printer.clear()
         gc.collect()
-
-    def screensaver(self):
-        """Displays a screensaver until user input"""
-        anim_frame = 0
-        initial_offset = (self.display.total_lines - len(SPLASH)) // 2
-        fg_color = theme.fg_color
-        bg_color = theme.bg_color
-        self.display.clear()
-        button_press = None
-        while not button_press:
-            # show animation on the screeen
-            offset_y = anim_frame * self.display.font_height
-            self.display.fill_rectangle(
-                0, offset_y, self.display.width(), self.display.font_height, bg_color
-            )
-            if initial_offset <= anim_frame < len(SPLASH) + initial_offset:
-                self.display.draw_hcentered_text(
-                    SPLASH[anim_frame - initial_offset], offset_y, fg_color, bg_color
-                )
-            anim_frame += 1
-            if anim_frame > len(SPLASH) + 2 * initial_offset:
-                anim_frame = 0
-                bg_color, fg_color = fg_color, bg_color
-            # wait_duration(animation period) can be modified here
-            button_press = self.input.wait_for_button(block=False)

@@ -550,6 +550,22 @@ class Menu:
             len(self.menu),
         )
         self.menu_view = ListView(self.menu, max_viewable)
+        self.screensaver_time = time.ticks_ms()
+
+    def screensaver_check(self):
+        """Loads and starts screensaver"""
+        if (
+            Settings().appearance.screensaver_time  # screensaver enabled
+            and not self.menu_offset  # won't start with info boxes
+            and self.screensaver_time + Settings().appearance.screensaver_time * 60000
+            < time.ticks_ms()
+        ):
+            from .screensaver import ScreenSaver
+
+            screen_saver = ScreenSaver(self.ctx)
+            screen_saver.start()
+            return True
+        return False
 
     def run_loop(self, start_from_index=None):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
@@ -586,7 +602,9 @@ class Menu:
                     return (self.menu_view.index(selected_item_index), status)
                 start_from_submenu = False
             else:
-                btn = self.ctx.input.wait_for_button(enable_screensaver=True)
+                btn = self.ctx.input.wait_for_button(block=False)
+                if btn:
+                    self.screensaver_time = time.ticks_ms()
                 if self.ctx.input.touch is not None:
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
@@ -615,6 +633,8 @@ class Menu:
                     self.menu_view.move_forward()
                 elif btn == SWIPE_DOWN:
                     self.menu_view.move_backward()
+                elif self.screensaver_check():
+                    self.screensaver_time = time.ticks_ms()
 
     def _clicked_item(self, selected_item_index):
         if self.menu_view[selected_item_index][1] is None:
