@@ -225,7 +225,7 @@ class Page:
                 self.ctx.display.to_portrait()
                 filled = self.ctx.display.width() * num_parts_captured
                 filled //= part_total
-                self.ctx.display.width()
+                # self.ctx.display.width()  # Dead code?
                 if self.ctx.display.height() < 320:  # M5StickV
                     height = 210
                 elif self.ctx.display.height() > 320:  # Amigo
@@ -638,9 +638,10 @@ class Menu:
 
     def draw_status_bar(self):
         """Draws a status bar along the top of the UI"""
-        self.draw_logging_indicator()
-        self.draw_battery_indicator()
-        self.draw_network_indicator()
+        if self.menu_offset == 0:  # Only draws if menu is full screen
+            self.draw_logging_indicator()
+            self.draw_battery_indicator()
+            self.draw_network_indicator()
 
     #     self.draw_ram_indicator()
 
