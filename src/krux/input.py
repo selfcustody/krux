@@ -172,6 +172,11 @@ class Input:
         if self.touch is not None:
             return self.touch.swipe_down_value()
         return RELEASED
+    
+    def wdt_feed_inc_entropy(self):
+        """Feeds the watchdog and increments the input's entropy"""
+        self.entropy += 1
+        wdt.feed()
 
     def wait_for_press(
         self, block=True, wait_duration=QR_ANIM_PERIOD, enable_screensaver=False
@@ -200,8 +205,7 @@ class Input:
             if self.touch_event():
                 return BUTTON_TOUCH
 
-            self.entropy += 1
-            wdt.feed()  # here is where krux spends most of its time
+            self.wdt_feed_inc_entropy()
 
             if not block and time.ticks_ms() > start_time + wait_duration:
                 return None
@@ -235,8 +239,7 @@ class Input:
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:
-                self.entropy += 1
-                wdt.feed()
+                self.wdt_feed_inc_entropy()
             if not self.buttons_active:
                 self.buttons_active = True
                 btn = None
@@ -245,8 +248,7 @@ class Input:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_value() == PRESSED:
-                self.entropy += 1
-                wdt.feed()
+                self.wdt_feed_inc_entropy()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
                     btn = SWIPE_LEFT
                     break
@@ -257,8 +259,7 @@ class Input:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_prev_value() == PRESSED:
-                self.entropy += 1
-                wdt.feed()
+                self.wdt_feed_inc_entropy()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
                     btn = SWIPE_RIGHT
                     break
@@ -268,8 +269,7 @@ class Input:
         elif btn == BUTTON_TOUCH:
             # Wait for release
             while self.touch_value() == PRESSED:
-                self.entropy += 1
-                wdt.feed()
+                self.wdt_feed_inc_entropy()
             self.buttons_active = False
             if self.swipe_right_value() == PRESSED:
                 btn = SWIPE_RIGHT
