@@ -31,33 +31,16 @@ sys.path.append(".")
 from krux.power import power_manager
 
 MIN_SPLASH_WAIT_TIME = 1000
-SPLASH = """
-██   
-██   
-██   
-██████   
-██   
- ██  ██
-██ ██
-████ 
-██ ██
- ██  ██
-  ██   ██
-"""[
-    1:-1
-].split(
-    "\n"
-)
 
 
-def splash(logo):
+def draw_splash():
     """Display splash while loading modules"""
-    from krux.display import Display
+    from krux.display import Display, SPLASH
 
     disp = Display()
     disp.initialize_lcd()
     disp.clear()
-    disp.draw_centered_text(logo)
+    disp.draw_centered_text(SPLASH)
 
 
 def check_for_updates():
@@ -107,13 +90,13 @@ def home(ctx_home):
 
 
 preimport_ticks = time.ticks_ms()
-splash(SPLASH)
+draw_splash()
 check_for_updates()
 gc.collect()
 
 from krux.context import Context
 
-ctx = Context(SPLASH)
+ctx = Context()
 ctx.power_manager = power_manager
 postimport_ticks = time.ticks_ms()
 

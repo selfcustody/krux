@@ -28,8 +28,22 @@ FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 PORTRAIT, LANDSCAPE = [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
-
 DEFAULT_BACKLIGHT = 1
+
+# Splash will use h. centered text plots. This spaces are used to align without being
+SPLASH = [
+    "██   ",
+    "██   ",
+    "██   ",
+    "██████   ",
+    "██   ",
+    " ██  ██",
+    "██ ██",
+    "████ ",
+    "██ ██",
+    " ██  ██",
+    "  ██   ██",
+]
 
 
 class Display:
@@ -301,23 +315,6 @@ class Display:
     def _obtain_hcentered_offset(self, line_str):
         """Return the offset_x to the horizontally-centered line_str"""
         return max(0, (self.width() - self.font_width * len(line_str)) // 2)
-
-    def draw_line_hcentered_with_fullw_bg(
-        self,
-        line_str,
-        qtd_offset_y,
-        color=theme.fg_color,
-        bg_color=theme.bg_color,
-    ):
-        """Draw a line_str horizontally-centered on the display, at qtd_offset_y times font_height,
-        useful for screensaver"""
-        lcd.fill_rectangle(
-            0, qtd_offset_y * self.font_height, self.width(), self.font_height, bg_color
-        )
-        offset_x = self._obtain_hcentered_offset(line_str)
-        self.draw_string(
-            offset_x, (qtd_offset_y * self.font_height), line_str, color, bg_color
-        )
 
     def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""

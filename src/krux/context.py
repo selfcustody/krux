@@ -20,16 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
-import time
 import board
 from .logging import logger
-from .display import Display
+from .display import Display, SPLASH
 from .input import Input
 from .camera import Camera
 from .light import Light
 from .themes import theme
-
-SCREENSAVER_ANIMATION_TIME = 150
 
 
 class Context:
@@ -37,18 +34,8 @@ class Context:
     duration of the program, including references to all device interfaces.
     """
 
-    def __init__(self, logo=None):
+    def __init__(self):
         self.display = Display()
-
-        if logo is None:
-            logo = []
-        self.logo = logo
-        for _ in range((self.display.total_lines - len(logo)) // 2):
-            self.logo.insert(0, "")
-            self.logo.append("")
-        self.logo.append("")
-        self.logo.append("")
-
         self.input = Input(screensaver_fallback=self.screensaver)
         self.camera = Camera()
         self.light = Light() if "LED_W" in board.config["krux"]["pins"] else None
@@ -71,27 +58,24 @@ class Context:
     def screensaver(self):
         """Displays a screensaver until user input"""
         anim_frame = 0
-        screensaver_time = 0
-
+        initial_offset = (self.display.total_lines - len(SPLASH)) // 2
         fg_color = theme.fg_color
         bg_color = theme.bg_color
-
         self.display.clear()
-
-        while True:
-            if screensaver_time + SCREENSAVER_ANIMATION_TIME < time.ticks_ms():
-                screensaver_time = time.ticks_ms()
-
-                # show animation on the screeen
-                if anim_frame < len(self.logo):
-                    self.display.draw_line_hcentered_with_fullw_bg(
-                        self.logo[anim_frame], anim_frame, fg_color, bg_color
-                    )
-
-                anim_frame = anim_frame + 1
-                if anim_frame > len(self.logo) * 1.4:
-                    anim_frame = 0
-                    bg_color, fg_color = fg_color, bg_color
-
-            if self.input.wait_for_button(block=False) is not None:
-                break
+        button_press = None
+        while not button_press:
+            # show animation on the screeen
+            offset_y = anim_frame * self.display.font_height
+            self.display.fill_rectangle(
+                0, offset_y, self.display.width(), self.display.font_height, bg_color
+            )
+            if initial_offset <= anim_frame < len(SPLASH) + initial_offset:
+                self.display.draw_hcentered_text(
+                    SPLASH[anim_frame - initial_offset], offset_y, fg_color, bg_color
+                )
+            anim_frame += 1
+            if anim_frame > len(SPLASH) + 2 * initial_offset:
+                anim_frame = 0
+                bg_color, fg_color = fg_color, bg_color
+            # wait_duration(animation period) can be modified here
+            button_press = self.input.wait_for_button(block=False)

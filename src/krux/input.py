@@ -172,7 +172,7 @@ class Input:
         if self.touch is not None:
             return self.touch.swipe_down_value()
         return RELEASED
-    
+
     def wdt_feed_inc_entropy(self):
         """Feeds the watchdog and increments the input's entropy"""
         self.entropy += 1
