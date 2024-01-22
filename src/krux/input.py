@@ -32,6 +32,7 @@ SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 SWIPE_UP = 6
 SWIPE_DOWN = 7
+ACTIVATING_BUTTONS = 8  # Won't trigger actions, just indicates buttons can used
 
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
@@ -217,7 +218,7 @@ class Input:
                 self.wdt_feed_inc_entropy()
             if not self.buttons_active:
                 self.buttons_active = True
-                btn = None
+                btn = ACTIVATING_BUTTONS
 
         elif btn == BUTTON_PAGE:
             start_time = time.ticks_ms()
@@ -229,7 +230,7 @@ class Input:
                     break
             if not self.buttons_active:
                 self.buttons_active = True
-                btn = None
+                btn = ACTIVATING_BUTTONS
         elif btn == BUTTON_PAGE_PREV:
             start_time = time.ticks_ms()
             # Wait for release
@@ -240,7 +241,7 @@ class Input:
                     break
             if not self.buttons_active:
                 self.buttons_active = True
-                btn = None
+                btn = ACTIVATING_BUTTONS
         elif btn == BUTTON_TOUCH:
             # Wait for release
             while self.touch_value() == PRESSED:

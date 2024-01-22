@@ -626,7 +626,7 @@ class Menu:
                     self.menu_view.move_forward()
                 elif btn == SWIPE_DOWN:
                     self.menu_view.move_backward()
-                elif not self.menu_offset:
+                elif btn is None and not self.menu_offset:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
                     self.screensaver()
 
