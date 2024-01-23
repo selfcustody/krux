@@ -69,7 +69,7 @@ class PMUController:
     def get_usb_voltage(self):
         return 0
 
-    def enable_pek_button_monitor(self, val):
+    def enable_pek_button_monitor(self):
         pass
 
     def enter_sleep_mode(self):
