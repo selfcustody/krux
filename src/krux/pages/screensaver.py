@@ -39,7 +39,7 @@ class ScreenSaver:
         bg_color = theme.bg_color
         self.ctx.display.clear()
         button_press = None
-        while not button_press:
+        while button_press is None:
             # show animation on the screeen
             offset_y = anim_frame * self.ctx.display.font_height
             self.ctx.display.fill_rectangle(
