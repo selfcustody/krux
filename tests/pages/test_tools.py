@@ -60,6 +60,7 @@ def test_delete_mnemonic_from_flash(m5stickv, mocker):
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Select first mnemonic
         BUTTON_ENTER,  # Confirm deletion
+        BUTTON_ENTER,  # Read remove message
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
@@ -125,6 +126,7 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         BUTTON_PAGE,
         BUTTON_ENTER,  # Select first mnemonic
         BUTTON_ENTER,  # Confirm deletion
+        BUTTON_ENTER,  # Read remove message
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
@@ -136,4 +138,5 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         tool.del_stored_mnemonic()
     # First mnemonic in the list (ECB) will be deleted
     # Assert only CBC remains
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
+    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)

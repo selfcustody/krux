@@ -299,9 +299,9 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             [
                 BUTTON_PAGE,
                 BUTTON_PAGE,
-                BUTTON_PAGE,  # select Compact SeedQR
+                BUTTON_PAGE,  # Select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Open QR Menu
                 BUTTON_PAGE_PREV,  # Move to leave QR Viewer
                 BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
@@ -318,9 +318,9 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
             [
                 BUTTON_PAGE,
                 BUTTON_PAGE,
-                BUTTON_PAGE,  # select Compact SeedQR
+                BUTTON_PAGE,  # Select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Open QR Menu
                 BUTTON_PAGE_PREV,  # Move to leave QR Viewer
                 BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
@@ -339,8 +339,10 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_PAGE,  # select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
-                BUTTON_ENTER,  # Leave
-                BUTTON_PAGE,  # change to Print
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,  # Move to Print
                 BUTTON_ENTER,  # Print
                 BUTTON_ENTER,  # Print confirm
                 BUTTON_ENTER,  # Leave
@@ -362,8 +364,10 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_PAGE,  # select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
-                BUTTON_ENTER,  # Leave
-                BUTTON_PAGE,  # change to Print
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,  # Move to Print
                 BUTTON_ENTER,  # Print
                 BUTTON_ENTER,  # Print confirm
                 BUTTON_ENTER,  # Leave
@@ -385,8 +389,10 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_PAGE,  # select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
-                BUTTON_ENTER,  # Leave
-                BUTTON_PAGE,  # change to Print
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,  # Move to Print
                 BUTTON_ENTER,  # Print
                 BUTTON_PAGE,  # Print decline
                 BUTTON_ENTER,  # Leave
@@ -408,8 +414,10 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,
                 BUTTON_PAGE,  # select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
-                BUTTON_ENTER,  # Leave
-                BUTTON_PAGE,  # change to Print
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,  # Move to Print
                 BUTTON_ENTER,  # Print
                 BUTTON_PAGE,  # Print decline
                 BUTTON_ENTER,  # Leave
@@ -564,125 +572,113 @@ def test_public_key(mocker, m5stickv, tdata):
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # 0 - No print prompt
+        # Case parameters: [Wallet, Printer, Button Sequence, Show XPUB, Show ZPUB]
+        # 0 - Singlesig - Show all text and QR codes
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
             [
-                BUTTON_ENTER,  # XPUB - Text
-                BUTTON_PAGE,  # move Back - child
-                BUTTON_ENTER,  # Press Back - child
-                BUTTON_PAGE,  # move to XPUB - QR
-                BUTTON_ENTER,  # Enter XPUB - QR
-                BUTTON_PAGE_PREV,  # move Back - child
-                BUTTON_ENTER,  # Press Back - child
-                BUTTON_PAGE,  # move to XPUB - QR
+                BUTTON_ENTER,  # Enter XPUB - Text
+                BUTTON_PAGE,  # move to Back
+                BUTTON_ENTER,  # Press Back
+                BUTTON_PAGE,  # move to XPUB - QR Code
+                BUTTON_ENTER,  # Enter XPUB - QR Code
+                BUTTON_ENTER,  # Enter QR Menu
+                BUTTON_PAGE_PREV,  # move to Back to Menu
+                BUTTON_ENTER,  # Press Back to Menu
+                BUTTON_PAGE,  # move to XPUB - QR Code
                 BUTTON_PAGE,  # move to ZPUB - Text
-                BUTTON_PAGE,  # move to ZPUB - QR
-                BUTTON_ENTER,  # Enter ZPUB - QR
-                BUTTON_PAGE_PREV,  # move Back - child
-                BUTTON_ENTER,  # Press Back - child
-                BUTTON_PAGE_PREV,  # Move Back - father
-                BUTTON_ENTER,  # Press Back - father
+                BUTTON_PAGE,  # move to ZPUB - QR Code
+                BUTTON_ENTER,  # Enter ZPUB - QR Code
+                BUTTON_ENTER,  # Enter QR Menu
+                BUTTON_PAGE_PREV,  # move to Back to Menu
+                BUTTON_ENTER,  # Press Back to Menu
+                BUTTON_PAGE_PREV,  # Move Back
+                BUTTON_ENTER,  # Press Back to leave
             ],
+            True,
+            True,
         ),
-        # 1 TODO: From now on tests are broken, it's worth wait for final version before fix
+        # 1 - Multisig - Show all text and QR codes
         (
             Wallet(tdata.MULTISIG_12_WORD_KEY),
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 2 - Print
-        (
-            Wallet(tdata.SINGLESIG_12_WORD_KEY),
-            MockPrinter(),
             [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
+                BUTTON_ENTER,  # Enter XPUB - Text
+                BUTTON_PAGE,  # move to Back
+                BUTTON_ENTER,  # Press Back
+                BUTTON_PAGE,  # move to XPUB - QR Code
+                BUTTON_ENTER,  # Enter XPUB - QR Code
+                BUTTON_ENTER,  # Enter QR Menu
+                BUTTON_PAGE_PREV,  # move to Back to Menu
+                BUTTON_ENTER,  # Press Back to Menu
+                BUTTON_PAGE,  # move to XPUB - QR Code
+                BUTTON_PAGE,  # move to ZPUB - Text
+                BUTTON_PAGE,  # move to ZPUB - QR Code
+                BUTTON_ENTER,  # Enter ZPUB - QR Code
+                BUTTON_ENTER,  # Enter QR Menu
+                BUTTON_PAGE_PREV,  # move to Back to Menu
+                BUTTON_ENTER,  # Press Back to Menu
+                BUTTON_PAGE_PREV,  # Move Back
+                BUTTON_ENTER,  # Press Back to leave
             ],
+            True,
+            True,
         ),
-        # 3
-        (
-            Wallet(tdata.MULTISIG_12_WORD_KEY),
-            MockPrinter(),
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-            ],
-        ),
-        # 4 - Decline to print
-        (
-            Wallet(tdata.SINGLESIG_12_WORD_KEY),
-            MockPrinter(),
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-            ],
-        ),
-        # 5
-        (
-            Wallet(tdata.MULTISIG_12_WORD_KEY),
-            MockPrinter(),
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-            ],
-        ),
+        # TODO: Create cases were not all text and QR codes are shown
     ]
     num = 0
+
     for case in cases:
         print(num)
         num += 1
+        mock_seed_qr_view = mocker.patch(
+            "krux.pages.qr_view.SeedQRView"
+        )  # Mock SeedQRView
         ctx = create_ctx(mocker, case[2], case[0], case[1])
         pub_key_viewer = PubkeyView(ctx)
-
-        mocker.spy(pub_key_viewer, "display_qr_codes")
-        mocker.spy(pub_key_viewer.utils, "print_standard_qr")
 
         pub_key_viewer.public_key()
 
         version = "Zpub" if ctx.wallet.key.multisig else "zpub"
-        display_qr_calls = [
-            mocker.call(
-                ctx.wallet.key.key_expression(None),
-                FORMAT_NONE,
-                "XPUB",
-            ),
-            mocker.call(
-                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
-                FORMAT_NONE,
-                "ZPUB",
-            ),
-        ]
-        print_qr_calls = [
-            mocker.call(ctx.wallet.key.key_expression(None), FORMAT_NONE, "XPUB"),
-            mocker.call(
-                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
-                FORMAT_NONE,
-                "ZPUB",
-            ),
-        ]
+        qr_view_calls = []
+        print_qr_calls = []
 
-        # TODO: Fix here to match the changes on XPUB screen
-        pub_key_viewer.display_qr_codes.assert_has_calls(display_qr_calls)
-        if case[1] is not None:
-            pub_key_viewer.utils.print_standard_qr.assert_has_calls(print_qr_calls)
+        if case[3]:  # Show XPUB
+            qr_view_calls.append(
+                mocker.call(
+                    ctx,
+                    data=ctx.wallet.key.key_expression(None),
+                    title="XPUB",
+                ),
+            )
+            print_qr_calls.append(
+                mocker.call(
+                    ctx.wallet.key.key_expression(None),
+                    FORMAT_NONE,
+                    "XPUB",
+                ),
+            )
+        if case[4]:  # Show ZPUB
+            qr_view_calls.append(
+                mocker.call(
+                    ctx,
+                    data=ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
+                    title="ZPUB",
+                ),
+            )
+            print_qr_calls.append(
+                mocker.call(
+                    ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
+                    FORMAT_NONE,
+                    "ZPUB",
+                ),
+            )
+
+        # Assert SeedQRView was initialized with the correct parameters
+        mock_seed_qr_view.assert_has_calls(qr_view_calls, any_order=True)
+
+        # TODO: Assert XPUB and ZPUB text was displayed
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 

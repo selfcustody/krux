@@ -136,11 +136,11 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
         # Test 135 pixels wide display
         (FORMAT_NONE, tdata.TEST_DATA_B58, 135, 1),
         (FORMAT_PMOFN, tdata.TEST_DATA_B58, 135, 9),
-        (FORMAT_UR, tdata.TEST_DATA_UR, 135, 22),
+        (FORMAT_UR, tdata.TEST_DATA_UR, 135, 26),
         # Test 320 pixels wide display
         (FORMAT_NONE, tdata.TEST_DATA_B58, 320, 1),
         (FORMAT_PMOFN, tdata.TEST_DATA_B58, 320, 3),
-        (FORMAT_UR, tdata.TEST_DATA_UR, 320, 5),
+        (FORMAT_UR, tdata.TEST_DATA_UR, 320, 6),
     ]
     for case in cases:
         mocker.patch(

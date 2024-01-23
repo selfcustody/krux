@@ -25,7 +25,7 @@ from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
 from ..settings import (
     CategorySetting,
     NumberSetting,
-    Store,
+    store,
     SD_PATH,
     FLASH_PATH,
     SETTINGS_FILENAME,
@@ -79,12 +79,12 @@ class SettingsPage(Page):
         location = Settings().persist.location
         if location == SD_PATH:
             if self.has_sd_card():
-                self._display_centered_text(
+                self.flash_text(
                     t("Your changes will be kept on the SD card."),
                     duration=SD_MSG_TIME,
                 )
             else:
-                self._display_centered_text(
+                self.flash_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -94,12 +94,12 @@ class SettingsPage(Page):
             try:
                 # Check for flash
                 os.listdir("/" + FLASH_PATH + "/.")
-                self._display_centered_text(
+                self.flash_text(
                     t("Your changes will be kept on device flash storage."),
                     duration=SD_MSG_TIME,
                 )
             except OSError:
-                self._display_centered_text(
+                self.flash_text(
                     t("Device flash storage not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -107,19 +107,6 @@ class SettingsPage(Page):
                 )
 
         return self.namespace(Settings())()
-
-    def _display_centered_text(
-        self,
-        message,
-        duration=FLASH_MSG_TIME,
-        color=theme.fg_color,
-        bg_color=theme.bg_color,
-    ):
-        """Display a text for duration ms or until you press a button"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(message, color, bg_color)
-        self.ctx.input.wait_for_press(block=False, wait_duration=duration)
-        self.ctx.display.clear()
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
@@ -179,46 +166,6 @@ class SettingsPage(Page):
                 pass
             self.ctx.power_manager.reboot()
 
-    def erase_spiffs(self):
-        """Erase all SPIFFS, removing all saved configs and mnemonics"""
-
-        import flash
-        from ..firmware import FLASH_SIZE, SPIFFS_ADDR, ERASE_BLOCK_SIZE
-
-        empty_buf = b"\xff" * ERASE_BLOCK_SIZE
-        for address in range(SPIFFS_ADDR, FLASH_SIZE, ERASE_BLOCK_SIZE):
-            if flash.read(address, ERASE_BLOCK_SIZE) == empty_buf:
-                continue
-            flash.erase(address, ERASE_BLOCK_SIZE)
-
-    def wipe_device(self):
-        """Fully formats SPIFFS memory"""
-        self.ctx.display.clear()
-        if self.prompt(
-            t(
-                "Permanently remove all stored encrypted mnemonics and settings from flash?"
-            ),
-            self.ctx.display.height() // 2,
-        ):
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Wiping Device.."))
-            self.erase_spiffs()
-            # Reboot so default settings take place and SPIFFS is formatted.
-            self.ctx.power_manager.reboot()
-
-    def restore_menu(self):
-        """Option to restore settings and wipe device"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("Restore Default Settings"), self.restore_settings),
-                (t("Wipe Device"), self.wipe_device),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        submenu.run_loop()
-        return MENU_CONTINUE
-
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
 
@@ -230,14 +177,29 @@ class SettingsPage(Page):
             try:
                 # Check for SD hot-plug
                 with SDHandler():
-                    Store.save_settings()
-                    self._display_centered_text(
-                        t("Changes persisted to SD card!"),
+                    if store.save_settings():
+                        self.flash_text(
+                            t("Changes persisted to SD card!"),
+                            duration=SD_MSG_TIME,
+                        )
+            except OSError:
+                self.flash_text(
+                    t("SD card not detected.")
+                    + "\n\n"
+                    + t("Changes will last until shutdown."),
+                    duration=SD_MSG_TIME,
+                )
+        else:
+            self.ctx.display.clear()
+            try:
+                if store.save_settings():
+                    self.flash_text(
+                        t("Changes persisted to Flash!"),
                         duration=SD_MSG_TIME,
                     )
-            except OSError:
-                self._display_centered_text(
-                    t("SD card not detected.")
+            except:
+                self.flash_text(
+                    t("Unexpected error saving to Flash.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
                     duration=SD_MSG_TIME,
@@ -275,7 +237,7 @@ class SettingsPage(Page):
 
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
-                items.append((t("Factory Settings"), self.restore_menu))
+                items.append((t("Factory Settings"), self.restore_settings))
                 items.append((t("Back"), self._settings_exit_check))
             else:
                 items.append((t("Back"), lambda: MENU_EXIT))
@@ -364,13 +326,13 @@ class SettingsPage(Page):
             if self.prompt(
                 t("Change theme and reboot?"), self.ctx.display.height() // 2
             ):
+                self._settings_exit_check()
                 self.ctx.display.clear()
                 self.ctx.power_manager.reboot()
             else:
                 # Restore previous theme
                 setting.__set__(settings_namespace, starting_category)
                 theme.update()
-                Store.save_settings()
 
         return MENU_CONTINUE
 

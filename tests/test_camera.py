@@ -169,26 +169,3 @@ def test_capture_qr_code_loop_skips_duplicate_qrcode(mocker, m5stickv):
     assert prev_parsed_count == MockQRPartParser.TOTAL - 1
     krux.camera.sensor.run.assert_called_with(0)
     krux.camera.wdt.feed.assert_called()
-
-
-def test_capture_snapshot_entropy(mocker, m5stickv):
-    mocker.patch(
-        "krux.camera.sensor.snapshot", new=snapshot_generator(outcome=SNAP_SUCCESS)
-    )
-    import hashlib
-    import krux
-    from krux.camera import Camera
-
-    c = Camera()
-    callback_returns = [
-        0,  # No button pressed
-        1,  # Enter pressed
-    ]
-    callback = mocker.MagicMock(side_effect=callback_returns)
-    entropy_bytes = c.capture_entropy(callback)
-    hasher = hashlib.sha256()
-    hasher.update(IMAGE_TO_HASH)
-
-    assert entropy_bytes == hasher.digest()
-    krux.camera.sensor.run.assert_called_with(0)
-    krux.camera.wdt.feed.assert_called()

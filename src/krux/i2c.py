@@ -19,5 +19,27 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-VERSION = "24.04.beta14"
-SIGNER_PUBKEY = "03339e883157e45891e61ca9df4cd3bb895ef32d475b8e793559ea10a36766689b"
+
+import board
+from machine import I2C
+
+
+class I2CBus:
+    """Shared I2C bus singleton"""
+
+    def __init__(self):
+        self.i2c = None
+        if (
+            "I2C_SCL" not in board.config["krux"]["pins"]
+            or "I2C_SDA" not in board.config["krux"]["pins"]
+        ):
+            return
+        self.i2c = I2C(
+            I2C.I2C0,
+            freq=400000,
+            scl=board.config["krux"]["pins"]["I2C_SCL"],
+            sda=board.config["krux"]["pins"]["I2C_SDA"],
+        )
+
+
+i2c_bus = I2CBus().i2c

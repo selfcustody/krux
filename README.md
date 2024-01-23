@@ -66,25 +66,25 @@ Note that you can run `poetry install` after making a change to the krux code if
 
 ## Format code
 ```bash
-poetry run black ./src
-poetry run black ./tests
+poetry run poe format
 ```
 
 ## Run pylint
 ```bash
-poetry run pylint ./src
+poetry run poe lint
 ```
 
 ## Run tests
 ```bash
-poetry run pytest --cache-clear --cov src/krux --cov-report html ./tests
+poetry run poe test
 ```
+
 This will run all tests and generate a coverage report you can browse to locally in your browser at `file:///path/to/krux/htmlcov/index.html`.
 
 For more verbose test output (e.g., to see the output of print statements), run:
 
 ```bash
-poetry run pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests
+poetry run poe test-verbose
 ```
 
 To run just a specific test from a specific file, run:

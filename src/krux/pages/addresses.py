@@ -132,10 +132,14 @@ class Addresses(Page):
 
         return MENU_CONTINUE
 
-    def show_address(self, addr, title="", qr_format=FORMAT_NONE):
+    def show_address(self, addr, title="", quick_exit=False):
         """Show addr provided as a QRCode"""
-        self.display_qr_codes(addr, qr_format, title)
-        self.utils.print_standard_qr(addr, qr_format, title)
+        from .qr_view import SeedQRView
+
+        seed_qr_view = SeedQRView(self.ctx, data=addr, title=title)
+        seed_qr_view.display_qr(
+            allow_export=True, transcript_tools=False, quick_exit=quick_exit
+        )
         return MENU_CONTINUE
 
     def pre_scan_address(self):
@@ -174,7 +178,7 @@ class Addresses(Page):
             self.flash_text(t("Invalid address"), theme.error_color)
             return MENU_CONTINUE
 
-        self.show_address(data, title=addr, qr_format=qr_format)
+        self.show_address(data, title=addr, quick_exit=True)
 
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
             self.ctx.display.clear()

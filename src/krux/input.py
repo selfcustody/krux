@@ -23,7 +23,6 @@ import time
 import board
 from .wdt import wdt
 from .buttons import PRESSED, RELEASED
-from .krux_settings import Settings
 
 BUTTON_ENTER = 0
 BUTTON_PAGE = 1
@@ -33,6 +32,7 @@ SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 SWIPE_UP = 6
 SWIPE_DOWN = 7
+ACTIVATING_BUTTONS = 8  # Won't trigger actions, just indicates buttons can used
 
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
@@ -44,10 +44,7 @@ DEBOUNCE = 100
 class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
-    def __init__(self, screensaver_fallback=None):
-        self.screensaver_fallback = screensaver_fallback
-        self.screensaver_time = 0
-        self.screensaver_active = False
+    def __init__(self):
         self.entropy = 0
         self.debounce_time = 0
         self.flushed_flag = False
@@ -173,13 +170,20 @@ class Input:
             return self.touch.swipe_down_value()
         return RELEASED
 
-    def wait_for_press(
-        self, block=True, wait_duration=QR_ANIM_PERIOD, enable_screensaver=False
-    ):
-        """Wait for first button press or for wait_duration ms.
-        Use block to wait indefinitely"""
+    def wdt_feed_inc_entropy(self):
+        """Feeds the watchdog and increments the input's entropy"""
+        self.entropy += 1
+        wdt.feed()
+
+    def _wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
+        """
+        Wait for first button press or for wait_duration ms.
+        Use block to wait indefinitely
+        Do not use this method outside of input module, use wait_for_button instead
+        """
         start_time = time.ticks_ms()
-        self.debounce_time = time.ticks_ms() if not self.flushed_flag else 0
+        if self.flushed_flag:
+            self.debounce_time = 0
         while time.ticks_ms() < self.debounce_time + DEBOUNCE:
             self.flush_events()
         if not self.flushed_flag or block:
@@ -189,7 +193,6 @@ class Input:
             self.flush_events()
             self.flushed_flag = not block
 
-        self.screensaver_time = start_time
         while True:
             if self.enter_event():
                 return BUTTON_ENTER
@@ -200,76 +203,53 @@ class Input:
             if self.touch_event():
                 return BUTTON_TOUCH
 
-            self.entropy += 1
-            wdt.feed()  # here is where krux spends most of its time
+            self.wdt_feed_inc_entropy()
 
             if not block and time.ticks_ms() > start_time + wait_duration:
                 return None
 
-            # Check for screensaver
-            if (
-                block
-                and enable_screensaver
-                and not self.screensaver_active
-                and self.screensaver_fallback
-                and self.screensaver_time
-                + (Settings().appearance.screensaver_time * 60000)
-                < time.ticks_ms()
-            ):
-                self.screensaver_active = True
-                self.screensaver_fallback()
-                self.screensaver_active = False
-                self.screensaver_time = time.ticks_ms()
-                return None
-
             time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
-    def wait_for_button(self, block=True, enable_screensaver=False):
+    def wait_for_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if non blocking.
         """
-        if Settings().appearance.screensaver_time == 0:
-            enable_screensaver = False
-        btn = self.wait_for_press(block, enable_screensaver=enable_screensaver)
+        btn = self._wait_for_press(block, wait_duration)
 
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:
-                self.entropy += 1
-                wdt.feed()
+                self.wdt_feed_inc_entropy()
             if not self.buttons_active:
                 self.buttons_active = True
-                btn = None
+                btn = ACTIVATING_BUTTONS
 
         elif btn == BUTTON_PAGE:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_value() == PRESSED:
-                self.entropy += 1
-                wdt.feed()
+                self.wdt_feed_inc_entropy()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
                     btn = SWIPE_LEFT
                     break
             if not self.buttons_active:
                 self.buttons_active = True
-                btn = None
+                btn = ACTIVATING_BUTTONS
         elif btn == BUTTON_PAGE_PREV:
             start_time = time.ticks_ms()
             # Wait for release
             while self.page_prev_value() == PRESSED:
-                self.entropy += 1
-                wdt.feed()
+                self.wdt_feed_inc_entropy()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
                     btn = SWIPE_RIGHT
                     break
             if not self.buttons_active:
                 self.buttons_active = True
-                btn = None
+                btn = ACTIVATING_BUTTONS
         elif btn == BUTTON_TOUCH:
             # Wait for release
             while self.touch_value() == PRESSED:
-                self.entropy += 1
-                wdt.feed()
+                self.wdt_feed_inc_entropy()
             self.buttons_active = False
             if self.swipe_right_value() == PRESSED:
                 btn = SWIPE_RIGHT
@@ -279,7 +259,7 @@ class Input:
                 btn = SWIPE_UP
             if self.swipe_down_value() == PRESSED:
                 btn = SWIPE_DOWN
-
+        self.debounce_time = time.ticks_ms()
         return btn
 
     def flush_events(self):

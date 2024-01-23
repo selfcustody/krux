@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .utils import Utils
-from ..qr import FORMAT_NONE
 from ..krux_settings import t
 from . import (
     Page,
@@ -42,7 +40,6 @@ class PubkeyView(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
-        self.utils = Utils(self.ctx)
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
@@ -65,21 +62,27 @@ class PubkeyView(Page):
             )
 
         def _pub_key_text(version):
-            pub_text_menu_items = []
+            def _save_sd_pubk_function():
+                return _save_xpub_to_sd(version)
+
             if self.has_sd_card():
-                pub_text_menu_items.append(
-                    (t("Save to SD card?"), lambda ver=version: _save_xpub_to_sd(ver))
-                )
-            pub_text_menu_items.append((t("Back"), lambda: MENU_EXIT))
+                save_sd_pubk_func = _save_sd_pubk_function
+            else:
+                save_sd_pubk_func = None
+
+            pub_text_menu_items = [
+                (t("Save to SD card"), save_sd_pubk_func),
+                (t("Back"), lambda: MENU_EXIT),
+            ]
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
             menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
             menu_offset *= self.ctx.display.font_height
             pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
-                self.ctx.wallet.key.fingerprint_hex_str()
+                self.ctx.wallet.key.fingerprint_hex_str(pretty=True)
                 + "\n\n"
-                + self.ctx.wallet.key.derivation_str()
+                + self.ctx.wallet.key.derivation_str(pretty=True)
                 + "\n\n"
                 + full_pub_key,
                 offset_y=self.ctx.display.font_height,
@@ -88,13 +91,14 @@ class PubkeyView(Page):
             pub_key_menu.run_loop()
 
         def _pub_key_qr(version):
-            # TODO: Add menu to offer print and export as image
             title = self.ctx.wallet.key.account_pubkey_str(version)[
                 :WALLET_XPUB_START
             ].upper()
             xpub = self.ctx.wallet.key.key_expression(version)
-            self.display_qr_codes(xpub, FORMAT_NONE, title)
-            self.utils.print_standard_qr(xpub, FORMAT_NONE, title)
+            from .qr_view import SeedQRView
+
+            seed_qr_view = SeedQRView(self.ctx, data=xpub, title=title)
+            seed_qr_view.display_qr(allow_export=True, transcript_tools=False)
 
         zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
         pub_key_menu_items = []

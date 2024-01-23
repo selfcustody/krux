@@ -67,6 +67,7 @@ class SeedQRView(Page):
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
+        self.bright = theme.bg_color == WHITE
 
     def _seed_qr(self):
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -153,7 +154,7 @@ class SeedQRView(Page):
         grid_pad = self.ctx.display.width() // (self.qr_size + 2)
         grid_offset += grid_pad
         if mode == STANDARD_MODE:
-            if theme.bg_color == WHITE:
+            if self.bright:
                 self.ctx.display.draw_qr_code(0, self.code, light_color=WHITE)
             else:
                 self.ctx.display.draw_qr_code(0, self.code)
@@ -368,12 +369,18 @@ class SeedQRView(Page):
 
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
-        # TODO: Allow custom file name
         from .files_operations import SaveFile
 
         file_saver = SaveFile(self.ctx)
+        suggested_file_name = self.title.replace(" ", "_")
+        suggested_file_name = suggested_file_name.replace(
+            " ", ""
+        )  # Replaces thin spaces too
+        if len(suggested_file_name) > 10:
+            # Crop file name
+            suggested_file_name = suggested_file_name[:10]
         file_name, filename_undefined = file_saver.set_filename(
-            self.title.replace(" ", "_"),
+            suggested_file_name,
         )
         if filename_undefined:
             return
@@ -411,18 +418,23 @@ class SeedQRView(Page):
         utils.print_standard_qr(self.code, title=self.title, is_qr=True)
         # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
-    def display_qr(self, allow_export=False):
+    def display_qr(self, allow_export=False, transcript_tools=True, quick_exit=False):
         """Displays QR codes in multiple modes"""
 
         if self.title:
             label = self.title
         else:
             label = ""
-        label += "\n" + t("Swipe to change mode")
+        if transcript_tools:
+            label += "\n" + t("Swipe to change mode")
         mode = 0
         while True:
             button = None
             while button not in (SWIPE_DOWN, SWIPE_UP):
+
+                def toggle_brightness():
+                    self.bright = not self.bright
+
                 self.draw_grided_qr(mode)
                 if self.ctx.input.touch is not None:
                     self.ctx.display.draw_hcentered_text(
@@ -430,15 +442,16 @@ class SeedQRView(Page):
                         self.ctx.display.qr_offset() + self.ctx.display.font_height,
                     )
                 button = self.ctx.input.wait_for_button()
-                if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
-                    mode += 1
-                    mode %= 5
-                    self.lr_index = 0
-                elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
-                    mode -= 1
-                    mode %= 5
-                    self.lr_index = 0
-                elif button in (BUTTON_ENTER, BUTTON_TOUCH):
+                if transcript_tools:
+                    if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
+                        mode += 1
+                        mode %= 5
+                        self.lr_index = 0
+                    elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
+                        mode -= 1
+                        mode %= 5
+                        self.lr_index = 0
+                if button in (BUTTON_ENTER, BUTTON_TOUCH):
                     if mode in (LINE_MODE, REGION_MODE, ZOOMED_R_MODE):
                         self.lr_index += 1
                     else:
@@ -448,13 +461,20 @@ class SeedQRView(Page):
                     self.lr_index %= self.qr_size
                 elif mode in (REGION_MODE, ZOOMED_R_MODE):
                     self.lr_index %= self.columns * self.columns
-            qr_menu = []
-            qr_menu.append((t("Return to QR Viewer"), lambda: None))
+            if quick_exit:
+                return MENU_CONTINUE
             if self.has_sd_card() and allow_export:
-                qr_menu.append((t("Save QR Image to SD Card"), self.save_qr_image_menu))
-            if self.has_printer():
-                qr_menu.append((t("Print to QR"), self.print_qr))
-            qr_menu.append((t("Back to Main Menu"), lambda: MENU_EXIT))
+                sd_func = self.save_qr_image_menu
+            else:
+                sd_func = None
+            printer_func = self.print_qr if self.has_printer() else None
+            qr_menu = [
+                (t("Return to QR Viewer"), lambda: None),
+                (t("Toggle Brightness"), toggle_brightness),
+                (t("Save QR Image to SD Card"), sd_func),
+                (t("Print to QR"), printer_func),
+                (t("Back to Menu"), lambda: MENU_EXIT),
+            ]
             submenu = Menu(self.ctx, qr_menu)
             _, status = submenu.run_loop()
             if status == MENU_EXIT:

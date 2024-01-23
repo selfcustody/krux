@@ -66,6 +66,24 @@ def test_load_key_from_keypad(m5stickv, mocker):
     key_generator = EncryptionKey(ctx)
     key = key_generator.encryption_key()
     assert key == "b"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_esc_loading_key_from_keypad_is_none(m5stickv, mocker):
+    from krux.pages.encryption_ui import EncryptionKey
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # choose to type key
+        + [BUTTON_PAGE_PREV] * 2  # go to ESC
+        + [BUTTON_ENTER]  # ESC
+        + [BUTTON_ENTER]  # Confirm
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    key_generator = EncryptionKey(ctx)
+    key = key_generator.encryption_key()
+    assert key is None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_key_from_qr_code(m5stickv, mocker):
@@ -108,7 +126,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
 def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
     from krux.wallet import Wallet
     from krux.krux_settings import Settings
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.pages.encryption_ui import EncryptMnemonic
     from krux.key import Key
     from embit.networks import NETWORKS
@@ -128,7 +146,7 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
         mocker.MagicMock(return_value=TEST_KEY),
     )
     mocker.patch(
-        "krux.pages.encryption_ui.EncryptMnemonic.capture_camera_entropy",
+        "krux.pages.capture_entropy.CameraEntropy.capture",
         mocker.MagicMock(return_value=I_VECTOR),
     )
     Settings().encryption.version = "AES-CBC"
@@ -137,6 +155,7 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
     ctx.display.draw_centered_text.assert_has_calls(
         [mocker.call("Encrypted mnemonic was stored with ID: 353175d8")], any_order=True
     )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
@@ -148,11 +167,11 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
     from embit.networks import NETWORKS
 
     BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # Move to store on Encrypted QR
+        [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
         + [BUTTON_ENTER]  # Confirm Encrypted QR
+        # Key is mocked here, no press needed
         + [BUTTON_PAGE]  # add custom ID - No
-        + [BUTTON_ENTER]  # Confirm and leave
-        + [BUTTON_ENTER]  # Confirm sure to leave
+        # QR view is mocked here, no press needed
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
@@ -172,6 +191,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
             )
         ]
     )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
@@ -183,12 +203,12 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
     from embit.networks import NETWORKS
 
     BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # Move to store on Encrypted QR
+        [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
         + [BUTTON_ENTER]  # Confirm Encrypted QR
-        + [BUTTON_ENTER]  # Confirm add CBC cam entropy
+        + [BUTTON_ENTER]  # Confirm to add CBC cam entropy
+        # Key is mocked here, no press needed
         + [BUTTON_PAGE]  # add custom ID - No
-        + [BUTTON_ENTER]  # Confirm and leave
-        + [BUTTON_ENTER]  # Confirm sure to leave
+        # QR view is mocked here, no press needed
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(CBC_WORDS, False, NETWORKS["main"]))
@@ -199,7 +219,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
         mocker.MagicMock(return_value=TEST_KEY),
     )
     mocker.patch(
-        "krux.pages.encryption_ui.EncryptMnemonic.capture_camera_entropy",
+        "krux.pages.capture_entropy.CameraEntropy.capture",
         mocker.MagicMock(return_value=I_VECTOR),
     )
 
@@ -213,6 +233,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
             )
         ]
     )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_encrypted_from_flash(m5stickv, mocker):
@@ -267,6 +288,7 @@ def test_load_encrypted_from_flash_wrong_key(m5stickv, mocker):
         encrypted_mnemonics = LoadEncryptedMnemonic(ctx)
         words = encrypted_mnemonics.load_from_storage()
     assert words == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_encrypted_qr_code(m5stickv, mocker):
@@ -316,3 +338,4 @@ def test_load_encrypted_qr_code(m5stickv, mocker):
     _ = login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == CBC_WORDS
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

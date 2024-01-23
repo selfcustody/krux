@@ -1,5 +1,5 @@
 # Updating the built-in font
-Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of the [Terminus](http://terminus-font.sourceforge.net/) font for its glyphs that includes Vietnamese characters, the Bitcoin currency symbol (₿) and the Pokémon Dollar symbol (₽ with 2 horizontal lines).
+Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of the [Terminus](http://terminus-font.sourceforge.net/) font for its glyphs that includes Vietnamese characters, the Bitcoin currency symbol (₿) and custom icons.
 
 To rebuild the font for all devices, run:
 ```

@@ -47,7 +47,7 @@ class Camera:
         self.antiglare_enabled = False
         self.cam_id = sensor.get_id()
         if self.cam_id == OV7740_ID:
-            sensor.reset(freq=16000000)
+            sensor.reset(freq=18200000)
         else:
             sensor.reset()
         if grayscale:
@@ -216,43 +216,3 @@ class Camera:
         if parser.is_complete():
             return (parser.result(), parser.format)
         return (None, None)
-
-    def capture_entropy(self, callback):
-        """Captures camera's entropy as the hash of image buffer"""
-        import hashlib
-
-        self.initialize_run()
-
-        command = 0
-        while True:
-            wdt.feed()
-
-            img = self.snapshot()
-
-            command = callback()
-            if not self.initialized:
-                # Ignores first callback as it may contain unintentional events
-                self.initialized = True
-                command = 0
-            if command > 0:
-                break
-
-            if board.config["type"] == "m5stickv":
-                img.lens_corr(strength=1.0, zoom=0.56)
-            lcd.display(img)
-
-        self.stop_sensor()
-
-        # User cancelled
-        if command == 2:
-            return None
-
-        img_bytes = img.to_bytes()
-        del img
-        hasher = hashlib.sha256()
-        image_len = len(img_bytes)
-        hasher_index = 0
-        while hasher_index < image_len:
-            hasher.update(img_bytes[hasher_index : hasher_index + 128])
-            hasher_index += 128
-        return hasher.digest()

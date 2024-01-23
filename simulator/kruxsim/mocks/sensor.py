@@ -21,11 +21,10 @@
 # THE SOFTWARE.
 import sys
 from unittest import mock
-import pyzbar.pyzbar
-import cv2
-import numpy as np
-import PIL
-import PIL.Image
+from pyzbar.pyzbar import decode
+from cv2 import split, VideoCapture, cvtColor, COLOR_BGR2RGB, COLOR_BGR2LAB
+from numpy import std
+from PIL import Image
 
 sequence_executor = None
 
@@ -35,14 +34,29 @@ def register_sequence_executor(s):
     sequence_executor = s
 
 
-class Mockhistogram_threshold:
-    def value(self):
-        return 1
+class MockStatistics:
+    """
+    Used to mock openMV the statistics object returned by the sensor module
+    """
+    def __init__(self, img):
+        self.img = img  # LAB image
+        # Split the LAB image into L, a, and b channels
+        lab_l, lab_a, lab_b = split(img)
+
+        # Calculate the standard deviation of each channel
+        self.std_L = std(lab_l)
+        self.std_a = std(lab_a)
+        self.std_b = std(lab_b)
 
 
-class Mockhistogram:
-    def get_threshold(self):
-        return Mockhistogram_threshold()
+    def l_stdev(self):
+        return self.std_L
+    
+    def a_stdev(self):
+        return self.std_a
+    
+    def b_stdev(self):
+        return self.std_b
 
 
 class Mockqrcode:
@@ -66,14 +80,14 @@ def run(on):
         return
 
     if on:
-        capturer = cv2.VideoCapture(0)
+        capturer = VideoCapture(0)
     else:
         capturer.release()
 
 
 def find_qrcodes(img):
     codes = []
-    data = pyzbar.pyzbar.decode(img)
+    data = decode(img)
     if data:
         codes.append(Mockqrcode(data[0].data.decode()))
     return codes
@@ -84,27 +98,24 @@ def snapshot():
     if sequence_executor:
         if sequence_executor.camera_image is not None:
             frame = sequence_executor.camera_image
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+            frame = cvtColor(frame, COLOR_BGR2RGB)
             img = sequence_executor.camera_image
-
             m.get_frame.return_value = frame
-            m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = find_qrcodes(img)
-
             sequence_executor.camera_image = None
-        else:
-            m.get_histogram.return_value = "failed"
     else:
         _, frame = capturer.read()
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-        frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
-        img = PIL.Image.fromarray(frame)
+        rgb_frame = cvtColor(frame, COLOR_BGR2RGB)
+        lab_frame = cvtColor(rgb_frame, COLOR_BGR2LAB)
+        img = Image.fromarray(rgb_frame)
 
-        m.get_frame.return_value = frame
-        m.get_histogram.return_value = Mockhistogram()
+        m.get_frame.return_value = rgb_frame
         m.find_qrcodes.return_value = find_qrcodes(img)
         m.to_bytes.return_value = frame.tobytes()
+        m.get_statistics.return_value = MockStatistics(lab_frame)
+        m.width.return_value = frame.shape[1]
+        m.height.return_value = frame.shape[0]
+
     return m
 
 
