@@ -81,6 +81,12 @@ class PMUController:
     def set_screen_brightness(self, level):
         pass
 
+    def charging(self):
+        return True
+    
+    def usb_connected(self):
+        return True
+
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
         PMU_Button=PMU_Button,
