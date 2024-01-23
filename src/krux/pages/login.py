@@ -523,7 +523,7 @@ class Login(Page):
 
         def possible_letters(prefix):
             if len(prefix) == 0:
-                return LETTERS
+                return LETTERS.replace("x", "")
             letter = prefix[0]
             if letter not in search_ranges:
                 return ""
