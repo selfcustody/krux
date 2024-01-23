@@ -688,7 +688,7 @@ class Menu:
             return
 
         charge = self.ctx.power_manager.battery_charge_remaining()
-        if self.ctx.power_manager.charging():
+        if self.ctx.power_manager.usb_connected():
             battery_color = theme.go_color
         else:
             if charge < 0.3:

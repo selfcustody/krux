@@ -62,11 +62,18 @@ class PowerManager:
             charge = max(0, (mv - 3131.427782118631) / 790.56172897)
         else:
             charge = max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
-        return min(1, charge)
 
-    def charging(self):
-        """Returns true if device has power delivered through USB"""
-        return self.pmu.get_usb_voltage() > 4200
+        # Dirty trick to avoid showing 100% when battery is not fully charged
+        if self.pmu.charging():
+            charge -= 0.35  # compensates for the batt voltage raise when charging
+            # limits in 90% when still charging to let user know it's not fully charged
+            charge = min(0.9, charge)
+
+        return min(1, charge)
+    
+    def usb_connected(self):
+        """Returns True if USB connected, False otherwise"""
+        return self.pmu.usb_connected()
 
     def set_screen_brightness(self, value):
         """Sets the screen brightness by modifying the backlight voltage"""
