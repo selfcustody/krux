@@ -175,11 +175,15 @@ class Input:
         self.entropy += 1
         wdt.feed()
 
-    def wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
-        """Wait for first button press or for wait_duration ms.
-        Use block to wait indefinitely"""
+    def _wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
+        """
+        Wait for first button press or for wait_duration ms.
+        Use block to wait indefinitely
+        Do not use this method outside of input module, use wait_for_button instead
+        """
         start_time = time.ticks_ms()
-        self.debounce_time = time.ticks_ms() if not self.flushed_flag else 0
+        if self.flushed_flag:
+            self.debounce_time = 0
         while time.ticks_ms() < self.debounce_time + DEBOUNCE:
             self.flush_events()
         if not self.flushed_flag or block:
@@ -210,7 +214,7 @@ class Input:
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if non blocking.
         """
-        btn = self.wait_for_press(block, wait_duration)
+        btn = self._wait_for_press(block, wait_duration)
 
         if btn == BUTTON_ENTER:
             # Wait for release
@@ -255,7 +259,7 @@ class Input:
                 btn = SWIPE_UP
             if self.swipe_down_value() == PRESSED:
                 btn = SWIPE_DOWN
-
+        self.debounce_time = time.ticks_ms()
         return btn
 
     def flush_events(self):

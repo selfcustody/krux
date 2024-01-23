@@ -79,12 +79,12 @@ class SettingsPage(Page):
         location = Settings().persist.location
         if location == SD_PATH:
             if self.has_sd_card():
-                self._display_centered_text(
+                self.flash_text(
                     t("Your changes will be kept on the SD card."),
                     duration=SD_MSG_TIME,
                 )
             else:
-                self._display_centered_text(
+                self.flash_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -94,12 +94,12 @@ class SettingsPage(Page):
             try:
                 # Check for flash
                 os.listdir("/" + FLASH_PATH + "/.")
-                self._display_centered_text(
+                self.flash_text(
                     t("Your changes will be kept on device flash storage."),
                     duration=SD_MSG_TIME,
                 )
             except OSError:
-                self._display_centered_text(
+                self.flash_text(
                     t("Device flash storage not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -107,19 +107,6 @@ class SettingsPage(Page):
                 )
 
         return self.namespace(Settings())()
-
-    def _display_centered_text(
-        self,
-        message,
-        duration=FLASH_MSG_TIME,
-        color=theme.fg_color,
-        bg_color=theme.bg_color,
-    ):
-        """Display a text for duration ms or until you press a button"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(message, color, bg_color)
-        self.ctx.input.wait_for_press(block=False, wait_duration=duration)
-        self.ctx.display.clear()
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
@@ -191,12 +178,12 @@ class SettingsPage(Page):
                 # Check for SD hot-plug
                 with SDHandler():
                     if store.save_settings():
-                        self._display_centered_text(
+                        self.flash_text(
                             t("Changes persisted to SD card!"),
                             duration=SD_MSG_TIME,
                         )
             except OSError:
-                self._display_centered_text(
+                self.flash_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -206,12 +193,12 @@ class SettingsPage(Page):
             self.ctx.display.clear()
             try:
                 if store.save_settings():
-                    self._display_centered_text(
+                    self.flash_text(
                         t("Changes persisted to Flash!"),
                         duration=SD_MSG_TIME,
                     )
             except:
-                self._display_centered_text(
+                self.flash_text(
                     t("Unexpected error saving to Flash.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),

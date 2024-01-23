@@ -92,6 +92,8 @@ class CameraEntropy(Page):
         y_label_offset = self.ctx.display.bottom_line
         if board.config["type"].startswith("amigo"):
             y_label_offset = self.ctx.display.bottom_prompt_line
+        # Flush events ocurred while loading camera
+        self.ctx.input.flush_events()
         while True:
             wdt.feed()
             img = sensor.snapshot()
