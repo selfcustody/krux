@@ -69,7 +69,7 @@ class PMUController:
     def get_usb_voltage(self):
         return 0
 
-    def enable_pek_button_monitor(self, val):
+    def enable_pek_button_monitor(self):
         pass
 
     def enter_sleep_mode(self):
@@ -80,6 +80,12 @@ class PMUController:
 
     def set_screen_brightness(self, level):
         pass
+
+    def charging(self):
+        return True
+    
+    def usb_connected(self):
+        return True
 
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
