@@ -374,6 +374,7 @@ def mock_context(mocker):
             display=mocker.MagicMock(
                 font_width=8,
                 font_height=14,
+                total_lines=17,  # 240 / 14
                 width=mocker.MagicMock(return_value=135),
                 height=mocker.MagicMock(return_value=240),
                 to_lines=mocker.MagicMock(return_value=[""]),
@@ -392,6 +393,7 @@ def mock_context(mocker):
             display=mocker.MagicMock(
                 font_width=8,
                 font_height=16,
+                total_lines=20,  # 320 / 16
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
                 to_lines=mocker.MagicMock(return_value=[""]),
@@ -403,6 +405,7 @@ def mock_context(mocker):
             display=mocker.MagicMock(
                 font_width=12,
                 font_height=24,
+                total_lines=20,  # 480 / 24
                 width=mocker.MagicMock(return_value=320),
                 height=mocker.MagicMock(return_value=480),
                 to_lines=mocker.MagicMock(return_value=[""]),

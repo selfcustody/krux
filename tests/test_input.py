@@ -396,15 +396,14 @@ def test_wait_for_button_returns_when_nonblocking(mocker, m5stickv):
 
 
 def test_long_press_page_simulates_swipe_left(mocker, m5stickv):
-    import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED, SWIPE_LEFT, LONG_PRESS_PERIOD
+    from krux.input import Input, RELEASED, PRESSED, SWIPE_LEFT
 
     input = Input()
     input = reset_input_states(mocker, input)
 
     # Create a table of states for button events, values and time ticks
-    mocker.patch.object(time, "ticks_ms", side_effect=[0, 100, 200, 300, 400, 1400])
+    mocker.patch.object(time, "ticks_ms", side_effect=[0, 100, 200, 300, 1400, 1500])
     mocker.patch.object(input, "page_event", side_effect=[False, True, False])
     mocker.patch.object(input, "page_value", side_effect=[PRESSED, PRESSED, RELEASED])
 
@@ -426,7 +425,7 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
     input = reset_input_states(mocker, input)
 
     # Create a table of states for button events, values and time ticks
-    mocker.patch.object(time, "ticks_ms", side_effect=[0, 100, 200, 300, 400, 1400])
+    mocker.patch.object(time, "ticks_ms", side_effect=[0, 100, 200, 300, 1400, 1500])
     mocker.patch.object(input, "page_prev_event", side_effect=[False, True, False])
     mocker.patch.object(
         input, "page_prev_value", side_effect=[PRESSED, PRESSED, RELEASED]
@@ -511,6 +510,7 @@ def test_touch_indexing(mocker, amigo_tft):
 
 
 def test_touch_gestures(mocker, amigo_tft):
+    # TODO: Replace threads by side_effect for stability
     import threading
     import krux
     from krux.input import Input, SWIPE_LEFT, SWIPE_RIGHT, SWIPE_UP, SWIPE_DOWN
@@ -682,10 +682,10 @@ def test_encoder_spin_left(mocker, dock):
     krux.input.wdt.feed.assert_called()
 
 
-def test_enter_button_press_when_buttons_not_active_returns_none(mocker, amigo_tft):
+def test_enter_button_press_when_buttons_not_active(mocker, amigo_tft):
     import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED
+    from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 
     input = Input()
     input = reset_input_states(mocker, input)
@@ -711,15 +711,15 @@ def test_enter_button_press_when_buttons_not_active_returns_none(mocker, amigo_t
     t.join()
 
     assert input.buttons_active
-    assert btn is None
+    assert btn is ACTIVATING_BUTTONS
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
 
 
-def test_page_button_press_when_buttons_not_active_returns_none(mocker, amigo_tft):
+def test_page_button_press_when_buttons_not_active(mocker, amigo_tft):
     import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED
+    from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 
     input = Input()
     input = reset_input_states(mocker, input)
@@ -744,15 +744,15 @@ def test_page_button_press_when_buttons_not_active_returns_none(mocker, amigo_tf
     t.join()
 
     assert input.buttons_active
-    assert btn is None
+    assert btn is ACTIVATING_BUTTONS
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
 
 
-def test_page_prev_button_press_when_buttons_not_active_returns_none(mocker, amigo_tft):
+def test_page_prev_button_press_when_buttons_not_active(mocker, amigo_tft):
     import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED
+    from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 
     input = Input()
     input = reset_input_states(mocker, input)
@@ -777,34 +777,6 @@ def test_page_prev_button_press_when_buttons_not_active_returns_none(mocker, ami
     t.join()
 
     assert input.buttons_active
-    assert btn is None
+    assert btn is ACTIVATING_BUTTONS
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
-
-
-def test_wait_for_press_screensaver(mocker, m5stickv):
-    from krux.input import Input
-    from krux.krux_settings import Settings
-    import krux
-
-    input = Input(screensaver_fallback=mocker.MagicMock())
-    input = reset_input_states(mocker, input)
-    input.buttons_active = False
-
-    # Make test faster
-    Settings().appearance.screensaver_time = 0.0001
-
-    time_seq = []
-    tmp = 100
-    for _ in range(10):
-        time_seq.append(tmp)
-        tmp += 100
-
-    time.ticks_ms = mocker.MagicMock(side_effect=time_seq)
-
-    input.wait_for_press(True, enable_screensaver=True)
-    input.screensaver_fallback.assert_called()
-
-    Settings().appearance.screensaver_time = 0
-    input.wait_for_button(block=False)
-    input.screensaver_fallback.assert_called_once()

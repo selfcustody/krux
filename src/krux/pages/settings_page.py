@@ -44,7 +44,6 @@ from ..encryption import QR_CODE_ITER_MULTIPLE
 from . import (
     Page,
     Menu,
-    FLASH_MSG_TIME,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -54,7 +53,6 @@ import os
 
 DIGITS = "0123456789"
 
-WAIT_TO_CHECK_INPUT = 200
 SD_MSG_TIME = 2500
 
 CATEGORY_SETTING_COLOR_DICT = {

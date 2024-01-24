@@ -70,7 +70,7 @@ class PowerManager:
             charge = min(0.9, charge)
 
         return min(1, charge)
-    
+
     def usb_connected(self):
         """Returns True if USB connected, False otherwise"""
         return self.pmu.usb_connected()

@@ -614,7 +614,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]  # Pick valid checksum final word message
             +
             # Go + Confirm word
-            [BUTTON_PAGE for _ in range(28)]
+            [BUTTON_PAGE for _ in range(27)]
             + [BUTTON_ENTER]
             + [BUTTON_ENTER]
             + [
