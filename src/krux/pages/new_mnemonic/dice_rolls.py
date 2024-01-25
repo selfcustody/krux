@@ -268,16 +268,20 @@ class DiceEntropy(Page):
             )
             self.ctx.display.clear()
             rolls_str = t("Rolls:\n\n%s") % entropy
-            self.ctx.display.draw_hcentered_text(rolls_str, info_box=True)
-
+            max_lines = self.ctx.display.total_lines - 5  # room for menu
+            self.ctx.display.draw_hcentered_text(
+                rolls_str, info_box=True, max_lines=max_lines
+            )
+            menu_offset = min(len(self.ctx.display.to_lines(rolls_str)), max_lines)
+            menu_offset *= self.ctx.display.font_height
+            menu_offset += DEFAULT_PADDING
             submenu = Menu(
                 self.ctx,
                 [
                     (t("Stats for Nerds"), lambda: MENU_EXIT),
                     (t("Generate Words"), lambda: MENU_EXIT),
                 ],
-                offset=(len(self.ctx.display.to_lines(rolls_str)) + 1)
-                * self.ctx.display.font_height,
+                offset=menu_offset,
             )
             index, _ = submenu.run_loop()
             if index == 0:

@@ -292,6 +292,7 @@ class Display:
         color=theme.fg_color,
         bg_color=theme.bg_color,
         info_box=False,
+        max_lines=None,
     ):
         """Draws text horizontally-centered on the display, at the given offset_y"""
         lines = text if isinstance(text, list) else self.to_lines(text)
@@ -304,7 +305,10 @@ class Display:
                 (len(lines)) * self.font_height + 2,
                 bg_color,
             )
-
+        if not max_lines:
+            max_lines = self.total_lines
+        if len(lines) > max_lines:
+            lines = lines[: max_lines - 1] + ["..."]
         for i, line in enumerate(lines):
             if len(line) > 0:
                 offset_x = self._obtain_hcentered_offset(line)
@@ -338,7 +342,7 @@ class Display:
 
         power_manager.set_screen_brightness(level)
 
-    def max_lines(self, line_offset=0):
-        """The max lines of text supported by the display"""
+    def max_menu_lines(self, line_offset=0):
+        """Maximum menu items the display can fit"""
         pad = DEFAULT_PADDING if line_offset else 2 * DEFAULT_PADDING
         return (self.height() - pad - line_offset) // (2 * self.font_height)

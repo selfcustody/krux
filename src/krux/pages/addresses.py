@@ -72,7 +72,7 @@ class Addresses(Page):
             if addr_type == 1:
                 loading_txt = t("Loading change address %d..")
 
-            max_addresses = self.ctx.display.max_lines() - 3
+            max_addresses = self.ctx.display.max_menu_lines() - 3
 
             num_checked = 0
             while True:

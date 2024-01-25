@@ -546,7 +546,7 @@ class Menu:
         self.menu = menu
         self.menu_offset = offset
         max_viewable = min(
-            self.ctx.display.max_lines(self.menu_offset),
+            self.ctx.display.max_menu_lines(self.menu_offset),
             len(self.menu),
         )
         self.menu_view = ListView(self.menu, max_viewable)
@@ -741,7 +741,7 @@ class Menu:
         height_multiplier = (
             self.ctx.display.height() - 2 * DEFAULT_PADDING - self.menu_offset
         )
-        height_multiplier //= offset_y
+        height_multiplier //= max(offset_y, 1)
         Page.y_keypad_map = [
             n * height_multiplier + DEFAULT_PADDING + self.menu_offset
             for n in Page.y_keypad_map
