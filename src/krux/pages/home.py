@@ -139,10 +139,6 @@ class Home(Page):
             self.display_wallet(wallet, include_qr=False)
             if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
                 self.ctx.wallet = wallet
-                self.ctx.log.debug(
-                    "Wallet output descriptor: %s"
-                    % self.ctx.wallet.descriptor.to_string()
-                )
                 self.flash_text(t("Wallet output descriptor loaded!"))
 
                 # BlueWallet single sig descriptor without fingerprint
@@ -158,7 +154,6 @@ class Home(Page):
                     self.ctx.input.wait_for_button()
 
         except Exception as e:
-            self.ctx.log.exception("Exception occurred loading wallet")
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Invalid wallet:\n%s") % repr(e), theme.error_color
@@ -228,7 +223,6 @@ class Home(Page):
         # TODO: FIX, FORMAT_UR increases QR Code data by a factor of 4.8 compared to FORMAT_PMOFN!!
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
         signer = PSBTSigner(self.ctx.wallet, data, qr_format)
-        self.ctx.log.debug("Received PSBT: %s" % signer.psbt)
 
         outputs = signer.outputs()
         for message in outputs:
@@ -243,8 +237,6 @@ class Home(Page):
         # If user confirm, Krux will sign
         if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             signer.sign()
-            self.ctx.log.debug("Signed PSBT: %s" % signer.psbt)
-
             qr_signed_psbt, qr_format = signer.psbt_qr()
             serialized_signed_psbt = signer.psbt.serialize()
 
@@ -258,9 +250,6 @@ class Home(Page):
                 self.display_qr_codes(qr_signed_psbt, qr_format)
                 self.utils.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
             except Exception as e:
-                self.ctx.log.exception(
-                    "Exception occurred in sign_psbt when trying to show the qr_signed_psbt"
-                )
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
                     t("Error:\n%s") % repr(e), theme.error_color

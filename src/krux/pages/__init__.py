@@ -252,15 +252,10 @@ class Page:
         try:
             code, qr_format = self.ctx.camera.capture_qr_code_loop(callback)
         except:
-            self.ctx.log.exception("Exception occurred capturing QR code")
+            print("Camera error")
         if self.ctx.light:
             self.ctx.light.turn_off()
         self.ctx.display.to_portrait()
-        if code is not None:
-            data = code.cbor if isinstance(code, UR) else code
-            self.ctx.log.debug(
-                'Captured QR Code in format "%d": %s' % (qr_format, data)
-            )
         return (code, qr_format)
 
     def display_qr_codes(self, data, qr_format, title=""):
@@ -639,10 +634,6 @@ class Menu:
             if status != MENU_CONTINUE:
                 return status
         except Exception as e:
-            self.ctx.log.exception(
-                'Exception occurred in menu item "%s"'
-                % self.menu_view[selected_item_index][0]
-            )
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Error:\n%s") % repr(e), theme.error_color
