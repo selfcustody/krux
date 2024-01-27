@@ -114,15 +114,15 @@ class CameraEntropy(Page):
             )
             if stdev_index > POOR_VARIANCE_TH:
                 self.ctx.display.draw_hcentered_text(
-                    "Good entropy", y_label_offset, theme.go_color
+                    t("Good entropy"), y_label_offset, theme.go_color
                 )
             elif stdev_index > INSUFFICIENT_VARIANCE_TH:
                 self.ctx.display.draw_hcentered_text(
-                    "Poor entropy", y_label_offset, theme.del_color
+                    t("Poor entropy"), y_label_offset, theme.del_color
                 )
             else:
                 self.ctx.display.draw_hcentered_text(
-                    "Insufficient entropy", y_label_offset, theme.error_color
+                    t("Insufficient entropy"), y_label_offset, theme.error_color
                 )
             self.ctx.display.to_landscape()
             command = self._callback()
@@ -150,10 +150,10 @@ class CameraEntropy(Page):
         shannon_16b = shannon.entropy_img16b(img_bytes)
         shannon_16b_total = shannon_16b * img_pixels
 
-        entropy_msg = "Shannon's entropy:\n"
+        entropy_msg = t("Shannon's entropy:\n")
         entropy_msg += str(round(shannon_16b, 2)) + " bits/px\n"
-        entropy_msg += "(" + str(int(shannon_16b_total)) + " total)\n\n"
-        entropy_msg += "Pixels deviation index: "
+        entropy_msg += t("(%d total)\n\n") % int(shannon_16b_total)
+        entropy_msg += t("Pixels deviation index: ")
         entropy_msg += str(stdev_index)
         self.ctx.display.clear()
         if (
