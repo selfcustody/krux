@@ -279,7 +279,7 @@ class DiceEntropy(Page):
                 self.ctx,
                 [
                     (t("Stats for Nerds"), lambda: MENU_EXIT),
-                    (t("Generate Words"), lambda: MENU_EXIT),
+                    (t("Generate Mnemonic"), lambda: MENU_EXIT),
                 ],
                 offset=menu_offset,
             )

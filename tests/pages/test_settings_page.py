@@ -35,7 +35,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
     from krux.translations import translation_table
-    from krux.themes import WHITE, RED, GREEN, ORANGE, MAGENTA
+    from krux.themes import WHITE, RED, GREEN, ORANGE
 
     tlist = list(translation_table)
     index_pt = tlist.index("pt-BR")
@@ -91,7 +91,6 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
-                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
@@ -120,37 +119,6 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
             CategorySetting,
         ),
         (  # 3
-            (
-                # Logging
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-                # Change log level
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-                # Leave Settings
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-            ),
-            [
-                mocker.call("Log Level\nNONE", WHITE),
-                mocker.call("Log Level\nERROR", RED),
-                mocker.call("Log Level\nWARN", ORANGE),
-                mocker.call("Log Level\nINFO", GREEN),
-                mocker.call("Log Level\nDEBUG", MAGENTA),
-            ],
-            lambda: Settings().logging.level == "DEBUG",
-            CategorySetting,
-        ),
-        (  # 4
             (
                 # Printer
                 BUTTON_PAGE,
@@ -193,7 +161,6 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
-                BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
             [
@@ -225,7 +192,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
     from krux.input import BUTTON_TOUCH
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
     from krux.translations import translation_table
-    from krux.themes import WHITE, RED, GREEN, ORANGE, MAGENTA
+    from krux.themes import WHITE, RED, GREEN, ORANGE
 
     tlist = list(translation_table)
     index_pt = tlist.index("pt-BR")
@@ -241,9 +208,8 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
 
     HARDWARE_INDEX = 2
     LOCALE_INDEX = 3
-    LOGGING_INDEX = 4
     PRINTER_INDEX = 0
-    LEAVE_INDEX = 8
+    LEAVE_INDEX = 7
 
     cases = [
         (
@@ -307,30 +273,6 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 mocker.call(text_next, WHITE),
             ],
             lambda: Settings().i18n.locale == tlist[index_next],
-            CategorySetting,
-        ),
-        (
-            # Case 3
-            (
-                # Logging
-                LOGGING_INDEX,
-                # Change log level
-                NEXT_INDEX,
-                NEXT_INDEX,
-                NEXT_INDEX,
-                NEXT_INDEX,
-                GO_INDEX,
-                # Leave Settings
-                LEAVE_INDEX,
-            ),
-            [
-                mocker.call("Log Level\nNONE", WHITE),
-                mocker.call("Log Level\nERROR", RED),
-                mocker.call("Log Level\nWARN", ORANGE),
-                mocker.call("Log Level\nINFO", GREEN),
-                mocker.call("Log Level\nDEBUG", MAGENTA),
-            ],
-            lambda: Settings().logging.level == "DEBUG",
             CategorySetting,
         ),
     ]

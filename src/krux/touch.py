@@ -24,7 +24,6 @@
 import time
 
 from .touchscreens.ft6x36 import touch_control
-from .logging import logger as log
 from .krux_settings import Settings
 
 IDLE = 0
@@ -158,7 +157,7 @@ class Touch:
                         self.gesture = SWIPE_UP
                 self.state = RELEASED
         else:
-            log.warn("Touch error: " + str(data))
+            print("Touch error")
         return self.state
 
     def event(self):

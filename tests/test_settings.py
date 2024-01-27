@@ -197,7 +197,6 @@ def test_all_labels(mocker, m5stickv):
     from krux.krux_settings import (
         BitcoinSettings,
         I18nSettings,
-        LoggingSettings,
         EncryptionSettings,
         PrinterSettings,
         ThermalSettings,
@@ -212,7 +211,6 @@ def test_all_labels(mocker, m5stickv):
 
     bitcoin = BitcoinSettings()
     i18n = I18nSettings()
-    logging = LoggingSettings()
     encryption = EncryptionSettings()
     printer = PrinterSettings()
     thermal = ThermalSettings()
@@ -226,7 +224,6 @@ def test_all_labels(mocker, m5stickv):
 
     assert bitcoin.label("network")
     assert i18n.label("locale")
-    assert logging.label("level")
     assert encryption.label("version")
     assert printer.label("thermal")
     assert thermal.label("adafruit")

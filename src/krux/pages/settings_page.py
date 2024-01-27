@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
-from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
+from ..themes import theme, GREEN, ORANGE
 from ..settings import (
     CategorySetting,
     NumberSetting,
@@ -32,7 +32,6 @@ from ..settings import (
 )
 from ..krux_settings import (
     Settings,
-    LoggingSettings,
     BitcoinSettings,
     TouchSettings,
     EncoderSettings,
@@ -56,10 +55,6 @@ DIGITS = "0123456789"
 SD_MSG_TIME = 2500
 
 CATEGORY_SETTING_COLOR_DICT = {
-    LoggingSettings.ERROR_TXT: RED,
-    LoggingSettings.WARN_TXT: ORANGE,
-    LoggingSettings.INFO_TXT: GREEN,
-    LoggingSettings.DEBUG_TXT: MAGENTA,
     BitcoinSettings.MAIN_TXT: ORANGE,
     BitcoinSettings.TEST_TXT: GREEN,
 }

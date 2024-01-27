@@ -44,7 +44,6 @@ YELLOW = 0x85F6
 BLUE = 0xF800
 LIGHTBLUE = 0xBD0E
 CYAN = 0xFF07
-MAGENTA = 0x1FF8  # Remove this color after logger is removed
 
 
 THEMES = {

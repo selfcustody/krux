@@ -85,37 +85,6 @@ class BitcoinSettings(SettingsNamespace):
         }[attr]
 
 
-class LoggingSettings(SettingsNamespace):
-    """Log-specific settings"""
-
-    NONE = 99
-    ERROR = 40
-    WARN = 30
-    INFO = 20
-    DEBUG = 10
-    NONE_TXT = "NONE"
-    ERROR_TXT = "ERROR"
-    WARN_TXT = "WARN"
-    INFO_TXT = "INFO"
-    DEBUG_TXT = "DEBUG"
-    LEVEL_NAMES = {
-        NONE: NONE_TXT,
-        ERROR: ERROR_TXT,
-        WARN: WARN_TXT,
-        INFO: INFO_TXT,
-        DEBUG: DEBUG_TXT,
-    }
-
-    namespace = "settings.logging"
-    level = CategorySetting("level", NONE_TXT, list(LEVEL_NAMES.values()))
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "level": t("Log Level"),
-        }[attr]
-
-
 class I18nSettings(SettingsNamespace):
     """I18n-specific settings"""
 
@@ -379,7 +348,6 @@ class Settings(SettingsNamespace):
         self.bitcoin = BitcoinSettings()
         self.hardware = HardwareSettings()
         self.i18n = I18nSettings()
-        self.logging = LoggingSettings()
         self.encryption = EncryptionSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
@@ -390,7 +358,6 @@ class Settings(SettingsNamespace):
             "bitcoin": t("Bitcoin"),
             "hardware": t("Hardware"),
             "i18n": t("Language"),
-            "logging": t("Logging"),
             "encryption": t("Encryption"),
             "persist": t("Persist"),
             "appearance": t("Appearance"),

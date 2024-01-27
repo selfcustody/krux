@@ -24,7 +24,7 @@ import math
 import time
 import board
 from .keypads import Keypad
-from ..themes import theme, WHITE, RED, GREEN, DARKGREEN, ORANGE, MAGENTA
+from ..themes import theme, WHITE, RED, GREEN, DARKGREEN, ORANGE
 from ur.ur import UR
 from ..input import (
     BUTTON_ENTER,
@@ -37,7 +37,7 @@ from ..input import (
 )
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
-from ..krux_settings import t, Settings, LoggingSettings, BitcoinSettings
+from ..krux_settings import t, Settings, BitcoinSettings
 from ..sd_card import SDHandler
 
 MENU_CONTINUE = 0
@@ -653,7 +653,6 @@ class Menu:
     def draw_status_bar(self):
         """Draws a status bar along the top of the UI"""
         if self.menu_offset == 0:  # Only draws if menu is full screen
-            self.draw_logging_indicator()
             self.draw_battery_indicator()
             self.draw_network_indicator()
 
@@ -663,24 +662,6 @@ class Menu:
     #     gc.collect()
     #     ram_text = "RAM: " + str(gc.mem_free())
     #     self.ctx.display.draw_string(12, 0, ram_text, GREEN)
-
-    def draw_logging_indicator(self):
-        """Draws a square mark if logging is enabled"""
-        log_level = Settings().logging.level
-
-        if log_level == LoggingSettings.NONE_TXT:
-            return
-
-        color = RED  # ERROR
-        if log_level == LoggingSettings.WARN_TXT:
-            color = ORANGE
-        if log_level == LoggingSettings.INFO_TXT:
-            color = DARKGREEN
-        if log_level == LoggingSettings.DEBUG_TXT:
-            color = MAGENTA
-
-        # print the square at the top left
-        self.ctx.display.fill_rectangle(3, 3, 6, 6, color)
 
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
