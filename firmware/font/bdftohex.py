@@ -21,6 +21,9 @@
 # THE SOFTWARE.
 # pylint: disable=C0103
 # pylint: disable=E1307
+
+"""Converts a BDF font file to a hex file for use with the Krux firmware."""
+
 from collections import namedtuple
 import math
 import sys
@@ -56,7 +59,7 @@ with open(sys.argv[1], "r", encoding="unicode_escape") as input_file:
                             bitmap = row * top_padding + bitmap
                         if bottom_padding > 0:
                             bitmap = bitmap + row * bottom_padding
-                print("%04X:%s" % (codepoint, bitmap))
+                print(f"{codepoint:04X}:{bitmap}")
             parsing_bitmap = False
             hex_chars = []
             codepoint = -1

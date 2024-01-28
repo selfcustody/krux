@@ -21,6 +21,9 @@
 # THE SOFTWARE.
 # pylint: disable=C0301
 # pylint: disable=C0103
+
+""" Convert a hex formatted bitmap font file to a kff file """
+
 import sys
 import math
 import os
@@ -42,14 +45,16 @@ width_bytes = math.ceil(width / 8)
 # across all translations
 used_codepoints = set(DEFAULT_CODEPOINTS)
 for translation_file in os.listdir(TRANSLATIONS_DIR):
-    translations = json.load(
-        open(os.path.join(TRANSLATIONS_DIR, translation_file), "r")
-    )
+    file_path = os.path.join(TRANSLATIONS_DIR, translation_file)
+
+    with open(file_path, "r", encoding="utf-8") as file:
+        translations = json.load(file)
+
     for translation in translations.values():
         for char in translation:
             used_codepoints.add(ord(char))
 
-with open(sys.argv[1], "r") as input_file:
+with open(sys.argv[1], "r", encoding="utf-8") as input_file:
     # Read in a hex formatted bitmap font file
     lines = input_file.readlines()
 
@@ -66,7 +71,7 @@ with open(sys.argv[1], "r") as input_file:
         total_codepoints += 1
 
         # Prefix with codepoint bytes
-        rows = ["0x%s,0x%s" % (codepoint[:2], codepoint[2:])]
+        rows = [f"0x{codepoint[:2]},0x{codepoint[2:]}"]
 
         for x in range(width_bytes):
             row = []
@@ -77,9 +82,5 @@ with open(sys.argv[1], "r") as input_file:
         bitmap.append(",\n".join(rows))
 
     # Prefix with number of codepoints as two hex bytes
-    total_codepoints = "%04X" % total_codepoints
-    print(
-        ",\n".join(
-            ["0x%s,0x%s" % (total_codepoints[:2], total_codepoints[2:])] + bitmap
-        )
-    )
+    total_codepoints = f"{total_codepoints:04X}"
+    print(",\n".join([f"0x{total_codepoints[:2]},0x{total_codepoints[2:]}"] + bitmap))

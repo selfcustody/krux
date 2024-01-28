@@ -20,6 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # pylint: disable=C0103
+
+"""
+Fills in missing characters in a hex formatted bitmap font file for use with the Krux firmware.
+"""
+
 import sys
 import math
 
@@ -29,7 +34,7 @@ height = int(sys.argv[3])
 font_byte_length = math.ceil(width / 8) * height
 line_char_length = (font_byte_length * 2) + 6  # 6 is codepoint prefix len
 
-with open(sys.argv[1], "r") as input_file:
+with open(sys.argv[1], "r", encoding="utf-8") as input_file:
     # Read in a hex formatted bitmap font file
     lines = input_file.readlines()
     # Zero out > height pixel width characters since they can't be scaled down
@@ -57,7 +62,7 @@ with open(sys.argv[1], "r") as input_file:
     while i < len(lines):
         codepoint = int(lines[i].split(":")[0], 16)
         while i < codepoint:
-            lines.insert(i, ("%04X" % i) + ":" + ("00" * font_byte_length) + "\n")
+            lines.insert(i, f"{i:04X}:{'00' * font_byte_length}\n")
             i += 1
         i += 1
     print("".join(lines).strip())

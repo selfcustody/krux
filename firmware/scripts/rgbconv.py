@@ -1,15 +1,17 @@
 """
-   Color conversions between 24-bit-rgb888 and 16-bit-rgb565
+Color conversions between 24-bit-rgb888 and 16-bit-rgb565
 """
 
-from binascii import hexlify, unhexlify
+from binascii import unhexlify
+import sys
+
 
 def rgb24_to_rgb16(rgb, big=False):
     """
-        convert 3 bytes of rgb888 into 2 bytes of rgb565
-        default to little-endian, so rgb565 becomes gbrg3553
+    convert 3 bytes of rgb888 into 2 bytes of rgb565
+    default to little-endian, so rgb565 becomes gbrg3553
     """
-    assert type(rgb) == bytes and len(rgb) == 3
+    assert isinstance(rgb, bytes) and len(rgb) == 3
 
     # 5 significant bits of red shifted to far left
     red = (rgb[0] >> 3) << 11
@@ -25,13 +27,14 @@ def rgb24_to_rgb16(rgb, big=False):
 
 def rgb16_to_rgb24(rgb, big=False):
     """
-        convert 2 bytes of rgb565 into 3 bytes of rgb888
-        default from little-endian, so rgb565 becomes gbrg3553
+    convert 2 bytes of rgb565 into 3 bytes of rgb888
+    default from little-endian, so rgb565 becomes gbrg3553
     """
-    def maxv(number_of_bits): 
-        return (2 ** number_of_bits) -1
 
-    assert type(rgb) == bytes and len(rgb) == 2
+    def maxv(number_of_bits):
+        return (2**number_of_bits) - 1
+
+    assert isinstance(rgb, bytes) and len(rgb) == 2
 
     rgb_int = int.from_bytes(rgb, "big" if big else "little")
 
@@ -44,44 +47,41 @@ def rgb16_to_rgb24(rgb, big=False):
     # right 5 bits of blue multiplied to fill 8 bit space
     blue = round((rgb_int & maxv(5)) * maxv(8) / maxv(5))
 
-    return b''.join([x.to_bytes(1, "big") for x in [red, green, blue]])
+    return b"".join([x.to_bytes(1, "big") for x in [red, green, blue]])
 
 
-def main(*args):
-    rgb = None
-
+def convert_color(*args):
+    """Detect if the input is RGB888 or RGB565 and converts to the other."""
     if len(args) == 1:
         arg = args[0]
-        if arg[:2] == "0x":
-            rgb = unhexlify(arg[2:])
-        else:
-            rgb = (abs(int(args[0])) % 65536).to_bytes(2, 'big')
+        rgb = (
+            unhexlify(arg[2:])
+            if arg[:2] == "0x"
+            else (int(arg) % 65536).to_bytes(2, "big")
+        )
     else:
-        rgb = b''.join([(abs(int(x)) % 256).to_bytes(1, 'big') for x in args])
+        rgb = bytes([int(x) % 256 for x in args])
 
-    if rgb:
-        if len(rgb) == 2:
-            answer = rgb16_to_rgb24(rgb)
-        elif len(rgb) == 3:
-            answer = rgb24_to_rgb16(rgb)
-    else:
-        answer = None
-
-    return(answer)
+    if len(rgb) == 2:
+        return rgb16_to_rgb24(rgb)
+    if len(rgb) == 3:
+        return rgb24_to_rgb16(rgb)
+    return None
 
 
-if __name__ == '__main__':
-    import sys
+def main():
+    """Main function for script execution."""
+    if len(sys.argv) <= 1:
+        print(f"Syntax: {sys.argv[0]} integer-bytes or 0x<hex-color>")
+        sys.exit(1)
 
-    def help():
-        print("syntax: {} integer-bytes-or-0xhex-color".format(sys.argv[0]))
+    try:
+        result = convert_color(*sys.argv[1:])
+        print("0x" + result.hex())
+    except (ValueError, TypeError) as error:  # Catch specific exceptions
+        print("Error:", error)
+        sys.exit(1)
 
-    if len(sys.argv) > 1:
-        try:
-            print('0x' + main(*sys.argv[1:]).hex())
-        except:
-            help()
-            exit(1)
-    else:
-        help()
-        exit(1)
+
+if __name__ == "__main__":
+    main()

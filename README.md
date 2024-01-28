@@ -287,7 +287,7 @@ Learn about how to setup fonts [here](firmware/font/README.md)
 
 ## Colors
 
-Use [this script](firmware/scripts/krux_colors.py) to generate Maixpy compatible colors from RGB values to customize Krux
+Use [this script](firmware/scripts/rgbconv.py) to generate Maixpy compatible colors from RGB values to customize Krux
 
 ## Documentation
 

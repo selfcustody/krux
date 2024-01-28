@@ -19,12 +19,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+
+"""Merge multiple hex files into one."""
+
 import sys
 
 characters = {}
 
 for i in range(len(sys.argv) - 1):
-    with open(sys.argv[i + 1], "r") as font_file:
+    with open(sys.argv[i + 1], "r", encoding="utf-8") as font_file:
         lines = font_file.readlines()
         for line in lines:
             if not line.strip():
@@ -36,4 +39,4 @@ for i in range(len(sys.argv) - 1):
                 if int(characters[codepoint], 16) == 0:
                     characters[codepoint] = glyph
 for codepoint, glyph in sorted(characters.items(), key=lambda s: s[0]):
-    print("%s:%s" % (codepoint, glyph))
+    print(f"{codepoint}:{glyph}")
