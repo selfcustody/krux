@@ -140,3 +140,55 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
     # Assert only CBC remains
     padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
     m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
+
+
+def test_wipe_device(amigo_tft, mocker):
+    """Test that the device is wiped when the user confirms the wipe."""
+    from krux.pages.tools import Tools
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm wipe
+
+    mocker.spy(Tools, "erase_spiffs")
+    ctx = mock_context(mocker)
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
+    test_tools = Tools(ctx)
+    test_tools.wipe_device()
+
+    assert test_tools.erase_spiffs.call_count == 1
+
+
+def test_printer_test_tool(amigo_tft, mocker):
+    """Test that the print tool is called with the correct text"""
+    from krux.pages.tools import Tools
+    from krux.themes import theme
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm print, then leave
+
+    with patch("krux.pages.print_page.PrintPage.print_qr") as mocked_print_qr:
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
+        test_tools = Tools(ctx)
+        test_tools.print_test()
+
+        mocked_print_qr.assert_called_with(
+            "Krux Printer Test QR", title="Krux Printer Test QR"
+        )
+
+
+def test_create_qr(amigo_tft, mocker):
+    """Test that QR creation tool is called with the correct text"""
+    from krux.pages.tools import Tools
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [BUTTON_ENTER]
+
+    with patch("krux.pages.qr_view.SeedQRView") as Mocked_QRView:
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
+        test_tools = Tools(ctx)
+        test_tools.capture_from_keypad = mocker.MagicMock(return_value="test")
+        test_tools.create_qr()
+
+        Mocked_QRView.assert_called_with(ctx, data="test", title="Custom QR Code")
