@@ -18,6 +18,7 @@
     "Adafruit": "Adafruit",
     "Additional entropy from camera required for AES-CBC mode": "Требуется дополнительная энтропия с камеры для режима AES-CBC",
     "Address": "Адрес",
+    "Address:": "Адрес:",
     "Aditional entropy from camera required for AES-CBC mode": "Для режима AES-CBC требуется дополнительная энтропия от камеры",
     "Align camera and Tiny Seed properly.": "Правильно совместите камеру и Мини Сид-фразу.",
     "Anti-glare disabled": "Антиблик отключен",
