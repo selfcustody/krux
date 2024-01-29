@@ -269,15 +269,6 @@ class Display:
             x -= width
         lcd.fill_rectangle(x, y, width, height, color)
 
-    def draw_img_hcentered_other_img(
-        self, img, other_img, offset_y=DEFAULT_PADDING, alpha=255
-    ):
-        """Draws other_img horizontally-centered on the img, at the given offset_y.
-        Alpha value is used, so any value less than 256 makes black pixels invisible"""
-        img.draw_image(
-            other_img, offset_y, (img.height() - other_img.height()) // 2, alpha=alpha
-        )
-
     def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
         if board.config["krux"]["display"]["inverted_coordinates"]:
@@ -311,14 +302,11 @@ class Display:
             lines = lines[: max_lines - 1] + ["..."]
         for i, line in enumerate(lines):
             if len(line) > 0:
-                offset_x = self._obtain_hcentered_offset(line)
+                offset_x = max(0, (self.width() - self.font_width * len(line)) // 2)
                 self.draw_string(
                     offset_x, offset_y + (i * self.font_height), line, color, bg_color
                 )
-
-    def _obtain_hcentered_offset(self, line_str):
-        """Return the offset_x to the horizontally-centered line_str"""
-        return max(0, (self.width() - self.font_width * len(line_str)) // 2)
+        return len(lines)  # return number of lines drawn
 
     def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""

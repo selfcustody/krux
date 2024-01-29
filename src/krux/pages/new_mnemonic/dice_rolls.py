@@ -268,11 +268,10 @@ class DiceEntropy(Page):
             )
             self.ctx.display.clear()
             rolls_str = t("Rolls:\n\n%s") % entropy
-            max_lines = self.ctx.display.total_lines - 5  # room for menu
-            self.ctx.display.draw_hcentered_text(
+            max_lines = self.ctx.display.total_lines - 6  # room for menu
+            menu_offset = self.ctx.display.draw_hcentered_text(
                 rolls_str, info_box=True, max_lines=max_lines
             )
-            menu_offset = min(len(self.ctx.display.to_lines(rolls_str)), max_lines)
             menu_offset *= self.ctx.display.font_height
             menu_offset += DEFAULT_PADDING
             submenu = Menu(

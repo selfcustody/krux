@@ -27,6 +27,7 @@ import hashlib
 import binascii
 from . import Page, MENU_CONTINUE
 from ..themes import theme
+from ..display import DEFAULT_PADDING
 from ..baseconv import base_encode
 from ..krux_settings import t
 from ..qr import FORMAT_NONE
@@ -64,35 +65,34 @@ class SignMessage(Page):
                     short_address = self.fit_to_line(
                         address, str(derivation[4]) + ". ", fixed_chars=3
                     )
-                    # Amount of lines to subtract for free room for message
-                    subtract_lines = 6 if board.config["type"] == "m5stickv" else 10
 
-                    message_to_display = self.ctx.display.to_lines(message.decode())
-                    if (
-                        len(message_to_display)
-                        > self.ctx.display.total_lines - subtract_lines
-                    ):
-                        message_cut = (
-                            self.ctx.display.total_lines - subtract_lines
-                        ) // 2
-                        message_to_display = (
-                            message_to_display[:message_cut]
-                            + ["\n...\n"]
-                            + message_to_display[-message_cut:]
-                        )
-                        message_to_display = "".join(message_to_display)
+                    # Maximum lines available for message
+                    max_lines = self.ctx.display.total_lines
+                    if board.config["type"] == "m5stickv":
+                        max_lines -= 7
                     else:
-                        message_to_display = message.decode()
+                        max_lines -= 10
 
-                    self.ctx.display.draw_hcentered_text(
-                        t("Message:")
-                        + "\n"
-                        + message_to_display
-                        + "\n\n"
-                        + "Address:"
-                        + "\n"
-                        + short_address
+                    offset_y = DEFAULT_PADDING
+                    offset_y += (
+                        self.ctx.display.draw_hcentered_text(
+                            t("Message:"), offset_y, theme.highlight_color
+                        )
+                        * self.ctx.display.font_height
                     )
+                    offset_y += (
+                        self.ctx.display.draw_hcentered_text(
+                            message.decode(), offset_y, max_lines=max_lines
+                        )
+                        + 1
+                    ) * self.ctx.display.font_height
+                    offset_y += (
+                        self.ctx.display.draw_hcentered_text(
+                            t("Address:"), offset_y, theme.highlight_color
+                        )
+                        * self.ctx.display.font_height
+                    )
+                    self.ctx.display.draw_hcentered_text(short_address, offset_y)
                     if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
                         return True
                     message_hash = hashlib.sha256(
