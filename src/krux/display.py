@@ -169,87 +169,57 @@ class Display:
         lcd.rotation(PORTRAIT)
         self.portrait = True
 
-    def to_lines(self, text):
+    def to_lines(self, text, max_lines=None):
         """Takes a string of text and converts it to lines to display on
         the screen
         """
+        lines = []
+        start = 0
+        line_count = 0
         if self.width() > 135:
             columns = self.usable_width() // self.font_width
         else:
             columns = self.width() // self.font_width
 
-        # Processing the words and maintaining newline characters
-        processed_text = []
-        for word in text.split(" "):
-            subwords = word.split("\n")
-            for i, subword in enumerate(subwords):
-                if len(subword) > columns:
-                    j = 0
-                    while j < len(subword):
-                        processed_text.append(subword[j : j + columns])
-                        j += columns
-                else:
-                    processed_text.append(subword)
+        # Quick return if content fits in one line
+        if len(text) <= columns and "\n" not in text:
+            return [text]
 
-                if len(subwords) > 1 and i < len(subwords) - 1:
-                    # Ensure proper handling of newline characters at the end of lines
-                    if not processed_text[-1].endswith("\n"):
-                        processed_text.append("\n")
+        if not max_lines:
+            max_lines = self.total_lines
 
-        num_words = len(processed_text)
-        words = processed_text
+        while start < len(text) and line_count < max_lines:
+            # Find the next line break, if any
+            line_break = text.find("\n", start)
+            if line_break == -1:
+                next_break = len(text)
+            else:
+                next_break = min(line_break, len(text))
 
-        # calculate cost of all pairs of words
-        cost_between = [[0 for _ in range(num_words + 1)] for _ in range(num_words + 1)]
-        for i in range(1, num_words + 1):
-            for j in range(i, num_words + 1):
-                for k in range(i, j + 1):
-                    if words[k - 1].endswith("\n"):
-                        word = words[k - 1].split("\n")[0]
-                        if word != "":
-                            cost_between[i][j] += len(words[k - 1]) + 1
-                        if i <= k < j:
-                            cost_between[i][j] += float("inf")
-                    else:
-                        cost_between[i][j] += len(words[k - 1]) + 1
-                cost_between[i][j] -= 1
-                cost_between[i][j] = columns - cost_between[i][j]
-                if cost_between[i][j] < 0:
-                    cost_between[i][j] = float("inf")
-                cost_between[i][j] = cost_between[i][j] ** 2
+            end = start + columns
+            # If next segment fits on one line, add it and continue
+            if end >= next_break:
+                lines.append(text[start:next_break].rstrip())
+                start = next_break + 1
+                line_count += 1
+                continue
 
-        # find optimal number of words on each line
-        indexes = [0 for _ in range(num_words + 1)]
-        cost = [0 for _ in range(num_words + 1)]
-        cost[0] = 0
-        for j in range(1, num_words + 1):
-            cost[j] = float("inf") * float("inf")
-            for i in range(1, j + 1):
-                if cost[i - 1] + cost_between[i][j] < cost[j]:
-                    cost[j] = cost[i - 1] + cost_between[i][j]
-                    indexes[j] = i
+            # If the end of the line is in the middle of a word,
+            # move the end back to the end of the previous word
+            if text[end] != " " and text[end] != "\n":
+                end = text.rfind(" ", start, end)
 
-        def build_lines(words, num_words, indexes):
-            lines = []
-            start = indexes[num_words]
-            end = num_words
-            if start != 1:
-                lines.extend(build_lines(words, start - 1, indexes))
-            line = ""
-            for i in range(start, end + 1):
-                if words[i - 1].endswith("\n"):
-                    word = words[i - 1].split("\n")[0]
-                    if word != "":
-                        line += (" " if len(line) > 0 else "") + word
-                    lines.append(line)
-                    line = ""
-                else:
-                    line += (" " if len(line) > 0 else "") + words[i - 1]
-            if len(line) > 0:
-                lines.append(line)
-            return lines
+            # If there is no space, force break the word
+            if end == -1 or end < start:
+                end = start + columns
 
-        return build_lines(words, num_words, indexes)
+            lines.append(text[start:end].rstrip())
+            # don't jump space if we're breaking a word
+            jump_space = 1 if text[end] == " " else 0
+            start = end + jump_space
+            line_count += 1
+
+        return lines
 
     def clear(self):
         """Clears the display"""
@@ -286,7 +256,9 @@ class Display:
         max_lines=None,
     ):
         """Draws text horizontally-centered on the display, at the given offset_y"""
-        lines = text if isinstance(text, list) else self.to_lines(text)
+        lines = (
+            text if isinstance(text, list) else self.to_lines(text, max_lines=max_lines)
+        )
         if info_box:
             bg_color = theme.disabled_color
             self.fill_rectangle(
@@ -296,10 +268,6 @@ class Display:
                 (len(lines)) * self.font_height + 2,
                 bg_color,
             )
-        if not max_lines:
-            max_lines = self.total_lines
-        if len(lines) > max_lines:
-            lines = lines[: max_lines - 1] + ["..."]
         for i, line in enumerate(lines):
             if len(line) > 0:
                 offset_x = max(0, (self.width() - self.font_width * len(line)) // 2)

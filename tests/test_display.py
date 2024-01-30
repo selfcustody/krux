@@ -109,6 +109,7 @@ def test_to_lines(mocker, m5stickv):
     from krux.display import Display
 
     cases = [
+        # 135 // 8 = 16 chars
         (135, "Two Words", ["Two Words"]),
         (135, "Two  Words", ["Two  Words"]),
         (135, "Two   Words", ["Two   Words"]),
@@ -121,11 +122,11 @@ def test_to_lines(mocker, m5stickv):
         (135, "\nTwo\nWords\n", ["", "Two", "Words"]),
         (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
         (135, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
-        (135, "More Than Two Words", ["More Than", "Two Words"]),
+        (135, "More Than Two Words", ["More Than Two", "Words"]),  # 13 + 5 chars
         (
             135,
             "A bunch of words that span multiple lines..",
-            ["A bunch of", "words that span", "multiple lines.."],
+            ["A bunch of words", "that span", "multiple lines.."],  # 16 + 9 + 16 chars
         ),
         (
             135,
@@ -173,6 +174,7 @@ def test_to_lines(mocker, m5stickv):
                 "Install?",
             ],
         ),
+        # (240 - 2 * 10) // 8 = 27 chars
         (240, "Two Words", ["Two Words"]),
         (240, "Two\nWords", ["Two", "Words"]),
         (240, "Two\n\nWords", ["Two", "", "Words"]),
@@ -186,7 +188,7 @@ def test_to_lines(mocker, m5stickv):
         (
             240,
             "A bunch of text that spans multiple lines..",
-            ["A bunch of text that", "spans multiple lines.."],
+            ["A bunch of text that spans", "multiple lines.."],  # 26 + 16 chars
         ),
         (
             240,
@@ -234,6 +236,7 @@ def test_to_lines(mocker, m5stickv):
             "krux.display.lcd",
             new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
         )
+        # print(case[0])
         d = Display()
         lines = d.to_lines(case[1])
         assert lines == case[2]
@@ -243,8 +246,13 @@ def test_to_lines_exact_match_amigo(mocker, amigo_tft):
     from krux.display import Display
 
     cases = [
+        # (320 - 2 * 10) // 12 = 24 chars
         (320, "01234 0123456789012345678", ["01234 0123456789012345678"]),
-        (320, "0123456789 01234567890 01234", ["0123456789", "01234567890 01234"]),
+        (
+            320,
+            "0123456789 01234567890 01234",
+            ["0123456789 01234567890", "01234"],
+        ),  # 22 + 5 chars
         (320, "01234567890123456789012345", ["0123456789012345678901234", "5"]),
         (
             320,
