@@ -219,6 +219,10 @@ class Display:
             start = end + jump_space
             line_count += 1
 
+        # Replace last line with ellipsis if we didn't finish the text
+        if line_count == max_lines and start < len(text):
+            lines[-1] = lines[-1][: columns - 3] + "..."
+
         return lines
 
     def clear(self):
