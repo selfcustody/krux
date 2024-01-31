@@ -231,10 +231,10 @@ class Display:
 
     def outline(self, x, y, width, height, color=theme.fg_color):
         """Draws an outline rectangle from given coordinates"""
-        self.fill_rectangle(x, y, width + 1, 1, color)  # up
-        self.fill_rectangle(x, y + height, width + 1, 1, color)  # bottom
-        self.fill_rectangle(x, y, 1, height + 1, color)  # left
-        self.fill_rectangle(x + width, y, 1, height + 1, color)  # right
+        if board.config["krux"]["display"]["inverted_coordinates"]:
+            x = self.width() - x
+            x -= width
+        lcd.draw_outline(x, y, width, height, color)
 
     def fill_rectangle(self, x, y, width, height, color):
         """Draws a rectangle to the screen"""
@@ -242,6 +242,13 @@ class Display:
             x = self.width() - x
             x -= width
         lcd.fill_rectangle(x, y, width, height, color)
+
+    def draw_line(self, x_start, y_start, x_end, y_end, color=theme.fg_color):
+        """Draws a line to the screen"""
+        if board.config["krux"]["display"]["inverted_coordinates"]:
+            x_start = self.width() - x_end
+            x_end = self.width() - x_start
+        lcd.draw_line(x_start, y_start, x_end, y_end, color)
 
     def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
