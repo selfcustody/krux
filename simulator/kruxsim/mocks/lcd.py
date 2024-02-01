@@ -232,7 +232,7 @@ def draw_qr_code_binary(offset_y, code_bin, max_width, dark_color, light_color, 
     pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
 
 
-def fill_rectangle(x, y, w, h, color):
+def fill_rectangle(x, y, w, h, color, radius=0):
     def run():
         pg.draw.rect(
             screen,
@@ -265,12 +265,13 @@ def draw_line(x_0, y_0, x_1, y_1, color):
     pg.event.post(pg.event.Event(events.LCD_DRAW_LINE_EVENT, {"f": run}))
 
 def draw_outline(x, y, w, h, color):
+    x += 1  # Adjust for compatibility with previous implementation
     def run():
         pg.draw.rect(
             screen,
             color,
             (
-                width() - w - x
+                width() - w - x + 1
                 if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
                 else x,
                 y,

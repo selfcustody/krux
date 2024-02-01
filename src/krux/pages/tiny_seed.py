@@ -97,6 +97,7 @@ class TinySeed(Page):
     def _draw_punched(self, words, page):
         """Draws punched bits for import and export Tinyseed UI"""
         y_offset = self.y_offset
+        radius = (self.x_pad - 5) // 3
         for x in range(12):
             if isinstance(words[0], str):
                 word_list_index = WORDLIST.index(words[page * 12 + x]) + 1
@@ -112,6 +113,7 @@ class TinySeed(Page):
                         self.x_pad - 5,
                         self.y_pad - 5,
                         theme.highlight_color,
+                        radius,
                     )
             y_offset += self.y_pad
 

@@ -27,10 +27,12 @@ DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
 # To create new colors from RGB values use firmware/scripts/rgbconv.py script
 
 BLACK = 0x0000
-WHITE = 0xFFFF
 LIGHTBLACK = 0x0842
 DARKGREY = 0xEF7B
+GREY = 0x14A5
 LIGHTGREY = 0x38C6
+DARKWHITE = 0x1CE7
+WHITE = 0xFFFF
 LIGHT_GREEN = 0xEC9F
 GREEN = 0xE007
 DARKGREEN = 0x8005
@@ -50,7 +52,7 @@ THEMES = {
     ThemeSettings.DARK_THEME_NAME: {
         "background": BLACK,
         "foreground": WHITE,
-        "frame": DARKGREY,
+        "frame": GREY,
         "disabled": DARKGREY,
         "go": GREEN,
         "esc_no": RED,
@@ -62,8 +64,8 @@ THEMES = {
     ThemeSettings.LIGHT_THEME_NAME: {
         "background": WHITE,
         "foreground": BLACK,
-        "frame": DARKGREY,
-        "disabled": LIGHTGREY,
+        "frame": LIGHTGREY,
+        "disabled": DARKWHITE,
         "go": DARKGREEN,
         "esc_no": RED,
         "del": DARKORANGE,

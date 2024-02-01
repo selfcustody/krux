@@ -316,7 +316,7 @@ def test_fill_rectangle(mocker, m5stickv):
     d.fill_rectangle(0, 0, 100, 100, krux.display.lcd.WHITE)
 
     krux.display.lcd.fill_rectangle.assert_called_with(
-        0, 0, 100, 100, krux.display.lcd.WHITE
+        0, 0, 100, 100, krux.display.lcd.WHITE, 0
     )
 
 
@@ -331,7 +331,7 @@ def test_fill_rectangle_on_inverted_display(mocker, amigo_tft):
     d.fill_rectangle(0, 0, 100, 100, krux.display.lcd.WHITE)
 
     krux.display.lcd.fill_rectangle.assert_called_with(
-        480 - 0 - 100, 0, 100, 100, krux.display.lcd.WHITE
+        480 - 0 - 100, 0, 100, 100, krux.display.lcd.WHITE, 0
     )
 
 
