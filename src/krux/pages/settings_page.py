@@ -158,6 +158,7 @@ class SettingsPage(Page):
             except:
                 pass
             self.ctx.power_manager.reboot()
+        return MENU_CONTINUE
 
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
