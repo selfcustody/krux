@@ -243,12 +243,12 @@ class Display:
             x -= width
         lcd.fill_rectangle(x, y, width, height, color)
 
-    def draw_line(self, x_start, y_start, x_end, y_end, color=theme.fg_color):
+    def draw_line(self, x_0, y_0, x_1, y_1, color=theme.fg_color):
         """Draws a line to the screen"""
         if board.config["krux"]["display"]["inverted_coordinates"]:
-            x_start = self.width() - x_end
-            x_end = self.width() - x_start
-        lcd.draw_line(x_start, y_start, x_end, y_end, color)
+            x_start = self.width() - x_1
+            x_end = self.width() - x_0
+        lcd.draw_line(x_start, y_0, x_end, y_1, color)
 
     def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""

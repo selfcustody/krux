@@ -87,10 +87,11 @@ class Stackbit(Page):
         # Horizontal lines
         width = 8 * self.x_pad + self.ctx.display.font_width // 2
         height = 2 * self.y_pad + 2
+        grid_x_offset = x_bar_offset - self.ctx.display.font_width // 2
 
         # Word_num background
         self.ctx.display.fill_rectangle(
-            x_bar_offset - self.ctx.display.font_width // 2,
+            grid_x_offset,
             y_offset,
             self.x_pad + self.ctx.display.font_width // 2,
             height,
@@ -98,47 +99,47 @@ class Stackbit(Page):
         )
 
         # top line
-        self.ctx.display.fill_rectangle(
-            x_bar_offset - self.ctx.display.font_width // 2,
+        self.ctx.display.draw_line(
+            grid_x_offset,
             y_offset,
-            width,
-            1,
+            grid_x_offset + width,
+            y_offset,
             theme.frame_color,
         )
         # bottom line
-        self.ctx.display.fill_rectangle(
-            x_bar_offset - self.ctx.display.font_width // 2,
+        self.ctx.display.draw_line(
+            grid_x_offset,
             y_offset + height,
-            width,
-            1,
+            grid_x_offset + width,
+            y_offset + height,
             theme.frame_color,
         )
         # Vertical lines
         # Left v line
-        self.ctx.display.fill_rectangle(
-            x_bar_offset - self.ctx.display.font_width // 2,
+        self.ctx.display.draw_line(
+            grid_x_offset,
             y_offset,
-            1,
-            height,
+            grid_x_offset,
+            y_offset + height,
             theme.frame_color,
         )
         # Second left vertical line
         x_bar_offset += self.x_pad
-        self.ctx.display.fill_rectangle(
+        self.ctx.display.draw_line(
             x_bar_offset,
             y_offset,
-            1,
-            height,
+            x_bar_offset,
+            y_offset + height,
             theme.frame_color,
         )
         x_bar_offset += self.x_pad
         # Next 4 vertical lines
         for _ in range(4):
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_bar_offset,
                 y_offset,
-                1,
-                height,
+                x_bar_offset,
+                y_offset + height,
                 theme.frame_color,
             )
             x_bar_offset += 2 * self.x_pad
@@ -314,26 +315,26 @@ class Stackbit(Page):
         )
         # print border around buttons only on touch devices
         if self.ctx.input.touch is not None:
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_offset,
                 y_offset,
-                6 * self.x_pad,
-                1,
+                x_offset + 6 * self.x_pad,
+                y_offset,
                 theme.frame_color,
             )
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_offset,
                 y_offset + self.y_pad,
-                6 * self.x_pad,
-                1,
+                x_offset + 6 * self.x_pad,
+                y_offset + self.y_pad,
                 theme.frame_color,
             )
             for _ in range(3):
-                self.ctx.display.fill_rectangle(
+                self.ctx.display.draw_line(
                     x_offset,
                     y_offset,
-                    1,
-                    self.y_pad,
+                    x_offset,
+                    y_offset + self.y_pad,
                     theme.frame_color,
                 )
                 x_offset += 3 * self.x_pad

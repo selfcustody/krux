@@ -301,13 +301,8 @@ def test_outline(mocker, m5stickv):
 
     d.outline(0, 0, 100, 100, krux.display.lcd.WHITE)
 
-    d.fill_rectangle.assert_has_calls(
-        [
-            mocker.call(0, 0, 101, 1, krux.display.lcd.WHITE),
-            mocker.call(0, 100, 101, 1, krux.display.lcd.WHITE),
-            mocker.call(0, 0, 1, 101, krux.display.lcd.WHITE),
-            mocker.call(100, 0, 1, 101, krux.display.lcd.WHITE),
-        ]
+    krux.display.lcd.draw_outline.assert_called_with(
+        0, 0, 100, 100, krux.display.lcd.WHITE
     )
 
 

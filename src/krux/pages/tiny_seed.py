@@ -47,19 +47,19 @@ class TinySeed(Page):
         y_var = self.y_offset
         x_offset = self.x_offset
         for _ in range(13):
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_offset,
                 self.y_offset,
-                1,
-                12 * self.y_pad,
+                x_offset,
+                self.y_offset + 12 * self.y_pad,
                 theme.frame_color,
             )
             x_offset += self.x_pad
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 self.x_offset,
                 y_var,
-                12 * (self.x_pad),
-                1,
+                self.x_offset + 12 * (self.x_pad),
+                y_var,
                 theme.frame_color,
             )
             y_var += self.y_pad
@@ -298,26 +298,26 @@ class TinySeed(Page):
         )
         # print border around buttons only on touch devices
         if self.ctx.input.touch is not None:
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_offset,
                 y_offset,
-                12 * self.x_pad,
-                1,
+                x_offset + 12 * self.x_pad,
+                y_offset,
                 theme.frame_color,
             )
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_offset,
                 y_offset + y_pad,
-                12 * self.x_pad,
-                1,
+                x_offset + 12 * self.x_pad,
+                y_offset + y_pad,
                 theme.frame_color,
             )
             for _ in range(3):
-                self.ctx.display.fill_rectangle(
+                self.ctx.display.draw_line(
                     x_offset,
                     y_offset,
-                    1,
-                    y_pad,
+                    x_offset,
+                    y_offset + y_pad,
                     theme.frame_color,
                 )
                 x_offset += 6 * self.x_pad
