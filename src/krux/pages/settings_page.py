@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
+import lcd
 from ..themes import theme, GREEN, ORANGE
 from ..settings import (
     CategorySetting,
@@ -287,6 +288,17 @@ class SettingsPage(Page):
             current_category = setting.__get__(settings_namespace)
             color = CATEGORY_SETTING_COLOR_DICT.get(current_category, theme.fg_color)
             self.ctx.display.clear()
+            if setting.attr == "flipped_x":
+                self.ctx.display.draw_string(
+                    self.ctx.display.width() // 4,
+                    DEFAULT_PADDING,
+                    t("Left"),
+                )
+                self.ctx.display.draw_string(
+                    (3 * self.ctx.display.width() // 4) - 5 * self.ctx.display.font_width,
+                    DEFAULT_PADDING,
+                    t("Right"),
+                )
             self.ctx.display.draw_centered_text(
                 settings_namespace.label(setting.attr) + "\n" + str(current_category),
                 color,
@@ -298,6 +310,7 @@ class SettingsPage(Page):
                 btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
+            new_category = None
             for i, category in enumerate(categories):
                 if current_category == category:
                     if btn in (BUTTON_PAGE, None):
@@ -308,6 +321,16 @@ class SettingsPage(Page):
                     break
             if setting.attr == "theme":
                 theme.update()
+            if setting.attr == "flipped_x" and new_category is not None:
+                lcd.mirror(new_category)
+            if setting.attr == "bgr_colors" and new_category is not None:
+                lcd.bgr_to_rgb(new_category)
+            if setting.attr == "inverted_colors" and new_category is not None:
+                lcd.init(invert=new_category)
+                # re-configuring the display after reinitializing it
+                lcd.mirror(Settings().hardware.display.flipped_x_coordinates)
+                lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
+                lcd.rotation(1)  # Portrait mode
 
         # When changing locale, exit Login to force recreate with new locale
         if (

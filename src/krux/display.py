@@ -22,6 +22,7 @@
 import lcd
 import board
 from .themes import theme
+from .krux_settings import Settings
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
@@ -117,15 +118,17 @@ class Display:
             )
             self.set_backlight(DEFAULT_BACKLIGHT)
         else:
-            invert = (
-                board.config["type"].startswith("amigo")
-                or board.config["lcd"]["invert"]
-            )
+            invert = False
+            mirror = False
+            bgr_to_rgb = False
+            if board.config["type"].startswith("amigo"):
+                mirror = True
+                invert = Settings().hardware.display.inverted_colors
+                bgr_to_rgb = Settings().hardware.display.bgr_colors
             lcd.init(invert=invert)
-            lcd.bgr_to_rgb(invert)
+            lcd.mirror(mirror)
+            lcd.bgr_to_rgb(bgr_to_rgb)
         self.to_portrait()
-        if board.config["type"].startswith("amigo"):
-            lcd.mirror(True)
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
@@ -231,21 +234,21 @@ class Display:
 
     def outline(self, x, y, width, height, color=theme.fg_color):
         """Draws an outline rectangle from given coordinates"""
-        if board.config["krux"]["display"]["inverted_coordinates"]:
+        if Settings().hardware.display.flipped_x_coordinates:
             x = self.width() - x - 1
             x -= width
         lcd.draw_outline(x, y, width, height, color)
 
     def fill_rectangle(self, x, y, width, height, color, radius=0):
         """Draws a rectangle to the screen with optional rounded corners"""
-        if board.config["krux"]["display"]["inverted_coordinates"]:
+        if Settings().hardware.display.flipped_x_coordinates:
             x = self.width() - x
             x -= width
         lcd.fill_rectangle(x, y, width, height, color, radius)
 
     def draw_line(self, x_0, y_0, x_1, y_1, color=theme.fg_color):
         """Draws a line to the screen"""
-        if board.config["krux"]["display"]["inverted_coordinates"]:
+        if Settings().hardware.display.flipped_x_coordinates:
             if x_0 < self.width():
                 x_0 += 1
             if x_1 < self.width():
@@ -259,13 +262,13 @@ class Display:
 
     def draw_circle(self, x, y, radius, quadrant, color=theme.fg_color):
         """Draws a circle to the screen"""
-        if board.config["krux"]["display"]["inverted_coordinates"]:
+        if Settings().hardware.display.flipped_x_coordinates:
             x = self.width() - x
         lcd.draw_circle(x, y, radius, quadrant, color)
 
     def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
-        if board.config["krux"]["display"]["inverted_coordinates"]:
+        if Settings().hardware.display.flipped_x_coordinates:
             x = self.width() - x
             x -= len(text) * self.font_width
         lcd.draw_string(x, y, text, color, bg_color)

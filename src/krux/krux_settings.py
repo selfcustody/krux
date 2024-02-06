@@ -240,6 +240,21 @@ class TouchSettings(SettingsNamespace):
             "threshold": t("Touch Threshold"),
         }[attr]
 
+class AmgDisplaySettings(SettingsNamespace):
+    """Custom display settings for Maix Amigo"""
+
+    namespace = "settings.amg_display"
+    flipped_x_coordinates = CategorySetting("flipped_x", True, [False, True])
+    inverted_colors = CategorySetting("inverted_colors", True, [False, True])
+    bgr_colors = CategorySetting("bgr_colors", True, [False, True])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "flipped_x": t("Flipped X Coordinates"),
+            "inverted_colors": t("Inverted Colors"),
+            "bgr_colors": t("BGR Colors"),
+        }[attr]
 
 class HardwareSettings(SettingsNamespace):
     """Hardware Related Settings"""
@@ -253,6 +268,8 @@ class HardwareSettings(SettingsNamespace):
             or board.config["type"] == "yahboom"
         ):
             self.touch = TouchSettings()
+        if board.config["type"].startswith("amigo"):
+            self.display = AmgDisplaySettings()
         if board.config["type"] == "dock":
             self.encoder = EncoderSettings()
 
@@ -267,6 +284,8 @@ class HardwareSettings(SettingsNamespace):
             or board.config["type"] == "yahboom"
         ):
             hardware_menu["touchscreen"] = t("Touchscreen")
+        if board.config["type"].startswith("amigo"):
+            hardware_menu["amg_display"] = t("Display")
         if board.config["type"] == "dock":
             hardware_menu["encoder"] = t("Encoder")
 
