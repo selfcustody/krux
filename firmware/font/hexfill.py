@@ -40,20 +40,26 @@ with open(sys.argv[1], "r", encoding="utf-8") as input_file:
     # Zero out > height pixel width characters since they can't be scaled down
     lines = list(
         map(
-            lambda line: line.split(":")[0] + ":" + ("00" * font_byte_length) + "\n"
-            if len(line) > line_char_length
-            else line,
+            lambda line: (
+                line.split(":")[0] + ":" + ("00" * font_byte_length) + "\n"
+                if len(line) > line_char_length
+                else line
+            ),
             lines,
         )
     )
     # Pad < height pixel width chars with leading 0s
     lines = list(
         map(
-            lambda line: line[:5]
-            + ("0" * (line_char_length - len(line)))
-            + line[5 : len(line) - 1]
-            # + ("0" * (line_char_length - len(line)))
-            + "\n" if len(line) < line_char_length else line,
+            lambda line: (
+                line[:5]
+                + ("0" * (line_char_length - len(line)))
+                + line[5 : len(line) - 1]
+                # + ("0" * (line_char_length - len(line)))
+                + "\n"
+                if len(line) < line_char_length
+                else line
+            ),
             lines,
         )
     )

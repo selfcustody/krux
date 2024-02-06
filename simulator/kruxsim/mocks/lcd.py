@@ -232,7 +232,7 @@ def draw_qr_code_binary(offset_y, code_bin, max_width, dark_color, light_color, 
     pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
 
 
-def fill_rectangle(x, y, w, h, color):
+def fill_rectangle(x, y, w, h, color, radius=0):
     def run():
         pg.draw.rect(
             screen,
@@ -250,6 +250,41 @@ def fill_rectangle(x, y, w, h, color):
     color = rgb565torgb888(color)
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 
+def draw_line(x_0, y_0, x_1, y_1, color):
+    def run():
+        start_pos = (x_0, y_0)
+        end_pos = (x_1, y_1)
+
+        # Apply inverted coordinates if necessary
+        if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]:
+            start_pos = (width() - x_1, y_0)
+            end_pos = (width() - x_0, y_1)
+
+        pg.draw.line(screen, color, start_pos, end_pos, 1)
+    color = rgb565torgb888(color)
+    pg.event.post(pg.event.Event(events.LCD_DRAW_LINE_EVENT, {"f": run}))
+
+def draw_outline(x, y, w, h, color):
+    x += 1  # Adjust for compatibility with previous implementation
+    def run():
+        pg.draw.rect(
+            screen,
+            color,
+            (
+                width() - w - x + 1
+                if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
+                else x,
+                y,
+                w,
+                h,
+            ),
+            1,
+        )
+
+    x -= 1  # Adjust for compatibility with previous implementation
+    color = rgb565torgb888(color)
+    pg.event.post(pg.event.Event(events.LCD_DRAW_OUTLINE_EVENT, {"f": run}))
+
 
 if "lcd" not in sys.modules:
     sys.modules["lcd"] = mock.MagicMock(
@@ -264,6 +299,8 @@ if "lcd" not in sys.modules:
         draw_qr_code=draw_qr_code,
         draw_qr_code_binary=draw_qr_code_binary,
         fill_rectangle=fill_rectangle,
+        draw_line=draw_line,
+        draw_outline=draw_outline,
         BLACK=COLOR_BLACK,
         WHITE=COLOR_WHITE,
     )

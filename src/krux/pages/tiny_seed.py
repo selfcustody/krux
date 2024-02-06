@@ -47,19 +47,19 @@ class TinySeed(Page):
         y_var = self.y_offset
         x_offset = self.x_offset
         for _ in range(13):
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_offset,
                 self.y_offset,
-                1,
-                12 * self.y_pad,
+                x_offset,
+                self.y_offset + 12 * self.y_pad,
                 theme.frame_color,
             )
             x_offset += self.x_pad
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 self.x_offset,
                 y_var,
-                12 * (self.x_pad),
-                1,
+                self.x_offset + 12 * (self.x_pad),
+                y_var,
                 theme.frame_color,
             )
             y_var += self.y_pad
@@ -97,6 +97,7 @@ class TinySeed(Page):
     def _draw_punched(self, words, page):
         """Draws punched bits for import and export Tinyseed UI"""
         y_offset = self.y_offset
+        radius = (self.x_pad - 5) // 3
         for x in range(12):
             if isinstance(words[0], str):
                 word_list_index = WORDLIST.index(words[page * 12 + x]) + 1
@@ -112,6 +113,7 @@ class TinySeed(Page):
                         self.x_pad - 5,
                         self.y_pad - 5,
                         theme.highlight_color,
+                        radius,
                     )
             y_offset += self.y_pad
 
@@ -298,26 +300,26 @@ class TinySeed(Page):
         )
         # print border around buttons only on touch devices
         if self.ctx.input.touch is not None:
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_offset,
                 y_offset,
-                12 * self.x_pad,
-                1,
+                x_offset + 12 * self.x_pad,
+                y_offset,
                 theme.frame_color,
             )
-            self.ctx.display.fill_rectangle(
+            self.ctx.display.draw_line(
                 x_offset,
                 y_offset + y_pad,
-                12 * self.x_pad,
-                1,
+                x_offset + 12 * self.x_pad,
+                y_offset + y_pad,
                 theme.frame_color,
             )
             for _ in range(3):
-                self.ctx.display.fill_rectangle(
+                self.ctx.display.draw_line(
                     x_offset,
                     y_offset,
-                    1,
-                    y_pad,
+                    x_offset,
+                    y_offset + y_pad,
                     theme.frame_color,
                 )
                 x_offset += 6 * self.x_pad

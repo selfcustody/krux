@@ -231,17 +231,37 @@ class Display:
 
     def outline(self, x, y, width, height, color=theme.fg_color):
         """Draws an outline rectangle from given coordinates"""
-        self.fill_rectangle(x, y, width + 1, 1, color)  # up
-        self.fill_rectangle(x, y + height, width + 1, 1, color)  # bottom
-        self.fill_rectangle(x, y, 1, height + 1, color)  # left
-        self.fill_rectangle(x + width, y, 1, height + 1, color)  # right
+        if board.config["krux"]["display"]["inverted_coordinates"]:
+            x = self.width() - x - 1
+            x -= width
+        lcd.draw_outline(x, y, width, height, color)
 
-    def fill_rectangle(self, x, y, width, height, color):
-        """Draws a rectangle to the screen"""
+    def fill_rectangle(self, x, y, width, height, color, radius=0):
+        """Draws a rectangle to the screen with optional rounded corners"""
         if board.config["krux"]["display"]["inverted_coordinates"]:
             x = self.width() - x
             x -= width
-        lcd.fill_rectangle(x, y, width, height, color)
+        lcd.fill_rectangle(x, y, width, height, color, radius)
+
+    def draw_line(self, x_0, y_0, x_1, y_1, color=theme.fg_color):
+        """Draws a line to the screen"""
+        if board.config["krux"]["display"]["inverted_coordinates"]:
+            if x_0 < self.width():
+                x_0 += 1
+            if x_1 < self.width():
+                x_1 += 1
+            x_start = self.width() - x_1
+            x_end = self.width() - x_0
+        else:
+            x_start = x_0
+            x_end = x_1
+        lcd.draw_line(x_start, y_0, x_end, y_1, color)
+
+    def draw_circle(self, x, y, radius, quadrant, color=theme.fg_color):
+        """Draws a circle to the screen"""
+        if board.config["krux"]["display"]["inverted_coordinates"]:
+            x = self.width() - x
+        lcd.draw_circle(x, y, radius, quadrant, color)
 
     def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
@@ -264,13 +284,14 @@ class Display:
             text if isinstance(text, list) else self.to_lines(text, max_lines=max_lines)
         )
         if info_box:
-            bg_color = theme.disabled_color
+            bg_color = theme.frame_color
             self.fill_rectangle(
                 DEFAULT_PADDING - 3,
                 offset_y - 1,
                 self.usable_width() + 6,
                 (len(lines)) * self.font_height + 2,
                 bg_color,
+                self.font_width,  # radius
             )
         for i, line in enumerate(lines):
             if len(line) > 0:
