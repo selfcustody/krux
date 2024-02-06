@@ -139,6 +139,7 @@ class Tools(Page):
             self.erase_spiffs()
             # Reboot so default settings take place and SPIFFS is formatted.
             self.ctx.power_manager.reboot()
+        return MENU_CONTINUE
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
