@@ -56,6 +56,12 @@ class Display:
         self.font_height = FONT_HEIGHT
         self.total_lines = board.config["lcd"]["width"] // FONT_HEIGHT
         self.bottom_line = (self.total_lines - 1) * FONT_HEIGHT
+        if board.config["type"].startswith("amigo"):
+            self.flipped_x_coordinates = (
+                Settings().hardware.display.flipped_x_coordinates
+            )
+        else:
+            self.flipped_x_coordinates = False
         if board.config["type"] == "m5stickv":
             self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
         else:
@@ -234,21 +240,21 @@ class Display:
 
     def outline(self, x, y, width, height, color=theme.fg_color):
         """Draws an outline rectangle from given coordinates"""
-        if Settings().hardware.display.flipped_x_coordinates:
+        if self.flipped_x_coordinates:
             x = self.width() - x - 1
             x -= width
         lcd.draw_outline(x, y, width, height, color)
 
     def fill_rectangle(self, x, y, width, height, color, radius=0):
         """Draws a rectangle to the screen with optional rounded corners"""
-        if Settings().hardware.display.flipped_x_coordinates:
+        if self.flipped_x_coordinates:
             x = self.width() - x
             x -= width
         lcd.fill_rectangle(x, y, width, height, color, radius)
 
     def draw_line(self, x_0, y_0, x_1, y_1, color=theme.fg_color):
         """Draws a line to the screen"""
-        if Settings().hardware.display.flipped_x_coordinates:
+        if self.flipped_x_coordinates:
             if x_0 < self.width():
                 x_0 += 1
             if x_1 < self.width():
@@ -262,13 +268,13 @@ class Display:
 
     def draw_circle(self, x, y, radius, quadrant, color=theme.fg_color):
         """Draws a circle to the screen"""
-        if Settings().hardware.display.flipped_x_coordinates:
+        if self.flipped_x_coordinates:
             x = self.width() - x
         lcd.draw_circle(x, y, radius, quadrant, color)
 
     def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
-        if Settings().hardware.display.flipped_x_coordinates:
+        if self.flipped_x_coordinates:
             x = self.width() - x
             x -= len(text) * self.font_width
         lcd.draw_string(x, y, text, color, bg_color)

@@ -295,7 +295,8 @@ class SettingsPage(Page):
                     t("Left"),
                 )
                 self.ctx.display.draw_string(
-                    (3 * self.ctx.display.width() // 4) - 5 * self.ctx.display.font_width,
+                    (3 * self.ctx.display.width() // 4)
+                    - 5 * self.ctx.display.font_width,
                     DEFAULT_PADDING,
                     t("Right"),
                 )
@@ -322,7 +323,7 @@ class SettingsPage(Page):
             if setting.attr == "theme":
                 theme.update()
             if setting.attr == "flipped_x" and new_category is not None:
-                lcd.mirror(new_category)
+                self.ctx.display.flipped_x_coordinates = new_category
             if setting.attr == "bgr_colors" and new_category is not None:
                 lcd.bgr_to_rgb(new_category)
             if setting.attr == "inverted_colors" and new_category is not None:

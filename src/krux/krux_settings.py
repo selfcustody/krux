@@ -240,6 +240,7 @@ class TouchSettings(SettingsNamespace):
             "threshold": t("Touch Threshold"),
         }[attr]
 
+
 class AmgDisplaySettings(SettingsNamespace):
     """Custom display settings for Maix Amigo"""
 
@@ -255,6 +256,7 @@ class AmgDisplaySettings(SettingsNamespace):
             "inverted_colors": t("Inverted Colors"),
             "bgr_colors": t("BGR Colors"),
         }[attr]
+
 
 class HardwareSettings(SettingsNamespace):
     """Hardware Related Settings"""
