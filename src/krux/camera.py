@@ -166,7 +166,7 @@ class Camera:
         gc.collect()
         sensor.run(0)
 
-    def capture_qr_code_loop(self, callback):
+    def capture_qr_code_loop(self, callback, flipped_x_coordinates=False):
         """Captures either singular or animated QRs and parses their contents until
         all parts of the message have been captured. The part data are then ordered
         and assembled into one message and returned.
@@ -196,7 +196,10 @@ class Camera:
                 img.lens_corr(strength=1.0, zoom=0.56)
                 lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
             elif board.config["type"].startswith("amigo"):
-                lcd.display(img, oft=(40, 40))
+                if flipped_x_coordinates:
+                    lcd.display(img, oft=(40, 40))
+                else:
+                    lcd.display(img, oft=(120, 40))  # X and Y are swapped
             else:
                 lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
 

@@ -329,7 +329,7 @@ class SettingsPage(Page):
             if setting.attr == "inverted_colors" and new_category is not None:
                 lcd.init(invert=new_category)
                 # re-configuring the display after reinitializing it
-                lcd.mirror(Settings().hardware.display.flipped_x_coordinates)
+                lcd.mirror(True)
                 lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
                 lcd.rotation(1)  # Portrait mode
 

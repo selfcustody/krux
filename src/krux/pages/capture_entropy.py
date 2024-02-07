@@ -48,7 +48,10 @@ class CameraEntropy(Page):
             img.lens_corr(strength=1.0, zoom=0.56)
             lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
         elif board_type.startswith("amigo"):
-            lcd.display(img, oft=(40, 40))
+            if self.ctx.display.flipped_x_coordinates:
+                lcd.display(img, oft=(40, 40))
+            else:
+                lcd.display(img, oft=(120, 40))  # X and Y are swapped
         else:
             lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
 

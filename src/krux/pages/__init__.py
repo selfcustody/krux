@@ -248,7 +248,9 @@ class Page:
         code = None
         qr_format = None
         try:
-            code, qr_format = self.ctx.camera.capture_qr_code_loop(callback)
+            code, qr_format = self.ctx.camera.capture_qr_code_loop(
+                callback, self.ctx.display.flipped_x_coordinates
+            )
         except:
             print("Camera error")
         if self.ctx.light:

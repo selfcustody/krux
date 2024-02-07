@@ -208,7 +208,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
 
     HARDWARE_INDEX = 2
     LOCALE_INDEX = 3
-    PRINTER_INDEX = 0
+    PRINTER_INDEX = 1
     LEAVE_INDEX = 7
 
     cases = [
@@ -248,7 +248,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
                 # Back from Printer
                 3,
                 # Back from Hardware
-                2,
+                3,
                 # Leave Settings
                 LEAVE_INDEX,
             ),
