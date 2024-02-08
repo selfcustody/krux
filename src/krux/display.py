@@ -266,8 +266,12 @@ class Display:
             x_end = x_1
         lcd.draw_line(x_start, y_0, x_end, y_1, color)
 
-    def draw_circle(self, x, y, radius, quadrant, color=theme.fg_color):
-        """Draws a circle to the screen"""
+    def draw_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
+        """
+        Draws a circle to the screen.
+        quadrant=0 will draw all 4 quadrants.
+        1 is top right, 2 is top left, 3 is bottom left, 4 is bottom right.
+        """
         if self.flipped_x_coordinates:
             x = self.width() - x
         lcd.draw_circle(x, y, radius, quadrant, color)

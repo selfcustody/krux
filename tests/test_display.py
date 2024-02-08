@@ -25,6 +25,25 @@ def test_init(mocker, m5stickv):
     )
 
 
+def test_init_amigo(mocker, amigo_tft):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+    import board
+
+    mocker.spy(Display, "initialize_lcd")
+
+    d = Display()
+    d.initialize_lcd()
+
+    assert isinstance(d, Display)
+    d.initialize_lcd.assert_called()
+
+    krux.display.lcd.init.assert_called_once()
+    assert "invert" in krux.display.lcd.init.call_args.kwargs
+    assert krux.display.lcd.init.call_args.kwargs["invert"] == True
+
+
 def test_width(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
@@ -241,6 +260,23 @@ def test_to_lines(mocker, m5stickv):
         lines = d.to_lines(case[1])
         assert lines == case[2]
 
+    # Test a text that don't fit in the screen
+    LCD_WIDTH = 240
+    MAX_LINES = 3
+    mocker.patch(
+        "krux.display.lcd",
+        new=mocker.MagicMock(width=mocker.MagicMock(return_value=LCD_WIDTH)),
+    )
+    long_text = "A really long text. " * 6
+    d = Display()
+    lines = d.to_lines(long_text, max_lines=MAX_LINES)
+    cut_text = [
+        "A really long text. A",
+        "really long text. A really",
+        "long text. A really long...",
+    ]
+    assert lines == cut_text
+
 
 def test_to_lines_exact_match_amigo(mocker, amigo_tft):
     from krux.display import Display
@@ -303,6 +339,64 @@ def test_outline(mocker, m5stickv):
 
     krux.display.lcd.draw_outline.assert_called_with(
         0, 0, 100, 100, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_line(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+
+    d.draw_line(100, 0, 100, 100, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_line.assert_called_with(
+        100, 0, 100, 100, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_line_on_inverted_display(mocker, amigo_tft):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.draw_line(100, 0, 100, 100, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_line.assert_called_with(
+        480 - 100 - 1, 0, 480 - 100 - 1, 100, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_circle(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+
+    d.draw_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_circle.assert_called_with(
+        100, 100, 50, 0, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_circle_on_inverted_display(mocker, amigo_tft):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.draw_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_circle.assert_called_with(
+        480 - 100, 100, 50, 0, krux.display.lcd.WHITE
     )
 
 
@@ -379,6 +473,54 @@ def test_draw_hcentered_text(mocker, m5stickv):
 
     d.draw_string.assert_called_with(
         23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+
+def test_draw_hcentered_text_on_inverted_display(mocker, amigo_tft):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text(
+        "Hello world", 50, krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+    d.draw_string.assert_called_with(
+        174, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+
+def test_draw_infobox(mocker, amigo_tft):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display, DEFAULT_PADDING
+    from krux.themes import WHITE, BLACK, GREY
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 320)
+    mocker.spy(d, "fill_rectangle")
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text("Hello world", DEFAULT_PADDING, WHITE, BLACK, info_box=True)
+
+    d.fill_rectangle.assert_called_with(
+        DEFAULT_PADDING - 3,
+        DEFAULT_PADDING - 1,
+        d.width() - 2 * DEFAULT_PADDING + 6,
+        d.font_height + 2,
+        GREY,
+        d.font_width,
+    )
+    d.draw_string.assert_called_with(
+        (d.width() - len("Hello world") * d.font_width) // 2,
+        DEFAULT_PADDING,
+        "Hello world",
+        WHITE,
+        GREY,
     )
 
 
