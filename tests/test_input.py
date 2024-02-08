@@ -417,9 +417,8 @@ def test_long_press_page_simulates_swipe_left(mocker, m5stickv):
 
 
 def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
-    import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED, SWIPE_RIGHT, LONG_PRESS_PERIOD
+    from krux.input import Input, RELEASED, PRESSED, SWIPE_RIGHT
 
     input = Input()
     input = reset_input_states(mocker, input)
@@ -441,69 +440,51 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
 
 
 def test_touch_indexing(mocker, amigo_tft):
-    import threading
     import krux
     from krux.input import Input, BUTTON_TOUCH
 
     input = Input()
     input = reset_input_states(mocker, input)
 
-    elapsed_time = 0
+    def mock_ticks():
+        tick_time = [0]
 
-    def time_control(point1, point2):
-        nonlocal elapsed_time
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
-        time.sleep(0.1)
-        elapsed_time += 200
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
-        # touch on 3º quadrant
-        mocker.patch.object(input.touch, "event", return_value=True)
+        def side_effect():
+            tick_time[0] += 100
+            return tick_time[0]
+
+        return side_effect
+
+    mocker.patch.object(time, "ticks_ms", side_effect=mock_ticks())
+
+    def mock_points(point1, point2):
+        mocker.patch.object(input.touch, "event", side_effect=[False, True, False])
         mocker.patch.object(input.touch.touch_driver, "irq_point", return_value=point1)
         mocker.patch.object(
-            input.touch.touch_driver, "current_point", return_value=point1
+            input.touch.touch_driver,
+            "current_point",
+            side_effect=[point1, point2, None, None],
         )
-        time.sleep(0.1)
-        mocker.patch.object(input.touch, "event", return_value=False)
-        time.sleep(0.1)
-        elapsed_time += 200
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
-        # touch slightly sideways before release
-        mocker.patch.object(
-            input.touch.touch_driver, "current_point", return_value=point2
-        )
-        time.sleep(0.1)
-        elapsed_time += 200
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
-        # release touch
-        mocker.patch.object(
-            input.touch.touch_driver, "current_point", return_value=None
-        )
-        time.sleep(0.1)
-        elapsed_time += 200
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
 
-    # full screen as single touch button
+    # Full screen as single touch button
     input.touch.clear_regions()
-    t = threading.Thread(target=time_control, args=((75, 150), (77, 152)))
-    t.start()
+    mock_points((75, 150), (77, 152))
     btn = input.wait_for_button(True)
-    t.join()
     assert btn == BUTTON_TOUCH
     assert input.touch.current_index() == 0
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
 
     # 2x2 array (4 quadrants) 200x200 pxls
+    mock_points((75, 150), (77, 152))
     input.touch.add_y_delimiter(50)
     input.touch.add_y_delimiter(100)
     input.touch.add_y_delimiter(200)
     input.touch.add_x_delimiter(50)
     input.touch.add_x_delimiter(100)
     input.touch.add_x_delimiter(200)
-    t = threading.Thread(target=time_control, args=((75, 150), (77, 152)))
-    t.start()
+    print("2nd case")
     btn = input.wait_for_button(True)
-    t.join()
 
     assert btn == BUTTON_TOUCH
     assert input.touch.current_index() == 2  # (3º quadrant)
@@ -518,73 +499,51 @@ def test_touch_gestures(mocker, amigo_tft):
     input = Input()
     input = reset_input_states(mocker, input)
 
-    elapsed_time = 0
+    def mock_ticks():
+        tick_time = [0]
 
-    def time_control(point1, point2):
-        nonlocal elapsed_time
+        def side_effect():
+            tick_time[0] += 100
+            return tick_time[0]
 
-        elapsed_time += 200
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
-        mocker.patch.object(input.touch, "event", return_value=True)
+        return side_effect
+
+    mocker.patch.object(time, "ticks_ms", side_effect=mock_ticks())
+
+    def mock_points(point1, point2):
+        mocker.patch.object(input.touch, "event", side_effect=[False, True, False])
         mocker.patch.object(input.touch.touch_driver, "irq_point", return_value=point1)
         mocker.patch.object(
-            input.touch.touch_driver, "current_point", return_value=point1
+            input.touch.touch_driver,
+            "current_point",
+            side_effect=[point1, point2, None, None],
         )
-        time.sleep(0.1)
-        # Detect press event
-        elapsed_time += 200
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
-        time.sleep(0.1)
-        mocker.patch.object(input.touch.touch_driver, "event", return_value=False)
-        time.sleep(0.1)
-        # Swipe
-        mocker.patch.object(
-            input.touch.touch_driver, "current_point", return_value=point2
-        )
-        time.sleep(0.1)
-        # Release
-        elapsed_time += 200
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
-        mocker.patch.object(
-            input.touch.touch_driver, "current_point", return_value=None
-        )
-        time.sleep(0.1)
-        elapsed_time += 200
-        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
 
     # Swipe Right
     input.touch.clear_regions()
-    t = threading.Thread(target=time_control, args=((75, 150), (175, 152)))
-    t.start()
+    mock_points((75, 150), (175, 152))
     btn = input.wait_for_button(True)
-    t.join()
     assert btn == SWIPE_RIGHT
     krux.input.wdt.feed.assert_called()
 
     # Swipe Left
     input.touch.clear_regions()
-    t = threading.Thread(target=time_control, args=((175, 150), (75, 152)))
-    t.start()
+    mock_points((175, 150), (75, 152))
     btn = input.wait_for_button(True)
-    t.join()
     assert btn == SWIPE_LEFT
     krux.input.wdt.feed.assert_called()
 
     # Swipe Up
     input.touch.clear_regions()
-    t = threading.Thread(target=time_control, args=((75, 150), (75, 50)))
-    t.start()
+    mock_points((75, 150), (75, 50))
     btn = input.wait_for_button(True)
-    t.join()
     assert btn == SWIPE_UP
     krux.input.wdt.feed.assert_called()
 
     # Swipe Down
     input.touch.clear_regions()
-    t = threading.Thread(target=time_control, args=((75, 50), (75, 150)))
-    t.start()
+    mock_points((75, 50), (75, 150))
     btn = input.wait_for_button(True)
-    t.join()
     assert btn == SWIPE_DOWN
     krux.input.wdt.feed.assert_called()
 
