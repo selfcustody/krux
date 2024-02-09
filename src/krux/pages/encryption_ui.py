@@ -257,9 +257,11 @@ class LoadEncryptedMnemonic(Page):
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(flash)",
-                    lambda m_id=mnemonic_id: self._delete_encrypted_mnemonic(m_id)
-                    if delete_opt
-                    else self._load_encrypted_mnemonic(m_id),
+                    lambda m_id=mnemonic_id: (
+                        self._delete_encrypted_mnemonic(m_id)
+                        if delete_opt
+                        else self._load_encrypted_mnemonic(m_id)
+                    ),
                 )
             )
         if has_sd:
@@ -267,11 +269,11 @@ class LoadEncryptedMnemonic(Page):
                 mnemonic_ids_menu.append(
                     (
                         mnemonic_id + "(SD card)",
-                        lambda m_id=mnemonic_id: self._delete_encrypted_mnemonic(
-                            m_id, sd_card=True
-                        )
-                        if delete_opt
-                        else self._load_encrypted_mnemonic(m_id, sd_card=True),
+                        lambda m_id=mnemonic_id: (
+                            self._delete_encrypted_mnemonic(m_id, sd_card=True)
+                            if delete_opt
+                            else self._load_encrypted_mnemonic(m_id, sd_card=True)
+                        ),
                     )
                 )
         mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))

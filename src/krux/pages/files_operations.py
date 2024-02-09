@@ -102,9 +102,11 @@ class SaveFile(Page):
         curr_filename = self.capture_from_keypad(
             t("Filename"),
             [LETTERS, UPPERCASE_LETTERS, FILE_SPECIAL],
-            starting_buffer=("%s" + suffix) % curr_filename
-            if curr_filename
-            else empty_filename + suffix,
+            starting_buffer=(
+                ("%s" + suffix) % curr_filename
+                if curr_filename
+                else empty_filename + suffix
+            ),
         )
 
         # Verify if user defined a filename and it is not just dots
