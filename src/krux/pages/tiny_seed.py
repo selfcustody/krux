@@ -988,7 +988,10 @@ class TinyScanner(Page):
             if full_screen:
                 lcd.display(img)
             else:
-                lcd.display(img, oft=(2, 40))  # Centralize image in Amigo
+                # Centralize image on top Amigo's screen
+                # Offset x = 480 - 320 - 2 = 158 if not flipped
+                oft_x = 2 if self.ctx.display.flipped_x_coordinates else 158
+                lcd.display(img, oft=(oft_x, 40))
 
             if page_seed_numbers:
                 if w24:
