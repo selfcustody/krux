@@ -94,10 +94,8 @@ class MnemonicStorage:
     def __init__(self) -> None:
         self.stored = {}
         self.stored_sd = {}
-        self.has_sd_card = False
         try:
             with SDHandler() as sd:
-                self.has_sd_card = True
                 self.stored_sd = json.loads(sd.read(MNEMONICS_FILE))
         except:
             pass

@@ -102,13 +102,12 @@ class EncryptMnemonic(Page):
         def _sd_store_function():
             return self.store_mnemonic_on_memory(sd_card=True)
 
-        if self.has_sd_card():
-            sd_store_func = _sd_store_function
-        else:
-            sd_store_func = None
         encrypt_outputs_menu = [
             (t("Store on Flash"), self.store_mnemonic_on_memory),
-            (t("Store on SD Card"), sd_store_func),
+            (
+                t("Store on SD Card"),
+                None if not self.has_sd_card() else _sd_store_function,
+            ),
             (t("Encrypted QR Code"), self.encrypted_qr_code),
             (t("Back"), lambda: MENU_EXIT),
         ]
@@ -248,7 +247,6 @@ class LoadEncryptedMnemonic(Page):
 
         mnemonic_ids_menu = []
         mnemonic_storage = MnemonicStorage()
-        has_sd = mnemonic_storage.has_sd_card
         mnemonics = mnemonic_storage.list_mnemonics()
         sd_mnemonics = mnemonic_storage.list_mnemonics(sd_card=True)
         del mnemonic_storage
@@ -264,18 +262,17 @@ class LoadEncryptedMnemonic(Page):
                     ),
                 )
             )
-        if has_sd:
-            for mnemonic_id in sd_mnemonics:
-                mnemonic_ids_menu.append(
-                    (
-                        mnemonic_id + "(SD card)",
-                        lambda m_id=mnemonic_id: (
-                            self._delete_encrypted_mnemonic(m_id, sd_card=True)
-                            if delete_opt
-                            else self._load_encrypted_mnemonic(m_id, sd_card=True)
-                        ),
-                    )
+        for mnemonic_id in sd_mnemonics:
+            mnemonic_ids_menu.append(
+                (
+                    mnemonic_id + "(SD card)",
+                    lambda m_id=mnemonic_id: (
+                        self._delete_encrypted_mnemonic(m_id, sd_card=True)
+                        if delete_opt
+                        else self._load_encrypted_mnemonic(m_id, sd_card=True)
+                    ),
                 )
+            )
         mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
         submenu = Menu(self.ctx, mnemonic_ids_menu)
         index, status = submenu.run_loop()
