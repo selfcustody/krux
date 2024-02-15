@@ -24,8 +24,7 @@ import math
 import time
 import board
 from .keypads import Keypad
-from ..themes import theme, WHITE, RED, GREEN, DARKGREEN, ORANGE
-from ur.ur import UR
+from ..themes import theme, WHITE, GREEN
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,

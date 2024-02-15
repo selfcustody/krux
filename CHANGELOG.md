@@ -11,6 +11,9 @@ When deleting an encrypted mnemonic from an SD card, Krux will now overwrite the
 ### Save and Load Wallet Output Descriptor from SD card
 Create or load from a wallet output descriptor file on an SD card. The backup file format is compatible with most coordinators.
 
+### Sign Messages at a Derived Bitcoin address
+Sign messages from Sparrow and Specter, via QR code, also attesting a Bitcoin address belongs to you.
+
 ### Add Entropy Quality Estimation for Mnemonic Creation.
 Entropy quality estimators, like Shannon's entropy, were added to mnemonic generation through dice rolls and camera snapshot.
 

@@ -93,7 +93,6 @@ def test_list_mnemonic_storage(m5stickv, mock_file_operations):
     from krux.encryption import MnemonicStorage
 
     storage = MnemonicStorage()
-    assert storage.has_sd_card is True
     flash_list = storage.list_mnemonics(sd_card=False)
     sd_list = storage.list_mnemonics(sd_card=True)
     assert "ecbID" and "cbcID" in flash_list

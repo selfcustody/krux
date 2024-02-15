@@ -21,10 +21,7 @@
 # THE SOFTWARE.
 
 import gc
-from .utils import Utils
 from ..themes import theme
-from ..display import DEFAULT_PADDING
-from ..psbt import PSBTSigner
 from ..qr import FORMAT_NONE, FORMAT_PMOFN
 from ..krux_settings import t
 from . import (
@@ -32,10 +29,6 @@ from . import (
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
-)
-from ..sd_card import (
-    PSBT_FILE_EXTENSION,
-    SIGNED_FILE_SUFFIX,
 )
 
 
@@ -58,7 +51,6 @@ class Home(Page):
                 ],
             ),
         )
-        self.utils = Utils(self.ctx)
 
     def mnemonic(self):
         """Handler for the 'mnemonic' menu item"""
@@ -110,8 +102,43 @@ class Home(Page):
             return MENU_CONTINUE
         return status
 
+    def load_psbt(self):
+        """Loads a PSBT from camera or SD card"""
+
+        load_menu = Menu(
+            self.ctx,
+            [
+                (t("Load from camera"), lambda: None),
+                (
+                    t("Load from SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = load_menu.run_loop()
+
+        if index == 2:
+            return (None, None, "")
+        
+        if index == 0:
+            data, qr_format = self.capture_qr_code()
+            return (data, qr_format, "")
+        
+        # If index == 1
+        from .utils import Utils
+        from ..sd_card import PSBT_FILE_EXTENSION
+
+        utils = Utils(self.ctx)
+        psbt_filename, data = utils.load_file(PSBT_FILE_EXTENSION, prompt=False)
+        return (data, FORMAT_NONE, psbt_filename)
+
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
+        from ..sd_card import (
+            PSBT_FILE_EXTENSION,
+            SIGNED_FILE_SUFFIX,
+        )
 
         # Warns in case multisig wallet descriptor is not loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
@@ -126,16 +153,7 @@ class Home(Page):
                 return MENU_CONTINUE
 
         # Try to read a PSBT from camera
-        psbt_filename = ""
-        data, qr_format = self.capture_qr_code()
-
-        if data is None:
-            # Try to read a PSBT from a file on the SD card
-            qr_format = FORMAT_NONE
-            try:
-                psbt_filename, data = self.utils.load_file(PSBT_FILE_EXTENSION)
-            except OSError:
-                pass
+        data, qr_format, psbt_filename = self.load_psbt()
 
         if data is None:
             # Both the camera and the file on SD card failed!
@@ -146,10 +164,10 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        # TODO: FIX, FORMAT_UR increases QR Code data by a factor of 4.8 compared to FORMAT_PMOFN!!
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
-        signer = PSBTSigner(self.ctx.wallet, data, qr_format)
+        from ..psbt import PSBTSigner
 
+        signer = PSBTSigner(self.ctx.wallet, data, qr_format)
         outputs = signer.outputs()
         for message in outputs:
             self.ctx.display.clear()
@@ -160,45 +178,63 @@ class Home(Page):
         del data, outputs
         gc.collect()
 
-        # If user confirm, Krux will sign
-        if self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
-            signer.sign()
+        sign_menu = Menu(
+            self.ctx,
+            [
+                (t("Sign to QR code"), lambda: None),
+                (
+                    t("Sign to SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = sign_menu.run_loop()
+        del sign_menu
+        gc.collect()
+
+        if index == 2:  # Back
+            return MENU_CONTINUE
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Signing.."))
+
+        signer.sign()
+
+        title = t("Signed PSBT")
+        if index == 0:
+            # Sign to QR code
             qr_signed_psbt, qr_format = signer.psbt_qr()
-            serialized_signed_psbt = signer.psbt.serialize()
 
             # memory management
             del signer
             gc.collect()
 
-            # Try to show the signed PSBT as a QRCode
-            title = t("Signed PSBT")
-            try:
-                self.display_qr_codes(qr_signed_psbt, qr_format)
-                self.utils.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
-            except Exception as e:
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    t("Error:\n%s") % repr(e), theme.error_color
-                )
-                self.ctx.input.wait_for_button()
+            self.display_qr_codes(qr_signed_psbt, qr_format)
 
-            # memory management
-            del qr_signed_psbt
-            gc.collect()
+            from .utils import Utils
 
-            # Try to save the signed PSBT file on the SD card
-            if self.has_sd_card():
-                from .files_operations import SaveFile
+            utils = Utils(self.ctx)
+            utils.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
+            return MENU_CONTINUE
 
-                save_page = SaveFile(self.ctx)
-                save_page.save_file(
-                    serialized_signed_psbt,
-                    "QRCode",
-                    psbt_filename,
-                    title + ":",
-                    PSBT_FILE_EXTENSION,
-                    SIGNED_FILE_SUFFIX,
-                )
+        # index == 1: Sign to SD card
+        serialized_signed_psbt = signer.psbt.serialize()
+
+        # memory management
+        del signer
+        gc.collect()
+        from .files_operations import SaveFile
+
+        save_page = SaveFile(self.ctx)
+        save_page.save_file(
+            serialized_signed_psbt,
+            "QRCode",
+            psbt_filename,
+            title + ":",
+            PSBT_FILE_EXTENSION,
+            SIGNED_FILE_SUFFIX,
+        )
         return MENU_CONTINUE
 
     def sign_message(self):
