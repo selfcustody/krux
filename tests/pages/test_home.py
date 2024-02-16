@@ -685,10 +685,10 @@ def test_public_key(mocker, m5stickv, tdata):
 
 def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.pages.home import Home
-    from krux.pages.utils import Utils
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.sd_card import PSBT_FILE_EXTENSION, SIGNED_FILE_SUFFIX
 
     cases = [
         # Single-sig, not loaded, no format => pmofn, sign, No print prompt
@@ -696,14 +696,12 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 0
             tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
             None,  # 1 wallet
-            False,  # 2 if True: wallet will be #1 instead
-            tdata.P2WPKH_PSBT_B64,  # 3 capture_qr_code return 1
-            FORMAT_NONE,  # 4 capture_qr_code return 2
-            True,  # 5 if was signed!
-            tdata.SIGNED_P2WPKH_PSBT_B64,  # 6
-            FORMAT_PMOFN,  # 7
-            None,  # 8 printer
-            # 9 btn_seq
+            tdata.P2WPKH_PSBT_B64,  # 2 capture_qr_code return 1
+            FORMAT_NONE,  # 3 capture_qr_code return 2
+            True,  # 4 if was signed!
+            tdata.SIGNED_P2WPKH_PSBT_B64,  # 5
+            None,  # 7 printer
+            # 8 btn_seq
             [
                 # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # Load from QR code
@@ -713,19 +711,17 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Sign to QR code
                 BUTTON_ENTER,  # Leave
             ],
-            None,  # 10 SD avaiable
+            None,  # 9 SD avaiable
         ),
         # Single-sig, not loaded, pmofn, sign, No print prompt
         (
             # Case 1
             tdata.SINGLESIG_SIGNING_KEY,
             None,
-            False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            True,  # 5
+            True,
             tdata.SIGNED_P2WPKH_PSBT_B64,
-            FORMAT_PMOFN,
             None,
             [
                 BUTTON_ENTER,  # Load frm QR code
@@ -742,12 +738,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 2
             tdata.SINGLESIG_SIGNING_KEY,
             None,
-            False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            True,  # 5
+            True,
             tdata.SIGNED_P2WPKH_PSBT_B64,
-            FORMAT_PMOFN,
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Load frm QR code
@@ -765,12 +759,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 3
             tdata.SINGLESIG_SIGNING_KEY,
             None,
-            False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            True,  # 5
+            True,
             tdata.SIGNED_P2WPKH_PSBT_B64,
-            FORMAT_PMOFN,
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Load frm QR code
@@ -788,11 +780,9 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 4
             tdata.SINGLESIG_SIGNING_KEY,
             None,
-            False,
             tdata.P2WPKH_PSBT_B64,
             FORMAT_PMOFN,
-            False,  # 5
-            None,
+            False,
             None,
             None,
             [
@@ -800,8 +790,8 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
-                BUTTON_PAGE,   # Move to Sign to QR SD card
-                BUTTON_PAGE,   # Move to Back
+                BUTTON_PAGE,  # Move to Sign to QR SD card
+                BUTTON_PAGE,  # Move to Back
                 BUTTON_ENTER,  # Leave
             ],
             None,
@@ -811,11 +801,9 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 5
             tdata.SINGLESIG_SIGNING_KEY,
             None,
+            None,
+            None,
             False,
-            None,
-            None,
-            False,  # 5
-            None,
             None,
             None,
             [BUTTON_ENTER],  # Load from QR code - failed
@@ -826,11 +814,9 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 6
             tdata.MULTISIG_SIGNING_KEY,
             None,
+            None,
+            None,
             False,
-            None,
-            None,
-            False,  # 5
-            None,
             None,
             None,
             [BUTTON_PAGE],  # Wallet not loaded, proceed?
@@ -841,12 +827,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 7
             tdata.MULTISIG_SIGNING_KEY,
             None,
-            False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,  # 5
+            True,
             tdata.SIGNED_P2WSH_PSBT_B64,
-            FORMAT_PMOFN,
             None,
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
@@ -864,12 +848,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 8
             tdata.MULTISIG_SIGNING_KEY,
             None,
-            False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,  # 5
+            True,
             tdata.SIGNED_P2WSH_PSBT_B64,
-            FORMAT_PMOFN,
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
@@ -888,12 +870,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 9
             tdata.MULTISIG_SIGNING_KEY,
             None,
-            False,
             tdata.P2WSH_PSBT_B64,
             FORMAT_PMOFN,
-            True,  # 5
+            True,
             tdata.SIGNED_P2WSH_PSBT_B64,
-            FORMAT_PMOFN,
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
@@ -912,12 +892,10 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             # Case 10
             tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
             None,
-            False,
             tdata.P2WPKH_PSBT,  # 3 capture_qr_code return 1
             FORMAT_NONE,  # 4 capture_qr_code return 2
-            True,  # 5 if was signed!
+            True,
             tdata.SIGNED_P2WPKH_PSBT_B64,
-            FORMAT_PMOFN,
             None,  # 8 printer
             [
                 BUTTON_PAGE,  # Move to "Load from SD card"
@@ -933,15 +911,13 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         # Multisig, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
             # Case 11
-            tdata.MULTISIG_SIGNING_KEY,  # 0 wallet
+            tdata.MULTISIG_SIGNING_KEY,
             None,
-            False,
-            tdata.P2WSH_PSBT,  # 3 capture_qr_code return 1
-            FORMAT_NONE,  # 4 capture_qr_code return 2
-            True,  # 5 if was signed!
+            tdata.P2WSH_PSBT,
+            FORMAT_NONE,
+            True,
             tdata.SIGNED_P2WSH_PSBT_B64,
-            FORMAT_PMOFN,
-            None,  # 8 printer
+            None,
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_PAGE,  # Move to "Load from SD card"
@@ -955,17 +931,29 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             tdata.SIGNED_P2WSH_PSBT,  # 10 SD avaiable
         ),
     ]
+    # Case X
+    # [0] Wallet
+    # [1] Imported wallet descriptor (not used yet)
+    # [2] PSBT Data imported from QR code or SD card
+    # [3] QR code format
+    # [4] Flag - Was it signed?
+    # [5] Signed PSBT Data exported to QR code
+    # [6] Printer
+    # [7] Button Sequence
+    # [8] Signed PSBT Data exported to SD card
+
+    PSBT_FILE_NAME = "test.psbt"
     num = 0
     for case in cases:
         print("test_sign_psbt", num)
         num += 1
         wallet = Wallet(case[0])
-        if case[2]:  # always False
+        if case[1] is not None:
             wallet.load(case[1], FORMAT_PMOFN)
 
-        ctx = create_ctx(mocker, case[9], wallet, case[8])
+        ctx = create_ctx(mocker, case[7], wallet, case[6])
         home = Home(ctx)
-        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[3], case[4]))
+        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[2], case[3]))
         mocker.patch.object(
             home,
             "display_qr_codes",
@@ -973,30 +961,56 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         )
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
+        if case[6]:
+            mock_send_to_printer = mocker.patch(
+                "krux.pages.print_page.PrintPage._send_qr_to_printer"
+            )
+
         # case SD available
-        if case[10] is not None:
-            mocker.patch.object(home,"has_sd_card", new=lambda: True)
-            mocker.patch.object(Utils, "load_file", new=lambda *args, **kwargs: ("test.psbt", case[3]))
-
-        else:  # SD NOT available
-            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=OSError))
-            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=OSError))
-
+        if case[8] is not None:
+            mocker.patch.object(home, "has_sd_card", new=lambda: True)
+            mock_utils = mocker.patch("krux.pages.utils.Utils")
+            mock_utils.return_value.load_file.return_value = (PSBT_FILE_NAME, case[2])
+            mock_file_save = mocker.patch(
+                "krux.pages.files_operations.SaveFile.save_file"
+            )
         home.sign_psbt()
 
-        assert ctx.input.wait_for_button.call_count == len(case[9])
-        loaded_via_sd = len(case[9]) > 1 and case[9][0] == BUTTON_PAGE and case[9][1] == BUTTON_ENTER
+        assert ctx.input.wait_for_button.call_count == len(case[7])
+
+        loaded_via_sd = (
+            len(case[7]) > 1
+            and case[7][0] == BUTTON_PAGE
+            and case[7][1] == BUTTON_ENTER
+        )
         if loaded_via_sd:
             home.capture_qr_code.assert_not_called()
 
-        if case[5] and case[10] is None:  # if signed to QR codes
-            home.display_qr_codes.assert_called_once()
+        if case[4] and case[8] is None:  # if signed from/to QR codes
+            home.display_qr_codes.assert_called_once_with(case[5], FORMAT_PMOFN)
 
-        if case[10] is not None:  # if signed to SD card
+        if case[8] is not None:  # if signed from/to SD card
+            mock_utils.return_value.load_file.assert_called_once_with(
+                ".psbt", prompt=False
+            )
+            mock_file_save.assert_called_once_with(
+                case[8],
+                "QRCode",
+                PSBT_FILE_NAME,
+                "Signed PSBT" + ":",  # Title
+                PSBT_FILE_EXTENSION,
+                SIGNED_FILE_SUFFIX,
+            )
             home.display_qr_codes.assert_not_called()
 
-        # TODO: Test signature results: case[6] ?
-        # TODO: Check if printing was called > home.utils.print_standard_qr.assert_called_once()
+        if case[6] is not None:  # if has printer
+            if case[7][-1] == BUTTON_ENTER:  # if printed
+                mock_send_to_printer.assert_called()
+            else:  # if declined to print
+                mock_send_to_printer.assert_not_called()
+
+    # TODO: Create cross test cases: Load from QR code, sign, save to SD card and vice versa
+    # TODO: Import wallet descriptor and test signing
 
 
 def test_sign_message(mocker, m5stickv, tdata):

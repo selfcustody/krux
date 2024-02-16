@@ -120,11 +120,11 @@ class Home(Page):
 
         if index == 2:
             return (None, None, "")
-        
+
         if index == 0:
             data, qr_format = self.capture_qr_code()
             return (data, qr_format, "")
-        
+
         # If index == 1
         from .utils import Utils
         from ..sd_card import PSBT_FILE_EXTENSION
