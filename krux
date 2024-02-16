@@ -55,7 +55,7 @@ if [ "$1" == "build" ]; then
     if [ -z "$device" ]; then
         echo "Missing device"
     else
-        declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g')
+        declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
         sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
 
         mkdir -p build

@@ -110,4 +110,5 @@ FROM build-firmware AS build
 ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/Kboot/build
 RUN cp /src/firmware/MaixPy/projects/"${DEVICE}"/build/firmware.bin .
+RUN sed -i -e 's/\r$//' *.sh
 RUN ./CLEAN.sh && ./BUILD.sh
