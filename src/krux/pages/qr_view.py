@@ -338,7 +338,6 @@ class SeedQRView(Page):
         """Save QR code image as .bmp file"""
         from ..sd_card import BMP_IMAGE_EXTENSION
 
-        # TODO: Try Compression?
         import image
         import lcd
 
