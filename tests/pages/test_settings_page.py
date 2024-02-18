@@ -1,5 +1,7 @@
 import pytest
+from unittest.mock import patch
 from ..shared_mocks import mock_context
+from ..test_sd_card import mocker_sd_card_ok
 import sys
 
 
@@ -304,12 +306,9 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
 def test_encryption_pbkdf2_setting(m5stickv, mocker, mocker_ucryptolib):
     from krux.pages.settings_page import SettingsPage
     from krux.krux_settings import Settings, EncryptionSettings
-    from krux.settings import NumberSetting
 
     ctx = mock_context(mocker)
     settings_page = SettingsPage(ctx)
-
-    enc_setting = EncryptionSettings()
 
     # pbkdf2_iterations has default value
     assert Settings().encryption.pbkdf2_iterations == 100000
@@ -331,3 +330,120 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker, mocker_ucryptolib):
 
     # value changed!
     assert Settings().encryption.pbkdf2_iterations == 110000
+
+
+def test_restore_settings(amigo_tft, mocker, mocker_sd_card_ok):
+    from krux.pages.settings_page import SettingsPage
+    from krux.settings import FLASH_PATH, SETTINGS_FILENAME
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm restore
+
+    with patch("os.remove") as mock_remove:
+        with patch("krux.sd_card.SDHandler.delete") as mock_delete_sd:
+            ctx = create_ctx(mocker, BTN_SEQUENCE)
+            settings_page = SettingsPage(ctx)
+            settings_page.restore_settings()
+    mock_delete_sd.assert_called_once_with(SETTINGS_FILENAME)
+    mock_remove.assert_called_once_with("/" + FLASH_PATH + "/" + SETTINGS_FILENAME)
+
+
+def test_save_settings_on_sd(amigo_tft, mocker, mocker_sd_card_ok):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, SD_PATH
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to "Back"
+        BUTTON_ENTER,  # Confirm "Back"
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    settings_page = SettingsPage(ctx)
+    settings_page.flash_text = mocker.MagicMock()
+    Settings().persist.location = SD_PATH
+    settings_page.settings()
+    settings_page.flash_text.assert_has_calls(
+        [
+            mocker.call("Your changes will be kept on the SD card.", duration=2500),
+            mocker.call("Changes persisted to SD card!", duration=2500),
+        ]
+    )
+
+
+def test_leave_settings_without_changes(amigo_tft, mocker, mocker_sd_card_ok):
+    # mocker_sd_card_ok will mock os.listdir so it will also mock flash storage
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to "Back"
+        BUTTON_ENTER,  # Confirm "Back"
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    settings_page = SettingsPage(ctx)
+    settings_page.flash_text = mocker.MagicMock()
+    settings_page.settings()
+    settings_page.flash_text.assert_has_calls(
+        [
+            mocker.call(
+                "Your changes will be kept on device flash storage.", duration=2500
+            ),
+        ]
+    )
+    persisted_to_flash_call = mocker.call("Changes persisted to Flash!", duration=2500)
+    assert persisted_to_flash_call not in settings_page.flash_text.call_args_list
+
+
+def test_leave_settings_with_changes(amigo_tft, mocker, mocker_sd_card_ok):
+    # mocker_sd_card_ok will mock os.listdir so it will also mock flash storage
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Change "Bitcoin"
+        BUTTON_PAGE,  # Change to testnet
+        BUTTON_ENTER,  # Confirm "testnet"
+        BUTTON_PAGE_PREV,  # Move to "Back"
+        BUTTON_ENTER,  # Confirm "Back"
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    settings_page = SettingsPage(ctx)
+    settings_page.flash_text = mocker.MagicMock()
+
+    # Leave settings without changes
+    settings_page.settings()
+    settings_page.flash_text.assert_has_calls(
+        [
+            mocker.call(
+                "Your changes will be kept on device flash storage.", duration=2500
+            ),
+            mocker.call("Changes persisted to Flash!", duration=2500),
+        ]
+    )
+
+
+def test_persist_to_sd_without_sd(amigo_tft, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, SD_PATH
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to "Back"
+        BUTTON_ENTER,  # Confirm "Back"
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    settings_page = SettingsPage(ctx)
+    settings_page.flash_text = mocker.MagicMock()
+    Settings().persist.location = SD_PATH
+    settings_page.settings()
+    settings_page.flash_text.assert_has_calls(
+        [
+            mocker.call(
+                "SD card not detected.\n\nChanges will last until shutdown.",
+                duration=2500,
+            ),
+        ]
+    )
