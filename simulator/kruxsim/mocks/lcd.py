@@ -80,7 +80,9 @@ def display(img, oft=(0, 0), roi=None):
     else:
         image_width = 240
         image_height = 320
-    
+
+    # Swap and adjust oft axis
+        oft = (oft[1], oft[0])
 
     def run():
         try:
@@ -257,8 +259,8 @@ def draw_line(x_0, y_0, x_1, y_1, color):
 
         # Apply inverted coordinates if necessary
         if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]:
-            start_pos = (width() - x_1, y_0)
-            end_pos = (width() - x_0, y_1)
+            start_pos = (width() - x_1 - 1, y_0)
+            end_pos = (width() - x_0 - 1, y_1)
 
         pg.draw.line(screen, color, start_pos, end_pos, 1)
     color = rgb565torgb888(color)
@@ -271,12 +273,12 @@ def draw_outline(x, y, w, h, color):
             screen,
             color,
             (
-                width() - w - x + 1
+                width() - w - x - 1
                 if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
                 else x,
                 y,
-                w,
-                h,
+                w + 1,
+                h + 1,
             ),
             1,
         )
