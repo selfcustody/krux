@@ -1,8 +1,8 @@
-from .test_home import tdata, create_ctx
+from .home_pages.test_home import tdata, create_ctx
 
 
 def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
-    from krux.pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -34,7 +34,7 @@ def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
 
 
 def test_export_mnemonic_stackbit_amigo(mocker, amigo_tft, tdata):
-    from krux.pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 

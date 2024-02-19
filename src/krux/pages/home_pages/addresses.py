@@ -21,11 +21,11 @@
 # THE SOFTWARE.
 
 import gc
-from ..krux_settings import t
-from ..themes import theme
-from ..qr import FORMAT_NONE
-from .utils import Utils
-from . import (
+from ...krux_settings import t
+from ...themes import theme
+from ...qr import FORMAT_NONE
+from ..utils import Utils
+from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -134,7 +134,7 @@ class Addresses(Page):
 
     def show_address(self, addr, title="", quick_exit=False):
         """Show addr provided as a QRCode"""
-        from .qr_view import SeedQRView
+        from ..qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, data=addr, title=title)
         seed_qr_view.display_qr(
@@ -171,7 +171,7 @@ class Addresses(Page):
 
         addr = None
         try:
-            from ..wallet import parse_address
+            from ...wallet import parse_address
 
             addr = parse_address(data)
         except:

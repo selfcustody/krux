@@ -1,5 +1,5 @@
 from ...shared_mocks import MockPrinter
-from ..test_home import tdata, create_ctx
+from .test_home import tdata, create_ctx
 
 
 def test_wallet(mocker, m5stickv, tdata):

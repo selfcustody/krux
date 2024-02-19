@@ -81,7 +81,7 @@ def login(ctx_login):
 
 def home(ctx_home):
     """Loads and run the Login page"""
-    from krux.pages.home import Home
+    from krux.pages.home_pages.home import Home
 
     if ctx_home.wallet is not None:
         while True:

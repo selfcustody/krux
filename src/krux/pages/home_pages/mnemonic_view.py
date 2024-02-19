@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .utils import Utils
-from ..qr import FORMAT_NONE
-from ..krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
-from . import (
+from ..utils import Utils
+from ...qr import FORMAT_NONE
+from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
+from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -74,7 +74,7 @@ class MnemonicsView(Page):
                 t("Print?\n\n%s\n\n") % Settings().hardware.printer.driver,
                 self.ctx.display.height() // 2,
             ):
-                from .print_page import PrintPage
+                from ..print_page import PrintPage
 
                 print_page = PrintPage(self.ctx)
                 print_page.print_mnemonic_text(mnemonic, suffix)
@@ -129,14 +129,14 @@ class MnemonicsView(Page):
     def display_seed_qr(self, binary=False):
         """Display Seed QR with with different view modes"""
 
-        from .qr_view import SeedQRView
+        from ..qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, binary)
         return seed_qr_view.display_qr()
 
     def stackbit(self):
         """Displays which numbers 1248 user should punch on 1248 steel card"""
-        from .stack_1248 import Stackbit
+        from ..stack_1248 import Stackbit
 
         stackbit = Stackbit(self.ctx)
         word_index = 1
@@ -164,7 +164,7 @@ class MnemonicsView(Page):
 
     def tiny_seed(self):
         """Displays the seed in Tiny Seed format"""
-        from .tiny_seed import TinySeed
+        from ..tiny_seed import TinySeed
 
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()

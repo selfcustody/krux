@@ -1,5 +1,5 @@
 import pytest
-from ..shared_mocks import MockPrinter, get_mock_open, mock_context
+from ...shared_mocks import MockPrinter, get_mock_open, mock_context
 
 
 @pytest.fixture
@@ -105,7 +105,7 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
 
 
 def test_mnemonic_words(mocker, m5stickv, tdata):
-    from krux.pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -165,7 +165,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
 
 
 def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
-    from krux.pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -286,7 +286,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
 
 
 def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
-    from krux.pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -447,7 +447,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
 
 
 def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
-    from krux.pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_TOUCH, BUTTON_PAGE_PREV, BUTTON_ENTER
     from krux.qr import FORMAT_NONE
@@ -566,7 +566,7 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
 
 
 def test_public_key(mocker, m5stickv, tdata):
-    from krux.pages.pub_key_view import PubkeyView
+    from krux.pages.home_pages.pub_key_view import PubkeyView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -684,7 +684,7 @@ def test_public_key(mocker, m5stickv, tdata):
 
 
 def test_sign_psbt(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -1011,186 +1011,3 @@ def test_sign_psbt(mocker, m5stickv, tdata):
 
     # TODO: Create cross test cases: Load from QR code, sign, save to SD card and vice versa
     # TODO: Import wallet descriptor and test signing
-
-
-def test_sign_message(mocker, m5stickv, tdata):
-    import binascii
-    from krux.pages.sign_message_ui import SignMessage
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.qr import FORMAT_NONE
-
-    cases = [
-        # 0 Hex-encoded hash, Sign, No print prompt
-        (
-            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",  # 0 data for capture_qr_code
-            FORMAT_NONE,  # 1 qr_format for capture_qr_code
-            None,  # 2 printer
-            # 3 btn_seq
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",  # 4 base64 for display_qr_codes / print_qr_prompt
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
-            None,  # 6 SD file
-        ),
-        # 1 Hash, Sign, No print prompt
-        (
-            binascii.unhexlify(
-                "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7"
-            ),
-            FORMAT_NONE,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
-            None,
-        ),
-        # 2 Message, Sign, No print prompt
-        (
-            "hello world",
-            FORMAT_NONE,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
-            None,
-        ),
-        # 3 64-byte message, Sign, No print prompt
-        (
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
-            FORMAT_NONE,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-            "MEQCIEHpCMfQ+5mBAOH//OCxF6iojpVtIS6G7X+3r3qB/0CaAiAkbjW2SGrPLvju+O05yH2x/4EKL2qlkdWnquiVkUY3jQ==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
-            None,
-        ),
-        # 4 Hex-encoded hash, Sign, Print
-        (
-            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
-            FORMAT_NONE,
-            MockPrinter(),
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-            ],
-            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
-            None,
-        ),
-        # 5 Hex-encoded hash, Sign, Decline to print
-        (
-            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
-            FORMAT_NONE,
-            MockPrinter(),
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-            ],
-            "MEQCID/PulsmI+E1HhJ55HdJJnKoMbUHw3c1WZnSrHqW5jlKAiB+vPbnRtmw6R9ZP8jUB8o02n+6QsX9uKy3hDiv9R2SuA==",
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
-            None,
-        ),
-        # 6 Hex-encoded hash, Decline to sign
-        (
-            "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
-            FORMAT_NONE,
-            None,
-            [BUTTON_PAGE],
-            None,
-            None,
-            None,
-        ),
-        # 7 Failed to capture message QR
-        (None, FORMAT_NONE, None, [], None, None, None),
-        # 8 Message, Sign, Save to SD, No print prompt
-        (
-            "hello world",  # 0 data for capture_qr_code
-            FORMAT_NONE,  # 1 qr_format for capture_qr_code
-            None,  # 2 printer
-            # 3 btn_seq
-            [
-                BUTTON_ENTER,  # SHA256 sign confirm
-                BUTTON_ENTER,  # Signature pass
-                BUTTON_ENTER,  # QRCode pass
-                BUTTON_ENTER,  # Public Key pass
-                BUTTON_ENTER,  # QRCode pass
-                BUTTON_ENTER,  # Yes save signed on SD
-                BUTTON_PAGE_PREV,  # Move to "Go"
-                BUTTON_ENTER,  # Press "Go"
-                BUTTON_ENTER,  # Yes save pubkey on SD
-                BUTTON_PAGE_PREV,  # Move to "Go"
-                BUTTON_ENTER,  # Press "Go"
-            ],
-            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",  # 4 base64 for display_qr_codes / print_qr_prompt
-            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
-            # 6 SD file
-            binascii.b2a_base64(
-                "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==".encode(
-                    "utf-8"
-                ),
-                newline=False,
-            ),
-        ),
-    ]
-    num = 0
-    for case in cases:
-        print("test_sign_message case: ", num)
-        num += 1
-        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
-
-        ctx = create_ctx(mocker, case[3], wallet, case[2])
-        home = SignMessage(ctx)
-        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
-        mocker.patch.object(
-            home,
-            "display_qr_codes",
-            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
-        )
-        mocker.spy(home.utils, "print_standard_qr")
-        mocker.spy(home, "capture_qr_code")
-        mocker.spy(home, "display_qr_codes")
-        if case[6] is not None:
-            mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
-            mocker.patch(
-                "builtins.open",
-                new=get_mock_open(
-                    {
-                        "/sd/signed-message.sig": case[6],
-                    }
-                ),
-            )
-        else:
-            mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=OSError))
-            mocker.patch("builtins.open", new=mocker.MagicMock(side_effect=OSError))
-
-        home.sign_message()
-
-        home.capture_qr_code.assert_called_once()
-        if case[0] and case[3][0] == BUTTON_ENTER:
-            home.display_qr_codes.assert_has_calls(
-                [
-                    mocker.call(case[4], case[1], "Signed Message"),
-                    mocker.call(case[5], case[1], "Hex Public Key"),
-                ]
-            )
-            home.utils.print_standard_qr.assert_has_calls(
-                [
-                    mocker.call(case[4], case[1], "Signed Message"),
-                    mocker.call(case[5], case[1], "Hex Public Key"),
-                ]
-            )
-        else:
-            home.display_qr_codes.assert_not_called()
-            home.utils.print_standard_qr.assert_not_called()
-
-        assert ctx.input.wait_for_button.call_count == len(case[3])

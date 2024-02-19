@@ -21,10 +21,10 @@
 # THE SOFTWARE.
 
 import gc
-from ..themes import theme
-from ..qr import FORMAT_NONE, FORMAT_PMOFN
-from ..krux_settings import t
-from . import (
+from ...themes import theme
+from ...qr import FORMAT_NONE, FORMAT_PMOFN
+from ...krux_settings import t
+from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -61,7 +61,7 @@ class Home(Page):
 
     def encrypt_mnemonic(self):
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
-        from .encryption_ui import EncryptMnemonic
+        from ..encryption_ui import EncryptMnemonic
 
         encrypt_mnemonic_menu = EncryptMnemonic(self.ctx)
         return encrypt_mnemonic_menu.encrypt_menu()
@@ -75,7 +75,7 @@ class Home(Page):
 
     def wallet(self):
         """Handler for the 'wallet' menu item"""
-        from .home_pages.wallet_descriptor import WalletDescriptor
+        from .wallet_descriptor import WalletDescriptor
 
         wallet_descriptor = WalletDescriptor(self.ctx)
         return wallet_descriptor.wallet()
@@ -126,8 +126,8 @@ class Home(Page):
             return (data, qr_format, "")
 
         # If index == 1
-        from .utils import Utils
-        from ..sd_card import PSBT_FILE_EXTENSION
+        from ..utils import Utils
+        from ...sd_card import PSBT_FILE_EXTENSION
 
         utils = Utils(self.ctx)
         psbt_filename, data = utils.load_file(PSBT_FILE_EXTENSION, prompt=False)
@@ -135,7 +135,7 @@ class Home(Page):
 
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
-        from ..sd_card import (
+        from ...sd_card import (
             PSBT_FILE_EXTENSION,
             SIGNED_FILE_SUFFIX,
         )
@@ -152,7 +152,7 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
                 return MENU_CONTINUE
 
-        # Try to read a PSBT from camera
+        # Load a PSBT
         data, qr_format, psbt_filename = self.load_psbt()
 
         if data is None:
@@ -165,7 +165,7 @@ class Home(Page):
         self.ctx.display.draw_centered_text(t("Loading.."))
 
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
-        from ..psbt import PSBTSigner
+        from ...psbt import PSBTSigner
 
         signer = PSBTSigner(self.ctx.wallet, data, qr_format)
         outputs = signer.outputs()
@@ -212,7 +212,7 @@ class Home(Page):
 
             self.display_qr_codes(qr_signed_psbt, qr_format)
 
-            from .utils import Utils
+            from ..utils import Utils
 
             utils = Utils(self.ctx)
             utils.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
@@ -224,7 +224,7 @@ class Home(Page):
         # memory management
         del signer
         gc.collect()
-        from .files_operations import SaveFile
+        from ..files_operations import SaveFile
 
         save_page = SaveFile(self.ctx)
         save_page.save_file(

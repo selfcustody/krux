@@ -25,18 +25,18 @@ import gc
 from embit import bip32, compact
 import hashlib
 import binascii
-from . import Page, MENU_CONTINUE
-from ..themes import theme
-from ..display import DEFAULT_PADDING
-from ..baseconv import base_encode
-from ..krux_settings import t
-from ..qr import FORMAT_NONE
-from ..sd_card import (
+from .. import Page, MENU_CONTINUE, Menu
+from ...themes import theme
+from ...display import DEFAULT_PADDING
+from ...baseconv import base_encode
+from ...krux_settings import t
+from ...qr import FORMAT_NONE
+from ...sd_card import (
     SIGNATURE_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
     PUBKEY_FILE_EXTENSION,
 )
-from .utils import Utils
+from ..utils import Utils
 
 
 class SignMessage(Page):
@@ -46,7 +46,34 @@ class SignMessage(Page):
         super().__init__(ctx, None)
         self.utils = Utils(self.ctx)
 
-    def sign_at_address(self, data, qr_format):
+    def load_message(self):
+        """Loads a message from camera or SD card"""
+
+        load_menu = Menu(
+            self.ctx,
+            [
+                (t("Load from camera"), lambda: None),
+                (
+                    t("Load from SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = load_menu.run_loop()
+
+        if index == 2:
+            return (None, None, "")
+
+        if index == 0:
+            data, qr_format = self.capture_qr_code()
+            return (data, qr_format, "")
+
+        # If index == 1
+        message_filename, data = self.utils.load_file(prompt=False)
+        return (data, FORMAT_NONE, message_filename)
+
+    def sign_at_address(self, data):
         """Message signed at a derived Bitcoin address - Sparrow/Specter"""
 
         if data.startswith(b"signmessage"):
@@ -94,7 +121,7 @@ class SignMessage(Page):
                     )
                     self.ctx.display.draw_hcentered_text(short_address, offset_y)
                     if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
-                        return True
+                        return ""
                     message_hash = hashlib.sha256(
                         hashlib.sha256(
                             b"\x18Bitcoin Signed Message:\n"
@@ -111,37 +138,11 @@ class SignMessage(Page):
                         t("Signature") + ":\n\n%s" % encoded_sig
                     )
                     self.ctx.input.wait_for_button()
-                    title = t("Signed Message")
-                    self.display_qr_codes(encoded_sig, qr_format, title)
-                    self.utils.print_standard_qr(encoded_sig, qr_format, title)
-                    return True
-        return False
+                    return sig
+        return None
 
-    def sign_message(self):
-        """Sign message user interface"""
-
-        # Try to read a message from camera
-        message_filename = ""
-        data, qr_format = self.capture_qr_code()
-
-        if data is None:
-            # Try to read a message from a file on the SD card
-            qr_format = FORMAT_NONE
-            try:
-                message_filename, data = self.utils.load_file()
-            except OSError:
-                pass
-
-        if data is None:
-            self.flash_text(t("Failed to load message"), theme.error_color)
-            return MENU_CONTINUE
-
-        # message read OK!
-        data = data.encode() if isinstance(data, str) else data
-
-        if self.sign_at_address(data, qr_format):
-            return MENU_CONTINUE
-
+    def sign_standard_message(self, data):
+        """Signs a standard message"""
         message_hash = None
         if len(data) == 32:
             # It's a sha256 hash already
@@ -166,7 +167,7 @@ class SignMessage(Page):
             t("SHA256:\n%s") % binascii.hexlify(message_hash).decode()
         )
         if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
-            return MENU_CONTINUE
+            return ""
 
         # User confirmed to sign!
         sig = self.ctx.wallet.key.sign(message_hash).serialize()
@@ -176,34 +177,70 @@ class SignMessage(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Signature") + ":\n\n%s" % encoded_sig)
         self.ctx.input.wait_for_button()
+        return sig
 
-        # Show the base64 signed message as a QRCode
-        title = t("Signed Message")
-        self.display_qr_codes(encoded_sig, qr_format, title)
-        self.utils.print_standard_qr(encoded_sig, qr_format, title)
+    def sign_message(self):
+        """Sign message user interface"""
 
-        # memory management
-        del encoded_sig
-        gc.collect()
+        # Load a Message
+        data, qr_format, message_filename = self.load_message()
 
-        # Show the public key as a QRCode
+        if data is None:
+            self.flash_text(t("Failed to load message"), theme.error_color)
+            return MENU_CONTINUE
+
+        # message read OK!
+        data = data.encode() if isinstance(data, str) else data
+
+        sign_at_address = False
+        sig = self.sign_at_address(data)
+        if sig is None:  # Not a message to sign at an address
+            sig = self.sign_standard_message(data)
+        else:
+            sign_at_address = True
+        if sig == "":  # If user declined to sign
+            return MENU_CONTINUE
+
+        sign_menu = Menu(
+            self.ctx,
+            [
+                (t("Sign to QR code"), lambda: None),
+                (
+                    t("Sign to SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = sign_menu.run_loop()
+
+        if index == 2:  # Back
+            return MENU_CONTINUE
+
         pubkey = binascii.hexlify(self.ctx.wallet.key.account.sec()).decode()
-        self.ctx.display.clear()
 
-        title = t("Hex Public Key")
-        self.ctx.display.draw_centered_text(title + ":\n\n%s" % pubkey)
-        self.ctx.input.wait_for_button()
+        if index == 0:
+            # Show the base64 signed message as a QRCode
+            title = t("Signed Message")
+            encoded_sig = base_encode(sig, 64).strip().decode()
+            self.display_qr_codes(encoded_sig, qr_format, title)
+            self.utils.print_standard_qr(encoded_sig, qr_format, title)
 
-        # Show the public key in hexadecimal format as a QRCode
-        self.display_qr_codes(pubkey, qr_format, title)
-        self.utils.print_standard_qr(pubkey, qr_format, title)
+            if not sign_at_address:
+                # Show the public key as a QRCode
+                self.ctx.display.clear()
+                title = t("Hex Public Key")
+                self.ctx.display.draw_centered_text(title + ":\n\n%s" % pubkey)
+                self.ctx.input.wait_for_button()
 
-        # memory management
-        gc.collect()
+                # Show the public key in hexadecimal format as a QRCode
+                self.display_qr_codes(pubkey, qr_format, title)
+                self.utils.print_standard_qr(pubkey, qr_format, title)
+            return MENU_CONTINUE
 
-        # Try to save the signature file on the SD card
+        # If index == 1 save the signature file on the SD card
         if self.has_sd_card():
-            from .files_operations import SaveFile
+            from ..files_operations import SaveFile
 
             save_page = SaveFile(self.ctx)
             save_page.save_file(
@@ -215,9 +252,11 @@ class SignMessage(Page):
                 SIGNED_FILE_SUFFIX,
             )
 
-            # Try to save the public key on the SD card
-            save_page.save_file(
-                pubkey, "pubkey", "", title + ":", PUBKEY_FILE_EXTENSION, "", False
-            )
+            if not sign_at_address:
+                # Save the public key on the SD card
+                title = t("Hex Public Key")
+                save_page.save_file(
+                    pubkey, "pubkey", "", title + ":", PUBKEY_FILE_EXTENSION, "", False
+                )
 
         return MENU_CONTINUE

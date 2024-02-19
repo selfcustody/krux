@@ -1,9 +1,9 @@
 from ..shared_mocks import MockPrinter, mock_context, snapshot_generator
-from .test_home import tdata, create_ctx
+from .home_pages.test_home import tdata, create_ctx
 
 
 def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
-    from krux.pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 

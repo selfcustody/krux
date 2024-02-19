@@ -1,9 +1,9 @@
 from ..shared_mocks import MockPrinter, mock_context
-from .test_home import tdata, create_ctx
+from .home_pages.test_home import tdata, create_ctx
 
 
 def test_scan_address(mocker, m5stickv, tdata):
-    from krux.pages.addresses import Addresses
+    from krux.pages.home_pages.addresses import Addresses
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -230,7 +230,7 @@ def test_scan_address(mocker, m5stickv, tdata):
 
 
 def test_list_receive_addresses(mocker, m5stickv, tdata):
-    from krux.pages.addresses import Addresses
+    from krux.pages.home_pages.addresses import Addresses
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE

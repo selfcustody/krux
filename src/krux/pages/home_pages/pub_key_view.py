@@ -20,15 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ..krux_settings import t
-from . import (
+from ...krux_settings import t
+from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
 )
 
-from ..sd_card import PUBKEY_FILE_EXTENSION
+from ...sd_card import PUBKEY_FILE_EXTENSION
 
 # to start xpub value without the xpub/zpub/ypub prefix
 WALLET_XPUB_START = 4
@@ -45,7 +45,7 @@ class PubkeyView(Page):
         """Handler for the 'xpub' menu item"""
 
         def _save_xpub_to_sd(version):
-            from .files_operations import SaveFile
+            from ..files_operations import SaveFile
 
             save_page = SaveFile(self.ctx)
             xpub = self.ctx.wallet.key.key_expression(version)
@@ -95,7 +95,7 @@ class PubkeyView(Page):
                 :WALLET_XPUB_START
             ].upper()
             xpub = self.ctx.wallet.key.key_expression(version)
-            from .qr_view import SeedQRView
+            from ..qr_view import SeedQRView
 
             seed_qr_view = SeedQRView(self.ctx, data=xpub, title=title)
             seed_qr_view.display_qr(allow_export=True, transcript_tools=False)
