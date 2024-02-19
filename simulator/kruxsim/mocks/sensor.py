@@ -57,6 +57,9 @@ class MockStatistics:
     
     def b_stdev(self):
         return self.std_b
+    
+    def median(self):
+        return 10
 
 
 class Mockqrcode:
