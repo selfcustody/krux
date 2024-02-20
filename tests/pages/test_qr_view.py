@@ -1,5 +1,6 @@
 from ..shared_mocks import mock_context
-from .home_pages.test_home import create_ctx, tdata
+from . import create_ctx
+from .home_pages.test_home import tdata
 from unittest.mock import patch
 
 SINGLE_SIG_12W_BINARY_QR = bytearray(

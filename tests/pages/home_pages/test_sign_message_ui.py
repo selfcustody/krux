@@ -1,5 +1,6 @@
 from ...shared_mocks import MockPrinter, get_mock_open, mock_context
-from .test_home import create_ctx, tdata
+from .. import create_ctx
+from .test_home import tdata
 
 
 def test_sign_message(mocker, m5stickv, tdata):
@@ -232,8 +233,9 @@ def test_sign_message(mocker, m5stickv, tdata):
 def test_sign_message_at_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.sign_message_ui import SignMessage
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+    from krux.themes import theme
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Load from camera
@@ -244,6 +246,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
     ]
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
     ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    mocker.patch.object(ctx.display, "width", new=lambda: 135)
     message_signer = SignMessage(ctx)
     mocker.spy(message_signer, "display_qr_codes")
     mocker.patch.object(
@@ -252,6 +255,19 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         new=lambda: ("signmessage m/84h/1h/0h/0/3 ascii:a test message", FORMAT_NONE),
     )
     message_signer.sign_message()
+
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("Message:", 10, theme.highlight_color)]
+    )
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("a test message", mocker.ANY, max_lines=10)]
+    )
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("Address:", mocker.ANY, theme.highlight_color)]
+    )
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("3. bc1qgl..cn3", mocker.ANY)],
+    )
     message_signer.display_qr_codes.assert_called_once_with(
         "HzRkfdy2sqvszgCn1jLkq3KfqP6Zd1wwG0v+95zfIz0WNizoXjjFBmB7ZxOHXSj4qAhwoNgUPJHDqzFaOq30URA=",
         0,

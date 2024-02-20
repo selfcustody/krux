@@ -333,7 +333,6 @@ def test_outline(mocker, m5stickv):
     from krux.display import Display
 
     d = Display()
-    mocker.patch.object(d, "fill_rectangle")
 
     d.outline(0, 0, 100, 100, krux.display.lcd.WHITE)
 

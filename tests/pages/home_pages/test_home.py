@@ -1,5 +1,6 @@
 import pytest
 from ...shared_mocks import MockPrinter, get_mock_open, mock_context
+from .. import create_ctx
 
 
 @pytest.fixture
@@ -78,30 +79,6 @@ def tdata(mocker):
         P2WSH_PSBT_B64,
         SIGNED_P2WSH_PSBT_B64,
     )
-
-
-def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
-    """Helper to create mocked context obj"""
-    from krux.krux_settings import Settings, THERMAL_ADAFRUIT_TXT
-
-    ctx = mock_context(mocker)
-    ctx.power_manager.battery_charge_remaining.return_value = 1
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
-    ctx.display.max_menu_lines = mocker.MagicMock(return_value=7)
-
-    ctx.wallet = wallet
-    ctx.printer = printer
-    if printer is None:
-        Settings().hardware.printer.driver = "none"
-    else:
-        mocker.patch("krux.printers.create_printer", new=mocker.MagicMock())
-        Settings().hardware.printer.driver = THERMAL_ADAFRUIT_TXT
-
-    if touch_seq:
-        ctx.input.touch = mocker.MagicMock(
-            current_index=mocker.MagicMock(side_effect=touch_seq)
-        )
-    return ctx
 
 
 def test_mnemonic_words(mocker, m5stickv, tdata):

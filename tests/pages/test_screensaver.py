@@ -1,5 +1,4 @@
-from ..shared_mocks import mock_context
-from .test_login import create_ctx
+from . import create_ctx
 
 
 def test_screensaver_m5stickv(m5stickv, mocker):

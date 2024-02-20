@@ -377,6 +377,7 @@ def mock_context(mocker):
                 total_lines=17,  # 240 / 14
                 width=mocker.MagicMock(return_value=135),
                 height=mocker.MagicMock(return_value=240),
+                usable_width=mocker.MagicMock(return_value=(135 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=7),
             ),
@@ -396,6 +397,7 @@ def mock_context(mocker):
                 total_lines=20,  # 320 / 16
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
+                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
             ),
@@ -408,6 +410,7 @@ def mock_context(mocker):
                 total_lines=20,  # 480 / 24
                 width=mocker.MagicMock(return_value=320),
                 height=mocker.MagicMock(return_value=480),
+                usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
             ),

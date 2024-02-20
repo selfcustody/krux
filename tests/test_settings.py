@@ -2,7 +2,7 @@ import sys
 import pytest
 from unittest import mock
 from Crypto.Cipher import AES
-from .pages.test_login import create_ctx
+from .pages import create_ctx
 
 if "ucryptolib" not in sys.modules:
     sys.modules["ucryptolib"] = mock.MagicMock(
