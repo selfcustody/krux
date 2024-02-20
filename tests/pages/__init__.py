@@ -14,11 +14,11 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
 
     ctx.wallet = wallet
     ctx.printer = printer
-    if printer is None:
-        Settings().hardware.printer.driver = "none"
-    else:
+    if printer is not None:
         mocker.patch("krux.printers.create_printer", new=mocker.MagicMock())
         Settings().hardware.printer.driver = THERMAL_ADAFRUIT_TXT
+    elif Settings().hardware.printer.driver != "none":
+        Settings().hardware.printer.driver = "none"
 
     if touch_seq:
         ctx.input.touch = mocker.MagicMock(

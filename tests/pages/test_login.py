@@ -1,29 +1,10 @@
-import sys
-from unittest import mock
 import pytest
-from ..shared_mocks import mock_context
+from . import create_ctx
 
 
 @pytest.fixture
 def mocker_printer(mocker):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
-
-
-def create_ctx(mocker, btn_seq, touch_seq=None):
-    """Helper to create mocked context obj"""
-
-    HASHED_IMAGE_BYTES = b"3\x0fr\x7fKY\x15\t\x83\xaab\x92\x0f&\x820\xb4\x14\x87\x19\xee\x95F\x9c\x8f\x0c\xbdo\xbc\x1d\xcbT"
-
-    ctx = mock_context(mocker)
-    ctx.power_manager.battery_charge_remaining.return_value = 1
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
-    ctx.camera.capture_entropy = mocker.MagicMock(return_value=HASHED_IMAGE_BYTES)
-
-    if touch_seq:
-        ctx.input.touch = mocker.MagicMock(
-            current_index=mocker.MagicMock(side_effect=touch_seq)
-        )
-    return ctx
 
 
 ################### Test menus
@@ -738,7 +719,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_pr
         print(num)
         num = num + 1
 
-        ctx = create_ctx(mocker, case[0], case[2])
+        ctx = create_ctx(mocker, case[0], touch_seq=case[2])
 
         login = Login(ctx)
         login.load_key_from_text()
@@ -1077,19 +1058,18 @@ def test_leaving_keypad(mocker, amigo_tft):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
-    esc_keypad = [
+    BTN_SEQUENCE = [
         BUTTON_ENTER,  # Proceed
         BUTTON_PAGE_PREV,  # Move to Go
         BUTTON_PAGE_PREV,  # Move to ESC
         BUTTON_ENTER,  # Press ESC
         BUTTON_ENTER,  # Leave
     ]
-    ctx = mock_context(mocker)
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=esc_keypad)
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
 
     login = Login(ctx)
     login.load_key_from_text()
-    assert ctx.input.wait_for_button.call_count == len(esc_keypad)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_no_passphrase_on_amigo(mocker, amigo_tft):
@@ -1339,9 +1319,9 @@ def test_about(mocker, m5stickv):
     from krux.metadata import VERSION
     from krux.input import BUTTON_ENTER
 
-    ctx = mock_context(mocker)
-    ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_ENTER)
-    ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_ENTER)
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
 
     login = Login(ctx)
 

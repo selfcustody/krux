@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch
+from . import create_ctx
 from ..shared_mocks import mock_context
 from ..test_sd_card import mocker_sd_card_ok
 import sys
@@ -13,19 +14,6 @@ def mocker_printer(mocker):
 @pytest.fixture
 def mocker_ucryptolib(mocker):
     sys.modules["ucryptolib"] = mocker.MagicMock()
-
-
-def create_ctx(mocker, btn_seq, touch_seq=None):
-    """Helper to create mocked context obj"""
-
-    ctx = mock_context(mocker)
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
-
-    if touch_seq:
-        ctx.input.touch = mocker.MagicMock(
-            current_index=mocker.MagicMock(side_effect=touch_seq)
-        )
-    return ctx
 
 
 ################### Test menus

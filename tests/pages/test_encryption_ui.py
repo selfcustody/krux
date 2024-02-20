@@ -3,7 +3,7 @@ import pytest
 from unittest import mock
 from unittest.mock import patch
 from Crypto.Cipher import AES
-from ..shared_mocks import mock_context
+from . import create_ctx
 
 if "ucryptolib" not in sys.modules:
     sys.modules["ucryptolib"] = mock.MagicMock(
@@ -40,15 +40,6 @@ def mock_file_operations(mocker):
         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
     )
     mocker.patch("builtins.open", mocker.mock_open(read_data="SEEDS_JSON"))
-
-
-def create_ctx(mocker, btn_seq):
-    """Helper to create mocked context obj"""
-    ctx = mock_context(mocker)
-    ctx.power_manager.battery_charge_remaining.return_value = 1
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
-    return ctx
-
 
 def test_load_key_from_keypad(m5stickv, mocker):
     from krux.pages.encryption_ui import EncryptionKey

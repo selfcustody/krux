@@ -1,5 +1,5 @@
 import pytest
-from ..shared_mocks import mock_context
+from . import create_ctx
 
 
 @pytest.fixture
@@ -10,14 +10,6 @@ def mock_file_operations(mocker):
     )
     mocker.patch("builtins.open", mocker.mock_open(read_data=""))
     mocker.patch("os.remove", mocker.mock_open(read_data=""))
-
-
-def create_ctx(mocker, btn_seq):
-    """Helper to create mocked context obj"""
-    ctx = mock_context(mocker)
-    ctx.power_manager.battery_charge_remaining.return_value = 1
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
-    return ctx
 
 
 def test_file_exploring(m5stickv, mocker, mock_file_operations):

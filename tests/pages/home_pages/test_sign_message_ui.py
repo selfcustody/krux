@@ -1,4 +1,4 @@
-from ...shared_mocks import MockPrinter, get_mock_open, mock_context
+from ...shared_mocks import MockPrinter, get_mock_open
 from .. import create_ctx
 from .test_home import tdata
 

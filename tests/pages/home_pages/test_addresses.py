@@ -1,5 +1,4 @@
-from ..shared_mocks import MockPrinter, mock_context
-from .home_pages.test_home import tdata, create_ctx
+from .test_home import tdata, create_ctx
 
 
 def test_scan_address(mocker, m5stickv, tdata):
