@@ -75,9 +75,6 @@ class AdafruitPrinter(Printer):
         self.dot_print_time = Settings().hardware.printer.thermal.adafruit.line_delay
         self.dot_feed_time = 2  # miliseconds
 
-        if not self.has_paper():
-            raise ValueError("missing paper")
-
     def write_bytes(self, *args):
         """Writes bytes to the printer at a stable speed"""
         for arg in args:
@@ -96,17 +93,6 @@ class AdafruitPrinter(Printer):
             self.write_bytes(10)
             # Wait for the paper to feed
             time.sleep_ms(self.dot_feed_time * self.character_height)
-
-    def has_paper(self):
-        """Returns a boolean indicating if the printer has paper or not"""
-        self.write_bytes(27, 118, 0)
-        # Bit 2 of response seems to be paper status
-        res = self.uart_conn.read(1)
-        if res is None:
-            return True  # If not set, won't raise value error
-        stat = ord(res) & 0b00000100
-        # If set, we have paper; if clear, no paper
-        return stat == 0
 
     def qr_data_width(self):
         """Returns a smaller width for the QR to be generated
