@@ -57,7 +57,7 @@ class Utils(Page):
                 if not prompt or self.prompt(
                     t("Load from SD card?") + "\n\n", self.ctx.display.height() // 2
                 ):
-                    from .files_manager import FileManager
+                    from .file_manager import FileManager
 
                     file_manager = FileManager(self.ctx)
                     filename = file_manager.select_file(file_extension=file_ext)

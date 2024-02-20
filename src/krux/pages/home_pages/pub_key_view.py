@@ -45,7 +45,7 @@ class PubkeyView(Page):
         """Handler for the 'xpub' menu item"""
 
         def _save_xpub_to_sd(version):
-            from ..files_operations import SaveFile
+            from ..file_operations import SaveFile
 
             save_page = SaveFile(self.ctx)
             xpub = self.ctx.wallet.key.key_expression(version)

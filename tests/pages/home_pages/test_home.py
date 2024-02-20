@@ -972,7 +972,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             mock_utils = mocker.patch("krux.pages.utils.Utils")
             mock_utils.return_value.load_file.return_value = (PSBT_FILE_NAME, case[2])
             mock_file_save = mocker.patch(
-                "krux.pages.files_operations.SaveFile.save_file"
+                "krux.pages.file_operations.SaveFile.save_file"
             )
         home.sign_psbt()
 

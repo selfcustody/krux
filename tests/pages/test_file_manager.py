@@ -21,7 +21,7 @@ def create_ctx(mocker, btn_seq):
 
 
 def test_file_exploring(m5stickv, mocker, mock_file_operations):
-    from krux.pages.files_manager import FileManager
+    from krux.pages.file_manager import FileManager
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
@@ -39,7 +39,7 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
 
 
 def test_folders_exploring(m5stickv, mocker, mock_file_operations):
-    from krux.pages.files_manager import FileManager
+    from krux.pages.file_manager import FileManager
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (

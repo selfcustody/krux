@@ -36,7 +36,7 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from .files_manager import SD_ROOT_PATH, THOUSANDS_SEPARATOR
+from .file_manager import SD_ROOT_PATH, THOUSANDS_SEPARATOR
 
 
 class Tools(Page):
@@ -91,7 +91,7 @@ class Tools(Page):
                 if self.prompt(
                     t("Explore files?"), self.ctx.display.bottom_prompt_line
                 ):
-                    from .files_manager import FileManager
+                    from .file_manager import FileManager
 
                     file_manager = FileManager(self.ctx)
                     file_manager.select_file(

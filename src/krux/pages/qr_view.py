@@ -368,7 +368,7 @@ class SeedQRView(Page):
 
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
-        from .files_operations import SaveFile
+        from .file_operations import SaveFile
 
         file_saver = SaveFile(self.ctx)
         suggested_file_name = self.title.replace(" ", "_")

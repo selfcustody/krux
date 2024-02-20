@@ -227,3 +227,33 @@ def test_sign_message(mocker, m5stickv, tdata):
             home.utils.print_standard_qr.assert_not_called()
 
         assert ctx.input.wait_for_button.call_count == len(case[3])
+
+
+def test_sign_message_at_address(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.qr import FORMAT_NONE
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Confirm to sign message
+        BUTTON_ENTER,  # Check signature
+        BUTTON_ENTER,  # Sign to QR code
+        BUTTON_ENTER,  # Check QR code
+    ]
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    message_signer = SignMessage(ctx)
+    mocker.spy(message_signer, "display_qr_codes")
+    mocker.patch.object(
+        message_signer,
+        "capture_qr_code",
+        new=lambda: ("signmessage m/84h/1h/0h/0/3 ascii:a test message", FORMAT_NONE),
+    )
+    message_signer.sign_message()
+    message_signer.display_qr_codes.assert_called_once_with(
+        "HzRkfdy2sqvszgCn1jLkq3KfqP6Zd1wwG0v+95zfIz0WNizoXjjFBmB7ZxOHXSj4qAhwoNgUPJHDqzFaOq30URA=",
+        0,
+        "Signed Message",
+    )

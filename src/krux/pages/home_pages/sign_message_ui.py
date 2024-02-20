@@ -240,7 +240,7 @@ class SignMessage(Page):
 
         # If index == 1 save the signature file on the SD card
         if self.has_sd_card():
-            from ..files_operations import SaveFile
+            from ..file_operations import SaveFile
 
             save_page = SaveFile(self.ctx)
             save_page.save_file(
