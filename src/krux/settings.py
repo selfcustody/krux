@@ -208,6 +208,10 @@ class Store:
             except:
                 old_contents = None
 
+            if not old_contents:
+                # Convert from None or empty string to "empty dict" file stream
+                old_contents = "{}"
+            #Compare old and new file contents, if different, write new content
             if new_contents != old_contents:
                 try:
                     with open(settings_filename, "w") as f:

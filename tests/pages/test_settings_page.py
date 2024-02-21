@@ -356,26 +356,43 @@ def test_save_settings_on_sd(amigo_tft, mocker, mocker_sd_card_ok):
 def test_leave_settings_without_changes(amigo_tft, mocker, mocker_sd_card_ok):
     # mocker_sd_card_ok will mock os.listdir so it will also mock flash storage
     from krux.pages.settings_page import SettingsPage
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
-    BTN_SEQUENCE = [
-        BUTTON_PAGE_PREV,  # Move to "Back"
-        BUTTON_ENTER,  # Confirm "Back"
+    BTN_SEQUENCES = [
+        [
+            # Change something then give up
+            BUTTON_ENTER,  # Change "Bitcoin"
+            BUTTON_PAGE,  # Change to testnet
+            BUTTON_ENTER,  # Confirm testnet
+            BUTTON_ENTER,  # Change "Bitcoin" again
+            BUTTON_PAGE,  # Change back to mainnet
+            BUTTON_ENTER,  # Confirm mainnet
+            BUTTON_PAGE_PREV,  # Move to "Back"
+            BUTTON_ENTER,  # Confirm "Back"
+        ],
+        [
+            # Don't change anything
+            BUTTON_PAGE_PREV,  # Move to "Back"
+            BUTTON_ENTER,  # Confirm "Back"
+        ],
     ]
 
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    settings_page = SettingsPage(ctx)
-    settings_page.flash_text = mocker.MagicMock()
-    settings_page.settings()
-    settings_page.flash_text.assert_has_calls(
-        [
-            mocker.call(
-                "Your changes will be kept on device flash storage.", duration=2500
-            ),
-        ]
-    )
-    persisted_to_flash_call = mocker.call("Changes persisted to Flash!", duration=2500)
-    assert persisted_to_flash_call not in settings_page.flash_text.call_args_list
+    for btn_sequence in BTN_SEQUENCES:
+        ctx = create_ctx(mocker, btn_sequence)
+        settings_page = SettingsPage(ctx)
+        settings_page.flash_text = mocker.MagicMock()
+        settings_page.settings()
+        settings_page.flash_text.assert_has_calls(
+            [
+                mocker.call(
+                    "Your changes will be kept on device flash storage.", duration=2500
+                ),
+            ]
+        )
+        persisted_to_flash_call = mocker.call(
+            "Changes persisted to Flash!", duration=2500
+        )
+        assert persisted_to_flash_call not in settings_page.flash_text.call_args_list
 
 
 def test_leave_settings_with_changes(amigo_tft, mocker, mocker_sd_card_ok):
