@@ -91,7 +91,7 @@ Define several machining parameters according to the desired size, material you'
 #### Thermal
 
 Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can change this here.
-Also setup the IOs you'll use and tweak parameters according to your printer recommendations.
+Also setup the IOs you'll use and tweak parameters according to your printer recommendations. Consult the [part list](../../parts.md#optional-thermal-printer) page for supported printers.
 
 #### Driver
 
