@@ -3,7 +3,6 @@ from unittest.mock import patch
 from . import create_ctx
 from ..shared_mocks import mock_context
 from ..test_sd_card import mocker_sd_card_ok
-import sys
 
 
 @pytest.fixture
@@ -11,15 +10,10 @@ def mocker_printer(mocker):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
 
 
-@pytest.fixture
-def mocker_ucryptolib(mocker):
-    sys.modules["ucryptolib"] = mocker.MagicMock()
-
-
 ################### Test menus
 
 
-def test_settings_m5stickv(m5stickv, mocker, mocker_printer, mocker_ucryptolib):
+def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     import krux
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -291,7 +285,7 @@ def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
         assert case[2]()
 
 
-def test_encryption_pbkdf2_setting(m5stickv, mocker, mocker_ucryptolib):
+def test_encryption_pbkdf2_setting(m5stickv, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.krux_settings import Settings, EncryptionSettings
 

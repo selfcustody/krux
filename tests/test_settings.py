@@ -1,13 +1,4 @@
-import sys
-import pytest
-from unittest import mock
-from Crypto.Cipher import AES
-from .pages import create_ctx
-
-if "ucryptolib" not in sys.modules:
-    sys.modules["ucryptolib"] = mock.MagicMock(
-        aes=AES.new, MODE_ECB=AES.MODE_ECB, MODE_CBC=AES.MODE_CBC
-    )
+# Tests for krux.settings
 
 
 def test_init(mocker, m5stickv):

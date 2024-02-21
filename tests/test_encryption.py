@@ -1,16 +1,7 @@
-import sys
 import pytest
-from unittest import mock
 from unittest.mock import patch
 from Crypto.Cipher import AES
 import base64
-
-from .shared_mocks import mock_context
-
-if "ucryptolib" not in sys.modules:
-    sys.modules["ucryptolib"] = mock.MagicMock(
-        aes=AES.new, MODE_ECB=AES.MODE_ECB, MODE_CBC=AES.MODE_CBC
-    )
 
 TEST_KEY = "test key"
 TEST_MNEMONIC_ID = "test ID"
