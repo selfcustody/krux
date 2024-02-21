@@ -1,14 +1,7 @@
-import sys
 import pytest
-from unittest import mock
 from unittest.mock import patch
-from Crypto.Cipher import AES
 from . import create_ctx
 
-if "ucryptolib" not in sys.modules:
-    sys.modules["ucryptolib"] = mock.MagicMock(
-        aes=AES.new, MODE_ECB=AES.MODE_ECB, MODE_CBC=AES.MODE_CBC
-    )
 
 TEST_KEY = "test key"
 CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
@@ -40,6 +33,7 @@ def mock_file_operations(mocker):
         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
     )
     mocker.patch("builtins.open", mocker.mock_open(read_data="SEEDS_JSON"))
+
 
 def test_load_key_from_keypad(m5stickv, mocker):
     from krux.pages.encryption_ui import EncryptionKey

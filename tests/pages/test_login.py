@@ -82,6 +82,21 @@ def test_menu_new_key(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_load_new_key_from_dice_module(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Exit
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login.new_key_from_dice()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
 def test_tools_menu(m5stickv, mocker):
     from krux.pages.login import Login, MENU_CONTINUE
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
@@ -98,6 +113,22 @@ def test_tools_menu(m5stickv, mocker):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert test_tools == MENU_CONTINUE
+
+
+def test_load_setting_menu(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Exit
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login.settings()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 ################### Test load from storage menu

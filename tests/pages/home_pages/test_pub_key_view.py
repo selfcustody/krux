@@ -1,6 +1,7 @@
 from .. import create_ctx
 from .test_home import tdata
 
+
 def test_public_key(mocker, m5stickv, tdata):
     from krux.pages.home_pages.pub_key_view import PubkeyView
     from krux.wallet import Wallet
