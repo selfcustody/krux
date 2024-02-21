@@ -1,4 +1,5 @@
 markdown_extensions:
+  - attr_list
   - meta
   - toc:
       permalink: true
@@ -8,6 +9,9 @@ markdown_extensions:
       preserve_tabs: true
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra_css:
   - css/custom.css
