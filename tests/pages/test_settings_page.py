@@ -353,10 +353,14 @@ def test_save_settings_on_sd(amigo_tft, mocker, mocker_sd_card_ok):
     )
 
 
-def test_leave_settings_without_changes(amigo_tft, mocker, mocker_sd_card_ok):
-    # mocker_sd_card_ok will mock os.listdir so it will also mock flash storage
+def test_leave_settings_without_changes(amigo_tft, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+    )
 
     BTN_SEQUENCES = [
         [
@@ -367,6 +371,18 @@ def test_leave_settings_without_changes(amigo_tft, mocker, mocker_sd_card_ok):
             BUTTON_ENTER,  # Change "Bitcoin" again
             BUTTON_PAGE,  # Change back to mainnet
             BUTTON_ENTER,  # Confirm mainnet
+            BUTTON_PAGE_PREV,  # Move to "Back"
+            BUTTON_ENTER,  # Confirm "Back"
+        ],
+        [
+            # Change persist then give up
+            [BUTTON_PAGE] * 3,  # Move to "Persist"
+            BUTTON_ENTER,  # Change "Persist"
+            BUTTON_PAGE,  # Change to SD
+            BUTTON_ENTER,  # Confirm SD
+            BUTTON_ENTER,  # Change "Persist" again
+            BUTTON_PAGE,  # Change back to flash
+            BUTTON_ENTER,  # Confirm flash
             BUTTON_PAGE_PREV,  # Move to "Back"
             BUTTON_ENTER,  # Confirm "Back"
         ],

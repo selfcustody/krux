@@ -202,16 +202,13 @@ class Store:
         if self.dirty:
             settings_filename = self.file_location + SETTINGS_FILENAME
             new_contents = json.dumps(self.settings)
+            old_contents = "{}"
             try:
                 with open(settings_filename, "r") as f:
                     old_contents = f.read()
             except:
-                old_contents = None
-
-            if not old_contents:
-                # Convert from None or empty string to "empty dict" file stream
-                old_contents = "{}"
-            #Compare old and new file contents, if different, write new content
+                pass
+            # Compare old and new file contents, if different, write new content
             if new_contents != old_contents:
                 try:
                     with open(settings_filename, "w") as f:
