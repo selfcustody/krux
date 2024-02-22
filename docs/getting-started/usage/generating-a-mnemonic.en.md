@@ -8,7 +8,11 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
 <img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right">
 
- (Experimental!) Choose between 12 or 24 words, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
+(Experimental!) Choose between 12 or 24 words, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
+
+### Image Entropy Quality Estimation
+
+During image capture, entropy quality estimation is displayed to assist you in obtaining a high-quality image source for your key. After a snapshot is taken, Shannon's entropy and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation. It's important to note that these values serve as indicators or estimations of entropy quality, but they are not absolute entropy values in a cryptographic context.
 
 <div style="clear: both"></div>
 
@@ -32,7 +36,18 @@ Since a D20 has more possible outcomes, the entropy is increased per roll to 4.3
 
 <div style="clear: both"></div>
 
-### How it works
+### Dice Rolls Entropy Quality Estimation
+
+When you input your dice rolls, you'll see two progress bars filling up. The top progress bar shows how many rolls you've entered compared to the minimum number needed. The bottom progress bar shows the real-time calculated Shannon's entropy compared to the required minimum (128 bits for 12 words and 256 bits for 24 words). When the Shannon's entropy estimation reaches the recommended level, the progress bar will be full, and its frame will change color. If you've met the minimum number of rolls but the entropy estimation is still below the recommended level, a warning will appear, suggesting you add more rolls to increase entropy.
+Note: Similar to image entropy quality estimation, dice rolls Shannon's entropy serves as an indicator and should not be considered an absolute measure of cryptographic entropy.
+
+### Stats for Nerds
+
+A low Shannon's entropy value might suggest that your dice are biased or that there's a problem with how you're gathering entropy. To investigate further, examine the "Stats for Nerds" section to check the distribution of your rolls and look for any abnormalities.
+
+<div style="clear: both"></div>
+
+## How it works
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-125.png" align="right">
 <img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-string-150.png" align="right">
 

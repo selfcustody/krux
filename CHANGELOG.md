@@ -26,6 +26,9 @@ Option to restore the device's settings to its factory state.
 ### Optimized Settings Storage
 Device's storage is now used more efficiently, data is stored less frequently, only in case a setting is changed from defaults.
 
+### Amigo's Power Manager Enhancements
+Standardize Amigo's shutdown and power on behavior.
+
 ### GUI Enhancements
 Icons, information text boxes, and rounded shapes are now present at the GUI.
 

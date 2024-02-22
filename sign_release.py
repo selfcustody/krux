@@ -135,7 +135,7 @@ for device in DEVICES:
         f.write(binary_signature)
 
 # Verify signatures
-PUBLIC_KEY_FILE = "odudex.PEM"  # "selfcustody.PEM"
+PUBLIC_KEY_FILE = "selfcustody.PEM"
 for device in DEVICES:
     file_name = os.path.join(folder, device, "firmware.bin")
     signature_file = os.path.join(folder, device, "firmware.bin.sig")
