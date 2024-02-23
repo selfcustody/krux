@@ -5,12 +5,20 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
 
 ## Camera
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="right">
 
 (Experimental!) Choose between 12 or 24 words, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
 
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-prompt-150.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-capturing-150.png" align="bottom">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-prompt-125.png" align="bottom">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-capturing-125.png" align="bottom">
+
+<div style="clear: both"></div>
+
 ### Image Entropy Quality Estimation
+
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-entropy-estimation-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-entropy-estimation-150.png" align="right">
 
 During image capture, entropy quality estimation is displayed to assist you in obtaining a high-quality image source for your key. After a snapshot is taken, Shannon's entropy and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation. It's important to note that these values serve as indicators or estimations of entropy quality, but they are not absolute entropy values in a cryptographic context.
 
@@ -19,12 +27,15 @@ During image capture, entropy quality estimation is displayed to assist you in o
 ## Dice Rolls
  
 ### Via D6
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-1-150.png" align="right">
 
 Choose between 12 or 24 words.
 
 The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore a minimum of a 50 rolls will be required for 128 bits of entropy, enough to generate a 12-word mnemonic. For 24 words, or an entropy of 256 bits, a minimum of 99 rolls will be required.
+
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-125.png" align="bottom">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-last-n-rolls-125.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-1-150.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-last-n-rolls-150.png" align="bottom">
 
 <div style="clear: both"></div>
 
@@ -53,11 +64,6 @@ A low Shannon's entropy value might suggest that your dice are biased or that th
 
 For dice rolls, Krux keeps track of every roll you enter and displays the cumulative string of outcomes after each roll. 
 
-<div style="clear: both"></div>
-
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-sha256-150.png" align="right">
-
 When you have entered your final roll, Krux will hash this string using SHA256 and output the resulting hash to the screen so that you can verify it for yourself.
 
 In the case a camera snapshot is used as source, image bytes, which contain pixels data in RGB565 format, will be hashed just like it is done with the dice rolls string.
@@ -65,6 +71,11 @@ In the case a camera snapshot is used as source, image bytes, which contain pixe
 Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/binascii.html#binascii.unhexlify) on it to encode it as bytes, and deterministically converts it into a mnemonic according to the [BIP-39 Reference Implementation](https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207).
 
 Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).
+
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="bottom">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-125.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-sha256-150.png" align="bottom">
 
 <div style="clear: both"></div>
 

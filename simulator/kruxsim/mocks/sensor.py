@@ -38,6 +38,7 @@ class MockStatistics:
     """
     Used to mock openMV the statistics object returned by the sensor module
     """
+
     def __init__(self, img):
         self.img = img  # LAB image
         # Split the LAB image into L, a, and b channels
@@ -48,16 +49,15 @@ class MockStatistics:
         self.std_a = std(lab_a)
         self.std_b = std(lab_b)
 
-
     def l_stdev(self):
         return self.std_L
-    
+
     def a_stdev(self):
         return self.std_a
-    
+
     def b_stdev(self):
         return self.std_b
-    
+
     def median(self):
         return 10
 
@@ -103,9 +103,15 @@ def snapshot():
             frame = sequence_executor.camera_image
             frame = cvtColor(frame, COLOR_BGR2RGB)
             img = sequence_executor.camera_image
+            rgb_frame = cvtColor(img, COLOR_BGR2RGB)
+            lab_frame = cvtColor(rgb_frame, COLOR_BGR2LAB)
             m.get_frame.return_value = frame
             m.find_qrcodes.return_value = find_qrcodes(img)
-            sequence_executor.camera_image = None
+            m.to_bytes.return_value = frame.tobytes()
+            m.get_statistics.return_value = MockStatistics(lab_frame)
+            m.width.return_value = frame.shape[1]
+            m.height.return_value = frame.shape[0]
+            # sequence_executor.camera_image = None
     else:
         _, frame = capturer.read()
         rgb_frame = cvtColor(frame, COLOR_BGR2RGB)

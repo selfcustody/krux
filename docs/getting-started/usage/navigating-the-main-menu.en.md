@@ -12,6 +12,10 @@ This will open a new submenu with several options to backup your mnemonic.
 
 Display the mnemonic words as text so you can write them down.
 
+#### Numbers
+
+Display the mnemonic word numbers in decimal, hex, or octal format.
+
 #### Plaintext QR
 
 Generate a QR containing the mnemonic words as regular text, where words are separated by spaces.

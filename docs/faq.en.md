@@ -44,8 +44,8 @@ If you are using an M5StickV, the small screen makes it difficult for laptop web
 You can toggle brightness of QR codes from public keys and PSBTs by pressing PAGE button.
 In the future, more work will be done to support displaying lower density QR codes. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes. You can also save the PSBT on a microSD card for Krux to sign and then save the signed transaction to the microSD card to transfer the file to the computer or phone.
 
-## Why isn't my Amigo device being recognized when connected to the computer USB?
-Make sure you’re using the bottom USB-C port, not the one on the left side. It is also possible that there is some incompatibility with the cable used, try a few before investigating further.
+## Why isn't my Amigo device being recognized when connected to the computer's USB?
+Make sure you’re using the USB-C port at the bottom of the device, not the one on the left side. There could also be an issue with the cable. Try using a different cable to see if that resolves the problem. If you're connecting to a USB-C port on your desktop computer, you may need to shut down and restart the device while it's connected. This ensures the driver loads correctly and creates the necessary serial ports.
 
 ## Why won't my Linux OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`

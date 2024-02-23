@@ -28,6 +28,7 @@ from unittest import mock
 
 BYTES_PER_PIXEL = 3
 
+
 def entropy_img16b(img_bytes):
     """Function to calculate Shannon's entropy.
     Will return average number of bits required to encode each pixel,
@@ -61,7 +62,8 @@ def entropy_img16b(img_bytes):
         probability = count / total_pixels
         entropy -= probability * (probability and math.log2(probability))
 
-    return entropy
+    # To resemble real devices we do a 24 bits/pixel -> 16 bits/pixel compensation (*2/3)
+    return entropy * 2 / 3
 
 if "shannon" not in sys.modules:
     sys.modules["shannon"] = mock.MagicMock(

@@ -6,10 +6,334 @@ press BUTTON_A
 
 screenshot new-mnemonic-options.png
 
-# screenshot new-mnemonic-options-via-d6.png
+# Via Snapshot
+press BUTTON_A
+
+# Chose 12 words
+press BUTTON_A
+
+screenshot new-mnemonic-via-snapshot-prompt.png
+
+press BUTTON_A
+
+qrcode arara.png
+
+screenshot new-mnemonic-via-snapshot-capturing.png
+
+wait 0.5
+
+press BUTTON_A
+
+screenshot new-mnemonic-via-snapshot-entropy-estimation.png
+
+press BUTTON_A
+
+screenshot new-mnemonic-via-snapshot-entropy-sha256.png
+
+# Discard
+press BUTTON_A
+press BUTTON_B
+press_big_only BUTTON_A
+
+# Move to D6
+press BUTTON_B
+press BUTTON_A
+
+# 12 words - intro ok
+x2 press BUTTON_A
+
+# Fill rolls
+press BUTTON_A
+
+screenshot new-mnemonic-via-d6-roll-1.png
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
 
 press BUTTON_B
-# screenshot new-mnemonic-options-via-d20.png
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
 
 press BUTTON_B
-# screenshot new-mnemonic-options-back.png
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+one
+x4 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+screenshot new-mnemonic-via-d6-last-n-rolls.png
+
+# Navigate to "Go"
+press BUTTON_C
+press BUTTON_A
+
+# Skip low entropy warinng
+press BUTTON_A
+
+screenshot new-mnemonic-via-d6-roll-string.png
+
+press BUTTON_A
+
+screenshot new-mnemonic-via-d6-roll-nerd-stats.png
+
+press BUTTON_A
+
+screenshot new-mnemonic-via-d6-roll-sha256.png
+
+# Return
+
+press BUTTON_A
+press BUTTON_B
+press_big_only BUTTON_A
+
+# Go to D20
+
+press BUTTON_B
+press BUTTON_A
+
+# 12 Words, skip intro
+x2 press BUTTON_A
+
+press BUTTON_A
+screenshot new-mnemonic-via-d20-roll-1.png
+
+press BUTTON_A
+
+x15 press BUTTON_B
+press BUTTON_A
+
+x13 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x17 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x9 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x14 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x16 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+screenshot new-mnemonic-via-d20-last-n-rolls.png
+
+# Navigate to "Go"
+press BUTTON_C
+press BUTTON_A
+
+# Skip low entropy warinng
+press BUTTON_A
+
+screenshot new-mnemonic-via-d20-roll-string.png
+
+press BUTTON_A
+
+screenshot new-mnemonic-via-d20-roll-nerd-stats.png
+
+press BUTTON_A
+
+screenshot new-mnemonic-via-d20-roll-sha256.png

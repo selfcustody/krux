@@ -60,9 +60,11 @@ buttons_control = TactileButtons()  # Singleton
 
 sequence_executor = None
 
+
 def register_sequence_executor(s):
     global sequence_executor
     sequence_executor = s
+
 
 class Button:
     """Generic button handler format"""
@@ -99,7 +101,7 @@ class ButtonEnter:
                 sequence_executor
                 and sequence_executor.key is not None
                 and sequence_executor.key == pg.K_RETURN
-                ):
+            ):
                 sequence_executor.key = None
                 return True
             if buttons_control.enter_event_flag:
@@ -127,7 +129,7 @@ class ButtonPage:
                 sequence_executor
                 and sequence_executor.key is not None
                 and sequence_executor.key == pg.K_DOWN
-                ):
+            ):
                 sequence_executor.key = None
                 return True
             if buttons_control.page_event_flag:
@@ -155,7 +157,7 @@ class ButtonPagePrev:
                 sequence_executor
                 and sequence_executor.key is not None
                 and sequence_executor.key == pg.K_UP
-                ):
+            ):
                 sequence_executor.key = None
                 return True
             if buttons_control.page_prev_event_flag:

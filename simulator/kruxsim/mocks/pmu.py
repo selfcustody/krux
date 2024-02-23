@@ -49,7 +49,7 @@ class PMU_Button:
                 sequence_executor
                 and sequence_executor.key is not None
                 and sequence_executor.key == pg.K_UP
-                ):
+            ):
                 sequence_executor.key = None
                 return True
             if self.value() == PRESSED:
@@ -83,9 +83,10 @@ class PMUController:
 
     def charging(self):
         return True
-    
+
     def usb_connected(self):
         return True
+
 
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(

@@ -23,6 +23,7 @@ import sys
 from unittest import mock
 import pyqrcode
 
+
 def encode(data):
     # Uses string encoded qr as it already cleaned up the frames
     # PyQRcode also doesn't offer any binary output
@@ -36,20 +37,17 @@ def encode(data):
     size = 0
     while code_str[size] != "\n":
         size += 1
-    binary_qr = bytearray(b"\x00" * ((size * size + 7) // 8))                                    
+    binary_qr = bytearray(b"\x00" * ((size * size + 7) // 8))
     for y in range(size):
         for x in range(size):
             bit_index = y * size + x
             bit_string_index = y * (size + 1) + x
             if code_str[bit_string_index] == "1":
-                binary_qr[bit_index>>3] |= 1 << (bit_index % 8)
+                binary_qr[bit_index >> 3] |= 1 << (bit_index % 8)
     return binary_qr
-
-
-    
 
 
 if "qrcode" not in sys.modules:
     sys.modules["qrcode"] = mock.MagicMock(
-        encode = encode,
+        encode=encode,
     )
