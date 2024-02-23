@@ -298,10 +298,11 @@ class Display:
         )
         if info_box:
             bg_color = theme.frame_color
+            padding = DEFAULT_PADDING if self.width() > 135 else DEFAULT_PADDING // 2
             self.fill_rectangle(
-                DEFAULT_PADDING - 3,
+                padding - 3,
                 offset_y - 1,
-                self.usable_width() + 6,
+                self.width() - (2 * padding) + 6,
                 (len(lines)) * self.font_height + 2,
                 bg_color,
                 self.font_width,  # radius
