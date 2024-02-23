@@ -736,15 +736,16 @@ class Menu:
             fg_color = (
                 theme.fg_color if menu_item[1] is not None else theme.disabled_color
             )
+            if selected_item_index == i and self.ctx.input.buttons_active:
+                self.ctx.display.fill_rectangle(
+                    0,
+                    offset_y + 1 - self.ctx.display.font_height // 2,
+                    self.ctx.display.width(),
+                    (len(menu_item_lines) + 1) * self.ctx.display.font_height,
+                    fg_color,
+                )
             for j, text in enumerate(menu_item_lines):
                 if selected_item_index == i and self.ctx.input.buttons_active:
-                    self.ctx.display.fill_rectangle(
-                        0,
-                        offset_y + 1 - self.ctx.display.font_height // 2,
-                        self.ctx.display.width(),
-                        (len(menu_item_lines) + 1) * self.ctx.display.font_height,
-                        fg_color,
-                    )
                     self.ctx.display.draw_hcentered_text(
                         text,
                         offset_y + self.ctx.display.font_height * j,
