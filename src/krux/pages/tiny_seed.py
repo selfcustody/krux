@@ -249,25 +249,22 @@ class TinySeed(Page):
         """Outline index postition"""
         width = 6 * self.x_pad - 2
         height = self.y_pad - 2
+        y_position = index // 12
+        y_position *= self.y_pad
+        y_position += self.y_offset + 1
+        if index >= TS_ESC_START_POSITION:
+            y_position -= 3 * self.y_pad // 4
+            height = 2 * self.y_pad - self.y_pad // 4 - 2
 
         if index > TS_ESC_END_POSITION:
             x_position = self.x_offset + 6 * self.x_pad + 1
-            # case for m5stickv
-            if self.ctx.display.width() == 135:
-                height = self.y_pad
         elif index >= TS_ESC_START_POSITION:
             x_position = self.x_offset + 1
-            # case for m5stickv
-            if self.ctx.display.width() == 135:
-                height = self.y_pad
         else:
             x_position = index % 12
             x_position *= self.x_pad
             x_position += self.x_offset + 1
             width = self.x_pad - 2
-        y_position = index // 12
-        y_position *= self.y_pad
-        y_position += self.y_offset + 1
         self.ctx.display.outline(
             x_position,
             y_position,
@@ -283,7 +280,7 @@ class TinySeed(Page):
             y_pad = self.ctx.input.touch.y_regions[14] - y_offset
         else:
             y_offset = self.y_offset + 13 * self.y_pad
-            y_pad = self.y_pad
+            y_pad = self.y_pad // 3
         x_offset = self.x_offset
         esc_x_offset = round(x_offset + 1.9 * self.x_pad)
 
