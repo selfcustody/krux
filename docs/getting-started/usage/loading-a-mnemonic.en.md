@@ -90,32 +90,32 @@ You can retrieve mnemonics previously stored on device's internal flash or exter
 ## Wallet loading sequence
 
 ### Confirm Mnemonic Words
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-qr-mnemonic-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-via-qr-mnemonic-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-mnemonic-150.png" align="right">
 
 Once you have entered your mnemonic, you will be presented with the full list of words to confirm.
 
 <div style="clear: both"></div>
 
 ### Passphrase
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-qr-passphrase-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-via-qr-passphrase-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-passphrase-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-passphrase-150.png" align="right">
 
 After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. You can create a QR code from your passphrase offline in [Tools](../features/tools.md#create-qr-code) section.
 
 <div style="clear: both"></div>
 
 ### Fingerprint
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-qr-fingerprint-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-via-qr-fingerprint-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-fingerprint-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-fingerprint-150.png" align="right">
 
 The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase(optional) and will load the expected wallet.
 
 <div style="clear: both"></div>
 
 ### Single-sig or Multisig
-<img src="../../../img/maixpy_m5stickv/wallet-type-options-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/wallet-type-options-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-single-multi-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-single-multi-150.png" align="right">
 
 After loading your mnemonic and passphrase(optional), you will be asked if you want to use it as part of a `Single-sig` or `Multisig` wallet.
 

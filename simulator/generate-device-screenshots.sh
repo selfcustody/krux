@@ -39,10 +39,14 @@ mOVkBE5QixIeJl7P0dYKVeOiuhNodO+qyI2lA+veFUxcXben1OZvKOqTbWNI2Oj8SROTpooiS/4WJdA=
 LyLgHTQ3oX8AbZR6+UXBXZUB+eSOHwJZm1jCO8AaBxQ==\"}}"
 echo "$encrypted_mnemonics" > sd/seeds.json
 
-# execute sequences in the order they appear in the application
+# Execute sequences in the order they appear in the application
+
 # Login
-# poetry run python simulator.py --sequence sequences/load-mnemonic-options.txt --sd --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-options.txt --sd --device $device
 poetry run python simulator.py --sequence sequences/new-mnemonic-options.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-sequence.txt  --sd --device $device
+
+# TODO: Fix remainng sequences
 
 # poetry run python simulator.py --sequence sequences/about.txt  --device $device
 # poetry run python simulator.py --sequence sequences/bitcoin-options.txt  --device $device

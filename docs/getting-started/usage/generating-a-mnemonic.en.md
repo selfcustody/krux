@@ -40,14 +40,20 @@ The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); there
 <div style="clear: both"></div>
 
 ### Via D20
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d20-roll-1-150.png" align="right">
 
 Since a D20 has more possible outcomes, the entropy is increased per roll to 4.322 bits ( log<sub>2</sub>(20) ). This means that only 30 rolls are necessary to create a 12-word mnemonic and 60 rolls for a 24-word mnemonic.
+
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-125.png" align="bottom">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-last-n-rolls-125.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d20-roll-1-150.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d20-last-n-rolls-150.png" align="bottom">
 
 <div style="clear: both"></div>
 
 ### Dice Rolls Entropy Quality Estimation
+
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-string-150.png" align="right">
 
 When you input your dice rolls, you'll see two progress bars filling up. The top progress bar shows how many rolls you've entered compared to the minimum number needed. The bottom progress bar shows the real-time calculated Shannon's entropy compared to the required minimum (128 bits for 12 words and 256 bits for 24 words). When the Shannon's entropy estimation reaches the recommended level, the progress bar will be full, and its frame will change color. If you've met the minimum number of rolls but the entropy estimation is still below the recommended level, a warning will appear, suggesting you add more rolls to increase entropy.
 Note: Similar to image entropy quality estimation, dice rolls Shannon's entropy serves as an indicator and should not be considered an absolute measure of cryptographic entropy.
@@ -56,11 +62,14 @@ Note: Similar to image entropy quality estimation, dice rolls Shannon's entropy 
 
 A low Shannon's entropy value might suggest that your dice are biased or that there's a problem with how you're gathering entropy. To investigate further, examine the "Stats for Nerds" section to check the distribution of your rolls and look for any abnormalities.
 
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-nerd-stats-125.png" align="top">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-nerd-stats-125.png" align="top">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-nerd-stats-150.png" align="top">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d20-roll-nerd-stats-150.png" align="top">
+
 <div style="clear: both"></div>
 
 ## How it works
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-string-150.png" align="right">
 
 For dice rolls, Krux keeps track of every roll you enter and displays the cumulative string of outcomes after each roll. 
 
@@ -68,14 +77,15 @@ When you have entered your final roll, Krux will hash this string using SHA256 a
 
 In the case a camera snapshot is used as source, image bytes, which contain pixels data in RGB565 format, will be hashed just like it is done with the dice rolls string.
 
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="bottom">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-125.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="bottom">
+<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-sha256-150.png" align="bottom">
+
 Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/binascii.html#binascii.unhexlify) on it to encode it as bytes, and deterministically converts it into a mnemonic according to the [BIP-39 Reference Implementation](https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207).
 
 Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).
 
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-125.png" align="bottom">
-<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-snapshot-sha256-150.png" align="bottom">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-125.png" align="bottom">
-<img src="../../../img/maixpy_amigo_tft/new-mnemonic-via-d6-roll-sha256-150.png" align="bottom">
 
 <div style="clear: both"></div>
 
