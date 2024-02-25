@@ -22,8 +22,8 @@ sudo apt-get remove brltty
 ## Why won't my Apple OS list a serial port after connecting my device?
 Some users reported that they were able to make their Apple devices recognize Krux devices only after they connected them through an USB dock instead of connecting them directly.
 
-## What are all the features available? What are the additional features of the Test (Beta) version?
-For [official releases](https://github.com/selfcustody/krux/releases) you will find all the features detailed here on the [Getting Started page](getting-started/index.en.md) with a brief summary on the [Navigation Overview page](getting-started/navigation.en.md). The latest and most experimental features, which we sometimes share on our social media, can be found only in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Only official releases are signed, Test (Beta) is just for trying new things and providing feedback.
+## What are all the features available? What are the additional features of the Test (Beta) version? Is there an Android app?
+For [official releases](https://github.com/selfcustody/krux/releases) you will find all the features detailed here on the [Getting Started page](getting-started/index.en.md) with a brief summary on the [Navigation Overview page](getting-started/navigation.en.md). The latest and most experimental features, which we sometimes share on our social media, can be found only in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Only official releases are signed, Test (Beta) is just for trying new things and providing feedback. Krux Android app ia available as an `apk` on the [test (beta) repository](https://github.com/odudex/krux_binaries/).
 
 ## Why does Krux show an xpub for a segwit address?
 The xpub that Krux displays follows the [bitcoin core descriptors spec](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md#key-origin-identification) and includes key origin and derivation info that, in theory, makes zpubs (and ypubs) unnecessary *if the wallet software being shown this extra information can parse it*. 

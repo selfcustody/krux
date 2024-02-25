@@ -22,7 +22,7 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
 ./ktool-win.exe -B goE -b 1500000 maixpy_m5stickv\kboot.kfpkg
 ```
 
-#### Sipeed Amigo TFT
+#### Sipeed Maix Amigo TFT
 ##### Linux
 To Flash Maix Amigo run:
 ```bash
@@ -35,9 +35,9 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
 ./ktool-win.exe -B goE -b 1500000 maixpy_amigo_tft\kboot.kfpkg
 ```
 
-#### Sipeed Bit
+#### Sipeed Maix Bit
 ##### Linux
-To Flash Maix Dock run:
+To Flash Maix Bit run:
 ```bash
 ./ktool-linux -B goE -b 1500000 maixpy_bit/kboot.kfpkg
 ```
@@ -48,7 +48,7 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
 ./ktool-win.exe -B goE -b 1500000 maixpy_bit\kboot.kfpkg
 ```
 
-#### Sipeed Dock
+#### Sipeed Maix Dock
 ##### Linux
 To Flash Maix Dock run:
 ```bash
