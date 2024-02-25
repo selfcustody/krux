@@ -85,7 +85,7 @@ nav:
     - Settings: getting-started/settings.en.md
   - Devices and Part List: parts.en.md
   - FAQ: faq.en.md
-  - Development: development.md
+  - Navigation Overview: navigation.en.md
   - Support the Project: support.en.md
 
 plugins:
