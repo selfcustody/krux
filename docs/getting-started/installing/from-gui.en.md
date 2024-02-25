@@ -95,7 +95,7 @@ The installer will present the latest test (beta) release.
 ![select-version-not-downloaded-odudex](../../img/krux-installer/select_version_not_downloaded_odudex.gif "KruxInstaller Select Odudex version Menu")
 
 - `<device>/firmware.bin`: is the unsigned firmware's binary of the choosen device;
-- `<device>/kboot.kfpkg`: is the unsigned and compressed bootloader of the choosen device;
+- `<device>/kboot.kfpkg`: is the unsigned and compressed firmware bootloader of the choosen device;
 - `<device>/ktool-<os>`: is the k210 tool "flasher" specific to Operational system:
     - `ktool-linux`: for linux machines;
     - `ktool-win.exe`: for windows machines;
