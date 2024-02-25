@@ -84,6 +84,8 @@ poetry run python simulator.py --sequence sequences/load-mnemonic-sequence.txt  
 # poetry run python simulator.py --sequence sequences/tools-check-sd.txt  --sd --device $device
 # poetry run python simulator.py --sequence sequences/tools-create-QR.txt  --sd --device $device
 # poetry run python simulator.py --sequence sequences/tools-mnemonic.txt  --sd --device $device
+# poetry run python simulator.py --sequence sequences/tools-print-test-qr.txt  --sd --device $device
+# poetry run python simulator.py --sequence sequences/tools-wipe-device.txt  --sd --device $device
 # poetry run python simulator.py --sequence sequences/wallet-type-options.txt  --device $device
 # poetry run python simulator.py --sequence sequences/wallet-wpkh.txt  --device $device
 # poetry run python simulator.py --sequence sequences/wallet-wsh.txt  --device $device
