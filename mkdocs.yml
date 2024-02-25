@@ -47,9 +47,9 @@ extra:
     - icon: fontawesome/brands/telegram
       link: https://t.me/SC_Krux
       name: Join our community-led Telegram
-    - icon: fontawesome/brands/twitter
+    - icon: fontawesome/brands/x-twitter
       link: https://twitter.com/selfcustodykrux
-      name: Follow us on Twitter
+      name: Follow us on X (Twitter)
     - icon: fontawesome/brands/github
       link: https://github.com/selfcustody/krux
       name: Our code on Github
