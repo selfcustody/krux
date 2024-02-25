@@ -23,12 +23,12 @@ Extract the latest version of Krux you downloaded and enter the folder:
 unzip krux-vX.Y.Z.zip && cd krux-vX.Y.Z
 ```
 
-Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, or `bit`:
+Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `bit` or `yahboom` (to yahboom you may need to manually specify the port):
 ```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
 
-For `dock` the `-b` parameter changes, so run:
+For `dock` the `-B` parameter changes, so run:
 ```bash
 ./ktool -B dan -b 1500000 maixpy_dock/kboot.kfpkg
 ```
@@ -69,12 +69,10 @@ ls /dev/cu.usbserial*
 Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue.
 
 #### A note about the Amigo
-Some Amigo screens have inverted x coordinates while others don’t.
-
-If after flashing `maixpy_amigo_tft` to your device you notice that the buttons on keypad input screens appear to be in the wrong order, please try flashing `maixpy_amigo_ips` instead (or vice versa) which should correct the issue. 
+Some Amigo screens have inverted X coordinates, others display colors differently. For more info check this FAQ item: ["Why are the buttons on my Amigo in the wrong order? Why is my Amigo screen displaying the wrong colors?"](../../../faq/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 ### Multilingual support
-Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use. If you have a microSD card inserted into the device, your preference will be automatically saved to a `settings.json` file at the root of the card.
+Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.
 
 ### Upgrade via microSD card
 Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades [via microSD](../features/sd-card-update.md) card to keep the device airgapped.

@@ -108,3 +108,12 @@ If they are already present on your computer, the application will give you the 
 Once we choose the device and firmware, we can flash. Before start the flash process itself, you be warned that you must plug and power on your device.
 
 ![flash-device](../../img/krux-installer/flash-device.gif "KruxInstaller Flash to device")
+
+##### A note about the Amigo
+Some Amigo screens have inverted X coordinates, others display colors differently. For more info check this FAQ item: ["Why are the buttons on my Amigo in the wrong order? Why is my Amigo screen displaying the wrong colors?"](../../../faq/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+
+### Multilingual support
+Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.
+
+### Upgrade via microSD card
+Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades [via microSD](../features/sd-card-update.md) card to keep the device airgapped.
