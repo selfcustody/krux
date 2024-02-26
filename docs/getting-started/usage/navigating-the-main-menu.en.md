@@ -26,15 +26,15 @@ A QR code is created from a binary representation of mnemonic words. Format crea
 
 #### SeedQR
 
-Words are converted to their BIP39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner
+Words are converted to their BIP-39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner
 
 #### Stackbit 1248
 
-Words are converted to their BIP39 numeric indexes, then each of the four digits is converted to a sum of 1,2,4 or 8.
+Words are converted to their BIP-39 numeric indexes, then each of the four digits is converted to a sum of 1,2,4 or 8.
 
 #### Tiny Seed
 
-This metal backup format represent BIP39 mnemonic word numbers index on its binary form on a metal plate, where 1's are marked(punched) and 0's are left intact
+This metal backup format represent BIP-39 mnemonic word numbers index on its binary form on a metal plate, where 1's are marked(punched) and 0's are left intact
 
 <div style="clear: both"></div>
 
