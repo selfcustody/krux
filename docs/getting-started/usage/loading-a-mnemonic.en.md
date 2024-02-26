@@ -19,7 +19,7 @@ It's unpleasant having to manually enter 12 or 24 words every time you want to u
 
 1. **Plain text QR**: The mnemonic words encoded as text, with words separated by spaces.
 2. [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP-39 numbers concatenated, encoded as text.
-3. [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
+3. [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
 4. [Encrypted Mnemonic](../features/encrypted-mnemonics.md): A specification created by Krux that encrypts the mnemonic words bits and adds some information about the encryption used.
 
 After opening your wallet via one of the manual methods you can use Krux to create QR codes of all types above, transcript them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic. Check out the [Printing section](../features/printing.md) for more information.
@@ -101,7 +101,7 @@ Once you have entered your mnemonic, you will be presented with the full list of
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-passphrase-125.png" align="right">
 <img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-passphrase-150.png" align="right">
 
-After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. You can create a QR code from your passphrase offline in [Tools](../features/tools.md#create-qr-code) section.
+After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. You can create a QR code from your passphrase offline in [Tools](../features/tools.md/#create-qr-code) section.
 
 <div style="clear: both"></div>
 

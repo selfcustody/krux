@@ -15,7 +15,7 @@ This option allows you to switch between `mainnet` (the default) and `testnet`. 
 <img src="../../img/maixpy_m5stickv/encryption-options-125.png" align="right">
 <img src="../../img/maixpy_amigo_tft/encryption-options-150.png" align="right">
 
-Modify the encryption method and parameters to fit your needs. This will be used when storing encrypted mnemonics or creating encrypted QR codes. For more info see [Krux Encrypted Mnemonics](./features/encrypted-mnemonics.en.md).
+Modify the encryption method and parameters to fit your needs. This will be used when storing encrypted mnemonics or creating encrypted QR codes. For more info see [Krux Encrypted Mnemonics](./features/encrypted-mnemonics.md).
 
 <div style="clear: both"></div>
 
@@ -56,7 +56,7 @@ If your device has a rotary encoder, you can change the debounce threshold in mi
 The caveat is low values can cause issues, such as double step and unexpected movements, especially with lower quality encoders. If this is the case increase the value to make navigation more stable.
 
 #### Display (Amigo only)
-Some Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../../../faq/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+Some Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 <img src="../../img/maixpy_amigo_tft/settings-options-hardware-display-150.png" align="right">
 
@@ -73,7 +73,7 @@ Define several machining parameters according to the desired size, material you'
 
 #### Thermal
 Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can change this here.
-Also setup the IOs you'll use and tweak parameters according to your printer recommendations. Consult the [part list](../../parts.md#optional-thermal-printer) page for supported printers.
+Also setup the IOs you'll use and tweak parameters according to your printer recommendations. Consult the [part list](../parts.md/#optional-thermal-printer) page for supported printers.
 
 #### Driver
 Here you choose between Thermal, CNC or none (default). Leave this setting to "none" if you won't use a printer and don't want to be bothered by print prompts.

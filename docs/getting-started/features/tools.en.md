@@ -31,7 +31,7 @@ Enter a text input to create, print or transcript a QR code that can be later us
 <img src="../../../img/maixpy_m5stickv/delete-mnemonic-125.png" align="right">
 <img src="../../../img/maixpy_amigo_tft/delete-mnemonic-150.png" align="right">
 
-Delete any stored encrypted mnemonic, on device's internal memory or SD card. For more info see [Krux Encrypted Mnemonics](./encrypted-mnemonics.en.md).
+Delete any stored encrypted mnemonic, on device's internal memory or SD card. For more info see [Krux Encrypted Mnemonics](./encrypted-mnemonics.md).
 
 <div style="clear: both"></div>
 

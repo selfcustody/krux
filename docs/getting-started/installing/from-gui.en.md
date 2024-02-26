@@ -4,7 +4,7 @@ This page explains how to install Krux with KruxInstaller (GUI).
 
 You can install krux onto your K210-based device using our official desktop application, which we named [KruxInstaller](https://github.com/selfcustody/krux-installer), available for Linux and Windows.
 
-Under the hood the GUI uses the same methods described in [Installing from pre-build release](../installing/from-pre-built-release.en.md), i.e. download, verify and flash the latest official release, but you won't need to type any command. Additionally you will be able to install the [pre-built test (beta) release](../installing/from-test-release.en.md) too.
+Under the hood the GUI uses the same methods described in [Installing from pre-build release](../installing/from-pre-built-release.md), i.e. download, verify and flash the latest official release, but you won't need to type any command. Additionally you will be able to install the [pre-built test (beta) release](../installing/from-test-release.md) too.
 
 Keep in mind that this is software under development in the alpha stage and may be buggy. If you find any bugs or want to contribute to the project, please open an [issue](https://github.com/selfcustody/krux-installer/issues) or make a PR.
 
@@ -110,7 +110,7 @@ Once we choose the device and firmware, we can flash. Before start the flash pro
 ![flash-device](../../img/krux-installer/flash-device.gif "KruxInstaller Flash to device")
 
 ##### A note about the Amigo
-Some Amigo screens have inverted X coordinates, others display colors differently. For more info see [FAQ](../../../faq/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+Some Amigo screens have inverted X coordinates, others display colors differently. For more info see [FAQ](../../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 ### Multilingual support
 Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.

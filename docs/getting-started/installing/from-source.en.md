@@ -73,7 +73,7 @@ If after 30 seconds you still see a black screen, try power cycling the device b
 Congrats, you're now running Krux!
 
 #### A note about the Amigo
-Some Amigo screens have inverted X coordinates, others display colors differently. For more info see [FAQ](../../../faq/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+Some Amigo screens have inverted X coordinates, others display colors differently. For more info see [FAQ](../../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 ### Multilingual support
 Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.

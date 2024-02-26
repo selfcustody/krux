@@ -5,4 +5,4 @@ To perform an upgrade, simply copy the [official release](https://github.com/sel
 
 Once installation is complete, eject the microSD card and delete the firmware files before reinserting and rebooting. Otherwise you will be prompted to install it again.
 
-We cannot guarantee that a microSD card is compatible and will work in your device; you'll need to test it on the device to be sure, read the [FAQ](faq.en.md/#why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error) for more info. Only official releases are signed and can be installed via microSD card.
+We cannot guarantee that a microSD card is compatible and will work in your device; you'll need to test it on the device to be sure, read the [FAQ](../../faq.md/#why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error) for more info. Only official releases are signed and can be installed via microSD card.
