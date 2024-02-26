@@ -1,4 +1,4 @@
-Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected thermal printer over its serial port. Consult the [part list](../../parts.md#optional-thermal-printer) page for supported printers.
+Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected thermal printer over its serial port. Consult the [part list](../../parts.md/#optional-thermal-printer) page for supported printers.
 
 <img src="../../../img/maixpy_amigo_tft/print-qr-printing-150.png">
 <img src="../../../img/maixpy_m5stickv/print-qr-printing-125.png">

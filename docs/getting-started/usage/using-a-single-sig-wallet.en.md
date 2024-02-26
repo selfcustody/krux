@@ -228,7 +228,7 @@ Navigate to the *Receive* screen where you should see a receive address that you
 
 <img src="../../../img/blue/receive-address-400.png" style="border: 1px solid;">
 
-Note that you can verify the receive address belongs to your wallet by using the [Scan Address](navigating-the-main-menu.md#scan-address) option.
+Note that you can verify the receive address belongs to your wallet by using the [Scan Address](navigating-the-main-menu.md/#scan-address) option.
 
 ## Send coins
 Go to the *Send* screen, fill in the recipient address, amount, and any extra information you wish to supply, and tap *Next*.

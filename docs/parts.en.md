@@ -53,7 +53,7 @@ Below are example implementations with instructions on how to recreate them:
 This will be included with the M5StickV and Maix Amigo that you purchase from one of the distributors above. It will be necessary to power and charge the device and to initially flash the firmware.
 
 ### (Optional) MicroSD Card
-Not all microSD cards will work with the devices. Make sure to use one that has been [tested and shown to work](https://github.com/m5stack/m5-docs/blob/master/docs/en/core/m5stickv.md#tf-cardmicrosd-test) with the devices already, read the [FAQ](faq.en.md/#why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error) for more info. The size of the SD card isn't important; anything over a few megabytes will be plenty.
+We cannot guarantee that a microSD card is compatible and will work in your device; you'll need to test it on the device to be sure, read the [FAQ](faq.md/#why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error) for more info. The size of the SD card isn't important; anything over a few megabytes will be plenty.
 
 ### (Optional) Thermal Printer
 Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected thermal printer over its serial port.

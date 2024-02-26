@@ -4,8 +4,8 @@ include _wait-for-logo.txt
 x3 press BUTTON_B
 press BUTTON_A
 
-# Create QR Code
-x2 press BUTTON_B
+# Print Test QR
+press BUTTON_B
 press BUTTON_A
 
-screenshot create-qr-code.png
+screenshot print-test-qr.png

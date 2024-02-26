@@ -40,7 +40,7 @@ The first command will create `privkey.pem` and `pubkey.pem` files you can use w
 Once you've updated the `SIGNER_PUBKEY` with this value, you can proceed with the regular build process.
 
 #### Build
-Run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, `dock`, or `bit`:
+Run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `dock`, `bit` or `yahboom`:
 ```bash
 vagrant ssh -c 'cd /vagrant; ./krux build maixpy_DEVICE'
 ```
@@ -50,7 +50,7 @@ This will take around an hour or so to complete the first time. Subsequent build
 If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
 ### Flash the firmware onto the device
-Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `amigo_ips`, `dock`, or `bit`:
+Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `dock`, `bit` or `yahboom`:
 ```bash
 vagrant ssh -c 'cd /vagrant; ./krux flash maixpy_DEVICE'
 ```
@@ -73,17 +73,15 @@ If after 30 seconds you still see a black screen, try power cycling the device b
 Congrats, you're now running Krux!
 
 #### A note about the Amigo
-Some Amigo screens have inverted x coordinates while others don’t.
-
-If after flashing `maixpy_amigo_tft` to your device you notice that the buttons on keypad input screens appear to be in the wrong order, please try flashing `maixpy_amigo_ips` instead (or vice versa) which should correct the issue. 
+Some Amigo screens have inverted X coordinates, others display colors differently. For more info see [FAQ](../../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 ### Multilingual support
-Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use. If you have a microSD card inserted into the device, your preference will be automatically saved to a `settings.json` file at the root of the card.
+Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.
 
 ### Upgrade via microSD card
-Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades via microSD card to keep the device airgapped.
+Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades [via microSD](../features/sd-card-update.md) card to keep the device airgapped.
 
-After you've built the firmware, you can sign it using one of the following methods.
+After you've built the firmware, you can sign it using one of the following methods:
 
 #### Method 1: Signing from Krux
 First, calculate the SHA256 hash of the new firmware by running:
@@ -109,8 +107,3 @@ vagrant ssh -c 'cd /vagrant; ./krux sign build/firmware.bin privkey.pem'
 ```
 
 This will generate a `firmware.bin.sig` file containing a signature of the firmware's SHA256 hash.
-
-### Upgrade via microSD card (continued)
-To perform an upgrade, simply copy the `firmware.bin` and `firmware.bin.sig` files to the root of a FAT-32 formatted microSD card, insert the card into your device, and reboot the device. If it detects the new firmware file and is able to verify the signature, you will be prompted to install it.
-
-Once installation is complete, eject the microSD card and delete the firmware files before reinserting and rebooting.

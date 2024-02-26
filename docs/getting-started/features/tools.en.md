@@ -11,14 +11,6 @@ You can check if a SD card can be detected and read by your device and explore i
 
 <div style="clear: both"></div>
 
-### Delete Mnemonic
-<img src="../../../img/maixpy_m5stickv/delete-mnemonic-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/delete-mnemonic-150.png" align="right">
-
-Delete any stored encrypted mnemonic, on device's internal memory or SD card.
-
-<div style="clear: both"></div>
-
 ### Print Test QR
 <img src="../../../img/maixpy_m5stickv/print-test-qr-125.png" align="right">
 <img src="../../../img/maixpy_amigo_tft/print-test-qr-150.png" align="right">
@@ -32,5 +24,21 @@ Quickly print a test QR code to check and optimize your printer setup.
 <img src="../../../img/maixpy_amigo_tft/create-qr-code-150.png" align="right">
 
 Enter a text input to create, print or transcript a QR code that can be later used as an encryption key or as a passphrase.
+
+<div style="clear: both"></div>
+
+### Delete Mnemonic
+<img src="../../../img/maixpy_m5stickv/delete-mnemonic-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/delete-mnemonic-150.png" align="right">
+
+Delete any stored encrypted mnemonic, on device's internal memory or SD card. For more info see [Krux Encrypted Mnemonics](./encrypted-mnemonics.md).
+
+<div style="clear: both"></div>
+
+### Wipe Device
+<img src="../../../img/maixpy_m5stickv/wipe-device-125.png" align="right">
+<img src="../../../img/maixpy_amigo_tft/wipe-device-150.png" align="right">
+
+Permanently remove all stored encrypted mnemonics and settings from device's internal flash memory.
 
 <div style="clear: both"></div>
