@@ -17,23 +17,24 @@ press BUTTON_B
 # screenshot settings-options-encryption.png
 
 press BUTTON_B
-press BUTTON_A
-screenshot settings-options-hardware.png
+# press BUTTON_A
+# screenshot settings-options-hardware.png
 
-press BUTTON_A
-screenshot settings-options-hardware-display.png
+# press BUTTON_A
+# screenshot settings-options-hardware-display.png
 
 press BUTTON_B
 # screenshot settings-options-language.png
 
 press BUTTON_B
-# screenshot settings-options-logging.png
-
-press BUTTON_B
 # screenshot settings-options-persist.png
 
 press BUTTON_B
-# screenshot settings-options-printer.png
+# press BUTTON_A
+# screenshot settings-options-appearance.png
+
+# press BUTTON_A
+# screenshot settings-options-appearance-screensaver.png
 
 press BUTTON_B
-# screenshot settings-options-theme.png
+screenshot settings-options-factory-settings.png

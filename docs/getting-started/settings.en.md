@@ -50,15 +50,17 @@ Encryption will take longer because a snapshot will be needed to generate the IV
 ### Hardware
 <img src="../../img/maixpy_amigo_tft/settings-options-hardware-150.png" align="right">
 
+Customize the parameters available for your device and change printer settings.
+
 #### Encoder (Dock only)
 If your device has a rotary encoder, you can change the debounce threshold in milliseconds. With lower values, faster movements and navigation will be allowed.
 
 The caveat is low values can cause issues, such as double step and unexpected movements, especially with lower quality encoders. If this is the case increase the value to make navigation more stable.
 
 #### Display (Amigo only)
-Some Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
-
 <img src="../../img/maixpy_amigo_tft/settings-options-hardware-display-150.png" align="right">
+
+Some Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 <div style="clear: both"></div>
 
@@ -104,10 +106,24 @@ Choose between flash (device's internal memory) or SD card for the place where y
 <div style="clear: both"></div>
 
 ### Appearance
+<img src="../../img/maixpy_m5stickv/settings-options-appearance-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/settings-options-appearance-150.png" align="right">
+
+Configure screensaver time and change Krux to your desired theme.
+
+<div style="clear: both"></div>
 
 #### Screensaver time
+<img src="../../img/maixpy_m5stickv/settings-options-appearance-screensaver-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/settings-options-appearance-screensaver-150.png" align="right">
+
+Set how long to wait idle before the screensaver appears. Enter 0 to disable the screensaver.
+
+<div style="clear: both"></div>
 
 #### Theme
+Choose your color theme according to your preference. Some themes may be more suitable for some devices, coordinator cameras and environments. As an example, it may be easier to scan QR codes from Krux devices using light theme in brighter environments.
+
 <img src="../../img/maixpy_amigo_tft/theme-1-150.png">
 <img src="../../img/maixpy_amigo_tft/theme-2-150.png">
 <img src="../../img/maixpy_amigo_tft/theme-3-150.png">
@@ -115,9 +131,10 @@ Choose between flash (device's internal memory) or SD card for the place where y
 <img src="../../img/maixpy_m5stickv/theme-2-125.png">
 <img src="../../img/maixpy_m5stickv/theme-3-125.png">
 
-Choose your color theme according to your preference. Some themes may be more suitable for some devices, coordinator cameras and environments. As an example, it may be easier to scan QR codes from Krux devices using light theme in brighter environments.
+### Factory Settings
+<img src="../../img/maixpy_m5stickv/settings-options-factory-settings-125.png" align="right">
+<img src="../../img/maixpy_amigo_tft/settings-options-factory-settings-150.png" align="right">
+
+Restore device to factory settings and reboot.
 
 <div style="clear: both"></div>
-
-### Factory Settings
-Restore device to factory settings and reboot.
