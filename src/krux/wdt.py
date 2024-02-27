@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import machine
-from .settings import FLASH_PATH
+from .settings import FLASH_PATH, SETTINGS_FILENAME
 
 try:
     import ujson as json
@@ -29,14 +29,13 @@ except ImportError:
 
 RESET_TIMEOUT = 30000
 WDT_CONF_NAME = "WATCHDOG_DISABLE"
-CONF_FILE = "config.json"
 
 # Create a watchdog timer that resets the device if not fed for 30s
 wdt = machine.WDT(timeout=RESET_TIMEOUT)
 
 # Check if user wanted to disable the watchdog!
 try:
-    with open("/" + FLASH_PATH + "/" + CONF_FILE, "r") as f:
+    with open("/" + FLASH_PATH + "/" + SETTINGS_FILENAME, "r") as f:
         conf_dict = json.loads(f.read())
         if conf_dict.get(WDT_CONF_NAME, False):
             wdt.stop()
