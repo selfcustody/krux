@@ -118,9 +118,11 @@ class Tools(Page):
 
         import flash
         from ..firmware import FLASH_SIZE, SPIFFS_ADDR, ERASE_BLOCK_SIZE
+        from ..wdt import wdt
 
         empty_buf = b"\xff" * ERASE_BLOCK_SIZE
         for address in range(SPIFFS_ADDR, FLASH_SIZE, ERASE_BLOCK_SIZE):
+            wdt.feed()
             if flash.read(address, ERASE_BLOCK_SIZE) == empty_buf:
                 continue
             flash.erase(address, ERASE_BLOCK_SIZE)
@@ -135,7 +137,11 @@ class Tools(Page):
             self.ctx.display.height() // 2,
         ):
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Wiping Device.."))
+            self.ctx.display.draw_centered_text(
+                t("Wiping Device..")
+                + "\n\n"
+                + t("Do not power off, it may take a while to complete.")
+            )
             self.erase_spiffs()
             # Reboot so default settings take place and SPIFFS is formatted.
             self.ctx.power_manager.reboot()
