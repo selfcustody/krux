@@ -3,7 +3,7 @@ This guide assumes you have already created a mnemonic. If that is not the case,
 When entering your mnemonic into Krux, make sure to select `Single-sig` before proceeding. The choice of `Single-sig` vs. `Multisig` at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
 
 <img src="../../../img/maixpy_m5stickv/wallet-type-options-125.png">
-<img src="../../../img/maixpy_amigo_tft/wallet-type-options-150.png">
+<img src="../../../img/maixpy_amigo/wallet-type-options-150.png">
 
 Selecting `Single-sig` will derive an xpub using the derivation path `m/84'/0'/0'` on mainnet and `m/84'/1'/0'` on testnet, which indicates to wallet software that a [Segregated Witness (Segwit) script type](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) should be used. For single-sig wallets, this script is `P2WPKH`, or just `wpkh`.
 
@@ -26,7 +26,7 @@ You will be taken to the *Upload Keys* screen where you can choose to *Scan QR c
 On your Krux, navigate to the *Extended Public Key* option under the main menu and show the **first** QR code to Specter Desktop.
 
 <img src="../../../img/maixpy_m5stickv/extended-public-key-wpkh-xpub-qr-125.png">
-<img src="../../../img/maixpy_amigo_tft/extended-public-key-wpkh-xpub-qr-150.png">
+<img src="../../../img/maixpy_amigo/extended-public-key-wpkh-xpub-qr-150.png">
 
 It should import the xpub and display the *Purpose* as *#0 Single Sig (Segwit)*.
 
@@ -62,12 +62,12 @@ Load the wallet into Krux by going to the *Settings* page in Specter Desktop, th
 In Krux, select the *Wallet* menu item option and scan the QR code.
 
 <img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/wallet-load-prompt-150.png">
+<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
 
 If it worked, Krux should display the wallet information that it loaded:
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/wallet-wpkh-load-prompt-150.png">
+<img src="../../../img/maixpy_amigo/wallet-wpkh-load-prompt-150.png">
 
 ### Receive coins
 Navigate to the *Receive* screen where you should see a receive address that you can send funds to.
@@ -84,12 +84,12 @@ You will now see a screen listing the devices in your wallet. Select the device 
 Specter Desktop will display an animated QR code of the PSBT that you can scan with Krux by going to *Sign > PSBT* in its main menu. After scanning, Krux should display info about the transaction for you to confirm before signing.
 
 <img src="../../../img/maixpy_m5stickv/sign-psbt-sign-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/sign-psbt-sign-prompt-150.png">
+<img src="../../../img/maixpy_amigo/sign-psbt-sign-prompt-150.png">
 
 Once you have confirmed, Krux will begin animating a QR code of the signed transaction that you can scan into Specter Desktop. 
 
 <img src="../../../img/maixpy_m5stickv/sign-psbt-signed-qr-125.png">
-<img src="../../../img/maixpy_amigo_tft/sign-psbt-signed-qr-150.png">
+<img src="../../../img/maixpy_amigo/sign-psbt-signed-qr-150.png">
 
 In Specter Desktop, click *Scan signed transaction* and show it the QR. Each part of the QR code that is read will receive a ghost icon to indicate progress.
 
@@ -118,7 +118,7 @@ Now, you will need to import your public key. To do so, press the *Airgapped Har
 On your Krux, navigate to the *Extended Public Key* option under the main menu and show the **first** QR code to Sparrow.
 
 <img src="../../../img/maixpy_m5stickv/extended-public-key-wpkh-xpub-qr-125.png">
-<img src="../../../img/maixpy_amigo_tft/extended-public-key-wpkh-xpub-qr-150.png">
+<img src="../../../img/maixpy_amigo/extended-public-key-wpkh-xpub-qr-150.png">
 
 It should import the xpub and show a key under *Keystores* like the following:
 
@@ -136,12 +136,12 @@ Load the wallet into Krux by going back to the *Settings* page in Sparrow, then 
 In Krux, select the *Wallet* menu item option and scan the QR code.
 
 <img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/wallet-load-prompt-150.png">
+<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
 
 If it worked, Krux should display the wallet information that it loaded:
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/wallet-wpkh-load-prompt-150.png">
+<img src="../../../img/maixpy_amigo/wallet-wpkh-load-prompt-150.png">
 
 ## Receive coins
 Navigate to the *Receive* screen where you should see a receive address that you can send funds to.
@@ -164,12 +164,12 @@ On the next screen, click *Show QR* to make Sparrow display an animated QR code 
 After scanning, Krux should display info about the transaction for you to confirm before signing.
 
 <img src="../../../img/maixpy_m5stickv/sign-psbt-sign-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/sign-psbt-sign-prompt-150.png">
+<img src="../../../img/maixpy_amigo/sign-psbt-sign-prompt-150.png">
 
 Once you have confirmed, Krux will begin animating a QR code of the signed transaction that you can scan into Sparrow. 
 
 <img src="../../../img/maixpy_m5stickv/sign-psbt-signed-qr-125.png">
-<img src="../../../img/maixpy_amigo_tft/sign-psbt-signed-qr-150.png">
+<img src="../../../img/maixpy_amigo/sign-psbt-signed-qr-150.png">
 
 In Sparrow, click *Scan QR* and show it the QR. A progress bar will indicate how many parts of the QR have been read.
 
@@ -196,7 +196,7 @@ On the following screen, tap *Scan or import a file* and it will begin trying to
 On your Krux, navigate to the *Extended Public Key* option under the main menu and **make sure to show the second, zpub QR code** to BlueWallet.
 
 <img src="../../../img/maixpy_m5stickv/extended-public-key-wpkh-zpub-qr-125.png">
-<img src="../../../img/maixpy_amigo_tft/extended-public-key-wpkh-zpub-qr-150.png">
+<img src="../../../img/maixpy_amigo/extended-public-key-wpkh-zpub-qr-150.png">
 
 It should import the key and create a watch-only wallet. From here, you can send or receive.
 
@@ -216,12 +216,12 @@ From here, tap *Export/Backup* in order to display a QR code of your wallet.
 In Krux, select the *Wallet* menu item option and scan the QR code.
 
 <img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/wallet-load-prompt-150.png">
+<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
 
 If it worked, Krux should display the wallet information that it loaded:
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/wallet-wpkh-load-prompt-150.png">
+<img src="../../../img/maixpy_amigo/wallet-wpkh-load-prompt-150.png">
 
 ## Receive coins
 Navigate to the *Receive* screen where you should see a receive address that you can send funds to.
@@ -240,12 +240,12 @@ You should see an animated QR code of the PSBT that you can scan with Krux by go
 After scanning, Krux should display info about the transaction for you to confirm before signing.
 
 <img src="../../../img/maixpy_m5stickv/sign-psbt-sign-prompt-125.png">
-<img src="../../../img/maixpy_amigo_tft/sign-psbt-sign-prompt-150.png">
+<img src="../../../img/maixpy_amigo/sign-psbt-sign-prompt-150.png">
 
 Once you have confirmed, Krux will begin animating a QR code of the signed transaction that you can scan into BlueWallet. 
 
 <img src="../../../img/maixpy_m5stickv/sign-psbt-signed-qr-125.png">
-<img src="../../../img/maixpy_amigo_tft/sign-psbt-signed-qr-150.png">
+<img src="../../../img/maixpy_amigo/sign-psbt-signed-qr-150.png">
 
 Once all parts of the QR code have been read, you can then choose to broadcast the transaction, sending it to the network!
 

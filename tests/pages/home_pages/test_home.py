@@ -81,7 +81,7 @@ def tdata(mocker):
     )
 
 
-def test_load_mnemonic_view(mocker, amigo_tft):
+def test_load_mnemonic_view(mocker, amigo):
     from krux.pages.home_pages.home import Home
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -97,7 +97,7 @@ def test_load_mnemonic_view(mocker, amigo_tft):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_load_mnemonic_encryption(mocker, amigo_tft):
+def test_load_mnemonic_encryption(mocker, amigo):
     from krux.pages.home_pages.home import Home
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -113,7 +113,7 @@ def test_load_mnemonic_encryption(mocker, amigo_tft):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_load_pub_key_view(mocker, amigo_tft, tdata):
+def test_load_pub_key_view(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
@@ -131,7 +131,7 @@ def test_load_pub_key_view(mocker, amigo_tft, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_load_wallet_descritor_manager(mocker, amigo_tft, tdata):
+def test_load_wallet_descritor_manager(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_PAGE, BUTTON_ENTER
@@ -149,7 +149,7 @@ def test_load_wallet_descritor_manager(mocker, amigo_tft, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_load_address_view(mocker, amigo_tft, tdata):
+def test_load_address_view(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
@@ -167,7 +167,7 @@ def test_load_address_view(mocker, amigo_tft, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_sign_menu(mocker, amigo_tft, tdata):
+def test_sign_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -183,7 +183,7 @@ def test_sign_menu(mocker, amigo_tft, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_load_sign_message_menu(mocker, amigo_tft):
+def test_load_sign_message_menu(mocker, amigo):
     from krux.pages.home_pages.home import Home
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 

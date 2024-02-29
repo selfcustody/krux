@@ -65,7 +65,7 @@ def m5stickv(monkeypatch, mp_modules):
 
 
 @pytest.fixture
-def amigo_tft(monkeypatch, mp_modules):
+def amigo(monkeypatch, mp_modules):
     import sys
 
     monkeypatch.setitem(sys.modules, "board", board_amigo_tft())

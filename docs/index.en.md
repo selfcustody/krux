@@ -6,7 +6,7 @@ hide:
 # Krux
 
 <img srcset="img/maixpy_m5stickv/logo-125.png" align="right">
-<img srcset="img/maixpy_amigo_tft/logo-150.png" align="right">
+<img srcset="img/maixpy_amigo/logo-150.png" align="right">
 
 Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts. It runs on Kendryte K210 devices such as the [Maix Amigo](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html), [M5StickV](https://docs.m5stack.com/en/core/m5stickv) and [more](parts.md), converting them into airgapped devices that can sign transactions for multisignature and single-signature wallets.
 

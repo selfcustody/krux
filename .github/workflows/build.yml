@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        device: [maixpy_m5stickv, maixpy_amigo_ips, maixpy_amigo_tft, maixpy_bit, maixpy_dock]
+        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock]
     runs-on: ubuntu-latest
     services:
       registry:
@@ -59,53 +59,29 @@ jobs:
           path: ${{ steps.extract-m5stickv.outputs.destination }}
           name: build-m5stickv
 
-      - name: Build for Amigo IPS
-        if: matrix.device == 'maixpy_amigo_ips'
+      - name: Build for Amigo
+        if: matrix.device == 'maixpy_amigo'
         uses: docker/build-push-action@v4
         with:
           context: .
-          build-args: DEVICE=maixpy_amigo_ips
+          build-args: DEVICE=maixpy_amigo
           push: true
-          tags: localhost:5000/selfcustody/krux-builder-amigo-ips:latest
+          tags: localhost:5000/selfcustody/krux-builder-amigo:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      - name: Extract firmware for Amigo IPS
-        id: extract-amigo-ips
-        if: matrix.device == 'maixpy_amigo_ips'
+      - name: Extract firmware for Amigo
+        id: extract-amigo
+        if: matrix.device == 'maixpy_amigo'
         uses: shrink/actions-docker-extract@v2
         with:
-          image: localhost:5000/selfcustody/krux-builder-amigo-ips:latest
+          image: localhost:5000/selfcustody/krux-builder-amigo:latest
           path: /src/firmware/Kboot/build/.
-      - name: Upload firmware for Amigo IPS
-        if: matrix.device == 'maixpy_amigo_ips'
+      - name: Upload firmware for Amigo
+        if: matrix.device == 'maixpy_amigo'
         uses: actions/upload-artifact@v3
         with:
-          path: ${{ steps.extract-amigo-ips.outputs.destination }}
-          name: build-amigo-ips
-
-      - name: Build for Amigo TFT
-        if: matrix.device == 'maixpy_amigo_tft'
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          build-args: DEVICE=maixpy_amigo_tft
-          push: true
-          tags: localhost:5000/selfcustody/krux-builder-amigo-tft:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      - name: Extract firmware for Amigo TFT
-        id: extract-amigo-tft
-        if: matrix.device == 'maixpy_amigo_tft'
-        uses: shrink/actions-docker-extract@v2
-        with:
-          image: localhost:5000/selfcustody/krux-builder-amigo-tft:latest
-          path: /src/firmware/Kboot/build/.
-      - name: Upload firmware for Amigo TFT
-        if: matrix.device == 'maixpy_amigo_tft'
-        uses: actions/upload-artifact@v3
-        with:
-          path: ${{ steps.extract-amigo-tft.outputs.destination }}
-          name: build-amigo-tft
+          path: ${{ steps.extract-amigo.outputs.destination }}
+          name: build-amigo
 
       - name: Build for Bit
         if: matrix.device == 'maixpy_bit'

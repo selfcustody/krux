@@ -657,7 +657,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
             assert ctx.wallet.key.mnemonic == case[1]
 
 
-def test_load_key_from_text_on_amigo_tft_with_touch(amigo_tft, mocker, mocker_printer):
+def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -1085,7 +1085,7 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
     assert ctx.wallet.key.mnemonic.startswith(MNEMONIC)
 
 
-def test_leaving_keypad(mocker, amigo_tft):
+def test_leaving_keypad(mocker, amigo):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -1103,7 +1103,7 @@ def test_leaving_keypad(mocker, amigo_tft):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_no_passphrase_on_amigo(mocker, amigo_tft):
+def test_no_passphrase_on_amigo(mocker, amigo):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -1152,7 +1152,7 @@ def test_no_passphrase_on_amigo(mocker, amigo_tft):
     assert ctx.input.wait_for_button.call_count == len(case)
 
 
-def test_passphrase(amigo_tft, mocker, mocker_printer):
+def test_passphrase(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
     from krux.input import (
         BUTTON_ENTER,
@@ -1215,7 +1215,7 @@ def test_passphrase(amigo_tft, mocker, mocker_printer):
 ############### load words from tiny seed (bits)
 
 
-def test_load_12w_from_tiny_seed(amigo_tft, mocker, mocker_printer):
+def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 

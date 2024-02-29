@@ -1,11 +1,11 @@
 In the Krux home menu, there is a `Settings` entry. Below is a breakdown of the options you can change:
 
-<img src="../../img/maixpy_amigo_tft/settings-options-150.png">
+<img src="../../img/maixpy_amigo/settings-options-150.png">
 <img src="../../img/maixpy_m5stickv/settings-options-125.png">
 
 ### Bitcoin - Network
 <img src="../../img/maixpy_m5stickv/network-options-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/network-options-150.png" align="right">
+<img src="../../img/maixpy_amigo/network-options-150.png" align="right">
 
 This option allows you to switch between `mainnet` (the default) and `testnet`. `Testnet` can be used to try out different wallet coordinators or for development. 
 
@@ -13,7 +13,7 @@ This option allows you to switch between `mainnet` (the default) and `testnet`. 
 
 ### Encryption
 <img src="../../img/maixpy_m5stickv/encryption-options-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/encryption-options-150.png" align="right">
+<img src="../../img/maixpy_amigo/encryption-options-150.png" align="right">
 
 Modify the encryption method and parameters to fit your needs. This will be used when storing encrypted mnemonics or creating encrypted QR codes. For more info see [Krux Encrypted Mnemonics](./features/encrypted-mnemonics.md).
 
@@ -21,7 +21,7 @@ Modify the encryption method and parameters to fit your needs. This will be used
 
 #### PBKDF2 Iter. (Iterations)
 <img src="../../img/maixpy_m5stickv/encryption-options-pbkdf2-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/encryption-options-pbkdf2-150.png" align="right">
+<img src="../../img/maixpy_amigo/encryption-options-pbkdf2-150.png" align="right">
 
 When you enter the encryption key, it is not directly used to encrypt your data. In order to protect against brute force attacks, the key is derived multiple times using hashing functions. PBKDF2 (Password-Based Key Derivation Function) iterations stands for the amount of derivations that will be performed over your key prior to encrypt/decrypt your mnemonic.
 
@@ -33,7 +33,7 @@ Values must be multiple of 10,000. This was done to save data space on QR codes.
 
 #### Encryption Mode
 <img src="../../img/maixpy_m5stickv/encryption-options-mode-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/encryption-options-mode-150.png" align="right">
+<img src="../../img/maixpy_amigo/encryption-options-mode-150.png" align="right">
 
 Choose between well known and widely used AES (Advanced Encryption Standard) modes:
 
@@ -48,7 +48,7 @@ Encryption will take longer because a snapshot will be needed to generate the IV
 <div style="clear: both"></div>
 
 ### Hardware
-<img src="../../img/maixpy_amigo_tft/settings-options-hardware-150.png" align="right">
+<img src="../../img/maixpy_amigo/settings-options-hardware-150.png" align="right">
 
 Customize the parameters available for your device and change printer settings.
 
@@ -58,7 +58,7 @@ If your device has a rotary encoder, you can change the debounce threshold in mi
 The caveat is low values can cause issues, such as double step and unexpected movements, especially with lower quality encoders. If this is the case increase the value to make navigation more stable.
 
 #### Display (Amigo only)
-<img src="../../img/maixpy_amigo_tft/settings-options-hardware-display-150.png" align="right">
+<img src="../../img/maixpy_amigo/settings-options-hardware-display-150.png" align="right">
 
 Some Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
@@ -66,7 +66,7 @@ Some Amigo screens are different, here you can customize the BGR Colors, Flipped
 
 ### Printer
 <img src="../../img/maixpy_m5stickv/printer-options-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/printer-options-150.png" align="right">
+<img src="../../img/maixpy_amigo/printer-options-150.png" align="right">
 
 You can set up a thermal printer or tell Krux to store a GRBL CNC instructions file on a SD card to machine QR codes
 
@@ -84,7 +84,7 @@ Here you choose between Thermal, CNC or none (default). Leave this setting to "n
 <div style="clear: both"></div>
 
 #### Touchscreen (Amigo and Yahboom only)
-<img src="../../img/maixpy_amigo_tft/touchscreen-150.png" align="right">
+<img src="../../img/maixpy_amigo/touchscreen-150.png" align="right">
 
 If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false (ghost) touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
 
@@ -92,7 +92,7 @@ If your device has touchscreen you can change the touch detection threshold. If 
 
 ### Language - Locale
 <img src="../../img/maixpy_m5stickv/locale-options-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/locale-options-150.png" align="right">
+<img src="../../img/maixpy_amigo/locale-options-150.png" align="right">
 
 Here you can change Krux to your desired language.
 
@@ -100,7 +100,7 @@ Here you can change Krux to your desired language.
 
 ### Persist
 <img src="../../img/maixpy_m5stickv/persist-options-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/persist-options-150.png" align="right">
+<img src="../../img/maixpy_amigo/persist-options-150.png" align="right">
 
 Choose between flash (device's internal memory) or SD card for the place where your settings will be stored.
 
@@ -108,7 +108,7 @@ Choose between flash (device's internal memory) or SD card for the place where y
 
 ### Appearance
 <img src="../../img/maixpy_m5stickv/settings-options-appearance-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/settings-options-appearance-150.png" align="right">
+<img src="../../img/maixpy_amigo/settings-options-appearance-150.png" align="right">
 
 Configure screensaver time and change Krux to your desired theme.
 
@@ -116,7 +116,7 @@ Configure screensaver time and change Krux to your desired theme.
 
 #### Screensaver time
 <img src="../../img/maixpy_m5stickv/settings-options-appearance-screensaver-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/settings-options-appearance-screensaver-150.png" align="right">
+<img src="../../img/maixpy_amigo/settings-options-appearance-screensaver-150.png" align="right">
 
 Set how long to wait idle before the screensaver appears. Enter 0 to disable the screensaver.
 
@@ -125,16 +125,16 @@ Set how long to wait idle before the screensaver appears. Enter 0 to disable the
 #### Theme
 Choose your color theme according to your preference. Some themes may be more suitable for some devices, coordinator cameras and environments. As an example, it may be easier to scan QR codes from Krux devices using light theme in brighter environments.
 
-<img src="../../img/maixpy_amigo_tft/theme-1-150.png">
-<img src="../../img/maixpy_amigo_tft/theme-2-150.png">
-<img src="../../img/maixpy_amigo_tft/theme-3-150.png">
+<img src="../../img/maixpy_amigo/theme-1-150.png">
+<img src="../../img/maixpy_amigo/theme-2-150.png">
+<img src="../../img/maixpy_amigo/theme-3-150.png">
 <img src="../../img/maixpy_m5stickv/theme-1-125.png">
 <img src="../../img/maixpy_m5stickv/theme-2-125.png">
 <img src="../../img/maixpy_m5stickv/theme-3-125.png">
 
 ### Factory Settings
 <img src="../../img/maixpy_m5stickv/settings-options-factory-settings-125.png" align="right">
-<img src="../../img/maixpy_amigo_tft/settings-options-factory-settings-150.png" align="right">
+<img src="../../img/maixpy_amigo/settings-options-factory-settings-150.png" align="right">
 
 Restore device to factory settings and reboot.
 

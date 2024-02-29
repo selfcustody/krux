@@ -72,7 +72,7 @@ def test_init(mocker, m5stickv):
     )
 
 
-def test_init_amigo_tft(mocker, amigo_tft):
+def test_init_amigo_tft(mocker, amigo):
     mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
     mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
     import krux
@@ -315,7 +315,7 @@ def test_wait_for_button_blocks_until_page_prev_released(mocker, m5stickv):
     krux.input.wdt.feed.assert_called()
 
 
-def test_wait_for_button_blocks_until_touch_released(mocker, amigo_tft):
+def test_wait_for_button_blocks_until_touch_released(mocker, amigo):
     import krux
     from krux.input import Input, BUTTON_TOUCH, PRESSED, RELEASED
 
@@ -396,7 +396,7 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
     krux.input.wdt.feed.assert_called()
 
 
-def test_touch_indexing(mocker, amigo_tft):
+def test_touch_indexing(mocker, amigo):
     import krux
     from krux.input import Input, BUTTON_TOUCH
 
@@ -438,7 +438,7 @@ def test_touch_indexing(mocker, amigo_tft):
     assert input.touch.current_index() == 2  # (3º quadrant)
 
 
-def test_touch_gestures(mocker, amigo_tft):
+def test_touch_gestures(mocker, amigo):
     import krux
     from krux.input import Input, SWIPE_LEFT, SWIPE_RIGHT, SWIPE_UP, SWIPE_DOWN
 
@@ -485,7 +485,7 @@ def test_touch_gestures(mocker, amigo_tft):
     krux.input.wdt.feed.assert_called()
 
 
-def test_invalid_touch_delimiter(mocker, amigo_tft):
+def test_invalid_touch_delimiter(mocker, amigo):
     # Tries to add a delimiter outside screen area
     from krux.input import Input
 
@@ -568,7 +568,7 @@ def test_encoder_spin_left(mocker, dock):
     krux.input.wdt.feed.assert_called()
 
 
-def test_enter_button_press_when_buttons_not_active(mocker, amigo_tft):
+def test_enter_button_press_when_buttons_not_active(mocker, amigo):
     import krux
     from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 
@@ -589,7 +589,7 @@ def test_enter_button_press_when_buttons_not_active(mocker, amigo_tft):
     krux.input.wdt.feed.assert_called()
 
 
-def test_page_button_press_when_buttons_not_active(mocker, amigo_tft):
+def test_page_button_press_when_buttons_not_active(mocker, amigo):
     import krux
     from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 
@@ -610,7 +610,7 @@ def test_page_button_press_when_buttons_not_active(mocker, amigo_tft):
     krux.input.wdt.feed.assert_called()
 
 
-def test_page_prev_button_press_when_buttons_not_active(mocker, amigo_tft):
+def test_page_prev_button_press_when_buttons_not_active(mocker, amigo):
     import krux
     from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 

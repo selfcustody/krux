@@ -13,8 +13,7 @@ assignees: ''
 <!-- Describe some general things about the bug -->
 
 **Device**
-- [ ] Amigo TFT
-- [ ] Amigo IPS
+- [ ] Amigo
 - [ ] M5stickV
 - [ ] Dock
 - [ ] Bit

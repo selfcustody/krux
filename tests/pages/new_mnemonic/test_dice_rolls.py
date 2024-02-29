@@ -90,7 +90,7 @@ def test_new_24w_from_d6(m5stickv, mocker):
     assert words == MNEMONIC
 
 
-def test_new_12w_from_d6_on_amigo_device(amigo_tft, mocker):
+def test_new_12w_from_d6_on_amigo_device(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -124,7 +124,7 @@ def test_new_12w_from_d6_on_amigo_device(amigo_tft, mocker):
     assert words == MNEMONIC
 
 
-def test_new_24w_from_d6_on_amigo_device(amigo_tft, mocker):
+def test_new_24w_from_d6_on_amigo_device(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_24W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -160,7 +160,7 @@ def test_new_24w_from_d6_on_amigo_device(amigo_tft, mocker):
     assert words == MNEMONIC
 
 
-def test_cancel_new_12w_from_d6_on_amigo_device(amigo_tft, mocker):
+def test_cancel_new_12w_from_d6_on_amigo_device(amigo, mocker):
     "Will test the Esc button on the roll screen"
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
@@ -295,7 +295,7 @@ def test_cancel_new_12w_from_d20(m5stickv, mocker):
 
 
 # Test low entropy warning
-def test_low_shannon_entropy_warning(amigo_tft, mocker):
+def test_low_shannon_entropy_warning(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -331,7 +331,7 @@ def test_low_shannon_entropy_warning(amigo_tft, mocker):
 
 
 # Test low entropy warning is not shown when Shannon's entropy is good
-def test_rolls_with_good_shannon_entropy(amigo_tft, mocker):
+def test_rolls_with_good_shannon_entropy(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -368,7 +368,7 @@ def test_rolls_with_good_shannon_entropy(amigo_tft, mocker):
 
 
 # Test stats for nerds
-def test_stats_for_nerds(amigo_tft, mocker):
+def test_stats_for_nerds(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 

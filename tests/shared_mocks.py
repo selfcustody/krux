@@ -283,7 +283,7 @@ def board_m5stickv():
 def board_amigo_tft():
     return mock.MagicMock(
         config={
-            "type": "amigo_tft",
+            "type": "amigo",
             "lcd": {"height": 320, "width": 480, "invert": 0, "dir": 40, "lcd_type": 1},
             "sdcard": {"sclk": 11, "mosi": 10, "miso": 6, "cs": 26},
             "board_info": {

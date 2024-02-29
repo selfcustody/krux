@@ -33,7 +33,7 @@ def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
     assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
-def test_export_mnemonic_stackbit_amigo(mocker, amigo_tft, tdata):
+def test_export_mnemonic_stackbit_amigo(mocker, amigo, tdata):
     from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
@@ -113,7 +113,7 @@ def test_enter_stackbit(m5stickv, mocker):
     assert " ".join(words) == TEST_12_WORDS
 
 
-def test_enter_stackbit_touch(amigo_tft, mocker):
+def test_enter_stackbit_touch(amigo, mocker):
     from krux.pages.stack_1248 import Stackbit, STACKBIT_GO_INDEX
     from krux.input import BUTTON_TOUCH
 
@@ -130,7 +130,7 @@ def test_enter_stackbit_touch(amigo_tft, mocker):
     assert " ".join(words) == TEST_12_WORDS
 
 
-def test_esc_entering_stackbit(amigo_tft, mocker):
+def test_esc_entering_stackbit(amigo, mocker):
     from krux.pages.stack_1248 import Stackbit
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 

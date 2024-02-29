@@ -21,7 +21,7 @@ PBM_TEST_CODE_BINARY_QR = bytearray(
 )
 
 
-def test_load_qr_view(amigo_tft, mocker):
+def test_load_qr_view(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
 
@@ -48,7 +48,7 @@ def test_load_qr_view(amigo_tft, mocker):
     assert ctx.display.draw_qr_code.call_args[0][1] == TEST_CODE_BINARY_QR
 
 
-def test_load_seed_qr(amigo_tft, mocker, tdata):
+def test_load_seed_qr(amigo, mocker, tdata):
     from krux.pages.qr_view import SeedQRView
     from krux.themes import WHITE
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
@@ -80,7 +80,7 @@ def test_load_seed_qr(amigo_tft, mocker, tdata):
     )
 
 
-def test_loop_through_regions(amigo_tft, mocker):
+def test_loop_through_regions(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
     from ..test_encryption import CBC_ENCRYPTED_QR
@@ -112,7 +112,7 @@ def test_loop_through_regions(amigo_tft, mocker):
     assert ctx.display.draw_qr_code.call_count == 57
 
 
-def test_add_frame(amigo_tft, mocker):
+def test_add_frame(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
 
     ctx = mock_context(mocker)
@@ -124,7 +124,7 @@ def test_add_frame(amigo_tft, mocker):
     assert framed_code == FRAMED_TEST_CODE_BINARY_QR
 
 
-def test_save_pbm_image(amigo_tft, mocker):
+def test_save_pbm_image(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.sd_card import PBM_IMAGE_EXTENSION
 
@@ -140,7 +140,7 @@ def test_save_pbm_image(amigo_tft, mocker):
         )
 
 
-def test_save_bmp_image(amigo_tft, mocker):
+def test_save_bmp_image(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.sd_card import BMP_IMAGE_EXTENSION
     import sys
@@ -154,7 +154,7 @@ def test_save_bmp_image(amigo_tft, mocker):
     )
 
 
-def test_save_qr_image_menu_pbm(amigo_tft, mocker):
+def test_save_qr_image_menu_pbm(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -186,7 +186,7 @@ def test_save_qr_image_menu_pbm(amigo_tft, mocker):
     )  # 10 is the max length for a suggested filename
 
 
-def save_qr_image_menu_pbm(amigo_tft, mocker):
+def save_qr_image_menu_pbm(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 

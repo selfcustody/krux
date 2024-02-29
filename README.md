@@ -4,7 +4,7 @@
 
 <p align="center">
 <img src="https://selfcustody.github.io/krux/img/maixpy_m5stickv/logo-125.png">
-<img src="https://selfcustody.github.io/krux/img/maixpy_amigo_tft/logo-150.png">
+<img src="https://selfcustody.github.io/krux/img/maixpy_amigo/logo-150.png">
 </p>
 
 Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts. It runs on Kendryte K210 devices such as the [M5StickV](https://docs.m5stack.com/en/core/m5stickv) and [Maix Amigo](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html), converting them into airgapped devices that can sign transactions for multisignature and single-sig wallets.
@@ -130,7 +130,7 @@ Run the simulator:
 cd simulator
 
 # Run simulator with the touch device amigo, then use mouse to navigate
-poetry run python simulator.py --device maixpy_amigo_tft
+poetry run python simulator.py --device maixpy_amigo
 
 # Run simulator with sd enabled (you need the folder `simulator/sd`) on the small button-only device m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
 poetry run python simulator.py --device maixpy_m5stickv --sd
@@ -168,7 +168,7 @@ cd simulator
 poetry run python simulator.py --sequence sequences/about.txt --sd --device maixpy_m5stickv
 
 # Sequence screenshots are scaled to fit in docs. Use --no-screenshot-scale to get full size
-poetry run python simulator.py --sequence sequences/home-options.txt --device maixpy_amigo_tft --no-screenshot-scale
+poetry run python simulator.py --sequence sequences/home-options.txt --device maixpy_amigoGO --no-screenshot-scale
 ```
 
 ## Live debug a device

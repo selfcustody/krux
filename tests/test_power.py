@@ -6,7 +6,7 @@ def test_init(mocker, m5stickv):
     assert isinstance(manager, PowerManager)
 
 
-def test_init_with_amigo(mocker, amigo_tft):
+def test_init_with_amigo(mocker, amigo):
     from krux.power import PowerManager
 
     manager = PowerManager()
@@ -27,7 +27,7 @@ def test_init_without_pmu(mocker, m5stickv):
     assert manager.pmu is None
 
 
-def test_init_with_amigo_without_pmu(mocker, amigo_tft):
+def test_init_with_amigo_without_pmu(mocker, amigo):
     import sys
 
     if "pmu" in sys.modules:
@@ -53,7 +53,7 @@ def test_shutdown(mocker, m5stickv):
     krux.power.sys.exit.assert_called()
 
 
-def test_shutdown_with_amigo(mocker, amigo_tft):
+def test_shutdown_with_amigo(mocker, amigo):
     mocker.patch("sys.exit")
     import krux
     from krux.power import PowerManager
@@ -96,7 +96,7 @@ def test_reboot(mocker, m5stickv):
     krux.power.sys.exit.assert_called()
 
 
-def test_reboot_with_amigo(mocker, amigo_tft):
+def test_reboot_with_amigo(mocker, amigo):
     mocker.patch("sys.exit")
     import krux
     from krux.power import PowerManager

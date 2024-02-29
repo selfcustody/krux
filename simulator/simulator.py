@@ -157,7 +157,7 @@ from krux.krux_settings import Settings
 screenshot_suffix = ""
 if (args.screenshot_scale):
     screenshot_suffix = "." + Settings().i18n.locale.split("-")[0]
-    if (args.device == devices.AMIGO_IPS or args.device == devices.AMIGO_TFT):
+    if (args.device == devices.AMIGO):
         screenshot_suffix = "-150" + screenshot_suffix
     elif (args.device == devices.M5STICKV):
         screenshot_suffix = "-125" + screenshot_suffix

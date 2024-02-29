@@ -2,7 +2,7 @@ import time
 from .test_input import mock_timer_ticks
 
 
-def test_touch_event(mocker, amigo_tft):
+def test_touch_event(mocker, amigo):
     from krux.touch import Touch
     import board
 

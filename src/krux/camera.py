@@ -195,7 +195,7 @@ class Camera:
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
                 lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
-            elif board.config["type"].startswith("amigo"):
+            elif board.config["type"] == "amigo":
                 if flipped_x_coordinates:
                     lcd.display(img, oft=(40, 40))
                 else:

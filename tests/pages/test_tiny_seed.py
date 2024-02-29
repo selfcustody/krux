@@ -131,7 +131,7 @@ def test_enter_tiny_seed_24w_m5stickv(m5stickv, mocker):
     assert " ".join(words) == TEST_24_WORDS
 
 
-def test_enter_tiny_seed_24w_amigo(amigo_tft, mocker):
+def test_enter_tiny_seed_24w_amigo(amigo, mocker):
     from krux.pages.tiny_seed import TinySeed
     from krux.input import BUTTON_TOUCH
 
@@ -329,7 +329,7 @@ def test_scan_tiny_seed_24w(m5stickv, mocker):
     assert " ".join(words) == TEST_24_WORDS
 
 
-def test_scan_tiny_seed_24w_amigo(amigo_tft, mocker):
+def test_scan_tiny_seed_24w_amigo(amigo, mocker):
     # This will be used when scanning 24 TinySeed
     # First scanned page will be loaded to be edited, then proceed to scan second page
     # Seed will be returned as its word index

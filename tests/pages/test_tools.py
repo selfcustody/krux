@@ -135,7 +135,7 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
     m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
 
 
-def test_wipe_device(amigo_tft, mocker):
+def test_wipe_device(amigo, mocker):
     """Test that the device is wiped when the user confirms the wipe."""
     from krux.pages.tools import Tools
     from krux.input import BUTTON_ENTER
@@ -151,7 +151,7 @@ def test_wipe_device(amigo_tft, mocker):
     assert test_tools.erase_spiffs.call_count == 1
 
 
-def test_printer_test_tool(amigo_tft, mocker):
+def test_printer_test_tool(amigo, mocker):
     """Test that the print tool is called with the correct text"""
     from krux.pages.tools import Tools
     from krux.themes import theme
@@ -170,7 +170,7 @@ def test_printer_test_tool(amigo_tft, mocker):
         )
 
 
-def test_create_qr(amigo_tft, mocker):
+def test_create_qr(amigo, mocker):
     """Test that QR creation tool is called with the correct text"""
     from krux.pages.tools import Tools
     from krux.input import BUTTON_ENTER, BUTTON_PAGE

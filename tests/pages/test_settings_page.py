@@ -170,7 +170,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         assert case[2]()
 
 
-def test_settings_on_amigo_tft(amigo_tft, mocker, mocker_printer):
+def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
     import krux
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_TOUCH
@@ -314,7 +314,7 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
     assert Settings().encryption.pbkdf2_iterations == 110000
 
 
-def test_restore_settings(amigo_tft, mocker, mocker_sd_card_ok):
+def test_restore_settings(amigo, mocker, mocker_sd_card_ok):
     from krux.pages.settings_page import SettingsPage
     from krux.settings import FLASH_PATH, SETTINGS_FILENAME
     from krux.input import BUTTON_ENTER
@@ -330,7 +330,7 @@ def test_restore_settings(amigo_tft, mocker, mocker_sd_card_ok):
     mock_remove.assert_called_once_with("/" + FLASH_PATH + "/" + SETTINGS_FILENAME)
 
 
-def test_save_settings_on_sd(amigo_tft, mocker, mocker_sd_card_ok):
+def test_save_settings_on_sd(amigo, mocker, mocker_sd_card_ok):
     from krux.pages.settings_page import SettingsPage
     from krux.krux_settings import Settings, SD_PATH
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
@@ -353,7 +353,7 @@ def test_save_settings_on_sd(amigo_tft, mocker, mocker_sd_card_ok):
     )
 
 
-def test_leave_settings_without_changes(amigo_tft, mocker):
+def test_leave_settings_without_changes(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -411,7 +411,7 @@ def test_leave_settings_without_changes(amigo_tft, mocker):
         assert persisted_to_flash_call not in settings_page.flash_text.call_args_list
 
 
-def test_leave_settings_with_changes(amigo_tft, mocker, mocker_sd_card_ok):
+def test_leave_settings_with_changes(amigo, mocker, mocker_sd_card_ok):
     # mocker_sd_card_ok will mock os.listdir so it will also mock flash storage
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -439,7 +439,7 @@ def test_leave_settings_with_changes(amigo_tft, mocker, mocker_sd_card_ok):
     )
 
 
-def test_persist_to_sd_without_sd(amigo_tft, mocker):
+def test_persist_to_sd_without_sd(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.krux_settings import Settings, SD_PATH
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
