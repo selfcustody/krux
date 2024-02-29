@@ -168,7 +168,7 @@ cd simulator
 poetry run python simulator.py --sequence sequences/about.txt --sd --device maixpy_m5stickv
 
 # Sequence screenshots are scaled to fit in docs. Use --no-screenshot-scale to get full size
-poetry run python simulator.py --sequence sequences/home-options.txt --device maixpy_amigoGO --no-screenshot-scale
+poetry run python simulator.py --sequence sequences/home-options.txt --device maixpy_amigo --no-screenshot-scale
 ```
 
 ## Live debug a device
