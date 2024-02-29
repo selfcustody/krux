@@ -42,20 +42,20 @@ echo "$encrypted_mnemonics" > sd/seeds.json
 # Execute sequences in the order they appear in the application
 
 # Login
-# poetry run python simulator.py --sequence sequences/logo.txt  --device $device
-# poetry run python simulator.py --sequence sequences/load-mnemonic-options.txt --sd --device $device
-# poetry run python simulator.py --sequence sequences/new-mnemonic-options.txt  --sd --device $device
-# poetry run python simulator.py --sequence sequences/load-mnemonic-sequence.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/logo.txt  --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-options.txt --sd --device $device
+poetry run python simulator.py --sequence sequences/new-mnemonic-options.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/load-mnemonic-sequence.txt  --sd --device $device
 
 # Home
-# poetry run python simulator.py --sequence sequences/home-options.txt  --device $device
-# poetry run python simulator.py --sequence sequences/encrypt-mnemonic.txt --sd --device $device
-# poetry run python simulator.py --sequence sequences/extended-public-key-wpkh.txt  --device $device
-# poetry run python simulator.py --sequence sequences/extended-public-key-wsh.txt  --device $device
-# poetry run python simulator.py --sequence sequences/wallet-wsh.txt  --device $device
-# poetry run python simulator.py --sequence sequences/scan-address.txt --device $device
-# poetry run python simulator.py --sequence sequences/list-address.txt --device $device
-# poetry run python simulator.py --sequence sequences/sign-psbt.txt  --sd --device $device
+poetry run python simulator.py --sequence sequences/home-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/encrypt-mnemonic.txt --sd --device $device
+poetry run python simulator.py --sequence sequences/extended-public-key-wpkh.txt  --device $device
+poetry run python simulator.py --sequence sequences/extended-public-key-wsh.txt  --device $device
+poetry run python simulator.py --sequence sequences/wallet-wsh.txt  --device $device
+poetry run python simulator.py --sequence sequences/scan-address.txt --device $device
+poetry run python simulator.py --sequence sequences/list-address.txt --device $device
+poetry run python simulator.py --sequence sequences/sign-psbt.txt  --sd --device $device
 poetry run python simulator.py --sequence sequences/sign-message.txt  --device $device
 
 

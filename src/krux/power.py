@@ -68,7 +68,7 @@ class PowerManager:
             charge -= 0.35  # compensates for the batt voltage raise when charging
             # limits in 90% when still charging to let user know it's not fully charged
             charge = min(0.9, charge)
-
+        charge = max(0, charge)  # Avoid negative values
         return min(1, charge)
 
     def usb_connected(self):
