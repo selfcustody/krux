@@ -123,6 +123,14 @@ class Display:
                 ],
             )
             self.set_backlight(DEFAULT_BACKLIGHT)
+        elif board.config["type"] == "yahboom":
+            lcd.init(
+                invert=True,
+                rst=board.config["lcd"]["rst"],
+                dcx=board.config["lcd"]["dcx"],
+                ss=board.config["lcd"]["ss"],
+                clk=board.config["lcd"]["clk"],
+            )
         else:
             invert = False
             mirror = False
