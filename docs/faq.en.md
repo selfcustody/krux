@@ -6,6 +6,9 @@ Others have found that there are issues with the colors displayed in the interfa
 ## Why isn't my Amigo device being recognized when connected to the computer's USB?
 Make sure you’re using the USB-C port at the bottom of the device, not the one on the left side. There could also be an issue with the cable. Try using a different cable to see if that resolves the problem. If you're connecting to a USB-C port on your desktop computer, you may need to shut down and restart the device while it's connected. This ensures the driver loads correctly and creates the necessary serial ports.
 
+## Why isn't my M5stickV device being recognized and charged when connected to the computer's USB-C?
+M5stickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host(computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5stickV
+
 ## Why won't my Linux OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
 Make sure your device is being detected and serial ports are being mounted by running:
@@ -18,9 +21,6 @@ If you don't see them, your OS may not be loading the correct drivers to create 
 ```bash
 sudo apt-get remove brltty
 ```
-
-## Why won't my Apple OS list a serial port after connecting my device?
-Some users reported that they were able to make their Apple devices recognize Krux devices only after they connected them through an USB dock instead of connecting them directly.
 
 ## What are all the features available? What are the additional features of the Test (Beta) version? Is there an Android app?
 For [official releases](https://github.com/selfcustody/krux/releases) you will find all the features detailed here on the [Getting Started page](getting-started/index.md) with a brief summary on the [Navigation Overview page](getting-started/navigation.md). The latest and most experimental features, which we sometimes share on our social media, can be found only in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Only official releases are signed, Test (Beta) is just for trying new things and providing feedback. Krux Android app ia available as an `apk` on the [test (beta) repository](https://github.com/odudex/krux_binaries/).
@@ -40,7 +40,7 @@ The level of detail that you see is what Krux sees. If the QR code shown on the 
 
 If you have adjusted the lens already, the device may be too far away or too close to the code to read it. Start by holding the device as close to the QR code as possible and pulling away slowly until all or most of the QR code is viewable within the screen. If the code on the screen looks crisp, Krux should read it quickly and give you immediate feedback.
 
-If you are in a dark environment, you can hold down the ENTER button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility. M5stickV and Amigo also has an anti-glare mode to better capture images from high brightness screens or with incident light, to enable/disable the anti-glare just press the PAGE button.
+If you are in a dark environment, you can hold down the ENTER button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility. M5stickV and Amigo also has an anti-glare mode to better capture images from high brightness screens or with incident light, to enable/disable the anti-glare just press the PAGE button while scanning.
 
 ## Why am I getting an error when I try to scan a QR code?
 If Krux is recognizing that it sees a QR code but is displaying an error message after reading it, the likely reason is that the QR code is not in a format that Krux works with. We have listed the supported formats below:

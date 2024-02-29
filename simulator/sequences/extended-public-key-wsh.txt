@@ -5,19 +5,39 @@ wait 1
 
 # Navigate to Extended Public Key
 x2 press BUTTON_B
-press BUTTON_A
+x2 press BUTTON_A
 
 screenshot extended-public-key-wsh-xpub-text.png
 
+# Return
+press BUTTON_B
 press BUTTON_A
+
+# Enter to xpub QR code
+press BUTTON_B
+press BUTTON_A
+
 # Give time to render QR code - slow computer?
 wait 0.1
 screenshot extended-public-key-wsh-xpub-qr.png
 
+# Return
 press BUTTON_A
+press BUTTON_C
+press BUTTON_A
+
+# Enter to zpub text
+x2 press BUTTON_B
+press BUTTON_A
+
 # screenshot extended-public-key-wsh-zpub-text.png
 
+# Return
+press BUTTON_B
 press BUTTON_A
-# screenshot extended-public-key-wsh-zpub-qr.png
 
+# Enter to zpub QR code
+x3 press BUTTON_B
 press BUTTON_A
+
+# screenshot extended-public-key-wsh-zpub-qr.png

@@ -5,11 +5,8 @@ press BUTTON_B
 press BUTTON_B
 press BUTTON_A
 
-# Wait message debounce
-wait 0.3
-
-# Skip message
-press BUTTON_A
+# Wait flash message
+wait 2.1
 
 # Navigate to Encryption
 press BUTTON_B

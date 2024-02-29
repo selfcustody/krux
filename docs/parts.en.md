@@ -8,7 +8,11 @@
 | Camera  | OV7740 | OV7740 rear<br>GC0328 front | GC0328 | OV2640 or<br>OV5642 | OV2640 |
 | Battery  | 200mAh | 520mAh | :x: | :x: | :x: |
 | Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | Buttons<br> [3D printed case](https://github.com/selfcustody/MaixBitCase)<br> Soldering<br>Assembly | None |
-| Warnings  |  |  | [:material-information:{ title="Some stores ship the Maix Dock with soldered pin connectors that do not fit into the 3D printed case" }](#dock-info) |  | Micro USB |
+| Warnings  | [:material-information:{ title="M5stickV and USB-C" }](#m5stickv-info) |  | [:material-information:{ title="Some stores ship the Maix Dock with soldered pin connectors that do not fit into the 3D printed case" }](#dock-info) |  | Micro USB |
+
+<i style="font-size: 85%">:material-information:{id="m5stickv-info"}:
+M5stickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host(computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5stick.
+</i>
 
 <i style="font-size: 85%">:material-information:{id="dock-info"}:
 Some stores ship the Maix Dock with soldered pin connectors that do not fit into the [3D printed case](https://github.com/selfcustody/DockEncoderCase)

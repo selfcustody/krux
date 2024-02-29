@@ -96,6 +96,3 @@ Don't trust, verify.  We encourage you not to trust any claim you cannot verify 
 ## Alternatives
 
 You can use any other offline airgapped devices to generate your mnemonic. If you want to use a regular PC, a common strategy is to boot the PC using [Tails](https://tails.boum.org/) from a USB stick, without connecting the device to the internet, and then use a copy of the the [Bitcoiner Guide website](https://bitcoiner.guide/seed/) or even [Ian Coleman's BIP-39 Tool](https://iancoleman.io/bip39/). It's worth noting that both generate a QR code that Krux can read via the QR input method mentioned on the next page (Loading a Mnemonic).
-
-See [here](https://vault12.com/securemycrypto/cryptocurrency-security-how-to/seed-phrase-creation/) for other good methods to generate a mnemonic manually.
-

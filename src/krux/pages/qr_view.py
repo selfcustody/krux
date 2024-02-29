@@ -424,7 +424,7 @@ class SeedQRView(Page):
             label = self.title
         else:
             label = ""
-        if transcript_tools:
+        if transcript_tools and self.ctx.input.touch is not None:
             label += "\n" + t("Swipe to change mode")
         mode = 0
         while True:
@@ -435,11 +435,10 @@ class SeedQRView(Page):
                     self.bright = not self.bright
 
                 self.draw_grided_qr(mode)
-                if self.ctx.input.touch is not None:
-                    self.ctx.display.draw_hcentered_text(
-                        label,
-                        self.ctx.display.qr_offset() + self.ctx.display.font_height,
-                    )
+                self.ctx.display.draw_hcentered_text(
+                    label,
+                    self.ctx.display.qr_offset() + self.ctx.display.font_height,
+                )
                 button = self.ctx.input.wait_for_button()
                 if transcript_tools:
                     if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe

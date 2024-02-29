@@ -4,23 +4,3 @@ wait 1
 
 screenshot home-options.png
 
-press BUTTON_A
-screenshot mnemonic-options.png
-
-press BUTTON_B
-# screenshot home-options-encrypt-mnemonic.png
-
-press BUTTON_B
-# screenshot home-options-extended-public-key.png
-
-press BUTTON_B
-# screenshot home-options-wallet.png
-
-press BUTTON_B
-# screenshot home-options-address.png
-
-press BUTTON_B
-# screenshot home-options-sign.png
-
-press BUTTON_B
-# screenshot home-options-shutdown.png
