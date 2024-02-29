@@ -22,7 +22,7 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 ./ktool-win.exe -B goE -b 1500000 maixpy_m5stickv\kboot.kfpkg
 ```
 
-#### Sipeed Maix Amigo TFT
+#### Sipeed Maix Amigo
 ##### Linux
 To Flash Maix Amigo run:
 ```bash
