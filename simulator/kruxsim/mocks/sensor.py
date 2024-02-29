@@ -111,7 +111,10 @@ def snapshot():
             m.get_statistics.return_value = MockStatistics(lab_frame)
             m.width.return_value = frame.shape[1]
             m.height.return_value = frame.shape[0]
-            # sequence_executor.camera_image = None
+            if m.find_qrcodes.return_value:
+                # Clear the camera image if a QR code is found
+                # Otherwise keep the camera image if it's to create entropy
+                sequence_executor.camera_image = None
     else:
         _, frame = capturer.read()
         rgb_frame = cvtColor(frame, COLOR_BGR2RGB)

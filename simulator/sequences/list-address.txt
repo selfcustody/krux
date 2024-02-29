@@ -6,12 +6,18 @@ wait 1
 x4 press BUTTON_B
 press BUTTON_A
 
-# highlight Receive Address
+screenshot address-menu.png
+
+# Receive Address
 press BUTTON_B
+press BUTTON_A
+screenshot list-address-receive.png
 
-screenshot list-address.png
-
-# show the list
+# Return
+press BUTTON_C
 press BUTTON_A
 
-screenshot list-address-receive.png
+# Change Address
+press BUTTON_B
+press BUTTON_A
+screenshot list-address-change.png
