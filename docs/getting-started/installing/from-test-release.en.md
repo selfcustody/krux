@@ -17,7 +17,7 @@ To Flash M5stickV run:
 ```
 
 ##### Windows
-Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
+Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 ```pwsh
 ./ktool-win.exe -B goE -b 1500000 maixpy_m5stickv\kboot.kfpkg
 ```
@@ -30,7 +30,7 @@ To Flash Maix Amigo run:
 ```
 
 ##### Windows
-Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
+Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 ```pwsh
 ./ktool-win.exe -B goE -b 1500000 maixpy_amigo\kboot.kfpkg
 ```
@@ -43,7 +43,7 @@ To Flash Maix Bit run:
 ```
 
 ##### Windows
-Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
+Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 ```pwsh
 ./ktool-win.exe -B goE -b 1500000 maixpy_bit\kboot.kfpkg
 ```
@@ -56,7 +56,7 @@ To Flash Maix Dock run:
 ```
 
 ##### Windows
-Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
+Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 ```pwsh
 ./ktool-win.exe -B dan -b 1500000 maixpy_dock\kboot.kfpkg
 ```

@@ -56,9 +56,9 @@ This will be included with the M5StickV and Maix Amigo that you purchase from on
 We cannot guarantee that a microSD card is compatible and will work in your device; you'll need to test it on the device to be sure, read the [FAQ](faq.md/#why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error) for more info. The size of the SD card isn't important; anything over a few megabytes will be plenty.
 
 ### (Optional) Thermal Printer
-Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected thermal printer over its serial port.
+Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup and signed PSBT, via a locally-connected thermal printer over its serial port.
 
-Many thermal printers may work, but the [starter pack](https://www.adafruit.com/product/600) would be the easiest way to get started since it includes all the parts you will need to begin printing (except the conversion cable). For more info, [see here](https://github.com/selfcustody/krux/discussions/312)
+Many thermal printers may work, but the [Adafruit printer starter pack](https://www.adafruit.com/product/600) would be the easiest way to get started, as it includes all the parts needed to print (except the conversion cable). Make sure to enable the printer driver and set the baudrate value in [settings](./getting-started/settings.md/#thermal) for 19200 or 9600 as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will also need to connect 2 cables, the device TX to the printer RX and ground. For more info, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
 
 ### (Optional) Conversion Cable for Thermal Printer
 To connect the printer to the device, you will need a [conversion cable](https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs) with a 4-pin female Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer).
