@@ -34,8 +34,7 @@ import subprocess
 
 DEVICES = [
     "maixpy_m5stickv",
-    "maixpy_amigo_ips",
-    "maixpy_amigo_tft",
+    "maixpy_amigo",
     "maixpy_bit",
     "maixpy_dock",
     "maixpy_yahboom",

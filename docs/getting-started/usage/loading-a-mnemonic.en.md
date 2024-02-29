@@ -1,11 +1,11 @@
 Once you have either a 12- or 24-word mnemonic, choose `Load Mnemonic` on Krux's start menu, and you will be presented with several input methods:
 
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-options-150.png">
+<img src="../../../img/maixpy_amigo/load-mnemonic-options-150.png">
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-options-125.png">
 
 ## Input Methods
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-camera-options-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-camera-options-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-camera-options-150.png" align="right">
 
 ### Via Camera
 
@@ -32,7 +32,7 @@ Krux devices have machine vision capabilities that allow users to scan these met
 
 ### Via Manual Input
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-manual-options-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-manual-options-150.png" align="right">
 
 Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) or [`Stackbit`](https://stackbit.me) (model 1248 metal plate backup).
 
@@ -40,7 +40,7 @@ Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) 
 
 #### Words
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-text-word-1-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-via-text-word-1-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-text-word-1-150.png" align="right">
 
 Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
 
@@ -50,7 +50,7 @@ On your 12th or 24th word, you can leave the word blank to have Krux generate th
 
 #### Word Numbers
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-numbers-word-1-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-via-numbers-word-1-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-1-150.png" align="right">
 
 ##### Decimal
 
@@ -65,7 +65,7 @@ On your 12th or 24th word, you can leave the word blank to have Krux generate th
 
 #### Tiny Seed (Bits)
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-via-tinyseed-filled-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-150.png" align="right">
 
 Enter each word of your BIP-39 mnemonic words in their binary form, toggling necessary bits to recreate each of the word's respective number. Last word will have checksum bits dynamically toggled while you fill previous bits.
 
@@ -73,7 +73,7 @@ Enter each word of your BIP-39 mnemonic words in their binary form, toggling nec
 
 #### Stackbit 1248
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-via-stackbit-filled-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-filled-150.png" align="right">
 
 Enter mnemonic BIP-39 word's numbers using Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of marked (punched) numbers 1,2,4 and 8. For example, to enter the word "pear", number 1297, you have to punch (1)(2)(1+8=9)(1+2+4=7)
 
@@ -81,7 +81,7 @@ Enter mnemonic BIP-39 word's numbers using Stackbit 1248 metal plate backup meth
 
 ### From Storage
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-storage-options-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-150.png" align="right">
 
 You can retrieve mnemonics previously stored on device's internal flash or external (SD card). All stored mnemonics are encrypted, to load them you'll have to enter the same key you used to encrypt them.
 
@@ -91,7 +91,7 @@ You can retrieve mnemonics previously stored on device's internal flash or exter
 
 ### Confirm Mnemonic Words
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-mnemonic-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-150.png" align="right">
 
 Once you have entered your mnemonic, you will be presented with the full list of words to confirm.
 
@@ -99,7 +99,7 @@ Once you have entered your mnemonic, you will be presented with the full list of
 
 ### Passphrase
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-passphrase-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-passphrase-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-passphrase-150.png" align="right">
 
 After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. You can create a QR code from your passphrase offline in [Tools](../features/tools.md/#create-qr-code) section.
 
@@ -107,7 +107,7 @@ After confirming the mnemonic words, you can optionally choose to type or scan a
 
 ### Fingerprint
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-fingerprint-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-fingerprint-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-fingerprint-150.png" align="right">
 
 The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase(optional) and will load the expected wallet.
 
@@ -115,7 +115,7 @@ The wallet's fingerprint, if you have it noted down, will help you make sure you
 
 ### Single-sig or Multisig
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-single-multi-125.png" align="right">
-<img src="../../../img/maixpy_amigo_tft/load-mnemonic-seq-single-multi-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-single-multi-150.png" align="right">
 
 After loading your mnemonic and passphrase(optional), you will be asked if you want to use it as part of a `Single-sig` or `Multisig` wallet.
 

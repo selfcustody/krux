@@ -265,12 +265,9 @@ class HardwareSettings(SettingsNamespace):
 
     def __init__(self):
         self.printer = PrinterSettings()
-        if (
-            board.config["type"].startswith("amigo")
-            or board.config["type"] == "yahboom"
-        ):
+        if board.config["type"] == "amigo" or board.config["type"] == "yahboom":
             self.touch = TouchSettings()
-        if board.config["type"].startswith("amigo"):
+        if board.config["type"] == "amigo":
             self.display = AmgDisplaySettings()
         if board.config["type"] == "dock":
             self.encoder = EncoderSettings()
@@ -281,12 +278,9 @@ class HardwareSettings(SettingsNamespace):
         hardware_menu = {
             "printer": t("Printer"),
         }
-        if (
-            board.config["type"].startswith("amigo")
-            or board.config["type"] == "yahboom"
-        ):
+        if board.config["type"] == "amigo" or board.config["type"] == "yahboom":
             hardware_menu["touchscreen"] = t("Touchscreen")
-        if board.config["type"].startswith("amigo"):
+        if board.config["type"] == "amigo":
             hardware_menu["amg_display"] = t("Display")
         if board.config["type"] == "dock":
             hardware_menu["encoder"] = t("Encoder")

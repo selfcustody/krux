@@ -23,7 +23,7 @@ Extract the latest version of Krux you downloaded and enter the folder:
 unzip krux-vX.Y.Z.zip && cd krux-vX.Y.Z
 ```
 
-Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo_tft`, `bit` or `yahboom` (to yahboom you may need to manually specify the port):
+Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit` or `yahboom` (to yahboom you may need to manually specify the port):
 ```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
@@ -37,7 +37,7 @@ For `dock` the `-B` parameter changes, so run:
 
 When the flashing process completes, you should see the Krux logo:
 
-<img src="../../../img/maixpy_amigo_tft/logo-150.png">
+<img src="../../../img/maixpy_amigo/logo-150.png">
 <img src="../../../img/maixpy_m5stickv/logo-125.png">
 
 If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
@@ -52,7 +52,7 @@ If the flashing process fails midway through, check the connection, restart the 
 Two serial ports are created when `Amigo` and `Bit` are connected to a PC. Sometimes Ktool will pick the wrong and flash will fail. Manually specify the serial port to overcome this issue using `-p` argument. Ex:
 
 ```bash
-./ktool-linux -B goE -b 1500000 maixpy_amigo_tft/kboot.kfpkg -p /dev/ttyUSB1
+./ktool-linux -B goE -b 1500000 maixpy_amigo/kboot.kfpkg -p /dev/ttyUSB1
 ```
 
 Check por names of devices manager on Windows (ex: COM1, COM9), or list the ports on linux

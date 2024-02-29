@@ -563,7 +563,7 @@ class TinyScanner(Page):
         self.x_regions = []
         self.y_regions = []
         if not page:
-            if board.config["type"].startswith("amigo"):
+            if board.config["type"] == "amigo":
                 # Amigo has mirrored coordinates
                 x_offset = rect_size[0] + (rect_size[2] * 39) / 345
                 y_offset = rect_size[1] + (rect_size[3] * 44) / 272
@@ -571,7 +571,7 @@ class TinyScanner(Page):
                 x_offset = rect_size[0] + (rect_size[2] * 65) / 345
                 y_offset = rect_size[1] + (rect_size[3] * 17) / 272
         else:
-            if board.config["type"].startswith("amigo"):
+            if board.config["type"] == "amigo":
                 x_offset = rect_size[0] + (rect_size[2] * 42) / 345
                 y_offset = rect_size[1] + (rect_size[3] * 41) / 272
             else:
@@ -599,7 +599,7 @@ class TinyScanner(Page):
 
         # Regions: Upper left, upper right, lower left and lower right
         # are corner fractions of main TinySeed rectangle
-        if not board.config["type"].startswith("amigo"):
+        if not board.config["type"] == "amigo":
             region_ul = (
                 rect[0] + rect[2] // 8,
                 rect[1] + rect[3] // 30,
@@ -802,7 +802,7 @@ class TinyScanner(Page):
             return page_seed_numbers
         y_map = self.y_regions[0:-1]
         x_map = self.x_regions[0:-1]
-        if board.config["type"].startswith("amigo"):
+        if board.config["type"] == "amigo":
             x_map.reverse()
         else:
             y_map.reverse()

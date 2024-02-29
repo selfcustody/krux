@@ -9,7 +9,7 @@ TEST_QR_CODE = bytearray(
 )
 
 
-def test_print_qr_code(mocker, amigo_tft):
+def test_print_qr_code(mocker, amigo):
     """Test that the print tool is called with the correct text"""
     from krux.pages.print_page import PrintPage
     from krux.input import BUTTON_ENTER

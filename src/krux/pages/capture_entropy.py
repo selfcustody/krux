@@ -47,7 +47,7 @@ class CameraEntropy(Page):
         if board_type == "m5stickv":
             img.lens_corr(strength=1.0, zoom=0.56)
             lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
-        elif board_type.startswith("amigo"):
+        elif board_type == "amigo":
             # Offset x = 480 - 320 - 40 = 120 if not flipped
             oft_x = 40 if self.ctx.display.flipped_x_coordinates else 120
             lcd.display(img, oft=(oft_x, 40))
@@ -92,7 +92,7 @@ class CameraEntropy(Page):
         self.ctx.display.clear()
         command = 0
         y_label_offset = self.ctx.display.bottom_line
-        if board.config["type"].startswith("amigo"):
+        if board.config["type"] == "amigo":
             y_label_offset = self.ctx.display.bottom_prompt_line
         # Flush events ocurred while loading camera
         self.ctx.input.flush_events()

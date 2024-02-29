@@ -56,7 +56,7 @@ class Display:
         self.font_height = FONT_HEIGHT
         self.total_lines = board.config["lcd"]["width"] // FONT_HEIGHT
         self.bottom_line = (self.total_lines - 1) * FONT_HEIGHT
-        if board.config["type"].startswith("amigo"):
+        if board.config["type"] == "amigo":
             self.flipped_x_coordinates = (
                 Settings().hardware.display.flipped_x_coordinates
             )
@@ -135,7 +135,7 @@ class Display:
             invert = False
             mirror = False
             bgr_to_rgb = False
-            if board.config["type"].startswith("amigo"):
+            if board.config["type"] == "amigo":
                 mirror = True
                 invert = Settings().hardware.display.inverted_colors
                 bgr_to_rgb = Settings().hardware.display.bgr_colors

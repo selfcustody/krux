@@ -23,7 +23,7 @@
 #!/bin/bash
 
 locales=("en-US")
-devices=("maixpy_m5stickv" "maixpy_amigo_tft")
+devices=("maixpy_m5stickv" "maixpy_amigo")
 
 rm -rf krux-screenshots
 

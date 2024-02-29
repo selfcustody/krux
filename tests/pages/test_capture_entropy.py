@@ -2,7 +2,7 @@ from ..shared_mocks import mock_context, snapshot_generator, SNAP_SUCCESS, IMAGE
 import hashlib
 
 
-def test_cancel_capture(amigo_tft, mocker):
+def test_cancel_capture(amigo, mocker):
     """Test that the capture method returns None when the user cancels the capture"""
     from krux.pages.capture_entropy import CameraEntropy
 
@@ -37,7 +37,7 @@ def test_cancel_capture(amigo_tft, mocker):
     camera_entropy.flash_text.assert_called_with("Capture cancelled")
 
 
-def test_insufficient_variance(amigo_tft, mocker):
+def test_insufficient_variance(amigo, mocker):
     """Test that the capture method returns None when the variance is below the threshold"""
     from krux.pages.capture_entropy import (
         CameraEntropy,
@@ -90,7 +90,7 @@ def test_insufficient_variance(amigo_tft, mocker):
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
 
-def test_insufficient_shannons_entropy(amigo_tft, mocker):
+def test_insufficient_shannons_entropy(amigo, mocker):
     """Test that the capture method returns None when the Shannon's entropy is below the threshold"""
     from krux.pages.capture_entropy import (
         CameraEntropy,
@@ -146,7 +146,7 @@ def test_insufficient_shannons_entropy(amigo_tft, mocker):
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
 
-def test_poor_variance(amigo_tft, mocker):
+def test_poor_variance(amigo, mocker):
     """
     Test that the capture method return a valid hash when the variance is below poor threshold,
     but above the insufficient threshold, and the Shannon's entropy is above the threshold
@@ -206,7 +206,7 @@ def test_poor_variance(amigo_tft, mocker):
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
 
-def test_good_variance_good_shannons_entropy(amigo_tft, mocker):
+def test_good_variance_good_shannons_entropy(amigo, mocker):
     """
     Test that the capture method return a valid hash when the variance and Shannon's entropy are above
     poor and insufficient thresholds

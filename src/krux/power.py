@@ -56,7 +56,7 @@ class PowerManager:
     def battery_charge_remaining(self):
         """Returns the state of charge of the device's battery"""
         mv = int(self.pmu.get_battery_voltage())
-        if board.config["type"].startswith("amigo"):
+        if board.config["type"] == "amigo":
             charge = max(0, (mv - 3394.102415024943) / 416.73204356)
         elif board.config["type"] == "m5stickv":
             charge = max(0, (mv - 3131.427782118631) / 790.56172897)

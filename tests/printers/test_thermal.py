@@ -40,7 +40,7 @@ def test_clear(mocker, m5stickv, mock_uart_cls):
     assert p.write_bytes.call_count == 5
 
 
-def test_print_qr_code(mocker, amigo_tft, mock_uart_cls):
+def test_print_qr_code(mocker, amigo, mock_uart_cls):
     mocker.patch("krux.printers.thermal.UART", new=mock_uart_cls)
     import krux
     from krux.printers.thermal import AdafruitPrinter

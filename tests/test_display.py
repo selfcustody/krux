@@ -25,7 +25,7 @@ def test_init(mocker, m5stickv):
     )
 
 
-def test_init_amigo(mocker, amigo_tft):
+def test_init_amigo(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -278,7 +278,7 @@ def test_to_lines(mocker, m5stickv):
     assert lines == cut_text
 
 
-def test_to_lines_exact_match_amigo(mocker, amigo_tft):
+def test_to_lines_exact_match_amigo(mocker, amigo):
     from krux.display import Display
 
     cases = [
@@ -355,7 +355,7 @@ def test_draw_line(mocker, m5stickv):
     )
 
 
-def test_draw_line_on_inverted_display(mocker, amigo_tft):
+def test_draw_line_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -384,7 +384,7 @@ def test_draw_circle(mocker, m5stickv):
     )
 
 
-def test_draw_circle_on_inverted_display(mocker, amigo_tft):
+def test_draw_circle_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -413,7 +413,7 @@ def test_fill_rectangle(mocker, m5stickv):
     )
 
 
-def test_fill_rectangle_on_inverted_display(mocker, amigo_tft):
+def test_fill_rectangle_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -442,7 +442,7 @@ def test_draw_string(mocker, m5stickv):
     )
 
 
-def test_draw_string_on_inverted_display(mocker, amigo_tft):
+def test_draw_string_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -475,7 +475,7 @@ def test_draw_hcentered_text(mocker, m5stickv):
     )
 
 
-def test_draw_hcentered_text_on_inverted_display(mocker, amigo_tft):
+def test_draw_hcentered_text_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -493,7 +493,7 @@ def test_draw_hcentered_text_on_inverted_display(mocker, amigo_tft):
     )
 
 
-def test_draw_infobox(mocker, amigo_tft):
+def test_draw_infobox(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display, DEFAULT_PADDING

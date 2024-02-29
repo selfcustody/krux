@@ -26,13 +26,13 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
 ##### Linux
 To Flash Maix Amigo run:
 ```bash
-./ktool-linux -B goE -b 1500000 maixpy_amigo_tft/kboot.kfpkg
+./ktool-linux -B goE -b 1500000 maixpy_amigo/kboot.kfpkg
 ```
 
 ##### Windows
 Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands. Ex:
 ```pwsh
-./ktool-win.exe -B goE -b 1500000 maixpy_amigo_tft\kboot.kfpkg
+./ktool-win.exe -B goE -b 1500000 maixpy_amigo\kboot.kfpkg
 ```
 
 #### Sipeed Maix Bit

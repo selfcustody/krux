@@ -345,7 +345,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
-def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
+def test_mnemonic_st_qr_touch(mocker, amigo, tdata):
     from krux.pages.home_pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_TOUCH, BUTTON_PAGE_PREV, BUTTON_ENTER

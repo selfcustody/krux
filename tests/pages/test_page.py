@@ -161,7 +161,7 @@ def test_prompt_m5stickv(mocker, m5stickv, mock_page_cls):
     assert page.prompt("test prompt") == False
 
 
-def test_prompt_amigo(mocker, amigo_tft, mock_page_cls):
+def test_prompt_amigo(mocker, amigo, mock_page_cls):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_TOUCH
 
     ctx = mock_context(mocker)
