@@ -9,6 +9,9 @@ Make sure you’re using the USB-C port at the bottom of the device, not the one
 ## Why isn't my M5stickV device being recognized and charged when connected to the computer's USB-C?
 M5stickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host(computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5stickV
 
+## Why does my Krux device randomly freeze or restart when connected to the computer? Why doesn't my device (which has a battery) charge when connected to power?
+Windows is known to have issues with the USB-C devices. If you are experiencing random crashes or even reboots, try using a phone charger or other power source such as a power bank. If your problem is with charging, it is expected that USB-A will always charge and turn on the device if it is turned off, you can also turn it off and continue charging. For USB-C, if it is turned off, it will turn on and start charging, it can also be turned off and continue charging, but if it is already turned on, it may not charge, nor be recognized by the computer, it must be turned off to be recognized, it will restart, it will be recognized and USB-C hosts will trigger charging.
+
 ## Why won't my Linux OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
 Make sure your device is being detected and serial ports are being mounted by running:
