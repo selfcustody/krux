@@ -38,6 +38,7 @@ try:
     with open("/" + FLASH_PATH + "/" + SETTINGS_FILENAME, "r") as f:
         conf_dict = json.loads(f.read())
         if conf_dict.get(WDT_CONF_NAME, False):
+            print("Watchdog disabled!")
             wdt.stop()
         del conf_dict
 except:
