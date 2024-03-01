@@ -4,7 +4,7 @@ import time
 
 def mock_timer_ticks(step=100):
     """Mocks the time.ticks_ms() function to simulate time passing"""
-    tick_time = [0]
+    tick_time = [10000]  # Start time
 
     def side_effect():
         tick_time[0] += step
@@ -251,6 +251,53 @@ def test_wait_for_release(mocker, m5stickv):
     input.wait_for_button()
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
+
+
+def test_debounce_presses_with_greater_interval(mocker, m5stickv):
+    from krux.input import Input, RELEASED, PRESSED
+
+    # First test button presses at an interval greater than the debounce time
+    input = Input()
+    interval = 500  # ms
+    input = reset_input_states(mocker, input)
+    mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks(interval))
+    mocker.patch.object(input, "enter_event", side_effect=[False, True, False] * 2)
+    mocker.patch.object(
+        input, "enter_value", side_effect=[PRESSED, PRESSED, RELEASED] * 2
+    )
+    mocker.spy(input, "flush_events")
+
+    assert input.entropy == 0
+    btn = input.wait_for_button()
+    assert btn == 0
+    btn = input.wait_for_button()
+    assert btn == 0
+    assert input.entropy > 0
+    # Assert that the flush_events was called only once for each button read
+    assert input.flush_events.call_count == 2
+
+
+def test_debounce_presses_with_smaller_interval(mocker, m5stickv):
+    from krux.input import Input, RELEASED, PRESSED
+
+    input = Input()
+    interval = 10  # ms
+    input = reset_input_states(mocker, input)
+    mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks(interval))
+    mocker.patch.object(input, "enter_event", side_effect=[False, True, False] * 5)
+    mocker.patch.object(
+        input, "enter_value", side_effect=[PRESSED, PRESSED, RELEASED] * 2
+    )
+    mocker.spy(input, "flush_events")
+
+    btn = input.wait_for_button()
+    assert btn == 0
+    btn = input.wait_for_button()
+    assert btn == 0
+    assert input.entropy > 0
+    # Assert that the flush_events was called 10 times
+    # meaning that the debounce time was respected
+    assert input.flush_events.call_count == 10
 
 
 def test_wait_for_button_blocks_until_enter_released(mocker, m5stickv):
