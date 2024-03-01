@@ -38,7 +38,7 @@ QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
 
 BUTTON_WAIT_PRESS_DELAY = 10
-DEBOUNCE = 100
+ONE_MINUTE = 60000
 
 
 class Input:
@@ -182,7 +182,11 @@ class Input:
         Do not use this method outside of input module, use wait_for_button instead
         """
         start_time = time.ticks_ms()
-        if self.flushed_flag:
+        # Disable debounce if in animated pages, except menu
+        disable_debounce = (
+            self.flushed_flag and not block and wait_duration < ONE_MINUTE
+        )
+        if disable_debounce:
             self.debounce_time = 0
         while time.ticks_ms() < self.debounce_time + DEBOUNCE:
             self.flush_events()
