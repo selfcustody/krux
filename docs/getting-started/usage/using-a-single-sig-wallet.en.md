@@ -2,8 +2,8 @@ This guide assumes you have already created a mnemonic. If that is not the case,
 
 When entering your mnemonic into Krux, make sure to select `Single-sig` before proceeding. The choice of `Single-sig` vs. `Multisig` at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
 
-<img src="../../../img/maixpy_m5stickv/wallet-type-options-125.png">
-<img src="../../../img/maixpy_amigo/wallet-type-options-150.png">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-single-multi-125.png">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-single-multi-150.png">
 
 Selecting `Single-sig` will derive an xpub using the derivation path `m/84'/0'/0'` on mainnet and `m/84'/1'/0'` on testnet, which indicates to wallet software that a [Segregated Witness (Segwit) script type](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) should be used. For single-sig wallets, this script is `P2WPKH`, or just `wpkh`.
 
@@ -59,12 +59,9 @@ Load the wallet into Krux by going to the *Settings* page in Specter Desktop, th
 
 <img src="../../../img/specter/export-wallet-screen-600.png">
 
-In Krux, select the *Wallet* menu item option and scan the QR code.
-
-<img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
-
-If it worked, Krux should display the wallet information that it loaded:
+----8<----
+single-multi-wallet-descriptor.md
+----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">
 <img src="../../../img/maixpy_amigo/wallet-wpkh-load-prompt-150.png">
@@ -111,16 +108,9 @@ On the wallet screen, make sure to select a *Single Signature* policy type with 
 
 <img src="../../../img/sparrow/singlesig-wallet-settings-400.png">
 
-Now, you will need to import your public key. To do so, press the *Airgapped Hardware Wallet* button under *Keystores*. On the screen that pops up, Krux is not listed as one of the available device types, so look for the *Specter DIY* option and click its *Scan...* button (You can also use the Jade, Keystone or Passport options available on Sparrow, they all have an animated QR code that is easy to be scanned by Krux).
-
-<img src="../../../img/sparrow/specter-diy-scan-qr-400.png" style="border: 1px solid;">
-
-On your Krux, navigate to the *Extended Public Key* option under the main menu and show the **first** QR code to Sparrow.
-
-<img src="../../../img/maixpy_m5stickv/extended-public-key-wpkh-xpub-qr-125.png">
-<img src="../../../img/maixpy_amigo/extended-public-key-wpkh-xpub-qr-150.png">
-
-It should import the xpub and show a key under *Keystores* like the following:
+----8<----
+sparrow/import-xpub-sparrow.md
+----8<----
 
 <img src="../../../img/sparrow/keystore-singlesig-key-settings-600.png">
 
@@ -128,56 +118,28 @@ If everything looks right, click the blue *Apply* button to create your wallet.
 
 Congrats, you just created a single-sig wallet with your key!
 
-## Load the wallet into Krux
-Load the wallet into Krux by going back to the *Settings* page in Sparrow, then click the *Export...* button at the bottom of the screen and find *Specter Desktop* in the options list that pops up. Click its *Show...* button to display a QR code that you can import into Krux.
-
-<img src="../../../img/sparrow/export-specter-wallet-600.png" style="border: 1px solid;">
-
-In Krux, select the *Wallet* menu item option and scan the QR code.
-
-<img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
-
-If it worked, Krux should display the wallet information that it loaded:
+### Load the wallet output descriptor into Krux (optional)
+Single-sig wallets don't need to perform this step, it is optional!
+----8<----
+sparrow/load-wallet-output-sparrow.md
+----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">
 <img src="../../../img/maixpy_amigo/wallet-wpkh-load-prompt-150.png">
 
-## Receive coins
+### Receive coins
 Navigate to the *Receive* screen where you should see a receive address that you can send funds to.
 
 <img src="../../../img/sparrow/singlesig-receive-address-600.png">
 
-## Send coins
-Go to the *Send* screen, fill in the recipient address, amount, and any extra information you wish to supply, and click the blue *Create Transaction* button.
+----8<----
+sparrow/send-coins-sparrow.md
+----8<----
 
-<img src="../../../img/sparrow/create-transaction-screen-600.png">
-
-On the next screen, make sure that the *Signing Wallet* is the one you created and that the *Sighash* is set to *All*. Click the blue *Finalize Transaction for Signing* button.
-
-<img src="../../../img/sparrow/finalize-transaction-600.png">
-
-On the next screen, click *Show QR* to make Sparrow display an animated QR code of the PSBT that you can scan with Krux by going to *Sign > PSBT* in its main menu.
-
-<img src="../../../img/sparrow/show-qr-600.png">
-
-After scanning, Krux should display info about the transaction for you to confirm before signing.
-
-<img src="../../../img/maixpy_m5stickv/sign-psbt-sign-prompt-125.png">
-<img src="../../../img/maixpy_amigo/sign-psbt-sign-prompt-150.png">
-
-Once you have confirmed, Krux will begin animating a QR code of the signed transaction that you can scan into Sparrow. 
-
-<img src="../../../img/maixpy_m5stickv/sign-psbt-signed-qr-125.png">
-<img src="../../../img/maixpy_amigo/sign-psbt-signed-qr-150.png">
-
-In Sparrow, click *Scan QR* and show it the QR. A progress bar will indicate how many parts of the QR have been read.
-
-Once all parts of the QR code have been read, you should see the signature bar fill and two new buttons appear. Click the blue *Broadcast Transaction* button and your transaction should be broadcasted to the network!
-
-<img src="../../../img/sparrow/broadcast-transaction-600.png">
-
-Congratulations, you have learned how to send a transaction using Sparrow 🎉
+Once all parts of the QR code have been read, you should see the signature bar fill and two new buttons appear. 
+----8<----
+sparrow/broadcast-sparrow.md
+----8<----
 
 ## BlueWallet
 ### Create the wallet
@@ -204,7 +166,7 @@ It should import the key and create a watch-only wallet. From here, you can send
 
 Congrats, you just created a single-sig wallet with your key!
 
-## Load the wallet into Krux
+### Load the wallet into Krux
 Load the wallet into Krux by tapping the ellipsis in the top-right to see the wallet settings.
 
 <img src="../../../img/blue/singlesig-wallet-home-400.png" style="border: 1px solid;">
@@ -213,24 +175,21 @@ From here, tap *Export/Backup* in order to display a QR code of your wallet.
 
 <img src="../../../img/blue/export-singlesig-wallet-400.png" style="border: 1px solid;">
 
-In Krux, select the *Wallet* menu item option and scan the QR code.
-
-<img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
-
-If it worked, Krux should display the wallet information that it loaded:
+----8<----
+single-multi-wallet-descriptor.md
+----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">
 <img src="../../../img/maixpy_amigo/wallet-wpkh-load-prompt-150.png">
 
-## Receive coins
+### Receive coins
 Navigate to the *Receive* screen where you should see a receive address that you can send funds to.
 
 <img src="../../../img/blue/receive-address-400.png" style="border: 1px solid;">
 
 Note that you can verify the receive address belongs to your wallet by using the [Scan Address](navigating-the-main-menu.md/#scan-address) option.
 
-## Send coins
+### Send coins
 Go to the *Send* screen, fill in the recipient address, amount, and any extra information you wish to supply, and tap *Next*.
 
 <img src="../../../img/blue/send-400.png" style="border: 1px solid;">
