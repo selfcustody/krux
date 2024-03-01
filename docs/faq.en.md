@@ -1,9 +1,9 @@
-## Why are the buttons on my Amigo in the wrong order? Why is my Amigo screen displaying the wrong colors?
+## Why are the buttons on my Maix Amigo in the wrong order? Why is my Amigo screen displaying the wrong colors?
 Some Amigo screens have inverted X coordinates while others don’t. If you notice that the buttons on keypad input screens appear to be in the wrong order, please go to `Settings > Hardware > Display` and change the value of `Flipped X Coordinates` which should correct the issue.
 
 Others have found that there are issues with the colors displayed in the interface and camera preview. To fix this we have two options in `Settings > Hardware > Display`, `BGR Colors` and `Inverted Colors`, test with them until the colors appear to be correct on your device.
 
-## Why isn't my Amigo device being recognized when connected to the computer's USB?
+## Why isn't my Maix Amigo device being recognized when connected to the computer's USB?
 Make sure you’re using the USB-C port at the bottom of the device, not the one on the left side. There could also be an issue with the cable. Try using a different cable to see if that resolves the problem. If you're connecting to a USB-C port on your desktop computer, you may need to shut down and restart the device while it's connected. This ensures the driver loads correctly and creates the necessary serial ports.
 
 ## Why isn't my M5stickV device being recognized and charged when connected to the computer's USB-C?
@@ -15,7 +15,7 @@ Make sure your device is being detected and serial ports are being mounted by ru
 ```bash
 ls /dev/ttyUSB*
 ```
-Expect one port to be listed for devices like M5stickV and Dock `/dev/ttyUSB0`, and two ports for Amigo and Bit `/dev/ttyUSB0  /dev/ttyUSB1`.
+Expect one port to be listed for devices like M5stickV and Maix Dock `/dev/ttyUSB0`, and two ports for Maix Amigo and Maix Bit `/dev/ttyUSB0  /dev/ttyUSB1`.
 
 If you don't see them, your OS may not be loading the correct drivers to create the serial ports to connect to. Ubuntu has a known bug where the `brltty` driver "kidnaps" serial devices. You can solve this problem by removing it:
 ```bash

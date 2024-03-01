@@ -52,15 +52,15 @@ Encryption will take longer because a snapshot will be needed to generate the IV
 
 Customize the parameters available for your device and change printer settings.
 
-#### Encoder (Dock only)
+#### Encoder (Maix Dock only)
 If your device has a rotary encoder, you can change the debounce threshold in milliseconds. With lower values, faster movements and navigation will be allowed.
 
 The caveat is low values can cause issues, such as double step and unexpected movements, especially with lower quality encoders. If this is the case increase the value to make navigation more stable.
 
-#### Display (Amigo only)
+#### Display (Maix Amigo only)
 <img src="../../img/maixpy_amigo/settings-options-hardware-display-150.png" align="right">
 
-Some Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+Some Maix Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 <div style="clear: both"></div>
 
@@ -76,14 +76,14 @@ Define several machining parameters according to the desired size, material you'
 #### Thermal
 Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can change it here.
 
-Also setup the TX Pin you'll use (e.g. 35 for M5stickV and 7 for Amigo) and tweak other parameters according to your printer recommendations. For most printers you will only need to connect 2 cables, the device TX to the printer RX and ground. Consult the [part list](../parts.md/#optional-thermal-printer) page for supported printers.
+Also setup the TX Pin you'll use (e.g. 35 for M5stickV and 7 for Maix Amigo) and tweak other parameters according to your printer recommendations. For most printers you will only need to connect 2 cables, the device TX to the printer RX and ground. Consult the [part list](../parts.md/#optional-thermal-printer) page for supported printers.
 
 #### Driver
 Here you choose between Thermal, CNC or none (default). Leave this setting to "none" if you won't use a printer and don't want to be bothered by print prompts.
 
 <div style="clear: both"></div>
 
-#### Touchscreen (Amigo and Yahboom only)
+#### Touchscreen (Maix Amigo and Yahboom only)
 <img src="../../img/maixpy_amigo/touchscreen-150.png" align="right">
 
 If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false (ghost) touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
