@@ -1,0 +1,1 @@
+We cannot guarantee that a microSD card is compatible and will work in your device; you'll need to test it on the device to be sure, read the [FAQ](/krux/faq/#why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error) for more info.
