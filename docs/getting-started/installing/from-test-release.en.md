@@ -35,6 +35,10 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 ./ktool-win.exe -B goE -b 1500000 maixpy_amigo\kboot.kfpkg
 ```
 
+----8<----
+amigo-more-info-faq.md
+----8<----
+
 #### Sipeed Maix Bit
 ##### Linux
 To Flash Maix Bit run:
