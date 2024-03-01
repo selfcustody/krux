@@ -33,6 +33,7 @@ from ..input import (
     SWIPE_DOWN,
     SWIPE_UP,
     PRESSED,
+    DEBOUNCE,
 )
 from ..display import DEFAULT_PADDING
 from ..qr import to_qr_codes
@@ -266,6 +267,7 @@ class Page:
         code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
         self.ctx.display.clear()
         bright = theme.bg_color == WHITE
+        extra_debounce_flag = True
         while not done:
             code = None
             num_parts = 0
@@ -295,6 +297,10 @@ class Page:
             self.ctx.display.draw_hcentered_text(subtitle, offset_y)
             i = (i + 1) % num_parts
             self.ctx.input.buttons_active = True
+            if extra_debounce_flag:
+                time.sleep_ms(DEBOUNCE)
+                self.ctx.input.flush_events()
+                extra_debounce_flag = False
             btn = self.ctx.input.wait_for_button(num_parts == 1)
             if btn in TOGGLE_BRIGHTNESS:
                 bright = not bright
