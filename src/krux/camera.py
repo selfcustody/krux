@@ -48,6 +48,10 @@ class Camera:
         self.cam_id = sensor.get_id()
         if self.cam_id == OV7740_ID:
             sensor.reset(freq=18200000)
+            if board.config["type"] == "cube":
+                # Rotate camera 180 degrees on Cube
+                sensor.set_hmirror(1)
+                sensor.set_vflip(1)
         else:
             sensor.reset()
         if grayscale:
@@ -200,6 +204,8 @@ class Camera:
                     lcd.display(img, oft=(40, 40))
                 else:
                     lcd.display(img, oft=(120, 40))  # X and Y are swapped
+            elif board.config["type"] == "cube":
+                lcd.display(img, oft=(0, 0), roi=(0, 0, 224, 240))
             else:
                 lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
 

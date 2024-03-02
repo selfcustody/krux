@@ -9,7 +9,7 @@ from . import Page, FLASH_MSG_TIME
 from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY
 from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -31,13 +31,12 @@ class TinySeed(Page):
         self.ctx = ctx
         self.x_offset = DEFAULT_PADDING // 2 + 2 * self.ctx.display.font_width
         self.printer = None
-        # case for non m5stickv
-        if self.ctx.display.width() > 135:
+        if not MINIMAL_DISPLAY:
             self.y_offset = DEFAULT_PADDING + 3 * self.ctx.display.font_height
             self.x_pad = self.ctx.display.width() * 2 // 27
             self.y_pad = self.ctx.display.height() // 17
         else:
-            # case for m5stickv
+            # case for m5stickv, cube
             self.y_offset = 2 * self.ctx.display.font_height
             self.x_pad = self.ctx.display.font_width + 1
             self.y_pad = self.ctx.display.font_height
@@ -68,8 +67,8 @@ class TinySeed(Page):
         """Draws labels for import and export Tinyseed UI"""
         self.ctx.display.draw_hcentered_text(t("Tiny Seed"))
 
-        # case for non m5stickv
-        if self.ctx.display.width() > 135:
+        # case for non m5stickv, cube
+        if not MINIMAL_DISPLAY:
             self.ctx.display.to_landscape()
             bit_number = 2048
             bit_offset = DEFAULT_PADDING // 2 + 2 * self.ctx.display.font_height
@@ -284,8 +283,8 @@ class TinySeed(Page):
         x_offset = self.x_offset
         esc_x_offset = round(x_offset + 1.9 * self.x_pad)
 
-        # case for non m5stickv
-        if self.ctx.display.width() > 135:
+        # case for non m5stickv, cube
+        if not MINIMAL_DISPLAY:
             esc_x_offset = round(x_offset + 2.3 * self.x_pad)
 
         text_offset = y_offset + y_pad // 2 - self.ctx.display.font_height // 2

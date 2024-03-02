@@ -51,6 +51,8 @@ class CameraEntropy(Page):
             # Offset x = 480 - 320 - 40 = 120 if not flipped
             oft_x = 40 if self.ctx.display.flipped_x_coordinates else 120
             lcd.display(img, oft=(oft_x, 40))
+        elif board_type == "cube":
+            lcd.display(img, oft=(0, 0), roi=(0, 0, 220, 240))
         else:
             lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
 
