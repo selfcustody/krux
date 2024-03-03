@@ -37,7 +37,7 @@ def hextokff(filename=None, width=None, height=None):
     BYTE_LEN = 2
     DEFAULT_CODEPOINTS = [
         ord(char)
-        for char in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !#$%&'()*+,-./:;<=>?@[\\]^_\"{|}~█₿ ₽"
+        for char in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !#$%&'()*+,-./:;<=>?@[\\]^_\"{|}~█₿ ⊚↳"
     ]
     TRANSLATIONS_DIR = "../../i18n/translations"
 
