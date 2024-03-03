@@ -28,41 +28,54 @@ from collections import namedtuple
 import math
 import sys
 
-BBox = namedtuple("BoundingBox", ["width", "height", "x", "y"])
+def bdftohex(filename=None):
+    if filename is None:
+        raise Exception("ERROR: Provide the filename.bdf as argument")
 
-with open(sys.argv[1], "r", encoding="unicode_escape") as input_file:
-    font_bbox = None
-    glyph_bbox = None
-    codepoint = -1
-    parsing_bitmap = False
-    hex_chars = []
-    for line in input_file.readlines():
-        if line.startswith("FONTBOUNDINGBOX"):
-            font_bbox = BBox(*[int(c) for c in line.split()[1:]])
-        elif line.startswith("BBX"):
-            glyph_bbox = BBox(*[int(c) for c in line.split()[1:]])
-        elif line.startswith("ENCODING"):
-            codepoint = int(line.split()[1])
-        elif line.startswith("BITMAP"):
-            parsing_bitmap = True
-        elif line.startswith("ENDCHAR"):
-            if parsing_bitmap and hex_chars and codepoint >= 0:
-                bitmap = "".join(hex_chars).upper()
-                if font_bbox and glyph_bbox:
-                    row = "00" * math.ceil(font_bbox.width / 8)
-                    glyph_height = len(hex_chars)
-                    padding = font_bbox.height - glyph_height
-                    if padding > 0:
-                        bottom_padding = glyph_bbox.y - font_bbox.y
-                        top_padding = padding - bottom_padding
-                        if top_padding > 0:
-                            bitmap = row * top_padding + bitmap
-                        if bottom_padding > 0:
-                            bitmap = bitmap + row * bottom_padding
-                print(f"{codepoint:04X}:{bitmap}")
-            parsing_bitmap = False
-            hex_chars = []
-            codepoint = -1
-            glyph_bbox = None
-        elif parsing_bitmap:
-            hex_chars.append(line.strip())
+    codepoint_list = []
+    BBox = namedtuple("BoundingBox", ["width", "height", "x", "y"])
+
+    with open(filename, "r", encoding="unicode_escape") as input_file:
+        font_bbox = None
+        glyph_bbox = None
+        codepoint = -1
+        parsing_bitmap = False
+        hex_chars = []
+        for line in input_file.readlines():
+            if line.startswith("FONTBOUNDINGBOX"):
+                font_bbox = BBox(*[int(c) for c in line.split()[1:]])
+            elif line.startswith("BBX"):
+                glyph_bbox = BBox(*[int(c) for c in line.split()[1:]])
+            elif line.startswith("ENCODING"):
+                codepoint = int(line.split()[1])
+            elif line.startswith("BITMAP"):
+                parsing_bitmap = True
+            elif line.startswith("ENDCHAR"):
+                if parsing_bitmap and hex_chars and codepoint >= 0:
+                    bitmap = "".join(hex_chars).upper()
+                    if font_bbox and glyph_bbox:
+                        row = "00" * math.ceil(font_bbox.width / 8)
+                        glyph_height = len(hex_chars)
+                        padding = font_bbox.height - glyph_height
+                        if padding > 0:
+                            bottom_padding = glyph_bbox.y - font_bbox.y
+                            top_padding = padding - bottom_padding
+                            if top_padding > 0:
+                                bitmap = row * top_padding + bitmap
+                            if bottom_padding > 0:
+                                bitmap = bitmap + row * bottom_padding
+                    codepoint_list.append(f"{codepoint:04X}:{bitmap}")
+                parsing_bitmap = False
+                hex_chars = []
+                codepoint = -1
+                glyph_bbox = None
+            elif parsing_bitmap:
+                hex_chars.append(line.strip())
+    return codepoint_list
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        print('\n'.join(bdftohex(sys.argv[1])))
+    else:
+        raise Exception("ERROR: Provide the filename.bdf as argument")

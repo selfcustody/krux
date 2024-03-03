@@ -24,19 +24,36 @@
 
 import sys
 
-characters = {}
+def hexmerge(filenames=None):
+    if filenames is None:
+        raise Exception("ERROR: Provide the filename.bdf as argument")
+    
+    if type(filenames) is str:
+        filenames = [filenames]
+    
+    characters = {}
 
-for i in range(len(sys.argv) - 1):
-    with open(sys.argv[i + 1], "r", encoding="utf-8") as font_file:
-        lines = font_file.readlines()
-        for line in lines:
-            if not line.strip():
-                continue
-            codepoint, glyph = line.replace("\n", "").split(":")
-            if codepoint not in characters:
-                characters[codepoint] = glyph
-            else:
-                if int(characters[codepoint], 16) == 0:
+    codepoint_list = []
+    for filename in filenames:
+        with open(filename, "r", encoding="utf-8") as font_file:
+            lines = font_file.readlines()
+            for line in lines:
+                if not line.strip():
+                    continue
+                codepoint, glyph = line.replace("\n", "").split(":")
+                if codepoint not in characters:
                     characters[codepoint] = glyph
-for codepoint, glyph in sorted(characters.items(), key=lambda s: s[0]):
-    print(f"{codepoint}:{glyph}")
+                else:
+                    if int(characters[codepoint], 16) == 0:
+                        characters[codepoint] = glyph
+    for codepoint, glyph in sorted(characters.items(), key=lambda s: s[0]):
+        codepoint_list.append(f"{codepoint}:{glyph}")
+
+    return codepoint_list
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        print('\n'.join(hexmerge(sys.argv[1:])))
+    else:
+        raise Exception("ERROR: Provide the filename.hex as argument")
