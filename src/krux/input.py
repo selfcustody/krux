@@ -215,6 +215,17 @@ class Input:
 
             time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
+    def wait_for_release(self):
+        """Waits for all buttons to be released"""
+        while (
+            self.enter_value() == PRESSED
+            or self.page_value() == PRESSED
+            or self.page_prev_value() == PRESSED
+            or self.touch_value() == PRESSED
+        ):
+            self.wdt_feed_inc_entropy()
+            print("waiting for release")
+
     def wait_for_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if non blocking.
