@@ -62,7 +62,7 @@ def test_delete_mnemonic_from_flash(m5stickv, mocker):
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         tool = Tools(ctx)
-        tool.del_stored_mnemonic()
+        tool.rm_stored_mnemonic()
     # First mnemonic in the list (ECB) will be deleted
     # Assert only CBC remains
     m().write.assert_called_once_with(CBC_ONLY_JSON)
@@ -128,7 +128,7 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         tool = Tools(ctx)
-        tool.del_stored_mnemonic()
+        tool.rm_stored_mnemonic()
     # First mnemonic in the list (ECB) will be deleted
     # Assert only CBC remains
     padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)

@@ -241,7 +241,7 @@ class LoadEncryptedMnemonic(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def load_from_storage(self, delete_opt=False):
+    def load_from_storage(self, remove_opt=False):
         """Lists all encrypted mnemonics stored is flash and SD card"""
         from ..encryption import MnemonicStorage
 
@@ -256,8 +256,8 @@ class LoadEncryptedMnemonic(Page):
                 (
                     mnemonic_id + "(flash)",
                     lambda m_id=mnemonic_id: (
-                        self._delete_encrypted_mnemonic(m_id)
-                        if delete_opt
+                        self._remove_encrypted_mnemonic(m_id)
+                        if remove_opt
                         else self._load_encrypted_mnemonic(m_id)
                     ),
                 )
@@ -267,8 +267,8 @@ class LoadEncryptedMnemonic(Page):
                 (
                     mnemonic_id + "(SD card)",
                     lambda m_id=mnemonic_id: (
-                        self._delete_encrypted_mnemonic(m_id, sd_card=True)
-                        if delete_opt
+                        self._remove_encrypted_mnemonic(m_id, sd_card=True)
+                        if remove_opt
                         else self._load_encrypted_mnemonic(m_id, sd_card=True)
                     ),
                 )
@@ -304,23 +304,23 @@ class LoadEncryptedMnemonic(Page):
         del mnemonic_storage
         return words
 
-    def _delete_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
+    def _remove_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
         """Deletes a mnemonic"""
         from ..encryption import MnemonicStorage
 
         mnemonic_storage = MnemonicStorage()
         self.ctx.display.clear()
-        if self.prompt(t("Delete %s?") % mnemonic_id, self.ctx.display.height() // 2):
+        if self.prompt(t("Remove %s?") % mnemonic_id, self.ctx.display.height() // 2):
             mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
             self.ctx.display.clear()
             if sd_card:
-                message = t("%s was deleted from SD card") % mnemonic_id
+                message = t("%s was removed from SD card") % mnemonic_id
                 message += "\n\n"
                 message += t(
                     "Fully erase your SD card in another device to ensure data is unrecoverable"
                 )
             else:
-                message = t("%s was deleted from flash") % mnemonic_id
+                message = t("%s was removed from flash") % mnemonic_id
                 message += "\n\n"
                 message += t("To ensure data is unrecoverable use Wipe Device feature")
             self.ctx.display.draw_centered_text(message)
