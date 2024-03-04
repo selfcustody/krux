@@ -30,7 +30,6 @@ from binascii import hexlify
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
-from .krux_settings import t
 
 DER_SINGLE = "m/84h/%dh/0h"
 DER_MULTI = "m/48h/%dh/0h/2h"
@@ -74,14 +73,14 @@ class Key:
 
     def fingerprint_hex_str(self, pretty=False):
         """Returns the master key fingerprint in hex format"""
-        formatted_txt = t("⊚ %s") if pretty else "%s"
+        formatted_txt = "⊚ %s" if pretty else "%s"
         return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
 
     def derivation_str(self, pretty=False):
         """Returns the derivation path for the Hierarchical Deterministic Wallet to
         be displayed as string
         """
-        formatted_txt = t("↳ %s") if pretty else "%s"
+        formatted_txt = "↳ %s" if pretty else "%s"
         return (formatted_txt % self.derivation).replace("h", HARDENED_STR_REPLACE)
 
     def sign(self, message_hash):

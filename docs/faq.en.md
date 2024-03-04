@@ -1,13 +1,16 @@
-## Why are the buttons on my Amigo in the wrong order? Why is my Amigo screen displaying the wrong colors?
+## Why are the buttons on my Maix Amigo in the wrong order? Why is my Amigo screen displaying the wrong colors?
 Some Amigo screens have inverted X coordinates while others don’t. If you notice that the buttons on keypad input screens appear to be in the wrong order, please go to `Settings > Hardware > Display` and change the value of `Flipped X Coordinates` which should correct the issue.
 
 Others have found that there are issues with the colors displayed in the interface and camera preview. To fix this we have two options in `Settings > Hardware > Display`, `BGR Colors` and `Inverted Colors`, test with them until the colors appear to be correct on your device.
 
-## Why isn't my Amigo device being recognized when connected to the computer's USB?
+## Why isn't my Maix Amigo device being recognized when connected to the computer's USB?
 Make sure you’re using the USB-C port at the bottom of the device, not the one on the left side. There could also be an issue with the cable. Try using a different cable to see if that resolves the problem. If you're connecting to a USB-C port on your desktop computer, you may need to shut down and restart the device while it's connected. This ensures the driver loads correctly and creates the necessary serial ports.
 
 ## Why isn't my M5stickV device being recognized and charged when connected to the computer's USB-C?
 M5stickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host(computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5stickV
+
+## Why does my Krux device randomly freeze or restart when connected to the computer? Why doesn't my device (which has a battery) charge when connected to power?
+Windows is known to have issues with the USB-C devices. If you are experiencing random crashes or even reboots, try using a phone charger or other power source such as a power bank. If your problem is with charging, it is expected that USB-A will always charge and turn on the device if it is turned off, you can also turn it off and continue charging. For USB-C, if it is turned off, it will turn on and start charging, it can also be turned off and continue charging, but if it is already turned on, it may not charge, nor be recognized by the computer, it must be turned off to be recognized, it will restart, it will be recognized and USB-C hosts will trigger charging.
 
 ## Why won't my Linux OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
@@ -15,7 +18,7 @@ Make sure your device is being detected and serial ports are being mounted by ru
 ```bash
 ls /dev/ttyUSB*
 ```
-Expect one port to be listed for devices like M5stickV and Dock `/dev/ttyUSB0`, and two ports for Amigo and Bit `/dev/ttyUSB0  /dev/ttyUSB1`.
+Expect one port to be listed for devices like M5stickV and Maix Dock `/dev/ttyUSB0`, and two ports for Maix Amigo and Maix Bit `/dev/ttyUSB0  /dev/ttyUSB1`.
 
 If you don't see them, your OS may not be loading the correct drivers to create the serial ports to connect to. Ubuntu has a known bug where the `brltty` driver "kidnaps" serial devices. You can solve this problem by removing it:
 ```bash
