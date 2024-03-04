@@ -127,6 +127,10 @@ Once all keys have been added, click the blue *Apply* button to create your wall
 Congrats, you just created a multisig wallet!
 
 ### Load the wallet output descriptor into Krux
+Load the wallet output descriptor into Krux by going to the *Settings* screen of the wallet in Sparrow, then click the :fontawesome-solid-qrcode: (QR code symbol) button at *Script Policy* section to the right of the *Descriptor:* to display a QR code that you can scan with Krux.
+
+<img src="../../../img/sparrow/descriptor-multisig-key-settings-600.png">
+
 ----8<----
 sparrow/load-wallet-output-sparrow.md
 ----8<----

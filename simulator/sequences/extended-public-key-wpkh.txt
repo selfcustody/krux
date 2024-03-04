@@ -44,4 +44,5 @@ press BUTTON_A
 x3 press BUTTON_B
 press BUTTON_A
 wait 0.1
-# screenshot extended-public-key-wpkh-zpub-qr.png
+
+screenshot extended-public-key-wpkh-zpub-qr.png

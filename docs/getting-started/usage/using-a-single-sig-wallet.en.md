@@ -120,6 +120,10 @@ Congrats, you just created a single-sig wallet with your key!
 
 ### Load the wallet output descriptor into Krux (optional)
 Single-sig wallets don't need to perform this step, it is optional!
+Load the wallet output descriptor into Krux by going to the *Settings* screen of the wallet in Sparrow, then click the :fontawesome-solid-qrcode: (QR code symbol) button at *Script Policy* section to the right of the *Descriptor:* to display a QR code that you can scan with Krux.
+
+<img src="../../../img/sparrow/descriptor-singlesig-key-settings-600.png">
+
 ----8<----
 sparrow/load-wallet-output-sparrow.md
 ----8<----

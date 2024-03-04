@@ -1,6 +1,62 @@
-include _load-12-word-mnemonic.txt
+include _load-12-word-mnemonic_b.txt
 press BUTTON_A
 wait 1
 
 screenshot home-options.png
+
+# Mnemonic Backup options
+
+press BUTTON_A
+
+screenshot backup-options.png
+
+press BUTTON_A
+
+screenshot backup-mnemonic-words.png
+
+press BUTTON_A
+press BUTTON_B
+x2 press BUTTON_A
+
+screenshot backup-mnemonic-numbers.png
+
+press BUTTON_A
+press BUTTON_C
+press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+
+screenshot backup-qr-plain-text.png
+
+press BUTTON_A
+
+# Re-enable Amigo's physical buttons
+press_amigo_only BUTTON_B
+
+press BUTTON_B
+press BUTTON_A
+
+screenshot backup-compact-qr.png
+
+press BUTTON_A
+press BUTTON_C
+press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+
+screenshot backup-seed-qr.png
+
+press BUTTON_A
+press BUTTON_C
+press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+
+screenshot backup-stackbit.png
+
+x2 press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+
+screenshot backup-tiny-seed.png
 

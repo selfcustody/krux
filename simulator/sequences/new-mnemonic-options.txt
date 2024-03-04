@@ -28,12 +28,12 @@ screenshot new-mnemonic-via-snapshot-entropy-estimation.png
 
 press BUTTON_A
 
-screenshot new-mnemonic-via-snapshot-entropy-sha256.png
+screenshot new-mnemonic-via-snapshot-sha256.png
 
 # Discard
 press BUTTON_A
 press BUTTON_B
-press_big_only BUTTON_A
+press_amigo_only BUTTON_A
 
 # Move to D6
 press BUTTON_B
@@ -217,7 +217,7 @@ screenshot new-mnemonic-via-d6-roll-sha256.png
 
 press BUTTON_A
 press BUTTON_B
-press_big_only BUTTON_A
+press_amigo_only BUTTON_A
 
 # Go to D20
 

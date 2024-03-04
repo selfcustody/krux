@@ -48,9 +48,12 @@ Encryption will take longer because a snapshot will be needed to generate the IV
 <div style="clear: both"></div>
 
 ### Hardware
+<img src="../../img/maixpy_m5stickv/settings-options-hardware-125.png" align="right">
 <img src="../../img/maixpy_amigo/settings-options-hardware-150.png" align="right">
 
 Customize the parameters available for your device and change printer settings.
+
+<div style="clear: both"></div>
 
 #### Encoder (Maix Dock only)
 If your device has a rotary encoder, you can change the debounce threshold in milliseconds. With lower values, faster movements and navigation will be allowed.
@@ -128,9 +131,14 @@ Choose your color theme according to your preference. Some themes may be more su
 <img src="../../img/maixpy_amigo/theme-1-150.png">
 <img src="../../img/maixpy_amigo/theme-2-150.png">
 <img src="../../img/maixpy_amigo/theme-3-150.png">
+<img src="../../img/maixpy_amigo/theme-4-150.png">
+<img src="../../img/maixpy_amigo/theme-5-150.png">
+
 <img src="../../img/maixpy_m5stickv/theme-1-125.png">
 <img src="../../img/maixpy_m5stickv/theme-2-125.png">
 <img src="../../img/maixpy_m5stickv/theme-3-125.png">
+<img src="../../img/maixpy_m5stickv/theme-4-125.png">
+<img src="../../img/maixpy_m5stickv/theme-5-125.png">
 
 ### Factory Settings
 <img src="../../img/maixpy_m5stickv/settings-options-factory-settings-125.png" align="right">

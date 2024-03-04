@@ -3,36 +3,68 @@ After entering your mnemonic, and loading a wallet, you will find yourself on Kr
 <img src="../../../img/maixpy_amigo/home-options-150.png">
 <img src="../../../img/maixpy_m5stickv/home-options-125.png">
 
+<div style="clear: both"></div>
+
 ### Mnemonic
+<img src="../../../img/maixpy_m5stickv/backup-options-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-options-150.png" align="right">
+
 This will open a new submenu with the following options to backup your mnemonic.
 
+<div style="clear: both"></div>
+
 #### Words
-<img src="../../../img/maixpy_m5stickv/mnemonic-options-125.png" align="right">
-<img src="../../../img/maixpy_amigo/mnemonic-options-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/backup-mnemonic-words-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-mnemonic-words-150.png" align="right">
 
 Display the mnemonic words as text so you can write them down.
 
+<div style="clear: both"></div>
+
 #### Numbers
+<img src="../../../img/maixpy_m5stickv/backup-mnemonic-numbers-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-mnemonic-numbers-150.png" align="right">
 
 Display the mnemonic word numbers in decimal, hex, or octal format.
 
+<div style="clear: both"></div>
+
 #### Plaintext QR
+<img src="../../../img/maixpy_m5stickv/backup-qr-plain-text-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-qr-plain-text-150.png" align="right">
 
 Generate a QR containing the mnemonic words as regular text, where words are separated by spaces.
 
+<div style="clear: both"></div>
+
 #### Compact SeedQR
+<img src="../../../img/maixpy_m5stickv/backup-compact-qr-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-compact-qr-150.png" align="right">
 
 A QR code is created from a binary representation of mnemonic words. Format created by SeedSigner
+backup-qr-compact
+
+<div style="clear: both"></div>
 
 #### SeedQR
+<img src="../../../img/maixpy_m5stickv/backup-seed-qr-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-seed-qr-150.png" align="right">
 
 Words are converted to their BIP-39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner
 
+<div style="clear: both"></div>
+
 #### Stackbit 1248
+<img src="../../../img/maixpy_m5stickv/backup-stackbit-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-stackbit-150.png" align="right">
 
 Words are converted to their BIP-39 numeric indexes, then each of the four digits is converted to a sum of 1,2,4 or 8.
 
+<div style="clear: both"></div>
+
 #### Tiny Seed
+<img src="../../../img/maixpy_m5stickv/backup-tiny-seed-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-tiny-seed-150.png" align="right">
 
 This metal backup format represent BIP-39 mnemonic word numbers index on its binary form on a metal plate, where 1's are marked(punched) and 0's are left intact
 
@@ -181,5 +213,8 @@ This feature is used to sign Krux releases, airgapped, using a Krux device.
 <div style="clear: both"></div>
 
 ##### Messages at Address
+
+<img src="../../../img/maixpy_m5stickv/sign-message-at-address-prompt-125.png" align="right">
+<img src="../../../img/maixpy_amigo/sign-message-at-address-prompt-150.png" align="right">
 
 Coordinators like Sparrow and Specter offer the possibility to sign messages at a Bitcoin receive address, allowing you to attest ownership of that address. Krux will detect if the message is of this type and present a similar workflow for signing. The main difference is that the address will be displayed along with the raw message, and since the message is signed with a derived address instead of the master public key, Krux won't offer the option to export the raw public key after the signature.

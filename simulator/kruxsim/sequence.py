@@ -27,7 +27,7 @@ import cv2
 from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
 
-COMMANDS = ["press", "press_big_only", "touch", "qrcode", "screenshot", "wait", "include", "x"]
+COMMANDS = ["press", "press_amigo_only", "touch", "qrcode", "screenshot", "wait", "include", "x"]
 THREAD_PERIOD = 0.1
 
 
@@ -64,7 +64,7 @@ class SequenceExecutor:
             self.command_params = params
             if cmd == "press":
                 self.command_fn = self.press_key
-            elif cmd == "press_big_only" and BOARD_CONFIG["type"] != "m5stickv":
+            elif cmd == "press_amigo_only" and BOARD_CONFIG["type"] != "m5stickv":
                 self.command_fn = self.press_key
             elif cmd == "touch":
                 self.command_fn = self.touch
