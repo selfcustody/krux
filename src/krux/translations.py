@@ -315,8 +315,6 @@ translation_table = {
         1303016265: "Ja",
         771968845: "Änderungen werden im Flash-Speicher des Geräts gespeichert.",
         2569054451: "Änderungen werden auf der SD-Karte gespeichert.",
-        3265071597: "↳ %s",
-        3663135832: "⊚ %s",
     },
     "es-MX": {
         1185266064: "%d de %d multisig",
@@ -612,8 +610,6 @@ translation_table = {
         1303016265: "Sí",
         771968845: "Sus cambios se guardarán en el almacenamiento flash del dispositivo.",
         2569054451: "Sus cambios se guardarán en la tarjeta SD.",
-        3265071597: "↳ %s",
-        3663135832: "⊚ %s",
     },
     "fr-FR": {
         1185266064: "%d de %d multisignature",
@@ -909,8 +905,6 @@ translation_table = {
         1303016265: "Oui",
         771968845: "Vos modifications seront conservées sur le stockage flash de l'appareil.",
         2569054451: "Vos modifications seront conservées sur la carte SD.",
-        3265071597: "↳ %s",
-        3663135832: "⊚ %s",
     },
     "nl-NL": {
         1185266064: "%d van %d multisig",
@@ -1206,8 +1200,6 @@ translation_table = {
         1303016265: "Yes",
         771968845: "Veranderingen worden opgeslagen in opslag van apparaat.",
         2569054451: "Veranderingen worden opgeslagen op SD kaart.",
-        3265071597: "↳ %s",
-        3663135832: "⊚ %s",
     },
     "pl-PL": {
         1185266064: "%d z %d multisig",
@@ -1503,8 +1495,6 @@ translation_table = {
         1303016265: "Tak",
         771968845: "Twoje zmiany będą przechowywane w pamięci flash urządzenia.",
         2569054451: "Twoje zmiany będą przechowywane na karcie SD.",
-        3265071597: "↳ %s",
-        3663135832: "⊚ %s",
     },
     "pt-BR": {
         1185266064: "%d da %d multisig",
@@ -1800,8 +1790,6 @@ translation_table = {
         1303016265: "Sim",
         771968845: "Suas alterações serão mantidas no armazenamento flash do dispositivo.",
         2569054451: "Suas alterações serão mantidas no cartão SD.",
-        3265071597: "↳ %s",
-        3663135832: "⊚ %s",
     },
     "ru-RU": {
         1185266064: "%d из %d мультиподпись",
@@ -2097,8 +2085,6 @@ translation_table = {
         1303016265: "Да",
         771968845: "Ваши изменения будут сохранены на флэш памяти устройства.",
         2569054451: "Ваши изменения будут сохранены на SD карте.",
-        3265071597: "↳ %s",
-        3663135832: "⊚ %s",
     },
     "vi-VN": {
         1185266064: "%d của %d đa chữ kí",
@@ -2394,7 +2380,5 @@ translation_table = {
         1303016265: "Đúng",
         771968845: "Thay đổi của bạn sẽ được lưu trên bộ nhớ flash của thiết bị.",
         2569054451: "Các thay đổi của bạn sẽ được lưu trên thẻ SD.",
-        3265071597: "↳ %s",
-        3663135832: "⊚ %s",
     },
 }
