@@ -160,6 +160,8 @@ class CameraEntropy(Page):
         entropy_msg += t("Pixels deviation index: ")
         entropy_msg += str(stdev_index)
         self.ctx.display.clear()
+        # Hold if there's a button still pressed
+        self.ctx.input.wait_for_release()
         # Flush events ocurred while processing
         self.ctx.input.reset_ios_state()
         if (

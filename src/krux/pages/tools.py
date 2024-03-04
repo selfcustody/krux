@@ -51,7 +51,7 @@ class Tools(Page):
                     (t("Check SD Card"), self.sd_check),
                     (t("Print Test QR"), self.print_test),
                     (t("Create QR Code"), self.create_qr),
-                    (t("Delete Mnemonic"), self.del_stored_mnemonic),
+                    (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("Wipe Device"), self.wipe_device),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
@@ -102,13 +102,13 @@ class Tools(Page):
 
         return MENU_CONTINUE
 
-    def del_stored_mnemonic(self):
+    def rm_stored_mnemonic(self):
         """Lists and allow deletion of stored mnemonics"""
         from .encryption_ui import LoadEncryptedMnemonic
 
         encrypted_mnemonics = LoadEncryptedMnemonic(self.ctx)
         while True:
-            ret = encrypted_mnemonics.load_from_storage(delete_opt=True)
+            ret = encrypted_mnemonics.load_from_storage(remove_opt=True)
             if ret == MENU_CONTINUE:
                 del encrypted_mnemonics
                 return ret

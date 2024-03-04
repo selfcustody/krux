@@ -39,8 +39,8 @@ Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) 
 <div style="clear: both"></div>
 
 #### Words
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-text-word-1-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-text-word-1-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-text-word-125.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-text-word-150.png" align="right">
 
 Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
 
@@ -49,8 +49,8 @@ On your 12th or 24th word, you can leave the word blank to have Krux generate th
 <div style="clear: both"></div>
 
 #### Word Numbers
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-numbers-word-1-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-1-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-numbers-word-125.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-150.png" align="right">
 
 ##### Decimal
 
