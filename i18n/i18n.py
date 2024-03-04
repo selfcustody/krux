@@ -157,7 +157,7 @@ def remove_unnecessary():
             print("Nothing removed")
         else:
             with open(
-                join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8"
+                join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8", newline='\n'
             ) as translation_file:
                 json.dump(full_translations, translation_file, ensure_ascii=False)
                 # run black after this
@@ -182,7 +182,7 @@ def bake_translations():
             translation_table[basename(translation_filename).split(".")[0]] = lookup
 
     with open(
-        join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8"
+        join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8", newline='\n'
     ) as translations:
         translations.write(
             """# The MIT License (MIT)
@@ -220,7 +220,7 @@ def create_translation_file(locale):
     for slug in slugs:
         translations[slug.replace("\\n", "\n")] = ""
     with open(
-        join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w", encoding="utf8"
+        join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w", encoding="utf8", newline='\n'
     ) as translation_file:
         translation_file.write(
             json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
@@ -241,7 +241,7 @@ def prettify_translation_files():
         ) as translation_file:
             translations = json.load(translation_file)
         with open(
-            join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8"
+            join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8", newline='\n'
         ) as translation_file:
             translation_file.write(
                 json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
