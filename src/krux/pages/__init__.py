@@ -211,7 +211,7 @@ class Page:
                         self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
                     time.sleep_ms(ANTI_GLARE_WAIT_TIME)
                     self.ctx.display.to_landscape()
-                    self.ctx.input.flush_events()
+                    self.ctx.input.reset_ios_state()
                     return 0
                 return 1
 
@@ -298,6 +298,8 @@ class Page:
             i = (i + 1) % num_parts
             self.ctx.input.buttons_active = True
             if extra_debounce_flag:
+                # Animated QR codes disable debounce
+                # so this is required to avoid double presses
                 time.sleep_ms(DEBOUNCE)
                 self.ctx.input.flush_events()
                 extra_debounce_flag = False
