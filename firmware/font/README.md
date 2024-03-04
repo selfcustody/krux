@@ -3,10 +3,10 @@ Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of
 
 To rebuild the font for all devices, run:
 ```python
-poetry run python bdftokff.py
+poetry run python bdftokff.py True
 ```
 
-This Python script will output 3 files: `m5stickv_font.c`, `amigo_font.c` and `bit_dock_yahboom_font.c`. You will need to overwrite the content of the `font.c` file in each of the projects `../MaixPy/projects/*/compile/overrides/components/micropython/port/src/omv/img/font.c`
+If the `True` argument was passed, the Python script will automatically overwrite the contents of the `font.c` file in each of the projects `../MaixPy/projects/*/compile/overrides/components/micropython/port/src/omv/img/font.c`, otherwise the script will produce 3 files: `m5stickv_font.c`, `amigo_font.c` and `bit_dock_yahboom_font.c`. Use these files to manually replace the contents of the `font.c` file in each of your projects.
 
 # How it works
 Krux uses bitmap fonts that are custom-built for each device it runs on. The format that the firmware expects fonts to be in is a custom format referred to as "krux font format," or `.kff`. 

@@ -21,16 +21,19 @@
 # THE SOFTWARE.
 # pylint: disable=C0103
 
-"""
-Fills in missing characters in a hex formatted bitmap font file for use with the Krux firmware.
-"""
 
 import sys
 import math
 
+
 def hexfill(filename=None, width=None, height=None):
+    """Fills in missing characters in a hex formatted
+    bitmap font file for use with the Krux firmware."""
+
     if filename is None or width is None or height is None:
-        raise Exception("ERROR: Provide the filename.hex, width and height as arguments")
+        raise ValueError(
+            "ERROR: Provide the filename.hex, width and height as arguments"
+        )
 
     width = int(width)
     height = int(height)
@@ -78,8 +81,10 @@ def hexfill(filename=None, width=None, height=None):
     return lines
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) > 3:
-        print(''.join(hexfill(sys.argv[1], sys.argv[2], sys.argv[3])).strip())
+        print("".join(hexfill(sys.argv[1], sys.argv[2], sys.argv[3])).strip())
     else:
-        raise Exception("ERROR: Provide the filename.hex, width and height as arguments")
+        raise ValueError(
+            "ERROR: Provide the filename.hex, width and height as arguments"
+        )

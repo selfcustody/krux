@@ -22,15 +22,16 @@
 # pylint: disable=C0103
 # pylint: disable=E1307
 
-"""Converts a BDF font file to a hex file for use with the Krux firmware."""
 
 from collections import namedtuple
 import math
 import sys
 
+
 def bdftohex(filename=None):
+    """Converts a BDF font filename to a hex file for use with the Krux firmware."""
     if filename is None:
-        raise Exception("ERROR: Provide the filename.bdf as argument")
+        raise ValueError("ERROR: Provide the filename.bdf as argument")
 
     codepoint_list = []
     BBox = namedtuple("BoundingBox", ["width", "height", "x", "y"])
@@ -74,8 +75,8 @@ def bdftohex(filename=None):
     return codepoint_list
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) > 1:
-        print('\n'.join(bdftohex(sys.argv[1])))
+        print("\n".join(bdftohex(sys.argv[1])))
     else:
-        raise Exception("ERROR: Provide the filename.bdf as argument")
+        raise ValueError("ERROR: Provide the filename.bdf as argument")

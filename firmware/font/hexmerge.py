@@ -20,17 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-"""Merge multiple hex files into one."""
-
 import sys
 
+
 def hexmerge(filenames=None):
+    """Merge multiple hex files into one."""
+
     if filenames is None:
-        raise Exception("ERROR: Provide the filename.bdf as argument")
-    
-    if type(filenames) is str:
+        raise ValueError("ERROR: Provide the filename.bdf as argument")
+
+    if isinstance(filenames) is str:
         filenames = [filenames]
-    
+
     characters = {}
 
     codepoint_list = []
@@ -52,8 +53,8 @@ def hexmerge(filenames=None):
     return codepoint_list
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) > 1:
-        print('\n'.join(hexmerge(sys.argv[1:])))
+        print("\n".join(hexmerge(sys.argv[1:])))
     else:
-        raise Exception("ERROR: Provide the filename.hex as argument")
+        raise ValueError("ERROR: Provide the filename.hex as argument")

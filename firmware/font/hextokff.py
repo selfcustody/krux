@@ -22,24 +22,28 @@
 # pylint: disable=C0301
 # pylint: disable=C0103
 
-""" Convert a hex formatted bitmap font file to a kff file """
 
 import sys
 import math
 import os
 import json
 
-def hextokff(filename=None, width=None, height=None):
-    if filename is None or width is None or height is None:
-        print("ERROR: Provide the filename.hex, width and height as arguments")
-        return None
 
-    BYTE_LEN = 2
-    DEFAULT_CODEPOINTS = [
-        ord(char)
-        for char in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !#$%&'()*+,-./:;<=>?@[\\]^_\"{|}~█₿ ⊚↳"
-    ]
-    TRANSLATIONS_DIR = "../../i18n/translations"
+BYTE_LEN = 2
+DEFAULT_CODEPOINTS = [
+    ord(char)
+    for char in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !#$%&'()*+,-./:;<=>?@[\\]^_\"{|}~█₿ ⊚↳"
+]
+TRANSLATIONS_DIR = "../../i18n/translations"
+
+
+def hextokff(filename=None, width=None, height=None):
+    """Convert a hex formatted bitmap font file to a kff file"""
+
+    if filename is None or width is None or height is None:
+        raise ValueError(
+            "ERROR: Provide the filename.hex, width and height as arguments"
+        )
 
     width = int(width)
     height = int(height)
@@ -88,11 +92,15 @@ def hextokff(filename=None, width=None, height=None):
 
         # Prefix with number of codepoints as two hex bytes
         total_codepoints = f"{total_codepoints:04X}"
-        return ",\n".join([f"0x{total_codepoints[:2]},0x{total_codepoints[2:]}"] + bitmap)
+        return ",\n".join(
+            [f"0x{total_codepoints[:2]},0x{total_codepoints[2:]}"] + bitmap
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) > 3:
         print(hextokff(sys.argv[1], sys.argv[2], sys.argv[3]))
     else:
-        raise Exception("ERROR: Provide the filename.hex, width and height as arguments")
+        raise ValueError(
+            "ERROR: Provide the filename.hex, width and height as arguments"
+        )

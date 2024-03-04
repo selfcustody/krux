@@ -21,80 +21,120 @@
 # THE SOFTWARE.
 
 import os
+import sys
 import re
-import bdftohex, hexfill, hexmerge, hextokff
+import bdftohex
+import hexfill
+import hexmerge
+import hextokff
 
 FONT14 = "ter-u14n"
 FONT16 = "ter-u16n"
 FONT24 = "ter-u24b"
 
+
 def open_bdf_save_kff(filename, width, height):
-    filename_kff = 'm5stickv'
+    """Open a bdf font filename and save the corresponding kff file based on the filename"""
+
+    filename_kff = "m5stickv"
     if filename == FONT16:
-        filename_kff = 'bit_dock_yahboom'
+        filename_kff = "bit_dock_yahboom"
     elif filename == FONT24:
-        filename_kff = 'amigo'
+        filename_kff = "amigo"
 
     # Create hexfile based on bdf
-    font_hex = '\n'.join(bdftohex.bdftohex(filename + '.bdf')) + '\n'
-    with open(filename + '.hex', "w", encoding="utf-8") as save_file:
+    font_hex = "\n".join(bdftohex.bdftohex(filename + ".bdf")) + "\n"
+    with open(filename + ".hex", "w", encoding="utf-8") as save_file:
         save_file.write(font_hex)
 
     # Fill the hexfile with missing empty glyphs
-    font_hex_filled = ''.join(hexfill.hexfill(filename + '.hex', width, height)).strip()
-    with open(filename + '.hex', "w", encoding="utf-8") as save_file:
+    font_hex_filled = "".join(hexfill.hexfill(filename + ".hex", width, height)).strip()
+    with open(filename + ".hex", "w", encoding="utf-8") as save_file:
         save_file.write(font_hex_filled)
 
-    # Merges the hexfile empty glyphs with the its corresponding contents (can be used with multiple files)
-    font_hex_merged = '\n'.join(hexmerge.hexmerge(filename + '.hex')) + '\n'
-    with open(filename + '.hex', "w", encoding="utf-8") as save_file:
+    # Merges the hexfile empty glyphs with the its corresponding contents
+    # (can be used with multiple files)
+    font_hex_merged = "\n".join(hexmerge.hexmerge(filename + ".hex")) + "\n"
+    with open(filename + ".hex", "w", encoding="utf-8") as save_file:
         save_file.write(font_hex_merged)
 
-    # Creates the Krux font file, to be used on
-    # ../MaixPy/projects/<device_name>/compile/overrides/components/micropython/port/src/omv/img/font.c
-    # replacing the contents of the unicode[] variable
-    font_kff = hextokff.hextokff(filename + '.hex', width, height)
-    with open(filename_kff + '.kff', "w", encoding="utf-8") as save_file:
+    # Creates the Krux font file, to be used on each project
+    # font.c file: ../MaixPy/projects/<device_name>/compile/
+    # overrides/components/micropython/port/src/omv/img/font.c
+    # in order to replace the contents of the unicode[] variable
+    #  in the font.c
+    font_kff = hextokff.hextokff(filename + ".hex", width, height)
+    with open(filename_kff + ".kff", "w", encoding="utf-8") as save_file:
         save_file.write(font_kff)
 
     # Deletes the temporary hexfile
-    os.remove(filename + '.hex')
+    os.remove(filename + ".hex")
 
-def save_new_fontc(font_name):
-    device_name = filename_kff = 'm5stickv'
+
+def save_new_fontc(font_name, overwrite=False):
+    """If overwrite=True them overwrite the content of the font.c file
+    on each project, based on the font_name passed otherwise save
+    a new font.c file"""
+
+    device_name = filename_kff = "m5stickv"
     if font_name == FONT16:
-        filename_kff = 'bit_dock_yahboom'
-        device_name = 'dock'
+        filename_kff = "bit_dock_yahboom"
+        device_name = "dock"
     elif font_name == FONT24:
-        device_name = filename_kff = 'amigo'
+        device_name = filename_kff = "amigo"
 
-    with open(filename_kff + '.kff', "r", encoding="utf-8") as read_file:
+    maixpy_path_start = "../MaixPy/projects/maixpy_"
+    maixpy_path_end = (
+        "/compile/overrides/components/micropython/port/src/omv/img/font.c"
+    )
+
+    with open(filename_kff + ".kff", "r", encoding="utf-8") as read_file:
         content_kff = read_file.read()
 
-    content_kff = 'static uint8_t unicode[] = {\n' + content_kff + '\n};'
+    content_kff = "static uint8_t unicode[] = {\n" + content_kff + "\n};"
 
-    filename = '../MaixPy/projects/maixpy_'+ device_name +'/compile/overrides/components/micropython/port/src/omv/img/font.c'
+    filename = maixpy_path_start + device_name + maixpy_path_end
     with open(filename, "r", encoding="utf-8") as font_file:
         lines = font_file.read()
-        unicode_str = re.sub(re.escape('static uint8_t unicode[] = {\n') +
-                      r'((\dx[0-9A-F]{2},)\n?)*\dx[0-9A-F]{2}\n};',
-                      content_kff
-                      ,lines)
-        
-    with open(filename_kff + '_font.c', 'w', encoding='utf-8') as save_file:
-        save_file.write(unicode_str)
+        unicode_str = re.sub(
+            re.escape("static uint8_t unicode[] = {\n")
+            + r"((\dx[0-9A-F]{2},)\n?)*\dx[0-9A-F]{2}\n};",
+            content_kff,
+            lines,
+        )
+
+    if overwrite:
+        with open(filename, "w", encoding="utf-8") as save_file:
+            save_file.write(unicode_str)
+
+        # Also replace for bit and yahboom
+        if font_name == FONT16:
+            filename = maixpy_path_start + "bit" + maixpy_path_end
+            with open(filename, "w", encoding="utf-8") as save_file:
+                save_file.write(unicode_str)
+
+            filename = maixpy_path_start + "yahboom" + maixpy_path_end
+            with open(filename, "w", encoding="utf-8") as save_file:
+                save_file.write(unicode_str)
+    else:
+        with open(filename_kff + "_font.c", "w", encoding="utf-8") as save_file:
+            save_file.write(unicode_str)
 
     # Deletes the temporary kff file
-        os.remove(filename_kff + '.kff')
+    os.remove(filename_kff + ".kff")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    REPLACE = False
+    if len(sys.argv) > 1:
+        REPLACE = True
+
     # generate kff files
     open_bdf_save_kff(FONT14, 8, 14)
     open_bdf_save_kff(FONT16, 8, 16)
     open_bdf_save_kff(FONT24, 12, 24)
 
     # generate new font.c files (delete kff files)
-    save_new_fontc(FONT14)
-    save_new_fontc(FONT16)
-    save_new_fontc(FONT24)
+    save_new_fontc(FONT14, REPLACE)
+    save_new_fontc(FONT16, REPLACE)
+    save_new_fontc(FONT24, REPLACE)
