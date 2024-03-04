@@ -98,7 +98,7 @@ def save_new_fontc(font_name, overwrite=False):
         lines = font_file.read()
         unicode_str = re.sub(
             re.escape("static uint8_t unicode[] = {\n")
-            + r"((\dx[0-9A-F]{2},)\n?)*\dx[0-9A-F]{2}\n};",
+            + r"((0[xX][\da-fA-F]{2},)\n?)*0[xX][\da-fA-F]{2}\n};",
             content_kff,
             lines,
         )

@@ -29,7 +29,7 @@ def hexmerge(filenames=None):
     if filenames is None:
         raise ValueError("ERROR: Provide the filename.bdf as argument")
 
-    if isinstance(filenames) is str:
+    if isinstance(filenames, str):
         filenames = [filenames]
 
     characters = {}
