@@ -44,18 +44,18 @@ def open_bdf_save_kff(filename, width, height):
 
     # Create hexfile based on bdf
     font_hex = "\n".join(bdftohex.bdftohex(filename + ".bdf")) + "\n"
-    with open(filename + ".hex", "w", encoding="utf-8", newline='\n') as save_file:
+    with open(filename + ".hex", "w", encoding="utf-8", newline="\n") as save_file:
         save_file.write(font_hex)
 
     # Fill the hexfile with missing empty glyphs
     font_hex_filled = "".join(hexfill.hexfill(filename + ".hex", width, height)).strip()
-    with open(filename + ".hex", "w", encoding="utf-8", newline='\n') as save_file:
+    with open(filename + ".hex", "w", encoding="utf-8", newline="\n") as save_file:
         save_file.write(font_hex_filled)
 
     # Merges the hexfile empty glyphs with the its corresponding contents
     # (can be used with multiple files)
     font_hex_merged = "\n".join(hexmerge.hexmerge(filename + ".hex")) + "\n"
-    with open(filename + ".hex", "w", encoding="utf-8", newline='\n') as save_file:
+    with open(filename + ".hex", "w", encoding="utf-8", newline="\n") as save_file:
         save_file.write(font_hex_merged)
 
     # Creates the Krux font file, to be used on each project
@@ -64,7 +64,7 @@ def open_bdf_save_kff(filename, width, height):
     # in order to replace the contents of the unicode[] variable
     #  in the font.c
     font_kff = hextokff.hextokff(filename + ".hex", width, height)
-    with open(filename_kff + ".kff", "w", encoding="utf-8", newline='\n') as save_file:
+    with open(filename_kff + ".kff", "w", encoding="utf-8", newline="\n") as save_file:
         save_file.write(font_kff)
 
     # Deletes the temporary hexfile
@@ -104,20 +104,22 @@ def save_new_fontc(font_name, overwrite=False):
         )
 
     if overwrite:
-        with open(filename, "w", encoding="utf-8", newline='\n') as save_file:
+        with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
             save_file.write(unicode_str)
 
         # Also replace for bit and yahboom
         if font_name == FONT16:
             filename = maixpy_path_start + "bit" + maixpy_path_end
-            with open(filename, "w", encoding="utf-8", newline='\n') as save_file:
+            with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
                 save_file.write(unicode_str)
 
             filename = maixpy_path_start + "yahboom" + maixpy_path_end
-            with open(filename, "w", encoding="utf-8", newline='\n') as save_file:
+            with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
                 save_file.write(unicode_str)
     else:
-        with open(filename_kff + "_font.c", "w", encoding="utf-8", newline='\n') as save_file:
+        with open(
+            filename_kff + "_font.c", "w", encoding="utf-8", newline="\n"
+        ) as save_file:
             save_file.write(unicode_str)
 
     # Deletes the temporary kff file
