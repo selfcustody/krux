@@ -23,7 +23,7 @@ Extract the latest version of Krux you downloaded and enter the folder:
 unzip krux-vX.Y.Z.zip && cd krux-vX.Y.Z
 ```
 
-Connect the device to your computer via USB (for Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit` or `yahboom` (to yahboom you may need to manually specify the port):
+Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit` or `yahboom` (to yahboom you may need to manually specify the port):
 ```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
@@ -68,8 +68,9 @@ ls /dev/cu.usbserial*
 ```
 Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue.
 
-#### A note about the Amigo
-Some Amigo screens have inverted X coordinates, others display colors differently. For more info see [FAQ](../../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+----8<----
+amigo-more-info-faq.md
+----8<----
 
 ### Multilingual support
 Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.

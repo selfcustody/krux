@@ -28,8 +28,8 @@ Enter a text input to create, print or transcript a QR code that can be later us
 <div style="clear: both"></div>
 
 ### Delete Mnemonic
-<img src="../../../img/maixpy_m5stickv/delete-mnemonic-125.png" align="right">
-<img src="../../../img/maixpy_amigo/delete-mnemonic-150.png" align="right">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-125.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-150.png" align="right">
 
 Delete any stored encrypted mnemonic, on device's internal memory or SD card. For more info see [Krux Encrypted Mnemonics](./encrypted-mnemonics.md).
 

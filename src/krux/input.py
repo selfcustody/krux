@@ -273,3 +273,8 @@ class Input:
         self.page_event()
         self.page_prev_event()
         self.touch_event()
+
+    def reset_ios_state(self):
+        """Clears all events and reset debounce time"""
+        self.flush_events()
+        self.debounce_time = time.ticks_ms()

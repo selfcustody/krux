@@ -8,10 +8,16 @@
 | Camera  | OV7740 | OV7740 rear<br>GC0328 front | GC0328 | OV2640 or<br>OV5642 | OV2640 |
 | Battery  | 200mAh | 520mAh | :x: | :x: | :x: |
 | Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | Buttons<br> [3D printed case](https://github.com/selfcustody/MaixBitCase)<br> Soldering<br>Assembly | None |
-| Warnings  | [:material-information:{ title="M5stickV and USB-C" }](#m5stickv-info) |  | [:material-information:{ title="Some stores ship the Maix Dock with soldered pin connectors that do not fit into the 3D printed case" }](#dock-info) |  | Micro USB |
+| Warnings  | [:material-information:{ title="M5stickV and USB-C" }](#m5stickv-info) | [:material-information:{ title="Maix Amigo screens" }](#amigo-info) | [:material-information:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB |
 
 <i style="font-size: 85%">:material-information:{id="m5stickv-info"}:
 M5stickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host(computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5stick.
+</i>
+
+<i style="font-size: 85%">:material-information:{id="amigo-info"}:
+----8<----
+amigo-more-info-faq.md:2
+----8<----
 </i>
 
 <i style="font-size: 85%">:material-information:{id="dock-info"}:
@@ -45,7 +51,7 @@ Available from many distributors, including:
 - [Amazon](https://www.amazon.com/s?k=sipeed+amigo&dc)
 
 ### Maix Dock and Maix Bit
-For the DIYers, the Maix Dock and Bit are also supported but will require sourcing the parts individually and building the device yourself.
+For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
 
 Below are example implementations with instructions on how to recreate them:
 
@@ -57,7 +63,10 @@ Below are example implementations with instructions on how to recreate them:
 This will be included with the M5StickV and Maix Amigo that you purchase from one of the distributors above. It will be necessary to power and charge the device and to initially flash the firmware.
 
 ### (Optional) MicroSD Card
-We cannot guarantee that a microSD card is compatible and will work in your device; you'll need to test it on the device to be sure, read the [FAQ](faq.md/#why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error) for more info. The size of the SD card isn't important; anything over a few megabytes will be plenty.
+----8<----
+sd-card-info-faq.md
+----8<----
+The size of the SD card isn't important; anything over a few megabytes will be plenty.
 
 ### (Optional) Thermal Printer
 Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup and signed PSBT, via a locally-connected thermal printer over its serial port.

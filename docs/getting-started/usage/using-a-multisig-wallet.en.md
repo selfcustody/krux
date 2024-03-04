@@ -61,15 +61,12 @@ Load the wallet into Krux by going to the *Settings* page in Specter Desktop, th
 
 <img src="../../../img/specter/export-wallet-screen-600.png">
 
-In Krux, select the *Wallet* menu item option and scan the QR code.
+----8<----
+single-multi-wallet-descriptor.md
+----8<----
 
-<img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
-
-If it worked, Krux should display the wallet information that it loaded:
-
-<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-150.png">
+<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png">
+<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-xpubs-150.png">
 
 ### Receive coins
 The *Receive* screen should show your first receive address that you can send funds to.
@@ -117,16 +114,9 @@ On the wallet screen, make sure to select a *Multi Signature* policy type with t
 
 <img src="../../../img/sparrow/multisig-wallet-settings-600.png">
 
-Now, you will need to import your public key. To do so, press the *Airgapped Hardware Wallet* button under *Keystores*. On the screen that pops up, Krux is not listed as one of the available device types, so look for the *Specter DIY* option and click its *Scan...* button.
-
-<img src="../../../img/sparrow/specter-diy-scan-qr-400.png" style="border: 1px solid;">
-
-On your Krux, navigate to the *Extended Public Key* option under the main menu and show the **first** QR code to Sparrow.
-
-<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-125.png">
-<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-150.png">
-
-It should import the xpub and show a key under *Keystores* like the following:
+----8<----
+sparrow/import-xpub-sparrow.md
+----8<----
 
 <img src="../../../img/sparrow/keystore-multisig-key-settings-600.png" style="border: 1px solid;">
 
@@ -136,60 +126,31 @@ Once all keys have been added, click the blue *Apply* button to create your wall
 
 Congrats, you just created a multisig wallet!
 
-### Load the wallet into Krux
-Load the wallet into Krux by going back to the *Settings* page in Sparrow, then click the *Export...* button at the bottom of the screen and find *Specter Desktop* in the options list that pops up. Click its *Show...* button to display a QR code that you can import into Krux.
+### Load the wallet output descriptor into Krux
+----8<----
+sparrow/load-wallet-output-sparrow.md
+----8<----
 
-<img src="../../../img/sparrow/export-specter-wallet-600.png" style="border: 1px solid;">
-
-In Krux, select the *Wallet* menu item option and scan the QR code.
-
-<img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
-
-If it worked, Krux should display the wallet information that it loaded:
-
-<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-150.png">
+<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png">
+<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-xpubs-150.png">
 
 ### Receive coins
 Navigate to the *Receive* screen where you should see your first receive address that you can send funds to.
 
 <img src="../../../img/sparrow/multisig-receive-address-600.png">
 
-### Send coins
-Go to the *Send* screen, fill in the recipient address, amount, and any extra information you wish to supply, and click the blue *Create Transaction* button.
-
-<img src="../../../img/sparrow/create-transaction-screen-600.png">
-
-On the next screen, make sure that the *Signing Wallet* is the one you created and that the *Sighash* is set to *All*. Click the blue *Finalize Transaction for Signing* button.
-
-<img src="../../../img/sparrow/finalize-transaction-600.png">
-
-On the next screen, click *Show QR* to make Sparrow display an animated QR code of the PSBT that you can scan with Krux by going to *Sign > PSBT* in its main menu.
-
-<img src="../../../img/sparrow/show-qr-600.png">
-
-After scanning, Krux should display info about the transaction for you to confirm before signing.
-
-<img src="../../../img/maixpy_m5stickv/sign-psbt-sign-prompt-125.png">
-<img src="../../../img/maixpy_amigo/sign-psbt-sign-prompt-150.png">
-
-Once you have confirmed, Krux will begin animating a QR code of the signed transaction that you can scan into Sparrow. 
-
-<img src="../../../img/maixpy_m5stickv/sign-psbt-signed-qr-125.png">
-<img src="../../../img/maixpy_amigo/sign-psbt-signed-qr-150.png">
-
-In Sparrow, click *Scan QR* and show it the QR. A progress bar will indicate how many parts of the QR have been read.
+----8<----
+sparrow/send-coins-sparrow.md
+----8<----
 
 Once all parts of the QR code have been read, you should see the signature bar partially fill indicating the signature was added.
 
 Repeat this process for the remaining keys in your wallet until you have a quorum of signatures. 
 
-After the final signature, the bar will fill and two new buttons appear. Click the blue *Broadcast Transaction* button and your transaction should be broadcasted to the network!
-
-<img src="../../../img/sparrow/broadcast-transaction-600.png">
-
-Congratulations, you have learned how to send a transaction using Sparrow 🎉
+After the final signature, the bar will fill and two new buttons appear. 
+----8<----
+sparrow/broadcast-sparrow.md
+----8<----
 
 ## BlueWallet
 ### Create the wallet
@@ -245,15 +206,12 @@ From here, tap *Export Coordination Setup* in order to display a QR code of your
 
 <img src="../../../img/blue/export-multisig-wallet-400.png" style="border: 1px solid;">
 
-In Krux, select the *Wallet* menu item option and scan the QR code.
+----8<----
+single-multi-wallet-descriptor.md
+----8<----
 
-<img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
-
-If it worked, Krux should display the wallet information that it loaded:
-
-<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-125.png">
-<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-150.png">
+<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png">
+<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-xpubs-150.png">
 
 ### Receive coins
 Navigate to the *Receive* screen where you should see your first receive address that you can send funds to.

@@ -4,7 +4,8 @@ markdown_extensions:
   - toc:
       permalink: true
   - pymdownx.mark
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: ["docs/snippets"]
   - pymdownx.superfences:
       preserve_tabs: true
   - pymdownx.tabbed:

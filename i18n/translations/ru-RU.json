@@ -291,7 +291,5 @@
     "Words": "Слова",
     "Yes": "Да",
     "Your changes will be kept on device flash storage.": "Ваши изменения будут сохранены на флэш памяти устройства.",
-    "Your changes will be kept on the SD card.": "Ваши изменения будут сохранены на SD карте.",
-    "↳ %s": "↳ %s",
-    "⊚ %s": "⊚ %s"
+    "Your changes will be kept on the SD card.": "Ваши изменения будут сохранены на SD карте."
 }
