@@ -95,7 +95,7 @@ class CameraEntropy(Page):
         if board.config["type"] == "amigo":
             y_label_offset = self.ctx.display.bottom_prompt_line
         # Flush events ocurred while loading camera
-        self.ctx.input.flush_events()
+        self.ctx.input.reset_ios_state()
         while True:
             wdt.feed()
             img = sensor.snapshot()
@@ -158,6 +158,8 @@ class CameraEntropy(Page):
         entropy_msg += t("Pixels deviation index: ")
         entropy_msg += str(stdev_index)
         self.ctx.display.clear()
+        # Flush events ocurred while processing
+        self.ctx.input.reset_ios_state()
         if (
             shannon_16b < INSUFFICIENT_SHANNONS_ENTROPY_TH
             or stdev_index < INSUFFICIENT_VARIANCE_TH

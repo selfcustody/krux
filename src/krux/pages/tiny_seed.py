@@ -960,7 +960,7 @@ class TinyScanner(Page):
         if precamera_ticks + FLASH_MSG_TIME > postcamera_ticks:
             time.sleep_ms(precamera_ticks + FLASH_MSG_TIME - postcamera_ticks)
         del message, precamera_ticks, postcamera_ticks
-        self.ctx.input.flush_events()
+        self.ctx.input.reset_ios_state()
         # # Debug FPS 1/4
         # clock = time.clock()
         # fps = 0
