@@ -916,6 +916,11 @@ class TinyScanner(Page):
 
     def _process_24w_pg0_scan(self, page_seed_numbers):
         if page_seed_numbers == self.previous_seed_numbers and self.capturing:
+            # Hold if there's a button still pressed
+            self.ctx.input.wait_for_release()
+            # Flush events ocurred while processing
+            self.ctx.input.reset_ios_state()
+
             self._exit_camera()
             self.ctx.display.draw_centered_text(
                 t("Review scanned data, edit if necessary")
@@ -960,6 +965,7 @@ class TinyScanner(Page):
         if precamera_ticks + FLASH_MSG_TIME > postcamera_ticks:
             time.sleep_ms(precamera_ticks + FLASH_MSG_TIME - postcamera_ticks)
         del message, precamera_ticks, postcamera_ticks
+        # Flush events ocurred while starting
         self.ctx.input.reset_ios_state()
         # # Debug FPS 1/4
         # clock = time.clock()
