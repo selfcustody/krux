@@ -3,14 +3,26 @@ Some Amigo screens have inverted X coordinates while others don’t. If you noti
 
 Others have found that there are issues with the colors displayed in the interface and camera preview. To fix this we have two options in `Settings > Hardware > Display`, `BGR Colors` and `Inverted Colors`, test with them until the colors appear to be correct on your device.
 
-## Why isn't my Maix Amigo device being recognized when connected to the computer's USB?
-Make sure you’re using the USB-C port at the bottom of the device, not the one on the left side. There could also be an issue with the cable. Try using a different cable to see if that resolves the problem. If you're connecting to a USB-C port on your desktop computer, you may need to shut down and restart the device while it's connected. This ensures the driver loads correctly and creates the necessary serial ports.
+## Why isn't my device charging or being recognized when connected to the computer's USB?
+If you have a Maix Amigo, make sure you're using the USB-C port at the bottom of the device, not the one on the left side.
+
+Different computer hosts have varying hardware, operating systems, and behaviors regarding their USB ports. Below are the expected behaviors:
+
+### USB-A:
+Your device should charge and turn on when connected to a USB-A port, even if it was initially turned off. You can also turn off the device while it continues to charge. However, some hosts' USB-A ports may behave like USB-C ports, as described below.
+
+### USB-C:
+
+- If the device is turned off and connected to a USB-C port, it should turn on and start charging. You can turn it off again, and it will continue to charge.
+
+- If the device is already turned on and connected to a USB-C port, it may not charge or be recognized by the computer. In this case, turn off the device to initiate recognition and charging. Once turned off and reconnected, the device should restart, be recognized by the computer, and charging should be triggered by USB-C hosts.
+If your device is not charging or being recognized as expected, try using a different USB port or a different computer to determine if the issue is with the device or the host's USB port.
 
 ## Why isn't my M5stickV device being recognized and charged when connected to the computer's USB-C?
 M5stickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host(computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5stickV
 
-## Why does my Krux device randomly freeze or restart when connected to the computer? Why doesn't my device (which has a battery) charge when connected to power?
-Windows is known to have issues with the USB-C devices. If you are experiencing random crashes or even reboots, try using a phone charger or other power source such as a power bank. If your problem is with charging, it is expected that USB-A will always charge and turn on the device if it is turned off, you can also turn it off and continue charging. For USB-C, if it is turned off, it will turn on and start charging, it can also be turned off and continue charging, but if it is already turned on, it may not charge, nor be recognized by the computer, it must be turned off to be recognized, it will restart, it will be recognized and USB-C hosts will trigger charging.
+## Why does my Krux device randomly freeze or restart when connected to the computer?
+Windows is known to have issues with the USB-C devices. If you are experiencing random crashes or even reboots and your device does not have a battery, try using a phone charger or other power source such as a power bank.
 
 ## Why won't my Linux OS list a serial port after connecting my device?
 If you get the following error when trying to flash your device: `Failed to find device via USB. Is it connected and powered on?`
