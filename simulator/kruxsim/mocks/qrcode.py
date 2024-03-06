@@ -24,37 +24,30 @@ from unittest import mock
 import pyqrcode
 
 
-def encode_to_string(data):
+def encode(data):
+    # Uses string encoded qr as it already cleaned up the frames
+    # PyQRcode also doesn't offer any binary output
+
     try:
-        code_str = pyqrcode.create(data, error="L", mode="binary").text()
+        code_str = pyqrcode.create(data, error="L", mode="binary").text(quiet_zone=0)
     except:
         # pre-decode if binary (SeedQR)
         data = data.decode("latin-1")
-        code_str = pyqrcode.create(data, error="L", mode="binary").text()
+        code_str = pyqrcode.create(data, error="L", mode="binary").text(quiet_zone=0)
     size = 0
     while code_str[size] != "\n":
         size += 1
-    i = 0
-    padding = 0
-    while code_str[i] != "1":
-        if code_str[i] == "\n":
-            padding += 1
-        i += 1
-    code_str = code_str[(padding) * (size + 1) : -(padding) * (size + 1)]
-    size -= 2 * padding
-
-    new_code_str = ""
-    for i in range(size):
-        for j in range(size + 2 * padding + 1):
-            if padding <= j < size + padding:
-                index = i * (size + 2 * padding + 1) + j
-                new_code_str += code_str[index]
-        new_code_str += "\n"
-
-    return new_code_str
+    binary_qr = bytearray(b"\x00" * ((size * size + 7) // 8))
+    for y in range(size):
+        for x in range(size):
+            bit_index = y * size + x
+            bit_string_index = y * (size + 1) + x
+            if code_str[bit_string_index] == "1":
+                binary_qr[bit_index >> 3] |= 1 << (bit_index % 8)
+    return binary_qr
 
 
 if "qrcode" not in sys.modules:
     sys.modules["qrcode"] = mock.MagicMock(
-        encode_to_string=encode_to_string,
+        encode=encode,
     )

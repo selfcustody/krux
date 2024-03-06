@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,15 +19,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-try:
-    import ujson as json
-except ImportError:
-    import json
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
-from embit.descriptor.arguments import Key, KeyHash, AllowedDerivation
-from embit.script import Script, address_to_scriptpubkey
-import urtypes
+from embit.descriptor.arguments import Key
 from .krux_settings import t
 
 
@@ -43,7 +37,7 @@ class Wallet:
         self.policy = None
         if not self.key.multisig:
             self.descriptor = Descriptor.from_string(
-                "wpkh(%s/{0,1}/*)" % self.key.key_expression()
+                "wpkh(%s/<0;1>/*)" % self.key.key_expression()
             )
             self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
@@ -115,6 +109,8 @@ def to_unambiguous_descriptor(descriptor):
     """If child derivation info is missing to generate receive addresses,
     use the default scheme
     """
+    from embit.descriptor.arguments import KeyHash, AllowedDerivation
+
     if descriptor.key:
         if descriptor.key.allowed_derivation is None:
             descriptor.key.allowed_derivation = AllowedDerivation.default()
@@ -133,6 +129,8 @@ def parse_wallet(wallet_data, network):
 
     If the descriptor cannot be derived, an exception is raised.
     """
+    import urtypes
+
     if isinstance(wallet_data, UR):
         # Try to parse as a Crypto-Output type
         try:
@@ -151,6 +149,11 @@ def parse_wallet(wallet_data, network):
 
     # Try to parse as JSON and look for a 'descriptor' key
     try:
+        try:
+            import ujson as json
+        except ImportError:
+            import json
+
         wallet_json = json.loads(wallet_data)
         if "descriptor" in wallet_json:
             descriptor = Descriptor.from_string(wallet_json["descriptor"])
@@ -206,7 +209,7 @@ def parse_wallet(wallet_data, network):
                 )
             else:
                 # Single-sig
-                descriptor = Descriptor.from_string("wpkh(%s/{0,1}/*)" % keys[0])
+                descriptor = Descriptor.from_string("wpkh(%s/<0;1>/*)" % keys[0])
             label = (
                 key_vals[key_vals.index("Name") + 1]
                 if key_vals.index("Name") >= 0
@@ -240,6 +243,8 @@ def parse_address(address_data):
 
     If the address cannot be derived, an exception is raised.
     """
+    from embit.script import Script, address_to_scriptpubkey
+
     addr = address_data
     if address_data.lower().startswith("bitcoin:"):
         addr_end = address_data.find("?")

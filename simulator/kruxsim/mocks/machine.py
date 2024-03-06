@@ -30,7 +30,7 @@ simulating_printer = False
 def simulate_printer():
     global simulating_printer
     simulating_printer = True
-    Settings().printer.driver = "thermal/adafruit"
+    Settings().hardware.printer.driver = "thermal/adafruit"
 
 
 def reset():
@@ -49,14 +49,14 @@ class UART:
 
     def read(self, num_bytes):
         if simulating_printer:
-            module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
+            module, cls = PrinterSettings.PRINTERS[Settings().hardware.printer.driver]
             if module == "thermal" and cls == "AdafruitPrinter":
                 return chr(0b00000000)
         return None
 
     def readline(self):
         if simulating_printer:
-            module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
+            module, cls = PrinterSettings.PRINTERS[Settings().hardware.printer.driver]
             if module == "cnc" and cls == "FilePrinter":
                 return "ok\n".encode()
         return None

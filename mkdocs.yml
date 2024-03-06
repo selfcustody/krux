@@ -1,13 +1,18 @@
 markdown_extensions:
+  - attr_list
   - meta
   - toc:
       permalink: true
   - pymdownx.mark
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: ["docs/snippets"]
   - pymdownx.superfences:
       preserve_tabs: true
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra_css:
   - css/custom.css
@@ -37,18 +42,15 @@ docs_dir: docs
 site_dir: public
 extra:
   social:
-    - icon: material/chat
-      link: https://matrix.to/#/#krux:matrix.org
-      name: Join our Matrix server
     - icon: fontawesome/solid/bullhorn
       link: https://bitcointalk.org/index.php?topic=5350905.0
       name: Send a message to the Bitcoin Forum
     - icon: fontawesome/brands/telegram
       link: https://t.me/SC_Krux
       name: Join our community-led Telegram
-    - icon: fontawesome/brands/twitter
+    - icon: fontawesome/brands/x-twitter
       link: https://twitter.com/selfcustodykrux
-      name: Follow us on Twitter
+      name: Follow us on X (Twitter)
     - icon: fontawesome/brands/github
       link: https://github.com/selfcustody/krux
       name: Our code on Github
@@ -62,9 +64,9 @@ nav:
     - About: getting-started/index.en.md
     - Installing:
       - Summary: getting-started/installing/index.en.md
+      - From GUI application: getting-started/installing/from-gui.en.md
       - From pre-built official release: getting-started/installing/from-pre-built-release.en.md
       - From pre-built test release: getting-started/installing/from-test-release.en.md
-      - From GUI application: getting-started/installing/from-gui.en.md
       - From source: getting-started/installing/from-source.en.md
     - Basic Usage:
       - Generating a Mnemonic: getting-started/usage/generating-a-mnemonic.en.md
@@ -79,9 +81,9 @@ nav:
       - Tools: getting-started/features/tools.en.md
       - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
     - Settings: getting-started/settings.en.md
+    - Navigation Overview: getting-started/navigation.en.md
   - Devices and Part List: parts.en.md
   - FAQ: faq.en.md
-  - Development: development.md
   - Support the Project: support.en.md
 
 plugins:

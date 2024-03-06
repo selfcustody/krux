@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,15 @@
 import os
 from machine import SDCard
 from .settings import SD_PATH
+
+SIGNED_FILE_SUFFIX = "-signed"
+PSBT_FILE_EXTENSION = ".psbt"
+DESCRIPTOR_FILE_EXTENSION = ".txt"
+JSON_FILE_EXTENSION = ".json"
+SIGNATURE_FILE_EXTENSION = ".sig"
+PUBKEY_FILE_EXTENSION = ".pub"
+BMP_IMAGE_EXTENSION = ".bmp"
+PBM_IMAGE_EXTENSION = ".pbm"
 
 
 class SDHandler:

@@ -6,8 +6,10 @@ wait 1
 x2 press BUTTON_C
 press BUTTON_A
 
+
+# Sign message, load qr code
 press BUTTON_B
-press BUTTON_A
+x2 press BUTTON_A
 
 qrcode message-sha256.png
 wait 0.5

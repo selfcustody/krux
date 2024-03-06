@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
+from .utils import Utils
 from ..themes import theme
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
@@ -41,16 +42,9 @@ from . import (
     NUM_SPECIAL_2,
 )
 
-D6_STATES = [str(i + 1) for i in range(6)]
-D20_STATES = [str(i + 1) for i in range(20)]
 DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
-
-D6_12W_MIN_ROLLS = 50
-D6_24W_MIN_ROLLS = 99
-D20_12W_MIN_ROLLS = 30
-D20_24W_MIN_ROLLS = 60
 
 SD_MSG_TIME = 2500
 
@@ -146,8 +140,8 @@ class Login(Page):
             self.ctx,
             [
                 (t("Via Camera"), self.new_key_from_snapshot),
-                (t("Via D6"), self.new_key_from_d6),
-                (t("Via D20"), self.new_key_from_d20),
+                (t("Via D6"), self.new_key_from_dice),
+                (t("Via D20"), lambda: self.new_key_from_dice(True)),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -156,13 +150,16 @@ class Login(Page):
             return MENU_CONTINUE
         return status
 
-    def new_key_from_d6(self):
-        """Handler for the 'via D6' menu item"""
-        return self._new_key_from_die(D6_STATES, D6_12W_MIN_ROLLS, D6_24W_MIN_ROLLS)
+    def new_key_from_dice(self, d_20=False):
+        """Handler for the 'via DX' menu item. Default is D6"""
+        from .new_mnemonic.dice_rolls import DiceEntropy
 
-    def new_key_from_d20(self):
-        """Handler for the 'via D20' menu item"""
-        return self._new_key_from_die(D20_STATES, D20_12W_MIN_ROLLS, D20_24W_MIN_ROLLS)
+        dice_entropy = DiceEntropy(self.ctx, d_20)
+        captured_entropy = dice_entropy.new_key()
+        if captured_entropy is not None:
+            words = bip39.mnemonic_from_bytes(captured_entropy).split()
+            return self._load_key_from_words(words)
+        return MENU_CONTINUE
 
     def new_key_from_snapshot(self):
         """Use camera's entropy to create a new mnemonic"""
@@ -186,7 +183,10 @@ class Login(Page):
             + t("(Experimental)")
         )
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            entropy_bytes = self.capture_camera_entropy()
+            from .capture_entropy import CameraEntropy
+
+            camera_entropy = CameraEntropy(self.ctx)
+            entropy_bytes = camera_entropy.capture()
             if entropy_bytes is not None:
                 import binascii
 
@@ -201,113 +201,40 @@ class Login(Page):
                 return self._load_key_from_words(words)
         return MENU_CONTINUE
 
-    def _new_key_from_die(self, roll_states, min_rolls_12w, min_rolls_24w):
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        if index == 2:
-            return MENU_CONTINUE
-
-        min_rolls = min_rolls_12w if index == 0 else min_rolls_24w
-        self.ctx.display.clear()
-
-        delete_flag = False
-        self.ctx.display.draw_hcentered_text(
-            t("Roll dice at least %d times to generate a mnemonic.") % (min_rolls)
-        )
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
-            rolls = []
-
-            def delete_roll(buffer):
-                # buffer not used here
-                nonlocal delete_flag
-                delete_flag = True
-                return buffer
-
-            while True:
-                roll = ""
-                while True:
-                    dice_title = t("Rolls: %d\n") % len(rolls)
-                    entropy = (
-                        "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
-                    )
-                    if len(entropy) <= 10:
-                        dice_title += entropy
-                    else:
-                        dice_title += "..." + entropy[-10:]
-                    roll = self.capture_from_keypad(
-                        dice_title,
-                        [roll_states],
-                        delete_key_fn=delete_roll,
-                        go_on_change=True,
-                    )
-                    if roll == ESC_KEY:
-                        return MENU_CONTINUE
-                    break
-
-                if roll != "":
-                    rolls.append(roll)
-                else:
-                    # If its not a roll it is Del or Go
-                    if delete_flag:  # Del
-                        delete_flag = False
-                        if len(rolls) > 0:
-                            rolls.pop()
-                    elif len(rolls) < min_rolls:  # Not enough to Go
-                        self.ctx.display.flash_text(t("Not enough rolls!"))
-                    else:  # Go
-                        break
-
-            entropy = "".join(rolls) if len(roll_states) < 10 else "-".join(rolls)
-
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Rolls:\n\n%s") % entropy)
-
-            import hashlib
-            import binascii
-
-            self.ctx.input.wait_for_button()
-            entropy_bytes = entropy.encode()
-            entropy_hash = binascii.hexlify(
-                hashlib.sha256(entropy_bytes).digest()
-            ).decode()
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("SHA256 of rolls:\n\n%s") % entropy_hash
-            )
-            self.ctx.input.wait_for_button()
-            num_bytes = 16 if min_rolls == min_rolls_12w else 32
-            words = bip39.mnemonic_from_bytes(
-                hashlib.sha256(entropy_bytes).digest()[:num_bytes]
-            ).split()
-            return self._load_key_from_words(words)
-
-        return MENU_CONTINUE
-
     def _load_qr_passphrase(self):
         data, _ = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(
-                t("Failed to load passphrase"), theme.error_color
-            )
+            self.flash_text(t("Failed to load passphrase"), theme.error_color)
             return MENU_CONTINUE
         if len(data) > PASSPHRASE_MAX_LEN:
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN,
                 theme.error_color,
             )
             return MENU_CONTINUE
         return data
 
-    def _load_key_from_words(self, words):
+    def _load_key_from_words(self, words, charset=LETTERS):
         mnemonic = " ".join(words)
-        self.display_mnemonic(mnemonic)
+
+        if charset != LETTERS:
+            charset_type = {
+                DIGITS: Utils.BASE_DEC,
+                DIGITS_HEX: Utils.BASE_HEX,
+                DIGITS_OCT: Utils.BASE_OCT,
+            }
+            suffix_dict = {
+                DIGITS: Utils.BASE_DEC_SUFFIX,
+                DIGITS_HEX: Utils.BASE_HEX_SUFFIX,
+                DIGITS_OCT: Utils.BASE_OCT_SUFFIX,
+            }
+            numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
+            self.display_mnemonic(numbers_str, suffix_dict[charset])
+            if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
+                return MENU_CONTINUE
+            self.ctx.display.clear()
+
+        self.display_mnemonic(mnemonic, t("Mnemonic"))
         if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
             return MENU_CONTINUE
         self.ctx.display.clear()
@@ -413,24 +340,24 @@ class Login(Page):
 
                 key_capture = EncryptionKey(self.ctx)
                 key = key_capture.encryption_key()
-                if key is None:
-                    self.ctx.display.flash_text(t("Mnemonic was not decrypted"))
-                    return None
+                if key in (None, "", ESC_KEY):
+                    self.flash_text(t("Key was not provided"), theme.error_color)
+                    return MENU_CONTINUE
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(t("Processing ..."))
-                if key in ("", ESC_KEY):
-                    raise ValueError(t("Failed to decrypt"))
                 word_bytes = encrypted_qr.decrypt(key)
                 if word_bytes is None:
-                    raise ValueError(t("Failed to decrypt"))
+                    self.flash_text(t("Failed to decrypt"), theme.error_color)
+                    return MENU_CONTINUE
                 return bip39.mnemonic_from_bytes(word_bytes).split()
+            return MENU_CONTINUE  # prompt NO
         return None
 
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
             return MENU_CONTINUE
 
         words = []
@@ -447,25 +374,34 @@ class Login(Page):
                 pass
 
             if not words:
+                data_bytes = ""
                 try:
                     data_bytes = (
                         data.encode("latin-1") if isinstance(data, str) else data
                     )
-                    # CompactSeedQR format
-                    if len(data_bytes) in (16, 32):
-                        words = bip39.mnemonic_from_bytes(data_bytes).split()
-                    # SeedQR format
-                    elif len(data_bytes) in (48, 96):
-                        words = [
-                            WORDLIST[int(data_bytes[i : i + 4])]
-                            for i in range(0, len(data_bytes), 4)
-                        ]
                 except:
-                    pass
+                    try:
+                        data_bytes = (
+                            data.encode("shift-jis") if isinstance(data, str) else data
+                        )
+                    except:
+                        pass
+
+                if len(data_bytes) in (16, 32):
+                    # CompactSeedQR format
+                    words = bip39.mnemonic_from_bytes(data_bytes).split()
+                # SeedQR format
+                elif len(data_bytes) in (48, 96):
+                    words = [
+                        WORDLIST[int(data_bytes[i : i + 4])]
+                        for i in range(0, len(data_bytes), 4)
+                    ]
             if not words:
                 words = self._encrypted_qr_code(data)
+                if words == MENU_CONTINUE:
+                    return MENU_CONTINUE
         if not words or (len(words) != 12 and len(words) != 24):
-            self.ctx.display.flash_text(t("Invalid mnemonic length"), theme.error_color)
+            self.flash_text(t("Invalid mnemonic length"), theme.error_color)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -481,6 +417,12 @@ class Login(Page):
         self.ctx.display.draw_hcentered_text(title)
         if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
             while len(words) < 24:
+                if len(words) in (11, 23):
+                    self.ctx.display.clear()
+                    self.ctx.display.draw_centered_text(
+                        t("Leave blank if you'd like Krux to pick a valid final word")
+                    )
+                    self.ctx.input.wait_for_button()
                 if len(words) == 12:
                     self.ctx.display.clear()
                     if self.prompt(t("Done?"), self.ctx.display.height() // 2):
@@ -524,7 +466,7 @@ class Login(Page):
                 ):
                     words.append(word)
 
-            return self._load_key_from_words(words)
+            return self._load_key_from_words(words, charset)
 
         return MENU_CONTINUE
 
@@ -581,7 +523,7 @@ class Login(Page):
 
         def possible_letters(prefix):
             if len(prefix) == 0:
-                return LETTERS
+                return LETTERS.replace("x", "")
             letter = prefix[0]
             if letter not in search_ranges:
                 return ""
@@ -773,7 +715,7 @@ class Login(Page):
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
         if words is None:
-            self.ctx.display.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 

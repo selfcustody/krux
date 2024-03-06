@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -87,14 +87,13 @@ def validate_translation_files():
 
 
 def fill_missing():
-    """Uses googletrans==4.0.0rc1 to automaticalyy fill missing translations"""
+    """Uses translate 3.6.1 to automaticalyy fill missing translations"""
     if len(sys.argv) > 2:
         force_target = sys.argv[2]
     else:
         force_target = None
-    from googletrans import Translator
+    from translate import Translator
 
-    translator = Translator()
     slugs = find_translation_slugs()
     translation_filenames = [
         f
@@ -102,12 +101,11 @@ def fill_missing():
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
     for translation_filename in translation_filenames:
-        target = translation_filename[:5].replace("-", "_")
+        target = translation_filename[:5]
         if force_target:
             if force_target != translation_filename:
                 continue
-        if translation_filename.startswith("poke"):
-            continue
+        translator = Translator(to_lang=target)
         print("Translating %s...\n" % translation_filename)
         complete = True
         with open(
@@ -117,21 +115,17 @@ def fill_missing():
             for slug in slugs:
                 if slug not in translations or translations[slug] == "":
                     try:
-                        translated = '"%s",' % translator.translate(
-                            slug, src="en", dest=target
-                        ).text.replace(" \ n", "\\n")
-                    except:
-                        # some languages fail to translate with a space at end of string
-                        translated = (
-                            '"%s",'
-                            % translator.translate(
-                                slug + "]", src="en", dest=target
-                            ).text.replace(" \ n", "\\n")[:-1]
+                        translated = '"%s",' % translator.translate(slug).replace(
+                            " \ n", "\\n"
                         )
-                    print('"%s":' % slug, translated)
+                        print('"%s":' % slug, translated)
+                    except Exception as e:
+                        print("Error:", e)
+                        print("Failed to translate:", slug)
+                        break
                     complete = False
         if complete:
-            print("Notthing to add")
+            print("Nothing to add")
         else:
             print("Please review and copy items above")
         print("\n\n")
@@ -163,7 +157,10 @@ def remove_unnecessary():
             print("Nothing removed")
         else:
             with open(
-                join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8"
+                join(TRANSLATION_FILES_DIR, translation_filename),
+                "w",
+                encoding="utf8",
+                newline="\n",
             ) as translation_file:
                 json.dump(full_translations, translation_file, ensure_ascii=False)
                 # run black after this
@@ -188,12 +185,12 @@ def bake_translations():
             translation_table[basename(translation_filename).split(".")[0]] = lookup
 
     with open(
-        join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8"
+        join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8", newline="\n"
     ) as translations:
         translations.write(
             """# The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -226,7 +223,10 @@ def create_translation_file(locale):
     for slug in slugs:
         translations[slug.replace("\\n", "\n")] = ""
     with open(
-        join(TRANSLATION_FILES_DIR, "%s.json" % locale), "w", encoding="utf8"
+        join(TRANSLATION_FILES_DIR, "%s.json" % locale),
+        "w",
+        encoding="utf8",
+        newline="\n",
     ) as translation_file:
         translation_file.write(
             json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
@@ -247,7 +247,10 @@ def prettify_translation_files():
         ) as translation_file:
             translations = json.load(translation_file)
         with open(
-            join(TRANSLATION_FILES_DIR, translation_filename), "w", encoding="utf8"
+            join(TRANSLATION_FILES_DIR, translation_filename),
+            "w",
+            encoding="utf8",
+            newline="\n",
         ) as translation_file:
             translation_file.write(
                 json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)

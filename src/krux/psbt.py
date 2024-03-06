@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,14 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from embit import script
-from embit.psbt import DerivationPath, PSBT
-from embit.finalizer import parse_multisig
+import gc
+from embit.psbt import PSBT
 from ur.ur import UR
 import urtypes
 from urtypes.crypto import CRYPTO_PSBT
-from .baseconv import base_encode, base_decode
-from .format import format_btc
+from .baseconv import base_decode
 from .krux_settings import t
 from .qr import FORMAT_PMOFN
 
@@ -104,6 +102,10 @@ class PSBTSigner:
 
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
+        from .format import format_btc
+
+        from embit import script
+
         inp_amount = 0
         for inp in self.psbt.inputs:
             inp_amount += inp.witness_utxo.value
@@ -262,10 +264,15 @@ class PSBTSigner:
     def psbt_qr(self):
         """Returns the psbt in the same form it was read as a QR code"""
         psbt_data = self.psbt.serialize()
+
+        self.psbt = None  # Remove PSBT free RAM
+        gc.collect()
+
         if self.base_encoding is not None:
+            from .baseconv import base_encode
+
             psbt_data = base_encode(psbt_data, self.base_encoding).decode()
 
-        # TODO: FIX data in the UR type. It increases the size of the data by a factor of 4.8 !!
         if self.ur_type == CRYPTO_PSBT:
             return (
                 UR(
@@ -280,6 +287,8 @@ class PSBTSigner:
         """Returns the xpubs in the PSBT mapped to their derivations, falling back to
         the wallet descriptor xpubs if not found
         """
+        from embit.psbt import DerivationPath
+
         if self.psbt.xpubs:
             return self.psbt.xpubs
 
@@ -339,6 +348,8 @@ def get_cosigners(pubkeys, derivations, xpubs):
 # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L64
 def get_policy(scope, scriptpubkey, xpubs):
     """Parse scope and get policy"""
+    from embit.finalizer import parse_multisig
+
     # we don't know the policy yet, let's parse it
     script_type = scriptpubkey.script_type()
     # p2sh can be either legacy multisig, or nested segwit multisig

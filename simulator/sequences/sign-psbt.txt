@@ -6,7 +6,11 @@ wait 1
 x2 press BUTTON_C
 press BUTTON_A
 
-press BUTTON_A
+screenshot sign-options.png
+
+# Sign PSBT, load QR code
+x2 press BUTTON_A
+
 qrcode singlesig-psbt-p1of5.png
 wait 0.5
 qrcode singlesig-psbt-p2of5.png

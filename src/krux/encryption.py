@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -94,10 +94,8 @@ class MnemonicStorage:
     def __init__(self) -> None:
         self.stored = {}
         self.stored_sd = {}
-        self.has_sd_card = False
         try:
             with SDHandler() as sd:
-                self.has_sd_card = True
                 self.stored_sd = json.loads(sd.read(MNEMONICS_FILE))
         except:
             pass
@@ -150,9 +148,11 @@ class MnemonicStorage:
             # load current MNEMONICS_FILE
             try:
                 with SDHandler() as sd:
-                    mnemonics = json.loads(sd.read(MNEMONICS_FILE))
+                    contents = sd.read(MNEMONICS_FILE)
+                    orig_len = len(contents)
+                    mnemonics = json.loads(contents)
             except:
-                pass
+                orig_len = 0
 
             # save the new MNEMONICS_FILE
             try:
@@ -165,7 +165,11 @@ class MnemonicStorage:
                         "key_iterations"
                     ] = Settings().encryption.pbkdf2_iterations
                     mnemonics[mnemonic_id]["data"] = encrypted
-                    sd.write(MNEMONICS_FILE, json.dumps(mnemonics))
+                    contents = json.dumps(mnemonics)
+                    # pad contents to orig_len to avoid abandoned bytes on sdcard
+                    if len(contents) < orig_len:
+                        contents += " " * (orig_len - len(contents))
+                    sd.write(MNEMONICS_FILE, contents)
             except:
                 return False
         else:
@@ -196,7 +200,12 @@ class MnemonicStorage:
         if sd_card:
             self.stored_sd.pop(mnemonic_id)
             with SDHandler() as sd:
-                sd.write(MNEMONICS_FILE, json.dumps(self.stored_sd))
+                orig_len = len(sd.read(MNEMONICS_FILE))
+                contents = json.dumps(self.stored_sd)
+                # pad contents to orig_len to avoid abandoned bytes on sdcard
+                if len(contents) < orig_len:
+                    contents += " " * (orig_len - len(contents))
+                sd.write(MNEMONICS_FILE, contents)
         else:
             self.stored.pop(mnemonic_id)
             with open("/flash/" + MNEMONICS_FILE, "w") as f:

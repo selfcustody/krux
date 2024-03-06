@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,44 +20,71 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # pylint: disable=C0103
+
+
 import sys
 import math
 
-width = int(sys.argv[2])
-height = int(sys.argv[3])
 
-font_byte_length = math.ceil(width / 8) * height
-line_char_length = (font_byte_length * 2) + 6  # 6 is codepoint prefix len
+def hexfill(filename=None, width=None, height=None):
+    """Fills in missing characters in a hex formatted
+    bitmap font file for use with the Krux firmware."""
 
-with open(sys.argv[1], "r") as input_file:
-    # Read in a hex formatted bitmap font file
-    lines = input_file.readlines()
-    # Zero out > height pixel width characters since they can't be scaled down
-    lines = list(
-        map(
-            lambda line: line.split(":")[0] + ":" + ("00" * font_byte_length) + "\n"
-            if len(line) > line_char_length
-            else line,
-            lines,
+    if filename is None or width is None or height is None:
+        raise ValueError(
+            "ERROR: Provide the filename.hex, width and height as arguments"
         )
-    )
-    # Pad < height pixel width chars with leading 0s
-    lines = list(
-        map(
-            lambda line: line[:5]
-            + ("0" * (line_char_length - len(line)))
-            + line[5 : len(line) - 1]
-            # + ("0" * (line_char_length - len(line)))
-            + "\n" if len(line) < line_char_length else line,
-            lines,
+
+    width = int(width)
+    height = int(height)
+    font_byte_length = math.ceil(width / 8) * height
+    line_char_length = (font_byte_length * 2) + 6  # 6 is codepoint prefix len
+
+    lines = None
+    with open(filename, "r", encoding="utf-8") as input_file:
+        # Read in a hex formatted bitmap font file
+        lines = input_file.readlines()
+        # Zero out > height pixel width characters since they can't be scaled down
+        lines = list(
+            map(
+                lambda line: (
+                    line.split(":")[0] + ":" + ("00" * font_byte_length) + "\n"
+                    if len(line) > line_char_length
+                    else line
+                ),
+                lines,
+            )
         )
-    )
-    # Add missing characters (zero'd out) so the codepoint sequence is contiguous
-    i = 0
-    while i < len(lines):
-        codepoint = int(lines[i].split(":")[0], 16)
-        while i < codepoint:
-            lines.insert(i, ("%04X" % i) + ":" + ("00" * font_byte_length) + "\n")
+        # Pad < height pixel width chars with leading 0s
+        lines = list(
+            map(
+                lambda line: (
+                    line[:5]
+                    + ("0" * (line_char_length - len(line)))
+                    + line[5 : len(line) - 1]
+                    # + ("0" * (line_char_length - len(line)))
+                    + "\n"
+                    if len(line) < line_char_length
+                    else line
+                ),
+                lines,
+            )
+        )
+        # Add missing characters (zero'd out) so the codepoint sequence is contiguous
+        i = 0
+        while i < len(lines):
+            codepoint = int(lines[i].split(":")[0], 16)
+            while i < codepoint:
+                lines.insert(i, f"{i:04X}:{'00' * font_byte_length}\n")
+                i += 1
             i += 1
-        i += 1
-    print("".join(lines).strip())
+    return lines
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 3:
+        print("".join(hexfill(sys.argv[1], sys.argv[2], sys.argv[3])).strip())
+    else:
+        raise ValueError(
+            "ERROR: Provide the filename.hex, width and height as arguments"
+        )

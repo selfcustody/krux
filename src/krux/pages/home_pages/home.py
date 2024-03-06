@@ -1,0 +1,245 @@
+# The MIT License (MIT)
+
+# Copyright (c) 2021-2024 Krux contributors
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+import gc
+from ...themes import theme
+from ...qr import FORMAT_NONE, FORMAT_PMOFN
+from ...krux_settings import t
+from .. import (
+    Page,
+    Menu,
+    MENU_CONTINUE,
+    MENU_EXIT,
+)
+
+
+class Home(Page):
+    """Home is the main menu page of the app"""
+
+    def __init__(self, ctx):
+        super().__init__(
+            ctx,
+            Menu(
+                ctx,
+                [
+                    (t("Mnemonic"), self.mnemonic),
+                    (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
+                    (t("Extended Public Key"), self.public_key),
+                    (t("Wallet Descriptor"), self.wallet),
+                    (t("Address"), self.addresses_menu),
+                    (t("Sign"), self.sign),
+                    (t("Shutdown"), self.shutdown),
+                ],
+            ),
+        )
+
+    def mnemonic(self):
+        """Handler for the 'mnemonic' menu item"""
+        from .mnemonic_view import MnemonicsView
+
+        mnemonics_viewer = MnemonicsView(self.ctx)
+        return mnemonics_viewer.mnemonic()
+
+    def encrypt_mnemonic(self):
+        """Handler for Mnemonic > Encrypt Mnemonic menu item"""
+        from ..encryption_ui import EncryptMnemonic
+
+        encrypt_mnemonic_menu = EncryptMnemonic(self.ctx)
+        return encrypt_mnemonic_menu.encrypt_menu()
+
+    def public_key(self):
+        """Handler for the 'xpub' menu item"""
+        from .pub_key_view import PubkeyView
+
+        pubkey_viewer = PubkeyView(self.ctx)
+        return pubkey_viewer.public_key()
+
+    def wallet(self):
+        """Handler for the 'wallet' menu item"""
+        from .wallet_descriptor import WalletDescriptor
+
+        wallet_descriptor = WalletDescriptor(self.ctx)
+        return wallet_descriptor.wallet()
+
+    def addresses_menu(self):
+        """Handler for the 'address' menu item"""
+        from .addresses import Addresses
+
+        adresses = Addresses(self.ctx)
+        return adresses.addresses_menu()
+
+    def sign(self):
+        """Handler for the 'sign' menu item"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("PSBT"), self.sign_psbt),
+                (t("Message"), self.sign_message),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return MENU_CONTINUE
+        return status
+
+    def load_psbt(self):
+        """Loads a PSBT from camera or SD card"""
+
+        load_menu = Menu(
+            self.ctx,
+            [
+                (t("Load from camera"), lambda: None),
+                (
+                    t("Load from SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = load_menu.run_loop()
+
+        if index == 2:
+            return (None, None, "")
+
+        if index == 0:
+            data, qr_format = self.capture_qr_code()
+            return (data, qr_format, "")
+
+        # If index == 1
+        from ..utils import Utils
+        from ...sd_card import PSBT_FILE_EXTENSION
+
+        utils = Utils(self.ctx)
+        psbt_filename, data = utils.load_file(PSBT_FILE_EXTENSION, prompt=False)
+        return (data, FORMAT_NONE, psbt_filename)
+
+    def sign_psbt(self):
+        """Handler for the 'sign psbt' menu item"""
+        from ...sd_card import (
+            PSBT_FILE_EXTENSION,
+            SIGNED_FILE_SUFFIX,
+        )
+
+        # Warns in case multisig wallet descriptor is not loaded
+        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + "\n"
+                + t("Wallet output descriptor not found.")
+                + "\n\n"
+                + t("Some checks cannot be performed.")
+            )
+            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+                return MENU_CONTINUE
+
+        # Load a PSBT
+        data, qr_format, psbt_filename = self.load_psbt()
+
+        if data is None:
+            # Both the camera and the file on SD card failed!
+            self.flash_text(t("Failed to load PSBT"), theme.error_color)
+            return MENU_CONTINUE
+
+        # PSBT read OK! Will try to sign
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Loading.."))
+
+        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
+        from ...psbt import PSBTSigner
+
+        signer = PSBTSigner(self.ctx.wallet, data, qr_format)
+        outputs = signer.outputs()
+        for message in outputs:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(message)
+            self.ctx.input.wait_for_button()
+
+        # memory management
+        del data, outputs
+        gc.collect()
+
+        sign_menu = Menu(
+            self.ctx,
+            [
+                (t("Sign to QR code"), lambda: None),
+                (
+                    t("Sign to SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = sign_menu.run_loop()
+        del sign_menu
+        gc.collect()
+
+        if index == 2:  # Back
+            return MENU_CONTINUE
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Signing.."))
+
+        signer.sign()
+
+        title = t("Signed PSBT")
+        if index == 0:
+            # Sign to QR code
+            qr_signed_psbt, qr_format = signer.psbt_qr()
+
+            # memory management
+            del signer
+            gc.collect()
+
+            self.display_qr_codes(qr_signed_psbt, qr_format)
+
+            from ..utils import Utils
+
+            utils = Utils(self.ctx)
+            utils.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
+            return MENU_CONTINUE
+
+        # index == 1: Sign to SD card
+        serialized_signed_psbt = signer.psbt.serialize()
+
+        # memory management
+        del signer
+        gc.collect()
+        from ..file_operations import SaveFile
+
+        save_page = SaveFile(self.ctx)
+        save_page.save_file(
+            serialized_signed_psbt,
+            "QRCode",
+            psbt_filename,
+            title + ":",
+            PSBT_FILE_EXTENSION,
+            SIGNED_FILE_SUFFIX,
+        )
+        return MENU_CONTINUE
+
+    def sign_message(self):
+        """Handler for the 'sign message' menu item"""
+        from .sign_message_ui import SignMessage
+
+        message_signer = SignMessage(self.ctx)
+        return message_signer.sign_message()

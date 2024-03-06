@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,17 +21,18 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
-from ..themes import theme, RED, GREEN, ORANGE, MAGENTA
+import lcd
+from ..themes import theme, GREEN, ORANGE
 from ..settings import (
     CategorySetting,
     NumberSetting,
+    store,
     SD_PATH,
     FLASH_PATH,
-    Store,
+    SETTINGS_FILENAME,
 )
 from ..krux_settings import (
     Settings,
-    LoggingSettings,
     BitcoinSettings,
     TouchSettings,
     EncoderSettings,
@@ -40,7 +41,6 @@ from ..krux_settings import (
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..sd_card import SDHandler
 from ..encryption import QR_CODE_ITER_MULTIPLE
-from ..display import FLASH_MSG_TIME
 from . import (
     Page,
     Menu,
@@ -53,14 +53,9 @@ import os
 
 DIGITS = "0123456789"
 
-WAIT_TO_CHECK_INPUT = 200
 SD_MSG_TIME = 2500
 
 CATEGORY_SETTING_COLOR_DICT = {
-    LoggingSettings.ERROR_TXT: RED,
-    LoggingSettings.WARN_TXT: ORANGE,
-    LoggingSettings.INFO_TXT: GREEN,
-    LoggingSettings.DEBUG_TXT: MAGENTA,
     BitcoinSettings.MAIN_TXT: ORANGE,
     BitcoinSettings.TEST_TXT: GREEN,
 }
@@ -77,17 +72,13 @@ class SettingsPage(Page):
         """Handler for the settings"""
         location = Settings().persist.location
         if location == SD_PATH:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-            try:
-                # Check for SD hot-plug
-                with SDHandler():
-                    self._display_centered_text(
-                        t("Your changes will be kept on the SD card."),
-                        duration=SD_MSG_TIME,
-                    )
-            except OSError:
-                self._display_centered_text(
+            if self.has_sd_card():
+                self.flash_text(
+                    t("Your changes will be kept on the SD card."),
+                    duration=SD_MSG_TIME,
+                )
+            else:
+                self.flash_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -97,12 +88,12 @@ class SettingsPage(Page):
             try:
                 # Check for flash
                 os.listdir("/" + FLASH_PATH + "/.")
-                self._display_centered_text(
+                self.flash_text(
                     t("Your changes will be kept on device flash storage."),
                     duration=SD_MSG_TIME,
                 )
             except OSError:
-                self._display_centered_text(
+                self.flash_text(
                     t("Device flash storage not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
@@ -110,19 +101,6 @@ class SettingsPage(Page):
                 )
 
         return self.namespace(Settings())()
-
-    def _display_centered_text(
-        self,
-        message,
-        duration=FLASH_MSG_TIME,
-        color=theme.fg_color,
-        bg_color=theme.bg_color,
-    ):
-        """Display a text for duration ms or until you press a button"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(message, color, bg_color)
-        self.ctx.input.wait_for_press(block=False, wait_duration=duration)
-        self.ctx.display.clear()
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
@@ -162,6 +140,27 @@ class SettingsPage(Page):
             return BUTTON_ENTER
         return BUTTON_PAGE
 
+    def restore_settings(self):
+        """Restore default settings by deleting the settings files"""
+        self.ctx.display.clear()
+        if self.prompt(
+            t("Restore factory settings and reboot?"), self.ctx.display.height() // 2
+        ):
+            self.ctx.display.clear()
+            try:
+                # Delete settings from SD
+                with SDHandler() as sd:
+                    sd.delete(SETTINGS_FILENAME)
+            except:
+                pass
+            try:
+                # Delete settings from flash
+                os.remove("/%s/%s" % (FLASH_PATH, SETTINGS_FILENAME))
+            except:
+                pass
+            self.ctx.power_manager.reboot()
+        return MENU_CONTINUE
+
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
 
@@ -173,14 +172,29 @@ class SettingsPage(Page):
             try:
                 # Check for SD hot-plug
                 with SDHandler():
-                    Store.save_settings()
-                    self._display_centered_text(
-                        t("Changes persisted to SD card!"),
+                    if store.save_settings():
+                        self.flash_text(
+                            t("Changes persisted to SD card!"),
+                            duration=SD_MSG_TIME,
+                        )
+            except OSError:
+                self.flash_text(
+                    t("SD card not detected.")
+                    + "\n\n"
+                    + t("Changes will last until shutdown."),
+                    duration=SD_MSG_TIME,
+                )
+        else:
+            self.ctx.display.clear()
+            try:
+                if store.save_settings():
+                    self.flash_text(
+                        t("Changes persisted to Flash!"),
                         duration=SD_MSG_TIME,
                     )
-            except OSError:
-                self._display_centered_text(
-                    t("SD card not detected.")
+            except:
+                self.flash_text(
+                    t("Unexpected error saving to Flash.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
                     duration=SD_MSG_TIME,
@@ -218,6 +232,7 @@ class SettingsPage(Page):
 
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
+                items.append((t("Factory Settings"), self.restore_settings))
                 items.append((t("Back"), self._settings_exit_check))
             else:
                 items.append((t("Back"), lambda: MENU_EXIT))
@@ -253,14 +268,16 @@ class SettingsPage(Page):
 
         # Update touch detection threshold
         if self.ctx.input.touch is not None:
-            self.ctx.input.touch.touch_driver.threshold(Settings().touch.threshold)
+            self.ctx.input.touch.touch_driver.threshold(
+                Settings().hardware.touch.threshold
+            )
 
     def _encoder_threshold_exit_check(self):
         """Handler for the 'Back' on encoder settings screen"""
         from ..rotary import encoder
 
         # Update rotary encoder debounce time
-        encoder.debounce = Settings().encoder.debounce
+        encoder.debounce = Settings().hardware.encoder.debounce
 
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""
@@ -271,6 +288,18 @@ class SettingsPage(Page):
             current_category = setting.__get__(settings_namespace)
             color = CATEGORY_SETTING_COLOR_DICT.get(current_category, theme.fg_color)
             self.ctx.display.clear()
+            if setting.attr == "flipped_x":
+                self.ctx.display.draw_string(
+                    self.ctx.display.width() // 4,
+                    DEFAULT_PADDING,
+                    t("Left"),
+                )
+                self.ctx.display.draw_string(
+                    (3 * self.ctx.display.width() // 4)
+                    - 5 * self.ctx.display.font_width,
+                    DEFAULT_PADDING,
+                    t("Right"),
+                )
             self.ctx.display.draw_centered_text(
                 settings_namespace.label(setting.attr) + "\n" + str(current_category),
                 color,
@@ -282,6 +311,7 @@ class SettingsPage(Page):
                 btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
+            new_category = None
             for i, category in enumerate(categories):
                 if current_category == category:
                     if btn in (BUTTON_PAGE, None):
@@ -292,6 +322,16 @@ class SettingsPage(Page):
                     break
             if setting.attr == "theme":
                 theme.update()
+            if setting.attr == "flipped_x" and new_category is not None:
+                self.ctx.display.flipped_x_coordinates = new_category
+            if setting.attr == "bgr_colors" and new_category is not None:
+                lcd.bgr_to_rgb(new_category)
+            if setting.attr == "inverted_colors" and new_category is not None:
+                lcd.init(invert=new_category)
+                # re-configuring the display after reinitializing it
+                lcd.mirror(True)
+                lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
+                lcd.rotation(1)  # Portrait mode
 
         # When changing locale, exit Login to force recreate with new locale
         if (
@@ -304,13 +344,13 @@ class SettingsPage(Page):
             if self.prompt(
                 t("Change theme and reboot?"), self.ctx.display.height() // 2
             ):
+                self._settings_exit_check()
                 self.ctx.display.clear()
                 self.ctx.power_manager.reboot()
             else:
                 # Restore previous theme
                 setting.__set__(settings_namespace, starting_category)
                 theme.update()
-                Store.save_settings()
 
         return MENU_CONTINUE
 
@@ -339,14 +379,14 @@ class SettingsPage(Page):
                 setting.attr == "pbkdf2_iterations"
                 and (new_value % QR_CODE_ITER_MULTIPLE) != 0
             ):
-                self.ctx.display.flash_text(
+                self.flash_text(
                     t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE,
                     theme.error_color,
                 )
             else:
                 setting.__set__(settings_namespace, new_value)
         else:
-            self.ctx.display.flash_text(
+            self.flash_text(
                 t("Value %s out of range: [%s, %s]")
                 % (new_value, setting.value_range[0], setting.value_range[1]),
                 theme.error_color,
