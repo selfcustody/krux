@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock]
+        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock, maixpy_yahboom]
     runs-on: ubuntu-latest
     services:
       registry:
@@ -24,7 +24,7 @@ jobs:
         with:
           submodules: recursive
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           driver-opts: network=host
       - name: Cache Docker layers
@@ -37,7 +37,7 @@ jobs:
 
       - name: Build for M5StickV
         if: matrix.device == 'maixpy_m5stickv'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           build-args: DEVICE=maixpy_m5stickv
@@ -48,20 +48,20 @@ jobs:
       - name: Extract firmware for M5StickV
         id: extract-m5stickv
         if: matrix.device == 'maixpy_m5stickv'
-        uses: shrink/actions-docker-extract@v2
+        uses: shrink/actions-docker-extract@v3
         with:
           image: localhost:5000/selfcustody/krux-builder-m5stickv:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for M5StickV
         if: matrix.device == 'maixpy_m5stickv'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ steps.extract-m5stickv.outputs.destination }}
           name: build-m5stickv
 
       - name: Build for Amigo
         if: matrix.device == 'maixpy_amigo'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           build-args: DEVICE=maixpy_amigo
@@ -72,20 +72,20 @@ jobs:
       - name: Extract firmware for Amigo
         id: extract-amigo
         if: matrix.device == 'maixpy_amigo'
-        uses: shrink/actions-docker-extract@v2
+        uses: shrink/actions-docker-extract@v3
         with:
           image: localhost:5000/selfcustody/krux-builder-amigo:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Amigo
         if: matrix.device == 'maixpy_amigo'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ steps.extract-amigo.outputs.destination }}
           name: build-amigo
 
       - name: Build for Bit
         if: matrix.device == 'maixpy_bit'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           build-args: DEVICE=maixpy_bit
@@ -96,20 +96,20 @@ jobs:
       - name: Extract firmware for Bit
         id: extract-bit
         if: matrix.device == 'maixpy_bit'
-        uses: shrink/actions-docker-extract@v2
+        uses: shrink/actions-docker-extract@v3
         with:
           image: localhost:5000/selfcustody/krux-builder-bit:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Bit
         if: matrix.device == 'maixpy_bit'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ steps.extract-bit.outputs.destination }}
           name: build-bit
 
       - name: Build for Dock
         if: matrix.device == 'maixpy_dock'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           build-args: DEVICE=maixpy_dock
@@ -120,13 +120,13 @@ jobs:
       - name: Extract firmware for Dock
         id: extract-dock
         if: matrix.device == 'maixpy_dock'
-        uses: shrink/actions-docker-extract@v2
+        uses: shrink/actions-docker-extract@v3
         with:
           image: localhost:5000/selfcustody/krux-builder-dock:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Dock
         if: matrix.device == 'maixpy_dock'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ steps.extract-dock.outputs.destination }}
           name: build-dock
