@@ -67,6 +67,7 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.0/cmake-3.21.0
     cd cmake-3.21.0 && ./bootstrap && make && make install
 
 RUN pip3 install astor
+RUN pip3 install pyserial==3.4
 
 FROM build-base as build-software
 ARG DEVICE="maixpy_m5stickv"
@@ -97,7 +98,7 @@ RUN find /src/build -type f -name \*.py -exec sh -c "python3 ./firmware/scripts/
 FROM build-software AS build-firmware
 ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/MaixPy
-RUN pip3 install -r requirements.txt
+# RUN pip3 install -r requirements.txt
 RUN python3 ./components/micropython/core/lib/memzip/make-memzip.py --zip-file ./components/micropython/port/memzip-files.zip --c-file ./components/micropython/port/memzip-files.c /src/build
 RUN cp -rf projects/"${DEVICE}"/compile/overrides/. ./
 RUN cd projects/"${DEVICE}" && \
