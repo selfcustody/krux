@@ -1,9 +1,9 @@
 You can install Krux in four different ways:
 
-- [From GUI application](../installing/from-gui.md)
-- [From pre-built official release](../installing/from-pre-built-release.md)
-- [From pre-built test (beta) release](../installing/from-test-release.md)
-- [From source](../installing/from-source.md)
+- [:material-package-variant: From GUI application](../installing/from-gui.md)
+- [:material-console: From pre-built official release](../installing/from-pre-built-release.md)
+- [:material-console: From pre-built test (beta) release](../installing/from-test-release.md)
+- [:material-console: From source](../installing/from-source.md)
 
 ### Requirements
 Please, check the [part list](../../parts.md) for the compatible devices and requirements.

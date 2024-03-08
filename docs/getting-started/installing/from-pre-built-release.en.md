@@ -33,16 +33,13 @@ For `dock` the `-B` parameter changes, so run:
 ./ktool -B dan -b 1500000 maixpy_dock/kboot.kfpkg
 ```
 
+----8<----
+flash-krux-logo.md
+----8<----
 
-
-When the flashing process completes, you should see the Krux logo:
-
-<img src="../../../img/maixpy_amigo/logo-150.png">
-<img src="../../../img/maixpy_m5stickv/logo-125.png">
-
-If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
-
-Congrats, you're now running Krux!
+----8<----
+amigo-more-info-faq.md
+----8<----
 
 #### Troubleshooting
 If `ktool` fails to run, you may need to give it executable permissions with `chmod +x ./ktool`, or you might need to use "sudo" if your user don't have access to serial port. In Windows or Mac you may need to explicitly allow the tool to run by adding an exception for it.
@@ -67,10 +64,6 @@ List ports on Mac
 ls /dev/cu.usbserial*
 ```
 Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue.
-
-----8<----
-amigo-more-info-faq.md
-----8<----
 
 ### Multilingual support
 Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.

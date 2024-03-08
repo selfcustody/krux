@@ -31,6 +31,7 @@ theme:
     - navigation.top
     - navigation.indexes
     - navigation.expand
+    - navigation.footer
     - toc.integrate
 
 site_name: Krux - Open-source signing device firmware for Bitcoin
@@ -61,9 +62,9 @@ copyright:
 nav:
   - Home: index.en.md
   - Getting Started:
-    - About: getting-started/index.en.md
+    - Getting Started: getting-started/index.en.md
     - Installing:
-      - Summary: getting-started/installing/index.en.md
+      - Installing: getting-started/installing/index.en.md
       - From GUI application: getting-started/installing/from-gui.en.md
       - From pre-built official release: getting-started/installing/from-pre-built-release.en.md
       - From pre-built test release: getting-started/installing/from-test-release.en.md

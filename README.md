@@ -53,6 +53,16 @@ Otherwise, to run the commands on bare metal, remove the `vagrant ssh -c 'cd /va
 ./krux flash maixpy_dock
 ```
 
+Note: if you encounter any of this errors during build, it is a connection issue with github, plz try to build again:
+```
+error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err8)
+fatal: the remote end hung up unexpectedly
+fatal: early EOF
+fatal: index-pack failed
+fatal: clone of ... failed
+Failed to clone ...
+```
+
 ## Install krux and dev tools
 The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/). To generate a new `poetry.lock` file use: `poetry lock --no-update`.
 ```bash
