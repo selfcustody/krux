@@ -14,6 +14,9 @@ Create or load from a wallet output descriptor file on an SD card. The backup fi
 ### Sign Messages at a Derived Bitcoin address
 Sign messages from Sparrow and Specter, via QR code, also attesting a Bitcoin address belongs to you.
 
+### Reproducibile Builds
+To enhance the reproducibility of firmware builds, random variables such as file write timestamps have been removed from the build process. As a result, builds from developers' computers, those built within GitHub Actions from published code, and those you compile locally are more likely to be identical and have the same hash checksum as the official and beta releases. This change ensures greater consistency and traceability across all builds.
+
 ### Add Entropy Quality Estimation for Mnemonic Creation.
 Entropy quality estimators, like Shannon's entropy, were added to mnemonic generation through dice rolls and camera snapshot.
 
