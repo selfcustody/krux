@@ -37,6 +37,9 @@ If you don't see them, your OS may not be loading the correct drivers to create 
 sudo apt-get remove brltty
 ```
 
+## My device didn't reboot after flashing the firmware and when I turned it off and on again, it just stayed blank without showing anything on the screen. What should I do?
+Check if the downloaded file matches the device, this can also occur due to data corruption. Try downloading binaries again. You can install [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) to help with debugging, Tools > Open Terminal > New Terminal > Connect to serial port > Select a COM port available (if it doesn't work, try another COM port). It will show the terminal and some messages, a message about an empty device or with corrupted firmware appears like: "interesting, something's wrong, boot failed with exit code 233, go to find your vendor."
+
 ## What are all the features available? What are the additional features of the Test (Beta) version? Is there an Android app?
 For [official releases](https://github.com/selfcustody/krux/releases) you will find all the features detailed here on the [Getting Started page](getting-started/index.md) with a brief summary on the [Navigation Overview page](getting-started/navigation.md). The latest and most experimental features, which we sometimes share on our social media, can be found only in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Only official releases are signed, Test (Beta) is just for trying new things and providing feedback. Krux Android app ia available as an `apk` on the [test (beta) repository](https://github.com/odudex/krux_binaries/).
 
