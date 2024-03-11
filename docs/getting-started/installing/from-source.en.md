@@ -49,6 +49,13 @@ This will take around an hour or so to complete the first time. Subsequent build
 
 If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
+### Reproducibility
+If you build from the `main` branch of the source code, you should be able to reproduce the build process used to generate the last release binaries and obtain an exact copy of the `firmware.bin` file, with a matching hash checksum. The `kboot.kfpkg` file may have a minor difference (1 byte) because it is a zip file, which may embed a timestamp or other local machine attributes.
+
+As it is a zip file, you can extract and verify the `firmware.bin` it contains using the following command:
+
+```unzip kboot.kfpkg -d ./kboot/```
+
 ### Flash the firmware onto the device
 Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `dock`, `bit` or `yahboom`:
 ```bash
