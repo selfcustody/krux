@@ -50,9 +50,9 @@ This will take around an hour or so to complete the first time. Subsequent build
 If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
 ### Reproducibility
-If you build from the `main` branch of the source code, you should be able to reproduce the build process used to generate the last release binaries and obtain an exact copy of the `firmware.bin` file, with a matching hash checksum. The `kboot.kfpkg` file may have a minor difference (1 byte) because it is a zip file, which may embed a timestamp or other local machine attributes.
+If you build from the `main` branch of the source code, you should be able to reproduce the build process used to generate the last release binaries and obtain exact copies of the `firmware.bin` and `kboot.kfpkg` files, with matching hash checksums.
 
-As it is a zip file, you can extract and verify the `firmware.bin` it contains using the following command:
+To extract and verify the firmware.bin contained in kboot.kfpkg, you can use the following command:
 
 ```unzip kboot.kfpkg -d ./kboot/```
 

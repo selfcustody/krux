@@ -1,4 +1,4 @@
-# Changelog 24.03.0 - March 11, 2024
+# Changelog 24.03.0 - March 12, 2024
 
 ## Changes
 
@@ -55,6 +55,9 @@ Use the latest Embit release.
 
 ### Maix Dock Simulator
 Now Krux PC simulator can also run in Maix Dock mode, mimicking appearance and characteristics of the most DIY Krux device.
+
+### New Compatible Device - Yahboom
+The Yahboom Aimotion K210 module, a compact touchscreen device, now has its first official firmware release.
 
 ### Join Amigo IPS and Amigo TFT firmwares
 Users will be able to flash a single firmware and change display settings if their device was shipped with a display different from standard TFT.
