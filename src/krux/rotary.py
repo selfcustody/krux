@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,11 @@ import board
 from Maix import GPIO
 from fpioa_manager import fm
 import time
-from .logging import logger as log
+from .krux_settings import Settings
+from .buttons import Button
 
 RIGHT = 1
 LEFT = 0
-DEBOUNCE = 50  # milliseconds
 
 
 def __handler__(pin_num=None):
@@ -55,21 +55,21 @@ class RotaryEncoder:
         self.value = 0
         self.time_frame = 0
 
-        log.info("Encoder Initiated Pins: %d and %d" % (pins[0], pins[1]))
+        self.debounce = Settings().hardware.encoder.debounce
 
     def process(self, new_state):
         """Sets new encoder state after position is changed"""
 
         def _right():
             if self.direction:
-                if time.ticks_ms() > self.time_frame + DEBOUNCE:
+                if time.ticks_ms() > self.time_frame + self.debounce:
                     self.value += 1
                     self.time_frame = time.ticks_ms()
             self.direction = RIGHT
 
         def _left():
             if not self.direction:
-                if time.ticks_ms() > self.time_frame + DEBOUNCE:
+                if time.ticks_ms() > self.time_frame + self.debounce:
                     self.value -= 1
                     self.time_frame = time.ticks_ms()
             self.direction = LEFT
@@ -101,29 +101,23 @@ class RotaryEncoder:
 encoder = RotaryEncoder()  # Singleton
 
 
-class EncoderPage:
+class EncoderPage(Button):
     """Encoder class that mimics Krux Page GPIO Button behavior"""
 
-    def __init__(self):
-        pass
-
-    def value(self):
-        """Returns encoder status while mimics Krux GPIO Buttons behavior"""
+    def event(self):
+        """Returns encoder events while mimics Krux GPIO Buttons behavior"""
         if encoder.value > 0:
-            encoder.value -= 1
-            return 0
-        return 1
+            encoder.value = 0
+            return True
+        return False
 
 
-class EncoderPagePrev:
+class EncoderPagePrev(Button):
     """Encoder class that mimics Krux Page_prev GPIO Button behavior"""
 
-    def __init__(self):
-        pass
-
-    def value(self):
-        """Returns encoder status while mimics Krux GPIO Buttons behavior"""
+    def event(self):
+        """Returns encoder events while mimics Krux GPIO Buttons behavior"""
         if encoder.value < 0:
-            encoder.value += 1
-            return 0
-        return 1
+            encoder.value = 0
+            return True
+        return False

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -50,11 +50,17 @@ class Printer:
         """Prints a QR code, scaling it up as large as possible"""
         raise NotImplementedError()
 
+    def print_string(self, text):
+        """Print a text string"""
+        raise NotImplementedError()
+
 
 def create_printer():
     """Instantiates a new printer dynamically based on the default in Settings"""
 
-    module, cls = PrinterSettings.PRINTERS[Settings().printer.driver]
+    module, cls = PrinterSettings.PRINTERS[Settings().hardware.printer.driver]
+    if not cls:
+        return None
     return getattr(
         __import__(module, globals(), None, [None], 1),
         cls,

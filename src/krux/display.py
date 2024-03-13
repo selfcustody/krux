@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,19 +19,35 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import time
 import lcd
 import board
-from machine import I2C
+from .themes import theme
+from .krux_settings import Settings
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
-PORTRAIT, LANDSCAPE = [1, 2]
+PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
+DEFAULT_BACKLIGHT = 1
+MINIMAL_DISPLAY = board.config["type"] in ("m5stickv", "cube")
 
-MAX_BACKLIGHT = 8
-MIN_BACKLIGHT = 1
+FLASH_MSG_TIME = 2000
+
+# Splash will use horizontally-centered text plots. The spaces are used to help with alignment
+SPLASH = [
+    "██   ",
+    "██   ",
+    "██   ",
+    "██████   ",
+    "██   ",
+    " ██  ██",
+    "██ ██",
+    "████ ",
+    "██ ██",
+    " ██  ██",
+    "  ██   ██",
+]
 
 
 class Display:
@@ -39,14 +55,17 @@ class Display:
 
     def __init__(self):
         self.portrait = True
-        self.initialize_lcd()
-        self.i2c = None
         self.font_width = FONT_WIDTH
         self.font_height = FONT_HEIGHT
-        self.bottom_line = self.height() // FONT_HEIGHT  # total lines
-        self.bottom_line -= 1
-        self.bottom_line *= FONT_HEIGHT
-        if board.config["type"] == "m5stickv":
+        self.total_lines = board.config["lcd"]["width"] // FONT_HEIGHT
+        self.bottom_line = (self.total_lines - 1) * FONT_HEIGHT
+        if board.config["type"] == "amigo":
+            self.flipped_x_coordinates = (
+                Settings().hardware.display.flipped_x_coordinates
+            )
+        else:
+            self.flipped_x_coordinates = False
+        if MINIMAL_DISPLAY:
             self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
         else:
             # room left for no/yes buttons
@@ -106,35 +125,37 @@ class Display:
                     0x2C,
                 ],
             )
-            self.initialize_backlight()
-        else:
-            invert = (
-                board.config["type"].startswith("amigo")
-                or board.config["lcd"]["invert"]
+            self.set_backlight(DEFAULT_BACKLIGHT)
+        elif board.config["type"] == "yahboom":
+            lcd.init(
+                invert=True,
+                rst=board.config["lcd"]["rst"],
+                dcx=board.config["lcd"]["dcx"],
+                ss=board.config["lcd"]["ss"],
+                clk=board.config["lcd"]["clk"],
             )
+        elif board.config["type"] == "cube":
+            lcd.init(
+                invert=True,
+                offset_h0=80,
+            )
+        else:
+            invert = False
+            mirror = False
+            bgr_to_rgb = False
+            if board.config["type"] == "amigo":
+                mirror = True
+                invert = Settings().hardware.display.inverted_colors
+                bgr_to_rgb = Settings().hardware.display.bgr_colors
             lcd.init(invert=invert)
-            lcd.bgr_to_rgb(invert)
+            lcd.mirror(mirror)
+            lcd.bgr_to_rgb(bgr_to_rgb)
         self.to_portrait()
-        if board.config["type"].startswith("amigo"):
-            lcd.mirror(True)
-
-    def initialize_backlight(self):
-        """Initializes the backlight"""
-        if (
-            "I2C_SCL" not in board.config["krux"]["pins"]
-            or "I2C_SDA" not in board.config["krux"]["pins"]
-        ):
-            return
-        self.i2c = I2C(
-            I2C.I2C0,
-            freq=400000,
-            scl=board.config["krux"]["pins"]["I2C_SCL"],
-            sda=board.config["krux"]["pins"]["I2C_SDA"],
-        )
-        self.set_backlight(MIN_BACKLIGHT)
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
+        if board.config["type"] == "cube":
+            return self.bottom_line
         return self.width() + DEFAULT_PADDING // 2
 
     def width(self):
@@ -161,6 +182,8 @@ class Display:
         """
         if self.width() > 300:
             return self.width() // 6  # reduce density even more on larger screens
+        if self.width() > 200:
+            return self.width() // 5
         return self.width() // 4
 
     def to_landscape(self):
@@ -173,161 +196,173 @@ class Display:
         lcd.rotation(PORTRAIT)
         self.portrait = True
 
-    def to_lines(self, text):
+    def to_lines(self, text, max_lines=None):
         """Takes a string of text and converts it to lines to display on
         the screen
         """
+        lines = []
+        start = 0
+        line_count = 0
         if self.width() > 135:
             columns = self.usable_width() // self.font_width
         else:
             columns = self.width() // self.font_width
-        words = []
-        for word in text.split(" "):
-            subwords = word.split("\n")
-            for i, subword in enumerate(subwords):
-                if len(subword) > columns:
-                    j = 0
-                    while j < len(subword):
-                        words.append(subword[j : j + columns])
-                        j += columns
-                else:
-                    words.append(subword)
 
-                if len(subwords) > 1 and i < len(subwords) - 1:
-                    # Only add newline to the end of the word if the word
-                    # is less than the amount of columns. If it's exactly equal,
-                    # a newline will be implicit.
-                    if len(words[-1]) < columns:
-                        words[-1] += "\n"
+        # Quick return if content fits in one line
+        if len(text) <= columns and "\n" not in text:
+            return [text]
 
-        num_words = len(words)
+        if not max_lines:
+            max_lines = self.total_lines
 
-        # calculate cost of all pairs of words
-        cost_between = [[0 for _ in range(num_words + 1)] for _ in range(num_words + 1)]
-        for i in range(1, num_words + 1):
-            for j in range(i, num_words + 1):
-                for k in range(i, j + 1):
-                    if words[k - 1].endswith("\n"):
-                        word = words[k - 1].split("\n")[0]
-                        if word != "":
-                            cost_between[i][j] += len(words[k - 1]) + 1
-                        if i <= k < j:
-                            cost_between[i][j] += float("inf")
-                    else:
-                        cost_between[i][j] += len(words[k - 1]) + 1
-                cost_between[i][j] -= 1
-                cost_between[i][j] = columns - cost_between[i][j]
-                if cost_between[i][j] < 0:
-                    cost_between[i][j] = float("inf")
-                cost_between[i][j] = cost_between[i][j] ** 2
+        while start < len(text) and line_count < max_lines:
+            # Find the next line break, if any
+            line_break = text.find("\n", start)
+            if line_break == -1:
+                next_break = len(text)
+            else:
+                next_break = min(line_break, len(text))
 
-        # find optimal number of words on each line
-        indexes = [0 for _ in range(num_words + 1)]
-        cost = [0 for _ in range(num_words + 1)]
-        cost[0] = 0
-        for j in range(1, num_words + 1):
-            cost[j] = float("inf") * float("inf")
-            for i in range(1, j + 1):
-                if cost[i - 1] + cost_between[i][j] < cost[j]:
-                    cost[j] = cost[i - 1] + cost_between[i][j]
-                    indexes[j] = i
+            end = start + columns
+            # If next segment fits on one line, add it and continue
+            if end >= next_break:
+                lines.append(text[start:next_break].rstrip())
+                start = next_break + 1
+                line_count += 1
+                continue
 
-        def build_lines(words, num_words, indexes):
-            lines = []
-            start = indexes[num_words]
-            end = num_words
-            if start != 1:
-                lines.extend(build_lines(words, start - 1, indexes))
-            line = ""
-            for i in range(start, end + 1):
-                if words[i - 1].endswith("\n"):
-                    word = words[i - 1].split("\n")[0]
-                    if word != "":
-                        line += (" " if len(line) > 0 else "") + word
-                    lines.append(line)
-                    line = ""
-                else:
-                    line += (" " if len(line) > 0 else "") + words[i - 1]
-            if len(line) > 0:
-                lines.append(line)
-            return lines
+            # If the end of the line is in the middle of a word,
+            # move the end back to the end of the previous word
+            if text[end] != " " and text[end] != "\n":
+                end = text.rfind(" ", start, end)
 
-        return build_lines(words, num_words, indexes)
+            # If there is no space, force break the word
+            if end == -1 or end < start:
+                end = start + columns
+
+            lines.append(text[start:end].rstrip())
+            # don't jump space if we're breaking a word
+            jump_space = 1 if text[end] == " " else 0
+            start = end + jump_space
+            line_count += 1
+
+        # Replace last line with ellipsis if we didn't finish the text
+        if line_count == max_lines and start < len(text):
+            lines[-1] = lines[-1][: columns - 3] + "..."
+
+        return lines
 
     def clear(self):
         """Clears the display"""
-        lcd.clear()
+        lcd.clear(theme.bg_color)
 
-    def outline(self, x, y, width, height, color=lcd.WHITE):
+    def outline(self, x, y, width, height, color=theme.fg_color):
         """Draws an outline rectangle from given coordinates"""
-        self.fill_rectangle(x, y, width + 1, 1, color)  # up
-        self.fill_rectangle(x, y + height, width + 1, 1, color)  # bottom
-        self.fill_rectangle(x, y, 1, height + 1, color)  # left
-        self.fill_rectangle(x + width, y, 1, height + 1, color)  # right
+        if self.flipped_x_coordinates:
+            x = self.width() - x - 1
+            x -= width
+        lcd.draw_outline(x, y, width, height, color)
 
-    def fill_rectangle(self, x, y, width, height, color):
-        """Draws a rectangle to the screen"""
-        if board.config["krux"]["display"]["inverted_coordinates"]:
+    def fill_rectangle(self, x, y, width, height, color, radius=0):
+        """Draws a rectangle to the screen with optional rounded corners"""
+        if self.flipped_x_coordinates:
             x = self.width() - x
             x -= width
-        lcd.fill_rectangle(x, y, width, height, color)
+        lcd.fill_rectangle(x, y, width, height, color, radius)
 
-    def draw_string(self, x, y, text, color, bg_color=lcd.BLACK):
+    def draw_line(self, x_0, y_0, x_1, y_1, color=theme.fg_color):
+        """Draws a line to the screen"""
+        if self.flipped_x_coordinates:
+            if x_0 < self.width():
+                x_0 += 1
+            if x_1 < self.width():
+                x_1 += 1
+            x_start = self.width() - x_1
+            x_end = self.width() - x_0
+        else:
+            x_start = x_0
+            x_end = x_1
+        lcd.draw_line(x_start, y_0, x_end, y_1, color)
+
+    def draw_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
+        """
+        Draws a circle to the screen.
+        quadrant=0 will draw all 4 quadrants.
+        1 is top right, 2 is top left, 3 is bottom left, 4 is bottom right.
+        """
+        if self.flipped_x_coordinates:
+            x = self.width() - x
+        lcd.draw_circle(x, y, radius, quadrant, color)
+
+    def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
-        if board.config["krux"]["display"]["inverted_coordinates"]:
+        if self.flipped_x_coordinates:
             x = self.width() - x
             x -= len(text) * self.font_width
         lcd.draw_string(x, y, text, color, bg_color)
 
     def draw_hcentered_text(
-        self, text, offset_y=DEFAULT_PADDING, color=lcd.WHITE, bg_color=lcd.BLACK
+        self,
+        text,
+        offset_y=DEFAULT_PADDING,
+        color=theme.fg_color,
+        bg_color=theme.bg_color,
+        info_box=False,
+        max_lines=None,
     ):
         """Draws text horizontally-centered on the display, at the given offset_y"""
-        lines = text if isinstance(text, list) else self.to_lines(text)
-        for i, line in enumerate(lines):
-            offset_x = (self.width() - self.font_width * len(line)) // 2
-            offset_x = max(0, offset_x)
-            self.draw_string(
-                offset_x, offset_y + (i * self.font_height), line, color, bg_color
+        lines = (
+            text if isinstance(text, list) else self.to_lines(text, max_lines=max_lines)
+        )
+        if info_box:
+            bg_color = theme.frame_color
+            padding = DEFAULT_PADDING if self.width() > 135 else DEFAULT_PADDING // 2
+            self.fill_rectangle(
+                padding - 3,
+                offset_y - 1,
+                self.width() - (2 * padding) + 6,
+                (len(lines)) * self.font_height + 2,
+                bg_color,
+                self.font_width,  # radius
             )
+        for i, line in enumerate(lines):
+            if len(line) > 0:
+                offset_x = max(0, (self.width() - self.font_width * len(line)) // 2)
+                self.draw_string(
+                    offset_x, offset_y + (i * self.font_height), line, color, bg_color
+                )
+        return len(lines)  # return number of lines drawn
 
-    def draw_centered_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK):
+    def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""
         lines = text if isinstance(text, list) else self.to_lines(text)
         lines_height = len(lines) * self.font_height
         offset_y = max(0, (self.height() - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, bg_color)
 
-    def flash_text(self, text, color=lcd.WHITE, bg_color=lcd.BLACK, duration=3000):
+    def flash_text(self, text, color=theme.fg_color, duration=FLASH_MSG_TIME):
         """Flashes text centered on the display for duration ms"""
         self.clear()
-        self.draw_centered_text(text, color, bg_color)
-        time.sleep_ms(duration)
+        self.draw_centered_text(text, color)
+        self.sleep_ms(duration)
         self.clear()
 
-    def draw_qr_code(self, offset_y, qr_code, bright=False):
+    def draw_qr_code(
+        self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
+    ):
         """Draws a QR code on the screen"""
-        # Add a 1px white border around the code before displaying
-        qr_code = qr_code.strip()
-        lines = qr_code.split("\n")
-        size = len(lines)
-        new_lines = ["0" * (size + 2)]
-        for line in lines:
-            new_lines.append("0" + line + "0")
-        new_lines.append("0" * (size + 2))
-        qr_code = "\n".join(new_lines)
-        if bright:
-            lcd.draw_qr_code(offset_y, qr_code, self.width(), lcd.BLACK, lcd.WHITE)
-        else:
-            lcd.draw_qr_code(
-                offset_y, qr_code, self.width(), QR_DARK_COLOR, QR_LIGHT_COLOR
-            )
+        lcd.draw_qr_code_binary(
+            offset_y, qr_code, self.width(), dark_color, light_color, light_color
+        )
 
     def set_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""
-        if not self.i2c:
-            return
-        # Ranges from 0 to 8
-        level = max(0, min(level, 8))
-        val = (level + 7) << 4
-        self.i2c.writeto_mem(0x34, 0x91, int(val))
+
+        from .power import power_manager
+
+        power_manager.set_screen_brightness(level)
+
+    def max_menu_lines(self, line_offset=0):
+        """Maximum menu items the display can fit"""
+        pad = DEFAULT_PADDING if line_offset else 2 * DEFAULT_PADDING
+        return (self.height() - pad - line_offset) // (2 * self.font_height)

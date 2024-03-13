@@ -5,37 +5,44 @@ press BUTTON_B
 press BUTTON_B
 press BUTTON_A
 
+# Wait message debounce
+wait 0.3
+
+# Skip message
+press BUTTON_A
+
 # Navigate to Printer
-press BUTTON_B
-press BUTTON_B
-press BUTTON_B
+x5 press BUTTON_B
 press BUTTON_A
 
 # Navigate to Thermal
 press BUTTON_B
 press BUTTON_A
 
-screenshot thermal-options.png
+# screenshot thermal-options.png
 
-screenshot thermal-options-baudrate.png
-
-press BUTTON_B
-screenshot thermal-options-heat-dots.png
+# screenshot thermal-options-baudrate.png
 
 press BUTTON_B
-screenshot thermal-options-heat-interval.png
+# screenshot thermal-options-heat-interval.png
 
 press BUTTON_B
-screenshot thermal-options-heat-time.png
+# screenshot thermal-options-heat-time.png
 
 press BUTTON_B
-screenshot thermal-options-paper-width.png
+# screenshot thermal-options-line-delay.png
 
 press BUTTON_B
-screenshot thermal-options-rx-pin.png
+# screenshot thermal-options-paper-width.png
 
 press BUTTON_B
-screenshot thermal-options-tx-pin.png
+# screenshot thermal-options-rx-pin.png
 
 press BUTTON_B
-screenshot thermal-options-back.png
+# screenshot thermal-options-scale.png
+
+press BUTTON_B
+# screenshot thermal-options-tx-pin.png
+
+press BUTTON_B
+# screenshot thermal-options-back.png

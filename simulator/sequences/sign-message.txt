@@ -3,11 +3,13 @@ press BUTTON_A
 wait 1
 
 # Navigate to Sign
-x4 press BUTTON_B
+x2 press BUTTON_C
 press BUTTON_A
 
+
+# Sign message, load qr code
 press BUTTON_B
-press BUTTON_A
+x2 press BUTTON_A
 
 qrcode message-sha256.png
 wait 0.5
@@ -16,19 +18,19 @@ screenshot sign-message-sha256-sign-prompt.png
 
 press BUTTON_A
 
-screenshot sign-message-signed-message-text.png
+# screenshot sign-message-signed-message-text.png
 
 press BUTTON_A
 press BUTTON_B
 
-screenshot sign-message-signed-message-qr.png
+# screenshot sign-message-signed-message-qr.png
 
 press BUTTON_A
 
-screenshot sign-message-public-key-text.png
+# screenshot sign-message-public-key-text.png
 
 press BUTTON_A
 
-screenshot sign-message-public-key-qr.png
+# screenshot sign-message-public-key-qr.png
 
 press BUTTON_A

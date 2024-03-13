@@ -282,7 +282,7 @@ def test_to_mnemonic_words(mocker, m5stickv, tdata):
 
 def test_pick_final_word(mocker, m5stickv, tdata):
     mock_modules(mocker)
-    from krux.key import pick_final_word
+    from krux.key import Key
 
     mocker.patch("time.ticks_ms", new=lambda: 0)
     cases = [
@@ -308,29 +308,29 @@ def test_pick_final_word(mocker, m5stickv, tdata):
         ),
     ]
     assert (
-        pick_final_word(
-            mocker.MagicMock(input=mocker.MagicMock(entropy=123456789)),
+        Key.pick_final_word(
+            123456789,
             tdata.TEST_12_WORD_MNEMONIC.split()[:-1],
         )
         == "army"
     )
     assert (
-        pick_final_word(
-            mocker.MagicMock(input=mocker.MagicMock(entropy=123456789)),
+        Key.pick_final_word(
+            123456789,
             tdata.TEST_24_WORD_MNEMONIC.split()[:-1],
         )
         == "habit"
     )
     assert (
-        pick_final_word(
-            mocker.MagicMock(input=mocker.MagicMock(entropy=987654321)),
+        Key.pick_final_word(
+            987654321,
             tdata.TEST_12_WORD_MNEMONIC.split()[:-1],
         )
         == "situate"
     )
     assert (
-        pick_final_word(
-            mocker.MagicMock(input=mocker.MagicMock(entropy=987654321)),
+        Key.pick_final_word(
+            987654321,
             tdata.TEST_24_WORD_MNEMONIC.split()[:-1],
         )
         == "speak"
@@ -339,7 +339,9 @@ def test_pick_final_word(mocker, m5stickv, tdata):
 
 def test_pick_final_word_fails_when_wrong_word_count(mocker, m5stickv, tdata):
     mock_modules(mocker)
-    from krux.key import pick_final_word
+    from krux.key import Key
 
     with pytest.raises(ValueError):
-        pick_final_word(mocker.MagicMock(), tdata.TEST_12_WORD_MNEMONIC.split()[:-2])
+        Key.pick_final_word(
+            mocker.MagicMock(), tdata.TEST_12_WORD_MNEMONIC.split()[:-2]
+        )

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,15 @@ import os
 import pygame as pg
 
 M5STICKV = "maixpy_m5stickv"
-AMIGO_IPS = "maixpy_amigo_ips"
-AMIGO_TFT = "maixpy_amigo_tft"
+AMIGO = "maixpy_amigo"
 PC = "maixpy_pc"
+DOCK = "maixpy_dock"
 
 WINDOW_SIZES = {
     M5STICKV: (320, 640),
-    AMIGO_IPS: (480, 768),
-    AMIGO_TFT: (480, 768),
+    AMIGO: (480, 768),
     PC: (480, 640),
+    DOCK: (440, 820),
 }
 
 
@@ -59,10 +59,19 @@ fonts = {}
 def load_font(device):
     device = with_prefix(device)
     if device not in fonts:
-        size = 14 if device == M5STICKV else 24
-        fonts[device] = pg.freetype.Font(
-            os.path.join("..", "firmware", "font", "ter-u%dn.bdf" % size)
-        )
+        if device == M5STICKV:
+            fonts[device] = pg.freetype.Font(
+                os.path.join("..", "firmware", "font", "ter-u14n.bdf")
+            )
+        elif device == DOCK:
+            fonts[device] = pg.freetype.Font(
+                os.path.join("..", "firmware", "font", "ter-u16n.bdf")
+            )
+        else:
+            fonts[device] = pg.freetype.Font(
+                os.path.join("..", "firmware", "font", "ter-u24b.bdf")
+            )
+
     return fonts[device]
 
 
@@ -79,7 +88,7 @@ def screenshot_rect(device):
             screen.get_rect().center[0] - 1,
             screen.get_rect().center[1] + 57,
         )
-    elif device == AMIGO_IPS or device == AMIGO_TFT:
+    elif device == AMIGO:
         rect.width -= 370
         rect.height -= 95
         rect.center = (

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=W0212
+
 import gc
 import sensor
 import lcd
@@ -36,56 +38,146 @@ class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
     def __init__(self):
+        self.initialized = False
         self.cam_id = None
+        self.antiglare_enabled = False
         self.initialize_sensor()
 
     def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
-        sensor.reset(dual_buff=True)
+        self.initialized = False
+        self.antiglare_enabled = False
         self.cam_id = sensor.get_id()
+        if self.cam_id == OV7740_ID:
+            sensor.reset(freq=18200000)
+            if board.config["type"] == "cube":
+                # Rotate camera 180 degrees on Cube
+                sensor.set_hmirror(1)
+                sensor.set_vflip(1)
+        else:
+            sensor.reset()
         if grayscale:
             sensor.set_pixformat(sensor.GRAYSCALE)
         else:
             sensor.set_pixformat(sensor.RGB565)
         if self.cam_id == OV5642_ID:
-            # CIF mode will use central pixels and discard darker periphery
-            sensor.set_framesize(sensor.CIF)
             sensor.set_hmirror(1)
         if self.cam_id == OV2640_ID:
-            sensor.set_framesize(sensor.CIF)
             sensor.set_vflip(1)
+        if board.config["type"] == "bit":
+            # CIF mode will use central pixels and discard darker periphery
+            sensor.set_framesize(sensor.CIF)
         else:
             sensor.set_framesize(sensor.QVGA)
         if self.cam_id == OV7740_ID:
             self.config_ov_7740()
+        if self.cam_id == OV2640_ID:
+            self.config_ov_2640()
         sensor.skip_frames()
 
     def config_ov_7740(self):
         """Specialized config for OV7740 sensor"""
         # Allowed luminance thresholds:
         # luminance high threshold, default=0x78
-        sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+        sensor.__write_reg(0x24, 0x70)
         # luminance low threshold, default=0x68
-        sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+        sensor.__write_reg(0x25, 0x60)
 
         # Average-based sensing window definition
         # Ingnore periphery and measure luminance only on central area
         # Regions 1,2,3,4
-        sensor.__write_reg(0x56, 0x0)  # pylint: disable=W0212
+        sensor.__write_reg(0x56, 0x0)
         # Regions 5,6,7,8
-        sensor.__write_reg(0x57, 0b00111100)  # pylint: disable=W0212
+        sensor.__write_reg(0x57, 0b00111100)
         # Regions 9,10,11,12
-        sensor.__write_reg(0x58, 0b00111100)  # pylint: disable=W0212
+        sensor.__write_reg(0x58, 0b00111100)
         # Regions 13,14,15,16
-        sensor.__write_reg(0x59, 0x0)  # pylint: disable=W0212
+        sensor.__write_reg(0x59, 0x0)
 
-    def capture_qr_code_loop(self, callback, x_offset=False):
+    def config_ov_2640(self):
+        """Specialized config for OV2640 sensor"""
+        # Set register bank 0
+        sensor.__write_reg(0xFF, 0x00)
+        # Enable AEC
+        sensor.__write_reg(0xC2, 0x8C)
+        # Set register bank 1
+        sensor.__write_reg(0xFF, 0x01)
+        sensor.__write_reg(0x03, 0xCF)
+        # Allowed luminance thresholds:
+        # luminance high threshold, default=0x78
+        sensor.__write_reg(0x24, 0x70)
+        # luminance low threshold, default=0x68
+        sensor.__write_reg(0x25, 0x60)
+
+        # Average-based sensing window definition
+        # Ingnore periphery and measure luminance only on central area
+        # Regions 1,2,3,4
+        sensor.__write_reg(0x5D, 0xFF)
+        # Regions 5,6,7,8
+        sensor.__write_reg(0x5E, 0b11000011)
+        # Regions 9,10,11,12
+        sensor.__write_reg(0x5F, 0b11000011)
+        # Regions 13,14,15,16
+        sensor.__write_reg(0x60, 0xFF)
+
+    def has_antiglare(self):
+        """Returns whether the camera has anti-glare functionality"""
+        return self.cam_id in (OV7740_ID, OV2640_ID)
+
+    def enable_antiglare(self):
+        """Enables anti-glare mode"""
+        if self.cam_id == OV2640_ID:
+            # Set register bank 1
+            sensor.__write_reg(0xFF, 0x01)
+            # luminance high level, default=0x78
+            sensor.__write_reg(0x24, 0x28)
+        else:
+            # luminance high level, default=0x78
+            sensor.__write_reg(0x24, 0x38)
+        # luminance low level, default=0x68
+        sensor.__write_reg(0x25, 0x20)
+        if self.cam_id == OV7740_ID:
+            # Disable frame integrtation (night mode)
+            sensor.__write_reg(0x15, 0x00)
+        sensor.skip_frames()
+        self.antiglare_enabled = True
+
+    def disable_antiglare(self):
+        """Disables anti-glare mode"""
+        if self.cam_id == OV2640_ID:
+            # Set register bank 1
+            sensor.__write_reg(0xFF, 0x01)
+        # luminance high level, default=0x78
+        sensor.__write_reg(0x24, 0x70)
+        # luminance low level, default=0x68
+        sensor.__write_reg(0x25, 0x60)
+        sensor.skip_frames()
+        self.antiglare_enabled = False
+
+    def snapshot(self):
+        """Helper to take a customized snapshot from sensor"""
+        img = sensor.snapshot()
+        if board.config["type"] == "bit":
+            img.lens_corr(strength=1.1)
+            img.rotation_corr(z_rotation=180)
+        return img
+
+    def initialize_run(self):
+        """Initializes and runs sensor"""
+        self.initialize_sensor()
+        sensor.run(1)
+
+    def stop_sensor(self):
+        """Stops capturing from sensor"""
+        gc.collect()
+        sensor.run(0)
+
+    def capture_qr_code_loop(self, callback, flipped_x_coordinates=False):
         """Captures either singular or animated QRs and parses their contents until
         all parts of the message have been captured. The part data are then ordered
         and assembled into one message and returned.
         """
-        self.initialize_sensor()
-        sensor.run(1)
+        self.initialize_run()
 
         parser = QRPartParser()
 
@@ -94,50 +186,43 @@ class Camera:
         while True:
             wdt.feed()
             command = callback(parser.total_count(), parser.parsed_count(), new_part)
+            if not self.initialized:
+                # Ignores first callback as it may contain unintentional events
+                self.initialized = True
+                command = 0
             if command == 1:
                 break
-            if command == 2:
-                # luminance high level, default=0x78
-                sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
-                # luminance low level, default=0x68
-                sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
-                # Disable frame integrtation (night mode)
-                sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
-                sensor.skip_frames()
-            elif command == 3:
-                # luminance high level, default=0x78
-                sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
-                # luminance low level, default=0x68
-                sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
-                sensor.skip_frames()
-
             new_part = False
 
-            img = sensor.snapshot()
-            if self.cam_id in (OV2640_ID, OV5642_ID):
-                img.lens_corr(strength=1.1, zoom=0.96)
-            if self.cam_id == OV2640_ID:
-                img.rotation_corr(z_rotation=180)
+            img = self.snapshot()
             res = img.find_qrcodes()
+
+            # different cases of lcd.display to show a progress bar on different devices!
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
-            if x_offset:
-                lcd.display(img, oft=(2, 40))  # 40 will centralize image in Amigo
+                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
+            elif board.config["type"] == "amigo":
+                if flipped_x_coordinates:
+                    lcd.display(img, oft=(40, 40))
+                else:
+                    lcd.display(img, oft=(120, 40))  # X and Y are swapped
+            elif board.config["type"] == "cube":
+                lcd.display(img, oft=(0, 0), roi=(0, 0, 224, 240))
             else:
-                lcd.display(img)
+                lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
+
             if len(res) > 0:
                 data = res[0].payload()
 
                 parser.parse(data)
 
-                if parser.parsed_count() > prev_parsed_count:
-                    prev_parsed_count = parser.parsed_count()
+                if parser.processed_parts_count() > prev_parsed_count:
+                    prev_parsed_count = parser.processed_parts_count()
                     new_part = True
 
             if parser.is_complete():
                 break
-        gc.collect()
-        sensor.run(0)
+        self.stop_sensor()
 
         if parser.is_complete():
             return (parser.result(), parser.format)

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,22 @@
 # THE SOFTWARE.
 import os
 from machine import SDCard
+from .settings import SD_PATH
+
+SIGNED_FILE_SUFFIX = "-signed"
+PSBT_FILE_EXTENSION = ".psbt"
+DESCRIPTOR_FILE_EXTENSION = ".txt"
+JSON_FILE_EXTENSION = ".json"
+SIGNATURE_FILE_EXTENSION = ".sig"
+PUBKEY_FILE_EXTENSION = ".pub"
+BMP_IMAGE_EXTENSION = ".bmp"
+PBM_IMAGE_EXTENSION = ".pbm"
 
 
 class SDHandler:
     """A simple handler to work with files on SDCard"""
 
-    SD_PATH = "/sd/%s"
+    PATH_STR = "/" + SD_PATH + "/%s"
 
     def __init__(self):
         pass
@@ -36,7 +46,7 @@ class SDHandler:
         SDCard.remount()
 
         # this will raise an exception if not found (SD not mount)
-        os.listdir(SDHandler.SD_PATH % ".")
+        os.listdir(SDHandler.PATH_STR % ".")
 
         # if the code reaches here, no exception was raised
         return self
@@ -46,24 +56,40 @@ class SDHandler:
 
     def write_binary(self, filename, data):
         """Writes the data in binary format into the filename, truncating the file first"""
-        with open(SDHandler.SD_PATH % filename, "wb") as file:
+        with open(SDHandler.PATH_STR % filename, "wb") as file:
             file.write(data)
 
     def write(self, filename, data):
         """Writes the data into the filename, truncating the file first"""
-        with open(SDHandler.SD_PATH % filename, "w") as file:
+        with open(SDHandler.PATH_STR % filename, "w") as file:
             file.write(data)
 
     def read_binary(self, filename):
         """Reads the filename in binary format and returns the data"""
-        with open(SDHandler.SD_PATH % filename, "rb") as file:
+        with open(SDHandler.PATH_STR % filename, "rb") as file:
             return file.read()
 
     def read(self, filename):
         """Reads the filename and returns the data"""
-        with open(SDHandler.SD_PATH % filename, "r") as file:
+        with open(SDHandler.PATH_STR % filename, "r") as file:
             return file.read()
 
     def delete(self, filename):
         """Deletes the filename"""
-        os.remove(SDHandler.SD_PATH % filename)
+        os.remove(SDHandler.PATH_STR % filename)
+
+    @staticmethod
+    def dir_exists(filename):
+        """Checks if the file exists and is a directory"""
+        try:
+            return (os.stat(filename)[0] & 0x4000) != 0
+        except OSError:
+            return False
+
+    @staticmethod
+    def file_exists(filename):
+        """Checks if the file exists and is a file"""
+        try:
+            return (os.stat(filename)[0] & 0x4000) == 0
+        except OSError:
+            return False

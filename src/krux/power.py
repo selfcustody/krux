@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,12 @@
 import machine
 import sys
 import board
+from .i2c import i2c_bus
+
+# https://github.com/m5stack/M5StickC/blob/0527606d9e56c956ab17b278c25e3d07d7664f5e/src/AXP192.cpp#L20
+MAX_BATTERY_MV = 4200
+# https://github.com/m5stack/M5StickC/blob/0527606d9e56c956ab17b278c25e3d07d7664f5e/src/AXP192.cpp#L56
+MIN_BATTERY_MV = 3000
 
 
 class PowerManager:
@@ -29,44 +35,63 @@ class PowerManager:
 
     def __init__(self):
         self.pmu = None
-        if board.config["type"].startswith("amigo"):
-            try:
-                from pmu import axp173
+        try:
+            from pmu import PMUController
 
-                self.pmu = axp173()
-                self.pmu.enablePMICSleepMode(False)
-                # Amigo already have a dedicated reset button
-                # Will only enable button checking when in sleep mode
-            except:
-                pass
+            self.pmu = PMUController(i2c_bus)
+            self.pmu.enable_adcs(True)
+            if board.config["type"] == "m5stickv":
+                self.pmu.enable_pek_button_monitor()
+        except Exception as e:
+            print(e)
+
+    def has_battery(self):
+        """Returns if the device has a battery"""
+        try:
+            assert int(self.pmu.get_battery_voltage()) > 0
+        except:
+            return False
+        return True
+
+    def battery_charge_remaining(self):
+        """Returns the state of charge of the device's battery"""
+        mv = int(self.pmu.get_battery_voltage())
+        if board.config["type"] == "amigo":
+            charge = max(0, (mv - 3394.102415024943) / 416.73204356)
+        elif board.config["type"] in ("m5stickv", "cube"):
+            charge = max(0, (mv - 3131.427782118631) / 790.56172897)
         else:
-            try:
-                from pmu import axp192
+            charge = max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
 
-                self.pmu = axp192()
-                self.pmu.enablePMICSleepMode(True)
-            except:
-                pass
+        # Dirty trick to avoid showing 100% when battery is not fully charged
+        if self.pmu.charging():
+            charge -= 0.35  # compensates for the batt voltage raise when charging
+            # limits in 90% when still charging to let user know it's not fully charged
+            charge = min(0.9, charge)
+        charge = max(0, charge)  # Avoid negative values
+        return min(1, charge)
 
-    def batt_voltage(self):
-        """Returns the battery voltage of the device"""
-        if self.pmu is not None:
-            return self.pmu.getVbatVoltage()
-        return None
+    def usb_connected(self):
+        """Returns True if USB connected, False otherwise"""
+        return self.pmu.usb_connected()
+
+    def set_screen_brightness(self, value):
+        """Sets the screen brightness by modifying the backlight voltage"""
+        # Accpeted values range from 0 to 8
+        # pmu register allow values from 0 to 15, but values below 7 result in no backlight
+        value += 7
+        self.pmu.set_screen_brightness(value)
 
     def shutdown(self):
         """Shuts down the device"""
         if self.pmu is not None:
-            # Enable button checking before shutdown
-            self.pmu.enablePMICSleepMode(True)
-            self.pmu.setEnterSleepMode()
+            self.pmu.enable_adcs(False)
+            self.pmu.enter_sleep_mode()
         machine.reset()
         sys.exit()
 
     def reboot(self):
         """Reboots the device"""
-        if self.pmu is not None:
-            self.pmu.enablePMICSleepMode(False)
         machine.reset()
         sys.exit()
 

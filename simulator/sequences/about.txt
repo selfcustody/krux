@@ -4,6 +4,7 @@ include _wait-for-logo.txt
 press BUTTON_B
 press BUTTON_B
 press BUTTON_B
+press BUTTON_B
 press BUTTON_A
 
 screenshot about.png

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,13 +32,19 @@ from .display import Display
 from .krux_settings import t
 from .wdt import wdt
 
+FLASH_SIZE = 2**24
 MAX_FIRMWARE_SIZE = 0x300000
 
 FIRMWARE_SLOT_1 = 0x00080000
-FIRMWARE_SLOT_2 = 0x00280000
+FIRMWARE_SLOT_2 = 0x00280000  # TODO: Move to 0x00390000 - Test all possible cases
+SPIFFS_ADDR = 0xD00000
 
 MAIN_BOOT_CONFIG_SECTOR_ADDRESS = 0x00004000
 BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = 0x00005000
+
+ERASE_BLOCK_SIZE = 0x1000
+
+FLASH_IO_WAIT_TIME = 100
 
 
 def find_active_firmware(sector):
@@ -128,12 +134,12 @@ def write_data(
 
         cur_address = i * chunk_size + address
         flash.erase(cur_address, chunk_size)
-        time.sleep_ms(100)
+        time.sleep_ms(FLASH_IO_WAIT_TIME)
         if header and i == 0:
             flash.write(cur_address, b"\x00" + data_size.to_bytes(4, "little"))
-            time.sleep_ms(100)
+            time.sleep_ms(FLASH_IO_WAIT_TIME)
         flash.write(cur_address + header_offset, buffer[:chunk_size_after_header])
-        time.sleep_ms(100)
+        time.sleep_ms(FLASH_IO_WAIT_TIME)
         i += 1
         num_read = 0
         chunk_read = 0

@@ -32,12 +32,14 @@ def test_run_loop(mocker, m5stickv):
     )
 
     ctx.input.wait_for_button.side_effect = [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]
+    ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
 
     ctx.input.wait_for_button.side_effect = [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+    ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 2
@@ -53,13 +55,14 @@ def test_run_loop(mocker, m5stickv):
         BUTTON_PAGE,
         BUTTON_ENTER,
     ]
+    ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
 
 
-def test_run_loop_on_amigo_tft(mocker, amigo_tft):
+def test_run_loop_on_amigo_tft(mocker, amigo):
     from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -85,6 +88,7 @@ def test_run_loop_on_amigo_tft(mocker, amigo_tft):
         BUTTON_PAGE,
         BUTTON_ENTER,
     ]
+    ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
@@ -95,6 +99,7 @@ def test_run_loop_on_amigo_tft(mocker, amigo_tft):
         BUTTON_PAGE_PREV,
         BUTTON_ENTER,
     ]
+    ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 2

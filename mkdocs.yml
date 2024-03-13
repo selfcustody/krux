@@ -1,16 +1,21 @@
 markdown_extensions:
+  - attr_list
   - meta
   - toc:
       permalink: true
   - pymdownx.mark
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: ["docs/snippets"]
   - pymdownx.superfences:
       preserve_tabs: true
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
-extra_javascript:
-  - js/tabsync.js
+extra_css:
+  - css/custom.css
 
 theme:
   name: material
@@ -26,6 +31,7 @@ theme:
     - navigation.top
     - navigation.indexes
     - navigation.expand
+    - navigation.footer
     - toc.integrate
 
 site_name: Krux - Open-source signing device firmware for Bitcoin
@@ -37,14 +43,18 @@ docs_dir: docs
 site_dir: public
 extra:
   social:
-    - icon: material/chat
-      link: https://matrix.to/#/#krux:matrix.org
-      name: Join our Matrix server
+    - icon: fontawesome/solid/bullhorn
+      link: https://bitcointalk.org/index.php?topic=5350905.0
+      name: Send a message to the Bitcoin Forum
     - icon: fontawesome/brands/telegram
       link: https://t.me/SC_Krux
       name: Join our community-led Telegram
+    - icon: fontawesome/brands/x-twitter
+      link: https://twitter.com/selfcustodykrux
+      name: Follow us on X (Twitter)
     - icon: fontawesome/brands/github
       link: https://github.com/selfcustody/krux
+      name: Our code on Github
   generator: true
 copyright: 
   Powered by <a href="https://embit.rocks/">embit</a>, the Bitcoin library for Python 3 and Micropython
@@ -52,16 +62,28 @@ copyright:
 nav:
   - Home: index.en.md
   - Getting Started:
-    - About: getting-started/index.en.md
-    - Installing: getting-started/installing.en.md
-    - Generating a Mnemonic: getting-started/generating-a-mnemonic.en.md
-    - Loading a Mnemonic: getting-started/loading-a-mnemonic.en.md
-    - Navigating the Main Menu: getting-started/navigating-the-main-menu.en.md
-    - Using a Single-key Wallet: getting-started/using-a-single-key-wallet.en.md
-    - Using a Multisig Wallet: getting-started/using-a-multisig-wallet.en.md
-    - Printing: getting-started/printing.en.md
+    - Getting Started: getting-started/index.en.md
+    - Installing:
+      - Installing: getting-started/installing/index.en.md
+      - From GUI application: getting-started/installing/from-gui.en.md
+      - From pre-built official release: getting-started/installing/from-pre-built-release.en.md
+      - From pre-built test release: getting-started/installing/from-test-release.en.md
+      - From source: getting-started/installing/from-source.en.md
+    - Basic Usage:
+      - Generating a Mnemonic: getting-started/usage/generating-a-mnemonic.en.md
+      - Loading a Mnemonic: getting-started/usage/loading-a-mnemonic.en.md
+      - Navigating the Main Menu: getting-started/usage/navigating-the-main-menu.en.md
+      - Using a Single-sig Wallet: getting-started/usage/using-a-single-sig-wallet.en.md
+      - Using a Multisig Wallet: getting-started/usage/using-a-multisig-wallet.en.md
+    - Features:
+      - Encrypted Mnemonics: getting-started/features/encrypted-mnemonics.en.md
+      - Printing: getting-started/features/printing.en.md
+      - SD Card Updates: getting-started/features/sd-card-update.en.md
+      - Tools: getting-started/features/tools.en.md
+      - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
     - Settings: getting-started/settings.en.md
-  - Part List: parts.en.md
+    - Navigation Overview: getting-started/navigation.en.md
+  - Devices and Part List: parts.en.md
   - FAQ: faq.en.md
   - Support the Project: support.en.md
 

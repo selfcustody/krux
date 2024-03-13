@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,5 +28,7 @@ LCD_ROTATION_EVENT = pg.USEREVENT + 4
 LCD_DRAW_STRING_EVENT = pg.USEREVENT + 5
 LCD_DRAW_QR_CODE_EVENT = pg.USEREVENT + 6
 LCD_FILL_RECTANGLE_EVENT = pg.USEREVENT + 7
+LCD_DRAW_LINE_EVENT = pg.USEREVENT + 8
+LCD_DRAW_OUTLINE_EVENT = pg.USEREVENT + 9
 
-SCREENSHOT_EVENT = pg.USEREVENT + 8
+SCREENSHOT_EVENT = pg.USEREVENT + 10

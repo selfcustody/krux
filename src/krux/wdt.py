@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import machine
+from .settings import FLASH_PATH, SETTINGS_FILENAME
 
 try:
     import ujson as json
@@ -34,11 +35,11 @@ wdt = machine.WDT(timeout=RESET_TIMEOUT)
 
 # Check if user wanted to disable the watchdog!
 try:
-    with open("/flash/config.json", "rb") as f:
+    with open("/" + FLASH_PATH + "/" + SETTINGS_FILENAME, "r") as f:
         conf_dict = json.loads(f.read())
-        if WDT_CONF_NAME in conf_dict.keys():
-            if conf_dict[WDT_CONF_NAME]:
-                wdt.stop()
+        if conf_dict.get(WDT_CONF_NAME, False):
+            print("Watchdog disabled!")
+            wdt.stop()
         del conf_dict
 except:
     pass

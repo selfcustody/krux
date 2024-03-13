@@ -1,76 +1,6 @@
-TEST_QR = """
-111111100111000100010011001111111
-100000101001100100101111001000001
-101110101001100001000001001011101
-101110100010101000110011101011101
-101110101101001110000101001011101
-100000101010100111011110101000001
-111111101010101010101010101111111
-000000001111101101101111000000000
-110100110101111010010110101110110
-001101000100111011101100101000001
-010101101010100000011000111110101
-001101010101010100111100010011001
-010110110010110011001100001000000
-011100011010100010010110101010001
-100110100001101011101101000110110
-000100001001011001110100010011011
-001011111100100011011110001010001
-111100011111010010100001110000000
-000111111110011000000010000110111
-101101000111100111001100101010001
-100010111100110010110100110100011
-011001011000110011001010111000011
-110111100110111010111000111000101
-011000000100011110011100001111001
-100101110101110011011111111110000
-000000001000101000011111100010001
-111111101111110010000010101010110
-100000100101110111011100100010011
-101110100010000101010110111110000
-101110101111101010100100001111111
-101110100100001000000010110110011
-100000101001000011110101100111000
-111111101000011010001101101011010
-""".strip()
-
-TEST_QR_WITH_BORDER = """
-00000000000000000000000000000000000
-01111111001110001000100110011111110
-01000001010011001001011110010000010
-01011101010011000010000010010111010
-01011101000101010001100111010111010
-01011101011010011100001010010111010
-01000001010101001110111101010000010
-01111111010101010101010101011111110
-00000000011111011011011110000000000
-01101001101011110100101101011101100
-00011010001001110111011001010000010
-00101011010101000000110001111101010
-00011010101010101001111000100110010
-00101101100101100110011000010000000
-00111000110101000100101101010100010
-01001101000011010111011010001101100
-00001000010010110011101000100110110
-00010111111001000110111100010100010
-01111000111110100101000011100000000
-00001111111100110000000100001101110
-01011010001111001110011001010100010
-01000101111001100101101001101000110
-00110010110001100110010101110000110
-01101111001101110101110001110001010
-00110000001000111100111000011110010
-01001011101011100110111111111100000
-00000000010001010000111111000100010
-01111111011111100100000101010101100
-01000001001011101110111001000100110
-01011101000100001010101101111100000
-01011101011111010101001000011111110
-01011101001000010000000101101100110
-01000001010010000111101011001110000
-01111111010000110100011011010110100
-00000000000000000000000000000000000
-""".strip()
+TEST_QR = bytearray(
+    b"\x7fn\xfd\x830\x08v9\xd6\xedj\xa0\xdbUU7\xc8\xa0\xe0_U\x7f\x00i\x00\xe3\xd61P\x08\xf5Q\xef^\xfe`\xe8\xc1\x7f\xdex\x936Y\x91\xb8\xeb\xd29c\xd5\xd4\x7f\x00\n#\xfe\xcd\xd7\rJ\x8e\xd9\xe5\xf8\xb9K\xe6x\x17\xb9\xca\xa0\x9a\x9a\x7f\xbb\x1b\x01"
+)
 
 
 def test_init(mocker, m5stickv):
@@ -82,6 +12,7 @@ def test_init(mocker, m5stickv):
     mocker.spy(Display, "initialize_lcd")
 
     d = Display()
+    d.initialize_lcd()
 
     assert isinstance(d, Display)
     d.initialize_lcd.assert_called()
@@ -94,22 +25,42 @@ def test_init(mocker, m5stickv):
     )
 
 
+def test_init_amigo(mocker, amigo):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+    import board
+
+    mocker.spy(Display, "initialize_lcd")
+
+    d = Display()
+    d.initialize_lcd()
+
+    assert isinstance(d, Display)
+    d.initialize_lcd.assert_called()
+
+    krux.display.lcd.init.assert_called_once()
+    assert "invert" in krux.display.lcd.init.call_args.kwargs
+    assert krux.display.lcd.init.call_args.kwargs["invert"] == True
+
+
 def test_width(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
     d = Display()
+    d.initialize_lcd()
 
     d.to_portrait()
 
     assert d.width() == krux.display.lcd.width()
-    krux.display.lcd.height.assert_called()
+    krux.display.lcd.width.assert_called()
 
     d.to_landscape()
 
     assert d.width() == krux.display.lcd.height()
-    krux.display.lcd.width.assert_called()
+    krux.display.lcd.height.assert_called()
 
 
 def test_height(mocker, m5stickv):
@@ -177,7 +128,11 @@ def test_to_lines(mocker, m5stickv):
     from krux.display import Display
 
     cases = [
+        # 135 // 8 = 16 chars
         (135, "Two Words", ["Two Words"]),
+        (135, "Two  Words", ["Two  Words"]),
+        (135, "Two   Words", ["Two   Words"]),
+        (135, "Two        Words", ["Two        Words"]),
         (135, "Two\nWords", ["Two", "Words"]),
         (135, "Two\n\nWords", ["Two", "", "Words"]),
         (135, "Two\n\n\nWords", ["Two", "", "", "Words"]),
@@ -186,11 +141,11 @@ def test_to_lines(mocker, m5stickv):
         (135, "\nTwo\nWords\n", ["", "Two", "Words"]),
         (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
         (135, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
-        (135, "More Than Two Words", ["More Than", "Two Words"]),
+        (135, "More Than Two Words", ["More Than Two", "Words"]),  # 13 + 5 chars
         (
             135,
             "A bunch of words that span multiple lines..",
-            ["A bunch of", "words that span", "multiple lines.."],
+            ["A bunch of words", "that span", "multiple lines.."],  # 16 + 9 + 16 chars
         ),
         (
             135,
@@ -234,9 +189,11 @@ def test_to_lines(mocker, m5stickv):
                 "52aad7bd7dcce121",
                 "",
                 "",
+                "",
                 "Install?",
             ],
         ),
+        # (240 - 2 * 10) // 8 = 27 chars
         (240, "Two Words", ["Two Words"]),
         (240, "Two\nWords", ["Two", "Words"]),
         (240, "Two\n\nWords", ["Two", "", "Words"]),
@@ -250,7 +207,7 @@ def test_to_lines(mocker, m5stickv):
         (
             240,
             "A bunch of text that spans multiple lines..",
-            ["A bunch of text that", "spans multiple lines.."],
+            ["A bunch of text that spans", "multiple lines.."],  # 26 + 16 chars
         ),
         (
             240,
@@ -298,8 +255,75 @@ def test_to_lines(mocker, m5stickv):
             "krux.display.lcd",
             new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
         )
+        # print(case[0])
         d = Display()
         lines = d.to_lines(case[1])
+        assert lines == case[2]
+
+    # Test a text that don't fit in the screen
+    LCD_WIDTH = 240
+    MAX_LINES = 3
+    mocker.patch(
+        "krux.display.lcd",
+        new=mocker.MagicMock(width=mocker.MagicMock(return_value=LCD_WIDTH)),
+    )
+    long_text = "A really long text. " * 6
+    d = Display()
+    lines = d.to_lines(long_text, max_lines=MAX_LINES)
+    cut_text = [
+        "A really long text. A",
+        "really long text. A really",
+        "long text. A really long...",
+    ]
+    assert lines == cut_text
+
+
+def test_to_lines_exact_match_amigo(mocker, amigo):
+    from krux.display import Display
+
+    cases = [
+        # (320 - 2 * 10) // 12 = 24 chars
+        (320, "01234 0123456789012345678", ["01234 0123456789012345678"]),
+        (
+            320,
+            "0123456789 01234567890 01234",
+            ["0123456789 01234567890", "01234"],
+        ),  # 22 + 5 chars
+        (320, "01234567890123456789012345", ["0123456789012345678901234", "5"]),
+        (
+            320,
+            "01234 0123456789012345678\n01234 0123456789012345678",
+            ["01234 0123456789012345678", "01234 0123456789012345678"],
+        ),
+        (
+            320,
+            "01 34 0123456789012345678\n01234 0123456789012345678",
+            ["01 34 0123456789012345678", "01234 0123456789012345678"],
+        ),
+        (
+            320,
+            "01 01 01 01 01 01 01 01 0\n01 01 01 01 01 01 01 0123",
+            ["01 01 01 01 01 01 01 01 0", "01 01 01 01 01 01 01 0123"],
+        ),
+        (
+            320,
+            "0 0 0 0 0 0 0 0 0 0 0 0 0\n01 01 01 01 01 01 01 0123",
+            ["0 0 0 0 0 0 0 0 0 0 0 0 0", "01 01 01 01 01 01 01 0123"],
+        ),
+        (
+            320,
+            "01 345 0123456789012345678\n01234 0123456789012345678",
+            ["01 345", "0123456789012345678", "01234 0123456789012345678"],
+        ),
+    ]
+    for case in cases:
+        mocker.patch(
+            "krux.display.lcd",
+            new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
+        )
+        d = Display()
+        lines = d.to_lines(case[1])
+        print(lines)
         assert lines == case[2]
 
 
@@ -309,17 +333,69 @@ def test_outline(mocker, m5stickv):
     from krux.display import Display
 
     d = Display()
-    mocker.patch.object(d, "fill_rectangle")
 
     d.outline(0, 0, 100, 100, krux.display.lcd.WHITE)
 
-    d.fill_rectangle.assert_has_calls(
-        [
-            mocker.call(0, 0, 101, 1, krux.display.lcd.WHITE),
-            mocker.call(0, 100, 101, 1, krux.display.lcd.WHITE),
-            mocker.call(0, 0, 1, 101, krux.display.lcd.WHITE),
-            mocker.call(100, 0, 1, 101, krux.display.lcd.WHITE),
-        ]
+    krux.display.lcd.draw_outline.assert_called_with(
+        0, 0, 100, 100, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_line(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+
+    d.draw_line(100, 0, 100, 100, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_line.assert_called_with(
+        100, 0, 100, 100, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_line_on_inverted_display(mocker, amigo):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.draw_line(100, 0, 100, 100, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_line.assert_called_with(
+        480 - 100 - 1, 0, 480 - 100 - 1, 100, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_circle(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+
+    d.draw_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_circle.assert_called_with(
+        100, 100, 50, 0, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_circle_on_inverted_display(mocker, amigo):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.draw_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_circle.assert_called_with(
+        480 - 100, 100, 50, 0, krux.display.lcd.WHITE
     )
 
 
@@ -333,11 +409,11 @@ def test_fill_rectangle(mocker, m5stickv):
     d.fill_rectangle(0, 0, 100, 100, krux.display.lcd.WHITE)
 
     krux.display.lcd.fill_rectangle.assert_called_with(
-        0, 0, 100, 100, krux.display.lcd.WHITE
+        0, 0, 100, 100, krux.display.lcd.WHITE, 0
     )
 
 
-def test_fill_rectangle_on_inverted_display(mocker, amigo_tft):
+def test_fill_rectangle_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -348,7 +424,7 @@ def test_fill_rectangle_on_inverted_display(mocker, amigo_tft):
     d.fill_rectangle(0, 0, 100, 100, krux.display.lcd.WHITE)
 
     krux.display.lcd.fill_rectangle.assert_called_with(
-        480 - 0 - 100, 0, 100, 100, krux.display.lcd.WHITE
+        480 - 0 - 100, 0, 100, 100, krux.display.lcd.WHITE, 0
     )
 
 
@@ -366,7 +442,7 @@ def test_draw_string(mocker, m5stickv):
     )
 
 
-def test_draw_string_on_inverted_display(mocker, amigo_tft):
+def test_draw_string_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -399,6 +475,54 @@ def test_draw_hcentered_text(mocker, m5stickv):
     )
 
 
+def test_draw_hcentered_text_on_inverted_display(mocker, amigo):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text(
+        "Hello world", 50, krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+    d.draw_string.assert_called_with(
+        174, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+
+def test_draw_infobox(mocker, amigo):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display, DEFAULT_PADDING
+    from krux.themes import WHITE, BLACK, GREY
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 320)
+    mocker.spy(d, "fill_rectangle")
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text("Hello world", DEFAULT_PADDING, WHITE, BLACK, info_box=True)
+
+    d.fill_rectangle.assert_called_with(
+        DEFAULT_PADDING - 3,
+        DEFAULT_PADDING - 1,
+        d.width() - 2 * DEFAULT_PADDING + 6,
+        d.font_height + 2,
+        GREY,
+        d.font_width,
+    )
+    d.draw_string.assert_called_with(
+        (d.width() - len("Hello world") * d.font_width) // 2,
+        DEFAULT_PADDING,
+        "Hello world",
+        WHITE,
+        GREY,
+    )
+
+
 def test_draw_centered_text(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
@@ -416,25 +540,6 @@ def test_draw_centered_text(mocker, m5stickv):
     )
 
 
-def test_flash_text(mocker, m5stickv):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
-    mocker.patch("krux.display.time", new=mocker.MagicMock())
-    import krux
-    from krux.display import Display
-
-    d = Display()
-    mocker.patch.object(d, "width", new=lambda: 135)
-    mocker.patch.object(d, "height", new=lambda: 240)
-    mocker.spy(d, "draw_centered_text")
-    mocker.spy(d, "clear")
-
-    d.flash_text("Hello world", krux.display.lcd.WHITE, 0, 1000)
-
-    assert d.clear.call_count == 2
-    d.draw_centered_text.assert_called_once()
-    krux.display.time.sleep_ms.assert_called_with(1000)
-
-
 def test_draw_qr_code(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
@@ -445,6 +550,6 @@ def test_draw_qr_code(mocker, m5stickv):
 
     d.draw_qr_code(0, TEST_QR)
 
-    krux.display.lcd.draw_qr_code.assert_called_with(
-        0, TEST_QR_WITH_BORDER, 135, QR_DARK_COLOR, QR_LIGHT_COLOR
+    krux.display.lcd.draw_qr_code_binary.assert_called_with(
+        0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
     )

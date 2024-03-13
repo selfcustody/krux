@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        device: [maixpy_m5stickv, maixpy_amigo_ips, maixpy_amigo_tft, maixpy_bit, maixpy_dock]
+        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock, maixpy_yahboom]
     runs-on: ubuntu-latest
     services:
       registry:
@@ -19,16 +19,22 @@ jobs:
         ports:
           - 5000:5000
     steps:
+      - name: Remove unnecessary files
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
         with:
           driver-opts: network=host
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -37,7 +43,7 @@ jobs:
 
       - name: Build for M5StickV
         if: matrix.device == 'maixpy_m5stickv'
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           build-args: DEVICE=maixpy_m5stickv
@@ -48,68 +54,44 @@ jobs:
       - name: Extract firmware for M5StickV
         id: extract-m5stickv
         if: matrix.device == 'maixpy_m5stickv'
-        uses: shrink/actions-docker-extract@v1
+        uses: shrink/actions-docker-extract@v3
         with:
           image: localhost:5000/selfcustody/krux-builder-m5stickv:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for M5StickV
         if: matrix.device == 'maixpy_m5stickv'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ steps.extract-m5stickv.outputs.destination }}
           name: build-m5stickv
 
-      - name: Build for Amigo IPS
-        if: matrix.device == 'maixpy_amigo_ips'
-        uses: docker/build-push-action@v2
+      - name: Build for Amigo
+        if: matrix.device == 'maixpy_amigo'
+        uses: docker/build-push-action@v5
         with:
           context: .
-          build-args: DEVICE=maixpy_amigo_ips
+          build-args: DEVICE=maixpy_amigo
           push: true
-          tags: localhost:5000/selfcustody/krux-builder-amigo-ips:latest
+          tags: localhost:5000/selfcustody/krux-builder-amigo:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      - name: Extract firmware for Amigo IPS
-        id: extract-amigo-ips
-        if: matrix.device == 'maixpy_amigo_ips'
-        uses: shrink/actions-docker-extract@v1
+      - name: Extract firmware for Amigo
+        id: extract-amigo
+        if: matrix.device == 'maixpy_amigo'
+        uses: shrink/actions-docker-extract@v3
         with:
-          image: localhost:5000/selfcustody/krux-builder-amigo-ips:latest
+          image: localhost:5000/selfcustody/krux-builder-amigo:latest
           path: /src/firmware/Kboot/build/.
-      - name: Upload firmware for Amigo IPS
-        if: matrix.device == 'maixpy_amigo_ips'
-        uses: actions/upload-artifact@v2
+      - name: Upload firmware for Amigo
+        if: matrix.device == 'maixpy_amigo'
+        uses: actions/upload-artifact@v4
         with:
-          path: ${{ steps.extract-amigo-ips.outputs.destination }}
-          name: build-amigo-ips
-
-      - name: Build for Amigo TFT
-        if: matrix.device == 'maixpy_amigo_tft'
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          build-args: DEVICE=maixpy_amigo_tft
-          push: true
-          tags: localhost:5000/selfcustody/krux-builder-amigo-tft:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      - name: Extract firmware for Amigo TFT
-        id: extract-amigo-tft
-        if: matrix.device == 'maixpy_amigo_tft'
-        uses: shrink/actions-docker-extract@v1
-        with:
-          image: localhost:5000/selfcustody/krux-builder-amigo-tft:latest
-          path: /src/firmware/Kboot/build/.
-      - name: Upload firmware for Amigo TFT
-        if: matrix.device == 'maixpy_amigo_tft'
-        uses: actions/upload-artifact@v2
-        with:
-          path: ${{ steps.extract-amigo-tft.outputs.destination }}
-          name: build-amigo-tft
+          path: ${{ steps.extract-amigo.outputs.destination }}
+          name: build-amigo
 
       - name: Build for Bit
         if: matrix.device == 'maixpy_bit'
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           build-args: DEVICE=maixpy_bit
@@ -120,20 +102,20 @@ jobs:
       - name: Extract firmware for Bit
         id: extract-bit
         if: matrix.device == 'maixpy_bit'
-        uses: shrink/actions-docker-extract@v1
+        uses: shrink/actions-docker-extract@v3
         with:
           image: localhost:5000/selfcustody/krux-builder-bit:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Bit
         if: matrix.device == 'maixpy_bit'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ steps.extract-bit.outputs.destination }}
           name: build-bit
 
       - name: Build for Dock
         if: matrix.device == 'maixpy_dock'
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           build-args: DEVICE=maixpy_dock
@@ -144,16 +126,40 @@ jobs:
       - name: Extract firmware for Dock
         id: extract-dock
         if: matrix.device == 'maixpy_dock'
-        uses: shrink/actions-docker-extract@v1
+        uses: shrink/actions-docker-extract@v3
         with:
           image: localhost:5000/selfcustody/krux-builder-dock:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Dock
         if: matrix.device == 'maixpy_dock'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ steps.extract-dock.outputs.destination }}
           name: build-dock
+
+      - name: Build for Yahboom
+        if: matrix.device == 'maixpy_yahboom'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          build-args: DEVICE=maixpy_yahboom
+          push: true
+          tags: localhost:5000/selfcustody/krux-builder-yahboom:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Extract firmware for Yahboom
+        id: extract-yahboom
+        if: matrix.device == 'maixpy_yahboom'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: localhost:5000/selfcustody/krux-builder-yahboom:latest
+          path: /src/firmware/Kboot/build/.
+      - name: Upload firmware for Yahboom
+        if: matrix.device == 'maixpy_yahboom'
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ steps.extract-yahboom.outputs.destination }}
+          name: build-yahboom
           
       - name: Move cache
         run: |

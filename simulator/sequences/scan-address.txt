@@ -3,12 +3,10 @@ press BUTTON_A
 wait 1
 
 # Navigate to Scan Address
-press BUTTON_B
-press BUTTON_B
-press BUTTON_B
-press BUTTON_A
+x4 press BUTTON_B
+x3 press BUTTON_A
 
-qrcode specter-desktop-singlekey-wallet-receive-address.png
+qrcode specter-desktop-singlesig-wallet-receive-address.png
 wait 0.5
 
 screenshot scan-address-scanned-address.png
@@ -18,7 +16,7 @@ press BUTTON_A
 press BUTTON_A
 
 wait 1
-screenshot scan-address-valid-address.png
+# screenshot scan-address-valid-address.png
 
 press BUTTON_A
 
@@ -31,10 +29,10 @@ press BUTTON_A
 
 press BUTTON_A
 
-screenshot scan-address-searching.png
+# screenshot scan-address-searching.png
 
 press BUTTON_B
 
-screenshot scan-address-invalid-address.png
+# screenshot scan-address-invalid-address.png
 
 press BUTTON_A

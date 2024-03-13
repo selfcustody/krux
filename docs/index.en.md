@@ -6,10 +6,12 @@ hide:
 # Krux
 
 <img srcset="img/maixpy_m5stickv/logo-125.png" align="right">
-<img srcset="img/maixpy_amigo_tft/logo-150.png" align="right">
+<img srcset="img/maixpy_amigo/logo-150.png" align="right">
 
-Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts. It runs on Kendryte K210 devices such as the [M5StickV](https://docs.m5stack.com/en/core/m5stickv) and [Maix Amigo](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html), converting them into airgapped devices that can sign transactions for multisignature and single-key wallets.
+Krux is an open-source firmware that transforms off-the-shelf Kendryte K210 devices, such as the [Maix Amigo](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html), [M5StickV](https://docs.m5stack.com/en/core/m5stickv) and [more](parts.md), into versatile Bitcoin transaction signers. Beyond its core functionality, Krux is a flexible platform that can adapt to devices with different form factors, providing a suite of tools to assist with the creation and recovery of mnemonic backups, some of which include encryption options for enhanced security.
 
-You can even attach a thermal printer and print out the QR codes that it generates.
+Devices like Maix Amigo comes ready to use, with large touchscreens that make it easy and user-friendly to operate. These devices are ideal for those looking for a plug-and-play solution. On the other hand, Krux also supports development board kits, which are perfect for DIY enthusiasts who enjoy customizing and building their own hardware setups.
 
-To learn more about how Krux works, check out [Getting Started](getting-started).
+Interacting seamlessly with leading coordinator wallets through QR codes, SD cards, and even thermal printers, the firmware is continuously evolving to become a Swiss Army knife for self-custody, offering an array of features to support transactions and backups in a user-friendly and airgapped environment.
+
+To learn more about Krux, check out [Getting Started](getting-started/index.md).

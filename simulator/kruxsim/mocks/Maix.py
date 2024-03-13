@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,13 +28,6 @@ from kruxsim.mocks.fpioa_manager import fm_map
 
 PRESSED = 0
 RELEASED = 1
-
-sequence_executor = None
-
-
-def register_sequence_executor(s):
-    global sequence_executor
-    sequence_executor = s
 
 
 class GPIO:
@@ -83,8 +76,9 @@ class GPIO:
     GPIO5 = 37
     GPIO6 = 38
     GPIO7 = 39
+    IRQ_FALLING = 0
 
-    def __init__(self, gpio_num, dir, val):
+    def __init__(self, gpio_num, dir=None, val=None):
         self.key = None
         pin = fm_map[gpio_num]
         if pin == BUTTON_A:
@@ -94,31 +88,23 @@ class GPIO:
         if pin == BUTTON_C:
             self.key = pg.K_UP
 
-    def value(self):
+    def value(self, val=1):
         if not self.key:
-            return 1
-        if (
-            sequence_executor
-            and sequence_executor.key is not None
-            and sequence_executor.key == self.key
-        ):
-            sequence_executor.key_checks += 1
-            # wait for release
-            if sequence_executor.key_checks == 1:
-                return RELEASED
-            # wait for press
-            # if pressed
-            elif sequence_executor.key_checks == 2 or sequence_executor.key_checks == 3:
-                return PRESSED
-            # released
-            elif sequence_executor.key_checks == 4:
-                sequence_executor.key = None
-                sequence_executor.key_checks = 0
-                return RELEASED
+            return RELEASED
         return PRESSED if pg.key.get_pressed()[self.key] else RELEASED
+
+    def irq(self, pin, mode):
+        pass
 
 
 if "Maix" not in sys.modules:
     sys.modules["Maix"] = mock.MagicMock(
         GPIO=GPIO,
+    )
+
+from Crypto.Cipher import AES
+
+if "ucryptolib" not in sys.modules:
+    sys.modules["ucryptolib"] = mock.MagicMock(
+        aes=AES.new, MODE_ECB=AES.MODE_ECB, MODE_CBC=AES.MODE_CBC
     )

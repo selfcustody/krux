@@ -3,13 +3,13 @@
 	url = ../../diybitcoinhardware/embit
 [submodule "urtypes"]
 	path = vendor/urtypes
-	url = ../urtypes
+	url = ../../selfcustody/urtypes
 [submodule "foundation-ur-py"]
 	path = vendor/foundation-ur-py
-	url = ../foundation-ur-py
+	url = ../../selfcustody/foundation-ur-py
 [submodule "firmware/Kboot"]
 	path = firmware/Kboot
-	url = ../Kboot
+	url = ../../selfcustody/Kboot
 [submodule "firmware/MaixPy"]
 	path = firmware/MaixPy
 	url = ../MaixPy

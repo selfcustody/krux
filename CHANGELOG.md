@@ -1,3 +1,151 @@
+# Changelog 24.03.0 - March 12, 2024
+
+## Changes
+
+### Wipe Device
+Option on tools to wipe the device, permanently removing settings and stored encrypted mnemonics by erasing every single bit of user's flash space.
+
+### Better Deletion of Mnemonics Stored on SD card
+When deleting an encrypted mnemonic from an SD card, Krux will now overwrite the memory area making it impossible to recover the previously stored data.
+
+### Save and Load Wallet Output Descriptor from SD card
+Create or load from a wallet output descriptor file on an SD card. The backup file format is compatible with most coordinators.
+
+### Sign Messages at a Derived Bitcoin address
+Sign messages from Sparrow and Specter, via QR code, also attesting a Bitcoin address belongs to you.
+
+### Reproducible Builds
+To enhance the reproducibility of firmware builds, random variables such as file write timestamps have been removed from the build process. As a result, builds from developers' computers, those built within GitHub Actions from published code, and those you compile locally are more likely to be identical and have the same hash checksum as the official and beta releases. This change ensures greater consistency and traceability across all builds.
+
+### Add Entropy Quality Estimation for Mnemonic Creation.
+Entropy quality estimators, like Shannon's entropy, were added to mnemonic generation through dice rolls and camera snapshot.
+
+### IRQ Interfaces
+Button and touch presses are now detected by the application through IO interrupts. Meaning inputs events will be registered and handled even if they happened when other tasks were being executed by the processor, resulting in a better UX.
+
+### Restore Default Settings
+Option to restore the device's settings to its factory state.
+
+### Optimized Settings Storage
+Device's storage is now used more efficiently, data is stored less frequently, only in case a setting is changed from defaults.
+
+### Amigo's Power Manager Enhancements
+The power management behavior for the Amigo device has been standardized. Previously, some devices would not wake up from shutdown or sleep mode. Now, these devices will fully shut down when the shutdown option is selected from the menu, and they will always power on when the power button is pressed for 1 second.
+
+### GUI Enhancements
+Icons, information text boxes, and rounded shapes are now present at the GUI.
+
+### Mnemonic Numbers
+To match the input options, export mnemonics as decimal, hexadecimal, or octal numbers. When loading from numbers, a new numbers confirmation screen was added.
+
+### Optimized QR codes
+QR codes rendering is faster and uses less RAM.
+
+### Export QR Codes as Images to SD Card
+Some QR codes can be exported as images to SD card.
+
+### Screensaver
+Optional screensaver to reduce pixels' burn-in and grab the attention of the user when the device is left powered on.
+
+### Addresses Exploring
+More receive and change addresses per page are shown on bigger screens.
+
+### Update Embit to version 0.7
+Use the latest Embit release.
+
+### Maix Dock Simulator
+Now Krux PC simulator can also run in Maix Dock mode, mimicking appearance and characteristics of the most DIY Krux device.
+
+### New Compatible Device - Yahboom
+The Yahboom Aimotion K210 module, a compact touchscreen device, now has its first official firmware release.
+
+### Join Amigo IPS and Amigo TFT firmwares
+Users will be able to flash a single firmware and change display settings if their device was shipped with a display different from standard TFT.
+
+### Other Small Fixes and Code Optimizations
+Many other small fixes and optimizations under the hood.
+
+# Version 23.09.1 - November 18, 2023
+This release contain bugfixes:
+
+Encrypted Mnemonic QR codes would fail to decrypt if PBKDF2 iterations settings was changed to non multiple of 10,000.
+
+QR code transcription helpers that highlight regions could crash on edges of some QR code sizes.
+
+Address navigation "previous" menu option wouldn't show correct number.
+
+# Version 23.09.0 - September 12, 2023
+After a long year, new features are finally coming out of beta and making their way into a stable release. Also @jreesun appointed @odudex as the new lead maintainer of the project.
+
+## Changes
+
+### Battery Indicator
+Check battery status of M5stickV or Maix Amigo on top right of the screen.
+
+### New Mnemonic From Camera
+Use camera as a source of entropy to quickly create a mnemonic.
+
+### Tiny Seed - Export, Print, Punch, Manually Load or Scan
+Import and export a binary representation of your mnemonic, in a format popularized by Tiny Seed metal plates. BIP39 mnemonic words number, ranging from 1 to 2048 are punched in binary format on a rectangular grid.
+Krux will automatically convert a mnemonic to Tiny Seed format allowing to print or transcript it. You can also load a tiny seed toggling word bits on screen, or make use of machine vision capabilities of K210 chip to directly scan a Tiny Seed mnemonic backup stored on metal or paper.
+
+### Stackbit - Import and Export
+Without needing tools, guides or dictionaries, import and export another metal plate backup format, where each of the four digits of the word's number is a sum of marked (punched) numbers 1,2,4 and 8.
+
+### Enter Mnemonic as Word Numbers - Hex and Octal formats
+Also available in some metal plate backup formats, you could load your mnemonic words from its decimal BIP39 word number (1-2048), now you can also load from its hexadecimal(0x1-0x800) or octal(01-04000) word number.
+
+### Encryption and Storage
+Conveniently store your mnemonics on device's internal flash memory or removable SD card, protecting them with encryption. It is now possible to export encrypted QR codes too.
+
+### Addresses
+Beyond verifying your wallet's receive addresses, you can now also list, export and print receive and change addresses.
+
+### SD Card Hot plugging
+SD cards can now be inserted and removed at any time, making it easier to use it for signing transactions, messages and storing encrypted mnemonics.
+
+### Transcript Tools for QR codes
+Different visualization modes which make it easier to transcript QR codes.
+
+### Transaction Details
+When signing a transaction, more information is presented, ensuring that the user sees all details before signing.
+
+### Tools
+#### Check SD Card
+Check if the SD card is detected and explore its content.
+
+#### Delete Mnemonic
+Delete any stored encrypted mnemonic, on device's internal flash memory or SD card.
+
+#### Print Test QR
+Quickly print a test QR code to check and optimize your printer setup.
+
+#### Create QR Code
+Enter a text input to create, print or transcript a QR code that can be later used as an encryption key or as a passphrase.
+
+### Themes
+Choose your color theme according to your preference.
+
+### Thermal Printing and CNC
+More mnemonic export formats and tools to create and print generic QR codes to be used as passphrases or encryption keys. You can also export QR codes to gcode files and save them in SD cards, allowing you to machine them GRBL compatible CNCs without the need of computers and CAD tools.
+
+### More Settings
+#### Persist
+Choose where you want to store your settings, on internal flash memory or SD card.
+
+#### Touchscreen
+If your device has touchscreen you can change the touch detection threshold.
+
+### Languages
+Dutch translations were added.
+
+### UI Tweaks
+Small changes to optimize user experience.
+
+### Under the Hood
+Small bugfixes, optimizations and code refactoring, targeting better compatibility with coordinator softwares, faster boot and better RAM management.
+
+
 # Version 22.08.2 - September 13, 2022
 
 This patch release reverts the zpub QR code format, once again including key origin derivation info which is necessary for BlueWallet to use when preparing PSBTs for signing with single-key wallets.

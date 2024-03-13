@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,65 +21,86 @@
 # THE SOFTWARE.
 # pylint: disable=C0301
 # pylint: disable=C0103
+
+
 import sys
 import math
 import os
 import json
 
+
 BYTE_LEN = 2
 DEFAULT_CODEPOINTS = [
     ord(char)
-    for char in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !#$%&'()*+,-./:;<=>?@[\\]^_\"{|}~█₿"
+    for char in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !#$%&'()*+,-./:;<=>?@[\\]^_\"{|}~█₿ ⊚↳"
 ]
 TRANSLATIONS_DIR = "../../i18n/translations"
 
-width = int(sys.argv[2])
-height = int(sys.argv[3])
 
-width_bytes = math.ceil(width / 8)
+def hextokff(filename=None, width=None, height=None):
+    """Convert a hex formatted bitmap font file to a kff file"""
 
-# Scan the translations folder and build a set of unique codepoints used
-# across all translations
-used_codepoints = set(DEFAULT_CODEPOINTS)
-for translation_file in os.listdir(TRANSLATIONS_DIR):
-    translations = json.load(
-        open(os.path.join(TRANSLATIONS_DIR, translation_file), "r")
-    )
-    for translation in translations.values():
-        for char in translation:
-            used_codepoints.add(ord(char))
-
-with open(sys.argv[1], "r") as input_file:
-    # Read in a hex formatted bitmap font file
-    lines = input_file.readlines()
-
-    # Output in modified dkz format ("krux font format") where first two bytes
-    # of each row are the codepoint
-    bitmap = []
-    total_codepoints = 0
-    for line in lines:
-        line = line.rstrip("\n")
-        codepoint, glyph = line.split(":")
-        if int(codepoint, 16) not in used_codepoints:
-            continue
-
-        total_codepoints += 1
-
-        # Prefix with codepoint bytes
-        rows = ["0x%s,0x%s" % (codepoint[:2], codepoint[2:])]
-
-        for x in range(width_bytes):
-            row = []
-            for y in range(height):
-                glyph_index = y * BYTE_LEN * width_bytes + (x * BYTE_LEN)
-                row.append("0x" + glyph[glyph_index : glyph_index + BYTE_LEN])
-            rows.append(",".join(row))
-        bitmap.append(",\n".join(rows))
-
-    # Prefix with number of codepoints as two hex bytes
-    total_codepoints = "%04X" % total_codepoints
-    print(
-        ",\n".join(
-            ["0x%s,0x%s" % (total_codepoints[:2], total_codepoints[2:])] + bitmap
+    if filename is None or width is None or height is None:
+        raise ValueError(
+            "ERROR: Provide the filename.hex, width and height as arguments"
         )
-    )
+
+    width = int(width)
+    height = int(height)
+
+    width_bytes = math.ceil(width / 8)
+
+    # Scan the translations folder and build a set of unique codepoints used
+    # across all translations
+    used_codepoints = set(DEFAULT_CODEPOINTS)
+    for translation_file in os.listdir(TRANSLATIONS_DIR):
+        file_path = os.path.join(TRANSLATIONS_DIR, translation_file)
+
+        with open(file_path, "r", encoding="utf-8") as file:
+            translations = json.load(file)
+
+        for translation in translations.values():
+            for char in translation:
+                used_codepoints.add(ord(char))
+
+    with open(filename, "r", encoding="utf-8") as input_file:
+        # Read in a hex formatted bitmap font file
+        lines = input_file.readlines()
+
+        # Output in modified dkz format ("krux font format") where first two bytes
+        # of each row are the codepoint
+        bitmap = []
+        total_codepoints = 0
+        for line in lines:
+            line = line.rstrip("\n")
+            codepoint, glyph = line.split(":")
+            if int(codepoint, 16) not in used_codepoints:
+                continue
+
+            total_codepoints += 1
+
+            # Prefix with codepoint bytes
+            rows = [f"0x{codepoint[:2]},0x{codepoint[2:]}"]
+
+            for x in range(width_bytes):
+                row = []
+                for y in range(height):
+                    glyph_index = y * BYTE_LEN * width_bytes + (x * BYTE_LEN)
+                    row.append("0x" + glyph[glyph_index : glyph_index + BYTE_LEN])
+                rows.append(",".join(row))
+            bitmap.append(",\n".join(rows))
+
+        # Prefix with number of codepoints as two hex bytes
+        total_codepoints = f"{total_codepoints:04X}"
+        return ",\n".join(
+            [f"0x{total_codepoints[:2]},0x{total_codepoints[2:]}"] + bitmap
+        )
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 3:
+        print(hextokff(sys.argv[1], sys.argv[2], sys.argv[3]))
+    else:
+        raise ValueError(
+            "ERROR: Provide the filename.hex, width and height as arguments"
+        )

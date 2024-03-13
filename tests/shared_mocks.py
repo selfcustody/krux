@@ -3,10 +3,12 @@ import pyqrcode
 
 
 def encode_to_string(data):
-    # pre-decode if binary (SeedQR)
-    if len(data) in (16, 32):
+    try:
+        code_str = pyqrcode.create(data, error="L", mode="binary").text()
+    except:
+        # pre-decode if binary (SeedQR)
         data = data.decode("latin-1")
-    code_str = pyqrcode.create(data, error="L", mode="binary").text()
+        code_str = pyqrcode.create(data, error="L", mode="binary").text()
     size = 0
     while code_str[size] != "\n":
         size += 1
@@ -30,6 +32,24 @@ def encode_to_string(data):
     return new_code_str
 
 
+def encode(data):
+    # Uses string encoded qr as it already cleaned up the frames
+    # PyQRcode also doesn't offer any binary output
+
+    frame_less_qr = encode_to_string(data)
+    size = 0
+    while frame_less_qr[size] != "\n":
+        size += 1
+    binary_qr = bytearray(b"\x00" * ((size * size + 7) // 8))
+    for y in range(size):
+        for x in range(size):
+            bit_index = y * size + x
+            bit_string_index = y * (size + 1) + x
+            if frame_less_qr[bit_string_index] == "1":
+                binary_qr[bit_index >> 3] |= 1 << (bit_index % 8)
+    return binary_qr
+
+
 def get_mock_open(files: dict[str, str]):
     def open_mock(filename, *args, **kwargs):
         for expected_filename, content in files.items():
@@ -37,9 +57,23 @@ def get_mock_open(files: dict[str, str]):
                 if content == "Exception":
                     raise Exception()
                 return mock.mock_open(read_data=content).return_value
-        raise FileNotFoundError("(mock) Unable to open {filename}")
+        raise OSError("(mock) Unable to open {filename}")
 
     return mock.MagicMock(side_effect=open_mock)
+
+
+def statvfs(_):
+    return (8192, 8192, 1896512, 1338303, 1338303, 0, 0, 0, 0, 255)
+
+
+class TimeMocker:
+    def __init__(self, increment) -> None:
+        self.increment = increment
+        self.time = 0
+
+    def tick(self):
+        self.time += self.increment
+        return self.time
 
 
 class MockPrinter:
@@ -58,6 +92,15 @@ class MockPrinter:
     def print_string(self, string):
         pass
 
+    def set_bitmap_mode(self, x_size, y_size, mode):
+        pass
+
+    def print_bitmap_line(self, line):
+        pass
+
+    def feed(self, amount):
+        pass
+
 
 class MockQRPartParser:
     TOTAL = 10
@@ -73,6 +116,9 @@ class MockQRPartParser:
 
     def parsed_count(self):
         return len(self.parts)
+
+    def processed_parts_count(self):
+        return self.parsed_count()
 
     def parse(self, part):
         if part not in self.parts:
@@ -103,10 +149,52 @@ class Mockqrcode:
         return self.data
 
 
+class MockBlob:
+    def rect(self):
+        return (10, 10, 125, 100)
+
+
+class MockStats:
+    """Mock the luminosity of dots of a TinySeed on which the words
+    abandon...(x11) + about mnemonic is punched"""
+
+    def __init__(self) -> None:
+        self.counter = 0
+        self.word_counter = 0
+
+    def median(self):
+        if self.word_counter == 0:
+            self.word_counter += 1
+            return 50
+        self.counter += 1
+        if self.word_counter == 12 and self.counter == 10:
+            return 20
+        if self.counter == 12:
+            self.counter = 0
+            self.word_counter += 1
+            if self.word_counter > 12:
+                self.word_counter = 0
+                return 60
+            return 20
+        return 60
+
+    def l_stdev(self):
+        return 0
+
+    def a_stdev(self):
+        return 0
+
+    def b_stdev(self):
+        return 0
+
+
 SNAP_SUCCESS = 0
 SNAP_HISTOGRAM_FAIL = 1
 SNAP_FIND_QRCODES_FAIL = 2
 SNAP_REPEAT_QRCODE = 3
+DONT_FIND_ANYTHING = 4
+
+IMAGE_TO_HASH = b"\x12" * 1024  # Dummy bytes
 
 
 def snapshot_generator(outcome=SNAP_SUCCESS):
@@ -125,9 +213,17 @@ def snapshot_generator(outcome=SNAP_SUCCESS):
         elif outcome == SNAP_REPEAT_QRCODE and count == 2:
             m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = [Mockqrcode(str(count - 1))]
+        elif outcome == DONT_FIND_ANYTHING:
+            m.get_histogram.return_value = Mockhistogram()
+            m.find_qrcodes.return_value = []
         else:
             m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = [Mockqrcode(str(count))]
+            m.to_bytes.return_value = IMAGE_TO_HASH
+            m.find_blobs.return_value = [MockBlob()]
+            m.width.return_value = 320
+            m.height.return_value = 240
+            m.get_statistics.return_value = MockStats()
         return m
 
     return snapshot
@@ -187,7 +283,7 @@ def board_m5stickv():
 def board_amigo_tft():
     return mock.MagicMock(
         config={
-            "type": "amigo_tft",
+            "type": "amigo",
             "lcd": {"height": 320, "width": 480, "invert": 0, "dir": 40, "lcd_type": 1},
             "sdcard": {"sclk": 11, "mosi": 10, "miso": 6, "cs": 26},
             "board_info": {
@@ -219,6 +315,7 @@ def board_amigo_tft():
                     "BUTTON_A": 16,
                     "BUTTON_B": 20,
                     "BUTTON_C": 23,
+                    "TOUCH_IRQ": 33,
                     "LED_W": 32,
                     "I2C_SDA": 27,
                     "I2C_SCL": 24,
@@ -267,24 +364,42 @@ def mock_context(mocker):
 
     if board.config["type"] == "m5stickv":
         return mocker.MagicMock(
-            input=mocker.MagicMock(touch=None),
+            input=mocker.MagicMock(
+                touch=None,
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
             display=mocker.MagicMock(
                 font_width=8,
                 font_height=14,
+                total_lines=17,  # 240 / 14
                 width=mocker.MagicMock(return_value=135),
                 height=mocker.MagicMock(return_value=240),
+                usable_width=mocker.MagicMock(return_value=(135 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=7),
             ),
         )
     elif board.config["type"] == "dock":
         return mocker.MagicMock(
-            input=mocker.MagicMock(touch=None),
+            input=mocker.MagicMock(
+                touch=None,
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
             display=mocker.MagicMock(
                 font_width=8,
                 font_height=16,
+                total_lines=20,  # 320 / 16
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
+                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=9),
             ),
         )
     elif board.config["type"].startswith("amigo"):
@@ -292,8 +407,11 @@ def mock_context(mocker):
             display=mocker.MagicMock(
                 font_width=12,
                 font_height=24,
+                total_lines=20,  # 480 / 24
                 width=mocker.MagicMock(return_value=320),
                 height=mocker.MagicMock(return_value=480),
+                usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=9),
             ),
         )

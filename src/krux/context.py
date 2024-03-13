@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 import gc
 import board
-from .logging import logger
 from .display import Display
 from .input import Input
 from .camera import Camera
@@ -41,11 +40,6 @@ class Context:
         self.power_manager = None
         self.printer = None
         self.wallet = None
-
-    @property
-    def log(self):
-        """Returns the default logger"""
-        return logger
 
     def clear(self):
         """Clears all sensitive data from the context, resetting it"""

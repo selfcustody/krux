@@ -5,16 +5,176 @@ press BUTTON_A
 
 screenshot load-mnemonic-options.png
 
-screenshot load-mnemonic-options-via-qr.png
+# Navigate to camera options
+press BUTTON_A
+
+screenshot load-mnemonic-camera-options.png
+
+# Navigate to manual options
+press BUTTON_C
+press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-manual-options.png
+
+# Navigate to via text
+x2 press BUTTON_A
+
+screenshot load-mnemonic-via-text-word.png
+
+# Return
+x2 press BUTTON_C
+x2 press BUTTON_A
+
+# Navigate to via numbers - decimal
+press BUTTON_B
+x3 press BUTTON_A
+
+screenshot load-mnemonic-via-numbers-word.png
+
+# Return
+x2 press BUTTON_C
+x2 press BUTTON_A
+press BUTTON_C
+press BUTTON_A
+
+# Navigate to tinyseed
+press BUTTON_B
+x2 press BUTTON_A
+
+# Fill Tinyseed
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x6 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x8 press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x6 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x8 press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x6 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x8 press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_B
+press BUTTON_A
+
+x5 press BUTTON_B
+press BUTTON_A
+
+x1 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x6 press BUTTON_B
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x8 press BUTTON_B
+press BUTTON_A
+
+x7 press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-via-tinyseed-filled.png
+
+# Go to ESC and leave
+x2 press BUTTON_B
+x2 press BUTTON_A
+
+
+# Navigate to stackbit
+press BUTTON_B
+press BUTTON_A
+
+# Fill Stacbit
+press BUTTON_A
+
+x3 press BUTTON_B
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
 
 press BUTTON_B
-screenshot load-mnemonic-options-via-text.png
+press BUTTON_A
 
-press BUTTON_B
-screenshot load-mnemonic-options-via-numbers.png
+x5 press BUTTON_B
+press BUTTON_A
 
-press BUTTON_B
-screenshot load-mnemonic-options-via-bits.png
+screenshot load-mnemonic-via-stackbit-filled.png
 
+# Return
 press BUTTON_B
-screenshot load-mnemonic-options-back.png
+x2 press BUTTON_A
+
+# Return to previous menu
+press BUTTON_B
+press BUTTON_A
+
+# Navigate to storage options
+press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-storage-options.png

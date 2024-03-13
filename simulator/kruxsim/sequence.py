@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2022 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,8 @@ import cv2
 from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
 
-COMMANDS = ["press", "touch", "qrcode", "screenshot", "wait", "include", "x"]
+COMMANDS = ["press", "press_amigo_only", "touch", "qrcode", "screenshot", "wait", "include", "x"]
+THREAD_PERIOD = 0.1
 
 
 class SequenceExecutor:
@@ -50,9 +51,9 @@ class SequenceExecutor:
 
     def execute(self):
         if self.command_fn:
-            if time.time() - self.command_timer > 0.1:
+            if time.time() > self.command_timer + THREAD_PERIOD:
                 print("Executing (%s, %r)" % (self.command, self.command_params))
-                self.command_timer = 0
+                self.command_timer = time.time()
                 self.command_fn()
                 self.command_fn = None
                 self.command_params = []
@@ -62,6 +63,8 @@ class SequenceExecutor:
             self.command = cmd
             self.command_params = params
             if cmd == "press":
+                self.command_fn = self.press_key
+            elif cmd == "press_amigo_only" and BOARD_CONFIG["type"] != "m5stickv":
                 self.command_fn = self.press_key
             elif cmd == "touch":
                 self.command_fn = self.touch
