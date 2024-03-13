@@ -24,7 +24,7 @@ from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..themes import theme
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -214,8 +214,8 @@ class Stackbit(Page):
         """Draws punch pattern for Stackbit 1248 seed layout"""
 
         self.x_offset = DEFAULT_PADDING
-        # case for m5stickv
-        if self.ctx.display.width() == 135:
+        # case for m5stickv, cube
+        if MINIMAL_DISPLAY:
             self.x_offset = 5
         self.x_pad = 2 * self.ctx.display.font_width
         self.y_offset = 2 * self.ctx.display.font_height
@@ -393,7 +393,7 @@ class Stackbit(Page):
 
     def enter_1248(self):
         """UI to manually enter a Stackbit 1248"""
-        if self.ctx.display.width() > 135:
+        if not MINIMAL_DISPLAY:
             self.x_pad = 3 * self.ctx.display.font_width
         else:
             self.x_pad = 2 * self.ctx.display.font_width

@@ -26,10 +26,11 @@ from .krux_settings import Settings
 
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
-PORTRAIT, LANDSCAPE = [1, 2]
+PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
 DEFAULT_BACKLIGHT = 1
+MINIMAL_DISPLAY = True if board.config["type"] in ("m5stickv", "cube") else False
 
 FLASH_MSG_TIME = 2000
 
@@ -64,7 +65,7 @@ class Display:
             )
         else:
             self.flipped_x_coordinates = False
-        if board.config["type"] == "m5stickv":
+        if MINIMAL_DISPLAY:
             self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
         else:
             # room left for no/yes buttons
@@ -133,6 +134,11 @@ class Display:
                 ss=board.config["lcd"]["ss"],
                 clk=board.config["lcd"]["clk"],
             )
+        elif board.config["type"] == "cube":
+            lcd.init(
+                invert=True,
+                offset_h0=80,
+            )
         else:
             invert = False
             mirror = False
@@ -148,6 +154,8 @@ class Display:
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
+        if board.config["type"] == "cube":
+            return self.bottom_line
         return self.width() + DEFAULT_PADDING // 2
 
     def width(self):

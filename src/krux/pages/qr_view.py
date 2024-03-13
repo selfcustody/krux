@@ -435,10 +435,11 @@ class SeedQRView(Page):
                     self.bright = not self.bright
 
                 self.draw_grided_qr(mode)
-                self.ctx.display.draw_hcentered_text(
-                    label,
-                    self.ctx.display.qr_offset() + self.ctx.display.font_height,
-                )
+                if self.ctx.display.height() > self.ctx.display.width():
+                    self.ctx.display.draw_hcentered_text(
+                        label,
+                        self.ctx.display.qr_offset() + self.ctx.display.font_height,
+                    )
                 button = self.ctx.input.wait_for_button()
                 if transcript_tools:
                     if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe

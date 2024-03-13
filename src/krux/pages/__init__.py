@@ -35,7 +35,7 @@ from ..input import (
     PRESSED,
     DEBOUNCE,
 )
-from ..display import DEFAULT_PADDING, FLASH_MSG_TIME
+from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY, FLASH_MSG_TIME
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, BitcoinSettings
 from ..sd_card import SDHandler
@@ -224,7 +224,9 @@ class Page:
                 self.ctx.display.to_portrait()
                 filled = self.ctx.display.width() * num_parts_captured
                 filled //= part_total
-                if self.ctx.display.height() < 320:  # M5StickV
+                if board.config["type"] == "cube":
+                    height = 225
+                elif self.ctx.display.height() < 320:  # M5StickV
                     height = 210
                 elif self.ctx.display.height() > 320:  # Amigo
                     height = 380
@@ -284,18 +286,18 @@ class Page:
                 self.ctx.display.draw_qr_code(0, code)
             subtitle = t("Part\n%d / %d") % (i + 1, num_parts) if not title else title
             offset_y = self.ctx.display.qr_offset()
-            if title:
+            if title and self.ctx.display.height() > self.ctx.display.width():
                 offset_y += self.ctx.display.font_height
-            # Clean area below QR code to refresh subtitle/part
-            self.ctx.display.fill_rectangle(
-                0,
-                offset_y,
-                self.ctx.display.width(),
-                self.ctx.display.height() - offset_y,
-                theme.bg_color,
-            )
-            self.ctx.display.draw_hcentered_text(subtitle, offset_y)
-            i = (i + 1) % num_parts
+                # Clean area below QR code to refresh subtitle/part
+                self.ctx.display.fill_rectangle(
+                    0,
+                    offset_y,
+                    self.ctx.display.width(),
+                    self.ctx.display.height() - offset_y,
+                    theme.bg_color,
+                )
+                self.ctx.display.draw_hcentered_text(subtitle, offset_y)
+                i = (i + 1) % num_parts
             self.ctx.input.buttons_active = True
             if extra_debounce_flag:
                 # Animated QR codes disable debounce
@@ -371,7 +373,7 @@ class Page:
         )
         self.y_keypad_map = []
         self.x_keypad_map = []
-        if board.config["type"] == "m5stickv":
+        if MINIMAL_DISPLAY:
             return self.ctx.input.wait_for_button() == BUTTON_ENTER
         offset_y += (
             len(self.ctx.display.to_lines(text)) + 1

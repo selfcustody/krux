@@ -27,7 +27,7 @@ import hashlib
 import binascii
 from .. import Page, MENU_CONTINUE, Menu
 from ...themes import theme
-from ...display import DEFAULT_PADDING
+from ...display import DEFAULT_PADDING, MINIMAL_DISPLAY
 from ...baseconv import base_encode
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
@@ -95,7 +95,7 @@ class SignMessage(Page):
 
                     # Maximum lines available for message
                     max_lines = self.ctx.display.total_lines
-                    if board.config["type"] == "m5stickv":
+                    if MINIMAL_DISPLAY:
                         max_lines -= 7
                     else:
                         max_lines -= 10
