@@ -30,7 +30,7 @@ PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
 DEFAULT_BACKLIGHT = 1
-MINIMAL_DISPLAY = True if board.config["type"] in ("m5stickv", "cube") else False
+MINIMAL_DISPLAY = board.config["type"] in ("m5stickv", "cube")
 
 FLASH_MSG_TIME = 2000
 
