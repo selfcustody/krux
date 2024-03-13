@@ -38,16 +38,21 @@ def test_init(mocker, m5stickv, mock_page_cls):
 
 
 def test_flash_text(mocker, m5stickv, mock_page_cls):
-    import krux
+    from krux.display import FLASH_MSG_TIME
+    from krux.themes import WHITE, RED
 
     ctx = mock_context(mocker)
     mocker.patch("time.ticks_ms", new=lambda: 0)
     page = mock_page_cls(ctx)
-    page.flash_text("Hello world", krux.display.lcd.WHITE, 0, 1000)
 
-    assert ctx.display.clear.call_count == 2
-    ctx.display.draw_centered_text.assert_called_once()
-    krux.pages.time.sleep_ms.assert_called_with(1000)
+    page.flash_text("Hello world", duration=1000)
+
+    ctx.display.flash_text.assert_called_with("Hello world", WHITE, 1000)
+
+    page.flash_error("Error")
+
+    assert ctx.display.flash_text.call_count == 2
+    ctx.display.flash_text.assert_called_with("Error", RED, FLASH_MSG_TIME)
 
 
 def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
