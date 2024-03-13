@@ -31,7 +31,9 @@ QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
 
 DEFAULT_BACKLIGHT = 1
 
-# Splash will use h. centered text plots. This spaces are used to align without being
+FLASH_MSG_TIME = 2000
+
+# Splash will use horizontally-centered text plots. The spaces are used to help with alignment
 SPLASH = [
     "██   ",
     "██   ",
@@ -329,6 +331,13 @@ class Display:
         lines_height = len(lines) * self.font_height
         offset_y = max(0, (self.height() - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, bg_color)
+
+    def flash_text(self, text, color=theme.fg_color, duration=FLASH_MSG_TIME):
+        """Flashes text centered on the display for duration ms"""
+        self.clear()
+        self.draw_centered_text(text, color)
+        self.sleep_ms(duration)
+        self.clear()
 
     def draw_qr_code(
         self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
