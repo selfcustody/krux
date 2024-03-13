@@ -19,6 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=W0212
+
 import gc
 import sensor
 import lcd
@@ -73,46 +75,46 @@ class Camera:
         """Specialized config for OV7740 sensor"""
         # Allowed luminance thresholds:
         # luminance high threshold, default=0x78
-        sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+        sensor.__write_reg(0x24, 0x70)
         # luminance low threshold, default=0x68
-        sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+        sensor.__write_reg(0x25, 0x60)
 
         # Average-based sensing window definition
         # Ingnore periphery and measure luminance only on central area
         # Regions 1,2,3,4
-        sensor.__write_reg(0x56, 0x0)  # pylint: disable=W0212
+        sensor.__write_reg(0x56, 0x0)
         # Regions 5,6,7,8
-        sensor.__write_reg(0x57, 0b00111100)  # pylint: disable=W0212
+        sensor.__write_reg(0x57, 0b00111100)
         # Regions 9,10,11,12
-        sensor.__write_reg(0x58, 0b00111100)  # pylint: disable=W0212
+        sensor.__write_reg(0x58, 0b00111100)
         # Regions 13,14,15,16
-        sensor.__write_reg(0x59, 0x0)  # pylint: disable=W0212
+        sensor.__write_reg(0x59, 0x0)
 
     def config_ov_2640(self):
         """Specialized config for OV2640 sensor"""
         # Set register bank 0
-        sensor.__write_reg(0xFF, 0x00)  # pylint: disable=W0212
+        sensor.__write_reg(0xFF, 0x00)
         # Enable AEC
-        sensor.__write_reg(0xC2, 0x8C)  # pylint: disable=W0212
+        sensor.__write_reg(0xC2, 0x8C)
         # Set register bank 1
-        sensor.__write_reg(0xFF, 0x01)  # pylint: disable=W0212
-        sensor.__write_reg(0x03, 0xCF)  # pylint: disable=W0212
+        sensor.__write_reg(0xFF, 0x01)
+        sensor.__write_reg(0x03, 0xCF)
         # Allowed luminance thresholds:
         # luminance high threshold, default=0x78
-        sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+        sensor.__write_reg(0x24, 0x70)
         # luminance low threshold, default=0x68
-        sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+        sensor.__write_reg(0x25, 0x60)
 
         # Average-based sensing window definition
         # Ingnore periphery and measure luminance only on central area
         # Regions 1,2,3,4
-        sensor.__write_reg(0x5D, 0xFF)  # pylint: disable=W0212
+        sensor.__write_reg(0x5D, 0xFF)
         # Regions 5,6,7,8
-        sensor.__write_reg(0x5E, 0b11000011)  # pylint: disable=W0212
+        sensor.__write_reg(0x5E, 0b11000011)
         # Regions 9,10,11,12
-        sensor.__write_reg(0x5F, 0b11000011)  # pylint: disable=W0212
+        sensor.__write_reg(0x5F, 0b11000011)
         # Regions 13,14,15,16
-        sensor.__write_reg(0x60, 0xFF)  # pylint: disable=W0212
+        sensor.__write_reg(0x60, 0xFF)
 
     def has_antiglare(self):
         """Returns whether the camera has anti-glare functionality"""
@@ -122,17 +124,17 @@ class Camera:
         """Enables anti-glare mode"""
         if self.cam_id == OV2640_ID:
             # Set register bank 1
-            sensor.__write_reg(0xFF, 0x01)  # pylint: disable=W0212
+            sensor.__write_reg(0xFF, 0x01)
             # luminance high level, default=0x78
-            sensor.__write_reg(0x24, 0x28)  # pylint: disable=W0212
+            sensor.__write_reg(0x24, 0x28)
         else:
             # luminance high level, default=0x78
-            sensor.__write_reg(0x24, 0x38)  # pylint: disable=W0212
+            sensor.__write_reg(0x24, 0x38)
         # luminance low level, default=0x68
-        sensor.__write_reg(0x25, 0x20)  # pylint: disable=W0212
+        sensor.__write_reg(0x25, 0x20)
         if self.cam_id == OV7740_ID:
             # Disable frame integrtation (night mode)
-            sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
+            sensor.__write_reg(0x15, 0x00)
         sensor.skip_frames()
         self.antiglare_enabled = True
 
@@ -140,11 +142,11 @@ class Camera:
         """Disables anti-glare mode"""
         if self.cam_id == OV2640_ID:
             # Set register bank 1
-            sensor.__write_reg(0xFF, 0x01)  # pylint: disable=W0212
+            sensor.__write_reg(0xFF, 0x01)
         # luminance high level, default=0x78
-        sensor.__write_reg(0x24, 0x70)  # pylint: disable=W0212
+        sensor.__write_reg(0x24, 0x70)
         # luminance low level, default=0x68
-        sensor.__write_reg(0x25, 0x60)  # pylint: disable=W0212
+        sensor.__write_reg(0x25, 0x60)
         sensor.skip_frames()
         self.antiglare_enabled = False
 
