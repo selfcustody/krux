@@ -4,7 +4,7 @@
 
 <p align="center">
 <img src="https://selfcustody.github.io/krux/img/maixpy_m5stickv/logo-125.png">
-<img src="https://selfcustody.github.io/krux/img/maixpy_amigo_tft/logo-150.png">
+<img src="https://selfcustody.github.io/krux/img/maixpy_amigo/logo-150.png">
 </p>
 
 Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts. It runs on Kendryte K210 devices such as the [M5StickV](https://docs.m5stack.com/en/core/m5stickv) and [Maix Amigo](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html), converting them into airgapped devices that can sign transactions for multisignature and single-sig wallets.
@@ -53,6 +53,16 @@ Otherwise, to run the commands on bare metal, remove the `vagrant ssh -c 'cd /va
 ./krux flash maixpy_dock
 ```
 
+Note: if you encounter any of this errors during build, it is a connection issue with github, plz try to build again:
+```
+error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err8)
+fatal: the remote end hung up unexpectedly
+fatal: early EOF
+fatal: index-pack failed
+fatal: clone of ... failed
+Failed to clone ...
+```
+
 ## Install krux and dev tools
 The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/). To generate a new `poetry.lock` file use: `poetry lock --no-update`.
 ```bash
@@ -66,25 +76,25 @@ Note that you can run `poetry install` after making a change to the krux code if
 
 ## Format code
 ```bash
-poetry run black ./src
-poetry run black ./tests
+poetry run poe format
 ```
 
 ## Run pylint
 ```bash
-poetry run pylint ./src
+poetry run poe lint
 ```
 
 ## Run tests
 ```bash
-poetry run pytest --cache-clear --cov src/krux --cov-report html ./tests
+poetry run poe test
 ```
+
 This will run all tests and generate a coverage report you can browse to locally in your browser at `file:///path/to/krux/htmlcov/index.html`.
 
 For more verbose test output (e.g., to see the output of print statements), run:
 
 ```bash
-poetry run pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests
+poetry run poe test-verbose
 ```
 
 To run just a specific test from a specific file, run:
@@ -130,7 +140,7 @@ Run the simulator:
 cd simulator
 
 # Run simulator with the touch device amigo, then use mouse to navigate
-poetry run python simulator.py --device maixpy_amigo_tft
+poetry run python simulator.py --device maixpy_amigo
 
 # Run simulator with sd enabled (you need the folder `simulator/sd`) on the small button-only device m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
 poetry run python simulator.py --device maixpy_m5stickv --sd
@@ -168,7 +178,7 @@ cd simulator
 poetry run python simulator.py --sequence sequences/about.txt --sd --device maixpy_m5stickv
 
 # Sequence screenshots are scaled to fit in docs. Use --no-screenshot-scale to get full size
-poetry run python simulator.py --sequence sequences/home-options.txt --device maixpy_amigo_tft --no-screenshot-scale
+poetry run python simulator.py --sequence sequences/home-options.txt --device maixpy_amigo --no-screenshot-scale
 ```
 
 ## Live debug a device
@@ -287,7 +297,7 @@ Learn about how to setup fonts [here](firmware/font/README.md)
 
 ## Colors
 
-Use [this script](firmware/scripts/krux_colors.py) to generate Maixpy compatible colors from RGB values to customize Krux
+Use [this script](firmware/scripts/rgbconv.py) to generate Maixpy compatible colors from RGB values to customize Krux
 
 ## Documentation
 

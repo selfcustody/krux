@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -85,37 +85,6 @@ class BitcoinSettings(SettingsNamespace):
         }[attr]
 
 
-class LoggingSettings(SettingsNamespace):
-    """Log-specific settings"""
-
-    NONE = 99
-    ERROR = 40
-    WARN = 30
-    INFO = 20
-    DEBUG = 10
-    NONE_TXT = "NONE"
-    ERROR_TXT = "ERROR"
-    WARN_TXT = "WARN"
-    INFO_TXT = "INFO"
-    DEBUG_TXT = "DEBUG"
-    LEVEL_NAMES = {
-        NONE: NONE_TXT,
-        ERROR: ERROR_TXT,
-        WARN: WARN_TXT,
-        INFO: INFO_TXT,
-        DEBUG: DEBUG_TXT,
-    }
-
-    namespace = "settings.logging"
-    level = CategorySetting("level", NONE_TXT, list(LEVEL_NAMES.values()))
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "level": t("Log Level"),
-        }[attr]
-
-
 class I18nSettings(SettingsNamespace):
     """I18n-specific settings"""
 
@@ -155,8 +124,6 @@ class AdafruitPrinterSettings(SettingsNamespace):
     paper_width = NumberSetting(int, "paper_width", 384, [100, 1000])
     tx_pin = NumberSetting(int, "tx_pin", DEFAULT_TX_PIN, [0, 10000])
     rx_pin = NumberSetting(int, "rx_pin", DEFAULT_RX_PIN, [0, 10000])
-    heat_time = NumberSetting(int, "heat_time", 120, [3, 255])
-    heat_interval = NumberSetting(int, "heat_interval", 40, [0, 255])
     line_delay = NumberSetting(int, "line_delay", 20, [0, 255])
     scale = NumberSetting(int, "scale", 75, [25, 100])
 
@@ -167,8 +134,6 @@ class AdafruitPrinterSettings(SettingsNamespace):
             "paper_width": t("Paper Width"),
             "tx_pin": t("TX Pin"),
             "rx_pin": t("RX Pin"),
-            "heat_time": t("Heat Time"),
-            "heat_interval": t("Heat Interval"),
             "line_delay": t("Line Delay"),
             "scale": t("Scale"),
         }[attr]
@@ -254,7 +219,7 @@ class EncoderSettings(SettingsNamespace):
     """Encoder debounce settings"""
 
     namespace = "settings.encoder"
-    debounce = NumberSetting(int, "debounce", 50, [25, 250])
+    debounce = NumberSetting(int, "debounce", 100, [100, 250])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -274,6 +239,53 @@ class TouchSettings(SettingsNamespace):
         return {
             "threshold": t("Touch Threshold"),
         }[attr]
+
+
+class AmgDisplaySettings(SettingsNamespace):
+    """Custom display settings for Maix Amigo"""
+
+    namespace = "settings.amg_display"
+    flipped_x_coordinates = CategorySetting("flipped_x", True, [False, True])
+    inverted_colors = CategorySetting("inverted_colors", True, [False, True])
+    bgr_colors = CategorySetting("bgr_colors", True, [False, True])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "flipped_x": t("Flipped X Coordinates"),
+            "inverted_colors": t("Inverted Colors"),
+            "bgr_colors": t("BGR Colors"),
+        }[attr]
+
+
+class HardwareSettings(SettingsNamespace):
+    """Hardware Related Settings"""
+
+    namespace = "settings.hardware"
+
+    def __init__(self):
+        self.printer = PrinterSettings()
+        if board.config["type"] == "amigo" or board.config["type"] == "yahboom":
+            self.touch = TouchSettings()
+        if board.config["type"] == "amigo":
+            self.display = AmgDisplaySettings()
+        if board.config["type"] == "dock":
+            self.encoder = EncoderSettings()
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+
+        hardware_menu = {
+            "printer": t("Printer"),
+        }
+        if board.config["type"] == "amigo" or board.config["type"] == "yahboom":
+            hardware_menu["touchscreen"] = t("Touchscreen")
+        if board.config["type"] == "amigo":
+            hardware_menu["amg_display"] = t("Display")
+        if board.config["type"] == "dock":
+            hardware_menu["encoder"] = t("Encoder")
+
+        return hardware_menu[attr]
 
 
 class PersistSettings(SettingsNamespace):
@@ -316,21 +328,29 @@ class ThemeSettings(SettingsNamespace):
     DARK_THEME = 0
     LIGHT_THEME = 1
     ORANGE_THEME = 3
+    GREEN_THEME = 4
+    PINK_THEME = 5
     DARK_THEME_NAME = "Dark"
     LIGHT_THEME_NAME = "Light"
     ORANGE_THEME_NAME = "Orange"
+    GREEN_THEME_NAME = "CypherPunk"
+    PINK_THEME_NAME = "CypherPink"
     THEME_NAMES = {
         DARK_THEME: DARK_THEME_NAME,
         LIGHT_THEME: LIGHT_THEME_NAME,
         ORANGE_THEME: ORANGE_THEME_NAME,
+        GREEN_THEME: GREEN_THEME_NAME,
+        PINK_THEME: PINK_THEME_NAME,
     }
     namespace = "settings.appearance"
     theme = CategorySetting("theme", DARK_THEME_NAME, list(THEME_NAMES.values()))
+    screensaver_time = NumberSetting(int, "screensaver_time", 5, [0, 30])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "theme": t("Theme"),
+            "screensaver_time": t("Screensaver time"),
         }[attr]
 
 
@@ -341,30 +361,21 @@ class Settings(SettingsNamespace):
 
     def __init__(self):
         self.bitcoin = BitcoinSettings()
+        self.hardware = HardwareSettings()
         self.i18n = I18nSettings()
-        self.logging = LoggingSettings()
         self.encryption = EncryptionSettings()
-        self.printer = PrinterSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
-        if board.config["type"].startswith("amigo"):
-            self.touch = TouchSettings()
-        if board.config["type"] == "dock":
-            self.encoder = EncoderSettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         main_menu = {
             "bitcoin": t("Bitcoin"),
+            "hardware": t("Hardware"),
             "i18n": t("Language"),
-            "logging": t("Logging"),
             "encryption": t("Encryption"),
             "persist": t("Persist"),
-            "printer": t("Printer"),
-            "appearance": t("Theme"),
+            "appearance": t("Appearance"),
         }
-        if board.config["type"].startswith("amigo"):
-            main_menu["touchscreen"] = t("Touchscreen")
-        if board.config["type"] == "dock":
-            main_menu["encoder"] = t("Encoder")
+
         return main_menu[attr]

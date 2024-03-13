@@ -7,18 +7,42 @@ wait 1
 x2 press BUTTON_B
 press BUTTON_A
 
-# screenshot extended-public-key-wpkh-xpub-text.png
+screenshot extended-public-key-menu.png
 
 press BUTTON_A
+
+screenshot extended-public-key-wpkh-xpub-text.png
+
+# Return
+press BUTTON_B
+press BUTTON_A
+
+# Enter to xpub QR code
+press BUTTON_B
+press BUTTON_A
+
 # Give time to render QR code - slow computer?
 wait 0.1
 screenshot extended-public-key-wpkh-xpub-qr.png
 
+# Return
 press BUTTON_A
+press BUTTON_C
+press BUTTON_A
+
+# Enter to zpub text
+x2 press BUTTON_B
+press BUTTON_A
+
 # screenshot extended-public-key-wpkh-zpub-text.png
 
+# Return
+press BUTTON_B
+press BUTTON_A
+
+# Enter to zpub QR code
+x3 press BUTTON_B
 press BUTTON_A
 wait 0.1
-screenshot extended-public-key-wpkh-zpub-qr.png
 
-press BUTTON_A
+screenshot extended-public-key-wpkh-zpub-qr.png

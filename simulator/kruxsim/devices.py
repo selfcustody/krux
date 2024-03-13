@@ -23,17 +23,15 @@ import os
 import pygame as pg
 
 M5STICKV = "maixpy_m5stickv"
-AMIGO_IPS = "maixpy_amigo_ips"
-AMIGO_TFT = "maixpy_amigo_tft"
+AMIGO = "maixpy_amigo"
 PC = "maixpy_pc"
 DOCK = "maixpy_dock"
 
 WINDOW_SIZES = {
     M5STICKV: (320, 640),
-    AMIGO_IPS: (480, 768),
-    AMIGO_TFT: (480, 768),
+    AMIGO: (480, 768),
     PC: (480, 640),
-    DOCK: (440, 640),
+    DOCK: (440, 820),
 }
 
 
@@ -47,8 +45,6 @@ images = {}
 def load_image(device):
     device = with_prefix(device)
     if device == PC:
-        return None
-    if device == DOCK:
         return None
     if device not in images:
         images[device] = pg.image.load(
@@ -92,7 +88,7 @@ def screenshot_rect(device):
             screen.get_rect().center[0] - 1,
             screen.get_rect().center[1] + 57,
         )
-    elif device == AMIGO_IPS or device == AMIGO_TFT:
+    elif device == AMIGO:
         rect.width -= 370
         rect.height -= 95
         rect.center = (

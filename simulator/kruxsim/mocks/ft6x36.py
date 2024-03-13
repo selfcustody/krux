@@ -19,9 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import imp
 import sys
-import time
 from unittest import mock
 import pygame as pg
 from . import lcd
@@ -34,45 +32,49 @@ def register_sequence_executor(s):
     sequence_executor = s
 
 
-def to_screen_pos(pos):
-    if lcd.screen:
-        rect = lcd.screen.get_rect()
-        rect.center = pg.display.get_surface().get_rect().center
-        if rect.collidepoint(pos):
-            out = pos[0] - rect.left, pos[1] - rect.top
-            return out
-    return None
-
-
 class FT6X36:
     def __init__(self):
+        self.event_flag = False
+
+    def to_screen_pos(self, pos):
+        if lcd.screen:
+            rect = lcd.screen.get_rect()
+            rect.center = pg.display.get_surface().get_rect().center
+            if rect.collidepoint(pos):
+                out = pos[0] - rect.left, pos[1] - rect.top
+                return out
+        return None
+
+    def activate_irq(self, irq_pin):
         pass
 
     def current_point(self):
+        return (
+            self.to_screen_pos(pg.mouse.get_pos())
+            if pg.mouse.get_pressed()[0]
+            else None
+        )
+
+    def trigger_event(self):
+        self.event_flag = True
+        self.irq_point = self.current_point()
+
+    def event(self):
         if sequence_executor and sequence_executor.touch_pos is not None:
-            sequence_executor.touch_checks += 1
-            # wait for release
-            if sequence_executor.touch_checks == 1:
-                return None
-            # wait for press
-            # if pressed
-            elif (
-                sequence_executor.touch_checks == 2
-                or sequence_executor.touch_checks == 3
-            ):
-                return sequence_executor.touch_pos
-            # released
-            elif sequence_executor.touch_checks == 4:
-                sequence_executor.touch_pos = None
-                sequence_executor.touch_checks = 0
-                return None
-        return to_screen_pos(pg.mouse.get_pos()) if pg.mouse.get_pressed()[0] else None
+            sequence_executor.touch_pos = None
+            return True
+        flag = self.event_flag
+        self.event_flag = False  # Always clean event flag
+        return flag
 
     def threshold(self, value):
         pass
 
 
+touch_control = FT6X36()
+
+
 if "krux.touchscreens.ft6x36" not in sys.modules:
     sys.modules["krux.touchscreens.ft6x36"] = mock.MagicMock(
-        FT6X36=FT6X36,
+        touch_control=touch_control,
     )

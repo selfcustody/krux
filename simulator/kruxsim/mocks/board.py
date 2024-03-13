@@ -43,7 +43,7 @@ def register_device(device):
     global BUTTON_A
     global BUTTON_B
     global BUTTON_C
-    project = devices.AMIGO_TFT if device == devices.PC else device
+    project = devices.AMIGO if device == devices.PC else device
     BOARD_CONFIG = load_file_as_module(
         "board", "../firmware/MaixPy/projects/%s/builtin_py/board.py" % project
     ).config
@@ -58,8 +58,10 @@ def register_device(device):
 
     BUTTON_A = BOARD_CONFIG["krux"]["pins"]["BUTTON_A"]
     if "ENCODER" in BOARD_CONFIG["krux"]["pins"]:
+        # replace encoder with regular buttons in simulator
         del BOARD_CONFIG["krux"]["pins"]["ENCODER"]
         BOARD_CONFIG["krux"]["pins"]["BUTTON_B"] = 37
+        BOARD_CONFIG["krux"]["pins"]["BUTTON_C"] = 38
     BUTTON_B = BOARD_CONFIG["krux"]["pins"]["BUTTON_B"]
     if "BUTTON_C" in BOARD_CONFIG["krux"]["pins"]:
         BUTTON_C = BOARD_CONFIG["krux"]["pins"]["BUTTON_C"]

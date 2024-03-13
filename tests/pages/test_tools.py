@@ -1,14 +1,7 @@
-import sys
 import pytest
-from unittest import mock
 from unittest.mock import patch
-from Crypto.Cipher import AES
 from ..shared_mocks import mock_context
 
-if "ucryptolib" not in sys.modules:
-    sys.modules["ucryptolib"] = mock.MagicMock(
-        aes=AES.new, MODE_ECB=AES.MODE_ECB, MODE_CBC=AES.MODE_CBC
-    )
 
 SEEDS_JSON = """{
     "ecbID": {
@@ -60,6 +53,7 @@ def test_delete_mnemonic_from_flash(m5stickv, mocker):
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Select first mnemonic
         BUTTON_ENTER,  # Confirm deletion
+        BUTTON_ENTER,  # Read remove message
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
@@ -68,7 +62,7 @@ def test_delete_mnemonic_from_flash(m5stickv, mocker):
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         tool = Tools(ctx)
-        tool.del_stored_mnemonic()
+        tool.rm_stored_mnemonic()
     # First mnemonic in the list (ECB) will be deleted
     # Assert only CBC remains
     m().write.assert_called_once_with(CBC_ONLY_JSON)
@@ -89,9 +83,9 @@ def test_sd_check_no_sd(m5stickv, mocker):
     ctx = mock_context(mocker)
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     tool = Tools(ctx)
+    tool.flash_text = mocker.MagicMock()
     tool.sd_check()
-
-    ctx.display.flash_text.assert_has_calls([mocker.call("SD card not detected", ANY)])
+    tool.flash_text.assert_has_calls([mocker.call("SD card not detected", ANY)])
 
 
 def test_sd_check(m5stickv, mocker, mock_file_operations):
@@ -125,6 +119,7 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         BUTTON_PAGE,
         BUTTON_ENTER,  # Select first mnemonic
         BUTTON_ENTER,  # Confirm deletion
+        BUTTON_ENTER,  # Read remove message
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
@@ -133,7 +128,60 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         tool = Tools(ctx)
-        tool.del_stored_mnemonic()
+        tool.rm_stored_mnemonic()
     # First mnemonic in the list (ECB) will be deleted
     # Assert only CBC remains
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
+    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
+
+
+def test_wipe_device(amigo, mocker):
+    """Test that the device is wiped when the user confirms the wipe."""
+    from krux.pages.tools import Tools
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm wipe
+
+    mocker.spy(Tools, "erase_spiffs")
+    ctx = mock_context(mocker)
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
+    test_tools = Tools(ctx)
+    test_tools.wipe_device()
+
+    assert test_tools.erase_spiffs.call_count == 1
+
+
+def test_printer_test_tool(amigo, mocker):
+    """Test that the print tool is called with the correct text"""
+    from krux.pages.tools import Tools
+    from krux.themes import theme
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm print, then leave
+
+    with patch("krux.pages.print_page.PrintPage.print_qr") as mocked_print_qr:
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
+        test_tools = Tools(ctx)
+        test_tools.print_test()
+
+        mocked_print_qr.assert_called_with(
+            "Krux Printer Test QR", title="Krux Printer Test QR"
+        )
+
+
+def test_create_qr(amigo, mocker):
+    """Test that QR creation tool is called with the correct text"""
+    from krux.pages.tools import Tools
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [BUTTON_ENTER]
+
+    with patch("krux.pages.qr_view.SeedQRView") as Mocked_QRView:
+        ctx = mock_context(mocker)
+        ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
+        test_tools = Tools(ctx)
+        test_tools.capture_from_keypad = mocker.MagicMock(return_value="test")
+        test_tools.create_qr()
+
+        Mocked_QRView.assert_called_with(ctx, data="test", title="Custom QR Code")

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,41 +24,36 @@ from .krux_settings import Settings, ThemeSettings
 
 DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
 
-# Colors: Ditching firmware colors
-# To create new colors from RGB values use firmware/scripts/krux_colors.py script
+# To create new colors from RGB values use firmware/scripts/rgbconv.py script
 
 BLACK = 0x0000
-WHITE = 0xFFFF
 LIGHTBLACK = 0x0842
 DARKGREY = 0xEF7B
-LIGHTGREY = 0x18C6
+GREY = 0x14A5
+LIGHTGREY = 0x38C6
+DARKWHITE = 0x1CE7
+WHITE = 0xFFFF
+LIGHT_GREEN = 0xEC9F
 GREEN = 0xE007
 DARKGREEN = 0x8005
 RED = 0x00F8
+LIGHT_PINK = 0xDFFC
+PINK = 0x1FF8
+PURPLE = 0x0F78
 ORANGE = 0x20FD
-DARKORANGE = 0x40C3
-YELLOW = 0xE0FF
+DARKORANGE = 0xA0CA
+YELLOW = 0x85F6
 BLUE = 0xF800
 LIGHTBLUE = 0xBD0E
 CYAN = 0xFF07
-MAGENTA = 0x1FF8
 
-# define NAVY        0x0F00
-# define DARKGREEN   0xE003
-# define DARKCYAN    0xEF03
-# define MAROON      0x0078
-# define PURPLE      0x0F78
-# define OLIVE       0xE07B
-# define RED         0x00F8
-# define GREENYELLOW 0xE5AF
-# define PINK        0x1FF8
 
 THEMES = {
     ThemeSettings.DARK_THEME_NAME: {
         "background": BLACK,
         "foreground": WHITE,
-        "frame": DARKGREY,
-        "disabled": LIGHTBLACK,
+        "frame": GREY,
+        "disabled": DARKGREY,
         "go": GREEN,
         "esc_no": RED,
         "del": YELLOW,
@@ -69,8 +64,8 @@ THEMES = {
     ThemeSettings.LIGHT_THEME_NAME: {
         "background": WHITE,
         "foreground": BLACK,
-        "frame": DARKGREY,
-        "disabled": LIGHTGREY,
+        "frame": LIGHTGREY,
+        "disabled": DARKWHITE,
         "go": DARKGREEN,
         "esc_no": RED,
         "del": DARKORANGE,
@@ -88,7 +83,31 @@ THEMES = {
         "del": YELLOW,
         "toggle": CYAN,
         "error": RED,
-        "highlight": ORANGE,
+        "highlight": YELLOW,
+    },
+    ThemeSettings.PINK_THEME_NAME: {
+        "background": BLACK,
+        "foreground": LIGHT_PINK,
+        "frame": PURPLE,
+        "disabled": DARKGREY,
+        "go": PINK,
+        "esc_no": RED,
+        "del": YELLOW,
+        "toggle": CYAN,
+        "error": RED,
+        "highlight": PINK,
+    },
+    ThemeSettings.GREEN_THEME_NAME: {
+        "background": BLACK,
+        "foreground": LIGHT_GREEN,
+        "frame": DARKGREEN,
+        "disabled": DARKGREY,
+        "go": GREEN,
+        "esc_no": RED,
+        "del": YELLOW,
+        "toggle": CYAN,
+        "error": RED,
+        "highlight": GREEN,
     },
 }
 

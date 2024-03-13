@@ -38,46 +38,58 @@ def register_sequence_executor(s):
 class PMU_Button:
     def __init__(self):
         self.key = pg.K_UP
+        self.state = RELEASED
 
     def value(self):
-        if (
-            sequence_executor
-            and sequence_executor.key is not None
-            and sequence_executor.key == self.key
-        ):
-            sequence_executor.key_checks += 1
-            # wait for release
-            if sequence_executor.key_checks == 1:
-                return RELEASED
-            # wait for press
-            # if pressed
-            elif sequence_executor.key_checks == 2 or sequence_executor.key_checks == 3:
-                return PRESSED
-            # released
-            elif sequence_executor.key_checks == 4:
+        return PRESSED if pg.key.get_pressed()[self.key] else RELEASED
+
+    def event(self):
+        if self.state == RELEASED:
+            if (
+                sequence_executor
+                and sequence_executor.key is not None
+                and sequence_executor.key == pg.K_UP
+            ):
                 sequence_executor.key = None
-                sequence_executor.key_checks = 0
-                return RELEASED
-        return 0 if pg.key.get_pressed()[self.key] else 1
+                return True
+            if self.value() == PRESSED:
+                self.state = PRESSED
+                return True
+        self.state = self.value()
+        return False
 
 
-class Battery:
-    def getVbatVoltage(self):
+class PMUController:
+    def __init__(self, i2c_bus):
+        pass
+
+    def get_battery_voltage(self):
         return 3400
 
-    def getUSBVoltage(self):
+    def get_usb_voltage(self):
         return 0
 
-    def enablePMICSleepMode(self, val):
+    def enable_pek_button_monitor(self):
         pass
 
-    def setEnterSleepMode(self):
+    def enter_sleep_mode(self):
         pass
+
+    def enable_adcs(self, on_off):
+        pass
+
+    def set_screen_brightness(self, level):
+        pass
+
+    def charging(self):
+        return True
+
+    def usb_connected(self):
+        return True
 
 
 if "pmu" not in sys.modules:
     sys.modules["pmu"] = mock.MagicMock(
         PMU_Button=PMU_Button,
-        axp192=Battery,
-        axp173=Battery,
+        PMUController=PMUController,
     )

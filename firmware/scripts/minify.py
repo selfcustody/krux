@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,11 +19,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+
+""" This script removes docstrings from the source code. This is useful for
+    reducing the size of the firmware image. """
+
 import ast
 import sys
 import astor
 
-source_ast = ast.parse(open(sys.argv[1], "r").read())
+# Read the source file
+with open(sys.argv[1], "r", encoding="utf-8") as infile:
+    source_ast = ast.parse(infile.read())
+
+# Iterate over the AST nodes
 for node in ast.walk(source_ast):
     if not isinstance(
         node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)
@@ -33,5 +41,7 @@ for node in ast.walk(source_ast):
         node.body = node.body[1:]
         if len(node.body) == 0:
             node.body.append(ast.Pass())
-with open(sys.argv[1], "w") as outfile:
+
+# Write the modified AST back to the file
+with open(sys.argv[1], "w", encoding="utf-8") as outfile:
     outfile.write(astor.to_source(source_ast))

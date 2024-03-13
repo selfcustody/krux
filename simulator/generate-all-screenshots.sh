@@ -23,7 +23,7 @@
 #!/bin/bash
 
 locales=("en-US")
-devices=("maixpy_m5stickv" "maixpy_amigo_tft")
+devices=("maixpy_m5stickv" "maixpy_amigo")
 
 rm -rf krux-screenshots
 
@@ -33,6 +33,7 @@ do
     do
         ./generate-device-screenshots.sh $device $locale
         mkdir -p krux-screenshots/$device/
-        cp -r screenshots krux-screenshots/$device/$locale
+        cp screenshots/* krux-screenshots/$device/.
+        #cp -r screenshots krux-screenshots/$device/$locale
     done
 done

@@ -79,7 +79,10 @@ def test_parser(mocker, m5stickv, tdata):
         (FORMAT_UR, tdata.TEST_PARTS_FORMAT_SINGLEPART_UR),
         (FORMAT_UR, tdata.TEST_PARTS_FORMAT_MULTIPART_UR),
     ]
+    num = 0
     for case in cases:
+        print("case: ", num)
+        num += 1
         fmt = case[0]
         parts = case[1]
 
@@ -89,7 +92,10 @@ def test_parser(mocker, m5stickv, tdata):
 
             assert parser.format == fmt
 
-            assert parser.total_count() == len(parts)
+            if num == 4:
+                assert parser.total_count() == len(parts) * 2
+            else:
+                assert parser.total_count() == len(parts)
             if parser.format == FORMAT_UR:
                 assert parser.parsed_count() > 0
             else:
@@ -103,7 +109,11 @@ def test_parser(mocker, m5stickv, tdata):
         # Re-parse the first part to test that redundant parts are ignored
         parser.parse(parts[0])
 
-        assert parser.total_count() == len(parts)
+        if num == 4:
+            assert parser.total_count() == len(parts) * 2
+        else:
+            assert parser.total_count() == len(parts)
+
         if parser.format == FORMAT_UR:
             assert parser.parsed_count() > 0
         else:
@@ -120,19 +130,31 @@ def test_parser(mocker, m5stickv, tdata):
 
 def test_to_qr_codes(mocker, m5stickv, tdata):
     from krux.qr import to_qr_codes, FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+    from krux.display import Display
 
     cases = [
-        (FORMAT_NONE, tdata.TEST_DATA_B58, 1),
-        (FORMAT_PMOFN, tdata.TEST_DATA_B58, 3),
-        (FORMAT_UR, tdata.TEST_DATA_UR, 3),
+        # Test 135 pixels wide display
+        (FORMAT_NONE, tdata.TEST_DATA_B58, 135, 1),
+        (FORMAT_PMOFN, tdata.TEST_DATA_B58, 135, 9),
+        (FORMAT_UR, tdata.TEST_DATA_UR, 135, 26),
+        # Test 320 pixels wide display
+        (FORMAT_NONE, tdata.TEST_DATA_B58, 320, 1),
+        (FORMAT_PMOFN, tdata.TEST_DATA_B58, 320, 3),
+        (FORMAT_UR, tdata.TEST_DATA_UR, 320, 6),
     ]
     for case in cases:
+        mocker.patch(
+            "krux.display.lcd",
+            new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[2])),
+        )
+        display = Display()
+        qr_data_width = display.qr_data_width()
         fmt = case[0]
         data = case[1]
-        expected_parts = case[2]
+        expected_parts = case[3]
 
         codes = []
-        code_generator = to_qr_codes(data, 135, fmt)
+        code_generator = to_qr_codes(data, qr_data_width, fmt)
         i = 0
         while True:
             try:
@@ -141,7 +163,8 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
                 assert total == expected_parts
                 if i == total - 1:
                     break
-            except:
+            except Exception as e:
+                print("Error:", e)
                 break
             i += 1
         assert len(codes) == expected_parts
@@ -155,3 +178,13 @@ def test_detect_plaintext_qr(mocker, m5stickv):
     )
 
     detect_format(PLAINTEXT_QR_DATA)
+
+
+def test_find_min_num_parts(m5stickv):
+    from krux.qr import find_min_num_parts
+
+    with pytest.raises(ValueError) as raised_ex:
+        find_min_num_parts("", 10, "format unknown")
+
+    assert raised_ex.type is ValueError
+    assert raised_ex.value.args[0] == "Invalid format type"

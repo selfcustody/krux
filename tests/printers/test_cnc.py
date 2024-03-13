@@ -81,8 +81,8 @@ def test_print_qr_code_with_row_cutmethod(mocker, m5stickv, mocker_sd_card):
         )
     )
 
-    Settings().printer.cnc.cut_method = "row"
-    Settings().printer.cnc.invert = False
+    Settings().hardware.printer.cnc.cut_method = "row"
+    Settings().hardware.printer.cnc.invert = False
 
     p = FilePrinter()
 
@@ -112,8 +112,8 @@ def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv, mocker_sd_card):
         )
     )
 
-    Settings().printer.cnc.cut_method = "spiral"
-    Settings().printer.cnc.invert = False
+    Settings().hardware.printer.cnc.cut_method = "spiral"
+    Settings().hardware.printer.cnc.invert = False
 
     p = FilePrinter()
 
@@ -143,8 +143,8 @@ def test_print_qr_code_inverted(mocker, m5stickv, mocker_sd_card):
         )
     )
 
-    Settings().printer.cnc.cut_method = "spiral"
-    Settings().printer.cnc.invert = True
+    Settings().hardware.printer.cnc.cut_method = "spiral"
+    Settings().hardware.printer.cnc.invert = True
 
     p = FilePrinter()
 
