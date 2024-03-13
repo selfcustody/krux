@@ -186,7 +186,7 @@ class SignMessage(Page):
         data, qr_format, message_filename = self.load_message()
 
         if data is None:
-            self.flash_text(t("Failed to load message"), theme.error_color)
+            self.flash_error(t("Failed to load message"))
             return MENU_CONTINUE
 
         # message read OK!

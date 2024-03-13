@@ -88,7 +88,7 @@ class WalletDescriptor(Page):
 
         if wallet_data is None:
             # Both the camera and the file on SD card failed!
-            self.flash_text(t("Failed to load output descriptor"), theme.error_color)
+            self.flash_error(t("Failed to load output descriptor"))
             return MENU_CONTINUE
 
         try:

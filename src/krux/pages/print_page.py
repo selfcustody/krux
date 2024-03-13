@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 from . import Page
-from ..themes import theme
 from ..krux_settings import t, Settings
 from ..qr import to_qr_codes, FORMAT_NONE
 from ..printers import create_printer
@@ -51,7 +50,7 @@ class PrintPage(Page):
         if a printer is connected
         """
         if self.printer is None:
-            self.flash_text(t("Printer Driver not set!"), theme.error_color)
+            self.flash_error(t("Printer Driver not set!"))
             return
         self.ctx.display.clear()
         if title:

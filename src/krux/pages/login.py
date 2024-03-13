@@ -25,7 +25,6 @@ from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
 from .utils import Utils
-from ..themes import theme
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import Key
@@ -45,8 +44,6 @@ from . import (
 DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
-
-SD_MSG_TIME = 2500
 
 PASSPHRASE_MAX_LEN = 200
 
@@ -204,13 +201,10 @@ class Login(Page):
     def _load_qr_passphrase(self):
         data, _ = self.capture_qr_code()
         if data is None:
-            self.flash_text(t("Failed to load passphrase"), theme.error_color)
+            self.flash_error(t("Failed to load passphrase"))
             return MENU_CONTINUE
         if len(data) > PASSPHRASE_MAX_LEN:
-            self.flash_text(
-                t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN,
-                theme.error_color,
-            )
+            self.flash_error(t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN)
             return MENU_CONTINUE
         return data
 
@@ -341,13 +335,13 @@ class Login(Page):
                 key_capture = EncryptionKey(self.ctx)
                 key = key_capture.encryption_key()
                 if key in (None, "", ESC_KEY):
-                    self.flash_text(t("Key was not provided"), theme.error_color)
+                    self.flash_error(t("Key was not provided"))
                     return MENU_CONTINUE
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(t("Processing ..."))
                 word_bytes = encrypted_qr.decrypt(key)
                 if word_bytes is None:
-                    self.flash_text(t("Failed to decrypt"), theme.error_color)
+                    self.flash_error(t("Failed to decrypt"))
                     return MENU_CONTINUE
                 return bip39.mnemonic_from_bytes(word_bytes).split()
             return MENU_CONTINUE  # prompt NO
@@ -357,7 +351,7 @@ class Login(Page):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_error(t("Failed to load mnemonic"))
             return MENU_CONTINUE
 
         words = []
@@ -401,7 +395,7 @@ class Login(Page):
                 if words == MENU_CONTINUE:
                     return MENU_CONTINUE
         if not words or (len(words) != 12 and len(words) != 24):
-            self.flash_text(t("Invalid mnemonic length"), theme.error_color)
+            self.flash_error(t("Invalid mnemonic length"))
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -715,7 +709,7 @@ class Login(Page):
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
         if words is None:
-            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_error(t("Failed to load mnemonic"))
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
