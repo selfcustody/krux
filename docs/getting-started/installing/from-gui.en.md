@@ -110,6 +110,10 @@ Once we choose the device and firmware, we can flash. Before start the flash pro
 ![flash-device](../../img/krux-installer/flash-device.gif "KruxInstaller Flash to device")
 
 ----8<----
+flash-krux-logo.md
+----8<----
+
+----8<----
 amigo-more-info-faq.md
 ----8<----
 

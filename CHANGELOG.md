@@ -1,4 +1,4 @@
-# Changelog 24.04.beta16 - February 10, 2024
+# Changelog 24.03.0 - March 12, 2024
 
 ## Changes
 
@@ -14,6 +14,9 @@ Create or load from a wallet output descriptor file on an SD card. The backup fi
 ### Sign Messages at a Derived Bitcoin address
 Sign messages from Sparrow and Specter, via QR code, also attesting a Bitcoin address belongs to you.
 
+### Reproducible Builds
+To enhance the reproducibility of firmware builds, random variables such as file write timestamps have been removed from the build process. As a result, builds from developers' computers, those built within GitHub Actions from published code, and those you compile locally are more likely to be identical and have the same hash checksum as the official and beta releases. This change ensures greater consistency and traceability across all builds.
+
 ### Add Entropy Quality Estimation for Mnemonic Creation.
 Entropy quality estimators, like Shannon's entropy, were added to mnemonic generation through dice rolls and camera snapshot.
 
@@ -27,7 +30,7 @@ Option to restore the device's settings to its factory state.
 Device's storage is now used more efficiently, data is stored less frequently, only in case a setting is changed from defaults.
 
 ### Amigo's Power Manager Enhancements
-Standardize Amigo's shutdown and power on behavior.
+The power management behavior for the Amigo device has been standardized. Previously, some devices would not wake up from shutdown or sleep mode. Now, these devices will fully shut down when the shutdown option is selected from the menu, and they will always power on when the power button is pressed for 1 second.
 
 ### GUI Enhancements
 Icons, information text boxes, and rounded shapes are now present at the GUI.
@@ -52,6 +55,9 @@ Use the latest Embit release.
 
 ### Maix Dock Simulator
 Now Krux PC simulator can also run in Maix Dock mode, mimicking appearance and characteristics of the most DIY Krux device.
+
+### New Compatible Device - Yahboom
+The Yahboom Aimotion K210 module, a compact touchscreen device, now has its first official firmware release.
 
 ### Join Amigo IPS and Amigo TFT firmwares
 Users will be able to flash a single firmware and change display settings if their device was shipped with a display different from standard TFT.
