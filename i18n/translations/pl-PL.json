@@ -1,8 +1,8 @@
 {
     "%d of %d multisig": "%d z %d multisig",
-    "%d. Change: \n\n%s\n\n": "%D.Zmiana:\n\n%s\n\n",
-    "%d. Self-transfer: \n\n%s\n\n": "%D.Samo-transfer:\n\n%s\n\n",
-    "%d. Spend: \n\n%s\n\n": "%D.Wydać:\n\n%s\n\n",
+    "%d. Change:": "%D.Zmiana:",
+    "%d. Self-transfer:": "%D.Samo-transfer:",
+    "%d. Spend:": "%D.Wydać:",
     "%s\n\nis a valid change address!": "%s\n\nis prawidłowy adres zmiany!",
     "%s\n\nis a valid receive address!": "%s\n\nis ważny adres odbierania!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nwas nie znaleziono w pierwszych adresach zmiany",

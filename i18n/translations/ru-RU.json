@@ -1,8 +1,8 @@
 {
     "%d of %d multisig": "%d из %d мультиподпись",
-    "%d. Change: \n\n%s\n\n": "%d. Сдача: \n\n%s\n\n",
-    "%d. Self-transfer: \n\n%s\n\n": "%d. Перевод самому себе: \n\n%s\n\n",
-    "%d. Spend: \n\n%s\n\n": "%d. Расход: \n\n%s\n\n",
+    "%d. Change:": "%d. Сдача:",
+    "%d. Self-transfer:": "%d. Перевод самому себе:",
+    "%d. Spend:": "%d. Расход:",
     "%s\n\nis a valid change address!": "%s\n\nвалидный адрес сдачи!",
     "%s\n\nis a valid receive address!": "%s\n\nвалидный адрес получения!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nНЕ НАЙДЕН в первых %d адресах сдачи",

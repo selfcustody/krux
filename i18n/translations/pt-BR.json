@@ -1,8 +1,8 @@
 {
     "%d of %d multisig": "%d da %d multisig",
-    "%d. Change: \n\n%s\n\n": "%d. Troco: \n\n%s\n\n",
-    "%d. Self-transfer: \n\n%s\n\n": "%d. Autotransferência: \n\n%s\n\n",
-    "%d. Spend: \n\n%s\n\n": "%d. Gasto: \n\n%s\n\n",
+    "%d. Change:": "%d. Troco:",
+    "%d. Self-transfer:": "%d. Autotransferência:",
+    "%d. Spend:": "%d. Gasto:",
     "%s\n\nis a valid change address!": "%s\n\né um endereço de troco válido!",
     "%s\n\nis a valid receive address!": "%s\n\né um endereço de recebimento válido!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nNÃO FOI ENCONTRADO nos primeiros %d endereços de troco",

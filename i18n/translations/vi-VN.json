@@ -1,8 +1,8 @@
 {
     "%d of %d multisig": "%d của %d đa chữ kí",
-    "%d. Change: \n\n%s\n\n": "%d. Thay đổi: \n\n%s\n\n",
-    "%d. Self-transfer: \n\n%s\n\n": "%d. Tự chuyển nhượng: \n\n%s\n\n",
-    "%d. Spend: \n\n%s\n\n": "%d. Chi tiêu: \n\n%s\n\n",
+    "%d. Change:": "%d. Thay đổi:",
+    "%d. Self-transfer:": "%d. Tự chuyển nhượng:",
+    "%d. Spend:": "%d. Chi tiêu:",
     "%s\n\nis a valid change address!": "%s\n\nis một địa chỉ thay đổi hợp lệ!",
     "%s\n\nis a valid receive address!": "%s\n\nlà một địa chỉ khả dụng!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nKHÔNG TÌM ĐƯỢC trong địa chỉ %d tiền thối đầu tiên",
