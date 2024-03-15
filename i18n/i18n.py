@@ -23,7 +23,7 @@ import binascii
 import sys
 import json
 from os import listdir, walk
-from os.path import isfile, join, basename
+from os.path import isfile, exists, join, basename
 import re
 
 SRC_DIR = "../src"
@@ -214,6 +214,7 @@ def bake_translations():
         translations.write("translation_table = ")
         translations.write(repr(translation_table))
         translations.write("\n")
+        print("Baked " + SRC_DIR + "/krux/" + "translations.py")
 
 
 def create_translation_file(locale):
@@ -255,24 +256,45 @@ def prettify_translation_files():
             translation_file.write(
                 json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
             )
-
-
-def main():
-    """Main handler"""
-
-    if sys.argv[1] == "validate":
-        validate_translation_files()
-    elif sys.argv[1] == "new":
-        create_translation_file(sys.argv[2])
-    elif sys.argv[1] == "fill":
-        fill_missing()
-    elif sys.argv[1] == "clean":
-        remove_unnecessary()
-    elif sys.argv[1] == "prettify":
-        prettify_translation_files()
-    elif sys.argv[1] == "bake":
-        bake_translations()
+            print("Prettified " + translation_filename)
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        raise ValueError(
+            "ERROR: Provide one action as argument (validate, new, fill, clean, prettify, bake)"
+        )
+
+    if not exists(SRC_DIR):
+        SRC_DIR = "src"
+        if not exists(SRC_DIR):
+            raise ValueError("ERROR: SRC_DIR 'src' not found!")
+
+    if not exists(TRANSLATION_FILES_DIR):
+        TRANSLATION_FILES_DIR = "i18n/translations"
+        if not exists(TRANSLATION_FILES_DIR):
+            raise ValueError("ERROR: TRANSLATION_FILES_DIR 'translations' not found!")
+
+    if sys.argv[1] in ("new", "fill"):
+        if sys.argv[1] == "new":
+            if len(sys.argv) < 3:
+                raise ValueError("ERROR: Provide the locale to fill")
+            create_translation_file(sys.argv[2])
+        else:
+            fill_missing()
+    else:
+        for arg in sys.argv[1:]:
+            if arg == "validate":
+                validate_translation_files()
+            elif arg == "new":
+                create_translation_file(sys.argv[2])
+            elif arg == "fill":
+                fill_missing()
+            elif arg == "clean":
+                remove_unnecessary()
+            elif arg == "prettify":
+                prettify_translation_files()
+            elif arg == "bake":
+                bake_translations()
+            else:
+                print("\n\nWARNING: Unreconized argument: " + arg)
