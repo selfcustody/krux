@@ -26,6 +26,13 @@ import threading
 import pygame as pg
 from kruxsim import devices, events
 
+exec_folder = 'simulator'
+current_dir = os.getcwd()
+
+# check if is executing in exec_folder, if not, try to change to exec_folder
+if current_dir[len(current_dir) - len(exec_folder):].find(exec_folder) == -1:
+    os.chdir(exec_folder)
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--device",
