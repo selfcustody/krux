@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 import lcd
 import board
+import time
 from .themes import theme
 from .krux_settings import Settings
 
@@ -344,7 +345,7 @@ class Display:
         """Flashes text centered on the display for duration ms"""
         self.clear()
         self.draw_centered_text(text, color)
-        self.sleep_ms(duration)
+        time.sleep_ms(duration)
         self.clear()
 
     def draw_qr_code(
