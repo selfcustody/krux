@@ -86,8 +86,8 @@ def validate_translation_files():
         sys.exit(1)
 
 
-def fill_missing():
-    """Uses translate 3.6.1 to automaticalyy fill missing translations"""
+def print_missing():
+    """Uses translate 3.6.1 to automatically print missing translations"""
     if len(sys.argv) > 2:
         force_target = sys.argv[2]
     else:
@@ -103,7 +103,7 @@ def fill_missing():
     for translation_filename in translation_filenames:
         target = translation_filename[:5]
         if force_target:
-            if force_target != translation_filename:
+            if not force_target in translation_filename:
                 continue
         translator = Translator(to_lang=target)
         print("Translating %s...\n" % translation_filename)
@@ -235,7 +235,7 @@ def create_translation_file(locale):
 
 
 def prettify_translation_files():
-    """Sorts and pretty-prints all translation files"""
+    """Sorts and pretty-prints all translation files (one per line)"""
     translation_filenames = [
         f
         for f in listdir(TRANSLATION_FILES_DIR)
@@ -281,7 +281,7 @@ if __name__ == "__main__":
                 raise ValueError("ERROR: Provide the locale to fill")
             create_translation_file(sys.argv[2])
         else:
-            fill_missing()
+            print_missing()
     else:
         for arg in sys.argv[1:]:
             if arg == "validate":
@@ -289,7 +289,7 @@ if __name__ == "__main__":
             elif arg == "new":
                 create_translation_file(sys.argv[2])
             elif arg == "fill":
-                fill_missing()
+                print_missing()
             elif arg == "clean":
                 remove_unnecessary()
             elif arg == "prettify":
