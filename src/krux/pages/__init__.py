@@ -703,7 +703,7 @@ class Menu:
             padding + 2,
             charge_length,
             cylinder_height - 3,
-            theme.go_color,
+            battery_color,
         )
 
     def draw_network_indicator(self):
