@@ -1,4 +1,7 @@
-**Krux compatible devices comparative table**
+## Krux Compatible Devices
+<img src="../img/krux-devices.jpg">
+
+### Comparative Table
 
 | Device | M5stickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -28,8 +31,9 @@ Some stores ship the Maix Dock with soldered pin connectors that do not fit into
 28nm process, dual-core RISC-V 64bit @400MHz, 8 MB high-speed SRAM, DVP camera and MCU LCD interface, AES Accelerator, SHA256 Accelerator, FFT Accelerator.
 </i>
 
-## Devices
 ### M5StickV
+<img srcset="../img/maixpy_m5stickv/logo-125.png" align="right">
+
 Available from many distributors, including:
 
 - [M5Stack](https://shop.m5stack.com/products/stickv)
@@ -40,7 +44,11 @@ Available from many distributors, including:
 - [Cytron](https://www.cytron.io/c-development-tools/c-fpga/p-m5stickv-k210-ai-camera-without-wifi)
 - [OKDO](https://www.okdo.com/p/m5stickv-k210-ai-camera-without-wifi/)
 
+<div style="clear: both"></div>
+
 ### Maix Amigo
+<img srcset="../img/maixpy_amigo/logo-150.png" align="right">
+
 Available from many distributors, including:
 
 - [Seeed Studio](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html)
@@ -50,6 +58,8 @@ Available from many distributors, including:
 - [AliExpress](https://www.aliexpress.com/w/wholesale-sipeed-amigo.html)
 - [Amazon](https://www.amazon.com/s?k=sipeed+amigo&dc)
 
+<div style="clear: both"></div>
+
 ### Maix Dock and Maix Bit
 For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
 
@@ -58,7 +68,7 @@ Below are example implementations with instructions on how to recreate them:
 - [https://github.com/selfcustody/DockEncoderCase](https://github.com/selfcustody/DockEncoderCase)
 - [https://github.com/selfcustody/MaixBitCase](https://github.com/selfcustody/MaixBitCase)
 
-## Ohter parts
+## Other Parts
 ### USB-C Charge Cable
 This will be included with the M5StickV and Maix Amigo that you purchase from one of the distributors above. It will be necessary to power and charge the device and to initially flash the firmware.
 
