@@ -3,6 +3,13 @@ Some Amigo screens have inverted X coordinates while others don’t. If you noti
 
 Others have found that there are issues with the colors displayed in the interface and camera preview. To fix this we have two options in `Settings > Hardware > Display`, `BGR Colors` and `Inverted Colors`, test with them until the colors appear to be correct on your device.
 
+## Why doesn't my Maix Amigo touchscreen work with v24.03.0 if it worked fine with v23.09.1?
+<img src="../img/amigo-inside-switch-up.jpg" align="right">
+
+We added IRQ to the firmware, so when you open your Maix Amigo, you will see a switch in the middle of the device board, it must be in the upper position for the touchscreen to work with v24.03.0 and later.
+
+<div style="clear: both"></div>
+
 ## Why isn't my device charging or being recognized when connected to the computer's USB?
 If you have a Maix Amigo, make sure you're using the USB-C port at the bottom of the device, not the one on the left side.
 
