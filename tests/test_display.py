@@ -554,6 +554,7 @@ def test_draw_qr_code(mocker, m5stickv):
         0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
     )
 
+
 def test_flash_text(mocker, m5stickv):
     from krux.display import Display, FLASH_MSG_TIME
     from krux.themes import WHITE
@@ -568,7 +569,5 @@ def test_flash_text(mocker, m5stickv):
     d.flash_text("test", WHITE)
 
     d.clear.assert_called()
-    d.draw_centered_text.assert_called_with(
-        "test", WHITE
-    )
+    d.draw_centered_text.assert_called_with("test", WHITE)
     time.sleep_ms.assert_called_with(FLASH_MSG_TIME)
