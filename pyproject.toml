@@ -78,3 +78,6 @@ test-verbose = "poetry run pytest --cache-clear --cov src/krux --cov-report html
 
 # pre commit (do formatting, linting and tests)
 pre-commit = ["format", "lint", "test"]
+
+# run docs locally
+docs = "poetry run mkdocs serve"
