@@ -53,7 +53,7 @@ import os
 
 DIGITS = "0123456789"
 
-SD_MSG_TIME = 2500
+PERSIST_MSG_TIME = 2500
 
 CATEGORY_SETTING_COLOR_DICT = {
     BitcoinSettings.MAIN_TXT: ORANGE,
@@ -75,14 +75,14 @@ class SettingsPage(Page):
             if self.has_sd_card():
                 self.flash_text(
                     t("Your changes will be kept on the SD card."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
             else:
                 self.flash_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
         else:
             try:
@@ -90,14 +90,14 @@ class SettingsPage(Page):
                 os.listdir("/" + FLASH_PATH + "/.")
                 self.flash_text(
                     t("Your changes will be kept on device flash storage."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
             except OSError:
                 self.flash_text(
                     t("Device flash storage not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
 
         return self.namespace(Settings())()
@@ -175,14 +175,14 @@ class SettingsPage(Page):
                     if store.save_settings():
                         self.flash_text(
                             t("Changes persisted to SD card!"),
-                            duration=SD_MSG_TIME,
+                            duration=PERSIST_MSG_TIME,
                         )
             except OSError:
                 self.flash_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
         else:
             self.ctx.display.clear()
@@ -190,14 +190,14 @@ class SettingsPage(Page):
                 if store.save_settings():
                     self.flash_text(
                         t("Changes persisted to Flash!"),
-                        duration=SD_MSG_TIME,
+                        duration=PERSIST_MSG_TIME,
                     )
             except:
                 self.flash_text(
                     t("Unexpected error saving to Flash.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
 
         return MENU_EXIT
@@ -379,17 +379,15 @@ class SettingsPage(Page):
                 setting.attr == "pbkdf2_iterations"
                 and (new_value % QR_CODE_ITER_MULTIPLE) != 0
             ):
-                self.flash_text(
-                    t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE,
-                    theme.error_color,
+                self.flash_error(
+                    t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE
                 )
             else:
                 setting.__set__(settings_namespace, new_value)
         else:
-            self.flash_text(
+            self.flash_error(
                 t("Value %s out of range: [%s, %s]")
-                % (new_value, setting.value_range[0], setting.value_range[1]),
-                theme.error_color,
+                % (new_value, setting.value_range[0], setting.value_range[1])
             )
 
         return MENU_CONTINUE

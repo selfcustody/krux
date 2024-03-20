@@ -23,7 +23,6 @@
 from ..sd_card import SDHandler
 import uos
 from ..krux_settings import t
-from ..themes import theme
 from ..qr import FORMAT_NONE
 from . import (
     Page,
@@ -98,7 +97,7 @@ class Tools(Page):
                         select_file_handler=file_manager.show_file_details
                     )
         except OSError:
-            self.flash_text(t("SD card not detected"), theme.error_color)
+            self.flash_error(t("SD card not detected"))
 
         return MENU_CONTINUE
 

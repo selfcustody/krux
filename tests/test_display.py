@@ -553,3 +553,21 @@ def test_draw_qr_code(mocker, m5stickv):
     krux.display.lcd.draw_qr_code_binary.assert_called_with(
         0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
     )
+
+
+def test_flash_text(mocker, m5stickv):
+    from krux.display import Display, FLASH_MSG_TIME
+    from krux.themes import WHITE
+    import time
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.patch.object(d, "height", new=lambda: 240)
+    mocker.spy(d, "clear")
+    mocker.spy(d, "draw_centered_text")
+
+    d.flash_text("test", WHITE)
+
+    d.clear.assert_called()
+    d.draw_centered_text.assert_called_with("test", WHITE)
+    time.sleep_ms.assert_called_with(FLASH_MSG_TIME)

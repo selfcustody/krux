@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import gc
 from embit import bip32, compact
 import hashlib
@@ -186,7 +185,7 @@ class SignMessage(Page):
         data, qr_format, message_filename = self.load_message()
 
         if data is None:
-            self.flash_text(t("Failed to load message"), theme.error_color)
+            self.flash_error(t("Failed to load message"))
             return MENU_CONTINUE
 
         # message read OK!
