@@ -82,6 +82,7 @@ test = "pytest --cache-clear --cov src/krux --cov-report html ./tests"
 test-verbose = "pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests"
 test-simple = "pytest --cache-clear ./tests"
 # aliases
+tests.ref = "test"
 pytest.ref = "test"
 
 # pre commit task (do formatting, linting and tests)
