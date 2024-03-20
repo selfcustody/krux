@@ -36,7 +36,7 @@ FLASH_SIZE = 2**24
 MAX_FIRMWARE_SIZE = 0x300000
 
 FIRMWARE_SLOT_1 = 0x00080000
-FIRMWARE_SLOT_2 = 0x00280000  # TODO: Move to 0x00390000 - Test all possible cases
+FIRMWARE_SLOT_2 = 0x00390000
 SPIFFS_ADDR = 0xD00000
 
 MAIN_BOOT_CONFIG_SECTOR_ADDRESS = 0x00004000
@@ -194,14 +194,25 @@ def upgrade():
     display = Display()
     inp = Input()
 
+    display.clear()
+    display.draw_centered_text(
+        t("New firmware detected on SD card.")
+        + "\n\n"
+        + t("Verifying..")
+    )
+
     new_size = fsize(firmware_path)
     firmware_hash = sha256(firmware_path)
     firmware_with_header_hash = sha256(firmware_path, new_size)
 
     display.clear()
     display.draw_centered_text(
-        t("New firmware detected.\n\nSHA256:\n%s\n\n\n\nInstall?")
-        % binascii.hexlify(firmware_hash).decode()
+        t("New firmware detected.")
+        + "\n\n"
+        + "SHA256:\n"
+        + binascii.hexlify(firmware_hash).decode()
+        + "\n\n\n\n"
+        + t("Install?")
     )
     inp.buttons_active = True
     if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
@@ -280,5 +291,14 @@ def upgrade():
         4096,
     )
 
-    display.flash_text(t("Upgrade complete.\n\nShutting down.."))
+    display.clear()
+    display.draw_centered_text(
+        t("Upgrade complete.") + "\n" + t("Remove firmware files from SD Card?")
+    )
+    inp.buttons_active = True
+    if not inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
+        os.remove(firmware_path)
+        os.remove(firmware_path + ".sig")
+
+    display.flash_text(t("Shutting down.."))
     return True
