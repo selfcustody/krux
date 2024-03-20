@@ -64,7 +64,7 @@ class PMUController:
         pass
 
     def get_battery_voltage(self):
-        return 3400
+        return 3820
 
     def get_usb_voltage(self):
         return 0

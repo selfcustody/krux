@@ -1,8 +1,8 @@
 {
     "%d of %d multisig": "%d van %d multisig",
-    "%d. Change: \n\n%s\n\n": "%d. Wisselgeld: \n\n%s\n\n",
-    "%d. Self-transfer: \n\n%s\n\n": "%d. Zelf overschrijving: \n\n%s\n\n",
-    "%d. Spend: \n\n%s\n\n": "%d. Uitgaven: \n\n%s\n\n",
+    "%d. Change:": "%d. Wisselgeld:",
+    "%d. Self-transfer:": "%d. Zelf overschrijving:",
+    "%d. Spend:": "%d. Uitgaven:",
     "%s\n\nis a valid change address!": "%s\n\nis een valide wisselgeld adres!",
     "%s\n\nis a valid receive address!": "%s\n\nis een valide ontvangst adres!",
     "%s\n\nwas NOT FOUND in the first %d change addresses": "%s\n\nwerd NIET GEVONDEN in de eerste %d wisselgeld adressen",

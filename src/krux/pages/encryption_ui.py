@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 from ..krux_settings import t, Settings, AES_BLOCK_SIZE
-from ..themes import theme
 from . import (
     Page,
     Menu,
@@ -78,13 +77,10 @@ class EncryptionKey(Page):
         """Loads and returns a key from a QR code"""
         data, _ = self.capture_qr_code()
         if data is None:
-            self.flash_text(t("Failed to load key"), theme.error_color)
+            self.flash_error(t("Failed to load key"))
             return None
         if len(data) > ENCRYPTION_KEY_MAX_LEN:
-            self.flash_text(
-                t("Maximum length exceeded (%s)") % ENCRYPTION_KEY_MAX_LEN,
-                theme.error_color,
-            )
+            self.flash_error(t("Maximum length exceeded (%s)") % ENCRYPTION_KEY_MAX_LEN)
             return None
         return data
 
@@ -287,7 +283,7 @@ class LoadEncryptedMnemonic(Page):
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key in (None, "", ESC_KEY):
-            self.flash_text(t("Key was not provided"), theme.error_color)
+            self.flash_error(t("Key was not provided"))
             return MENU_CONTINUE
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
@@ -295,11 +291,11 @@ class LoadEncryptedMnemonic(Page):
         try:
             words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()
         except:
-            self.flash_text(t("Failed to decrypt"), theme.error_color)
+            self.flash_error(t("Failed to decrypt"))
             return MENU_CONTINUE
 
         if len(words) not in (12, 24):
-            self.flash_text(t("Failed to decrypt"), theme.error_color)
+            self.flash_error(t("Failed to decrypt"))
             return MENU_CONTINUE
         del mnemonic_storage
         return words

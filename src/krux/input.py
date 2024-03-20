@@ -38,7 +38,7 @@ QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
 
 BUTTON_WAIT_PRESS_DELAY = 10
-DEBOUNCE = 300 if board.config["type"] =="cube" else 100
+DEBOUNCE = 300 if board.config["type"] == "cube" else 100
 ONE_MINUTE = 60000
 
 

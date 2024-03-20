@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 import gc
-from ...themes import theme
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t
 from .. import (
@@ -157,7 +156,7 @@ class Home(Page):
 
         if data is None:
             # Both the camera and the file on SD card failed!
-            self.flash_text(t("Failed to load PSBT"), theme.error_color)
+            self.flash_error(t("Failed to load PSBT"))
             return MENU_CONTINUE
 
         # PSBT read OK! Will try to sign

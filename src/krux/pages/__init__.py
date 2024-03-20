@@ -35,7 +35,7 @@ from ..input import (
     PRESSED,
     DEBOUNCE,
 )
-from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY
+from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY, FLASH_MSG_TIME
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, BitcoinSettings
 from ..sd_card import SDHandler
@@ -44,7 +44,7 @@ MENU_CONTINUE = 0
 MENU_EXIT = 1
 MENU_SHUTDOWN = 2
 
-FLASH_MSG_TIME = 2000
+ONE_MINUTE = 60000
 
 ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
@@ -91,15 +91,15 @@ class Page:
         self,
         text,
         color=theme.fg_color,
-        bg_color=theme.bg_color,
         duration=FLASH_MSG_TIME,
     ):
         """Flashes text centered on the display for duration ms"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(text, color, bg_color)
-        time.sleep_ms(duration)
-        self.ctx.display.clear()
+        self.ctx.display.flash_text(text, color, duration)
         self.ctx.input.flush_events()
+
+    def flash_error(self, text):
+        """Flashes text centered on the display for duration ms"""
+        self.flash_text(text, theme.error_color)
 
     def capture_from_keypad(
         self,
@@ -600,7 +600,7 @@ class Menu:
                 btn = self.ctx.input.wait_for_button(
                     # Block if screen saver not active
                     block=Settings().appearance.screensaver_time == 0,
-                    wait_duration=Settings().appearance.screensaver_time * 60000,
+                    wait_duration=Settings().appearance.screensaver_time * ONE_MINUTE,
                 )
                 if self.ctx.input.touch is not None:
                     if btn == BUTTON_TOUCH:
@@ -703,7 +703,7 @@ class Menu:
             padding + 2,
             charge_length,
             cylinder_height - 3,
-            theme.go_color,
+            battery_color,
         )
 
     def draw_network_indicator(self):
