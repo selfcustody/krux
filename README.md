@@ -63,8 +63,8 @@ fatal: clone of ... failed
 Failed to clone ...
 ```
 
-## Install krux and dev tools
-The krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/). To generate a new `poetry.lock` file use: `poetry lock --no-update`.
+## Install Krux and dev tools
+The Krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/). To generate a new `poetry.lock` file use: `poetry lock --no-update`.
 ```bash
 pip install poetry
 poetry install
@@ -117,7 +117,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ```
 
 ## Run the simulator
-This can be useful for testing a change to the krux code without having to run a full build and flash, visual regression testing,
+This can be useful for testing a change to Krux code without having to run a full build and flash, visual regression testing,
 generating screenshots, or even just trying out Krux before purchasing a device. However, the simulator may not behave exactly as
 the HW device and may not have all features implemented (e.g. scanning via camera a TinySeed currently only works on the HW device)
 
@@ -287,7 +287,7 @@ poetry run python i18n.py validate
 # Format translation files properly:
 poetry run python i18n.py prettify
 
-# Create the compiled table for krux translations.py
+# Create the compiled table for Krux translations.py
 poetry run python i18n.py bake
 ```
 
@@ -317,7 +317,7 @@ To create or edit translations on documentation (TODO: need help!), read more [h
 Once changes are made, you can run:
 
 ```bash
-poetry run mkdocs serve
+poetry run poe docs
 ```
 
 # Inspired by these similar projects
