@@ -2,7 +2,7 @@ This page explains how to install Krux with KruxInstaller (GUI).
 
 ### Installing from a GUI
 
-You can install krux onto your K210-based device using our official desktop application, which we named [KruxInstaller](https://github.com/selfcustody/krux-installer), available for Linux and Windows.
+You can install Krux onto your K210-based device using our official desktop application, which we named [KruxInstaller](https://github.com/selfcustody/krux-installer), available for Linux and Windows.
 
 Under the hood the GUI uses the same methods described in [Installing from pre-build release](../installing/from-pre-built-release.md), i.e. download, verify and flash the latest official release, but you won't need to type any command. Additionally you will be able to install the [pre-built test (beta) release](../installing/from-test-release.md) too.
 
@@ -48,7 +48,7 @@ chown +x ./KruxInstaller-0.0.1-alpha-4.AppImage
 If you use Windows, the first time you run the `.exe` file the system will ask you if you trust the application. Click on `more info` and then `Run anyway`.
 
 ### Openssl
-When downloading the official krux firmware, it is necessary to verify the signature to confirm the authenticity of the binaries using OpenSSL tool.
+When downloading the official Krux firmware, it is necessary to verify the signature to confirm the authenticity of the binaries using OpenSSL tool.
 
 On Linux, verification is easily done since OpenSSL is already installed. On windows we would need to install it first. To avoid that, we packaged a stable version of OpenSSL, compiled from source. The compilation process is done entirely in a virtual environment on github and it is expected to be fully verifiable and free of malicious code. You can check the build steps in [github actions](https://github.com/selfcustody/krux-installer/actions).
 

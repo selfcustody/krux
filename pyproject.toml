@@ -87,6 +87,9 @@ pytest.ref = "test"
 # pre commit task (do formatting, linting and tests)
 pre-commit = ["format", "lint", "test"]
 
+# run docs locally
+docs = "poetry run mkdocs serve"
+
 # translations tasks
 i18n = "python i18n/i18n.py"
 i18n-all = "python i18n/i18n.py validate clean prettify bake"
