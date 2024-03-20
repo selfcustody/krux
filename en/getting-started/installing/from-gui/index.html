@@ -1289,7 +1289,7 @@
 
 <p>This page explains how to install Krux with KruxInstaller (GUI).</p>
 <h3 id="installing-from-a-gui">Installing from a GUI<a class="headerlink" href="#installing-from-a-gui" title="Permanent link">&para;</a></h3>
-<p>You can install krux onto your K210-based device using our official desktop application, which we named <a href="https://github.com/selfcustody/krux-installer">KruxInstaller</a>, available for Linux and Windows.</p>
+<p>You can install Krux onto your K210-based device using our official desktop application, which we named <a href="https://github.com/selfcustody/krux-installer">KruxInstaller</a>, available for Linux and Windows.</p>
 <p>Under the hood the GUI uses the same methods described in <a href="../from-pre-built-release/">Installing from pre-build release</a>, i.e. download, verify and flash the latest official release, but you won't need to type any command. Additionally you will be able to install the <a href="../from-test-release/">pre-built test (beta) release</a> too.</p>
 <p>Keep in mind that this is software under development in the alpha stage and may be buggy. If you find any bugs or want to contribute to the project, please open an <a href="https://github.com/selfcustody/krux-installer/issues">issue</a> or make a PR.</p>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
@@ -1316,7 +1316,7 @@
 </code></pre></div>
 <p>If you use Windows, the first time you run the <code>.exe</code> file the system will ask you if you trust the application. Click on <code>more info</code> and then <code>Run anyway</code>.</p>
 <h3 id="openssl">Openssl<a class="headerlink" href="#openssl" title="Permanent link">&para;</a></h3>
-<p>When downloading the official krux firmware, it is necessary to verify the signature to confirm the authenticity of the binaries using OpenSSL tool.</p>
+<p>When downloading the official Krux firmware, it is necessary to verify the signature to confirm the authenticity of the binaries using OpenSSL tool.</p>
 <p>On Linux, verification is easily done since OpenSSL is already installed. On windows we would need to install it first. To avoid that, we packaged a stable version of OpenSSL, compiled from source. The compilation process is done entirely in a virtual environment on github and it is expected to be fully verifiable and free of malicious code. You can check the build steps in <a href="https://github.com/selfcustody/krux-installer/actions">github actions</a>.</p>
 <h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
 <p>When running Krux Installer, you will be presented with a menu of three items:</p>
