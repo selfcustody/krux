@@ -198,6 +198,7 @@ def test_all_labels(mocker, m5stickv):
         ThemeSettings,
         TouchSettings,
         EncoderSettings,
+        AmgDisplaySettings,
     )
 
     bitcoin = BitcoinSettings()
@@ -212,6 +213,7 @@ def test_all_labels(mocker, m5stickv):
     appearance = ThemeSettings()
     touch = TouchSettings()
     encoder = EncoderSettings()
+    amigo_display = AmgDisplaySettings()
 
     assert bitcoin.label("network")
     assert i18n.label("locale")
@@ -226,3 +228,12 @@ def test_all_labels(mocker, m5stickv):
     assert appearance.label("screensaver_time")
     assert touch.label("threshold")
     assert encoder.label("debounce")
+    assert amigo_display.label("flipped_x")
+    
+
+def test_dock_label(mocker, dock):
+    from krux.krux_settings import HardwareSettings
+
+    hardware = HardwareSettings()
+
+    assert hardware.label("encoder")
