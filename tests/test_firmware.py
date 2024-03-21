@@ -14,8 +14,10 @@ def tdata(mocker):
     )
     TEST_SIGNER_PUBLIC_KEY = ec.PublicKey.from_string(TEST_SIGNER_PUBKEY)
 
+    FILES_FOLDER = "files"
+
     TEST_FIRMWARE_FILENAME = os.path.join(
-        os.path.dirname(__file__), "firmware-v0.0.0.bin"
+        os.path.dirname(__file__), FILES_FOLDER, "firmware-v0.0.0.bin"
     )
     TEST_FIRMWARE = open(TEST_FIRMWARE_FILENAME, "rb").read()
     TEST_FIRMWARE_SHA256 = open(TEST_FIRMWARE_FILENAME + ".sha256.txt", "r").read()
