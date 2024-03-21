@@ -23,6 +23,7 @@ import time
 import board
 from .wdt import wdt
 from .buttons import PRESSED, RELEASED
+from .krux_settings import Settings
 
 BUTTON_ENTER = 0
 BUTTON_PAGE = 1
@@ -38,7 +39,6 @@ QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
 
 BUTTON_WAIT_PRESS_DELAY = 10
-DEBOUNCE = 300 if board.config["type"] == "cube" else 100
 ONE_MINUTE = 60000
 
 
@@ -47,6 +47,7 @@ class Input:
 
     def __init__(self):
         self.entropy = 0
+        self.debounce_value = Settings().hardware.buttons.debounce
         self.debounce_time = 0
         self.flushed_flag = False
 
@@ -98,6 +99,21 @@ class Input:
                 board.config["krux"]["pins"]["TOUCH_IRQ"],
             )
             self.buttons_active = False
+        self.button_integrity_check()
+
+    def button_integrity_check(self):
+        """
+        Check buttons state, if one of them is pressed at boot time it will assume it is
+        damaged and will disable it to avoid a single button to freeze the interface.
+        """
+        if self.enter and self.enter_value() == PRESSED:
+            self.enter = None
+        if self.page and self.page_value() == PRESSED:
+            self.page = None
+        if self.page_prev and self.page_prev_value() == PRESSED:
+            self.page_prev = None
+        if self.touch and self.touch_value() == PRESSED:
+            self.touch = None
 
     def enter_value(self):
         """Intermediary method to pull button ENTER state"""
@@ -189,7 +205,7 @@ class Input:
         )
         if disable_debounce:
             self.debounce_time = 0
-        while time.ticks_ms() < self.debounce_time + DEBOUNCE:
+        while time.ticks_ms() < self.debounce_time + self.debounce_value:
             self.flush_events()
         if not self.flushed_flag or block:
             # Makes sure events that happened between pages load are cleared.
@@ -223,14 +239,15 @@ class Input:
             or self.page_prev_value() == PRESSED
             or self.touch_value() == PRESSED
         ):
+            self.reset_ios_state()
             self.wdt_feed_inc_entropy()
 
     def wait_for_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if non blocking.
         """
+        self.wait_for_release()
         btn = self._wait_for_press(block, wait_duration)
-
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:

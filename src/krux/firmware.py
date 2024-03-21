@@ -196,9 +196,7 @@ def upgrade():
 
     display.clear()
     display.draw_centered_text(
-        t("New firmware detected on SD card.")
-        + "\n\n"
-        + t("Verifying..")
+        t("New firmware detected on SD card.") + "\n\n" + t("Verifying..")
     )
 
     new_size = fsize(firmware_path)
