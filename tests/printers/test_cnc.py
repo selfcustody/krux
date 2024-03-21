@@ -40,6 +40,7 @@ TEST_QR = """
 
 FILES_FOLDER = "files"
 
+
 @pytest.fixture
 def mocker_sd_card(mocker):
     mocker.patch(
@@ -77,7 +78,10 @@ def test_print_qr_code_with_row_cutmethod(mocker, m5stickv, mocker_sd_card):
         map(
             mocker.call,
             open(
-                os.path.join(os.path.dirname(__file__), FILES_FOLDER, "qr_row_cutmethod.nc"), "r"
+                os.path.join(
+                    os.path.dirname(__file__), FILES_FOLDER, "qr_row_cutmethod.nc"
+                ),
+                "r",
             ).readlines(),
         )
     )
@@ -108,7 +112,10 @@ def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv, mocker_sd_card):
         map(
             mocker.call,
             open(
-                os.path.join(os.path.dirname(__file__), FILES_FOLDER, "qr_spiral_cutmethod.nc"), "r"
+                os.path.join(
+                    os.path.dirname(__file__), FILES_FOLDER, "qr_spiral_cutmethod.nc"
+                ),
+                "r",
             ).readlines(),
         )
     )
@@ -139,7 +146,8 @@ def test_print_qr_code_inverted(mocker, m5stickv, mocker_sd_card):
         map(
             mocker.call,
             open(
-                os.path.join(os.path.dirname(__file__), FILES_FOLDER, "qr_invert.nc"), "r"
+                os.path.join(os.path.dirname(__file__), FILES_FOLDER, "qr_invert.nc"),
+                "r",
             ).readlines(),
         )
     )

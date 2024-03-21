@@ -229,7 +229,7 @@ def test_all_labels(mocker, m5stickv):
     assert touch.label("threshold")
     assert encoder.label("debounce")
     assert amigo_display.label("flipped_x")
-    
+
 
 def test_dock_label(mocker, dock):
     from krux.krux_settings import HardwareSettings
