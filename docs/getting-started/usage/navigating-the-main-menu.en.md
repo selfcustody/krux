@@ -58,7 +58,7 @@ Words are converted to their BIP-39 numeric indexes, those numbers are then conc
 <img src="../../../img/maixpy_m5stickv/backup-stackbit-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-stackbit-150.png" align="right">
 
-Words are converted to their BIP-39 numeric indexes, then each of the four digits is converted to a sum of 1,2,4 or 8. This option does not print even if a printer driver is set.
+Words are converted to their BIP-39 mnemonic word numbers, then each of the four digits is converted to a sum of 1,2,4 or 8. This option does not print even if a printer driver is set.
 
 <div style="clear: both"></div>
 
