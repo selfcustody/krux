@@ -44,7 +44,9 @@ Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) 
 
 Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
 
-On your 12th or 24th word, you can leave the word blank to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.
+----8<----
+12th-24th-word-generate.md
+----8<----
 
 <div style="clear: both"></div>
 
@@ -53,13 +55,14 @@ On your 12th or 24th word, you can leave the word blank to have Krux generate th
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-150.png" align="right">
 
 ##### Decimal
-
 Enter each word of your BIP-39 mnemonic as a number from 1 to 2048 one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
+
 ##### Hexadecimal and Octal
+You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal format, with values ranging from 0x1 to 0x800, or in octal format, with values ranging from 01 to 04000. This is useful with some metal plate backups that uses those formats.
 
-You can also enter your mnemonic as hexadecimal numbers, with values ranging from 0x1 to 0x800 or octal numbers, with values ranging from 01 to 04000. This is useful with some metal plate backups that store mnemonic word numbers using these formats.
-
-On your 12th or 24th word, you can leave the word blank to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.
+----8<----
+12th-24th-word-generate.md
+----8<----
 
 <div style="clear: both"></div>
 
@@ -67,7 +70,7 @@ On your 12th or 24th word, you can leave the word blank to have Krux generate th
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-150.png" align="right">
 
-Enter each word of your BIP-39 mnemonic words in their binary form, toggling necessary bits to recreate each of the word's respective number. Last word will have checksum bits dynamically toggled while you fill previous bits.
+Enter the BIP-39 mnemonic word's numbers (1-2048) in binary format, toggling necessary bits to recreate each of the word's respective number. The last word will have checksum bits dynamically toggled while you fill the bits.
 
 <div style="clear: both"></div>
 
@@ -75,7 +78,7 @@ Enter each word of your BIP-39 mnemonic words in their binary form, toggling nec
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-filled-150.png" align="right">
 
-Enter mnemonic BIP-39 word's numbers using Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of marked (punched) numbers 1,2,4 and 8. For example, to enter the word "pear", number 1297, you have to punch (1)(2)(1+8=9)(1+2+4=7)
+Enter the BIP-39 mnemonic word's numbers (1-2048) using the Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of the numbers marked (punched) 1, 2, 4, or 8. For example, to enter the word "pear", number 1297, you must punch (1)(2)(1+8=9)(1+2+4=7).
 
 <div style="clear: both"></div>
 
@@ -109,7 +112,7 @@ After confirming the mnemonic words, you can optionally choose to type or scan a
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-fingerprint-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-fingerprint-150.png" align="right">
 
-The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase(optional) and will load the expected wallet.
+The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.
 
 <div style="clear: both"></div>
 
@@ -117,7 +120,7 @@ The wallet's fingerprint, if you have it noted down, will help you make sure you
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-single-multi-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-single-multi-150.png" align="right">
 
-After loading your mnemonic and passphrase(optional), you will be asked if you want to use it as part of a `Single-sig` or `Multisig` wallet.
+After loading your mnemonic and passphrase (optional), you will be asked if you want to use it as part of a `Single-sig` or `Multisig` wallet.
 
 Your choice here will subtly change the generated xpub that is used to set up your device in your wallet coordinator software. You can learn more about the difference in the following guides for using [single-sig](using-a-single-sig-wallet.md) and [multisig](using-a-multisig-wallet.md) wallets.
 

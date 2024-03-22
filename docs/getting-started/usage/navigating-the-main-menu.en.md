@@ -58,7 +58,7 @@ Words are converted to their BIP-39 numeric indexes, those numbers are then conc
 <img src="../../../img/maixpy_m5stickv/backup-stackbit-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-stackbit-150.png" align="right">
 
-Words are converted to their BIP-39 mnemonic word numbers, then each of the four digits is converted to a sum of 1,2,4 or 8. This option does not print even if a printer driver is set.
+This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
 
 <div style="clear: both"></div>
 
@@ -66,7 +66,7 @@ Words are converted to their BIP-39 mnemonic word numbers, then each of the four
 <img src="../../../img/maixpy_m5stickv/backup-tiny-seed-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-tiny-seed-150.png" align="right">
 
-This metal backup format represent BIP-39 mnemonic word numbers index on its binary form on a metal plate, where 1's are marked(punched) and 0's are left intact.
+This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact.
 
 <div style="clear: both"></div>
 
