@@ -2,11 +2,17 @@
 
 
 def test_init(mocker, m5stickv):
-    from krux.krux_settings import Settings
+    from krux.krux_settings import Settings, SettingsNamespace
+    import pytest
 
     s = Settings()
 
     assert isinstance(s, Settings)
+
+    sn = SettingsNamespace()
+
+    with pytest.raises(NotImplementedError):
+        sn.label("test")
 
 
 def test_store_init(mocker, m5stickv):
