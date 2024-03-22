@@ -937,8 +937,6 @@ class TinyScanner(Page):
 
     def _process_24w_pg0_scan(self, page_seed_numbers):
         if page_seed_numbers == self.previous_seed_numbers and self.capturing:
-            # Hold if there's a button still pressed
-            self.ctx.input.wait_for_release()
             # Flush events ocurred while processing
             self.ctx.input.reset_ios_state()
 

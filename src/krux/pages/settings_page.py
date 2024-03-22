@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
+import board
 import lcd
 from ..themes import theme, GREEN, ORANGE
 from ..settings import (
@@ -35,7 +36,7 @@ from ..krux_settings import (
     Settings,
     BitcoinSettings,
     TouchSettings,
-    EncoderSettings,
+    ButtonsSettings,
     t,
 )
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
@@ -256,8 +257,8 @@ class SettingsPage(Page):
                 self.number_setting(settings_namespace, setting)
                 if settings_namespace.namespace == TouchSettings.namespace:
                     self._touch_threshold_exit_check()
-                elif settings_namespace.namespace == EncoderSettings.namespace:
-                    self._encoder_threshold_exit_check()
+                elif settings_namespace.namespace == ButtonsSettings.namespace:
+                    self._buttons_debounce_exit_check()
 
             return MENU_CONTINUE
 
@@ -272,12 +273,14 @@ class SettingsPage(Page):
                 Settings().hardware.touch.threshold
             )
 
-    def _encoder_threshold_exit_check(self):
-        """Handler for the 'Back' on encoder settings screen"""
-        from ..rotary import encoder
+    def _buttons_debounce_exit_check(self):
+        """Handler for the 'Back' on buttons debounce settings screen"""
 
-        # Update rotary encoder debounce time
-        encoder.debounce = Settings().hardware.encoder.debounce
+        # Update buttons debounce time
+        self.ctx.input.debounce_value = Settings().hardware.buttons.debounce
+        if "ENCODER" in board.config["krux"]["pins"]:
+            from ..rotary import encoder
+            encoder.debounce = Settings().hardware.buttons.debounce
 
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""

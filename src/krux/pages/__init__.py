@@ -33,7 +33,6 @@ from ..input import (
     SWIPE_DOWN,
     SWIPE_UP,
     PRESSED,
-    DEBOUNCE,
 )
 from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY, FLASH_MSG_TIME
 from ..qr import to_qr_codes
@@ -95,7 +94,8 @@ class Page:
     ):
         """Flashes text centered on the display for duration ms"""
         self.ctx.display.flash_text(text, color, duration)
-        self.ctx.input.flush_events()
+        # Discard button presses that occurred during the message
+        self.ctx.input.reset_ios_state()
 
     def flash_error(self, text):
         """Flashes text centered on the display for duration ms"""
@@ -302,8 +302,8 @@ class Page:
             if extra_debounce_flag:
                 # Animated QR codes disable debounce
                 # so this is required to avoid double presses
-                time.sleep_ms(DEBOUNCE)
-                self.ctx.input.flush_events()
+                time.sleep_ms(self.ctx.input.debounce_value)
+                self.ctx.input.reset_ios_state()
                 extra_debounce_flag = False
             btn = self.ctx.input.wait_for_button(num_parts == 1)
             if btn in TOGGLE_BRIGHTNESS:
@@ -589,7 +589,7 @@ class Menu:
                 self._draw_menu(selected_item_index)
 
             self.draw_status_bar()
-            self.ctx.input.flush_events()
+            self.ctx.input.reset_ios_state()
 
             if start_from_submenu:
                 status = self._clicked_item(selected_item_index)

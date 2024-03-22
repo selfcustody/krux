@@ -55,7 +55,7 @@ class RotaryEncoder:
         self.value = 0
         self.time_frame = 0
 
-        self.debounce = Settings().hardware.encoder.debounce
+        self.debounce = Settings().hardware.buttons.debounce
 
     def process(self, new_state):
         """Sets new encoder state after position is changed"""
