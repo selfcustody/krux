@@ -14,7 +14,7 @@ def tdata(mocker):
     )
     TEST_SIGNER_PUBLIC_KEY = ec.PublicKey.from_string(TEST_SIGNER_PUBKEY)
 
-    FILES_FOLDER = "files"
+    FILES_FOLDER = ""
 
     TEST_FIRMWARE_FILENAME = os.path.join(
         os.path.dirname(__file__), FILES_FOLDER, "firmware-v0.0.0.bin"
