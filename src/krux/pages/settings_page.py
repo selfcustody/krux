@@ -280,6 +280,7 @@ class SettingsPage(Page):
         self.ctx.input.debounce_value = Settings().hardware.buttons.debounce
         if "ENCODER" in board.config["krux"]["pins"]:
             from ..rotary import encoder
+
             encoder.debounce = Settings().hardware.buttons.debounce
 
     def category_setting(self, settings_namespace, setting):

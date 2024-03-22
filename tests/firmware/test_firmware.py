@@ -1,5 +1,5 @@
 import pytest
-from .shared_mocks import get_mock_open
+from ..shared_mocks import get_mock_open
 
 
 @pytest.fixture
@@ -12818,6 +12818,10 @@ def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
         ),
     )
     mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
+    )
+    mocker.patch(
         "os.listdir",
         new=mocker.MagicMock(
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
@@ -12912,6 +12916,10 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
                 "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
             }
         ),
+    )
+    mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
     )
     mocker.patch(
         "os.listdir",
@@ -13014,6 +13022,10 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
                 "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
             }
         ),
+    )
+    mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
     )
     mocker.patch(
         "os.listdir",
