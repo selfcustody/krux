@@ -791,6 +791,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#final-checksum-word" class="md-nav__link">
+    <span class="md-ellipsis">
+      Final checksum word
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1285,7 +1294,7 @@
 You can also use <a href="https://iancoleman.io/bip39/">an offline QR code generator for this</a> (ideally on an airgapped device).</p>
 <h4 id="tiny-seed">Tiny Seed<a class="headerlink" href="#tiny-seed" title="Permanent link">&para;</a></h4>
 <p><a href="https://tinyseed.io/">Tiny Seed</a> is a compact metal plate mnemonic backup method.
-Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them. To properly scan them place the Tiny Seed over a black background and paint the punched bits black to increase contrast.</p>
+Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them. To properly scan them place the Tiny Seed over a black background and paint the punched bits black to increase contrast. You can also scan the thermally printed version, or a filled template. Find templates to scan or print <a href="https://github.com/odudex/krux_binaries/tree/main/templates">here</a>.</p>
 <h3 id="via-manual-input">Via Manual Input<a class="headerlink" href="#via-manual-input" title="Permanent link">&para;</a></h3>
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-manual-options-150.png" align="right"></p>
@@ -1296,7 +1305,7 @@ Krux devices have machine vision capabilities that allow users to scan these met
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-via-text-word-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-text-word-150.png" align="right"></p>
 <p>Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.</p>
-<p>On your 12th or 24th word, you can leave the word blank to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.</p>
+<p>On your 12th or 24th word, you can leave it blank to have Krux generate the final checksum word of your mnemonic for you. This is useful when you choose a manual method to generate your mnemonic and want the final BIP-39 checksum word to be valid.</p>
 <div style="clear: both"></div>
 
 <h4 id="word-numbers">Word Numbers<a class="headerlink" href="#word-numbers" title="Permanent link">&para;</a></h4>
@@ -1305,20 +1314,21 @@ Krux devices have machine vision capabilities that allow users to scan these met
 <h5 id="decimal">Decimal<a class="headerlink" href="#decimal" title="Permanent link">&para;</a></h5>
 <p>Enter each word of your BIP-39 mnemonic as a number from 1 to 2048 one at a time. You can use <a href="https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt">this list</a> for reference.</p>
 <h5 id="hexadecimal-and-octal">Hexadecimal and Octal<a class="headerlink" href="#hexadecimal-and-octal" title="Permanent link">&para;</a></h5>
-<p>You can also enter your mnemonic as hexadecimal numbers, with values ranging from 0x1 to 0x800 or octal numbers, with values ranging from 01 to 04000. This is useful with some metal plate backups that store mnemonic word numbers using these formats.</p>
-<p>On your 12th or 24th word, you can leave the word blank to have Krux generate the final word of your mnemonic for you. This is handy if you chose a manual method to generate your mnemonic and want the final word to be a valid checksum.</p>
+<p>You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal format, with values ranging from 0x1 to 0x800, or in octal format, with values ranging from 01 to 04000. This is useful with some metal plate backups that uses those formats.</p>
+<h5 id="final-checksum-word">Final checksum word<a class="headerlink" href="#final-checksum-word" title="Permanent link">&para;</a></h5>
+<p>On your 12th or 24th word, you can leave it blank to have Krux generate the final checksum word of your mnemonic for you. This is useful when you choose a manual method to generate your mnemonic and want the final BIP-39 checksum word to be valid.</p>
 <div style="clear: both"></div>
 
 <h4 id="tiny-seed-bits">Tiny Seed (Bits)<a class="headerlink" href="#tiny-seed-bits" title="Permanent link">&para;</a></h4>
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-150.png" align="right"></p>
-<p>Enter each word of your BIP-39 mnemonic words in their binary form, toggling necessary bits to recreate each of the word's respective number. Last word will have checksum bits dynamically toggled while you fill previous bits.</p>
+<p>Enter the BIP-39 mnemonic word's numbers (1-2048) in binary format, toggling necessary bits to recreate each of the word's respective number. The last word will have checksum bits dynamically toggled while you fill the bits.</p>
 <div style="clear: both"></div>
 
 <h4 id="stackbit-1248">Stackbit 1248<a class="headerlink" href="#stackbit-1248" title="Permanent link">&para;</a></h4>
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-filled-150.png" align="right"></p>
-<p>Enter mnemonic BIP-39 word's numbers using Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of marked (punched) numbers 1,2,4 and 8. For example, to enter the word "pear", number 1297, you have to punch (1)(2)(1+8=9)(1+2+4=7)</p>
+<p>Enter the BIP-39 mnemonic word's numbers (1-2048) using the Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of the numbers marked (punched) 1, 2, 4, or 8. For example, to enter the word "pear", number 1297, you must punch (1)(2)(1+8=9)(1+2+4=7).</p>
 <div style="clear: both"></div>
 
 <h3 id="from-storage">From Storage<a class="headerlink" href="#from-storage" title="Permanent link">&para;</a></h3>
@@ -1343,13 +1353,13 @@ Krux devices have machine vision capabilities that allow users to scan these met
 <h3 id="fingerprint">Fingerprint<a class="headerlink" href="#fingerprint" title="Permanent link">&para;</a></h3>
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-fingerprint-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-fingerprint-150.png" align="right"></p>
-<p>The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase(optional) and will load the expected wallet.</p>
+<p>The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.</p>
 <div style="clear: both"></div>
 
 <h3 id="single-sig-or-multisig">Single-sig or Multisig<a class="headerlink" href="#single-sig-or-multisig" title="Permanent link">&para;</a></h3>
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-single-multi-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-single-multi-150.png" align="right"></p>
-<p>After loading your mnemonic and passphrase(optional), you will be asked if you want to use it as part of a <code>Single-sig</code> or <code>Multisig</code> wallet.</p>
+<p>After loading your mnemonic and passphrase (optional), you will be asked if you want to use it as part of a <code>Single-sig</code> or <code>Multisig</code> wallet.</p>
 <p>Your choice here will subtly change the generated xpub that is used to set up your device in your wallet coordinator software. You can learn more about the difference in the following guides for using <a href="../using-a-single-sig-wallet/">single-sig</a> and <a href="../using-a-multisig-wallet/">multisig</a> wallets.</p>
 <p>Now, onto the main menu...</p>
 <div style="clear: both"></div>
