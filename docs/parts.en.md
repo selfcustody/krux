@@ -14,7 +14,9 @@
 | Warnings  | [:material-information:{ title="M5stickV and USB-C" }](#m5stickv-info) | [:material-information:{ title="Maix Amigo screens" }](#amigo-info) | [:material-information:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB |
 
 <i style="font-size: 85%">:material-information:{id="m5stickv-info"}:
-M5stickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host(computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5stick.
+----8<----
+m5stickv-usb-c.md
+----8<----
 </i>
 
 <i style="font-size: 85%">:material-information:{id="amigo-info"}:
