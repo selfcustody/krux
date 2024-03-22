@@ -347,7 +347,7 @@ class Page:
                     offset_y = starting_y_offset + (i * self.ctx.display.font_height)
                     self.ctx.display.draw_string(offset_x, offset_y, word)
 
-    def print_qr_prompt(self):
+    def print_prompt(self, text):
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
         """
@@ -356,7 +356,7 @@ class Page:
 
         self.ctx.display.clear()
         if self.prompt(
-            t("Print to QR?\n\n%s\n\n") % Settings().hardware.printer.driver,
+            (text + "\n\n%s\n\n") % Settings().hardware.printer.driver,
             self.ctx.display.height() // 2,
         ):
             return True

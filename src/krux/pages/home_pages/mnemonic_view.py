@@ -70,10 +70,7 @@ class MnemonicsView(Page):
         # Avoid printing text on a cnc
         if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
             self.ctx.display.clear()
-            if self.prompt(
-                t("Print?\n\n%s\n\n") % Settings().hardware.printer.driver,
-                self.ctx.display.height() // 2,
-            ):
+            if self.print_prompt(t("Print?")):
                 from ..print_page import PrintPage
 
                 print_page = PrintPage(self.ctx)
@@ -171,6 +168,6 @@ class MnemonicsView(Page):
 
         # Allow to print on thermal printer only
         if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
-            if self.print_qr_prompt():
+            if self.print_prompt(t("Print?")):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
