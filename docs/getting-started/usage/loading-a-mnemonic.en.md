@@ -28,7 +28,7 @@ You can also use [an offline QR code generator for this](https://iancoleman.io/b
 #### Tiny Seed
 
 [Tiny Seed](https://tinyseed.io/) is a compact metal plate mnemonic backup method.
-Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them. To properly scan them place the Tiny Seed over a black background and paint the punched bits black to increase contrast. You can also scan the thermally printed version, or a filled template. Find templates to scan or print [here](https://github.com/odudex/krux_binaries/tree/main/templates)
+Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them. To properly scan them place the Tiny Seed over a black background and paint the punched bits black to increase contrast. You can also scan the thermally printed version, or a filled template. Find templates to scan or print [here](https://github.com/odudex/krux_binaries/tree/main/templates).
 
 ### Via Manual Input
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-125.png" align="right">
@@ -60,6 +60,7 @@ Enter each word of your BIP-39 mnemonic as a number from 1 to 2048 one at a time
 ##### Hexadecimal and Octal
 You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal format, with values ranging from 0x1 to 0x800, or in octal format, with values ranging from 01 to 04000. This is useful with some metal plate backups that uses those formats.
 
+##### Final checksum word
 ----8<----
 12th-24th-word-generate.md
 ----8<----
