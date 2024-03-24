@@ -140,17 +140,17 @@ class Display:
                 invert=True,
                 offset_h0=80,
             )
-        else:
-            invert = False
-            mirror = False
-            bgr_to_rgb = False
-            if board.config["type"] == "amigo":
-                mirror = True
-                invert = Settings().hardware.display.inverted_colors
-                bgr_to_rgb = Settings().hardware.display.bgr_colors
-            lcd.init(invert=invert)
-            lcd.mirror(mirror)
+        elif board.config["type"] == "amigo":
+            lcd_type = Settings().hardware.display.lcd_type
+            invert = Settings().hardware.display.inverted_colors
+            bgr_to_rgb = Settings().hardware.display.bgr_colors
+            lcd.init(invert=invert, lcd_type=lcd_type)
+            lcd.mirror(True)
             lcd.bgr_to_rgb(bgr_to_rgb)
+        else:
+            lcd.init(invert=False)
+            lcd.mirror(False)
+            lcd.bgr_to_rgb(False)
         self.to_portrait()
 
     def qr_offset(self):

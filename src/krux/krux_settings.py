@@ -249,6 +249,7 @@ class AmgDisplaySettings(SettingsNamespace):
     flipped_x_coordinates = CategorySetting("flipped_x", True, [False, True])
     inverted_colors = CategorySetting("inverted_colors", True, [False, True])
     bgr_colors = CategorySetting("bgr_colors", True, [False, True])
+    lcd_type = CategorySetting("lcd_type", 0, [0, 1])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -256,6 +257,7 @@ class AmgDisplaySettings(SettingsNamespace):
             "flipped_x": t("Flipped X Coordinates"),
             "inverted_colors": t("Inverted Colors"),
             "bgr_colors": t("BGR Colors"),
+            "lcd_type": t("LCD Type"),
         }[attr]
 
 

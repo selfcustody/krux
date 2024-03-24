@@ -1,7 +1,20 @@
-## Why are the buttons on my Maix Amigo in the wrong order? Why is my Amigo screen displaying the wrong colors?
-Some Amigo screens have inverted X coordinates while others don’t. If you notice that the buttons on keypad input screens appear to be in the wrong order, please go to `Settings > Hardware > Display` and change the value of `Flipped X Coordinates` which should correct the issue.
+## Troubleshooting LCD Settings on Maix Amigo
+### Buttons in the Wrong Order
+If the buttons on keypad input screens appear to be in the wrong order, this might be due to inverted X coordinates. To correct this:
 
-Others have found that there are issues with the colors displayed in the interface and camera preview. To fix this we have two options in `Settings > Hardware > Display`, `BGR Colors` and `Inverted Colors`, test with them until the colors appear to be correct on your device.
+1. Go to Settings > Hardware > Display.
+2. Change the value of Flipped X Coordinates.
+### Incorrect Colors
+If the colors displayed on the interface or camera preview are incorrect, you can try the following options:
+
+#### Inverted Colors
+If, for example, the background color is white when it should be black, go to Settings > Hardware > Display and toggle  `Inverted Colors` .
+
+#### BGR Colors
+If, for example, you are using the Orange theme, and instead of orange the colors appear bluish, toggle `BGR Colors` in the display settings.
+
+#### LCD Type
+If adjusting `BGR Colors` and  `Inverted Colors`  doesn't fix the issue, try changing the `LCD Type`. After changing this setting, you will be warned that the device will reboot automatically if this change does not resolve the issue. Next, if you see a message prompting you to press `PREVIOUS` (`UP`) button in case the new setting worked, do so. Then, try different combinations of  `Inverted Colors`  and `BGR Colors` until the colors display correctly
 
 ## Why doesn't my Maix Amigo touchscreen work with v24.03.0 if it worked fine with v23.09.1?
 <img src="../img/amigo-inside-switch-up.jpg" align="right">
@@ -65,7 +78,7 @@ The level of detail that you see is what Krux sees. If the QR code shown on the 
 
 If you have adjusted the lens already, the device may be too far away or too close to the code to read it. Start by holding the device as close to the QR code as possible and pulling away slowly until all or most of the QR code is viewable within the screen. If the code on the screen looks crisp, Krux should read it quickly and give you immediate feedback.
 
-If you are in a dark environment, you can hold down the ENTER button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility. M5stickV and Amigo also has an anti-glare mode to better capture images from high brightness screens or with incident light, to enable/disable the anti-glare just press the PAGE button while scanning.
+If you are in a dark environment, you can hold down the `ENTER` button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility. M5stickV and Amigo also has an anti-glare mode to better capture images from high brightness screens or with incident light, to enable/disable the anti-glare just press the PAGE button while scanning.
 
 ## Why am I getting an error when I try to scan a QR code?
 If Krux is recognizing that it sees a QR code but is displaying an error message after reading it, the likely reason is that the QR code is not in a format that Krux works with. We have listed the supported formats below:
