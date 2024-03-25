@@ -36,31 +36,41 @@ Some stores ship the Maix Dock with soldered pin connectors that do not fit into
 ### M5StickV
 <img srcset="../img/maixpy_m5stickv/logo-125.png" align="right">
 
-Available from many distributors, including:
+Below is a list of some distributors where you can find this device:
 
 - [M5Stack](https://shop.m5stack.com/products/stickv)
-- [Adafruit](https://www.adafruit.com/product/4321)
 - [Mouser](https://www.mouser.com/c/?q=m5stickv)
 - [Digi-Key](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/K027/10492135)
+- [Elektromaker](https://www.electromaker.io/shop/product/m5stickv-k210-ai-camera-without-wifi)
 - [Lee's Electronic](https://leeselectronic.com/en/product/169940-m5stick-ai-camera-kendryte-k210-risc-v-core-no-wifi.html)
+- [AliExpress](https://www.aliexpress.com/w/wholesale-m5stickv.html)
+- [ABRA](https://abra-electronics.com/sensors/cameras/m5stickv-k210-ai-camera-ideal-for-machine-vision.html)
+- [Adafruit](https://www.adafruit.com/product/4321)
 - [Cytron](https://www.cytron.io/c-development-tools/c-fpga/p-m5stickv-k210-ai-camera-without-wifi)
-- [OKDO](https://www.okdo.com/p/m5stickv-k210-ai-camera-without-wifi/)
 
 <div style="clear: both"></div>
 
 ### Maix Amigo
 <img srcset="../img/maixpy_amigo/logo-150.png" align="right">
 
-Available from many distributors, including:
+Below is a list of some distributors where you can find this device:
 
+- [AliExpress](https://www.aliexpress.com/w/wholesale-sipeed-amigo.html)
 - [Seeed Studio](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html)
+- [Digi-Key](https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/102110463/13168813)
 - [Mouser](https://www.mouser.com/c/?q=sipeed)
 - [Electromaker](https://www.electromaker.io/shop/search/sipeed)
-- [Digi-Key](https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/102110463/13168813)
-- [AliExpress](https://www.aliexpress.com/w/wholesale-sipeed-amigo.html)
-- [Amazon](https://www.amazon.com/s?k=sipeed+amigo&dc)
 
 <div style="clear: both"></div>
+
+### Yahboom k210 module
+
+Below is a list of some distributors where you can find this device:
+
+- [AliExpress](https://www.aliexpress.com/w/wholesale-yahboom-k210-module.html)
+- [Amazon](https://www.amazon.com/s?k=Yahboom+k210+module)
+- [Yahboom Store](https://category.yahboom.net/collections/mb-module/products/k210-module)
+- [ETC HK Shop](https://www.etchkshop.com/products/k210-module-ai-camera)
 
 ### Maix Dock and Maix Bit
 For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
@@ -69,6 +79,14 @@ Below are example implementations with instructions on how to recreate them:
 
 - [https://github.com/selfcustody/DockEncoderCase](https://github.com/selfcustody/DockEncoderCase)
 - [https://github.com/selfcustody/MaixBitCase](https://github.com/selfcustody/MaixBitCase)
+
+Below is a list of some distributors where you can find these devices:
+
+- [Mouser](https://www.mouser.com/c/?q=sipeed)
+- [Electromaker](https://www.electromaker.io/shop/search/sipeed)
+- [Digi-Key](https://www.digikey.com.br/en/products/filter/embedded-mcu-dsp-evaluation-boards/786?s=N4IgTCBcDaIM4EsAOBTFATEBdAvkA)
+- [AliExpress](https://www.aliexpress.com/w/wholesale-sipeed-maix.html)
+- [Amazon](https://www.amazon.com/s?k=sipeed+k210)
 
 ## Other Parts
 ### USB-C Charge Cable
