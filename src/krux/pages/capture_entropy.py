@@ -154,10 +154,10 @@ class CameraEntropy(Page):
         shannon_16b = shannon.entropy_img16b(img_bytes)
         shannon_16b_total = shannon_16b * img_pixels
 
-        entropy_msg = t("Shannon's entropy:\n")
-        entropy_msg += str(round(shannon_16b, 2)) + " bits/px\n"
-        entropy_msg += t("(%d total)\n\n") % int(shannon_16b_total)
-        entropy_msg += t("Pixels deviation index: ")
+        entropy_msg = t("Shannon's Entropy:") + "\n"
+        entropy_msg += str(round(shannon_16b, 2)) + " " + t("bits/px") + "\n"
+        entropy_msg += t("(%d total)") % int(shannon_16b_total) + "\n\n"
+        entropy_msg += t("Pixels deviation index:") + " "
         entropy_msg += str(stdev_index)
         self.ctx.display.clear()
         self.ctx.input.reset_ios_state()

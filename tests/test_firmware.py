@@ -14,8 +14,10 @@ def tdata(mocker):
     )
     TEST_SIGNER_PUBLIC_KEY = ec.PublicKey.from_string(TEST_SIGNER_PUBKEY)
 
+    FILES_FOLDER = "files"
+
     TEST_FIRMWARE_FILENAME = os.path.join(
-        os.path.dirname(__file__), "firmware-v0.0.0.bin"
+        os.path.dirname(__file__), FILES_FOLDER, "firmware-v0.0.0.bin"
     )
     TEST_FIRMWARE = open(TEST_FIRMWARE_FILENAME, "rb").read()
     TEST_FIRMWARE_SHA256 = open(TEST_FIRMWARE_FILENAME + ".sha256.txt", "r").read()
@@ -12816,6 +12818,10 @@ def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
         ),
     )
     mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
+    )
+    mocker.patch(
         "os.listdir",
         new=mocker.MagicMock(
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
@@ -12910,6 +12916,10 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
                 "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
             }
         ),
+    )
+    mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
     )
     mocker.patch(
         "os.listdir",
@@ -13012,6 +13022,10 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
                 "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
             }
         ),
+    )
+    mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
     )
     mocker.patch(
         "os.listdir",

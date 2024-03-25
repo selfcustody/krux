@@ -57,7 +57,9 @@ Your device should charge and turn on when connected to a USB-A port, even if it
 If your device is not charging or being recognized as expected, try using a different USB port or a different computer to determine if the issue is with the device or the host's USB port.
 
 ## Why isn't my M5stickV device being recognized and charged when connected to the computer's USB-C?
-M5stickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host(computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5stickV
+----8<----
+m5stickv-usb-c.md
+----8<----
 
 ## Why does my Krux device randomly freeze or restart when connected to the computer?
 Windows is known to have issues with the USB-C devices. If you are experiencing random crashes or even reboots and your device does not have a battery, try using a phone charger or other power source such as a power bank.
