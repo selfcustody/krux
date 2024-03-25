@@ -79,6 +79,10 @@ COPY ./vendor /src/vendor
 WORKDIR /src
 RUN cd vendor/embit && pip3 install -e .
 RUN rm -rf vendor/embit/src/embit/util/prebuilt && \
+    rm -rf vendor/embit/src/embit/liquid && \
+    rm -f vendor/embit/src/embit/psbtview.py && \
+    rm -f vendor/embit/src/embit/slip39.py && \
+    rm -f vendor/embit/src/embit/wordlists/slip39.py && \
     rm -f vendor/embit/src/embit/util/ctypes_secp256k1.py && \
     rm -f vendor/embit/src/embit/util/py_secp256k1.py && \
     mv src/boot.py src/_boot.py && \
