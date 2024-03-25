@@ -14,7 +14,25 @@ If, for example, the background color is white when it should be black, go to Se
 If, for example, you are using the Orange theme, and instead of orange the colors appear bluish, toggle `BGR Colors` in the display settings.
 
 #### LCD Type
-If adjusting `BGR Colors` and  `Inverted Colors`  doesn't fix the issue, try changing the `LCD Type`. After changing this setting, you will be warned that the device will reboot automatically if this change does not resolve the issue. Next, if you see a message prompting you to press `PREVIOUS` (`UP`) button in case the new setting worked, do so. Then, try different combinations of  `Inverted Colors`  and `BGR Colors` until the colors display correctly
+**Warning!**  Only try changing this setting if you failed to fix colors with previous ones.
+
+If adjusting `BGR Colors` and `Inverted Colors` doesn't fix the color issue, try changing the LCD Type:
+
+1. After changing this setting, you will be warned that the device will reboot automatically if this change does not resolve the issue (if it fails, the screen will turn black, and you'll not see anything).
+2. After proceeding with the warning, if you see a message prompting you to press the `PREVIOUS` (UP) button, it means that the new setting worked. Follow the instructions and press UP.
+3. If you notice menu options but the colors are still wrong, try again with different combinations of `Inverted Colors` and `BGR Colors`. This time, it is likely you will find a combination that correctly displays the colors of themes and the camera feed.
+
+If, after the warning in step 1, the screen turns black and you don't see anything, don't panic or press any buttons. Just wait 5 seconds, and the device will automatically reboot with the previous display settings. This means you should keep the default LCD Type setting and maybe try again with `Inverted Colors` and `BGR Colors`.
+
+If you accidentally pressed `PREVIOUS` (UP) and saved the wrong setting, you will have to perform a wipe to remove all stored settings to be able to see the screen working again. On Linux, go to the folder where you downloaded the Krux firmware and use Ktool to fully wipe your device:
+
+`./ktool-linux -B goE -b 1500000 -E`
+
+(Soon Krux-Installer will have a full wipe button too)
+
+Then flash the fimrware again.
+
+`./ktool-linux -B goE -b 1500000 maixpy_amigo/kboot.kfpkg`
 
 ## Why doesn't my Maix Amigo touchscreen work with v24.03.0 if it worked fine with v23.09.1?
 <img src="../img/amigo-inside-switch-up.jpg" align="right">
