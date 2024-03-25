@@ -40,8 +40,7 @@ class Home(Page):
             Menu(
                 ctx,
                 [
-                    (t("Mnemonic"), self.mnemonic),
-                    (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
+                    (t("Backup Mnemonic"), self.backup_mnemonic),
                     (t("Extended Public Key"), self.public_key),
                     (t("Wallet Descriptor"), self.wallet),
                     (t("Address"), self.addresses_menu),
@@ -51,19 +50,12 @@ class Home(Page):
             ),
         )
 
-    def mnemonic(self):
-        """Handler for the 'mnemonic' menu item"""
-        from .mnemonic_view import MnemonicsView
+    def backup_mnemonic(self):
+        """Handler for the 'Backup Mnemonic' menu item"""
+        from .mnemonic_backup import MnemonicsView
 
         mnemonics_viewer = MnemonicsView(self.ctx)
         return mnemonics_viewer.mnemonic()
-
-    def encrypt_mnemonic(self):
-        """Handler for Mnemonic > Encrypt Mnemonic menu item"""
-        from ..encryption_ui import EncryptMnemonic
-
-        encrypt_mnemonic_menu = EncryptMnemonic(self.ctx)
-        return encrypt_mnemonic_menu.encrypt_menu()
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""

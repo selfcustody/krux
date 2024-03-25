@@ -4,7 +4,7 @@ from .. import create_ctx
 
 
 def test_mnemonic_words(mocker, m5stickv, tdata):
-    from krux.pages.home_pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -64,7 +64,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
 
 
 def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
-    from krux.pages.home_pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -185,7 +185,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
 
 
 def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
-    from krux.pages.home_pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -346,7 +346,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
 
 
 def test_mnemonic_st_qr_touch(mocker, amigo, tdata):
-    from krux.pages.home_pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_TOUCH, BUTTON_PAGE_PREV, BUTTON_ENTER
     from krux.qr import FORMAT_NONE
