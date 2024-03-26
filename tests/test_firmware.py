@@ -13336,7 +13336,7 @@ def test_firmware_constants_guard_against_overflow(mocker, m5stickv):
         MAX_FIRMWARE_SIZE,
         FIRMWARE_SLOT_1,
         FIRMWARE_SLOT_2,
-        SPIFFS_ADDR
+        SPIFFS_ADDR,
     )
 
     # kboot rules define these for app/user firmware
@@ -13356,8 +13356,8 @@ def test_firmware_constants_guard_against_overflow(mocker, m5stickv):
     # or exceed 16MB wrapping/bricking lowest sectors (needing fix w/ kboot or ktool).
     for i in range(len(slots)):
         assert lowest_firmware <= slots[i] <= highest_firmware
-        if i+1 < len(slots):
-            assert slots[i] + max_footprint <= slots[i+1]
+        if i + 1 < len(slots):
+            assert slots[i] + max_footprint <= slots[i + 1]
         else:
             assert slots[i] + max_footprint <= SPIFFS_ADDR
             assert slots[i] + max_footprint <= FLASH_SIZE
@@ -13365,11 +13365,12 @@ def test_firmware_constants_guard_against_overflow(mocker, m5stickv):
 
 def test_firmware_constants_consistent_w4096_aligned_sectors(mocker, m5stickv):
     import krux.firmware
+
     addresses = (
-         krux.firmware.FIRMWARE_SLOT_1, 
-         krux.firmware.FIRMWARE_SLOT_2,
-         krux.firmware.MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
-         krux.firmware.BACKUP_BOOT_CONFIG_SECTOR_ADDRESS
+        krux.firmware.FIRMWARE_SLOT_1,
+        krux.firmware.FIRMWARE_SLOT_2,
+        krux.firmware.MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
+        krux.firmware.BACKUP_BOOT_CONFIG_SECTOR_ADDRESS,
     )
     # kboot/ktool expects sectors to be aligned at 4096 bytes
     chunk_size = 0x1000
