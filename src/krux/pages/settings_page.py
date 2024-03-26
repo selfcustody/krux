@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
+import board
 import lcd
 from ..themes import theme, GREEN, ORANGE
 from ..settings import (
@@ -35,7 +36,7 @@ from ..krux_settings import (
     Settings,
     BitcoinSettings,
     TouchSettings,
-    EncoderSettings,
+    ButtonsSettings,
     t,
 )
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
@@ -54,6 +55,7 @@ import os
 DIGITS = "0123456789"
 
 PERSIST_MSG_TIME = 2500
+DISPLAY_TEST_TIME = 5000  # 5 seconds
 
 CATEGORY_SETTING_COLOR_DICT = {
     BitcoinSettings.MAIN_TXT: ORANGE,
@@ -256,8 +258,8 @@ class SettingsPage(Page):
                 self.number_setting(settings_namespace, setting)
                 if settings_namespace.namespace == TouchSettings.namespace:
                     self._touch_threshold_exit_check()
-                elif settings_namespace.namespace == EncoderSettings.namespace:
-                    self._encoder_threshold_exit_check()
+                elif settings_namespace.namespace == ButtonsSettings.namespace:
+                    self._buttons_debounce_exit_check()
 
             return MENU_CONTINUE
 
@@ -272,12 +274,15 @@ class SettingsPage(Page):
                 Settings().hardware.touch.threshold
             )
 
-    def _encoder_threshold_exit_check(self):
-        """Handler for the 'Back' on encoder settings screen"""
-        from ..rotary import encoder
+    def _buttons_debounce_exit_check(self):
+        """Handler for the 'Back' on buttons debounce settings screen"""
 
-        # Update rotary encoder debounce time
-        encoder.debounce = Settings().hardware.encoder.debounce
+        # Update buttons debounce time
+        self.ctx.input.debounce_value = Settings().hardware.buttons.debounce
+        if "ENCODER" in board.config["krux"]["pins"]:
+            from ..rotary import encoder
+
+            encoder.debounce = Settings().hardware.buttons.debounce
 
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""
@@ -327,11 +332,39 @@ class SettingsPage(Page):
             if setting.attr == "bgr_colors" and new_category is not None:
                 lcd.bgr_to_rgb(new_category)
             if setting.attr == "inverted_colors" and new_category is not None:
-                lcd.init(invert=new_category)
-                # re-configuring the display after reinitializing it
+                lcd.init(
+                    invert=new_category, lcd_type=Settings().hardware.display.lcd_type
+                )
+                # re-configuring the display after re-initializing it
                 lcd.mirror(True)
                 lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
                 lcd.rotation(1)  # Portrait mode
+            if setting.attr == "lcd_type" and new_category is not None:
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t(
+                        "If your device display does not work after this change, "
+                        "it will automatically reboot with previous settings after 5 seconds."
+                    )
+                )
+                self.ctx.input.wait_for_button()
+                lcd.init(
+                    invert=Settings().hardware.display.inverted_colors,
+                    lcd_type=new_category,
+                )
+                # re-configuring the display after re-initializing it
+                lcd.mirror(True)
+                lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
+                lcd.rotation(1)  # Portrait mode
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t('Press "PREVIOUS" (up arrow) button to keep this setting.')
+                )
+                btn = self.ctx.input.wait_for_button(
+                    block=False, wait_duration=DISPLAY_TEST_TIME
+                )
+                if btn != BUTTON_PAGE_PREV:
+                    self.ctx.power_manager.reboot()
 
         # When changing locale, exit Login to force recreate with new locale
         if (

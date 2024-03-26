@@ -14,20 +14,14 @@ def mocker_printer(mocker):
 
 
 def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
-    import krux
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
     from krux.translations import translation_table
-    from krux.themes import WHITE, RED, GREEN, ORANGE
 
     tlist = list(translation_table)
     index_pt = tlist.index("pt-BR")
     index_next = (index_pt + 1) % (len(tlist))
-    text_pt = translation_table[tlist[index_pt]][1177338798] + "\n" + tlist[index_pt]
-    text_next = (
-        translation_table[tlist[index_next]][1177338798] + "\n" + tlist[index_next]
-    )
 
     cases = [
         (  # 0
@@ -41,12 +35,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,
             ),
-            [
-                mocker.call("Network\nmain", ORANGE),
-                mocker.call("Network\ntest", GREEN),
-            ],
             lambda: Settings().bitcoin.network == "test",
-            CategorySetting,
         ),
         (  # 1
             (
@@ -54,8 +43,10 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
-                # TODO: Identify it's printer settings
-                # Thermal
+                # Printer
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Thermal (printer)
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Change Baudrate
@@ -69,6 +60,9 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
+                # Back to settings
+                BUTTON_PAGE,
+                BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE,
                 BUTTON_PAGE,
@@ -77,12 +71,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
-            [
-                mocker.call("Baudrate\n9600", WHITE),
-                mocker.call("Baudrate\n19200", WHITE),
-            ],
             lambda: Settings().hardware.printer.thermal.adafruit.baudrate == 19200,
-            CategorySetting,
         ),
         (  # 2
             (
@@ -95,20 +84,18 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
-            [
-                mocker.call(text_pt, WHITE),
-                mocker.call(text_next, WHITE),
-            ],
             lambda: Settings().i18n.locale == tlist[index_next],
-            CategorySetting,
         ),
         (  # 3
             (
-                # Printer
+                # Hardware
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
-                # Thermal
+                # Printer
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Thermal (printer)
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Paper Width
@@ -116,7 +103,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Change width
-                # Remove digit
+                # Remove digit (become 38)
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
@@ -139,6 +126,9 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
+                # Back to settings
+                BUTTON_PAGE,
+                BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE,
                 BUTTON_PAGE,
@@ -147,11 +137,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
-            [
-                mocker.call("Paper Width", 10),
-            ],
             lambda: Settings().hardware.printer.thermal.adafruit.paper_width == 389,
-            NumberSetting,
         ),
     ]
     case_num = 0
@@ -166,8 +152,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         settings_page.settings()
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
-
-        assert case[2]()
+        assert case[1]()
 
 
 def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
@@ -192,7 +177,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
 
     HARDWARE_INDEX = 2
     LOCALE_INDEX = 3
-    PRINTER_INDEX = 1
+    PRINTER_INDEX = 2
     LEAVE_INDEX = 7
 
     cases = [
@@ -232,7 +217,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
                 # Back from Printer
                 3,
                 # Back from Hardware
-                3,
+                4,
                 # Leave Settings
                 LEAVE_INDEX,
             ),
@@ -292,6 +277,8 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
     ctx = mock_context(mocker)
     settings_page = SettingsPage(ctx)
 
+    mocker.spy(SettingsPage, "flash_error")
+
     # pbkdf2_iterations has default value
     assert Settings().encryption.pbkdf2_iterations == 100000
 
@@ -304,6 +291,9 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
     # continue with default value because it must be multiple of 10000
     assert Settings().encryption.pbkdf2_iterations == 100000
 
+    # error msg is shown
+    settings_page.flash_error.assert_called()
+
     # try to change the value to a multiple of 10000
     settings_page.capture_from_keypad = mocker.MagicMock(return_value=110000)
     settings_page.number_setting(
@@ -311,6 +301,15 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
     )
 
     # value changed!
+    assert Settings().encryption.pbkdf2_iterations == 110000
+
+    # try to change the value to a value out of range
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=0)
+    settings_page.number_setting(
+        EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
+    )
+
+    # value remain unchanged!
     assert Settings().encryption.pbkdf2_iterations == 110000
 
 

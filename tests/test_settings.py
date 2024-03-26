@@ -2,11 +2,17 @@
 
 
 def test_init(mocker, m5stickv):
-    from krux.krux_settings import Settings
+    from krux.krux_settings import Settings, SettingsNamespace
+    import pytest
 
     s = Settings()
 
     assert isinstance(s, Settings)
+
+    sn = SettingsNamespace()
+
+    with pytest.raises(NotImplementedError):
+        sn.label("test")
 
 
 def test_store_init(mocker, m5stickv):
@@ -197,7 +203,8 @@ def test_all_labels(mocker, m5stickv):
         PersistSettings,
         ThemeSettings,
         TouchSettings,
-        EncoderSettings,
+        ButtonsSettings,
+        AmgDisplaySettings,
     )
 
     bitcoin = BitcoinSettings()
@@ -211,7 +218,8 @@ def test_all_labels(mocker, m5stickv):
     persist = PersistSettings()
     appearance = ThemeSettings()
     touch = TouchSettings()
-    encoder = EncoderSettings()
+    buttons = ButtonsSettings()
+    amigo_display = AmgDisplaySettings()
 
     assert bitcoin.label("network")
     assert i18n.label("locale")
@@ -225,4 +233,5 @@ def test_all_labels(mocker, m5stickv):
     assert appearance.label("theme")
     assert appearance.label("screensaver_time")
     assert touch.label("threshold")
-    assert encoder.label("debounce")
+    assert buttons.label("debounce")
+    assert amigo_display.label("flipped_x")

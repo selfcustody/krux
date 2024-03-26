@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "24.03.0"
+version = "24.04.beta22"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
@@ -69,6 +69,7 @@ format-scripts = "black firmware/font firmware/scripts i18n/*.py"
 format = ["format-src", "format-tests", "format-scripts"]
 # aliases
 black.ref = "format"
+format-test.ref = "format-tests"
 
 # pylint tasks
 lint-src = "pylint src"

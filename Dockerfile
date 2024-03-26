@@ -72,33 +72,28 @@ RUN pip3 install pyserial==3.4
 FROM build-base as build-software
 ARG DEVICE="maixpy_m5stickv"
 RUN mkdir /src
+# COPY ./LICENSE.md /src/LICENSE.md
+COPY ./firmware /src/firmware
+COPY ./src /src/src
+COPY ./vendor /src/vendor
 WORKDIR /src
-COPY ./LICENSE.md LICENSE.md
-RUN mkdir build && \
-    cp LICENSE.md build/LICENSE.md
-COPY ./vendor vendor
 RUN cd vendor/embit && pip3 install -e .
-RUN cp -r vendor/embit/src/embit build && \
-    rm -rf build/embit/util/prebuilt && \
-    rm -f build/embit/util/ctypes_secp256k1.py && \
-    rm -f build/embit/util/py_secp256k1.py && \
-    cp -r vendor/urtypes/src/urtypes build && \
-    cp -r vendor/foundation-ur-py/src/ur build
-COPY ./firmware firmware
-RUN cp -r firmware/MaixPy/projects/"${DEVICE}"/builtin_py/. build
-COPY ./src src
-RUN cp -r src/. build && \
-    find build -type f -name '*.py[co]' -delete && \
-    find build -type f -name '.DS_Store' -delete && \
-    find build -type d -name '__pycache__' -exec rm -rv {} + -depth && \
-    find build -type d -name '.pytest_cache' -exec rm -rv {} + -depth && \
-    find build -type d -name '*.egg-info' -exec rm -rv {} + -depth
-RUN find /src/build -type f -name \*.py -exec sh -c "python3 ./firmware/scripts/minify.py {}" \;
+RUN rm -rf vendor/embit/src/embit/util/prebuilt && \
+    rm -rf vendor/embit/src/embit/liquid && \
+    rm -f vendor/embit/src/embit/psbtview.py && \
+    rm -f vendor/embit/src/embit/slip39.py && \
+    rm -f vendor/embit/src/embit/wordlists/slip39.py && \
+    rm -f vendor/embit/src/embit/util/ctypes_secp256k1.py && \
+    rm -f vendor/embit/src/embit/util/py_secp256k1.py && \
+    mv src/boot.py src/_boot.py && \
+    cp -r src/. firmware/MaixPy/projects/"${DEVICE}"/builtin_py/ && \
+    cp -r vendor/embit/src/embit firmware/MaixPy/projects/"${DEVICE}"/builtin_py/ && \
+    cp -r vendor/urtypes/src/urtypes firmware/MaixPy/projects/"${DEVICE}"/builtin_py/ && \
+    cp -r vendor/foundation-ur-py/src/ur firmware/MaixPy/projects/"${DEVICE}"/builtin_py/
 
 FROM build-software AS build-firmware
 ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/MaixPy
-RUN python3 ./components/micropython/core/lib/memzip/make-memzip.py --zip-file ./components/micropython/port/memzip-files.zip --c-file ./components/micropython/port/memzip-files.c /src/build
 RUN cp -rf projects/"${DEVICE}"/compile/overrides/. ./
 RUN cd projects/"${DEVICE}" && \
     python3 project.py clean && \

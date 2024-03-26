@@ -3,7 +3,7 @@ from .home_pages.test_home import tdata, create_ctx
 
 
 def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
-    from krux.pages.home_pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -15,15 +15,17 @@ def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
         [
             BUTTON_PAGE,
             BUTTON_PAGE,
-            BUTTON_PAGE,
+            BUTTON_ENTER,  # Other
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_ENTER,  # Open TinySeed
-            BUTTON_ENTER,  # go to page 2
+            BUTTON_ENTER,  # PG2
             BUTTON_ENTER,  # Leave
             BUTTON_ENTER,  # Print
             BUTTON_PAGE,  # Go to "Back"
+            BUTTON_ENTER,  # click on back to return Mnemonic Backup
+            BUTTON_PAGE,
             BUTTON_ENTER,  # click on back to return to home init screen
         ],
     ]
