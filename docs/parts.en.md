@@ -73,6 +73,7 @@ Below is a list of some distributors where you can find this device:
 - [ETC HK Shop](https://www.etchkshop.com/products/k210-module-ai-camera)
 
 ### Maix Dock and Maix Bit
+<img srcset="../img/maixpy_dock/logo-150.png" align="right">
 For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
 
 Below are example implementations with instructions on how to recreate them:
