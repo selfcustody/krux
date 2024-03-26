@@ -92,23 +92,7 @@ def test_load_mnemonic_view(mocker, amigo):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     home = Home(ctx)
-    home.mnemonic()
-
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-
-
-def test_load_mnemonic_encryption(mocker, amigo):
-    from krux.pages.home_pages.home import Home
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
-
-    BTN_SEQUENCE = [
-        BUTTON_PAGE_PREV,  # Go to Back
-        BUTTON_ENTER,  # Exit
-    ]
-
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    home = Home(ctx)
-    home.encrypt_mnemonic()
+    home.backup_mnemonic()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 

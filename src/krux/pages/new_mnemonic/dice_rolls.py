@@ -126,7 +126,7 @@ class DiceEntropy(Page):
             offset_x += bar_pad
         offset_y += self.ctx.display.font_height
         self.ctx.display.draw_hcentered_text(
-            t("Shannon's Entropy:") + " " + str(shannon_entropy) + " " + t("bits"),
+            t("Shannon's Entropy:") + " " + str(shannon_entropy) + " " + "bits",
             offset_y,
         )
 

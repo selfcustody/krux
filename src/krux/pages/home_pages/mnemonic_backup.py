@@ -111,7 +111,7 @@ class MnemonicsView(Page):
         if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
             self.ctx.display.clear()
             if self.prompt(
-                t("Print?\n\n%s\n\n") % Settings().hardware.printer.driver,
+                t("Print?") + "\n\n" + Settings().hardware.printer.driver + "\n\n",
                 self.ctx.display.height() // 2,
             ):
                 from ..print_page import PrintPage
@@ -211,6 +211,6 @@ class MnemonicsView(Page):
 
         # Allow to print on thermal printer only
         if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
-            if self.print_qr_prompt():
+            if self.print_prompt(t("Print Tiny Seed?")):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE

@@ -12,7 +12,7 @@ def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
         [
             BUTTON_PAGE,
             BUTTON_PAGE,
-            BUTTON_PAGE,
+            BUTTON_ENTER,  # Other
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_ENTER,  # Open Stackbit
@@ -21,6 +21,8 @@ def test_export_mnemonic_stackbit(mocker, m5stickv, tdata):
             BUTTON_ENTER,  # PG4
             BUTTON_ENTER,  # Leave
             BUTTON_PAGE,  # Go to "Back"
+            BUTTON_PAGE,
+            BUTTON_ENTER,  # click on back to return Mnemonic Backup
             BUTTON_PAGE,
             BUTTON_ENTER,  # click on back to return to home init screen
         ],
@@ -44,7 +46,7 @@ def test_export_mnemonic_stackbit_amigo(mocker, amigo, tdata):
         [
             BUTTON_PAGE,
             BUTTON_PAGE,
-            BUTTON_PAGE,
+            BUTTON_ENTER,  # Other
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_ENTER,  # Open Stackbit
@@ -53,6 +55,8 @@ def test_export_mnemonic_stackbit_amigo(mocker, amigo, tdata):
             BUTTON_ENTER,  # PG4
             BUTTON_ENTER,  # Leave
             BUTTON_PAGE,  # Go to "Back"
+            BUTTON_PAGE,
+            BUTTON_ENTER,  # click on back to return Mnemonic Backup
             BUTTON_PAGE,
             BUTTON_ENTER,  # click on back to return to home init screen
         ],

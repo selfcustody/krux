@@ -155,7 +155,7 @@ class CameraEntropy(Page):
         shannon_16b_total = shannon_16b * img_pixels
 
         entropy_msg = t("Shannon's Entropy:") + "\n"
-        entropy_msg += str(round(shannon_16b, 2)) + " " + t("bits/px") + "\n"
+        entropy_msg += str(round(shannon_16b, 2)) + " " + "bits/px" + "\n"
         entropy_msg += t("(%d total)") % int(shannon_16b_total) + "\n\n"
         entropy_msg += t("Pixels deviation index:") + " "
         entropy_msg += str(stdev_index)
