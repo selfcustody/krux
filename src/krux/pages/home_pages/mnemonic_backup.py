@@ -211,6 +211,6 @@ class MnemonicsView(Page):
 
         # Allow to print on thermal printer only
         if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
-            if self.print_qr_prompt():
+            if self.print_prompt(t("Print Tiny Seed?")):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
