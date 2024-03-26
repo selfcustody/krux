@@ -105,6 +105,8 @@ translations.ref = "i18n-build"
 simulator-amigo = "python simulator/simulator.py --device maixpy_amigo"
 simulator-m5stickv = "python simulator/simulator.py --device maixpy_m5stickv"
 simulator-dock = "python simulator/simulator.py --device maixpy_dock"
+simulator-yahboom = "python simulator/simulator.py --device maixpy_yahboom"
+simulator-cube = "python simulator/simulator.py --device maixpy_cube"
 # aliases
 simulator.ref = "simulator-amigo"
 simulator-m5.ref = "simulator-m5stickv"
