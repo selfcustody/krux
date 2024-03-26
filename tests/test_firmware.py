@@ -4168,7 +4168,7 @@ def tdata(mocker):
         0xD0,
         0xC5,
         0x00,
-        0x28,
+        0x39,
         0x00,
         0x00,
         0x00,
