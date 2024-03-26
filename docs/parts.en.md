@@ -64,6 +64,7 @@ Below is a list of some distributors where you can find this device:
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
+<img srcset="../img/maixpy_yahboom/logo-156.png" align="right">
 
 Below is a list of some distributors where you can find this device:
 
@@ -72,7 +73,11 @@ Below is a list of some distributors where you can find this device:
 - [Yahboom Store](https://category.yahboom.net/collections/mb-module/products/k210-module)
 - [ETC HK Shop](https://www.etchkshop.com/products/k210-module-ai-camera)
 
+<div style="clear: both"></div>
+
 ### Maix Dock and Maix Bit
+<img srcset="../img/maixpy_dock/logo-151.png" align="right">
+
 For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
 
 Below are example implementations with instructions on how to recreate them:
@@ -87,6 +92,8 @@ Below is a list of some distributors where you can find these devices:
 - [Digi-Key](https://www.digikey.com.br/en/products/filter/embedded-mcu-dsp-evaluation-boards/786?s=N4IgTCBcDaIM4EsAOBTFATEBdAvkA)
 - [AliExpress](https://www.aliexpress.com/w/wholesale-sipeed-maix.html)
 - [Amazon](https://www.amazon.com/s?k=sipeed+k210)
+
+<div style="clear: both"></div>
 
 ## Other Parts
 ### USB-C Charge Cable
