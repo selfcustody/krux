@@ -4,10 +4,6 @@ hide:
   - toc
 ---
 # Krux
-
-
-
-
 <img srcset="img/maixpy_amigo/logo-150.png">
 <img srcset="img/maixpy_m5stickv/logo-125.png" width="75">
 <img srcset="img/maixpy_dock/logo-151.png" width="144">
