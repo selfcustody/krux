@@ -95,4 +95,11 @@ def screenshot_rect(device):
             screen.get_rect().center[0],
             screen.get_rect().center[1],
         )
+    elif device == DOCK:
+        rect.width -= 73
+        rect.height -= 169
+        rect.center = (
+            screen.get_rect().center[0] + 1,
+            screen.get_rect().center[1] + 74,
+        )
     return rect

@@ -142,32 +142,33 @@ pg.display.set_caption("Krux Simulator")
 
 device_image = devices.load_image(args.device)
 
-# Handle screenshots for docs scale
+# Scale screenshots for docs
 AMIGO_SIZE = (150, 252)
 M5STICKV_SIZE = (125, 247)
+DOCK_SIZE = (150, 256)
 
+# Handle screenshots scale and alpha bg
+# When exporting the mask from GIMP uncheck "Save info about transparent pixels color"
 device_screenshot_size = AMIGO_SIZE
-if (args.device == devices.M5STICKV):
-    device_screenshot_size = M5STICKV_SIZE
-
-# Handle screenshots alpha bg
 mask_img = pg.image.load(
     os.path.join("assets", "maixpy_amigo_mask.png")
     ).convert_alpha()
 if (args.device == devices.M5STICKV):
+    device_screenshot_size = M5STICKV_SIZE
     mask_img = pg.image.load(
         os.path.join("assets", "maixpy_m5stickv_mask.png")
         ).convert_alpha()
+elif (args.device == devices.DOCK):
+    device_screenshot_size = DOCK_SIZE
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_dock_mask.png")
+        ).convert_alpha()
     
-# Handle screenshots filename suffix
+# Handle screenshots filename suffix when scaled
 from krux.krux_settings import Settings
 screenshot_suffix = ""
 if (args.screenshot_scale):
-    screenshot_suffix = "." + Settings().i18n.locale.split("-")[0]
-    if (args.device == devices.AMIGO):
-        screenshot_suffix = "-150" + screenshot_suffix
-    elif (args.device == devices.M5STICKV):
-        screenshot_suffix = "-125" + screenshot_suffix
+    screenshot_suffix = "-" + str(device_screenshot_size[0]) + "." + Settings().i18n.locale.split("-")[0]
 
 
 if(args.device == devices.PC):
