@@ -112,7 +112,7 @@ class Login(Page):
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
                 ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
-                (t("Stackbit 1248"), self.load_key_from_1248),
+                ("Stackbit 1248", self.load_key_from_1248),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )

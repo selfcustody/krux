@@ -80,7 +80,7 @@ class MnemonicsView(Page):
                     ),
                 ),
                 (t("Numbers"), self.display_mnemonic_numbers),
-                (t("Stackbit 1248"), self.stackbit),
+                ("Stackbit 1248", self.stackbit),
                 ("Tiny Seed", self.tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
             ],
