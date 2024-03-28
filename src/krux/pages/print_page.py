@@ -71,7 +71,7 @@ class PrintPage(Page):
         self.ctx.display.draw_hcentered_text(
             t("Printing ..."), self.ctx.display.height() // 2
         )
-        self.printer.print_string(t("BIP39") + " " + suffix + "\n\n")
+        self.printer.print_string("BIP39" + " " + suffix + "\n\n")
         words = mnemonic.split(" ")
         lines = len(words) // 3
         for i in range(lines):

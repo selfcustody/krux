@@ -114,7 +114,7 @@ class SignMessage(Page):
                     ) * self.ctx.display.font_height
                     offset_y += (
                         self.ctx.display.draw_hcentered_text(
-                            t("Address:"), offset_y, theme.highlight_color
+                            t("Address") + ":", offset_y, theme.highlight_color
                         )
                         * self.ctx.display.font_height
                     )
@@ -163,7 +163,7 @@ class SignMessage(Page):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            t("SHA256:\n%s") % binascii.hexlify(message_hash).decode()
+            "SHA256:\n%s" % binascii.hexlify(message_hash).decode()
         )
         if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             return ""

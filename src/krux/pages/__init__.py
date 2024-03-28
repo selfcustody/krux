@@ -321,7 +321,7 @@ class Page:
             str(i + 1) + "." + ("  " if i + 1 < 10 else " ") + word
             for i, word in enumerate(words)
         ]
-        header = t("BIP39") + " " + suffix
+        header = "BIP39" + " " + suffix
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (

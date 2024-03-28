@@ -286,8 +286,6 @@ if __name__ == "__main__":
         for arg in sys.argv[1:]:
             if arg == "validate":
                 validate_translation_files()
-            elif arg == "new":
-                create_translation_file(sys.argv[2])
             elif arg == "fill":
                 print_missing()
             elif arg == "clean":

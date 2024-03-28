@@ -155,7 +155,7 @@ class Keypad:
                     key = t("Go")
                     custom_color = theme.go_color
                 elif key_index == self.more_index and len(self.keysets) > 1:
-                    key = t("ABC")
+                    key = "ABC"
                     custom_color = theme.toggle_color
                 if key is not None:
                     offset_x = x

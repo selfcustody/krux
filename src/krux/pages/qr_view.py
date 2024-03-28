@@ -61,7 +61,7 @@ class SeedQRView(Page):
                 self.title = t("Compact SeedQR")
                 self.code = self._binary_seed_qr()
             else:
-                self.title = t("SeedQR")
+                self.title = "SeedQR"
                 self.code = self._seed_qr()
         self.qr_size = get_size(self.code)
         self.region_size = 7 if self.qr_size == 21 else 5

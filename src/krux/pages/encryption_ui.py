@@ -58,7 +58,7 @@ class EncryptionKey(Page):
 
         if key:
             self.ctx.display.clear()
-            continue_string = t("Key: ") + key + "\n\n"
+            continue_string = t("Key") + ": " + key + "\n\n"
             continue_string += t("Continue?")
             if self.prompt(
                 continue_string,

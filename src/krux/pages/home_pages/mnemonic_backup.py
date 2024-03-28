@@ -60,7 +60,7 @@ class MnemonicsView(Page):
             [
                 (t("Plaintext QR"), self.display_standard_qr),
                 (t("Compact SeedQR"), lambda: self.display_seed_qr(True)),
-                (t("SeedQR"), self.display_seed_qr),
+                ("SeedQR", self.display_seed_qr),
                 (t("Encrypted QR Code"), self.encrypt_qr_code),
                 (t("Back"), lambda: MENU_EXIT),
             ],
@@ -81,7 +81,7 @@ class MnemonicsView(Page):
                 ),
                 (t("Numbers"), self.display_mnemonic_numbers),
                 (t("Stackbit 1248"), self.stackbit),
-                (t("Tiny Seed"), self.tiny_seed),
+                ("Tiny Seed", self.tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )

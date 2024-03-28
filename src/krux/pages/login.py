@@ -93,7 +93,7 @@ class Login(Page):
             [
                 (t("QR Code"), self.load_key_from_qr_code),
                 (
-                    t("Tiny Seed"),
+                    "Tiny Seed",
                     self.load_key_from_tiny_seed_image,
                 ),
                 (t("Back"), lambda: MENU_EXIT),
@@ -111,7 +111,7 @@ class Login(Page):
             [
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
-                (t("Tiny Seed (Bits)"), self.load_key_from_tiny_seed),
+                ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
                 (t("Stackbit 1248"), self.load_key_from_1248),
                 (t("Back"), lambda: MENU_EXIT),
             ],
@@ -267,7 +267,7 @@ class Login(Page):
             # and user needs to confirm not just the words, but the fingerprint too
             continue_string = ""
             if passphrase:
-                continue_string += t("Passphrase: ") + passphrase + "\n\n"
+                continue_string += t("Passphrase") + ": " + passphrase + "\n\n"
             continue_string += (
                 temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?")
             )
