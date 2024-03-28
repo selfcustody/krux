@@ -47,3 +47,6 @@ class Context:
         if self.printer is not None:
             self.printer.clear()
         gc.collect()
+
+
+ctx = Context()  # Singleton instance

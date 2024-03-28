@@ -423,4 +423,8 @@ class SettingsPage(Page):
                 % (new_value, setting.value_range[0], setting.value_range[1])
             )
 
+        # Flash a message if auto_shutdown time is changed
+        if setting.attr == "auto_shutdown" and starting_value != new_value:
+            self.flash_text(t("Changes will take effect after reboot"))
+
         return MENU_CONTINUE

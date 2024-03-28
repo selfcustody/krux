@@ -94,9 +94,11 @@ draw_splash()
 check_for_updates()
 gc.collect()
 
-from krux.context import Context
+from krux.context import ctx
+from krux.auto_shutdown import auto_shutdown
 
-ctx = Context()
+auto_shutdown.add_ctx(ctx)
+
 ctx.power_manager = power_manager
 postimport_ticks = time.ticks_ms()
 

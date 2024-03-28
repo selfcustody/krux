@@ -33,6 +33,7 @@ from ..input import (
     SWIPE_DOWN,
     SWIPE_UP,
     PRESSED,
+    ONE_MINUTE,
 )
 from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY, FLASH_MSG_TIME
 from ..qr import to_qr_codes
@@ -42,8 +43,6 @@ from ..sd_card import SDHandler
 MENU_CONTINUE = 0
 MENU_EXIT = 1
 MENU_SHUTDOWN = 2
-
-ONE_MINUTE = 60000
 
 ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets

@@ -351,7 +351,20 @@ class ThemeSettings(SettingsNamespace):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "theme": t("Theme"),
-            "screensaver_time": t("Screensaver time"),
+            "screensaver_time": t("Screensaver Time"),
+        }[attr]
+
+
+class SecuritySettings(SettingsNamespace):
+    """Security settings"""
+
+    namespace = "settings.security"
+    auto_shutdown = NumberSetting(int, "auto_shutdown", 10, [0, 60])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "auto_shutdown": t("Shutdown Time"),
         }[attr]
 
 
@@ -362,6 +375,7 @@ class Settings(SettingsNamespace):
 
     def __init__(self):
         self.bitcoin = BitcoinSettings()
+        self.security = SecuritySettings()
         self.hardware = HardwareSettings()
         self.i18n = I18nSettings()
         self.encryption = EncryptionSettings()
@@ -372,6 +386,7 @@ class Settings(SettingsNamespace):
         """Returns a label for UI when given a setting name or namespace"""
         main_menu = {
             "bitcoin": t("Bitcoin"),
+            "security": t("Security"),
             "hardware": t("Hardware"),
             "i18n": t("Language"),
             "encryption": t("Encryption"),
