@@ -385,7 +385,7 @@ class Settings(SettingsNamespace):
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         main_menu = {
-            "bitcoin": "Bitcoin",
+            "bitcoin": t("Bitcoin"),
             "security": t("Security"),
             "hardware": t("Hardware"),
             "i18n": t("Language"),
