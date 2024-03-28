@@ -174,6 +174,7 @@ def bake_translations():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
+    translation_filenames.sort()
     for translation_filename in translation_filenames:
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
@@ -241,6 +242,7 @@ def prettify_translation_files():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
+    translation_filenames.sort()
     for translation_filename in translation_filenames:
         translations = {}
         with open(
