@@ -24,6 +24,7 @@
 
 ############
 # build-base
+# install kendryte (k210), cmake and python dependencies
 ############
 FROM gcc:9.4.0-buster AS build-base
 
@@ -76,6 +77,8 @@ RUN pip3 install pyserial==3.4
 
 ############
 # build-software
+# copy vendor, firmware and Kurx (src) files
+# install embit dependency
 ############
 FROM build-base as build-software
 ARG DEVICE="maixpy_m5stickv"
@@ -128,11 +131,16 @@ RUN cp -r src/. "${DEVICE_BUILTIN}"
 
 ############
 # build-firmware
+# python compilation of Krux and its dependencies inside MaixPy
+# creation of the firmware.bin
 ############
 FROM build-software AS build-firmware
 ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/MaixPy
+
+# overrides the DEVICE specific font.c in componets/micropython
 RUN cp -rf projects/"${DEVICE}"/compile/overrides/. ./
+
 RUN cd projects/"${DEVICE}" && \
     python3 project.py clean && \
     python3 project.py distclean && \
@@ -142,13 +150,14 @@ RUN cd projects/"${DEVICE}" && \
 
 ############
 # build
+# creation of kboot.kfpkg using firmware.bin
 ############
 FROM build-firmware AS build
 ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/Kboot/build
 RUN cp /src/firmware/MaixPy/projects/"${DEVICE}"/build/firmware.bin .
 
-# replace windows line endings
+# replace possible windows line endings
 RUN sed -i -e 's/\r$//' *.sh
 
 RUN ./CLEAN.sh && ./BUILD.sh
