@@ -31,7 +31,7 @@ RESET_TIMEOUT = 30000
 WDT_CONF_NAME = "WATCHDOG_DISABLE"
 
 # Create a watchdog timer that resets the device if not fed for 30s
-wdt = machine.WDT(timeout=RESET_TIMEOUT)
+wdt = machine.WDT(id=0, timeout=RESET_TIMEOUT)
 
 # Check if user wanted to disable the watchdog!
 try:

@@ -22,6 +22,7 @@
 import time
 import board
 from .wdt import wdt
+from .auto_shutdown import auto_shutdown
 from .buttons import PRESSED, RELEASED
 from .krux_settings import Settings
 
@@ -248,6 +249,8 @@ class Input:
         """
         self.wait_for_release()
         btn = self._wait_for_press(block, wait_duration)
+        if btn is not None:
+            auto_shutdown.feed()
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:
