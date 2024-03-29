@@ -59,7 +59,7 @@ class MnemonicsView(Page):
             self.ctx,
             [
                 (t("Plaintext QR"), self.display_standard_qr),
-                (t("Compact SeedQR"), lambda: self.display_seed_qr(True)),
+                ("Compact SeedQR", lambda: self.display_seed_qr(True)),
                 ("SeedQR", self.display_seed_qr),
                 (t("Encrypted QR Code"), self.encrypt_qr_code),
                 (t("Back"), lambda: MENU_EXIT),

@@ -58,7 +58,7 @@ class SeedQRView(Page):
             self.title = title
         else:
             if self.binary:
-                self.title = t("Compact SeedQR")
+                self.title = "Compact SeedQR"
                 self.code = self._binary_seed_qr()
             else:
                 self.title = "SeedQR"
