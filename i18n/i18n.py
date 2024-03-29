@@ -127,7 +127,7 @@ def print_missing():
         if complete:
             print("Nothing to add")
         else:
-            print("Please review and copy items above")
+            print("\n -- Please review and copy items above -- ")
         print("\n\n")
 
 
