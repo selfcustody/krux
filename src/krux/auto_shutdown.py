@@ -20,46 +20,55 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# Create a watchdog timer that shuts down the device if in inactivity
-import machine
+from machine import Timer
 from .krux_settings import Settings
 
-ONE_MINUTE = 60000
+ONE_SECOND = 1000
 from .power import power_manager
 
 
-def wdt_shutdown(_):
-    """Watchdog timer callback to shutdown the device"""
-    auto_shutdown.shutdown()
+def seconds_counter(_):
+    """Timer callback to increment seconds counter"""
+    auto_shutdown.seconds_counter()
 
 
 class AutoShutdown:
-    """Uses an watchdog timer to shutdown the device if inactivity is detected"""
+    """Uses a timer to shutdown the device if inactivity is detected"""
 
     def __init__(self):
         self.auto_shutdown_timer = None
-        self.shutdown_time = Settings().security.auto_shutdown * ONE_MINUTE
+        self.shutdown_time = Settings().security.auto_shutdown
+        # Convert to seconds
+        self.shutdown_time = self.shutdown_time * 60
+        self.time_out = self.shutdown_time
         self.ctx = None
         if self.shutdown_time > 0:
-            self.auto_shutdown_timer = machine.WDT(
-                id=1, timeout=self.shutdown_time, callback=wdt_shutdown
+            self.auto_shutdown_timer = Timer(
+                Timer.TIMER1,
+                Timer.CHANNEL0,
+                mode=Timer.MODE_PERIODIC,
+                period=ONE_SECOND,
+                callback=seconds_counter,
             )
 
     def add_ctx(self, ctx):
         """Add a context to the auto_shutdown object"""
         self.ctx = ctx
 
-    def shutdown(self):
-        """Clear context and shutdown the device"""
-        if self.ctx:
-            self.ctx.clear()
-        if self.auto_shutdown_timer:
-            power_manager.shutdown()
+    def seconds_counter(self):
+        """Counts the seconds and shuts down the device if threshold is reached"""
+        if self.time_out > 0:
+            self.time_out -= 1
+        else:
+            if self.ctx:
+                self.ctx.clear()
+            if self.auto_shutdown_timer:
+                power_manager.shutdown()
 
     def feed(self):
         """Feed the auto_shutdown timer"""
         if self.auto_shutdown_timer:
-            self.auto_shutdown_timer.feed()
+            self.time_out = self.shutdown_time
 
 
 auto_shutdown = AutoShutdown()  # Singleton
