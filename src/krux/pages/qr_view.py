@@ -332,7 +332,7 @@ class SeedQRView(Page):
         file_name += PBM_IMAGE_EXTENSION
         with SDHandler() as sd:
             sd.write_binary(file_name, pbm_data)
-        self.flash_text(t("Saved to SD card:\n%s") % file_name)
+        self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
 
     def save_bmp_image(self, file_name, resolution):
         """Save QR code image as .bmp file"""
@@ -364,7 +364,7 @@ class SeedQRView(Page):
         )
         file_name += BMP_IMAGE_EXTENSION
         bmp_img.save("/sd/" + file_name)
-        self.flash_text(t("Saved to SD card:\n%s") % file_name)
+        self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
 
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""

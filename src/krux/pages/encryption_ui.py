@@ -155,7 +155,7 @@ class EncryptMnemonic(Page):
             mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
         if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
             self.flash_text(
-                t("ID already exists\n") + t("Encrypted mnemonic was not stored")
+                t("ID already exists") + "\n" + t("Encrypted mnemonic was not stored")
             )
             del mnemonic_storage
             return

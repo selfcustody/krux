@@ -283,7 +283,9 @@ class Page:
                 self.ctx.display.draw_qr_code(0, code, light_color=WHITE)
             else:
                 self.ctx.display.draw_qr_code(0, code)
-            subtitle = t("Part\n%d / %d") % (i + 1, num_parts) if not title else title
+            subtitle = (
+                t("Part") + "\n%d / %d" % (i + 1, num_parts) if not title else title
+            )
             offset_y = self.ctx.display.qr_offset()
             if title and self.ctx.display.height() > self.ctx.display.width():
                 offset_y += self.ctx.display.font_height
@@ -644,7 +646,7 @@ class Menu:
         except Exception as e:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Error:\n%s") % repr(e), theme.error_color
+                t("Error:") + "\n%s" % repr(e), theme.error_color
             )
             self.ctx.input.wait_for_button()
         return MENU_CONTINUE

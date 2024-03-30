@@ -746,6 +746,8 @@ class Login(Page):
         from ..metadata import VERSION
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
+        self.ctx.display.draw_centered_text(
+            "Krux\n\n\n" + t("Version") + "\n%s" % VERSION
+        )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
