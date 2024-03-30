@@ -295,7 +295,7 @@ class DiceEntropy(Page):
             ).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("SHA256 of rolls:\n\n%s") % entropy_hash
+                t("SHA256 of rolls:") + "\n\n%s" % entropy_hash
             )
             self.ctx.input.wait_for_button()
             num_bytes = 32 if is_24_words else 16

@@ -185,14 +185,16 @@ class Addresses(Page):
 
             checking_match_txt = t("Checking receive address %d for match..")
             checked_no_match_txt = t("Checked %d receive addresses with no matches.")
-            is_valid_txt = t("%s\n\nis a valid receive address!")
-            not_found_txt = t("%s\n\nwas NOT FOUND in the first %d receive addresses")
+            is_valid_txt = "%s\n\n" + t("is a valid receive address!")
+            not_found_txt = "%s\n\n" + t(
+                "was NOT FOUND in the first %d receive addresses"
+            )
             if addr_type == 1:
                 checking_match_txt = t("Checking change address %d for match..")
                 checked_no_match_txt = t("Checked %d change addresses with no matches.")
-                is_valid_txt = t("%s\n\nis a valid change address!")
-                not_found_txt = t(
-                    "%s\n\nwas NOT FOUND in the first %d change addresses"
+                is_valid_txt = "%s\n\n" + t("is a valid change address!")
+                not_found_txt = "%s\n\n" + t(
+                    "was NOT FOUND in the first %d change addresses"
                 )
 
             found = False
