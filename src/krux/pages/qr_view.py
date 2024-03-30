@@ -137,7 +137,7 @@ class SeedQRView(Page):
     def _region_legend(self, row, column):
         region_char = chr(65 + row)
         self.ctx.display.draw_hcentered_text(
-            t("Region: ") + region_char + str(column + 1),
+            t("Region:") + " " + region_char + str(column + 1),
             self.ctx.display.qr_offset(),
             color=theme.highlight_color,
         )
@@ -183,7 +183,7 @@ class SeedQRView(Page):
                     theme.highlight_color,
                 )
             self.ctx.display.draw_hcentered_text(
-                t("Line: ") + str(self.lr_index + 1),
+                t("Line:") + " " + str(self.lr_index + 1),
                 self.ctx.display.qr_offset(),
                 color=theme.highlight_color,
             )
