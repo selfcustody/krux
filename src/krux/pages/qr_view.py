@@ -462,15 +462,18 @@ class SeedQRView(Page):
                     self.lr_index %= self.columns * self.columns
             if quick_exit:
                 return MENU_CONTINUE
-            if self.has_sd_card() and allow_export:
-                sd_func = self.save_qr_image_menu
-            else:
-                sd_func = None
             printer_func = self.print_qr if self.has_printer() else None
             qr_menu = [
                 (t("Return to QR Viewer"), lambda: None),
                 (t("Toggle Brightness"), toggle_brightness),
-                (t("Save QR Image to SD Card"), sd_func),
+                (
+                    t("Save QR Image to SD Card"),
+                    (
+                        self.save_qr_image_menu
+                        if allow_export and self.has_sd_card()
+                        else None
+                    ),
+                ),
                 (t("Print to QR"), printer_func),
                 (t("Back to Menu"), lambda: MENU_EXIT),
             ]
