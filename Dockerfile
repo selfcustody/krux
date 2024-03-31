@@ -112,20 +112,18 @@ COPY ./firmware firmware
 # clean firmware
 RUN find firmware -type d -name '__pycache__' -exec rm -rv {} + -depth
 
-# copy vendor/urtypes to DEVICE_BUILTIN
+# copy all vendors to DEVICE_BUILTIN
 RUN cp -r vendor/urtypes/src/urtypes "${DEVICE_BUILTIN}"
-# copy vendor/foundation-ur to DEVICE_BUILTIN
 RUN cp -r vendor/foundation-ur-py/src/ur "${DEVICE_BUILTIN}"
-# copy vendor/embit to DEVICE_BUILTIN
 RUN cp -r vendor/embit/src/embit "${DEVICE_BUILTIN}"
 
 # copy Krux (src) to WORKDIR (src)
 COPY ./src src
 # rename boot.py
 RUN mv src/boot.py src/_boot.py
-# clean Krux (src)
+# clean it
 RUN find src -type d -name '__pycache__' -exec rm -rv {} + -depth
-# copy krux-src to DEVICE_BUILTIN
+# copy it to DEVICE_BUILTIN
 RUN cp -r src/. "${DEVICE_BUILTIN}"
 
 
