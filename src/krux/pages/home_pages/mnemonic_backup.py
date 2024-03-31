@@ -192,13 +192,6 @@ class MnemonicsView(Page):
                     y_offset += 5 + 2 * self.ctx.display.font_height
                 word_index += 1
             self.ctx.input.wait_for_button()
-
-            # removed the hability to go back in favor or the Krux UI patter (always move forward)
-            # if self.ctx.input.wait_for_button() == BUTTON_PAGE_PREV:
-            #     if word_index > 12:
-            #         word_index -= 12
-            #     else:
-            #         word_index = 1
             self.ctx.display.clear()
         return MENU_CONTINUE
 
