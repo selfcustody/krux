@@ -95,14 +95,15 @@ class EncryptMnemonic(Page):
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
 
-        def _sd_store_function():
-            return self.store_mnemonic_on_memory(sd_card=True)
-
         encrypt_outputs_menu = [
             (t("Store on Flash"), self.store_mnemonic_on_memory),
             (
                 t("Store on SD Card"),
-                None if not self.has_sd_card() else _sd_store_function,
+                (
+                    None
+                    if not self.has_sd_card()
+                    else lambda: self.store_mnemonic_on_memory(True)
+                ),
             ),
             (t("Encrypted QR Code"), self.encrypted_qr_code),
             (t("Back"), lambda: MENU_EXIT),
@@ -129,6 +130,7 @@ class EncryptMnemonic(Page):
                 t("Additional entropy from camera required for AES-CBC mode")
             )
             if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+                self.flash_text(t("Mnemonic was not encrypted"))
                 return
             from .capture_entropy import CameraEntropy
 
@@ -138,9 +140,9 @@ class EncryptMnemonic(Page):
                 self.flash_text(t("Mnemonic was not encrypted"))
                 return
             i_vector = entropy[:AES_BLOCK_SIZE]
+        mnemonic_id = None
         self.ctx.display.clear()
         mnemonic_storage = MnemonicStorage()
-        mnemonic_id = None
         if self.prompt(
             t(
                 "Give this mnemonic a custom ID? Otherwise current fingerprint will be used"
@@ -153,12 +155,14 @@ class EncryptMnemonic(Page):
             )
         if mnemonic_id in (None, ESC_KEY):
             mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
+
         if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
             self.flash_text(
                 t("ID already exists") + "\n" + t("Encrypted mnemonic was not stored")
             )
             del mnemonic_storage
             return
+
         words = self.ctx.wallet.key.mnemonic
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
@@ -181,6 +185,7 @@ class EncryptMnemonic(Page):
         if key is None:
             self.flash_text(t("Mnemonic was not encrypted"))
             return
+
         version = Settings().encryption.version
         i_vector = None
         if version == "AES-CBC":
@@ -208,7 +213,7 @@ class EncryptMnemonic(Page):
             self.ctx.display.height() // 2,
         ):
             mnemonic_id = self.capture_from_keypad(
-                t("Mnemonic Storage ID"),
+                t("Mnemonic ID"),
                 [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
             )
         if mnemonic_id in (None, ESC_KEY):
