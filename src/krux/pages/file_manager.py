@@ -129,10 +129,6 @@ class FileManager(Page):
 
         self.display_file(file)
         self.ctx.input.wait_for_button()
-        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
-        #     with SDHandler() as sd:
-        #         sd.delete(file)
-        #     return MENU_EXIT
         return MENU_CONTINUE
 
     def display_file(self, file):
