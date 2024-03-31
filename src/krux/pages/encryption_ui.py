@@ -112,7 +112,7 @@ class EncryptMnemonic(Page):
         _, _ = submenu.run_loop()
         return MENU_CONTINUE
 
-    def get_user_inputs(self):
+    def _get_user_inputs(self):
         """Ask user for the key, mnemonic_id and i_vector"""
 
         key_capture = EncryptionKey(self.ctx)
@@ -160,7 +160,7 @@ class EncryptMnemonic(Page):
     def store_mnemonic_on_memory(self, sd_card=False):
         """Save encrypted mnemonic on flash or sd_card"""
 
-        user_inputs = self.get_user_inputs()
+        user_inputs = self._get_user_inputs()
         if user_inputs is None:
             return
         key, mnemonic_id, i_vector = user_inputs
@@ -192,7 +192,7 @@ class EncryptMnemonic(Page):
     def encrypted_qr_code(self):
         """Exports an encryprted mnemonic QR code"""
 
-        user_inputs = self.get_user_inputs()
+        user_inputs = self._get_user_inputs()
         if user_inputs is None:
             return
         key, mnemonic_id, i_vector = user_inputs
