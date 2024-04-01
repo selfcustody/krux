@@ -34,7 +34,7 @@ Some stores ship the Maix Dock with soldered pin connectors that do not fit into
 </i>
 
 ### M5StickV
-<img srcset="../img/maixpy_m5stickv/logo-125.png" align="right">
+<img srcset="../img/maixpy_m5stickv/logo-125.png" align="right" width="75">
 
 Below is a list of some distributors where you can find this device:
 
@@ -64,7 +64,7 @@ Below is a list of some distributors where you can find this device:
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
-<img srcset="../img/maixpy_yahboom/logo-156.png" align="right">
+<img srcset="../img/maixpy_yahboom/logo-156.png" align="right" width="116">
 
 Below is a list of some distributors where you can find this device:
 
@@ -76,7 +76,7 @@ Below is a list of some distributors where you can find this device:
 <div style="clear: both"></div>
 
 ### Maix Dock and Maix Bit
-<img srcset="../img/maixpy_dock/logo-151.png" align="right">
+<img srcset="../img/maixpy_dock/logo-151.png" align="right" width="144">
 
 For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
 
