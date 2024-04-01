@@ -89,7 +89,7 @@ Here you choose between Thermal, CNC or none (default). Leave this setting to "n
 #### Touchscreen (Maix Amigo and Yahboom only)
 <img src="../../img/maixpy_amigo/touchscreen-150.png" align="right">
 
-If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false (ghost) touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
+If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false or ghost touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
 
 <div style="clear: both"></div>
 

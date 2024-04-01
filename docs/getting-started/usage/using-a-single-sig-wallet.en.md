@@ -76,7 +76,7 @@ Go to *Send* in Specter Desktop, fill in the recipient address, amount, and any 
 
 <img src="../../../img/specter/create-transaction-screen-600.png">
 
-You will now see a screen listing the devices in your wallet. Select the device you want to sign the transaction (PSBT) with.
+You will now see a screen listing the devices in your wallet. Select the device you want to sign the PSBT transaction with.
 
 Specter Desktop will display an animated QR code of the PSBT that you can scan with Krux by going to *Sign > PSBT* in its main menu. After scanning, Krux should display info about the transaction for you to confirm before signing.
 
