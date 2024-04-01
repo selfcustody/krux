@@ -41,23 +41,22 @@ class AutoShutdown:
         self.time_out = 0
         self.ctx = None
         self.init_timer(Settings().security.auto_shutdown)
-        
 
     def init_timer(self, value=None):
         """Initializes the timer 1 with a 1 second period"""
         self.shutdown_time = value * 60
         self.time_out = self.shutdown_time
         if self.shutdown_time and self.auto_shutdown_timer is None:
-                # Creates a timer in case it does not exist
-                print("AutoShutdown: Creating timer")
-                self.auto_shutdown_timer = Timer(
-                    Timer.TIMER1,
-                    Timer.CHANNEL0,
-                    mode=Timer.MODE_PERIODIC,
-                    period=ONE_SECOND,
-                    callback=seconds_counter,
-                )
-    
+            # Creates a timer in case it does not exist
+            print("AutoShutdown: Creating timer")
+            self.auto_shutdown_timer = Timer(
+                Timer.TIMER1,
+                Timer.CHANNEL0,
+                mode=Timer.MODE_PERIODIC,
+                period=ONE_SECOND,
+                callback=seconds_counter,
+            )
+
     def add_ctx(self, ctx):
         """Add a context to the auto_shutdown object"""
         self.ctx = ctx
