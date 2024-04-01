@@ -24,7 +24,7 @@ import gc
 from embit import bip32, compact
 import hashlib
 import binascii
-from .. import Page, MENU_CONTINUE, Menu
+from .. import MENU_CONTINUE, Menu
 from ...themes import theme
 from ...display import DEFAULT_PADDING, MINIMAL_DISPLAY
 from ...baseconv import base_encode
