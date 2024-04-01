@@ -1108,9 +1108,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-are-all-the-features-available-what-are-the-additional-features-of-the-test-beta-version-is-there-an-android-app" class="md-nav__link">
+  <a href="#what-are-all-the-features-available-what-are-the-additional-features-of-the-test-or-beta-version-is-there-an-android-app" class="md-nav__link">
     <span class="md-ellipsis">
-      What are all the features available? What are the additional features of the Test (Beta) version? Is there an Android app?
+      What are all the features available? What are the additional features of the Test or Beta version? Is there an Android app?
     </span>
   </a>
   
@@ -1256,8 +1256,8 @@ Expect one port to be listed for devices like M5stickV and Maix Dock <code>/dev/
 </code></pre></div></p>
 <h2 id="my-device-didnt-reboot-after-flashing-the-firmware-and-when-i-turned-it-off-and-on-again-it-just-stayed-blank-without-showing-anything-on-the-screen-what-should-i-do">My device didn't reboot after flashing the firmware and when I turned it off and on again, it just stayed blank without showing anything on the screen. What should I do?<a class="headerlink" href="#my-device-didnt-reboot-after-flashing-the-firmware-and-when-i-turned-it-off-and-on-again-it-just-stayed-blank-without-showing-anything-on-the-screen-what-should-i-do" title="Permanent link">&para;</a></h2>
 <p>Check if the downloaded file matches the device, this can also occur due to data corruption. Try downloading binaries again. You can install <a href="https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5">MaixPy IDE</a> to help with debugging, Tools &gt; Open Terminal &gt; New Terminal &gt; Connect to serial port &gt; Select a COM port available (if it doesn't work, try another COM port). It will show the terminal and some messages, a message about an empty device or with corrupted firmware appears like: "interesting, something's wrong, boot failed with exit code 233, go to find your vendor."</p>
-<h2 id="what-are-all-the-features-available-what-are-the-additional-features-of-the-test-beta-version-is-there-an-android-app">What are all the features available? What are the additional features of the Test (Beta) version? Is there an Android app?<a class="headerlink" href="#what-are-all-the-features-available-what-are-the-additional-features-of-the-test-beta-version-is-there-an-android-app" title="Permanent link">&para;</a></h2>
-<p>For <a href="https://github.com/selfcustody/krux/releases">official releases</a> you will find all the features detailed here on the <a href="../getting-started/">Getting Started page</a> with a brief summary on the <a href="../getting-started/navigation/">Navigation Overview page</a>. The latest and most experimental features, which we sometimes share on our social media, can be found only in the <a href="https://github.com/odudex/krux_binaries/">test (beta) repository</a>. Only official releases are signed, Test (Beta) is just for trying new things and providing feedback. Krux Android app is available as an <code>apk</code> on the <a href="https://github.com/odudex/krux_binaries/">test (beta) repository</a> (requires Android 6.0 or above).</p>
+<h2 id="what-are-all-the-features-available-what-are-the-additional-features-of-the-test-or-beta-version-is-there-an-android-app">What are all the features available? What are the additional features of the Test or Beta version? Is there an Android app?<a class="headerlink" href="#what-are-all-the-features-available-what-are-the-additional-features-of-the-test-or-beta-version-is-there-an-android-app" title="Permanent link">&para;</a></h2>
+<p>For <a href="https://github.com/selfcustody/krux/releases">official releases</a> you will find all the features detailed here on the <a href="../getting-started/">Getting Started page</a> with a brief summary on the <a href="../getting-started/navigation/">Navigation Overview page</a>. The latest and most experimental features, which we sometimes share on our social media, can be found only in the <a href="https://github.com/odudex/krux_binaries/">test (beta) repository</a>. Only official releases are signed, Test or Beta is just for trying new things and providing feedback. Krux Android app is available as an <code>apk</code> on the <a href="https://github.com/odudex/krux_binaries/">test (beta) repository</a> (requires Android 6.0 or above).</p>
 <h2 id="why-does-krux-show-an-xpub-for-a-segwit-address">Why does Krux show an xpub for a segwit address?<a class="headerlink" href="#why-does-krux-show-an-xpub-for-a-segwit-address" title="Permanent link">&para;</a></h2>
 <p>The xpub that Krux displays follows the <a href="https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md/#key-origin-identification">bitcoin core descriptors spec</a> and includes key origin and derivation info that, in theory, makes zpubs (and ypubs) unnecessary <em>if the wallet software being shown this extra information can parse it</em>. </p>
 <p>From the spec:</p>
@@ -1285,13 +1285,13 @@ Expect one port to be listed for devices like M5stickV and Maix Dock <code>/dev/
 <li>Key-value INI files with at least <code>Format</code>, <code>Policy</code>, and <code>Derivation</code> keys</li>
 <li><a href="https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-010-output-desc.md">UR Type <code>crypto-output</code></a></li>
 </ol>
-<p>For Partially Signed Bitcoin Transactions (PSBT):</p>
+<p>For PSBT (Partially Signed Bitcoin Transactions):</p>
 <ol>
 <li>Base43, Base58, and Base64-encoded bytes</li>
 <li>Raw Bytes</li>
 <li><a href="https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md">UR Type <code>crypto-psbt</code></a></li>
 </ol>
-<p>Additionally, Krux recognizes animated QR codes that use either the plaintext <code>pMofN</code> (Specter QR format) or binary <a href="https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md"><code>UR</code></a> encodings.</p>
+<p>Additionally, Krux recognizes animated QR codes that use either the plaintext <code>pMofN</code> (the Specter QR format) or binary <a href="https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md"><code>UR</code></a> encodings.</p>
 <h2 id="why-cant-my-computer-read-the-qr-code-that-krux-displays">Why can't my computer read the QR code that Krux displays?<a class="headerlink" href="#why-cant-my-computer-read-the-qr-code-that-krux-displays" title="Permanent link">&para;</a></h2>
 <p>If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays.
 You can toggle brightness of QR codes from public keys and PSBTs by pressing PAGE button.
@@ -1394,7 +1394,7 @@ Make sure the SD card is using MBR/DOS partition table and FAT32 format.</p>
     
     
     
-    <a href="https://bitcointalk.org/index.php?topic=5350905.0" target="_blank" rel="noopener" title="Send a message to the Bitcoin Forum" class="md-social__link">
+    <a href="https://bitcointalk.org/index.php?topic=5489022.0" target="_blank" rel="noopener" title="Send a message to the Bitcoin Forum" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M480 32c0-12.9-7.8-24.6-19.8-29.6S434.5.2 425.3 9.3L381.7 53c-48 48-113.1 75-181 75H64c-35.3 0-64 28.7-64 64v96c0 35.3 28.7 64 64 64v128c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V352h8.7c67.9 0 133 27 181 75l43.6 43.6c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V300.4c18.6-8.8 32-32.5 32-60.4s-13.4-51.6-32-60.4V32zm-64 76.7v262.6C357.2 317.8 280.5 288 200.7 288H192v-96h8.7c79.8 0 156.5-29.8 215.3-83.3z"/></svg>
     </a>
   

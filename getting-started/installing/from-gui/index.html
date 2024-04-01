@@ -678,9 +678,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#test-beta-binaries" class="md-nav__link">
+  <a href="#test-or-beta-binaries" class="md-nav__link">
     <span class="md-ellipsis">
-      Test (beta) binaries
+      Test or beta binaries
     </span>
   </a>
   
@@ -1290,7 +1290,7 @@
 <p>This page explains how to install Krux with KruxInstaller (GUI).</p>
 <h3 id="installing-from-a-gui">Installing from a GUI<a class="headerlink" href="#installing-from-a-gui" title="Permanent link">&para;</a></h3>
 <p>You can install Krux onto your K210-based device using our official desktop application, which we named <a href="https://github.com/selfcustody/krux-installer">KruxInstaller</a>, available for Linux and Windows.</p>
-<p>Under the hood the GUI uses the same methods described in <a href="../from-pre-built-release/">Installing from pre-build release</a>, i.e. download, verify and flash the latest official release, but you won't need to type any command. Additionally you will be able to install the <a href="../from-test-release/">pre-built test (beta) release</a> too.</p>
+<p>Under the hood the GUI uses the same methods described in <a href="../from-pre-built-release/">Installing from pre-build release</a>, i.e. download, verify and flash the latest official release, but you won't need to type any command. Additionally you will be able to install the <a href="../from-test-release/">pre-built test or beta release</a> too.</p>
 <p>Keep in mind that this is software under development in the alpha stage and may be buggy. If you find any bugs or want to contribute to the project, please open an <a href="https://github.com/selfcustody/krux-installer/issues">issue</a> or make a PR.</p>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <h4 id="hardware">Hardware<a class="headerlink" href="#hardware" title="Permanent link">&para;</a></h4>
@@ -1330,7 +1330,7 @@
 <p>This is the first step, to select the device we want to flash. Click on the dropdown arrow to list the supported devices, each one have a different firmware. Then click on SELECT.</p>
 <p><img alt="select-device" src="../../../img/krux-installer/select_device.gif" title="KruxInstaller Select Device Menu with choosen device" /></p>
 <h4 id="select-version">Select version<a class="headerlink" href="#select-version" title="Permanent link">&para;</a></h4>
-<p>Now select which firmware you want to flash, i.e. the <a href="https://github.com/selfcustody/krux/releases">latest official release</a> or the <a href="https://github.com/odudex/krux_binaries">test (beta) release</a>. While in the official release we can <a href="../from-pre-built-release/#verify-the-files">verify its integrity and authenticity</a>, in the second one we will have no means of verifying it, because it is not signed. However, the test (beta) firmware will contain the newest features that are being developed and discussed on our social media.</p>
+<p>Now select which firmware you want to flash, i.e. the <a href="https://github.com/selfcustody/krux/releases">latest official release</a> or the <a href="https://github.com/odudex/krux_binaries">test (beta) release</a>. While in the official release we can <a href="../from-pre-built-release/#verify-the-files">verify its integrity and authenticity</a>, in the second one we will have no means of verifying it, because it is not signed. However, the test or beta firmware will contain the newest features that are being developed and discussed on our social media.</p>
 <h5 id="official-release">Official release<a class="headerlink" href="#official-release" title="Permanent link">&para;</a></h5>
 <p>The software will display the latest officially released version in the form <code>selfcustody/tags/vXX.YY.Z</code>, where XX means the year of release, YY the month of release and Z a subversion of this release.</p>
 <p>Once selected, the application will check if the entry exists in the system. If not, it will download the following files: the firmware as a <code>.zip</code>, the sha256 of the zip as <code>sha256.txt</code>, the signature of the zip as <code>.sig</code> and the <code>selfcustody.pem</code>.</p>
@@ -1351,7 +1351,7 @@
 <p><img alt="select-version-not-downloaded-selfcustody" src="../../../img/krux-installer/select_version_not_downloaded_selfcustody.gif" title="KruxInstaller Select Selfcustody Version not downloaded Menu" /></p>
 <p>If they are already present on your computer, the application will give you the option to download them again or continue with the files already downloaded.</p>
 <p><img alt="select-version-downloaded-selfcustody" src="../../../img/krux-installer/select_version_downloaded_selfcustody.gif" title="KruxInstaller Select Selfcustody version downloaded Menu" /></p>
-<h5 id="test-beta-binaries">Test (beta) binaries<a class="headerlink" href="#test-beta-binaries" title="Permanent link">&para;</a></h5>
+<h5 id="test-or-beta-binaries">Test or beta binaries<a class="headerlink" href="#test-or-beta-binaries" title="Permanent link">&para;</a></h5>
 <p>As the name suggests, these binaries are intended for test purposes, contain experimental features, and are more likely to contain bugs. Use only for experimentation and to provide feedback.</p>
 <p>The installer will present the latest test (beta) release.
 <img alt="select-version-not-downloaded-odudex" src="../../../img/krux-installer/select_version_not_downloaded_odudex.gif" title="KruxInstaller Select Odudex version Menu" /></p>
@@ -1472,7 +1472,7 @@
     
     
     
-    <a href="https://bitcointalk.org/index.php?topic=5350905.0" target="_blank" rel="noopener" title="Send a message to the Bitcoin Forum" class="md-social__link">
+    <a href="https://bitcointalk.org/index.php?topic=5489022.0" target="_blank" rel="noopener" title="Send a message to the Bitcoin Forum" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M480 32c0-12.9-7.8-24.6-19.8-29.6S434.5.2 425.3 9.3L381.7 53c-48 48-113.1 75-181 75H64c-35.3 0-64 28.7-64 64v96c0 35.3 28.7 64 64 64v128c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V352h8.7c67.9 0 133 27 181 75l43.6 43.6c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V300.4c18.6-8.8 32-32.5 32-60.4s-13.4-51.6-32-60.4V32zm-64 76.7v262.6C357.2 317.8 280.5 288 200.7 288H192v-96h8.7c79.8 0 156.5-29.8 215.3-83.3z"/></svg>
     </a>
   
