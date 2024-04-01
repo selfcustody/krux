@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ..utils import Utils
 from ...qr import FORMAT_NONE
 from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
 from .. import (
@@ -33,11 +32,6 @@ from .. import (
 
 class MnemonicsView(Page):
     """UI to show mnemonic in different formats"""
-
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.ctx = ctx
-        self.utils = Utils(self.ctx)
 
     def mnemonic(self):
         """Menu with export mnemonic formats"""
@@ -122,6 +116,8 @@ class MnemonicsView(Page):
 
     def display_mnemonic_numbers(self):
         """Handler for the 'numbers' menu item"""
+        from ..utils import Utils
+
         submenu = Menu(
             self.ctx,
             [
@@ -163,7 +159,11 @@ class MnemonicsView(Page):
         title = t("Plaintext QR")
         data = self.ctx.wallet.key.mnemonic
         self.display_qr_codes(data, FORMAT_NONE, title)
-        self.utils.print_standard_qr(data, FORMAT_NONE, title)
+
+        from ..utils import Utils
+
+        utils = Utils(self.ctx)
+        utils.print_standard_qr(data, FORMAT_NONE, title)
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):

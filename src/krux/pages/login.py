@@ -24,7 +24,6 @@ import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
-from .utils import Utils
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import Key
@@ -212,6 +211,8 @@ class Login(Page):
         mnemonic = " ".join(words)
 
         if charset != LETTERS:
+            from .utils import Utils
+
             charset_type = {
                 DIGITS: Utils.BASE_DEC,
                 DIGITS_HEX: Utils.BASE_HEX,

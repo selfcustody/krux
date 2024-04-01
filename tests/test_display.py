@@ -29,7 +29,6 @@ def test_init_amigo(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
-    import board
 
     mocker.spy(Display, "initialize_lcd")
 

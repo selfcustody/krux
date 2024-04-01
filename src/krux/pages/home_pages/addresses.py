@@ -23,7 +23,6 @@
 import gc
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
-from ..utils import Utils
 from .. import (
     Page,
     Menu,
@@ -36,11 +35,6 @@ SCAN_ADDRESS_LIMIT = 20
 
 class Addresses(Page):
     """UI to show and scan wallet addresses"""
-
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.ctx = ctx
-        self.utils = Utils(self.ctx)
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""

@@ -37,10 +37,6 @@ WALLET_XPUB_START = 4
 class PubkeyView(Page):
     """UI to show and export extended public key"""
 
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.ctx = ctx
-
     def public_key(self):
         """Handler for the 'xpub' menu item"""
 

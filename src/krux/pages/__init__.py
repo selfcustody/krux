@@ -67,7 +67,7 @@ class Page:
     Must be subclassed.
     """
 
-    def __init__(self, ctx, menu):
+    def __init__(self, ctx, menu=None):
         self.ctx = ctx
         self.menu = menu
         self._time_frame = 0

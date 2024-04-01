@@ -38,12 +38,8 @@ from ...sd_card import (
 from ..utils import Utils
 
 
-class SignMessage(Page):
+class SignMessage(Utils):
     """Message Signing user interface"""
-
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.utils = Utils(self.ctx)
 
     def load_message(self):
         """Loads a message from camera or SD card"""
@@ -69,7 +65,7 @@ class SignMessage(Page):
             return (data, qr_format, "")
 
         # If index == 1
-        message_filename, data = self.utils.load_file(prompt=False)
+        message_filename, data = self.load_file(prompt=False)
         return (data, FORMAT_NONE, message_filename)
 
     def sign_at_address(self, data):
@@ -223,7 +219,7 @@ class SignMessage(Page):
             title = t("Signed Message")
             encoded_sig = base_encode(sig, 64).strip().decode()
             self.display_qr_codes(encoded_sig, qr_format, title)
-            self.utils.print_standard_qr(encoded_sig, qr_format, title)
+            self.print_standard_qr(encoded_sig, qr_format, title)
 
             if not sign_at_address:
                 # Show the public key as a QRCode
@@ -234,7 +230,7 @@ class SignMessage(Page):
 
                 # Show the public key in hexadecimal format as a QRCode
                 self.display_qr_codes(pubkey, qr_format, title)
-                self.utils.print_standard_qr(pubkey, qr_format, title)
+                self.print_standard_qr(pubkey, qr_format, title)
             return MENU_CONTINUE
 
         # If index == 1 save the signature file on the SD card
