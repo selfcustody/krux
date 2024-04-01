@@ -73,18 +73,18 @@ class Tools(Page):
                 self.ctx.display.draw_hcentered_text(
                     t("SD card")
                     + "\n\n"
-                    + t("Size: ")
-                    + "{:,}".format(sd_total_MB).replace(",", THOUSANDS_SEPARATOR)
+                    + t("Size:")
+                    + " {:,}".format(sd_total_MB).replace(",", THOUSANDS_SEPARATOR)
                     + " MB"
                     + "\n\n"
-                    + t("Used: ")
-                    + "{:,}".format(sd_total_MB - sd_free_MB).replace(
+                    + t("Used:")
+                    + " {:,}".format(sd_total_MB - sd_free_MB).replace(
                         ",", THOUSANDS_SEPARATOR
                     )
                     + " MB"
                     + "\n\n"
-                    + t("Free: ")
-                    + "{:,}".format(sd_free_MB).replace(",", THOUSANDS_SEPARATOR)
+                    + t("Free:")
+                    + " {:,}".format(sd_free_MB).replace(",", THOUSANDS_SEPARATOR)
                     + " MB"
                 )
                 if self.prompt(

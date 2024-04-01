@@ -261,7 +261,9 @@ def upgrade():
         display.draw_centered_text(text)
 
     write_data(
-        lambda pct: status_text(t("Upgrading firmware..\n\n%d%%") % int(pct * 100)),
+        lambda pct: status_text(
+            t("Upgrading firmware..") + "\n\n%d%%" % int(pct * 100)
+        ),
         new_address,
         open(firmware_path, "rb", buffering=0),
         new_size,
@@ -271,7 +273,9 @@ def upgrade():
     )
 
     write_data(
-        lambda pct: status_text(t("Backing up bootloader..\n\n%d%%") % int(pct * 100)),
+        lambda pct: status_text(
+            t("Backing up bootloader..") + "\n\n%d%%" % int(pct * 100)
+        ),
         BACKUP_BOOT_CONFIG_SECTOR_ADDRESS,
         io.BytesIO(boot_config_sector),
         len(boot_config_sector),
@@ -282,7 +286,9 @@ def upgrade():
         boot_config_sector, entry_index, new_address, new_size
     )
     write_data(
-        lambda pct: status_text(t("Updating bootloader..\n\n%d%%") % int(pct * 100)),
+        lambda pct: status_text(
+            t("Updating bootloader..") + "\n\n%d%%" % int(pct * 100)
+        ),
         MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
         io.BytesIO(new_boot_config_sector),
         len(new_boot_config_sector),

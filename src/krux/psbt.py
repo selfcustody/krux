@@ -110,8 +110,8 @@ class PSBTSigner:
         for inp in self.psbt.inputs:
             inp_amount += inp.witness_utxo.value
         resume_inputs_str = (
-            (t("Inputs (%d): ") % len(self.psbt.inputs))
-            + ("₿ %s" % format_btc(inp_amount))
+            (t("Inputs (%d):") % len(self.psbt.inputs))
+            + (" ₿ %s" % format_btc(inp_amount))
             + "\n\n"
         )
 
@@ -199,23 +199,23 @@ class PSBTSigner:
 
         if len(spend_list) > 0:
             resume_spend_str = (
-                (t("Spend (%d): ") % len(spend_list))
-                + ("₿ %s" % format_btc(spend_amount))
+                (t("Spend (%d):") % len(spend_list))
+                + (" ₿ %s" % format_btc(spend_amount))
                 + "\n\n"
             )
 
         if len(self_transfer_list) + len(change_list) > 0:
             resume_self_or_change_str = (
                 (
-                    t("Self-transfer or Change (%d): ")
+                    t("Self-transfer or Change (%d):")
                     % (len(self_transfer_list) + len(change_list))
                 )
-                + ("₿ %s" % format_btc(self_amount + change_amount))
+                + (" ₿ %s" % format_btc(self_amount + change_amount))
                 + "\n\n"
             )
 
         fee = inp_amount - spend_amount - self_amount - change_amount
-        resume_fee_str = t("Fee: ") + ("₿ %s" % format_btc(fee))
+        resume_fee_str = t("Fee:") + (" ₿ %s" % format_btc(fee))
 
         messages = []
         # first screen - resume

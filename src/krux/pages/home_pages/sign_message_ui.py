@@ -24,7 +24,7 @@ import gc
 from embit import bip32, compact
 import hashlib
 import binascii
-from .. import Page, MENU_CONTINUE, Menu
+from .. import MENU_CONTINUE, Menu
 from ...themes import theme
 from ...display import DEFAULT_PADDING, MINIMAL_DISPLAY
 from ...baseconv import base_encode
@@ -38,12 +38,8 @@ from ...sd_card import (
 from ..utils import Utils
 
 
-class SignMessage(Page):
+class SignMessage(Utils):
     """Message Signing user interface"""
-
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.utils = Utils(self.ctx)
 
     def load_message(self):
         """Loads a message from camera or SD card"""
@@ -69,7 +65,7 @@ class SignMessage(Page):
             return (data, qr_format, "")
 
         # If index == 1
-        message_filename, data = self.utils.load_file(prompt=False)
+        message_filename, data = self.load_file(prompt=False)
         return (data, FORMAT_NONE, message_filename)
 
     def sign_at_address(self, data):
@@ -114,7 +110,7 @@ class SignMessage(Page):
                     ) * self.ctx.display.font_height
                     offset_y += (
                         self.ctx.display.draw_hcentered_text(
-                            t("Address:"), offset_y, theme.highlight_color
+                            t("Address") + ":", offset_y, theme.highlight_color
                         )
                         * self.ctx.display.font_height
                     )
@@ -163,7 +159,7 @@ class SignMessage(Page):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            t("SHA256:\n%s") % binascii.hexlify(message_hash).decode()
+            "SHA256:\n%s" % binascii.hexlify(message_hash).decode()
         )
         if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
             return ""
@@ -223,7 +219,7 @@ class SignMessage(Page):
             title = t("Signed Message")
             encoded_sig = base_encode(sig, 64).strip().decode()
             self.display_qr_codes(encoded_sig, qr_format, title)
-            self.utils.print_standard_qr(encoded_sig, qr_format, title)
+            self.print_standard_qr(encoded_sig, qr_format, title)
 
             if not sign_at_address:
                 # Show the public key as a QRCode
@@ -234,7 +230,7 @@ class SignMessage(Page):
 
                 # Show the public key in hexadecimal format as a QRCode
                 self.display_qr_codes(pubkey, qr_format, title)
-                self.utils.print_standard_qr(pubkey, qr_format, title)
+                self.print_standard_qr(pubkey, qr_format, title)
             return MENU_CONTINUE
 
         # If index == 1 save the signature file on the SD card

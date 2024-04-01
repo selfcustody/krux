@@ -23,7 +23,6 @@
 import gc
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
-from ..utils import Utils
 from .. import (
     Page,
     Menu,
@@ -36,11 +35,6 @@ SCAN_ADDRESS_LIMIT = 20
 
 class Addresses(Page):
     """UI to show and scan wallet addresses"""
-
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.ctx = ctx
-        self.utils = Utils(self.ctx)
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
@@ -185,14 +179,16 @@ class Addresses(Page):
 
             checking_match_txt = t("Checking receive address %d for match..")
             checked_no_match_txt = t("Checked %d receive addresses with no matches.")
-            is_valid_txt = t("%s\n\nis a valid receive address!")
-            not_found_txt = t("%s\n\nwas NOT FOUND in the first %d receive addresses")
+            is_valid_txt = "%s\n\n" + t("is a valid receive address!")
+            not_found_txt = "%s\n\n" + t(
+                "was NOT FOUND in the first %d receive addresses"
+            )
             if addr_type == 1:
                 checking_match_txt = t("Checking change address %d for match..")
                 checked_no_match_txt = t("Checked %d change addresses with no matches.")
-                is_valid_txt = t("%s\n\nis a valid change address!")
-                not_found_txt = t(
-                    "%s\n\nwas NOT FOUND in the first %d change addresses"
+                is_valid_txt = "%s\n\n" + t("is a valid change address!")
+                not_found_txt = "%s\n\n" + t(
+                    "was NOT FOUND in the first %d change addresses"
                 )
 
             found = False

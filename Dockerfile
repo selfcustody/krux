@@ -21,6 +21,11 @@
 # THE SOFTWARE.
 
 # syntax=docker/dockerfile:1
+
+############
+# build-base
+# install kendryte (k210), cmake and python dependencies
+############
 FROM gcc:9.4.0-buster AS build-base
 
 RUN apt-get update -y && \
@@ -69,15 +74,30 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.0/cmake-3.21.0
 RUN pip3 install astor
 RUN pip3 install pyserial==3.4
 
+
+############
+# build-software
+# copy vendor, firmware and Kurx (src) files
+# install embit dependency
+############
 FROM build-base as build-software
 ARG DEVICE="maixpy_m5stickv"
+ENV DEVICE_BUILTIN="firmware/MaixPy/projects/${DEVICE}/builtin_py"
 RUN mkdir /src
-# COPY ./LICENSE.md /src/LICENSE.md
-COPY ./firmware /src/firmware
-COPY ./src /src/src
-COPY ./vendor /src/vendor
 WORKDIR /src
+
+# copy vendor to WORKDIR (src)
+COPY ./vendor vendor
+
+# clean vendor/urtypes
+RUN find vendor/urtypes -type d -name '__pycache__' -exec rm -rv {} + -depth
+
+# clean vendor/foundation-ur-py
+RUN find vendor/foundation-ur-py -type d -name '__pycache__' -exec rm -rv {} + -depth
+
+# install vendor/embit
 RUN cd vendor/embit && pip3 install -e .
+# clean vendor/embit
 RUN rm -rf vendor/embit/src/embit/util/prebuilt && \
     rm -rf vendor/embit/src/embit/liquid && \
     rm -f vendor/embit/src/embit/psbtview.py && \
@@ -85,25 +105,57 @@ RUN rm -rf vendor/embit/src/embit/util/prebuilt && \
     rm -f vendor/embit/src/embit/wordlists/slip39.py && \
     rm -f vendor/embit/src/embit/util/ctypes_secp256k1.py && \
     rm -f vendor/embit/src/embit/util/py_secp256k1.py && \
-    mv src/boot.py src/_boot.py && \
-    cp -r src/. firmware/MaixPy/projects/"${DEVICE}"/builtin_py/ && \
-    cp -r vendor/embit/src/embit firmware/MaixPy/projects/"${DEVICE}"/builtin_py/ && \
-    cp -r vendor/urtypes/src/urtypes firmware/MaixPy/projects/"${DEVICE}"/builtin_py/ && \
-    cp -r vendor/foundation-ur-py/src/ur firmware/MaixPy/projects/"${DEVICE}"/builtin_py/
+    find vendor/embit -type d -name '__pycache__' -exec rm -rv {} + -depth
 
+# copy firmware to WORKDIR (src)
+COPY ./firmware firmware
+# clean firmware
+RUN find firmware -type d -name '__pycache__' -exec rm -rv {} + -depth
+
+# copy all vendors to DEVICE_BUILTIN
+RUN cp -r vendor/urtypes/src/urtypes "${DEVICE_BUILTIN}"
+RUN cp -r vendor/foundation-ur-py/src/ur "${DEVICE_BUILTIN}"
+RUN cp -r vendor/embit/src/embit "${DEVICE_BUILTIN}"
+
+# copy Krux (src) to WORKDIR (src)
+COPY ./src src
+# rename boot.py
+RUN mv src/boot.py src/_boot.py
+# clean it
+RUN find src -type d -name '__pycache__' -exec rm -rv {} + -depth
+# copy it to DEVICE_BUILTIN
+RUN cp -r src/. "${DEVICE_BUILTIN}"
+
+
+############
+# build-firmware
+# python compilation of Krux and its dependencies inside MaixPy
+# creation of the firmware.bin
+############
 FROM build-software AS build-firmware
 ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/MaixPy
+
+# overrides the DEVICE specific font.c in componets/micropython
 RUN cp -rf projects/"${DEVICE}"/compile/overrides/. ./
+
 RUN cd projects/"${DEVICE}" && \
     python3 project.py clean && \
     python3 project.py distclean && \
     python3 project.py build && \
     mv build/maixpy.bin build/firmware.bin
 
+
+############
+# build
+# creation of kboot.kfpkg using firmware.bin
+############
 FROM build-firmware AS build
 ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/Kboot/build
 RUN cp /src/firmware/MaixPy/projects/"${DEVICE}"/build/firmware.bin .
+
+# replace possible windows line endings
 RUN sed -i -e 's/\r$//' *.sh
+
 RUN ./CLEAN.sh && ./BUILD.sh

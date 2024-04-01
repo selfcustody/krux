@@ -83,7 +83,7 @@ class Home(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("PSBT"), self.sign_psbt),
+                ("PSBT", self.sign_psbt),
                 (t("Message"), self.sign_message),
                 (t("Back"), lambda: MENU_EXIT),
             ],

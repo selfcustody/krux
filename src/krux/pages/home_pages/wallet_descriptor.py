@@ -117,7 +117,7 @@ class WalletDescriptor(Page):
         except Exception as e:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Invalid wallet:\n%s") % repr(e), theme.error_color
+                t("Invalid wallet:") + "\n%s" % repr(e), theme.error_color
             )
             self.ctx.input.wait_for_button()
 
@@ -171,7 +171,7 @@ class WalletDescriptor(Page):
                 except Exception as e:
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(
-                        t("Error:\n%s") % repr(e), theme.error_color
+                        t("Error:") + "\n%s" % repr(e), theme.error_color
                     )
                     self.ctx.input.wait_for_button()
             else:

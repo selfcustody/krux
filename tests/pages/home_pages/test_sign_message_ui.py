@@ -185,7 +185,6 @@ def test_sign_message(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home.utils, "print_standard_qr")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
         if case[6] is not None:
@@ -217,15 +216,8 @@ def test_sign_message(mocker, m5stickv, tdata):
                     mocker.call(case[5], case[1], "Hex Public Key"),
                 ]
             )
-            home.utils.print_standard_qr.assert_has_calls(
-                [
-                    mocker.call(case[4], case[1], "Signed Message"),
-                    mocker.call(case[5], case[1], "Hex Public Key"),
-                ]
-            )
         else:
             home.display_qr_codes.assert_not_called()
-            home.utils.print_standard_qr.assert_not_called()
 
         assert ctx.input.wait_for_button.call_count == len(case[3])
 

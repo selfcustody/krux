@@ -112,7 +112,7 @@ class ThermalSettings(SettingsNamespace):
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
-            "adafruit": t("Adafruit"),
+            "adafruit": "Adafruit",
         }[attr]
 
 
@@ -170,7 +170,7 @@ class CNCSettings(SettingsNamespace):
             "depth_per_pass": t("Depth Per Pass"),
             "part_size": t("Part Size"),
             "border_padding": t("Border Padding"),
-            "grbl": t("GRBL"),
+            "grbl": "GRBL",
         }[attr]
 
 
@@ -211,7 +211,7 @@ class PrinterSettings(SettingsNamespace):
         return {
             "thermal": t("Thermal"),
             "driver": t("Driver"),
-            "cnc": t("CNC"),
+            "cnc": "CNC",
         }[attr]
 
 

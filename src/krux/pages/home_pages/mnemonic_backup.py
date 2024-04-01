@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ..utils import Utils
 from ...qr import FORMAT_NONE
 from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
 from .. import (
@@ -33,11 +32,6 @@ from .. import (
 
 class MnemonicsView(Page):
     """UI to show mnemonic in different formats"""
-
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.ctx = ctx
-        self.utils = Utils(self.ctx)
 
     def mnemonic(self):
         """Menu with export mnemonic formats"""
@@ -59,8 +53,8 @@ class MnemonicsView(Page):
             self.ctx,
             [
                 (t("Plaintext QR"), self.display_standard_qr),
-                (t("Compact SeedQR"), lambda: self.display_seed_qr(True)),
-                (t("SeedQR"), self.display_seed_qr),
+                ("Compact SeedQR", lambda: self.display_seed_qr(True)),
+                ("SeedQR", self.display_seed_qr),
                 (t("Encrypted QR Code"), self.encrypt_qr_code),
                 (t("Back"), lambda: MENU_EXIT),
             ],
@@ -80,8 +74,8 @@ class MnemonicsView(Page):
                     ),
                 ),
                 (t("Numbers"), self.display_mnemonic_numbers),
-                (t("Stackbit 1248"), self.stackbit),
-                (t("Tiny Seed"), self.tiny_seed),
+                ("Stackbit 1248", self.stackbit),
+                ("Tiny Seed", self.tiny_seed),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -122,6 +116,8 @@ class MnemonicsView(Page):
 
     def display_mnemonic_numbers(self):
         """Handler for the 'numbers' menu item"""
+        from ..utils import Utils
+
         submenu = Menu(
             self.ctx,
             [
@@ -163,7 +159,11 @@ class MnemonicsView(Page):
         title = t("Plaintext QR")
         data = self.ctx.wallet.key.mnemonic
         self.display_qr_codes(data, FORMAT_NONE, title)
-        self.utils.print_standard_qr(data, FORMAT_NONE, title)
+
+        from ..utils import Utils
+
+        utils = Utils(self.ctx)
+        utils.print_standard_qr(data, FORMAT_NONE, title)
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
@@ -192,13 +192,6 @@ class MnemonicsView(Page):
                     y_offset += 5 + 2 * self.ctx.display.font_height
                 word_index += 1
             self.ctx.input.wait_for_button()
-
-            # removed the hability to go back in favor or the Krux UI patter (always move forward)
-            # if self.ctx.input.wait_for_button() == BUTTON_PAGE_PREV:
-            #     if word_index > 12:
-            #         word_index -= 12
-            #     else:
-            #         word_index = 1
             self.ctx.display.clear()
         return MENU_CONTINUE
 

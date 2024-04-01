@@ -127,7 +127,7 @@ def print_missing():
         if complete:
             print("Nothing to add")
         else:
-            print("Please review and copy items above")
+            print("\n -- Please review and copy items above -- ")
         print("\n\n")
 
 
@@ -174,6 +174,7 @@ def bake_translations():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
+    translation_filenames.sort()
     for translation_filename in translation_filenames:
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
@@ -241,6 +242,7 @@ def prettify_translation_files():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
+    translation_filenames.sort()
     for translation_filename in translation_filenames:
         translations = {}
         with open(
@@ -286,8 +288,6 @@ if __name__ == "__main__":
         for arg in sys.argv[1:]:
             if arg == "validate":
                 validate_translation_files()
-            elif arg == "new":
-                create_translation_file(sys.argv[2])
             elif arg == "fill":
                 print_missing()
             elif arg == "clean":

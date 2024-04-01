@@ -218,7 +218,7 @@ class DiceEntropy(Page):
             while True:
                 roll = ""
                 while True:
-                    dice_title = t("Rolls: %d\n") % len(self.rolls)
+                    dice_title = t("Rolls:") + " %d\n" % len(self.rolls)
                     entropy = (
                         "".join(self.rolls)
                         if self.len_states < 10
@@ -267,7 +267,7 @@ class DiceEntropy(Page):
                 "".join(self.rolls) if self.len_states < 10 else "-".join(self.rolls)
             )
             self.ctx.display.clear()
-            rolls_str = t("Rolls:\n\n%s") % entropy
+            rolls_str = t("Rolls:") + "\n\n%s" % entropy
             max_lines = self.ctx.display.total_lines - 6  # room for menu
             menu_offset = self.ctx.display.draw_hcentered_text(
                 rolls_str, info_box=True, max_lines=max_lines
@@ -295,7 +295,7 @@ class DiceEntropy(Page):
             ).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("SHA256 of rolls:\n\n%s") % entropy_hash
+                t("SHA256 of rolls:") + "\n\n%s" % entropy_hash
             )
             self.ctx.input.wait_for_button()
             num_bytes = 32 if is_24_words else 16

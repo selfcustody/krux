@@ -195,17 +195,12 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         mnemonics = MnemonicsView(ctx)
 
         mocker.spy(mnemonics, "display_qr_codes")
-        mocker.spy(mnemonics.utils, "print_standard_qr")
         mnemonics.mnemonic()
 
         title = "Plaintext QR"
         mnemonics.display_qr_codes.assert_called_with(
             ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
-        if case[1] is not None:
-            mnemonics.utils.print_standard_qr.assert_called_with(
-                ctx.wallet.key.mnemonic, FORMAT_NONE, title
-            )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
@@ -453,7 +448,6 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
         mnemonics = MnemonicsView(ctx)
 
         mocker.spy(mnemonics, "display_qr_codes")
-        mocker.spy(mnemonics.utils, "print_standard_qr")
 
         mnemonics.mnemonic()
 
@@ -461,9 +455,5 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
         mnemonics.display_qr_codes.assert_called_with(
             ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
-        if case[1] is not None:
-            mnemonics.utils.print_standard_qr.assert_called_with(
-                ctx.wallet.key.mnemonic, FORMAT_NONE, title
-            )
 
         assert ctx.input.wait_for_button.call_count == len(case[2])

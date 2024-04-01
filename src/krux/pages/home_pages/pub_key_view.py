@@ -37,10 +37,6 @@ WALLET_XPUB_START = 4
 class PubkeyView(Page):
     """UI to show and export extended public key"""
 
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.ctx = ctx
-
     def public_key(self):
         """Handler for the 'xpub' menu item"""
 
@@ -62,16 +58,11 @@ class PubkeyView(Page):
             )
 
         def _pub_key_text(version):
-            def _save_sd_pubk_function():
-                return _save_xpub_to_sd(version)
-
-            if self.has_sd_card():
-                save_sd_pubk_func = _save_sd_pubk_function
-            else:
-                save_sd_pubk_func = None
-
             pub_text_menu_items = [
-                (t("Save to SD card"), save_sd_pubk_func),
+                (
+                    t("Save to SD card"),
+                    lambda: _save_xpub_to_sd(version) if self.has_sd_card() else None,
+                ),
                 (t("Back"), lambda: MENU_EXIT),
             ]
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)

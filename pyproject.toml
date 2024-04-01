@@ -94,9 +94,9 @@ docs = "poetry run mkdocs serve"
 
 # translations tasks
 i18n = "python i18n/i18n.py"
-i18n-all = "python i18n/i18n.py validate clean prettify bake"
+i18n-bake = "python i18n/i18n.py clean prettify bake"
 format-translations = "black src/krux/translations.py"
-i18n-build = ["i18n-all", "format-translations"]
+i18n-build = ["i18n-bake", "format-translations", "i18n validate"]
 # aliases
 translations.ref = "i18n-build"
 
@@ -111,6 +111,8 @@ simulator-cube = "python simulator/simulator.py --device maixpy_cube"
 simulator.ref = "simulator-amigo"
 simulator-m5.ref = "simulator-m5stickv"
 
+# other tasks
+git-update = "git submodule update --init --recursive"
 
 # task for bdftokff?
 # python bdftokff.py True

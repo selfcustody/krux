@@ -24,7 +24,6 @@ import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
-from .utils import Utils
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import Key
@@ -93,7 +92,7 @@ class Login(Page):
             [
                 (t("QR Code"), self.load_key_from_qr_code),
                 (
-                    t("Tiny Seed"),
+                    "Tiny Seed",
                     self.load_key_from_tiny_seed_image,
                 ),
                 (t("Back"), lambda: MENU_EXIT),
@@ -111,8 +110,8 @@ class Login(Page):
             [
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
-                (t("Tiny Seed (Bits)"), self.load_key_from_tiny_seed),
-                (t("Stackbit 1248"), self.load_key_from_1248),
+                ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
+                ("Stackbit 1248", self.load_key_from_1248),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -190,7 +189,7 @@ class Login(Page):
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    t("SHA256 of snapshot:\n\n%s") % entropy_hash
+                    t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash
                 )
                 self.ctx.input.wait_for_button()
                 num_bytes = 16 if index == 0 else 32
@@ -212,6 +211,8 @@ class Login(Page):
         mnemonic = " ".join(words)
 
         if charset != LETTERS:
+            from .utils import Utils
+
             charset_type = {
                 DIGITS: Utils.BASE_DEC,
                 DIGITS_HEX: Utils.BASE_HEX,
@@ -267,7 +268,7 @@ class Login(Page):
             # and user needs to confirm not just the words, but the fingerprint too
             continue_string = ""
             if passphrase:
-                continue_string += t("Passphrase: ") + passphrase + "\n\n"
+                continue_string += t("Passphrase") + ": " + passphrase + "\n\n"
             continue_string += (
                 temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?")
             )
@@ -746,6 +747,8 @@ class Login(Page):
         from ..metadata import VERSION
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
+        self.ctx.display.draw_centered_text(
+            "Krux\n\n\n" + t("Version") + "\n%s" % VERSION
+        )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
