@@ -22,7 +22,7 @@
 
 import gc
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
-from ...krux_settings import t
+from ...krux_settings import t, Settings
 from .. import (
     Page,
     Menu,
@@ -35,20 +35,18 @@ class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
-        super().__init__(
-            ctx,
-            Menu(
-                ctx,
-                [
-                    (t("Backup Mnemonic"), self.backup_mnemonic),
-                    (t("Extended Public Key"), self.public_key),
-                    (t("Wallet Descriptor"), self.wallet),
-                    (t("Address"), self.addresses_menu),
-                    (t("Sign"), self.sign),
-                    (t("Shutdown"), self.shutdown),
-                ],
-            ),
-        )
+        home_menu = [
+            (t("Backup Mnemonic"), self.backup_mnemonic),
+            (t("Extended Public Key"), self.public_key),
+            (t("Wallet Descriptor"), self.wallet),
+            (t("Address"), self.addresses_menu),
+            (t("Sign"), self.sign),
+            (t("Shutdown"), self.shutdown),
+        ]
+        if Settings().security.hide_mnemonic:
+            home_menu.pop(0)
+
+        super().__init__(ctx, Menu(ctx, home_menu))
 
     def backup_mnemonic(self):
         """Handler for the 'Backup Mnemonic' menu item"""

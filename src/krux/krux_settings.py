@@ -360,11 +360,13 @@ class SecuritySettings(SettingsNamespace):
 
     namespace = "settings.security"
     auto_shutdown = NumberSetting(int, "auto_shutdown", 10, [0, 60])
+    hide_mnemonic = CategorySetting("hide_mnemonic", False, [False, True])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "auto_shutdown": t("Shutdown Time"),
+            "hide_mnemonic": t("Hide Mnemonic"),
         }[attr]
 
 
