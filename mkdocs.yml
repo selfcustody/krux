@@ -44,7 +44,7 @@ site_dir: public
 extra:
   social:
     - icon: fontawesome/solid/bullhorn
-      link: https://bitcointalk.org/index.php?topic=5350905.0
+      link: https://bitcointalk.org/index.php?topic=5489022.0
       name: Send a message to the Bitcoin Forum
     - icon: fontawesome/brands/telegram
       link: https://t.me/SC_Krux

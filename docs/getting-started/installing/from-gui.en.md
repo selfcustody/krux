@@ -4,7 +4,7 @@ This page explains how to install Krux with KruxInstaller (GUI).
 
 You can install Krux onto your K210-based device using our official desktop application, which we named [KruxInstaller](https://github.com/selfcustody/krux-installer), available for Linux and Windows.
 
-Under the hood the GUI uses the same methods described in [Installing from pre-build release](../installing/from-pre-built-release.md), i.e. download, verify and flash the latest official release, but you won't need to type any command. Additionally you will be able to install the [pre-built test (beta) release](../installing/from-test-release.md) too.
+Under the hood the GUI uses the same methods described in [Installing from pre-build release](../installing/from-pre-built-release.md), i.e. download, verify and flash the latest official release, but you won't need to type any command. Additionally you will be able to install the [pre-built test or beta release](../installing/from-test-release.md) too.
 
 Keep in mind that this is software under development in the alpha stage and may be buggy. If you find any bugs or want to contribute to the project, please open an [issue](https://github.com/selfcustody/krux-installer/issues) or make a PR.
 
@@ -67,7 +67,7 @@ This is the first step, to select the device we want to flash. Click on the drop
 ![select-device](../../img/krux-installer/select_device.gif "KruxInstaller Select Device Menu with choosen device")
 
 #### Select version
-Now select which firmware you want to flash, i.e. the [latest official release](https://github.com/selfcustody/krux/releases) or the [test (beta) release](https://github.com/odudex/krux_binaries). While in the official release we can [verify its integrity and authenticity](from-pre-built-release.md/#verify-the-files), in the second one we will have no means of verifying it, because it is not signed. However, the test (beta) firmware will contain the newest features that are being developed and discussed on our social media.
+Now select which firmware you want to flash, i.e. the [latest official release](https://github.com/selfcustody/krux/releases) or the [test (beta) release](https://github.com/odudex/krux_binaries). While in the official release we can [verify its integrity and authenticity](from-pre-built-release.md/#verify-the-files), in the second one we will have no means of verifying it, because it is not signed. However, the test or beta firmware will contain the newest features that are being developed and discussed on our social media.
 
 ##### Official release
 The software will display the latest officially released version in the form `selfcustody/tags/vXX.YY.Z`, where XX means the year of release, YY the month of release and Z a subversion of this release.
@@ -88,7 +88,7 @@ If they are already present on your computer, the application will give you the 
 
 ![select-version-downloaded-selfcustody](../../img/krux-installer/select_version_downloaded_selfcustody.gif "KruxInstaller Select Selfcustody version downloaded Menu")
 
-##### Test (beta) binaries
+##### Test or beta binaries
 As the name suggests, these binaries are intended for test purposes, contain experimental features, and are more likely to contain bugs. Use only for experimentation and to provide feedback.
 
 The installer will present the latest test (beta) release.

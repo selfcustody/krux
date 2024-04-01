@@ -49,8 +49,8 @@ sudo apt-get remove brltty
 ## My device didn't reboot after flashing the firmware and when I turned it off and on again, it just stayed blank without showing anything on the screen. What should I do?
 Check if the downloaded file matches the device, this can also occur due to data corruption. Try downloading binaries again. You can install [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) to help with debugging, Tools > Open Terminal > New Terminal > Connect to serial port > Select a COM port available (if it doesn't work, try another COM port). It will show the terminal and some messages, a message about an empty device or with corrupted firmware appears like: "interesting, something's wrong, boot failed with exit code 233, go to find your vendor."
 
-## What are all the features available? What are the additional features of the Test (Beta) version? Is there an Android app?
-For [official releases](https://github.com/selfcustody/krux/releases) you will find all the features detailed here on the [Getting Started page](getting-started/index.md) with a brief summary on the [Navigation Overview page](getting-started/navigation.md). The latest and most experimental features, which we sometimes share on our social media, can be found only in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Only official releases are signed, Test (Beta) is just for trying new things and providing feedback. Krux Android app is available as an `apk` on the [test (beta) repository](https://github.com/odudex/krux_binaries/) (requires Android 6.0 or above).
+## What are all the features available? What are the additional features of the Test or Beta version? Is there an Android app?
+For [official releases](https://github.com/selfcustody/krux/releases) you will find all the features detailed here on the [Getting Started page](getting-started/index.md) with a brief summary on the [Navigation Overview page](getting-started/navigation.md). The latest and most experimental features, which we sometimes share on our social media, can be found only in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Only official releases are signed, Test or Beta is just for trying new things and providing feedback. Krux Android app is available as an `apk` on the [test (beta) repository](https://github.com/odudex/krux_binaries/) (requires Android 6.0 or above).
 
 ## Why does Krux show an xpub for a segwit address?
 The xpub that Krux displays follows the [bitcoin core descriptors spec](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md/#key-origin-identification) and includes key origin and derivation info that, in theory, makes zpubs (and ypubs) unnecessary *if the wallet software being shown this extra information can parse it*. 
@@ -85,13 +85,13 @@ For Wallet output descriptor:
 2. Key-value INI files with at least `Format`, `Policy`, and `Derivation` keys
 3. [UR Type `crypto-output`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-010-output-desc.md)
 
-For Partially Signed Bitcoin Transactions (PSBT):
+For PSBT (Partially Signed Bitcoin Transactions):
 
 1. Base43, Base58, and Base64-encoded bytes
 2. Raw Bytes
 3. [UR Type `crypto-psbt`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md)
 
-Additionally, Krux recognizes animated QR codes that use either the plaintext `pMofN` (Specter QR format) or binary [`UR`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md) encodings.
+Additionally, Krux recognizes animated QR codes that use either the plaintext `pMofN` (the Specter QR format) or binary [`UR`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md) encodings.
 
 ## Why can't my computer read the QR code that Krux displays?
 If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays.
