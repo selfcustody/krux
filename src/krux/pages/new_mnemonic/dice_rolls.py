@@ -102,8 +102,8 @@ class DiceEntropy(Page):
         shannon_entropy = self.calculate_entropy()
         max_count = max(self.roll_counts)
 
-        scale_factor = (self.ctx.display.height() * BAR_GRAPH_SIZE) // 100
-        scale_factor //= max_count
+        scale_factor = (self.ctx.display.height() * BAR_GRAPH_SIZE) / 100
+        scale_factor /= max_count
         bar_graph = []
         for count in self.roll_counts:
             bar_graph.append(int(count * scale_factor))
