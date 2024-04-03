@@ -238,12 +238,16 @@ try:
                 shutdown()
             elif event.type >= pg.USEREVENT:
                 if event.type == events.SCREENSHOT_EVENT:
+                    SCREENSHOTS_DIR = "screenshots"
+                    if not os.path.exists(SCREENSHOTS_DIR):
+                        os.makedirs(SCREENSHOTS_DIR)
+
                     sub = screen.subsurface(devices.screenshot_rect(args.device)).convert_alpha()
                     sub.blit(mask_img, sub.get_rect(), None, pg.BLEND_RGBA_SUB)
                     if (args.screenshot_scale):
                         sub = pg.transform.smoothscale(sub, device_screenshot_size)
                     pg.image.save(
-                        sub, os.path.join("screenshots", event.dict["filename"].replace(".png", screenshot_suffix + ".png"))
+                        sub, os.path.join(SCREENSHOTS_DIR, event.dict["filename"].replace(".png", screenshot_suffix + ".png"))
                     )
                 else:
                     event.dict["f"]()
