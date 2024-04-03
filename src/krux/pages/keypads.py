@@ -30,7 +30,7 @@ from ..input import (
     SWIPE_RIGHT,
     SWIPE_LEFT,
 )
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
@@ -133,13 +133,13 @@ class Keypad:
 
     def keypad_offset(self):
         """Returns keypad start position"""
-        return DEFAULT_PADDING + self.ctx.display.font_height * 3
+        return DEFAULT_PADDING + FONT_HEIGHT * 3
 
     def draw_keys(self, possible_keys):
         """Draws keypad on the screen"""
         key_index = 0
         for y in self.y_keypad_map[:-1]:
-            offset_y = y + (self.key_v_spacing - self.ctx.display.font_height) // 2
+            offset_y = y + (self.key_v_spacing - FONT_HEIGHT) // 2
             for x in self.x_keypad_map[:-1]:
                 key = None
                 custom_color = None
@@ -159,9 +159,7 @@ class Keypad:
                     custom_color = theme.toggle_color
                 if key is not None:
                     offset_x = x
-                    key_offset_x = (
-                        self.key_h_spacing - len(key) * self.ctx.display.font_width
-                    ) // 2
+                    key_offset_x = (self.key_h_spacing - len(key) * FONT_WIDTH) // 2
                     key_offset_x += offset_x
                     if (
                         key_index < len(self.keys)

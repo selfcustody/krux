@@ -23,6 +23,7 @@
 
 import board
 import lcd
+from ..display import FONT_HEIGHT, FONT_WIDTH
 from ..themes import theme, GREEN, ORANGE
 from ..settings import (
     CategorySetting,
@@ -110,26 +111,22 @@ class SettingsPage(Page):
             self.ctx.input.touch.clear_regions()
             offset_y = self.ctx.display.height() * 2 // 3
             self.ctx.input.touch.add_y_delimiter(offset_y)
-            self.ctx.input.touch.add_y_delimiter(
-                offset_y + self.ctx.display.font_height * 3
-            )
+            self.ctx.input.touch.add_y_delimiter(offset_y + FONT_HEIGHT * 3)
             button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
             for i in range(4):
                 self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
-            offset_y += self.ctx.display.font_height
+            offset_y += FONT_HEIGHT
             keys = ["<", t("Go"), ">"]
             for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
                 self.ctx.display.outline(
                     x,
                     self.ctx.input.touch.y_regions[0],
                     button_width - 1,
-                    self.ctx.display.font_height * 3,
+                    FONT_HEIGHT * 3,
                     theme.frame_color,
                 )
                 offset_x = x
-                offset_x += (
-                    button_width - len(keys[i]) * self.ctx.display.font_width
-                ) // 2
+                offset_x += (button_width - len(keys[i]) * FONT_WIDTH) // 2
                 self.ctx.display.draw_string(
                     offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
                 )
@@ -300,8 +297,7 @@ class SettingsPage(Page):
                     t("Left"),
                 )
                 self.ctx.display.draw_string(
-                    (3 * self.ctx.display.width() // 4)
-                    - 5 * self.ctx.display.font_width,
+                    (3 * self.ctx.display.width() // 4) - 5 * FONT_WIDTH,
                     DEFAULT_PADDING,
                     t("Right"),
                 )

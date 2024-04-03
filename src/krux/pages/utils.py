@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 from . import Page
+from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..sd_card import SDHandler
 from embit.wordlists.bip39 import WORDLIST
@@ -65,7 +66,7 @@ class Utils(Page):
                     if filename:
                         filename = file_manager.display_file(filename)
 
-                        if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
+                        if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                             return filename, sd.read_binary(filename)
         return "", None
 

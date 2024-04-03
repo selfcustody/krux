@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 import gc
+from ...display import BOTTOM_PROMPT_LINE
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t, Settings
 from .. import (
@@ -138,7 +139,7 @@ class Home(Page):
                 + "\n\n"
                 + t("Some checks cannot be performed.")
             )
-            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
 
         # Load a PSBT

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from ...display import FONT_HEIGHT
 from ...krux_settings import t
 from .. import (
     Page,
@@ -71,7 +72,7 @@ class PubkeyView(Page):
             ]
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
             menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
-            menu_offset *= self.ctx.display.font_height
+            menu_offset *= FONT_HEIGHT
             pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
@@ -80,7 +81,7 @@ class PubkeyView(Page):
                 + self.ctx.wallet.key.derivation_str(pretty=True)
                 + "\n\n"
                 + full_pub_key,
-                offset_y=self.ctx.display.font_height,
+                offset_y=FONT_HEIGHT,
                 info_box=True,
             )
             pub_key_menu.run_loop()

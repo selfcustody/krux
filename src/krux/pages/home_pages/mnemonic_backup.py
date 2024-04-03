@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from ...display import FONT_HEIGHT
 from ...qr import FORMAT_NONE
 from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
 from .. import (
@@ -183,13 +184,13 @@ class MnemonicsView(Page):
         words = self.ctx.wallet.key.mnemonic.split(" ")
 
         while word_index < len(words):
-            y_offset = 2 * self.ctx.display.font_height
+            y_offset = 2 * FONT_HEIGHT
             for _ in range(6):
                 stackbit.export_1248(word_index, y_offset, words[word_index - 1])
                 if self.ctx.display.height() > 240:
-                    y_offset += 3 * self.ctx.display.font_height
+                    y_offset += 3 * FONT_HEIGHT
                 else:
-                    y_offset += 5 + 2 * self.ctx.display.font_height
+                    y_offset += 5 + 2 * FONT_HEIGHT
                 word_index += 1
             self.ctx.input.wait_for_button()
             self.ctx.display.clear()

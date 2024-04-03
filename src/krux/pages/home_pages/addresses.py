@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 import gc
+from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from .. import (
@@ -215,9 +216,7 @@ class Addresses(Page):
                     self.ctx.display.draw_centered_text(
                         checked_no_match_txt % num_checked
                     )
-                    if not self.prompt(
-                        t("Try more?"), self.ctx.display.bottom_prompt_line
-                    ):
+                    if not self.prompt(t("Try more?"), BOTTOM_PROMPT_LINE):
                         break
 
             self.ctx.display.clear()

@@ -23,6 +23,7 @@
 import lcd
 import board
 import math
+from ..display import FONT_HEIGHT, BOTTOM_LINE, BOTTOM_PROMPT_LINE
 from . import Page
 
 POOR_VARIANCE_TH = 10  # RMS value of L, A, B channels considered poor
@@ -93,9 +94,9 @@ class CameraEntropy(Page):
         sensor.run(1)
         self.ctx.display.clear()
         command = 0
-        y_label_offset = self.ctx.display.bottom_line
+        y_label_offset = BOTTOM_LINE
         if board.config["type"] == "amigo":
-            y_label_offset = self.ctx.display.bottom_prompt_line
+            y_label_offset = BOTTOM_PROMPT_LINE
         # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
         while True:
@@ -113,7 +114,7 @@ class CameraEntropy(Page):
                 0,
                 y_label_offset,
                 self.ctx.display.width(),
-                self.ctx.display.font_height,
+                FONT_HEIGHT,
                 theme.bg_color,
             )
             if stdev_index > POOR_VARIANCE_TH:

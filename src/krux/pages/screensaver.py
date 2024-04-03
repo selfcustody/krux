@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 # from . import Page
-from ..display import SPLASH
+from ..display import SPLASH, FONT_HEIGHT, TOTAL_LINES
 from ..themes import theme
 
 
@@ -34,19 +34,19 @@ class ScreenSaver:
     def start(self):
         """Displays a screensaver until user presses a button or touch"""
         anim_frame = 0
-        initial_offset = (self.ctx.display.total_lines - len(SPLASH)) // 2
+        initial_offset = (TOTAL_LINES - len(SPLASH)) // 2
         fg_color = theme.fg_color
         bg_color = theme.bg_color
         self.ctx.display.clear()
         button_press = None
         while button_press is None:
             # show animation on the screeen
-            offset_y = anim_frame * self.ctx.display.font_height
+            offset_y = anim_frame * FONT_HEIGHT
             self.ctx.display.fill_rectangle(
                 0,
                 offset_y,
                 self.ctx.display.width(),
-                self.ctx.display.font_height,
+                FONT_HEIGHT,
                 bg_color,
             )
             if initial_offset <= anim_frame < len(SPLASH) + initial_offset:

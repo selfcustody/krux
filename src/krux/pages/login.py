@@ -24,6 +24,7 @@ import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import Key
@@ -178,7 +179,7 @@ class Login(Page):
             + ". "
             + t("(Experimental)")
         )
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             from .capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
@@ -410,7 +411,7 @@ class Login(Page):
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             while len(words) < 24:
                 if len(words) in (11, 23):
                     self.ctx.display.clear()
@@ -702,7 +703,7 @@ class Login(Page):
         intro += t("Use a black background surface.") + " "
         intro += t("Align camera and Tiny Seed properly.")
         self.ctx.display.draw_hcentered_text(intro)
-        if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
         w24 = index == 1

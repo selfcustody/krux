@@ -20,8 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ..sd_card import SDHandler
 import uos
+from ..sd_card import SDHandler
+from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..qr import FORMAT_NONE
 from . import (
@@ -87,9 +88,7 @@ class Tools(Page):
                     + " {:,}".format(sd_free_MB).replace(",", THOUSANDS_SEPARATOR)
                     + " MB"
                 )
-                if self.prompt(
-                    t("Explore files?"), self.ctx.display.bottom_prompt_line
-                ):
+                if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
                     from .file_manager import FileManager
 
                     file_manager = FileManager(self.ctx)

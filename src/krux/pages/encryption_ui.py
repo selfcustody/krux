@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings, AES_BLOCK_SIZE
 from . import (
     Page,
@@ -128,7 +129,7 @@ class EncryptMnemonic(Page):
             self.ctx.display.draw_centered_text(
                 t("Additional entropy from camera required for AES-CBC mode")
             )
-            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 self.flash_text(t("Mnemonic was not encrypted"))
                 return None
             from .capture_entropy import CameraEntropy
