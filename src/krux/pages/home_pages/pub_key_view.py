@@ -61,7 +61,11 @@ class PubkeyView(Page):
             pub_text_menu_items = [
                 (
                     t("Save to SD card"),
-                    lambda: _save_xpub_to_sd(version) if self.has_sd_card() else None,
+                    (
+                        None
+                        if not self.has_sd_card()
+                        else lambda: _save_xpub_to_sd(version)
+                    ),
                 ),
                 (t("Back"), lambda: MENU_EXIT),
             ]
