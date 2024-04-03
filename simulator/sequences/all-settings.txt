@@ -58,13 +58,13 @@ press_amigo_only BUTTON_A
 
 # Move to printer
 press_amigo_only BUTTON_B
-press BUTTON_A
+press_amigo_only BUTTON_A
 
 screenshot printer-options.png
 
 # Return to hardware
-press BUTTON_C
-press BUTTON_A
+press_amigo_only BUTTON_C
+press_amigo_only BUTTON_A
 
 # Move to touchscreen
 press_amigo_only BUTTON_B
@@ -73,11 +73,12 @@ press_amigo_only BUTTON_A
 screenshot touchscreen.png
 
 # Return to hardware
-x2 press BUTTON_C
-press BUTTON_A
+x2 press_amigo_only BUTTON_C
+press_amigo_only BUTTON_A
 
 # Return to settings
-press BUTTON_B
+press_amigo_only BUTTON_B
+press_m5stickv_only BUTTON_C
 press BUTTON_A
 
 # Navigate to Language
@@ -101,9 +102,11 @@ press BUTTON_A
 # Navigate to Appearance
 press BUTTON_B
 press BUTTON_A
+
 screenshot settings-options-appearance.png
 
 press BUTTON_A
+
 screenshot settings-options-appearance-screensaver.png
 
 x2 press BUTTON_C
@@ -132,7 +135,7 @@ screenshot theme-5.png
 # Return
 press BUTTON_A
 press BUTTON_B
-press BUTTON_A
+press_amigo_only BUTTON_A
 press BUTTON_B
 press BUTTON_A
 

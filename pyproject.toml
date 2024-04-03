@@ -113,6 +113,7 @@ simulator-m5.ref = "simulator-m5stickv"
 
 # other tasks
 git-update = "git submodule update --init --recursive"
+git-pull = "git pull git@github.com:selfcustody/krux.git"
 
 # task for bdftokff?
 # python bdftokff.py True
