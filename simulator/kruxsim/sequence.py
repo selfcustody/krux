@@ -64,7 +64,9 @@ class SequenceExecutor:
             self.command_params = params
             if cmd == "press":
                 self.command_fn = self.press_key
-            elif cmd == "press_amigo_only" and BOARD_CONFIG["type"] != "m5stickv":
+            elif cmd == "press_amigo_only" and BOARD_CONFIG["type"] == "amigo":
+                self.command_fn = self.press_key
+            elif cmd == "press_m5stickv_only" and BOARD_CONFIG["type"] == "m5stickv":
                 self.command_fn = self.press_key
             elif cmd == "touch":
                 self.command_fn = self.touch
