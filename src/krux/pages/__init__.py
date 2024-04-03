@@ -543,10 +543,14 @@ class Menu:
     and invoke menu item callbacks that return a status
     """
 
-    def __init__(self, ctx, menu, offset=0):
+    def __init__(self, ctx, menu, offset=None):
         self.ctx = ctx
         self.menu = menu
-        self.menu_offset = offset
+        if offset is None:
+            # Default offset for status bar
+            self.menu_offset = FONT_HEIGHT
+        else:
+            self.menu_offset = offset
         max_viewable = min(
             self.ctx.display.max_menu_lines(self.menu_offset),
             len(self.menu),
@@ -571,7 +575,8 @@ class Menu:
             selected_item_index = start_from_index
         while True:
             gc.collect()
-            if self.menu_offset:
+            if self.menu_offset > FONT_HEIGHT:
+                # Clear only the menu area
                 self.ctx.display.fill_rectangle(
                     0,
                     self.menu_offset,
@@ -628,7 +633,7 @@ class Menu:
                     self.menu_view.move_forward()
                 elif btn == SWIPE_DOWN:
                     self.menu_view.move_backward()
-                elif btn is None and not self.menu_offset:
+                elif btn is None and self.menu_offset == FONT_HEIGHT:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
                     self.screensaver()
 
@@ -650,9 +655,17 @@ class Menu:
 
     def draw_status_bar(self):
         """Draws a status bar along the top of the UI"""
-        if self.menu_offset == 0:  # Only draws if menu is full screen
+        if self.menu_offset == FONT_HEIGHT:  # Only draws if menu is full screen
+            self.ctx.display.fill_rectangle(
+                0,
+                0,
+                self.ctx.display.width(),
+                FONT_HEIGHT + 2,
+                theme.disabled_color,
+            )
             self.draw_battery_indicator()
             self.draw_network_indicator()
+            self.draw_wallet_indicator()
 
     #     self.draw_ram_indicator()
 
@@ -673,10 +686,10 @@ class Menu:
             if charge < 0.3:
                 battery_color = theme.error_color
             else:
-                battery_color = theme.frame_color
+                battery_color = theme.fg_color
 
         # Draw (filled) outline of battery in top-right corner of display
-        padding = 4
+        padding = FONT_HEIGHT // 3 + 1
         cylinder_length = 22
         cylinder_height = 7
         self.ctx.display.outline(
@@ -704,10 +717,23 @@ class Menu:
             battery_color,
         )
 
+    def draw_wallet_indicator(self):
+        """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
+        if self.ctx.wallet is not None:
+            self.ctx.display.draw_hcentered_text(
+                self.ctx.wallet.key.fingerprint_hex_str(True),
+                0,
+                theme.highlight_color,
+                theme.disabled_color,
+            )
+
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
-        if Settings().bitcoin.network == BitcoinSettings.TEST_TXT:
-            self.ctx.display.draw_string(12, 0, "test", GREEN)
+        if (
+            self.ctx.wallet is not None
+            and self.ctx.wallet.key.network == BitcoinSettings.TEST_TXT
+        ):
+            self.ctx.display.draw_string(12, 0, "test", GREEN, theme.disabled_color)
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
@@ -717,13 +743,12 @@ class Menu:
         for menu_item in self.menu_view:
             offset_y += len(self.ctx.display.to_lines(menu_item[0])) + 1
             Page.y_keypad_map.append(offset_y)
-        height_multiplier = (
-            self.ctx.display.height() - 2 * DEFAULT_PADDING - self.menu_offset
-        )
+        height_multiplier = self.ctx.display.height()
+        height_multiplier -= self.menu_offset  # Top offset
+        height_multiplier -= DEFAULT_PADDING  # Bottom padding
         height_multiplier //= max(offset_y, 1)
         Page.y_keypad_map = [
-            n * height_multiplier + DEFAULT_PADDING + self.menu_offset
-            for n in Page.y_keypad_map
+            n * height_multiplier + self.menu_offset for n in Page.y_keypad_map
         ]
         self.ctx.input.touch.y_regions = Page.y_keypad_map
 
