@@ -97,13 +97,15 @@ class Home(Page):
                 self.ctx.wallet.key.account_number,
             )
         )
+        return MENU_CONTINUE
 
     def customize(self):
         """Handler for the 'Customize' Wallet menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
             t(
-                "Wallet customization will create a new Key. If you are using a passphrase, you will need to enter it again."
+                "Wallet customization will create a new Key."
+                "If you are using a passphrase, you will need to enter it again."
             )
         )
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
@@ -127,21 +129,42 @@ class Home(Page):
                 account_number,
             )
         )
+        return MENU_CONTINUE
+
+    def bip85(self):
+        """Handler for the 'BIP85' menu item"""
+        from .bip85 import Bip85
+
+        bip85 = Bip85(self.ctx)
+        bip85_child = bip85.export()
+        if bip85_child is not None:
+            from ...key import Key
+            from ...wallet import Wallet
+
+            self.ctx.wallet = Wallet(
+                Key(
+                    bip85_child,
+                    self.ctx.wallet.key.multisig,
+                    self.ctx.wallet.key.network,
+                )
+            )
+        return MENU_CONTINUE
 
     def wallet(self):
         """Handler for the 'wallet' menu item"""
+
         submenu = Menu(
             self.ctx,
             [
                 (t("Wallet Descriptor"), self.wallet_descriptor),
                 (t("Passphrase"), self.passphrase),
                 (t("Customize"), self.customize),
+                (t("BIP85"), self.bip85),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
-        index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
-            return MENU_CONTINUE
+        submenu.run_loop()
+        return MENU_CONTINUE
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""

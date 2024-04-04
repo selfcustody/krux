@@ -269,7 +269,6 @@ class Login(Page):
                 from .wallet_settings import WalletSettings
 
                 wallet_settings = WalletSettings(self.ctx)
-                script_type = wallet.policy["type"] if not multisig else None
                 network, multisig, script_type, account_number = (
                     wallet_settings.customize_wallet(key)
                 )

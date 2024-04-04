@@ -37,6 +37,7 @@ from . import (
 from .settings_page import DIGITS
 
 PASSPHRASE_MAX_LEN = 200
+ACCOUNT_MAX = 999  # Maximum account number
 
 
 class PassphraseEditor(Page):
@@ -118,7 +119,14 @@ class WalletSettings(Page):
                     (t("Network"), self._coin_type),
                     (t("Single/Multisig"), lambda: None),
                     (t("Script Type"), self._script_type if not multisig else None),
-                    (t("Account"), (lambda: self._account_number(account_number)) if not multisig else None),
+                    (
+                        t("Account"),
+                        (
+                            (lambda: self._account_number(account_number))
+                            if not multisig
+                            else None
+                        ),
+                    ),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
                 offset=2 * FONT_HEIGHT,
@@ -191,7 +199,7 @@ class WalletSettings(Page):
             return None
         try:
             account_number = int(account)
-            if account_number > 999:
+            if account_number > ACCOUNT_MAX:
                 raise ValueError
         except:
             self.flash_text(t("Insert an account between 0 and 999"))
