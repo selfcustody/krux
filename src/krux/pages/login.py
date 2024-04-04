@@ -234,7 +234,7 @@ class Login(Page):
                 passphrase,
                 account_number,
             )
-            wallet = Wallet(key)
+
             wallet_info = key.fingerprint_hex_str(True) + "\n"
             wallet_info += network["name"] + "\n"
             wallet_info += (
@@ -256,8 +256,9 @@ class Login(Page):
             )
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
-                del key, wallet
-                return MENU_CONTINUE
+                if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                    del key
+                    return MENU_CONTINUE
             if index == 0:
                 break
             if index == 1:
@@ -278,7 +279,7 @@ class Login(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        self.ctx.wallet = wallet
+        self.ctx.wallet = Wallet(key)
         return MENU_EXIT
 
     def _encrypted_qr_code(self, data):

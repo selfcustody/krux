@@ -73,11 +73,7 @@ class Home(Page):
     def passphrase(self):
         """Add or replace wallet's passphrase"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(
-            t(
-                "Add a new passphrase, or replace the existing one if you already have one."
-            )
-        )
+        self.ctx.display.draw_centered_text(t("Add or change wallet passphrase."))
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
@@ -106,8 +102,8 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
             t(
-                "Wallet customization will create a new Key."
-                "If you are using a passphrase, you will need to enter it again."
+                "Customizing your wallet will generate a new Key,"
+                "and any existing passphrase will need to be re-entered."
             )
         )
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
@@ -135,6 +131,11 @@ class Home(Page):
 
     def bip85(self):
         """Handler for the 'BIP85' menu item"""
+        if not self.prompt(
+            t("Generate a BIP85 child mnemonic?"), self.ctx.display.height() // 2
+        ):
+            return MENU_CONTINUE
+
         from .bip85 import Bip85
 
         bip85 = Bip85(self.ctx)

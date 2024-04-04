@@ -58,7 +58,7 @@ class PassphraseEditor(Page):
                     (t("Scan BIP39 passphrase"), self._load_qr_passphrase),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
-                disable_statubar=True,
+                disable_statusbar=True,
             )
             _, passphrase = submenu.run_loop()
             if passphrase in (ESC_KEY, MENU_EXIT):
@@ -155,7 +155,7 @@ class WalletSettings(Page):
                 (t("Mainnet"), lambda: None),
                 (t("Testnet"), lambda: None),
             ],
-            disable_statubar=True,
+            disable_statusbar=True,
         )
         index, _ = submenu.run_loop()
         return NETWORKS["test"] if index == 1 else NETWORKS["main"]
@@ -168,7 +168,7 @@ class WalletSettings(Page):
                 (t("Single-sig"), lambda: MENU_EXIT),
                 (t("Multisig"), lambda: MENU_EXIT),
             ],
-            disable_statubar=True,
+            disable_statusbar=True,
         )
         index, _ = submenu.run_loop()
         return index == 1
@@ -183,7 +183,7 @@ class WalletSettings(Page):
                 (t("Native Segwit") + " - 84", lambda: "84"),
                 (t("Taproot") + " - 86", None),  # lambda: "86"),
             ],
-            disable_statubar=True,
+            disable_statusbar=True,
         )
         _, purpose = submenu.run_loop()
         return purpose

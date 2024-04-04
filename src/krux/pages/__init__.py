@@ -543,7 +543,7 @@ class Menu:
     and invoke menu item callbacks that return a status
     """
 
-    def __init__(self, ctx, menu, offset=None, disable_statubar=False):
+    def __init__(self, ctx, menu, offset=None, disable_statusbar=False):
         self.ctx = ctx
         self.menu = menu
         if offset is None:
@@ -551,10 +551,10 @@ class Menu:
             self.menu_offset = FONT_HEIGHT
         else:
             self.menu_offset = offset
-        self.disable_statubar = disable_statubar
-        if self.menu_offset > FONT_HEIGHT:
+        self.disable_statusbar = disable_statusbar
+        if self.menu_offset != FONT_HEIGHT:
             # Always diasble status bar if menu has non standard offset
-            self.disable_statubar = True
+            self.disable_statusbar = True
         max_viewable = min(
             self.ctx.display.max_menu_lines(self.menu_offset),
             len(self.menu),
@@ -659,7 +659,7 @@ class Menu:
 
     def draw_status_bar(self):
         """Draws a status bar along the top of the UI"""
-        if not self.disable_statubar:
+        if not self.disable_statusbar:
             self.ctx.display.fill_rectangle(
                 0,
                 0,
