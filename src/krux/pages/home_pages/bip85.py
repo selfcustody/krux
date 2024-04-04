@@ -48,7 +48,7 @@ class Bip85(Page):
         menu_index, _ = submenu.run_loop()
         num_words = 12 if menu_index == 0 else 24
         while True:
-            child = self.capture_from_keypad(t("BIP85 child number"), [DIGITS])
+            child = self.capture_from_keypad(t("BIP85 Child Index"), [DIGITS])
             if child == ESC_KEY:
                 return None
             try:
