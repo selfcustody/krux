@@ -43,7 +43,7 @@ from ..display import (
     FONT_WIDTH,
 )
 from ..qr import to_qr_codes
-from ..krux_settings import t, Settings, BitcoinSettings
+from ..krux_settings import t, Settings, DefaultWallet
 from ..sd_card import SDHandler
 
 MENU_CONTINUE = 0
@@ -660,8 +660,8 @@ class Menu:
                 0,
                 0,
                 self.ctx.display.width(),
-                FONT_HEIGHT + 2,
-                theme.disabled_color,
+                FONT_HEIGHT + 1,
+                theme.info_bg_color,
             )
             self.draw_battery_indicator()
             self.draw_network_indicator()
@@ -689,7 +689,7 @@ class Menu:
                 battery_color = theme.fg_color
 
         # Draw (filled) outline of battery in top-right corner of display
-        padding = FONT_HEIGHT // 3 + 1
+        padding = FONT_HEIGHT // 3
         cylinder_length = 22
         cylinder_height = 7
         self.ctx.display.outline(
@@ -720,20 +720,32 @@ class Menu:
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
         if self.ctx.wallet is not None:
-            self.ctx.display.draw_hcentered_text(
-                self.ctx.wallet.key.fingerprint_hex_str(True),
-                0,
-                theme.highlight_color,
-                theme.disabled_color,
-            )
+            if self.ctx.display.width() > 140:
+                self.ctx.display.draw_hcentered_text(
+                    self.ctx.wallet.key.fingerprint_hex_str(True),
+                    0,
+                    theme.highlight_color,
+                    theme.info_bg_color,
+                )
+            else:
+                self.ctx.display.draw_string(
+                    24,
+                    0,
+                    self.ctx.wallet.key.fingerprint_hex_str(True),
+                    theme.highlight_color,
+                    theme.info_bg_color,
+                )
 
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if (
             self.ctx.wallet is not None
-            and self.ctx.wallet.key.network == BitcoinSettings.TEST_TXT
+            and self.ctx.wallet.key.network["name"] == "Testnet"
         ):
-            self.ctx.display.draw_string(12, 0, "test", GREEN, theme.disabled_color)
+            if self.ctx.display.width() > 140:
+                self.ctx.display.draw_string(12, 0, "test", GREEN, theme.info_bg_color)
+            else:
+                self.ctx.display.draw_string(6, 0, "T", GREEN, theme.info_bg_color)
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
@@ -791,7 +803,7 @@ class Menu:
                     )
 
     def _draw_menu(self, selected_item_index):
-        if self.menu_offset:
+        if self.menu_offset > FONT_HEIGHT:
             offset_y = self.menu_offset + 3 * FONT_HEIGHT // 2
         else:
             offset_y = len(self.menu_view) * 2

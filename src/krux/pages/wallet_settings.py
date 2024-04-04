@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 from embit.networks import NETWORKS
+from ..display import FONT_HEIGHT
 from ..krux_settings import t
 from . import (
     Page,
@@ -91,40 +92,53 @@ class WalletSettings(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def customize_wallet(
-        self,
-        network,
-        multisig=False,
-        script_type=None,
-        account_number=0,
-    ):
+    def customize_wallet(self, key):
         """Customize wallet derivation properties"""
 
+        network = key.network
+        multisig = key.multisig
+        script_type = "84"  # TODO: Add script type selection
+        account_number = key.account_number
         while True:
+            derivation_path = "m/"
+            derivation_path += "'/".join(
+                [
+                    "48" if multisig else script_type,
+                    "0" if network == NETWORKS["main"] else "1",
+                    str(account_number) + "'" if not multisig else "0'",
+                ]
+            )
+            if multisig:
+                derivation_path += "/2'"
+
+            self.ctx.display.draw_hcentered_text(derivation_path, info_box=True)
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Network"), lambda: None),
+                    (t("Network"), self._coin_type),
                     (t("Single/Multisig"), lambda: None),
-                    (t("Script Type"), None),
-                    (t("Account"), lambda: None if not multisig else None),
+                    (t("Script Type"), self._script_type if not multisig else None),
+                    (t("Account"), (lambda: self._account_number(account_number)) if not multisig else None),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
+                offset=2 * FONT_HEIGHT,
             )
-            index, _ = submenu.run_loop()
+            index, value = submenu.run_loop()
             if index == len(submenu.menu) - 1:
                 break
             if index == 0:
-                network = self._testnet()
+                network = value
             elif index == 1:
                 multisig = self._multisig()
+            elif index == 2:
+                script_type = value
             elif index == 3:
-                account_temp = self._account_number()
+                account_temp = value
                 if account_temp is not None:
                     account_number = account_temp
         return network, multisig, script_type, account_number
 
-    def _testnet(self):
+    def _coin_type(self):
         """Network selection menu"""
         submenu = Menu(
             self.ctx,
@@ -141,16 +155,38 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Single-sig"), lambda: None),
-                (t("Multisig"), lambda: None),
+                (t("Single-sig"), lambda: MENU_EXIT),
+                (t("Multisig"), lambda: MENU_EXIT),
             ],
         )
         index, _ = submenu.run_loop()
         return index == 1
 
-    def _account_number(self):
+    def _script_type(self):
+        """Script type selection menu"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Legacy") + " - 44", None),  #  lambda: "44"),
+                (t("Nested Segwit") + " - 49", None),  #  lambda: "49"),
+                (t("Native Segwit") + " - 84", lambda: "84"),
+                (t("Taproot") + " - 86", None),  # lambda: "86"),
+            ],
+        )
+        _, purpose = submenu.run_loop()
+        return purpose
+
+    def _account_number(self, initial_account_number=None):
         """Account number input"""
-        account = self.capture_from_keypad(t("Account Number"), [DIGITS])
+        account = self.capture_from_keypad(
+            t("Account Number"),
+            [DIGITS],
+            starting_buffer=(
+                str(initial_account_number)
+                if initial_account_number is not None
+                else ""
+            ),
+        )
         if account == ESC_KEY:
             return None
         try:

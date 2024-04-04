@@ -221,8 +221,8 @@ class Login(Page):
         self.ctx.display.clear()
 
         passphrase = ""
-        multisig = False
-        network = NETWORKS[Settings().bitcoin.network]
+        multisig = Settings().wallet.multisig
+        network = NETWORKS[Settings().wallet.network]
         account_number = 0
         from ..wallet import Wallet
 
@@ -256,7 +256,7 @@ class Login(Page):
             )
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
-                del key
+                del key, wallet
                 return MENU_CONTINUE
             if index == 0:
                 break
@@ -271,9 +271,7 @@ class Login(Page):
                 wallet_settings = WalletSettings(self.ctx)
                 script_type = wallet.policy["type"] if not multisig else None
                 network, multisig, script_type, account_number = (
-                    wallet_settings.customize_wallet(
-                        network, multisig, script_type, account_number
-                    )
+                    wallet_settings.customize_wallet(key)
                 )
 
         self.ctx.display.clear()

@@ -315,7 +315,7 @@ class Display:
             text if isinstance(text, list) else self.to_lines(text, max_lines=max_lines)
         )
         if info_box:
-            bg_color = theme.frame_color
+            bg_color = theme.info_bg_color
             padding = DEFAULT_PADDING if self.width() > 135 else DEFAULT_PADDING // 2
             self.fill_rectangle(
                 padding - 3,

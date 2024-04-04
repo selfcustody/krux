@@ -69,19 +69,21 @@ def t(slug):
     return lookup[slug_id]
 
 
-class BitcoinSettings(SettingsNamespace):
+class DefaultWallet(SettingsNamespace):
     """Bitcoin-specific settings"""
 
     MAIN_TXT = "main"
     TEST_TXT = "test"
 
-    namespace = "settings.bitcoin"
+    namespace = "settings.wallet"
     network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
+    multisig = CategorySetting("multisig", False, [False, True])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "network": t("Network"),
+            "multisig": t("Multisig"),
         }[attr]
 
 
@@ -376,7 +378,7 @@ class Settings(SettingsNamespace):
     namespace = "settings"
 
     def __init__(self):
-        self.bitcoin = BitcoinSettings()
+        self.wallet = DefaultWallet()
         self.security = SecuritySettings()
         self.hardware = HardwareSettings()
         self.i18n = I18nSettings()
@@ -387,7 +389,7 @@ class Settings(SettingsNamespace):
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         main_menu = {
-            "bitcoin": t("Bitcoin"),
+            "wallet": t("Default Wallet"),
             "security": t("Security"),
             "hardware": t("Hardware"),
             "i18n": t("Language"),

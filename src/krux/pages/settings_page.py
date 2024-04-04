@@ -35,7 +35,7 @@ from ..settings import (
 )
 from ..krux_settings import (
     Settings,
-    BitcoinSettings,
+    DefaultWallet,
     TouchSettings,
     ButtonsSettings,
     t,
@@ -59,8 +59,8 @@ PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
 
 CATEGORY_SETTING_COLOR_DICT = {
-    BitcoinSettings.MAIN_TXT: ORANGE,
-    BitcoinSettings.TEST_TXT: GREEN,
+    DefaultWallet.MAIN_TXT: ORANGE,
+    DefaultWallet.TEST_TXT: GREEN,
 }
 
 
