@@ -264,7 +264,9 @@ class Login(Page):
                 from .wallet_settings import PassphraseEditor
 
                 passphrase_editor = PassphraseEditor(self.ctx)
-                passphrase = passphrase_editor.load_passphrase_menu()
+                temp_passphrase = passphrase_editor.load_passphrase_menu()
+                if temp_passphrase is not None:
+                    passphrase = temp_passphrase
             elif index == 2:
                 from .wallet_settings import WalletSettings
 

@@ -87,6 +87,8 @@ class Home(Page):
 
         passphrase_editor = PassphraseEditor(self.ctx)
         passphrase = passphrase_editor.load_passphrase_menu()
+        if passphrase is None:
+            return MENU_CONTINUE
 
         self.ctx.wallet = Wallet(
             Key(
