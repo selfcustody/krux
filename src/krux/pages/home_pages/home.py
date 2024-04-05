@@ -139,18 +139,7 @@ class Home(Page):
         from .bip85 import Bip85
 
         bip85 = Bip85(self.ctx)
-        bip85_child = bip85.export()
-        if bip85_child is not None:
-            from ...key import Key
-            from ...wallet import Wallet
-
-            self.ctx.wallet = Wallet(
-                Key(
-                    bip85_child,
-                    self.ctx.wallet.key.multisig,
-                    self.ctx.wallet.key.network,
-                )
-            )
+        bip85.export()
         return MENU_CONTINUE
 
     def wallet(self):

@@ -48,7 +48,7 @@ class Bip85(Page):
         menu_index, _ = submenu.run_loop()
         num_words = 12 if menu_index == 0 else 24
         while True:
-            child = self.capture_from_keypad(t("BIP85 Child Index"), [DIGITS])
+            child = self.capture_from_keypad(t("Child Index"), [DIGITS])
             if child == ESC_KEY:
                 return None
             try:
@@ -67,7 +67,20 @@ class Bip85(Page):
             child_index,
         )
         self.ctx.display.clear()
-        self.display_mnemonic(bip85_words)
-        if self.prompt(t("Load BIP85 child?"), BOTTOM_PROMPT_LINE):
-            return bip85_words
+
+        from ...key import Key
+
+        key = Key(
+            bip85_words,
+            self.ctx.wallet.key.multisig,
+            self.ctx.wallet.key.network,
+        )
+        self.display_mnemonic(
+            bip85_words,
+            suffix=t("Words") +"\n%s" % key.fingerprint_hex_str(True),
+        )
+        if self.prompt(t("Load child?"), BOTTOM_PROMPT_LINE):
+            from ...wallet import Wallet
+
+            self.ctx.wallet = Wallet(key)
         return None
