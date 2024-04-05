@@ -23,6 +23,7 @@ from embit import bip85
 from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
 from ..settings_page import DIGITS
+from ...krux_settings import Settings
 from .. import (
     Page,
     Menu,
@@ -75,10 +76,13 @@ class Bip85(Page):
             self.ctx.wallet.key.multisig,
             self.ctx.wallet.key.network,
         )
-        self.display_mnemonic(
-            bip85_words,
-            suffix=t("Words") + "\n%s" % key.fingerprint_hex_str(True),
-        )
+        if not Settings().security.hide_mnemonic:
+            self.display_mnemonic(
+                bip85_words,
+                suffix=t("Words") + "\n%s" % key.fingerprint_hex_str(True),
+            )
+        else:
+            self.ctx.display.draw_centered_text(key.fingerprint_hex_str(True))
         if self.prompt(t("Load child?"), BOTTOM_PROMPT_LINE):
             from ...wallet import Wallet
 
