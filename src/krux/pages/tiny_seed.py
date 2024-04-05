@@ -53,15 +53,16 @@ class TinySeed(Page):
         self.ctx = ctx
         self.x_offset = DEFAULT_PADDING // 2 + 2 * FONT_WIDTH
         self.printer = None
-        if not MINIMAL_DISPLAY:
-            self.y_offset = DEFAULT_PADDING + 3 * FONT_HEIGHT
+        if self.ctx.display.width() > 140:
             self.x_pad = self.ctx.display.width() * 2 // 27
             self.y_pad = self.ctx.display.height() // 17
         else:
-            # case for m5stickv, cube
-            self.y_offset = 2 * FONT_HEIGHT
             self.x_pad = FONT_WIDTH + 1
             self.y_pad = FONT_HEIGHT
+        if self.ctx.display.height() > 240:
+            self.y_offset = DEFAULT_PADDING + 3 * FONT_HEIGHT
+        else:
+            self.y_offset = 2 * FONT_HEIGHT
 
     def _draw_grid(self):
         """Draws grid for import and export Tinyseed UI"""
@@ -117,7 +118,12 @@ class TinySeed(Page):
     def _draw_punched(self, words, page):
         """Draws punched bits for import and export Tinyseed UI"""
         y_offset = self.y_offset
-        radius = (self.x_pad - 5) // 3
+        if self.x_pad < self.y_pad:
+            radius = (self.x_pad - 5) // 3
+        else:
+            radius = (self.y_pad - 5) // 3
+        if radius < 4:
+            radius = 0  # Don't round corners if too small
         for x in range(12):
             if isinstance(words[0], str):
                 word_list_index = WORDLIST.index(words[page * 12 + x]) + 1
