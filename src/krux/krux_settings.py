@@ -368,7 +368,7 @@ class SecuritySettings(SettingsNamespace):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "auto_shutdown": t("Shutdown Time"),
-            "hide_mnemonic": t("Hide Mnemonic"),
+            "hide_mnemonic": t("Hide Mnemonics"),
         }[attr]
 
 

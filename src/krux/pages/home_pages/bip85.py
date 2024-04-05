@@ -77,7 +77,7 @@ class Bip85(Page):
         )
         self.display_mnemonic(
             bip85_words,
-            suffix=t("Words") +"\n%s" % key.fingerprint_hex_str(True),
+            suffix=t("Words") + "\n%s" % key.fingerprint_hex_str(True),
         )
         if self.prompt(t("Load child?"), BOTTOM_PROMPT_LINE):
             from ...wallet import Wallet

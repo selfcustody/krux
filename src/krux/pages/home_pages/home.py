@@ -36,18 +36,27 @@ class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
-        home_menu = [
-            (t("Backup Mnemonic"), self.backup_mnemonic),
-            (t("Extended Public Key"), self.public_key),
-            (t("Wallet"), self.wallet),
-            (t("Address"), self.addresses_menu),
-            (t("Sign"), self.sign),
-            (t("Shutdown"), self.shutdown),
-        ]
-        if Settings().security.hide_mnemonic:
-            home_menu.pop(0)
-
-        super().__init__(ctx, Menu(ctx, home_menu))
+        super().__init__(
+            ctx,
+            Menu(
+                ctx,
+                [
+                    (
+                        t("Backup Mnemonic"),
+                        (
+                            self.backup_mnemonic
+                            if not Settings().security.hide_mnemonic
+                            else None
+                        ),
+                    ),
+                    (t("Extended Public Key"), self.public_key),
+                    (t("Wallet"), self.wallet),
+                    (t("Address"), self.addresses_menu),
+                    (t("Sign"), self.sign),
+                    (t("Shutdown"), self.shutdown),
+                ],
+            ),
+        )
 
     def backup_mnemonic(self):
         """Handler for the 'Backup Mnemonic' menu item"""
@@ -151,7 +160,10 @@ class Home(Page):
                 (t("Wallet Descriptor"), self.wallet_descriptor),
                 (t("Passphrase"), self.passphrase),
                 (t("Customize"), self.customize),
-                (t("BIP85"), self.bip85),
+                (
+                    t("BIP85"),
+                    self.bip85 if not Settings().security.hide_mnemonic else None,
+                ),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
