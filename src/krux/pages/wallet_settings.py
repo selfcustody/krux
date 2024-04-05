@@ -37,7 +37,7 @@ from . import (
 from .settings_page import DIGITS
 
 PASSPHRASE_MAX_LEN = 200
-ACCOUNT_MAX = 999  # Maximum account number
+ACCOUNT_MAX = 2**31 - 1  # Maximum account number
 
 
 class PassphraseEditor(Page):
@@ -112,7 +112,8 @@ class WalletSettings(Page):
             )
             if multisig:
                 derivation_path += "/2'"
-
+                
+            derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
             self.ctx.display.draw_hcentered_text(derivation_path, info_box=True)
             submenu = Menu(
                 self.ctx,
@@ -206,6 +207,6 @@ class WalletSettings(Page):
             if account_number > ACCOUNT_MAX:
                 raise ValueError
         except:
-            self.flash_text(t("Insert an account between 0 and 999"))
+            self.flash_text(t("Insert an account between 0 and %d") % ACCOUNT_MAX)
             return None
         return account_number

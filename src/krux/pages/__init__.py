@@ -450,11 +450,15 @@ class Page:
         # BUTTON_ENTER
         return answer
 
-    def fit_to_line(self, text, prefix="", fixed_chars=0):
+    def fit_to_line(self, text, prefix="", fixed_chars=0, crop_middle=True):
         """Fits text with prefix plus fixed_chars at the beginning into one line,
         removing the central content and leaving the ends"""
 
         add_chars_amount = self.ctx.display.usable_width() // FONT_WIDTH
+        if len(text) + len(prefix) <= add_chars_amount:
+            return prefix + text
+        if not crop_middle:  # Crop from the end
+            return prefix + text[: add_chars_amount - 2] + ".."
         add_chars_amount -= len(prefix) + fixed_chars + 2
         add_chars_amount //= 2
         return (
