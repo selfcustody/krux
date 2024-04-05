@@ -112,7 +112,7 @@ class WalletSettings(Page):
             )
             if multisig:
                 derivation_path += "/2'"
-                
+
             derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
             self.ctx.display.draw_hcentered_text(derivation_path, info_box=True)
             submenu = Menu(

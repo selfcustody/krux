@@ -240,7 +240,9 @@ class Login(Page):
             wallet_info += (
                 t("Single-sig") + "\n" if not multisig else t("Multisig") + "\n"
             )
-            wallet_info += self.fit_to_line(key.derivation_str(True), crop_middle=False) + "\n"
+            wallet_info += (
+                self.fit_to_line(key.derivation_str(True), crop_middle=False) + "\n"
+            )
             wallet_info += "No Passphrase\n" if not passphrase else "Passphrase: *..*"
 
             self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)

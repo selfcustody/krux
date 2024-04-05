@@ -766,9 +766,9 @@ class Menu:
         height_multiplier = self.ctx.display.height()
         height_multiplier -= self.menu_offset  # Top offset
         height_multiplier -= DEFAULT_PADDING  # Bottom padding
-        height_multiplier //= max(offset_y, 1)
+        height_multiplier /= max(offset_y, 1)
         Page.y_keypad_map = [
-            n * height_multiplier + self.menu_offset for n in Page.y_keypad_map
+            int(n * height_multiplier) + self.menu_offset for n in Page.y_keypad_map
         ]
         self.ctx.input.touch.y_regions = Page.y_keypad_map
 
