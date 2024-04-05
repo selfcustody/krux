@@ -124,7 +124,7 @@ class WalletSettings(Page):
                     (
                         t("Account"),
                         (
-                            (lambda: self._account_number(account_number))
+                            (lambda: None)
                             if not multisig
                             else None
                         ),
@@ -143,7 +143,7 @@ class WalletSettings(Page):
             elif index == 2:
                 script_type = value
             elif index == 3:
-                account_temp = value
+                account_temp = self._account_number(account_number)
                 if account_temp is not None:
                     account_number = account_temp
         return network, multisig, script_type, account_number
