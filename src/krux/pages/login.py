@@ -223,7 +223,7 @@ class Login(Page):
         passphrase = ""
         multisig = Settings().wallet.multisig
         network = NETWORKS[Settings().wallet.network]
-        account_number = 0
+        account = 0
         from ..wallet import Wallet
 
         while True:
@@ -232,7 +232,7 @@ class Login(Page):
                 multisig,
                 network,
                 passphrase,
-                account_number,
+                account,
             )
 
             wallet_info = key.fingerprint_hex_str(True) + "\n"
@@ -274,7 +274,7 @@ class Login(Page):
                 from .wallet_settings import WalletSettings
 
                 wallet_settings = WalletSettings(self.ctx)
-                network, multisig, script_type, account_number = (
+                network, multisig, script_type, account = (
                     wallet_settings.customize_wallet(key)
                 )
 

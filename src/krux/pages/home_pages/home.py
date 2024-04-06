@@ -101,7 +101,7 @@ class Home(Page):
                 self.ctx.wallet.key.multisig,
                 self.ctx.wallet.key.network,
                 passphrase,
-                self.ctx.wallet.key.account_number,
+                self.ctx.wallet.key.account_index,
             )
         )
         return MENU_CONTINUE
@@ -123,7 +123,7 @@ class Home(Page):
         from ...wallet import Wallet
 
         wallet_settings = WalletSettings(self.ctx)
-        network, multisig, script_type, account_number = (
+        network, multisig, script_type, account = (
             wallet_settings.customize_wallet(self.ctx.wallet.key)
         )
         mnemonic = self.ctx.wallet.key.mnemonic
@@ -133,7 +133,7 @@ class Home(Page):
                 multisig,
                 network,
                 "",
-                account_number,
+                account,
             )
         )
         return MENU_CONTINUE
