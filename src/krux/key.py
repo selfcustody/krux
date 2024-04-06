@@ -45,18 +45,18 @@ class Key:
         multisig,
         network=NETWORKS["test"],
         passphrase="",
-        account_number=0,
+        account=0,
     ):
         self.mnemonic = mnemonic
         self.multisig = multisig
         self.network = network
-        self.account_number = account_number
+        self.account_index = account
         self.root = bip32.HDKey.from_seed(
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
         self.derivation = self.get_default_derivation(
-            self.multisig, network, account_number
+            self.multisig, self.network, self.account_index
         )
         self.account = self.root.derive(self.derivation).to_public()
 
@@ -130,17 +130,17 @@ class Key:
                 return word
 
     @staticmethod
-    def get_default_derivation(multisig, network, account_number=0):
+    def get_default_derivation(multisig, network, account=0):
         """Return the Krux default derivation path for single-sig or multisig"""
         if multisig:
             return DER_MULTI % network["bip32"]
-        return DER_SINGLE % (network["bip32"], account_number)
+        return DER_SINGLE % (network["bip32"], account)
 
     @staticmethod
-    def get_default_derivation_str(multisig, network, account_number=0):
+    def get_default_derivation_str(multisig, network, account=0):
         """Return the Krux default derivation path for single-sig or multisig to
         be displayd as string
         """
         return "↳ " + Key.get_default_derivation(
-            multisig, network, account_number
+            multisig, network, account
         ).replace("h", HARDENED_STR_REPLACE)

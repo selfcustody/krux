@@ -37,7 +37,7 @@ from . import (
 from .settings_page import DIGITS
 
 PASSPHRASE_MAX_LEN = 200
-ACCOUNT_MAX = 2**31 - 1  # Maximum account number
+ACCOUNT_MAX = 2**31 - 1  # Maximum account index
 
 
 class PassphraseEditor(Page):
@@ -100,14 +100,14 @@ class WalletSettings(Page):
         network = key.network
         multisig = key.multisig
         script_type = "84"  # TODO: Add script type selection
-        account_number = key.account_number
+        account = key.account_index
         while True:
             derivation_path = "m/"
             derivation_path += "'/".join(
                 [
                     "48" if multisig else script_type,
                     "0" if network == NETWORKS["main"] else "1",
-                    str(account_number) + "'" if not multisig else "0'",
+                    str(account) + "'" if not multisig else "0'",
                 ]
             )
             if multisig:
@@ -143,10 +143,10 @@ class WalletSettings(Page):
             elif index == 2:
                 script_type = value
             elif index == 3:
-                account_temp = self._account_number(account_number)
+                account_temp = self._account(account)
                 if account_temp is not None:
-                    account_number = account_temp
-        return network, multisig, script_type, account_number
+                    account = account_temp
+        return network, multisig, script_type, account
 
     def _coin_type(self):
         """Network selection menu"""
@@ -189,24 +189,24 @@ class WalletSettings(Page):
         _, purpose = submenu.run_loop()
         return purpose
 
-    def _account_number(self, initial_account_number=None):
-        """Account number input"""
+    def _account(self, initial_account=None):
+        """Account input"""
         account = self.capture_from_keypad(
-            t("Account Number"),
+            t("Account Index"),
             [DIGITS],
             starting_buffer=(
-                str(initial_account_number)
-                if initial_account_number is not None
+                str(initial_account)
+                if initial_account is not None
                 else ""
             ),
         )
         if account == ESC_KEY:
             return None
         try:
-            account_number = int(account)
-            if account_number > ACCOUNT_MAX:
+            account = int(account)
+            if account > ACCOUNT_MAX:
                 raise ValueError
         except:
             self.flash_text(t("Insert an account between 0 and %d") % ACCOUNT_MAX)
             return None
-        return account_number
+        return account
