@@ -107,7 +107,7 @@ class WalletSettings(Page):
                 [
                     "48" if multisig else script_type,
                     "0" if network == NETWORKS["main"] else "1",
-                    str(account) + "'" if not multisig else "0'",
+                    str(account) + "'",
                 ]
             )
             if multisig:
@@ -121,14 +121,7 @@ class WalletSettings(Page):
                     (t("Network"), self._coin_type),
                     (t("Single/Multisig"), lambda: None),
                     (t("Script Type"), self._script_type if not multisig else None),
-                    (
-                        t("Account"),
-                        (
-                            (lambda: None)
-                            if not multisig
-                            else None
-                        ),
-                    ),
+                    (t("Account"), lambda: None),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
                 offset=2 * FONT_HEIGHT,
@@ -195,9 +188,7 @@ class WalletSettings(Page):
             t("Account Index"),
             [DIGITS],
             starting_buffer=(
-                str(initial_account)
-                if initial_account is not None
-                else ""
+                str(initial_account) if initial_account is not None else ""
             ),
         )
         if account == ESC_KEY:
