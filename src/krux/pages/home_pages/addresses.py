@@ -60,30 +60,30 @@ class Addresses(Page):
         """Handler for the 'receive addresses' or 'change addresses' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
-            loading_txt = t("Loading receive address %d..")
+            loading_txt = t("Loading receive addresses..")
             if addr_type == 1:
-                loading_txt = t("Loading change address %d..")
+                loading_txt = t("Loading change addresses..")
 
             max_addresses = self.ctx.display.max_menu_lines() - 3
 
             num_checked = 0
             while True:
                 items = []
-                if num_checked + 1 > max_addresses:
+                if num_checked >= max_addresses:
                     items.append(
                         (
-                            "%d..%d" % (num_checked - max_addresses + 1, num_checked),
+                            "%d..%d" % (num_checked - max_addresses, num_checked - 1),
                             lambda: MENU_EXIT,
                         )
                     )
 
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(loading_txt)
                 for addr in self.ctx.wallet.obtain_addresses(
                     num_checked, limit=max_addresses, branch_index=addr_type
                 ):
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(loading_txt % (num_checked + 1))
 
-                    pos_str = str(num_checked + 1) + "." + " "  # thin space
+                    pos_str = str(num_checked) + "." + " "  # thin space
                     qr_title = pos_str + addr
                     items.append(
                         (
@@ -98,7 +98,7 @@ class Addresses(Page):
 
                 items.append(
                     (
-                        "%d..%d" % (num_checked + 1, num_checked + max_addresses),
+                        "%d..%d" % (num_checked, num_checked + max_addresses - 1),
                         lambda: MENU_EXIT,
                     )
                 )
