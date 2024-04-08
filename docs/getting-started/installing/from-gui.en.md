@@ -10,17 +10,14 @@ but you won't need to type any command.
 Additionally you will be able to install the
 [pre-built test or beta release](../installing/from-test-release.md) too.
 
-### Requirements
-#### Hardware
-Please, check the [part list](../../parts.md) for the compatible devices and requirements.
-
 #### Download the latest release
 
 The primary way to download the installer is via
 [releases page on Github](https://github.com/selfcustody/krux-installer/releases),
 
 <div>
-    <img src="../../img/krux-installer/download_release.gif" alt="KruxInstaller download release page"/>
+    <img src="/krux/img/krux-installer/download_release.png" alt="KruxInstaller download release page"/>
+    <br/>
     <em> Figure 1: KruxInstaller download release page</em>
 </div>
 
@@ -36,7 +33,9 @@ Then run on your terminal:
 yay -Sy krux-installer-bin
 ```
 
-##### Choose files according to your operating system
+##### Other Linux distros and Windows
+
+###### Choose files according to your operating system
 
 At the moment we support some Operational Systems with `x86`/`x86_64`/`amd64` architetures.
 Above we list some of them with a `*` (wildcard), where it can be followed with `.sha256.txt`
@@ -50,100 +49,165 @@ Above we list some of them with a `*` (wildcard), where it can be followed with 
 | `krux-installer_0.0.13.exe*`       | Windows                            | 
 
 
-#### Verify the integrity of files
-
-Before installing the release, it's a good idea to check if the [sha256sum](https://sha256sum.com/)
-matches the one defined in the file `*.sha256.txt`.
+###### Verify the integrity
 
 If you trust the developer, you can skip to [Usage](./#usage). But we encourage you to follow this
 ethos to detect if any unauthorized modification was made between the site an your local computer.
 
-**Any linux distribution**:
-```bash
-sha256sum --check krux-installer-0.0.13.AppImage.sha256.txt
-```
+<table>
+    <thead>
+        <tr>
+            <th><strong>System</strong></th>
+            <th style="text-align: center;"><strong>Commands</strong></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Any Linux distribution</td>
+            <td>
+                ```bash
+                sha256sum --check krux-installer-0.0.13.AppImage.sha256.txt
+                ``` 
+            </td>
+        </tr>
+        <tr>
+            <td>RedHat-based</td>        
+            <td>
+                ```bash
+                sha256txt --check ./krux-installer-0.0.13.x86_64.rpm.sha256.txt
+                ``` 
+            </td>
+        </tr>
+        <tr>
+            <td>Debian-based</td>        
+            <td>
+                ```bash
+                sha256sum --check ./krux-installer_0.0.13_amd64.sha256.txt
+                ``` 
+            </td>
+        </tr>
+        <tr>
+            <td>Windows (powershell)</td>        
+            <td>
+                ```pwsh
+                (Get-FileHash '.\krux-installer_0.0.13.exe').Hash -eq (Get-Content '.\krux-installer_0.0.13.exe.sha256.txt')
+                ``` 
+            </td>
+        </tr>
+    </tbody>
+</table>
+            
+###### Verify the authenticity
 
-**RedHat-based**:
-```bash
-sha256sum --check krux-installer-0.0.13.x86_64.rpm.sha256.txt
-```
+To do this, you will need have [GPG](https://gnupg.org/) installed. In Linux systems, it's common to already have it installed by default.
+In Windows, we recommend install [GPG4Win](https://www.gpg4win.org/).
 
-**Debian-based**:
-```bash
-sha256sum --check krux-installer_0.0.13_amd64.deb.sha256.txt
-```
+Once installed, run this command to retrieve the developer's key:
 
-**Windows (powershell)**
-```pwsh
-(Get-FileHash '.\krux-installer_0.0.13.exe').Hash -eq (Get-Content '.\krux-installer_0.0.13.exe.sha256.txt')
-```
-
-#### Verify the authenticity of files
-
-Before installing the release, it's a good idea to check (but not imperative)
-if the [signature](https://sha256sum.com/) matches with the
-[developer's PGP public key](https://keys.openpgp.org/search?q=B4281DDDFBBD207BFA4113138974C90299326322)
-
-**Any linux distribution**:
 ```bash
 gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974C90299326322
-gpg --verify krux-installer-0.0.13.AppImage.sig 
 ```
 
-**RedHat-based**:
-```bash
-gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974C90299326322
-gpg --verify krux-installer-0.0.13.x86_64.rpm.sig 
-```
+<table>
+    <thead>
+        <tr>
+            <th><strong>System</strong></th>
+            <th style="text-align: center;"><strong>Commands</strong></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Any Linux distribution</td>
+            <td>
+                ```bash
+                gpg --verify ./krux-installer-0.0.13.AppImage.sig
+                ``` 
+            </td>
+        </tr>
+        <tr>
+            <td>RedHat-based</td>        
+            <td>
+                ```bash
+                gpg --verify ./krux-installer-0.0.13.x86_64.rpm.sig
+                ``` 
+            </td>
+        </tr>
+        <tr>
+            <td>Debian-based</td>        
+            <td>
+                ```bash
+                gpg --verify ./krux-installer_0.0.13_amd64.deb.sig
+                ``` 
+            </td>
+        </tr>
+        <tr>
+            <td>Windows (powershell)</td>        
+            <td>
+                ```pwsh
+                gpg --verify .\krux-installer_0.0.13_exe.sig
+                ``` 
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-**Debian-based**:
-```bash
-gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974C90299326322
-gpg --verify krux-installer_0.0.13_amd64.deb.sig 
-```
 
-**Windows (powershell) (GPG4win required)**:
-```pwsh
-gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974C90299326322
-gpg --verify krux-installer_0.0.13.exe.sig
-```
+##### Install
 
-Additionaly, you can use the [GPG4Win GUI](https://wiki.gnupg.org/Gpg4win/Tutorials/RetrievePublicKeys)
-to do it. 
+<table>
+    <thead>
+        <tr>
+            <td><strong>System</strong></td>
+            <td style="text-align: center"><strong>Steps</strong></td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>            
+            <td>Any Linux distribution</td>
+            <td>
+                <ul>
+                    <li>Place the <code>krux-installer-0.0.13.AppImage</code> where you want;</li>
+                    <li>Modify permision to execute: <code>chmod +x krux-installer-0.0.13.AppImage</code>;</li>
+                    <li>Run it: <code>./krux-installer-0.0.13.AppImage</code>.</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>RedHat-based</td>                
+            <td>
+                <ul>
+                    <li>Fedora: <code>sudo  dnf install krux-installer-0.0.13.x86_64.rpm</code>;</li>
+                    <li>Other RedHat based distros: <code>sudo yum localinstall krux-installer-0.0.13.x86_64.rpm</code>.</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>Debian-based</td>
+            <td>
+                <ul>
+                    <li>Install with dpkg: <code>sudo dpkg -i krux-installer_0.0.13_amd64.deb</code>;</li>
+                    <li>Update it with apt-get: <code>sudo apt-get install -f</code>.</li>
+                </ul>
+            </td>             
+        </tr>
+        <tr>
+            <td>Windows</td>
+            <td>
+                The `krux-installer_0.0.13.exe` is a <a href="https://nsis.sourceforge.io/Main_Page)">NSIS</a> installer.
+                If you use Windows, the first time you run the `.exe` file the system will ask you if you
+                trust the application.
+            </td>             
+        </tr>
+    </tbody>   
+</table>
 
-#### Install
-
-For each operational system, there's a different way to install:
-
-##### Any linux distribution
-
-- Place the `krux-installer-0.0.13.AppImage` where you want;
-- Modify permision to execute: `chmod +x krux-installer-0.0.13.AppImage`
-- Run it: `./krux-installer-0.0.13.AppImage`
-
-##### RedHat based
-
-- Fedora: `sudo  dnf install krux-installer-0.0.13.x86_64.rpm`
-- Other RedHat based distros: `sudo yum localinstall krux-installer-0.0.13.x86_64.rpm`
-
-##### Debian based
-
-- Install with dpkg: `sudo dpkg -i krux-installer_0.0.13_amd64.deb`;
-- Update it with apt-get: `sudo apt-get install -f`
-
-##### Windows
-
-The `krux-installer_0.0.13.exe` is a [NSIS](https://nsis.sourceforge.io/Main_Page) installer.
-If you use Windows, the first time you run the `.exe` file the system will ask you if you
-trust the application. Click on `more info` and then `Run anyway`.
-
-### Usage
+#### Usage
 
 ##### Main Menu 
 When running Krux Installer, you will be presented with a menu of two items:
 
 <div>
-    <img src="../../../img/krux-installer/main.png" alt="KruxInstaller Main Menu" />
+    <img src="/krux/img/krux-installer/main.png" alt="KruxInstaller Main Menu" />
     <br/>
     <em>Figure 2: Main menu with two items</em>
 </div>
@@ -153,7 +217,7 @@ When running Krux Installer, you will be presented with a menu of two items:
 This is the first step, to select the device we want to flash.
 
 <div>
-    <img src="../../../img/krux-installer/select_device.png" alt="Select Device Menu with choosen device" />
+    <img src="/krux/img/krux-installer/select_device.png" alt="Select Device Menu with choosen device" />
     <br/>
     <em>Figure 3: Select Device Menu with choosen device</em>
 </div>
@@ -165,12 +229,41 @@ Now you will be faced with a menu with three items:
 <div>
     <img src="../../../img/krux-installer/main2.png" alt=" Menu with three items" />
     <br/>
-    <em>Figure 3: Main menu with three items</em>
+    <em>Figure 4: Main menu with three items</em>
+</div>
+
+##### Wipe device
+
+This option will give the oportunity to **erase ALL data in device's flash memory**.
+It's useful when your device is bricked or as a security approach. To use Krux again, you'll need
+to re-flash it. You will be warned (use it on your own risk):
+
+<div>
+    <img src="../../../img/krux-installer/wipe_warn.png" alt="Wipe Warning" />
+    <br/>
+    <em>Figure 5: Wipe warning before execution</em>
+</div>
+
+Once selected, the system will prompt for your password. Once typed the `Wipe` process will start and the 
+screen will appear to be freeze. Do not touch, unplug or poweroff your device/computer and wait until be done.
+
+<div>
+    <img src="../../../img/krux-installer/wipe_run.png" alt="Wipe running" />
+    <br/>
+    <em>Figure 6: Wipe process running</em>
+</div>
+
+Once done, you can scroll down the window to see all events that occured:
+
+<div>
+    <img src="../../../img/krux-installer/wipe_finished.png" alt="Wipe done" />
+    <br/>
+    <em>Figure 7: Wipe done</em>
 </div>
 
 Now select which firmware you want to flash, i.e. the [latest official release](https://github.com/selfcustody/krux/releases) or the [test (beta) release](https://github.com/odudex/krux_binaries). While in the official release we can [verify its integrity and authenticity](from-pre-built-release.md/#verify-the-files), in the second one we will have no means of verifying it, because it is not signed. However, the test or beta firmware will contain the newest features that are being developed and discussed on our social media.
 
-##### Official release
+#### Official release
 The software will display the latest officially released version in the form `selfcustody/tags/vXX.YY.Z`, where XX means the year of release, YY the month of release and Z a subversion of this release.
 
 Once selected, the application will check if the entry exists in the system. If not, it will download the following files: the firmware as a `.zip`, the sha256 of the zip as `sha256.txt`, the signature of the zip as `.sig` and the `selfcustody.pem`.
