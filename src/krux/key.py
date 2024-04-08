@@ -50,6 +50,7 @@ class Key:
         self.mnemonic = mnemonic
         self.multisig = multisig
         self.network = network
+        self.passphrase = passphrase
         self.account_index = account
         self.root = bip32.HDKey.from_seed(
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
