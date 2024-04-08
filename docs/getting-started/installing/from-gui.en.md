@@ -1,16 +1,10 @@
 ### Installing from a GUI
 
-You can install Krux onto your K210-based device using our official desktop application,
-[KruxInstaller](https://github.com/selfcustody/krux-installer), available for Linux and Windows.
+You can install Krux (both official or beta releases) onto your K210-based device using our
+official desktop application, [KruxInstaller](https://github.com/selfcustody/krux-installer),
+available for Linux and Windows.
 
-Under the hood the GUI uses the same methods described in
-[Installing from pre-build release](../installing/from-pre-built-release.md),
-i.e., download, verify and flash the latest official release,
-but you won't need to type any command.
-Additionally you will be able to install the
-[pre-built test or beta release](../installing/from-test-release.md) too.
-
-#### Download the latest release
+#### Download 
 
 The primary way to download the installer is via
 [releases page on Github](https://github.com/selfcustody/krux-installer/releases),
@@ -27,19 +21,15 @@ There is a package named [`krux-installer-bin`](https://aur.archlinux.org/packag
 for Archlinux in the [AUR](https://aur.archlinux.org/). To install `krux-installer-bin`,
 you will need to have some [pacman wrapper](https://wiki.archlinux.org/title/AUR_helpers#Pacman_wrappers)
 
-Then run on your terminal:
+For example:
 
 ```bash
-yay -Sy krux-installer-bin
+🤖 yay -S krux-installer-bin
 ```
 
 ##### Other Linux distros and Windows
 
-###### Choose files according to your operating system
-
-At the moment we support some Operational Systems with `x86`/`x86_64`/`amd64` architetures.
-Above we list some of them with a `*` (wildcard), where it can be followed with `.sha256.txt`
-(integrity extension) and `.sig` (authenticity extension) files.
+We have files for:
 
 | **File**                           | **Operational System**             |
 |------------------------------------|:----------------------------------:|
@@ -49,16 +39,21 @@ Above we list some of them with a `*` (wildcard), where it can be followed with 
 | `krux-installer_0.0.13.exe*`       | Windows                            | 
 
 
-###### Verify the integrity
+#### Verify files
 
-If you trust the developer, you can skip to [Usage](./#usage). But we encourage you to follow this
-ethos to detect if any unauthorized modification was made between the site an your local computer.
+If you trust the developer, you can skip to [Install](./#install).
+
+> ⚠️  TIP: The verification will help to detect
+if any unauthorized modification was made between github
+and your local computer. 
+
+##### Integrity
 
 <table>
     <thead>
         <tr>
             <th><strong>System</strong></th>
-            <th style="text-align: center;"><strong>Commands</strong></th>
+            <th><strong>Commands</strong></th>
         </tr>
     </thead>
     <tbody>
@@ -66,7 +61,7 @@ ethos to detect if any unauthorized modification was made between the site an yo
             <td>Any Linux distribution</td>
             <td>
                 ```bash
-                sha256sum --check krux-installer-0.0.13.AppImage.sha256.txt
+                🤖 sha256sum --check krux-installer-0.0.13.AppImage.sha256.txt
                 ``` 
             </td>
         </tr>
@@ -74,7 +69,7 @@ ethos to detect if any unauthorized modification was made between the site an yo
             <td>RedHat-based</td>        
             <td>
                 ```bash
-                sha256txt --check ./krux-installer-0.0.13.x86_64.rpm.sha256.txt
+                🤖 sha256txt --check ./krux-installer-0.0.13.x86_64.rpm.sha256.txt
                 ``` 
             </td>
         </tr>
@@ -82,7 +77,7 @@ ethos to detect if any unauthorized modification was made between the site an yo
             <td>Debian-based</td>        
             <td>
                 ```bash
-                sha256sum --check ./krux-installer_0.0.13_amd64.sha256.txt
+                🤖 sha256sum --check ./krux-installer_0.0.13_amd64.sha256.txt
                 ``` 
             </td>
         </tr>
@@ -90,23 +85,29 @@ ethos to detect if any unauthorized modification was made between the site an yo
             <td>Windows (powershell)</td>        
             <td>
                 ```pwsh
-                (Get-FileHash '.\krux-installer_0.0.13.exe').Hash -eq (Get-Content '.\krux-installer_0.0.13.exe.sha256.txt')
+                🤖 (Get-FileHash '.\krux-installer_0.0.13.exe').Hash -eq (Get-Content '.\krux-installer_0.0.13.exe.sha256.txt')
                 ``` 
             </td>
         </tr>
     </tbody>
 </table>
             
-###### Verify the authenticity
+##### Authenticity
 
-To do this, you will need have [GPG](https://gnupg.org/) installed. In Linux systems, it's common to already have it installed by default.
-In Windows, we recommend install [GPG4Win](https://www.gpg4win.org/).
+To do this, you will need have [GPG](https://gnupg.org/) installed.
+
+> ✅ TIP: In Linux systems, it's common to already have it installed by default.
+
+
+> ⚠️  TIP: In Windows, we recommend install [GPG4Win](https://www.gpg4win.org/).
 
 Once installed, run this command to retrieve the developer's key:
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974C90299326322
+🤖 gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974C90299326322
 ```
+
+Then you can verify:
 
 <table>
     <thead>
@@ -120,7 +121,7 @@ gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974
             <td>Any Linux distribution</td>
             <td>
                 ```bash
-                gpg --verify ./krux-installer-0.0.13.AppImage.sig
+                🤖 gpg --verify ./krux-installer-0.0.13.AppImage.sig
                 ``` 
             </td>
         </tr>
@@ -128,7 +129,7 @@ gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974
             <td>RedHat-based</td>        
             <td>
                 ```bash
-                gpg --verify ./krux-installer-0.0.13.x86_64.rpm.sig
+                🤖 gpg --verify ./krux-installer-0.0.13.x86_64.rpm.sig
                 ``` 
             </td>
         </tr>
@@ -136,7 +137,7 @@ gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974
             <td>Debian-based</td>        
             <td>
                 ```bash
-                gpg --verify ./krux-installer_0.0.13_amd64.deb.sig
+                🤖 gpg --verify ./krux-installer_0.0.13_amd64.deb.sig
                 ``` 
             </td>
         </tr>
@@ -144,7 +145,7 @@ gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974
             <td>Windows (powershell)</td>        
             <td>
                 ```pwsh
-                gpg --verify .\krux-installer_0.0.13_exe.sig
+                🤖 gpg --verify .\krux-installer_0.0.13_exe.sig
                 ``` 
             </td>
         </tr>
@@ -152,7 +153,9 @@ gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974
 </table>
 
 
-##### Install
+#### Install
+
+Each system require different steps to install:
 
 <table>
     <thead>
@@ -194,8 +197,8 @@ gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974
             <td>Windows</td>
             <td>
                 The `krux-installer_0.0.13.exe` is a <a href="https://nsis.sourceforge.io/Main_Page)">NSIS</a> installer.
-                If you use Windows, the first time you run the `.exe` file the system will ask you if you
-                trust the application.
+                The first time you run the `.exe` file the system will ask you to trust the application. The NSIS installer
+                will do the rest.
             </td>             
         </tr>
     </tbody>   
@@ -261,47 +264,61 @@ Once done, you can scroll down the window to see all events that occured:
     <em>Figure 7: Wipe done</em>
 </div>
 
-Now select which firmware you want to flash, i.e. the [latest official release](https://github.com/selfcustody/krux/releases) or the [test (beta) release](https://github.com/odudex/krux_binaries). While in the official release we can [verify its integrity and authenticity](from-pre-built-release.md/#verify-the-files), in the second one we will have no means of verifying it, because it is not signed. However, the test or beta firmware will contain the newest features that are being developed and discussed on our social media.
+##### Select version
 
-#### Official release
-The software will display the latest officially released version in the form `selfcustody/tags/vXX.YY.Z`, where XX means the year of release, YY the month of release and Z a subversion of this release.
+Once you click `Select version` button, it will always retrieve the latest offical release and the
+latest beta release on github.
 
-Once selected, the application will check if the entry exists in the system. If not, it will download the following files: the firmware as a `.zip`, the sha256 of the zip as `sha256.txt`, the signature of the zip as `.sig` and the `selfcustody.pem`.
+<div>
+    <img src="../../../img/krux-installer/github_retrieve.png" alt="Retrieving data from github" />
+    <br/>
+    <em>Figure 8: Retrieving data from github</em>
+</div>
 
-- `krux-vXX.YY.Z.zip`: contains all the necessary binaries and signature files to install the firmware on each of the supported devices;
+If your connection work, it will show a menu of versions:
 
-- `krux-vXX.YY.Z.zip.sha256.txt`: contains a hash to verify the integrity of the downloaded `zip` file;
+<div>
+    <img src="../../../img/krux-installer/select_version_menu.png" alt="Select version menu" />
+    <br/>
+    <em>Figure 9: Select version menu</em>
+</div>
 
-- `krux.vXX.YY.Z.zip.sig`: is the public digital signature for authenticity verification of the downloaded `zip` file;
+| **Version** | **Name**                          |**Advantages**                                                                                                                 | **Disavanteges**                                                | 
+|-------------|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| Official    | `selfcustody/krux/releases/tag/*` |<ul><li>Stable version;</li><li>all features were reviewd and tested;</li><li>It's integrity/authenticity can be verified.</li>| <ul><li>Updates may take some time to be released.</li></ul>    |
+| Beta        | `odudex/krux_binaries`            |<ul><li>Constant development by our team;</li><li>Constant UX reviews by our community.</li></ul>                              | <ul><li>Its integrity/authenticity cannot be verified.</li></ul>|
 
-- `selfcustody.pem`: is the public digital certificate that attests to the veracity of the public digital signature.
 
-![select-version-not-downloaded-selfcustody](../../img/krux-installer/select_version_not_downloaded_selfcustody.gif "KruxInstaller Select Selfcustody Version not downloaded Menu")
+##### Flash
 
-If they are already present on your computer, the application will give you the option to download them again or continue with the files already downloaded.
+Once we choose the device and firmware, we can flash.
 
-![select-version-downloaded-selfcustody](../../img/krux-installer/select_version_downloaded_selfcustody.gif "KruxInstaller Select Selfcustody version downloaded Menu")
+> ⚠️  TIP: You be warned that you must plug and power on your device **before click the flash button**
 
-##### Test or beta binaries
-As the name suggests, these binaries are intended for test purposes, contain experimental features, and are more likely to contain bugs. Use only for experimentation and to provide feedback.
+<div>
+    <img src="../../../img/krux-installer/select_flash.png" alt="Main menu with flash button" />
+    <br/>
+    <em>Figure 10: Main menu with flash button</em>
+</div>
 
-The installer will present the latest test (beta) release.
-![select-version-not-downloaded-odudex](../../img/krux-installer/select_version_not_downloaded_odudex.gif "KruxInstaller Select Odudex version Menu")
 
-- `<device>/firmware.bin`: is the unsigned firmware's binary of the choosen device;
-- `<device>/kboot.kfpkg`: is the unsigned and compressed firmware bootloader of the choosen device;
-- `<device>/ktool-<os>`: is the k210 tool "flasher" specific to Operational system:
-    - `ktool-linux`: for linux machines;
-    - `ktool-win.exe`: for windows machines;
+> 🔒 TIP: In linux, you'll be prompted to type your **sudo password**
 
-If they are already present on your computer, the application will give you the option to download them again or continue with the files already downloaded.
 
-![select-version-downloaded-odudex](../../img/krux-installer/select_version_downloaded_odudex.gif "KruxInstaller Select Odudex version downloaded Menu")
+<div>
+    <img src="../../../img/krux-installer/flash_start.png" alt="Flashing firmware in process" />
+    <br/>
+    <em>Figure 11: Flashing firmware in process</em>
+</div>
 
-#### Flash
-Once we choose the device and firmware, we can flash. Before start the flash process itself, you be warned that you must plug and power on your device.
 
-![flash-device](../../img/krux-installer/flash-device.gif "KruxInstaller Flash to device")
+> ⚠️  TIP: **Do not unplug device before the process is done!**
+
+<div>
+    <img src="../../../img/krux-installer/flash_done.png" alt="Flashing firmware done" />
+    <br/>
+    <em>Figure 12: Flashing firmware done</em>
+</div>
 
 ----8<----
 flash-krux-logo.md
