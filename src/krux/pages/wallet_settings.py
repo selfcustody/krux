@@ -119,7 +119,7 @@ class WalletSettings(Page):
                 self.ctx,
                 [
                     (t("Network"), self._coin_type),
-                    (t("Single/Multisig"), lambda: None),
+                    ("Single/Multisig", lambda: None),
                     (t("Script Type"), self._script_type if not multisig else None),
                     (t("Account"), lambda: None),
                     (t("Back"), lambda: MENU_EXIT),
@@ -146,8 +146,8 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Mainnet"), lambda: None),
-                (t("Testnet"), lambda: None),
+                ("Mainnet", lambda: None),
+                ("Testnet", lambda: None),
             ],
             disable_statusbar=True,
         )
@@ -172,10 +172,10 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Legacy") + " - 44", None),  #  lambda: "44"),
-                (t("Nested Segwit") + " - 49", None),  #  lambda: "49"),
-                (t("Native Segwit") + " - 84", lambda: "84"),
-                (t("Taproot") + " - 86", None),  # lambda: "86"),
+                ("Legacy - 44", None),  #  lambda: "44"),
+                ("Nested Segwit - 49", None),  #  lambda: "49"),
+                ("Native Segwit - 84", lambda: "84"),
+                ("Taproot - 86", None),  # lambda: "86"),
             ],
             disable_statusbar=True,
         )
@@ -198,6 +198,8 @@ class WalletSettings(Page):
             if account > ACCOUNT_MAX:
                 raise ValueError
         except:
-            self.flash_text(t("Insert an account between 0 and %d") % ACCOUNT_MAX)
+            self.flash_error(
+                t("Value %s out of range: [%s, %s]") % (account, 0, ACCOUNT_MAX)
+            )
             return None
         return account

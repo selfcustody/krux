@@ -81,9 +81,9 @@ class Home(Page):
 
     def passphrase(self):
         """Add or replace wallet's passphrase"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Add or change wallet passphrase."))
-        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+        if not self.prompt(
+            t("Add or change wallet passphrase?"), self.ctx.display.height() // 2
+        ):
             return MENU_CONTINUE
 
         from ..wallet_settings import PassphraseEditor
@@ -161,10 +161,7 @@ class Home(Page):
                 (t("Wallet Descriptor"), self.wallet_descriptor),
                 (t("Passphrase"), self.passphrase),
                 (t("Customize"), self.customize),
-                (
-                    t("BIP85"),
-                    self.bip85,
-                ),
+                ("BIP85", self.bip85),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
