@@ -180,7 +180,6 @@ def test_init_singlesig(mocker, m5stickv, tdata):
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
         assert isinstance(signer, PSBTSigner)
-    assert 0
 
 
 def test_init_multisig(mocker, m5stickv, tdata):
