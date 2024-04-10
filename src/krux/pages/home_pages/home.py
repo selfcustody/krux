@@ -31,6 +31,8 @@ from .. import (
     MENU_EXIT,
 )
 
+MAX_POLICY_COSIGNERS_DISPLAYED = 5
+
 
 class Home(Page):
     """Home is the main menu page of the app"""
@@ -260,11 +262,25 @@ class Home(Page):
         if path_mismatch:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Warning: Mismatch between PSBT and loaded wallet derivations.")
+                t("Warning: Mismatch between PSBT and wallet.")
                 + "\n"
-                + "PSBT derivation path: "
+                + "PSBT: "
                 + path_mismatch
             )
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return MENU_CONTINUE
+        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
+            policy_str = "PBST policy:\n"
+            policy_str += signer.policy["type"] + "\n"
+            policy_str += (
+                str(signer.policy["m"]) + " of " + str(signer.policy["n"]) + "\n"
+            )
+            for cosigner in signer.policy["cosigners"][:MAX_POLICY_COSIGNERS_DISPLAYED]:
+                policy_str += self.fit_to_line(cosigner) + "\n"
+            if len(signer.policy["cosigners"]) > MAX_POLICY_COSIGNERS_DISPLAYED:
+                policy_str += "..."
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(policy_str)
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
         outputs = signer.outputs()
