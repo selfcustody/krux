@@ -100,6 +100,26 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
+    def path_mismatch(self):
+        """Verifies if the PSBT path matches wallet's derivation path"""
+        if not is_multisig(self.policy):
+            # Single-sig check
+            first_input = self.psbt.inputs[0]
+            first_pubkey = next(iter(first_input.bip32_derivations))
+            # Get the derivation path for the first public key
+            derivation_path = first_input.bip32_derivations[first_pubkey].derivation
+            textual_path = "m"
+            for index in derivation_path[:3]:
+                if index >= 2**31:
+                    textual_path += "/{}h".format(index - 2**31)
+                else:
+                    textual_path += "/{}".format(index)
+            if textual_path == self.wallet.key.derivation:
+                return ""
+            return textual_path
+        # Multisig check - not implemented
+        return ""
+
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
         from .format import format_btc

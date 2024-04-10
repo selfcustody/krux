@@ -256,6 +256,17 @@ class Home(Page):
         from ...psbt import PSBTSigner
 
         signer = PSBTSigner(self.ctx.wallet, data, qr_format)
+        path_mismatch = signer.path_mismatch()
+        if path_mismatch:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning: Mismatch between PSBT and loaded wallet derivations.")
+                + "\n"
+                + "PSBT derivation path: "
+                + path_mismatch
+            )
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return MENU_CONTINUE
         outputs = signer.outputs()
         for message in outputs:
             self.ctx.display.clear()

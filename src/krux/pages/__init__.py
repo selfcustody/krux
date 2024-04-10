@@ -291,7 +291,7 @@ class Page:
                 t("Part") + "\n%d / %d" % (i + 1, num_parts) if not title else title
             )
             offset_y = self.ctx.display.qr_offset()
-            if title and self.ctx.display.height() > self.ctx.display.width():
+            if subtitle and self.ctx.display.height() > self.ctx.display.width():
                 offset_y += FONT_HEIGHT
                 # Clean area below QR code to refresh subtitle/part
                 self.ctx.display.fill_rectangle(
