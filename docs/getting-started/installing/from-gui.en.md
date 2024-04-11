@@ -25,7 +25,7 @@ The primary way to download the installer is via
 
 #### Verify files
 
-If you trust the developer, you can skip to [Install](./#install).
+If you trust the developer, you can skip to [install](#install):
 
 > ⚠️  TIP: The verification will help to detect
 if any unauthorized modification was made between
@@ -192,15 +192,46 @@ Each system require different steps to install:
     </tbody>   
 </table>
 
+##### Windows advice
+
+On Windows, you'll be faced with a blue window saying "Windows protected your computer". This occurs because
+we don't have a [code signing certificate](https://signmycode.com/resources/how-to-sign-an-exe-or-windows-application):
+
+> 🛡️  TIP: If you followed the steps presented in [authenticity](#authenticity), you already 
+have the assurance that the software is from a verified and genuine software publisher:
+
+<div>
+    <img src="/krux/img/krux-installer/windows_warn0.jpg" alt="Windows protected your computer" />
+    <br/>
+    <em>Figure 2: "Windows protected your computer" window</em>
+</div>
+
+> ⚠️  TIP: Click on "More information" to see the button "Execute anyway"
+
+<div>
+    <img src="/krux/img/krux-installer/windows_warn1.jpg" alt="Execute anymway" />
+    <br/>
+    <em>Figure 3: Click on "Excute anyway" button</em>
+</div>
+
+
+> 🚧 TIP: Now you can proceed with installation
+
+<div>
+    <img src="/krux/img/krux-installer/windows_warn2.jpg" alt="Execute anymway" />
+    <br/>
+    <em>Figure 4: Proceed with the installation</em>
+</div>
+
 #### Usage
 
 ##### Main Menu 
 When running Krux Installer, you will be presented with a menu of two items:
 
 <div>
-    <img src="/krux/img/krux-installer/main.png" alt="KruxInstaller Main Menu" />
+    <img src="/krux/img/krux-installer/main.png" style="max-width: 50%; max-height: 50%" alt="KruxInstaller Main Menu" />
     <br/>
-    <em>Figure 2: Main menu with two items</em>
+    <em>Figure 5: Main menu with two items</em>
 </div>
 
 
@@ -208,9 +239,9 @@ When running Krux Installer, you will be presented with a menu of two items:
 This is the first step, to select the device we want to flash.
 
 <div>
-    <img src="/krux/img/krux-installer/select_device.png" alt="Select Device Menu with choosen device" />
+    <img src="/krux/img/krux-installer/select_device.png" style="max-width: 50%; max-height: 50%" alt="Select Device Menu with choosen device" />
     <br/>
-    <em>Figure 3: Select Device Menu with choosen device</em>
+    <em>Figure 6: Select Device Menu with choosen device</em>
 </div>
 
 ##### Returned to main menu
@@ -218,9 +249,9 @@ This is the first step, to select the device we want to flash.
 Now you will be faced with a menu with three items:
 
 <div>
-    <img src="../../../img/krux-installer/main2.png" alt=" Menu with three items" />
+    <img src="../../../img/krux-installer/main2.png" style="max-width: 50%; max-height: 50%" alt=" Menu with three items" />
     <br/>
-    <em>Figure 4: Main menu with three items</em>
+    <em>Figure 7: Main menu with three items</em>
 </div>
 
 ##### Select version
@@ -229,9 +260,9 @@ Once you click `Select version` button, it will always retrieve the latest offic
 latest beta release on github. If your connection work, it will show a menu of versions:
 
 <div>
-    <img src="../../../img/krux-installer/select_version_menu.png" alt="Select version menu" />
+    <img src="../../../img/krux-installer/select_version_menu.png" style="max-width: 50%; max-height: 50%" alt="Select version menu" />
     <br/>
-    <em>Figure 5: Select version menu</em>
+    <em>Figure 8: Select version menu</em>
 </div>
 
 | **Version** | **Name**                          |**Advantages**                                                                                                                 | **Disavanteges**                                                | 
@@ -247,9 +278,9 @@ Once we choose the device and firmware, we can flash.
 > ⚠️  TIP: You be warned that you must plug and power on your device **before click the flash button**
 
 <div>
-    <img src="../../../img/krux-installer/select_flash.png" alt="Main menu with flash button" />
+    <img src="../../../img/krux-installer/select_flash.png" style="max-width: 50%; max-height: 50%" alt="Main menu with flash button" />
     <br/>
-    <em>Figure 6: Main menu with flash button</em>
+    <em>Figure 9: Main menu with flash button</em>
 </div>
 
 
@@ -257,18 +288,18 @@ Once we choose the device and firmware, we can flash.
 
 
 <div>
-    <img src="../../../img/krux-installer/flash_start.png" alt="Flashing firmware in process" />
+    <img src="../../../img/krux-installer/flash_start.png" style="max-width: 50%; max-height: 50%" alt="Flashing firmware in process" />
     <br/>
-    <em>Figure 7: Flashing firmware in process</em>
+    <em>Figure 10: Flashing firmware in process</em>
 </div>
 
 
 > 🚧 TIP: **Do not unplug device before the process is done!**
 
 <div>
-    <img src="../../../img/krux-installer/flash_done.png" alt="Flashing firmware done" />
+    <img src="../../../img/krux-installer/flash_done.png" style="max-width: 50%; max-height: 50%" alt="Flashing firmware done" />
     <br/>
-    <em>Figure 8: Flashing firmware done</em>
+    <em>Figure 11: Flashing firmware done</em>
 </div>
 
 ----8<----
@@ -293,9 +324,9 @@ This option will give the oportunity to **erase ALL data in device's flash memor
 
 
 <div>
-    <img src="../../../img/krux-installer/wipe_warn.png" alt="Wipe Warning" />
+    <img src="../../../img/krux-installer/wipe_warn.png" style="max-width: 50%; max-height: 50%" alt="Wipe Warning" />
     <br/>
-    <em>Figure 9: Wipe warning before execution</em>
+    <em>Figure 12: Wipe warning before execution</em>
 </div>
 
 Once selected, the system will prompt for your password. Once typed the `Wipe` process will start and the 
@@ -304,15 +335,15 @@ screen will appear to be freeze.
 > 🚧 TIP: Do not touch, unplug or poweroff your device/computer and wait until be done.
 
 <div>
-    <img src="../../../img/krux-installer/wipe_run.png" alt="Wipe running" />
+    <img src="../../../img/krux-installer/wipe_run.png" style="max-width: 50%; max-height: 50%" alt="Wipe running" />
     <br/>
-    <em>Figure 10: Wipe process running</em>
+    <em>Figure 13: Wipe process running</em>
 </div>
 
 Once done, you can scroll down the window to see all events that occured:
 
 <div>
-    <img src="../../../img/krux-installer/wipe_finished.png" alt="Wipe done" />
+    <img src="../../../img/krux-installer/wipe_finished.png" style="max-width: 50%; max-height: 50% alt="Wipe done" />
     <br/>
-    <em>Figure 11: Wipe done</em>
+    <em>Figure 14: Wipe done</em>
 </div>
