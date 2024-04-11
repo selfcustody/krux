@@ -101,9 +101,10 @@ Each system require different steps to install:
         <tr>
             <td>Windows</td>
             <td>
-                The <code>krux-installer_0.0.13.exe</code> is a <a href="https://nsis.sourceforge.io/Main_Page">NSIS</a> installer.
-                The first time you run the <code>.exe</code> file the system will ask you to trust the application. Follow the installer's
-                instructions to complete the installation.
+                <ul>
+                    <li>The <code>krux-installer_0.0.13.exe</code> is a <a href="https://nsis.sourceforge.io/Main_Page">NSIS</a> installer;</li>
+                    <li>The first time you run the <code>.exe</code> file the system will ask you to trust the application;</li>
+                    <li>See <a href="/krux/getting-started/installing/from-gui/#windows">windows section below</a> for more information</li>
             </td>             
         </tr>
         <tr>
@@ -140,7 +141,7 @@ Each system require different steps to install:
 #### Windows
 On Windows, you'll be faced with a blue window saying "Windows protected your PC". This occurs because
 we don't have a [code signing certificate](https://signmycode.com/resources/how-to-sign-an-exe-or-windows-application),
-Click on "More information" and then "Execute anyway". Follow the installer's instructions to complete the installation.
+Click on "More info" and allow the execution. Follow the installer's instructions to complete the installation.
 
 > 🛡️  TIP: If you followed the steps presented in [authenticity](#authenticity), you already 
 have the assurance that the software is from a verified and genuine software publisher
@@ -167,17 +168,19 @@ This option allows you to select the latest official version or the latest beta 
 
 <img width="450" src="../../../img/krux-installer/select_version_menu.png" alt="Select version menu" />
 
-| **Version** | **Name**                          |**Advantages**                                                                                                                 | **Disavanteges**                                                | 
-|-------------|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
-| Official    | `selfcustody/krux/releases/tag/*` |<ul><li>Stable version;</li><li>All features were reviewd and tested;</li><li>It's integrity and authenticity can be verified.</li>| <ul><li>Updates may take some time to be released.</li></ul>    |
-| Beta        | `odudex/krux_binaries`            |<ul><li>Latest features available;</li><li>Constant UX reviews by our community.</li></ul>                              | <ul><li>Its integrity or authenticity cannot be verified.</li></ul>|
+| **Version** | **Name**                           |**Advantages**                                                                                                                     | **Disadvantages**                                                | 
+|-------------|------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| Official    | `selfcustody/krux/releases/tag/* `  |<ul><li>Stable version;</li><li>All features were reviewd and tested;</li><li>It's integrity and authenticity can be verified.</li>| <ul><li>Updates may take some time to be released.</li></ul>    |
+| Beta        | `odudex/krux_binaries`             |<ul><li>Latest features available;</li><li>Constant UX reviews by our community.</li></ul>                                         | <ul><li>Its integrity or authenticity cannot be verified.</li></ul>|
 
 
 #### Flash
 
 Once you choose the device and version, it enables the "flash with ktool" button.
 
-> ⚠️  TIP: You must connect and turn on your device **before flashing**. 🔒 In linux, you'll be prompted to type your **password** (sudo or admin). 🚧 **Do not disconnect the device until the process is complete!**
+> ⚠️  TIP: You must connect and turn on your device **before flashing**.
+In Linux, you'll be prompted to type your **password** (sudo or admin).
+**Do not disconnect the device until the process is complete!**
 
 <img width="600" src="../../../img/krux-installer/select_flash.png" alt="Main menu with flash button" />
 
@@ -189,15 +192,11 @@ flash-krux-logo.md
 
 This option **erases ALL data from the device's flash memory**. On Linux, it will prompt for your password before. Once the process starts, the screen will appear frozen. When it's done, you can scroll down and see all the events that occurred.
 
->  👷🏾‍♀️ TIP: It's useful when your device is not working;
-
-> 🛡️  TIP: It's useful for security reasons;
-
-> ⚠️  TIP: To use Krux again, you'll need to re-flash the firmware on it.
+> ⚠️  TIP: It's useful when your device is not working or for security reasons. To use Krux again, you'll need to re-flash the firmware.
 
 <img width="600" src="../../../img/krux-installer/wipe_warn.png" alt="Wipe Warning" />
 
-> 🚧 TIP: Do not unplug or poweroff your device or computer. Wait until the process finishes.
+> ⚠️  TIP: Do not unplug or poweroff your device or computer. Wait until the process finishes.
 
 ----8<----
 tips-after-install.md
