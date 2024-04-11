@@ -270,15 +270,27 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            policy_str = "PBST policy:\n"
+            from binascii import hexlify
+
+            policy_str = "PSBT policy:\n"
             policy_str += signer.policy["type"] + "\n"
             policy_str += (
                 str(signer.policy["m"]) + " of " + str(signer.policy["n"]) + "\n"
             )
-            for cosigner in signer.policy["cosigners"][:MAX_POLICY_COSIGNERS_DISPLAYED]:
-                policy_str += self.fit_to_line(cosigner) + "\n"
-            if len(signer.policy["cosigners"]) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                policy_str += "..."
+            fingerprints = []
+            for inp in signer.psbt.inputs:
+                # Do we need to loop through all the inputs or just one?
+                for pub in inp.bip32_derivations:
+                    fingerprint_srt = (
+                        "⊚ " + hexlify(inp.bip32_derivations[pub].fingerprint).decode()
+                    )
+                    if fingerprint_srt not in fingerprints:
+                        if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
+                            fingerprints[-1] = "..."
+                            break
+                        fingerprints.append(fingerprint_srt)
+
+            policy_str += "\n".join(fingerprints)
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(policy_str)
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
