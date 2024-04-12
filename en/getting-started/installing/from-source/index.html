@@ -688,22 +688,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#multilingual-support" class="md-nav__link">
+  <a href="#signing-the-firmware" class="md-nav__link">
     <span class="md-ellipsis">
-      Multilingual support
+      Signing the firmware
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#upgrade-via-microsd-card" class="md-nav__link">
-    <span class="md-ellipsis">
-      Upgrade via microSD card
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Upgrade via microSD card">
+    <nav class="md-nav" aria-label="Signing the firmware">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1215,7 +1206,7 @@
 
   <h1>From source</h1>
 
-<p>This page explains how to install Krux from source.</p>
+<p>This page explains how to install Krux from source. You can check these instructions in our <a href="https://github.com/selfcustody/krux">README</a> too.</p>
 <h4 id="software">Software<a class="headerlink" href="#software" title="Permanent link">&para;</a></h4>
 <p>You will need a computer with <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"><code>git</code></a> and <a href="https://www.vagrantup.com/downloads"><code>vagrant</code></a> installed.</p>
 <h3 id="fetch-the-code">Fetch the code<a class="headerlink" href="#fetch-the-code" title="Permanent link">&para;</a></h3>
@@ -1266,15 +1257,12 @@ If the flashing fails try one of the following common solutions:</p>
 <p>When the flashing process completes, you should see the Krux logo:</p>
 <p><img src="../../../img/maixpy_amigo/logo-150.png">
 <img src="../../../img/maixpy_m5stickv/logo-125.png"></p>
-<p>If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.</p>
+<p>If it doesn't, try turning your device off and on by holding down the power button for six seconds.</p>
 <p>Congrats, you're now running Krux!</p>
 <h5 id="a-note-about-the-maix-amigo">A note about the Maix Amigo<a class="headerlink" href="#a-note-about-the-maix-amigo" title="Permanent link">&para;</a></h5>
 <p>Some Amigo screens have inverted X coordinates, others display colors differently. For more info see <a href="/krux/faq/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors">FAQ</a></p>
-<h3 id="multilingual-support">Multilingual support<a class="headerlink" href="#multilingual-support" title="Permanent link">&para;</a></h3>
-<p>Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to <code>Settings</code>, followed by <code>Locale</code>, and select the locale you wish to use.</p>
-<h3 id="upgrade-via-microsd-card">Upgrade via microSD card<a class="headerlink" href="#upgrade-via-microsd-card" title="Permanent link">&para;</a></h3>
-<p>Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades <a href="../../features/sd-card-update/">via microSD</a> card to keep the device airgapped.</p>
-<p>After you've built the firmware, you can sign it using one of the following methods:</p>
+<h3 id="signing-the-firmware">Signing the firmware<a class="headerlink" href="#signing-the-firmware" title="Permanent link">&para;</a></h3>
+<p>You can sign the firmware using one of the two methods listed below:</p>
 <h4 id="method-1-signing-from-krux">Method 1: Signing from Krux<a class="headerlink" href="#method-1-signing-from-krux" title="Permanent link">&para;</a></h4>
 <p>First, calculate the SHA256 hash of the new firmware by running:
 <div class="highlight"><pre><span></span><code>vagrant<span class="w"> </span>ssh<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;cd /vagrant; ./krux sha256 build/firmware.bin&#39;</span>
