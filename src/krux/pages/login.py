@@ -224,16 +224,11 @@ class Login(Page):
         multisig = Settings().wallet.multisig
         network = NETWORKS[Settings().wallet.network]
         account = 0
+        script_type = "p2wpkh"
         from ..wallet import Wallet
 
         while True:
-            key = Key(
-                mnemonic,
-                multisig,
-                network,
-                passphrase,
-                account,
-            )
+            key = Key(mnemonic, multisig, network, passphrase, account, script_type)
 
             wallet_info = key.fingerprint_hex_str(True) + "\n"
             wallet_info += network["name"] + "\n"

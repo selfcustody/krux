@@ -31,9 +31,18 @@ from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
 
-DER_SINGLE = "m/84h/%dh/%dh"
-DER_MULTI = "m/48h/%dh/%dh/2h"
+DER_SINGLE = "m/%dh/%dh/%dh"
+DER_MULTI = "m/%dh/%dh/%dh/2h"
 HARDENED_STR_REPLACE = "'"
+
+SINGLESIG_SCRIPT_PURPOSE = {
+    "p2pkh": 44,
+    "p2sh-p2wpkh": 49,
+    "p2wpkh": 84,
+    "p2tr": 86,
+}
+
+MULTISIG_SCRIPT_PURPOSE = 48
 
 
 class Key:
@@ -45,19 +54,21 @@ class Key:
         multisig,
         network=NETWORKS["test"],
         passphrase="",
-        account=0,
+        account_index=0,
+        script_type="p2wpkh",
     ):
         self.mnemonic = mnemonic
         self.multisig = multisig
         self.network = network
         self.passphrase = passphrase
-        self.account_index = account
+        self.account_index = account_index
+        self.script_type = script_type if not multisig else "p2wsh"
         self.root = bip32.HDKey.from_seed(
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
         self.derivation = self.get_default_derivation(
-            self.multisig, self.network, self.account_index
+            self.multisig, self.network, self.account_index, self.script_type
         )
         self.account = self.root.derive(self.derivation).to_public()
 
@@ -131,16 +142,21 @@ class Key:
                 return word
 
     @staticmethod
-    def get_default_derivation(multisig, network, account=0):
+    def get_default_derivation(multisig, network, account=0, script_type="p2wpkh"):
         """Return the Krux default derivation path for single-sig or multisig"""
         der_format = DER_MULTI if multisig else DER_SINGLE
-        return der_format % (network["bip32"], account)
+        purpose = (
+            MULTISIG_SCRIPT_PURPOSE
+            if multisig
+            else SINGLESIG_SCRIPT_PURPOSE[script_type]
+        )
+        return der_format % (purpose, network["bip32"], account)
 
     @staticmethod
-    def get_default_derivation_str(multisig, network, account=0):
+    def get_default_derivation_str(multisig, network, account=0, script_type="p2wpkh"):
         """Return the Krux default derivation path for single-sig or multisig to
         be displayd as string
         """
-        return "↳ " + Key.get_default_derivation(multisig, network, account).replace(
-            "h", HARDENED_STR_REPLACE
-        )
+        return "↳ " + Key.get_default_derivation(
+            multisig, network, account, script_type
+        ).replace("h", HARDENED_STR_REPLACE)

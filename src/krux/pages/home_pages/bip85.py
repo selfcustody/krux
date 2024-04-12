@@ -76,6 +76,7 @@ class Bip85(Page):
             bip85_words,
             self.ctx.wallet.key.multisig,
             self.ctx.wallet.key.network,
+            script_type=self.ctx.wallet.key.script_type,
         )
         if not Settings().security.hide_mnemonic:
             self.display_mnemonic(

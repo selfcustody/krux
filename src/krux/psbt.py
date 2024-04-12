@@ -150,6 +150,7 @@ class PSBTSigner:
             out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs)
 
             address_from_my_wallet = False
+            address_is_change = False
             # if policy is the same - probably change
             if out_policy == self.policy:
                 # double-check that it's change
@@ -176,17 +177,28 @@ class PSBTSigner:
                         elif self.policy["type"] == "p2sh-p2wpkh":
                             sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
 
-                address_from_my_wallet = (
-                    sc.data == self.psbt.tx.vout[i].script_pubkey.data
-                )
+                if self.policy["type"] == "p2tr":
+                    address_from_my_wallet = self.wallet.descriptor.owns(out)
+                    _, der = list(out.taproot_bip32_derivations.values())[
+                        0
+                    ]  # _ = leafs
+                    address_is_change = (
+                        len(list(out.taproot_bip32_derivations.values())) > 0
+                        and der.derivation[3] == 1
+                    )
+                else:
+                    address_from_my_wallet = (
+                        sc.data == self.psbt.tx.vout[i].script_pubkey.data
+                    )
+                    address_is_change = (
+                        len(list(out.bip32_derivations.values())) > 0
+                        and list(out.bip32_derivations.values())[0].derivation[3] == 1
+                    )
 
             # Address is from my wallet
             if address_from_my_wallet:
                 # is addr_type change?
-                if (
-                    len(list(out.bip32_derivations.values())) > 0
-                    and list(out.bip32_derivations.values())[0].derivation[3] == 1
-                ):
+                if address_is_change:
                     change_list.append(
                         (
                             self.psbt.tx.vout[i].script_pubkey.address(
@@ -277,7 +289,10 @@ class PSBTSigner:
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
-            trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
+            if inp.final_scriptwitness:  # If Taproot
+                trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
+            else:
+                trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
         self.psbt = trimmed_psbt
 

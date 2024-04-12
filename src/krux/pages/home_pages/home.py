@@ -104,6 +104,7 @@ class Home(Page):
                 self.ctx.wallet.key.network,
                 passphrase,
                 self.ctx.wallet.key.account_index,
+                self.ctx.wallet.key.script_type,
             )
         )
         return MENU_CONTINUE
@@ -137,6 +138,7 @@ class Home(Page):
                 network,
                 passphrase,
                 account,
+                script_type,
             )
         )
         return MENU_CONTINUE
@@ -295,6 +297,8 @@ class Home(Page):
             self.ctx.display.draw_centered_text(policy_str)
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing.."))
         outputs = signer.outputs()
         for message in outputs:
             self.ctx.display.clear()

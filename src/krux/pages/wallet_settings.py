@@ -35,6 +35,7 @@ from . import (
     NUM_SPECIAL_2,
 )
 from .settings_page import DIGITS
+from ..key import SINGLESIG_SCRIPT_PURPOSE, MULTISIG_SCRIPT_PURPOSE
 
 PASSPHRASE_MAX_LEN = 200
 ACCOUNT_MAX = 2**31 - 1  # Maximum account index
@@ -99,13 +100,17 @@ class WalletSettings(Page):
 
         network = key.network
         multisig = key.multisig
-        script_type = "84"  # TODO: Add script type selection
+        script_type = key.script_type
         account = key.account_index
         while True:
             derivation_path = "m/"
             derivation_path += "'/".join(
                 [
-                    "48" if multisig else script_type,
+                    (
+                        str(MULTISIG_SCRIPT_PURPOSE)
+                        if multisig
+                        else str(SINGLESIG_SCRIPT_PURPOSE[script_type])
+                    ),
                     "0" if network == NETWORKS["main"] else "1",
                     str(account) + "'",
                 ]
@@ -118,27 +123,32 @@ class WalletSettings(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Network"), self._coin_type),
+                    (t("Network"), lambda: None),
                     ("Single/Multisig", lambda: None),
-                    (t("Script Type"), self._script_type if not multisig else None),
+                    (t("Script Type"), (lambda: None) if not multisig else None),
                     (t("Account"), lambda: None),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
                 offset=2 * FONT_HEIGHT,
             )
-            index, value = submenu.run_loop()
+            index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
                 break
             if index == 0:
-                network = value
+                network = self._coin_type()
             elif index == 1:
                 multisig = self._multisig()
+                if not multisig and script_type == "p2wsh":
+                    # If is not multisig, and script is p2wsh, force to pick a new type
+                    script_type = self._script_type()
             elif index == 2:
-                script_type = value
+                script_type = self._script_type()
             elif index == 3:
                 account_temp = self._account(account)
                 if account_temp is not None:
                     account = account_temp
+        if multisig:
+            script_type = "p2wsh"
         return network, multisig, script_type, account
 
     def _coin_type(self):
@@ -172,15 +182,15 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                ("Legacy - 44", None),  #  lambda: "44"),
-                ("Nested Segwit - 49", None),  #  lambda: "49"),
-                ("Native Segwit - 84", lambda: "84"),
-                ("Taproot - 86", None),  # lambda: "86"),
+                ("Legacy - 44 (soon)", None),  #  lambda: "44"),
+                ("Nested Segwit (soon) - 49", None),  #  lambda: "49"),
+                ("Native Segwit - 84", lambda: "p2wpkh"),
+                ("Taproot - 86 (Experimental)", lambda: "p2tr"),
             ],
             disable_statusbar=True,
         )
-        _, purpose = submenu.run_loop()
-        return purpose
+        _, script_type = submenu.run_loop()
+        return script_type
 
     def _account(self, initial_account=None):
         """Account input"""

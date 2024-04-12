@@ -96,9 +96,15 @@ class PubkeyView(Page):
             seed_qr_view = SeedQRView(self.ctx, data=xpub, title=title)
             seed_qr_view.display_qr(allow_export=True, transcript_tools=False)
 
-        zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
+        versions = [None]
+        if self.ctx.wallet.key.script_type == "p2wpkh":
+            versions.append(self.ctx.wallet.key.network["zpub"])
+        elif self.ctx.wallet.key.script_type == "p2sh-p2wpkh":
+            versions.append(self.ctx.wallet.key.network["ypub"])
+        elif self.ctx.wallet.key.script_type == "p2wsh":
+            versions.append(self.ctx.wallet.key.network["Zpub"])
         pub_key_menu_items = []
-        for version in [None, self.ctx.wallet.key.network[zpub]]:
+        for version in versions:
             title = self.ctx.wallet.key.account_pubkey_str(version)[
                 :WALLET_XPUB_START
             ].upper()
