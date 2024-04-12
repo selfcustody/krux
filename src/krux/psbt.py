@@ -102,22 +102,22 @@ class PSBTSigner:
 
     def path_mismatch(self):
         """Verifies if the PSBT path matches wallet's derivation path"""
-        if not is_multisig(self.policy):
-            # Single-sig check
-            first_input = self.psbt.inputs[0]
-            first_pubkey = next(iter(first_input.bip32_derivations))
-            # Get the derivation path for the first public key
-            derivation_path = first_input.bip32_derivations[first_pubkey].derivation
-            textual_path = "m"
-            for index in derivation_path[:3]:
-                if index >= 2**31:
-                    textual_path += "/{}h".format(index - 2**31)
-                else:
-                    textual_path += "/{}".format(index)
-            if textual_path == self.wallet.key.derivation:
-                return ""
-            return textual_path
-        # Multisig check - not implemented
+        mismatched_paths = []
+        der_path_nodes = len(self.wallet.key.derivation.split("/")) - 1
+        for _input in self.psbt.inputs:
+            for pubkey in _input.bip32_derivations:
+                derivation_path = _input.bip32_derivations[pubkey].derivation
+                textual_path = "m"
+                for index in derivation_path[:der_path_nodes]:
+                    if index >= 2**31:
+                        textual_path += "/{}h".format(index - 2**31)
+                    else:
+                        textual_path += "/{}".format(index)
+                if textual_path != self.wallet.key.derivation:
+                    if textual_path not in mismatched_paths:
+                        mismatched_paths.append(textual_path)
+        if mismatched_paths:
+             return ", ".join(mismatched_paths)
         return ""
 
     def outputs(self):
