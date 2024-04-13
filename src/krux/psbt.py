@@ -185,23 +185,24 @@ class PSBTSigner:
                             sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
 
                 if self.policy["type"] == "p2tr":
-                    address_from_my_wallet = self.wallet.descriptor.owns(out)
+                    address_from_my_wallet = (
+                        len(list(out.taproot_bip32_derivations.values())) > 0
+                    )
                     if address_from_my_wallet:
                         _, der = list(  # _ = leafs
                             out.taproot_bip32_derivations.values()
                         )[0]
-                        address_is_change = (
-                            len(list(out.taproot_bip32_derivations.values())) > 0
-                            and der.derivation[3] == 1
-                        )
+                        address_is_change = der.derivation[3] == 1
                 else:
                     address_from_my_wallet = (
                         sc.data == self.psbt.tx.vout[i].script_pubkey.data
                     )
-                    address_is_change = (
-                        len(list(out.bip32_derivations.values())) > 0
-                        and list(out.bip32_derivations.values())[0].derivation[3] == 1
-                    )
+                    if address_from_my_wallet:
+                        address_is_change = (
+                            len(list(out.bip32_derivations.values())) > 0
+                            and list(out.bip32_derivations.values())[0].derivation[3]
+                            == 1
+                        )
 
             # Address is from my wallet
             if address_from_my_wallet:
