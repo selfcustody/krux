@@ -105,8 +105,15 @@ class PSBTSigner:
         mismatched_paths = []
         der_path_nodes = len(self.wallet.key.derivation.split("/")) - 1
         for _input in self.psbt.inputs:
-            for pubkey in _input.bip32_derivations:
-                derivation_path = _input.bip32_derivations[pubkey].derivation
+            if self.policy["type"] == "p2tr":
+                derivations = _input.taproot_bip32_derivations
+            else:
+                derivations = _input.bip32_derivations
+            for pubkey in derivations:
+                if self.policy["type"] == "p2tr":
+                    derivation_path = derivations[pubkey][1].derivation # ignore taproot leaf
+                else:
+                    derivation_path = derivations[pubkey].derivation
                 textual_path = "m"
                 for index in derivation_path[:der_path_nodes]:
                     if index >= 2**31:
