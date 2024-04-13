@@ -117,7 +117,7 @@ class PSBTSigner:
                     if textual_path not in mismatched_paths:
                         mismatched_paths.append(textual_path)
         if mismatched_paths:
-             return ", ".join(mismatched_paths)
+            return ", ".join(mismatched_paths)
         return ""
 
     def outputs(self):
@@ -179,13 +179,14 @@ class PSBTSigner:
 
                 if self.policy["type"] == "p2tr":
                     address_from_my_wallet = self.wallet.descriptor.owns(out)
-                    _, der = list(out.taproot_bip32_derivations.values())[
-                        0
-                    ]  # _ = leafs
-                    address_is_change = (
-                        len(list(out.taproot_bip32_derivations.values())) > 0
-                        and der.derivation[3] == 1
-                    )
+                    if address_from_my_wallet:
+                        _, der = list(  # _ = leafs
+                            out.taproot_bip32_derivations.values()
+                        )[0]
+                        address_is_change = (
+                            len(list(out.taproot_bip32_derivations.values())) > 0
+                            and der.derivation[3] == 1
+                        )
                 else:
                     address_from_my_wallet = (
                         sc.data == self.psbt.tx.vout[i].script_pubkey.data
