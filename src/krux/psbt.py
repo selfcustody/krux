@@ -111,7 +111,9 @@ class PSBTSigner:
                 derivations = _input.bip32_derivations
             for pubkey in derivations:
                 if self.policy["type"] == "p2tr":
-                    derivation_path = derivations[pubkey][1].derivation # ignore taproot leaf
+                    derivation_path = derivations[pubkey][
+                        1
+                    ].derivation  # ignore taproot leaf
                 else:
                     derivation_path = derivations[pubkey].derivation
                 textual_path = "m"

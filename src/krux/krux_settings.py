@@ -261,7 +261,8 @@ class AmgDisplaySettings(SettingsNamespace):
             "bgr_colors": t("BGR Colors"),
             "lcd_type": t("LCD Type"),
         }[attr]
-    
+
+
 class CubeDisplaySettings(SettingsNamespace):
     """Custom display settings for Maix Cube"""
 
