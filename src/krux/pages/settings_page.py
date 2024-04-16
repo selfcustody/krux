@@ -323,6 +323,8 @@ class SettingsPage(Page):
                     break
             if setting.attr == "theme":
                 theme.update()
+            if setting.attr == "brightness":
+                self.ctx.display.gpio_backlight_ctrl(new_category)
             if setting.attr == "flipped_x" and new_category is not None:
                 self.ctx.display.flipped_x_coordinates = new_category
             if setting.attr == "bgr_colors" and new_category is not None:

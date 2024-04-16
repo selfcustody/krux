@@ -139,6 +139,9 @@ class Display:
                 invert=True,
                 offset_h0=80,
             )
+            if "BACKLIGHT" in board.config["krux"]["pins"]:
+                self.gpio_backlight_ctrl(Settings().hardware.display.brightness)
+
         elif board.config["type"] == "amigo":
             lcd_type = Settings().hardware.display.lcd_type
             invert = Settings().hardware.display.inverted_colors
@@ -151,6 +154,23 @@ class Display:
             lcd.mirror(False)
             lcd.bgr_to_rgb(False)
         self.to_portrait()
+
+    def gpio_backlight_ctrl(self, brightness):
+        from machine import Timer,PWM
+
+        pwm_timer = Timer(Timer.TIMER0, Timer.CHANNEL0, mode=Timer.MODE_PWM)
+        blk_ctrl = PWM(pwm_timer, freq=1000, duty=100, pin=board.config["krux"]["pins"]['BACKLIGHT'], enable=True)
+        
+        # Calculate duty cycle
+        # 100 is 0% duty cycle (off)
+        # 0 is 100% duty cycle
+        pwm_value = 5 - int(brightness)
+        pwm_value *= 20
+        if pwm_value == 100:  # backlight off
+            # Brightness X duty is non linear
+            # Ok to have a smaller step on lower values
+            pwm_value = 90
+        blk_ctrl.duty(pwm_value)
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""

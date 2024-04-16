@@ -261,6 +261,18 @@ class AmgDisplaySettings(SettingsNamespace):
             "bgr_colors": t("BGR Colors"),
             "lcd_type": t("LCD Type"),
         }[attr]
+    
+class CubeDisplaySettings(SettingsNamespace):
+    """Custom display settings for Maix Cube"""
+
+    namespace = "settings.cube_display"
+    brightness = CategorySetting("brightness", "3", ["1", "2", "3", "4", "5"])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "brightness": t("Brightness"),
+        }[attr]
 
 
 class HardwareSettings(SettingsNamespace):
@@ -275,6 +287,8 @@ class HardwareSettings(SettingsNamespace):
             self.touch = TouchSettings()
         if board.config["type"] == "amigo":
             self.display = AmgDisplaySettings()
+        elif board.config["type"] == "cube":
+            self.display = CubeDisplaySettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -287,6 +301,8 @@ class HardwareSettings(SettingsNamespace):
             hardware_menu["touchscreen"] = t("Touchscreen")
         if board.config["type"] == "amigo":
             hardware_menu["amg_display"] = t("Display")
+        elif board.config["type"] == "cube":
+            hardware_menu["cube_display"] = t("Display")
 
         return hardware_menu[attr]
 
