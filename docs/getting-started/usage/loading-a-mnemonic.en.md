@@ -105,7 +105,7 @@ Once you have entered your mnemonic, you will be presented with the full list of
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-passphrase-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-passphrase-150.png" align="right">
 
-After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. You can create a QR code from your passphrase offline in [Tools](../features/tools.md/#create-qr-code) section.
+After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes if your device has a touchscreen. For scanning, you can also create a QR code from your offline passphrase in [Tools](../features/tools.md/#create-qr-code).
 
 <div style="clear: both"></div>
 
