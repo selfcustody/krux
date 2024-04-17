@@ -38,8 +38,6 @@ else:
     # room left for no/yes buttons
     BOTTOM_PROMPT_LINE = BOTTOM_LINE - 3 * FONT_HEIGHT
 
-DEFAULT_BACKLIGHT = 1
-
 
 FLASH_MSG_TIME = 2000
 
@@ -128,7 +126,7 @@ class Display:
                     0x2C,
                 ],
             )
-            self.set_backlight(DEFAULT_BACKLIGHT)
+            self.set_pmu_backlight(Settings().hardware.display.brightness)
         elif board.config["type"] == "yahboom":
             lcd.init(
                 invert=True,
@@ -382,12 +380,18 @@ class Display:
             offset_y, qr_code, self.width(), dark_color, light_color, light_color
         )
 
-    def set_backlight(self, level):
+    def set_pmu_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""
 
         from .power import power_manager
 
-        power_manager.set_screen_brightness(level)
+        # Translate 5 levels to 1-8 range = 1,2,3,5,8
+        translated_level = int(level)
+        if translated_level == 4:
+            translated_level = 5
+        elif translated_level == 5:
+            translated_level = 8
+        power_manager.set_screen_brightness(translated_level)
 
     def max_menu_lines(self, line_offset=0):
         """Maximum menu items the display can fit"""

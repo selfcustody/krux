@@ -263,11 +263,12 @@ class AmgDisplaySettings(SettingsNamespace):
         }[attr]
 
 
-class CubeDisplaySettings(SettingsNamespace):
+class DisplaySettings(SettingsNamespace):
     """Custom display settings for Maix Cube"""
 
-    namespace = "settings.cube_display"
-    brightness = CategorySetting("brightness", "3", ["1", "2", "3", "4", "5"])
+    namespace = "settings.display"
+    default_brightness = "1" if board.config["type"] == "m5stickv" else "3"
+    brightness = CategorySetting("brightness", default_brightness, ["1", "2", "3", "4", "5"])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -284,12 +285,12 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
-        if board.config["type"] == "amigo" or board.config["type"] == "yahboom":
+        if board.config["type"] in ["amigo", "yahboom"]:
             self.touch = TouchSettings()
         if board.config["type"] == "amigo":
             self.display = AmgDisplaySettings()
-        elif board.config["type"] == "cube":
-            self.display = CubeDisplaySettings()
+        elif board.config["type"] in ["cube", "m5stickv"]:
+            self.display = DisplaySettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -298,12 +299,12 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
-        if board.config["type"] == "amigo" or board.config["type"] == "yahboom":
+        if board.config["type"] in ["amigo", "yahboom"]:
             hardware_menu["touchscreen"] = t("Touchscreen")
         if board.config["type"] == "amigo":
             hardware_menu["amg_display"] = t("Display")
-        elif board.config["type"] == "cube":
-            hardware_menu["cube_display"] = t("Display")
+        elif board.config["type"] in ["cube", "m5stickv"]:
+            hardware_menu["display"] = t("Display")
 
         return hardware_menu[attr]
 
