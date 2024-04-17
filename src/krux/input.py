@@ -34,6 +34,8 @@ SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 SWIPE_UP = 6
 SWIPE_DOWN = 7
+FAST_FORWARD = 8
+FAST_BACKWARD = 9
 ACTIVATING_BUTTONS = 8  # Won't trigger actions, just indicates buttons can used
 
 QR_ANIM_PERIOD = 300  # milliseconds
@@ -216,14 +218,19 @@ class Input:
             self.flushed_flag = not block
 
         while True:
+            event = None
             if self.enter_event():
-                return BUTTON_ENTER
-            if self.page_event():
-                return BUTTON_PAGE
-            if self.page_prev_event():
-                return BUTTON_PAGE_PREV
-            if self.touch_event():
-                return BUTTON_TOUCH
+                event = BUTTON_ENTER
+            elif self.page_event():
+                event = BUTTON_PAGE
+            elif self.page_prev_event():
+                event = BUTTON_PAGE_PREV
+            elif self.touch_event():
+                event = BUTTON_TOUCH
+            if event is not None:
+                if board.config["type"] == "cube":
+                    time.sleep_ms(200)  # Stabilization time for cube
+                return event
 
             self.wdt_feed_inc_entropy()
 
@@ -251,18 +258,10 @@ class Input:
         btn = self._wait_for_press(block, wait_duration)
         if btn is not None:
             auto_shutdown.feed()
+        start_time = time.ticks_ms()
         if btn == BUTTON_ENTER:
             # Wait for release
             while self.enter_value() == PRESSED:
-                self.wdt_feed_inc_entropy()
-            if not self.buttons_active:
-                self.buttons_active = True
-                btn = ACTIVATING_BUTTONS
-
-        elif btn == BUTTON_PAGE:
-            start_time = time.ticks_ms()
-            # Wait for release
-            while self.page_value() == PRESSED:
                 self.wdt_feed_inc_entropy()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
                     btn = SWIPE_LEFT
@@ -270,13 +269,23 @@ class Input:
             if not self.buttons_active:
                 self.buttons_active = True
                 btn = ACTIVATING_BUTTONS
+
+        elif btn == BUTTON_PAGE:
+            # Wait for release
+            while self.page_value() == PRESSED:
+                self.wdt_feed_inc_entropy()
+                if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
+                    btn = FAST_FORWARD
+                    break
+            if not self.buttons_active:
+                self.buttons_active = True
+                btn = ACTIVATING_BUTTONS
         elif btn == BUTTON_PAGE_PREV:
-            start_time = time.ticks_ms()
             # Wait for release
             while self.page_prev_value() == PRESSED:
                 self.wdt_feed_inc_entropy()
                 if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
-                    btn = SWIPE_RIGHT
+                    btn = FAST_BACKWARD
                     break
             if not self.buttons_active:
                 self.buttons_active = True

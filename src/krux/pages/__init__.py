@@ -32,6 +32,8 @@ from ..input import (
     BUTTON_TOUCH,
     SWIPE_DOWN,
     SWIPE_UP,
+    FAST_FORWARD,
+    FAST_BACKWARD,
     PRESSED,
     ONE_MINUTE,
 )
@@ -64,6 +66,9 @@ LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
+
+FAST_FORWARD_MODE = 1
+FAST_BACKWARD_MODE = -1
 
 
 class Page:
@@ -123,6 +128,7 @@ class Page:
         """
         buffer = starting_buffer
         pad = Keypad(self.ctx, keysets)
+        fast_movement = 0
         while True:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
@@ -133,11 +139,30 @@ class Page:
 
             if progress_bar_fn:
                 progress_bar_fn()
-            possible_keys = pad.keys
-            if possible_keys_fn is not None:
-                possible_keys = possible_keys_fn(buffer)
+            if not fast_movement:
+                # Don't recalculate possible keys if fast movement is active
+                possible_keys = pad.keys
+                if possible_keys_fn is not None:
+                    possible_keys = possible_keys_fn(buffer)
+                    pad.get_valid_index(possible_keys)
+            elif possible_keys_fn is not None:
                 pad.get_valid_index(possible_keys)
+
             pad.draw_keys(possible_keys)
+            if fast_movement == FAST_FORWARD_MODE:
+                if self.ctx.input.page_value() == PRESSED:
+                    pad.navigate(BUTTON_PAGE)
+                    time.sleep_ms(100)
+                else:
+                    fast_movement = 0
+                continue
+            elif fast_movement == FAST_BACKWARD_MODE:
+                if self.ctx.input.page_prev_value() == PRESSED:
+                    pad.navigate(BUTTON_PAGE_PREV)
+                    time.sleep_ms(100)
+                else:
+                    fast_movement = 0
+                continue
             btn = self.ctx.input.wait_for_button()
             if self.ctx.input.touch is not None:
                 if btn == BUTTON_TOUCH:
@@ -176,7 +201,12 @@ class Page:
 
                 if changed and go_on_change:
                     break
-
+            elif btn == FAST_FORWARD:
+                fast_movement = FAST_FORWARD_MODE
+                pad.moving_forward = True
+            elif btn == FAST_BACKWARD:
+                pad.moving_forward = False
+                fast_movement = FAST_BACKWARD_MODE
             else:
                 pad.navigate(btn)
 

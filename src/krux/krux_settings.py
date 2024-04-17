@@ -221,8 +221,7 @@ class ButtonsSettings(SettingsNamespace):
     """Buttons debounce settings"""
 
     namespace = "settings.buttons"
-    debounce_value = 300 if board.config["type"] == "cube" else 100
-    debounce = NumberSetting(int, "debounce", debounce_value, [100, 500])
+    debounce = NumberSetting(int, "debounce", 100, [100, 500])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
