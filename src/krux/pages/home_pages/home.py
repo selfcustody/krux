@@ -225,6 +225,21 @@ class Home(Page):
         psbt_filename, data = utils.load_file(PSBT_FILE_EXTENSION, prompt=False)
         return (data, FORMAT_NONE, psbt_filename)
 
+    def _sign_menu(self):
+        sign_menu = Menu(
+            self.ctx,
+            [
+                (t("Sign to QR code"), lambda: None),
+                (
+                    t("Sign to SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = sign_menu.run_loop()
+        return index
+
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
         from ...sd_card import (
@@ -309,20 +324,7 @@ class Home(Page):
         del data, outputs
         gc.collect()
 
-        sign_menu = Menu(
-            self.ctx,
-            [
-                (t("Sign to QR code"), lambda: None),
-                (
-                    t("Sign to SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
-                (t("Back"), lambda: None),
-            ],
-        )
-        index, _ = sign_menu.run_loop()
-        del sign_menu
-        gc.collect()
+        index = self._sign_menu()
 
         if index == 2:  # Back
             return MENU_CONTINUE
