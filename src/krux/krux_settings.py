@@ -267,7 +267,9 @@ class DisplaySettings(SettingsNamespace):
 
     namespace = "settings.display"
     default_brightness = "1" if board.config["type"] == "m5stickv" else "3"
-    brightness = CategorySetting("brightness", default_brightness, ["1", "2", "3", "4", "5"])
+    brightness = CategorySetting(
+        "brightness", default_brightness, ["1", "2", "3", "4", "5"]
+    )
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
