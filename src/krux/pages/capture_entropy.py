@@ -23,6 +23,7 @@
 import lcd
 import board
 import math
+from ..display import FONT_HEIGHT, BOTTOM_LINE, BOTTOM_PROMPT_LINE
 from . import Page
 
 POOR_VARIANCE_TH = 10  # RMS value of L, A, B channels considered poor
@@ -51,6 +52,8 @@ class CameraEntropy(Page):
             # Offset x = 480 - 320 - 40 = 120 if not flipped
             oft_x = 40 if self.ctx.display.flipped_x_coordinates else 120
             lcd.display(img, oft=(oft_x, 40))
+        elif board_type == "cube":
+            lcd.display(img, oft=(0, 0), roi=(0, 0, 220, 240))
         else:
             lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
 
@@ -91,9 +94,9 @@ class CameraEntropy(Page):
         sensor.run(1)
         self.ctx.display.clear()
         command = 0
-        y_label_offset = self.ctx.display.bottom_line
+        y_label_offset = BOTTOM_LINE
         if board.config["type"] == "amigo":
-            y_label_offset = self.ctx.display.bottom_prompt_line
+            y_label_offset = BOTTOM_PROMPT_LINE
         # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
         while True:
@@ -111,7 +114,7 @@ class CameraEntropy(Page):
                 0,
                 y_label_offset,
                 self.ctx.display.width(),
-                self.ctx.display.font_height,
+                FONT_HEIGHT,
                 theme.bg_color,
             )
             if stdev_index > POOR_VARIANCE_TH:
@@ -152,15 +155,12 @@ class CameraEntropy(Page):
         shannon_16b = shannon.entropy_img16b(img_bytes)
         shannon_16b_total = shannon_16b * img_pixels
 
-        entropy_msg = t("Shannon's entropy:\n")
-        entropy_msg += str(round(shannon_16b, 2)) + " bits/px\n"
-        entropy_msg += t("(%d total)\n\n") % int(shannon_16b_total)
-        entropy_msg += t("Pixels deviation index: ")
+        entropy_msg = t("Shannon's Entropy:") + "\n"
+        entropy_msg += str(round(shannon_16b, 2)) + " " + "bits/px" + "\n"
+        entropy_msg += t("(%d total)") % int(shannon_16b_total) + "\n\n"
+        entropy_msg += t("Pixels deviation index:") + " "
         entropy_msg += str(stdev_index)
         self.ctx.display.clear()
-        # Hold if there's a button still pressed
-        self.ctx.input.wait_for_release()
-        # Flush events ocurred while processing
         self.ctx.input.reset_ios_state()
         if (
             shannon_16b < INSUFFICIENT_SHANNONS_ENTROPY_TH

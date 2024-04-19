@@ -28,6 +28,11 @@ from .baseconv import base_decode
 from .krux_settings import t
 from .qr import FORMAT_PMOFN
 
+# PSBT Output Types:
+CHANGE = 0
+SELF_TRANSFER = 1
+SPEND = 2
+
 
 class PSBTSigner:
     """Responsible for validating and signing PSBTs"""
@@ -100,18 +105,100 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
+    def path_mismatch(self):
+        """Verifies if the PSBT path matches wallet's derivation path"""
+        mismatched_paths = []
+        der_path_nodes = len(self.wallet.key.derivation.split("/")) - 1
+        for _input in self.psbt.inputs:
+            if self.policy["type"] == "p2tr":
+                derivations = _input.taproot_bip32_derivations
+            else:
+                derivations = _input.bip32_derivations
+            for pubkey in derivations:
+                if self.policy["type"] == "p2tr":
+                    derivation_path = derivations[pubkey][
+                        1
+                    ].derivation  # ignore taproot leaf
+                else:
+                    derivation_path = derivations[pubkey].derivation
+                textual_path = "m"
+                for index in derivation_path[:der_path_nodes]:
+                    if index >= 2**31:
+                        textual_path += "/{}h".format(index - 2**31)
+                    else:
+                        textual_path += "/{}".format(index)
+                if textual_path != self.wallet.key.derivation:
+                    if textual_path not in mismatched_paths:
+                        mismatched_paths.append(textual_path)
+        if mismatched_paths:
+            return ", ".join(mismatched_paths)
+        return ""
+
+    def _classify_output(self, out_policy, i, out):
+        """Classify the output based on its properties and policy"""
+        from embit import script
+
+        address_from_my_wallet = False
+        address_is_change = False
+        # if policy is the same - probably change
+        if out_policy == self.policy:
+            # double-check that it's change
+            # we already checked in get_cosigners and parse_multisig
+            # that pubkeys are generated from cosigners,
+            # and witness script is corresponding multisig
+            # so we only need to check that scriptpubkey is generated from
+            # witness script
+
+            # empty script by default
+            sc = script.Script(b"")
+            # multisig, we know witness script
+            if self.policy["type"] == "p2wsh":
+                sc = script.p2wsh(out.witness_script)
+            elif self.policy["type"] == "p2sh-p2wsh":
+                sc = script.p2sh(script.p2wsh(out.witness_script))
+            # single-sig
+            elif "pkh" in self.policy["type"]:
+                if len(list(out.bip32_derivations.values())) > 0:
+                    der = list(out.bip32_derivations.values())[0].derivation
+                    my_hd_prvkey = self.wallet.key.root.derive(der)
+                    if self.policy["type"] == "p2wpkh":
+                        sc = script.p2wpkh(my_hd_prvkey)
+                    elif self.policy["type"] == "p2sh-p2wpkh":
+                        sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
+
+            if self.policy["type"] == "p2tr":
+                address_from_my_wallet = (
+                    len(list(out.taproot_bip32_derivations.values())) > 0
+                )
+                if address_from_my_wallet:
+                    # _ = leafs
+                    _, der = list(out.taproot_bip32_derivations.values())[0]
+                    address_is_change = der.derivation[3] == 1
+            else:
+                address_from_my_wallet = (
+                    sc.data == self.psbt.tx.vout[i].script_pubkey.data
+                )
+                if address_from_my_wallet:
+                    address_is_change = (
+                        len(list(out.bip32_derivations.values())) > 0
+                        and list(out.bip32_derivations.values())[0].derivation[3] == 1
+                    )
+        if address_is_change:
+            return CHANGE
+        if address_from_my_wallet:
+            return SELF_TRANSFER
+        return SPEND
+
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
         from .format import format_btc
-
-        from embit import script
 
         inp_amount = 0
         for inp in self.psbt.inputs:
             inp_amount += inp.witness_utxo.value
         resume_inputs_str = (
-            (t("Inputs (%d): ") % len(self.psbt.inputs))
-            + ("₿ %s" % format_btc(inp_amount))
+            (t("Inputs (%d):") % len(self.psbt.inputs))
+            + (" ₿ %s" % format_btc(inp_amount))
             + "\n\n"
         )
 
@@ -128,64 +215,28 @@ class PSBTSigner:
         xpubs = self.xpubs()
         for i, out in enumerate(self.psbt.outputs):
             out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs)
+            output_type = self._classify_output(out_policy, i, out)
 
-            address_from_my_wallet = False
-            # if policy is the same - probably change
-            if out_policy == self.policy:
-                # double-check that it's change
-                # we already checked in get_cosigners and parse_multisig
-                # that pubkeys are generated from cosigners,
-                # and witness script is corresponding multisig
-                # so we only need to check that scriptpubkey is generated from
-                # witness script
-
-                # empty script by default
-                sc = script.Script(b"")
-                # multisig, we know witness script
-                if self.policy["type"] == "p2wsh":
-                    sc = script.p2wsh(out.witness_script)
-                elif self.policy["type"] == "p2sh-p2wsh":
-                    sc = script.p2sh(script.p2wsh(out.witness_script))
-                # single-sig
-                elif "pkh" in self.policy["type"]:
-                    if len(list(out.bip32_derivations.values())) > 0:
-                        der = list(out.bip32_derivations.values())[0].derivation
-                        my_hd_prvkey = self.wallet.key.root.derive(der)
-                        if self.policy["type"] == "p2wpkh":
-                            sc = script.p2wpkh(my_hd_prvkey)
-                        elif self.policy["type"] == "p2sh-p2wpkh":
-                            sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
-
-                address_from_my_wallet = (
-                    sc.data == self.psbt.tx.vout[i].script_pubkey.data
+            if output_type == CHANGE:
+                change_list.append(
+                    (
+                        self.psbt.tx.vout[i].script_pubkey.address(
+                            network=self.wallet.key.network
+                        ),
+                        self.psbt.tx.vout[i].value,
+                    )
                 )
-
-            # Address is from my wallet
-            if address_from_my_wallet:
-                # is addr_type change?
-                if (
-                    len(list(out.bip32_derivations.values())) > 0
-                    and list(out.bip32_derivations.values())[0].derivation[3] == 1
-                ):
-                    change_list.append(
-                        (
-                            self.psbt.tx.vout[i].script_pubkey.address(
-                                network=self.wallet.key.network
-                            ),
-                            self.psbt.tx.vout[i].value,
-                        )
+                change_amount += self.psbt.tx.vout[i].value
+            elif output_type == SELF_TRANSFER:
+                self_transfer_list.append(
+                    (
+                        self.psbt.tx.vout[i].script_pubkey.address(
+                            network=self.wallet.key.network
+                        ),
+                        self.psbt.tx.vout[i].value,
                     )
-                    change_amount += self.psbt.tx.vout[i].value
-                else:
-                    self_transfer_list.append(
-                        (
-                            self.psbt.tx.vout[i].script_pubkey.address(
-                                network=self.wallet.key.network
-                            ),
-                            self.psbt.tx.vout[i].value,
-                        )
-                    )
-                    self_amount += self.psbt.tx.vout[i].value
+                )
+                self_amount += self.psbt.tx.vout[i].value
             else:  # Address is from other wallet
                 spend_list.append(
                     (
@@ -199,23 +250,23 @@ class PSBTSigner:
 
         if len(spend_list) > 0:
             resume_spend_str = (
-                (t("Spend (%d): ") % len(spend_list))
-                + ("₿ %s" % format_btc(spend_amount))
+                (t("Spend (%d):") % len(spend_list))
+                + (" ₿ %s" % format_btc(spend_amount))
                 + "\n\n"
             )
 
         if len(self_transfer_list) + len(change_list) > 0:
             resume_self_or_change_str = (
                 (
-                    t("Self-transfer or Change (%d): ")
+                    t("Self-transfer or Change (%d):")
                     % (len(self_transfer_list) + len(change_list))
                 )
-                + ("₿ %s" % format_btc(self_amount + change_amount))
+                + (" ₿ %s" % format_btc(self_amount + change_amount))
                 + "\n\n"
             )
 
         fee = inp_amount - spend_amount - self_amount - change_amount
-        resume_fee_str = t("Fee: ") + ("₿ %s" % format_btc(fee))
+        resume_fee_str = t("Fee:") + (" ₿ %s" % format_btc(fee))
 
         messages = []
         # first screen - resume
@@ -229,21 +280,21 @@ class PSBTSigner:
         # sequence of spend
         for i, out in enumerate(spend_list):
             messages.append(
-                (t("%d. Spend: \n\n%s\n\n") % (i + 1, out[0]))
+                ((t("%d. Spend:") + " \n\n%s\n\n") % (i + 1, out[0]))
                 + ("₿ %s" % format_btc(out[1]))
             )
 
         # sequence of self_transfer
         for i, out in enumerate(self_transfer_list):
             messages.append(
-                (t("%d. Self-transfer: \n\n%s\n\n") % (i + 1, out[0]))
+                ((t("%d. Self-transfer:") + " \n\n%s\n\n") % (i + 1, out[0]))
                 + ("₿ %s" % format_btc(out[1]))
             )
 
         # sequence of change
         for i, out in enumerate(change_list):
             messages.append(
-                (t("%d. Change: \n\n%s\n\n") % (i + 1, out[0]))
+                ((t("%d. Change:") + " \n\n%s\n\n") % (i + 1, out[0]))
                 + ("₿ %s" % format_btc(out[1]))
             )
 
@@ -257,7 +308,10 @@ class PSBTSigner:
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
-            trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
+            if inp.final_scriptwitness:  # If Taproot
+                trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
+            else:
+                trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
         self.psbt = trimmed_psbt
 

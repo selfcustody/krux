@@ -117,7 +117,7 @@ def rotation(r):
         if not screen:
             portrait = True
             screen = pg.Surface((HEIGHT, WIDTH)).convert()
-        if r == 2:
+        if r == 2 and BOARD_CONFIG["type"] != "cube":
             landscape = True
         else:
             landscape = False

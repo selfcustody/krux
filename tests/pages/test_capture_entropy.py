@@ -1,6 +1,12 @@
 from ..shared_mocks import mock_context, snapshot_generator, SNAP_SUCCESS, IMAGE_TO_HASH
 import hashlib
 
+ENTROPY_MESSAGE_STR = (
+    f"Shannon's Entropy:\n%s bits/px\n(%s total)\n\nPixels deviation index: %s"
+)
+
+ENTROPY_INSUFFICIENT_MESSAGE_STR = "Insufficient Entropy!\n\n" + ENTROPY_MESSAGE_STR
+
 
 def test_cancel_capture(amigo, mocker):
     """Test that the capture method returns None when the user cancels the capture"""
@@ -79,13 +85,9 @@ def test_insufficient_variance(amigo, mocker):
     assert result is None
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient Entropy!"
-    call_message_str = (
-        "Insufficient Entropy!\n\n"
-        + f"Shannon's entropy:\n{shannon_value} bits/px\n"
-        + f"({total_shannon} total)\n\n"
-        + f"Pixels deviation index: {variance}"
+    call_message = mocker.call(
+        ENTROPY_INSUFFICIENT_MESSAGE_STR % (shannon_value, total_shannon, variance), RED
     )
-    call_message = mocker.call(call_message_str, RED)
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
@@ -135,13 +137,9 @@ def test_insufficient_shannons_entropy(amigo, mocker):
     assert result is None
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient Entropy!"
-    call_message_str = (
-        "Insufficient Entropy!\n\n"
-        + f"Shannon's entropy:\n{shannon_value} bits/px\n"
-        + f"({total_shannon} total)\n\n"
-        + f"Pixels deviation index: {variance}"
+    call_message = mocker.call(
+        ENTROPY_INSUFFICIENT_MESSAGE_STR % (shannon_value, total_shannon, variance), RED
     )
-    call_message = mocker.call(call_message_str, RED)
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
@@ -196,12 +194,9 @@ def test_poor_variance(amigo, mocker):
     assert result == hasher.digest()
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient Entropy!"
-    call_message_str = (
-        f"Shannon's entropy:\n{shannon_value} bits/px\n"
-        + f"({total_shannon} total)\n\n"
-        + f"Pixels deviation index: {variance}"
+    call_message = mocker.call(
+        ENTROPY_MESSAGE_STR % (shannon_value, total_shannon, variance)
     )
-    call_message = mocker.call(call_message_str)
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
@@ -256,11 +251,8 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
     assert result == hasher.digest()
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient Entropy!"
-    call_message_str = (
-        f"Shannon's entropy:\n{shannon_value} bits/px\n"
-        + f"({total_shannon} total)\n\n"
-        + f"Pixels deviation index: {variance}"
+    call_message = mocker.call(
+        ENTROPY_MESSAGE_STR % (shannon_value, total_shannon, variance)
     )
-    call_message = mocker.call(call_message_str)
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])

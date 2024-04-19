@@ -245,7 +245,9 @@ def test_wait_for_release(mocker, m5stickv):
     input = reset_input_states(mocker, input)
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
     mocker.patch.object(input, "enter_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "enter_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "enter_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
     input.wait_for_button()
@@ -263,7 +265,7 @@ def test_debounce_presses_with_greater_interval(mocker, m5stickv):
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks(interval))
     mocker.patch.object(input, "enter_event", side_effect=[False, True, False] * 2)
     mocker.patch.object(
-        input, "enter_value", side_effect=[PRESSED, PRESSED, RELEASED] * 2
+        input, "enter_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED] * 2
     )
     mocker.spy(input, "flush_events")
 
@@ -286,7 +288,7 @@ def test_debounce_presses_with_smaller_interval(mocker, m5stickv):
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks(interval))
     mocker.patch.object(input, "enter_event", side_effect=[False, True, False] * 5)
     mocker.patch.object(
-        input, "enter_value", side_effect=[PRESSED, PRESSED, RELEASED] * 2
+        input, "enter_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED] * 2
     )
     mocker.spy(input, "flush_events")
 
@@ -309,7 +311,9 @@ def test_wait_for_button_blocks_until_enter_released(mocker, m5stickv):
 
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
     mocker.patch.object(input, "enter_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "enter_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "enter_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 
@@ -329,7 +333,9 @@ def test_wait_for_button_blocks_until_page_released(mocker, m5stickv):
 
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
     mocker.patch.object(input, "page_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "page_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "page_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 
@@ -350,7 +356,7 @@ def test_wait_for_button_blocks_until_page_prev_released(mocker, m5stickv):
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
     mocker.patch.object(input, "page_prev_event", side_effect=[False, True, False])
     mocker.patch.object(
-        input, "page_prev_value", side_effect=[PRESSED, PRESSED, RELEASED]
+        input, "page_prev_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
     )
 
     assert input.entropy == 0
@@ -371,7 +377,9 @@ def test_wait_for_button_blocks_until_touch_released(mocker, amigo):
 
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
     mocker.patch.object(input, "touch_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "touch_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "touch_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 
@@ -409,7 +417,9 @@ def test_long_press_page_simulates_swipe_left(mocker, m5stickv):
     # Create a table of states for button events, values and time ticks
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks(step=1000))
     mocker.patch.object(input, "page_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "page_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "page_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 
@@ -431,7 +441,7 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks(step=1000))
     mocker.patch.object(input, "page_prev_event", side_effect=[False, True, False])
     mocker.patch.object(
-        input, "page_prev_value", side_effect=[PRESSED, PRESSED, RELEASED]
+        input, "page_prev_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
     )
 
     assert input.entropy == 0
@@ -458,7 +468,7 @@ def test_touch_indexing(mocker, amigo):
         mocker.patch.object(
             input.touch.touch_driver,
             "current_point",
-            side_effect=[point1, point2, None, None],
+            side_effect=[None, point1, point2, None, None],
         )
 
     # Full screen as single touch button
@@ -500,7 +510,7 @@ def test_touch_gestures(mocker, amigo):
         mocker.patch.object(
             input.touch.touch_driver,
             "current_point",
-            side_effect=[point1, point2, None, None],
+            side_effect=[None, point1, point2, None, None],
         )
 
     # Swipe Right
@@ -624,7 +634,9 @@ def test_enter_button_press_when_buttons_not_active(mocker, amigo):
     input.buttons_active = False
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
     mocker.patch.object(input, "enter_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "enter_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "enter_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 
@@ -645,7 +657,9 @@ def test_page_button_press_when_buttons_not_active(mocker, amigo):
     input.buttons_active = False
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
     mocker.patch.object(input, "page_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "page_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "page_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 
@@ -666,7 +680,9 @@ def test_page_prev_button_press_when_buttons_not_active(mocker, amigo):
     input.buttons_active = False
     mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
     mocker.patch.object(input, "enter_event", side_effect=[False, True, False])
-    mocker.patch.object(input, "enter_value", side_effect=[PRESSED, PRESSED, RELEASED])
+    mocker.patch.object(
+        input, "enter_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 

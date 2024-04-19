@@ -24,8 +24,7 @@ import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
-from .utils import Utils
-from ..themes import theme
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import Key
@@ -37,18 +36,11 @@ from . import (
     MENU_EXIT,
     ESC_KEY,
     LETTERS,
-    UPPERCASE_LETTERS,
-    NUM_SPECIAL_1,
-    NUM_SPECIAL_2,
 )
 
 DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
-
-SD_MSG_TIME = 2500
-
-PASSPHRASE_MAX_LEN = 200
 
 
 class Login(Page):
@@ -96,7 +88,7 @@ class Login(Page):
             [
                 (t("QR Code"), self.load_key_from_qr_code),
                 (
-                    t("Tiny Seed"),
+                    "Tiny Seed",
                     self.load_key_from_tiny_seed_image,
                 ),
                 (t("Back"), lambda: MENU_EXIT),
@@ -114,8 +106,8 @@ class Login(Page):
             [
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
-                (t("Tiny Seed (Bits)"), self.load_key_from_tiny_seed),
-                (t("Stackbit 1248"), self.load_key_from_1248),
+                ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
+                ("Stackbit 1248", self.load_key_from_1248),
                 (t("Back"), lambda: MENU_EXIT),
             ],
         )
@@ -182,7 +174,7 @@ class Login(Page):
             + ". "
             + t("(Experimental)")
         )
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             from .capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
@@ -193,7 +185,7 @@ class Login(Page):
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    t("SHA256 of snapshot:\n\n%s") % entropy_hash
+                    t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash
                 )
                 self.ctx.input.wait_for_button()
                 num_bytes = 16 if index == 0 else 32
@@ -201,23 +193,12 @@ class Login(Page):
                 return self._load_key_from_words(words)
         return MENU_CONTINUE
 
-    def _load_qr_passphrase(self):
-        data, _ = self.capture_qr_code()
-        if data is None:
-            self.flash_text(t("Failed to load passphrase"), theme.error_color)
-            return MENU_CONTINUE
-        if len(data) > PASSPHRASE_MAX_LEN:
-            self.flash_text(
-                t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN,
-                theme.error_color,
-            )
-            return MENU_CONTINUE
-        return data
-
     def _load_key_from_words(self, words, charset=LETTERS):
         mnemonic = " ".join(words)
 
         if charset != LETTERS:
+            from .utils import Utils
+
             charset_type = {
                 DIGITS: Utils.BASE_DEC,
                 DIGITS_HEX: Utils.BASE_HEX,
@@ -230,99 +211,72 @@ class Login(Page):
             }
             numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
             self.display_mnemonic(numbers_str, suffix_dict[charset])
-            if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
+            if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
             self.ctx.display.clear()
 
         self.display_mnemonic(mnemonic, t("Mnemonic"))
-        if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
+        if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
         self.ctx.display.clear()
 
-        # Test mnemonic Checksum verification before asking for passphrase
-        temp_key = Key(
-            mnemonic,
-            False,
-            NETWORKS[Settings().bitcoin.network],
-        )
+        passphrase = ""
+        multisig = Settings().wallet.multisig
+        network = NETWORKS[Settings().wallet.network]
+        account = 0
+        script_type = "p2wpkh"
+        from ..wallet import Wallet
 
         while True:
+            key = Key(mnemonic, multisig, network, passphrase, account, script_type)
+
+            wallet_info = key.fingerprint_hex_str(True) + "\n"
+            wallet_info += network["name"] + "\n"
+            wallet_info += (
+                t("Single-sig") + "\n" if not multisig else t("Multisig") + "\n"
+            )
+            wallet_info += (
+                self.fit_to_line(key.derivation_str(True), crop_middle=False) + "\n"
+            )
+            wallet_info += "No Passphrase\n" if not passphrase else "Passphrase: *..*"
+
+            self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Type BIP39 passphrase"), self.load_passphrase),
-                    (t("Scan BIP39 passphrase"), self._load_qr_passphrase),
-                    (t("No BIP39 passphrase"), lambda: ""),
+                    (t("Load Wallet"), lambda: None),
+                    (t("Passphrase"), lambda: None),
+                    (t("Customize"), lambda: None),
+                    (t("Back"), lambda: MENU_EXIT),
                 ],
+                offset=5 * FONT_HEIGHT + DEFAULT_PADDING,
             )
-            _, passphrase = submenu.run_loop()
-            if passphrase in (ESC_KEY, MENU_CONTINUE):
-                continue
-
-            self.ctx.display.clear()
-
-            # Temporary key, just to show the fingerprint
-            temp_key = Key(
-                mnemonic,
-                False,
-                NETWORKS[Settings().bitcoin.network],
-                passphrase,
-            )
-
-            # Show fingerprint again because password can change the fingerprint,
-            # and user needs to confirm not just the words, but the fingerprint too
-            continue_string = ""
-            if passphrase:
-                continue_string += t("Passphrase: ") + passphrase + "\n\n"
-            continue_string += (
-                temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?")
-            )
-
-            if self.prompt(
-                continue_string,
-                self.ctx.display.height() // 2,
-            ):
+            index, _ = submenu.run_loop()
+            if index == len(submenu.menu) - 1:
+                if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                    del key
+                    return MENU_CONTINUE
+            if index == 0:
                 break
+            if index == 1:
+                from .wallet_settings import PassphraseEditor
 
-        submenu = Menu(
-            self.ctx,
-            [
-                (
-                    t("Single-sig")
-                    + "\n"
-                    + Key.get_default_derivation_str(
-                        False, NETWORKS[Settings().bitcoin.network]
-                    ),
-                    lambda: MENU_EXIT,
-                ),
-                (
-                    t("Multisig")
-                    + "\n"
-                    + Key.get_default_derivation_str(
-                        True, NETWORKS[Settings().bitcoin.network]
-                    ),
-                    lambda: MENU_EXIT,
-                ),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        multisig = index == 1
+                passphrase_editor = PassphraseEditor(self.ctx)
+                temp_passphrase = passphrase_editor.load_passphrase_menu()
+                if temp_passphrase is not None:
+                    passphrase = temp_passphrase
+            elif index == 2:
+                from .wallet_settings import WalletSettings
+
+                wallet_settings = WalletSettings(self.ctx)
+                network, multisig, script_type, account = (
+                    wallet_settings.customize_wallet(key)
+                )
+
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        del temp_key
-
-        # Permanent wallet loaded
-        from ..wallet import Wallet
-
-        self.ctx.wallet = Wallet(
-            Key(
-                mnemonic,
-                multisig,
-                NETWORKS[Settings().bitcoin.network],
-                passphrase,
-            )
-        )
+        self.ctx.wallet = Wallet(key)
         return MENU_EXIT
 
     def _encrypted_qr_code(self, data):
@@ -341,13 +295,13 @@ class Login(Page):
                 key_capture = EncryptionKey(self.ctx)
                 key = key_capture.encryption_key()
                 if key in (None, "", ESC_KEY):
-                    self.flash_text(t("Key was not provided"), theme.error_color)
+                    self.flash_error(t("Key was not provided"))
                     return MENU_CONTINUE
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(t("Processing ..."))
                 word_bytes = encrypted_qr.decrypt(key)
                 if word_bytes is None:
-                    self.flash_text(t("Failed to decrypt"), theme.error_color)
+                    self.flash_error(t("Failed to decrypt"))
                     return MENU_CONTINUE
                 return bip39.mnemonic_from_bytes(word_bytes).split()
             return MENU_CONTINUE  # prompt NO
@@ -357,7 +311,7 @@ class Login(Page):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_error(t("Failed to load mnemonic"))
             return MENU_CONTINUE
 
         words = []
@@ -401,7 +355,7 @@ class Login(Page):
                 if words == MENU_CONTINUE:
                     return MENU_CONTINUE
         if not words or (len(words) != 12 and len(words) != 24):
-            self.flash_text(t("Invalid mnemonic length"), theme.error_color)
+            self.flash_error(t("Invalid mnemonic length"))
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -415,7 +369,7 @@ class Login(Page):
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             while len(words) < 24:
                 if len(words) in (11, 23):
                     self.ctx.display.clear()
@@ -707,7 +661,7 @@ class Login(Page):
         intro += t("Use a black background surface.") + " "
         intro += t("Align camera and Tiny Seed properly.")
         self.ctx.display.draw_hcentered_text(intro)
-        if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
         w24 = index == 1
@@ -715,15 +669,9 @@ class Login(Page):
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
         if words is None:
-            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_error(t("Failed to load mnemonic"))
             return MENU_CONTINUE
         return self._load_key_from_words(words)
-
-    def load_passphrase(self):
-        """Loads and returns a passphrase from keypad"""
-        return self.capture_from_keypad(
-            t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-        )
 
     def tools(self):
         """Handler for the 'Tools' menu item"""
@@ -752,6 +700,8 @@ class Login(Page):
         from ..metadata import VERSION
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
+        self.ctx.display.draw_centered_text(
+            "Krux\n\n\n" + t("Version") + "\n%s" % VERSION
+        )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

@@ -21,7 +21,9 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
+import board
 import lcd
+from ..display import FONT_HEIGHT, FONT_WIDTH
 from ..themes import theme, GREEN, ORANGE
 from ..settings import (
     CategorySetting,
@@ -33,9 +35,9 @@ from ..settings import (
 )
 from ..krux_settings import (
     Settings,
-    BitcoinSettings,
+    DefaultWallet,
     TouchSettings,
-    EncoderSettings,
+    ButtonsSettings,
     t,
 )
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
@@ -53,11 +55,12 @@ import os
 
 DIGITS = "0123456789"
 
-SD_MSG_TIME = 2500
+PERSIST_MSG_TIME = 2500
+DISPLAY_TEST_TIME = 5000  # 5 seconds
 
 CATEGORY_SETTING_COLOR_DICT = {
-    BitcoinSettings.MAIN_TXT: ORANGE,
-    BitcoinSettings.TEST_TXT: GREEN,
+    DefaultWallet.MAIN_TXT: ORANGE,
+    DefaultWallet.TEST_TXT: GREEN,
 }
 
 
@@ -75,14 +78,14 @@ class SettingsPage(Page):
             if self.has_sd_card():
                 self.flash_text(
                     t("Your changes will be kept on the SD card."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
             else:
                 self.flash_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
         else:
             try:
@@ -90,14 +93,14 @@ class SettingsPage(Page):
                 os.listdir("/" + FLASH_PATH + "/.")
                 self.flash_text(
                     t("Your changes will be kept on device flash storage."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
             except OSError:
                 self.flash_text(
                     t("Device flash storage not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
 
         return self.namespace(Settings())()
@@ -108,26 +111,22 @@ class SettingsPage(Page):
             self.ctx.input.touch.clear_regions()
             offset_y = self.ctx.display.height() * 2 // 3
             self.ctx.input.touch.add_y_delimiter(offset_y)
-            self.ctx.input.touch.add_y_delimiter(
-                offset_y + self.ctx.display.font_height * 3
-            )
+            self.ctx.input.touch.add_y_delimiter(offset_y + FONT_HEIGHT * 3)
             button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
             for i in range(4):
                 self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
-            offset_y += self.ctx.display.font_height
+            offset_y += FONT_HEIGHT
             keys = ["<", t("Go"), ">"]
             for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
                 self.ctx.display.outline(
                     x,
                     self.ctx.input.touch.y_regions[0],
                     button_width - 1,
-                    self.ctx.display.font_height * 3,
+                    FONT_HEIGHT * 3,
                     theme.frame_color,
                 )
                 offset_x = x
-                offset_x += (
-                    button_width - len(keys[i]) * self.ctx.display.font_width
-                ) // 2
+                offset_x += (button_width - len(keys[i]) * FONT_WIDTH) // 2
                 self.ctx.display.draw_string(
                     offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
                 )
@@ -175,14 +174,14 @@ class SettingsPage(Page):
                     if store.save_settings():
                         self.flash_text(
                             t("Changes persisted to SD card!"),
-                            duration=SD_MSG_TIME,
+                            duration=PERSIST_MSG_TIME,
                         )
             except OSError:
                 self.flash_text(
                     t("SD card not detected.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
         else:
             self.ctx.display.clear()
@@ -190,14 +189,14 @@ class SettingsPage(Page):
                 if store.save_settings():
                     self.flash_text(
                         t("Changes persisted to Flash!"),
-                        duration=SD_MSG_TIME,
+                        duration=PERSIST_MSG_TIME,
                     )
             except:
                 self.flash_text(
                     t("Unexpected error saving to Flash.")
                     + "\n\n"
                     + t("Changes will last until shutdown."),
-                    duration=SD_MSG_TIME,
+                    duration=PERSIST_MSG_TIME,
                 )
 
         return MENU_EXIT
@@ -256,8 +255,8 @@ class SettingsPage(Page):
                 self.number_setting(settings_namespace, setting)
                 if settings_namespace.namespace == TouchSettings.namespace:
                     self._touch_threshold_exit_check()
-                elif settings_namespace.namespace == EncoderSettings.namespace:
-                    self._encoder_threshold_exit_check()
+                elif settings_namespace.namespace == ButtonsSettings.namespace:
+                    self._buttons_debounce_exit_check()
 
             return MENU_CONTINUE
 
@@ -272,12 +271,15 @@ class SettingsPage(Page):
                 Settings().hardware.touch.threshold
             )
 
-    def _encoder_threshold_exit_check(self):
-        """Handler for the 'Back' on encoder settings screen"""
-        from ..rotary import encoder
+    def _buttons_debounce_exit_check(self):
+        """Handler for the 'Back' on buttons debounce settings screen"""
 
-        # Update rotary encoder debounce time
-        encoder.debounce = Settings().hardware.encoder.debounce
+        # Update buttons debounce time
+        self.ctx.input.debounce_value = Settings().hardware.buttons.debounce
+        if "ENCODER" in board.config["krux"]["pins"]:
+            from ..rotary import encoder
+
+            encoder.debounce = Settings().hardware.buttons.debounce
 
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""
@@ -295,8 +297,7 @@ class SettingsPage(Page):
                     t("Left"),
                 )
                 self.ctx.display.draw_string(
-                    (3 * self.ctx.display.width() // 4)
-                    - 5 * self.ctx.display.font_width,
+                    (3 * self.ctx.display.width() // 4) - 5 * FONT_WIDTH,
                     DEFAULT_PADDING,
                     t("Right"),
                 )
@@ -322,16 +323,49 @@ class SettingsPage(Page):
                     break
             if setting.attr == "theme":
                 theme.update()
+            if setting.attr == "brightness":
+                if board.config["type"] == "cube":
+                    self.ctx.display.gpio_backlight_ctrl(new_category)
+                elif board.config["type"] == "m5stickv":
+                    self.ctx.display.set_pmu_backlight(new_category)
             if setting.attr == "flipped_x" and new_category is not None:
                 self.ctx.display.flipped_x_coordinates = new_category
             if setting.attr == "bgr_colors" and new_category is not None:
                 lcd.bgr_to_rgb(new_category)
             if setting.attr == "inverted_colors" and new_category is not None:
-                lcd.init(invert=new_category)
-                # re-configuring the display after reinitializing it
+                lcd.init(
+                    invert=new_category, lcd_type=Settings().hardware.display.lcd_type
+                )
+                # re-configuring the display after re-initializing it
                 lcd.mirror(True)
                 lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
                 lcd.rotation(1)  # Portrait mode
+            if setting.attr == "lcd_type" and new_category is not None:
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t(
+                        "If your device display does not work after this change, "
+                        "it will automatically reboot with previous settings after 5 seconds."
+                    )
+                )
+                self.ctx.input.wait_for_button()
+                lcd.init(
+                    invert=Settings().hardware.display.inverted_colors,
+                    lcd_type=new_category,
+                )
+                # re-configuring the display after re-initializing it
+                lcd.mirror(True)
+                lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
+                lcd.rotation(1)  # Portrait mode
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t('Press "PREVIOUS" (up arrow) button to keep this setting.')
+                )
+                btn = self.ctx.input.wait_for_button(
+                    block=False, wait_duration=DISPLAY_TEST_TIME
+                )
+                if btn != BUTTON_PAGE_PREV:
+                    self.ctx.power_manager.reboot()
 
         # When changing locale, exit Login to force recreate with new locale
         if (
@@ -379,17 +413,20 @@ class SettingsPage(Page):
                 setting.attr == "pbkdf2_iterations"
                 and (new_value % QR_CODE_ITER_MULTIPLE) != 0
             ):
-                self.flash_text(
-                    t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE,
-                    theme.error_color,
+                self.flash_error(
+                    t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE
                 )
             else:
                 setting.__set__(settings_namespace, new_value)
         else:
-            self.flash_text(
+            self.flash_error(
                 t("Value %s out of range: [%s, %s]")
-                % (new_value, setting.value_range[0], setting.value_range[1]),
-                theme.error_color,
+                % (new_value, setting.value_range[0], setting.value_range[1])
             )
+
+        if setting.attr == "auto_shutdown" and starting_value != new_value:
+            from ..auto_shutdown import auto_shutdown
+
+            auto_shutdown.init_timer(new_value)
 
         return MENU_CONTINUE

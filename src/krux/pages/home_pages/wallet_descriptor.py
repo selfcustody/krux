@@ -24,7 +24,7 @@ from .. import (
     Page,
     MENU_CONTINUE,
 )
-from ...display import DEFAULT_PADDING
+from ...display import DEFAULT_PADDING, BOTTOM_PROMPT_LINE
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
@@ -45,7 +45,7 @@ class WalletDescriptor(Page):
             self.ctx.display.draw_centered_text(
                 t("Wallet output descriptor not found.")
             )
-            if self.prompt(t("Load one?"), self.ctx.display.bottom_prompt_line):
+            if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
                 return self._load_wallet()
         else:
             self.display_wallet(self.ctx.wallet)
@@ -88,7 +88,7 @@ class WalletDescriptor(Page):
 
         if wallet_data is None:
             # Both the camera and the file on SD card failed!
-            self.flash_text(t("Failed to load output descriptor"), theme.error_color)
+            self.flash_error(t("Failed to load output descriptor"))
             return MENU_CONTINUE
 
         try:
@@ -98,7 +98,7 @@ class WalletDescriptor(Page):
             wallet.load(wallet_data, qr_format)
             self.ctx.display.clear()
             self.display_wallet(wallet, include_qr=False)
-            if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
+            if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                 self.ctx.wallet = wallet
                 self.flash_text(t("Wallet output descriptor loaded!"))
 
@@ -117,7 +117,7 @@ class WalletDescriptor(Page):
         except Exception as e:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Invalid wallet:\n%s") % repr(e), theme.error_color
+                t("Invalid wallet:") + "\n%s" % repr(e), theme.error_color
             )
             self.ctx.input.wait_for_button()
 
@@ -171,7 +171,7 @@ class WalletDescriptor(Page):
                 except Exception as e:
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(
-                        t("Error:\n%s") % repr(e), theme.error_color
+                        t("Error:") + "\n%s" % repr(e), theme.error_color
                     )
                     self.ctx.input.wait_for_button()
             else:

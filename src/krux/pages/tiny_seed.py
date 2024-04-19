@@ -31,7 +31,7 @@ from . import Page, FLASH_MSG_TIME
 from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY, FONT_HEIGHT, FONT_WIDTH
 from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -51,18 +51,18 @@ class TinySeed(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
-        self.x_offset = DEFAULT_PADDING // 2 + 2 * self.ctx.display.font_width
+        self.x_offset = DEFAULT_PADDING // 2 + 2 * FONT_WIDTH
         self.printer = None
-        # case for non m5stickv
-        if self.ctx.display.width() > 135:
-            self.y_offset = DEFAULT_PADDING + 3 * self.ctx.display.font_height
+        if self.ctx.display.width() > 140:
             self.x_pad = self.ctx.display.width() * 2 // 27
             self.y_pad = self.ctx.display.height() // 17
         else:
-            # case for m5stickv
-            self.y_offset = 2 * self.ctx.display.font_height
-            self.x_pad = self.ctx.display.font_width + 1
-            self.y_pad = self.ctx.display.font_height
+            self.x_pad = FONT_WIDTH + 1
+            self.y_pad = FONT_HEIGHT
+        if self.ctx.display.height() > 240:
+            self.y_offset = DEFAULT_PADDING + 3 * FONT_HEIGHT
+        else:
+            self.y_offset = 2 * FONT_HEIGHT
 
     def _draw_grid(self):
         """Draws grid for import and export Tinyseed UI"""
@@ -88,17 +88,16 @@ class TinySeed(Page):
 
     def _draw_labels(self, page):
         """Draws labels for import and export Tinyseed UI"""
-        self.ctx.display.draw_hcentered_text(t("Tiny Seed"))
+        self.ctx.display.draw_hcentered_text("Tiny Seed")
 
-        # case for non m5stickv
-        if self.ctx.display.width() > 135:
+        # case for non m5stickv, cube
+        if not MINIMAL_DISPLAY:
             self.ctx.display.to_landscape()
             bit_number = 2048
-            bit_offset = DEFAULT_PADDING // 2 + 2 * self.ctx.display.font_height
+            bit_offset = DEFAULT_PADDING // 2 + 2 * FONT_HEIGHT
             for _ in range(12):
                 lcd.draw_string(
-                    (7 - len(str(bit_number))) * self.ctx.display.font_width
-                    - DEFAULT_PADDING // 2,
+                    (7 - len(str(bit_number))) * FONT_WIDTH - DEFAULT_PADDING // 2,
                     self.ctx.display.width() - bit_offset,
                     str(bit_number),
                     theme.fg_color,
@@ -108,7 +107,7 @@ class TinySeed(Page):
                 bit_offset += self.x_pad
             self.ctx.display.to_portrait()
         y_offset = self.y_offset
-        y_offset += (self.y_pad - self.ctx.display.font_height) // 2
+        y_offset += (self.y_pad - FONT_HEIGHT) // 2
         for x in range(12):
             line = str(page * 12 + x + 1)
             if (page * 12 + x + 1) < 10:
@@ -119,7 +118,12 @@ class TinySeed(Page):
     def _draw_punched(self, words, page):
         """Draws punched bits for import and export Tinyseed UI"""
         y_offset = self.y_offset
-        radius = (self.x_pad - 5) // 3
+        if self.x_pad < self.y_pad:
+            radius = (self.x_pad - 5) // 3
+        else:
+            radius = (self.y_pad - 5) // 3
+        if radius < 4:
+            radius = 0  # Don't round corners if too small
         for x in range(12):
             if isinstance(words[0], str):
                 word_list_index = WORDLIST.index(words[page * 12 + x]) + 1
@@ -166,7 +170,7 @@ class TinySeed(Page):
         pad_y = 8  # 2mm*8px
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Printing ..."), self.ctx.display.height() // 2
+            t("Printing") + " ...", self.ctx.display.height() // 2
         )
         self.printer.print_string("Tiny Seed\n\n")
         for page in range(len(words) // 12):
@@ -201,8 +205,8 @@ class TinySeed(Page):
 
             # labels
             y_offset = grid_y_offset
-            if self.ctx.display.font_height > pad_y:
-                y_offset -= (self.ctx.display.font_height - pad_y) // 2 + 1
+            if FONT_HEIGHT > pad_y:
+                y_offset -= (FONT_HEIGHT - pad_y) // 2 + 1
 
             # grid
             y_offset = grid_y_offset
@@ -306,11 +310,11 @@ class TinySeed(Page):
         x_offset = self.x_offset
         esc_x_offset = round(x_offset + 1.9 * self.x_pad)
 
-        # case for non m5stickv
-        if self.ctx.display.width() > 135:
+        # case for non m5stickv, cube
+        if not MINIMAL_DISPLAY:
             esc_x_offset = round(x_offset + 2.3 * self.x_pad)
 
-        text_offset = y_offset + y_pad // 2 - self.ctx.display.font_height // 2
+        text_offset = y_offset + y_pad // 2 - FONT_HEIGHT // 2
         self.ctx.display.draw_string(
             esc_x_offset, text_offset, t("Esc"), theme.no_esc_color
         )
@@ -938,8 +942,6 @@ class TinyScanner(Page):
 
     def _process_24w_pg0_scan(self, page_seed_numbers):
         if page_seed_numbers == self.previous_seed_numbers and self.capturing:
-            # Hold if there's a button still pressed
-            self.ctx.input.wait_for_release()
             # Flush events ocurred while processing
             self.ctx.input.reset_ios_state()
 

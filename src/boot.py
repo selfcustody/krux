@@ -35,12 +35,11 @@ MIN_SPLASH_WAIT_TIME = 1000
 
 def draw_splash():
     """Display splash while loading modules"""
-    from krux.display import Display, SPLASH
+    from krux.display import display, SPLASH
 
-    disp = Display()
-    disp.initialize_lcd()
-    disp.clear()
-    disp.draw_centered_text(SPLASH)
+    display.initialize_lcd()
+    display.clear()
+    display.draw_centered_text(SPLASH)
 
 
 def check_for_updates():
@@ -94,9 +93,11 @@ draw_splash()
 check_for_updates()
 gc.collect()
 
-from krux.context import Context
+from krux.context import ctx
+from krux.auto_shutdown import auto_shutdown
 
-ctx = Context()
+auto_shutdown.add_ctx(ctx)
+
 ctx.power_manager = power_manager
 postimport_ticks = time.ticks_ms()
 
