@@ -1,5 +1,6 @@
 from . import create_ctx
 
+
 def test_qr_passphrase(m5stickv, mocker):
     from krux.pages.wallet_settings import PassphraseEditor
 

@@ -950,8 +950,7 @@ def test_no_passphrase_on_amigo(mocker, amigo):
         +
         # Words correct? Confirm
         [BUTTON_ENTER]
-        +
-        [BUTTON_ENTER]  # Load wallet
+        + [BUTTON_ENTER]  # Load wallet
     )
 
     ctx = create_ctx(mocker, case)

@@ -313,7 +313,7 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing ..."))
         outputs = signer.outputs()
         for message in outputs:
             self.ctx.display.clear()
