@@ -26,16 +26,22 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     cases = [
         (  # 0
             (
-                # Bitcoin
+                # Default Wallet
+                BUTTON_ENTER,
+                # Go to Network
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Change network
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                # Leave Default Wallet
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,
             ),
-            lambda: Settings().bitcoin.network == "test",
+            lambda: Settings().wallet.network == "test",
         ),
         (  # 1
             (
@@ -44,6 +50,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Printer
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Thermal (printer)
@@ -91,6 +98,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Printer
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Thermal (printer)
@@ -180,11 +188,15 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
         (
             # Case 0
             (
-                # Bitcoin
+                # Enter Wallet
                 0,
+                # Go to Network
+                1,
                 # Change network
                 NEXT_INDEX,
                 GO_INDEX,
+                # Back from wallet
+                2,
                 # Leave Settings
                 LEAVE_INDEX,
             ),
@@ -192,7 +204,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
                 mocker.call("Network\nmain", ORANGE),
                 mocker.call("Network\ntest", GREEN),
             ],
-            lambda: Settings().bitcoin.network == "test",
+            lambda: Settings().wallet.network == "test",
             CategorySetting,
         ),
         (
@@ -412,9 +424,13 @@ def test_leave_settings_with_changes(amigo, mocker, mocker_sd_card_ok):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Change "Bitcoin"
+        BUTTON_ENTER,  # Go to "Wallet"
+        BUTTON_PAGE,  # Go to "Network"
+        BUTTON_ENTER,  # Enter "Network"
         BUTTON_PAGE,  # Change to testnet
         BUTTON_ENTER,  # Confirm "testnet"
+        BUTTON_PAGE,  # Move to back
+        BUTTON_ENTER,  # Leave "Wallet"
         BUTTON_PAGE_PREV,  # Move to "Back"
         BUTTON_ENTER,  # Confirm "Back"
     ]

@@ -128,7 +128,7 @@ def test_load_wallet_descritor_manager(mocker, amigo, tdata):
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
     ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
     home = Home(ctx)
-    home.wallet()
+    home.wallet_descriptor()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
@@ -205,6 +205,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             [
                 # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # Load from QR code
+                BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -225,6 +226,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,
             [
                 BUTTON_ENTER,  # Load frm QR code
+                BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -245,6 +247,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Load frm QR code
+                BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -266,6 +269,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Load frm QR code
+                BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -287,6 +291,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,
             [
                 BUTTON_ENTER,  # Load frm QR code
+                BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -335,6 +340,8 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # Load from QR code
+                BUTTON_ENTER,  # Path mismatch ACK
+                BUTTON_ENTER,  # PSBT Policy ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -356,6 +363,8 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # Load from QR code
+                BUTTON_ENTER,  # Path mismatch ACK
+                BUTTON_ENTER,  # PSBT Policy ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -378,6 +387,8 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # Load from QR code
+                BUTTON_ENTER,  # Path mismatch ACK
+                BUTTON_ENTER,  # PSBT Policy ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -400,6 +411,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             [
                 BUTTON_PAGE,  # Move to "Load from SD card"
                 BUTTON_ENTER,  # Load from SD card
+                BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -422,6 +434,8 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_PAGE,  # Move to "Load from SD card"
                 BUTTON_ENTER,  # Load from SD card
+                BUTTON_ENTER,  # Path mismatch ACK
+                BUTTON_ENTER,  # PSBT Policy ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2

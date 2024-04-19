@@ -240,7 +240,7 @@ class Login(Page):
             )
             wallet_info += "No Passphrase\n" if not passphrase else "Passphrase: *..*"
 
-            self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
+            info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
             submenu = Menu(
                 self.ctx,
                 [
@@ -249,7 +249,7 @@ class Login(Page):
                     (t("Customize"), lambda: None),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
-                offset=5 * FONT_HEIGHT + DEFAULT_PADDING,
+                offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:

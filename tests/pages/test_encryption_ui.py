@@ -292,19 +292,7 @@ def test_load_encrypted_qr_code(m5stickv, mocker):
         # 1 press to proceed with the 24 words
         [BUTTON_ENTER]
         +
-        # 1 press to move to Scan passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to move to No passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to skip passphrase
-        [BUTTON_ENTER]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # 1 press to select single-sig
+        # 1 press to load wallet
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE

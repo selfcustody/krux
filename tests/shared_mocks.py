@@ -380,6 +380,7 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(135 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=7),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
     elif board.config["type"] == "dock":
@@ -400,6 +401,7 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
     elif board.config["type"].startswith("amigo"):
@@ -413,5 +415,6 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )

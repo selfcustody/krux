@@ -144,11 +144,7 @@ def test_load_from_storage(m5stickv, mocker):
         + [BUTTON_ENTER]
         + [
             BUTTON_ENTER,  # 1 press to continue loading key
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # 1 press to select single-sig
+            BUTTON_ENTER,  # 1 press to load wallet
         ]
     )
 
@@ -164,54 +160,6 @@ def test_load_from_storage(m5stickv, mocker):
     print(ctx.wallet.key.mnemonic)
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.wallet.key.mnemonic == MNEMONIC
-
-
-################### QR Passphrase
-
-
-def test_qr_passphrase(m5stickv, mocker):
-    from krux.pages.login import Login
-
-    TEST_VALUE = "Test value"
-    QR_DATA = (TEST_VALUE, None)
-    ctx = create_ctx(mocker, None)
-    login = Login(ctx)
-    mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
-    )
-    test_passphrase = login._load_qr_passphrase()
-
-    assert test_passphrase == TEST_VALUE
-
-
-def test_qr_passphrase_too_long(m5stickv, mocker):
-    from krux.pages.login import Login, MENU_CONTINUE
-
-    TEST_VALUE = "Test value" * 25
-    QR_DATA = (TEST_VALUE, None)
-    ctx = create_ctx(mocker, None)
-    login = Login(ctx)
-    mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
-    )
-    test_passphrase = login._load_qr_passphrase()
-
-    assert test_passphrase == MENU_CONTINUE
-
-
-def test_qr_passphrase_fail(m5stickv, mocker):
-    from krux.pages.login import Login, MENU_CONTINUE
-
-    TEST_VALUE = None
-    QR_DATA = (TEST_VALUE, None)
-    ctx = create_ctx(mocker, None)
-    login = Login(ctx)
-    mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
-    )
-    test_passphrase = login._load_qr_passphrase()
-
-    assert test_passphrase == MENU_CONTINUE
 
 
 def test_new_12w_from_snapshot(m5stickv, mocker):
@@ -236,16 +184,7 @@ def test_new_12w_from_snapshot(m5stickv, mocker):
         # Words
         [BUTTON_ENTER]
         +
-        # Move to No passphrase
-        [BUTTON_PAGE_PREV]
-        +
-        # Confirm No passphrase
-        [BUTTON_ENTER]
-        +
-        # Confirm Fingerpint
-        [BUTTON_ENTER]
-        +
-        # Confirm Singlesig
+        # Load Wallet
         [BUTTON_ENTER]
     )
     MNEMONIC = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
@@ -269,19 +208,7 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to move to Scan passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to move to No passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to skip passphrase
-        [BUTTON_ENTER]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # 1 press to select single-sig
+        # Load the wallet
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -308,19 +235,7 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to move to Scan passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to move to No passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to skip passphrase
-        [BUTTON_ENTER]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # 1 press to select single-sig
+        # Load the wallet
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -350,19 +265,7 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to move to Scan passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to move to No passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to skip passphrase
-        [BUTTON_ENTER]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # 1 press to select single-sig
+        # Load the wallet
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -393,19 +296,7 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the next 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to move to Scan passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to move to No passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to skip passphrase
-        [BUTTON_ENTER]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # 1 press to select single-sig
+        # Load the wallet
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -433,19 +324,7 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the next 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to move to Scan passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to move to No passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to skip passphrase
-        [BUTTON_ENTER]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # 1 press to select single-sig
+        # Load the wallet
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -476,19 +355,7 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the next 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to move to Scan passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to move to No passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to skip passphrase
-        [BUTTON_ENTER]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # 1 press to select single-sig
+        # Load the wallet
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
@@ -518,19 +385,7 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
         # 1 press to proceed with the 12 words
         [BUTTON_ENTER]
         +
-        # 1 press to move to Scan passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to move to No passphrase
-        [BUTTON_PAGE]
-        +
-        # 1 press to skip passphrase
-        [BUTTON_ENTER]
-        +
-        # 1 press to confirm fingerprint
-        [BUTTON_ENTER]
-        +
-        # 1 press to select single-sig
+        # Load the wallet
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_UR
@@ -599,11 +454,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
             + [
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 word confirm
-                BUTTON_PAGE,  # 1 press to move to Scan passphrase
-                BUTTON_PAGE,  # 1 press to move to No passphrase
-                BUTTON_ENTER,  # 1 press to skip passphrase
-                BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,  # Single-sig
+                BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
@@ -632,11 +483,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
             + [
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 word confirm
-                BUTTON_PAGE,  # 1 press to move to Scan passphrase
-                BUTTON_PAGE,  # 1 press to move to No passphrase
-                BUTTON_ENTER,  # 1 press to skip passphrase
-                BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,  # Single-sig
+                BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
@@ -701,11 +548,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_PAGE,  # 1 press to move to Scan passphrase
-                BUTTON_PAGE,  # 1 press to move to No passphrase
-                BUTTON_ENTER,  # 1 press to skip passphrase
-                BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,
+                BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
             [13, 14, 17, 27, 26, 17, 19, 0],
@@ -734,11 +577,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
             [
                 BUTTON_ENTER,
                 BUTTON_ENTER,
-                BUTTON_PAGE,  # 1 press to move to Scan passphrase
-                BUTTON_PAGE,  # 1 press to move to No passphrase
-                BUTTON_ENTER,  # 1 press to skip passphrase
-                BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,
+                BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability",
             [0],
@@ -810,11 +649,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 numbers confirm
                 BUTTON_ENTER,  # 12 word confirm
-                BUTTON_PAGE,  # 1 press to move to Scan passphrase
-                BUTTON_PAGE,  # 1 press to move to No passphrase
-                BUTTON_ENTER,  # 1 press to skip passphrase
-                BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,  # Single-sig
+                BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
@@ -839,11 +674,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 numbers confirm
                 BUTTON_ENTER,  # 12 word confirm
-                BUTTON_PAGE,  # 1 press to move to Scan passphrase
-                BUTTON_PAGE,  # 1 press to move to No passphrase
-                BUTTON_ENTER,  # 1 press to skip passphrase
-                BUTTON_ENTER,  # 1 press to confirm fingerprint
-                BUTTON_ENTER,  # Single-sig
+                BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability",
         ),
@@ -890,11 +721,7 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-sig
+            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = "cabin cabin cabin cabin cabin cabin cabin cabin cabin cabin cabin card"
@@ -959,11 +786,7 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-sig
+            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = "avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado "
@@ -1006,11 +829,7 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-sig
+            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = "divert divert divert divert divert divert divert divert divert divert divert heavy"
@@ -1068,11 +887,7 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-sig
+            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = "cable cable cable cable cable cable cable cable cable cable cable "
@@ -1136,14 +951,7 @@ def test_no_passphrase_on_amigo(mocker, amigo):
         # Words correct? Confirm
         [BUTTON_ENTER]
         +
-        # No BIP39 Passphrase menu
-        [BUTTON_PAGE_PREV, BUTTON_ENTER]
-        +
-        # Accept fingerprint and derivation
-        [
-            BUTTON_ENTER,  # Continue?
-            BUTTON_ENTER,  # Single-sig
-        ]
+        [BUTTON_ENTER]  # Load wallet
     )
 
     ctx = create_ctx(mocker, case)
@@ -1156,6 +964,7 @@ def test_passphrase(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
     from krux.input import (
         BUTTON_ENTER,
+        BUTTON_PAGE,
         BUTTON_PAGE_PREV,
         SWIPE_LEFT,
         SWIPE_RIGHT,
@@ -1191,7 +1000,7 @@ def test_passphrase(amigo, mocker, mocker_printer):
         [BUTTON_ENTER]
         +
         # Passphrase, confirm
-        [BUTTON_ENTER]
+        [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER]
         +
         # In passphrase keypad:
         [
@@ -1201,8 +1010,8 @@ def test_passphrase(amigo, mocker, mocker_printer):
             BUTTON_ENTER,  # Add "a" character
             BUTTON_PAGE_PREV,  # Move to Go
             BUTTON_ENTER,  # Press Go
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single key
+            BUTTON_ENTER,  # Confirm passphrase
+            BUTTON_ENTER,  # Load Wallet
         ]
     )
 
@@ -1225,11 +1034,7 @@ def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
         + [BUTTON_ENTER]  # 1 press to select Go
         + [
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-sig
+            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo daring"
@@ -1257,11 +1062,7 @@ def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
         + [
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_ENTER,  # 24 word confirm
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-sig
+            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = "lend zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo blossom"
@@ -1283,11 +1084,7 @@ def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
         + [BUTTON_ENTER]  # Confirm
         + [
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-sig
+            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = (
@@ -1327,11 +1124,7 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
         + [
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 word confirm
-            BUTTON_PAGE,  # 1 press to move to Scan passphrase
-            BUTTON_PAGE,  # 1 press to move to No passphrase
-            BUTTON_ENTER,  # 1 press to skip passphrase
-            BUTTON_ENTER,  # 1 press to confirm fingerprint
-            BUTTON_ENTER,  # Single-sig
+            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = "language language language language language language language language language language language auction"
