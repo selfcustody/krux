@@ -1,4 +1,4 @@
-This page explains how to install Krux from source.
+This page explains how to install Krux from source. You can check these instructions in our [README](https://github.com/selfcustody/krux) too.
 
 #### Software
 You will need a computer with [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [`vagrant`](https://www.vagrantup.com/downloads) installed.
@@ -78,13 +78,8 @@ flash-krux-logo.md
 amigo-more-info-faq.md
 ----8<----
 
-### Multilingual support
-Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.
-
-### Upgrade via microSD card
-Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades [via microSD](../features/sd-card-update.md) card to keep the device airgapped.
-
-After you've built the firmware, you can sign it using one of the following methods:
+### Signing the firmware
+You can sign the firmware using one of the two methods listed below:
 
 #### Method 1: Signing from Krux
 First, calculate the SHA256 hash of the new firmware by running:
