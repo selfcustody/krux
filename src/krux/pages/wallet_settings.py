@@ -55,8 +55,8 @@ class PassphraseEditor(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Type BIP39 passphrase"), self._load_passphrase),
-                    (t("Scan BIP39 passphrase"), self._load_qr_passphrase),
+                    (t("Type BIP39 Passphrase"), self._load_passphrase),
+                    (t("Scan BIP39 Passphrase"), self._load_qr_passphrase),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
                 disable_statusbar=True,

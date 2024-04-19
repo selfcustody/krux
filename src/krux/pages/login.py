@@ -238,7 +238,9 @@ class Login(Page):
             wallet_info += (
                 self.fit_to_line(key.derivation_str(True), crop_middle=False) + "\n"
             )
-            wallet_info += "No Passphrase\n" if not passphrase else "Passphrase: *..*"
+            wallet_info += (
+                t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
+            )
 
             info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
             submenu = Menu(
