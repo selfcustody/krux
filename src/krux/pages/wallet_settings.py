@@ -22,7 +22,7 @@
 
 from embit.networks import NETWORKS
 from ..display import FONT_HEIGHT
-from ..krux_settings import t
+from ..krux_settings import t, Settings
 from . import (
     Page,
     Menu,
@@ -36,6 +36,10 @@ from . import (
 )
 from .settings_page import DIGITS
 from ..key import SINGLESIG_SCRIPT_PURPOSE, MULTISIG_SCRIPT_PURPOSE
+from ..settings import (
+    MAIN_TXT,
+    TEST_TXT,
+)
 
 PASSPHRASE_MAX_LEN = 200
 ACCOUNT_MAX = 2**31 - 1  # Maximum account index
@@ -111,7 +115,7 @@ class WalletSettings(Page):
                         if multisig
                         else str(SINGLESIG_SCRIPT_PURPOSE[script_type])
                     ),
-                    "0" if network == NETWORKS["main"] else "1",
+                    "0" if network == NETWORKS[MAIN_TXT] else "1",
                     str(account) + "'",
                 ]
             )
@@ -162,7 +166,7 @@ class WalletSettings(Page):
             disable_statusbar=True,
         )
         index, _ = submenu.run_loop()
-        return NETWORKS["test"] if index == 1 else NETWORKS["main"]
+        return NETWORKS[TEST_TXT] if index == 1 else NETWORKS[MAIN_TXT]
 
     def _multisig(self):
         """Multisig selection menu"""
