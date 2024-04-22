@@ -22,7 +22,7 @@
 
 from embit.networks import NETWORKS
 from ..display import FONT_HEIGHT
-from ..krux_settings import t, Settings
+from ..krux_settings import t
 from . import (
     Page,
     Menu,
