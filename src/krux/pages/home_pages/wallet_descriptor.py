@@ -176,4 +176,5 @@ class WalletDescriptor(Page):
                     self.ctx.input.wait_for_button()
             else:
                 self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
