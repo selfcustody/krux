@@ -35,7 +35,8 @@ from ..settings import (
 )
 from ..krux_settings import (
     Settings,
-    DefaultWallet,
+    MAIN_TXT,
+    TEST_TXT,
     TouchSettings,
     ButtonsSettings,
     t,
@@ -59,8 +60,8 @@ PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
 
 CATEGORY_SETTING_COLOR_DICT = {
-    DefaultWallet.MAIN_TXT: ORANGE,
-    DefaultWallet.TEST_TXT: GREEN,
+    MAIN_TXT: ORANGE,
+    TEST_TXT: GREEN,
 }
 
 

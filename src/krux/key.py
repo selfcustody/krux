@@ -30,6 +30,7 @@ from binascii import hexlify
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
+from .settings import TEST_TXT
 
 DER_SINGLE = "m/%dh/%dh/%dh"
 DER_MULTI = "m/%dh/%dh/%dh/2h"
@@ -52,7 +53,7 @@ class Key:
         self,
         mnemonic,
         multisig,
-        network=NETWORKS["test"],
+        network=NETWORKS[TEST_TXT],
         passphrase="",
         account_index=0,
         script_type="p2wpkh",

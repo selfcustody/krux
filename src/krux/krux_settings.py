@@ -26,6 +26,8 @@ from .settings import (
     NumberSetting,
     SD_PATH,
     FLASH_PATH,
+    MAIN_TXT,
+    TEST_TXT,
 )
 import board
 import binascii
@@ -71,9 +73,6 @@ def t(slug):
 
 class DefaultWallet(SettingsNamespace):
     """Bitcoin-specific settings"""
-
-    MAIN_TXT = "main"
-    TEST_TXT = "test"
 
     namespace = "settings.wallet"
     network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
