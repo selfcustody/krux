@@ -41,6 +41,9 @@ else:
 
 FLASH_MSG_TIME = 2000
 
+SMALLEST_WIDTH = 135
+SMALLEST_HEIGHT = 240
+
 # Splash will use horizontally-centered text plots. The spaces are used to help with alignment
 SPLASH = [
     "██   ",
@@ -228,7 +231,7 @@ class Display:
         lines = []
         start = 0
         line_count = 0
-        if self.width() > 135:
+        if self.width() > SMALLEST_WIDTH:
             columns = self.usable_width() // FONT_WIDTH
         else:
             columns = self.width() // FONT_WIDTH
@@ -341,7 +344,7 @@ class Display:
         )
         if info_box:
             bg_color = theme.info_bg_color
-            padding = DEFAULT_PADDING if self.width() > 135 else DEFAULT_PADDING // 2
+            padding = DEFAULT_PADDING if self.width() > SMALLEST_WIDTH else DEFAULT_PADDING // 2
             self.fill_rectangle(
                 padding - 3,
                 offset_y - 1,
