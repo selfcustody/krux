@@ -748,7 +748,7 @@ class Menu:
             and self.ctx.wallet.key.network["name"] == "Testnet"
         ):
             if self.ctx.display.width() > SMALLEST_WIDTH:
-                self.ctx.display.draw_string(12, 0, "test", GREEN, theme.info_bg_color)
+                self.ctx.display.draw_string(12, 0, "Test", GREEN, theme.info_bg_color)
             else:
                 self.ctx.display.draw_string(6, 0, "T", GREEN, theme.info_bg_color)
 

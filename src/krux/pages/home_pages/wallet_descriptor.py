@@ -42,9 +42,10 @@ class WalletDescriptor(Page):
         """Handler for the 'wallet' menu item"""
         self.ctx.display.clear()
         if not self.ctx.wallet.is_loaded():
-            self.ctx.display.draw_centered_text(
-                t("Wallet output descriptor not found.")
-            )
+            text = t("Wallet output descriptor not found.")
+            if not self.ctx.wallet.is_multisig():
+                text += " " + t("It is optional for single-sig.")
+            self.ctx.display.draw_centered_text(text)
             if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
                 return self._load_wallet()
         else:
