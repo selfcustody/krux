@@ -272,8 +272,6 @@ def board_m5stickv():
                 "display": {
                     "touch": False,
                     "font": [8, 14],
-                    "inverted_coordinates": False,
-                    "qr_colors": [16904, 61307],
                 },
             },
         }
@@ -323,8 +321,6 @@ def board_amigo_tft():
                 "display": {
                     "touch": True,
                     "font": [12, 24],
-                    "inverted_coordinates": True,
-                    "qr_colors": [0, 6342],
                 },
             },
         }
@@ -351,8 +347,6 @@ def board_dock():
                 "display": {
                     "touch": False,
                     "font": [8, 16],
-                    "inverted_coordinates": False,
-                    "qr_colors": [0, 6342],
                 },
             },
         }
