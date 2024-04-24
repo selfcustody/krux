@@ -28,7 +28,9 @@ from .krux_settings import Settings
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
-QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
+QR_DARK_COLOR, QR_LIGHT_COLOR = (
+    [16904, 61307] if board.config["type"] == "m5stickv" else [0, 6342]
+)
 TOTAL_LINES = board.config["lcd"]["width"] // FONT_HEIGHT
 BOTTOM_LINE = (TOTAL_LINES - 1) * FONT_HEIGHT
 MINIMAL_DISPLAY = board.config["type"] in ("m5stickv", "cube")
