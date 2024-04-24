@@ -158,14 +158,11 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                 ),
             )
         else:
+            x_val = x if BOARD_CONFIG["type"] != "amigo" else width() - text.get_width() - x
             screen.blit(
                 text,
                 (
-                    (
-                        width() - text.get_width() - x
-                        if _is_x_flipped()
-                        else x
-                    ),
+                    x_val,
                     y,
                 ),
             )
