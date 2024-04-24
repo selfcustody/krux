@@ -346,7 +346,11 @@ class Display:
         )
         if info_box:
             bg_color = theme.info_bg_color
-            padding = DEFAULT_PADDING if self.width() > SMALLEST_WIDTH else DEFAULT_PADDING // 2
+            padding = (
+                DEFAULT_PADDING
+                if self.width() > SMALLEST_WIDTH
+                else DEFAULT_PADDING // 2
+            )
             self.fill_rectangle(
                 padding - 3,
                 offset_y - 1,

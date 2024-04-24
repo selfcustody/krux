@@ -31,7 +31,14 @@ from . import Page, FLASH_MSG_TIME
 from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY, FONT_HEIGHT, FONT_WIDTH, SMALLEST_WIDTH, SMALLEST_HEIGHT
+from ..display import (
+    DEFAULT_PADDING,
+    MINIMAL_DISPLAY,
+    FONT_HEIGHT,
+    FONT_WIDTH,
+    SMALLEST_WIDTH,
+    SMALLEST_HEIGHT,
+)
 from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -856,7 +863,9 @@ class TinyScanner(Page):
                     self._gradient_value(index, gradient_corners) * 4
                 ) // 5  # ~-20%
                 # Sensor image will be downscaled on small displays
-                punch_thickness = 1 if self.ctx.display.height() > SMALLEST_HEIGHT else 2
+                punch_thickness = (
+                    1 if self.ctx.display.height() > SMALLEST_HEIGHT else 2
+                )
                 # If the dot is punched, draws a rectangle and toggle respective bit
                 if dot_l < punch_threshold:
                     _ = img.draw_rectangle(
