@@ -26,6 +26,7 @@ import pygame as pg
 import cv2
 from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
+from krux.krux_settings import Settings
 
 COLOR_BLACK = (0, 0, 0)
 COLOR_WHITE = (255, 255, 255)
@@ -57,6 +58,7 @@ def rgb565torgb888(color):
 
 
 def clear(color):
+
     def run():
         if screen:
             screen.fill(color)
@@ -133,7 +135,15 @@ def height():
     return WIDTH if portrait else HEIGHT
 
 
+def _is_x_flipped():
+    flipped_x = False
+    if BOARD_CONFIG["type"] == "amigo":
+        flipped_x = Settings().hardware.display.flipped_x_coordinates
+    return flipped_x
+
+
 def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
+
     def run():
         from kruxsim import devices
 
@@ -143,11 +153,7 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
             screen.blit(
                 text,
                 (
-                    (
-                        height() - text.get_width() - y
-                        if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
-                        else y
-                    ),
+                    height() - text.get_width() - y,
                     x,
                 ),
             )
@@ -157,7 +163,7 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                 (
                     (
                         width() - text.get_width() - x
-                        if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
+                        if _is_x_flipped()
                         else x
                     ),
                     y,
@@ -170,6 +176,7 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
 
 
 def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color, background):
+
     def run():
         starting_size = 0
         while code_str[starting_size] != "\n":
@@ -197,6 +204,7 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color, backgro
 def draw_qr_code_binary(
     offset_y, code_bin, max_width, dark_color, light_color, background
 ):
+    
     def run():
         starting_size = int(math.sqrt(len(code_bin) * 8))
         block_size_divisor = starting_size + 2
@@ -243,6 +251,7 @@ def draw_qr_code_binary(
 
 
 def fill_rectangle(x, y, w, h, color, radius=0):
+
     def run():
         if radius == 0:
             pg.draw.rect(screen, color, (x, y, w, h))
@@ -263,19 +272,20 @@ def fill_rectangle(x, y, w, h, color, radius=0):
             pg.draw.circle(screen, color, (x + w - radius, y + h - radius), radius)
 
     color = rgb565torgb888(color)
-    if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]:
+    if _is_x_flipped():
         x = width() - w - x
     radius = min(radius, min(w, h) // 2)
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 
 
 def draw_line(x_0, y_0, x_1, y_1, color):
+
     def run():
         start_pos = (x_0, y_0)
         end_pos = (x_1, y_1)
 
         # Apply inverted coordinates if necessary
-        if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]:
+        if _is_x_flipped():
             start_pos = (width() - x_1 - 1, y_0)
             end_pos = (width() - x_0 - 1, y_1)
 
@@ -289,13 +299,14 @@ def draw_outline(x, y, w, h, color):
     x += 1  # Adjust for compatibility with previous implementation
 
     def run():
+
         pg.draw.rect(
             screen,
             color,
             (
                 (
                     width() - w - x - 1
-                    if BOARD_CONFIG["krux"]["display"]["inverted_coordinates"]
+                    if _is_x_flipped()
                     else x
                 ),
                 y,
