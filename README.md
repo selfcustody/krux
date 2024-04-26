@@ -1,6 +1,11 @@
+![created at](https://img.shields.io/github/created-at/selfcustody/krux)
 [![downloads](https://img.shields.io/github/downloads/selfcustody/krux/total)](https://github.com/selfcustody/krux/releases)
+[![release](https://img.shields.io/github/v/release/selfcustody/krux)](https://github.com/selfcustody/krux/releases)
+[![downloads (latest release)](https://img.shields.io/github/downloads/selfcustody/krux/latest/total)](https://github.com/selfcustody/krux/releases)
+[![commits (since latest release)](https://img.shields.io/github/commits-since/selfcustody/krux/latest/develop)](https://github.com/selfcustody/krux/compare/main...develop)
 [![codecov](https://codecov.io/gh/selfcustody/krux/branch/main/graph/badge.svg?token=XU80PT6Q9V)](https://codecov.io/gh/selfcustody/krux)
 [![calver](https://img.shields.io/badge/calver-YY.0M.MICRO-22bfda.svg)](https://calver.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/selfcustody/krux/blob/main/LICENSE.md)
 
 <p align="center">
 <img src="https://selfcustody.github.io/krux/img/maixpy_m5stickv/logo-125.png">
