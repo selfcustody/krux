@@ -36,7 +36,7 @@ from . import (
     MENU_EXIT,
     ESC_KEY,
     LETTERS,
-    choose_len_mnemonic
+    choose_len_mnemonic,
 )
 
 DIGITS = "0123456789"
@@ -83,7 +83,7 @@ class Login(Page):
         return status
 
     def load_key_from_camera(self):
-        """Handler for the 'via camera' menu item"""
+        """Handler for the 'load mnemonic'>'via camera' menu item"""
         submenu = Menu(
             self.ctx,
             [
@@ -101,7 +101,7 @@ class Login(Page):
         return status
 
     def load_key_from_manual_input(self):
-        """Handler for the 'via manual input' menu item"""
+        """Handler for the 'load mnemonic'>'via manual input' menu item"""
         submenu = Menu(
             self.ctx,
             [
@@ -118,7 +118,7 @@ class Login(Page):
         return status
 
     def load_mnemonic_from_storage(self):
-        """Handler to load mnemonic from storage"""
+        """Handler to 'load mnemonic'>'from storage"""
         from .encryption_ui import LoadEncryptedMnemonic
 
         encrypted_mnemonics = LoadEncryptedMnemonic(self.ctx)
@@ -133,6 +133,7 @@ class Login(Page):
             self.ctx,
             [
                 (t("Via Camera"), self.new_key_from_snapshot),
+                (t("Via Words"), lambda: self.load_key_from_text(new=True)),
                 (t("Via D6"), self.new_key_from_dice),
                 (t("Via D20"), lambda: self.new_key_from_dice(True)),
                 (t("Back"), lambda: MENU_EXIT),
@@ -144,7 +145,7 @@ class Login(Page):
         return status
 
     def new_key_from_dice(self, d_20=False):
-        """Handler for the 'via DX' menu item. Default is D6"""
+        """Handler for both 'new mnemonic'>'via D6/D20' menu items. Default is D6"""
         from .new_mnemonic.dice_rolls import DiceEntropy
 
         dice_entropy = DiceEntropy(self.ctx, d_20)
@@ -359,6 +360,8 @@ class Login(Page):
         to_word,
         autocomplete_fn=None,
         possible_keys_fn=None,
+        new=False,
+        len_mnemonic=None
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
@@ -417,9 +420,17 @@ class Login(Page):
 
         return MENU_CONTINUE
 
-    def load_key_from_text(self):
-        """Handler for the 'via text' menu item"""
-        title = t("Enter each word of your BIP-39 mnemonic.")
+    def load_key_from_text(self, new=False):
+        """Handler for both 'new/load mnemonic'>[...]>'via words' menu items"""
+
+        if new:
+            len_mnemonic = choose_len_mnemonic(self.ctx)
+            if not len_mnemonic:
+                return MENU_CONTINUE
+            title = t("Enter %d BIP-39 words.") % len_mnemonic
+        else:
+            len_mnemonic = None
+            title = t("Enter each word of your BIP-39 mnemonic.")
 
         # Precompute start and stop indexes for each letter in the wordlist
         # to reduce the search space for autocomplete, possible_letters, etc.
@@ -482,11 +493,17 @@ class Login(Page):
             }
 
         return self._load_key_from_keypad(
-            title, LETTERS, to_word, autocomplete, possible_letters
+            title,
+            LETTERS,
+            to_word,
+            autocomplete_fn=autocomplete,
+            possible_keys_fn=possible_letters,
+            new=new,
+            len_mnemonic=len_mnemonic
         )
 
     def pre_load_key_from_digits(self):
-        """Handler for the 'via numbers' menu item"""
+        """Handler for the 'load mnemonic'>'via numbers' menu item"""
         submenu = Menu(
             self.ctx,
             [
@@ -502,7 +519,7 @@ class Login(Page):
         return status
 
     def load_key_from_octal(self):
-        """Handler for the 'via numbers'>'Octal' submenu item"""
+        """Handler for the 'load mnemonic'>'via numbers'>'octal' submenu item"""
         title = t(
             "Enter each word of your BIP-39 mnemonic as a number in octal from 1 to 4000."
         )
@@ -531,11 +548,11 @@ class Login(Page):
             DIGITS_OCT,
             to_word,
             autocomplete_fn=autocomplete,
-            possible_keys_fn=possible_letters,
+            possible_keys_fn=possible_letters
         )
 
     def load_key_from_hexadecimal(self):
-        """Handler for the 'via numbers'>'Hexadecimal' submenu item"""
+        """Handler for the 'load mnemonic'>'via numbers'>'hexadecimal' submenu item"""
         title = t(
             "Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800."
         )
@@ -564,11 +581,11 @@ class Login(Page):
             DIGITS_HEX,
             to_word,
             autocomplete_fn=autocomplete,
-            possible_keys_fn=possible_letters,
+            possible_keys_fn=possible_letters
         )
 
     def load_key_from_digits(self):
-        """Handler for the 'via numbers'>'Decimal' submenu item"""
+        """Handler for the 'load mnemonic'>'via numbers'>'decimal' submenu item"""
         title = t("Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.")
 
         def autocomplete(prefix):
@@ -594,7 +611,7 @@ class Login(Page):
             DIGITS,
             to_word,
             autocomplete_fn=autocomplete,
-            possible_keys_fn=possible_letters,
+            possible_keys_fn=possible_letters
         )
 
     def load_key_from_1248(self):
