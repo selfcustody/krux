@@ -1,4 +1,4 @@
-<img src="https://img.shields.io/github/created-at/selfcustody/krux">
+[![created at](https://img.shields.io/github/created-at/selfcustody/krux)](https://github.com/selfcustody/krux/commit/bb8e2d63e031417111ff7cb2b8877c10e19410be)
 [![downloads](https://img.shields.io/github/downloads/selfcustody/krux/total)](https://github.com/selfcustody/krux/releases)
 [![downloads (latest release)](https://img.shields.io/github/downloads/selfcustody/krux/latest/total)](https://github.com/selfcustody/krux/releases)
 [![commits (since latest release)](https://img.shields.io/github/commits-since/selfcustody/krux/latest/develop)](https://github.com/selfcustody/krux/compare/main...develop)
