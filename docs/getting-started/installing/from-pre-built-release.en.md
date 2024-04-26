@@ -63,7 +63,7 @@ List ports on Mac
 ```bash
 ls /dev/cu.usbserial*
 ```
-Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue.
+Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue. See [FAQ](../../faq.md/#why-isnt-my-device-charging-or-being-recognized-when-connected-to-the-computers-usb) for more info.
 
 ----8<----
 tips-after-install.en.txt
