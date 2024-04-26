@@ -36,6 +36,7 @@ from . import (
     MENU_EXIT,
     ESC_KEY,
     LETTERS,
+    choose_len_mnemonic
 )
 
 DIGITS = "0123456789"
@@ -155,19 +156,9 @@ class Login(Page):
 
     def new_key_from_snapshot(self):
         """Use camera's entropy to create a new mnemonic"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        if index == 2:
+        len_mnemonic = choose_len_mnemonic(self.ctx)
+        if not len_mnemonic:
             return MENU_CONTINUE
-
-        self.ctx.display.clear()
 
         self.ctx.display.draw_hcentered_text(
             t("Use camera's entropy to create a new mnemonic")
@@ -188,7 +179,7 @@ class Login(Page):
                     t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash
                 )
                 self.ctx.input.wait_for_button()
-                num_bytes = 16 if index == 0 else 32
+                num_bytes = 16 if len_mnemonic == 12 else 32
                 words = bip39.mnemonic_from_bytes(entropy_bytes[:num_bytes]).split()
                 return self._load_key_from_words(words)
         return MENU_CONTINUE
@@ -621,22 +612,12 @@ class Login(Page):
         """Menu handler to manually load key from Tiny Seed sheet metal storage method"""
         from .tiny_seed import TinySeed
 
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        self.ctx.display.clear()
-        if index == 2:
+        len_mnemonic = choose_len_mnemonic(self.ctx)
+        if not len_mnemonic:
             return MENU_CONTINUE
 
-        w24 = index == 1
         tiny_seed = TinySeed(self.ctx)
-        words = tiny_seed.enter_tiny_seed(w24)
+        words = tiny_seed.enter_tiny_seed(len_mnemonic==24)
         del tiny_seed
         if words is not None:
             return self._load_key_from_words(words)
@@ -646,17 +627,8 @@ class Login(Page):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
         from .tiny_seed import TinyScanner
 
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        self.ctx.display.clear()
-        if index == 2:
+        len_mnemonic = choose_len_mnemonic(self.ctx)
+        if not len_mnemonic:
             return MENU_CONTINUE
 
         intro = t("Paint punched dots black so they can be detected.") + " "
@@ -666,9 +638,8 @@ class Login(Page):
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
-        w24 = index == 1
         tiny_scanner = TinyScanner(self.ctx)
-        words = tiny_scanner.scanner(w24)
+        words = tiny_scanner.scanner(len_mnemonic==24)
         del tiny_scanner
         if words is None:
             self.flash_error(t("Failed to load mnemonic"))

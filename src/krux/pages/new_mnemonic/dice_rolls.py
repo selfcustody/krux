@@ -25,6 +25,7 @@ from .. import (
     Menu,
     MENU_EXIT,
     ESC_KEY,
+    choose_len_mnemonic,
 )
 from ...themes import theme
 from ...krux_settings import t
@@ -181,25 +182,16 @@ class DiceEntropy(Page):
 
     def new_key(self):
         """Create a new key from dice rolls"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        is_24_words = index == 1
-        if index == 2:
+        len_mnemonic = choose_len_mnemonic(self.ctx)
+        if not len_mnemonic:
             return None
-        if index == 1:  # 24 words
+
+        if len_mnemonic == 24:
             self.min_entropy = MIN_ENTROPY_24W
             self.min_rolls = D20_24W_MIN_ROLLS if self.is_d20 else D6_24W_MIN_ROLLS
         else:  # 12 words
             self.min_entropy = MIN_ENTROPY_12W
             self.min_rolls = D20_12W_MIN_ROLLS if self.is_d20 else D6_12W_MIN_ROLLS
-        self.ctx.display.clear()
 
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
@@ -294,7 +286,7 @@ class DiceEntropy(Page):
                 t("SHA256 of rolls:") + "\n\n%s" % entropy_hash
             )
             self.ctx.input.wait_for_button()
-            num_bytes = 32 if is_24_words else 16
+            num_bytes = 32 if len_mnemonic==24 else 16
             return hashlib.sha256(entropy_bytes).digest()[:num_bytes]
 
         return None
