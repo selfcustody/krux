@@ -4,10 +4,10 @@ This page explains how to install Krux from a test (beta), pre-built release.
 Keep in mind that these are unsigned binaries.
 
 ### Download
-Download experimental compiled firmware or the Android app `apk`: [Krux binaries](https://github.com/odudex/krux_binaries)
+Download experimental compiled firmware or the Android app `apk` from our [test (beta) repository](https://github.com/odudex/krux_binaries).
 
 #### Android
-Krux Android app is intended for learning about Krux and Bitcoin airgapped transactions. Vulnerabilities inherent to Android phones such as the OS, other apps and wireless / CDMA / GSM / Bluetooth connectivity make using any phone insecure. Krux app should NOT be used to manage savings or important keys and mnemonics. For that, a dedicated device is recommended.
+Krux Android app is intended for learning about Krux and Bitcoin airgapped transactions (requires Android 6.0 or above). Vulnerabilities inherent to Android phones such as the OS, other apps and wireless / CDMA / GSM / Bluetooth connectivity make using any phone insecure. Krux app should NOT be used to manage savings or important keys and mnemonics. For that, a dedicated device is recommended.
 
 #### M5StickV
 ##### Linux
