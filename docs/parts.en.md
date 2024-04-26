@@ -15,13 +15,13 @@
 
 <i style="font-size: 85%">:material-information:{id="m5stickv-info"}:
 ----8<----
-m5stickv-usb-c.md
+m5stickv-usb-c.en.txt
 ----8<----
 </i>
 
 <i style="font-size: 85%">:material-information:{id="amigo-info"}:
 ----8<----
-amigo-more-info-faq.md:2
+amigo-more-info-faq.en.txt:2
 ----8<----
 </i>
 
@@ -101,7 +101,7 @@ This will be included with the M5StickV and Maix Amigo that you purchase from on
 
 ### (Optional) MicroSD Card
 ----8<----
-sd-card-info-faq.md
+sd-card-info-faq.en.txt
 ----8<----
 The size of the SD card isn't important; anything over a few megabytes will be plenty.
 

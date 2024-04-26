@@ -36,7 +36,7 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 ```
 
 ----8<----
-amigo-more-info-faq.md
+amigo-more-info-faq.en.txt
 ----8<----
 
 #### Sipeed Maix Bit

@@ -34,11 +34,11 @@ For `dock` the `-B` parameter changes, so run:
 ```
 
 ----8<----
-flash-krux-logo.md
+flash-krux-logo.en.txt
 ----8<----
 
 ----8<----
-amigo-more-info-faq.md
+amigo-more-info-faq.en.txt
 ----8<----
 
 #### Troubleshooting
@@ -66,5 +66,5 @@ ls /dev/cu.usbserial*
 Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue.
 
 ----8<----
-tips-after-install.md
+tips-after-install.en.txt
 ----8<----

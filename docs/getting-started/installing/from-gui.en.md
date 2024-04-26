@@ -185,7 +185,7 @@ In Linux, you'll be prompted to type your **password** (sudo or admin).
 <img width="600" src="../../../img/krux-installer/select_flash.png" alt="Main menu with flash button" />
 
 ----8<----
-flash-krux-logo.md
+flash-krux-logo.en.txt
 ----8<----
 
 #### Wipe device
@@ -199,5 +199,5 @@ This option **erases ALL data from the device's flash memory**. On Linux, it wil
 > ⚠️  TIP: Do not unplug or poweroff your device or computer. Wait until the process finishes.
 
 ----8<----
-tips-after-install.md
+tips-after-install.en.txt
 ----8<----

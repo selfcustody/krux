@@ -6,6 +6,6 @@ To perform an upgrade, simply copy the [official release](https://github.com/sel
 Once installation is complete, eject the microSD card and delete the firmware files before reinserting and rebooting. Otherwise you will be prompted to install it again.
 
 ----8<----
-sd-card-info-faq.md
+sd-card-info-faq.en.txt
 ----8<----
 Only official releases are signed and can be installed via microSD card.

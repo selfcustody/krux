@@ -60,7 +60,7 @@ Load the wallet into Krux by going to the *Settings* page in Specter Desktop, th
 <img src="../../../img/specter/export-wallet-screen-600.png">
 
 ----8<----
-single-multi-wallet-descriptor.md
+single-multi-wallet-descriptor.en.txt
 ----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">
@@ -109,7 +109,7 @@ On the wallet screen, make sure to select a *Single Signature* policy type with 
 <img src="../../../img/sparrow/singlesig-wallet-settings-400.png">
 
 ----8<----
-sparrow/import-xpub-sparrow.md
+sparrow/import-xpub-sparrow.en.txt
 ----8<----
 
 <img src="../../../img/sparrow/keystore-singlesig-key-settings-600.png">
@@ -125,7 +125,7 @@ Load the wallet output descriptor into Krux by going to the *Settings* screen of
 <img src="../../../img/sparrow/descriptor-singlesig-key-settings-600.png">
 
 ----8<----
-sparrow/load-wallet-output-sparrow.md
+sparrow/load-wallet-output-sparrow.en.txt
 ----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">
@@ -137,12 +137,12 @@ Navigate to the *Receive* screen where you should see a receive address that you
 <img src="../../../img/sparrow/singlesig-receive-address-600.png">
 
 ----8<----
-sparrow/send-coins-sparrow.md
+sparrow/send-coins-sparrow.en.txt
 ----8<----
 
 Once all parts of the QR code have been read, you should see the signature bar fill and two new buttons appear. 
 ----8<----
-sparrow/broadcast-sparrow.md
+sparrow/broadcast-sparrow.en.txt
 ----8<----
 
 ## BlueWallet
@@ -180,7 +180,7 @@ From here, tap *Export/Backup* in order to display a QR code of your wallet.
 <img src="../../../img/blue/export-singlesig-wallet-400.png" style="border: 1px solid;">
 
 ----8<----
-single-multi-wallet-descriptor.md
+single-multi-wallet-descriptor.en.txt
 ----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wpkh-load-prompt-125.png">

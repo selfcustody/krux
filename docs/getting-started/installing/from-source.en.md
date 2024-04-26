@@ -71,11 +71,11 @@ If the flashing fails try one of the following common solutions:
 - If the flashing process fails midway through, check the connection, restart the device, and try the command again.
 
 ----8<----
-flash-krux-logo.md
+flash-krux-logo.en.txt
 ----8<----
 
 ----8<----
-amigo-more-info-faq.md
+amigo-more-info-faq.en.txt
 ----8<----
 
 ### Signing the firmware
