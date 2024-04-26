@@ -37,23 +37,18 @@ git pull origin main && git submodule update --init --recursive
 This will make sure that all submodules (and their submodules, etc.) are pulled down and updated.
 
 ## Krux (script)
-The [krux](krux) bash script contains commands for common development tasks. It assumes a Linux host, but may work on other systems. For this reason, we suggest you use [Vagrant](https://www.vagrantup.com/) since all dependencies for development will be included. If running outside of Vagrant, you will need to have [Docker](https://www.docker.com/), `openssl`, and `wget` installed at a minimum for the commands to work as expected.
+The [krux](krux) bash script contains commands for common development tasks. It assumes a Linux host, you will need to have [Docker](https://www.docker.com/), `openssl`, and `wget` installed at a minimum for the commands to work as expected.
 
-For building and flashing Krux from within Vagrant, please follow the [Installing from source](https://selfcustody.github.io/krux/getting-started/installing-from-source) guide on the website.
-
-Otherwise, to run the commands on bare metal, remove the `vagrant ssh -c 'cd /vagrant; <command>'` wrapper from all commands like so:
-
+To build and flash the firmware:
 ```bash
-# build firmware for MaixDock
-# vagrant ssh -c 'cd /vagrant; ./krux build maixpy_dock'
-./krux build maixpy_dock
+# build firmware for Maix Amigo
+./krux build maixpy_amigo
 
-# flash the firmware to a MaixDock
-# vagrant ssh -c 'cd /vagrant; ./krux flash maixpy_dock'
-./krux flash maixpy_dock
+# flash the firmware to Maix Amigo
+./krux flash maixpy_amigo
 ```
 
-Note: if you encounter any of this errors during build, it is a connection issue with github, plz try to build again:
+Note: if you encounter any of this errors during build, it is a connection issue with github, plz try again (if the error persist, try to change DNS/VPN or fix host name resolution of github.com to an IP that is working for you):
 ```
 error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err8)
 fatal: the remote end hung up unexpectedly
@@ -180,11 +175,6 @@ poetry run poe simulator --sequence sequences/home-options.txt --no-screenshot-s
 If you've made a fresh build and flashed it to your device, you can connect to the device over serial connection with:
 ```bash
 screen /dev/tty.usbserial-device-name 115200
-```
-
-If you see a `Resource is busy` message, make sure to shut down the Vagrant box and try again:
-```bash
-vagrant halt
 ```
 
 If successful, the device should restart and you should see:
