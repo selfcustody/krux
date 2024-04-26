@@ -335,11 +335,10 @@ def test_get_final_word_candidates(mocker, m5stickv, tdata):
         for final_word in candidates:
             assert mnemonic_is_valid(" ".join(partial + [final_word]))
 
+
 def test_get_final_word_candidates_fails_when_wrong_word_count(mocker, m5stickv, tdata):
     mock_modules(mocker)
     from krux.key import Key
 
     with pytest.raises(ValueError):
-        Key.get_final_word_candidates(
-            tdata.TEST_12_WORD_MNEMONIC.split()[:-2]
-        )
+        Key.get_final_word_candidates(tdata.TEST_12_WORD_MNEMONIC.split()[:-2])

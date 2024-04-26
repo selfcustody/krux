@@ -847,7 +847,9 @@ class Menu:
                     )
             offset_y += delta_y
 
+
 def choose_len_mnemonic(ctx):
+    """Reusable '12 or 24 words?" menu choice"""
     submenu = Menu(
         ctx,
         [
@@ -860,8 +862,6 @@ def choose_len_mnemonic(ctx):
     ctx.display.clear()
     if index == 0:
         return 12
-    elif index == 1:
+    if index == 1:
         return 24
-    else:
-        return None
-
+    return None

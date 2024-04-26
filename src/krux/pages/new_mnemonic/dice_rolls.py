@@ -286,7 +286,7 @@ class DiceEntropy(Page):
                 t("SHA256 of rolls:") + "\n\n%s" % entropy_hash
             )
             self.ctx.input.wait_for_button()
-            num_bytes = 32 if len_mnemonic==24 else 16
+            num_bytes = 32 if len_mnemonic == 24 else 16
             return hashlib.sha256(entropy_bytes).digest()[:num_bytes]
 
         return None

@@ -26,10 +26,8 @@ from ..settings_page import DIGITS
 from ...krux_settings import Settings
 from .. import (
     Page,
-    Menu,
     ESC_KEY,
     MENU_CONTINUE,
-    MENU_EXIT,
     choose_len_mnemonic,
 )
 
