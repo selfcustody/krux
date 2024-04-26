@@ -361,39 +361,57 @@ class Login(Page):
         autocomplete_fn=None,
         possible_keys_fn=None,
         new=False,
-        len_mnemonic=None
+        len_mnemonic=None,
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
         if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             while len(words) < 24:
-                if len(words) in (11, 23):
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(
-                        t("Leave blank if you'd like Krux to pick a valid final word")
-                    )
-                    self.ctx.input.wait_for_button()
-                if len(words) == 12:
-                    self.ctx.display.clear()
-                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
+                if new:
+                    if len(words) == len_mnemonic - 1:
+                        self.ctx.display.clear()
+                        self.ctx.display.draw_centered_text(
+                            t(
+                                "Leave blank if you'd like Krux to pick a valid final word"
+                            )
+                        )
+                        self.ctx.input.wait_for_button()
+                    elif len(words) == len_mnemonic:
                         break
+                else:
+                    if len(words) == 12:
+                        self.ctx.display.clear()
+                        if self.prompt(t("Done?"), self.ctx.display.height() // 2):
+                            break
 
                 word = ""
                 word_num = ""
                 while True:
                     word_num = ""
-                    word = self.capture_from_keypad(
-                        t("Word %d") % (len(words) + 1),
-                        [charset],
-                        autocomplete_fn,
-                        possible_keys_fn,
-                    )
+
+                    # if new and last word, lead input to a valid mnemonic
+                    if new and len(words) == len_mnemonic - 1:
+                        finalwords = Key.get_final_word_candidates(words)
+                        word = self.capture_from_keypad(
+                            t("Word %d") % (len(words) + 1),
+                            [charset],
+                            lambda x: autocomplete_fn(x, finalwords),
+                            lambda x: possible_keys_fn(x, finalwords),
+                        )
+                    else:
+                        word = self.capture_from_keypad(
+                            t("Word %d") % (len(words) + 1),
+                            [charset],
+                            autocomplete_fn,
+                            possible_keys_fn,
+                        )
+
                     if word == ESC_KEY:
                         return MENU_CONTINUE
 
-                    # If the last 'word' is blank,
+                    # If 'new' and the last 'word' is blank,
                     # pick a random final word that is a valid checksum
-                    if (len(words) in (11, 23)) and word == "":
+                    if new and word == "" and len(words) == len_mnemonic - 1:
                         break
 
                     if word != "":
@@ -435,34 +453,48 @@ class Login(Page):
         # Precompute start and stop indexes for each letter in the wordlist
         # to reduce the search space for autocomplete, possible_letters, etc.
         # This is much cheaper (memory-wise) than a trie.
-        search_ranges = {}
-        i = 0
-        while i < len(WORDLIST):
-            start_word = WORDLIST[i]
-            start_letter = start_word[0]
-            j = i + 1
-            while j < len(WORDLIST):
-                end_word = WORDLIST[j]
-                end_letter = end_word[0]
-                if end_letter != start_letter:
+        def compute_search_ranges(alt_wordlist=None):
+            if alt_wordlist:
+                wordlist = alt_wordlist
+            else:
+                wordlist = WORDLIST
+            search_ranges = {}
+            i = 0
+            while i < len(wordlist):
+                start_word = wordlist[i]
+                start_letter = start_word[0]
+                j = i + 1
+                while j < len(wordlist):
+                    end_word = wordlist[j]
+                    end_letter = end_word[0]
+                    if end_letter != start_letter:
+                        search_ranges[start_letter] = (i, j)
+                        i = j - 1
+                        break
+                    j += 1
+                if start_letter not in search_ranges:
                     search_ranges[start_letter] = (i, j)
-                    i = j - 1
-                    break
-                j += 1
-            if start_letter not in search_ranges:
-                search_ranges[start_letter] = (i, j)
-            i += 1
+                i += 1
+            return search_ranges
 
-        def autocomplete(prefix):
+        search_ranges = compute_search_ranges()
+
+        def autocomplete(prefix, alt_wordlist=None):
+            if alt_wordlist:
+                wordlist = alt_wordlist
+                search = compute_search_ranges(wordlist)
+            else:
+                wordlist = WORDLIST
+                search = search_ranges
             if len(prefix) > 0:
                 letter = prefix[0]
-                if letter not in search_ranges:
+                if letter not in search:
                     return None
-                start, stop = search_ranges[letter]
+                start, stop = search[letter]
                 matching_words = list(
                     filter(
                         lambda word: word.startswith(prefix),
-                        WORDLIST[start:stop],
+                        wordlist[start:stop],
                     )
                 )
                 if len(matching_words) == 1:
@@ -479,16 +511,22 @@ class Login(Page):
                     return user_input
             return ""
 
-        def possible_letters(prefix):
+        def possible_letters(prefix, alt_wordlist=None):
+            if alt_wordlist:
+                wordlist = alt_wordlist
+                search = compute_search_ranges(wordlist)
+            else:
+                wordlist = WORDLIST
+                search = search_ranges
             if len(prefix) == 0:
-                return LETTERS.replace("x", "")
+                return search.keys()
             letter = prefix[0]
-            if letter not in search_ranges:
+            if letter not in search:
                 return ""
-            start, stop = search_ranges[letter]
+            start, stop = search[letter]
             return {
                 word[len(prefix)]
-                for word in WORDLIST[start:stop]
+                for word in wordlist[start:stop]
                 if word.startswith(prefix) and len(word) > len(prefix)
             }
 
@@ -499,7 +537,7 @@ class Login(Page):
             autocomplete_fn=autocomplete,
             possible_keys_fn=possible_letters,
             new=new,
-            len_mnemonic=len_mnemonic
+            len_mnemonic=len_mnemonic,
         )
 
     def pre_load_key_from_digits(self):
@@ -548,7 +586,7 @@ class Login(Page):
             DIGITS_OCT,
             to_word,
             autocomplete_fn=autocomplete,
-            possible_keys_fn=possible_letters
+            possible_keys_fn=possible_letters,
         )
 
     def load_key_from_hexadecimal(self):
@@ -581,7 +619,7 @@ class Login(Page):
             DIGITS_HEX,
             to_word,
             autocomplete_fn=autocomplete,
-            possible_keys_fn=possible_letters
+            possible_keys_fn=possible_letters,
         )
 
     def load_key_from_digits(self):
@@ -611,7 +649,7 @@ class Login(Page):
             DIGITS,
             to_word,
             autocomplete_fn=autocomplete,
-            possible_keys_fn=possible_letters
+            possible_keys_fn=possible_letters,
         )
 
     def load_key_from_1248(self):
@@ -634,7 +672,7 @@ class Login(Page):
             return MENU_CONTINUE
 
         tiny_seed = TinySeed(self.ctx)
-        words = tiny_seed.enter_tiny_seed(len_mnemonic==24)
+        words = tiny_seed.enter_tiny_seed(len_mnemonic == 24)
         del tiny_seed
         if words is not None:
             return self._load_key_from_words(words)
@@ -656,7 +694,7 @@ class Login(Page):
             return MENU_CONTINUE
 
         tiny_scanner = TinyScanner(self.ctx)
-        words = tiny_scanner.scanner(len_mnemonic==24)
+        words = tiny_scanner.scanner(len_mnemonic == 24)
         del tiny_scanner
         if words is None:
             self.flash_error(t("Failed to load mnemonic"))
