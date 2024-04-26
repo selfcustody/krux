@@ -7,15 +7,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/selfcustody/krux/blob/main/LICENSE.md)
 
 <p align="center">
-<img src="https://selfcustody.github.io/krux/img/maixpy_m5stickv/logo-125.png">
-<img src="https://selfcustody.github.io/krux/img/maixpy_amigo/logo-150.png">
+<img srcset="img/maixpy_amigo/logo-150.png">
+<img srcset="img/maixpy_m5stickv/logo-125.png" width="75">
+<img srcset="img/maixpy_dock/logo-151.png" width="144">
+<img srcset="img/maixpy_yahboom/logo-156.png" width="116">
 </p>
 
-Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts. It runs on Kendryte K210 devices such as the [M5StickV](https://docs.m5stack.com/en/core/m5stickv) and [Maix Amigo](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html), converting them into airgapped devices that can sign transactions for multisignature and single-sig wallets.
+Krux is an open-source firmware facilitating the creation of Bitcoin signing devices from readily available components, such as Kendryte K210 devices. It transforms these devices into airgapped tools capable of handling transactions for both single and multisignature wallets, supporting offline signing via QR code or SD card, thus empowering users to securely self-custody their Bitcoin.
 
 ---
 ## Disclaimer
-**WARNING**: *This software has not yet been audited by a third party. Use at your own risk!*
+**WARNING**: *This software has not yet been formally audited by a third party. Use at your own risk!*
 
 ---
 
