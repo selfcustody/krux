@@ -11,6 +11,7 @@
 <img src="https://selfcustody.github.io/krux/img/maixpy_m5stickv/logo-125.png" width="75">
 <img src="https://selfcustody.github.io/krux/img/maixpy_dock/logo-151.png" width="144">
 <img src="https://selfcustody.github.io/krux/img/maixpy_yahboom/logo-156.png" width="116">
+<img src="https://selfcustody.github.io/krux/img/maixpy_cube/logo-200.png" width="120">
 </p>
 
 Krux is an open-source firmware facilitating the creation of Bitcoin signing devices from readily available components, such as Kendryte K210 devices. It transforms these devices into airgapped tools capable of handling transactions for both single and multisignature wallets, supporting offline signing via QR code or SD card, thus empowering users to securely self-custody their Bitcoin.
