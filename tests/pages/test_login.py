@@ -433,7 +433,6 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
                 [BUTTON_ENTER]
             )
             * 11
-            + [BUTTON_ENTER]  # Pick valid checksum final word message
             + (
                 # N
                 [BUTTON_PAGE for _ in range(13)]
@@ -474,18 +473,19 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
                 [BUTTON_ENTER]
             )
             * 11
-            + [BUTTON_ENTER]  # Pick valid checksum final word message
             +
             # Go + Confirm word
-            [BUTTON_PAGE for _ in range(27)]
-            + [BUTTON_ENTER]
-            + [BUTTON_ENTER]
+            [BUTTON_PAGE for _ in range(28)]
+            + [BUTTON_ENTER]  # A
+            + [BUTTON_PAGE, BUTTON_ENTER]  # C
+            + [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]  # I
+            + [BUTTON_ENTER]  # Go
             + [
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 word confirm
                 BUTTON_ENTER,  # Load wallet
             ],
-            "ability ability ability ability ability ability ability ability ability ability ability",
+            "ability ability ability ability ability ability ability ability ability ability ability acid",
         ),
     ]
     num = 0
@@ -498,10 +498,7 @@ def test_load_key_from_text(m5stickv, mocker, mocker_printer):
         login.load_key_from_text()
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
-        if len(case[1].split()) == 11:
-            assert ctx.wallet.key.mnemonic.startswith(case[1])
-        else:
-            assert ctx.wallet.key.mnemonic == case[1]
+        assert ctx.wallet.key.mnemonic == case[1]
 
 
 def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printer):
@@ -525,7 +522,6 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
                 [BUTTON_ENTER]
             )
             * 11
-            + [BUTTON_ENTER]  # Pick valid checksum final word message
             + (
                 # N
                 [BUTTON_TOUCH]  # index 13 -> "n"
@@ -553,41 +549,12 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
             "ability ability ability ability ability ability ability ability ability ability ability north",
             [13, 14, 17, 27, 26, 17, 19, 0],
         ),
-        (
-            [BUTTON_ENTER]
-            + (
-                # A
-                [BUTTON_ENTER]
-                +
-                # B
-                [BUTTON_ENTER]
-                +
-                # I
-                [BUTTON_ENTER]
-                +
-                # Confirm
-                [BUTTON_ENTER]
-            )
-            * 11
-            + [BUTTON_ENTER]  # Pick valid checksum final word message
-            +
-            # Move to Go, press Go, confirm word
-            [BUTTON_PAGE_PREV] + [BUTTON_ENTER] + [BUTTON_ENTER] +
-            # Done? Confirm, Words correct? Confirm, No passphrase, Single-sig
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,  # Load wallet
-            ],
-            "ability ability ability ability ability ability ability ability ability ability ability",
-            [0],
-        ),
     ]
 
     num = 0
     for case in cases:
-        print(num)
         num = num + 1
+        print(num)
 
         ctx = create_ctx(mocker, case[0], touch_seq=case[2])
 
@@ -595,10 +562,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
         login.load_key_from_text()
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
-        if len(case[1].split()) == 11:
-            assert ctx.wallet.key.mnemonic.startswith(case[1])
-        else:
-            assert ctx.wallet.key.mnemonic == case[1]
+        assert ctx.wallet.key.mnemonic == case[1]
 
 
 ############## load words from digits tests
@@ -616,14 +580,13 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 10 press to place on btn Go
-                [BUTTON_PAGE for _ in range(10)]
+                [BUTTON_PAGE] * 10
                 + [
                     BUTTON_ENTER,
                     BUTTON_ENTER,
                 ]  # 1 press to select and 1 press to confirm
             )
             * 11  # repeat selection of word=2 (ability) eleven times
-            + [BUTTON_ENTER]  # Pick valid checksum final word message
             + (
                 # 1
                 [BUTTON_ENTER]
@@ -632,17 +595,13 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 0
-                [BUTTON_PAGE for _ in range(11)]
+                [BUTTON_PAGE] * 11
                 + [BUTTON_ENTER]
                 +
                 # 3
-                [
-                    BUTTON_PAGE,
-                    BUTTON_PAGE,
-                    BUTTON_PAGE,
-                    BUTTON_ENTER,
-                ]  # twelve word=1203 (north)
-                # Confirm
+                [BUTTON_PAGE] * 3
+                + [BUTTON_ENTER]
+                # Confirm twelve word=1203 (north)
                 + [BUTTON_ENTER]
             )
             + [
@@ -654,29 +613,40 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
             "ability ability ability ability ability ability ability ability ability ability ability north",
         ),
         (
-            [BUTTON_ENTER]
+            [BUTTON_ENTER]  # 1 press confirm msg
             + (
-                # 2
+                # 1 press change to number "2" and 1 press to select
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
-                # Go + Confirm
-                [BUTTON_PAGE for _ in range(10)]
-                + [BUTTON_ENTER, BUTTON_ENTER]
+                # 10 press to place on btn Go
+                [BUTTON_PAGE] * 10
+                + [
+                    BUTTON_ENTER,
+                    BUTTON_ENTER,
+                ]  # 1 press to select and 1 press to confirm
             )
-            * 11
-            + [BUTTON_ENTER]  # Pick valid checksum final word message
-            +
-            # Go + Confirm
-            [BUTTON_PAGE for _ in range(11)]
-            + [BUTTON_ENTER]
-            + [BUTTON_ENTER]
+            * 11  # repeat selection of word=2 (ability) eleven times
+            + (
+                # 1
+                [BUTTON_ENTER]
+                +
+                # 6
+                [BUTTON_PAGE] * 5
+                + [BUTTON_ENTER]
+                +
+                # Go
+                [BUTTON_PAGE] * 6
+                + [BUTTON_ENTER]
+                # Confirm
+                + [BUTTON_ENTER]
+            )
             + [
                 BUTTON_ENTER,  # Done?
                 BUTTON_ENTER,  # 12 numbers confirm
                 BUTTON_ENTER,  # 12 word confirm
                 BUTTON_ENTER,  # Load wallet
             ],
-            "ability ability ability ability ability ability ability ability ability ability ability",
+            "ability ability ability ability ability ability ability ability ability ability ability acid",
         ),
     ]
     num = 0
@@ -689,10 +659,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
         login.load_key_from_digits()
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
-        if len(case[1].split()) == 11:
-            assert ctx.wallet.key.mnemonic.startswith(case[1])
-        else:
-            assert ctx.wallet.key.mnemonic == case[1]
+        assert ctx.wallet.key.mnemonic == case[1]
 
 
 def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
@@ -709,7 +676,6 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]  # 1 press to confirm word=FF(255 decimal) cabin
         )
         * 11  # repeat selection of word=FF(255, cabin) eleven times
-        + [BUTTON_ENTER]  # Pick valid checksum final word message
         + (
             [BUTTON_ENTER]  # 1 press to number 1
             + [BUTTON_ENTER]  # 1 press to number 1
@@ -776,11 +742,12 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]  # 1 press to confirm word=80(128 decimal) avocado
         )
         * 11  # repeat selection of word=80(128, avocado) eleven times
-        + [BUTTON_ENTER]  # Pick valid checksum final word message
         + (
-            [BUTTON_PAGE_PREV]  # 1 press change to btn Go
+            [BUTTON_PAGE] * 4  # 4 presses to change to 5
+            + [BUTTON_ENTER]  # 1 press to select 5
+            + [BUTTON_PAGE_PREV] * 6  # 6 press change to btn Go
             + [BUTTON_ENTER]  # 1 press to select Go
-            + [BUTTON_ENTER]  # Confirm last random word
+            + [BUTTON_ENTER]  # Confirm "above"
         )
         + [
             BUTTON_ENTER,  # Done?
@@ -789,14 +756,14 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # Load wallet
         ]
     )
-    MNEMONIC = "avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado "
+    MNEMONIC = "avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado avocado above"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
 
     login.load_key_from_hexadecimal()
 
-    assert ctx.wallet.key.mnemonic.startswith(MNEMONIC)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
 
 
 def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
@@ -807,26 +774,25 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
         [BUTTON_ENTER]  # 1 press confirm msg
         + (
             # 4 press change to number "7"
-            [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV]
+            [BUTTON_PAGE_PREV] * 4
             + [BUTTON_ENTER]  # 1 press to select 7
             + [BUTTON_ENTER]  # 1 press to select 7 again
             + [BUTTON_ENTER]  # 1 press to select 7 again
             + [BUTTON_ENTER]  # 1 press to confirm word=777(511 decimal) divert
         )
         * 11  # repeat selection of word=777(511, divert) eleven times
-        + [BUTTON_ENTER]  # Pick valid checksum final word message
         + (
-            [BUTTON_ENTER]  # 1 press to number 1
-            + [BUTTON_PAGE for _ in range(4)]  # 4 press change to number 5
+            [BUTTON_ENTER]  # 1 press to select 1
+            + [BUTTON_PAGE] * 4  # 4 press change to number 5
             + [BUTTON_ENTER]  # 1 press to number 5
-            + [BUTTON_PAGE_PREV for _ in range(3)]  # 3 press change to number 2
+            + [BUTTON_PAGE_PREV] * 3  # 3 press change to number 2
             + [BUTTON_ENTER]  # 1 press to select 2
-            + [BUTTON_PAGE for _ in range(2)]  # 2 press change to number 4
+            + [BUTTON_PAGE] * 2  # 2 press change to number 4
             + [BUTTON_ENTER]  # 1 press to select 4
             + [BUTTON_ENTER]  # Confirm word=1524(852 decimal) heavy
         )
         + [
-            BUTTON_ENTER,  # Done?
+            BUTTON_ENTER,  # Done
             BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_ENTER,  # Load wallet
@@ -877,27 +843,32 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
             + [BUTTON_ENTER]  # 1 press to confirm word=400(256 decimal) cable
         )
         * 11  # repeat selection of word=400(256, cable) eleven times
-        + [BUTTON_ENTER]  # Pick valid checksum final word message
         + (
-            [BUTTON_PAGE_PREV]  # 1 press change to btn Go
+            [BUTTON_ENTER]  # 1 press select 1
+            + [BUTTON_PAGE] * 5  # 5 presses to change to 6
+            + [BUTTON_ENTER]  # 1 press to select 6
+            + [BUTTON_PAGE] * 4  # 4 presses to change to Go
             + [BUTTON_ENTER]  # 1 press to select Go
-            + [BUTTON_ENTER]  # Confirm last random word
+            + [BUTTON_ENTER]  # Confirm word=16(14 decimal) accuse
         )
         + [
             BUTTON_ENTER,  # Done?
             BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_ENTER,  # Load wallet
+            BUTTON_ENTER,  # Load wallet
         ]
     )
-    MNEMONIC = "cable cable cable cable cable cable cable cable cable cable cable "
+    MNEMONIC = (
+        "cable cable cable cable cable cable cable cable cable cable cable accuse"
+    )
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
 
     login.load_key_from_octal()
 
-    assert ctx.wallet.key.mnemonic.startswith(MNEMONIC)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
 
 
 def test_leaving_keypad(mocker, amigo):
@@ -920,7 +891,7 @@ def test_leaving_keypad(mocker, amigo):
 
 def test_no_passphrase_on_amigo(mocker, amigo):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE
 
     case = (
         [BUTTON_ENTER]
@@ -938,18 +909,12 @@ def test_no_passphrase_on_amigo(mocker, amigo):
             [BUTTON_ENTER]
         )
         * 11
-        + [BUTTON_ENTER]  # Pick valid checksum final word message
-        +
-        # Move to Go, press Go, confirm word
-        [BUTTON_PAGE_PREV]
-        + [BUTTON_ENTER]
-        + [BUTTON_ENTER]
-        +
-        # Done? Confirm
-        [BUTTON_ENTER]
-        +
-        # Words correct? Confirm
-        [BUTTON_ENTER]
+        + [BUTTON_ENTER]  # A
+        + [BUTTON_PAGE, BUTTON_ENTER]  # C
+        + [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]  # I
+        + [BUTTON_ENTER]  # Go
+        + [BUTTON_ENTER]  # Done?
+        + [BUTTON_ENTER]  # 12 word confirm
         + [BUTTON_ENTER]  # Load wallet
     )
 
@@ -985,18 +950,12 @@ def test_passphrase(amigo, mocker, mocker_printer):
             [BUTTON_ENTER]
         )
         * 11
-        + [BUTTON_ENTER]  # Pick valid checksum final word message
-        +
-        # Move to Go, press Go, confirm word
-        [BUTTON_PAGE_PREV]
-        + [BUTTON_ENTER]
-        + [BUTTON_ENTER]
-        +
-        # Done? Confirm
-        [BUTTON_ENTER]
-        +
-        # Words correct? Confirm
-        [BUTTON_ENTER]
+        + [BUTTON_ENTER]  # A
+        + [BUTTON_PAGE, BUTTON_ENTER]  # C
+        + [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]  # I
+        + [BUTTON_ENTER]  # Go
+        + [BUTTON_ENTER]  # Done?
+        + [BUTTON_ENTER]  # 12 word confirm
         +
         # Passphrase, confirm
         [BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER]
