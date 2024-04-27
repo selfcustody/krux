@@ -72,7 +72,7 @@ class SaveFile(Page):
                                 sd.write_binary(filename, data)
                             else:
                                 sd.write(filename, data)
-                            self.flash_text(t("Saved to SD card:\n%s") % filename)
+                            self.flash_text(t("Saved to SD card") + ":\n%s" % filename)
                     else:
                         filename_undefined = False
         except:

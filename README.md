@@ -136,17 +136,14 @@ sudo apt install zbar-tools
 
 Run the simulator:
 ```bash
-# Enter simulator folder
-cd simulator
-
 # Run simulator with the touch device amigo, then use mouse to navigate
-poetry run python simulator.py --device maixpy_amigo
+poetry run poe simulator
 
 # Run simulator with sd enabled (you need the folder `simulator/sd`) on the small button-only device m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
-poetry run python simulator.py --device maixpy_m5stickv --sd
+poetry run poe simulator-m5stickv --sd
 
 # Run simulator with the rotary encoder device dock, then use keyboard (arrow keys UP or DOWN and ENTER)
-poetry run python simulator.py --device maixpy_dock
+poetry run poe simulator-dock
 ```
 
 To be able to emulate a SD card, first create a folder called `sd` inside `simulator` folder.
@@ -168,20 +165,18 @@ sudo apt install libgl1
 
 Simulator sequences (automatic testing):
 ```bash
-# Enter simulator folder:
+# Run all sequences of commands on all devices and in all locales (languages) [Linux OS]
 cd simulator
-
-# Run all sequences of commands on all devices and in all locales (languages)
 ./generate-all-screenshots.sh
 
 # Run a specific sequence for a specific device's with sd enabled (you need the folder `simulator/sd`)
-poetry run python simulator.py --sequence sequences/about.txt --sd --device maixpy_m5stickv
+poetry run poe simulator --sequence sequences/about.txt --sd
 
 # Sequence screenshots are scaled to fit in docs. Use --no-screenshot-scale to get full size
-poetry run python simulator.py --sequence sequences/home-options.txt --device maixpy_amigo --no-screenshot-scale
+poetry run poe simulator --sequence sequences/home-options.txt --no-screenshot-scale
 ```
 
-## Live debug a device
+## Live debug a device (Linux OS)
 If you've made a fresh build and flashed it to your device, you can connect to the device over serial connection with:
 ```bash
 screen /dev/tty.usbserial-device-name 115200
@@ -224,7 +219,7 @@ Krux makes use of MaixPy's [WDT watchdog module](https://wiki.sipeed.com/soft/ma
 
 import json, machine
 
-CONF_FILENAME="/flash/config.json"
+CONF_FILENAME="/flash/settings.json"
 CONF_NAME="WATCHDOG_DISABLE"
 
 conf_dict = {}
@@ -259,48 +254,41 @@ Type "help()" for more information.
 >>>
 ```
 
-Customizations made to the firmware removed the support to MaixPy IDE (due to size constraints), but you still can use it's terminal (MaixPy IDE menu bar > Tools > Open Terminal).
+Customizations made to the firmware have removed support for [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) (due to size constraints), but you can still use MaixPy IDE to help with debugging. To start the terminal go to `Tools > Open Terminal > New Terminal > Connect to serial port > Select a COM port available` (if it didn't work, try another COM port)
 
 ## Create new translations - i18n
-
 The project has lots of translations [here](i18n/translations), if you add new english messages in code using `t()` function, you will need to:
 
 ```bash
-# Enter i18n folder:
-cd i18n
-
 # Clean unused translations:
-poetry run python i18n.py clean
+poetry run poe i18n clean
 
 # Create a new translation file in JSON:
-poetry run python i18n.py new tr-TR
+poetry run poe i18n new tr-TR
 
 # Use Google translate to create missing translations, copy them to respective files, review phrases and commas.
-poetry run python i18n.py fill
+poetry run poe i18n fill
 
 # Create missing translations for a single language. Ex: Brazilian Portuguese
-poetry run python i18n.py fill pt-BR.json
+poetry run poe i18n fill pt-BR
 
 # Make sure all files have this new translated message:
-poetry run python i18n.py validate
+poetry run poe i18n validate
 
 # Format translation files properly:
-poetry run python i18n.py prettify
+poetry run poe i18n prettify
 
-# Create the compiled table for Krux translations.py
-poetry run python i18n.py bake
+# Create the compiled table for krux translations.py
+poetry run poe i18n bake
 ```
 
 ## Fonts
-
 Learn about how to setup fonts [here](firmware/font/README.md)
 
 ## Colors
-
 Use [this script](firmware/scripts/rgbconv.py) to generate Maixpy compatible colors from RGB values to customize Krux
 
 ## Documentation
-
 Before change documentation, and run the mkdocs server, make sure you have installed the poetry extras:
 
 ```bash

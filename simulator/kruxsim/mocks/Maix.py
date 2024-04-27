@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
-import time
 from unittest import mock
 import pygame as pg
 from kruxsim.mocks.board import BUTTON_A, BUTTON_B, BUTTON_C

@@ -24,7 +24,7 @@ from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..themes import theme
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -44,16 +44,16 @@ class Stackbit(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.x_offset = DEFAULT_PADDING
-        self.x_pad = 2 * self.ctx.display.font_width
-        self.y_offset = 2 * self.ctx.display.font_height
-        self.y_pad = self.ctx.display.font_height
+        self.x_pad = 2 * FONT_WIDTH
+        self.y_offset = 2 * FONT_HEIGHT
+        self.y_pad = FONT_HEIGHT
 
     def _draw_labels(self, y_offset, word_index):
         """Draws labels for import and export Stackbit 1248 UI"""
         index_x_offset = self.x_offset + self.x_pad // 2 - 1
-        y_offset += (self.y_pad - self.ctx.display.font_height) // 2
+        y_offset += (self.y_pad - FONT_HEIGHT) // 2
         if len(str(word_index)) > 1:
-            index_x_offset -= self.ctx.display.font_width
+            index_x_offset -= FONT_WIDTH
         self.ctx.display.draw_string(
             index_x_offset,
             y_offset + self.y_pad // 2,
@@ -62,7 +62,7 @@ class Stackbit(Page):
             theme.disabled_color,
         )
         numbers_offset = self.x_offset + self.x_pad
-        numbers_offset += (self.x_pad - self.ctx.display.font_width) // 2
+        numbers_offset += (self.x_pad - FONT_WIDTH) // 2
         upper_numbers = [1, 1, 2, 1, 2, 1, 2]
         lower_numbers = [2, 4, 8, 4, 8, 4, 8]
         for x in range(len(upper_numbers)):
@@ -85,15 +85,15 @@ class Stackbit(Page):
         y_offset -= 2
         x_bar_offset = self.x_offset
         # Horizontal lines
-        width = 8 * self.x_pad + self.ctx.display.font_width // 2
+        width = 8 * self.x_pad + FONT_WIDTH // 2
         height = 2 * self.y_pad + 2
-        grid_x_offset = x_bar_offset - self.ctx.display.font_width // 2
+        grid_x_offset = x_bar_offset - FONT_WIDTH // 2
 
         # Word_num background
         self.ctx.display.fill_rectangle(
             grid_x_offset,
             y_offset,
-            self.x_pad + self.ctx.display.font_width // 2,
+            self.x_pad + FONT_WIDTH // 2,
             height,
             theme.disabled_color,
         )
@@ -214,27 +214,27 @@ class Stackbit(Page):
         """Draws punch pattern for Stackbit 1248 seed layout"""
 
         self.x_offset = DEFAULT_PADDING
-        # case for m5stickv
-        if self.ctx.display.width() == 135:
+        # case for m5stickv, cube
+        if self.ctx.display.width() < 140:
             self.x_offset = 5
-        self.x_pad = 2 * self.ctx.display.font_width
-        self.y_offset = 2 * self.ctx.display.font_height
-        self.y_pad = self.ctx.display.font_height
+        self.x_pad = 2 * FONT_WIDTH
+        self.y_offset = 2 * FONT_HEIGHT
+        self.y_pad = FONT_HEIGHT
 
-        self.ctx.display.draw_hcentered_text(t("Stackbit 1248"))
+        self.ctx.display.draw_hcentered_text("Stackbit 1248")
         self._draw_grid(y_offset)
         self._draw_labels(y_offset, word_index)
         digits, digits_str = self._word_to_digits(word)
         self._draw_punched(digits, y_offset)
-        if self.ctx.display.height() > 240:
+        if self.ctx.display.height() > 140:
             self.ctx.display.draw_string(
-                self.x_offset + 17 * self.ctx.display.font_width,
+                self.x_offset + 17 * FONT_WIDTH,
                 y_offset,
                 digits_str,
                 theme.disabled_color,
             )
             self.ctx.display.draw_string(
-                self.x_offset + 17 * self.ctx.display.font_width,
+                self.x_offset + 17 * FONT_WIDTH,
                 y_offset + self.y_pad,
                 word,
                 theme.disabled_color,
@@ -299,7 +299,7 @@ class Stackbit(Page):
     def _draw_menu(self):
         """Draws options to leave and proceed"""
         y_offset = self.y_offset + 5 * self.y_pad
-        label_y_offset = (self.y_pad - self.ctx.display.font_height) // 2
+        label_y_offset = (self.y_pad - FONT_HEIGHT) // 2
         x_offset = self.x_offset + self.x_pad
         self.ctx.display.draw_string(
             x_offset + 1 * self.x_pad,
@@ -393,23 +393,23 @@ class Stackbit(Page):
 
     def enter_1248(self):
         """UI to manually enter a Stackbit 1248"""
-        if self.ctx.display.width() > 135:
-            self.x_pad = 3 * self.ctx.display.font_width
+        if self.ctx.display.width() > 140:
+            self.x_pad = 3 * FONT_WIDTH
         else:
-            self.x_pad = 2 * self.ctx.display.font_width
+            self.x_pad = 2 * FONT_WIDTH
         self.x_offset = self.ctx.display.width()
         self.x_offset -= 8 * self.x_pad
         self.x_offset = max(self.x_offset, DEFAULT_PADDING)
         self.x_offset //= 2
-        self.y_offset = 3 * self.ctx.display.font_height
-        self.y_pad = 2 * self.ctx.display.font_height
+        self.y_offset = 3 * FONT_HEIGHT
+        self.y_pad = 2 * FONT_HEIGHT
         index = 0
         digits = [0, 0, 0, 0]
         word_index = 1
         words = []
         while word_index <= 24:
             self._map_keys_array()
-            self.ctx.display.draw_hcentered_text(t("Stackbit 1248"))
+            self.ctx.display.draw_hcentered_text("Stackbit 1248")
             y_offset = self.y_offset
             self._draw_grid(y_offset)
             self._draw_labels(y_offset, word_index)

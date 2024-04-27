@@ -129,10 +129,6 @@ class FileManager(Page):
 
         self.display_file(file)
         self.ctx.input.wait_for_button()
-        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
-        #     with SDHandler() as sd:
-        #         sd.delete(file)
-        #     return MENU_EXIT
         return MENU_CONTINUE
 
     def display_file(self, file):
@@ -154,18 +150,18 @@ class FileManager(Page):
         self.ctx.display.draw_hcentered_text(
             file
             + "\n\n"
-            + t("Size: ")
-            + "{:,}".format(int(size_KB)).replace(",", THOUSANDS_SEPARATOR)
+            + t("Size:")
+            + " {:,}".format(int(size_KB)).replace(",", THOUSANDS_SEPARATOR)
             + decimal_separator
             + size_KB_fraction
             + " KB"
             + "\n\n"
-            + t("Created: ")
-            + "%s-%s-%s %s:%s"
+            + t("Created:")
+            + " %s-%s-%s %s:%s"
             % (created[0], created[1], created[2], created[3], created[4])
             + "\n\n"
-            + t("Modified: ")
-            + "%s-%s-%s %s:%s"
+            + t("Modified:")
+            + " %s-%s-%s %s:%s"
             % (modified[0], modified[1], modified[2], modified[3], modified[4])
         )
 

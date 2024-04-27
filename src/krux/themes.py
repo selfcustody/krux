@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 from .krux_settings import Settings, ThemeSettings
+import board
 
 DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
 
@@ -51,6 +52,7 @@ CYAN = 0xFF07
 THEMES = {
     ThemeSettings.DARK_THEME_NAME: {
         "background": BLACK,
+        "info_background": LIGHTBLACK,
         "foreground": WHITE,
         "frame": GREY,
         "disabled": DARKGREY,
@@ -63,6 +65,7 @@ THEMES = {
     },
     ThemeSettings.LIGHT_THEME_NAME: {
         "background": WHITE,
+        "info_background": DARKWHITE,
         "foreground": BLACK,
         "frame": LIGHTGREY,
         "disabled": DARKWHITE,
@@ -74,7 +77,8 @@ THEMES = {
         "highlight": BLUE,
     },
     ThemeSettings.ORANGE_THEME_NAME: {
-        "background": LIGHTBLACK,
+        "background": BLACK,
+        "info_background": LIGHTBLACK,
         "foreground": ORANGE,
         "frame": DARKORANGE,
         "disabled": DARKGREY,
@@ -87,6 +91,7 @@ THEMES = {
     },
     ThemeSettings.PINK_THEME_NAME: {
         "background": BLACK,
+        "info_background": LIGHTBLACK,
         "foreground": LIGHT_PINK,
         "frame": PURPLE,
         "disabled": DARKGREY,
@@ -99,6 +104,7 @@ THEMES = {
     },
     ThemeSettings.GREEN_THEME_NAME: {
         "background": BLACK,
+        "info_background": LIGHTBLACK,
         "foreground": LIGHT_GREEN,
         "frame": DARKGREEN,
         "disabled": DARKGREY,
@@ -126,6 +132,10 @@ class Theme:
             current_theme = ThemeSettings.DARK_THEME_NAME
             Settings().appearance.theme = current_theme
         self.bg_color = THEMES[current_theme]["background"]
+        self.info_bg_color = THEMES[current_theme]["info_background"]
+        if board.config["type"] == "amigo":
+            # Amigo has darker grays, so we will use a lighter one
+            self.info_bg_color = THEMES[current_theme]["disabled"]
         self.fg_color = THEMES[current_theme]["foreground"]
         self.frame_color = THEMES[current_theme]["frame"]
         self.disabled_color = THEMES[current_theme]["disabled"]

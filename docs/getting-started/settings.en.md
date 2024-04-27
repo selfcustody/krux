@@ -63,7 +63,7 @@ The caveat is low values can cause issues, such as double step and unexpected mo
 #### Display (Maix Amigo only)
 <img src="../../img/maixpy_amigo/settings-options-hardware-display-150.png" align="right">
 
-Some Maix Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+Some Maix Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates, Inverted Colors and LCD Type. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 <div style="clear: both"></div>
 
