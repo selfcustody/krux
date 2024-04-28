@@ -283,7 +283,7 @@
     "Wallet output descriptor loaded!": "Cüzdan çıktı tanımlayıcısı yüklendi!",
     "Wallet output descriptor not found.": "Cüzdan çıktı tanımlayıcısı bulunamadı.",
     "Warning:": "Uyarı:",
-    "Warning: Mismatch between PSBT and wallet.": "Uyarı: PSBT ve cüzdan arasında uyumsuzluk.",
+    "Warning: Path mismatch": "Uyarı: Yol uyuşmazlığı",
     "Wipe Device": "Cihazı Sil",
     "Wiping Device..": "Cihaz Siliniyor..",
     "Word %d": "Kelime %d",

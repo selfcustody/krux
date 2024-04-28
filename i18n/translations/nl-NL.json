@@ -283,7 +283,7 @@
     "Wallet output descriptor loaded!": "Portemonnee descriptor geladen!",
     "Wallet output descriptor not found.": "Portemonnee descriptor niet gevonden.",
     "Warning:": "Waarschuwing:",
-    "Warning: Mismatch between PSBT and wallet.": "Waarschuwing: Mismatch tussen PSBT en wallet.",
+    "Warning: Path mismatch": "Waarschuwing: pad komt niet overeen",
     "Wipe Device": "Apparaat wissen",
     "Wiping Device..": "Apparaat wissen...",
     "Word %d": "Woord %d",
