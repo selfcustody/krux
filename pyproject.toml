@@ -91,7 +91,7 @@ tests.ref = "test"
 pytest.ref = "test"
 
 # pre commit task (do formatting, linting and tests)
-pre-commit = ["format", "lint", "test-simple"]
+pre-commit = ["format", "lint", "i18n validate", "test-simple"]
 
 # run docs locally
 docs = "poetry run mkdocs serve"
