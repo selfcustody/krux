@@ -303,11 +303,15 @@ class PSBTSigner:
 
         return messages
 
-    def sign(self):
-        """Signs the PSBT"""
+    def add_signatures(self):
+        """Add signatures to PSBT"""
         sigs_added = self.psbt.sign_with(self.wallet.key.root)
         if sigs_added == 0:
             raise ValueError("cannot sign")
+
+    def sign(self):
+        """Signs the PSBT removing all irrelevant data"""
+        self.add_signatures()
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):

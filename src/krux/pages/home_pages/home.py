@@ -317,6 +317,10 @@ class Home(Page):
                 return MENU_CONTINUE
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
+
+        # Add signatures to verify in advance whether the key can sign
+        signer.add_signatures()
+
         outputs = signer.outputs()
         for message in outputs:
             self.ctx.display.clear()
