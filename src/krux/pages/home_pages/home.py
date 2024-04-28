@@ -279,7 +279,10 @@ class Home(Page):
         if path_mismatch:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Warning: Mismatch between PSBT and wallet.")
+                t("Warning: Path mismatch")
+                + "\n"
+                + "Wallet: "
+                + self.ctx.wallet.key.derivation_str()
                 + "\n"
                 + "PSBT: "
                 + path_mismatch
@@ -287,7 +290,7 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            from binascii import hexlify
+            from ...key import Key
 
             policy_str = "PSBT policy:\n"
             policy_str += signer.policy["type"] + "\n"
@@ -298,8 +301,8 @@ class Home(Page):
             for inp in signer.psbt.inputs:
                 # Do we need to loop through all the inputs or just one?
                 for pub in inp.bip32_derivations:
-                    fingerprint_srt = (
-                        "⊚ " + hexlify(inp.bip32_derivations[pub].fingerprint).decode()
+                    fingerprint_srt = Key.format_fingerprint(
+                        inp.bip32_derivations[pub].fingerprint, True
                     )
                     if fingerprint_srt not in fingerprints:
                         if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:

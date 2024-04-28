@@ -525,3 +525,87 @@ def test_sign_psbt(mocker, m5stickv, tdata):
 
     # TODO: Create cross test cases: Load from QR code, sign, save to SD card and vice versa
     # TODO: Import wallet descriptor and test signing
+
+
+def test_psbt_warnings(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.sd_card import PSBT_FILE_EXTENSION, SIGNED_FILE_SUFFIX
+    from krux.themes import theme
+
+    PSBT_FILE_NAME = "test.psbt"
+
+    wallet = Wallet(tdata.MULTISIG_SIGNING_KEY)
+
+    btn_seq = [
+        BUTTON_ENTER,  # Wallet not loaded, proceed?
+        BUTTON_PAGE,  # Move to "Load from SD card"
+        BUTTON_ENTER,  # Load from SD card
+        BUTTON_ENTER,  # Path mismatch ACK
+        BUTTON_ENTER,  # PSBT Policy ACK
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_ENTER,  # output 2
+        BUTTON_PAGE,  # Move to "Sign to QR SD card"
+        BUTTON_ENTER,  # Sign to SD card
+    ]
+
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    home = Home(ctx)
+    mocker.patch.object(
+        home, "capture_qr_code", new=lambda: (tdata.P2WSH_PSBT_B64, FORMAT_PMOFN)
+    )
+    mocker.patch.object(
+        home,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    mocker.spy(home, "capture_qr_code")
+    mocker.spy(home, "display_qr_codes")
+    mocker.spy(ctx.display, "draw_centered_text")
+
+    # SD available
+    mocker.patch.object(home, "has_sd_card", new=lambda: True)
+    mock_utils = mocker.patch("krux.pages.utils.Utils")
+    mock_utils.return_value.load_file.return_value = (
+        PSBT_FILE_NAME,
+        tdata.P2WSH_PSBT_B64,
+    )
+    mock_file_save = mocker.patch("krux.pages.file_operations.SaveFile.save_file")
+    home.sign_psbt()
+
+    # Wallet output descriptor not loaded
+    assert ctx.wallet.is_loaded() == wallet.is_loaded() == False
+
+    # Wallet is multisig
+    assert ctx.wallet.is_multisig() == wallet.is_multisig() == True
+
+    # Multisig with wallet output descriptor not loaded had to show a warning
+    ctx.display.draw_centered_text.assert_any_call(
+        "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+    )
+
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Path mismatch\nWallet: m/48'/0'/0'/2'\nPSBT: m/48'/1'/0'/2'"
+            ),
+            mocker.call(
+                "PSBT policy:\np2wsh\n2 of 3\n⊚ 26bb83c4\n⊚ 0208cb77\n⊚ 73c5da0a"
+            ),
+        ]
+    )
+
+    # signed from/to SD card
+    mock_utils.return_value.load_file.assert_called_once_with(".psbt", prompt=False)
+    mock_file_save.assert_called_once_with(
+        tdata.SIGNED_P2WSH_PSBT,
+        "QRCode",
+        PSBT_FILE_NAME,
+        "Signed PSBT" + ":",  # Title
+        PSBT_FILE_EXTENSION,
+        SIGNED_FILE_SUFFIX,
+    )
+    home.display_qr_codes.assert_not_called()

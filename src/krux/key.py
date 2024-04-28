@@ -96,15 +96,13 @@ class Key:
 
     def fingerprint_hex_str(self, pretty=False):
         """Returns the master key fingerprint in hex format"""
-        formatted_txt = "⊚ %s" if pretty else "%s"
-        return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
+        return Key.format_fingerprint(self.fingerprint, pretty)
 
     def derivation_str(self, pretty=False):
         """Returns the derivation path for the Hierarchical Deterministic Wallet to
         be displayed as string
         """
-        formatted_txt = "↳ %s" if pretty else "%s"
-        return (formatted_txt % self.derivation).replace("h", HARDENED_STR_REPLACE)
+        return Key.format_derivation(self.derivation, pretty)
 
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
@@ -154,10 +152,13 @@ class Key:
         return der_format % (purpose, network["bip32"], account)
 
     @staticmethod
-    def get_default_derivation_str(multisig, network, account=0, script_type="p2wpkh"):
-        """Return the Krux default derivation path for single-sig or multisig to
-        be displayd as string
-        """
-        return "↳ " + Key.get_default_derivation(
-            multisig, network, account, script_type
-        ).replace("h", HARDENED_STR_REPLACE)
+    def format_derivation(derivation, pretty=False):
+        """Helper method to display the derivation path formatted"""
+        formatted_txt = "↳ %s" if pretty else "%s"
+        return (formatted_txt % derivation).replace("h", HARDENED_STR_REPLACE)
+
+    @staticmethod
+    def format_fingerprint(fingerprint, pretty=False):
+        """Helper method to display the fingerprint formatted"""
+        formatted_txt = "⊚ %s" if pretty else "%s"
+        return formatted_txt % hexlify(fingerprint).decode("utf-8")
