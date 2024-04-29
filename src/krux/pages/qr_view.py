@@ -27,7 +27,7 @@ from ..sd_card import SDHandler
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
 from ..qr import get_size
-from ..display import DEFAULT_PADDING, FONT_HEIGHT
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -145,8 +145,8 @@ class SeedQRView(Page):
     def draw_grided_qr(self, mode):
         """Draws grided QR"""
         self.ctx.display.clear()
-        if self.ctx.display.width() > 140:
-            grid_size = self.ctx.display.width() // 140
+        if self.ctx.display.width() > SMALLEST_WIDTH:
+            grid_size = self.ctx.display.width() // SMALLEST_WIDTH
         else:
             grid_size = 1
         grid_offset = self.ctx.display.width() % (self.qr_size + 2)

@@ -58,7 +58,7 @@ If your device is not charging or being recognized as expected, try using a diff
 
 ## Why isn't my M5stickV device being recognized and charged when connected to the computer's USB-C?
 ----8<----
-m5stickv-usb-c.md
+m5stickv-usb-c.en.txt
 ----8<----
 
 ## Why does my Krux device randomly freeze or restart when connected to the computer?

@@ -28,7 +28,9 @@ from .krux_settings import Settings
 DEFAULT_PADDING = 10
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
-QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
+QR_DARK_COLOR, QR_LIGHT_COLOR = (
+    [16904, 61307] if board.config["type"] == "m5stickv" else [0, 6342]
+)
 TOTAL_LINES = board.config["lcd"]["width"] // FONT_HEIGHT
 BOTTOM_LINE = (TOTAL_LINES - 1) * FONT_HEIGHT
 MINIMAL_DISPLAY = board.config["type"] in ("m5stickv", "cube")
@@ -40,6 +42,9 @@ else:
 
 
 FLASH_MSG_TIME = 2000
+
+SMALLEST_WIDTH = 135
+SMALLEST_HEIGHT = 240
 
 # Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
 SPLASH = [
@@ -228,7 +233,7 @@ class Display:
         lines = []
         start = 0
         line_count = 0
-        if self.width() > 135:
+        if self.width() > SMALLEST_WIDTH:
             columns = self.usable_width() // FONT_WIDTH
         else:
             columns = self.width() // FONT_WIDTH
@@ -341,7 +346,11 @@ class Display:
         )
         if info_box:
             bg_color = theme.info_bg_color
-            padding = DEFAULT_PADDING if self.width() > 135 else DEFAULT_PADDING // 2
+            padding = (
+                DEFAULT_PADDING
+                if self.width() > SMALLEST_WIDTH
+                else DEFAULT_PADDING // 2
+            )
             self.fill_rectangle(
                 padding - 3,
                 offset_y - 1,

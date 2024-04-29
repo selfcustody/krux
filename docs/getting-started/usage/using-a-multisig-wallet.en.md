@@ -62,7 +62,7 @@ Load the wallet into Krux by going to the *Settings* page in Specter Desktop, th
 <img src="../../../img/specter/export-wallet-screen-600.png">
 
 ----8<----
-single-multi-wallet-descriptor.md
+single-multi-wallet-descriptor.en.txt
 ----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png">
@@ -115,7 +115,7 @@ On the wallet screen, make sure to select a *Multi Signature* policy type with t
 <img src="../../../img/sparrow/multisig-wallet-settings-600.png">
 
 ----8<----
-sparrow/import-xpub-sparrow.md
+sparrow/import-xpub-sparrow.en.txt
 ----8<----
 
 <img src="../../../img/sparrow/keystore-multisig-key-settings-600.png" style="border: 1px solid;">
@@ -132,7 +132,7 @@ Load the wallet output descriptor into Krux by going to the *Settings* screen of
 <img src="../../../img/sparrow/descriptor-multisig-key-settings-600.png">
 
 ----8<----
-sparrow/load-wallet-output-sparrow.md
+sparrow/load-wallet-output-sparrow.en.txt
 ----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png">
@@ -144,7 +144,7 @@ Navigate to the *Receive* screen where you should see your first receive address
 <img src="../../../img/sparrow/multisig-receive-address-600.png">
 
 ----8<----
-sparrow/send-coins-sparrow.md
+sparrow/send-coins-sparrow.en.txt
 ----8<----
 
 Once all parts of the QR code have been read, you should see the signature bar partially fill indicating the signature was added.
@@ -153,7 +153,7 @@ Repeat this process for the remaining keys in your wallet until you have a quoru
 
 After the final signature, the bar will fill and two new buttons appear. 
 ----8<----
-sparrow/broadcast-sparrow.md
+sparrow/broadcast-sparrow.en.txt
 ----8<----
 
 ## BlueWallet
@@ -211,7 +211,7 @@ From here, tap *Export Coordination Setup* in order to display a QR code of your
 <img src="../../../img/blue/export-multisig-wallet-400.png" style="border: 1px solid;">
 
 ----8<----
-single-multi-wallet-descriptor.md
+single-multi-wallet-descriptor.en.txt
 ----8<----
 
 <img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png">

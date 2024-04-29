@@ -129,6 +129,10 @@ def run_krux():
 
 # mock for SD
 if args.sd:
+    # create the sd folder if not exists
+    from krux.settings import SD_PATH
+    if not os.path.exists(SD_PATH):
+        os.makedirs(SD_PATH)
     from kruxsim.mocks import sd_card
 
 t = threading.Thread(target=run_krux)
@@ -179,11 +183,11 @@ elif (args.device == devices.CUBE):
 # Handle screenshots filename suffix when scaled
 from krux.krux_settings import Settings
 screenshot_suffix = ""
-if (args.screenshot_scale):
+if args.screenshot_scale:
     screenshot_suffix = "-" + str(device_screenshot_size[0]) + "." + Settings().i18n.locale.split("-")[0]
 
 
-if(args.device == devices.PC):
+if args.device == devices.PC:
     from kruxsim.mocks.board import BOARD_CONFIG
     BOARD_CONFIG["type"] = "amigo_like"
 

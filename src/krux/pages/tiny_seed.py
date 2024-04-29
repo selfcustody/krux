@@ -31,7 +31,14 @@ from . import Page, FLASH_MSG_TIME
 from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY, FONT_HEIGHT, FONT_WIDTH
+from ..display import (
+    DEFAULT_PADDING,
+    MINIMAL_DISPLAY,
+    FONT_HEIGHT,
+    FONT_WIDTH,
+    SMALLEST_WIDTH,
+    SMALLEST_HEIGHT,
+)
 from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -53,13 +60,13 @@ class TinySeed(Page):
         self.ctx = ctx
         self.x_offset = DEFAULT_PADDING // 2 + 2 * FONT_WIDTH
         self.printer = None
-        if self.ctx.display.width() > 140:
+        if self.ctx.display.width() > SMALLEST_WIDTH:
             self.x_pad = self.ctx.display.width() * 2 // 27
             self.y_pad = self.ctx.display.height() // 17
         else:
             self.x_pad = FONT_WIDTH + 1
             self.y_pad = FONT_HEIGHT
-        if self.ctx.display.height() > 240:
+        if self.ctx.display.height() > SMALLEST_HEIGHT:
             self.y_offset = DEFAULT_PADDING + 3 * FONT_HEIGHT
         else:
             self.y_offset = 2 * FONT_HEIGHT
@@ -801,7 +808,7 @@ class TinyScanner(Page):
         return rect
 
     def _draw_grid(self, img):
-        if self.ctx.display.height() > 240:
+        if self.ctx.display.height() > SMALLEST_HEIGHT:
             for i in range(13):
                 img.draw_line(
                     self.x_regions[i],
@@ -856,7 +863,9 @@ class TinyScanner(Page):
                     self._gradient_value(index, gradient_corners) * 4
                 ) // 5  # ~-20%
                 # Sensor image will be downscaled on small displays
-                punch_thickness = 1 if self.ctx.display.height() > 240 else 2
+                punch_thickness = (
+                    1 if self.ctx.display.height() > SMALLEST_HEIGHT else 2
+                )
                 # If the dot is punched, draws a rectangle and toggle respective bit
                 if dot_l < punch_threshold:
                     _ = img.draw_rectangle(

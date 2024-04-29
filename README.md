@@ -1,59 +1,59 @@
+[![created at](https://img.shields.io/github/created-at/selfcustody/krux)](https://github.com/selfcustody/krux/commit/bb8e2d63e031417111ff7cb2b8877c10e19410be)
 [![downloads](https://img.shields.io/github/downloads/selfcustody/krux/total)](https://github.com/selfcustody/krux/releases)
+[![downloads (latest release)](https://img.shields.io/github/downloads/selfcustody/krux/latest/total)](https://github.com/selfcustody/krux/releases)
+[![commits (since latest release)](https://img.shields.io/github/commits-since/selfcustody/krux/latest/develop)](https://github.com/selfcustody/krux/compare/main...develop)
 [![codecov](https://codecov.io/gh/selfcustody/krux/branch/main/graph/badge.svg?token=XU80PT6Q9V)](https://codecov.io/gh/selfcustody/krux)
 [![calver](https://img.shields.io/badge/calver-YY.0M.MICRO-22bfda.svg)](https://calver.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/selfcustody/krux/blob/main/LICENSE.md)
 
 <p align="center">
-<img src="https://selfcustody.github.io/krux/img/maixpy_m5stickv/logo-125.png">
 <img src="https://selfcustody.github.io/krux/img/maixpy_amigo/logo-150.png">
+<img src="https://selfcustody.github.io/krux/img/maixpy_m5stickv/logo-125.png" width="75">
+<img src="https://selfcustody.github.io/krux/img/maixpy_dock/logo-151.png" width="144">
+<img src="https://selfcustody.github.io/krux/img/maixpy_yahboom/logo-156.png" width="116">
+<img src="https://selfcustody.github.io/krux/img/maixpy_cube/logo-200.png" width="120">
 </p>
 
-Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts. It runs on Kendryte K210 devices such as the [M5StickV](https://docs.m5stack.com/en/core/m5stickv) and [Maix Amigo](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html), converting them into airgapped devices that can sign transactions for multisignature and single-sig wallets.
+Krux is an open-source firmware facilitating the creation of Bitcoin signing devices from readily available components, such as Kendryte K210 devices. It transforms these devices into airgapped tools capable of handling transactions for both single and multisignature wallets, supporting offline signing via QR code or SD card, thus empowering users to securely self-custody their Bitcoin.
 
 ---
 ## Disclaimer
-**WARNING**: *This software has not yet been audited by a third party. Use at your own risk!*
+**WARNING**: *This software has not yet been formally audited by a third party. Use at your own risk!*
 
 ---
 
 # Getting Started
-Instructions for building and running Krux can now be found on our GitHub Pages site:
+Detailed instructions for installing and running Krux can now be found in our [official documentation](https://selfcustody.github.io/krux/)
 
-https://selfcustody.github.io/krux/
-
-The instructions below are intended for developers who wish to contribute to the project.
+The instructions below are intended for programmers or developers who want to contribute to the project.
 
 # Development
 ## Fetch the code
-Run the following:
+This will download the source code of Krux as well as the code of all its dependencies inside a new folder called `krux`:
 ```bash
 git clone --recurse-submodules https://github.com/selfcustody/krux
 ```
-This will pull down the Krux source code as well as the code for all its dependencies and put them inside a new `krux` folder.
 
-Note: When you wish to pull down updates to this repo, you should run the following:
+Note: When you wish to pull updates (to all submodules, their submodules, ...) to this repo, use:
 ```bash
 git pull origin main && git submodule update --init --recursive
 ```
-This will make sure that all submodules (and their submodules, etc.) are pulled down and updated.
 
-## Krux (script)
-The [krux](krux) bash script contains commands for common development tasks. It assumes a Linux host, but may work on other systems. For this reason, we suggest you use [Vagrant](https://www.vagrantup.com/) since all dependencies for development will be included. If running outside of Vagrant, you will need to have [Docker](https://www.docker.com/), `openssl`, and `wget` installed at a minimum for the commands to work as expected.
+## Krux (script) (Linux or WSL)
+The [krux](krux) bash script contains commands for common development tasks. It assumes a Linux host, you will need to have [Docker Desktop or Docker Engine](https://docs.docker.com/desktop/), `openssl`, and `wget` installed at a minimum for the commands to work as expected. It works on Windows using WSL. The channel Crypto Guide from Youtube made a step-by-step video - [Krux DIY Bitcoin Signer: Build From Source & Verify (With Windows + WSL2 + Docker)](https://www.youtube.com/watch?v=Vmr_TFy2TfQ)
 
-For building and flashing Krux from within Vagrant, please follow the [Installing from source](https://selfcustody.github.io/krux/getting-started/installing-from-source) guide on the website.
-
-Otherwise, to run the commands on bare metal, remove the `vagrant ssh -c 'cd /vagrant; <command>'` wrapper from all commands like so:
-
+To build and flash the firmware:
 ```bash
-# build firmware for MaixDock
-# vagrant ssh -c 'cd /vagrant; ./krux build maixpy_dock'
-./krux build maixpy_dock
+# build firmware for Maix Amigo
+./krux build maixpy_amigo
 
-# flash the firmware to a MaixDock
-# vagrant ssh -c 'cd /vagrant; ./krux flash maixpy_dock'
-./krux flash maixpy_dock
+# flash the firmware to Maix Amigo
+./krux flash maixpy_amigo
 ```
 
-Note: if you encounter any of this errors during build, it is a connection issue with github, plz try to build again:
+The first time, the build can take around an hour or so to complete. Subsequent builds should take only a few minutes. If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
+
+Note: if you encounter any of these errors while building, it is a problem connecting to github, try again (if the error persists, try changing the DNS/VPN or correcting the hostname resolution of github.com to an IP that is working for you):
 ```
 error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err8)
 fatal: the remote end hung up unexpectedly
@@ -64,46 +64,43 @@ Failed to clone ...
 ```
 
 ## Install Krux and dev tools
-The Krux code is a Python package that should be installed with [Poetry](https://python-poetry.org/). To generate a new `poetry.lock` file use: `poetry lock --no-update`.
+Krux uses [Poetry](https://python-poetry.org/) as Python packaging and dependency management. This cmd installs development dependencies like [embit](https://github.com/diybitcoinhardware/embit), [ur](https://github.com/selfcustody/foundation-ur-py) and [urtypes](https://github.com/selfcustody/urtypes), and tools to run [tests](https://docs.pytest.org), review code with [pylint](https://pypi.org/project/pylint/), format code with [black](https://github.com/psf/black) and a lib to help handle i18n translations.
 ```bash
 pip install poetry
 poetry install
 ```
 
-This will also install all development tools so that you can run tests, run pylint, format code with [black](https://github.com/psf/black), etc.
-
-Note that you can run `poetry install` after making a change to the krux code if you wish to test a change in the [interpreter](#use-the-python-interpreter-repl).
+Note: when changing the dependencies in `pyptoject.toml` you need to generate a new `poetry.lock` file using the cmd: `poetry lock --no-update`.
 
 ## Format code
 ```bash
 poetry run poe format
 ```
 
-## Run pylint
+## Review code
 ```bash
 poetry run poe lint
 ```
 
-## Run tests
+## Run tests with coverage
 ```bash
 poetry run poe test
 ```
 
-This will run all tests and generate a coverage report you can browse to locally in your browser at `file:///path/to/krux/htmlcov/index.html`.
+Note: The coverage report will be created at the `htmlcov` folder `file:///path/to/krux/htmlcov/index.html`. 
 
-For more verbose test output (e.g., to see the output of print statements), run:
-
+For more verbose output (e.g., to see the output of print statements):
 ```bash
 poetry run poe test-verbose
 ```
 
-To run just a specific test from a specific file, run:
+To run just a specific test from a specific file:
 ```bash
 poetry run pytest --cache-clear ./tests/pages/test_login.py -k 'test_load_key_from_hexadecimal'
 ```
 
 ## Use the Python interpreter (REPL)
-This can be useful for testing a change to the krux code without having to run a full build and flash:
+This is useful for rapid development of non-visual code:
 ```bash
 poetry run python
 ```
@@ -116,41 +113,37 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>>
 ```
 
-## Run the simulator
-This can be useful for testing a change to Krux code without having to run a full build and flash, visual regression testing,
-generating screenshots, or even just trying out Krux before purchasing a device. However, the simulator may not behave exactly as
-the HW device and may not have all features implemented (e.g. scanning via camera a TinySeed currently only works on the HW device)
+## Run the device simulator
+This is useful for rapid code development that utilizes UI/UX. It is also good for newcomers to try Krux before purchasing a device. However, the simulator does not behave exactly as the HW device and may not have all features implemented (e.g. scanning via camera a TinySeed currently only works on the HW device).
 
-Before executing the simulator, make sure you have installed the poetry extras:
+Before executing, make sure you have installed the poetry extras:
 ```bash
+# This cmd will uninstall other extras
 poetry install --extras simulator
 
-# To install alongside docs extras, use:
-poetry install --extras "simulator docs"
-```
-
-Depending on the OS, it may be necessary to install zbar-tools:
-```bash
-sudo apt install zbar-tools
+# To install all extras, use:
+poetry install --all-extras
 ```
 
 Run the simulator:
 ```bash
-# Run simulator with the touch device amigo, then use mouse to navigate
+# Run simulator with the touch device Amigo, then use mouse to navigate
 poetry run poe simulator
 
-# Run simulator with sd enabled (you need the folder `simulator/sd`) on the small button-only device m5stick, then use keyboard (arrow keys UP or DOWN and ENTER)
+# Run simulator with SD enabled (folder `simulator/sd`) on the small button-only device M5stickV, then use keyboard (arrow keys UP or DOWN and ENTER)
 poetry run poe simulator-m5stickv --sd
 
-# Run simulator with the rotary encoder device dock, then use keyboard (arrow keys UP or DOWN and ENTER)
+# Run simulator on the device dock, then use keyboard (arrow keys UP or DOWN and ENTER)
 poetry run poe simulator-dock
+
+# Run simulator with the touch device yahboom, then use mouse to navigate
+poetry run poe simulator-yahboom
+
+# Run simulator on the device cube, then use keyboard (arrow keys UP or DOWN and ENTER)
+poetry run poe simulator-cube
 ```
 
-To be able to emulate a SD card, first create a folder called `sd` inside `simulator` folder.
-With emulated SD card it is possible to store settings, encrypted mnemonics, also drop and sign PSBTs.
-
-Simulator error troubleshooting:
-After some time running, the simulator may become slow. If that happens, just close and open again!
+Note: With emulated SD card it is possible to store settings, encrypted mnemonics, also drop and sign PSBTs. After some time running, the simulator may become slow. If that happens, just close and open again!
 
 ```bash
 # ImportError: Unable to find zbar shared library
@@ -161,30 +154,30 @@ sudo apt install libgl1
 
 # `pygame.error: No available video device`
 # You are trying to run the simulator on an OS without a GUI (some kind of terminal only or WSL). Try one with GUI!
+
+# Depending on the OS, it may be necessary to install zbar-tools too:
+sudo apt install zbar-tools
 ```
 
-Simulator sequences (automatic testing):
+### Simulator sequences execution
+
+This is useful for taking screenshots of device screens to use in documentation:
 ```bash
 # Run all sequences of commands on all devices and in all locales (languages) [Linux OS]
 cd simulator
 ./generate-all-screenshots.sh
 
-# Run a specific sequence for a specific device's with sd enabled (you need the folder `simulator/sd`)
+# Run a specific sequence for a specific device's with SD enabled (folder `simulator/sd`)
 poetry run poe simulator --sequence sequences/about.txt --sd
 
 # Sequence screenshots are scaled to fit in docs. Use --no-screenshot-scale to get full size
 poetry run poe simulator --sequence sequences/home-options.txt --no-screenshot-scale
 ```
 
-## Live debug a device (Linux OS)
+## Live debug a device (Linux)
 If you've made a fresh build and flashed it to your device, you can connect to the device over serial connection with:
 ```bash
 screen /dev/tty.usbserial-device-name 115200
-```
-
-If you see a `Resource is busy` message, make sure to shut down the Vagrant box and try again:
-```bash
-vagrant halt
 ```
 
 If successful, the device should restart and you should see:
@@ -212,7 +205,10 @@ Some devices like Amigo have two serial ports, check the second one if you don't
 
 To leave `screen` serial monitor press `Ctrl+a`, followed by `k`, then confirm with `y`.
 
+## Live debug a device using MaixPy IDE (Mac or Windows)
+Use [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) to debug the devices. Click on `Tools > Open Terminal > New Terminal > Connect to serial port > Select a COM port available` (if didn't work, try another COM port). We have removed some support for MaixPy IDE (due to size constraints), but the debug works.
 
+## WDT watchdog
 Krux makes use of MaixPy's [WDT watchdog module](https://wiki.sipeed.com/soft/maixpy/en/api_reference/machine/wdt.html), you can see it [here](src/krux/wdt.py). This will reset the device if not fed for some time. To stop the watchdog, when connected through the terminal, run the following:
 ```python
 # This will read the board config file, add the config to disable watchdog, save the new config file and reset the device (in order to make krux read the new file!)
@@ -237,7 +233,7 @@ with open(CONF_FILENAME, "w") as f:
 machine.reset()
 ```
 
-Now, with watchdog disabled, you can use the device normally. So no more automatic resets, and if you added any print statements to the code, they should appear whenever your code is reached.
+Now, with watchdog disabled, you can use debug the device normally. So no more automatic resets, and if you added any print statements to the code, they should appear whenever your code is reached.
 
 You can also drop into a live Python REPL at any point by issuing an interrupt with Ctrl-C:
 
@@ -253,8 +249,6 @@ Type "help()" for more information.
 >>>
 >>>
 ```
-
-Customizations made to the firmware have removed support for [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) (due to size constraints), but you can still use MaixPy IDE to help with debugging. To start the terminal go to `Tools > Open Terminal > New Terminal > Connect to serial port > Select a COM port available` (if it didn't work, try another COM port)
 
 ## Create new translations - i18n
 The project has lots of translations [here](i18n/translations), if you add new english messages in code using `t()` function, you will need to:
@@ -286,24 +280,22 @@ poetry run poe i18n bake
 Learn about how to setup fonts [here](firmware/font/README.md)
 
 ## Colors
-Use [this script](firmware/scripts/rgbconv.py) to generate Maixpy compatible colors from RGB values to customize Krux
+Use [this script](firmware/scripts/rgbconv.py) to generate device compatible colors from RGB values (usefull for color themes).
 
 ## Documentation
 Before change documentation, and run the mkdocs server, make sure you have installed the poetry extras:
 
 ```bash
+# This cmd will uninstall other extras
 poetry install --extras docs
 
-# To install alongside simulator extras, use:
-poetry install --extras "docs simulator"
+# To install all extras, use:
+poetry install --all-extras
 ```
 
-To change lateral and upper menus on generated documentation, see `mkdocs.yml` file on `nav` section. 
+To change lateral and upper menus on documentation, see `mkdocs.yml` file on `nav` section. To create or edit translations (TODO: need help!), read [here](i18n/README.md).
 
-To create or edit translations on documentation (TODO: need help!), read more [here](i18n/README.md).
-
-Once changes are made, you can run:
-
+Create the documentation site locally - `http://127.0.0.1:8000/krux/`:
 ```bash
 poetry run poe docs
 ```
@@ -321,13 +313,11 @@ poetry run poe docs
 # Contributing
 Issues and pull requests welcome! Let's make this as good as it can be.
 
-Before opening a pull request for a new feature, please first start a [new discussion](https://github.com/selfcustody/krux/discussions) if the feature is large, is a proposal, or is in need of fleshing out before it can be turned into issue(s) for work. If the pull request you're opening already has an associated issue, please reference it when making your pull request and briefly explain how your PR resolves it. Ideally, each PR should be focused on resolving one issue (exceptions can be made if the work is related or tightly coupled).
+Feel free to start a [new discussion](https://github.com/selfcustody/krux/discussions) or an [issue](https://github.com/selfcustody/krux/issues) for work. When making your pull request, explain what it solves, ideally each PR should focus on solving one issue (exceptions can be made if the work is related or tightly coupled).
 
-**Please note**: When adding a new feature, please checkout and branch off of the `develop` branch. When making a PR, please also make sure to explicitly target `develop`; `main` is the default branch on GitHub because we want it to be easy for users (who aren't necessarily devs) to download and install Krux from source.
+**Note for PR's**: Checkout and branch off of the `develop` branch, please also make sure to explicitly target `develop`; `main` is the default branch for the latest version and also for downloading and installing Krux from source.
 
 # Support
-For technical support installing or using Krux, you can join our [#krux:matrix.org](https://matrix.to/#/#krux:matrix.org) server or [Telegram chat](https://t.me/SC_Krux). Make sure to also check out the [DIYbitcoin chat](https://t.me/diybitcoin) on Telegram, a broader community of tinkerers, builders, hackers, etc.
+For technical support installing or using Krux, you can join our [Telegram chat](https://t.me/SC_Krux). Follow us on [X (Twitter)](https://twitter.com/selfcustodykrux) or send a message to the [Bitcoin Forum](https://bitcointalk.org/index.php?topic=5489022.0). Also check out the [DIYbitcoin chat](https://t.me/diybitcoin) on Telegram, a broader community of tinkerers, builders and hackers!
 
-We do not use GitHub issues for support requests, only for bug reports and feature requests. 
-
-You can also post a question in our [Discussions](https://github.com/selfcustody/krux/discussions) forum here on GitHub.
+Please do not use issues for support requests. If necessary, you can use our [Discussions](https://github.com/selfcustody/krux/discussions) to post your question here on GitHub.
