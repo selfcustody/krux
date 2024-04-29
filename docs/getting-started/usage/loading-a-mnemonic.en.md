@@ -45,7 +45,7 @@ Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) 
 Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
 
 ----8<----
-12th-24th-word-generate.md
+12th-24th-word-generate.en.txt
 ----8<----
 
 <div style="clear: both"></div>
@@ -62,7 +62,7 @@ You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal f
 
 ##### Final checksum word
 ----8<----
-12th-24th-word-generate.md
+12th-24th-word-generate.en.txt
 ----8<----
 
 <div style="clear: both"></div>

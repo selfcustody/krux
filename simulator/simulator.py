@@ -129,6 +129,10 @@ def run_krux():
 
 # mock for SD
 if args.sd:
+    # create the sd folder if not exists
+    from krux.settings import SD_PATH
+    if not os.path.exists(SD_PATH):
+        os.makedirs(SD_PATH)
     from kruxsim.mocks import sd_card
 
 t = threading.Thread(target=run_krux)

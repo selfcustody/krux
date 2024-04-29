@@ -15,13 +15,13 @@
 
 <i style="font-size: 85%">:material-information:{id="m5stickv-info"}:
 ----8<----
-m5stickv-usb-c.md
+m5stickv-usb-c.en.txt
 ----8<----
 </i>
 
 <i style="font-size: 85%">:material-information:{id="amigo-info"}:
 ----8<----
-amigo-more-info-faq.md:2
+amigo-more-info-faq.en.txt:2
 ----8<----
 </i>
 
@@ -34,7 +34,7 @@ Some stores ship the Maix Dock with soldered pin connectors that do not fit into
 </i>
 
 ### M5StickV
-<img srcset="../img/maixpy_m5stickv/logo-125.png" align="right" width="75">
+<img src="../img/maixpy_m5stickv/logo-125.png" align="right" width="75">
 
 Below is a list of some distributors where you can find this device:
 
@@ -51,7 +51,7 @@ Below is a list of some distributors where you can find this device:
 <div style="clear: both"></div>
 
 ### Maix Amigo
-<img srcset="../img/maixpy_amigo/logo-150.png" align="right">
+<img src="../img/maixpy_amigo/logo-150.png" align="right">
 
 Below is a list of some distributors where you can find this device:
 
@@ -64,7 +64,7 @@ Below is a list of some distributors where you can find this device:
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
-<img srcset="../img/maixpy_yahboom/logo-156.png" align="right" width="116">
+<img src="../img/maixpy_yahboom/logo-156.png" align="right" width="116">
 
 Below is a list of some distributors where you can find this device:
 
@@ -76,7 +76,7 @@ Below is a list of some distributors where you can find this device:
 <div style="clear: both"></div>
 
 ### Maix Dock and Maix Bit
-<img srcset="../img/maixpy_dock/logo-151.png" align="right" width="144">
+<img src="../img/maixpy_dock/logo-151.png" align="right" width="144">
 
 For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
 
@@ -101,7 +101,7 @@ This will be included with the M5StickV and Maix Amigo that you purchase from on
 
 ### (Optional) MicroSD Card
 ----8<----
-sd-card-info-faq.md
+sd-card-info-faq.en.txt
 ----8<----
 The size of the SD card isn't important; anything over a few megabytes will be plenty.
 
