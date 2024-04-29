@@ -847,3 +847,22 @@ class Menu:
                         text, offset_y + FONT_HEIGHT * j, fg_color
                     )
             offset_y += delta_y
+
+
+def choose_len_mnemonic(ctx):
+    """Reusable '12 or 24 words?" menu choice"""
+    submenu = Menu(
+        ctx,
+        [
+            (t("12 words"), lambda: MENU_EXIT),
+            (t("24 words"), lambda: MENU_EXIT),
+            (t("Back"), lambda: MENU_EXIT),
+        ],
+    )
+    index, _ = submenu.run_loop()
+    ctx.display.clear()
+    if index == 0:
+        return 12
+    if index == 1:
+        return 24
+    return None
