@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ...display import FONT_HEIGHT
+from ...display import FONT_HEIGHT, SMALLEST_HEIGHT
 from ...qr import FORMAT_NONE
 from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
 from .. import (
@@ -187,7 +187,7 @@ class MnemonicsView(Page):
             y_offset = 2 * FONT_HEIGHT
             for _ in range(6):
                 stackbit.export_1248(word_index, y_offset, words[word_index - 1])
-                if self.ctx.display.height() > 240:
+                if self.ctx.display.height() > SMALLEST_HEIGHT:
                     y_offset += 3 * FONT_HEIGHT
                 else:
                     y_offset += 5 + 2 * FONT_HEIGHT

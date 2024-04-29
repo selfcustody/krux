@@ -24,7 +24,7 @@ from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..themes import theme
 from ..krux_settings import t
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH, SMALLEST_WIDTH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -214,8 +214,8 @@ class Stackbit(Page):
         """Draws punch pattern for Stackbit 1248 seed layout"""
 
         self.x_offset = DEFAULT_PADDING
-        # case for m5stickv, cube
-        if self.ctx.display.width() < 140:
+        # case for m5stickv
+        if self.ctx.display.width() < SMALLEST_WIDTH:
             self.x_offset = 5
         self.x_pad = 2 * FONT_WIDTH
         self.y_offset = 2 * FONT_HEIGHT
@@ -226,7 +226,7 @@ class Stackbit(Page):
         self._draw_labels(y_offset, word_index)
         digits, digits_str = self._word_to_digits(word)
         self._draw_punched(digits, y_offset)
-        if self.ctx.display.height() > 140:
+        if self.ctx.display.height() > SMALLEST_WIDTH:
             self.ctx.display.draw_string(
                 self.x_offset + 17 * FONT_WIDTH,
                 y_offset,
@@ -393,7 +393,7 @@ class Stackbit(Page):
 
     def enter_1248(self):
         """UI to manually enter a Stackbit 1248"""
-        if self.ctx.display.width() > 140:
+        if self.ctx.display.width() > SMALLEST_WIDTH:
             self.x_pad = 3 * FONT_WIDTH
         else:
             self.x_pad = 2 * FONT_WIDTH

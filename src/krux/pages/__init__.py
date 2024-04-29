@@ -41,6 +41,7 @@ from ..display import (
     FLASH_MSG_TIME,
     FONT_HEIGHT,
     FONT_WIDTH,
+    SMALLEST_WIDTH,
 )
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, DefaultWallet
@@ -724,7 +725,7 @@ class Menu:
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
         if self.ctx.wallet is not None:
-            if self.ctx.display.width() > 140:
+            if self.ctx.display.width() > SMALLEST_WIDTH:
                 self.ctx.display.draw_hcentered_text(
                     self.ctx.wallet.key.fingerprint_hex_str(True),
                     0,
@@ -746,7 +747,7 @@ class Menu:
             self.ctx.wallet is not None
             and self.ctx.wallet.key.network["name"] == "Testnet"
         ):
-            if self.ctx.display.width() > 140:
+            if self.ctx.display.width() > SMALLEST_WIDTH:
                 self.ctx.display.draw_string(12, 0, "Test", GREEN, theme.info_bg_color)
             else:
                 self.ctx.display.draw_string(6, 0, "T", GREEN, theme.info_bg_color)

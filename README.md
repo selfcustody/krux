@@ -123,10 +123,11 @@ the HW device and may not have all features implemented (e.g. scanning via camer
 
 Before executing the simulator, make sure you have installed the poetry extras:
 ```bash
+# This cmd will uninstall other extras
 poetry install --extras simulator
 
-# To install alongside docs extras, use:
-poetry install --extras "simulator docs"
+# To install all extras, use:
+poetry install --all-extras
 ```
 
 Depending on the OS, it may be necessary to install zbar-tools:
@@ -292,10 +293,11 @@ Use [this script](firmware/scripts/rgbconv.py) to generate Maixpy compatible col
 Before change documentation, and run the mkdocs server, make sure you have installed the poetry extras:
 
 ```bash
+# This cmd will uninstall other extras
 poetry install --extras docs
 
-# To install alongside simulator extras, use:
-poetry install --extras "docs simulator"
+# To install all extras, use:
+poetry install --all-extras
 ```
 
 To change lateral and upper menus on generated documentation, see `mkdocs.yml` file on `nav` section. 
