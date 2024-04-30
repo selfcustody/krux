@@ -33,6 +33,7 @@ from ..wdt import wdt
 from ..krux_settings import t
 from ..display import (
     DEFAULT_PADDING,
+    MINIMAL_PADDING,
     MINIMAL_DISPLAY,
     FONT_HEIGHT,
     FONT_WIDTH,
@@ -58,7 +59,7 @@ class TinySeed(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
-        self.x_offset = DEFAULT_PADDING // 2 + 2 * FONT_WIDTH
+        self.x_offset = MINIMAL_PADDING + 2 * FONT_WIDTH
         self.printer = None
         if self.ctx.display.width() > SMALLEST_WIDTH:
             self.x_pad = self.ctx.display.width() * 2 // 27
@@ -101,10 +102,10 @@ class TinySeed(Page):
         if not MINIMAL_DISPLAY:
             self.ctx.display.to_landscape()
             bit_number = 2048
-            bit_offset = DEFAULT_PADDING // 2 + 2 * FONT_HEIGHT
+            bit_offset = MINIMAL_PADDING + 2 * FONT_HEIGHT
             for _ in range(12):
                 lcd.draw_string(
-                    (7 - len(str(bit_number))) * FONT_WIDTH - DEFAULT_PADDING // 2,
+                    (7 - len(str(bit_number))) * FONT_WIDTH - MINIMAL_PADDING,
                     self.ctx.display.width() - bit_offset,
                     str(bit_number),
                     theme.fg_color,
@@ -119,7 +120,7 @@ class TinySeed(Page):
             line = str(page * 12 + x + 1)
             if (page * 12 + x + 1) < 10:
                 line = " " + line
-            self.ctx.display.draw_string(DEFAULT_PADDING // 2, y_offset, line)
+            self.ctx.display.draw_string(MINIMAL_PADDING, y_offset, line)
             y_offset += self.y_pad
 
     def _draw_punched(self, words, page):

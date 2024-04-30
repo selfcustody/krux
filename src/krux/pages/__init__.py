@@ -37,6 +37,7 @@ from ..input import (
 )
 from ..display import (
     DEFAULT_PADDING,
+    MINIMAL_PADDING,
     MINIMAL_DISPLAY,
     FLASH_MSG_TIME,
     FONT_HEIGHT,
@@ -65,6 +66,13 @@ LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
+
+# Status bar dimensions
+STATUS_BAR_HEIGHT = (
+    FONT_HEIGHT + 1 if MINIMAL_DISPLAY else FONT_HEIGHT + MINIMAL_PADDING
+)
+BATTERY_WIDTH = 22
+BATTERY_HEIGHT = 7
 
 
 class Page:
@@ -547,15 +555,14 @@ class Menu:
     def __init__(self, ctx, menu, offset=None, disable_statusbar=False):
         self.ctx = ctx
         self.menu = menu
+        self.disable_statusbar = disable_statusbar
         if offset is None:
             # Default offset for status bar
-            self.menu_offset = FONT_HEIGHT
+            self.menu_offset = STATUS_BAR_HEIGHT
         else:
-            self.menu_offset = offset
-        self.disable_statusbar = disable_statusbar
-        if self.menu_offset != FONT_HEIGHT:
             # Always diasble status bar if menu has non standard offset
             self.disable_statusbar = True
+            self.menu_offset = offset
         max_viewable = min(
             self.ctx.display.max_menu_lines(self.menu_offset),
             len(self.menu),
@@ -665,7 +672,7 @@ class Menu:
                 0,
                 0,
                 self.ctx.display.width(),
-                FONT_HEIGHT + 1,
+                STATUS_BAR_HEIGHT,
                 theme.info_bg_color,
             )
             self.draw_battery_indicator()
@@ -694,31 +701,30 @@ class Menu:
                 battery_color = theme.fg_color
 
         # Draw (filled) outline of battery in top-right corner of display
-        padding = FONT_HEIGHT // 3
-        cylinder_length = 22
-        cylinder_height = 7
+        x_padding = FONT_HEIGHT // 3
+        y_padding = (STATUS_BAR_HEIGHT // 2) - (BATTERY_HEIGHT // 2)
         self.ctx.display.outline(
-            self.ctx.display.width() - padding - cylinder_length,
-            padding,
-            cylinder_length,
-            cylinder_height,
+            self.ctx.display.width() - x_padding - BATTERY_WIDTH,
+            y_padding,
+            BATTERY_WIDTH,
+            BATTERY_HEIGHT,
             battery_color,
         )
         self.ctx.display.fill_rectangle(
-            self.ctx.display.width() - padding + 1,
-            padding + 2,
+            self.ctx.display.width() - x_padding + 1,
+            y_padding + 2,
             2,
-            cylinder_height - 3,
+            BATTERY_HEIGHT - 3,
             battery_color,
         )
 
         # Indicate how much battery is depleted
-        charge_length = int((cylinder_length - 3) * charge)
+        charge_length = int((BATTERY_WIDTH - 3) * charge)
         self.ctx.display.fill_rectangle(
-            self.ctx.display.width() - padding - cylinder_length + 2,
-            padding + 2,
+            self.ctx.display.width() - x_padding - BATTERY_WIDTH + 2,
+            y_padding + 2,
             charge_length,
-            cylinder_height - 3,
+            BATTERY_HEIGHT - 3,
             battery_color,
         )
 
@@ -728,14 +734,14 @@ class Menu:
             if self.ctx.display.width() > SMALLEST_WIDTH:
                 self.ctx.display.draw_hcentered_text(
                     self.ctx.wallet.key.fingerprint_hex_str(True),
-                    0,
+                    STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
                     theme.highlight_color,
                     theme.info_bg_color,
                 )
             else:
                 self.ctx.display.draw_string(
                     24,
-                    0,
+                    STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
                     self.ctx.wallet.key.fingerprint_hex_str(True),
                     theme.highlight_color,
                     theme.info_bg_color,
@@ -748,9 +754,21 @@ class Menu:
             and self.ctx.wallet.key.network["name"] == "Testnet"
         ):
             if self.ctx.display.width() > SMALLEST_WIDTH:
-                self.ctx.display.draw_string(12, 0, "Test", GREEN, theme.info_bg_color)
+                self.ctx.display.draw_string(
+                    12,
+                    STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
+                    "Test",
+                    GREEN,
+                    theme.info_bg_color,
+                )
             else:
-                self.ctx.display.draw_string(6, 0, "T", GREEN, theme.info_bg_color)
+                self.ctx.display.draw_string(
+                    6,
+                    STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
+                    "T",
+                    GREEN,
+                    theme.info_bg_color,
+                )
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
