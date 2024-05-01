@@ -69,7 +69,21 @@ The Krux code is a Python package that should be installed with [Poetry](https:/
 pip install poetry
 poetry install
 ```
-
+There may be a problem at this stage when trying to directly install Poetry, we have a solution proposal(this comand is for unix system mac or linux):
+In a local directory run(we consider the name of the venv .krux but you can change this...):
+```bash
+python -m venv .krux
+source .krux/bin/activate
+```
+The result will be something like:
+```bash
+(.krux) username:~/directory name$ 
+```
+Now you can run normaly the pip of the poetry:
+```bash
+pip install poetry
+poetry install
+```
 This will also install all development tools so that you can run tests, run pylint, format code with [black](https://github.com/psf/black), etc.
 
 Note that you can run `poetry install` after making a change to the krux code if you wish to test a change in the [interpreter](#use-the-python-interpreter-repl).
