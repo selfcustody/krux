@@ -285,7 +285,7 @@
     "Wallet output descriptor loaded!": "¡Se ha cargado el descriptor de salida de la cartera!",
     "Wallet output descriptor not found.": "No se encontró el descriptor de salida de la cartera.",
     "Warning:": "Advertencia:",
-    "Warning: Mismatch between PSBT and wallet.": "Advertencia: Desajuste entre PSBT y monedero.",
+    "Warning: Path mismatch": "Advertencia: La ruta no coincide",
     "Wipe Device": "Limpiar dispositivo",
     "Wiping Device..": "Limpiando el dispositivo..",
     "Word %d": "Palabra %d",

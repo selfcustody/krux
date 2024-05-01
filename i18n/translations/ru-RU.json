@@ -285,7 +285,7 @@
     "Wallet output descriptor loaded!": "Выходной дескриптор кошелька загружен!",
     "Wallet output descriptor not found.": "Выходной дескриптор кошелька не найден.",
     "Warning:": "Предупреждение:",
-    "Warning: Mismatch between PSBT and wallet.": "Предупреждение: Несоответствие между PSBT и кошельком.",
+    "Warning: Path mismatch": "Предупреждение: Несоответствие пути",
     "Wipe Device": "Очистка Устройства",
     "Wiping Device..": "Очистка Устройства..",
     "Word %d": "Слово %d",

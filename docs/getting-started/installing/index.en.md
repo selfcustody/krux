@@ -6,6 +6,6 @@ You can install Krux in four different ways:
 - [:material-console: From source](../installing/from-source.md)
 
 ### Requirements
-Please, check the [part list](../../parts.md) for the compatible devices and requirements.
+Please, check the [parts list](../../parts.md) for the compatible devices and requirements.
 
 After the first firmware install, you can use a microSD card if you wish to perform further [airgapped updates](../features/sd-card-update.md).

@@ -285,7 +285,7 @@
     "Wallet output descriptor loaded!": "Descripteur de sortie du portefeuille chargé!",
     "Wallet output descriptor not found.": "Descripteur de sortie du portefeuille introuvable.",
     "Warning:": "Avertissement:",
-    "Warning: Mismatch between PSBT and wallet.": "Avertissement : Incompatibilité entre PSBT et portefeuille.",
+    "Warning: Path mismatch": "Avertissement : non-concordance de chemin",
     "Wipe Device": "Effacer l'appareil",
     "Wiping Device..": "Effacement de l'appareil en cours...",
     "Word %d": "Mot %d",

@@ -27,11 +27,14 @@ from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
 from .qr import FORMAT_PMOFN
+from .key import Key
 
 # PSBT Output Types:
 CHANGE = 0
 SELF_TRANSFER = 1
 SPEND = 2
+
+# We always uses thin spaces after the ₿ in this file
 
 
 class PSBTSigner:
@@ -131,7 +134,7 @@ class PSBTSigner:
                     if textual_path not in mismatched_paths:
                         mismatched_paths.append(textual_path)
         if mismatched_paths:
-            return ", ".join(mismatched_paths)
+            return Key.format_derivation(", ".join(mismatched_paths))
         return ""
 
     def _classify_output(self, out_policy, i, out):
@@ -300,11 +303,15 @@ class PSBTSigner:
 
         return messages
 
-    def sign(self):
-        """Signs the PSBT"""
+    def add_signatures(self):
+        """Add signatures to PSBT"""
         sigs_added = self.psbt.sign_with(self.wallet.key.root)
         if sigs_added == 0:
             raise ValueError("cannot sign")
+
+    def sign(self):
+        """Signs the PSBT removing all irrelevant data"""
+        self.add_signatures()
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):

@@ -285,7 +285,7 @@
     "Wallet output descriptor loaded!": "Załadowany deskryptor wyjściowy portfela!",
     "Wallet output descriptor not found.": "Nie znaleziono deskryptora wyjściowego portfela.",
     "Warning:": "Ostrzeżenie:",
-    "Warning: Mismatch between PSBT and wallet.": "Ostrzeżenie: Niezgodność między PSBT a portfelem.",
+    "Warning: Path mismatch": "Ostrzeżenie: Niezgodność ścieżki",
     "Wipe Device": "Wyczyść urządzenie",
     "Wiping Device..": "Czyszczenie urządzenia...",
     "Word %d": "Słowo %d",

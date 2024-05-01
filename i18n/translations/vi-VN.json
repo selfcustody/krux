@@ -285,7 +285,7 @@
     "Wallet output descriptor loaded!": "Đã tải bộ mô tả đầu ra của ví!",
     "Wallet output descriptor not found.": "Không tìm thấy bộ mô tả đầu ra ví.",
     "Warning:": "Cảnh báo:",
-    "Warning: Mismatch between PSBT and wallet.": "Cảnh báo: Không khớp giữa PSBT và ví.",
+    "Warning: Path mismatch": "Cảnh báo: Đường dẫn không khớp",
     "Wipe Device": "Xóa dữ liệu trên thiết bị",
     "Wiping Device..": "Đang xóa dữ liệu trên thiết bị..",
     "Word %d": "Kí tự %d",
