@@ -69,8 +69,7 @@ The Krux code is a Python package that should be installed with [Poetry](https:/
 pip install poetry
 poetry install
 ```
-If you have a problem installing Poetry on Linux OS try:
-In a local directory run(we consider the name of the venv .krux but you can change this...):
+If you have a problem installing Poetry on Linux OS try (we consider the name of the venv .krux but you can change this...):
 ```bash
 python -m venv .krux
 source .krux/bin/activate
