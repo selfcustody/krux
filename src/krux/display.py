@@ -41,6 +41,10 @@ else:
     # room left for no/yes buttons
     BOTTOM_PROMPT_LINE = BOTTOM_LINE - 3 * FONT_HEIGHT
 
+# Status bar dimensions
+STATUS_BAR_HEIGHT = (
+    FONT_HEIGHT + 1 if MINIMAL_DISPLAY else FONT_HEIGHT + MINIMAL_PADDING
+)
 
 FLASH_MSG_TIME = 2000
 
@@ -401,9 +405,9 @@ class Display:
             translated_level = 8
         power_manager.set_screen_brightness(translated_level)
 
-    def max_menu_lines(self, line_offset=0):
+    def max_menu_lines(self, line_offset=STATUS_BAR_HEIGHT):
         """Maximum menu items the display can fit"""
-        return (self.height() - DEFAULT_PADDING - line_offset) // (2 * FONT_HEIGHT)
+        return (self.height() - line_offset) // (2 * FONT_HEIGHT)
 
 
 display = Display()

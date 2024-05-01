@@ -37,12 +37,12 @@ from ..input import (
 )
 from ..display import (
     DEFAULT_PADDING,
-    MINIMAL_PADDING,
     MINIMAL_DISPLAY,
     FLASH_MSG_TIME,
     FONT_HEIGHT,
     FONT_WIDTH,
     SMALLEST_WIDTH,
+    STATUS_BAR_HEIGHT,
 )
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, DefaultWallet
@@ -67,10 +67,6 @@ UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 
-# Status bar dimensions
-STATUS_BAR_HEIGHT = (
-    FONT_HEIGHT + 1 if MINIMAL_DISPLAY else FONT_HEIGHT + MINIMAL_PADDING
-)
 BATTERY_WIDTH = 22
 BATTERY_HEIGHT = 7
 
@@ -826,7 +822,7 @@ class Menu:
                     )
 
     def _draw_menu(self, selected_item_index):
-        if self.menu_offset > FONT_HEIGHT:
+        if self.menu_offset > STATUS_BAR_HEIGHT:
             offset_y = self.menu_offset + 3 * FONT_HEIGHT // 2
         else:
             offset_y = len(self.menu_view) * 2

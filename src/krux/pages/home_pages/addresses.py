@@ -66,13 +66,14 @@ class Addresses(Page):
 
             max_addresses = self.ctx.display.max_menu_lines() - 3
 
-            num_checked = 0
+            address_index = 0
             while True:
                 items = []
-                if num_checked >= max_addresses:
+                if address_index >= max_addresses:
                     items.append(
                         (
-                            "%d..%d" % (num_checked - max_addresses, num_checked - 1),
+                            "%d..%d"
+                            % (address_index - max_addresses, address_index - 1),
                             lambda: MENU_EXIT,
                         )
                     )
@@ -80,10 +81,10 @@ class Addresses(Page):
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(loading_txt)
                 for addr in self.ctx.wallet.obtain_addresses(
-                    num_checked, limit=max_addresses, branch_index=addr_type
+                    address_index, limit=max_addresses, branch_index=addr_type
                 ):
 
-                    pos_str = str(num_checked) + "." + " "  # thin space
+                    pos_str = str(address_index) + "." + " "  # thin space
                     qr_title = pos_str + addr
                     items.append(
                         (
@@ -94,11 +95,11 @@ class Addresses(Page):
                         )
                     )
 
-                    num_checked += 1
+                    address_index += 1
 
                 items.append(
                     (
-                        "%d..%d" % (num_checked, num_checked + max_addresses - 1),
+                        "%d..%d" % (address_index, address_index + max_addresses - 1),
                         lambda: MENU_EXIT,
                     )
                 )
@@ -118,9 +119,9 @@ class Addresses(Page):
                     if index == len(submenu.menu) - 2:
                         stay_on_this_addr_menu = False
                     # Prev
-                    if index == 0 and num_checked > max_addresses:
+                    if index == 0 and address_index > max_addresses:
                         stay_on_this_addr_menu = False
-                        num_checked -= 2 * max_addresses
+                        address_index -= 2 * max_addresses
 
         return MENU_CONTINUE
 
