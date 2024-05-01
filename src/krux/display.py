@@ -26,6 +26,7 @@ from .themes import theme
 from .krux_settings import Settings
 
 DEFAULT_PADDING = 10
+MINIMAL_PADDING = 5
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = (
@@ -186,7 +187,7 @@ class Display:
         """Retuns y offset to subtitle QR codes"""
         if board.config["type"] == "cube":
             return BOTTOM_LINE
-        return self.width() + DEFAULT_PADDING // 2
+        return self.width() + MINIMAL_PADDING
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""
@@ -347,9 +348,7 @@ class Display:
         if info_box:
             bg_color = theme.info_bg_color
             padding = (
-                DEFAULT_PADDING
-                if self.width() > SMALLEST_WIDTH
-                else DEFAULT_PADDING // 2
+                DEFAULT_PADDING if self.width() > SMALLEST_WIDTH else MINIMAL_PADDING
             )
             self.fill_rectangle(
                 padding - 3,

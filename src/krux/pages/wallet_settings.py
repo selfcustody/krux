@@ -186,8 +186,8 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                ("Legacy - 44 (soon)", None),  #  lambda: "44"),
-                ("Nested Segwit (soon) - 49", None),  #  lambda: "49"),
+                ("Legacy - 44 (soon)", None),  #  lambda: "p2pkh"),
+                ("Nested Segwit - 49 (soon)", None),  #  lambda: "p2sh-p2wpkh"),
                 ("Native Segwit - 84", lambda: "p2wpkh"),
                 ("Taproot - 86 (Experimental)", lambda: "p2tr"),
             ],

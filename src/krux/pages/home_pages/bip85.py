@@ -26,9 +26,9 @@ from ..settings_page import DIGITS
 from ...krux_settings import Settings
 from .. import (
     Page,
-    Menu,
     ESC_KEY,
-    MENU_EXIT,
+    MENU_CONTINUE,
+    choose_len_mnemonic,
 )
 
 MAX_BIP85_CHILD_INDEX = 2**31 - 1
@@ -39,15 +39,10 @@ class Bip85(Page):
 
     def export(self):
         """Exports BIP85 child mnemonics"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-            ],
-        )
-        menu_index, _ = submenu.run_loop()
-        num_words = 12 if menu_index == 0 else 24
+        num_words = choose_len_mnemonic(self.ctx)
+        if not num_words:
+            return MENU_CONTINUE
+
         while True:
             child = self.capture_from_keypad(t("Child Index"), [DIGITS])
             if child == ESC_KEY:

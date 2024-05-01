@@ -27,6 +27,7 @@ try:
 except:
     import random
 from binascii import hexlify
+from hashlib import sha256
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
@@ -96,13 +97,15 @@ class Key:
 
     def fingerprint_hex_str(self, pretty=False):
         """Returns the master key fingerprint in hex format"""
-        return Key.format_fingerprint(self.fingerprint, pretty)
+        formatted_txt = "⊚ %s" if pretty else "%s"
+        return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
 
     def derivation_str(self, pretty=False):
         """Returns the derivation path for the Hierarchical Deterministic Wallet to
         be displayed as string
         """
-        return Key.format_derivation(self.derivation, pretty)
+        formatted_txt = "↳ %s" if pretty else "%s"
+        return (formatted_txt % self.derivation).replace("h", HARDENED_STR_REPLACE)
 
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
@@ -134,11 +137,7 @@ class Key:
             raise ValueError("must provide 11 or 23 words")
 
         random.seed(int(time.ticks_ms() + entropy))
-        while True:
-            word = random.choice(WORDLIST)
-            mnemonic = " ".join(words) + " " + word
-            if bip39.mnemonic_is_valid(mnemonic):
-                return word
+        return random.choice(Key.get_final_word_candidates(words))
 
     @staticmethod
     def get_default_derivation(multisig, network, account=0, script_type="p2wpkh"):
@@ -162,3 +161,28 @@ class Key:
         """Helper method to display the fingerprint formatted"""
         formatted_txt = "⊚ %s" if pretty else "%s"
         return formatted_txt % hexlify(fingerprint).decode("utf-8")
+
+    @staticmethod
+    def get_final_word_candidates(words):
+        """Returns a list of valid final words"""
+        if len(words) != 11 and len(words) != 23:
+            raise ValueError("must provide 11 or 23 words")
+
+        accu = 0
+        for index in [WORDLIST.index(x) for x in words]:
+            accu = (accu << 11) + index
+
+        # in bits: final entropy, needed entropy, checksum
+        len_target = (len(words) * 11 + 11) // 33 * 32
+        len_needed = len_target - (len(words) * 11)
+        len_cksum = len_target // 32
+
+        candidates = []
+        for i in range(2**len_needed):
+            entropy = (accu << len_needed) + i
+            ck_bytes = sha256(entropy.to_bytes(len_target // 8, "big")).digest()
+            cksum = int.from_bytes(ck_bytes, "big") >> 256 - len_cksum
+            last_word = WORDLIST[(i << len_cksum) + cksum]
+            candidates.append(last_word)
+
+        return candidates

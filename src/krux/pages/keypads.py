@@ -34,7 +34,7 @@ from ..input import (
     FAST_BACKWARD,
     PRESSED,
 )
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
@@ -131,7 +131,7 @@ class Keypad:
             region = y * key_v_spacing + self.keypad_offset()
             self.y_keypad_map.append(region)
         for x in range(width + 1):
-            region = x * key_h_spacing + DEFAULT_PADDING // 2
+            region = x * key_h_spacing + MINIMAL_PADDING
             self.x_keypad_map.append(region)
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.y_regions = self.y_keypad_map
