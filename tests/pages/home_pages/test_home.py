@@ -619,7 +619,11 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
 
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
-        BUTTON_ENTER,  # Path mismatch ACK > Error wii be raised "cannot sign"
+        BUTTON_ENTER,  # Path mismatch ACK
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_ENTER,  # output 2
+        BUTTON_ENTER,  # Sign to QR code
     ]
     wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
     ctx = create_ctx(mocker, btn_seq, wallet)
@@ -655,11 +659,10 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
         BUTTON_ENTER,  # Path mismatch ACK
-        # BUTTON_ENTER,  # PSBT resume
-        # BUTTON_ENTER,  # output 1
-        # BUTTON_ENTER,  # output 2
-        # BUTTON_ENTER,  # Sign to QR code
-        # BUTTON_ENTER,  # Leave
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_ENTER,  # output 2
+        BUTTON_ENTER,  # Sign to QR code
     ]
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
     ctx = create_ctx(mocker, btn_seq, wallet)
