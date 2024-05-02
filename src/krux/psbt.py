@@ -85,7 +85,7 @@ class PSBTSigner:
         for inp in self.psbt.inputs:
             # get policy of the input
             try:
-                inp_policy = get_policy(inp, inp.witness_utxo.script_pubkey, xpubs)
+                inp_policy = self.get_policy_from_psbt_input(inp, xpubs)
             except:
                 raise ValueError("Unable to get policy")
             # if policy is None - assign current
@@ -108,6 +108,18 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
+    def get_policy_from_psbt_input(self, input, xpubs):
+        """Extracts the scriptPubKey from an input's UTXO and determines the policy."""
+        if input.witness_utxo:
+            scriptpubkey = input.witness_utxo.script_pubkey
+        elif input.non_witness_utxo:
+            # Retrieve the scriptPubKey from the specified output in the non_witness_utxo
+            scriptpubkey = input.non_witness_utxo.vout[input.vout].script_pubkey
+        else:
+            raise ValueError("No UTXO information available in the input.")
+
+        return get_policy(input, scriptpubkey, xpubs)
+    
     def path_mismatch(self):
         """Verifies if the PSBT path matches wallet's derivation path"""
         mismatched_paths = []
@@ -168,6 +180,8 @@ class PSBTSigner:
                         sc = script.p2wpkh(my_hd_prvkey)
                     elif self.policy["type"] == "p2sh-p2wpkh":
                         sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
+                    elif self.policy["type"] == "p2pkh":
+                        sc = script.p2pkh(my_hd_prvkey)
 
             if self.policy["type"] == "p2tr":
                 address_from_my_wallet = (
@@ -198,7 +212,11 @@ class PSBTSigner:
 
         inp_amount = 0
         for inp in self.psbt.inputs:
-            inp_amount += inp.witness_utxo.value
+            if inp.witness_utxo:
+                inp_amount += inp.witness_utxo.value
+            elif inp.non_witness_utxo:  # Legacy
+                # Retrieve the value from the specified output in the non_witness_utxo
+                inp_amount += inp.non_witness_utxo.vout[inp.vout].value
         resume_inputs_str = (
             (t("Inputs (%d):") % len(self.psbt.inputs))
             + (" ₿ %s" % format_btc(inp_amount))
