@@ -31,7 +31,7 @@ from .. import (
     MENU_EXIT,
 )
 
-SCAN_ADDRESS_LIMIT = 20
+SCAN_ADDRESS_LIMIT = 50
 
 
 class Addresses(Page):
@@ -179,14 +179,14 @@ class Addresses(Page):
             ):
                 return MENU_CONTINUE
 
-            checking_match_txt = t("Checking receive address %d for match..")
+            checking_match_txt = t("Checking receive address from %d to %d for match..")
             checked_no_match_txt = t("Checked %d receive addresses with no matches.")
             is_valid_txt = "%s\n\n" + t("is a valid receive address!")
             not_found_txt = "%s\n\n" + t(
                 "was NOT FOUND in the first %d receive addresses"
             )
             if addr_type == 1:
-                checking_match_txt = t("Checking change address %d for match..")
+                checking_match_txt = t("Checking change address from %d to %d for match..")
                 checked_no_match_txt = t("Checked %d change addresses with no matches.")
                 is_valid_txt = "%s\n\n" + t("is a valid change address!")
                 not_found_txt = "%s\n\n" + t(
@@ -196,14 +196,13 @@ class Addresses(Page):
             found = False
             num_checked = 0
             while not found:
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    checking_match_txt % (num_checked, num_checked + SCAN_ADDRESS_LIMIT - 1)
+                )
                 for some_addr in self.ctx.wallet.obtain_addresses(
                     num_checked, limit=SCAN_ADDRESS_LIMIT, branch_index=addr_type
                 ):
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(
-                        checking_match_txt % (num_checked + 1)
-                    )
-
                     num_checked += 1
 
                     found = addr == some_addr
@@ -222,7 +221,7 @@ class Addresses(Page):
 
             self.ctx.display.clear()
             result_message = (
-                is_valid_txt % (str(num_checked) + ". \n\n" + addr)
+                is_valid_txt % (str(num_checked - 1) + ". \n\n" + addr)
                 if found
                 else not_found_txt % (addr, num_checked)
             )
