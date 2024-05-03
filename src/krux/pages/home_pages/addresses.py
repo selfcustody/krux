@@ -186,7 +186,9 @@ class Addresses(Page):
                 "was NOT FOUND in the first %d receive addresses"
             )
             if addr_type == 1:
-                checking_match_txt = t("Checking change address from %d to %d for match..")
+                checking_match_txt = t(
+                    "Checking change address from %d to %d for match.."
+                )
                 checked_no_match_txt = t("Checked %d change addresses with no matches.")
                 is_valid_txt = "%s\n\n" + t("is a valid change address!")
                 not_found_txt = "%s\n\n" + t(
@@ -198,7 +200,8 @@ class Addresses(Page):
             while not found:
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    checking_match_txt % (num_checked, num_checked + SCAN_ADDRESS_LIMIT - 1)
+                    checking_match_txt
+                    % (num_checked, num_checked + SCAN_ADDRESS_LIMIT - 1)
                 )
                 for some_addr in self.ctx.wallet.obtain_addresses(
                     num_checked, limit=SCAN_ADDRESS_LIMIT, branch_index=addr_type

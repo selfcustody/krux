@@ -497,7 +497,7 @@ translation_table = {
         3559456868: "Tamaño de la pieza",
         4249903283: "Contraseña",
         3040011773: "¿Eliminar permanentemente todos los mnemónicos y configuraciones cifrados almacenados del flash?",
-        140802882: "Salvar",
+        140802882: "Guardar",
         2578106186: "Índice de desviación de píxeles:",
         1703779997: "QR de Texto",
         3561756278: "Cargue un descriptor de billetera",

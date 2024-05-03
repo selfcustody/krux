@@ -108,18 +108,18 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
-    def get_policy_from_psbt_input(self, input, xpubs):
+    def get_policy_from_psbt_input(self, tx_input, xpubs):
         """Extracts the scriptPubKey from an input's UTXO and determines the policy."""
-        if input.witness_utxo:
-            scriptpubkey = input.witness_utxo.script_pubkey
-        elif input.non_witness_utxo:
+        if tx_input.witness_utxo:
+            scriptpubkey = tx_input.witness_utxo.script_pubkey
+        elif tx_input.non_witness_utxo:
             # Retrieve the scriptPubKey from the specified output in the non_witness_utxo
-            scriptpubkey = input.non_witness_utxo.vout[input.vout].script_pubkey
+            scriptpubkey = tx_input.non_witness_utxo.vout[tx_input.vout].script_pubkey
         else:
             raise ValueError("No UTXO information available in the input.")
 
-        return get_policy(input, scriptpubkey, xpubs)
-    
+        return get_policy(tx_input, scriptpubkey, xpubs)
+
     def path_mismatch(self):
         """Verifies if the PSBT path matches wallet's derivation path"""
         mismatched_paths = []
