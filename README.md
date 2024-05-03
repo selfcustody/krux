@@ -233,21 +233,23 @@ with open(CONF_FILENAME, "w") as f:
 machine.reset()
 ```
 
-Now, with watchdog disabled, you can use debug the device normally. So no more automatic resets, and if you added any print statements to the code, they should appear whenever your code is reached.
+Now, with watchdog disabled, you can use debug the device normally. Also remember to disable the `Settings > Security > Shutdown Time` setting it to `0` to no more automatic resets, and if you added any print statements to the code, they should appear whenever your code is reached.
 
-You can also drop into a live Python REPL at any point by issuing an interrupt with Ctrl-C:
+It is not possible to drop into a live Python REPL anymore as we disabled the `MICROPY_ENABLE_COMPILER` flag in `firmware\MaixPy\components\micropython\port\include\mpconfigport.h`. If you enable it again it will be possible to drop into a live Python REPL by issuing an interrupt with Ctrl-C:
 
 ```bash
 Traceback (most recent call last):
-  File "boot.py", line 38, in <module>
-  File "krux/pages/__init__.py", line 192, in run
-  File "krux/pages/__init__.py", line 207, in run_loop
-  File "krux/input.py", line 27, in wait_for_button
-KeyboardInterrupt:
-MicroPython; Sipeed_M1 with kendryte-k210
+  File "_boot.py", line 109, in <module>
+  File "_boot.py", line 64, in login
+  File "krux/pages/__init__.py", line 498, in run
+  File "krux/pages/__init__.py", line 614, in run_loop
+  File "krux/input.py", line 325, in wait_for_button
+  File "krux/input.py", line 238, in _wait_for_press
+KeyboardInterrupt: 
+MicroPython v1.11 on 2024-03-11; Sipeed_M1 with kendryte-k210
 Type "help()" for more information.
->>>
->>>
+>>> 
+>>> 
 ```
 
 ## Create new translations - i18n
