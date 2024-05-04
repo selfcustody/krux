@@ -2,6 +2,8 @@
     "%d of %d multisig": "%d из %d мультиподпись",
     "%d. Change:": "%d. Сдача:",
     "%d. Self-transfer:": "%d. Перевод самому себе:",
+    "Percentage": "Доля в процентах",
+    "Battery": "Батарея",
     "%d. Spend:": "%d. Расход:",
     "%s was removed from SD card": "%s удален с SD-карты",
     "%s was removed from flash": "%s удален с флеш-памяти",

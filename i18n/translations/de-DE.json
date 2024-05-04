@@ -6,6 +6,8 @@
     "%s was removed from SD card": "%s wurde von der SD-Karte gelöscht",
     "%s was removed from flash": "%s wurde aus dem Flash-Speicher gelöscht",
     "(%d total)": "(%d insgesamt)",
+    "Percentage": "Prozent",
+    "Battery": "Batterie",
     "(Experimental)": "(Experimental)",
     "12 words": "12 Wörter",
     "24 words": "24 Wörter",
