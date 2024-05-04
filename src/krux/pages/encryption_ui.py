@@ -50,7 +50,7 @@ class EncryptionKey(Page):
             self.ctx,
             [
                 (t("Type Key"), self.load_key),
-                (t("Scan Key QR code"), self.load_qr_encryption_key),
+                (t("Scan Key QR Code"), self.load_qr_encryption_key),
             ],
         )
         _, key = submenu.run_loop()
