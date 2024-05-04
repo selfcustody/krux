@@ -69,6 +69,20 @@ Krux uses [Poetry](https://python-poetry.org/) as Python packaging and dependenc
 pip install poetry
 poetry install
 ```
+If you have a problem installing Poetry on Linux OS try (we consider the name of the venv .krux but you can change this...):
+```bash
+python -m venv .krux
+source .krux/bin/activate
+```
+The result will be something like:
+```bash
+(.krux) username:~/directory name$ 
+```
+Now you can run normaly the pip of the poetry:
+```bash
+pip install poetry
+poetry install
+```
 
 Note: when changing the dependencies in `pyptoject.toml` you need to generate a new `poetry.lock` file using the cmd: `poetry lock --no-update`.
 
