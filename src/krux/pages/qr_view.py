@@ -27,7 +27,7 @@ from ..sd_card import SDHandler
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
 from ..qr import get_size
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -58,10 +58,10 @@ class SeedQRView(Page):
             self.title = title
         else:
             if self.binary:
-                self.title = t("Compact SeedQR")
+                self.title = "Compact SeedQR"
                 self.code = self._binary_seed_qr()
             else:
-                self.title = t("SeedQR")
+                self.title = "SeedQR"
                 self.code = self._seed_qr()
         self.qr_size = get_size(self.code)
         self.region_size = 7 if self.qr_size == 21 else 5
@@ -137,7 +137,7 @@ class SeedQRView(Page):
     def _region_legend(self, row, column):
         region_char = chr(65 + row)
         self.ctx.display.draw_hcentered_text(
-            t("Region: ") + region_char + str(column + 1),
+            t("Region:") + " " + region_char + str(column + 1),
             self.ctx.display.qr_offset(),
             color=theme.highlight_color,
         )
@@ -145,8 +145,8 @@ class SeedQRView(Page):
     def draw_grided_qr(self, mode):
         """Draws grided QR"""
         self.ctx.display.clear()
-        if self.ctx.display.width() > 140:
-            grid_size = self.ctx.display.width() // 140
+        if self.ctx.display.width() > SMALLEST_WIDTH:
+            grid_size = self.ctx.display.width() // SMALLEST_WIDTH
         else:
             grid_size = 1
         grid_offset = self.ctx.display.width() % (self.qr_size + 2)
@@ -183,7 +183,7 @@ class SeedQRView(Page):
                     theme.highlight_color,
                 )
             self.ctx.display.draw_hcentered_text(
-                t("Line: ") + str(self.lr_index + 1),
+                t("Line:") + " " + str(self.lr_index + 1),
                 self.ctx.display.qr_offset(),
                 color=theme.highlight_color,
             )
@@ -332,7 +332,7 @@ class SeedQRView(Page):
         file_name += PBM_IMAGE_EXTENSION
         with SDHandler() as sd:
             sd.write_binary(file_name, pbm_data)
-        self.flash_text(t("Saved to SD card:\n%s") % file_name)
+        self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
 
     def save_bmp_image(self, file_name, resolution):
         """Save QR code image as .bmp file"""
@@ -364,7 +364,7 @@ class SeedQRView(Page):
         )
         file_name += BMP_IMAGE_EXTENSION
         bmp_img.save("/sd/" + file_name)
-        self.flash_text(t("Saved to SD card:\n%s") % file_name)
+        self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
 
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
@@ -392,7 +392,7 @@ class SeedQRView(Page):
                 bmp_resolutions.append(resolution)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Res. - Format"), self.ctx.display.font_height, info_box=True
+            t("Res. - Format"), FONT_HEIGHT, info_box=True
         )
         qr_menu = []
         qr_menu.append(
@@ -405,7 +405,7 @@ class SeedQRView(Page):
                     lambda res=bmp_resolution: self.save_bmp_image(file_name, res),
                 )
             )
-        submenu = Menu(self.ctx, qr_menu, offset=2 * self.ctx.display.font_height)
+        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT)
         submenu.run_loop()
         # return MENU_EXIT  # Uncomment to exit QR Viewer after saving
 
@@ -435,10 +435,11 @@ class SeedQRView(Page):
                     self.bright = not self.bright
 
                 self.draw_grided_qr(mode)
-                self.ctx.display.draw_hcentered_text(
-                    label,
-                    self.ctx.display.qr_offset() + self.ctx.display.font_height,
-                )
+                if self.ctx.display.height() > self.ctx.display.width():
+                    self.ctx.display.draw_hcentered_text(
+                        label,
+                        self.ctx.display.qr_offset() + FONT_HEIGHT,
+                    )
                 button = self.ctx.input.wait_for_button()
                 if transcript_tools:
                     if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
@@ -461,15 +462,18 @@ class SeedQRView(Page):
                     self.lr_index %= self.columns * self.columns
             if quick_exit:
                 return MENU_CONTINUE
-            if self.has_sd_card() and allow_export:
-                sd_func = self.save_qr_image_menu
-            else:
-                sd_func = None
             printer_func = self.print_qr if self.has_printer() else None
             qr_menu = [
                 (t("Return to QR Viewer"), lambda: None),
                 (t("Toggle Brightness"), toggle_brightness),
-                (t("Save QR Image to SD Card"), sd_func),
+                (
+                    t("Save QR Image to SD Card"),
+                    (
+                        self.save_qr_image_menu
+                        if allow_export and self.has_sd_card()
+                        else None
+                    ),
+                ),
                 (t("Print to QR"), printer_func),
                 (t("Back to Menu"), lambda: MENU_EXIT),
             ]

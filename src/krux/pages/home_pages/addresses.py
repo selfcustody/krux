@@ -21,10 +21,9 @@
 # THE SOFTWARE.
 
 import gc
+from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
-from ...themes import theme
 from ...qr import FORMAT_NONE
-from ..utils import Utils
 from .. import (
     Page,
     Menu,
@@ -32,24 +31,17 @@ from .. import (
     MENU_EXIT,
 )
 
-SCAN_ADDRESS_LIMIT = 20
+SCAN_ADDRESS_LIMIT = 50
 
 
 class Addresses(Page):
     """UI to show and scan wallet addresses"""
 
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.ctx = ctx
-        self.utils = Utils(self.ctx)
-
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            self.flash_text(
-                t("Please load a wallet output descriptor"), theme.error_color
-            )
+            self.flash_error(t("Please load a wallet output descriptor"))
             return MENU_CONTINUE
 
         submenu = Menu(
@@ -68,30 +60,31 @@ class Addresses(Page):
         """Handler for the 'receive addresses' or 'change addresses' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
-            loading_txt = t("Loading receive address %d..")
+            loading_txt = t("Loading receive addresses..")
             if addr_type == 1:
-                loading_txt = t("Loading change address %d..")
+                loading_txt = t("Loading change addresses..")
 
             max_addresses = self.ctx.display.max_menu_lines() - 3
 
-            num_checked = 0
+            address_index = 0
             while True:
                 items = []
-                if num_checked + 1 > max_addresses:
+                if address_index >= max_addresses:
                     items.append(
                         (
-                            "%d..%d" % (num_checked - max_addresses + 1, num_checked),
+                            "%d..%d"
+                            % (address_index - max_addresses, address_index - 1),
                             lambda: MENU_EXIT,
                         )
                     )
 
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(loading_txt)
                 for addr in self.ctx.wallet.obtain_addresses(
-                    num_checked, limit=max_addresses, branch_index=addr_type
+                    address_index, limit=max_addresses, branch_index=addr_type
                 ):
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(loading_txt % (num_checked + 1))
 
-                    pos_str = str(num_checked + 1) + "." + " "  # thin space
+                    pos_str = str(address_index) + "." + " "  # thin space
                     qr_title = pos_str + addr
                     items.append(
                         (
@@ -102,11 +95,11 @@ class Addresses(Page):
                         )
                     )
 
-                    num_checked += 1
+                    address_index += 1
 
                 items.append(
                     (
-                        "%d..%d" % (num_checked + 1, num_checked + max_addresses),
+                        "%d..%d" % (address_index, address_index + max_addresses - 1),
                         lambda: MENU_EXIT,
                     )
                 )
@@ -126,9 +119,9 @@ class Addresses(Page):
                     if index == len(submenu.menu) - 2:
                         stay_on_this_addr_menu = False
                     # Prev
-                    if index == 0 and num_checked > max_addresses:
+                    if index == 0 and address_index > max_addresses:
                         stay_on_this_addr_menu = False
-                        num_checked -= 2 * max_addresses
+                        address_index -= 2 * max_addresses
 
         return MENU_CONTINUE
 
@@ -146,9 +139,7 @@ class Addresses(Page):
         """Handler for the 'scan address' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            self.flash_text(
-                t("Please load a wallet output descriptor"), theme.error_color
-            )
+            self.flash_error(t("Please load a wallet output descriptor"))
             return MENU_CONTINUE
 
         submenu = Menu(
@@ -166,7 +157,7 @@ class Addresses(Page):
         """Handler for the 'receive' or 'change' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None or qr_format != FORMAT_NONE:
-            self.flash_text(t("Failed to load address"), theme.error_color)
+            self.flash_error(t("Failed to load address"))
             return MENU_CONTINUE
 
         addr = None
@@ -175,7 +166,7 @@ class Addresses(Page):
 
             addr = parse_address(data)
         except:
-            self.flash_text(t("Invalid address"), theme.error_color)
+            self.flash_error(t("Invalid address"))
             return MENU_CONTINUE
 
         self.show_address(data, title=addr, quick_exit=True)
@@ -188,29 +179,33 @@ class Addresses(Page):
             ):
                 return MENU_CONTINUE
 
-            checking_match_txt = t("Checking receive address %d for match..")
+            checking_match_txt = t("Checking receive address from %d to %d for match..")
             checked_no_match_txt = t("Checked %d receive addresses with no matches.")
-            is_valid_txt = t("%s\n\nis a valid receive address!")
-            not_found_txt = t("%s\n\nwas NOT FOUND in the first %d receive addresses")
+            is_valid_txt = "%s\n\n" + t("is a valid receive address!")
+            not_found_txt = "%s\n\n" + t(
+                "was NOT FOUND in the first %d receive addresses"
+            )
             if addr_type == 1:
-                checking_match_txt = t("Checking change address %d for match..")
+                checking_match_txt = t(
+                    "Checking change address from %d to %d for match.."
+                )
                 checked_no_match_txt = t("Checked %d change addresses with no matches.")
-                is_valid_txt = t("%s\n\nis a valid change address!")
-                not_found_txt = t(
-                    "%s\n\nwas NOT FOUND in the first %d change addresses"
+                is_valid_txt = "%s\n\n" + t("is a valid change address!")
+                not_found_txt = "%s\n\n" + t(
+                    "was NOT FOUND in the first %d change addresses"
                 )
 
             found = False
             num_checked = 0
             while not found:
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    checking_match_txt
+                    % (num_checked, num_checked + SCAN_ADDRESS_LIMIT - 1)
+                )
                 for some_addr in self.ctx.wallet.obtain_addresses(
                     num_checked, limit=SCAN_ADDRESS_LIMIT, branch_index=addr_type
                 ):
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(
-                        checking_match_txt % (num_checked + 1)
-                    )
-
                     num_checked += 1
 
                     found = addr == some_addr
@@ -224,14 +219,12 @@ class Addresses(Page):
                     self.ctx.display.draw_centered_text(
                         checked_no_match_txt % num_checked
                     )
-                    if not self.prompt(
-                        t("Try more?"), self.ctx.display.bottom_prompt_line
-                    ):
+                    if not self.prompt(t("Try more?"), BOTTOM_PROMPT_LINE):
                         break
 
             self.ctx.display.clear()
             result_message = (
-                is_valid_txt % (str(num_checked) + ". \n\n" + addr)
+                is_valid_txt % (str(num_checked - 1) + ". \n\n" + addr)
                 if found
                 else not_found_txt % (addr, num_checked)
             )

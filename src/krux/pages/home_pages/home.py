@@ -21,15 +21,17 @@
 # THE SOFTWARE.
 
 import gc
-from ...themes import theme
+from ...display import BOTTOM_PROMPT_LINE
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
-from ...krux_settings import t
+from ...krux_settings import t, Settings
 from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
 )
+
+MAX_POLICY_COSIGNERS_DISPLAYED = 5
 
 
 class Home(Page):
@@ -41,10 +43,16 @@ class Home(Page):
             Menu(
                 ctx,
                 [
-                    (t("Mnemonic"), self.mnemonic),
-                    (t("Encrypt Mnemonic"), self.encrypt_mnemonic),
+                    (
+                        t("Backup Mnemonic"),
+                        (
+                            self.backup_mnemonic
+                            if not Settings().security.hide_mnemonic
+                            else None
+                        ),
+                    ),
                     (t("Extended Public Key"), self.public_key),
-                    (t("Wallet Descriptor"), self.wallet),
+                    (t("Wallet"), self.wallet),
                     (t("Address"), self.addresses_menu),
                     (t("Sign"), self.sign),
                     (t("Shutdown"), self.shutdown),
@@ -52,19 +60,12 @@ class Home(Page):
             ),
         )
 
-    def mnemonic(self):
-        """Handler for the 'mnemonic' menu item"""
-        from .mnemonic_view import MnemonicsView
+    def backup_mnemonic(self):
+        """Handler for the 'Backup Mnemonic' menu item"""
+        from .mnemonic_backup import MnemonicsView
 
         mnemonics_viewer = MnemonicsView(self.ctx)
         return mnemonics_viewer.mnemonic()
-
-    def encrypt_mnemonic(self):
-        """Handler for Mnemonic > Encrypt Mnemonic menu item"""
-        from ..encryption_ui import EncryptMnemonic
-
-        encrypt_mnemonic_menu = EncryptMnemonic(self.ctx)
-        return encrypt_mnemonic_menu.encrypt_menu()
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
@@ -73,12 +74,103 @@ class Home(Page):
         pubkey_viewer = PubkeyView(self.ctx)
         return pubkey_viewer.public_key()
 
-    def wallet(self):
-        """Handler for the 'wallet' menu item"""
+    def wallet_descriptor(self):
+        """Handler for the 'wallet descriptor' menu item"""
         from .wallet_descriptor import WalletDescriptor
 
         wallet_descriptor = WalletDescriptor(self.ctx)
         return wallet_descriptor.wallet()
+
+    def passphrase(self):
+        """Add or replace wallet's passphrase"""
+        if not self.prompt(
+            t("Add or change wallet passphrase?"), self.ctx.display.height() // 2
+        ):
+            return MENU_CONTINUE
+
+        from ..wallet_settings import PassphraseEditor
+        from ...key import Key
+        from ...wallet import Wallet
+
+        passphrase_editor = PassphraseEditor(self.ctx)
+        passphrase = passphrase_editor.load_passphrase_menu()
+        if passphrase is None:
+            return MENU_CONTINUE
+
+        self.ctx.wallet = Wallet(
+            Key(
+                self.ctx.wallet.key.mnemonic,
+                self.ctx.wallet.key.multisig,
+                self.ctx.wallet.key.network,
+                passphrase,
+                self.ctx.wallet.key.account_index,
+                self.ctx.wallet.key.script_type,
+            )
+        )
+        return MENU_CONTINUE
+
+    def customize(self):
+        """Handler for the 'Customize' Wallet menu item"""
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t(
+                "Customizing your wallet will generate a new Key, "
+                "mnemonic and passphrase will be kept."
+            )
+        )
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+            return MENU_CONTINUE
+
+        from ..wallet_settings import WalletSettings
+        from ...key import Key
+        from ...wallet import Wallet
+
+        wallet_settings = WalletSettings(self.ctx)
+        network, multisig, script_type, account = wallet_settings.customize_wallet(
+            self.ctx.wallet.key
+        )
+        mnemonic = self.ctx.wallet.key.mnemonic
+        passphrase = self.ctx.wallet.key.passphrase
+        self.ctx.wallet = Wallet(
+            Key(
+                mnemonic,
+                multisig,
+                network,
+                passphrase,
+                account,
+                script_type,
+            )
+        )
+        return MENU_CONTINUE
+
+    def bip85(self):
+        """Handler for the 'BIP85' menu item"""
+        if not self.prompt(
+            t("Generate a BIP85 child mnemonic?"), self.ctx.display.height() // 2
+        ):
+            return MENU_CONTINUE
+
+        from .bip85 import Bip85
+
+        bip85 = Bip85(self.ctx)
+        bip85.export()
+        return MENU_CONTINUE
+
+    def wallet(self):
+        """Handler for the 'wallet' menu item"""
+
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Wallet Descriptor"), self.wallet_descriptor),
+                (t("Passphrase"), self.passphrase),
+                (t("Customize"), self.customize),
+                ("BIP85", self.bip85),
+                (t("Back"), lambda: MENU_EXIT),
+            ],
+        )
+        submenu.run_loop()
+        return MENU_CONTINUE
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
@@ -92,7 +184,7 @@ class Home(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("PSBT"), self.sign_psbt),
+                ("PSBT", self.sign_psbt),
                 (t("Message"), self.sign_message),
                 (t("Back"), lambda: MENU_EXIT),
             ],
@@ -133,6 +225,21 @@ class Home(Page):
         psbt_filename, data = utils.load_file(PSBT_FILE_EXTENSION, prompt=False)
         return (data, FORMAT_NONE, psbt_filename)
 
+    def _sign_menu(self):
+        sign_menu = Menu(
+            self.ctx,
+            [
+                (t("Sign to QR code"), lambda: None),
+                (
+                    t("Sign to SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = sign_menu.run_loop()
+        return index
+
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
         from ...sd_card import (
@@ -149,7 +256,7 @@ class Home(Page):
                 + "\n\n"
                 + t("Some checks cannot be performed.")
             )
-            if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
 
         # Load a PSBT
@@ -157,7 +264,7 @@ class Home(Page):
 
         if data is None:
             # Both the camera and the file on SD card failed!
-            self.flash_text(t("Failed to load PSBT"), theme.error_color)
+            self.flash_error(t("Failed to load PSBT"))
             return MENU_CONTINUE
 
         # PSBT read OK! Will try to sign
@@ -168,6 +275,49 @@ class Home(Page):
         from ...psbt import PSBTSigner
 
         signer = PSBTSigner(self.ctx.wallet, data, qr_format)
+        path_mismatch = signer.path_mismatch()
+        if path_mismatch:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning: Path mismatch")
+                + "\n"
+                + "Wallet: "
+                + self.ctx.wallet.key.derivation_str()
+                + "\n"
+                + "PSBT: "
+                + path_mismatch
+            )
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return MENU_CONTINUE
+        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
+            from ...key import Key
+
+            policy_str = "PSBT policy:\n"
+            policy_str += signer.policy["type"] + "\n"
+            policy_str += (
+                str(signer.policy["m"]) + " of " + str(signer.policy["n"]) + "\n"
+            )
+            fingerprints = []
+            for inp in signer.psbt.inputs:
+                # Do we need to loop through all the inputs or just one?
+                for pub in inp.bip32_derivations:
+                    fingerprint_srt = Key.format_fingerprint(
+                        inp.bip32_derivations[pub].fingerprint, True
+                    )
+                    if fingerprint_srt not in fingerprints:
+                        if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
+                            fingerprints[-1] = "..."
+                            break
+                        fingerprints.append(fingerprint_srt)
+
+            policy_str += "\n".join(fingerprints)
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(policy_str)
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return MENU_CONTINUE
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing ..."))
+
         outputs = signer.outputs()
         for message in outputs:
             self.ctx.display.clear()
@@ -178,20 +328,7 @@ class Home(Page):
         del data, outputs
         gc.collect()
 
-        sign_menu = Menu(
-            self.ctx,
-            [
-                (t("Sign to QR code"), lambda: None),
-                (
-                    t("Sign to SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
-                (t("Back"), lambda: None),
-            ],
-        )
-        index, _ = sign_menu.run_loop()
-        del sign_menu
-        gc.collect()
+        index = self._sign_menu()
 
         if index == 2:  # Back
             return MENU_CONTINUE

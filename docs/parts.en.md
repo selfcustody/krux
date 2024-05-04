@@ -3,25 +3,26 @@
 
 ### Comparative Table
 
-| Device | M5stickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| Price avg. | US$50 | US$55 | US$35 | US$35 | US$60 |
-| Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2.4" / 240*320 | 2" / 240*320 |
-| Touchscreen  | :x: | Capacitive | :x: | :x: | Capacitive |
-| Camera  | OV7740 | OV7740 rear<br>GC0328 front | GC0328 | OV2640 or<br>OV5642 | OV2640 <!-- or<br>GC2145 --> |
-| Battery  | 200mAh | 520mAh | :x: | :x: | :x: |
-| Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | Buttons<br> [3D printed case](https://github.com/selfcustody/MaixBitCase)<br> Soldering<br>Assembly | None |
-| Warnings  | [:material-information:{ title="M5stickV and USB-C" }](#m5stickv-info) | [:material-information:{ title="Maix Amigo screens" }](#amigo-info) | [:material-information:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB |
+| Device | M5stickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module | Maix Cube
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 32-42 | US$ 45-61 | US$ 34-49 |
+| Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 |
+| Device size | 48\*24\*22mm | 104\*63\*17mm | 98\*59\*18mm | 69\*84\*41mm | 57\*41\*17mm | 40\*40\*16mm |
+| Touchscreen  | :x: | Capacitive | :x: | :x: | Capacitive | :x: |
+| Camera  | OV7740 | OV7740 rear<br>GC0328 front | GC0328 | OV2640 or<br>OV5642 | OV2640 <!-- or<br>GC2145 --> | OV7740 |
+| Battery  | 200mAh | 520mAh | :x: | :x: | :x: | 200mAh |
+| Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | Buttons<br> [3D printed case](https://github.com/selfcustody/MaixBitCase)<br> Soldering<br>Assembly | None | None |
+| Warnings  | [:material-information:{ title="M5stickV and USB-C" }](#m5stickv-info) | [:material-information:{ title="Maix Amigo screens" }](#amigo-info) | [:material-information:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB | 3-Way button |
 
 <i style="font-size: 85%">:material-information:{id="m5stickv-info"}:
 ----8<----
-m5stickv-usb-c.md
+m5stickv-usb-c.en.txt
 ----8<----
 </i>
 
 <i style="font-size: 85%">:material-information:{id="amigo-info"}:
 ----8<----
-amigo-more-info-faq.md:2
+amigo-more-info-faq.en.txt:2
 ----8<----
 </i>
 
@@ -34,14 +35,14 @@ Some stores ship the Maix Dock with soldered pin connectors that do not fit into
 </i>
 
 ### M5StickV
-<img srcset="../img/maixpy_m5stickv/logo-125.png" align="right" width="75">
+<img src="../img/maixpy_m5stickv/logo-125.png" align="right" width="75">
 
 Below is a list of some distributors where you can find this device:
 
 - [M5Stack](https://shop.m5stack.com/products/stickv)
 - [Mouser](https://www.mouser.com/c/?q=m5stickv)
 - [Digi-Key](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/K027/10492135)
-- [Elektromaker](https://www.electromaker.io/shop/product/m5stickv-k210-ai-camera-without-wifi)
+- [Electromaker](https://www.electromaker.io/shop/product/m5stickv-k210-ai-camera-without-wifi)
 - [Lee's Electronic](https://leeselectronic.com/en/product/169940-m5stick-ai-camera-kendryte-k210-risc-v-core-no-wifi.html)
 - [AliExpress](https://www.aliexpress.com/w/wholesale-m5stickv.html)
 - [ABRA](https://abra-electronics.com/sensors/cameras/m5stickv-k210-ai-camera-ideal-for-machine-vision.html)
@@ -51,7 +52,7 @@ Below is a list of some distributors where you can find this device:
 <div style="clear: both"></div>
 
 ### Maix Amigo
-<img srcset="../img/maixpy_amigo/logo-150.png" align="right">
+<img src="../img/maixpy_amigo/logo-150.png" align="right">
 
 Below is a list of some distributors where you can find this device:
 
@@ -64,7 +65,7 @@ Below is a list of some distributors where you can find this device:
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
-<img srcset="../img/maixpy_yahboom/logo-156.png" align="right" width="116">
+<img src="../img/maixpy_yahboom/logo-156.png" align="right" width="116">
 
 Below is a list of some distributors where you can find this device:
 
@@ -75,8 +76,22 @@ Below is a list of some distributors where you can find this device:
 
 <div style="clear: both"></div>
 
+### Maix Cube
+<img src="../img/maixpy_cube/logo-200.png" align="right" width="120">
+
+Below is a list of some distributors where you can find this device:
+
+- [Seeed Studio](https://www.seeedstudio.com/Sipeed-Maix-Cube-p-4553.html)
+- [Mouser](https://www.mouser.com/c/?q=sipeed)
+- [Electromaker](https://www.electromaker.io/shop/search/sipeed)
+- [Digi-Key](https://www.digikey.com.br/en/products/filter/embedded-mcu-dsp-evaluation-boards/786?s=N4IgTCBcDaIM4EsAOBTFATEBdAvkA)
+- [AliExpress](https://www.aliexpress.com/w/wholesale-sipeed-cube.html)
+- [Amazon](https://www.amazon.com/s?k=k210+cube)
+
+<div style="clear: both"></div>
+
 ### Maix Dock and Maix Bit
-<img srcset="../img/maixpy_dock/logo-151.png" align="right" width="144">
+<img src="../img/maixpy_dock/logo-151.png" align="right" width="144">
 
 For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
 
@@ -101,7 +116,7 @@ This will be included with the M5StickV and Maix Amigo that you purchase from on
 
 ### (Optional) MicroSD Card
 ----8<----
-sd-card-info-faq.md
+sd-card-info-faq.en.txt
 ----8<----
 The size of the SD card isn't important; anything over a few megabytes will be plenty.
 

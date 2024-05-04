@@ -36,9 +36,23 @@ class Wallet:
         self.label = None
         self.policy = None
         if not self.key.multisig:
-            self.descriptor = Descriptor.from_string(
-                "wpkh(%s/<0;1>/*)" % self.key.key_expression()
-            )
+            if self.key.script_type == "p2pkh":
+                self.descriptor = Descriptor.from_string(
+                    "pkh(%s/<0;1>/*)" % self.key.key_expression()
+                )
+            elif self.key.script_type == "p2sh-p2wpkh":
+                self.descriptor = Descriptor.from_string(
+                    "sh(wpkh(%s/<0;1>/*))" % self.key.key_expression()
+                )
+            elif self.key.script_type == "p2wpkh":
+                self.descriptor = Descriptor.from_string(
+                    "wpkh(%s/<0;1>/*)" % self.key.key_expression()
+                )
+
+            elif self.key.script_type == "p2tr":
+                self.descriptor = Descriptor.from_string(
+                    "tr(%s/<0;1>/*)" % self.key.key_expression()
+                )
             self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
 
@@ -208,7 +222,7 @@ def parse_wallet(wallet_data, network):
                     ("wsh(sortedmulti(%d," % m) + ",".join(keys) + "))"
                 )
             else:
-                # Single-sig
+                # Single-sig - assuming Native Segwit
                 descriptor = Descriptor.from_string("wpkh(%s/<0;1>/*)" % keys[0])
             label = (
                 key_vals[key_vals.index("Name") + 1]
@@ -229,6 +243,7 @@ def parse_wallet(wallet_data, network):
             pubkey = Key.from_string(wallet_data)
             if pubkey.is_extended:
                 xpub = pubkey.key.to_base58(version=network["xpub"])
+                # Assuming Native Segwit
                 descriptor = Descriptor.from_string("wpkh(%s)" % xpub)
                 return descriptor, None
         except:

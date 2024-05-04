@@ -25,10 +25,11 @@ from .. import (
     Menu,
     MENU_EXIT,
     ESC_KEY,
+    choose_len_mnemonic,
 )
 from ...themes import theme
 from ...krux_settings import t
-from ...display import DEFAULT_PADDING
+from ...display import DEFAULT_PADDING, FONT_HEIGHT, TOTAL_LINES, BOTTOM_PROMPT_LINE
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
@@ -96,14 +97,12 @@ class DiceEntropy(Page):
         It's intended for users interested in the quality and distribution of their entropy source.
         """
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(
-            t("Rolls distribution:"), self.ctx.display.font_height
-        )
+        self.ctx.display.draw_hcentered_text(t("Rolls distribution:"), FONT_HEIGHT)
         shannon_entropy = self.calculate_entropy()
         max_count = max(self.roll_counts)
 
-        scale_factor = (self.ctx.display.height() * BAR_GRAPH_SIZE) // 100
-        scale_factor //= max_count
+        scale_factor = (self.ctx.display.height() * BAR_GRAPH_SIZE) / 100
+        scale_factor /= max_count
         bar_graph = []
         for count in self.roll_counts:
             bar_graph.append(int(count * scale_factor))
@@ -124,9 +123,9 @@ class DiceEntropy(Page):
                 theme.highlight_color,
             )
             offset_x += bar_pad
-        offset_y += self.ctx.display.font_height
+        offset_y += FONT_HEIGHT
         self.ctx.display.draw_hcentered_text(
-            t("Shannon's Entropy: ") + str(shannon_entropy) + " bits",
+            t("Shannon's Entropy:") + " " + str(shannon_entropy) + " " + "bits",
             offset_y,
         )
 
@@ -140,8 +139,8 @@ class DiceEntropy(Page):
         entropy of the rolls relative to the minimum required entropy. It changes color
         to indicate when the minimum criteria have been met.
         """
-        offset_y = DEFAULT_PADDING + 2 * self.ctx.display.font_height
-        pb_height = self.ctx.display.font_height - 4
+        offset_y = DEFAULT_PADDING + 2 * FONT_HEIGHT
+        pb_height = FONT_HEIGHT - 4
         if len(self.rolls) > 0:  # Only draws if rolls > 0
             progress = min(self.min_rolls, len(self.rolls))
             progress *= self.ctx.display.usable_width() - 3
@@ -183,31 +182,22 @@ class DiceEntropy(Page):
 
     def new_key(self):
         """Create a new key from dice rolls"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        is_24_words = index == 1
-        if index == 2:
+        len_mnemonic = choose_len_mnemonic(self.ctx)
+        if not len_mnemonic:
             return None
-        if index == 1:  # 24 words
+
+        if len_mnemonic == 24:
             self.min_entropy = MIN_ENTROPY_24W
             self.min_rolls = D20_24W_MIN_ROLLS if self.is_d20 else D6_24W_MIN_ROLLS
         else:  # 12 words
             self.min_entropy = MIN_ENTROPY_12W
             self.min_rolls = D20_12W_MIN_ROLLS if self.is_d20 else D6_12W_MIN_ROLLS
-        self.ctx.display.clear()
 
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
             t("Roll dice at least %d times to generate a mnemonic.") % (self.min_rolls)
         )
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
 
             def delete_roll(buffer):
                 # buffer not used here
@@ -218,7 +208,7 @@ class DiceEntropy(Page):
             while True:
                 roll = ""
                 while True:
-                    dice_title = t("Rolls: %d\n") % len(self.rolls)
+                    dice_title = t("Rolls:") + " %d\n" % len(self.rolls)
                     entropy = (
                         "".join(self.rolls)
                         if self.len_states < 10
@@ -256,9 +246,7 @@ class DiceEntropy(Page):
                         self.ctx.display.draw_hcentered_text(
                             t("Poor entropy detected. More rolls are recommended")
                         )
-                        if self.prompt(
-                            t("Proceed anyway?"), self.ctx.display.bottom_prompt_line
-                        ):
+                        if self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
                             break
                     else:  # Go
                         break
@@ -267,12 +255,12 @@ class DiceEntropy(Page):
                 "".join(self.rolls) if self.len_states < 10 else "-".join(self.rolls)
             )
             self.ctx.display.clear()
-            rolls_str = t("Rolls:\n\n%s") % entropy
-            max_lines = self.ctx.display.total_lines - 6  # room for menu
+            rolls_str = t("Rolls:") + "\n\n%s" % entropy
+            max_lines = TOTAL_LINES - 6  # room for menu
             menu_offset = self.ctx.display.draw_hcentered_text(
                 rolls_str, info_box=True, max_lines=max_lines
             )
-            menu_offset *= self.ctx.display.font_height
+            menu_offset *= FONT_HEIGHT
             menu_offset += DEFAULT_PADDING
             submenu = Menu(
                 self.ctx,
@@ -295,10 +283,10 @@ class DiceEntropy(Page):
             ).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("SHA256 of rolls:\n\n%s") % entropy_hash
+                t("SHA256 of rolls:") + "\n\n%s" % entropy_hash
             )
             self.ctx.input.wait_for_button()
-            num_bytes = 32 if is_24_words else 16
+            num_bytes = 32 if len_mnemonic == 24 else 16
             return hashlib.sha256(entropy_bytes).digest()[:num_bytes]
 
         return None

@@ -23,7 +23,7 @@ import binascii
 import sys
 import json
 from os import listdir, walk
-from os.path import isfile, join, basename
+from os.path import isfile, exists, join, basename
 import re
 
 SRC_DIR = "../src"
@@ -86,8 +86,8 @@ def validate_translation_files():
         sys.exit(1)
 
 
-def fill_missing():
-    """Uses translate 3.6.1 to automaticalyy fill missing translations"""
+def print_missing():
+    """Uses translate 3.6.1 to automatically print missing translations"""
     if len(sys.argv) > 2:
         force_target = sys.argv[2]
     else:
@@ -103,7 +103,7 @@ def fill_missing():
     for translation_filename in translation_filenames:
         target = translation_filename[:5]
         if force_target:
-            if force_target != translation_filename:
+            if not force_target in translation_filename:
                 continue
         translator = Translator(to_lang=target)
         print("Translating %s...\n" % translation_filename)
@@ -127,7 +127,7 @@ def fill_missing():
         if complete:
             print("Nothing to add")
         else:
-            print("Please review and copy items above")
+            print("\n -- Please review and copy items above -- ")
         print("\n\n")
 
 
@@ -174,6 +174,7 @@ def bake_translations():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
+    translation_filenames.sort()
     for translation_filename in translation_filenames:
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
@@ -214,6 +215,7 @@ def bake_translations():
         translations.write("translation_table = ")
         translations.write(repr(translation_table))
         translations.write("\n")
+        print("Baked " + SRC_DIR + "/krux/" + "translations.py")
 
 
 def create_translation_file(locale):
@@ -234,12 +236,13 @@ def create_translation_file(locale):
 
 
 def prettify_translation_files():
-    """Sorts and pretty-prints all translation files"""
+    """Sorts and pretty-prints all translation files (one per line)"""
     translation_filenames = [
         f
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
+    translation_filenames.sort()
     for translation_filename in translation_filenames:
         translations = {}
         with open(
@@ -255,24 +258,43 @@ def prettify_translation_files():
             translation_file.write(
                 json.dumps(translations, sort_keys=True, indent=4, ensure_ascii=False)
             )
-
-
-def main():
-    """Main handler"""
-
-    if sys.argv[1] == "validate":
-        validate_translation_files()
-    elif sys.argv[1] == "new":
-        create_translation_file(sys.argv[2])
-    elif sys.argv[1] == "fill":
-        fill_missing()
-    elif sys.argv[1] == "clean":
-        remove_unnecessary()
-    elif sys.argv[1] == "prettify":
-        prettify_translation_files()
-    elif sys.argv[1] == "bake":
-        bake_translations()
+            print("Prettified " + translation_filename)
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        raise ValueError(
+            "ERROR: Provide one action as argument (validate, new, fill, clean, prettify, bake)"
+        )
+
+    if not exists(SRC_DIR):
+        SRC_DIR = "src"
+        if not exists(SRC_DIR):
+            raise ValueError("ERROR: SRC_DIR 'src' not found!")
+
+    if not exists(TRANSLATION_FILES_DIR):
+        TRANSLATION_FILES_DIR = "i18n/translations"
+        if not exists(TRANSLATION_FILES_DIR):
+            raise ValueError("ERROR: TRANSLATION_FILES_DIR 'translations' not found!")
+
+    if sys.argv[1] in ("new", "fill"):
+        if sys.argv[1] == "new":
+            if len(sys.argv) < 3:
+                raise ValueError("ERROR: Provide the locale to fill")
+            create_translation_file(sys.argv[2])
+        else:
+            print_missing()
+    else:
+        for arg in sys.argv[1:]:
+            if arg == "validate":
+                validate_translation_files()
+            elif arg == "fill":
+                print_missing()
+            elif arg == "clean":
+                remove_unnecessary()
+            elif arg == "prettify":
+                prettify_translation_files()
+            elif arg == "bake":
+                bake_translations()
+            else:
+                print("\n\nWARNING: Unreconized argument: " + arg)

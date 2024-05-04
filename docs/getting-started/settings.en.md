@@ -63,7 +63,7 @@ The caveat is low values can cause issues, such as double step and unexpected mo
 #### Display (Maix Amigo only)
 <img src="../../img/maixpy_amigo/settings-options-hardware-display-150.png" align="right">
 
-Some Maix Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+Some Maix Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates, Inverted Colors and LCD Type. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
 
 <div style="clear: both"></div>
 
@@ -79,7 +79,7 @@ Define several machining parameters according to the desired size, material you'
 #### Thermal
 Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can change it here.
 
-Also setup the TX Pin you'll use (e.g. 35 for M5stickV and 7 for Maix Amigo) and tweak other parameters according to your printer recommendations. For most printers you will only need to connect 2 cables, the device TX to the printer RX and ground. Consult the [part list](../parts.md/#optional-thermal-printer) page for supported printers.
+Also setup the TX Pin you'll use (e.g. 35 for M5stickV and 7 for Maix Amigo) and tweak other parameters according to your printer recommendations. For most printers you will only need to connect 2 cables, the device TX to the printer RX and ground. Consult the [parts list](../parts.md/#optional-thermal-printer) page for supported printers.
 
 #### Driver
 Here you choose between Thermal, CNC or none (default). Leave this setting to "none" if you won't use a printer and don't want to be bothered by print prompts.

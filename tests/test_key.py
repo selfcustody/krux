@@ -285,55 +285,33 @@ def test_pick_final_word(mocker, m5stickv, tdata):
     from krux.key import Key
 
     mocker.patch("time.ticks_ms", new=lambda: 0)
-    cases = [
-        (
-            tdata.TEST_D6_MIN_ENTROPY,
-            16,
-            "range fatigue into stadium endless kitchen royal present rally welcome scatter twice",
-        ),
-        (
-            tdata.TEST_D6_MAX_ENTROPY,
-            32,
-            "universe multiply siege pizza chapter copper huge regular flock soft tragic what method lesson ancient acquire amused dinner dial skate toilet affair warrior crazy",
-        ),
-        (
-            tdata.TEST_D20_MIN_ENTROPY,
-            16,
-            "wasp payment shoot govern mobile strike dizzy ahead plastic cross dog joy",
-        ),
-        (
-            tdata.TEST_D20_MAX_ENTROPY,
-            32,
-            "episode sentence sauce near bridge frequent forum junior develop slender sun title master twenty pair sudden nasty admit vault fitness reason setup hamster adult",
-        ),
-    ]
     assert (
         Key.pick_final_word(
             123456789,
             tdata.TEST_12_WORD_MNEMONIC.split()[:-1],
         )
-        == "army"
+        == "tobacco"
     )
     assert (
         Key.pick_final_word(
             123456789,
             tdata.TEST_24_WORD_MNEMONIC.split()[:-1],
         )
-        == "habit"
+        == "uphold"
     )
     assert (
         Key.pick_final_word(
             987654321,
             tdata.TEST_12_WORD_MNEMONIC.split()[:-1],
         )
-        == "situate"
+        == "flavor"
     )
     assert (
         Key.pick_final_word(
             987654321,
             tdata.TEST_24_WORD_MNEMONIC.split()[:-1],
         )
-        == "speak"
+        == "drink"
     )
 
 
@@ -345,3 +323,22 @@ def test_pick_final_word_fails_when_wrong_word_count(mocker, m5stickv, tdata):
         Key.pick_final_word(
             mocker.MagicMock(), tdata.TEST_12_WORD_MNEMONIC.split()[:-2]
         )
+
+
+def test_get_final_word_candidates(mocker, m5stickv, tdata):
+    from embit.bip39 import mnemonic_is_valid
+    from krux.key import Key
+
+    for mnemonic in (tdata.TEST_12_WORD_MNEMONIC, tdata.TEST_24_WORD_MNEMONIC):
+        partial = mnemonic.split()[:-1]
+        candidates = Key.get_final_word_candidates(partial)
+        for final_word in candidates:
+            assert mnemonic_is_valid(" ".join(partial + [final_word]))
+
+
+def test_get_final_word_candidates_fails_when_wrong_word_count(mocker, m5stickv, tdata):
+    mock_modules(mocker)
+    from krux.key import Key
+
+    with pytest.raises(ValueError):
+        Key.get_final_word_candidates(tdata.TEST_12_WORD_MNEMONIC.split()[:-2])
