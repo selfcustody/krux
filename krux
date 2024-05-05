@@ -56,7 +56,7 @@ if [ "$1" == "build" ]; then
         echo "Missing device"
     else
         if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]||
-        poetry run[ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]||[ "$device" == "maixpy_cube" ]; then
+        [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]||[ "$device" == "maixpy_cube" ]; then
             declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
             sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
 
