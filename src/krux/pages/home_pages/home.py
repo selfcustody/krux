@@ -113,10 +113,9 @@ class Home(Page):
         """Handler for the 'Customize' Wallet menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            t(
-                "Customizing your wallet will generate a new Key, "
-                "mnemonic and passphrase will be kept."
-            )
+            t("Customizing your wallet will generate a new Key.")
+            + " "
+            + t("Mnemonic and passphrase will be kept.")
         )
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
