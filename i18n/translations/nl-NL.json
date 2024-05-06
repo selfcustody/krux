@@ -95,6 +95,7 @@
     "Feed Rate": "Voedingssnelheid",
     "Filename": "Bestandsnaam",
     "Filename %s exists on SD card, overwrite?": "Bestandsnaam %s OVERSCHRIJVEN op SD kaart?",
+    "Fingerprint unset in PSBT": "Vingerafdruk niet ingesteld in PSBT",
     "Firmware exceeds max size: %d": "Firmware overschrijdt de maximale grootte: %d",
     "Flipped X Coordinates": "Geflipte X-coördinaten",
     "Flute Diameter": "Fluit diameter",

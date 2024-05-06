@@ -95,6 +95,7 @@
     "Feed Rate": "Szybkość pasz",
     "Filename": "Nazwa pliku",
     "Filename %s exists on SD card, overwrite?": "Nazwa pliku %s istnieje na karcie SD, zastąp?",
+    "Fingerprint unset in PSBT": "Odcisk palca nie jest ustawiony w PSBT",
     "Firmware exceeds max size: %d": "Oprogramowanie układowe przekracza maksymalny rozmiar: %D",
     "Flipped X Coordinates": "Odwrócone współrzędne X",
     "Flute Diameter": "Średnica fletu",

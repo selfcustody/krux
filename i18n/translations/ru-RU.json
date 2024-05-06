@@ -95,6 +95,7 @@
     "Feed Rate": "Скорость Подачи",
     "Filename": "Имя файла",
     "Filename %s exists on SD card, overwrite?": "Файл %s существует на SD карте, перезаписать?",
+    "Fingerprint unset in PSBT": "Отпечаток пальца не установлен в PSBT",
     "Firmware exceeds max size: %d": "Прошивка превышает максимальный размер: %d",
     "Flipped X Coordinates": "Перевернутые координаты X",
     "Flute Diameter": "Диаметр Флюта",

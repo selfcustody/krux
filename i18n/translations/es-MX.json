@@ -95,6 +95,7 @@
     "Feed Rate": "Feed Rate",
     "Filename": "Nombre del Archivo",
     "Filename %s exists on SD card, overwrite?": "El nombre de archivo %s existe en la tarjeta SD, ¿sobrescribir?",
+    "Fingerprint unset in PSBT": "Huella dactilar no establecida en PSBT",
     "Firmware exceeds max size: %d": "El firmware supera el tamaño máximo: %d",
     "Flipped X Coordinates": "Coordenadas X Invertidas",
     "Flute Diameter": "Diámetro de la Flauta",

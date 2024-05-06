@@ -95,6 +95,7 @@
     "Feed Rate": "Besleme Hızı",
     "Filename": "Dosya adı",
     "Filename %s exists on SD card, overwrite?": "%s dosya adı SD kartta var, üzerine yazılsın mı?",
+    "Fingerprint unset in PSBT": "PSBT'de parmak izi ayarı kaldırıldı",
     "Firmware exceeds max size: %d": "Donanım yazılımı maksimum boyutu aşıyor: %d",
     "Flipped X Coordinates": "X Koordinatları Tersine Çevrildi",
     "Flute Diameter": "Flute Çapı",
