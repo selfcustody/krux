@@ -317,6 +317,9 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing ..."))
 
+        # This is necessary for the signing process on embit in a few cases
+        signer.fill_zero_fingerprint()
+
         outputs = signer.outputs()
         for message in outputs:
             self.ctx.display.clear()

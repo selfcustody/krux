@@ -663,6 +663,7 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
         BUTTON_ENTER,  # output 1
         BUTTON_ENTER,  # output 2
         BUTTON_ENTER,  # Sign to QR code
+        BUTTON_ENTER,  # Jump QR signed
     ]
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
     ctx = create_ctx(mocker, btn_seq, wallet)
@@ -680,14 +681,11 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
     mocker.spy(home, "capture_qr_code")
     mocker.spy(home, "display_qr_codes")
 
-    # Wrong key, will raise error "cannot sign"
-    with pytest.raises(ValueError):
-        home.sign_psbt()
+    home.sign_psbt()
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
-    # ERROR raised: no qrcode
-    home.display_qr_codes.assert_not_called()
-
-    # TODO: when fixed, uncomment this line
-    # home.display_qr_codes.assert_called_once_with(tdata.SIGNED_P2WPKH_PSBT_B64, FORMAT_PMOFN)
+    # Signed normally even with zeroes in fingerprint
+    home.display_qr_codes.assert_called_once_with(
+        tdata.SIGNED_P2WPKH_PSBT_B64, FORMAT_PMOFN
+    )

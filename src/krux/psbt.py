@@ -327,6 +327,31 @@ class PSBTSigner:
         if sigs_added == 0:
             raise ValueError("cannot sign")
 
+    def fill_zero_fingerprint(self):
+        """Fix for zeroes in fingerprint that happen when user imports the wallet
+        with XPUB only (without derivation path)
+        """
+        for inp in self.psbt.inputs:
+            self._fill_zero_fingerprint_scope(inp)
+
+        for out in self.psbt.outputs:
+            self._fill_zero_fingerprint_scope(out)
+
+    def _fill_zero_fingerprint_scope(self, scope):
+        """Helper function to fill a scope (input/output)"""
+        for pub in scope.bip32_derivations:
+            if scope.bip32_derivations[pub].fingerprint == b"\x00\x00\x00\x00":
+                # check if pubkey matches
+                if (
+                    self.wallet.key.get_xpub(
+                        scope.bip32_derivations[pub].derivation
+                    ).key
+                    == pub
+                ):
+                    scope.bip32_derivations[pub].fingerprint = (
+                        self.wallet.key.fingerprint
+                    )
+
     def sign(self):
         """Signs the PSBT removing all irrelevant data"""
         self.add_signatures()
