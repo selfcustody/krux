@@ -72,6 +72,12 @@ To Flash Yahboom k210 module you'll have to manually specify the port, on this e
 ./ktool-linux -B goE -b 1500000 -p /dev/ttyUSB0 yahboom/kboot.kfpkg
 ```
 
+##### Windows
+See the correct port at Device Manager > Ports (COM & LPT), or just try one from 1 to 12, on this example `COM6`:
+```bash
+./ktool-win.exe -B goE -b 1500000 -p COM6 yahboom\kboot.kfpkg
+```
+
 
 
 

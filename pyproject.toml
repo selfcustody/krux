@@ -118,11 +118,12 @@ simulator-m5.ref = "simulator-m5stickv"
 # git tasks
 git-update = "git submodule update --init --recursive"
 git-pull = "git pull git@github.com:selfcustody/krux.git"
+git-pull-https = "git pull https://github.com/selfcustody/krux.git"
 
 # flash tasks
 flash-cmd = "python firmware/Kboot/build/ktool.py -b 1500000 build/kboot.kfpkg"
-flash = ["flash-cmd -B goE"]
-flash-dock = ["flash-cmd -B dan"]
+flash.ref = "flash-cmd -B goE"
+flash-dock.ref = "flash-cmd -B dan"
 
 # task for bdftokff?
 # python bdftokff.py True
