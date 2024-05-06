@@ -331,26 +331,34 @@ class PSBTSigner:
         """Fix for zeroes in fingerprint that happen when user imports the wallet
         with XPUB only (without derivation path)
         """
+        filled = 0
+
         for inp in self.psbt.inputs:
-            self._fill_zero_fingerprint_scope(inp)
+            filled += self._fill_zero_fingerprint_scope(inp)
 
         for out in self.psbt.outputs:
-            self._fill_zero_fingerprint_scope(out)
+            filled += self._fill_zero_fingerprint_scope(out)
+
+        return filled
 
     def _fill_zero_fingerprint_scope(self, scope):
         """Helper function to fill a scope (input/output)"""
-        for pub in scope.bip32_derivations:
-            if scope.bip32_derivations[pub].fingerprint == b"\x00\x00\x00\x00":
+        filled = 0
+        if self.policy["type"] == "p2tr":
+            derivations = scope.taproot_bip32_derivations
+        else:
+            derivations = scope.bip32_derivations
+        for pub in derivations:
+            if self.policy["type"] == "p2tr":
+                derivation = derivations[pub][1]  # ignore taproot leaf
+            else:
+                derivation = derivations[pub]
+            if derivation.fingerprint == b"\x00\x00\x00\x00":
                 # check if pubkey matches
-                if (
-                    self.wallet.key.get_xpub(
-                        scope.bip32_derivations[pub].derivation
-                    ).key
-                    == pub
-                ):
-                    scope.bip32_derivations[pub].fingerprint = (
-                        self.wallet.key.fingerprint
-                    )
+                if self.wallet.key.get_xpub(derivation.derivation).key == pub:
+                    derivation.fingerprint = self.wallet.key.fingerprint
+                    filled += 1
+        return filled
 
     def sign(self):
         """Signs the PSBT removing all irrelevant data"""
