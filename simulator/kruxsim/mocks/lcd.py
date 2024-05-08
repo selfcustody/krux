@@ -26,7 +26,6 @@ import pygame as pg
 import cv2
 from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
-from krux.krux_settings import Settings
 
 COLOR_BLACK = (0, 0, 0)
 COLOR_WHITE = (255, 255, 255)
@@ -138,6 +137,8 @@ def height():
 def _is_x_flipped():
     flipped_x = False
     if BOARD_CONFIG["type"] == "amigo":
+        from krux.krux_settings import Settings
+        
         flipped_x = Settings().hardware.display.flipped_x_coordinates
     return flipped_x
 

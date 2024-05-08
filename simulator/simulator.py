@@ -81,6 +81,7 @@ pg.init()
 pg.freetype.init()
 
 from kruxsim.mocks import board
+from kruxsim.mocks import pmu
 
 board.register_device(args.device)
 
@@ -95,10 +96,10 @@ from kruxsim.mocks import utime
 from kruxsim.mocks import fpioa_manager
 from kruxsim.mocks import Maix
 from kruxsim.mocks import flash
-from kruxsim.mocks import lcd
 from kruxsim.mocks import machine
+from kruxsim.mocks import lcd
 from kruxsim.mocks import image
-from kruxsim.mocks import pmu
+
 
 if args.printer:
     machine.simulate_printer()
