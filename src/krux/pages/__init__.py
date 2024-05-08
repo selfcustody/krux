@@ -43,7 +43,6 @@ from ..display import (
     FONT_WIDTH,
     SMALLEST_WIDTH,
     STATUS_BAR_HEIGHT,
-    MINIMAL_PADDING,
 )
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings, DefaultWallet
@@ -700,47 +699,30 @@ class Menu:
         # Draw (filled) outline of battery in top-right corner of display
         x_padding = FONT_HEIGHT // 3
         y_padding = (STATUS_BAR_HEIGHT // 2) - (BATTERY_HEIGHT // 2)
+        self.ctx.display.outline(
+            self.ctx.display.width() - x_padding - BATTERY_WIDTH,
+            y_padding,
+            BATTERY_WIDTH,
+            BATTERY_HEIGHT,
+            battery_color,
+        )
+        self.ctx.display.fill_rectangle(
+            self.ctx.display.width() - x_padding + 1,
+            y_padding + 2,
+            2,
+            BATTERY_HEIGHT - 3,
+            battery_color,
+        )
 
-        if Settings().hardware.battery.percentage:
-            # Battery %
-            charge = min(int(charge * 100), 99)
-            x_padding = self.ctx.display.width() - (3 * FONT_WIDTH)
-            x_padding = (
-                x_padding - 1 if MINIMAL_DISPLAY else x_padding - MINIMAL_PADDING
-            )
-            self.ctx.display.draw_string(
-                x_padding,
-                STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
-                str(charge) + "%",
-                battery_color,
-                theme.info_bg_color,
-            )
-        else:
-            # Battery outline
-            self.ctx.display.outline(
-                self.ctx.display.width() - x_padding - BATTERY_WIDTH,
-                y_padding,
-                BATTERY_WIDTH,
-                BATTERY_HEIGHT,
-                battery_color,
-            )
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - x_padding + 1,
-                y_padding + 2,
-                2,
-                BATTERY_HEIGHT - 3,
-                battery_color,
-            )
-
-            # Battery fill - Indicate how much battery is depleted
-            charge_length = int((BATTERY_WIDTH - 3) * charge)
-            self.ctx.display.fill_rectangle(
-                self.ctx.display.width() - x_padding - BATTERY_WIDTH + 2,
-                y_padding + 2,
-                charge_length,
-                BATTERY_HEIGHT - 3,
-                battery_color,
-            )
+        # Indicate how much battery is depleted
+        charge_length = int((BATTERY_WIDTH - 3) * charge)
+        self.ctx.display.fill_rectangle(
+            self.ctx.display.width() - x_padding - BATTERY_WIDTH + 2,
+            y_padding + 2,
+            charge_length,
+            BATTERY_HEIGHT - 3,
+            battery_color,
+        )
 
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
