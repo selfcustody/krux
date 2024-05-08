@@ -78,6 +78,10 @@ class Key:
         """Returns the xpub representation of the extended master public key"""
         return self.account.to_base58(version)
 
+    def get_xpub(self, path):
+        """Returns the xpub for the provided path"""
+        return self.root.derive(path).to_public()
+
     def key_expression(self, version=None):
         """Returns the extended master public key (xpub/ypub/zpub) in key expression format
         per https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#key-expressions,

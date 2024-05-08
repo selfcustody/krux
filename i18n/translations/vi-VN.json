@@ -95,6 +95,7 @@
     "Feed Rate": "Tốc độ cắt CNC",
     "Filename": "Tên tệp",
     "Filename %s exists on SD card, overwrite?": "Tên tệp %s tồn tại trên thẻ SD, ghi đè lên?",
+    "Fingerprint unset in PSBT": "Bỏ dấu vân tay trong PSBT",
     "Firmware exceeds max size: %d": "Phần mềm vượt quá kích thước tối đa: %d",
     "Flipped X Coordinates": "Tọa độ X bị lật",
     "Flute Diameter": "Đường kính mũi cắt CNC",

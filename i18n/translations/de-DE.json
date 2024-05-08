@@ -95,6 +95,7 @@
     "Feed Rate": "Vorschubgeschwindigkeit",
     "Filename": "Dateiname",
     "Filename %s exists on SD card, overwrite?": "Dateiname %s existiert auf SD-Karte, überschreiben?",
+    "Fingerprint unset in PSBT": "Fingerabdruck in PSBT deaktiviert",
     "Firmware exceeds max size: %d": "Die Firmware übersteigt die maximale Größe: %d",
     "Flipped X Coordinates": "Umgedrehte X-Koordinaten",
     "Flute Diameter": "Flötendurchmesser",

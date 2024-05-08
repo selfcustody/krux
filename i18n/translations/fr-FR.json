@@ -95,6 +95,7 @@
     "Feed Rate": "Taux d'alimentation",
     "Filename": "Nom de fichier",
     "Filename %s exists on SD card, overwrite?": "Le nom de fichier %s existe sur la carte SD, écraser ?",
+    "Fingerprint unset in PSBT": "Annulation de l'empreinte digitale dans PSBT",
     "Firmware exceeds max size: %d": "Le micrologiciel dépasse la taille maximale: %d",
     "Flipped X Coordinates": "Coordonnées X inversées",
     "Flute Diameter": "Diamètre de flûte",
