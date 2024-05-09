@@ -53,24 +53,16 @@ To build and flash the firmware:
 
 The first time, the build can take around an hour or so to complete. Subsequent builds should take only a few minutes. If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
-Note: if you encounter any of these errors while building, it is a problem connecting to github, try again (if the error persists, try changing the DNS/VPN or correcting the hostname resolution of github.com to an IP that is working for you):
-```
-error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err8)
-fatal: the remote end hung up unexpectedly
-fatal: early EOF
-fatal: index-pack failed
-fatal: clone of ... failed
-Failed to clone ...
-```
-
 ## Install Krux and dev tools
 Krux uses [Poetry](https://python-poetry.org/) as Python packaging and dependency management. This cmd installs development dependencies like [embit](https://github.com/diybitcoinhardware/embit), [ur](https://github.com/selfcustody/foundation-ur-py) and [urtypes](https://github.com/selfcustody/urtypes), and tools to run [tests](https://docs.pytest.org), review code with [pylint](https://pypi.org/project/pylint/), format code with [black](https://github.com/psf/black) and a lib to help handle i18n translations.
 ```bash
 pip install poetry
 poetry install
 ```
-If you have a problem installing Poetry on Linux OS try (we consider the name of the venv .krux but you can change this...):
+
+If you have a problem installing Poetry on Linux OS:
 ```bash
+# we considered the name of the venv .krux
 python -m venv .krux
 source .krux/bin/activate
 ```
