@@ -52,6 +52,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 # Printer
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Thermal (printer)
                 BUTTON_PAGE,
@@ -98,6 +99,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Printer
+                BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_PAGE,
                 BUTTON_ENTER,
@@ -181,7 +183,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
 
     HARDWARE_INDEX = 2
     LOCALE_INDEX = 3
-    PRINTER_INDEX = 2
+    PRINTER_INDEX = 3
     LEAVE_INDEX = 8
 
     cases = [
@@ -225,7 +227,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
                 # Back from Printer
                 3,
                 # Back from Hardware
-                4,
+                5,
                 # Leave Settings
                 LEAVE_INDEX,
             ),

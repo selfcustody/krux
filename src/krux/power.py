@@ -19,8 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import machine
-import sys
 import board
 from .i2c import i2c_bus
 
@@ -30,8 +28,8 @@ MAX_BATTERY_MV = 4200
 MIN_BATTERY_MV = 3000
 
 
-class PowerManager:
-    """PowerManager is a singleton interface for controlling the device's power management unit"""
+class _PowerManager:
+    """_PowerManager is a singleton interface for controlling the device's power management unit"""
 
     def __init__(self):
         self.pmu = None
@@ -84,6 +82,9 @@ class PowerManager:
 
     def shutdown(self):
         """Shuts down the device"""
+        import machine
+        import sys
+
         if self.pmu is not None:
             self.pmu.enable_adcs(False)
             self.pmu.enter_sleep_mode()
@@ -92,8 +93,11 @@ class PowerManager:
 
     def reboot(self):
         """Reboots the device"""
+        import machine
+        import sys
+
         machine.reset()
         sys.exit()
 
 
-power_manager = PowerManager()  # Singleton
+power_manager = _PowerManager()  # Singleton
