@@ -32,7 +32,6 @@ from .settings import (
 import board
 import binascii
 from .translations import translation_table
-from krux.power import power_manager
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
@@ -230,19 +229,6 @@ class ButtonsSettings(SettingsNamespace):
         }[attr]
 
 
-class BatterySettings(SettingsNamespace):
-    """Battery display settings"""
-
-    namespace = "settings.battery"
-    percentage = CategorySetting("percentage", False, [False, True])
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "percentage": t("Percentage"),
-        }[attr]
-
-
 class TouchSettings(SettingsNamespace):
     """Touch sensitivity settings"""
 
@@ -299,16 +285,8 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
-
-        # Battery
-        if power_manager.has_battery():
-            self.battery = BatterySettings()
-
-        # Touch
         if board.config["type"] in ["amigo", "yahboom"]:
             self.touch = TouchSettings()
-
-        # Display
         if board.config["type"] == "amigo":
             self.display = AmgDisplaySettings()
         elif board.config["type"] in ["cube", "m5stickv"]:
@@ -321,16 +299,8 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
-
-        # Battery
-        if power_manager.has_battery():
-            hardware_menu["battery"] = t("Battery")
-
-        # Touch
         if board.config["type"] in ["amigo", "yahboom"]:
             hardware_menu["touchscreen"] = t("Touchscreen")
-
-        # Display
         if board.config["type"] == "amigo":
             hardware_menu["amg_display"] = t("Display")
         elif board.config["type"] in ["cube", "m5stickv"]:
