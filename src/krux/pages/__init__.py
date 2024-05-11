@@ -726,7 +726,7 @@ class Menu:
 
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
-        if self.ctx.wallet is not None:
+        if self.ctx.wallet is not None and self.ctx.wallet.key:
             if self.ctx.display.width() > SMALLEST_WIDTH:
                 self.ctx.display.draw_hcentered_text(
                     self.ctx.wallet.key.fingerprint_hex_str(True),
@@ -746,7 +746,7 @@ class Menu:
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if (
-            self.ctx.wallet is not None
+            self.ctx.wallet is not None and self.ctx.wallet.key
             and self.ctx.wallet.key.network["name"] == "Testnet"
         ):
             if self.ctx.display.width() > SMALLEST_WIDTH:

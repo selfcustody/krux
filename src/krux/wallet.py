@@ -35,7 +35,7 @@ class Wallet:
         self.descriptor = None
         self.label = None
         self.policy = None
-        if not self.key.multisig:
+        if self.key and not self.key.multisig:
             if self.key.script_type == "p2pkh":
                 self.descriptor = Descriptor.from_string(
                     "pkh(%s/<0;1>/*)" % self.key.key_expression()
@@ -58,7 +58,11 @@ class Wallet:
 
     def is_multisig(self):
         """Returns a boolean indicating whether or not the wallet is multisig"""
-        return self.key.multisig
+        if self.key:
+            return self.key.multisig
+        if self.descriptor:
+            return self.descriptor.is_basic_multisig
+        return None
 
     def is_loaded(self):
         """Returns a boolean indicating whether or not this wallet has been loaded"""
@@ -66,19 +70,26 @@ class Wallet:
 
     def load(self, wallet_data, qr_format):
         """Loads the wallet from the given data"""
-        descriptor, label = parse_wallet(wallet_data, self.key.network)
-
-        if self.is_multisig():
-            if not descriptor.is_basic_multisig:
-                raise ValueError("not multisig")
-            if self.key.xpub() not in [key.key.to_base58() for key in descriptor.keys]:
-                raise ValueError("xpub not a cosigner")
+        if self.key:
+            network = self.key.network
         else:
-            if not descriptor.key:
-                if len(descriptor.keys) > 1:
-                    raise ValueError("not single-sig")
-            if self.key.xpub() != descriptor.key.key.to_base58():
-                raise ValueError("xpub does not match")
+            # todo, fix this hardcode for sans_key usecases
+            from embit.networks import NETWORKS
+            network = NETWORKS["main"]
+        descriptor, label = parse_wallet(wallet_data, network)
+
+        if self.key:
+            if self.is_multisig():
+                if not descriptor.is_basic_multisig:
+                    raise ValueError("not multisig")
+                if self.key.xpub() not in [key.key.to_base58() for key in descriptor.keys]:
+                    raise ValueError("xpub not a cosigner")
+            else:
+                if not descriptor.key:
+                    if len(descriptor.keys) > 1:
+                        raise ValueError("not single-sig")
+                if self.key.xpub() != descriptor.key.key.to_base58():
+                    raise ValueError("xpub does not match")
 
         self.wallet_data = wallet_data
         self.wallet_qr_format = qr_format
@@ -112,9 +123,15 @@ class Wallet:
         """Returns an iterator deriving addresses (default branch_index is receive)
         for the wallet up to the provided limit"""
         starting_index = i
+        if self.key:
+            network = self.key.network
+        else:
+            # todo, fix this hardcode for sans_key usecases
+            from embit.networks import NETWORKS
+            network = NETWORKS["main"]
         while limit is None or i < starting_index + limit:
             yield self.descriptor.derive(i, branch_index=branch_index).address(
-                network=self.key.network
+                network=network
             )
             i += 1
 
