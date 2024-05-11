@@ -39,12 +39,10 @@ class WalletDescriptor(Page):
         self.ctx = ctx
 
     def wallet(self):
-        """Handler for the 'wallet' menu item"""
+        """Handler for the 'wallet descriptor' menu item"""
         self.ctx.display.clear()
         if not self.ctx.wallet.is_loaded():
             text = t("Wallet output descriptor not found.")
-            if not self.ctx.wallet.is_multisig():
-                text += " " + t("It is optional for single-sig.")
             self.ctx.display.draw_centered_text(text)
             if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
                 return self._load_wallet()
@@ -130,20 +128,16 @@ class WalletDescriptor(Page):
         which will contain the same data as was originally loaded, in
         the same QR format
         """
-        about = [wallet.label]
-        if wallet.is_multisig():
-            import binascii
+        import binascii
 
-            fingerprints = []
-            for i, key in enumerate(wallet.descriptor.keys):
-                fingerprints.append(
-                    str(i + 1) + ". " + binascii.hexlify(key.fingerprint).decode()
-                )
-            about.extend(fingerprints)
-        else:
-            about.append(wallet.key.fingerprint_hex_str())
-            xpub = wallet.key.xpub()
-            about.append(self.fit_to_line(xpub))
+        about = [wallet.label]
+        fingerprints = []
+        for i, key in enumerate(wallet.descriptor.keys):
+            label = str(i + 1) + ". " if wallet.is_multisig() else ""
+            fingerprints.append(label + binascii.hexlify(key.fingerprint).decode())
+        about.extend(fingerprints)
+        if not wallet.is_multisig():
+            about.append(self.fit_to_line(str(wallet.descriptor.keys[0].key)))
 
         if not wallet.is_multisig() and include_qr:
             wallet_data, qr_format = wallet.wallet_qr()

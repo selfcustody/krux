@@ -22,7 +22,8 @@
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
-from .krux_settings import t
+from embit.networks import NETWORKS
+from .krux_settings import t, Settings
 
 
 class Wallet:
@@ -73,9 +74,7 @@ class Wallet:
         if self.key:
             network = self.key.network
         else:
-            # todo, fix this hardcode for sans_key usecases
-            from embit.networks import NETWORKS
-            network = NETWORKS["main"]
+            network = NETWORKS[Settings().wallet.network]
         descriptor, label = parse_wallet(wallet_data, network)
 
         if self.key:
@@ -126,9 +125,7 @@ class Wallet:
         if self.key:
             network = self.key.network
         else:
-            # todo, fix this hardcode for sans_key usecases
-            from embit.networks import NETWORKS
-            network = NETWORKS["main"]
+            network = NETWORKS[Settings().wallet.network]
         while limit is None or i < starting_index + limit:
             yield self.descriptor.derive(i, branch_index=branch_index).address(
                 network=network

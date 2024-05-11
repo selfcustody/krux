@@ -179,6 +179,7 @@ class Tools(Page):
         """Handler for the 'Load Descriptor' menu item"""
         from .home_pages.wallet_descriptor import WalletDescriptor
         from krux.wallet import Wallet
-        self.ctx.wallet = Wallet(None)
+        if not self.ctx.wallet:
+            self.ctx.wallet = Wallet(None)
         wallet_descriptor = WalletDescriptor(self.ctx)
         return wallet_descriptor.wallet()
