@@ -36,6 +36,7 @@ class Wallet:
         self.descriptor = None
         self.label = None
         self.policy = None
+        self.persisted = None
         if self.key and not self.key.multisig:
             if self.key.script_type == "p2pkh":
                 self.descriptor = Descriptor.from_string(

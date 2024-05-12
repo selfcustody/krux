@@ -51,7 +51,7 @@ class Tools(Page):
                     (t("Check SD Card"), self.sd_check),
                     (t("Print Test QR"), self.print_test),
                     (t("Create QR Code"), self.create_qr),
-                    (t("Load Descriptor"), self.load_descriptor),
+                    (t("Wallet Addresses"), self.wallet_addresses),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("Wipe Device"), self.wipe_device),
                     (t("Back"), lambda: MENU_EXIT),
@@ -175,11 +175,14 @@ class Tools(Page):
             return seed_qr_view.display_qr(allow_export=True)
         return MENU_CONTINUE
 
-    def load_descriptor(self):
-        """Handler for the 'Load Descriptor' menu item"""
+    def wallet_addresses(self):
+        """Handler for the 'Wallet Addresses' menu item"""
         from .home_pages.wallet_descriptor import WalletDescriptor
+        from .home_pages.addresses import Addresses
         from krux.wallet import Wallet
         if not self.ctx.wallet:
             self.ctx.wallet = Wallet(None)
-        wallet_descriptor = WalletDescriptor(self.ctx)
-        return wallet_descriptor.wallet()
+        menu_result = WalletDescriptor(self.ctx).wallet()
+        if self.ctx.wallet.is_loaded():
+            menu_result = Addresses(self.ctx).addresses_menu()
+        return menu_result
