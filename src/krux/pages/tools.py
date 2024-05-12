@@ -180,6 +180,7 @@ class Tools(Page):
         from .home_pages.wallet_descriptor import WalletDescriptor
         from .home_pages.addresses import Addresses
         from krux.wallet import Wallet
+
         if not self.ctx.wallet:
             self.ctx.wallet = Wallet(None)
         menu_result = WalletDescriptor(self.ctx).wallet()

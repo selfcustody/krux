@@ -746,7 +746,8 @@ class Menu:
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if (
-            self.ctx.wallet is not None and self.ctx.wallet.key
+            self.ctx.wallet is not None
+            and self.ctx.wallet.key
             and self.ctx.wallet.key.network["name"] == "Testnet"
         ):
             if self.ctx.display.width() > SMALLEST_WIDTH:

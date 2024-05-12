@@ -82,7 +82,9 @@ class Wallet:
             if self.is_multisig():
                 if not descriptor.is_basic_multisig:
                     raise ValueError("not multisig")
-                if self.key.xpub() not in [key.key.to_base58() for key in descriptor.keys]:
+                if self.key.xpub() not in [
+                    key.key.to_base58() for key in descriptor.keys
+                ]:
                     raise ValueError("xpub not a cosigner")
             else:
                 if not descriptor.key:
