@@ -37,11 +37,39 @@ DER_SINGLE = "m/%dh/%dh/%dh"
 DER_MULTI = "m/%dh/%dh/%dh/2h"
 HARDENED_STR_REPLACE = "'"
 
+# Pay To Public Key Hash - 44' Legacy single-sig
+# address starts with 1 (mainnet) or m (testnet)
+P2PKH = "p2pkh"
+
+# Pay To Script Hash - 45' Legacy multisig
+# address starts with 3 (mainnet) or 2 (testnet)
+P2SH = "p2sh"
+
+# Pay To Witness Public Key Hash Wrapped In P2SH - 49' Nested Segwit single-sig
+# address starts with 3 (mainnet) or 2 (testnet)
+P2SH_P2WPKH = "p2sh-p2wpkh"
+
+# Pay To Witness Script Hash Wrapped In P2SH - 48'/0'/0'/1' Nested Segwit multisig
+# address starts with 3 (mainnet) or 2 (testnet)
+P2SH_P2WSH = "p2sh-p2wsh"
+
+# Pay To Witness Public Key Hash - 84' Native Segwit single-sig
+# address starts with bc1q (mainnet) or tb1q (testnet)
+P2WPKH = "p2wpkh"
+
+# Pay To Witness Script Hash - 48'/0'/0'/2' Native Segwit multisig
+# address starts with bc1q (mainnet) or tb1q (testnet)
+P2WSH = "p2wsh"
+
+# Pay To Taproot - 86' Taproot single-sig
+# address starts with bc1p (mainnet) or tb1p (testnet)
+P2TR = "p2tr"
+
 SINGLESIG_SCRIPT_PURPOSE = {
-    "p2pkh": 44,
-    "p2sh-p2wpkh": 49,
-    "p2wpkh": 84,
-    "p2tr": 86,
+    P2PKH: 44,
+    P2SH_P2WPKH: 49,
+    P2WPKH: 84,
+    P2TR: 86,
 }
 
 MULTISIG_SCRIPT_PURPOSE = 48
@@ -57,14 +85,14 @@ class Key:
         network=NETWORKS[TEST_TXT],
         passphrase="",
         account_index=0,
-        script_type="p2wpkh",
+        script_type=P2WPKH,
     ):
         self.mnemonic = mnemonic
         self.multisig = multisig
         self.network = network
         self.passphrase = passphrase
         self.account_index = account_index
-        self.script_type = script_type if not multisig else "p2wsh"
+        self.script_type = script_type if not multisig else P2WSH
         self.root = bip32.HDKey.from_seed(
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
@@ -144,7 +172,7 @@ class Key:
         return random.choice(Key.get_final_word_candidates(words))
 
     @staticmethod
-    def get_default_derivation(multisig, network, account=0, script_type="p2wpkh"):
+    def get_default_derivation(multisig, network, account=0, script_type=P2WPKH):
         """Return the Krux default derivation path for single-sig or multisig"""
         der_format = DER_MULTI if multisig else DER_SINGLE
         purpose = (

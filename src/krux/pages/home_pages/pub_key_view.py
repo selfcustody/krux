@@ -28,8 +28,8 @@ from .. import (
     MENU_CONTINUE,
     MENU_EXIT,
 )
-
 from ...sd_card import PUBKEY_FILE_EXTENSION
+from ...key import P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH
 
 # to start xpub value without the xpub/zpub/ypub prefix
 WALLET_XPUB_START = 4
@@ -97,11 +97,13 @@ class PubkeyView(Page):
             seed_qr_view.display_qr(allow_export=True, transcript_tools=False)
 
         versions = [None]
-        if self.ctx.wallet.key.script_type == "p2wpkh":
+        if self.ctx.wallet.key.script_type == P2WPKH:
             versions.append(self.ctx.wallet.key.network["zpub"])
-        elif self.ctx.wallet.key.script_type == "p2sh-p2wpkh":
+        elif self.ctx.wallet.key.script_type == P2SH_P2WPKH:
             versions.append(self.ctx.wallet.key.network["ypub"])
-        elif self.ctx.wallet.key.script_type == "p2wsh":
+        elif self.ctx.wallet.key.script_type == P2SH_P2WSH:
+            versions.append(self.ctx.wallet.key.network["Ypub"])
+        elif self.ctx.wallet.key.script_type == P2WSH:
             versions.append(self.ctx.wallet.key.network["Zpub"])
         pub_key_menu_items = []
         for version in versions:
