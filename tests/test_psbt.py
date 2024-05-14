@@ -341,7 +341,7 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
 
     for case in cases:
         signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
-        outputs = signer.outputs()
+        outputs, _ = signer.outputs()
         assert outputs == case[1]
 
 
@@ -374,7 +374,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
 
     for case in cases:
         signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
-        outputs = signer.outputs()
+        outputs, _ = signer.outputs()
         assert outputs == case[1]
 
 
@@ -408,5 +408,5 @@ def test_sign_single_1_input_1_output_no_change(m5stickv):
 
     wallet = Wallet(Key(MNEMONIC, False, NETWORKS["test"]))
     signer = PSBTSigner(wallet, PSBT_B64, FORMAT_PMOFN)
-    outputs = signer.outputs()
+    outputs, _ = signer.outputs()
     assert outputs == OUTPUT
