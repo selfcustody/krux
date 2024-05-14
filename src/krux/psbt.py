@@ -287,7 +287,12 @@ class PSBTSigner:
             )
 
         fee = inp_amount - spend_amount - self_amount - change_amount
-        resume_fee_str = t("Fee:") + (" ₿ %s" % format_btc(fee))
+        import math
+
+        fee_percent = math.ceil(fee * 100 / spend_amount * 10) / 10
+        resume_fee_str = (
+            t("Fee:") + (" ₿ %s" % format_btc(fee)) + (" (%.1f%%)" % fee_percent)
+        )
 
         messages = []
         # first screen - resume
