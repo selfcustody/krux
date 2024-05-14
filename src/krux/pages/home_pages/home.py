@@ -24,6 +24,7 @@ import gc
 from ...display import BOTTOM_PROMPT_LINE
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t, Settings
+from ...format import replace_decimal_separator
 from .. import (
     Page,
     Menu,
@@ -279,7 +280,9 @@ class Home(Page):
         if path_mismatch:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Warning: Path mismatch")
+                t("Warning:")
+                + " "
+                + t("Path mismatch")
                 + "\n"
                 + "Wallet: "
                 + self.ctx.wallet.key.derivation_str()
@@ -332,7 +335,15 @@ class Home(Page):
         # Warn if fees greater than 30% of what is spent
         if fee_percent >= 30.0:
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Warning: Fees are greater than 30%"))
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + " "
+                + t("High fees!")
+                + "\n"
+                + replace_decimal_separator(("%.1f" % fee_percent))
+                + t("% of the amount spent")
+            )
+
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
 

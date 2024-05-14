@@ -289,7 +289,7 @@
     "Wallet output descriptor loaded!": "Wallet Ausgabedeskriptor geladen!",
     "Wallet output descriptor not found.": "Wallet Ausgabedeskriptor nicht gefunden.",
     "Warning:": "Warnung:",
-    "Warning: Path mismatch": "Warnung: Pfad stimmt nicht überein",
+    "Path mismatch": "Pfad stimmt nicht überein",
     "Wipe Device": "Gerät löschen",
     "Wiping Device..": "Gerät wird gewischt..",
     "Word %d": "Wort %d",

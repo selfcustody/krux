@@ -289,7 +289,7 @@
     "Wallet output descriptor loaded!": "Descritor de saída da carteira carregado!",
     "Wallet output descriptor not found.": "O descritor de saída da carteira não foi encontrado.",
     "Warning:": "Aviso:",
-    "Warning: Path mismatch": "Aviso: Incompatibilidade de caminho",
+    "Path mismatch": "Incompatibilidade de caminho",
     "Wipe Device": "Limpar Dispositivo",
     "Wiping Device..": "Limpando Dispositivo..",
     "Word %d": "Palavra %d",
