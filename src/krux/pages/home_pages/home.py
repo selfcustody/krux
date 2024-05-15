@@ -24,6 +24,7 @@ import gc
 from ...display import BOTTOM_PROMPT_LINE
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t, Settings
+from ...format import replace_decimal_separator
 from .. import (
     Page,
     Menu,
@@ -273,12 +274,15 @@ class Home(Page):
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
         from ...psbt import PSBTSigner
 
+        # Warns in case of path mismatch
         signer = PSBTSigner(self.ctx.wallet, data, qr_format)
         path_mismatch = signer.path_mismatch()
         if path_mismatch:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Warning: Path mismatch")
+                t("Warning:")
+                + " "
+                + t("Path mismatch")
                 + "\n"
                 + "Wallet: "
                 + self.ctx.wallet.key.derivation_str()
@@ -288,6 +292,8 @@ class Home(Page):
             )
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
+
+        # Show the policy for multisig
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
             from ...key import Key
 
@@ -314,17 +320,33 @@ class Home(Page):
             self.ctx.display.draw_centered_text(policy_str)
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
 
-        # This is necessary for the signing process on embit in a few cases
+        # Fix zero fingerprint, it is necessary for the signing process on embit in a few cases
         if signer.fill_zero_fingerprint():
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Fingerprint unset in PSBT"))
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
 
-        outputs = signer.outputs()
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing ..."))
+        outputs, fee_percent = signer.outputs()
+
+        # Warn if fees greater than 30% of what is spent
+        if fee_percent >= 30.0:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + " "
+                + t("High fees!")
+                + "\n"
+                + replace_decimal_separator(("%.1f" % fee_percent))
+                + t("% of the amount spent.")
+            )
+
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return MENU_CONTINUE
+
         for message in outputs:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(message)
