@@ -341,7 +341,7 @@ class Home(Page):
                 + t("High fees!")
                 + "\n"
                 + replace_decimal_separator(("%.1f" % fee_percent))
-                + t("% of the amount spent")
+                + t("% of the amount spent.")
             )
 
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
