@@ -21,6 +21,9 @@
 # THE SOFTWARE.
 from binascii import a2b_base64, b2a_base64
 
+B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+assert len(B32CHARS) == 32
+
 B43CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:"
 assert len(B43CHARS) == 43
 
@@ -30,7 +33,7 @@ assert len(B58CHARS) == 58
 
 def base_decode(v, base):
     """Decodes v from base encoding and returns the decoded bytes"""
-    if base not in (43, 58, 64):
+    if base not in (32, 43, 58, 64):
         raise ValueError("not supported base: {}".format(base))
 
     if v == b"":
@@ -41,7 +44,13 @@ def base_decode(v, base):
     if base == 64:
         return a2b_base64(v)
 
-    chars = B58CHARS if base == 58 else B43CHARS
+    if base == 32:
+        chars = B32CHARS
+    elif base == 58:
+        chars = B58CHARS
+    else:
+        chars = B43CHARS
+
     long_value = 0
     power_of_base = 1
     for char in reversed(v):
@@ -106,3 +115,28 @@ def base_encode(v, base):
     if n_pad > 0:
         result.extend((chars[0] * n_pad).encode())
     return bytes(reversed(result))
+
+
+def base32_encode(data):
+    """Encodes bytes into a Base32 string according to RFC 4648."""
+
+    def byte_to_bin(byte):
+        """Convert a single byte to a binary string."""
+        return "".join(str((byte >> i) & 1) for i in range(7, -1, -1))
+
+    # Collect bits as a string of '1's and '0's
+    bits = "".join(byte_to_bin(byte) for byte in data)
+
+    # Prepare to segment bits into groups of 5
+    padding_length = (5 - len(bits) % 5) % 5
+    bits += "0" * padding_length  # Pad bits to make length a multiple of 5
+
+    # Encode bits to Base32
+    encoded = ""
+    for i in range(0, len(bits), 5):
+        index = int(bits[i : i + 5], 2)
+        encoded += B32CHARS[index]
+
+    # Calculate required padding for the encoded string
+    padding = "=" * ((8 - len(encoded) % 8) % 8)
+    return encoded + padding
