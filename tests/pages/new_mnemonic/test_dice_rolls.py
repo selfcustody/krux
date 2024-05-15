@@ -21,9 +21,59 @@ POOR_ROLLS_TOUCH_SEQUENCE = (
     + [5] * 4  # 2 number 6 presses
 )
 
-GOOD_ROLLS_SEQUENCE = (
-    [1, 4, 5, 2, 0, 3, 2, 4, 4, 5, 5, 5, 0, 5, 2, 3, 2, 5, 2, 5, 0, 5, 2, 1, 4, 3, 0, 5, 3, 4, 1, 0, 3, 0, 3, 5, 5, 4, 2, 1, 4, 1, 5, 4, 5, 2, 0, 3, 3, 0]
-)
+GOOD_ROLLS_SEQUENCE = [
+    1,
+    4,
+    5,
+    2,
+    0,
+    3,
+    2,
+    4,
+    4,
+    5,
+    5,
+    5,
+    0,
+    5,
+    2,
+    3,
+    2,
+    5,
+    2,
+    5,
+    0,
+    5,
+    2,
+    1,
+    4,
+    3,
+    0,
+    5,
+    3,
+    4,
+    1,
+    0,
+    3,
+    0,
+    3,
+    5,
+    5,
+    4,
+    2,
+    1,
+    4,
+    1,
+    5,
+    4,
+    5,
+    2,
+    0,
+    3,
+    3,
+    0,
+]
+
 
 def test_new_12w_from_d6(m5stickv, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS

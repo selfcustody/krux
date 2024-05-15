@@ -208,7 +208,7 @@ class PSBTSigner:
 
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
-        from .format import format_btc
+        from .format import format_btc, replace_decimal_separator
 
         inp_amount = 0
         for inp in self.psbt.inputs:
@@ -287,7 +287,18 @@ class PSBTSigner:
             )
 
         fee = inp_amount - spend_amount - self_amount - change_amount
-        resume_fee_str = t("Fee:") + (" ₿ %s" % format_btc(fee))
+
+        fee_percent = 0
+        if spend_amount > 0:
+            fee_percent = (((fee * 10000 // spend_amount) + 9) // 10) / 10
+
+        resume_fee_str = (
+            t("Fee:")
+            + (" ₿ %s" % format_btc(fee))
+            + " ("
+            + replace_decimal_separator("%.1f" % fee_percent)
+            + "%)"
+        )
 
         messages = []
         # first screen - resume
@@ -319,7 +330,7 @@ class PSBTSigner:
                 + ("₿ %s" % format_btc(out[1]))
             )
 
-        return messages
+        return messages, fee_percent
 
     def add_signatures(self):
         """Add signatures to PSBT"""
