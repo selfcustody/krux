@@ -27,7 +27,7 @@ from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
 from .qr import FORMAT_PMOFN
-from .key import Key
+from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 
 # PSBT Output Types:
 CHANGE = 0
@@ -125,12 +125,12 @@ class PSBTSigner:
         mismatched_paths = []
         der_path_nodes = len(self.wallet.key.derivation.split("/")) - 1
         for _input in self.psbt.inputs:
-            if self.policy["type"] == "p2tr":
+            if self.policy["type"] == P2TR:
                 derivations = _input.taproot_bip32_derivations
             else:
                 derivations = _input.bip32_derivations
             for pubkey in derivations:
-                if self.policy["type"] == "p2tr":
+                if self.policy["type"] == P2TR:
                     derivation_path = derivations[pubkey][
                         1
                     ].derivation  # ignore taproot leaf
@@ -167,23 +167,23 @@ class PSBTSigner:
             # empty script by default
             sc = script.Script(b"")
             # multisig, we know witness script
-            if self.policy["type"] == "p2wsh":
+            if self.policy["type"] == P2WSH:
                 sc = script.p2wsh(out.witness_script)
-            elif self.policy["type"] == "p2sh-p2wsh":
+            elif self.policy["type"] == P2SH_P2WSH:
                 sc = script.p2sh(script.p2wsh(out.witness_script))
             # single-sig
             elif "pkh" in self.policy["type"]:
                 if len(list(out.bip32_derivations.values())) > 0:
                     der = list(out.bip32_derivations.values())[0].derivation
                     my_hd_prvkey = self.wallet.key.root.derive(der)
-                    if self.policy["type"] == "p2wpkh":
+                    if self.policy["type"] == P2WPKH:
                         sc = script.p2wpkh(my_hd_prvkey)
-                    elif self.policy["type"] == "p2sh-p2wpkh":
+                    elif self.policy["type"] == P2SH_P2WPKH:
                         sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
-                    elif self.policy["type"] == "p2pkh":
+                    elif self.policy["type"] == P2PKH:
                         sc = script.p2pkh(my_hd_prvkey)
 
-            if self.policy["type"] == "p2tr":
+            if self.policy["type"] == P2TR:
                 address_from_my_wallet = (
                     len(list(out.taproot_bip32_derivations.values())) > 0
                 )
@@ -208,7 +208,7 @@ class PSBTSigner:
 
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
-        from .format import format_btc
+        from .format import format_btc, replace_decimal_separator
 
         inp_amount = 0
         for inp in self.psbt.inputs:
@@ -287,7 +287,18 @@ class PSBTSigner:
             )
 
         fee = inp_amount - spend_amount - self_amount - change_amount
-        resume_fee_str = t("Fee:") + (" ₿ %s" % format_btc(fee))
+
+        fee_percent = 0
+        if spend_amount > 0:
+            fee_percent = (((fee * 10000 // spend_amount) + 9) // 10) / 10
+
+        resume_fee_str = (
+            t("Fee:")
+            + (" ₿ %s" % format_btc(fee))
+            + " ("
+            + replace_decimal_separator("%.1f" % fee_percent)
+            + "%)"
+        )
 
         messages = []
         # first screen - resume
@@ -319,7 +330,7 @@ class PSBTSigner:
                 + ("₿ %s" % format_btc(out[1]))
             )
 
-        return messages
+        return messages, fee_percent
 
     def add_signatures(self):
         """Add signatures to PSBT"""
@@ -344,12 +355,12 @@ class PSBTSigner:
     def _fill_zero_fingerprint_scope(self, scope):
         """Helper function to fill a scope (input/output)"""
         filled = 0
-        if self.policy["type"] == "p2tr":
+        if self.policy["type"] == P2TR:
             derivations = scope.taproot_bip32_derivations
         else:
             derivations = scope.bip32_derivations
         for pub in derivations:
-            if self.policy["type"] == "p2tr":
+            if self.policy["type"] == P2TR:
                 derivation = derivations[pub][1]  # ignore taproot leaf
             else:
                 derivation = derivations[pub]
@@ -426,7 +437,7 @@ def is_multisig(policy):
     """Returns a boolean indicating if the policy is a multisig"""
     return (
         "type" in policy
-        and "p2wsh" in policy["type"]
+        and P2WSH in policy["type"]
         and "m" in policy
         and "n" in policy
         and "cosigners" in policy
@@ -466,17 +477,17 @@ def get_policy(scope, scriptpubkey, xpubs):
     script_type = scriptpubkey.script_type()
     # p2sh can be either legacy multisig, or nested segwit multisig
     # or nested segwit singlesig
-    if script_type == "p2sh":
+    if script_type == P2SH:
         if scope.witness_script is not None:
-            script_type = "p2sh-p2wsh"
+            script_type = P2SH_P2WSH
         elif (
             scope.redeem_script is not None
-            and scope.redeem_script.script_type() == "p2wpkh"
+            and scope.redeem_script.script_type() == P2WPKH
         ):
-            script_type = "p2sh-p2wpkh"
+            script_type = P2SH_P2WPKH
     policy = {"type": script_type}
     # expected multisig
-    if "p2wsh" in script_type and scope.witness_script is not None:
+    if P2WSH in script_type and scope.witness_script is not None:
         m, pubkeys = parse_multisig(scope.witness_script)
         # check pubkeys are derived from cosigners
         cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)

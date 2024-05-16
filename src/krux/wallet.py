@@ -24,6 +24,7 @@ from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from embit.networks import NETWORKS
 from .krux_settings import t, Settings
+from .key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
 
 class Wallet:
@@ -38,20 +39,20 @@ class Wallet:
         self.policy = None
         self.persisted = None
         if self.key and not self.key.multisig:
-            if self.key.script_type == "p2pkh":
+            if self.key.script_type == P2PKH:
                 self.descriptor = Descriptor.from_string(
                     "pkh(%s/<0;1>/*)" % self.key.key_expression()
                 )
-            elif self.key.script_type == "p2sh-p2wpkh":
+            elif self.key.script_type == P2SH_P2WPKH:
                 self.descriptor = Descriptor.from_string(
                     "sh(wpkh(%s/<0;1>/*))" % self.key.key_expression()
                 )
-            elif self.key.script_type == "p2wpkh":
+            elif self.key.script_type == P2WPKH:
                 self.descriptor = Descriptor.from_string(
                     "wpkh(%s/<0;1>/*)" % self.key.key_expression()
                 )
 
-            elif self.key.script_type == "p2tr":
+            elif self.key.script_type == P2TR:
                 self.descriptor = Descriptor.from_string(
                     "tr(%s/<0;1>/*)" % self.key.key_expression()
                 )
@@ -225,7 +226,7 @@ def parse_wallet(wallet_data, network=None):
                 )
 
             script = key_vals[key_vals.index("Format") + 1].lower()
-            if script != "p2wsh":
+            if script != P2WSH:
                 raise ValueError("invalid script type: %s" % script)
 
             policy = key_vals[key_vals.index("Policy") + 1]

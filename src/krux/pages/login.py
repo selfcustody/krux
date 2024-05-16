@@ -27,7 +27,7 @@ from embit import bip39
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
-from ..key import Key
+from ..key import Key, P2WPKH
 from ..krux_settings import t
 from . import (
     Page,
@@ -216,7 +216,7 @@ class Login(Page):
         multisig = Settings().wallet.multisig
         network = NETWORKS[Settings().wallet.network]
         account = 0
-        script_type = "p2wpkh"
+        script_type = P2WPKH
         from ..wallet import Wallet
 
         while True:

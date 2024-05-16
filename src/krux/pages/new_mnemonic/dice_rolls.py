@@ -45,6 +45,7 @@ MIN_ENTROPY_24W = 256
 # With a small tolerance, excessive low entropy warnings won't pop up when min. rolls are used.
 ENTROPY_TOLERANCE = 2  # bits
 
+PATTERN_DETECT_TOLERANCE = 30  # %
 BAR_GRAPH_POSITION = 20  # % of screen (top of the graph)
 BAR_GRAPH_SIZE = 60  # % of screen
 
@@ -57,36 +58,66 @@ class DiceEntropy(Page):
         self.ctx = ctx
         self.is_d20 = is_d20
         self.roll_states = D20_STATES if is_d20 else D6_STATES
-        self.len_states = len(self.roll_states)
+        self.num_sides = len(self.roll_states)
         self.min_rolls = 0
         self.min_entropy = 0
         self.rolls = []
-        self.roll_counts = [0] * self.len_states
+        self.roll_counts = [0] * self.num_sides
 
-    def _count_rolls(self):
-        """Recompute rolls count every time entropy is calculated"""
-        self.roll_counts = [0] * self.len_states
-        for roll in self.rolls:
-            self.roll_counts[int(roll) - 1] += 1
-
-    def calculate_entropy(self):
+    def shannon_sum(self, distribution, sample_size):
         """Calculates Shannon's entropy of a given list"""
         import math
 
-        # Total number of pixels (equal to the number of bytes)
+        # Calculate entropy
+        unit_entropy = 0
+        for count in distribution:
+            probability = count / sample_size
+            unit_entropy -= probability * (probability and math.log2(probability))
+        return unit_entropy
+
+    def calculate_entropy(self):
+        """Calculates Shannon's entropy of a given list"""
+
         total_rolls = len(self.rolls)
         if not total_rolls:
             return 0
-        self._count_rolls()
+        self.roll_counts = [0] * self.num_sides
+        for roll in self.rolls:
+            self.roll_counts[int(roll) - 1] += 1
 
-        # Calculate entropy
-        entropy = 0
-        for count in self.roll_counts:
-            probability = count / total_rolls
-            entropy -= probability * (probability and math.log2(probability))
+        return int(self.shannon_sum(self.roll_counts, total_rolls) * total_rolls)
 
-        total_entropy = entropy * total_rolls
-        return int(total_entropy)
+    def pattern_detection(self):
+        """
+        Calculate Shannon's entropy of roll derivatives
+        to detect arithmetic progression patterns.
+        """
+        import math
+
+        if len(self.rolls) < self.min_rolls // 2:
+            return 0  # Not enough data to analyze
+
+        # Calculate derivatives
+        derivatives = [
+            int(self.rolls[i]) - int(self.rolls[i - 1])
+            for i in range(1, len(self.rolls))
+        ]
+        min_derivative, max_derivative = -self.num_sides + 1, self.num_sides - 1
+        derivative_range = max_derivative - min_derivative + 1
+        derivative_counts = [0] * derivative_range
+
+        # Count each derivative
+        for derivative in derivatives:
+            index = derivative - min_derivative
+            derivative_counts[index] += 1
+
+        derivative_entropy = self.shannon_sum(derivative_counts, len(derivatives))
+
+        # Normalize entropy
+        max_entropy = math.log2(derivative_range)
+        normalized_entropy = (max_entropy - derivative_entropy) / max_entropy * 100
+
+        return int(normalized_entropy) > PATTERN_DETECT_TOLERANCE
 
     def stats_for_nerds(self):
         """
@@ -106,7 +137,7 @@ class DiceEntropy(Page):
         bar_graph = []
         for count in self.roll_counts:
             bar_graph.append(int(count * scale_factor))
-        bar_pad = self.ctx.display.width() // (self.len_states + 2)
+        bar_pad = self.ctx.display.width() // (self.num_sides + 2)
         offset_x = bar_pad
         # Bar graph offset (bottom of the graph)
         offset_y = BAR_GRAPH_POSITION + BAR_GRAPH_SIZE
@@ -154,6 +185,9 @@ class DiceEntropy(Page):
             )
 
         shannon_entropy = self.calculate_entropy()
+        entropy_color = (
+            theme.error_color if self.pattern_detection() else theme.highlight_color
+        )
         if shannon_entropy:  # Only draws if Shannon's > 0
             shannon_progress = min(self.min_entropy, shannon_entropy)
             shannon_progress *= self.ctx.display.usable_width() - 3
@@ -163,7 +197,7 @@ class DiceEntropy(Page):
                 offset_y + (pb_height // 2) + 1,
                 shannon_progress,
                 (pb_height // 2) - 2,
-                theme.highlight_color,
+                entropy_color,
             )
         if (
             shannon_entropy >= (self.min_entropy - ENTROPY_TOLERANCE)
@@ -211,7 +245,7 @@ class DiceEntropy(Page):
                     dice_title = t("Rolls:") + " %d\n" % len(self.rolls)
                     entropy = (
                         "".join(self.rolls)
-                        if self.len_states < 10
+                        if self.num_sides < 10
                         else "-".join(self.rolls)
                     )
                     if len(entropy) <= 10:
@@ -239,20 +273,26 @@ class DiceEntropy(Page):
                             self.rolls.pop()
                     elif len(self.rolls) < self.min_rolls:  # Not enough to Go
                         self.flash_text(t("Not enough rolls!"))
-                    elif self.calculate_entropy() < (
-                        self.min_entropy - ENTROPY_TOLERANCE
-                    ):
-                        self.ctx.display.clear()
-                        self.ctx.display.draw_hcentered_text(
-                            t("Poor entropy detected. More rolls are recommended")
-                        )
-                        if self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
+                    else:
+                        warning_txt = ""
+                        if self.calculate_entropy() < (
+                            self.min_entropy - ENTROPY_TOLERANCE
+                        ):
+                            warning_txt += t("Poor entropy detected!")
+                        if self.pattern_detection():
+                            if warning_txt:
+                                warning_txt += "\n"
+                            warning_txt += t("Pattern detected!")
+                        if warning_txt:
+                            self.ctx.display.clear()
+                            self.ctx.display.draw_centered_text(warning_txt)
+                            if self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
+                                break
+                        else:
                             break
-                    else:  # Go
-                        break
 
             entropy = (
-                "".join(self.rolls) if self.len_states < 10 else "-".join(self.rolls)
+                "".join(self.rolls) if self.num_sides < 10 else "-".join(self.rolls)
             )
             self.ctx.display.clear()
             rolls_str = t("Rolls:") + "\n\n%s" % entropy
