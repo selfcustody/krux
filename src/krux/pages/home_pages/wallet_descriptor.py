@@ -46,7 +46,7 @@ class WalletDescriptor(Page):
             text = t("Wallet output descriptor not found.")
             self.ctx.display.draw_centered_text(text)
             if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
-                self._load_wallet()
+                return self._load_wallet()
         else:
             self.display_wallet(self.ctx.wallet)
             wallet_data, qr_format = self.ctx.wallet.wallet_qr()
@@ -55,19 +55,19 @@ class WalletDescriptor(Page):
             utils = Utils(self.ctx)
             utils.print_standard_qr(wallet_data, qr_format, title)
 
-        # Try to save the Wallet output descriptor on the SD card
-        if self.has_sd_card() and not self.ctx.wallet.persisted:
-            from ..file_operations import SaveFile
+            # Try to save the Wallet output descriptor on the SD card
+            if self.has_sd_card() and not self.ctx.wallet.persisted:
+                from ..file_operations import SaveFile
 
-            save_page = SaveFile(self.ctx)
-            self.ctx.wallet.persisted = save_page.save_file(
-                self.ctx.wallet.descriptor.to_string(),
-                self.ctx.wallet.label,
-                self.ctx.wallet.label,
-                title + ":",
-                DESCRIPTOR_FILE_EXTENSION,
-                save_as_binary=False,
-            )
+                save_page = SaveFile(self.ctx)
+                self.ctx.wallet.persisted = save_page.save_file(
+                    self.ctx.wallet.descriptor.to_string(),
+                    self.ctx.wallet.label,
+                    self.ctx.wallet.label,
+                    title + ":",
+                    DESCRIPTOR_FILE_EXTENSION,
+                    save_as_binary=False,
+                )
 
         return MENU_CONTINUE
 

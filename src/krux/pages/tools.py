@@ -181,8 +181,7 @@ class Tools(Page):
         from .home_pages.addresses import Addresses
         from krux.wallet import Wallet
 
-        if not self.ctx.wallet:
-            self.ctx.wallet = Wallet(None)
+        self.ctx.wallet = Wallet(None)
         menu_result = WalletDescriptor(self.ctx).wallet()
         if self.ctx.wallet.is_loaded():
             menu_result = Addresses(self.ctx).addresses_menu()

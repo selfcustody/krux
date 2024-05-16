@@ -75,7 +75,7 @@ class Wallet:
         if self.key:
             network = self.key.network
         else:
-            network = NETWORKS[Settings().wallet.network]
+            network = None
         descriptor, label = parse_wallet(wallet_data, network)
 
         if self.key:
@@ -125,10 +125,22 @@ class Wallet:
         """Returns an iterator deriving addresses (default branch_index is receive)
         for the wallet up to the provided limit"""
         starting_index = i
+        # network is that of the HDKey, else the descriptor, else settings
         if self.key:
             network = self.key.network
         else:
-            network = NETWORKS[Settings().wallet.network]
+            # todo: consider wallet.network attribute filled when loading
+            if not self.descriptor.key and len(self.descriptor.keys) > 1:
+                version = self.descriptor.keys[0].key.version
+            else:
+                version = self.descriptor.key.key.version
+            network = None
+            for network in NETWORKS.values():
+                if version in network.values():
+                    break
+            if not network:
+                network = NETWORKS[Settings().wallet.network]
+
         while limit is None or i < starting_index + limit:
             yield self.descriptor.derive(i, branch_index=branch_index).address(
                 network=network
@@ -154,7 +166,7 @@ def to_unambiguous_descriptor(descriptor):
     return descriptor
 
 
-def parse_wallet(wallet_data, network):
+def parse_wallet(wallet_data, network=None):
     """Exhaustively tries to parse the wallet data from a known format, returning
     a descriptor and label if possible.
 
@@ -259,7 +271,8 @@ def parse_wallet(wallet_data, network):
             # If that fails, try to parse as an xpub as a last resort
             pubkey = Key.from_string(wallet_data)
             if pubkey.is_extended:
-                xpub = pubkey.key.to_base58(version=network["xpub"])
+                version = network["xpub"] if network else pubkey.key.version
+                xpub = pubkey.key.to_base58(version=version)
                 # Assuming Native Segwit
                 descriptor = Descriptor.from_string("wpkh(%s)" % xpub)
                 return descriptor, None
