@@ -265,12 +265,12 @@ def parse_wallet(wallet_data, network=None):
 
     # Try to parse directly as a descriptor
     try:
-        descriptor = Descriptor.from_string(wallet_data)
+        descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
     except:
         try:
             # If that fails, try to parse as an xpub as a last resort
-            pubkey = Key.from_string(wallet_data)
+            pubkey = Key.from_string(wallet_data.strip())
             if pubkey.is_extended:
                 version = network["xpub"] if network else pubkey.key.version
                 xpub = pubkey.key.to_base58(version=version)
