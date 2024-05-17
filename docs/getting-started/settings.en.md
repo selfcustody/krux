@@ -1,4 +1,4 @@
-In the Krux home menu, there is a `Settings` entry. Below is a breakdown of the options you can change:
+In the Krux home menu, there is a `Settings` entry. Some submenu entries have too many options to fit on one screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens if your device has a touchscreen. Below is a breakdown of the options you can change:
 
 <img src="../../img/maixpy_amigo/settings-options-150.png">
 <img src="../../img/maixpy_m5stickv/settings-options-125.png">
