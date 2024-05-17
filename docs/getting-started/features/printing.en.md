@@ -3,12 +3,16 @@ Krux has the ability to print mnemonic backup (Words, Numbers, Tiny Seed templat
 <img src="../../../img/maixpy_amigo/print-qr-printing-150.png">
 <img src="../../../img/maixpy_m5stickv/print-qr-printing-125.png">
 
-<video width="430" height="300" controls>
+<video width="430" controls>
   <source src="../../../img/printing-qr.mp4" type="video/mp4"></source>
 </video>
 
-<video width="400" height="300" controls>
+<video width="400" controls>
   <source src="../../../img/scanning-printed-qr.mp4" type="video/mp4"></source>
+</video>
+
+<video width="480" controls>
+  <source src="../../../img/printing-scanning-psbt.mp4" type="video/mp4"></source>
 </video>
 
 
