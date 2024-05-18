@@ -22,7 +22,7 @@
 # pylint: disable=C0301
 translation_table = {
     "de-DE": {
-        232475068: "50% des Betrags.",
+        232475068: "% des Betrags.",
         1185266064: "%d von %d Multisig",
         2331290367: "%d. Change:",
         1866298120: "%d. Selbstübertragung:",
@@ -636,7 +636,7 @@ translation_table = {
         1266915636: "NO FUE ENCONTRADO en las primeras %d direcciones de recepción",
     },
     "fr-FR": {
-        232475068: "1% du montant.",
+        232475068: "% du montant.",
         1185266064: "%d de %d multisignature",
         2331290367: "%d. Changement :",
         1866298120: "%d. Auto-transfert :",
@@ -1864,7 +1864,7 @@ translation_table = {
         1266915636: "NÃO FOI ENCONTRADO nos primeiros %d endereços de recebimento",
     },
     "ru-RU": {
-        232475068: "0,6 % от суммы.",
+        232475068: "% от суммы.",
         1185266064: "%d из %d мультиподпись",
         2331290367: "%d. Сдача:",
         1866298120: "%d. Перевод самому себе:",
