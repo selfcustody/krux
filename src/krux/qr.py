@@ -182,13 +182,13 @@ class QRPartParser:
 
             if self.bbqr_encoding == "Z":
                 try:
-                    import uzlib
+                    import deflate
 
                     stream = io.BytesIO(binary_data)
 
                     # Decompress
-                    decompressor = uzlib.DecompIO(stream, -10)
-                    decompressed = decompressor.read()
+                    with deflate.DeflateIO(stream) as d:
+                        decompressed = d.read()
                     if self.bbqr_file_type == "U":
                         return decompressed.decode("utf-8")
                     return decompressed
@@ -231,16 +231,18 @@ def to_qr_codes(data, max_width, qr_format, file_type=None):
     else:
         if qr_format == FORMAT_BBQR:
             # Compress data and check if it's worth it
-            # import uzlib
+            import deflate
             from .baseconv import base32_encode
 
-            # cmp = uzlib.compress(data)
-            # if len(cmp) >= len(data):
-            #     encoding = "2"
-            # else:
-            #     encoding = "Z"
-            #     data = cmp
-            encoding = "2"  # Current micropython does not have compression on uzlib
+            stream = io.BytesIO()
+            with deflate.DeflateIO(stream) as d:
+                d.write(data)
+            cmp = stream.getvalue()
+            if len(cmp) >= len(data):
+                encoding = "2"
+            else:
+                encoding = "Z"
+                data = cmp
             data = data.encode("utf-8") if isinstance(data, str) else data
             data = base32_encode(data)
         num_parts, part_size = find_min_num_parts(data, max_width, qr_format)
