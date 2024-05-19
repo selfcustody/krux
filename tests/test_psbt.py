@@ -484,5 +484,5 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (2): ₿\u20090.00 130 622\n\nSpend (7): ₿\u20090.00 009 519\n\nSelf-transfer or Change (2): ₿\u20090.00 018 824\n\nFee: ₿\u20090.00 102 279 (1074.5%) ~165.2 sat/vB"
+        == "Inputs (2): ₿\u20090.00 130 622\n\nSpend (7): ₿\u20090.00 009 519\n\nSelf-transfer or Change (2): ₿\u20090.00 018 824\n\nFee: ₿\u20090.00 102 279 (360.9%) ~165.2 sat/vB"
     )
