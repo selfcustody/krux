@@ -22,7 +22,7 @@
 # pylint: disable=C0301
 translation_table = {
     "de-DE": {
-        2378912133: "% des ausgegebenen Betrags.",
+        232475068: "% des Betrags.",
         1185266064: "%d von %d Multisig",
         2331290367: "%d. Change:",
         1866298120: "%d. Selbstübertragung:",
@@ -329,7 +329,7 @@ translation_table = {
         1266915636: "wurde in den ersten %d Empfangsadressen NICHT GEFUNDEN",
     },
     "es-MX": {
-        2378912133: "% del monto gastado.",
+        232475068: "% del monto.",
         1185266064: "%d de %d multisig",
         2331290367: "%d. Cambio:",
         1866298120: "%d. Autotransferencia:",
@@ -636,7 +636,7 @@ translation_table = {
         1266915636: "NO FUE ENCONTRADO en las primeras %d direcciones de recepción",
     },
     "fr-FR": {
-        2378912133: "% du montant dépensé.",
+        232475068: "% du montant.",
         1185266064: "%d de %d multisignature",
         2331290367: "%d. Changement :",
         1866298120: "%d. Auto-transfert :",
@@ -943,7 +943,7 @@ translation_table = {
         1266915636: "INTROUVABLE dans les premières %d adresses de reçues",
     },
     "nl-NL": {
-        2378912133: "% van het uitgegeven bedrag.",
+        232475068: "% van het bedrag.",
         1185266064: "%d van %d multisig",
         2331290367: "%d. Wisselgeld:",
         1866298120: "%d. Zelf overschrijving:",
@@ -1250,7 +1250,7 @@ translation_table = {
         1266915636: "werd NIET GEVONDEN in de eerste %d ontvangst adressen",
     },
     "pl-PL": {
-        2378912133: "% wydanej kwoty.",
+        232475068: "% kwoty.",
         1185266064: "%d z %d multisig",
         2331290367: "%D.Zmiana:",
         1866298120: "%D.Samo-transfer:",
@@ -1557,7 +1557,7 @@ translation_table = {
         1266915636: "was nie znaleziono w pierwszych %D Otrzymuj adresy",
     },
     "pt-BR": {
-        2378912133: "% do valor gasto.",
+        232475068: "% do valor.",
         1185266064: "%d da %d multisig",
         2331290367: "%d. Troco:",
         1866298120: "%d. Autotransferência:",
@@ -1864,7 +1864,7 @@ translation_table = {
         1266915636: "NÃO FOI ENCONTRADO nos primeiros %d endereços de recebimento",
     },
     "ru-RU": {
-        2378912133: "% от потраченной суммы.",
+        232475068: "% от суммы.",
         1185266064: "%d из %d мультиподпись",
         2331290367: "%d. Сдача:",
         1866298120: "%d. Перевод самому себе:",
@@ -2171,7 +2171,7 @@ translation_table = {
         1266915636: "НЕ НАЙДЕН в первых %d адресах получения",
     },
     "tr-TR": {
-        2378912133: "Harcanan Miktarın.",
+        232475068: "tutarın %'si.",
         1185266064: "%d / %d çoklu imza",
         2331290367: "%d. Para Üstü:",
         1866298120: "%d. Kendine-transfer:",
@@ -2478,7 +2478,7 @@ translation_table = {
         1266915636: "ilk %d alım adresinde BULUNAMADI",
     },
     "vi-VN": {
-        2378912133: "% số tiền đã chi.",
+        232475068: "% của số tiền.",
         1185266064: "%d của %d đa chữ kí",
         2331290367: "%d. Thay đổi:",
         1866298120: "%d. Tự chuyển nhượng:",
