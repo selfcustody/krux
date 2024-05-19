@@ -400,7 +400,7 @@ class SettingsPage(Page):
             numerals += "."
 
         new_value = self.capture_from_keypad(
-            settings_namespace.label(setting.attr),
+            self.fit_to_line(settings_namespace.label(setting.attr)),
             [numerals],
             starting_buffer=str(starting_value),
             esc_prompt=False,

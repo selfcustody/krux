@@ -288,9 +288,12 @@ class PSBTSigner:
 
         fee = inp_amount - spend_amount - self_amount - change_amount
 
-        fee_percent = 0
-        if spend_amount > 0:
-            fee_percent = (((fee * 10000 // spend_amount) + 9) // 10) / 10
+        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
+        fee_percent = max(
+            0.1,
+            (((fee * 10000 // (spend_amount + self_amount + change_amount)) + 9) // 10)
+            / 10,
+        )
 
         resume_fee_str = (
             t("Fee:")

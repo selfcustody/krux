@@ -33,7 +33,7 @@ Display the mnemonic word numbers in decimal, hex, or octal format.
 <img src="../../../img/maixpy_m5stickv/backup-qr-plain-text-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-qr-plain-text-150.png" align="right">
 
-Generate a QR containing the mnemonic words as regular text, where words are separated by spaces.
+Generate a QR containing the mnemonic words as regular text, where words are separated by spaces. Any QR code can be printed if a thermal printer driver is set.
 
 <div style="clear: both"></div>
 
@@ -41,8 +41,7 @@ Generate a QR containing the mnemonic words as regular text, where words are sep
 <img src="../../../img/maixpy_m5stickv/backup-compact-qr-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-compact-qr-150.png" align="right">
 
-A QR code is created from a binary representation of mnemonic words. Format created by SeedSigner
-backup-qr-compact
+A QR code is created from a binary representation of mnemonic words. Format created by SeedSigner, more info [here](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md#compactseedqr-specification).
 
 <div style="clear: both"></div>
 
@@ -50,7 +49,7 @@ backup-qr-compact
 <img src="../../../img/maixpy_m5stickv/backup-seed-qr-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-seed-qr-150.png" align="right">
 
-Words are converted to their BIP-39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner
+Words are converted to their BIP-39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner, more info [here](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md).
 
 <div style="clear: both"></div>
 
@@ -66,7 +65,7 @@ This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048).
 <img src="../../../img/maixpy_m5stickv/backup-tiny-seed-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-tiny-seed-150.png" align="right">
 
-This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact.
+This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format if a thermal printer driver is set.
 
 <div style="clear: both"></div>
 
@@ -91,9 +90,9 @@ If an SD card is available, this option stores the encrypted mnemonic on it. You
 
 #### Encrypted QR Code
 
-This option converts the encrypted mnemonic into a QR code. When you scan this QR code through "Load Mnemonic" -> "Via Camera" -> "QR Code," you will be prompted to enter the decryption key to load the mnemonic stored in it.
+This option converts the encrypted mnemonic into a QR code. When you scan this QR code through "Load Mnemonic" -> "Via Camera" -> "QR Code," you will be prompted to enter the decryption key to load the mnemonic stored in it. As any QR code, it can be printed if a thermal printer driver is set.
 
-[Learn more about Krux Mnemonics Encryption](../../getting-started/features/encrypted-mnemonics.md)
+See this page to find out more about: [Krux Mnemonics Encryption](../../getting-started/features/encrypted-mnemonics.md).
 
 <div style="clear: both"></div>
 
@@ -139,9 +138,7 @@ Scan, verify, export or print your wallet addresses.
 <img src="../../../img/maixpy_m5stickv/scan-address-scanned-address-125.png" align="right">
 <img src="../../../img/maixpy_amigo/scan-address-scanned-address-150.png" align="right">
 
-This option turns on the camera and allows you to scan in a QR code of a receive address. Upon scanning, it will render its own QR code of the address back to the display along with the (text) address below it. You could use this feature to scan the address of someone you want to send coins to and display the QR back to your wallet coordinator rather than copy-pasting an address.
-
-If you have a thermal printer attached, you can also print this QR code. 
+This option turns on the camera and allows you to scan in a QR code of a receive address. Upon scanning, it will render its own QR code of the address back to the display along with the (text) address below it. You could use this feature to scan the address of someone you want to send coins to and display the QR back to your wallet coordinator rather than copy-pasting an address. If you have a thermal printer attached, you can also print this QR code. 
 
 After proceeding through this screen, you will be asked if you want to check that the address belongs to your wallet. If you confirm, it will exhaustively search through as many addresses derived from your wallet as you want in order to find a match.
 
@@ -153,7 +150,7 @@ This option exists as an extra security check to verify that the address your wa
 <img src="../../../img/maixpy_m5stickv/list-address-receive-125.png" align="right">
 <img src="../../../img/maixpy_amigo/list-address-receive-150.png" align="right">
 
-List your wallet receiving addresses, you can browse to select an arbitrary address to show your QRCode and print if you want
+List your wallet receiving addresses, you can browse to select an arbitrary address to show your QR code and print if you want.
 
 <div style="clear: both"></div>
 
@@ -161,7 +158,7 @@ List your wallet receiving addresses, you can browse to select an arbitrary addr
 <img src="../../../img/maixpy_m5stickv/list-address-change-125.png" align="right">
 <img src="../../../img/maixpy_amigo/list-address-change-150.png" align="right">
 
-List your wallet change addresses, you can browse to select an arbitrary address to show your QRCode and print if you want
+List your wallet change addresses, you can browse to select an arbitrary address to show your QR code and print if you want.
 
 <div style="clear: both"></div>
 
