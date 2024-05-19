@@ -167,7 +167,7 @@ class QRPartParser:
         if self.format == FORMAT_UR:
             return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
         if self.format == FORMAT_BBQR:
-            from .baseconv import base_decode
+            from .baseconv import base32_decode
 
             if self.bbqr_encoding == "H":
                 from binascii import unhexlify
@@ -177,8 +177,8 @@ class QRPartParser:
             binary_data = b""
             for _, part in sorted(self.parts.items()):
                 padding = (8 - (len(part) % 8)) % 8
-                padded_part = part + (padding * "A")
-                binary_data += base_decode(padded_part.encode("utf-8"), 32)
+                padded_part = part + (padding * "=")
+                binary_data += base32_decode(padded_part)
 
             if self.bbqr_encoding == "Z":
                 try:
@@ -194,6 +194,7 @@ class QRPartParser:
                     return decompressed
                 except Exception as e:
                     print("Error decompressing BBQR: ", e)
+                    raise ValueError("Error decompressing BBQR")
             if self.bbqr_file_type == "U":
                 return binary_data.decode("utf-8")
             return binary_data
@@ -244,7 +245,7 @@ def to_qr_codes(data, max_width, qr_format, file_type=None):
                 encoding = "Z"
                 data = cmp
             data = data.encode("utf-8") if isinstance(data, str) else data
-            data = base32_encode(data)
+            data = base32_encode(data).rstrip('=')
         num_parts, part_size = find_min_num_parts(data, max_width, qr_format)
         if qr_format == FORMAT_PMOFN:
             part_index = 0

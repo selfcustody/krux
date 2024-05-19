@@ -33,7 +33,7 @@ assert len(B58CHARS) == 58
 
 def base_decode(v, base):
     """Decodes v from base encoding and returns the decoded bytes"""
-    if base not in (32, 43, 58, 64):
+    if base not in (43, 58, 64):
         raise ValueError("not supported base: {}".format(base))
 
     if v == b"":
@@ -44,13 +44,7 @@ def base_decode(v, base):
     if base == 64:
         return a2b_base64(v)
 
-    if base == 32:
-        chars = B32CHARS
-    elif base == 58:
-        chars = B58CHARS
-    else:
-        chars = B43CHARS
-
+    chars = B58CHARS if base == 58 else B43CHARS
     long_value = 0
     power_of_base = 1
     for char in reversed(v):
@@ -116,6 +110,37 @@ def base_encode(v, base):
         result.extend((chars[0] * n_pad).encode())
     return bytes(reversed(result))
 
+def base32_decode(encoded_str):
+    """Decodes a Base32 string according to RFC 4648."""
+
+    # Reverse lookup table
+    base32_index = {ch: index for index, ch in enumerate(B32CHARS)}
+
+    # Strip padding
+    encoded_str = encoded_str.rstrip('=')
+
+    # Convert Base32 characters to binary string
+    bits = ''
+    for char in encoded_str:
+        if char not in base32_index:
+            raise ValueError("Invalid Base32 character: %s" % char)
+        index = base32_index[char]
+        binary_str = ''
+        for i in range(5):
+            binary_str = str(index & 1) + binary_str
+            index >>= 1
+        bits += binary_str
+
+    # Convert binary string to bytes
+    n = len(bits) // 8 * 8  # Only take complete groups of 8 bits
+    bytes_list = []
+    for i in range(0, n, 8):
+        byte = 0
+        for j in range(8):
+            byte = (byte << 1) | int(bits[i+j])
+        bytes_list.append(byte)
+    
+    return bytes(bytes_list)
 
 def base32_encode(data):
     """Encodes bytes into a Base32 string according to RFC 4648."""
