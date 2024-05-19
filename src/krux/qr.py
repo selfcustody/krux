@@ -327,7 +327,7 @@ def find_min_num_parts(data, max_width, qr_format):
         # For UR, part size will be the input for "max_fragment_len"
         part_size = len(data.cbor) // num_parts
         part_size = max(part_size, UR_MIN_FRAGMENT_LENGTH)
-    elif qr_format == FORMAT_BBQR:
+    elif qr_format in (FORMAT_BBQR, FORMAT_COMPRESSED_BBQR):
         data_length = len(data)
         part_size = qr_capacity - BBQR_PREFIX_LENGTH
         num_parts = (data_length + part_size - 1) // part_size
