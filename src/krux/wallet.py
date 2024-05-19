@@ -24,6 +24,7 @@ from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from .krux_settings import t
 from .key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
+from .qr import FORMAT_BBQR
 
 
 class Wallet:
@@ -107,6 +108,10 @@ class Wallet:
 
     def wallet_qr(self):
         """Returns the original wallet data and qr format for display back as a QR code"""
+        if self.wallet_qr_format == FORMAT_BBQR:
+            from .qr import encode_bbqr
+
+            return encode_bbqr(self.wallet_data)
         return (self.wallet_data, self.wallet_qr_format)
 
     def obtain_addresses(self, i=0, limit=None, branch_index=0):

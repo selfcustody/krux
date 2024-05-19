@@ -110,6 +110,7 @@ def base_encode(v, base):
         result.extend((chars[0] * n_pad).encode())
     return bytes(reversed(result))
 
+
 def base32_decode(encoded_str):
     """Decodes a Base32 string according to RFC 4648."""
 
@@ -117,15 +118,15 @@ def base32_decode(encoded_str):
     base32_index = {ch: index for index, ch in enumerate(B32CHARS)}
 
     # Strip padding
-    encoded_str = encoded_str.rstrip('=')
+    encoded_str = encoded_str.rstrip("=")
 
     # Convert Base32 characters to binary string
-    bits = ''
+    bits = ""
     for char in encoded_str:
         if char not in base32_index:
             raise ValueError("Invalid Base32 character: %s" % char)
         index = base32_index[char]
-        binary_str = ''
+        binary_str = ""
         for i in range(5):
             binary_str = str(index & 1) + binary_str
             index >>= 1
@@ -137,10 +138,11 @@ def base32_decode(encoded_str):
     for i in range(0, n, 8):
         byte = 0
         for j in range(8):
-            byte = (byte << 1) | int(bits[i+j])
+            byte = (byte << 1) | int(bits[i + j])
         bytes_list.append(byte)
-    
+
     return bytes(bytes_list)
+
 
 def base32_encode(data):
     """Encodes bytes into a Base32 string according to RFC 4648."""

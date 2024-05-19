@@ -30,6 +30,7 @@ FORMAT_NONE = 0
 FORMAT_PMOFN = 1
 FORMAT_UR = 2
 FORMAT_BBQR = 3
+FORMAT_COMPRESSED_BBQR = 4
 
 PMOFN_PREFIX_LENGTH_1D = 6
 PMOFN_PREFIX_LENGTH_2D = 8
@@ -230,22 +231,6 @@ def to_qr_codes(data, max_width, qr_format, file_type=None):
         code = qrcode.encode(data)
         yield (code, 1)
     else:
-        if qr_format == FORMAT_BBQR:
-            # Compress data and check if it's worth it
-            import deflate
-            from .baseconv import base32_encode
-
-            stream = io.BytesIO()
-            with deflate.DeflateIO(stream) as d:
-                d.write(data)
-            cmp = stream.getvalue()
-            if len(cmp) >= len(data):
-                encoding = "2"
-            else:
-                encoding = "Z"
-                data = cmp
-            data = data.encode("utf-8") if isinstance(data, str) else data
-            data = base32_encode(data).rstrip('=')
         num_parts, part_size = find_min_num_parts(data, max_width, qr_format)
         if qr_format == FORMAT_PMOFN:
             part_index = 0
@@ -271,7 +256,8 @@ def to_qr_codes(data, max_width, qr_format, file_type=None):
                 part = encoder.next_part()
                 code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
-        elif qr_format == FORMAT_BBQR:
+        elif qr_format in (FORMAT_BBQR, FORMAT_COMPRESSED_BBQR):
+            encoding = "Z" if qr_format == FORMAT_COMPRESSED_BBQR else "2"
             part_index = 0
             while True:
                 header = "B$%s%s%s%s" % (
@@ -386,6 +372,26 @@ def parse_bbqr(data):
     except:
         raise ValueError("Invalid BBQR format")
     return data[8:], part_index, part_total, encoding, file_type
+
+
+def encode_bbqr(data):
+    """Encodes the given data as BBQR, returning the encoded data and format"""
+    import deflate
+    from io import BytesIO
+    from .baseconv import base32_encode
+
+    stream = BytesIO()
+    with deflate.DeflateIO(stream) as d:
+        d.write(data)
+    cmp = stream.getvalue()
+    if len(cmp) >= len(data):
+        qr_format = FORMAT_BBQR
+    else:
+        qr_format = FORMAT_COMPRESSED_BBQR
+        data = cmp
+    data = data.encode("utf-8") if isinstance(data, str) else data
+    data = base32_encode(data).rstrip("=")
+    return data, qr_format
 
 
 def detect_format(data):

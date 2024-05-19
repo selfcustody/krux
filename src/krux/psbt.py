@@ -26,7 +26,7 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
-from .qr import FORMAT_PMOFN
+from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 
 # PSBT Output Types:
@@ -390,6 +390,11 @@ class PSBTSigner:
 
         self.psbt = None  # Remove PSBT free RAM
         gc.collect()
+
+        if self.qr_format == FORMAT_BBQR:
+            from .qr import encode_bbqr
+
+            return encode_bbqr(psbt_data)
 
         if self.base_encoding is not None:
             from .baseconv import base_encode
