@@ -1,5 +1,4 @@
 # The MIT License (MIT)
-
 # Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,7 +22,7 @@ from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from embit.networks import NETWORKS
-from .krux_settings import t, Settings
+from .krux_settings import t
 from .key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
 
@@ -38,6 +37,7 @@ class Wallet:
         self.label = None
         self.policy = None
         self.persisted = None
+        self._network = None
         if self.key and not self.key.multisig:
             if self.key.script_type == P2PKH:
                 self.descriptor = Descriptor.from_string(
@@ -59,6 +59,22 @@ class Wallet:
             self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
 
+    @property
+    def network(self):
+        """Returns network from user's current wallet, else from the descriptor"""
+        if self._network is None:
+            if self.key:
+                self._network = [
+                    k for k, v in NETWORKS.items() if v == self.key.network
+                ][0]
+            else:
+                version = self.descriptor.keys[0].key.version
+                for k, v in NETWORKS.items():
+                    if version in v.values():
+                        self._network = k
+                    break
+        return self._network
+
     def is_multisig(self):
         """Returns a boolean indicating whether or not the wallet is multisig"""
         if self.key:
@@ -73,11 +89,7 @@ class Wallet:
 
     def load(self, wallet_data, qr_format):
         """Loads the wallet from the given data"""
-        if self.key:
-            network = self.key.network
-        else:
-            network = None
-        descriptor, label = parse_wallet(wallet_data, network)
+        descriptor, label = parse_wallet(wallet_data)
 
         if self.key:
             if self.is_multisig():
@@ -126,25 +138,10 @@ class Wallet:
         """Returns an iterator deriving addresses (default branch_index is receive)
         for the wallet up to the provided limit"""
         starting_index = i
-        # network is that of the HDKey, else the descriptor, else settings
-        if self.key:
-            network = self.key.network
-        else:
-            # todo: consider wallet.network attribute filled when loading
-            if not self.descriptor.key and len(self.descriptor.keys) > 1:
-                version = self.descriptor.keys[0].key.version
-            else:
-                version = self.descriptor.key.key.version
-            network = None
-            for network in NETWORKS.values():
-                if version in network.values():
-                    break
-            if not network:
-                network = NETWORKS[Settings().wallet.network]
 
         while limit is None or i < starting_index + limit:
             yield self.descriptor.derive(i, branch_index=branch_index).address(
-                network=network
+                network=NETWORKS[self.network]
             )
             i += 1
 
@@ -167,12 +164,14 @@ def to_unambiguous_descriptor(descriptor):
     return descriptor
 
 
-def parse_wallet(wallet_data, network=None):
+def parse_wallet(wallet_data):
     """Exhaustively tries to parse the wallet data from a known format, returning
     a descriptor and label if possible.
 
     If the descriptor cannot be derived, an exception is raised.
     """
+    # pylint: disable=R0912
+
     import urtypes
 
     if isinstance(wallet_data, UR):
@@ -272,7 +271,11 @@ def parse_wallet(wallet_data, network=None):
             # If that fails, try to parse as an xpub as a last resort
             pubkey = Key.from_string(wallet_data.strip())
             if pubkey.is_extended:
-                version = network["xpub"] if network else pubkey.key.version
+                version = pubkey.key.version
+                for v in NETWORKS.values():
+                    if version in v.values():
+                        version = v["xpub"]
+                        break
                 xpub = pubkey.key.to_base58(version=version)
                 # Assuming Native Segwit
                 descriptor = Descriptor.from_string("wpkh(%s)" % xpub)

@@ -481,7 +481,6 @@ def test_load_multisig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata)
 
 def test_parse_wallet(mocker, m5stickv, tdata):
     from krux.wallet import parse_wallet
-    from embit.networks import NETWORKS
 
     cases = [
         (
@@ -540,14 +539,13 @@ def test_parse_wallet(mocker, m5stickv, tdata):
     for case in cases:
         print(case_n)
         case_n += 1
-        descriptor, label = parse_wallet(case[0], NETWORKS["main"])
+        descriptor, label = parse_wallet(case[0])
         assert descriptor.to_string() == case[1]
         assert label == case[2]
 
 
 def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
     from krux.wallet import parse_wallet
-    from embit.networks import NETWORKS
     from ur.ur import UR
 
     cases = [
@@ -560,7 +558,7 @@ def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
     ]
     for case in cases:
         with pytest.raises(ValueError):
-            parse_wallet(case, NETWORKS["main"])
+            parse_wallet(case)
 
 
 def test_parse_address(mocker, m5stickv, tdata):
