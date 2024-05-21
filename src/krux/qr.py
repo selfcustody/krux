@@ -31,6 +31,9 @@ FORMAT_PMOFN = 1
 FORMAT_UR = 2
 FORMAT_BBQR = 3
 FORMAT_COMPRESSED_BBQR = 4
+FORMAT_HEX_BBQR = 5
+
+BBQR_FORMATS = [FORMAT_BBQR, FORMAT_COMPRESSED_BBQR, FORMAT_HEX_BBQR]
 
 PMOFN_PREFIX_LENGTH_1D = 6
 PMOFN_PREFIX_LENGTH_2D = 8
@@ -256,8 +259,13 @@ def to_qr_codes(data, max_width, qr_format, file_type=None):
                 part = encoder.next_part()
                 code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
-        elif qr_format in (FORMAT_BBQR, FORMAT_COMPRESSED_BBQR):
-            encoding = "Z" if qr_format == FORMAT_COMPRESSED_BBQR else "2"
+        elif qr_format in BBQR_FORMATS:
+            if qr_format == FORMAT_COMPRESSED_BBQR:
+                encoding = "Z"  # Compressed
+            elif qr_format == FORMAT_HEX_BBQR:
+                encoding = "H"
+            else:
+                encoding = "2"
             part_index = 0
             while True:
                 header = "B$%s%s%s%s" % (
@@ -327,7 +335,7 @@ def find_min_num_parts(data, max_width, qr_format):
         # For UR, part size will be the input for "max_fragment_len"
         part_size = len(data.cbor) // num_parts
         part_size = max(part_size, UR_MIN_FRAGMENT_LENGTH)
-    elif qr_format in (FORMAT_BBQR, FORMAT_COMPRESSED_BBQR):
+    elif qr_format in BBQR_FORMATS:
         data_length = len(data)
         part_size = qr_capacity - BBQR_PREFIX_LENGTH
         num_parts = (data_length + part_size - 1) // part_size
@@ -374,8 +382,14 @@ def parse_bbqr(data):
     return data[8:], part_index, part_total, encoding, file_type
 
 
-def encode_bbqr(data):
+def encode_bbqr(data, qr_format=FORMAT_BBQR):
     """Encodes the given data as BBQR, returning the encoded data and format"""
+
+    if qr_format == FORMAT_HEX_BBQR:
+        from binascii import hexlify
+
+        return hexlify(data).decode(), FORMAT_HEX_BBQR
+
     import deflate
     from io import BytesIO
     from .baseconv import base32_encode
