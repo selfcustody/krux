@@ -37,7 +37,7 @@ def format_btc(amount):
     btc_decimal_8char = ("{:0>" + BTC_SATS_LEN + "}").format(btc_decimal_only)
 
     return (
-        "{:,}".format(btc_without_decimal).replace(",", THOUSANDS_SEPARATOR)
+        generate_thousands_separator(btc_without_decimal)
         + render_decimal_separator()
         + btc_decimal_8char[:2]
         + THOUSANDS_SEPARATOR
@@ -59,3 +59,8 @@ def render_decimal_separator():
 def replace_decimal_separator(text):
     """Replace decimal separator in text depending on locale"""
     return text.replace(".", render_decimal_separator())
+
+
+def generate_thousands_separator(number_without_decimal):
+    """Generate thousands separator in number_without_decimal"""
+    return "{:,}".format(number_without_decimal).replace(",", THOUSANDS_SEPARATOR)
