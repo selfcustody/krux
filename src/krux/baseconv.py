@@ -21,9 +21,6 @@
 # THE SOFTWARE.
 from binascii import a2b_base64, b2a_base64
 
-B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
-assert len(B32CHARS) == 32
-
 B43CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:"
 assert len(B43CHARS) == 43
 
@@ -110,60 +107,3 @@ def base_encode(v, base):
         result.extend((chars[0] * n_pad).encode())
     return bytes(reversed(result))
 
-
-def base32_decode(encoded_str):
-    """Decodes a Base32 string according to RFC 4648."""
-
-    # Reverse lookup table
-    base32_index = {ch: index for index, ch in enumerate(B32CHARS)}
-
-    # Strip padding
-    encoded_str = encoded_str.rstrip("=")
-
-    # Convert Base32 characters to binary string
-    bits = ""
-    for char in encoded_str:
-        if char not in base32_index:
-            raise ValueError("Invalid Base32 character: %s" % char)
-        index = base32_index[char]
-        binary_str = ""
-        for i in range(5):
-            binary_str = str(index & 1) + binary_str
-            index >>= 1
-        bits += binary_str
-
-    # Convert binary string to bytes
-    n = len(bits) // 8 * 8  # Only take complete groups of 8 bits
-    bytes_list = []
-    for i in range(0, n, 8):
-        byte = 0
-        for j in range(8):
-            byte = (byte << 1) | int(bits[i + j])
-        bytes_list.append(byte)
-
-    return bytes(bytes_list)
-
-
-def base32_encode(data):
-    """Encodes bytes into a Base32 string according to RFC 4648."""
-
-    def byte_to_bin(byte):
-        """Convert a single byte to a binary string."""
-        return "".join(str((byte >> i) & 1) for i in range(7, -1, -1))
-
-    # Collect bits as a string of '1's and '0's
-    bits = "".join(byte_to_bin(byte) for byte in data)
-
-    # Prepare to segment bits into groups of 5
-    padding_length = (5 - len(bits) % 5) % 5
-    bits += "0" * padding_length  # Pad bits to make length a multiple of 5
-
-    # Encode bits to Base32
-    encoded = ""
-    for i in range(0, len(bits), 5):
-        index = int(bits[i : i + 5], 2)
-        encoded += B32CHARS[index]
-
-    # Calculate required padding for the encoded string
-    padding = "=" * ((8 - len(encoded) % 8) % 8)
-    return encoded + padding

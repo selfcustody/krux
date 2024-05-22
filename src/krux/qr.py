@@ -25,15 +25,17 @@ import math
 import qrcode
 from ur.ur_decoder import URDecoder
 from ur.ur import UR
+from .bbqr import (
+    BBQR_FORMATS,
+    FORMAT_BBQR,
+    FORMAT_COMPRESSED_BBQR,
+    FORMAT_HEX_BBQR,
+    parse_bbqr,
+)
 
 FORMAT_NONE = 0
 FORMAT_PMOFN = 1
 FORMAT_UR = 2
-FORMAT_BBQR = 3
-FORMAT_COMPRESSED_BBQR = 4
-FORMAT_HEX_BBQR = 5
-
-BBQR_FORMATS = [FORMAT_BBQR, FORMAT_COMPRESSED_BBQR, FORMAT_HEX_BBQR]
 
 PMOFN_PREFIX_LENGTH_1D = 6
 PMOFN_PREFIX_LENGTH_2D = 8
@@ -72,22 +74,6 @@ QR_CAPACITY = [
     792,
     858,
 ]
-
-# BBQR
-# Human names
-FILETYPE_NAMES = {
-    # PSBT and unicode text supported for now
-    "P": "PSBT",
-    # "T": "Transaction",
-    # "J": "JSON",
-    # "C": "CBOR",
-    "U": "Unicode Text",
-    # "X": "Executable",
-    # "B": "Binary",
-}
-
-# Codes for PSBT vs. TXN and so on
-KNOWN_FILETYPES = set(FILETYPE_NAMES.keys())
 
 
 class QRPartParser:
@@ -170,38 +156,11 @@ class QRPartParser:
         """Returns the combined part data"""
         if self.format == FORMAT_UR:
             return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
+
         if self.format == FORMAT_BBQR:
-            from .baseconv import base32_decode
+            from .bbqr import decode_bbqr
 
-            if self.bbqr_encoding == "H":
-                from binascii import unhexlify
-
-                return b"".join(unhexlify(part) for part in sorted(self.parts.values()))
-
-            binary_data = b""
-            for _, part in sorted(self.parts.items()):
-                padding = (8 - (len(part) % 8)) % 8
-                padded_part = part + (padding * "=")
-                binary_data += base32_decode(padded_part)
-
-            if self.bbqr_encoding == "Z":
-                try:
-                    import deflate
-
-                    stream = io.BytesIO(binary_data)
-
-                    # Decompress
-                    with deflate.DeflateIO(stream) as d:
-                        decompressed = d.read()
-                    if self.bbqr_file_type == "U":
-                        return decompressed.decode("utf-8")
-                    return decompressed
-                except Exception as e:
-                    print("Error decompressing BBQR: ", e)
-                    raise ValueError("Error decompressing BBQR")
-            if self.bbqr_file_type == "U":
-                return binary_data.decode("utf-8")
-            return binary_data
+            return decode_bbqr(self.parts, self.bbqr_encoding, self.bbqr_file_type)
 
         code_buffer = io.StringIO("")
         for _, part in sorted(self.parts.items()):
@@ -359,53 +318,6 @@ def parse_pmofn_qr_part(data):
     part_index = int(data[1:of_index])
     part_total = int(data[of_index + 2 : space_index])
     return data[space_index + 1 :], part_index, part_total
-
-
-def parse_bbqr(data):
-    """
-    Parses the QR as a BBQR part, extracting the part's content,
-    encoding, file format, index, and total
-    """
-    try:
-        encoding = data[2]
-        if encoding not in "H2Z":
-            raise ValueError("Invalid encoding")
-        file_type = data[3]
-        if file_type not in KNOWN_FILETYPES:
-            raise ValueError("Invalid file type")
-        part_total = int(data[4:6], 36)
-        part_index = int(data[6:8], 36)
-        if part_index >= part_total:
-            raise ValueError("Invalid part index")
-    except:
-        raise ValueError("Invalid BBQR format")
-    return data[8:], part_index, part_total, encoding, file_type
-
-
-def encode_bbqr(data, qr_format=FORMAT_BBQR):
-    """Encodes the given data as BBQR, returning the encoded data and format"""
-
-    if qr_format == FORMAT_HEX_BBQR:
-        from binascii import hexlify
-
-        return hexlify(data).decode(), FORMAT_HEX_BBQR
-
-    import deflate
-    from io import BytesIO
-    from .baseconv import base32_encode
-
-    stream = BytesIO()
-    with deflate.DeflateIO(stream) as d:
-        d.write(data)
-    cmp = stream.getvalue()
-    if len(cmp) >= len(data):
-        qr_format = FORMAT_BBQR
-    else:
-        qr_format = FORMAT_COMPRESSED_BBQR
-        data = cmp
-    data = data.encode("utf-8") if isinstance(data, str) else data
-    data = base32_encode(data).rstrip("=")
-    return data, qr_format
 
 
 def detect_format(data):

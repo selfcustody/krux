@@ -264,7 +264,7 @@ class Page:
         self.ctx.display.to_portrait()
         return (code, qr_format)
 
-    def display_qr_codes(self, data, qr_format, title="", file_type="P"):
+    def display_qr_codes(self, data, qr_format, title="", file_type=None):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
