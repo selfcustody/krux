@@ -130,7 +130,7 @@ class QRPartParser:
             self.total = total
         elif self.format == FORMAT_UR:
             self.decoder.receive_part(data)
-        elif self.format == FORMAT_BBQR:
+        elif self.format in BBQR_FORMATS:
             part, index, total, encoding, file_type = parse_bbqr(data)
             self.parts[index] = part
             self.total = total
@@ -157,7 +157,7 @@ class QRPartParser:
         if self.format == FORMAT_UR:
             return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
 
-        if self.format == FORMAT_BBQR:
+        if self.format in BBQR_FORMATS:
             from .bbqr import decode_bbqr
 
             return decode_bbqr(self.parts, self.bbqr_encoding, self.bbqr_file_type)
@@ -329,7 +329,13 @@ def detect_format(data):
         elif data.lower().startswith("ur:"):
             qr_format = FORMAT_UR
         elif data.startswith("B$"):
-            qr_format = FORMAT_BBQR
+            if data[3] in "PU":
+                if data[2] == "2":
+                    qr_format = FORMAT_BBQR
+                elif data[2] == "Z":
+                    qr_format = FORMAT_COMPRESSED_BBQR
+                elif data[2] == "H":
+                    qr_format = FORMAT_HEX_BBQR
 
     except:
         pass
