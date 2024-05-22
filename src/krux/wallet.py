@@ -171,6 +171,7 @@ def parse_wallet(wallet_data):
     If the descriptor cannot be derived, an exception is raised.
     """
     # pylint: disable=R0912
+    # pylint: disable=R0915
 
     import urtypes
 
@@ -277,8 +278,21 @@ def parse_wallet(wallet_data):
                         version = v["xpub"]
                         break
                 xpub = pubkey.key.to_base58(version=version)
-                # Assuming Native Segwit
-                descriptor = Descriptor.from_string("wpkh(%s)" % xpub)
+                # assume native-segwit unless purpose informs otherwise
+                fmt = "wpkh({})"
+                if pubkey.origin:
+                    purpose = str(pubkey.origin).split("/")[1]
+                    if purpose == "44h":
+                        fmt = "pkh([%s]{})" % pubkey.origin
+                    elif purpose == "49h":
+                        fmt = "sh(wpkh([%s]{}))" % pubkey.origin
+                    elif purpose == "84h":
+                        fmt = "wpkh([%s]{})" % pubkey.origin
+                    elif purpose == "86h":
+                        fmt = "tr([%s]{})" % pubkey.origin
+                    print(fmt)
+                descriptor = Descriptor.from_string(fmt.format(xpub))
+                print(descriptor)
                 return descriptor, None
         except:
             pass
