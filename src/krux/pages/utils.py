@@ -50,7 +50,7 @@ class Utils(Page):
             print_page = PrintPage(self.ctx)
             print_page.print_qr(data, qr_format, title, width, is_qr)
 
-    def load_file(self, file_ext="", prompt=True):
+    def load_file(self, file_ext="", prompt=True, only_get_filename=False):
         """Load a file from SD card"""
         if self.has_sd_card():
             with SDHandler() as sd:
@@ -67,6 +67,8 @@ class Utils(Page):
                         filename = file_manager.display_file(filename)
 
                         if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
+                            if only_get_filename:
+                                return filename, None
                             return filename, sd.read_binary(filename)
         return "", None
 

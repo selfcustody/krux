@@ -106,4 +106,3 @@ def base_encode(v, base):
     if n_pad > 0:
         result.extend((chars[0] * n_pad).encode())
     return bytes(reversed(result))
-

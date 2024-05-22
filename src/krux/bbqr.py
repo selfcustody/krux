@@ -48,6 +48,7 @@ BBQR_FORMATS = [FORMAT_BBQR, FORMAT_COMPRESSED_BBQR, FORMAT_HEX_BBQR]
 B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 assert len(B32CHARS) == 32
 
+
 def parse_bbqr(data):
     """
     Parses the QR as a BBQR part, extracting the part's content,
@@ -126,7 +127,9 @@ def encode_bbqr(data, qr_format=FORMAT_BBQR):
     data = base32_encode(data).rstrip("=")
     return data, qr_format
 
+
 # Base 32 encoding/decoding, used in BBQR only
+
 
 def base32_decode(encoded_str):
     """Decodes a Base32 string according to RFC 4648."""

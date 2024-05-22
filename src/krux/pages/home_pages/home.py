@@ -222,8 +222,10 @@ class Home(Page):
         from ...sd_card import PSBT_FILE_EXTENSION
 
         utils = Utils(self.ctx)
-        psbt_filename, data = utils.load_file(PSBT_FILE_EXTENSION, prompt=False)
-        return (data, FORMAT_NONE, psbt_filename)
+        psbt_filename, _ = utils.load_file(
+            PSBT_FILE_EXTENSION, prompt=False, only_get_filename=True
+        )
+        return (None, FORMAT_NONE, psbt_filename)
 
     def _sign_menu(self):
         sign_menu = Menu(
@@ -262,7 +264,7 @@ class Home(Page):
         # Load a PSBT
         data, qr_format, psbt_filename = self.load_psbt()
 
-        if data is None:
+        if data is None and psbt_filename == "":
             # Both the camera and the file on SD card failed!
             self.flash_error(t("Failed to load PSBT"))
             return MENU_CONTINUE
@@ -275,7 +277,7 @@ class Home(Page):
         from ...psbt import PSBTSigner
 
         # Warns in case of path mismatch
-        signer = PSBTSigner(self.ctx.wallet, data, qr_format)
+        signer = PSBTSigner(self.ctx.wallet, data, qr_format, psbt_filename)
         path_mismatch = signer.path_mismatch()
         if path_mismatch:
             self.ctx.display.clear()

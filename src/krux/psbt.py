@@ -41,13 +41,24 @@ SPEND = 2
 class PSBTSigner:
     """Responsible for validating and signing PSBTs"""
 
-    def __init__(self, wallet, psbt_data, qr_format):
+    def __init__(self, wallet, psbt_data, qr_format, psbt_filename=None):
         self.wallet = wallet
         self.base_encoding = None
         self.ur_type = None
         self.qr_format = qr_format
         # Parse the PSBT
-        if isinstance(psbt_data, UR):
+        if psbt_filename:
+            gc.collect()
+            from .sd_card import SD_PATH
+
+            try:
+                file_path = "/%s/%s" % (SD_PATH, psbt_filename)
+                with open(file_path, "rb") as file:
+                    self.psbt = PSBT.read_from(file, compress=1)
+                self.base_encoding = 64  # In case it is exported as QR code
+            except Exception as e:
+                raise ValueError("Error loading PSBT file: %s" % e)
+        elif isinstance(psbt_data, UR):
             try:
                 self.psbt = PSBT.parse(
                     urtypes.crypto.PSBT.from_cbor(psbt_data.cbor).data
