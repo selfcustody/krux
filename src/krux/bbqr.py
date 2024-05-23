@@ -45,6 +45,8 @@ FORMAT_HEX_BBQR = 5
 
 BBQR_FORMATS = [FORMAT_BBQR, FORMAT_COMPRESSED_BBQR, FORMAT_HEX_BBQR]
 
+BBQR_ALWAYS_COMPRESS_THRESHOLD = 5000  # bytes
+
 B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 assert len(B32CHARS) == 32
 
@@ -70,6 +72,32 @@ def parse_bbqr(data):
     return data[8:], part_index, part_total, encoding, file_type
 
 
+def deflate_compress(data):
+    """Compresses the given data using deflate module"""
+    try:
+        import deflate
+        from io import BytesIO
+
+        stream = BytesIO()
+        with deflate.DeflateIO(stream) as d:
+            d.write(data)
+        return stream.getvalue()
+    except:
+        raise ValueError("Error decompressing BBQR")
+
+
+def deflate_decompress(data):
+    """Decompresses the given data using deflate module"""
+    try:
+        import deflate
+        from io import BytesIO
+
+        with deflate.DeflateIO(BytesIO(data)) as d:
+            return d.read()
+    except:
+        raise ValueError("Error decompressing BBQR")
+
+
 def decode_bbqr(parts, encoding, file_type):
     """Decodes the given data as BBQR, returning the decoded data"""
 
@@ -82,22 +110,12 @@ def decode_bbqr(parts, encoding, file_type):
     for _, part in sorted(parts.items()):
         padding = (8 - (len(part) % 8)) % 8
         padded_part = part + (padding * "=")
-        binary_data += base32_decode(padded_part)
+        binary_data += base32_decode_stream(padded_part)
 
     if encoding == "Z":
-        try:
-            import deflate
-            from io import BytesIO
-
-            # Decompress
-            with deflate.DeflateIO(BytesIO(binary_data)) as d:
-                decompressed = d.read()
-            if file_type == "U":
-                return decompressed.decode("utf-8")
-            return decompressed
-        except Exception as e:
-            print("Error decompressing BBQR: ", e)
-            raise ValueError("Error decompressing BBQR")
+        if file_type == "U":
+            return deflate_decompress(binary_data).decode("utf-8")
+        return deflate_decompress(binary_data)
     if file_type == "U":
         return binary_data.decode("utf-8")
     return binary_data
@@ -105,85 +123,86 @@ def decode_bbqr(parts, encoding, file_type):
 
 def encode_bbqr(data, qr_format=FORMAT_BBQR):
     """Encodes the given data as BBQR, returning the encoded data and format"""
+    import gc
 
     if qr_format == FORMAT_HEX_BBQR:
         from binascii import hexlify
 
         return hexlify(data).decode(), FORMAT_HEX_BBQR
 
-    import deflate
-    from io import BytesIO
-
-    stream = BytesIO()
-    with deflate.DeflateIO(stream) as d:
-        d.write(data)
-    cmp = stream.getvalue()
-    if len(cmp) >= len(data):
-        qr_format = FORMAT_BBQR
-    else:
+    if len(data) > BBQR_ALWAYS_COMPRESS_THRESHOLD:
+        data = deflate_compress(data)
         qr_format = FORMAT_COMPRESSED_BBQR
-        data = cmp
+    else:
+        # Check if compression is beneficial
+        cmp = deflate_compress(data)
+        if len(cmp) >= len(data):
+            qr_format = FORMAT_BBQR
+        else:
+            qr_format = FORMAT_COMPRESSED_BBQR
+            data = cmp
+
+    gc.collect()
     data = data.encode("utf-8") if isinstance(data, str) else data
-    data = base32_encode(data).rstrip("=")
+    data = base32_encode_stream(data).rstrip("=")
     return data, qr_format
 
 
 # Base 32 encoding/decoding, used in BBQR only
 
 
-def base32_decode(encoded_str):
-    """Decodes a Base32 string according to RFC 4648."""
-
-    # Reverse lookup table
+def base32_decode_stream(encoded_str):
+    """Decodes a Base32 string"""
     base32_index = {ch: index for index, ch in enumerate(B32CHARS)}
 
     # Strip padding
     encoded_str = encoded_str.rstrip("=")
 
-    # Convert Base32 characters to binary string
-    bits = ""
+    buffer = 0
+    bits_left = 0
+    decoded_bytes = bytearray()
+
     for char in encoded_str:
         if char not in base32_index:
             raise ValueError("Invalid Base32 character: %s" % char)
         index = base32_index[char]
-        binary_str = ""
-        for i in range(5):
-            binary_str = str(index & 1) + binary_str
-            index >>= 1
-        bits += binary_str
+        buffer = (buffer << 5) | index
+        bits_left += 5
 
-    # Convert binary string to bytes
-    n = len(bits) // 8 * 8  # Only take complete groups of 8 bits
-    bytes_list = []
-    for i in range(0, n, 8):
-        byte = 0
-        for j in range(8):
-            byte = (byte << 1) | int(bits[i + j])
-        bytes_list.append(byte)
+        while bits_left >= 8:
+            bits_left -= 8
+            decoded_bytes.append((buffer >> bits_left) & 0xFF)
+            buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
 
-    return bytes(bytes_list)
+    # Process any remaining bits
+    if bits_left > 0:
+        remaining_byte = (buffer << (8 - bits_left)) & 0xFF
+        decoded_bytes.append(remaining_byte)
+
+    return bytes(decoded_bytes)
 
 
-def base32_encode(data):
-    """Encodes bytes into a Base32 string according to RFC 4648."""
+def base32_encode_stream(data):
+    """A streaming base32 encoder"""
+    encoded = []
+    buffer = 0
+    bits_left = 0
 
-    def byte_to_bin(byte):
-        """Convert a single byte to a binary string."""
-        return "".join(str((byte >> i) & 1) for i in range(7, -1, -1))
+    for byte in data:
+        buffer = (buffer << 8) | byte
+        bits_left += 8
 
-    # Collect bits as a string of '1's and '0's
-    bits = "".join(byte_to_bin(byte) for byte in data)
+        while bits_left >= 5:
+            bits_left -= 5
+            encoded.append(B32CHARS[(buffer >> bits_left) & 0x1F])
+            buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
 
-    # Prepare to segment bits into groups of 5
-    padding_length = (5 - len(bits) % 5) % 5
-    bits += "0" * padding_length  # Pad bits to make length a multiple of 5
+    if bits_left > 0:
+        buffer <<= 5 - bits_left
+        encoded.append(B32CHARS[buffer & 0x1F])
 
-    # Encode bits to Base32
-    encoded = ""
-    for i in range(0, len(bits), 5):
-        index = int(bits[i : i + 5], 2)
-        encoded += B32CHARS[index]
+    while len(encoded) % 8 != 0:
+        encoded.append("=")  # Add padding
 
-    # Calculate required padding for the encoded string
-    padding = "=" * ((8 - len(encoded) % 8) % 8)
-    return encoded + padding
+    print("Finished processing")
+    return "".join(encoded)
