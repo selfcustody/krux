@@ -72,7 +72,7 @@ class Wallet:
                 for k, v in NETWORKS.items():
                     if version in v.values():
                         self._network = k
-                    break
+                        break
         return self._network
 
     def is_multisig(self):
