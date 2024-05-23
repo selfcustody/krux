@@ -20,7 +20,7 @@
 # THE SOFTWARE.
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
-from embit.descriptor.arguments import Key
+from embit.descriptor.arguments import Key, KeyOrigin
 from embit.networks import NETWORKS
 from .krux_settings import t
 from .key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
@@ -171,7 +171,6 @@ def parse_wallet(wallet_data):
     If the descriptor cannot be derived, an exception is raised.
     """
     # pylint: disable=R0912
-    # pylint: disable=R0915
 
     import urtypes
 
@@ -272,25 +271,24 @@ def parse_wallet(wallet_data):
             # If that fails, try to parse as an xpub as a last resort
             pubkey = Key.from_string(wallet_data.strip())
             if pubkey.is_extended:
-                version = pubkey.key.version
-                for v in NETWORKS.values():
-                    if version in v.values():
-                        version = v["xpub"]
-                        break
-                xpub = pubkey.key.to_base58(version=version)
-                # assume native-segwit unless purpose informs otherwise
-                fmt = "wpkh({})"
+                network, versiontype = version_to_network_versiontype(
+                    pubkey.key.version
+                )
+
+                xpub = pubkey.key.to_base58(version=NETWORKS[network]["xpub"])
+
+                if pubkey.origin is None:
+                    # assume Key.origin if possible
+                    derivation = versiontype_network_child_to_derivation(
+                        versiontype, network, pubkey.key.child_number
+                    )
+                    if derivation:
+                        pubkey.origin = KeyOrigin(b"\x00" * 4, derivation)
+
+                fmt = None
                 if pubkey.origin:
-                    purpose = str(pubkey.origin).split("/")[1]
-                    if purpose == "44h":
-                        fmt = "pkh([%s]{})" % pubkey.origin
-                    elif purpose == "49h":
-                        fmt = "sh(wpkh([%s]{}))" % pubkey.origin
-                    elif purpose == "84h":
-                        fmt = "wpkh([%s]{})" % pubkey.origin
-                    elif purpose == "86h":
-                        fmt = "tr([%s]{})" % pubkey.origin
-                    print(fmt)
+                    fmt = key_origin_to_script_wrapper(pubkey.origin)
+
                 descriptor = Descriptor.from_string(fmt.format(xpub))
                 print(descriptor)
                 return descriptor, None
@@ -322,3 +320,57 @@ def parse_address(address_data):
         raise ValueError("invalid address")
 
     return addr
+
+
+def version_to_network_versiontype(hdkey_version):
+    """returns embit.networks.NETWORKS[network][versiontype] keys
+    based on HDKey's version bytes"""
+    network, versiontype = None, None
+    for netname, versiontypes in NETWORKS.items():
+        if hdkey_version in versiontypes.values():
+            network = netname
+            versiontype = [k for k, v in versiontypes.items() if v == hdkey_version][0]
+            break
+    return network, versiontype
+
+
+def versiontype_network_child_to_derivation(versiontype, network, child):
+    """returns assumed derivation list for supported slip32 bips
+    based on embit.networks.NETWORKS keys for versiontype, network,
+    and the child_number (used as account for single-sig)"""
+
+    derivation, network_node = None, None
+
+    if network == "main":
+        network_node = 0 + 2**31
+    elif network in ("test", "regtest", "signet"):
+        network_node = 1 + 2**31
+
+    if network_node and child >= 2**31:
+        if versiontype == "xpub":
+            derivation = [44 + 2**31, network_node, child]
+        elif versiontype == "ypub":
+            derivation = [49 + 2**31, network_node, child]
+        elif versiontype == "zpub":
+            derivation = [84 + 2**31, network_node, child]
+        # todo: consider rebuilding multisig descriptors from xpubs?
+        # elif versiontype in ("Ypub", "Zpub"):
+        #    derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+
+    return derivation
+
+
+def key_origin_to_script_wrapper(key_origin):
+    """returns format_str for wrapping xpub into wallet descriptor,
+    based on embit.descriptor.arguments.KeyOrigin"""
+    format_str = None
+    purpose = key_origin.derivation[0]
+    if purpose == 44 + 2**31:
+        format_str = "pkh([%s]{})" % key_origin
+    elif purpose == 49 + 2**31:
+        format_str = "sh(wpkh([%s]{}))" % key_origin
+    elif purpose == 84 + 2**31:
+        format_str = "wpkh([%s]{})" % key_origin
+    elif purpose == 86 + 2**31:
+        format_str = "tr([%s]{})" % key_origin
+    return format_str
