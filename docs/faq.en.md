@@ -3,12 +3,13 @@
 If the buttons on keypad input screens appear to be in the wrong order, this might be due to inverted X coordinates. To correct this:
 
 1. Go to Settings > Hardware > Display.
-2. Change the value of Flipped X Coordinates.
+2. Change the value of `Flipped X Coordinates`.
+
 ### Incorrect Colors
 If the colors displayed on the interface or camera preview are incorrect, you can try the following options:
 
 #### Inverted Colors
-If, for example, the background color is white when it should be black, go to Settings > Hardware > Display and toggle  `Inverted Colors` .
+If, for example, the background color is white when it should be black, go to *Settings > Hardware > Display and toggle*  `Inverted Colors` .
 
 #### BGR Colors
 If, for example, you are using the Orange theme, and instead of orange the colors appear bluish, toggle `BGR Colors` in the display settings.
@@ -16,13 +17,13 @@ If, for example, you are using the Orange theme, and instead of orange the color
 #### LCD Type
 **Warning!**  Only try changing this setting if you failed to fix colors with previous ones.
 
-If adjusting `BGR Colors` and `Inverted Colors` doesn't fix the color issue, try changing the LCD Type:
+If adjusting `BGR Colors` and `Inverted Colors` doesn't fix the color issue, try changing the `LCD Type`:
 
 1. After changing this setting, you will be warned that the device will reboot automatically if this change does not resolve the issue (if it fails, the screen will turn black, and you'll not see anything).
 2. After proceeding with the warning, if you see a message prompting you to press the `PREVIOUS` (UP) button, it means that the new setting worked. Follow the instructions and press UP.
 3. If you notice menu options but the colors are still wrong, try again with different combinations of `Inverted Colors` and `BGR Colors`. This time, it is likely you will find a combination that correctly displays the colors of themes and the camera feed.
 
-If, after the warning in step 1, the screen turns black and you don't see anything, don't panic or press any buttons. Just wait 5 seconds, and the device will automatically reboot with the previous display settings. This means you should keep the default LCD Type setting and maybe try again with `Inverted Colors` and `BGR Colors`.
+If, after the warning in step 1, the screen turns black and you don't see anything, don't panic or press any buttons. Just wait 5 seconds, and the device will automatically reboot with the previous display settings. This means you should keep the default `LCD Type` setting and maybe try again with `Inverted Colors` and `BGR Colors`.
 
 If you accidentally pressed `PREVIOUS` (UP) and saved the wrong setting, you will have to perform a wipe to remove all stored settings to be able to see the screen working again. On Linux, go to the folder where you downloaded the Krux firmware and use Ktool to fully wipe your device:
 
@@ -56,7 +57,7 @@ Your device should charge and turn on when connected to a USB-A port, even if it
 - If the device is already turned on and connected to a USB-C port, it may not charge or be recognized by the computer. In this case, turn off the device to initiate recognition and charging. Once turned off and reconnected, the device should restart, be recognized by the computer, and charging should be triggered by USB-C hosts.
 If your device is not charging or being recognized as expected, try using a different USB port or a different computer to determine if the issue is with the device or the host's USB port.
 
-## Why isn't my M5stickV device being recognized and charged when connected to the computer's USB-C?
+## Why isn't my M5StickV device being recognized and charged when connected to the computer's USB-C?
 ----8<----
 m5stickv-usb-c.en.txt
 ----8<----
@@ -70,7 +71,7 @@ Make sure your device is being detected and serial ports are being mounted by ru
 ```bash
 ls /dev/ttyUSB*
 ```
-Expect one port to be listed for devices like M5stickV and Maix Dock `/dev/ttyUSB0`, and two ports for Maix Amigo and Maix Bit `/dev/ttyUSB0  /dev/ttyUSB1`.
+Expect one port to be listed for devices like M5StickV and Maix Dock `/dev/ttyUSB0`, and two ports for Maix Amigo and Maix Bit `/dev/ttyUSB0  /dev/ttyUSB1`.
 
 If you don't see them, your OS may not be loading the correct drivers to create the serial ports to connect to. Ubuntu has a known bug where the `brltty` driver "kidnaps" serial devices. You can solve this problem by removing it:
 ```bash
@@ -98,35 +99,37 @@ The level of detail that you see is what Krux sees. If the QR code shown on the 
 
 If you have adjusted the lens already, the device may be too far away or too close to the code to read it. Start by holding the device as close to the QR code as possible and pulling away slowly until all or most of the QR code is viewable within the screen. If the code on the screen looks crisp, Krux should read it quickly and give you immediate feedback.
 
-If you are in a dark environment, you can hold down the `ENTER` button of the M5StickV or Maix Amigo to turn on their LED light to potentially increase visibility. M5stickV and Amigo also has an anti-glare mode to better capture images from high brightness screens or with incident light, to enable/disable the anti-glare just press the PAGE button while scanning.
+----8<----
+camera-scan-tips.en.txt
+----8<----
 
 ## Why am I getting an error when I try to scan a QR code?
 If Krux is recognizing that it sees a QR code but is displaying an error message after reading it, the likely reason is that the QR code is not in a format that Krux works with. We have listed the supported formats below:
 
 For BIP-39 mnemonics:
 
-1. BIP-39 Plaintext (Used by Krux and [https://iancoleman.io/bip39/](https://iancoleman.io/bip39/))
-2. SeedSigner [SeedQR and CompactSeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md) Formats
-3. [UR Type `crypto-bip39`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md)
-4. Encrypted QR Code (Format created by Krux, [more info here](getting-started/features/encrypted-mnemonics.md))
+- BIP-39 Plaintext (Used by Krux and [https://iancoleman.io/bip39/](https://iancoleman.io/bip39/))
+- SeedSigner [SeedQR and CompactSeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md) Formats
+- [UR Type `crypto-bip39`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md)
+- Encrypted QR Code (Format created by Krux, [more info here](getting-started/features/encrypted-mnemonics.md))
 
 For Wallet output descriptor:
 
-1. JSON with at least a `descriptor` key containing an output descriptor string
-2. Key-value INI files with at least `Format`, `Policy`, and `Derivation` keys
-3. [UR Type `crypto-output`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-010-output-desc.md)
+- JSON with at least a `descriptor` key containing an output descriptor string
+- Key-value INI files with at least `Format`, `Policy`, and `Derivation` keys
+- [UR Type `crypto-output`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-010-output-desc.md)
 
 For PSBT (Partially Signed Bitcoin Transactions):
 
-1. Base43, Base58, and Base64-encoded bytes
-2. Raw Bytes
-3. [UR Type `crypto-psbt`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md)
+- Base43, Base58, and Base64-encoded bytes
+- Raw Bytes
+- [UR Type `crypto-psbt`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md)
 
 Additionally, Krux recognizes animated QR codes that use either the plaintext `pMofN` (the Specter QR format) or binary [`UR`](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md) encodings.
 
 ## Why can't my computer read the QR code that Krux displays?
 If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays.
-You can toggle brightness of QR codes from public keys and PSBTs by pressing PAGE button.
+You can toggle brightness of QR codes from public keys and PSBTs by pressing `PAGE` button.
 In the future, more work will be done to support displaying lower density QR codes. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes. You can also save the PSBT on a microSD card for Krux to sign and then save the signed transaction to the microSD card to transfer the file to the computer or phone.
 
 ## Why isn't Krux detecting my microSD card or presenting an error?

@@ -184,8 +184,7 @@ class Display:
             # 100 is 0% duty cycle (off, not used here)
             pwm_value = 5 - int(brightness)
             pwm_value *= 20
-
-        self.blk_ctrl.duty(pwm_value)
+            self.blk_ctrl.duty(pwm_value)
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
