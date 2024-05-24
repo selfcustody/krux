@@ -7,7 +7,7 @@ Here are some useful tools that are available as soon as Krux starts! These are 
 <img src="../../../img/maixpy_m5stickv/check-sd-card-125.png" align="right">
 <img src="../../../img/maixpy_amigo/check-sd-card-150.png" align="right">
 
-You can check if a SD card can be detected and read by your device and explore its content.
+You can check if a SD card can be detected and read by your device and explore its content. If there are too many files to fit on one screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens if your device has a touchscreen.
 
 <div style="clear: both"></div>
 

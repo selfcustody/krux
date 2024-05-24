@@ -36,7 +36,8 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from .file_manager import SD_ROOT_PATH, THOUSANDS_SEPARATOR
+from .file_manager import SD_ROOT_PATH
+from ..format import generate_thousands_separator
 
 
 class Tools(Page):
@@ -75,17 +76,18 @@ class Tools(Page):
                     t("SD card")
                     + "\n\n"
                     + t("Size:")
-                    + " {:,}".format(sd_total_MB).replace(",", THOUSANDS_SEPARATOR)
+                    + " "
+                    + generate_thousands_separator(sd_total_MB)
                     + " MB"
                     + "\n\n"
                     + t("Used:")
-                    + " {:,}".format(sd_total_MB - sd_free_MB).replace(
-                        ",", THOUSANDS_SEPARATOR
-                    )
+                    + " "
+                    + generate_thousands_separator(sd_total_MB - sd_free_MB)
                     + " MB"
                     + "\n\n"
                     + t("Free:")
-                    + " {:,}".format(sd_free_MB).replace(",", THOUSANDS_SEPARATOR)
+                    + " "
+                    + generate_thousands_separator(sd_free_MB)
                     + " MB"
                 )
                 if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
