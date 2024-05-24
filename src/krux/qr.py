@@ -296,14 +296,17 @@ def find_min_num_parts(data, max_width, qr_format):
         part_size = max(part_size, UR_MIN_FRAGMENT_LENGTH)
     elif qr_format in BBQR_FORMATS:
         data_length = len(data)
-        part_size = qr_capacity - BBQR_PREFIX_LENGTH
-        num_parts = (data_length + part_size - 1) // part_size
+        max_part_size = qr_capacity - BBQR_PREFIX_LENGTH
 
-        # Ensure part_size is a multiple of 8
+        # Calculate the number of parts if each part had the maximum size
+        num_parts = (data_length + max_part_size - 1) // max_part_size
+
+        # Calculate the optimal part size to make it a multiple of 8
         part_size = (data_length + num_parts - 1) // num_parts
-        part_size -= part_size % 8  # Adjust to the nearest lower multiple of 8
+        # Adjust to the nearest higher multiple of 8
+        part_size += 7 - (part_size - 1) % 8
 
-        # Recalculate num_parts with the adjusted part_size
+        # Recalculate the number of parts with the adjusted part_size
         num_parts = (data_length + part_size - 1) // part_size
 
     else:
