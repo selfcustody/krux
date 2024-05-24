@@ -204,5 +204,4 @@ def base32_encode_stream(data):
     while len(encoded) % 8 != 0:
         encoded.append("=")  # Add padding
 
-    print("Finished processing")
     return "".join(encoded)

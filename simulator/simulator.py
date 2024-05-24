@@ -99,6 +99,7 @@ from kruxsim.mocks import lcd
 from kruxsim.mocks import machine
 from kruxsim.mocks import image
 from kruxsim.mocks import pmu
+from kruxsim.mocks import deflate
 
 if args.printer:
     machine.simulate_printer()
