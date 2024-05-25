@@ -175,7 +175,7 @@ def base32_decode_stream(encoded_str):
             buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
 
     # Process any remaining bits
-    if bits_left > 0:
+    if bits_left >= 5:
         remaining_byte = (buffer << (8 - bits_left)) & 0xFF
         decoded_bytes.append(remaining_byte)
 
