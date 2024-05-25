@@ -73,7 +73,7 @@ Below is a list of some distributors where you can find this device:
 ### Yahboom k210 module
 <img src="../img/maixpy_yahboom/logo-156.png" align="right" width="116">
 
-Below is a list of some distributors where you can find this device:
+It comes with a compatible 32G card, an USB card reader, one PH2.0 4Pin male-to-male connector and one PH2.0 female adapter (to connect to a [thermal printer](#optional-ttl-serial-thermal-printer)). Below is a list of some distributors where you can find this device:
 
 - [AliExpress](https://www.aliexpress.com/w/wholesale-yahboom-k210-module.html)
 - [Amazon](https://www.amazon.com/s?k=Yahboom+k210+module)
@@ -117,19 +117,19 @@ Below is a list of some distributors where you can find these devices:
 <div style="clear: both"></div>
 
 ## Other Parts
-### USB-C Charge Cable
-This will be included with the M5StickV and Maix Amigo that you purchase from one of the distributors above. It will be necessary to power and charge the device and to initially flash the firmware.
+### USB-C or Micro USB Charge Cable
+This will come with the device. It will be necessary to power, charge the device (if it has battery) and to initially flash the firmware.
 
 ### (Optional) MicroSD Card
 ----8<----
 sd-card-info-faq.en.txt
 ----8<----
-The size of the SD card isn't important; anything over a few megabytes will be plenty.
+Yahboom will come with a compatible 32G card. The size of the SD card isn't important; anything over a few megabytes will be plenty.
 
 ### (Optional) TTL Serial Thermal Printer
 Krux has the capability to print all QR codes it generates, including those for mnemonics, xpubs, wallet backups, and signed PSBTs, using a locally-connected thermal printer via its serial port.
 
-Many TTL serial thermal printers may be compatible, but currently, the [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) has the best support. The [Adafruit printer starter pack](https://www.adafruit.com/product/600) can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in the [Krux settings](./getting-started/settings.md/#thermal), set the Tx pin and baud rate value to either 19200 or 9600, as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will need to connect the device's Tx to the printer's Rx and ground. The printer requires a dedicated power supply, typically with an output of 5 to 9V and capable of supplying at least 2A. For more information, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
+Many TTL serial thermal printers may be compatible, but currently, the [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) has the best support. The [Adafruit printer starter pack](https://www.adafruit.com/product/600) can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in the [Krux settings](./getting-started/settings.md/#thermal), set the Tx pin and baud rate value to either 19200 or 9600 (depends on the printer), as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will need to connect the device's Tx to the printer's Rx and device's ground to the printer's ground, do not connect any other pins because a wrong connection may damage your device. The printer requires a dedicated power supply, typically with an output of 5 to 9V and capable of supplying at least 2A. For more information, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
 
-### (Optional) Conversion Cable for Thermal Printer
-To connect the printer to the device, you will need a [conversion cable](https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs) with a 4-pin female Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). For a more reliable connection, it is recommended to cut and solder the wires of your custom cables instead of using jumpers.
+#### (Optional) Conversion Cable for Thermal Printer
+To connect the printer to M5StickV or Amigo, you will need a [grove conversion cable](https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs) with a 4-pin male Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). Check your device and printer model connection first, Yahboom comes with PH2.0 4Pin female connector; Dock and Bit doesn't have a connector. For a more reliable connection, it is recommended to cut and solder the wires of your custom cables instead of using jumpers.
