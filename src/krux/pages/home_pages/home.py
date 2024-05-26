@@ -386,22 +386,24 @@ class Home(Page):
             return MENU_CONTINUE
 
         # index == 1: Sign to SD card
-        serialized_signed_psbt = signer.psbt.serialize()
-
-        # memory management
-        del signer
-        gc.collect()
         from ..file_operations import SaveFile
 
         save_page = SaveFile(self.ctx)
-        save_page.save_file(
-            serialized_signed_psbt,
-            "QRCode",
+        psbt_filename, filename_undefined = save_page.set_filename(
             psbt_filename,
-            title + ":",
-            PSBT_FILE_EXTENSION,
+            "QRCode",
             SIGNED_FILE_SUFFIX,
+            PSBT_FILE_EXTENSION,
         )
+        del save_page
+        gc.collect()
+
+        if not filename_undefined:
+            with open("/sd/" + psbt_filename, "wb") as f:
+                # Write PSBT data directly to the file
+                signer.psbt.write_to(f)
+                self.flash_text(t("Saved to SD card") + ":\n%s" % psbt_filename)
+
         return MENU_CONTINUE
 
     def sign_message(self):
