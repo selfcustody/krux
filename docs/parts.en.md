@@ -127,6 +127,10 @@ sd-card-info-faq.en.txt
 Yahboom will come with a compatible 32G card. The size of the SD card isn't important; anything over a few megabytes will be plenty.
 
 ### (Optional) TTL Serial Thermal Printer
+----8<----
+warning-printer.en.txt
+----8<----
+
 Krux has the capability to print all QR codes it generates, including those for mnemonics, xpubs, wallet backups, and signed PSBTs, using a locally-connected thermal printer via its serial port.
 
 Many TTL serial thermal printers may be compatible, but currently, the [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) has the best support. The [Adafruit printer starter pack](https://www.adafruit.com/product/600) can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in the [Krux settings](./getting-started/settings.md/#thermal), set the Tx pin and baud rate value to either 19200 or 9600 (depends on the printer), as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will need to connect the device's Tx to the printer's Rx and device's ground to the printer's ground, do not connect any other pins because a wrong connection may damage your device. The printer requires a dedicated power supply, typically with an output of 5 to 9V and capable of supplying at least 2A. For more information, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
