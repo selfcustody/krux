@@ -52,7 +52,7 @@ class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
     def __init__(self):
-        self.entropy = 0
+        self.entropy = 0  # used only to pick a random final word
         self.debounce_value = Settings().hardware.buttons.debounce
         self.debounce_time = 0
         self.flushed_flag = False

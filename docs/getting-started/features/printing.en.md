@@ -1,3 +1,7 @@
+----8<----
+warning-printer.en.txt
+----8<----
+
 Krux has the ability to print mnemonic backup (Words, Numbers, Tiny Seed template; but not Stackbit 1248) and any QR code (SeedQR, signed PSBT, Address, XPUB, Wallet output descriptor, ...) via a locally-connected TTL serial thermal printer. Consult the [parts list](../../parts.md/#optional-thermal-printer) page for supported printers.
 
 <img src="../../../img/maixpy_amigo/print-qr-printing-150.png">
