@@ -26,6 +26,10 @@ from .krux_settings import t
 from .key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
 
+class AssumptionWarning(Exception):
+    """An exception for assumptions that require user acceptance"""
+
+
 class Wallet:
     """Represents the wallet that the current key belongs to"""
 
@@ -87,9 +91,9 @@ class Wallet:
         """Returns a boolean indicating whether or not this wallet has been loaded"""
         return self.wallet_data is not None
 
-    def load(self, wallet_data, qr_format):
+    def load(self, wallet_data, qr_format, allow_assumptions=False):
         """Loads the wallet from the given data"""
-        descriptor, label = parse_wallet(wallet_data)
+        descriptor, label = parse_wallet(wallet_data, allow_assumptions)
 
         if self.key:
             if self.is_multisig():
@@ -164,7 +168,7 @@ def to_unambiguous_descriptor(descriptor):
     return descriptor
 
 
-def parse_wallet(wallet_data):
+def parse_wallet(wallet_data, allow_assumptions=False):
     """Exhaustively tries to parse the wallet data from a known format, returning
     a descriptor and label if possible.
 
@@ -267,32 +271,31 @@ def parse_wallet(wallet_data):
         descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
     except:
-        try:
-            # If that fails, try to parse as an xpub as a last resort
-            pubkey = Key.from_string(wallet_data.strip())
-            if pubkey.is_extended:
-                network, versiontype = version_to_network_versiontype(
-                    pubkey.key.version
+        # If that fails, try to parse as an xpub as a last resort
+        pubkey = Key.from_string(wallet_data.strip())
+        if pubkey.is_extended:
+            network, versiontype = version_to_network_versiontype(pubkey.key.version)
+
+            xpub = pubkey.key.to_base58(version=NETWORKS[network]["xpub"])
+
+            if pubkey.origin is None:
+                # assume Key.origin if possible
+                derivation = xpub_data_to_derivation(
+                    versiontype,
+                    network,
+                    pubkey.key.child_number,
+                    pubkey.key.depth,
+                    allow_assumptions=allow_assumptions,
                 )
+                if derivation:
+                    pubkey.origin = KeyOrigin(b"\x00" * 4, derivation)
 
-                xpub = pubkey.key.to_base58(version=NETWORKS[network]["xpub"])
+            fmt = None
+            if pubkey.origin:
+                fmt = key_origin_to_script_wrapper(pubkey.origin)
 
-                if pubkey.origin is None:
-                    # assume Key.origin if possible
-                    derivation = xpub_data_to_derivation(
-                        versiontype, network, pubkey.key.child_number, pubkey.key.depth
-                    )
-                    if derivation:
-                        pubkey.origin = KeyOrigin(b"\x00" * 4, derivation)
-
-                fmt = None
-                if pubkey.origin:
-                    fmt = key_origin_to_script_wrapper(pubkey.origin)
-
-                descriptor = Descriptor.from_string(fmt.format(xpub))
-                return descriptor, None
-        except:
-            pass
+            descriptor = Descriptor.from_string(fmt.format(xpub))
+            return descriptor, None
 
     raise ValueError("invalid wallet format")
 
@@ -333,15 +336,18 @@ def version_to_network_versiontype(hdkey_version):
     return network, versiontype
 
 
-def xpub_data_to_derivation(versiontype, network, child, depth):
+def xpub_data_to_derivation(
+    versiontype, network, child, depth, allow_assumptions=False
+):
     """returns assumed derivation list for supported slip32 bips
     based on embit.networks.NETWORKS keys for versiontype, network,
-    and the child_number (used as account for single-sig).  An
-    assumption of account=0 is made for multisig since there is not
-    enough information in xpub data. Depth is used as weak verification,
-    it must match the expected depth."""
+    child_number (used as account for single-sig) and depth.  Depth
+    is used as weak verification, it must match the expected depth.
+    Where unsafe assumptions could be made, AssumptionError is raised
+    unless called with allow_assumptions=True.
+    """
 
-    derivation, network_node = None, None
+    derivation, network_node, assumption_text = None, None, None
 
     if network == "main":
         network_node = 0 + 2**31
@@ -350,17 +356,27 @@ def xpub_data_to_derivation(versiontype, network, child, depth):
 
     if network_node and child >= 2**31:
         if versiontype == "xpub" and depth == 3:
-            # xpub w/o key-origin info is too vague to assume it's bip44
-            # derivation = [44 + 2**31, network_node, child]
-            pass
+            if allow_assumptions:
+                derivation = [44 + 2**31, network_node, child]
+            else:
+                assumption_text = t("Legacy - 44 (p2pkh) would be assumed")
         elif versiontype == "ypub" and depth == 3:
             derivation = [49 + 2**31, network_node, child]
         elif versiontype == "zpub" and depth == 3:
             derivation = [84 + 2**31, network_node, child]
         elif versiontype == "Ypub" and depth == 4 and child == 1 + 2**31:
-            derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+            if allow_assumptions:
+                derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+            else:
+                assumption_text = t("Account #0 would be assumed")
         elif versiontype == "Zpub" and depth == 4 and child == 2 + 2**31:
-            derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+            if allow_assumptions:
+                derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+            else:
+                assumption_text = t("Account #0 would be assumed")
+
+    if assumption_text:
+        raise AssumptionWarning(assumption_text)
 
     return derivation
 

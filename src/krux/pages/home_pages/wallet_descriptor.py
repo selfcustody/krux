@@ -95,36 +95,37 @@ class WalletDescriptor(Page):
             self.flash_error(t("Failed to load output descriptor"))
             return MENU_CONTINUE
 
-        try:
-            from ...wallet import Wallet
+        from ...wallet import Wallet, AssumptionWarning
 
-            wallet = Wallet(self.ctx.wallet.key)
-            wallet.persisted = persisted
+        wallet = Wallet(self.ctx.wallet.key)
+        wallet.persisted = persisted
+        wallet_load_exception = None
+        try:
             wallet.load(wallet_data, qr_format)
+        except AssumptionWarning as e:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(e.args[0], theme.error_color)
+            if self.prompt(t("Accept assumption?"), BOTTOM_PROMPT_LINE):
+                try:
+                    wallet.load(wallet_data, qr_format, allow_assumptions=True)
+                except Exception as e_again:
+                    wallet_load_exception = e_again
+        except Exception as e:
+            wallet_load_exception = e
+        if wallet_load_exception:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Invalid wallet:") + "\n%s" % repr(wallet_load_exception),
+                theme.error_color,
+            )
+            self.ctx.input.wait_for_button()
+
+        if wallet.is_loaded():
             self.ctx.display.clear()
             self.display_wallet(wallet, include_qr=False)
             if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                 self.ctx.wallet = wallet
                 self.flash_text(t("Wallet output descriptor loaded!"))
-
-                # BlueWallet single sig descriptor without fingerprint
-                if (
-                    self.ctx.wallet.descriptor.key
-                    and not self.ctx.wallet.descriptor.key.origin
-                ):
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(
-                        t("Warning:") + "\n" + t("Incomplete output descriptor"),
-                        theme.error_color,
-                    )
-                    self.ctx.input.wait_for_button()
-
-        except Exception as e:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Invalid wallet:") + "\n%s" % repr(e), theme.error_color
-            )
-            self.ctx.input.wait_for_button()
 
         return MENU_CONTINUE
 

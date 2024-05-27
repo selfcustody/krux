@@ -36,7 +36,13 @@ def test_wallet(mocker, m5stickv, tdata):
         # 3 Load, bad capture
         (False, tdata.SINGLESIG_12_WORD_KEY, None, None, [BUTTON_ENTER]),
         # 4 Load, bad wallet data
-        (False, tdata.SINGLESIG_12_WORD_KEY, "{}", None, [BUTTON_ENTER, BUTTON_ENTER]),
+        (
+            False,
+            tdata.SINGLESIG_12_WORD_KEY,
+            "{}",
+            None,
+            [BUTTON_ENTER, BUTTON_ENTER],
+        ),
         # 5 No print prompt
         (
             True,
