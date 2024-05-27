@@ -24,13 +24,13 @@ import board
 import gc
 from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
 from ..sd_card import SDHandler
-from ..krux_settings import t, Settings
+from ..krux_settings import t
+from ..format import generate_thousands_separator, render_decimal_separator
 
 LIST_FILE_DIGITS = 9  # len on large devices per menu item
 LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
 
 SD_ROOT_PATH = "/sd"
-THOUSANDS_SEPARATOR = " "
 
 
 class FileManager(Page):
@@ -141,28 +141,25 @@ class FileManager(Page):
         size_KB_fraction = str(int(size_KB * 100))[-2:]
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
+        format_datetime = " %s-%02d-%02d %02d:%02d"
         file = file[4:]  # remove "/sd/" prefix
-        decimal_separator = ","
-        if Settings().i18n.locale == "en-US":
-            decimal_separator = "."
 
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             file
             + "\n\n"
             + t("Size:")
-            + " {:,}".format(int(size_KB)).replace(",", THOUSANDS_SEPARATOR)
-            + decimal_separator
+            + " "
+            + generate_thousands_separator(int(size_KB))
+            + render_decimal_separator()
             + size_KB_fraction
             + " KB"
             + "\n\n"
             + t("Created:")
-            + " %s-%s-%s %s:%s"
-            % (created[0], created[1], created[2], created[3], created[4])
+            + format_datetime % created[:5]
             + "\n\n"
             + t("Modified:")
-            + " %s-%s-%s %s:%s"
-            % (modified[0], modified[1], modified[2], modified[3], modified[4])
+            + format_datetime % modified[:5]
         )
 
         return file

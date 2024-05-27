@@ -3,31 +3,37 @@
 
 ### Comparative Table
 
-| Device | M5stickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module | Maix Cube
+| Device | M5StickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module | Maix Cube
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 32-42 | US$ 45-61 | US$ 34-49 |
 | Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 |
+| Brightness control | :white_check_mark: | :x: | :x: | :x: | :x: | :white_check_mark: |
 | Device size | 48\*24\*22mm | 104\*63\*17mm | 98\*59\*18mm | 69\*84\*41mm | 57\*41\*17mm | 40\*40\*16mm |
 | Touchscreen  | :x: | Capacitive | :x: | :x: | Capacitive | :x: |
-| Camera  | OV7740 | OV7740 rear<br>GC0328 front | GC0328 | OV2640 or<br>OV5642 | OV2640 <!-- or<br>GC2145 --> | OV7740 |
+| Camera [:material-information:{ title="Anti-glare mode" }](#camera-info)  | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` or<br>`OV5642` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` |
 | Battery  | 200mAh | 520mAh | :x: | :x: | :x: | 200mAh |
 | Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | Buttons<br> [3D printed case](https://github.com/selfcustody/MaixBitCase)<br> Soldering<br>Assembly | None | None |
-| Warnings  | [:material-information:{ title="M5stickV and USB-C" }](#m5stickv-info) | [:material-information:{ title="Maix Amigo screens" }](#amigo-info) | [:material-information:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB | 3-Way button |
+| Warnings  | [:material-numeric-1-circle:{ title="M5StickV and USB-C" }](#m5stickv-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB | 3-Way button |
 
-<i style="font-size: 85%">:material-information:{id="m5stickv-info"}:
+
+<i style="font-size: 85%">:material-information:{id="camera-info"}:
+Only `OV7740` and `OV2640` have an anti-glare mode to better capture images from high brightness screens or with incident light.
+</i>
+
+<i style="font-size: 85%">:material-numeric-1-circle:{id="m5stickv-info"}:
 ----8<----
 m5stickv-usb-c.en.txt
 ----8<----
 </i>
 
-<i style="font-size: 85%">:material-information:{id="amigo-info"}:
+<i style="font-size: 85%">:material-numeric-2-circle:{id="amigo-info"}:
 ----8<----
 amigo-more-info-faq.en.txt:2
 ----8<----
 </i>
 
-<i style="font-size: 85%">:material-information:{id="dock-info"}:
-Some stores ship the Maix Dock with soldered pin connectors that do not fit into the [3D printed case](https://github.com/selfcustody/DockEncoderCase)
+<i style="font-size: 85%">:material-numeric-3-circle:{id="dock-info"}:
+Some stores ship the Maix Dock with soldered pin connectors that do not fit into the [3D printed case](https://github.com/selfcustody/DockEncoderCase).
 </i>
 
 <i style="font-size: 85%">**All devices feature Kendryte K210 chip:**

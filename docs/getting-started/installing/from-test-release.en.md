@@ -11,7 +11,7 @@ Krux Android app is intended for learning about Krux and Bitcoin airgapped trans
 
 #### M5StickV
 ##### Linux
-To Flash M5stickV run:
+To Flash M5StickV run:
 ```bash
 ./ktool-linux -B goE -b 1500000 maixpy_m5stickv/kboot.kfpkg
 ```

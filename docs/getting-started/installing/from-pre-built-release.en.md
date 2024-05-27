@@ -6,8 +6,8 @@ Head over to the [releases](https://github.com/selfcustody/krux/releases) page a
 ### Verify the files
 Before installing the release, it's a good idea to check that:
 
-1. The SHA256 hash of `krux-vX.Y.Z.zip` matches the hash in `krux-vX.Y.Z.zip.sha256.txt`
-2. The signature file `krux-vX.Y.Z.zip.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
+1. The *SHA256 hash* of `krux-vX.Y.Z.zip` matches the hash in `krux-vX.Y.Z.zip.sha256.txt`
+2. The *signature file* `krux-vX.Y.Z.zip.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
 
 You can either do this manually or with the `krux` shell script, which contains helper commands for this:
 ```bash
