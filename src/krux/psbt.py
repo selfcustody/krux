@@ -392,14 +392,27 @@ class PSBTSigner:
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
-            if inp.final_scriptwitness:  # If Taproot
+            # Copy the final_scriptwitness if it's present (Taproot case)
+            if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
-            else:
+            # Copy partial signatures for multisig or other script types
+            if inp.partial_sigs:
                 trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
-
             # Include the PSBT_IN_WITNESS_UTXO field if it exists
             if hasattr(inp, 'witness_utxo'):
                 trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
+
+            # Include the PSBT_IN_NON_WITNESS_UTXO field if it exists (Legacy)
+            if hasattr(inp, 'non_witness_utxo'):
+                trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
+
+            # Check for P2SH (Nested SegWit) and copy redeem_script if present
+            if hasattr(inp, 'redeem_script'):
+                trimmed_psbt.inputs[i].redeem_script = inp.redeem_script
+
+             # Check for P2WSH (SegWit multisig) and copy witness_script if present
+            if hasattr(inp, 'witness_script'):
+                trimmed_psbt.inputs[i].witness_script = inp.witness_script
 
         self.psbt = trimmed_psbt
 
