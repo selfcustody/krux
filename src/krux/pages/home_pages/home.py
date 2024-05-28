@@ -402,7 +402,7 @@ class Home(Page):
             with open("/sd/" + psbt_filename, "wb") as f:
                 # Write PSBT data directly to the file
                 signer.psbt.write_to(f)
-                self.flash_text(t("Saved to SD card") + ":\n%s" % psbt_filename)
+            self.flash_text(t("Saved to SD card") + ":\n%s" % psbt_filename)
 
         return MENU_CONTINUE
 

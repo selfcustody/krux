@@ -397,6 +397,10 @@ class PSBTSigner:
             else:
                 trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
+            # Include the PSBT_IN_WITNESS_UTXO field if it exists
+            if hasattr(inp, 'witness_utxo'):
+                trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
+
         self.psbt = trimmed_psbt
 
     def psbt_qr(self):
