@@ -22,6 +22,7 @@ from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from embit.networks import NETWORKS
+from embit.bip32 import HARDENED_INDEX
 from .krux_settings import t
 from .key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
@@ -348,25 +349,25 @@ def xpub_data_to_derivation(versiontype, network, child, depth, allow_assumption
     derivation, network_node, assumption_text = None, None, None
 
     if network == "main":
-        network_node = 0 + 2**31
+        network_node = 0 + HARDENED_INDEX
     elif network in ("test", "regtest", "signet"):
-        network_node = 1 + 2**31
+        network_node = 1 + HARDENED_INDEX
 
-    if network_node and child >= 2**31:
+    if network_node and child >= HARDENED_INDEX:
         if versiontype == "xpub" and depth == 3:
-            derivation = [44 + 2**31, network_node, child]
+            derivation = [44 + HARDENED_INDEX, network_node, child]
             if allow_assumption != derivation:
                 assumption_text = t("Legacy - 44 would be assumed")
         elif versiontype == "ypub" and depth == 3:
-            derivation = [49 + 2**31, network_node, child]
+            derivation = [49 + HARDENED_INDEX, network_node, child]
         elif versiontype == "zpub" and depth == 3:
-            derivation = [84 + 2**31, network_node, child]
-        elif versiontype == "Ypub" and depth == 4 and child == 1 + 2**31:
-            derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+            derivation = [84 + HARDENED_INDEX, network_node, child]
+        elif versiontype == "Ypub" and depth == 4 and child == 1 + HARDENED_INDEX:
+            derivation = [48 + HARDENED_INDEX, network_node, 0 + HARDENED_INDEX, child]
             if allow_assumption != derivation:
                 assumption_text = t("Account #0 would be assumed")
-        elif versiontype == "Zpub" and depth == 4 and child == 2 + 2**31:
-            derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+        elif versiontype == "Zpub" and depth == 4 and child == 2 + HARDENED_INDEX:
+            derivation = [48 + HARDENED_INDEX, network_node, 0 + HARDENED_INDEX, child]
             if allow_assumption != derivation:
                 assumption_text = t("Account #0 would be assumed")
 
@@ -387,14 +388,17 @@ def derivation_to_script_wrapper(derivation):
         network = derivation[1]
         account = derivation[2]
 
-        if network in (0 + 2**31, 1 + 2**31) and account >= 0 + 2**31:
-            if purpose == 44 + 2**31:
+        if (
+            network in (0 + HARDENED_INDEX, 1 + HARDENED_INDEX)
+            and account >= 0 + HARDENED_INDEX
+        ):
+            if purpose == 44 + HARDENED_INDEX:
                 format_str = "pkh({})"
-            elif purpose == 49 + 2**31:
+            elif purpose == 49 + HARDENED_INDEX:
                 format_str = "sh(wpkh({}))"
-            elif purpose == 84 + 2**31:
+            elif purpose == 84 + HARDENED_INDEX:
                 format_str = "wpkh({})"
-            elif purpose == 86 + 2**31:
+            elif purpose == 86 + HARDENED_INDEX:
                 format_str = "tr({})"
 
     return format_str
