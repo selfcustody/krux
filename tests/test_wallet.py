@@ -34,6 +34,12 @@ def tdata(mocker):
     BLUEWALLET_SINGLESIG_DESCRIPTOR = "wpkh(xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
     BLUEWALLET_SINGLESIG_WALLET_DATA = "zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw"
 
+    BLUEWALLET_LEGACY_DESCRIPTOR = "pkh(xpub6C1dUaopHgps26SpkdwL28cS5WFH7Xyaut4HLKZq8Jgiisp5VZK8o1HJLoDRiQyAbdMpBJSpgc8eToiJay4XAnSSvxDVvMuMTnBoTAR26Gb)"
+    BLUEWALLET_LEGACY_WALLET_DATA = "xpub6C1dUaopHgps26SpkdwL28cS5WFH7Xyaut4HLKZq8Jgiisp5VZK8o1HJLoDRiQyAbdMpBJSpgc8eToiJay4XAnSSvxDVvMuMTnBoTAR26Gb"
+
+    BLUEWALLET_NESTEDSW_DESCRIPTOR = "sh(wpkh(xpub6Ca1JGnSFNZ7g8zXNjwY1Li1GKEJPQnbq8Lcev7qoXj33PzMkwWnRKjwqSPo1ArJ2KY3GYAcYhJvcZTwvb99yWuQ5eH4rPEd5mvazBhKiTn))"
+    BLUEWALLET_NESTEDSW_WALLET_DATA = "ypub6XQGbwTMQ46bXSBeD6jADRoWSHNkL2n6kErqSK1jBY6v6Vob1bgM3PQ5reMP15WDRxer21mB1MfUVr5WeHZAmkazwyyVSJ47MVzENnCyRcP"
+
     BLUEWALLET_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
     BLUEWALLET_MULTISIG_WALLET_DATA = """
     # BlueWallet Multisig setup file
@@ -145,6 +151,10 @@ def tdata(mocker):
             "SPECTER_MULTISIG_WALLET_DATA",
             "BLUEWALLET_SINGLESIG_DESCRIPTOR",
             "BLUEWALLET_SINGLESIG_WALLET_DATA",
+            "BLUEWALLET_LEGACY_DESCRIPTOR",
+            "BLUEWALLET_LEGACY_WALLET_DATA",
+            "BLUEWALLET_NESTEDSW_DESCRIPTOR",
+            "BLUEWALLET_NESTEDSW_WALLET_DATA",
             "BLUEWALLET_MULTISIG_DESCRIPTOR",
             "BLUEWALLET_MULTISIG_WALLET_DATA",
             "BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT",
@@ -176,6 +186,10 @@ def tdata(mocker):
         SPECTER_MULTISIG_WALLET_DATA,
         BLUEWALLET_SINGLESIG_DESCRIPTOR,
         BLUEWALLET_SINGLESIG_WALLET_DATA,
+        BLUEWALLET_LEGACY_DESCRIPTOR,
+        BLUEWALLET_LEGACY_WALLET_DATA,
+        BLUEWALLET_NESTEDSW_DESCRIPTOR,
+        BLUEWALLET_NESTEDSW_WALLET_DATA,
         BLUEWALLET_MULTISIG_DESCRIPTOR,
         BLUEWALLET_MULTISIG_WALLET_DATA,
         BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT,
@@ -197,20 +211,32 @@ def tdata(mocker):
 
 def test_init_singlesig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(tdata.SINGLESIG_KEY)
-
     assert isinstance(wallet, Wallet)
     assert wallet.descriptor.to_string() == tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR
     assert wallet.label == "Single-sig"
     assert wallet.policy == {"type": "p2wpkh"}
 
+    wallet = Wallet(None)
+    assert isinstance(wallet, Wallet)
+    assert wallet.descriptor is None
+    assert wallet.label is None
+    assert wallet.policy is None
+
 
 def test_init_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(tdata.MULTISIG_KEY1)
+    assert isinstance(wallet, Wallet)
+    assert wallet.descriptor is None
+    assert wallet.label is None
+    assert wallet.policy is None
 
+    wallet = Wallet(None)
     assert isinstance(wallet, Wallet)
     assert wallet.descriptor is None
     assert wallet.label is None
@@ -221,42 +247,43 @@ def test_is_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
     wallet = Wallet(tdata.SINGLESIG_KEY)
-
     assert not wallet.is_multisig()
 
     wallet = Wallet(tdata.MULTISIG_KEY1)
-
     assert wallet.is_multisig()
+
+    wallet = Wallet(None)
+    assert not wallet.is_multisig()
 
 
 def test_is_loaded(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
     wallet = Wallet(tdata.SINGLESIG_KEY)
-
     assert not wallet.is_loaded()
 
     wallet = Wallet(tdata.MULTISIG_KEY1)
-
     assert not wallet.is_loaded()
 
     wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
-
     assert wallet.is_loaded()
+
+    wallet = Wallet(None)
+    assert not wallet.is_loaded()
 
 
 def test_wallet_qr(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_UR
 
-    wallet = Wallet(tdata.MULTISIG_KEY1)
-    wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
-    wallet.wallet_qr_format = FORMAT_UR
+    for wallet in (Wallet(tdata.MULTISIG_KEY1), Wallet(None)):
+        wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
+        wallet.wallet_qr_format = FORMAT_UR
 
-    wallet_data, wallet_qr_format = wallet.wallet_qr()
+        wallet_data, wallet_qr_format = wallet.wallet_qr()
 
-    assert wallet_data == tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
-    assert wallet_qr_format == FORMAT_UR
+        assert wallet_data == tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
+        assert wallet_qr_format == FORMAT_UR
 
 
 def test_receive_addresses(mocker, m5stickv, tdata):
@@ -303,15 +330,16 @@ def test_receive_addresses(mocker, m5stickv, tdata):
     for case in cases:
         wallet = Wallet(case[0])
         wallet.load(case[1], case[2])
+        assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 
+        wallet = Wallet(None)
+        wallet.load(case[1], case[2])
         assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 
 
 def test_load_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
-
-    wallet = Wallet(tdata.MULTISIG_KEY1)
 
     cases = [
         (
@@ -346,14 +374,23 @@ def test_load_multisig(mocker, m5stickv, tdata):
                 ],
             },
         ),
-        # TODO: Fix - ValueError: xpub not a cosigner
-        # (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR, tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR, '2 of 3', {
-        #     'type': 'p2wsh', 'm': 2, 'n': 3, 'cosigners': [
-        #         tdata.MULTISIG_KEY1.xpub(),
-        #         tdata.MULTISIG_KEY2.xpub(),
-        #         tdata.MULTISIG_KEY3.xpub()
-        #     ]
-        # }),
+        # TODO: Fix AssertionError (see previous "TODO: Switch to 2-of-3 from keys defined above")
+        # (
+        #    tdata.UR_OUTPUT_MULTISIG_WALLET_DATA,
+        #    FORMAT_UR,
+        #    tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR,
+        #    '2 of 3',
+        #    {
+        #        'type': 'p2wsh',
+        #        'm': 2,
+        #        'n': 3,
+        #        'cosigners': [
+        #            tdata.MULTISIG_KEY1.xpub(),
+        #            tdata.MULTISIG_KEY2.xpub(),
+        #            tdata.MULTISIG_KEY3.xpub()
+        #        ],
+        #    },
+        # ),
         (
             tdata.UR_BYTES_MULTISIG_WALLET_DATA,
             FORMAT_UR,
@@ -387,20 +424,19 @@ def test_load_multisig(mocker, m5stickv, tdata):
             },
         ),
     ]
-    for case in cases:
-        wallet.load(case[0], case[1])
-        assert wallet.wallet_data == case[0]
-        assert wallet.wallet_qr_format == case[1]
-        assert wallet.descriptor.to_string() == case[2]
-        assert wallet.label == case[3]
-        assert wallet.policy == case[4]
+    for wallet in (Wallet(None), Wallet(tdata.MULTISIG_KEY1)):
+        for case in cases:
+            wallet.load(case[0], case[1])
+            assert wallet.wallet_data == case[0]
+            assert wallet.wallet_qr_format == case[1]
+            assert wallet.descriptor.to_string() == case[2]
+            assert wallet.label == case[3]
+            assert wallet.policy == case[4]
 
 
 def test_load_singlesig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN
-
-    wallet = Wallet(tdata.SINGLESIG_KEY)
 
     cases = [
         (
@@ -418,13 +454,14 @@ def test_load_singlesig(mocker, m5stickv, tdata):
             {"type": "p2wpkh"},
         ),
     ]
-    for case in cases:
-        wallet.load(case[0], case[1])
-        assert wallet.wallet_data == case[0]
-        assert wallet.wallet_qr_format == case[1]
-        assert wallet.descriptor.to_string() == case[2]
-        assert wallet.label == case[3]
-        assert wallet.policy == case[4]
+    for wallet in (Wallet(None), Wallet(tdata.SINGLESIG_KEY)):
+        for case in cases:
+            wallet.load(case[0], case[1])
+            assert wallet.wallet_data == case[0]
+            assert wallet.wallet_qr_format == case[1]
+            assert wallet.descriptor.to_string() == case[2]
+            assert wallet.label == case[3]
+            assert wallet.policy == case[4]
 
 
 def test_load_singlesig_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
@@ -480,7 +517,7 @@ def test_load_multisig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata)
 
 
 def test_parse_wallet(mocker, m5stickv, tdata):
-    from krux.wallet import parse_wallet
+    from krux.wallet import parse_wallet, AssumptionWarning
 
     cases = [
         (
@@ -496,6 +533,16 @@ def test_parse_wallet(mocker, m5stickv, tdata):
         (
             tdata.BLUEWALLET_SINGLESIG_WALLET_DATA,
             tdata.BLUEWALLET_SINGLESIG_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.BLUEWALLET_LEGACY_WALLET_DATA,
+            tdata.BLUEWALLET_LEGACY_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.BLUEWALLET_NESTEDSW_WALLET_DATA,
+            tdata.BLUEWALLET_NESTEDSW_DESCRIPTOR,
             None,
         ),
         (
@@ -539,7 +586,10 @@ def test_parse_wallet(mocker, m5stickv, tdata):
     for case in cases:
         print(case_n)
         case_n += 1
-        descriptor, label = parse_wallet(case[0])
+        try:
+            descriptor, label = parse_wallet(case[0])
+        except AssumptionWarning as e:
+            descriptor, label = parse_wallet(case[0], allow_assumption=e.args[1])
         assert descriptor.to_string() == case[1]
         assert label == case[2]
 
@@ -670,3 +720,150 @@ def test_to_unambiguous_descriptor(mocker, m5stickv, tdata):
             Descriptor.from_string(case[0])
         )
         assert unambiguous_descriptor.to_string() == case[1]
+
+
+def test_version_to_network_versiontype():
+    from embit.networks import NETWORKS
+    from krux.wallet import version_to_network_versiontype
+
+    for network_name, version_dict in [
+        (k, v) for k, v in NETWORKS.items() if k in ("main", "test")
+    ]:
+        for versiontype, version in version_dict.items():
+            assert version_to_network_versiontype(version) == (
+                network_name,
+                versiontype,
+            )
+
+
+def test_xpub_data_to_derivation():
+    from krux.wallet import xpub_data_to_derivation, AssumptionWarning
+
+    # purpose
+    LEGACY = 44 + 2**31
+    NATSW = 84 + 2**31
+    NESSW = 49 + 2**31
+    TAPROOT = 86 + 2**31
+    MULTISIG = 48 + 2**31
+
+    # network
+    MAIN = 0 + 2**31
+    TEST = 1 + 2**31
+
+    # account
+    ACCT0 = 0 + 2**31
+    ACCT1 = 1 + 2**31
+
+    # multisig script type
+    MULTINESSW = 1 + 2**31
+    MULTINATSW = 2 + 2**31
+
+    cases = [
+        # versiontype, network, child, depth, allow_assumption, expected_return
+        ("xpub", "main", ACCT0, 3, None, AssumptionWarning),  # don't assume
+        ("xpub", "main", ACCT0, 3, [LEGACY, MAIN, ACCT0], [LEGACY, MAIN, ACCT0]),
+        ("xpub", "test", ACCT0, 3, [LEGACY, TEST, ACCT0], [LEGACY, TEST, ACCT0]),
+        ("xpub", "main", ACCT1, 3, [LEGACY, MAIN, ACCT1], [LEGACY, MAIN, ACCT1]),
+        ("xpub", "main", ACCT0, 4, [LEGACY, MAIN, ACCT0], None),  # wrong depth
+        ("ypub", "main", ACCT0, 3, None, [NESSW, MAIN, ACCT0]),
+        ("ypub", "test", ACCT0, 3, None, [NESSW, TEST, ACCT0]),
+        ("ypub", "main", ACCT1, 3, None, [NESSW, MAIN, ACCT1]),
+        ("ypub", "test", ACCT1, 3, None, [NESSW, TEST, ACCT1]),
+        ("ypub", "main", ACCT0, 4, None, None),  # wrong depth
+        ("zpub", "main", ACCT0, 3, None, [NATSW, MAIN, ACCT0]),
+        ("zpub", "test", ACCT0, 3, None, [NATSW, TEST, ACCT0]),
+        ("zpub", "main", ACCT1, 3, None, [NATSW, MAIN, ACCT1]),
+        ("zpub", "test", ACCT1, 3, None, [NATSW, TEST, ACCT1]),
+        ("zpub", "main", ACCT0, 4, None, None),  # wrong depth
+        ("Ypub", "main", MULTINESSW, 4, None, AssumptionWarning),  # don't assume
+        ("Ypub", "test", MULTINESSW, 4, None, AssumptionWarning),
+        (
+            "Ypub",
+            "main",
+            MULTINESSW,
+            4,
+            [MULTISIG, MAIN, ACCT0, MULTINESSW],
+            [MULTISIG, MAIN, ACCT0, MULTINESSW],
+        ),
+        (
+            "Ypub",
+            "test",
+            MULTINESSW,
+            4,
+            [MULTISIG, TEST, ACCT0, MULTINESSW],
+            [MULTISIG, TEST, ACCT0, MULTINESSW],
+        ),
+        ("Ypub", "main", MULTINESSW, 3, None, None),  # wrong depth
+        ("Zpub", "main", MULTINATSW, 4, None, AssumptionWarning),  # don't assume
+        ("Zpub", "test", MULTINATSW, 4, None, AssumptionWarning),
+        (
+            "Zpub",
+            "main",
+            MULTINATSW,
+            4,
+            [MULTISIG, MAIN, ACCT0, MULTINATSW],
+            [MULTISIG, MAIN, ACCT0, MULTINATSW],
+        ),
+        (
+            "Zpub",
+            "test",
+            MULTINATSW,
+            4,
+            [MULTISIG, TEST, ACCT0, MULTINATSW],
+            [MULTISIG, TEST, ACCT0, MULTINATSW],
+        ),
+        ("Zpub", "main", MULTINATSW, 3, None, None),  # wrong depth
+    ]
+
+    for _case in cases:
+        if type(_case[5]) == type and issubclass(_case[5], Exception):
+            with pytest.raises(_case[5]):
+                xpub_data_to_derivation(*_case[:5])
+        else:
+            assert xpub_data_to_derivation(*_case[:5]) == _case[5]
+
+
+def test_derivation_to_script_wrapper():
+    from krux.wallet import derivation_to_script_wrapper
+
+    # purpose
+    LEGACY = 44 + 2**31
+    NATSW = 84 + 2**31
+    NESSW = 49 + 2**31
+    TAPROOT = 86 + 2**31
+
+    # network
+    MAIN = 0 + 2**31
+    TEST = 1 + 2**31
+
+    # account
+    HARD = 0 + 2**31
+
+    NOTHARD = 2**31 - 1
+
+    cases = [
+        # derivation list as the only function param and expected return
+        ([HARD, MAIN], None),
+        ([HARD, TEST], None),
+        ([HARD, MAIN, HARD], None),
+        ([NOTHARD, MAIN, HARD], None),
+        ([LEGACY, MAIN, HARD], "pkh({})"),
+        ([LEGACY, TEST, HARD], "pkh({})"),
+        ([LEGACY, MAIN, NOTHARD], None),
+        ([LEGACY, NOTHARD, HARD], None),
+        ([NESSW, MAIN, HARD], "sh(wpkh({}))"),
+        ([NESSW, TEST, HARD], "sh(wpkh({}))"),
+        ([NESSW, MAIN, NOTHARD], None),
+        ([NESSW, NOTHARD, HARD], None),
+        ([NATSW, MAIN, HARD], "wpkh({})"),
+        ([NATSW, TEST, HARD], "wpkh({})"),
+        ([NATSW, MAIN, NOTHARD], None),
+        ([NATSW, NOTHARD, HARD], None),
+        ([TAPROOT, MAIN, HARD], "tr({})"),
+        ([TAPROOT, TEST, HARD], "tr({})"),
+        ([TAPROOT, MAIN, NOTHARD], None),
+        ([TAPROOT, NOTHARD, HARD], None),
+    ]
+
+    for _case in cases:
+        assert derivation_to_script_wrapper(_case[0]) == _case[1]
