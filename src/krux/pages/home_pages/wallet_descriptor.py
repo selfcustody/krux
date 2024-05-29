@@ -107,7 +107,7 @@ class WalletDescriptor(Page):
             self.ctx.display.draw_centered_text(e.args[0], theme.error_color)
             if self.prompt(t("Accept assumption?"), BOTTOM_PROMPT_LINE):
                 try:
-                    wallet.load(wallet_data, qr_format, allow_assumptions=True)
+                    wallet.load(wallet_data, qr_format, allow_assumption=e.args[1])
                 except Exception as e_again:
                     wallet_load_exception = e_again
         except Exception as e:

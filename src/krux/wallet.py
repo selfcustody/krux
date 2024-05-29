@@ -20,7 +20,7 @@
 # THE SOFTWARE.
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
-from embit.descriptor.arguments import Key, KeyOrigin
+from embit.descriptor.arguments import Key
 from embit.networks import NETWORKS
 from .krux_settings import t
 from .key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
@@ -63,9 +63,8 @@ class Wallet:
             self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
 
-    @property
-    def network(self):
-        """Returns network from user's current wallet, else from the descriptor"""
+    def which_network(self):
+        """Returns network (NETWORKS.keys()) using current wallet key, else from descriptor"""
         if self._network is None:
             if self.key:
                 self._network = [
@@ -91,9 +90,9 @@ class Wallet:
         """Returns a boolean indicating whether or not this wallet has been loaded"""
         return self.wallet_data is not None
 
-    def load(self, wallet_data, qr_format, allow_assumptions=False):
+    def load(self, wallet_data, qr_format, allow_assumption=None):
         """Loads the wallet from the given data"""
-        descriptor, label = parse_wallet(wallet_data, allow_assumptions)
+        descriptor, label = parse_wallet(wallet_data, allow_assumption)
 
         if self.key:
             if self.is_multisig():
@@ -145,7 +144,7 @@ class Wallet:
 
         while limit is None or i < starting_index + limit:
             yield self.descriptor.derive(i, branch_index=branch_index).address(
-                network=NETWORKS[self.network]
+                network=NETWORKS[self.which_network()]
             )
             i += 1
 
@@ -168,7 +167,7 @@ def to_unambiguous_descriptor(descriptor):
     return descriptor
 
 
-def parse_wallet(wallet_data, allow_assumptions=False):
+def parse_wallet(wallet_data, allow_assumption=None):
     """Exhaustively tries to parse the wallet data from a known format, returning
     a descriptor and label if possible.
 
@@ -278,21 +277,21 @@ def parse_wallet(wallet_data, allow_assumptions=False):
 
             xpub = pubkey.key.to_base58(version=NETWORKS[network]["xpub"])
 
+            fmt = None
             if pubkey.origin is None:
-                # assume Key.origin if possible
+                # assume derivation if possible
                 derivation = xpub_data_to_derivation(
                     versiontype,
                     network,
                     pubkey.key.child_number,
                     pubkey.key.depth,
-                    allow_assumptions=allow_assumptions,
+                    allow_assumption=allow_assumption,
                 )
                 if derivation:
-                    pubkey.origin = KeyOrigin(b"\x00" * 4, derivation)
-
-            fmt = None
-            if pubkey.origin:
-                fmt = key_origin_to_script_wrapper(pubkey.origin)
+                    fmt = derivation_to_script_wrapper(derivation)
+            else:
+                fmt = derivation_to_script_wrapper(pubkey.origin.derivation)
+                fmt = fmt.format("[" + str(pubkey.origin) + "]{}")
 
             descriptor = Descriptor.from_string(fmt.format(xpub))
             return descriptor, None
@@ -336,15 +335,14 @@ def version_to_network_versiontype(hdkey_version):
     return network, versiontype
 
 
-def xpub_data_to_derivation(
-    versiontype, network, child, depth, allow_assumptions=False
-):
+def xpub_data_to_derivation(versiontype, network, child, depth, allow_assumption=None):
     """returns assumed derivation list for supported slip32 bips
     based on embit.networks.NETWORKS keys for versiontype, network,
     child_number (used as account for single-sig) and depth.  Depth
     is used as weak verification, it must match the expected depth.
-    Where unsafe assumptions could be made, AssumptionError is raised
-    unless called with allow_assumptions=True.
+    Where unsafe assumptions could be made, AssumptionWarning is raised
+    (with warning text and assumed derivation as first two params)
+    unless called with allow_assumption=assumed_derivation.
     """
 
     derivation, network_node, assumption_text = None, None, None
@@ -356,42 +354,39 @@ def xpub_data_to_derivation(
 
     if network_node and child >= 2**31:
         if versiontype == "xpub" and depth == 3:
-            if allow_assumptions:
-                derivation = [44 + 2**31, network_node, child]
-            else:
-                assumption_text = t("Legacy - 44 (p2pkh) would be assumed")
+            derivation = [44 + 2**31, network_node, child]
+            if allow_assumption != derivation:
+                assumption_text = t("Legacy - 44 would be assumed")
         elif versiontype == "ypub" and depth == 3:
             derivation = [49 + 2**31, network_node, child]
         elif versiontype == "zpub" and depth == 3:
             derivation = [84 + 2**31, network_node, child]
         elif versiontype == "Ypub" and depth == 4 and child == 1 + 2**31:
-            if allow_assumptions:
-                derivation = [48 + 2**31, network_node, 0 + 2**31, child]
-            else:
+            derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+            if allow_assumption != derivation:
                 assumption_text = t("Account #0 would be assumed")
         elif versiontype == "Zpub" and depth == 4 and child == 2 + 2**31:
-            if allow_assumptions:
-                derivation = [48 + 2**31, network_node, 0 + 2**31, child]
-            else:
+            derivation = [48 + 2**31, network_node, 0 + 2**31, child]
+            if allow_assumption != derivation:
                 assumption_text = t("Account #0 would be assumed")
 
     if assumption_text:
-        raise AssumptionWarning(assumption_text)
+        raise AssumptionWarning(assumption_text, derivation)
 
     return derivation
 
 
-def key_origin_to_script_wrapper(key_origin):
+def derivation_to_script_wrapper(derivation):
     """returns format_str for wrapping xpub into wallet descriptor,
     based on embit.descriptor.arguments.KeyOrigin"""
     format_str = None
-    purpose = key_origin.derivation[0]
+    purpose = derivation[0]
     if purpose == 44 + 2**31:
-        format_str = "pkh([%s]{})" % key_origin
+        format_str = "pkh({})"
     elif purpose == 49 + 2**31:
-        format_str = "sh(wpkh([%s]{}))" % key_origin
+        format_str = "sh(wpkh({}))"
     elif purpose == 84 + 2**31:
-        format_str = "wpkh([%s]{})" % key_origin
+        format_str = "wpkh({})"
     elif purpose == 86 + 2**31:
-        format_str = "tr([%s]{})" % key_origin
+        format_str = "tr({})"
     return format_str
