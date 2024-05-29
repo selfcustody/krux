@@ -378,15 +378,23 @@ def xpub_data_to_derivation(versiontype, network, child, depth, allow_assumption
 
 def derivation_to_script_wrapper(derivation):
     """returns format_str for wrapping xpub into wallet descriptor,
-    based on embit.descriptor.arguments.KeyOrigin"""
+    supporting single-sig only for now, based on
+    embit.descriptor.arguments.KeyOrigin.derivation list"""
     format_str = None
-    purpose = derivation[0]
-    if purpose == 44 + 2**31:
-        format_str = "pkh({})"
-    elif purpose == 49 + 2**31:
-        format_str = "sh(wpkh({}))"
-    elif purpose == 84 + 2**31:
-        format_str = "wpkh({})"
-    elif purpose == 86 + 2**31:
-        format_str = "tr({})"
+
+    if len(derivation) == 3:
+        purpose = derivation[0]
+        network = derivation[1]
+        account = derivation[2]
+
+        if network in (0 + 2**31, 1 + 2**31) and account >= 0 + 2**31:
+            if purpose == 44 + 2**31:
+                format_str = "pkh({})"
+            elif purpose == 49 + 2**31:
+                format_str = "sh(wpkh({}))"
+            elif purpose == 84 + 2**31:
+                format_str = "wpkh({})"
+            elif purpose == 86 + 2**31:
+                format_str = "tr({})"
+
     return format_str
