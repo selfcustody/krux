@@ -7,7 +7,7 @@ def tdata(mocker):
     from collections import namedtuple
     from ur.ur import UR
     from embit.networks import NETWORKS
-    from krux.key import Key
+    from krux.key import Key, P2PKH, P2SH_P2WPKH, P2TR
 
     TEST_MNEMONIC1 = (
         "olympic term tissue route sense program under choose bean emerge velvet absurd"
@@ -15,7 +15,12 @@ def tdata(mocker):
     TEST_MNEMONIC2 = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
-    SINGLESIG_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"])
+    SINGLESIG_KEY = Key(
+        TEST_MNEMONIC1, False, NETWORKS["main"]
+    )  # default account=0, script=P2WPKH
+    LEGACY1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2PKH)
+    NESTEDSW1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2SH_P2WPKH)
+    TAPROOT1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2TR)
     MULTISIG_KEY1 = Key(TEST_MNEMONIC1, True, NETWORKS["main"])
     MULTISIG_KEY2 = Key(TEST_MNEMONIC2, True, NETWORKS["main"])
     MULTISIG_KEY3 = Key(TEST_MNEMONIC3, True, NETWORKS["main"])
@@ -24,6 +29,20 @@ def tdata(mocker):
     # MULTISIG_KEY1 [55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
     # MULTISIG_KEY2 [3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
     # MULTISIG_KEY3 [d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
+
+    KRUX_LEGACY1_DESCRIPTOR = "pkh([55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE)"
+    KRUX_LEGACY1_XPUB = "[55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
+
+    KRUX_NESTEDSW1_DESCRIPTOR = "sh(wpkh([55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV))"
+    KRUX_NESTEDSW1_XPUB = "[55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV"
+    KRUX_NESTEDSW1_YPUB = "[55f8fc5d/49h/0h/1h]ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
+
+    KRUX_NATIVESW1_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/1h]xpub6DPMTPxGMqdu43FvwYdC6eHCPJWckCkx1rLJ1HEG7259GyWQD5P17WB2oowP9SpQdC8ogrmXfwfoazvf6Te8svtxWh4UTwTqyRdG5G54FxW)"
+    KRUX_NATIVESW1_XPUB = "[55f8fc5d/84h/0h/1h]xpub6DPMTPxGMqdu43FvwYdC6eHCPJWckCkx1rLJ1HEG7259GyWQD5P17WB2oowP9SpQdC8ogrmXfwfoazvf6Te8svtxWh4UTwTqyRdG5G54FxW"
+    KRUX_NATIVESW1_ZPUB = "[55f8fc5d/84h/0h/1h]zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
+
+    KRUX_TAPROOT1_DESCRIPTOR = "tr([55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q)"
+    KRUX_TAPROOT1_XPUB = "[55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q"
 
     SPECTER_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)"
     SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
@@ -142,9 +161,22 @@ def tdata(mocker):
             "TEST_MNEMONIC2",
             "TEST_MNEMONIC3",
             "SINGLESIG_KEY",
+            "LEGACY1_KEY",
+            "NESTEDSW1_KEY",
+            "TAPROOT1_KEY",
             "MULTISIG_KEY1",
             "MULTISIG_KEY2",
             "MULTISIG_KEY3",
+            "KRUX_LEGACY1_DESCRIPTOR",
+            "KRUX_LEGACY1_XPUB",
+            "KRUX_NESTEDSW1_DESCRIPTOR",
+            "KRUX_NESTEDSW1_XPUB",
+            "KRUX_NESTEDSW1_YPUB",
+            "KRUX_NATIVESW1_DESCRIPTOR",
+            "KRUX_NATIVESW1_XPUB",
+            "KRUX_NATIVESW1_ZPUB",
+            "KRUX_TAPROOT1_DESCRIPTOR",
+            "KRUX_TAPROOT1_XPUB",
             "SPECTER_SINGLESIG_DESCRIPTOR",
             "SPECTER_SINGLESIG_WALLET_DATA",
             "SPECTER_MULTISIG_DESCRIPTOR",
@@ -177,9 +209,22 @@ def tdata(mocker):
         TEST_MNEMONIC2,
         TEST_MNEMONIC3,
         SINGLESIG_KEY,
+        LEGACY1_KEY,
+        NESTEDSW1_KEY,
+        TAPROOT1_KEY,
         MULTISIG_KEY1,
         MULTISIG_KEY2,
         MULTISIG_KEY3,
+        KRUX_LEGACY1_DESCRIPTOR,
+        KRUX_LEGACY1_XPUB,
+        KRUX_NESTEDSW1_DESCRIPTOR,
+        KRUX_NESTEDSW1_XPUB,
+        KRUX_NESTEDSW1_YPUB,
+        KRUX_NATIVESW1_DESCRIPTOR,
+        KRUX_NATIVESW1_XPUB,
+        KRUX_NATIVESW1_ZPUB,
+        KRUX_TAPROOT1_DESCRIPTOR,
+        KRUX_TAPROOT1_XPUB,
         SPECTER_SINGLESIG_DESCRIPTOR,
         SPECTER_SINGLESIG_WALLET_DATA,
         SPECTER_MULTISIG_DESCRIPTOR,
@@ -210,20 +255,53 @@ def tdata(mocker):
 
 
 def test_init_singlesig(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
+    from embit.descriptor import Descriptor
+    from krux.wallet import Wallet, to_unambiguous_descriptor
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(tdata.SINGLESIG_KEY)
-    assert isinstance(wallet, Wallet)
-    assert wallet.descriptor.to_string() == tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR
-    assert wallet.label == "Single-sig"
-    assert wallet.policy == {"type": "p2wpkh"}
+    cases = [
+        # key, descriptor, label, policy
+        (None, None, None, None),
+        (
+            tdata.SINGLESIG_KEY,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
+            "Single-sig",
+            {"type": "p2wpkh"},
+        ),
+        (
+            tdata.LEGACY1_KEY,
+            tdata.KRUX_LEGACY1_DESCRIPTOR,
+            "Single-sig",
+            {"type": "p2pkh"},
+        ),
+        (
+            tdata.NESTEDSW1_KEY,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+            "Single-sig",
+            {"type": "p2sh"},
+        ),
+        (
+            tdata.TAPROOT1_KEY,
+            tdata.KRUX_TAPROOT1_DESCRIPTOR,
+            "Single-sig",
+            {"type": "p2tr"},
+        ),
+    ]
 
-    wallet = Wallet(None)
-    assert isinstance(wallet, Wallet)
-    assert wallet.descriptor is None
-    assert wallet.label is None
-    assert wallet.policy is None
+    for _case in cases:
+        wallet = Wallet(_case[0])
+        assert isinstance(wallet, Wallet)
+        if wallet.descriptor:
+            # don't fail simply because of a difference between ambiguous and unambiguous
+            try:
+                assert wallet.descriptor.to_string() == _case[1]
+            except AssertionError:
+                test_descr = to_unambiguous_descriptor(
+                    Descriptor.from_string(_case[1])
+                ).to_string()
+                assert wallet.descriptor.to_string() == test_descr
+        assert wallet.label == _case[2]
+        assert wallet.policy == _case[3]
 
 
 def test_init_multisig(mocker, m5stickv, tdata):
@@ -254,6 +332,10 @@ def test_is_multisig(mocker, m5stickv, tdata):
 
     wallet = Wallet(None)
     assert not wallet.is_multisig()
+    from krux.qr import FORMAT_NONE
+
+    wallet.load(tdata.SPECTER_MULTISIG_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.is_multisig()
 
 
 def test_is_loaded(mocker, m5stickv, tdata):
@@ -520,6 +602,36 @@ def test_parse_wallet(mocker, m5stickv, tdata):
     from krux.wallet import parse_wallet, AssumptionWarning
 
     cases = [
+        (
+            tdata.KRUX_LEGACY1_XPUB,
+            tdata.KRUX_LEGACY1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_NESTEDSW1_XPUB,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_NESTEDSW1_YPUB,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_NATIVESW1_XPUB,
+            tdata.KRUX_NATIVESW1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_NATIVESW1_ZPUB,
+            tdata.KRUX_NATIVESW1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_TAPROOT1_XPUB,
+            tdata.KRUX_TAPROOT1_DESCRIPTOR,
+            None,
+        ),
         (
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             tdata.SPECTER_SINGLESIG_DESCRIPTOR,
