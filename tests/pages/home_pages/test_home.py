@@ -6,7 +6,7 @@ from .. import create_ctx
 @pytest.fixture
 def tdata(mocker):
     from collections import namedtuple
-    from krux.key import Key
+    from krux.key import Key, P2PKH, P2SH_P2WPKH
     from embit.networks import NETWORKS
 
     TEST_12_WORD_MNEMONIC = (
@@ -22,6 +22,30 @@ def tdata(mocker):
     SINGLESIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, False, NETWORKS["main"])
     MULTISIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, True, NETWORKS["main"])
     SINGLESIG_ACTION_KEY = Key(ACTION_MNEMONIC, False, NETWORKS["main"])
+    LEGACY1_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        False,
+        NETWORKS["main"],
+        account_index=1,
+        script_type=P2PKH,
+    )
+    NESTEDSW1_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        False,
+        NETWORKS["main"],
+        account_index=1,
+        script_type=P2SH_P2WPKH,
+    )
+    NATIVESW1_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        False,
+        NETWORKS["main"],
+        account_index=1,
+    )
+
+    VAGUE_LEGACY1_XPUB = "xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
+    VAGUE_NESTEDSW1_YPUB = "ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
+    VAGUE_NATIVESW1_ZPUB = "zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
 
     SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
     SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
@@ -53,6 +77,12 @@ def tdata(mocker):
             "SINGLESIG_SIGNING_KEY",
             "MULTISIG_SIGNING_KEY",
             "SINGLESIG_ACTION_KEY",
+            "LEGACY1_KEY",
+            "NESTEDSW1_KEY",
+            "NATIVESW1_KEY",
+            "VAGUE_LEGACY1_XPUB",
+            "VAGUE_NESTEDSW1_YPUB",
+            "VAGUE_NATIVESW1_ZPUB",
             "SPECTER_SINGLESIG_WALLET_DATA",
             "SPECTER_MULTISIG_WALLET_DATA",
             "P2WPKH_PSBT",
@@ -76,6 +106,12 @@ def tdata(mocker):
         SINGLESIG_SIGNING_KEY,
         MULTISIG_SIGNING_KEY,
         SINGLESIG_ACTION_KEY,
+        LEGACY1_KEY,
+        NESTEDSW1_KEY,
+        NATIVESW1_KEY,
+        VAGUE_LEGACY1_XPUB,
+        VAGUE_NESTEDSW1_YPUB,
+        VAGUE_NATIVESW1_ZPUB,
         SPECTER_SINGLESIG_WALLET_DATA,
         SPECTER_MULTISIG_WALLET_DATA,
         P2WPKH_PSBT,
