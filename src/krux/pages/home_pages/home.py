@@ -30,6 +30,7 @@ from .. import (
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
+    ESC_KEY,
 )
 
 MAX_POLICY_COSIGNERS_DISPLAYED = 5
@@ -389,7 +390,7 @@ class Home(Page):
         from ..file_operations import SaveFile
 
         save_page = SaveFile(self.ctx)
-        psbt_filename, filename_undefined = save_page.set_filename(
+        psbt_filename = save_page.set_filename(
             psbt_filename,
             "QRCode",
             SIGNED_FILE_SUFFIX,
@@ -398,7 +399,7 @@ class Home(Page):
         del save_page
         gc.collect()
 
-        if not filename_undefined:
+        if psbt_filename and psbt_filename != ESC_KEY:
             with open("/sd/" + psbt_filename, "wb") as f:
                 # Write PSBT data directly to the file
                 signer.psbt.write_to(f)
