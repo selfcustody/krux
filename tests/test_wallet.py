@@ -647,11 +647,11 @@ def test_parse_wallet(mocker, m5stickv, tdata):
             tdata.BLUEWALLET_SINGLESIG_DESCRIPTOR,
             None,
         ),
-        (
-            tdata.BLUEWALLET_LEGACY_WALLET_DATA,
-            tdata.BLUEWALLET_LEGACY_DESCRIPTOR,
-            None,
-        ),
+        # ( BlueWallet legacy bip44 xpub w/o key-origin is not supported, will default to bip84
+        #    tdata.BLUEWALLET_LEGACY_WALLET_DATA,
+        #    tdata.BLUEWALLET_LEGACY_DESCRIPTOR,
+        #    None,
+        # ),
         (
             tdata.BLUEWALLET_NESTEDSW_WALLET_DATA,
             tdata.BLUEWALLET_NESTEDSW_DESCRIPTOR,
@@ -873,10 +873,10 @@ def test_xpub_data_to_derivation():
     cases = [
         # versiontype, network, child, depth, allow_assumption, expected_return
         ("xpub", "main", ACCT0, 3, None, AssumptionWarning),  # don't assume
-        ("xpub", "main", ACCT0, 3, [LEGACY, MAIN, ACCT0], [LEGACY, MAIN, ACCT0]),
-        ("xpub", "test", ACCT0, 3, [LEGACY, TEST, ACCT0], [LEGACY, TEST, ACCT0]),
-        ("xpub", "main", ACCT1, 3, [LEGACY, MAIN, ACCT1], [LEGACY, MAIN, ACCT1]),
-        ("xpub", "main", ACCT0, 4, [LEGACY, MAIN, ACCT0], None),  # wrong depth
+        ("xpub", "main", ACCT0, 3, [NATSW, MAIN, ACCT0], [NATSW, MAIN, ACCT0]),
+        ("xpub", "test", ACCT0, 3, [NATSW, TEST, ACCT0], [NATSW, TEST, ACCT0]),
+        ("xpub", "main", ACCT1, 3, [NATSW, MAIN, ACCT1], [NATSW, MAIN, ACCT1]),
+        ("xpub", "main", ACCT0, 4, [NATSW, MAIN, ACCT0], None),  # wrong depth
         ("ypub", "main", ACCT0, 3, None, [NESSW, MAIN, ACCT0]),
         ("ypub", "test", ACCT0, 3, None, [NESSW, TEST, ACCT0]),
         ("ypub", "main", ACCT1, 3, None, [NESSW, MAIN, ACCT1]),

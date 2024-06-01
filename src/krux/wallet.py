@@ -364,12 +364,12 @@ def xpub_data_to_derivation(versiontype, network, child, depth, allow_assumption
     if network_node and child >= HARDENED_INDEX:
         if versiontype == "xpub" and depth == 3:
             derivation = [
-                SINGLESIG_SCRIPT_PURPOSE[P2PKH] + HARDENED_INDEX,
+                SINGLESIG_SCRIPT_PURPOSE[P2WPKH] + HARDENED_INDEX,
                 network_node,
                 child,
             ]
             if allow_assumption != derivation:
-                assumption_text = t("Legacy - 44 would be assumed")
+                assumption_text = t("Native Segwit - 84 would be assumed")
         elif versiontype == "ypub" and depth == 3:
             derivation = [
                 SINGLESIG_SCRIPT_PURPOSE[P2SH_P2WPKH] + HARDENED_INDEX,
