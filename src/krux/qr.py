@@ -175,7 +175,8 @@ class QRPartParser:
 
 def int2base36(n):
     """Convert integer n to a base36 string."""
-    assert 0 <= n <= 1295  # ensure the number is within the valid range
+    if not 0 <= n <= 1295:  # ensure the number is within the valid range
+        raise ValueError("Number out of range")
 
     def tostr(x):
         """Convert integer x to a base36 character."""

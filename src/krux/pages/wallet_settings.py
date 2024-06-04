@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 from embit.networks import NETWORKS
-from ..display import FONT_HEIGHT
+from ..display import FONT_HEIGHT, DEFAULT_PADDING
 from ..krux_settings import t
 from . import (
     Page,
@@ -124,7 +124,7 @@ class WalletSettings(Page):
                 derivation_path += "/2'"
 
             derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
-            self.ctx.display.draw_hcentered_text(derivation_path, info_box=True)
+            info_len = self.ctx.display.draw_hcentered_text(derivation_path, info_box=True)
             submenu = Menu(
                 self.ctx,
                 [
@@ -134,7 +134,7 @@ class WalletSettings(Page):
                     (t("Account"), lambda: None),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
-                offset=2 * FONT_HEIGHT,
+                offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
