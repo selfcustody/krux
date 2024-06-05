@@ -147,9 +147,7 @@ class WalletDescriptor(Page):
 
         if not wallet.is_multisig() and include_qr:
             wallet_data, qr_format = wallet.wallet_qr()
-            self.display_qr_codes(
-                wallet_data, qr_format, title=about, file_type="U"
-            )  # U for Unicode
+            self.display_qr_codes(wallet_data, qr_format, title=about)
         else:
             self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
 
@@ -170,9 +168,7 @@ class WalletDescriptor(Page):
                 # Try to show the wallet output descriptor as a QRCode
                 try:
                     wallet_data, qr_format = wallet.wallet_qr()
-                    self.display_qr_codes(
-                        wallet_data, qr_format, title=wallet.label, file_type="U"
-                    )
+                    self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
                 except Exception as e:
                     self.ctx.display.clear()
                     self.ctx.display.draw_centered_text(

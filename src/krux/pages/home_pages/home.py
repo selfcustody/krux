@@ -378,7 +378,7 @@ class Home(Page):
             del signer
             gc.collect()
 
-            self.display_qr_codes(qr_signed_psbt, qr_format, file_type="P")
+            self.display_qr_codes(qr_signed_psbt, qr_format)
 
             from ..utils import Utils
 

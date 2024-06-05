@@ -39,16 +39,25 @@ FILETYPE_NAMES = {
 # Codes for PSBT vs. TXN and so on
 KNOWN_FILETYPES = set(FILETYPE_NAMES.keys())
 
-FORMAT_BBQR = 3
-FORMAT_COMPRESSED_BBQR = 4
-FORMAT_HEX_BBQR = 5
-
-BBQR_FORMATS = [FORMAT_BBQR, FORMAT_COMPRESSED_BBQR, FORMAT_HEX_BBQR]
-
 BBQR_ALWAYS_COMPRESS_THRESHOLD = 5000  # bytes
 
 B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 assert len(B32CHARS) == 32
+
+
+class BBQrCode:
+    """A BBQr code, containing the data, encoding, and file type"""
+
+    def __init__(self, payload, encoding=None, file_type=None):
+        """Initializes the BBQr code with the given data, encoding, and file type"""
+
+        if encoding not in "H2Z":
+            raise ValueError("Invalid BBQr encoding")
+        if file_type not in KNOWN_FILETYPES:
+            raise ValueError("Invalid BBQr file type")
+        self.payload = payload
+        self.encoding = encoding
+        self.file_type = file_type
 
 
 def parse_bbqr(data):
@@ -69,7 +78,7 @@ def parse_bbqr(data):
             raise ValueError("Invalid part index")
     except:
         raise ValueError("Invalid BBQR format")
-    return data[8:], part_index, part_total, encoding, file_type
+    return data[8:], part_index, part_total
 
 
 def deflate_compress(data):
@@ -101,6 +110,11 @@ def deflate_decompress(data):
 def decode_bbqr(parts, encoding, file_type):
     """Decodes the given data as BBQR, returning the decoded data"""
 
+    if encoding not in "H2Z":
+        raise ValueError("Invalid BBQr encoding")
+    if file_type not in KNOWN_FILETYPES:
+        raise ValueError("Invalid BBQr file type")
+
     if encoding == "H":
         from binascii import unhexlify
 
@@ -121,31 +135,33 @@ def decode_bbqr(parts, encoding, file_type):
     return binary_data
 
 
-def encode_bbqr(data, qr_format=FORMAT_BBQR):
+def encode_bbqr(data, encoding="Z", file_type="P"):
     """Encodes the given data as BBQR, returning the encoded data and format"""
-    import gc
 
-    if qr_format == FORMAT_HEX_BBQR:
+    if encoding not in "H2Z":
+        raise ValueError("Invalid BBQr encoding")
+    if file_type not in KNOWN_FILETYPES:
+        raise ValueError("Invalid BBQr file type")
+
+    if encoding == "H":
         from binascii import hexlify
 
-        return hexlify(data).decode(), FORMAT_HEX_BBQR
+        data = hexlify(data).decode()
 
     if len(data) > BBQR_ALWAYS_COMPRESS_THRESHOLD:
         data = deflate_compress(data)
-        qr_format = FORMAT_COMPRESSED_BBQR
     else:
         # Check if compression is beneficial
         cmp = deflate_compress(data)
         if len(cmp) >= len(data):
-            qr_format = FORMAT_BBQR
+            encoding = "2"
         else:
-            qr_format = FORMAT_COMPRESSED_BBQR
+            encoding = "Z"
             data = cmp
 
-    gc.collect()
     data = data.encode("utf-8") if isinstance(data, str) else data
     data = base32_encode_stream(data).rstrip("=")
-    return data, qr_format
+    return BBQrCode(data, encoding, file_type)
 
 
 # Base 32 encoding/decoding, used in BBQR only

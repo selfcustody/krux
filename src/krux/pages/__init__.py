@@ -264,15 +264,13 @@ class Page:
         self.ctx.display.to_portrait()
         return (code, qr_format)
 
-    def display_qr_codes(self, data, qr_format, title="", file_type=None):
+    def display_qr_codes(self, data, qr_format, title=""):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
         done = False
         i = 0
-        code_generator = to_qr_codes(
-            data, self.ctx.display.qr_data_width(), qr_format, file_type=file_type
-        )
+        code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
         self.ctx.display.clear()
         bright = theme.bg_color == WHITE
         extra_debounce_flag = True
@@ -283,10 +281,7 @@ class Page:
                 code, num_parts = next(code_generator)
             except:
                 code_generator = to_qr_codes(
-                    data,
-                    self.ctx.display.qr_data_width(),
-                    qr_format,
-                    file_type=file_type,
+                    data, self.ctx.display.qr_data_width(), qr_format
                 )
                 code, num_parts = next(code_generator)
             if bright:
