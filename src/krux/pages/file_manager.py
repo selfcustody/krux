@@ -64,7 +64,7 @@ class FileManager(Page):
                     menu_items.append(("..", lambda: MENU_EXIT))
 
                 dir_files = os.listdir(path)
-                for filename in dir_files:
+                for filename in sorted(dir_files):
                     extension_match = False
                     if isinstance(file_extension, str):
                         # No extension filter or matches
