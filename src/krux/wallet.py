@@ -80,11 +80,13 @@ class Wallet:
                     k for k, v in NETWORKS.items() if v == self.key.network
                 ][0]
             else:
+                # use first key; restrict networks to "main" and "test", version to pubkeys
                 version = self.descriptor.keys[0].key.version
-                for k, v in NETWORKS.items():
-                    if version in v.values():
-                        self._network = k
-                        break
+                for em_network in ("main", "test"):
+                    for em_vertype in ("xpub", "ypub", "zpub", "Ypub", "Zpub"):
+                        if version == NETWORKS[em_network][em_vertype]:
+                            self._network = em_network
+                            break
         return self._network
 
     def is_multisig(self):
