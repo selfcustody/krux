@@ -414,7 +414,8 @@ class SeedQRView(Page):
         from .utils import Utils
 
         utils = Utils(self.ctx)
-        utils.print_standard_qr(self.code, title=self.title, is_qr=True)
+        title = self.title.replace(" ", " ")  # Replaces thin spaces
+        utils.print_standard_qr(self.code, title=title, is_qr=True)
         # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
     def display_qr(self, allow_export=False, transcript_tools=True, quick_exit=False):
