@@ -92,7 +92,7 @@ def deflate_compress(data):
             d.write(data)
         return stream.getvalue()
     except:
-        raise ValueError("Error decompressing BBQR")
+        raise ValueError("Error compressing BBQR")
 
 
 def deflate_decompress(data):

@@ -150,7 +150,12 @@ class Wallet:
         if self.wallet_qr_format == FORMAT_BBQR:
             from .bbqr import encode_bbqr
 
-            return encode_bbqr(self.wallet_data, file_type="U"), FORMAT_BBQR
+            wallet_data = (
+                self.wallet_data.encode("utf-8")
+                if isinstance(self.wallet_data, str)
+                else self.wallet_data
+            )
+            return encode_bbqr(wallet_data, file_type="U"), FORMAT_BBQR
         return (self.wallet_data, self.wallet_qr_format)
 
     def obtain_addresses(self, i=0, limit=None, branch_index=0):
