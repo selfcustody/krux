@@ -93,7 +93,7 @@ class WalletDescriptor(Page):
 
                 utils = Utils(self.ctx)
                 _, wallet_data = utils.load_file(
-                    (DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION)
+                    (DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION), prompt=False
                 )
                 persisted = True
             except OSError:
