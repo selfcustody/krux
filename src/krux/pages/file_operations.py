@@ -49,6 +49,7 @@ class SaveFile(Page):
         save_as_binary=True,
     ):
         """File saver handler page"""
+        persisted = False
         try:
             with SDHandler() as sd:
                 # Wait until user defines a filename or select NO on the prompt
@@ -73,10 +74,12 @@ class SaveFile(Page):
                             else:
                                 sd.write(filename, data)
                             self.flash_text(t("Saved to SD card") + ":\n%s" % filename)
+                            persisted = True
                     else:
                         filename_undefined = False
         except:
             self.flash_text(t("SD card not detected."))
+        return persisted
 
     def set_filename(
         self, curr_filename="", empty_filename="some_file", suffix="", file_extension=""

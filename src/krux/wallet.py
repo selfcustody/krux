@@ -1,5 +1,4 @@
 # The MIT License (MIT)
-
 # Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,8 +21,22 @@
 from ur.ur import UR
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
+from embit.networks import NETWORKS
+from embit.bip32 import HARDENED_INDEX
 from .krux_settings import t
-from .key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
+from .key import (
+    P2PKH,
+    P2SH_P2WPKH,
+    P2WPKH,
+    P2WSH,
+    P2TR,
+    SINGLESIG_SCRIPT_PURPOSE,
+    MULTISIG_SCRIPT_PURPOSE,
+)
+
+
+class AssumptionWarning(Exception):
+    """An exception for assumptions that require user acceptance"""
 
 
 class Wallet:
@@ -36,7 +49,9 @@ class Wallet:
         self.descriptor = None
         self.label = None
         self.policy = None
-        if not self.key.multisig:
+        self.persisted = None
+        self._network = None
+        if self.key and not self.key.multisig:
             if self.key.script_type == P2PKH:
                 self.descriptor = Descriptor.from_string(
                     "pkh(%s/<0;1>/*)" % self.key.key_expression()
@@ -57,29 +72,53 @@ class Wallet:
             self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
 
+    def which_network(self):
+        """Returns network (NETWORKS.keys()) using current wallet key, else from descriptor"""
+        if self._network is None:
+            if self.key:
+                self._network = [
+                    k for k, v in NETWORKS.items() if v == self.key.network
+                ][0]
+            else:
+                # use first key; restrict networks to "main" and "test", version to pubkeys
+                version = self.descriptor.keys[0].key.version
+                for em_network in ("main", "test"):
+                    for em_vertype in ("xpub", "ypub", "zpub", "Ypub", "Zpub"):
+                        if version == NETWORKS[em_network][em_vertype]:
+                            self._network = em_network
+                            break
+        return self._network
+
     def is_multisig(self):
         """Returns a boolean indicating whether or not the wallet is multisig"""
-        return self.key.multisig
+        if self.key:
+            return self.key.multisig
+        if self.descriptor:
+            return self.descriptor.is_basic_multisig
+        return None
 
     def is_loaded(self):
         """Returns a boolean indicating whether or not this wallet has been loaded"""
         return self.wallet_data is not None
 
-    def load(self, wallet_data, qr_format):
+    def load(self, wallet_data, qr_format, allow_assumption=None):
         """Loads the wallet from the given data"""
-        descriptor, label = parse_wallet(wallet_data, self.key.network)
+        descriptor, label = parse_wallet(wallet_data, allow_assumption)
 
-        if self.is_multisig():
-            if not descriptor.is_basic_multisig:
-                raise ValueError("not multisig")
-            if self.key.xpub() not in [key.key.to_base58() for key in descriptor.keys]:
-                raise ValueError("xpub not a cosigner")
-        else:
-            if not descriptor.key:
-                if len(descriptor.keys) > 1:
-                    raise ValueError("not single-sig")
-            if self.key.xpub() != descriptor.key.key.to_base58():
-                raise ValueError("xpub does not match")
+        if self.key:
+            if self.is_multisig():
+                if not descriptor.is_basic_multisig:
+                    raise ValueError("not multisig")
+                if self.key.xpub() not in [
+                    key.key.to_base58() for key in descriptor.keys
+                ]:
+                    raise ValueError("xpub not a cosigner")
+            else:
+                if not descriptor.key:
+                    if len(descriptor.keys) > 1:
+                        raise ValueError("not single-sig")
+                if self.key.xpub() != descriptor.key.key.to_base58():
+                    raise ValueError("xpub does not match")
 
         self.wallet_data = wallet_data
         self.wallet_qr_format = qr_format
@@ -113,9 +152,10 @@ class Wallet:
         """Returns an iterator deriving addresses (default branch_index is receive)
         for the wallet up to the provided limit"""
         starting_index = i
+
         while limit is None or i < starting_index + limit:
             yield self.descriptor.derive(i, branch_index=branch_index).address(
-                network=self.key.network
+                network=NETWORKS[self.which_network()]
             )
             i += 1
 
@@ -138,12 +178,14 @@ def to_unambiguous_descriptor(descriptor):
     return descriptor
 
 
-def parse_wallet(wallet_data, network):
+def parse_wallet(wallet_data, allow_assumption=None):
     """Exhaustively tries to parse the wallet data from a known format, returning
     a descriptor and label if possible.
 
     If the descriptor cannot be derived, an exception is raised.
     """
+    # pylint: disable=R0912
+
     import urtypes
 
     if isinstance(wallet_data, UR):
@@ -236,19 +278,34 @@ def parse_wallet(wallet_data, network):
 
     # Try to parse directly as a descriptor
     try:
-        descriptor = Descriptor.from_string(wallet_data)
+        descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
     except:
-        try:
-            # If that fails, try to parse as an xpub as a last resort
-            pubkey = Key.from_string(wallet_data)
-            if pubkey.is_extended:
-                xpub = pubkey.key.to_base58(version=network["xpub"])
-                # Assuming Native Segwit
-                descriptor = Descriptor.from_string("wpkh(%s)" % xpub)
-                return descriptor, None
-        except:
-            pass
+        # If that fails, try to parse as an xpub as a last resort
+        pubkey = Key.from_string(wallet_data.strip())
+        if pubkey.is_extended:
+            network, versiontype = version_to_network_versiontype(pubkey.key.version)
+
+            xpub = pubkey.key.to_base58(version=NETWORKS[network]["xpub"])
+
+            fmt = None
+            if pubkey.origin is None:
+                # assume derivation if possible
+                derivation = xpub_data_to_derivation(
+                    versiontype,
+                    network,
+                    pubkey.key.child_number,
+                    pubkey.key.depth,
+                    allow_assumption=allow_assumption,
+                )
+                if derivation:
+                    fmt = derivation_to_script_wrapper(derivation)
+            else:
+                fmt = derivation_to_script_wrapper(pubkey.origin.derivation)
+                fmt = fmt.format("[" + str(pubkey.origin) + "]{}")
+
+            descriptor = Descriptor.from_string(fmt.format(xpub))
+            return descriptor, None
 
     raise ValueError("invalid wallet format")
 
@@ -275,3 +332,105 @@ def parse_address(address_data):
         raise ValueError("invalid address")
 
     return addr
+
+
+def version_to_network_versiontype(hdkey_version):
+    """returns embit.networks.NETWORKS[network][versiontype] keys
+    based on HDKey's version bytes"""
+    network, versiontype = None, None
+    for netname, versiontypes in NETWORKS.items():
+        if hdkey_version in versiontypes.values():
+            network = netname
+            versiontype = [k for k, v in versiontypes.items() if v == hdkey_version][0]
+            break
+    return network, versiontype
+
+
+def xpub_data_to_derivation(versiontype, network, child, depth, allow_assumption=None):
+    """returns assumed derivation list for supported slip32 bips
+    based on embit.networks.NETWORKS keys for versiontype, network,
+    child_number (used as account for single-sig) and depth.  Depth
+    is used as weak verification, it must match the expected depth.
+    Where unsafe assumptions could be made, AssumptionWarning is raised
+    (with warning text and assumed derivation as first two params)
+    unless called with allow_assumption=assumed_derivation.
+    """
+
+    derivation, network_node, assumption_text = None, None, None
+
+    if network == "main":
+        network_node = 0 + HARDENED_INDEX
+    elif network in ("test", "regtest", "signet"):
+        network_node = 1 + HARDENED_INDEX
+
+    if network_node and child >= HARDENED_INDEX:
+        if versiontype == "xpub" and depth == 3:
+            derivation = [
+                SINGLESIG_SCRIPT_PURPOSE[P2WPKH] + HARDENED_INDEX,
+                network_node,
+                child,
+            ]
+            if allow_assumption != derivation:
+                assumption_text = t("Native Segwit - 84 would be assumed")
+        elif versiontype == "ypub" and depth == 3:
+            derivation = [
+                SINGLESIG_SCRIPT_PURPOSE[P2SH_P2WPKH] + HARDENED_INDEX,
+                network_node,
+                child,
+            ]
+        elif versiontype == "zpub" and depth == 3:
+            derivation = [
+                SINGLESIG_SCRIPT_PURPOSE[P2WPKH] + HARDENED_INDEX,
+                network_node,
+                child,
+            ]
+        elif versiontype == "Ypub" and depth == 4 and child == 1 + HARDENED_INDEX:
+            derivation = [
+                MULTISIG_SCRIPT_PURPOSE + HARDENED_INDEX,
+                network_node,
+                0 + HARDENED_INDEX,
+                child,
+            ]
+            if allow_assumption != derivation:
+                assumption_text = t("Account #0 would be assumed")
+        elif versiontype == "Zpub" and depth == 4 and child == 2 + HARDENED_INDEX:
+            derivation = [
+                MULTISIG_SCRIPT_PURPOSE + HARDENED_INDEX,
+                network_node,
+                0 + HARDENED_INDEX,
+                child,
+            ]
+            if allow_assumption != derivation:
+                assumption_text = t("Account #0 would be assumed")
+
+    if assumption_text:
+        raise AssumptionWarning(assumption_text, derivation)
+
+    return derivation
+
+
+def derivation_to_script_wrapper(derivation):
+    """returns format_str for wrapping xpub into wallet descriptor,
+    supporting single-sig only for now, based on
+    embit.descriptor.arguments.KeyOrigin.derivation list"""
+    format_str = None
+
+    if len(derivation) == 3:
+        purpose = derivation[0]
+        network = derivation[1]
+        account = derivation[2]
+
+        if (
+            network in (0 + HARDENED_INDEX, 1 + HARDENED_INDEX)
+            and account >= 0 + HARDENED_INDEX
+        ):
+            if purpose == SINGLESIG_SCRIPT_PURPOSE[P2PKH] + HARDENED_INDEX:
+                format_str = "pkh({})"
+            elif purpose == SINGLESIG_SCRIPT_PURPOSE[P2SH_P2WPKH] + HARDENED_INDEX:
+                format_str = "sh(wpkh({}))"
+            elif purpose == SINGLESIG_SCRIPT_PURPOSE[P2WPKH] + HARDENED_INDEX:
+                format_str = "wpkh({})"
+            elif purpose == SINGLESIG_SCRIPT_PURPOSE[P2TR] + HARDENED_INDEX:
+                format_str = "tr({})"
+
+    return format_str
