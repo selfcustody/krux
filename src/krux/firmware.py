@@ -28,7 +28,7 @@ import flash
 from embit import ec
 from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
 from .metadata import SIGNER_PUBKEY
-from .display import Display
+from .display import display
 from .krux_settings import t
 from .wdt import wdt
 
@@ -191,7 +191,6 @@ def upgrade():
     except:
         return False
 
-    display = Display()
     inp = Input()
 
     display.clear()

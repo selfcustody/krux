@@ -26,7 +26,13 @@ import hashlib
 import binascii
 from .. import MENU_CONTINUE, Menu
 from ...themes import theme
-from ...display import DEFAULT_PADDING, MINIMAL_DISPLAY
+from ...display import (
+    DEFAULT_PADDING,
+    MINIMAL_DISPLAY,
+    FONT_HEIGHT,
+    TOTAL_LINES,
+    BOTTOM_PROMPT_LINE,
+)
 from ...baseconv import base_encode
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
@@ -89,7 +95,7 @@ class SignMessage(Utils):
                     )
 
                     # Maximum lines available for message
-                    max_lines = self.ctx.display.total_lines
+                    max_lines = TOTAL_LINES
                     if MINIMAL_DISPLAY:
                         max_lines -= 7
                     else:
@@ -100,22 +106,22 @@ class SignMessage(Utils):
                         self.ctx.display.draw_hcentered_text(
                             t("Message:"), offset_y, theme.highlight_color
                         )
-                        * self.ctx.display.font_height
+                        * FONT_HEIGHT
                     )
                     offset_y += (
                         self.ctx.display.draw_hcentered_text(
                             message.decode(), offset_y, max_lines=max_lines
                         )
                         + 1
-                    ) * self.ctx.display.font_height
+                    ) * FONT_HEIGHT
                     offset_y += (
                         self.ctx.display.draw_hcentered_text(
                             t("Address") + ":", offset_y, theme.highlight_color
                         )
-                        * self.ctx.display.font_height
+                        * FONT_HEIGHT
                     )
                     self.ctx.display.draw_hcentered_text(short_address, offset_y)
-                    if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
+                    if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
                         return ""
                     message_hash = hashlib.sha256(
                         hashlib.sha256(
@@ -161,7 +167,7 @@ class SignMessage(Utils):
         self.ctx.display.draw_centered_text(
             "SHA256:\n%s" % binascii.hexlify(message_hash).decode()
         )
-        if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
+        if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return ""
 
         # User confirmed to sign!

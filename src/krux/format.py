@@ -36,15 +36,31 @@ def format_btc(amount):
     btc_decimal_only = amount % SATS_PER_BTC
     btc_decimal_8char = ("{:0>" + BTC_SATS_LEN + "}").format(btc_decimal_only)
 
-    decimal_separator = ","
-    if Settings().i18n.locale == "en-US":
-        decimal_separator = "."
     return (
-        "{:,}".format(btc_without_decimal).replace(",", THOUSANDS_SEPARATOR)
-        + decimal_separator
+        generate_thousands_separator(btc_without_decimal)
+        + render_decimal_separator()
         + btc_decimal_8char[:2]
         + THOUSANDS_SEPARATOR
         + btc_decimal_8char[2:5]
         + THOUSANDS_SEPARATOR
         + btc_decimal_8char[5:]
     )
+
+
+def render_decimal_separator():
+    """Return decimal separator depending on locale"""
+    decimal_separator = ","
+    if Settings().i18n.locale == "en-US":
+        decimal_separator = "."
+
+    return decimal_separator
+
+
+def replace_decimal_separator(text):
+    """Replace decimal separator in text depending on locale"""
+    return text.replace(".", render_decimal_separator())
+
+
+def generate_thousands_separator(number_without_decimal):
+    """Generate thousands separator in number_without_decimal"""
+    return "{:,}".format(number_without_decimal).replace(",", THOUSANDS_SEPARATOR)

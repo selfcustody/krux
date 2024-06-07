@@ -4,14 +4,14 @@ This page explains how to install Krux from a test (beta), pre-built release.
 Keep in mind that these are unsigned binaries.
 
 ### Download
-Download experimental compiled firmware or the Android app `apk`: [Krux binaries](https://github.com/odudex/krux_binaries)
+Download experimental compiled firmware or the Android app `apk` from our [test (beta) repository](https://github.com/odudex/krux_binaries).
 
 #### Android
-Krux Android app is intended for learning about Krux and Bitcoin airgapped transactions. Vulnerabilities inherent to Android phones such as the OS, other apps and wireless / CDMA / GSM / Bluetooth connectivity make using any phone insecure. Krux app should NOT be used to manage savings or important keys and mnemonics. For that, a dedicated device is recommended.
+Krux Android app is intended for learning about Krux and Bitcoin airgapped transactions (requires Android 6.0 or above). Vulnerabilities inherent to Android phones such as the OS, other apps and wireless / CDMA / GSM / Bluetooth connectivity make using any phone insecure. Krux app should NOT be used to manage savings or important keys and mnemonics. For that, a dedicated device is recommended.
 
 #### M5StickV
 ##### Linux
-To Flash M5stickV run:
+To Flash M5StickV run:
 ```bash
 ./ktool-linux -B goE -b 1500000 maixpy_m5stickv/kboot.kfpkg
 ```
@@ -36,7 +36,7 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 ```
 
 ----8<----
-amigo-more-info-faq.md
+amigo-more-info-faq.en.txt
 ----8<----
 
 #### Sipeed Maix Bit
@@ -70,6 +70,12 @@ Replace './ktool-linux' for 'ktool-win.exe' and / for \ in commands:
 To Flash Yahboom k210 module you'll have to manually specify the port, on this example `/dev/ttyUSB0`:
 ```bash
 ./ktool-linux -B goE -b 1500000 -p /dev/ttyUSB0 yahboom/kboot.kfpkg
+```
+
+##### Windows
+See the correct port at Device Manager > Ports (COM & LPT), or just try one from 1 to 12, on this example `COM6`:
+```bash
+./ktool-win.exe -B goE -b 1500000 -p COM6 yahboom\kboot.kfpkg
 ```
 
 

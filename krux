@@ -55,17 +55,22 @@ if [ "$1" == "build" ]; then
     if [ -z "$device" ]; then
         echo "Missing device"
     else
-        declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
-        sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
+        if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]||
+        [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]||[ "$device" == "maixpy_cube" ]; then
+            declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
+            sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
 
-        mkdir -p build
-        docker build . -t krux-builder --build-arg DEVICE=$device
+            mkdir -p build
+            docker build . -t krux-builder --build-arg DEVICE=$device
 
-        # Create a container to extract the built firmware
-        docker create --name extract-firmware krux-builder
-        docker cp extract-firmware:$BUILD_DIR/firmware.bin build/firmware.bin
-        docker cp extract-firmware:$BUILD_DIR/kboot.kfpkg build/kboot.kfpkg
-        docker rm extract-firmware
+            # Create a container to extract the built firmware
+            docker create --name extract-firmware krux-builder
+            docker cp extract-firmware:$BUILD_DIR/firmware.bin build/firmware.bin
+            docker cp extract-firmware:$BUILD_DIR/kboot.kfpkg build/kboot.kfpkg
+            docker rm extract-firmware
+        else
+            echo "Wrong device name, use maixpy_devicename"
+        fi
     fi
 elif [ "$1" == "flash" ]; then
     device="$2"

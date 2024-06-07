@@ -1,25 +1,33 @@
-Krux has the ability to print all QR codes it generates, including mnemonic, xpub, wallet backup, and signed PSBT, via a locally-connected thermal printer over its serial port. Consult the [part list](../../parts.md/#optional-thermal-printer) page for supported printers.
+----8<----
+warning-printer.en.txt
+----8<----
+
+Krux has the ability to print mnemonic backup (Words, Numbers, Tiny Seed template; but not Stackbit 1248) and any QR code (SeedQR, signed PSBT, Address, XPUB, Wallet output descriptor, ...) via a locally-connected TTL serial thermal printer. Consult the [parts list](../../parts.md/#optional-thermal-printer) page for supported printers.
 
 <img src="../../../img/maixpy_amigo/print-qr-printing-150.png">
 <img src="../../../img/maixpy_m5stickv/print-qr-printing-125.png">
 
-<video width="430" height="300" controls>
+<video width="430" controls>
   <source src="../../../img/printing-qr.mp4" type="video/mp4"></source>
 </video>
 
-<video width="400" height="300" controls>
+<video width="400" controls>
   <source src="../../../img/scanning-printed-qr.mp4" type="video/mp4"></source>
+</video>
+
+<video width="480" controls>
+  <source src="../../../img/printing-scanning-psbt.mp4" type="video/mp4"></source>
 </video>
 
 
 <img src="../../../img/maixpy_m5stickv/print-qr-prompt-125.png" align="right">
 <img src="../../../img/maixpy_amigo/print-qr-prompt-150.png" align="right">
 
-Once connected and powered on, all screens that display a QR code will begin showing a follow-up screen asking if you want to `Print to QR?`.
+Once enabled the printer driver to thermal in the [Krux settings](./getting-started/settings.md/#thermal), all screens that display a QR code will offer the option to `Print to QR`. Other formats of mnemonic backup will also ask if you want to `Print to QR?`. 
 
 There are many ways you can use this functionality, including:
 
-- Printing backups of your mnemonics and multisig wallets
+- Printing backups of your mnemonics and multisig wallet output descriptor
 - Printing your xpubs and receive addresses to share
 - Printing signed messages and PSBTs
 

@@ -22,12 +22,11 @@
 
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT
-from ..sd_card import SDHandler
+from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
 from ..qr import get_size
-from ..display import DEFAULT_PADDING
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -145,8 +144,8 @@ class SeedQRView(Page):
     def draw_grided_qr(self, mode):
         """Draws grided QR"""
         self.ctx.display.clear()
-        if self.ctx.display.width() > 140:
-            grid_size = self.ctx.display.width() // 140
+        if self.ctx.display.width() > SMALLEST_WIDTH:
+            grid_size = self.ctx.display.width() // SMALLEST_WIDTH
         else:
             grid_size = 1
         grid_offset = self.ctx.display.width() % (self.qr_size + 2)
@@ -313,6 +312,7 @@ class SeedQRView(Page):
     def save_pbm_image(self, file_name):
         """Saves QR code image as compact B&W bitmap format file"""
         from ..sd_card import PBM_IMAGE_EXTENSION
+        from .file_operations import SaveFile
 
         code, size = self.add_frame(self.code, self.qr_size)
         pbm_data = bytearray()
@@ -329,20 +329,23 @@ class SeedQRView(Page):
                     pbm_data.append(byte)
                     byte = 0
 
-        file_name += PBM_IMAGE_EXTENSION
-        with SDHandler() as sd:
-            sd.write_binary(file_name, pbm_data)
-        self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
+        save_page = SaveFile(self.ctx)
+        save_page.save_file(
+            pbm_data,
+            file_name,
+            file_extension=PBM_IMAGE_EXTENSION,
+            save_as_binary=True,
+            prompt=False,
+        )
 
     def save_bmp_image(self, file_name, resolution):
         """Save QR code image as .bmp file"""
         from ..sd_card import BMP_IMAGE_EXTENSION
+        from .file_operations import SaveFile
 
         import image
         import lcd
 
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Saving ..."))
         code, size = self.add_frame(self.code, self.qr_size)
         raw_image = image.Image(size=(size, size))
         for y_index in range(0, size):
@@ -362,27 +365,28 @@ class SeedQRView(Page):
             x_scale=scale,
             y_scale=scale,
         )
-        file_name += BMP_IMAGE_EXTENSION
+        save_page = SaveFile(self.ctx)
+        file_name = save_page.set_filename(
+            file_name, file_extension=BMP_IMAGE_EXTENSION
+        )
+        if file_name == ESC_KEY:
+            return
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Saving ..."))
+
         bmp_img.save("/sd/" + file_name)
         self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
 
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
-        from .file_operations import SaveFile
 
-        file_saver = SaveFile(self.ctx)
         suggested_file_name = self.title.replace(" ", "_")
-        suggested_file_name = suggested_file_name.replace(
-            " ", ""
-        )  # Replaces thin spaces too
-        if len(suggested_file_name) > 10:
-            # Crop file name
+        # Replaces thin spaces too
+        suggested_file_name = suggested_file_name.replace(" ", "_")
+        if len(suggested_file_name) > 10:  # Crop file name
             suggested_file_name = suggested_file_name[:10]
-        file_name, filename_undefined = file_saver.set_filename(
-            suggested_file_name,
-        )
-        if filename_undefined:
-            return
+
         size = self.qr_size + 2
         bmp_resolutions = []
         resolution = size
@@ -392,29 +396,37 @@ class SeedQRView(Page):
                 bmp_resolutions.append(resolution)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Res. - Format"), self.ctx.display.font_height, info_box=True
+            t("Res. - Format"), FONT_HEIGHT, info_box=True
         )
         qr_menu = []
         qr_menu.append(
-            ("%dx%d - PBM" % (size, size), lambda: self.save_pbm_image(file_name))
+            (
+                "%dx%d - PBM" % (size, size),
+                lambda: self.save_pbm_image(suggested_file_name),
+            )
         )
         for bmp_resolution in bmp_resolutions:
             qr_menu.append(
                 (
                     "%dx%d - BMP" % (bmp_resolution, bmp_resolution),
-                    lambda res=bmp_resolution: self.save_bmp_image(file_name, res),
+                    lambda res=bmp_resolution: self.save_bmp_image(
+                        suggested_file_name, res
+                    ),
                 )
             )
-        submenu = Menu(self.ctx, qr_menu, offset=2 * self.ctx.display.font_height)
+        qr_menu.append((t("Back"), lambda: None))
+        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT)
         submenu.run_loop()
-        # return MENU_EXIT  # Uncomment to exit QR Viewer after saving
+        return MENU_CONTINUE
+        # return MENU_EXIT  # Use this to exit QR Viewer after saving
 
     def print_qr(self):
         "Printer handler"
         from .utils import Utils
 
         utils = Utils(self.ctx)
-        utils.print_standard_qr(self.code, title=self.title, is_qr=True)
+        title = self.title.replace(" ", " ")  # Replaces thin spaces
+        utils.print_standard_qr(self.code, title=title, is_qr=True)
         # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
     def display_qr(self, allow_export=False, transcript_tools=True, quick_exit=False):
@@ -438,7 +450,7 @@ class SeedQRView(Page):
                 if self.ctx.display.height() > self.ctx.display.width():
                     self.ctx.display.draw_hcentered_text(
                         label,
-                        self.ctx.display.qr_offset() + self.ctx.display.font_height,
+                        self.ctx.display.qr_offset() + FONT_HEIGHT,
                     )
                 button = self.ctx.input.wait_for_button()
                 if transcript_tools:

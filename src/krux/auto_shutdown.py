@@ -48,7 +48,6 @@ class AutoShutdown:
         self.time_out = self.shutdown_time
         if self.shutdown_time and self.auto_shutdown_timer is None:
             # Creates a timer in case it does not exist
-            print("AutoShutdown: Creating timer")
             self.auto_shutdown_timer = Timer(
                 Timer.TIMER1,
                 Timer.CHANNEL0,

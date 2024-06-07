@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from ...display import FONT_HEIGHT
 from ...krux_settings import t
 from .. import (
     Page,
@@ -27,8 +28,8 @@ from .. import (
     MENU_CONTINUE,
     MENU_EXIT,
 )
-
 from ...sd_card import PUBKEY_FILE_EXTENSION
+from ...key import P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH
 
 # to start xpub value without the xpub/zpub/ypub prefix
 WALLET_XPUB_START = 4
@@ -71,7 +72,7 @@ class PubkeyView(Page):
             ]
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
             menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
-            menu_offset *= self.ctx.display.font_height
+            menu_offset *= FONT_HEIGHT
             pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
@@ -80,7 +81,7 @@ class PubkeyView(Page):
                 + self.ctx.wallet.key.derivation_str(pretty=True)
                 + "\n\n"
                 + full_pub_key,
-                offset_y=self.ctx.display.font_height,
+                offset_y=FONT_HEIGHT,
                 info_box=True,
             )
             pub_key_menu.run_loop()
@@ -95,9 +96,17 @@ class PubkeyView(Page):
             seed_qr_view = SeedQRView(self.ctx, data=xpub, title=title)
             seed_qr_view.display_qr(allow_export=True, transcript_tools=False)
 
-        zpub = "Zpub" if self.ctx.wallet.key.multisig else "zpub"
+        versions = [None]
+        if self.ctx.wallet.key.script_type == P2WPKH:
+            versions.append(self.ctx.wallet.key.network["zpub"])
+        elif self.ctx.wallet.key.script_type == P2SH_P2WPKH:
+            versions.append(self.ctx.wallet.key.network["ypub"])
+        elif self.ctx.wallet.key.script_type == P2SH_P2WSH:
+            versions.append(self.ctx.wallet.key.network["Ypub"])
+        elif self.ctx.wallet.key.script_type == P2WSH:
+            versions.append(self.ctx.wallet.key.network["Zpub"])
         pub_key_menu_items = []
-        for version in [None, self.ctx.wallet.key.network[zpub]]:
+        for version in versions:
             title = self.ctx.wallet.key.account_pubkey_str(version)[
                 :WALLET_XPUB_START
             ].upper()

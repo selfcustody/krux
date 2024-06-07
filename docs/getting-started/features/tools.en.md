@@ -7,7 +7,7 @@ Here are some useful tools that are available as soon as Krux starts! These are 
 <img src="../../../img/maixpy_m5stickv/check-sd-card-125.png" align="right">
 <img src="../../../img/maixpy_amigo/check-sd-card-150.png" align="right">
 
-You can check if a SD card can be detected and read by your device and explore its content.
+You can check if a SD card can be detected and read by your device and explore its content. If there are too many files to fit on one screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens if your device has a touchscreen.
 
 <div style="clear: both"></div>
 
@@ -23,7 +23,7 @@ Quickly print a test QR code to check and optimize your printer setup.
 <img src="../../../img/maixpy_m5stickv/create-qr-code-125.png" align="right">
 <img src="../../../img/maixpy_amigo/create-qr-code-150.png" align="right">
 
-Enter a text input to create, print or transcript a QR code that can be later used as an encryption key or as a passphrase.
+Enter a text input to create, print or transcript a QR code that can be later used as an encryption key or as a passphrase. Swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes if your device has a touchscreen.
 
 <div style="clear: both"></div>
 

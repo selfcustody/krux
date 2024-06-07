@@ -59,9 +59,9 @@ RUN apt-get update -y && \
         python3-setuptools
 
 RUN mkdir -p /opt && \
-    git clone --recursive https://github.com/kendryte/kendryte-gnu-toolchain && \
-    cd kendryte-gnu-toolchain && \
-    git checkout fbf55383711b68c00ecf67e23959822180010398 && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --branch v8.2.0-20190409 https://github.com/kendryte/kendryte-gnu-toolchain
+
+RUN cd kendryte-gnu-toolchain && \
     export PATH=$PATH:/opt/kendryte-toolchain/bin && \
     ./configure --prefix=/opt/kendryte-toolchain --with-cmodel=medany --with-arch=rv64imafc --with-abi=lp64f --enable-threads=posix --enable-libatomic && \
     make -j8

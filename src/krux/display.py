@@ -26,16 +26,32 @@ from .themes import theme
 from .krux_settings import Settings
 
 DEFAULT_PADDING = 10
+MINIMAL_PADDING = 5
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
-QR_DARK_COLOR, QR_LIGHT_COLOR = board.config["krux"]["display"]["qr_colors"]
-
-DEFAULT_BACKLIGHT = 1
+QR_DARK_COLOR, QR_LIGHT_COLOR = (
+    [16904, 61307] if board.config["type"] == "m5stickv" else [0, 6342]
+)
+TOTAL_LINES = board.config["lcd"]["width"] // FONT_HEIGHT
+BOTTOM_LINE = (TOTAL_LINES - 1) * FONT_HEIGHT
 MINIMAL_DISPLAY = board.config["type"] in ("m5stickv", "cube")
+if MINIMAL_DISPLAY:
+    BOTTOM_PROMPT_LINE = BOTTOM_LINE - DEFAULT_PADDING
+else:
+    # room left for no/yes buttons
+    BOTTOM_PROMPT_LINE = BOTTOM_LINE - 3 * FONT_HEIGHT
+
+# Status bar dimensions
+STATUS_BAR_HEIGHT = (
+    FONT_HEIGHT + 1 if MINIMAL_DISPLAY else FONT_HEIGHT + MINIMAL_PADDING
+)
 
 FLASH_MSG_TIME = 2000
 
-# Splash will use horizontally-centered text plots. The spaces are used to help with alignment
+SMALLEST_WIDTH = 135
+SMALLEST_HEIGHT = 240
+
+# Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
 SPLASH = [
     "██   ",
     "██   ",
@@ -56,21 +72,15 @@ class Display:
 
     def __init__(self):
         self.portrait = True
-        self.font_width = FONT_WIDTH
-        self.font_height = FONT_HEIGHT
-        self.total_lines = board.config["lcd"]["width"] // FONT_HEIGHT
-        self.bottom_line = (self.total_lines - 1) * FONT_HEIGHT
         if board.config["type"] == "amigo":
             self.flipped_x_coordinates = (
                 Settings().hardware.display.flipped_x_coordinates
             )
         else:
             self.flipped_x_coordinates = False
-        if MINIMAL_DISPLAY:
-            self.bottom_prompt_line = self.bottom_line - DEFAULT_PADDING
-        else:
-            # room left for no/yes buttons
-            self.bottom_prompt_line = self.bottom_line - 3 * FONT_HEIGHT
+        self.blk_ctrl = None
+        if "BACKLIGHT" in board.config["krux"]["pins"]:
+            self.gpio_backlight_ctrl(Settings().hardware.display.brightness)
 
     def initialize_lcd(self):
         """Initializes the LCD"""
@@ -126,7 +136,7 @@ class Display:
                     0x2C,
                 ],
             )
-            self.set_backlight(DEFAULT_BACKLIGHT)
+            self.set_pmu_backlight(Settings().hardware.display.brightness)
         elif board.config["type"] == "yahboom":
             lcd.init(
                 invert=True,
@@ -153,11 +163,34 @@ class Display:
             lcd.bgr_to_rgb(False)
         self.to_portrait()
 
+    def gpio_backlight_ctrl(self, brightness):
+        """Control backlight using GPIO PWM"""
+
+        if self.blk_ctrl is None:
+            from machine import Timer, PWM
+
+            pwm_timer = Timer(Timer.TIMER0, Timer.CHANNEL0, mode=Timer.MODE_PWM)
+            self.blk_ctrl = PWM(
+                pwm_timer,
+                freq=1000,
+                duty=100,
+                pin=board.config["krux"]["pins"]["BACKLIGHT"],
+                enable=True,
+            )
+
+        if board.config["type"] == "cube":
+            # Calculate duty cycle
+            # Ranges from 0% to 80% duty cycle
+            # 100 is 0% duty cycle (off, not used here)
+            pwm_value = 5 - int(brightness)
+            pwm_value *= 20
+            self.blk_ctrl.duty(pwm_value)
+
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
         if board.config["type"] == "cube":
-            return self.bottom_line
-        return self.width() + DEFAULT_PADDING // 2
+            return BOTTOM_LINE
+        return self.width() + MINIMAL_PADDING
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""
@@ -204,17 +237,17 @@ class Display:
         lines = []
         start = 0
         line_count = 0
-        if self.width() > 135:
-            columns = self.usable_width() // self.font_width
+        if self.width() > SMALLEST_WIDTH:
+            columns = self.usable_width() // FONT_WIDTH
         else:
-            columns = self.width() // self.font_width
+            columns = self.width() // FONT_WIDTH
 
         # Quick return if content fits in one line
         if len(text) <= columns and "\n" not in text:
             return [text]
 
         if not max_lines:
-            max_lines = self.total_lines
+            max_lines = TOTAL_LINES
 
         while start < len(text) and line_count < max_lines:
             # Find the next line break, if any
@@ -299,7 +332,7 @@ class Display:
         """Draws a string to the screen"""
         if self.flipped_x_coordinates:
             x = self.width() - x
-            x -= len(text) * self.font_width
+            x -= len(text) * FONT_WIDTH
         lcd.draw_string(x, y, text, color, bg_color)
 
     def draw_hcentered_text(
@@ -316,28 +349,30 @@ class Display:
             text if isinstance(text, list) else self.to_lines(text, max_lines=max_lines)
         )
         if info_box:
-            bg_color = theme.frame_color
-            padding = DEFAULT_PADDING if self.width() > 135 else DEFAULT_PADDING // 2
+            bg_color = theme.info_bg_color
+            padding = (
+                DEFAULT_PADDING if self.width() > SMALLEST_WIDTH else MINIMAL_PADDING
+            )
             self.fill_rectangle(
                 padding - 3,
                 offset_y - 1,
                 self.width() - (2 * padding) + 6,
-                (len(lines)) * self.font_height + 2,
+                (len(lines)) * FONT_HEIGHT + 2,
                 bg_color,
-                self.font_width,  # radius
+                FONT_WIDTH,  # radius
             )
         for i, line in enumerate(lines):
             if len(line) > 0:
-                offset_x = max(0, (self.width() - self.font_width * len(line)) // 2)
+                offset_x = max(0, (self.width() - FONT_WIDTH * len(line)) // 2)
                 self.draw_string(
-                    offset_x, offset_y + (i * self.font_height), line, color, bg_color
+                    offset_x, offset_y + (i * FONT_HEIGHT), line, color, bg_color
                 )
         return len(lines)  # return number of lines drawn
 
     def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws text horizontally and vertically centered on the display"""
         lines = text if isinstance(text, list) else self.to_lines(text)
-        lines_height = len(lines) * self.font_height
+        lines_height = len(lines) * FONT_HEIGHT
         offset_y = max(0, (self.height() - lines_height) // 2)
         self.draw_hcentered_text(text, offset_y, color, bg_color)
 
@@ -356,14 +391,22 @@ class Display:
             offset_y, qr_code, self.width(), dark_color, light_color, light_color
         )
 
-    def set_backlight(self, level):
+    def set_pmu_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""
 
         from .power import power_manager
 
-        power_manager.set_screen_brightness(level)
+        # Translate 5 levels to 1-8 range = 1,2,3,5,8
+        translated_level = int(level)
+        if translated_level == 4:
+            translated_level = 5
+        elif translated_level == 5:
+            translated_level = 8
+        power_manager.set_screen_brightness(translated_level)
 
-    def max_menu_lines(self, line_offset=0):
+    def max_menu_lines(self, line_offset=STATUS_BAR_HEIGHT):
         """Maximum menu items the display can fit"""
-        pad = DEFAULT_PADDING if line_offset else 2 * DEFAULT_PADDING
-        return (self.height() - pad - line_offset) // (2 * self.font_height)
+        return (self.height() - line_offset) // (2 * FONT_HEIGHT)
+
+
+display = Display()

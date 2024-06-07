@@ -34,7 +34,12 @@ SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 SWIPE_UP = 6
 SWIPE_DOWN = 7
+FAST_FORWARD = 8
+FAST_BACKWARD = 9
 ACTIVATING_BUTTONS = 8  # Won't trigger actions, just indicates buttons can used
+
+# Release must be confirmed X times
+BUTTON_RELEASE_FILTER = 10 if board.config["type"] in ["cube", "dock"] else 1
 
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
@@ -47,7 +52,7 @@ class Input:
     """Input is a singleton interface for interacting with the device's buttons"""
 
     def __init__(self):
-        self.entropy = 0
+        self.entropy = 0  # used only to pick a random final word
         self.debounce_value = Settings().hardware.buttons.debounce
         self.debounce_time = 0
         self.flushed_flag = False
@@ -243,6 +248,75 @@ class Input:
             self.reset_ios_state()
             self.wdt_feed_inc_entropy()
 
+    def _detect_press_type(self, btn):
+        """Detects the type of press and returns the appropriate button value"""
+
+        def _handle_button_press(btn):
+            press_start_time = time.ticks_ms()
+            if board.config["type"] == "cube":
+                time.sleep_ms(200)  # Stabilization time for cube
+            release_filter = _get_release_filter(btn)
+            while release_filter:
+                if _button_still_pressed(btn):
+                    release_filter = _get_release_filter(btn)
+                else:
+                    release_filter -= 1
+                self.wdt_feed_inc_entropy()
+                if time.ticks_ms() > press_start_time + LONG_PRESS_PERIOD:
+                    return _map_long_press(btn)
+                time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
+
+            if not self.buttons_active:
+                self.buttons_active = True
+                return ACTIVATING_BUTTONS
+            return btn
+
+        def _get_release_filter(btn):
+            """Returns the appropriate release filter for the button"""
+            if (
+                btn in [BUTTON_PAGE, BUTTON_PAGE_PREV]
+                and "ENCODER" in board.config["krux"]["pins"]
+            ):
+                return 0
+            return BUTTON_RELEASE_FILTER
+
+        def _button_still_pressed(btn):
+            if btn == BUTTON_ENTER:
+                return self.enter_value() == PRESSED
+            if btn == BUTTON_PAGE:
+                return self.page_value() == PRESSED
+            # if btn == BUTTON_PAGE_PREV:
+            return self.page_prev_value() == PRESSED
+
+        def _map_long_press(btn):
+            if btn == BUTTON_ENTER:
+                return SWIPE_LEFT
+            if btn == BUTTON_PAGE:
+                return FAST_FORWARD
+            # if btn == BUTTON_PAGE_PREV:
+            return FAST_BACKWARD
+
+        def _handle_touch_input():
+            while self.touch_value() == PRESSED:
+                self.wdt_feed_inc_entropy()
+            self.buttons_active = False
+            if self.swipe_right_value() == PRESSED:
+                return SWIPE_RIGHT
+            if self.swipe_left_value() == PRESSED:
+                return SWIPE_LEFT
+            if self.swipe_up_value() == PRESSED:
+                return SWIPE_UP
+            if self.swipe_down_value() == PRESSED:
+                return SWIPE_DOWN
+            return BUTTON_TOUCH
+
+        if btn in [BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV]:
+            btn = _handle_button_press(btn)
+        elif btn == BUTTON_TOUCH:
+            btn = _handle_touch_input()
+
+        return btn
+
     def wait_for_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if non blocking.
@@ -251,49 +325,7 @@ class Input:
         btn = self._wait_for_press(block, wait_duration)
         if btn is not None:
             auto_shutdown.feed()
-        if btn == BUTTON_ENTER:
-            # Wait for release
-            while self.enter_value() == PRESSED:
-                self.wdt_feed_inc_entropy()
-            if not self.buttons_active:
-                self.buttons_active = True
-                btn = ACTIVATING_BUTTONS
-
-        elif btn == BUTTON_PAGE:
-            start_time = time.ticks_ms()
-            # Wait for release
-            while self.page_value() == PRESSED:
-                self.wdt_feed_inc_entropy()
-                if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
-                    btn = SWIPE_LEFT
-                    break
-            if not self.buttons_active:
-                self.buttons_active = True
-                btn = ACTIVATING_BUTTONS
-        elif btn == BUTTON_PAGE_PREV:
-            start_time = time.ticks_ms()
-            # Wait for release
-            while self.page_prev_value() == PRESSED:
-                self.wdt_feed_inc_entropy()
-                if time.ticks_ms() > start_time + LONG_PRESS_PERIOD:
-                    btn = SWIPE_RIGHT
-                    break
-            if not self.buttons_active:
-                self.buttons_active = True
-                btn = ACTIVATING_BUTTONS
-        elif btn == BUTTON_TOUCH:
-            # Wait for release
-            while self.touch_value() == PRESSED:
-                self.wdt_feed_inc_entropy()
-            self.buttons_active = False
-            if self.swipe_right_value() == PRESSED:
-                btn = SWIPE_RIGHT
-            if self.swipe_left_value() == PRESSED:
-                btn = SWIPE_LEFT
-            if self.swipe_up_value() == PRESSED:
-                btn = SWIPE_UP
-            if self.swipe_down_value() == PRESSED:
-                btn = SWIPE_DOWN
+        btn = self._detect_press_type(btn)
         self.debounce_time = time.ticks_ms()
         return btn
 

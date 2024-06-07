@@ -192,7 +192,7 @@ def test_setting(mocker, m5stickv):
 
 def test_all_labels(mocker, m5stickv):
     from krux.krux_settings import (
-        BitcoinSettings,
+        DefaultWallet,
         I18nSettings,
         EncryptionSettings,
         PrinterSettings,
@@ -207,7 +207,7 @@ def test_all_labels(mocker, m5stickv):
         AmgDisplaySettings,
     )
 
-    bitcoin = BitcoinSettings()
+    bitcoin = DefaultWallet()
     i18n = I18nSettings()
     encryption = EncryptionSettings()
     printer = PrinterSettings()

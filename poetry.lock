@@ -1200,6 +1200,20 @@ files = [
 png = ["pypng (>=0.0.13)"]
 
 [[package]]
+name = "pyserial"
+version = "3.5"
+description = "Python Serial Port Extension"
+optional = true
+python-versions = "*"
+files = [
+    {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},
+    {file = "pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb"},
+]
+
+[package.extras]
+cp2110 = ["hidapi"]
+
+[[package]]
 name = "pytest"
 version = "8.1.1"
 description = "pytest: simple powerful testing with Python"
@@ -1723,9 +1737,10 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
+flash = ["pyserial"]
 simulator = ["Pillow", "numpy", "opencv-python", "pygame", "pyzbar"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9.1"
-content-hash = "a7e58af74d19d8418fa751c9ff3935c97e16e8526cbe767a876d446e7d3001fa"
+content-hash = "291f4863905567b90ac059f39c070da941bb6301fca81db0c18b34cece5f1e13"

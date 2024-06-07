@@ -6,8 +6,8 @@ Head over to the [releases](https://github.com/selfcustody/krux/releases) page a
 ### Verify the files
 Before installing the release, it's a good idea to check that:
 
-1. The SHA256 hash of `krux-vX.Y.Z.zip` matches the hash in `krux-vX.Y.Z.zip.sha256.txt`
-2. The signature file `krux-vX.Y.Z.zip.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
+1. The *SHA256 hash* of `krux-vX.Y.Z.zip` matches the hash in `krux-vX.Y.Z.zip.sha256.txt`
+2. The *signature file* `krux-vX.Y.Z.zip.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
 
 You can either do this manually or with the `krux` shell script, which contains helper commands for this:
 ```bash
@@ -23,7 +23,7 @@ Extract the latest version of Krux you downloaded and enter the folder:
 unzip krux-vX.Y.Z.zip && cd krux-vX.Y.Z
 ```
 
-Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit` or `yahboom` (to yahboom you may need to manually specify the port):
+Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit` or `yahboom` (to yahboom you may need to manually specify the port, for example `/dev/ttyUSB0` on Linux or `COM6` on Windows):
 ```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
@@ -34,11 +34,11 @@ For `dock` the `-B` parameter changes, so run:
 ```
 
 ----8<----
-flash-krux-logo.md
+flash-krux-logo.en.txt
 ----8<----
 
 ----8<----
-amigo-more-info-faq.md
+amigo-more-info-faq.en.txt
 ----8<----
 
 #### Troubleshooting
@@ -63,10 +63,8 @@ List ports on Mac
 ```bash
 ls /dev/cu.usbserial*
 ```
-Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue.
+Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue. See [FAQ](../../faq.md/#why-isnt-my-device-charging-or-being-recognized-when-connected-to-the-computers-usb) for more info.
 
-### Multilingual support
-Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.
-
-### Upgrade via microSD card
-Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades [via microSD](../features/sd-card-update.md) card to keep the device airgapped.
+----8<----
+tips-after-install.en.txt
+----8<----

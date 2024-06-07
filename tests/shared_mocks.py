@@ -272,8 +272,6 @@ def board_m5stickv():
                 "display": {
                     "touch": False,
                     "font": [8, 14],
-                    "inverted_coordinates": False,
-                    "qr_colors": [16904, 61307],
                 },
             },
         }
@@ -323,8 +321,6 @@ def board_amigo_tft():
                 "display": {
                     "touch": True,
                     "font": [12, 24],
-                    "inverted_coordinates": True,
-                    "qr_colors": [0, 6342],
                 },
             },
         }
@@ -351,8 +347,6 @@ def board_dock():
                 "display": {
                     "touch": False,
                     "font": [8, 16],
-                    "inverted_coordinates": False,
-                    "qr_colors": [0, 6342],
                 },
             },
         }
@@ -380,6 +374,7 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(135 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=7),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
     elif board.config["type"] == "dock":
@@ -400,6 +395,7 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
     elif board.config["type"].startswith("amigo"):
@@ -413,5 +409,6 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )

@@ -1,55 +1,55 @@
-This page explains how to install Krux from source.
-
-#### Software
-You will need a computer with [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [`vagrant`](https://www.vagrantup.com/downloads) installed.
+This page explains how to install Krux from source. You can check a simplified version of these instructions in our [README](https://github.com/selfcustody/krux) too.
 
 ### Fetch the code
-In a terminal, run the following:
+This will download the source code of Krux as well as the code of all its dependencies inside a new folder called `krux` (needs [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)):
 ```bash
 git clone --recurse-submodules https://github.com/selfcustody/krux
 ```
-This will pull down the Krux source code as well as the code for all its dependencies and put them inside a new `krux` folder.
 
-Note: When you wish to pull down updates to this repo, you can run the following inside the `krux` folder:
+Note: When you wish to pull updates (to all submodules, their submodules, ...) to this repo, use:
 ```bash
 git pull origin main && git submodule update --init --recursive
 ```
 
-### Spin up a virtual machine
-After you have installed Vagrant, run the following inside the `krux` folder to spin up a new VM:
-```bash
-vagrant up
-```
-
-### Build the firmware
 #### Prerequisite for upgrading via microSD
-If you wish to perform airgapped upgrades via microSD card, you will need to have a private and public key pair to sign your builds and verify the signatures.
+If you wish to perform airgapped upgrades via microSD card later, you will need to have a private and public key pair to sign your builds and verify the signatures. If you do not want to perform further airgapped upgrades, jump to [build section](#build-the-firmware-linux-or-wsl).
 
 You can use an existing Krux installation and mnemonic to sign your builds with, **or** you can generate a keypair and sign from the [`openssl` CLI](https://wiki.openssl.org/index.php/Command_Line_Elliptic_Curve_Operations). Commands have been added to the `krux` shell script to make this easier.
 
 In either case, you will need to update the `SIGNER_PUBKEY` field in `src/krux/metadata.py` to store your public key so that Krux can verify future builds before installing.
 
-To generate a keypair, run:
+To generate a keypair:
 ```bash
-vagrant ssh -c 'cd /vagrant; ./krux generate-keypair'
-vagrant ssh -c 'cd /vagrant; ./krux pem-to-pubkey pubkey.pem'
+./krux generate-keypair
+./krux pem-to-pubkey pubkey.pem
 ```
 
 The first command will create `privkey.pem` and `pubkey.pem` files you can use with openssl, and the second command will output your public key in the form expected by Krux.
 
 Once you've updated the `SIGNER_PUBKEY` with this value, you can proceed with the regular build process.
 
-#### Build
-Run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `dock`, `bit` or `yahboom`:
+### Build the firmware (Linux or WSL)
+The [krux](https://github.com/selfcustody/krux/blob/main/krux) bash script contains commands for common development tasks. It assumes a Linux host, you will need to have [Docker Desktop or Docker Engine](https://docs.docker.com/desktop/), `openssl`, and `wget` installed at a minimum for the commands to work as expected. It works on Windows using WSL. The channel Crypto Guide from Youtube made a step-by-step video - [Krux DIY Bitcoin Signer: Build From Source & Verify (With Windows + WSL2 + Docker)](https://www.youtube.com/watch?v=Vmr_TFy2TfQ)
+
+To build and flash the firmware:
 ```bash
-vagrant ssh -c 'cd /vagrant; ./krux build maixpy_DEVICE'
+# build firmware for Maix Amigo
+./krux build maixpy_amigo
 ```
 
-This will take around an hour or so to complete the first time. Subsequent builds should take only a few minutes.
+The first time, the build can take around an hour or so to complete. Subsequent builds should take only a few minutes. If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
-If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
+Note: if you encounter any of these errors while building, it is a problem connecting to github, try again (if the error persists, try changing the DNS/VPN or correcting the hostname resolution of github.com to an IP that is working for you):
+```
+error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err8)
+fatal: the remote end hung up unexpectedly
+fatal: early EOF
+fatal: index-pack failed
+fatal: clone of ... failed
+Failed to clone ...
+```
 
-### Reproducibility
+#### Reproducibility
 If you build from the `main` branch of the source code, you should be able to reproduce the build process used to generate the last release binaries and obtain exact copies of the `firmware.bin` and `kboot.kfpkg` files, with matching hash checksums.
 
 To extract and verify the firmware.bin contained in kboot.kfpkg, you can use the following command:
@@ -59,37 +59,26 @@ To extract and verify the firmware.bin contained in kboot.kfpkg, you can use the
 ### Flash the firmware onto the device
 Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `dock`, `bit` or `yahboom`:
 ```bash
-vagrant ssh -c 'cd /vagrant; ./krux flash maixpy_DEVICE'
+# build firmware for DEVICE
+./krux flash maixpy_DEVICE
 ```
-If the flashing fails try one of the following common solutions:
-
-- Running `vagrant reload` prior to flashing in order for the newly-inserted USB device to be detected and passed through to the VM on startup.
-- If this command fails, even after reloading, with the error `Failed to find device via USB. Is it connected and powered on?`, make sure that your user has been added to the `vboxusers` group. On Mac or Linux, run the following command:
-  ```bash
-  sudo usermod -a -G vboxusers yourusername
-  ```
-- If the flashing process fails midway through, check the connection, restart the device, and try the command again.
+If the flashing fails try one of the following common solutions listed on FAQ
 
 ----8<----
-flash-krux-logo.md
+flash-krux-logo.en.txt
 ----8<----
 
 ----8<----
-amigo-more-info-faq.md
+amigo-more-info-faq.en.txt
 ----8<----
 
-### Multilingual support
-Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.
-
-### Upgrade via microSD card
-Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades [via microSD](../features/sd-card-update.md) card to keep the device airgapped.
-
-After you've built the firmware, you can sign it using one of the following methods:
+### Signing the firmware
+You can sign the firmware to [perform airgapped upgrades](#prerequisite-for-upgrading-via-microsd) using one of the two methods listed below:
 
 #### Method 1: Signing from Krux
 First, calculate the SHA256 hash of the new firmware by running:
 ```bash
-vagrant ssh -c 'cd /vagrant; ./krux sha256 build/firmware.bin'
+./krux sha256 build/firmware.bin'
 ```
 
 Copy this hex string and turn it into a QR code using whichever QR code generator you'd like.
@@ -98,7 +87,7 @@ In Krux, enter the mnemonic of your private key that will be used for signing, a
 
 Take this string and create a signature file by running:
 ```bash
-vagrant ssh -c 'cd /vagrant; ./krux b64decode "signature-in-base64" > build/firmware.bin.sig'
+./krux b64decode "signature-in-base64" > build/firmware.bin.sig
 ```
 
 This will generate a `firmware.bin.sig` file containing a signature of the firmware's SHA256 hash.
@@ -106,7 +95,7 @@ This will generate a `firmware.bin.sig` file containing a signature of the firmw
 #### Method 2: Signing from your computer with OpenSSL
 With the keypair [you generated before](#prerequisite-for-upgrading-via-microsd), you can now run:
 ```bash
-vagrant ssh -c 'cd /vagrant; ./krux sign build/firmware.bin privkey.pem'
+./krux sign build/firmware.bin privkey.pem'
 ```
 
 This will generate a `firmware.bin.sig` file containing a signature of the firmware's SHA256 hash.

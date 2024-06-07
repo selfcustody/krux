@@ -1,0 +1,1 @@
+M5StickV's USB-C port lacks pull up resistors required for it to be recognized and powered by host (computer) USB-C ports. If you don't have an USB-A available, you can use a USB hub connected between your computer's USB-C and M5StickV.

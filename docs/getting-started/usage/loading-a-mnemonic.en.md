@@ -11,16 +11,20 @@ Once you have either a 12- or 24-word mnemonic, choose `Load Mnemonic` on Krux's
 
 You can choose to use the camera to scan a `QR code` or `Tiny Seed` metal plate backup.
 
+----8<----
+camera-scan-tips.en.txt
+----8<----
+
 <div style="clear: both"></div>
 
 #### QR Code
 
 It's unpleasant having to manually enter 12 or 24 words every time you want to use Krux. To remedy this you can instead use the device's camera to read a QR code containing the words. Krux will decode QR codes of four types:
 
-1. **Plain text QR**: The mnemonic words encoded as text, with words separated by spaces.
-2. [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP-39 numbers concatenated, encoded as text.
-3. [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
-4. [Encrypted Mnemonic](../features/encrypted-mnemonics.md): A specification created by Krux that encrypts the mnemonic words bits and adds some information about the encryption used.
+- **Plain text QR**: The mnemonic words encoded as text, with words separated by spaces.
+- [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP-39 numbers concatenated, encoded as text.
+- [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
+- [Encrypted Mnemonic](../features/encrypted-mnemonics.md): A specification created by Krux that encrypts the mnemonic words bits and adds some information about the encryption used.
 
 After opening your wallet via one of the manual methods you can use Krux to create QR codes of all types above, transcript them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic. Check out the [Printing section](../features/printing.md) for more information.
 You can also use [an offline QR code generator for this](https://iancoleman.io/bip39/) (ideally on an airgapped device).
@@ -45,7 +49,7 @@ Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) 
 Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
 
 ----8<----
-12th-24th-word-generate.md
+12th-24th-word-generate.en.txt
 ----8<----
 
 <div style="clear: both"></div>
@@ -62,7 +66,7 @@ You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal f
 
 ##### Final checksum word
 ----8<----
-12th-24th-word-generate.md
+12th-24th-word-generate.en.txt
 ----8<----
 
 <div style="clear: both"></div>
@@ -105,7 +109,7 @@ Once you have entered your mnemonic, you will be presented with the full list of
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-passphrase-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-passphrase-150.png" align="right">
 
-After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. You can create a QR code from your passphrase offline in [Tools](../features/tools.md/#create-qr-code) section.
+After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes if your device has a touchscreen. For scanning, you can also create a QR code from your offline passphrase in [Tools](../features/tools.md/#create-qr-code).
 
 <div style="clear: both"></div>
 

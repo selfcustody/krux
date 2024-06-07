@@ -26,6 +26,8 @@ from .settings import (
     NumberSetting,
     SD_PATH,
     FLASH_PATH,
+    MAIN_TXT,
+    TEST_TXT,
 )
 import board
 import binascii
@@ -69,19 +71,18 @@ def t(slug):
     return lookup[slug_id]
 
 
-class BitcoinSettings(SettingsNamespace):
+class DefaultWallet(SettingsNamespace):
     """Bitcoin-specific settings"""
 
-    MAIN_TXT = "main"
-    TEST_TXT = "test"
-
-    namespace = "settings.bitcoin"
+    namespace = "settings.wallet"
     network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
+    multisig = CategorySetting("multisig", False, [False, True])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "network": t("Network"),
+            "multisig": t("Multisig"),
         }[attr]
 
 
@@ -219,8 +220,7 @@ class ButtonsSettings(SettingsNamespace):
     """Buttons debounce settings"""
 
     namespace = "settings.buttons"
-    debounce_value = 300 if board.config["type"] == "cube" else 100
-    debounce = NumberSetting(int, "debounce", debounce_value, [100, 500])
+    debounce = NumberSetting(int, "debounce", 100, [100, 500])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -261,6 +261,22 @@ class AmgDisplaySettings(SettingsNamespace):
         }[attr]
 
 
+class DisplaySettings(SettingsNamespace):
+    """Custom display settings for Maix Cube"""
+
+    namespace = "settings.display"
+    default_brightness = "1" if board.config["type"] == "m5stickv" else "3"
+    brightness = CategorySetting(
+        "brightness", default_brightness, ["1", "2", "3", "4", "5"]
+    )
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "brightness": t("Brightness"),
+        }[attr]
+
+
 class HardwareSettings(SettingsNamespace):
     """Hardware Related Settings"""
 
@@ -269,10 +285,12 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
-        if board.config["type"] == "amigo" or board.config["type"] == "yahboom":
+        if board.config["type"] in ["amigo", "yahboom"]:
             self.touch = TouchSettings()
         if board.config["type"] == "amigo":
             self.display = AmgDisplaySettings()
+        elif board.config["type"] in ["cube", "m5stickv"]:
+            self.display = DisplaySettings()
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -281,10 +299,12 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
-        if board.config["type"] == "amigo" or board.config["type"] == "yahboom":
+        if board.config["type"] in ["amigo", "yahboom"]:
             hardware_menu["touchscreen"] = t("Touchscreen")
         if board.config["type"] == "amigo":
             hardware_menu["amg_display"] = t("Display")
+        elif board.config["type"] in ["cube", "m5stickv"]:
+            hardware_menu["display"] = t("Display")
 
         return hardware_menu[attr]
 
@@ -366,7 +386,7 @@ class SecuritySettings(SettingsNamespace):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "auto_shutdown": t("Shutdown Time"),
-            "hide_mnemonic": t("Hide Mnemonic"),
+            "hide_mnemonic": t("Hide Mnemonics"),
         }[attr]
 
 
@@ -376,7 +396,7 @@ class Settings(SettingsNamespace):
     namespace = "settings"
 
     def __init__(self):
-        self.bitcoin = BitcoinSettings()
+        self.wallet = DefaultWallet()
         self.security = SecuritySettings()
         self.hardware = HardwareSettings()
         self.i18n = I18nSettings()
@@ -387,7 +407,7 @@ class Settings(SettingsNamespace):
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         main_menu = {
-            "bitcoin": t("Bitcoin"),
+            "wallet": t("Default Wallet"),
             "security": t("Security"),
             "hardware": t("Hardware"),
             "i18n": t("Language"),

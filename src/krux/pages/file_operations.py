@@ -47,94 +47,99 @@ class SaveFile(Page):
         file_extension="",
         file_suffix="",
         save_as_binary=True,
+        prompt=True,
     ):
         """File saver handler page"""
+        persisted = False
         try:
             with SDHandler() as sd:
                 # Wait until user defines a filename or select NO on the prompt
-                filename_undefined = True
-                while filename_undefined:
+                while True:
                     self.ctx.display.clear()
-                    if self.prompt(
+                    if not prompt or self.prompt(
                         file_description + "\n" + t("Save to SD card?") + "\n\n",
                         self.ctx.display.height() // 2,
                     ):
-                        filename, filename_undefined = self.set_filename(
+                        new_filename = self.set_filename(
                             filename,
                             empty_name,
                             file_suffix,
                             file_extension,
                         )
 
+                        if new_filename == ESC_KEY:
+                            break
+
                         # if user defined a filename and it is ok, save!
-                        if not filename_undefined:
+                        if new_filename:
                             if save_as_binary:
-                                sd.write_binary(filename, data)
+                                sd.write_binary(new_filename, data)
                             else:
-                                sd.write(filename, data)
-                            self.flash_text(t("Saved to SD card") + ":\n%s" % filename)
+                                sd.write(new_filename, data)
+                            self.flash_text(
+                                t("Saved to SD card") + ":\n%s" % new_filename
+                            )
+                            persisted = True
+                            break
                     else:
-                        filename_undefined = False
+                        break
         except:
             self.flash_text(t("SD card not detected."))
+        return persisted
 
     def set_filename(
         self, curr_filename="", empty_filename="some_file", suffix="", file_extension=""
     ):
-        """Helper to set the filename based on a suggestion and the user input"""
-        started_filename = curr_filename
-        filename_undefined = True
+        """
+        Helper to set the filename based on a suggestion and the user input.
+        Returns ESC_KEY if the user cancels the operation.
+        Returns None if filename was not properly defined.
+        """
 
-        # remove the file_extension if exists
-        curr_filename = (
-            curr_filename[: len(curr_filename) - len(file_extension)]
-            if curr_filename.endswith(file_extension)
-            else curr_filename
-        )
-
-        # remove the suffix if exists (because we will add it later)
-        curr_filename = (
-            curr_filename[: len(curr_filename) - len(suffix)]
-            if curr_filename.endswith(suffix)
-            else curr_filename
-        )
-
-        curr_filename = self.capture_from_keypad(
-            t("Filename"),
-            [LETTERS, UPPERCASE_LETTERS, FILE_SPECIAL],
-            starting_buffer=(
-                ("%s" + suffix) % curr_filename
-                if curr_filename
-                else empty_filename + suffix
-            ),
-        )
-
-        # Verify if user defined a filename and it is not just dots
-        if (
-            curr_filename
-            and curr_filename != ESC_KEY
-            and not all(c in "." for c in curr_filename)
-        ):
-            # add the extension ".psbt"
-            curr_filename = (
-                curr_filename
-                if curr_filename.endswith(file_extension)
-                else curr_filename + file_extension
+        def remove_suffix(filename, suffix):
+            return (
+                filename[: -len(suffix)]
+                if suffix and filename.endswith(suffix)
+                else filename
             )
-            # check and warn for overwrite filename
-            # add the "/sd/" prefix
-            if SDHandler.file_exists("/sd/" + curr_filename):
+
+        # Remove file extension and suffix if they exist
+        curr_filename = remove_suffix(
+            remove_suffix(curr_filename, file_extension), suffix
+        )
+
+        while True:
+            # Loop until user types a valid name or presses ESC
+            # Capture filename from keypad
+            new_filename = self.capture_from_keypad(
+                t("Filename"),
+                [LETTERS, UPPERCASE_LETTERS, FILE_SPECIAL],
+                starting_buffer=(
+                    (curr_filename + suffix)
+                    if curr_filename
+                    else (empty_filename + suffix)
+                ),
+            )
+
+            if new_filename == ESC_KEY:
+                return new_filename
+
+            if new_filename == "" or all(c == "." for c in new_filename):
+                continue
+
+            final_filename = new_filename
+            # Add file extension if not present
+            if not final_filename.endswith(file_extension):
+                final_filename += file_extension
+
+            # Check for existing file and prompt for overwrite if necessary
+            if SDHandler.file_exists("/sd/" + final_filename):
                 self.ctx.display.clear()
-                if self.prompt(
-                    t("Filename %s exists on SD card, overwrite?") % curr_filename
+                if not self.prompt(
+                    t("Filename %s exists on SD card, overwrite?") % final_filename
                     + "\n\n",
                     self.ctx.display.height() // 2,
                 ):
-                    filename_undefined = False
-            else:
-                filename_undefined = False
+                    continue
 
-        if curr_filename == ESC_KEY:
-            curr_filename = started_filename
-
-        return (curr_filename, filename_undefined)
+            return final_filename

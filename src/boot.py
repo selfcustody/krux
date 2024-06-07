@@ -35,12 +35,11 @@ MIN_SPLASH_WAIT_TIME = 1000
 
 def draw_splash():
     """Display splash while loading modules"""
-    from krux.display import Display, SPLASH
+    from krux.display import display, SPLASH
 
-    disp = Display()
-    disp.initialize_lcd()
-    disp.clear()
-    disp.draw_centered_text(SPLASH)
+    display.initialize_lcd()
+    display.clear()
+    display.draw_centered_text(SPLASH)
 
 
 def check_for_updates():
@@ -83,7 +82,7 @@ def home(ctx_home):
     """Loads and run the Login page"""
     from krux.pages.home_pages.home import Home
 
-    if ctx_home.wallet is not None:
+    if ctx_home.is_logged_in():
         while True:
             if not Home(ctx_home).run():
                 break

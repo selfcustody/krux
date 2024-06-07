@@ -35,9 +35,17 @@ from ..input import (
     PRESSED,
     ONE_MINUTE,
 )
-from ..display import DEFAULT_PADDING, MINIMAL_DISPLAY, FLASH_MSG_TIME
+from ..display import (
+    DEFAULT_PADDING,
+    MINIMAL_DISPLAY,
+    FLASH_MSG_TIME,
+    FONT_HEIGHT,
+    FONT_WIDTH,
+    SMALLEST_WIDTH,
+    STATUS_BAR_HEIGHT,
+)
 from ..qr import to_qr_codes
-from ..krux_settings import t, Settings, BitcoinSettings
+from ..krux_settings import t, Settings, DefaultWallet
 from ..sd_card import SDHandler
 
 MENU_CONTINUE = 0
@@ -58,6 +66,9 @@ LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
+
+BATTERY_WIDTH = 22
+BATTERY_HEIGHT = 7
 
 
 class Page:
@@ -116,28 +127,23 @@ class Page:
         Returns a string.
         """
         buffer = starting_buffer
-        pad = Keypad(self.ctx, keysets)
+        pad = Keypad(self.ctx, keysets, possible_keys_fn)
         while True:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
-            if (
-                len(buffer) + 1
-            ) * self.ctx.display.font_width < self.ctx.display.width():
+            if (len(buffer) + 1) * FONT_WIDTH < self.ctx.display.width():
                 self.ctx.display.draw_hcentered_text(title, offset_y)
-                offset_y += self.ctx.display.font_height * 3 // 2
+                offset_y += FONT_HEIGHT * 3 // 2
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
 
             if progress_bar_fn:
                 progress_bar_fn()
-            possible_keys = pad.keys
-            if possible_keys_fn is not None:
-                possible_keys = possible_keys_fn(buffer)
-                pad.get_valid_index(possible_keys)
-            pad.draw_keys(possible_keys)
+            pad.compute_possible_keys(buffer)
+            pad.get_valid_index()
+            pad.draw_keys()
             btn = self.ctx.input.wait_for_button()
-            if self.ctx.input.touch is not None:
-                if btn == BUTTON_TOUCH:
-                    btn = pad.touch_to_physical(possible_keys)
+            if btn == BUTTON_TOUCH:
+                btn = pad.touch_to_physical()
             if btn == BUTTON_ENTER:
                 pad.moving_forward = True
                 changed = False
@@ -172,7 +178,6 @@ class Page:
 
                 if changed and go_on_change:
                     break
-
             else:
                 pad.navigate(btn)
 
@@ -287,8 +292,8 @@ class Page:
                 t("Part") + "\n%d / %d" % (i + 1, num_parts) if not title else title
             )
             offset_y = self.ctx.display.qr_offset()
-            if title and self.ctx.display.height() > self.ctx.display.width():
-                offset_y += self.ctx.display.font_height
+            if subtitle and self.ctx.display.height() > self.ctx.display.width():
+                offset_y += FONT_HEIGHT
                 # Clean area below QR code to refresh subtitle/part
                 self.ctx.display.fill_rectangle(
                     0,
@@ -326,12 +331,11 @@ class Page:
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (
-            len(self.ctx.display.to_lines(header)) * self.ctx.display.font_height
-            + self.ctx.display.font_height
+            len(self.ctx.display.to_lines(header)) * FONT_HEIGHT + FONT_HEIGHT
         )
         for i, word in enumerate(word_list[:12]):
             offset_x = DEFAULT_PADDING
-            offset_y = starting_y_offset + (i * self.ctx.display.font_height)
+            offset_y = starting_y_offset + (i * FONT_HEIGHT)
             self.ctx.display.draw_string(offset_x, offset_y, word)
         if len(word_list) > 12:
             if board.config["type"] == "m5stickv":
@@ -340,12 +344,12 @@ class Page:
                 self.ctx.display.draw_hcentered_text(header)
                 for i, word in enumerate(word_list[12:]):
                     offset_x = DEFAULT_PADDING
-                    offset_y = starting_y_offset + (i * self.ctx.display.font_height)
+                    offset_y = starting_y_offset + (i * FONT_HEIGHT)
                     self.ctx.display.draw_string(offset_x, offset_y, word)
             else:
                 for i, word in enumerate(word_list[12:]):
                     offset_x = self.ctx.display.width() // 2
-                    offset_y = starting_y_offset + (i * self.ctx.display.font_height)
+                    offset_y = starting_y_offset + (i * FONT_HEIGHT)
                     self.ctx.display.draw_string(offset_x, offset_y, word)
 
     def print_prompt(self, text):
@@ -366,9 +370,7 @@ class Page:
     def prompt(self, text, offset_y=0):
         """Prompts user to answer Yes or No"""
         # Go up if question has multiple lines
-        offset_y -= (
-            len(self.ctx.display.to_lines(text)) - 1
-        ) * self.ctx.display.font_height
+        offset_y -= (len(self.ctx.display.to_lines(text)) - 1) * FONT_HEIGHT
         self.ctx.display.draw_hcentered_text(
             text, offset_y, theme.fg_color, theme.bg_color
         )
@@ -376,15 +378,13 @@ class Page:
         self.x_keypad_map = []
         if MINIMAL_DISPLAY:
             return self.ctx.input.wait_for_button() == BUTTON_ENTER
-        offset_y += (
-            len(self.ctx.display.to_lines(text)) + 1
-        ) * self.ctx.display.font_height
+        offset_y += (len(self.ctx.display.to_lines(text)) + 1) * FONT_HEIGHT
         self.x_keypad_map.append(DEFAULT_PADDING)
         self.x_keypad_map.append(self.ctx.display.width() // 2)
         self.x_keypad_map.append(self.ctx.display.width() - DEFAULT_PADDING)
-        y_key_map = offset_y - self.ctx.display.font_height // 2
+        y_key_map = offset_y - FONT_HEIGHT // 2
         self.y_keypad_map.append(y_key_map)
-        y_key_map += 2 * self.ctx.display.font_height
+        y_key_map += 2 * FONT_HEIGHT
         self.y_keypad_map.append(y_key_map)
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
@@ -395,12 +395,12 @@ class Page:
         answer = True
         while btn != BUTTON_ENTER:
             offset_x = self.ctx.display.width() // 4
-            offset_x -= (len(t("Yes")) * self.ctx.display.font_width) // 2
+            offset_x -= (len(t("Yes")) * FONT_WIDTH) // 2
             self.ctx.display.draw_string(
                 offset_x, offset_y, t("Yes"), theme.go_color, theme.bg_color
             )
             offset_x = (self.ctx.display.width() * 3) // 4
-            offset_x -= (len(t("No")) * self.ctx.display.font_width) // 2
+            offset_x -= (len(t("No")) * FONT_WIDTH) // 2
             self.ctx.display.draw_string(
                 offset_x, offset_y, t("No"), theme.no_esc_color, theme.bg_color
             )
@@ -408,17 +408,17 @@ class Page:
                 if answer:
                     self.ctx.display.outline(
                         DEFAULT_PADDING,
-                        offset_y - self.ctx.display.font_height // 2,
+                        offset_y - FONT_HEIGHT // 2,
                         self.ctx.display.usable_width() // 2,
-                        2 * self.ctx.display.font_height - 2,
+                        2 * FONT_HEIGHT - 2,
                         theme.go_color,
                     )
                 else:
                     self.ctx.display.outline(
                         self.ctx.display.width() // 2,
-                        offset_y - self.ctx.display.font_height // 2,
+                        offset_y - FONT_HEIGHT // 2,
                         self.ctx.display.usable_width() // 2,
-                        2 * self.ctx.display.font_height - 2,
+                        2 * FONT_HEIGHT - 2,
                         theme.no_esc_color,
                     )
             elif self.ctx.input.touch is not None:
@@ -427,7 +427,7 @@ class Page:
                         region,
                         self.y_keypad_map[0],
                         region,
-                        self.y_keypad_map[0] + 2 * self.ctx.display.font_height,
+                        self.y_keypad_map[0] + 2 * FONT_HEIGHT,
                         theme.frame_color,
                     )
             btn = self.ctx.input.wait_for_button()
@@ -436,9 +436,9 @@ class Page:
                 # erase yes/no area for next loop
                 self.ctx.display.fill_rectangle(
                     0,
-                    offset_y - self.ctx.display.font_height,
+                    offset_y - FONT_HEIGHT,
                     self.ctx.display.width(),
-                    3 * self.ctx.display.font_height,
+                    3 * FONT_HEIGHT,
                     theme.bg_color,
                 )
             elif btn == BUTTON_TOUCH:
@@ -451,13 +451,15 @@ class Page:
         # BUTTON_ENTER
         return answer
 
-    def fit_to_line(self, text, prefix="", fixed_chars=0):
+    def fit_to_line(self, text, prefix="", fixed_chars=0, crop_middle=True):
         """Fits text with prefix plus fixed_chars at the beginning into one line,
         removing the central content and leaving the ends"""
 
-        add_chars_amount = (
-            self.ctx.display.usable_width() // self.ctx.display.font_width
-        )
+        add_chars_amount = self.ctx.display.usable_width() // FONT_WIDTH
+        if len(text) + len(prefix) <= add_chars_amount:
+            return prefix + text
+        if not crop_middle:  # Crop from the end
+            return prefix + text[: add_chars_amount - 2] + ".."
         add_chars_amount -= len(prefix) + fixed_chars + 2
         add_chars_amount //= 2
         return (
@@ -546,10 +548,17 @@ class Menu:
     and invoke menu item callbacks that return a status
     """
 
-    def __init__(self, ctx, menu, offset=0):
+    def __init__(self, ctx, menu, offset=None, disable_statusbar=False):
         self.ctx = ctx
         self.menu = menu
-        self.menu_offset = offset
+        self.disable_statusbar = disable_statusbar
+        if offset is None:
+            # Default offset for status bar
+            self.menu_offset = STATUS_BAR_HEIGHT
+        else:
+            # Always diasble status bar if menu has non standard offset
+            self.disable_statusbar = True
+            self.menu_offset = offset
         max_viewable = min(
             self.ctx.display.max_menu_lines(self.menu_offset),
             len(self.menu),
@@ -574,7 +583,8 @@ class Menu:
             selected_item_index = start_from_index
         while True:
             gc.collect()
-            if self.menu_offset:
+            if self.menu_offset > FONT_HEIGHT:
+                # Clear only the menu area
                 self.ctx.display.fill_rectangle(
                     0,
                     self.menu_offset,
@@ -631,7 +641,7 @@ class Menu:
                     self.menu_view.move_forward()
                 elif btn == SWIPE_DOWN:
                     self.menu_view.move_backward()
-                elif btn is None and not self.menu_offset:
+                elif btn is None and self.menu_offset == STATUS_BAR_HEIGHT:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
                     self.screensaver()
 
@@ -653,9 +663,17 @@ class Menu:
 
     def draw_status_bar(self):
         """Draws a status bar along the top of the UI"""
-        if self.menu_offset == 0:  # Only draws if menu is full screen
+        if not self.disable_statusbar:
+            self.ctx.display.fill_rectangle(
+                0,
+                0,
+                self.ctx.display.width(),
+                STATUS_BAR_HEIGHT,
+                theme.info_bg_color,
+            )
             self.draw_battery_indicator()
             self.draw_network_indicator()
+            self.draw_wallet_indicator()
 
     #     self.draw_ram_indicator()
 
@@ -676,41 +694,74 @@ class Menu:
             if charge < 0.3:
                 battery_color = theme.error_color
             else:
-                battery_color = theme.frame_color
+                battery_color = theme.fg_color
 
         # Draw (filled) outline of battery in top-right corner of display
-        padding = 4
-        cylinder_length = 22
-        cylinder_height = 7
+        x_padding = FONT_HEIGHT // 3
+        y_padding = (STATUS_BAR_HEIGHT // 2) - (BATTERY_HEIGHT // 2)
         self.ctx.display.outline(
-            self.ctx.display.width() - padding - cylinder_length,
-            padding,
-            cylinder_length,
-            cylinder_height,
+            self.ctx.display.width() - x_padding - BATTERY_WIDTH,
+            y_padding,
+            BATTERY_WIDTH,
+            BATTERY_HEIGHT,
             battery_color,
         )
         self.ctx.display.fill_rectangle(
-            self.ctx.display.width() - padding + 1,
-            padding + 2,
+            self.ctx.display.width() - x_padding + 1,
+            y_padding + 2,
             2,
-            cylinder_height - 3,
+            BATTERY_HEIGHT - 3,
             battery_color,
         )
 
         # Indicate how much battery is depleted
-        charge_length = int((cylinder_length - 3) * charge)
+        charge_length = int((BATTERY_WIDTH - 3) * charge)
         self.ctx.display.fill_rectangle(
-            self.ctx.display.width() - padding - cylinder_length + 2,
-            padding + 2,
+            self.ctx.display.width() - x_padding - BATTERY_WIDTH + 2,
+            y_padding + 2,
             charge_length,
-            cylinder_height - 3,
+            BATTERY_HEIGHT - 3,
             battery_color,
         )
 
+    def draw_wallet_indicator(self):
+        """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
+        if self.ctx.is_logged_in():
+            if self.ctx.display.width() > SMALLEST_WIDTH:
+                self.ctx.display.draw_hcentered_text(
+                    self.ctx.wallet.key.fingerprint_hex_str(True),
+                    STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
+                    theme.highlight_color,
+                    theme.info_bg_color,
+                )
+            else:
+                self.ctx.display.draw_string(
+                    24,
+                    STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
+                    self.ctx.wallet.key.fingerprint_hex_str(True),
+                    theme.highlight_color,
+                    theme.info_bg_color,
+                )
+
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
-        if Settings().bitcoin.network == BitcoinSettings.TEST_TXT:
-            self.ctx.display.draw_string(12, 0, "test", GREEN)
+        if self.ctx.is_logged_in() and self.ctx.wallet.key.network["name"] == "Testnet":
+            if self.ctx.display.width() > SMALLEST_WIDTH:
+                self.ctx.display.draw_string(
+                    12,
+                    STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
+                    "Test",
+                    GREEN,
+                    theme.info_bg_color,
+                )
+            else:
+                self.ctx.display.draw_string(
+                    6,
+                    STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
+                    "T",
+                    GREEN,
+                    theme.info_bg_color,
+                )
 
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
@@ -720,13 +771,12 @@ class Menu:
         for menu_item in self.menu_view:
             offset_y += len(self.ctx.display.to_lines(menu_item[0])) + 1
             Page.y_keypad_map.append(offset_y)
-        height_multiplier = (
-            self.ctx.display.height() - 2 * DEFAULT_PADDING - self.menu_offset
-        )
-        height_multiplier //= max(offset_y, 1)
+        height_multiplier = self.ctx.display.height()
+        height_multiplier -= self.menu_offset  # Top offset
+        height_multiplier -= DEFAULT_PADDING  # Bottom padding
+        height_multiplier /= max(offset_y, 1)
         Page.y_keypad_map = [
-            n * height_multiplier + DEFAULT_PADDING + self.menu_offset
-            for n in Page.y_keypad_map
+            int(n * height_multiplier) + self.menu_offset for n in Page.y_keypad_map
         ]
         self.ctx.input.touch.y_regions = Page.y_keypad_map
 
@@ -741,7 +791,7 @@ class Menu:
         for i, menu_item in enumerate(self.menu_view):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             offset_y = Page.y_keypad_map[i + 1] - Page.y_keypad_map[i]
-            offset_y -= len(menu_item_lines) * self.ctx.display.font_height
+            offset_y -= len(menu_item_lines) * FONT_HEIGHT
             offset_y //= 2
             offset_y += Page.y_keypad_map[i]
             fg_color = (
@@ -750,47 +800,47 @@ class Menu:
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.fill_rectangle(
                     0,
-                    offset_y + 1 - self.ctx.display.font_height // 2,
+                    offset_y + 1 - FONT_HEIGHT // 2,
                     self.ctx.display.width(),
-                    (len(menu_item_lines) + 1) * self.ctx.display.font_height,
+                    (len(menu_item_lines) + 1) * FONT_HEIGHT,
                     fg_color,
                 )
             for j, text in enumerate(menu_item_lines):
                 if selected_item_index == i and self.ctx.input.buttons_active:
                     self.ctx.display.draw_hcentered_text(
                         text,
-                        offset_y + self.ctx.display.font_height * j,
+                        offset_y + FONT_HEIGHT * j,
                         theme.bg_color,
                         fg_color,
                     )
                 else:
                     self.ctx.display.draw_hcentered_text(
-                        text, offset_y + self.ctx.display.font_height * j, fg_color
+                        text, offset_y + FONT_HEIGHT * j, fg_color
                     )
 
     def _draw_menu(self, selected_item_index):
-        if self.menu_offset:
-            offset_y = self.menu_offset + self.ctx.display.font_height // 2
+        if self.menu_offset > STATUS_BAR_HEIGHT:
+            offset_y = self.menu_offset + 3 * FONT_HEIGHT // 2
         else:
             offset_y = len(self.menu_view) * 2
             extra_lines = 0
             for menu_item in self.menu_view:
                 extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
             offset_y += extra_lines
-            offset_y *= self.ctx.display.font_height
+            offset_y *= FONT_HEIGHT
             offset_y = self.ctx.display.height() - offset_y
             offset_y //= 2
-            offset_y += self.ctx.display.font_height // 2
+            offset_y += FONT_HEIGHT // 2
         for i, menu_item in enumerate(self.menu_view):
             fg_color = (
                 theme.fg_color if menu_item[1] is not None else theme.disabled_color
             )
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
-            delta_y = (len(menu_item_lines) + 1) * self.ctx.display.font_height
+            delta_y = (len(menu_item_lines) + 1) * FONT_HEIGHT
             if selected_item_index == i:
                 self.ctx.display.fill_rectangle(
                     0,
-                    offset_y + 1 - self.ctx.display.font_height // 2,
+                    offset_y + 1 - FONT_HEIGHT // 2,
                     self.ctx.display.width(),
                     delta_y - 2,
                     fg_color,
@@ -798,13 +848,32 @@ class Menu:
                 for j, text in enumerate(menu_item_lines):
                     self.ctx.display.draw_hcentered_text(
                         text,
-                        offset_y + self.ctx.display.font_height * j,
+                        offset_y + FONT_HEIGHT * j,
                         theme.bg_color,
                         fg_color,
                     )
             else:
                 for j, text in enumerate(menu_item_lines):
                     self.ctx.display.draw_hcentered_text(
-                        text, offset_y + self.ctx.display.font_height * j, fg_color
+                        text, offset_y + FONT_HEIGHT * j, fg_color
                     )
             offset_y += delta_y
+
+
+def choose_len_mnemonic(ctx):
+    """Reusable '12 or 24 words?" menu choice"""
+    submenu = Menu(
+        ctx,
+        [
+            (t("12 words"), lambda: MENU_EXIT),
+            (t("24 words"), lambda: MENU_EXIT),
+            (t("Back"), lambda: MENU_EXIT),
+        ],
+    )
+    index, _ = submenu.run_loop()
+    ctx.display.clear()
+    if index == 0:
+        return 12
+    if index == 1:
+        return 24
+    return None

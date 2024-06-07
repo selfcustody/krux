@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 import gc
 import board
-from .display import Display
+from .display import display
 from .input import Input
 from .camera import Camera
 from .light import Light
@@ -33,7 +33,7 @@ class Context:
     """
 
     def __init__(self):
-        self.display = Display()
+        self.display = display
         self.input = Input()
         self.camera = Camera()
         self.light = Light() if "LED_W" in board.config["krux"]["pins"] else None
@@ -47,6 +47,10 @@ class Context:
         if self.printer is not None:
             self.printer.clear()
         gc.collect()
+
+    def is_logged_in(self):
+        """Returns True if user is logged-in with private key material"""
+        return bool(self.wallet is not None and self.wallet.key)
 
 
 ctx = Context()  # Singleton instance
