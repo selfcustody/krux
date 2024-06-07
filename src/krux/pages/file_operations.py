@@ -50,6 +50,7 @@ class SaveFile(Page):
         prompt=True,
     ):
         """File saver handler page"""
+        persisted = False
         try:
             with SDHandler() as sd:
                 # Wait until user defines a filename or select NO on the prompt
@@ -78,11 +79,13 @@ class SaveFile(Page):
                             self.flash_text(
                                 t("Saved to SD card") + ":\n%s" % new_filename
                             )
+                            persisted = True
                             break
                     else:
                         break
         except:
             self.flash_text(t("SD card not detected."))
+        return persisted
 
     def set_filename(
         self, curr_filename="", empty_filename="some_file", suffix="", file_extension=""
