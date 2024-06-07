@@ -23,6 +23,8 @@
 from .. import (
     Page,
     MENU_CONTINUE,
+    LOAD_FROM_CAMERA,
+    LOAD_FROM_SD,
 )
 from ...display import DEFAULT_PADDING, BOTTOM_PROMPT_LINE
 from ...krux_settings import t
@@ -42,7 +44,13 @@ class WalletDescriptor(Page):
         """Handler for the 'wallet descriptor' menu item"""
         title = t("Wallet output descriptor")
         self.ctx.display.clear()
-        if not self.ctx.wallet.is_loaded():
+        if self.ctx.wallet.key is None:
+            # No key loaded, so it's being called from tools -> descriptor addresses
+            text = t("Load a trusted wallet descriptor to view addresses?")
+            text += "\n" + t("(watch-only)")
+            if self.prompt(text, self.ctx.display.height() // 2):
+                return self._load_wallet()
+        elif not self.ctx.wallet.is_loaded():
             text = t("Wallet output descriptor not found.")
             self.ctx.display.draw_centered_text(text)
             if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
@@ -72,9 +80,12 @@ class WalletDescriptor(Page):
         return MENU_CONTINUE
 
     def _load_wallet(self):
-        wallet_data, qr_format = self.capture_qr_code()
+
         persisted = None
-        if wallet_data is None:
+        load_method = self.load_method()
+        if load_method == LOAD_FROM_CAMERA:
+            wallet_data, qr_format = self.capture_qr_code()
+        elif load_method == LOAD_FROM_SD:
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE
             try:
@@ -87,11 +98,11 @@ class WalletDescriptor(Page):
                 persisted = True
             except OSError:
                 pass
-        else:
-            persisted = False
+        else:  # Cancel
+            return MENU_CONTINUE
 
         if wallet_data is None:
-            # Both the camera and the file on SD card failed!
+            # Camera or SD card loading failed!
             self.flash_error(t("Failed to load output descriptor"))
             return MENU_CONTINUE
 

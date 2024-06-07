@@ -24,7 +24,7 @@ import gc
 from embit import bip32, compact
 import hashlib
 import binascii
-from .. import MENU_CONTINUE, Menu
+from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
 from ...themes import theme
 from ...display import (
     DEFAULT_PADDING,
@@ -50,27 +50,16 @@ class SignMessage(Utils):
     def load_message(self):
         """Loads a message from camera or SD card"""
 
-        load_menu = Menu(
-            self.ctx,
-            [
-                (t("Load from camera"), lambda: None),
-                (
-                    t("Load from SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
-                (t("Back"), lambda: None),
-            ],
-        )
-        index, _ = load_menu.run_loop()
+        load_method = self.load_method()
 
-        if index == 2:
+        if load_method > LOAD_FROM_SD:
             return (None, None, "")
 
-        if index == 0:
+        if load_method == LOAD_FROM_CAMERA:
             data, qr_format = self.capture_qr_code()
             return (data, qr_format, "")
 
-        # If index == 1
+        # If load_method == LOAD_FROM_SD
         message_filename, data = self.load_file(prompt=False)
         return (data, FORMAT_NONE, message_filename)
 

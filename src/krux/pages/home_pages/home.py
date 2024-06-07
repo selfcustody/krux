@@ -31,6 +31,8 @@ from .. import (
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
+    LOAD_FROM_CAMERA,
+    LOAD_FROM_SD,
 )
 
 MAX_POLICY_COSIGNERS_DISPLAYED = 5
@@ -198,27 +200,16 @@ class Home(Page):
     def load_psbt(self):
         """Loads a PSBT from camera or SD card"""
 
-        load_menu = Menu(
-            self.ctx,
-            [
-                (t("Load from camera"), lambda: None),
-                (
-                    t("Load from SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
-                (t("Back"), lambda: None),
-            ],
-        )
-        index, _ = load_menu.run_loop()
+        load_method = self.load_method()
 
-        if index == 2:
+        if load_method > LOAD_FROM_SD:
             return (None, None, "")
 
-        if index == 0:
+        if load_method == LOAD_FROM_CAMERA:
             data, qr_format = self.capture_qr_code()
             return (data, qr_format, "")
 
-        # If index == 1
+        # If load_method == LOAD_FROM_SD
         from ..utils import Utils
         from ...sd_card import PSBT_FILE_EXTENSION
 

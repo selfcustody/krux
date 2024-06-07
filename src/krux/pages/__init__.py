@@ -70,6 +70,9 @@ NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 BATTERY_WIDTH = 22
 BATTERY_HEIGHT = 7
 
+LOAD_FROM_CAMERA = 0
+LOAD_FROM_SD = 1
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -95,6 +98,22 @@ class Page:
         if answer:
             return ESC_KEY
         return None
+
+    def load_method(self):
+        """Prompts user to choose a method to load data from"""
+        load_menu = Menu(
+            self.ctx,
+            [
+                (t("Load from camera"), lambda: None),
+                (
+                    t("Load from SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = load_menu.run_loop()
+        return index
 
     def flash_text(
         self,
