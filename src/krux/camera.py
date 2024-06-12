@@ -32,6 +32,7 @@ OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
 OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
+GC2145_ID = 0x45  # Yahboom
 
 
 class Camera:
@@ -122,7 +123,7 @@ class Camera:
 
     def has_antiglare(self):
         """Returns whether the camera has anti-glare functionality"""
-        return self.cam_id in (OV7740_ID, OV2640_ID)
+        return self.cam_id in (OV7740_ID, OV2640_ID, GC2145_ID)
 
     def enable_antiglare(self):
         """Enables anti-glare mode"""
@@ -131,26 +132,46 @@ class Camera:
             sensor.__write_reg(0xFF, 0x01)
             # luminance high level, default=0x78
             sensor.__write_reg(0x24, 0x28)
-        else:
+            # luminance low level, default=0x68
+            sensor.__write_reg(0x25, 0x20)
+        elif self.cam_id == OV7740_ID:
             # luminance high level, default=0x78
             sensor.__write_reg(0x24, 0x38)
-        # luminance low level, default=0x68
-        sensor.__write_reg(0x25, 0x20)
-        if self.cam_id == OV7740_ID:
+            # luminance low level, default=0x68
+            sensor.__write_reg(0x25, 0x20)
             # Disable frame integrtation (night mode)
             sensor.__write_reg(0x15, 0x00)
+        elif self.cam_id == GC2145_ID:
+            # Set register bank 1
+            sensor.__write_reg(0xFE, 0x01)
+            # Expected luminance level, default=0x50
+            sensor.__write_reg(0x13, 0x25)
+            # luminance high level, default=0xF2
+            sensor.__write_reg(0x0E, 0x40)
+            # luminance low level, default=0x20
+            sensor.__write_reg(0x0F, 0x15)
         sensor.skip_frames()
         self.antiglare_enabled = True
 
     def disable_antiglare(self):
         """Disables anti-glare mode"""
-        if self.cam_id == OV2640_ID:
+        if self.cam_id in (OV7740_ID, OV2640_ID):
+            if self.cam_id == OV2640_ID:
+                # Set register bank 1
+                sensor.__write_reg(0xFF, 0x01)
+            # luminance high level, default=0x78
+            sensor.__write_reg(0x24, 0x70)
+            # luminance low level, default=0x68
+            sensor.__write_reg(0x25, 0x60)
+        elif self.cam_id == GC2145_ID:
             # Set register bank 1
-            sensor.__write_reg(0xFF, 0x01)
-        # luminance high level, default=0x78
-        sensor.__write_reg(0x24, 0x70)
-        # luminance low level, default=0x68
-        sensor.__write_reg(0x25, 0x60)
+            sensor.__write_reg(0xFE, 0x01)
+            # Expected luminance level, default=0x50
+            sensor.__write_reg(0x13, 0x50)
+            # luminance high level, default=0xF2
+            sensor.__write_reg(0x0E, 0xF2)
+            # luminance low level, default=0x20
+            sensor.__write_reg(0x0F, 0x20)
         sensor.skip_frames()
         self.antiglare_enabled = False
 
