@@ -318,18 +318,22 @@ def find_min_num_parts(data, max_width, qr_format):
     elif isinstance(data, BBQrCode):
         data_length = len(data.payload)
         max_part_size = qr_capacity - BBQR_PREFIX_LENGTH
-
-        # Calculate the number of parts if each part had the maximum size
+        if data_length < max_part_size:
+            return 1, data_length
+        # Round max_part_size to the nearest lower multiple of 8
+        max_part_size = (max_part_size // 8) * 8
+        # Calculate the number of parts required (rounded up)
         num_parts = (data_length + max_part_size - 1) // max_part_size
-
-        # Calculate the optimal part size to make it a multiple of 8
-        part_size = (data_length + num_parts - 1) // num_parts
-        # Adjust to the nearest lower multiple of 8
-        part_size = (part_size // 8) * 8
-
-        # Recalculate the number of parts with the adjusted part_size
-        num_parts = (data_length + part_size - 1) // part_size
-
+        # Calculate the optimal part size
+        part_size = data_length // num_parts
+        # Round to the nearest higher multiple of 8
+        part_size = ((part_size + 7) // 8) * 8
+        # Check if the part size is within the limits
+        if part_size > max_part_size:
+            num_parts += 1
+            part_size = data_length // num_parts
+            # Round to the nearest higher multiple of 8 again
+            part_size = ((part_size + 7) // 8) * 8
     else:
         raise ValueError("Invalid format type")
     return num_parts, part_size
