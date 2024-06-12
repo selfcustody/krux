@@ -50,7 +50,7 @@ UR_MIN_FRAGMENT_LENGTH = 10
 # List of capacities, based on versions
 # Version 1(index 0)=21x21px = 17 bytes, version 2=25x25px = 32 bytes ...
 # Limited to version 20
-QR_CAPACITY = [
+QR_CAPACITY_BYTE = [
     17,
     32,
     53,
@@ -71,6 +71,29 @@ QR_CAPACITY = [
     718,
     792,
     858,
+]
+
+QR_CAPACITY_ALPHANUMERIC = [
+    25,
+    47,
+    77,
+    114,
+    154,
+    195,
+    224,
+    279,
+    335,
+    395,
+    468,
+    535,
+    619,
+    667,
+    758,
+    854,
+    938,
+    1046,
+    1153,
+    1249,
 ]
 
 
@@ -245,23 +268,29 @@ def get_size(qr_code):
     return int(size)
 
 
-def max_qr_bytes(max_width):
+def max_qr_bytes(max_width, encoding="byte"):
     """Calculates the maximum length, in bytes, a QR code of a given size can store"""
-    # Given qr_size =  17 + 4 * version + 2 * frame_size
+    # Given qr_size = 17 + 4 * version + 2 * frame_size
     max_width -= 2  # Subtract frame width
     qr_version = (max_width - 17) // 4
+    if encoding == "alphanumeric":
+        capacity_list = QR_CAPACITY_ALPHANUMERIC
+    else:
+        capacity_list = QR_CAPACITY_BYTE
+
     try:
-        return QR_CAPACITY[qr_version - 1]
+        return capacity_list[qr_version - 1]
     except:
         # Limited to version 20
-        return QR_CAPACITY[-1]
+        return capacity_list[-1]
 
 
 def find_min_num_parts(data, max_width, qr_format):
     """Finds the minimum number of QR parts necessary to encode the data in
     the specified format within the max_width constraint
     """
-    qr_capacity = max_qr_bytes(max_width)
+    encoding = "alphanumeric" if qr_format == FORMAT_BBQR else "byte"
+    qr_capacity = max_qr_bytes(max_width, encoding)
     if qr_format == FORMAT_PMOFN:
         data_length = len(data)
         part_size = qr_capacity - PMOFN_PREFIX_LENGTH_1D
@@ -295,8 +324,8 @@ def find_min_num_parts(data, max_width, qr_format):
 
         # Calculate the optimal part size to make it a multiple of 8
         part_size = (data_length + num_parts - 1) // num_parts
-        # Adjust to the nearest higher multiple of 8
-        part_size += 7 - (part_size - 1) % 8
+        # Adjust to the nearest lower multiple of 8
+        part_size = (part_size // 8) * 8
 
         # Recalculate the number of parts with the adjusted part_size
         num_parts = (data_length + part_size - 1) // part_size

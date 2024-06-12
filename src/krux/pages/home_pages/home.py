@@ -268,8 +268,12 @@ class Home(Page):
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
         from ...psbt import PSBTSigner
 
-        # Warns in case of path mismatch
         signer = PSBTSigner(self.ctx.wallet, data, qr_format, psbt_filename)
+
+        del data
+        gc.collect()
+
+        # Warns in case of path mismatch
         path_mismatch = signer.path_mismatch()
         if path_mismatch:
             self.ctx.display.clear()
@@ -347,7 +351,7 @@ class Home(Page):
             self.ctx.input.wait_for_button()
 
         # memory management
-        del data, outputs
+        del outputs
         gc.collect()
 
         index = self._sign_menu()

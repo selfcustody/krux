@@ -1,6 +1,7 @@
 from Crypto.Cipher import AES
 import pytest
 from .shared_mocks import (
+    DeflateIO,
     board_amigo_tft,
     board_dock,
     board_m5stickv,
@@ -54,6 +55,7 @@ def mp_modules(mocker, monkeypatch):
         "uos",
         mocker.MagicMock(statvfs=statvfs),
     )
+    monkeypatch.setitem(sys.modules, "deflate", mocker.MagicMock(DeflateIO=DeflateIO))
 
 
 @pytest.fixture

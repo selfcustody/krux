@@ -23,6 +23,8 @@
 # This code an adaptation of Coinkite's BBQr python implementation for Krux environment
 # https://github.com/coinkite/BBQr
 
+import gc
+
 # BBQR
 # Human names
 FILETYPE_NAMES = {
@@ -160,8 +162,8 @@ def encode_bbqr(data, encoding="Z", file_type="P"):
             data = cmp
 
     data = data.encode("utf-8") if isinstance(data, str) else data
-    data = base32_encode_stream(data).rstrip("=")
-    return BBQrCode(data, encoding, file_type)
+    gc.collect()
+    return BBQrCode("".join(base32_encode_stream(data)), encoding, file_type)
 
 
 # Base 32 encoding/decoding, used in BBQR only
@@ -198,9 +200,8 @@ def base32_decode_stream(encoded_str):
     return bytes(decoded_bytes)
 
 
-def base32_encode_stream(data):
+def base32_encode_stream(data, add_padding=False):
     """A streaming base32 encoder"""
-    encoded = []
     buffer = 0
     bits_left = 0
 
@@ -210,14 +211,16 @@ def base32_encode_stream(data):
 
         while bits_left >= 5:
             bits_left -= 5
-            encoded.append(B32CHARS[(buffer >> bits_left) & 0x1F])
+            yield B32CHARS[(buffer >> bits_left) & 0x1F]
             buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
 
     if bits_left > 0:
         buffer <<= 5 - bits_left
-        encoded.append(B32CHARS[buffer & 0x1F])
+        yield B32CHARS[buffer & 0x1F]
 
-    while len(encoded) % 8 != 0:
-        encoded.append("=")  # Add padding
-
-    return "".join(encoded)
+    # Padding
+    if add_padding:
+        padding = 8 - (len(data) * 8 % 5)
+        if padding != 8:
+            for _ in range(padding):
+                yield "="
