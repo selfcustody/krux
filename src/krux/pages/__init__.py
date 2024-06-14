@@ -221,8 +221,11 @@ class Page:
             elif self.ctx.input.enter_event():
                 return 1
 
-            # Anti-glare mode (M5stickV and Amigo)
-            if self.ctx.input.page_event():
+            # Anti-glare mode
+            if self.ctx.input.page_event() or (
+                # Yahboom may have page or page_prev mapped to its single button
+                board.config["type"] == "yahboom" and self.ctx.input.page_prev_event()
+            ):
                 if self.ctx.camera.has_antiglare():
                     self._time_frame = time.ticks_ms()
                     self.ctx.display.to_portrait()
