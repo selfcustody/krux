@@ -143,7 +143,7 @@ def encode_bbqr(data, encoding="Z", file_type="P"):
         data = hexlify(data).decode()
         return BBQrCode(data.upper(), encoding, file_type)
 
-    elif encoding == "Z":
+    if encoding == "Z":
         if len(data) > BBQR_ALWAYS_COMPRESS_THRESHOLD:
             # RAM won't be enough to have both compressed and not compressed data
             # It will always be beneficial to compress large data
@@ -189,7 +189,7 @@ def base32_decode_stream(encoded_str):
             buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
 
     # Process any remaining bits if they form a valid byte
-    if bits_left > 0 and bits_left < 8:
+    if 0 < bits_left < 8:
         remaining_byte = (buffer << (8 - bits_left)) & 0xFF
         if remaining_byte != 0:
             decoded_bytes.append(remaining_byte)

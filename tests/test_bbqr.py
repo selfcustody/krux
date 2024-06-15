@@ -199,9 +199,10 @@ def test_base32_decoding(mocker):
 
     for test_bytes, encoded in zip(B32_TEST_BYTES, B32_ENCODED_STRINGS):
         assert base32_decode_stream(encoded) == test_bytes
-    
+
     for test_bytes, encoded in zip(B32_TEST_BYTES, B32_ENCODED_STRINGS_PADDED):
         assert base32_decode_stream(encoded) == test_bytes
+
 
 def test_base32_decoding_invalid_character():
     from krux.bbqr import base32_decode_stream
