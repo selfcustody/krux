@@ -701,6 +701,7 @@ class Menu:
     #     self.draw_ram_indicator()
 
     # def draw_ram_indicator(self):
+    #     """Draws the amount of free RAM in the status bar"""
     #     gc.collect()
     #     ram_text = "RAM: " + str(gc.mem_free())
     #     self.ctx.display.draw_string(12, 0, ram_text, GREEN)

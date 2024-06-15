@@ -18,7 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from ur.ur import UR
+
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from embit.networks import NETWORKS
@@ -196,9 +196,10 @@ def parse_wallet(wallet_data, allow_assumption=None):
     """
     # pylint: disable=R0912
 
-    import urtypes
+    # Check if wallet_data is a UR object without loading the UR module
+    if wallet_data.__class__.__name__ == "UR":
+        import urtypes
 
-    if isinstance(wallet_data, UR):
         # Try to parse as a Crypto-Output type
         try:
             output = urtypes.crypto.Output.from_cbor(wallet_data.cbor)
