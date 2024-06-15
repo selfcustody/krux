@@ -1,8 +1,13 @@
+from krux.bbqr import BBQrCode
+import pytest
+
 B32_TEST_BYTES = [
     b'psbt\xff\x01\x00{\x02\x00\x00\x00\x02\xd2h\x80v\xf6<\x08\xa0k\x16\xce\x9f\xd9\n1\xbfF\x06\x81\x01\x0c\xae]\x0b\x11\x8a\xb5\xdfZ\xa6\xd3\xcf\x00\x00\x00\x00\x00\xfd\xff\xff\xffX\xb8\x91\x7f\xcb\x166\xae\xcf\x9b\xa4\xec\x8f\x1d \xc9\xcfb\x82}\x16\x1d\xc0\xd7sb\xaf\x02\x7f\xcf\xa7}\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x01\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hl\xb0\xfe*\x00\x00"\x02\x02\xd7\xb1PI\x10\xbbq\'\x14Js\t\xde\xee\xde2\xe8\x8a\x06W\r\x96\xdbh1\x9e\xb7V\x05\xd5D\x12G0D\x02 \x07\x8b\x9f\xe8y\xec_5\x12|\xbf;\xb5&2d\x07=x\x9f\xa2\xc8\x9b\x08\x9f\x12\xf1\xfeP\xea\xefV\x02 \x1a\xf3\xcc*\x97\x0e\x00\x9c\xcf\xa9\x83\xd1\xe4ph\x98\x9e\x8cML>\x03\xc4\x04\xb06\xa1+\xab\x1cs\x9c\x01\x00"\x02\x03\xc4\xc8\x06\xd0\xc1\x19\xb35\xe3\x9b\x14K\xc4\xba\xb1\xa5\x10\x06\xcf=\x97]\xbet\x07\xe3\x1e\xe7Y9\xe9\xe0G0D\x02 \x12\xeb\n\xf4\x95>3\xbdG\x07\xd5#\xf0z\x1d\xdaN\xcf0\xea\x157\x8c\xf5l\xb1:\x85#\x14\xd31\x02 x\x8aV;\xf1z\x17\x85\x80\xab\xc5\xae;\x96_\\\xfc\x02\xc3\xff\xd7N\xf8V&C\xe0\xcc<\x9e\xdb\xe0\x01\x00\x00',
     b"Hello World",
     b"Hello World.",
-    b"1234567890" b"\x00",  # Single byte
+    b"1234567890",
+    b"\x00",  # Single byte
+    b"f",  # Single byte
     b"\x01\x02\x03\x04",  # Sequence of bytes
     b"\x00\xff\xfe\xfd\xfc\xfb",  # Mixed bytes
     b"\x00" * 10,  # All zeros
@@ -13,6 +18,45 @@ B32_TEST_BYTES = [
     b"\x12\x34\x56\x78\x9a\xbc\xde\xf0",  # Random hex sequence
     b"\x93\x83\xc1\x28\xd9\x8a\xea\xf4\xfa\xb1\xc8\xe0\x1c\xf7\xbf\x29",  # Random binary
 ]
+
+B32_ENCODED_STRINGS = [
+    "OBZWE5H7AEAHWAQAAAAAFUTIQB3PMPAIUBVRNTU73EFDDP2GA2AQCDFOLUFRDCVV35NKNU6PAAAAAAAA7X77772YXCIX7SYWG2XM7G5E5SHR2IGJZ5RIE7IWDXANO43CV4BH7T5HPUAAAAAAAD677777AHUAGAAAAAAAAAAWAAKK5TI63Q7P6ZNKECOQEFPHHVYJAXOBNBWLB7RKAAACEAQC26YVASIQXNYSOFCKOME553W6GLUIUBSXBWLNW2BRT23VMBOVIQJEOMCEAIQAPC475B46YXZVCJ6L6O5VEYZGIBZ5PCP2FSE3BCPRF4P6KDVO6VQCEANPHTBKS4HABHGPVGB5DZDQNCMJ5DCNJQ7AHRAEWA3KCK5LDRZZYAIAEIBAHRGIA3IMCGNTGXRZWFCLYS5LDJIQA3HT3F25XZ2APYY645MTT2PAI4YEIARACLVQV5EVHYZ32RYH2UR7A6Q53JHM6MHKCU3YZ5LMWE5IKIYU2MYQEIDYRJLDX4L2C6CYBK6FVY5ZMX247QBMH76XJ34FMJSD4DGDZHW34AAQAAA",
+    "JBSWY3DPEBLW64TMMQ",
+    "JBSWY3DPEBLW64TMMQXA",
+    "GEZDGNBVGY3TQOJQ",
+    "AA",
+    "MY",
+    "AEBAGBA",
+    "AD7757P47M",
+    "AAAAAAAAAAAAAAAA",
+    "7777777777777777",
+    "JBSWY3DPFQQFO33SNRSCC",
+    "AAAQEAYEAUDAOCAJBIFQYDIOB4",
+    "KRUGKIDROVUWG2ZAMJZG653OEBTG66BANJ2W24DTEBXXMZLSEB2GQZJANRQXU6JAMRXWO",
+    "CI2FM6E2XTPPA",
+    "SOB4CKGZRLVPJ6VRZDQBZ557FE",
+]
+
+B32_ENCODED_STRINGS_PADDED = [
+    "OBZWE5H7AEAHWAQAAAAAFUTIQB3PMPAIUBVRNTU73EFDDP2GA2AQCDFOLUFRDCVV35NKNU6PAAAAAAAA7X77772YXCIX7SYWG2XM7G5E5SHR2IGJZ5RIE7IWDXANO43CV4BH7T5HPUAAAAAAAD677777AHUAGAAAAAAAAAAWAAKK5TI63Q7P6ZNKECOQEFPHHVYJAXOBNBWLB7RKAAACEAQC26YVASIQXNYSOFCKOME553W6GLUIUBSXBWLNW2BRT23VMBOVIQJEOMCEAIQAPC475B46YXZVCJ6L6O5VEYZGIBZ5PCP2FSE3BCPRF4P6KDVO6VQCEANPHTBKS4HABHGPVGB5DZDQNCMJ5DCNJQ7AHRAEWA3KCK5LDRZZYAIAEIBAHRGIA3IMCGNTGXRZWFCLYS5LDJIQA3HT3F25XZ2APYY645MTT2PAI4YEIARACLVQV5EVHYZ32RYH2UR7A6Q53JHM6MHKCU3YZ5LMWE5IKIYU2MYQEIDYRJLDX4L2C6CYBK6FVY5ZMX247QBMH76XJ34FMJSD4DGDZHW34AAQAAA======",
+    "JBSWY3DPEBLW64TMMQ=====",
+    "JBSWY3DPEBLW64TMMQXA=======",
+    "GEZDGNBVGY3TQOJQ",
+    "AA=====",
+    "MY=====",
+    "AEBAGBA======",
+    "AD7757P47M=====",
+    "AAAAAAAAAAAAAAAA",
+    "7777777777777777",
+    "JBSWY3DPFQQFO33SNRSCC====",
+    "AAAQEAYEAUDAOCAJBIFQYDIOB4=====",
+    "KRUGKIDROVUWG2ZAMJZG653OEBTG66BANJ2W24DTEBXXMZLSEB2GQZJANRQXU6JAMRXWO====",
+    "CI2FM6E2XTPPA====",
+    "SOB4CKGZRLVPJ6VRZDQBZ557FE=====",
+]
+
+INVALID_ENCODING_BBQR = "B$XU0100CX"
+INVALID_TYPE_BBQR = "B$ZA0100CX"
 
 BBQR_ENCODED_DESCRIPTORS = [
     # Nunchuk single
@@ -33,6 +77,7 @@ BBQR_ENCODED_DESCRIPTORS = [
         "B$ZU0100GXG4XEVCGAAEBUJ5L6I2UXRYWOZMCIHCJYPNDYSVBDJCBO4QABDIKUBRGTBNP5ZMPL3PPVXZAA3H6UUCAUC6D6EU5TCVV4FK4U4IBBR5NPYIPCA2ZONIE2QG5GAILYGTL7SUHCLQK7XUD5Z3FAYX6MRS56AQM6ADG2FFGC7WRUS6H7N7MYGXPK5VXJNH7LWW3JFECXDULDXEDLHF5FEVDNR2WLQANOL3ECD3C4SQXDWRNBU3UDY6FA4ZJI2C5X6U2ZX7FDWDZPVQXR7J4H7MFN6WQVCLHQ34NDG5TRZ66RTI5LP327K7GM2UTA7J2K6YWQEKH3G4SXITCM6UWM5JK3OJR2QXVZGGUCNVDLSAMNR6XNTG7TFG4ZUP55D3HBCRO44RU7AQL3R2WJ7LGRXFAFGCRUJ45XPBH2HVGEMF2EN6MU6AFLRZ2YVS5BF6QJYOHFMB5ULYXVMADK43ACFXRZEF3VLRPLY3Y2E5GKUGPXBLHRFDVGZIHFXZ5FVNM73Z5PULPI3WZ2BNHLRA2ZKCN4KOOXXMRPO6DY2KDLXO2KBVOEAZH63MJTR5X3OMIFXBOTTHZGBT2MQRT473JSKCU3CLIKBWITHRMVZOEYPOVWCTNHMEZDW6V7T2NGCFI7QA"
     ],
 ]
+
 BBQR_DECODED_DESCRIPTORS = [
     # Nunchuk single
     "# Exported from Nunchuk\nName: testnet\nPolicy: 1 of 1\nFormat: P2WSH\n\nDerivation: m/84'/1'/0'\n65fb43fe: tpubDDe8bRQqws125ChaJ4ZoB6qVbFn1sBubiim6SYcfmFz8XVSp4WWiMj4gAuzSxJPRDZwT9rT928wQmWX993CAq4TjBXdcoCUtuG2E115mLD5\n\n",
@@ -42,6 +87,24 @@ BBQR_DECODED_DESCRIPTORS = [
     "wpkh([65fb43fe/84h/1h/0h]tpubDDe8bRQqws125ChaJ4ZoB6qVbFn1sBubiim6SYcfmFz8XVSp4WWiMj4gAuzSxJPRDZwT9rT928wQmWX993CAq4TjBXdcoCUtuG2E115mLD5/<0;1>/*)#na408ft8",
     # Sparrow multi (for Coldcard)
     "# Coldcard Multisig setup file (created by Sparrow)\n#\nName: multisig\nPolicy: 2 of 3\nDerivation: m/48'/1'/0'/2'\nFormat: P2WSH\n\n65FB43FE: tpubDFM6mziafLfJPA9StFuzvdC5htjaMTsVaPSAjsahgE4c2CMWpg9yKaK4JyoaBjVYJKUFX9Kdyb4fgFaFUQmZNGU71Q1wZgZiGM1Go7p59NW\n473C5C27: tpubDEUCuxkfzMNmTG7oprJfK1HBHu3FNM43DMymAjyuwXNMNx4WwLib7xSacz5zMKRDcABJc2oezBLiefLarPuoXCnbTJmpuwodbP4nRoURJdS\n84B90E2B: tpubDE6D5hG2QULH8XcBwZRP81DjFEYhkdRdE5EdAJXctPk6cCWJozhr6FaSyoopyU9DcUiKnUrZ14gZcdLRuSaTwDPpynBzdfmt4FEmenYTfrt\n",
+]
+
+BBQR_ENCODED_JSON_DESCRIPTOR = [
+    # Coldcard single/multi
+    [
+        "B$2J0700PMRGG2DBNFXCEORAEJMFITRCFQQCE6DGOARDUIBCGY2UMQRUGNDEKIRMEARGCY3DN52W45BCHIQDALBAEJ4HA5LCEI5CAITUOB2WERBWJZ5FMYTLOJMWQWRUK5MWKSRRNVREMSCXOE4WIRDYKVXWWTSBIFNEWZTZKJZFETRZOJJEUWDKNJBUOV3JONITQTSEKNQW6WLBMZLEEN2FOFVVCVTTI5RTS5SSGFIUC53HORYGETRSJRBXA3LXPFFXK2SFKZ3VCMZWMRTWSRKDEIWCAITCNFYDINBCHIQHWITOMFWWKIR2EARHAMTQNNUCELBAEJ4GM4BCHIQCENSDIM2TOQRSGYRCYIBCMRSXE2LWEI5CAITNF42DI2BPGFUC6MDIEIWCAITYOB2WEIR2EARHI4DVMJCEIQ3WPJYVGZSFKZTXQTCFMJ2HETJUIY2UI22EMVGFG4TYPJLUMM2KONHEUTDDOBBTCWTXNN2EWYLNGZEDSWKRHFGEWTCQM52FCS3ZOFUHOURWJZDWI4BUGZQWOYTLNNFG4RC2JJ4FAVJUI44DK5LDIJSGGTSZNZUHA2C2OVVHOIRMEARGIZLTMMRDUIBCOBVWQKC3GY2WMYRUGNTGKLZUGRUC6MLIF4YGQXLUOB2WERCEIN3HU4KTMZCVMZ3YJRCWE5DSJU2EMNKENNCGKTCT",
+        "B$2J0701OJ4HUV2GGNFHGTSKJRRXAQZRLJ3WW5CLMFWTMSBZLFITSTCLJRIGO5CRJN4XC2DXKI3E4R3EOA2DMYLHMJVWWSTOIRNEU6CQKU2EOOBVOVRUEZDDJZMW42DQNBNHK2TXF46DAOZRHYXSUKJDNU2HU4DQGJ5GQIRMEARGM2LSON2CEORAEJWXO5TWGNCGUMKOJJSTC33YJJIVSYSZN5QXI4LTKZSEQRBYIF2TMZ3DEJ6SYIBCMJUXANBZEI5CA6ZCNZQW2ZJCHIQCE4BSONUC24BSO5YGW2BCFQQCE6DGOARDUIBCII3UGQJTGAYUIIRMEARGIZLSNF3CEORAEJWS6NBZNAXTC2BPGBUCELBAEJ4HA5LCEI5CAITUOB2WERCEKBHEKMSSGRDFQ32IGZGHE42YNNEFU6L2KBGFUWKROJ4HANSMIRZXMM3ONVSUCTTHGU2UIWBRPFAXMULYK5QUM53QHAYUMWTEJV4UQ6KFNZ4XG6KYKVTGMZCQI5CEES3JMVVEGZC2OFXXI2TRIZMDC6RVJNIUWYSSJNFFI4KUEIWCAITEMVZWGIR2EARHG2BIO5YGW2BILM3DKZTCGQZWMZJPGQ4WQLZRNAXTA2C5ORYHKYSEIRIE4RJSKI2EMWDPJA3EY4TTLBVUQWTZPJIEYWSZKFZHQ4BWJRCHG5RTNZWWKQKO",
+        "B$2J0702M42TKRCYGF4UC5SRPBLWCRTXOA4DCRS2MRGXSSDZIVXHS43ZLBKWMZTEKBDUIQSLNFSWUQ3ELJYW65DKOFDFQML2GVFVCS3CKJFUUVDRKQXTYMB3GE7C6KRJFERWC6TWMY3GG5BZEIWCAIS7OB2WEIR2EARHK4DVMI2UKV3XNZXGCZBWIRCFAR3GGZTGCVLXMM4W63KUNFLXG4ZZLJRW25TVNU3DMMTVJV2GWQSZJJ3HKYKMNI2UEVTXMNUFOVJTNEZVCU3ZJA4U2VJXONTHSWTBNV3TGRDTONWW2WSTOZLDI2ZZI52UM4CGOVEGOQTDPFTGUNKVJJ3GIIRMEARGM2LSON2CEORAEIZE4RBTMNDVSNTYJRZTC32KMF3EWQ3EHFTXOVJZGR3VCQTTKM3HCS3ENARH2LBAEJRGS4BYGQRDUID3EJXGC3LFEI5CAITQGJ3XA23IEIWCAITYMZYCEORAEI4DSN2BIY2DORBCFQQCEZDFOJUXMIR2EARG2LZYGRUC6MLIF4YGQIRMEARHQ4DVMIRDUIBCORYHKYSEIRSTQYSSKFYXO4ZRGI2UG2DBJI2FU32CGZYVMYSGNYYXGQTVMJUWS3JWKNMWGZTNIZ5DQWCWKNYDIV2XNFGWUNDHIF2XUU3YJJIFERC2O5KDS4SUHEZDQ52RNVLVQOJZGNBUC4JU",
+        "B$2J0703KRVEEWDEMNXUGVLUOVDTERJRGE2W2TCEGURCYIBCMRSXGYZCHIQCE53QNNUCQWZWGVTGENBTMZSS6OBUNAXTC2BPGBUF25DQOVREIRDFHBRFEULRO5ZTCMRVINUGCSRULJXUENTRKZREM3RRONBHKYTJNFWTMU2ZMNTG2RT2HBMFMU3QGRLVO2KNNI2GOQLVPJJXQSSQKJCFU52UHFZFIOJSHB3VC3KXLA4TSM2DIFYTIVDKIJMGIY3PINKXI5KHGJCTCMJVNVGEINJPHQYDWMJ6F4VCSI3OME2DAODGOQ4CELBAEJPXA5LCEI5CAITWOB2WENK2MJ4VI4SGJN3UI6DDGZYDQVSCIEYVIWRRJM3XMQ2QKR5FUUSZJRZTQTKYINWWWZSMKVKWOMJZMVKXSTCWPFATKWTUKR5FMUT2HBGGGUCBO4ZUW2ZZLJUVCR2KNNXVCSTOK52U2OLFIVIEMVSUO5ZEEZ3NOJFFQVDLNNVXERLJEIWCAITGNFZHG5BCHIQCE5DCGFYXA43VNI2WQZTDOZZDQNDIMNQWMZJTOFTGO53ZGRWTSMDMMVYDI5JQOI4HQM3QEJ6SYIBCMJUXANBYL4YSEORAPMRG4YLNMURDUIBCOAZHG2BNOAZHO43IEIWCAITYMZYCEORAEI2EKNJTIM3UINBCFQQCEZDFOJUXMIR2",
+        "B$2J0704EARG2LZUHBUC6MLIF4YGQLZRNARCYIBCPBYHKYRCHIQCE5DQOVREIRSNGZWXU2LBMZGGMSSNJZZGU3ZYLB2XUTSRMFMTSVLOMNDWC33XIQ2UEVDCIV5FG2KKG5ZVMVTNKJEE2N22IV2UMTKHLBEEC2SMI5LUG6KTPFMUK2TEOQ3EKWJUPBUFMTKZHFDXAVDBNJ2UQVT2PF3EM6SGKNVXMMT2MRGDCURCFQQCEZDFONRSEORAEJZWQKDXONUCQ43POJ2GKZDNOVWHI2JIJUWFWNRVMZRDIM3GMUXTIODIF4YWQLZQNAXTC2C5ORYHKYSEIZGTM3L2NFQWMTDGJJGU44TKN44FQ5L2JZIWCWJZKVXGGR3BN53UINKCKRREK6STNFFDO42WKZWVESCNG5NEK5KGJVDVQSCBNJGEOV2DPFJXSWKFNJSHINSFLE2HQ2CWJVMTSR3QKRQWU5KIKZ5HS5SGPJDFG23WGJ5GITBRKIXTALZKFQXC4LRJFEUSELBAEJPXA5LCEI5CAISVOB2WENKUJZWVI6TDMI2HSZDNPBDUM5LOLBSXM6SHHBLVC5L2GQYU43TRPBLVU5DHG5WWUTC2IV5GENLYJBGVMUDDMRVDO5TSJNMEIQ3XMVAWS4SBGZ5DO52KMMYWEM2LINDECRLEMJYDSQJVHF2WWWSLPE4EOWSV",
+        "B$2J0705OF3UQYKFKVCHE6SVEJ6SYIBCMJUXANBYL4ZCEORAPMRG4YLNMURDUIBCOAZHO43IEIWCAITYMZYCEORAEIZDQN2BGIZTIRRCFQQCEZDFOJUXMIR2EARG2LZUHBUC6MLIF4YGQLZSNARCYIBCPBYHKYRCHIQCE5DQOVREIRSNGZWXU2LBMZGGMSSQIE4VG5CGOV5HMZCDGVUHI2TBJVKHGVTBKBJUC2TTMFUGORJUMMZEGTKXOBTTS6KLMFFTISTZN5QUE2SWLFFEWVKGLA4UWZDZMI2GMZ2GMFDFKULNLJHEOVJXGFITC522M5NGSR2NGFDW6N3QGU4U4VZCFQQCEZDFONRSEORAEJ3XG2BIONXXE5DFMRWXK3DUNEUE2LC3GY2WMYRUGNTGKLZUHBUC6MLIF4YGQLZSNBOXI4DVMJCEMTJWNV5GSYLGJRTEUUCBHFJXIRTVPJ3GIQZVNB2GUYKNKRZVMYKQKNAWU43BNBTUKNDDGJBU2V3QM44XSS3BJM2EU6LPMFBGUVSZJJFVKRSYHFFWI6LCGRTGORTBIZKVC3K2JZDVKNZRKEYXOWTHLJUUOTJRI5XTO4BVHFHFOLZQF4VCYLROFYUSSIRMEARF64DVMIRDUIBCKZYHKYRVNZCDE3LGJBLUIZSCIZYUY2TKNEYXAZJYMMYVO23EKBEGQQZV",
+        "B$2J0706GJLW6VBWNJXTCS3YGVIE23TUMRDTCWKOGMZDQQTTOFCW2NSEOJKE25TCNVUUQQ3DNVIU45RSJRTFKR3XKBDEMMTRNVEDGYL2IM3WU2SXGJTFUU3RPBITK4DEJARH2LBAEJRGS4BUGURDUID3EJXGC3LFEI5CAITQGJZWQIRMEARHQZTQEI5CAIRQGQYTOQJZG43SELBAEJSGK4TJOYRDUIBCNUXTINLIEIWCAITYOB2WEIR2EARHI4DVMJCDSMLCO53TK5SSM5VGWTSLOVBU2S2YNA2HOUKMHFSWURCIPFZW443DKRBVATJYOBBUUQTIKVNDQZSZGIYW6RLLKQ4TQUSQMVNEW6THPF2FQS2XO5RHMWKGN5HHKWSOHA4VSZDFIVKHUVCGIJLHMYLOGRLEYN3QHBSWQ3TFIZMVAIRMEARGIZLTMMRDUIBCONUCQ43POJ2GKZDNOVWHI2JIJUWFWNRVMZRDIM3GMUXTINLILV2HA5LCIQ4TCYTXO42XMUTHNJVU4S3VINGUWWDIGR3VCTBZMVVEISDZONXHGY2UINIE2ODQINFEE2CVLI4GMWJSGFXUK22UHE4FEUDFLJFXUZ3ZORMEWV3XMJ3FSRTPJZ2VUTRYHFMWIZKFKR5FIRSCKZ3GC3RUKZGDO4BYMVUG4ZKGLFIC6MBPFIWC4LROFEUSE7L5",
+    ]
+]
+
+BBQR_DECODED_JSON_DESCRIPTOR = [
+    # Coldcard single/multi
+    '{"chain": "XTN", "xfp": "65FB43FE", "account": 0, "xpub": "tpubD6NzVbkrYhZ4WYeJ1mbFHWq9dDxUokNAAZKfyRrRN9rRJXjjCGWisQ8NDSaoYafVB7EqkQVsGc9vR1QAwgtpbN2LCpmwyKujEVwQ36dgiEC", "bip44": {"name": "p2pkh", "xfp": "6CC57B26", "deriv": "m/44h/1h/0h", "xpub": "tpubDDCvzqSfEVgxLEbtrM4F5DkDeLSrxzWF3JsNJLcpC1ZwktKam6H9YQ9LKLPgtQKyqhwR6NGdp46agbkkJnDZJxPU4G85ucBdcNYnhphZujw", "desc": "pkh([65fb43fe/44h/1h/0h]tpubDDCvzqSfEVgxLEbtrM4F5DkDeLSrxzWF3JsNJLcpC1ZwktKam6H9YQ9LKLPgtQKyqhwR6NGdp46agbkkJnDZJxPU4G85ucBdcNYnhphZujw/<0;1>/*)#m4zpp2zh", "first": "mwvv3Dj1NJe1oxJQYbYoatqsVdHD8Au6gc"}, "bip49": {"name": "p2sh-p2wpkh", "xfp": "B7CA301D", "deriv": "m/49h/1h/0h", "xpub": "tpubDDPNE2R4FXoH6LrsXkHZyzPLZYQrxp6LDsv3nmeANg55DX1yAvQxWaFwp81FZdMyHyEnysyXUffdPGDBKiejCdZqotjqFX1z5KQKbRKJTqT", "desc": "sh(wpkh([65fb43fe/49h/1h/0h]tpubDDPNE2R4FXoH6LrsXkHZyzPLZYQrxp6LDsv3nmeANg55DX1yAvQxWaFwp81FZdMyHyEnysyXUffdPGDBKiejCdZqotjqFX1z5KQKbRKJTqT/<0;1>/*))#azvf6ct9", "_pub": "upub5EWwnnad6DDPGf6faUwc9omTiWss9Zcmvum662uMtkBYJvuaLj5BVwchWU3i3QSyH9MU7sfyZamw3DssmmZSvV4k9GuFpFuHgBcyfj5UJvd", "first": "2ND3cGY6xLs1oJavKCd9gwU94wQBsS6qKdh"}, "bip84": {"name": "p2wpkh", "xfp": "897AF47D", "deriv": "m/84h/1h/0h", "xpub": "tpubDDe8bRQqws125ChaJ4ZoB6qVbFn1sBubiim6SYcfmFz8XVSp4WWiMj4gAuzSxJPRDZwT9rT928wQmWX993CAq4TjBXdcoCUtuG2E115mLD5", "desc": "wpkh([65fb43fe/84h/1h/0h]tpubDDe8bRQqws125ChaJ4ZoB6qVbFn1sBubiim6SYcfmFz8XVSp4WWiMj4gAuzSxJPRDZwT9rT928wQmWX993CAq4TjBXdcoCUtuG2E115mLD5/<0;1>/*)#na408ft8", "_pub": "vpub5ZbyTrFKwDxc6p8VBA1TZ1K7vCPTzZRYLs8MXCmkfLUUg19eUyLVyA5ZtTzVRz8LcPAw3Kk9ZiQGJkoQJnWuM9eEPFVTwrBgmrJXTkkkrEi", "first": "tb1qpsuj5hfcvr84hcafe3qfgwy4m90lep4u0r8x3p"}, "bip48_1": {"name": "p2sh-p2wsh", "xfp": "4E53C7D4", "deriv": "m/48h/1h/0h/1h", "xpub": "tpubDFM6mziafLfJMNrjo8XuzNQaY9UncGaowD5BTbEzSiJ7sVVmRHM7ZEuFMGXHAjLGWCySyYEjdt6EY4xhVMY9GpTajuHVzyvFzFSkv2zdL1R", "desc": "sh(wsh(sortedmulti(M,[65fb43fe/48h/1h/0h/1h]tpubDFM6mziafLfJMNrjo8XuzNQaY9UncGaowD5BTbEzSiJ7sVVmRHM7ZEuFMGXHAjLGWCySyYEjdt6EY4xhVMY9GpTajuHVzyvFzFSkv2zdL1R/0/*,...)))", "_pub": "Upub5TNmTzcb4ydmxGFunXevzG8WQuz41NnqxWZtg7mjLZEzb5xHMVPcdj7vrKXDCweAirA6z7wJc1b3KCFAEdbp9A59ukZKy8GZUqwHaEUDrzU"}, "bip48_2": {"name": "p2wsh", "xfp": "287A234F", "deriv": "m/48h/1h/0h/2h", "xpub": "tpubDFM6mziafLfJPA9StFuzvdC5htjaMTsVaPSAjsahgE4c2CMWpg9yKaK4JyoaBjVYJKUFX9Kdyb4fgFaFUQmZNGU71Q1wZgZiGM1Go7p59NW", "desc": "wsh(sortedmulti(M,[65fb43fe/48h/1h/0h/2h]tpubDFM6mziafLfJPA9StFuzvdC5htjaMTsVaPSAjsahgE4c2CMWpg9yKaK4JyoaBjVYJKUFX9Kdyb4fgFaFUQmZNGU71Q1wZgZiGM1Go7p59NW/0/*,...))", "_pub": "Vpub5nD2mfHWDfBFqLjji1pe8c1WkdPHhC52WoT6jo1Kx5PMntdG1YN328BsqEm6DrTMvbmiHCcmQNv2LfUGwPFF2qmH3azC7jjW2fZSqxQ5pdH"}, "bip45": {"name": "p2sh", "xfp": "0417A977", "deriv": "m/45h", "xpub": "tpubD91bww5vRgjkNKuCMKXh4wQL9ejDHysnscTCPM8pCJBhUZ8fY21oEkT98RPeZKzgytXKWwbvYFoNuZN89YdeETzTFBVvan4VL7p8ehneFYP", "desc": "sh(sortedmulti(M,[65fb43fe/45h]tpubD91bww5vRgjkNKuCMKXh4wQL9ejDHysnscTCPM8pCJBhUZ8fY21oEkT98RPeZKzgytXKWwbvYFoNuZN89YdeETzTFBVvan4VL7p8ehneFYP/0/*,...))"}}',
 ]
 
 BBQR_ENCODED_PSBTS = [
@@ -59,12 +122,61 @@ BBQR_ENCODED_PSBTS = [
     ],
 ]
 
+BBQR_NON_COMPRESSED_ENCODED_PSBTS = [
+    [
+        "B$2P0200OBZWE5H7AEAMGAQAAAAAGLZDYX3EGIZDZMNR5DQRFVCQAIG3FL5BAHWRJ3PGCJ3NTFFLVFRKBIAAAAAA7X77776SNCAHN5R4BCQGWFWOT7MQUMN7IYDICAIMVZOQWEMKWXPVVJWTZ4AAAAAAAD6777775FCZSAY26LQG5V3DG7J4Y6HFZSAL65OCPEMYB6SLACVNXVAAIOPAAAAAAAAP377774BBAJYAAAAAAAAACYABITRMR72K5TBKF5JQHFEP3N7MTN6BSTVZO6AAAAAAAAAAAALAAFH572746E5HEAFOBJOKAWW3AZSTJ5YGQ4IAAAAAATYBAQ2YPTYD3PPOOG4AAAAABMZKKMFX7N7X3N7UFH3DJ6TPIJJNKDDEZ2V5WXVEFF7ED2KPRLQWAJQJYJPKMVHIF3B567MHOVVTZEREDZ3JU5K7433BO4PCIWIAXMMKCEDF7NB74VAAACAACAAAQAAAAAEAAAAQB7MIAEBAAAAAAFYISWF3KWA2BQJIWFBLOAQUC75FZ7U663FLHY2UPMSMBIORDQQ4ICAAAAAAB7P7777QWEBHAAAAAAAAAALAAFDLBORR4YUXZXUT2AMGPV5STUNSAWXZC3AQE4AAAAAAAAABMAAUGQY57O3ZSGKZQPJIVDDRHCZR26EBKEXBCATQAAAAAAAAAFQACRQDOY52JHJTNRMSBEU3ZNF7MU3CQ67OE7UAGAAAAAAAAAAWAAKHTOIMMYL4F27RNYMKHR27HEACX2GC5OBRAJYAAAAAAAAACYABIUXQGIMLE6T4JV4HB7DBKMD2ZSOAJ3BNWEBHAAAAAAAAAALAAFG6U2YBVVC5EOTPROOXWHTT3NQNDN24INYQE4AAAAAAAAABMAAUCUT7GZTM564L2AHZT2WWKSNMW2XN6SRTTQZSWAAAAAAAAFQACSIVWLYCFXTXUOPJHVTG424NY2MHVFAUJ4ICOAAAAAAAAAAWAAKO5BX4TBBZOLBTGINJPGZXHCHXLSFXOGFRAJYAAAAAAAAACYABJ6E4FYLPW652VRHZ2TXZ",
+        "B$2P0201MH36EIIPZFAIMEBHAAAAAAAAAALAAFGZMA575IOQ64JRLZ7FDFP5HXDSI7T5TCB3K4TQAAIBD4ICOAAAAAAAAAAWAAKNSYB372Q5B5YTCXT6KGK72POHER7H3GECEBQDUQRHUJOBI3ZLGB5D45DTXHXDO2KR3SYOVVK7B3IWBLBTMZOLAWMBQZP3IP7FIAAAQAAQAAEAAAAABAAAAAAAALAAAAAAAAIAOEBAAAAAAGYGM76R4MFE4PVHWKO7UMETKM7CMCYSGXHLZBKFSTV77SGMMGAIWAIAAAAAB7P7777QF2ADAAAAAAAAAALAAFDVHQFTAZIUYBERQK72U7UJXL4TP4IATCF7VQXQAAAAAAABMAAUJKWTGIZ24GA6VEFIYS3FJBDRMPCZEAN75DGSKAABAEP6QAYAAAAAAAAACYABI5J4BMYGKFGAJEMCX6VH5CN27E37CAEYQIQGALL3CUCJCC5XCJYUJJZQTXXO3YZORCQGK4GZNW3IGGPLOVQF2VCBEGDF7NB74VAAACAACAAAQAAAAAEAAAAAAAAEAAAAAAABABJAEAAAAAA7YEPDL6LPKO5S4PGHT7RSZD7WRGO3JUDPI2L2LPGRPBZ3ORRB5NYAAAAAAAH577776ALCA4AAAAAAAAABMAAUXRNOMGZL4W3EIBN7B33H6UPCYV3NJF32PVLCOAABAEPWEBYAAAAAAAAACYABJPC24YNSXZNWIQC36DXWP5I6FRLW2SLXUIQGALPV276UOSFQ4GYKIORFRCTTGOSCPBCJ7QWFFL2K4UCZDA27YOVQGGDF7NB74VAAACAACAAAQAAAAAEAAAAAAAA6AAAAAABCAIB2VZDSEABFIYX7GUZUJM27QMBDRYRRCHKG6SGYIID7ZDZIBMWDLLAYMX5UH7SUAAAIAAIAACAAAAAAQAAAAAAAGUAAAAAAEIBAENBW7O5JKFANLCOJJSIFIZLZ2JPIDZRECITJNP2QDDZACAOE57MRDBS7WQ76KQAABAABAAAIAAAAACAACAAAAAIQAAAAAA",
+    ],
+    [
+        "B$2P0100OBZWE5H7AEAFEAQAAAAADGU34HFCSEC4S52DYD6R5Z44BZQNEKFGDSHMX52PTZ6P7IARSDD3AEAAAAAA7X7777YBEETAAAAAAAAAAFQACSXM2HW4H37WLKRATUBBLZZ5OCIF3QLINRMAWKYAJ4AQINMHZ4B5XXXHDOAAAAAAWMVFGC37W735W72CT5RU7JXUEUWVBRSM5K63L2SCS7SB5FHYVYLAEYE4EXVGKTUC5Q67PWDXK2Z4SISB45U2OVP6N5QXOHRELEALWGFBCBS7WQ76KQAABAABAAAIAAAAACAAAAIBD4ICOAAAAAAAAAAWAAKETDCNUWGLXHC2NGELQMW6WMZWZ5CCKSQACAYEAEAAAABCAYB62F75AWXWXTKR7DOWZ5ZXVQJWV6QANAP3FKOD6V6HZLPIJL4B6YIYMX5UH7SUAAAIAAIAACAAAAAAQAAAAAAABAAAAAAAAA",
+    ],
+]
+
 BBQR_DECODED_PSBTS = [
     # Nunchuk PSBT
     b"psbt\xff\x01\x00\xc3\x02\x00\x00\x00\x03/#\xc5\xf6C##\xcb\x1b\x1e\x8e\x11-E\x00 \xdb*\xfa\x10\x1e\xd1N\xdea'm\x99J\xba\x96*\n\x00\x00\x00\x00\xfd\xff\xff\xff\xd2h\x80v\xf6<\x08\xa0k\x16\xce\x9f\xd9\n1\xbfF\x06\x81\x01\x0c\xae]\x0b\x11\x8a\xb5\xdfZ\xa6\xd3\xcf\x00\x00\x00\x00\x00\xfd\xff\xff\xff\xe9E\x99\x03\x1a\xf2\xe0n\xd7c7\xd3\xccx\xe5\xcc\x80\xbfu\xc2y\x19\x80\xfaK\x00\xaa\xdb\xd4\x00C\x9e\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x02\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14N,\x8f\xf4\xae\xcc*/S\x03\x94\x8f\xdb~\xc9\xb7\xc1\x94\xeb\x97x\x00\x00\x00\x00\x00\x00\x00\x16\x00\x14\xfd\xfe\xbf\xcf\x13\xa7 \n\xe0\xa5\xca\x05\xad\xb0fSOphq\x00\x00\x00\x00O\x01\x045\x87\xcf\x03\xdb\xde\xe7\x1b\x80\x00\x00\x00\xb3*S\x0b\x7f\xb7\xf7\xdb\x7fB\x9fcO\xa6\xf4%-P\xc6L\xea\xbd\xb5\xeaB\x97\xe4\x1e\x94\xf8\xae\x16\x02`\x9c%\xeaeN\x82\xec=\xf7\xd8wV\xb3\xc9\"A\xe7i\xa7U\xfeoaw\x1e$Y\x00\xbb\x18\xa1\x10e\xfbC\xfeT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x01\x00\xfd\x88\x01\x02\x00\x00\x00\x01p\x89X\xbbU\x81\xa0\xc1(\xb1B\xb7\x02\x14\x17\xfa\\\xfe\x9e\xf6\xca\xb3\xe3T{$\xc0\xa1\xd1\x1c!\xc4\x08\x00\x00\x00\x00\xfd\xff\xff\xff\x0b\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14k\x0b\xa3\x1eb\x97\xcd\xe9=\x01\x86}{)\xd1\xb2\x05\xaf\x91l\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x1441\xdf\xbby\x91\x95\x98=(\xa8\xc7\x13\x8b1\xd7\x88\x15\x12\xe1\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14`7c\xbaI\xd36\xc5\x92\t)\xbc\xb4\xbfe6({\xee'\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14y\xb9\x0cf\x17\xc2\xeb\xf1n\x18\xa3\xc7_9\x00+\xe8\xc2\xeb\x83\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14R\xf02\x18\xb2z|Mxp\xfcaS\x07\xac\xc9\xc0N\xc2\xdb\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14\xde\xa6\xb0\x1a\xd4]#\xa6\xf8\xb9\xd7\xb1\xe7=\xb6\r\x1bu\xc47\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14\x15'\xf3fl\xef\xb8\xbd\x00\xf9\x9e\xadeI\xac\xb6\xae\xdfJ3\x9c3+\x00\x00\x00\x00\x00\x16\x00\x14\x91[/\x02-\xe7z9\xe9=fnk\x8d\xc6\x98z\x94\x14O\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14\xee\x86\xfc\x98C\x97,32\x1a\x97\x9b78\x8fu\xc8\xb7q\x8b\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14\xf8\x9c.\x16\xfb{\xba\xacO\x9dN\xf9a\xf7\xe2!\x0f\xc9@\x86\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14\xd9`;\xfe\xa1\xd0\xf7\x13\x15\xe7\xe5\x19_\xd3\xdcrG\xe7\xd9\x88;W'\x00\x01\x01\x1f\x10'\x00\x00\x00\x00\x00\x00\x16\x00\x14\xd9`;\xfe\xa1\xd0\xf7\x13\x15\xe7\xe5\x19_\xd3\xdcrG\xe7\xd9\x88\"\x06\x03\xa4\"z%\xc1F\xf2\xb3\x07\xa3\xe7G;\x9e\xe3v\x95\x1d\xcb\x0e\xadU\xf0\xed\x16\n\xc36e\xcb\x05\x98\x18e\xfbC\xfeT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00q\x02\x00\x00\x00\x01\xb0f\x7f\xd1\xe3\nN>\xa7\xb2\x9d\xfa0\x93S>&\x0b\x125\xce\xbc\x85E\x94\xeb\xff\xc8\xcca\x80\x8b\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x02\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14u<\x0b0e\x14\xc0I\x18+\xfa\xa7\xe8\x9b\xaf\x93\x7f\x10\t\x88\xbf\xac/\x00\x00\x00\x00\x00\x16\x00\x14J\xad3#:\xe1\x81\xea\x90\xa8\xc4\xb6T\x84qc\xc5\x92\x01\xbf\xe8\xcd%\x00\x01\x01\x1f\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14u<\x0b0e\x14\xc0I\x18+\xfa\xa7\xe8\x9b\xaf\x93\x7f\x10\t\x88\"\x06\x02\xd7\xb1PI\x10\xbbq'\x14Js\t\xde\xee\xde2\xe8\x8a\x06W\r\x96\xdbh1\x9e\xb7V\x05\xd5D\x12\x18e\xfbC\xfeT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x04\x00\x00\x00\x00\x01\x00R\x02\x00\x00\x00\x01\xfc\x11\xe3_\x96\xf5;\xb2\xe3\xccy\xfe2\xc8\xffh\x99\xdbM\x06\xf4iz[\xcd\x17\x87;tb\x1e\xb7\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x01b\x07\x00\x00\x00\x00\x00\x00\x16\x00\x14\xbcZ\xe6\x1b+\xe5\xb6D\x05\xbf\x0e\xf6\x7fQ\xe2\xc5v\xd4\x97z}V'\x00\x01\x01\x1fb\x07\x00\x00\x00\x00\x00\x00\x16\x00\x14\xbcZ\xe6\x1b+\xe5\xb6D\x05\xbf\x0e\xf6\x7fQ\xe2\xc5v\xd4\x97z\"\x06\x02\xdf]\x7f\xd4t\x8b\x0e\x1b\nC\xa2X\x8as3\xa4'\x84I\xfc,R\xafJ\xe5\x05\x91\x83_\xc3\xab\x03\x18e\xfbC\xfeT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x1e\x00\x00\x00\x00\"\x02\x03\xaa\xe4r \x02Tb\xff53D\xb3_\x83\x028\xe21\x11\xd4oH\xd8B\x07\xfc\x8f(\x0b,5\xac\x18e\xfbC\xfeT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x005\x00\x00\x00\x00\"\x02\x0246\xfb\xba\x95\x14\rX\x9c\x94\xc9\x05FW\x9d%\xe8\x1ebA\"ik\xf5\x01\x8f \x10\x1cN\xfd\x91\x18e\xfbC\xfeT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x01\x00\x00\x00\x11\x00\x00\x00\x00",
     # Sparrow PSBT
     b'psbt\xff\x01\x00R\x02\x00\x00\x00\x01\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x01!&\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hlX\x0b+\x00O\x01\x045\x87\xcf\x03\xdb\xde\xe7\x1b\x80\x00\x00\x00\xb3*S\x0b\x7f\xb7\xf7\xdb\x7fB\x9fcO\xa6\xf4%-P\xc6L\xea\xbd\xb5\xeaB\x97\xe4\x1e\x94\xf8\xae\x16\x02`\x9c%\xeaeN\x82\xec=\xf7\xd8wV\xb3\xc9"A\xe7i\xa7U\xfeoaw\x1e$Y\x00\xbb\x18\xa1\x10e\xfbC\xfeT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x01\x01\x1f\x10\'\x00\x00\x00\x00\x00\x00\x16\x00\x14I\x8cM\xa5\x8c\xbb\x9cZi\x88\xb82\xde\xb33l\xf4BT\xa0\x01\x03\x04\x01\x00\x00\x00"\x06\x03\xed\x17\xfd\x05\xafk\xcdQ\xf8\xddl\xf77\xac\x13j\xfa\x00h\x1f\xb2\xa9\xc3\xf5||\xad\xe8J\xf8\x1fa\x18e\xfbC\xfeT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00',
 ]
+
+HEX_ENCODED_SIGNED_PSBT = [
+    "B$HT0400020000000001096AAB62E89980FC9845BB8EAF3A594F184FF618C843DF4D021F87E273AF05785A0000000000FDFFFFFF6AAB62E89980FC9845BB8EAF3A594F184FF618C843DF4D021F87E273AF05785A0100000000FDFFFFFF6AAB62E89980FC9845BB8EAF3A594F184FF618C843DF4D021F87E273AF05785A0A00000000FDFFFFFF6AAB62E89980FC9845BB8EAF3A594F184FF618C843DF4D021F87E273AF05785A0300000000FDFFFFFF6AAB62E89980FC9845BB8EAF3A594F184FF618C843DF4D021F87E273AF05785A0800000000FDFFFFFF58B8917FCB1636AECF9BA4EC8F1D20C9CF62827D161DC0D77362AF027FCFA77D0000000000FDFFFFFF6AAB62E89980FC9845BB8EAF3A594F184FF618C843DF4D021F87E273AF05785A0600000000FDFFFFFFD2688076F63C08A06B16CE9FD90A31BF460681010CAE5D0B118AB5DF5AA6D3CF0000000000FDFFFFFF708958BB5581A0C128",
+    "B$HT0401B142B7021417FA5CFE9EF6CAB3E3547B24C0A1D11C21C40200000000FDFFFFFF01E803000000000000160014AECD1EDC3EFF65AA209D0215E73D70905DC1686C02473044022043D4C9444BDCCC23C37544F622984966EBC6A8D03146E855F604C555F09C0E3B02206234F57CC99F6B05B3F402CD82DE0EF9EC7F8C64628AB1DEBB9616AA40B2D263012103CBA7809E8862DC7E609C19C2E255D2A2DF3DC17099ECA0167636056A9DF56D590247304402206FE155EB1D7E1EC2DB4FCD33C3319DCC118F9F71C5602280A974CC6FAA9D66D702206831C3ECD5FE1E500C937ACEA1862ABC0749C2D45CDFC17777AB6EB364D4586B0121027B62F7B82A9DE5E8C2E550A78610B0D3D64322459898DE34F0DF8B33971EA68302463043021F7406ADF0857795E7992137346D77D1FB8C9E6F0D31473B4F55AC3D5DF6E9C00220037575D2B4D4A4271BC8944624AFB16EFF212A77BD8B2DCBC79516",
+    "B$HT0402B93C479251012102F9378C4A197A57451B9AEA1AEBF78D3E20908444F4D8CE240F7F06D91DEAA87A02473044022042AE67F457CF92F429DAAC6CF6C319EFCD664B73BF1072FF5B653E2DAB54175A02207C4DC4CE59421FF19C2346F58EA318E0C12456A692014E8CB3D41ADCF0DFA68301210382F7309C405B04C698CD5C1EA18DD6DC4330659BC35BCAC8D74C04852E7E8C9202473044022033A8CC64B08C30E1ACE60F14878125CBC2E3E77E215D8D04B3C61EF82735C7D5022051B1437CA812E8802AA415504D4979C55A991CF95B6F13DE8B0367D7118327AC012103FF7607E75C052A60247355ED6AED6E4F7D65D10AF66E7591C84EA5CE9D0491380247304402202625CE8D7D0B809F4895CBB0F71FC41369D6B2284AC3BA086132C56691B78637022061EEF507FAF9D308C24954D16A4701C883BDE4F57B114BFCB6F66C9F31DF2E56012103C4C806D0C119B335E39B144BC4BAB1",
+    "B$HT0403A51006CF3D975DBE7407E31EE75939E9E0024730440220397CCF76626574AA1551490CDC9A33ED5841EA125A1153145ED5AB4C41EC7981022053CC43B804E59F702EDA14E78DB179478E1D78496DD949825CD1436CD20F4F2C0121020B3F0E581618AA6E7311DFD3ABC79B0EE0AAE516F66BA84FFA740B124534F51702473044022042A2C472C7B24CF60988204BD7A5EE5A5EF79429DB2680FBB94C679B731F7B92022009E6A5A1109EA0D65C177876D74344DDF5F089B639D3424EDDA8F8C595533CD7012102D7B1504910BB7127144A7309DEEEDE32E88A06570D96DB68319EB75605D544120247304402200C5CD1522AF79D8A8B695B501F5816B5371BE3BD78F7EED7DECAAD83E7A82105022079150EA0817EA83E802B1AC3B5C24528DBA5F6C264A6DEAA41788E7B852A77DB01210226310DD2E613C62E1E2D076381FA7CCB5C11978EF3C277AD6A91DA6156992905C40C2B00",
+]
+
+HEX_DECODED_SIGNED_PSBT = b"\x02\x00\x00\x00\x00\x01\tj\xabb\xe8\x99\x80\xfc\x98E\xbb\x8e\xaf:YO\x18O\xf6\x18\xc8C\xdfM\x02\x1f\x87\xe2s\xaf\x05xZ\x00\x00\x00\x00\x00\xfd\xff\xff\xffj\xabb\xe8\x99\x80\xfc\x98E\xbb\x8e\xaf:YO\x18O\xf6\x18\xc8C\xdfM\x02\x1f\x87\xe2s\xaf\x05xZ\x01\x00\x00\x00\x00\xfd\xff\xff\xffj\xabb\xe8\x99\x80\xfc\x98E\xbb\x8e\xaf:YO\x18O\xf6\x18\xc8C\xdfM\x02\x1f\x87\xe2s\xaf\x05xZ\n\x00\x00\x00\x00\xfd\xff\xff\xffj\xabb\xe8\x99\x80\xfc\x98E\xbb\x8e\xaf:YO\x18O\xf6\x18\xc8C\xdfM\x02\x1f\x87\xe2s\xaf\x05xZ\x03\x00\x00\x00\x00\xfd\xff\xff\xffj\xabb\xe8\x99\x80\xfc\x98E\xbb\x8e\xaf:YO\x18O\xf6\x18\xc8C\xdfM\x02\x1f\x87\xe2s\xaf\x05xZ\x08\x00\x00\x00\x00\xfd\xff\xff\xffX\xb8\x91\x7f\xcb\x166\xae\xcf\x9b\xa4\xec\x8f\x1d \xc9\xcfb\x82}\x16\x1d\xc0\xd7sb\xaf\x02\x7f\xcf\xa7}\x00\x00\x00\x00\x00\xfd\xff\xff\xffj\xabb\xe8\x99\x80\xfc\x98E\xbb\x8e\xaf:YO\x18O\xf6\x18\xc8C\xdfM\x02\x1f\x87\xe2s\xaf\x05xZ\x06\x00\x00\x00\x00\xfd\xff\xff\xff\xd2h\x80v\xf6<\x08\xa0k\x16\xce\x9f\xd9\n1\xbfF\x06\x81\x01\x0c\xae]\x0b\x11\x8a\xb5\xdfZ\xa6\xd3\xcf\x00\x00\x00\x00\x00\xfd\xff\xff\xffp\x89X\xbbU\x81\xa0\xc1(\xb1B\xb7\x02\x14\x17\xfa\\\xfe\x9e\xf6\xca\xb3\xe3T{$\xc0\xa1\xd1\x1c!\xc4\x02\x00\x00\x00\x00\xfd\xff\xff\xff\x01\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hl\x02G0D\x02 C\xd4\xc9DK\xdc\xcc#\xc3uD\xf6\"\x98If\xeb\xc6\xa8\xd01F\xe8U\xf6\x04\xc5U\xf0\x9c\x0e;\x02 b4\xf5|\xc9\x9fk\x05\xb3\xf4\x02\xcd\x82\xde\x0e\xf9\xec\x7f\x8cdb\x8a\xb1\xde\xbb\x96\x16\xaa@\xb2\xd2c\x01!\x03\xcb\xa7\x80\x9e\x88b\xdc~`\x9c\x19\xc2\xe2U\xd2\xa2\xdf=\xc1p\x99\xec\xa0\x16v6\x05j\x9d\xf5mY\x02G0D\x02 o\xe1U\xeb\x1d~\x1e\xc2\xdbO\xcd3\xc31\x9d\xcc\x11\x8f\x9fq\xc5`\"\x80\xa9t\xcco\xaa\x9df\xd7\x02 h1\xc3\xec\xd5\xfe\x1eP\x0c\x93z\xce\xa1\x86*\xbc\x07I\xc2\xd4\\\xdf\xc1ww\xabn\xb3d\xd4Xk\x01!\x02{b\xf7\xb8*\x9d\xe5\xe8\xc2\xe5P\xa7\x86\x10\xb0\xd3\xd6C\"E\x98\x98\xde4\xf0\xdf\x8b3\x97\x1e\xa6\x83\x02F0C\x02\x1ft\x06\xad\xf0\x85w\x95\xe7\x99!74mw\xd1\xfb\x8c\x9eo\r1G;OU\xac=]\xf6\xe9\xc0\x02 \x03uu\xd2\xb4\xd4\xa4'\x1b\xc8\x94F$\xaf\xb1n\xff!*w\xbd\x8b-\xcb\xc7\x95\x16\xb9<G\x92Q\x01!\x02\xf97\x8cJ\x19zWE\x1b\x9a\xea\x1a\xeb\xf7\x8d> \x90\x84D\xf4\xd8\xce$\x0f\x7f\x06\xd9\x1d\xea\xa8z\x02G0D\x02 B\xaeg\xf4W\xcf\x92\xf4)\xda\xacl\xf6\xc3\x19\xef\xcdfKs\xbf\x10r\xff[e>-\xabT\x17Z\x02 |M\xc4\xceYB\x1f\xf1\x9c#F\xf5\x8e\xa3\x18\xe0\xc1$V\xa6\x92\x01N\x8c\xb3\xd4\x1a\xdc\xf0\xdf\xa6\x83\x01!\x03\x82\xf70\x9c@[\x04\xc6\x98\xcd\\\x1e\xa1\x8d\xd6\xdcC0e\x9b\xc3[\xca\xc8\xd7L\x04\x85.~\x8c\x92\x02G0D\x02 3\xa8\xccd\xb0\x8c0\xe1\xac\xe6\x0f\x14\x87\x81%\xcb\xc2\xe3\xe7~!]\x8d\x04\xb3\xc6\x1e\xf8'5\xc7\xd5\x02 Q\xb1C|\xa8\x12\xe8\x80*\xa4\x15PMIy\xc5Z\x99\x1c\xf9[o\x13\xde\x8b\x03g\xd7\x11\x83'\xac\x01!\x03\xffv\x07\xe7\\\x05*`$sU\xedj\xednO}e\xd1\n\xf6nu\x91\xc8N\xa5\xce\x9d\x04\x918\x02G0D\x02 &%\xce\x8d}\x0b\x80\x9fH\x95\xcb\xb0\xf7\x1f\xc4\x13i\xd6\xb2(J\xc3\xba\x08a2\xc5f\x91\xb7\x867\x02 a\xee\xf5\x07\xfa\xf9\xd3\x08\xc2IT\xd1jG\x01\xc8\x83\xbd\xe4\xf5{\x11K\xfc\xb6\xf6l\x9f1\xdf.V\x01!\x03\xc4\xc8\x06\xd0\xc1\x19\xb35\xe3\x9b\x14K\xc4\xba\xb1\xa5\x10\x06\xcf=\x97]\xbet\x07\xe3\x1e\xe7Y9\xe9\xe0\x02G0D\x02 9|\xcfvbet\xaa\x15QI\x0c\xdc\x9a3\xedXA\xea\x12Z\x11S\x14^\xd5\xabLA\xecy\x81\x02 S\xccC\xb8\x04\xe5\x9fp.\xda\x14\xe7\x8d\xb1yG\x8e\x1dxIm\xd9I\x82\\\xd1Cl\xd2\x0fO,\x01!\x02\x0b?\x0eX\x16\x18\xaans\x11\xdf\xd3\xab\xc7\x9b\x0e\xe0\xaa\xe5\x16\xf6k\xa8O\xfat\x0b\x12E4\xf5\x17\x02G0D\x02 B\xa2\xc4r\xc7\xb2L\xf6\t\x88 K\xd7\xa5\xeeZ^\xf7\x94)\xdb&\x80\xfb\xb9Lg\x9bs\x1f{\x92\x02 \t\xe6\xa5\xa1\x10\x9e\xa0\xd6\\\x17xv\xd7CD\xdd\xf5\xf0\x89\xb69\xd3BN\xdd\xa8\xf8\xc5\x95S<\xd7\x01!\x02\xd7\xb1PI\x10\xbbq'\x14Js\t\xde\xee\xde2\xe8\x8a\x06W\r\x96\xdbh1\x9e\xb7V\x05\xd5D\x12\x02G0D\x02 \x0c\\\xd1R*\xf7\x9d\x8a\x8bi[P\x1fX\x16\xb57\x1b\xe3\xbdx\xf7\xee\xd7\xde\xca\xad\x83\xe7\xa8!\x05\x02 y\x15\x0e\xa0\x81~\xa8>\x80+\x1a\xc3\xb5\xc2E(\xdb\xa5\xf6\xc2d\xa6\xde\xaaAx\x8e{\x85*w\xdb\x01!\x02&1\r\xd2\xe6\x13\xc6.\x1e-\x07c\x81\xfa|\xcb\\\x11\x97\x8e\xf3\xc2w\xadj\x91\xdaaV\x99)\x05\xc4\x0c+\x00"
+
+
+def test_bbqr_code_initialization_valid():
+    payload = "sample_payload"
+    encoding = "Z"
+    file_type = "P"
+
+    bbqr = BBQrCode(payload, encoding, file_type)
+
+    assert bbqr.payload == payload
+    assert bbqr.encoding == encoding
+    assert bbqr.file_type == file_type
+
+
+def test_bbqr_code_invalid_encoding():
+    payload = "sample_payload"
+    invalid_encoding = "X"
+    file_type = "P"
+
+    with pytest.raises(ValueError, match="Invalid BBQr encoding"):
+        BBQrCode(payload, invalid_encoding, file_type)
+
+
+def test_bbqr_code_invalid_file_type():
+    payload = "sample_payload"
+    encoding = "Z"
+    invalid_file_type = "gif"
+
+    with pytest.raises(ValueError, match="Invalid BBQr file type"):
+        BBQrCode(payload, encoding, invalid_file_type)
 
 
 def test_base32_encoding(mocker):
@@ -75,17 +187,112 @@ def test_base32_encoding(mocker):
         expected = b32encode(test_bytes).decode("utf-8").rstrip("=")
         assert "".join(base32_encode_stream(test_bytes)) == expected
 
+    # Test padding
+    for test_bytes in B32_TEST_BYTES:
+        expected = b32encode(test_bytes).decode("utf-8")
+        print(len("".join(base32_encode_stream(test_bytes, True))), len(expected))
+        assert "".join(base32_encode_stream(test_bytes, True)) == expected
+
 
 def test_base32_decoding(mocker):
     from krux.bbqr import base32_decode_stream
-    from base64 import b32encode
 
-    for test_bytes in B32_TEST_BYTES:
-        encoded = b32encode(test_bytes).decode("utf-8")
+    for test_bytes, encoded in zip(B32_TEST_BYTES, B32_ENCODED_STRINGS):
+        assert base32_decode_stream(encoded) == test_bytes
+    
+    for test_bytes, encoded in zip(B32_TEST_BYTES, B32_ENCODED_STRINGS_PADDED):
         assert base32_decode_stream(encoded) == test_bytes
 
+def test_base32_decoding_invalid_character():
+    from krux.bbqr import base32_decode_stream
 
-def test_decode_bbqr(mocker, m5stickv):
+    encoded = "ASDDG134"  # 1 is invalid character
+
+    with pytest.raises(ValueError, match="Invalid Base32 character"):
+        base32_decode_stream(encoded)
+
+
+def test_parse_bbqr_valid_data():
+    from krux.bbqr import parse_bbqr
+
+    for encoded_blocks in BBQR_ENCODED_DESCRIPTORS:
+        for block in encoded_blocks:
+            content, part_index, part_total = parse_bbqr(block)
+
+            assert content == block[8:]
+            assert part_index == int(block[6:8], 36)
+            assert part_total == int(block[4:6], 36)
+
+
+def test_parse_bbqr_too_short():
+    from krux.bbqr import parse_bbqr
+
+    data = "B$XU01"
+
+    with pytest.raises(ValueError, match="Invalid BBQR format"):
+        parse_bbqr(data)
+
+
+def test_parse_bbqr_invalid_encoding():
+    from krux.bbqr import parse_bbqr
+
+    data = INVALID_ENCODING_BBQR
+
+    with pytest.raises(ValueError, match="Invalid encoding"):
+        parse_bbqr(data)
+
+
+def test_parse_bbqr_invalid_file_type():
+    from krux.bbqr import parse_bbqr
+
+    data = INVALID_TYPE_BBQR
+
+    with pytest.raises(ValueError, match="Invalid file type"):
+        parse_bbqr(data)
+
+
+def test_parse_bbqr_invalid_part_index():
+    from krux.bbqr import parse_bbqr
+
+    data = "B$ZU0102CX"  # '02' in base 36 is 2, greater than total parts 1
+
+    with pytest.raises(ValueError, match="Invalid part index"):
+        parse_bbqr(data)
+
+
+def test_parse_bbqr_invalid_part_total_indicator():
+    from krux.bbqr import parse_bbqr
+
+    data = "B$ZU01$0content"  # Invalid part_total and part_index
+
+    with pytest.raises(ValueError, match=("Invalid BBQR format")):
+        parse_bbqr(data)
+
+
+def test_deflate_compress_decompress(m5stickv):
+    from krux.bbqr import deflate_compress, deflate_decompress
+
+    for test_bytes in B32_TEST_BYTES:
+        compressed = deflate_compress(test_bytes)
+        decompressed = deflate_decompress(compressed)
+        assert decompressed == test_bytes
+
+
+def test_deflate_compress_invalid_data(m5stickv):
+    from krux.bbqr import deflate_compress
+
+    with pytest.raises(ValueError, match="Error compressing BBQR"):
+        deflate_compress("non binary string")
+
+
+def test_deflate_decompress_invalid_data(m5stickv):
+    from krux.bbqr import deflate_decompress
+
+    with pytest.raises(ValueError, match="Error decompressing BBQR"):
+        deflate_decompress("non binary string")
+
+
+def test_decode_bbqr_descriptors(m5stickv):
     from krux.qr import detect_format
     from krux.bbqr import decode_bbqr, parse_bbqr
 
@@ -97,6 +304,26 @@ def test_decode_bbqr(mocker, m5stickv):
             parts[index] = part
         assert decode_bbqr(parts, bbqr.encoding, bbqr.file_type) == decoded
 
+
+def test_decode_bbqr_json_non_compressed_descriptors(m5stickv):
+    from krux.qr import detect_format
+    from krux.bbqr import decode_bbqr, parse_bbqr
+
+    for encoded, decoded in zip(
+        BBQR_ENCODED_JSON_DESCRIPTOR, BBQR_DECODED_JSON_DESCRIPTOR
+    ):
+        parts = {}
+        _, bbqr = detect_format(encoded[0])
+        for encoded_part in encoded:
+            part, index, total = parse_bbqr(encoded_part)
+            parts[index] = part
+        assert decode_bbqr(parts, bbqr.encoding, bbqr.file_type) == decoded
+
+
+def test_decode_bbqr_psbts(m5stickv):
+    from krux.qr import detect_format
+    from krux.bbqr import decode_bbqr, parse_bbqr
+
     for encoded, decoded in zip(BBQR_ENCODED_PSBTS, BBQR_DECODED_PSBTS):
         parts = {}
         _, bbqr = detect_format(encoded[0])
@@ -106,7 +333,32 @@ def test_decode_bbqr(mocker, m5stickv):
         assert decode_bbqr(parts, bbqr.encoding, bbqr.file_type) == decoded
 
 
-def test_encode_bbqr(mocker, m5stickv):
+def test_decode_hex_encoded_psbt(m5stickv):
+    from krux.qr import detect_format
+    from krux.bbqr import decode_bbqr, parse_bbqr
+
+    parts = {}
+    _, bbqr = detect_format(HEX_ENCODED_SIGNED_PSBT[0])
+    for encoded_part in HEX_ENCODED_SIGNED_PSBT:
+        part, index, total = parse_bbqr(encoded_part)
+        parts[index] = part
+    assert decode_bbqr(parts, bbqr.encoding, bbqr.file_type) == HEX_DECODED_SIGNED_PSBT
+
+
+def test_decode_non_compressed_bbqr_psbts(m5stickv):
+    from krux.qr import detect_format
+    from krux.bbqr import decode_bbqr, parse_bbqr
+
+    for encoded, decoded in zip(BBQR_NON_COMPRESSED_ENCODED_PSBTS, BBQR_DECODED_PSBTS):
+        parts = {}
+        _, bbqr = detect_format(encoded[0])
+        for encoded_part in encoded:
+            part, index, total = parse_bbqr(encoded_part)
+            parts[index] = part
+        assert decode_bbqr(parts, bbqr.encoding, bbqr.file_type) == decoded
+
+
+def test_encode_bbqr_descriptors(m5stickv):
     from krux.bbqr import encode_bbqr
 
     for encoded, decoded in zip(BBQR_ENCODED_DESCRIPTORS, BBQR_DECODED_DESCRIPTORS):
@@ -114,7 +366,65 @@ def test_encode_bbqr(mocker, m5stickv):
         encoded_payload = "".join([part[8:] for part in sorted(encoded)])
         assert encoded_payload == bbqr_code.payload
 
+
+def test_encode_bbqr_json_non_compressed_descriptors(m5stickv):
+    from krux.bbqr import encode_bbqr
+
+    for encoded, decoded in zip(
+        BBQR_ENCODED_JSON_DESCRIPTOR, BBQR_DECODED_JSON_DESCRIPTOR
+    ):
+        bbqr_code = encode_bbqr(decoded.encode("utf-8"), encoding="2", file_type="J")
+        encoded_payload = "".join([part[8:] for part in sorted(encoded)])
+        assert encoded_payload == bbqr_code.payload
+
+
+def test_encode_bbqr_psbts(m5stickv):
+    from krux.bbqr import encode_bbqr
+
     for encoded, decoded in zip(BBQR_ENCODED_PSBTS, BBQR_DECODED_PSBTS):
         bbqr_code = encode_bbqr(decoded, file_type="P")
         encoded_payload = "".join([part[8:] for part in sorted(encoded)])
         assert encoded_payload == bbqr_code.payload
+
+
+def test_encode_non_compressed_bbqr_psbts(m5stickv):
+    from krux.bbqr import encode_bbqr
+
+    for encoded, decoded in zip(BBQR_NON_COMPRESSED_ENCODED_PSBTS, BBQR_DECODED_PSBTS):
+        bbqr_code = encode_bbqr(decoded, encoding="2", file_type="P")
+        encoded_payload = "".join([part[8:] for part in sorted(encoded)])
+        assert encoded_payload == bbqr_code.payload
+
+
+def test_encode_hex_encoded_psbt(m5stickv):
+    from krux.bbqr import encode_bbqr
+
+    bbqr_code = encode_bbqr(HEX_DECODED_SIGNED_PSBT, encoding="H", file_type="T")
+    print(bbqr_code.payload)
+    encoded_payload = "".join([part[8:] for part in sorted(HEX_ENCODED_SIGNED_PSBT)])
+    print(sorted(HEX_ENCODED_SIGNED_PSBT))
+    assert encoded_payload == bbqr_code.payload
+
+
+def test_encode_bbqr_compression_not_beneficial(m5stickv):
+    from krux.bbqr import encode_bbqr
+
+    ENCODED_BBQR = "B$2U0100KNWWC3DMEBRW63TUMVXHI"
+    BBQR_CONTENT = "Small content"
+
+    # Encode not specifying compression, let it decide
+    bbqr_code = encode_bbqr(BBQR_CONTENT.encode("utf-8"), file_type="U")
+    assert bbqr_code.payload == ENCODED_BBQR[8:]
+    assert bbqr_code.encoding == "2"
+    assert bbqr_code.file_type == "U"
+
+
+def test_encode_bbqr_always_compress_large_data(m5stickv):
+    from krux.bbqr import encode_bbqr
+
+    BBQR_CONTENT = "Large content" * 500
+
+    # Encode not specifying compression, let it decide
+    bbqr_code = encode_bbqr(BBQR_CONTENT.encode("utf-8"), file_type="U")
+    assert bbqr_code.encoding == "Z"
+    assert bbqr_code.file_type == "U"

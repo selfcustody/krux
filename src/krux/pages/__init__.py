@@ -224,7 +224,8 @@ class Page:
             # Anti-glare mode
             if self.ctx.input.page_event() or (
                 # Yahboom may have page or page_prev mapped to its single button
-                board.config["type"] == "yahboom" and self.ctx.input.page_prev_event()
+                board.config["type"] == "yahboom"
+                and self.ctx.input.page_prev_event()
             ):
                 if self.ctx.camera.has_antiglare():
                     self._time_frame = time.ticks_ms()

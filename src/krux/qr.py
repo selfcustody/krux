@@ -28,6 +28,8 @@ from ur.ur import UR
 from .bbqr import (
     BBQrCode,
     parse_bbqr,
+    KNOWN_ENCODINGS,
+    KNOWN_FILETYPES,
 )
 
 FORMAT_NONE = 0
@@ -357,9 +359,9 @@ def detect_format(data):
         elif data.lower().startswith("ur:"):
             qr_format = FORMAT_UR
         elif data.startswith("B$"):
-            if data[3] in "PU":
+            if data[3] in KNOWN_FILETYPES:
                 bbqr_file_type = data[3]
-                if data[2] in "2ZH":
+                if data[2] in KNOWN_ENCODINGS:
                     bbqr_encoding = data[2]
                     return FORMAT_BBQR, BBQrCode(None, bbqr_encoding, bbqr_file_type)
 

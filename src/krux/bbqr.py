@@ -26,20 +26,12 @@
 import gc
 
 # BBQR
-# Human names
-FILETYPE_NAMES = {
-    # PSBT and unicode text supported for now
-    "P": "PSBT",
-    # "T": "Transaction",
-    # "J": "JSON",
-    # "C": "CBOR",
-    "U": "Unicode Text",
-    # "X": "Executable",
-    # "B": "Binary",
-}
+KNOWN_ENCODINGS = {"H", "2", "Z"}
 
-# Codes for PSBT vs. TXN and so on
-KNOWN_FILETYPES = set(FILETYPE_NAMES.keys())
+# File types
+# P='PSBT', T='Transaction', J='JSON', C='CBOR'
+# U='Unicode Text', X='Executable', B='Binary'
+KNOWN_FILETYPES = {"P", "T", "J", "U"}
 
 BBQR_ALWAYS_COMPRESS_THRESHOLD = 5000  # bytes
 
@@ -53,7 +45,7 @@ class BBQrCode:
     def __init__(self, payload, encoding=None, file_type=None):
         """Initializes the BBQr code with the given data, encoding, and file type"""
 
-        if encoding not in "H2Z":
+        if encoding not in KNOWN_ENCODINGS:
             raise ValueError("Invalid BBQr encoding")
         if file_type not in KNOWN_FILETYPES:
             raise ValueError("Invalid BBQr file type")
@@ -67,19 +59,26 @@ def parse_bbqr(data):
     Parses the QR as a BBQR part, extracting the part's content,
     encoding, file format, index, and total
     """
+    if len(data) < 8:
+        raise ValueError("Invalid BBQR format")
+
+    encoding = data[2]
+    if encoding not in KNOWN_ENCODINGS:
+        raise ValueError("Invalid encoding")
+
+    file_type = data[3]
+    if file_type not in KNOWN_FILETYPES:
+        raise ValueError("Invalid file type")
+
     try:
-        encoding = data[2]
-        if encoding not in "H2Z":
-            raise ValueError("Invalid encoding")
-        file_type = data[3]
-        if file_type not in KNOWN_FILETYPES:
-            raise ValueError("Invalid file type")
         part_total = int(data[4:6], 36)
         part_index = int(data[6:8], 36)
-        if part_index >= part_total:
-            raise ValueError("Invalid part index")
-    except:
+    except ValueError:
         raise ValueError("Invalid BBQR format")
+
+    if part_index >= part_total:
+        raise ValueError("Invalid part index")
+
     return data[8:], part_index, part_total
 
 
@@ -112,15 +111,13 @@ def deflate_decompress(data):
 def decode_bbqr(parts, encoding, file_type):
     """Decodes the given data as BBQR, returning the decoded data"""
 
-    if encoding not in "H2Z":
-        raise ValueError("Invalid BBQr encoding")
-    if file_type not in KNOWN_FILETYPES:
-        raise ValueError("Invalid BBQr file type")
-
     if encoding == "H":
         from binascii import unhexlify
 
-        return b"".join(unhexlify(part) for part in sorted(parts.values()))
+        data_bytes = bytearray()
+        for _, part in sorted(parts.items()):
+            data_bytes.extend(unhexlify(part))
+        return bytes(data_bytes)
 
     binary_data = b""
     for _, part in sorted(parts.items()):
@@ -129,10 +126,10 @@ def decode_bbqr(parts, encoding, file_type):
         binary_data += base32_decode_stream(padded_part)
 
     if encoding == "Z":
-        if file_type == "U":
+        if file_type in "JU":
             return deflate_decompress(binary_data).decode("utf-8")
         return deflate_decompress(binary_data)
-    if file_type == "U":
+    if file_type in "JU":
         return binary_data.decode("utf-8")
     return binary_data
 
@@ -140,26 +137,25 @@ def decode_bbqr(parts, encoding, file_type):
 def encode_bbqr(data, encoding="Z", file_type="P"):
     """Encodes the given data as BBQR, returning the encoded data and format"""
 
-    if encoding not in "H2Z":
-        raise ValueError("Invalid BBQr encoding")
-    if file_type not in KNOWN_FILETYPES:
-        raise ValueError("Invalid BBQr file type")
-
     if encoding == "H":
         from binascii import hexlify
 
         data = hexlify(data).decode()
+        return BBQrCode(data.upper(), encoding, file_type)
 
-    if len(data) > BBQR_ALWAYS_COMPRESS_THRESHOLD:
-        data = deflate_compress(data)
-    else:
-        # Check if compression is beneficial
-        cmp = deflate_compress(data)
-        if len(cmp) >= len(data):
-            encoding = "2"
+    elif encoding == "Z":
+        if len(data) > BBQR_ALWAYS_COMPRESS_THRESHOLD:
+            # RAM won't be enough to have both compressed and not compressed data
+            # It will always be beneficial to compress large data
+            data = deflate_compress(data)
         else:
-            encoding = "Z"
-            data = cmp
+            # Check if compression is beneficial
+            cmp = deflate_compress(data)
+            if len(cmp) >= len(data):
+                encoding = "2"
+            else:
+                encoding = "Z"
+                data = cmp
 
     data = data.encode("utf-8") if isinstance(data, str) else data
     gc.collect()
@@ -192,10 +188,11 @@ def base32_decode_stream(encoded_str):
             decoded_bytes.append((buffer >> bits_left) & 0xFF)
             buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
 
-    # Process any remaining bits
-    if bits_left >= 5:
+    # Process any remaining bits if they form a valid byte
+    if bits_left > 0 and bits_left < 8:
         remaining_byte = (buffer << (8 - bits_left)) & 0xFF
-        decoded_bytes.append(remaining_byte)
+        if remaining_byte != 0:
+            decoded_bytes.append(remaining_byte)
 
     return bytes(decoded_bytes)
 
@@ -220,7 +217,7 @@ def base32_encode_stream(data, add_padding=False):
 
     # Padding
     if add_padding:
-        padding = 8 - (len(data) * 8 % 5)
-        if padding != 8:
-            for _ in range(padding):
-                yield "="
+        encoded_length = (len(data) * 8 + 4) // 5
+        padding_length = (8 - (encoded_length % 8)) % 8
+        for _ in range(padding_length):
+            yield "="
