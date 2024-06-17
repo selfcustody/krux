@@ -223,12 +223,12 @@ def test_customize_wallet_menu(mocker, amigo, tdata):
 
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
     ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
-    assert ctx.wallet.network == "mainnet"
+    assert ctx.wallet.key.network["name"] == "Mainnet"
     home = Home(ctx)
     home.customize()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert ctx.wallet.network == "testnet"
+    assert ctx.wallet.key.network["name"] == "Testnet"
 
 def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
