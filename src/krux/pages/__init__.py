@@ -855,16 +855,28 @@ class Menu:
             offset_y = self.ctx.display.height() - offset_y
             offset_y //= 2
             offset_y += FONT_HEIGHT // 2
+            offset_y = max(offset_y, STATUS_BAR_HEIGHT)
+            # Usable pixels height
+            items_pad = self.ctx.display.height() - STATUS_BAR_HEIGHT
+            # Usable pixes for padding
+            items_pad -= (len(self.menu_view) + extra_lines) * FONT_HEIGHT
+            # Ensure padding is positive
+            items_pad = max(items_pad, 0)
+            # Padding between items
+            items_pad //= max(len(self.menu_view) - 1, 1)
+            # Limit padding to font height
+            items_pad = min(items_pad, FONT_HEIGHT)
         for i, menu_item in enumerate(self.menu_view):
             fg_color = (
                 theme.fg_color if menu_item[1] is not None else theme.disabled_color
             )
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
-            delta_y = (len(menu_item_lines) + 1) * FONT_HEIGHT
+            delta_y = len(menu_item_lines) * FONT_HEIGHT
+            delta_y += items_pad
             if selected_item_index == i:
                 self.ctx.display.fill_rectangle(
                     0,
-                    offset_y + 1 - FONT_HEIGHT // 2,
+                    offset_y + 1 - items_pad // 2,
                     self.ctx.display.width(),
                     delta_y - 2,
                     fg_color,
