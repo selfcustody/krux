@@ -63,8 +63,23 @@ class FileManager(Page):
                     items.append("..")
                     menu_items.append(("..", lambda: MENU_EXIT))
 
-                dir_files = os.listdir(path)
-                for filename in sorted(dir_files):
+                # sorts by name ignorecase
+                dir_files = sorted(os.listdir(path), key=str.lower)
+
+                # separate directories from files
+                directories = []
+                files = []
+
+                for filename in dir_files:
+                    if SDHandler.file_exists(path + "/" + filename):
+                        files.append(filename)
+                    else:
+                        directories.append(filename)
+
+                del dir_files
+
+                # show sorted folders first than sorted files
+                for filename in directories + files:
                     extension_match = False
                     if isinstance(file_extension, str):
                         # No extension filter or matches

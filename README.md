@@ -217,7 +217,12 @@ Use [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) to debug
 ## WDT watchdog
 Krux makes use of MaixPy's [WDT watchdog module](https://wiki.sipeed.com/soft/maixpy/en/api_reference/machine/wdt.html), you can see it [here](src/krux/wdt.py). This will reset the device if not fed for some time. To stop the watchdog, when connected through the terminal, run the following:
 ```python
-# This will read the board config file, add the config to disable watchdog, save the new config file and reset the device (in order to make krux read the new file!)
+# Run this everytime you want to stop the watchdog
+
+from krux.wdt import wdt
+wdt.stop()
+
+# OR create this config to disable the watchdog, save the settings file and reset the device (in order to make krux read the new file!)
 
 import json, machine
 
