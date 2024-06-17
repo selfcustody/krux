@@ -843,29 +843,30 @@ class Menu:
                     )
 
     def _draw_menu(self, selected_item_index):
+        extra_lines = 0
+        for menu_item in self.menu_view:
+            # Count extra lines for multi-line menu items
+            extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
         if self.menu_offset > STATUS_BAR_HEIGHT:
-            offset_y = self.menu_offset + 3 * FONT_HEIGHT // 2
+            offset_y = self.menu_offset + FONT_HEIGHT
         else:
             offset_y = len(self.menu_view) * 2
-            extra_lines = 0
-            for menu_item in self.menu_view:
-                extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
             offset_y += extra_lines
             offset_y *= FONT_HEIGHT
             offset_y = self.ctx.display.height() - offset_y
             offset_y //= 2
             offset_y += FONT_HEIGHT // 2
-            offset_y = max(offset_y, STATUS_BAR_HEIGHT)
-            # Usable pixels height
-            items_pad = self.ctx.display.height() - STATUS_BAR_HEIGHT
-            # Usable pixes for padding
-            items_pad -= (len(self.menu_view) + extra_lines) * FONT_HEIGHT
-            # Ensure padding is positive
-            items_pad = max(items_pad, 0)
-            # Padding between items
-            items_pad //= max(len(self.menu_view) - 1, 1)
-            # Limit padding to font height
-            items_pad = min(items_pad, FONT_HEIGHT)
+        offset_y = max(offset_y, STATUS_BAR_HEIGHT)
+        # Usable pixels height
+        items_pad = self.ctx.display.height() - STATUS_BAR_HEIGHT
+        # Usable pixes for padding
+        items_pad -= (len(self.menu_view) + extra_lines) * FONT_HEIGHT
+        # Ensure padding is positive
+        items_pad = max(items_pad, 0)
+        # Padding between items
+        items_pad //= max(len(self.menu_view) - 1, 1)
+        # Limit padding to font height
+        items_pad = min(items_pad, FONT_HEIGHT)
         for i, menu_item in enumerate(self.menu_view):
             fg_color = (
                 theme.fg_color if menu_item[1] is not None else theme.disabled_color
