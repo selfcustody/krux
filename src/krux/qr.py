@@ -193,19 +193,6 @@ class QRPartParser:
         return code
 
 
-def int2base36(n):
-    """Convert integer n to a base36 string."""
-    if not 0 <= n <= 1295:  # ensure the number is within the valid range
-        raise ValueError("Number out of range")
-
-    def tostr(x):
-        """Convert integer x to a base36 character."""
-        return chr(48 + x) if x < 10 else chr(65 + x - 10)
-
-    quotient, remainder = divmod(n, 36)
-    return tostr(quotient) + tostr(remainder)
-
-
 def to_qr_codes(data, max_width, qr_format):
     """Returns the list of QR codes necessary to represent the data in the qr format, given
     the max_width constraint
@@ -240,6 +227,8 @@ def to_qr_codes(data, max_width, qr_format):
                 code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
         elif qr_format == FORMAT_BBQR:
+            from .bbqr import int2base36
+
             part_index = 0
             while True:
                 header = "B$%s%s%s%s" % (

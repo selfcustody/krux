@@ -207,6 +207,7 @@ def test_change_passphrase_menu(mocker, amigo, tdata):
     assert wallet.key.fingerprint != ctx.wallet.key.fingerprint
     assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_WITH_PASSPHRASE
 
+
 def test_customize_wallet_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
@@ -230,13 +231,14 @@ def test_customize_wallet_menu(mocker, amigo, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.wallet.key.network["name"] == "Testnet"
 
+
 def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     INDEX_0_B85_FINGERPRINT = "02e8bff2"
-    
+
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 3),  # Go to BIP85
         BUTTON_ENTER,  # Enter BIP85
@@ -246,7 +248,7 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
         BUTTON_PAGE_PREV,  # Move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_ENTER,  # Load words
-        BUTTON_PAGE, # Move to "Back"
+        BUTTON_PAGE,  # Move to "Back"
         BUTTON_ENTER,  # Exit
     ]
 

@@ -429,3 +429,22 @@ def test_encode_bbqr_always_compress_large_data(m5stickv):
     bbqr_code = encode_bbqr(BBQR_CONTENT.encode("utf-8"), file_type="U")
     assert bbqr_code.encoding == "Z"
     assert bbqr_code.file_type == "U"
+
+
+def test_int2base36():
+    from krux.bbqr import int2base36
+
+    # Test cases for valid inputs
+    assert int2base36(0) == "00"
+    assert int2base36(1) == "01"
+    assert int2base36(9) == "09"
+    assert int2base36(10) == "0A"
+    assert int2base36(35) == "0Z"
+    assert int2base36(36) == "10"
+    assert int2base36(1295) == "ZZ"
+
+    # Test cases for invalid inputs
+    with pytest.raises(ValueError):
+        int2base36(-1)
+    with pytest.raises(ValueError):
+        int2base36(1296)
