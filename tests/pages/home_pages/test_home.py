@@ -179,6 +179,88 @@ def test_load_wallet_descritor_manager(mocker, amigo, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_change_passphrase_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    FINGERPRINT_WITH_PASSPHRASE = "a63dbf9c"
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Proceed on message
+        BUTTON_ENTER,  # Type passphrase
+        BUTTON_ENTER,  # Enter "a"
+        BUTTON_PAGE_PREV,  # Move to Go
+        BUTTON_ENTER,  # Confirm Go
+        BUTTON_ENTER,  # Confirm passphrase "a"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    assert wallet.key.fingerprint == ctx.wallet.key.fingerprint
+
+    home = Home(ctx)
+    home.passphrase()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert wallet.key.fingerprint != ctx.wallet.key.fingerprint
+    assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_WITH_PASSPHRASE
+
+def test_customize_wallet_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Agree to customize
+        BUTTON_ENTER,  # Enter "Network"
+        BUTTON_PAGE,  # Change to "Testnet"
+        BUTTON_ENTER,  # Confirm "Testnet"
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Exit
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    assert ctx.wallet.network == "mainnet"
+    home = Home(ctx)
+    home.customize()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.network == "testnet"
+
+def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    INDEX_0_B85_FINGERPRINT = "02e8bff2"
+    
+    BTN_SEQUENCE = [
+        *([BUTTON_PAGE] * 3),  # Go to BIP85
+        BUTTON_ENTER,  # Enter BIP85
+        BUTTON_ENTER,  # Agree
+        BUTTON_ENTER,  # 12 words
+        BUTTON_ENTER,  # Index 0
+        BUTTON_PAGE_PREV,  # Move to "Go"
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # Load words
+        BUTTON_PAGE, # Move to "Back"
+        BUTTON_ENTER,  # Exit
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    home = Home(ctx)
+    # To also cover the wallet menu
+    # Instead of entering directly to bip85, we enter to the wallet menu
+    home.wallet()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.fingerprint_hex_str() == INDEX_0_B85_FINGERPRINT
+
+
 def test_load_address_view(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
