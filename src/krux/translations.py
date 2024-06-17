@@ -1642,7 +1642,7 @@ translation_table = {
         2751113454: "Descriptografar?",
         1272005728: "Carteira Padrão",
         4102535566: "Profundidade da Passagem",
-        1712856005: "Endereços do descritor",
+        1712856005: "Endereços do Descritor",
         1230133196: "Armazenamento flash do dispositivo não detectado.",
         3278654271: "Display",
         3895447625: "Não desligue, pode demorar um pouco para concluir.",
