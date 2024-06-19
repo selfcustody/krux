@@ -81,7 +81,7 @@ class WalletDescriptor(Page):
 
     def _load_wallet(self):
 
-        persisted = None
+        persisted = False
         load_method = self.load_method()
         if load_method == LOAD_FROM_CAMERA:
             wallet_data, qr_format = self.capture_qr_code()

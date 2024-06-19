@@ -50,7 +50,7 @@ class Wallet:
         self.descriptor = None
         self.label = None
         self.policy = None
-        self.persisted = None
+        self.persisted = False
         self._network = None
         if self.key and not self.key.multisig:
             if self.key.script_type == P2PKH:
