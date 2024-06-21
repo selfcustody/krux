@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 from embit.networks import NETWORKS
+from embit.bip32 import HARDENED_INDEX
 from ..display import FONT_HEIGHT, DEFAULT_PADDING
 from ..krux_settings import t
 from . import (
@@ -43,7 +44,6 @@ from ..settings import (
 from ..key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
 PASSPHRASE_MAX_LEN = 200
-ACCOUNT_MAX = 2**31 - 1  # Maximum account index
 
 
 class PassphraseEditor(Page):
@@ -212,11 +212,11 @@ class WalletSettings(Page):
             return None
         try:
             account = int(account)
-            if account > ACCOUNT_MAX:
+            if account >= HARDENED_INDEX:
                 raise ValueError
         except:
             self.flash_error(
-                t("Value %s out of range: [%s, %s]") % (account, 0, ACCOUNT_MAX)
+                t("Value %s out of range: [%s, %s]") % (account, 0, HARDENED_INDEX - 1)
             )
             return None
         return account
