@@ -52,7 +52,7 @@ Two serial ports are created when `Amigo` and `Bit` are connected to a PC. Somet
 ./ktool-linux -B goE -b 1500000 maixpy_amigo/kboot.kfpkg -p /dev/ttyUSB1
 ```
 
-Check por names of devices manager on Windows (e.g. COM1, COM9), or list the ports on linux
+Check port names of devices manager on Windows (e.g. COM1, COM9), or list the ports on linux
 
 ```bash
 ls /dev/ttyUSB*
@@ -63,6 +63,8 @@ List ports on Mac
 ```bash
 ls /dev/cu.usbserial*
 ```
+*If the output isn't what you expect try a different cable, preferably a smartphone usb-c charger cable.*
+
 Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue. See [FAQ](../../faq.md/#why-isnt-my-device-charging-or-being-recognized-when-connected-to-the-computers-usb) for more info.
 
 ----8<----
