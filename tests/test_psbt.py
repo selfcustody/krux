@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import MagicMock
 
 
 @pytest.fixture
@@ -193,6 +194,39 @@ def tdata(mocker):
     )
 
 
+class MockFile:
+    """Custom mock file class that supports read, write, seek, and other file methods"""
+
+    def __init__(self, data=b""):
+        self.data = data
+        self.file = MagicMock()
+        self.file.read.side_effect = self.read
+        self.file.write.side_effect = self.write
+        self.file.seek.side_effect = self.seek
+        self.position = 0
+        self.write_data = b""
+
+    def seek(self, pos):
+        self.position = pos
+
+    def read(self, size=None):
+        if size is None:
+            size = len(self.data) - self.position
+        result = self.data[self.position : self.position + size]
+        self.position += size
+        return result
+
+    def write(self, content):
+        self.write_data += content
+        return len(content)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+
 def test_init_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
@@ -224,6 +258,27 @@ def test_init_singlesig(mocker, m5stickv, tdata):
         assert isinstance(signer, PSBTSigner)
 
 
+def test_init_singlesig_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    cases = [
+        (tdata.P2PKH_PSBT, FORMAT_NONE),
+        (tdata.P2WPKH_PSBT, FORMAT_NONE),
+        (tdata.P2SH_P2WPKH_PSBT, FORMAT_NONE),
+    ]
+
+    for case in cases:
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", return_value=mock_file)
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
+        assert isinstance(signer, PSBTSigner)
+
+
 def test_init_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
@@ -247,6 +302,26 @@ def test_init_multisig(mocker, m5stickv, tdata):
 
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
+        assert isinstance(signer, PSBTSigner)
+
+
+def test_init_multisig_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    cases = [
+        (tdata.P2WSH_PSBT, FORMAT_NONE),
+        (tdata.P2SH_P2WSH_PSBT, FORMAT_NONE),
+    ]
+
+    for case in cases:
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", return_value=mock_file)
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
         assert isinstance(signer, PSBTSigner)
 
 
@@ -310,6 +385,33 @@ def test_sign_singlesig(mocker, m5stickv, tdata):
         assert signer.psbt_qr() == (case[2], case[1])
 
 
+def test_sign_singlesig_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    cases = [
+        (tdata.P2PKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2PKH_PSBT),
+        (tdata.P2WPKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2WPKH_PSBT),
+        (tdata.P2SH_P2WPKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2SH_P2WPKH_PSBT),
+    ]
+
+    num = 0
+    for case in cases:
+        print("test_sign_singlesig case: ", num)
+        num += 1
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", return_value=mock_file)
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
+        signer.sign()
+        with open("dummy-signed.psbt", "wb") as f:
+            signer.psbt.write_to(f)
+        assert mock_file.write_data == case[2]
+
+
 def test_sign_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
@@ -341,6 +443,29 @@ def test_sign_multisig(mocker, m5stickv, tdata):
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
         assert signer.psbt_qr() == (case[2], case[1])
+
+
+def test_sign_multisig_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    cases = [
+        (tdata.P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2WSH_PSBT),
+        (tdata.P2SH_P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2SH_P2WSH_PSBT),
+    ]
+
+    for case in cases:
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", return_value=mock_file)
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
+        signer.sign()
+        with open("dummy-signed.psbt", "wb") as f:
+            signer.psbt.write_to(f)
+        assert mock_file.write_data == case[2]
 
 
 def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
