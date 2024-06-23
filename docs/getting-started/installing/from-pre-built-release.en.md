@@ -55,7 +55,7 @@ See the correct port using `ls /dev/ttyUSB*`, in the example below we use `/dev/
 ```
 
 ##### Windows
-See the correct port at Device Manager > Ports (COM & LPT), or just try one from 1 to 12, in the example below we use `COM6`:
+See the correct port at Device Manager > Ports (COM & LPT), in the example below we use `COM6`:
 ```pwsh
 .\ktool-win.exe -B goE -b 1500000 maixpy_amigo\kboot.kfpkg -p COM6
 ```
