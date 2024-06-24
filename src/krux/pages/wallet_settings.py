@@ -21,7 +21,8 @@
 # THE SOFTWARE.
 
 from embit.networks import NETWORKS
-from ..display import FONT_HEIGHT
+from embit.bip32 import HARDENED_INDEX
+from ..display import FONT_HEIGHT, DEFAULT_PADDING
 from ..krux_settings import t
 from . import (
     Page,
@@ -43,7 +44,6 @@ from ..settings import (
 from ..key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
 PASSPHRASE_MAX_LEN = 200
-ACCOUNT_MAX = 2**31 - 1  # Maximum account index
 
 
 class PassphraseEditor(Page):
@@ -124,7 +124,9 @@ class WalletSettings(Page):
                 derivation_path += "/2'"
 
             derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
-            self.ctx.display.draw_hcentered_text(derivation_path, info_box=True)
+            info_len = self.ctx.display.draw_hcentered_text(
+                derivation_path, info_box=True
+            )
             submenu = Menu(
                 self.ctx,
                 [
@@ -134,7 +136,7 @@ class WalletSettings(Page):
                     (t("Account"), lambda: None),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
-                offset=2 * FONT_HEIGHT,
+                offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
@@ -210,11 +212,11 @@ class WalletSettings(Page):
             return None
         try:
             account = int(account)
-            if account > ACCOUNT_MAX:
+            if account >= HARDENED_INDEX:
                 raise ValueError
         except:
             self.flash_error(
-                t("Value %s out of range: [%s, %s]") % (account, 0, ACCOUNT_MAX)
+                t("Value %s out of range: [%s, %s]") % (account, 0, HARDENED_INDEX - 1)
             )
             return None
         return account

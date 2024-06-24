@@ -70,6 +70,9 @@ NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 BATTERY_WIDTH = 22
 BATTERY_HEIGHT = 7
 
+LOAD_FROM_CAMERA = 0
+LOAD_FROM_SD = 1
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -95,6 +98,22 @@ class Page:
         if answer:
             return ESC_KEY
         return None
+
+    def load_method(self):
+        """Prompts user to choose a method to load data from"""
+        load_menu = Menu(
+            self.ctx,
+            [
+                (t("Load from camera"), lambda: None),
+                (
+                    t("Load from SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+                (t("Back"), lambda: None),
+            ],
+        )
+        index, _ = load_menu.run_loop()
+        return index
 
     def flash_text(
         self,
@@ -202,8 +221,12 @@ class Page:
             elif self.ctx.input.enter_event():
                 return 1
 
-            # Anti-glare mode (M5stickV and Amigo)
-            if self.ctx.input.page_event():
+            # Anti-glare mode
+            if self.ctx.input.page_event() or (
+                # Yahboom may have page or page_prev mapped to its single button
+                board.config["type"] == "yahboom"
+                and self.ctx.input.page_prev_event()
+            ):
                 if self.ctx.camera.has_antiglare():
                     self._time_frame = time.ticks_ms()
                     self.ctx.display.to_portrait()
@@ -678,6 +701,7 @@ class Menu:
     #     self.draw_ram_indicator()
 
     # def draw_ram_indicator(self):
+    #     """Draws the amount of free RAM in the status bar"""
     #     gc.collect()
     #     ram_text = "RAM: " + str(gc.mem_free())
     #     self.ctx.display.draw_string(12, 0, ram_text, GREEN)
@@ -726,7 +750,7 @@ class Menu:
 
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
-        if self.ctx.wallet is not None:
+        if self.ctx.is_logged_in():
             if self.ctx.display.width() > SMALLEST_WIDTH:
                 self.ctx.display.draw_hcentered_text(
                     self.ctx.wallet.key.fingerprint_hex_str(True),
@@ -745,10 +769,7 @@ class Menu:
 
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
-        if (
-            self.ctx.wallet is not None
-            and self.ctx.wallet.key.network["name"] == "Testnet"
-        ):
+        if self.ctx.is_logged_in() and self.ctx.wallet.key.network["name"] == "Testnet":
             if self.ctx.display.width() > SMALLEST_WIDTH:
                 self.ctx.display.draw_string(
                     12,
@@ -822,28 +843,41 @@ class Menu:
                     )
 
     def _draw_menu(self, selected_item_index):
+        extra_lines = 0
+        for menu_item in self.menu_view:
+            # Count extra lines for multi-line menu items
+            extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
         if self.menu_offset > STATUS_BAR_HEIGHT:
-            offset_y = self.menu_offset + 3 * FONT_HEIGHT // 2
+            offset_y = self.menu_offset + FONT_HEIGHT
         else:
             offset_y = len(self.menu_view) * 2
-            extra_lines = 0
-            for menu_item in self.menu_view:
-                extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
             offset_y += extra_lines
             offset_y *= FONT_HEIGHT
             offset_y = self.ctx.display.height() - offset_y
             offset_y //= 2
             offset_y += FONT_HEIGHT // 2
+        offset_y = max(offset_y, STATUS_BAR_HEIGHT)
+        # Usable pixels height
+        items_pad = self.ctx.display.height() - STATUS_BAR_HEIGHT
+        # Usable pixes for padding
+        items_pad -= (len(self.menu_view) + extra_lines) * FONT_HEIGHT
+        # Ensure padding is positive
+        items_pad = max(items_pad, 0)
+        # Padding between items
+        items_pad //= max(len(self.menu_view) - 1, 1)
+        # Limit padding to font height
+        items_pad = min(items_pad, FONT_HEIGHT)
         for i, menu_item in enumerate(self.menu_view):
             fg_color = (
                 theme.fg_color if menu_item[1] is not None else theme.disabled_color
             )
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
-            delta_y = (len(menu_item_lines) + 1) * FONT_HEIGHT
+            delta_y = len(menu_item_lines) * FONT_HEIGHT
+            delta_y += items_pad
             if selected_item_index == i:
                 self.ctx.display.fill_rectangle(
                     0,
-                    offset_y + 1 - FONT_HEIGHT // 2,
+                    offset_y + 1 - items_pad // 2,
                     self.ctx.display.width(),
                     delta_y - 2,
                     fg_color,

@@ -48,5 +48,9 @@ class Context:
             self.printer.clear()
         gc.collect()
 
+    def is_logged_in(self):
+        """Returns True if user is logged-in with private key material"""
+        return bool(self.wallet is not None and self.wallet.key)
+
 
 ctx = Context()  # Singleton instance

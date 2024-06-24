@@ -127,8 +127,14 @@ def test_add_frame(amigo, mocker):
 def test_save_pbm_image(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.sd_card import PBM_IMAGE_EXTENSION
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
 
-    ctx = mock_context(mocker)
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # move to "Back to Menu"
+        BUTTON_ENTER,  # confirm
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
 
     mocker.patch("os.listdir", new=mocker.MagicMock(return_value=["file1"]))
     with patch("krux.sd_card.SDHandler.write_binary") as mock_write_binary:
@@ -144,8 +150,14 @@ def test_save_bmp_image(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.sd_card import BMP_IMAGE_EXTENSION
     import sys
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
 
-    ctx = mock_context(mocker)
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # move to "Back to Menu"
+        BUTTON_ENTER,  # confirm
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
 
     qr_viewer = SeedQRView(ctx, data=TEST_DATA, title="Test QR Code")
     qr_viewer.save_bmp_image(TEST_TITLE, TEST_DATA_QR_SIZE_FRAMED * 2)
@@ -163,11 +175,9 @@ def test_save_qr_image_menu_pbm(amigo, mocker):
         BUTTON_PAGE,
         BUTTON_PAGE,  # Move to "Save QR image to SD card"
         BUTTON_ENTER,  # Save QR image to SD card
-        BUTTON_PAGE_PREV,  # On filename prompt, move to "Go"
-        BUTTON_ENTER,  # Confirm
         BUTTON_ENTER,  # Confirm first resolution - PBM format
-        BUTTON_ENTER,  # Enter QR menu again
-        BUTTON_PAGE_PREV,  # Move to "Back to Menu"
+        BUTTON_PAGE,
+        BUTTON_PAGE,  # Move to "Back to Menu"
         BUTTON_ENTER,  # Confirm
     ]
 
@@ -180,7 +190,7 @@ def test_save_qr_image_menu_pbm(amigo, mocker):
     seed_qr_view.display_qr(allow_export=True)
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert ctx.display.draw_qr_code.call_count == 2  # 1 for before, 1 for after saving
+    assert ctx.display.draw_qr_code.call_count == 1
     mock_save_pbm_image.assert_called_once_with(
         TEST_TITLE.replace(" ", "_")[:10]
     )  # 10 is the max length for a suggested filename

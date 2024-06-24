@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 from embit import bip85
+from embit.bip32 import HARDENED_INDEX
 from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
 from ..settings_page import DIGITS
@@ -30,8 +31,6 @@ from .. import (
     MENU_CONTINUE,
     choose_len_mnemonic,
 )
-
-MAX_BIP85_CHILD_INDEX = 2**31 - 1
 
 
 class Bip85(Page):
@@ -49,15 +48,16 @@ class Bip85(Page):
                 return None
             try:
                 child_index = int(child)
-                if child_index > MAX_BIP85_CHILD_INDEX:
-                    raise ValueError
-                break
-            except ValueError:
+            except:  # Empty input
+                continue
+
+            if child_index >= HARDENED_INDEX:
                 self.flash_error(
                     t("Value %s out of range: [%s, %s]")
-                    % (child_index, 0, MAX_BIP85_CHILD_INDEX)
+                    % (child_index, 0, HARDENED_INDEX - 1)
                 )
                 continue
+            break
         bip85_words = bip85.derive_mnemonic(
             self.ctx.wallet.key.root,
             num_words,

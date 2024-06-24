@@ -26,7 +26,7 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
-from .qr import FORMAT_PMOFN
+from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 
 # PSBT Output Types:
@@ -65,13 +65,24 @@ class Counter(dict):
 class PSBTSigner:
     """Responsible for validating and signing PSBTs"""
 
-    def __init__(self, wallet, psbt_data, qr_format):
+    def __init__(self, wallet, psbt_data, qr_format, psbt_filename=None):
         self.wallet = wallet
         self.base_encoding = None
         self.ur_type = None
         self.qr_format = qr_format
         # Parse the PSBT
-        if isinstance(psbt_data, UR):
+        if psbt_filename:
+            gc.collect()
+            from .sd_card import SD_PATH
+
+            try:
+                file_path = "/%s/%s" % (SD_PATH, psbt_filename)
+                with open(file_path, "rb") as file:
+                    self.psbt = PSBT.read_from(file, compress=1)
+                self.base_encoding = 64  # In case it is exported as QR code
+            except Exception as e:
+                raise ValueError("Error loading PSBT file: %s" % e)
+        elif isinstance(psbt_data, UR):
             try:
                 self.psbt = PSBT.parse(
                     urtypes.crypto.PSBT.from_cbor(psbt_data.cbor).data
@@ -552,10 +563,28 @@ class PSBTSigner:
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
-            if inp.final_scriptwitness:  # If Taproot
+            # Copy the final_scriptwitness if it's present (Taproot case)
+            if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
-            else:
+            # Copy partial signatures for multisig or other script types
+            if inp.partial_sigs:
                 trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
+
+            # Include the PSBT_IN_WITNESS_UTXO field if it exists
+            if hasattr(inp, "witness_utxo"):
+                trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
+
+            # Include the PSBT_IN_NON_WITNESS_UTXO field if it exists (Legacy)
+            if hasattr(inp, "non_witness_utxo"):
+                trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
+
+            # Check for P2SH (Nested SegWit) and copy redeem_script if present
+            if hasattr(inp, "redeem_script"):
+                trimmed_psbt.inputs[i].redeem_script = inp.redeem_script
+
+            # Check for P2WSH (SegWit multisig) and copy witness_script if present
+            if hasattr(inp, "witness_script"):
+                trimmed_psbt.inputs[i].witness_script = inp.witness_script
 
         self.psbt = trimmed_psbt
 
@@ -565,6 +594,12 @@ class PSBTSigner:
 
         self.psbt = None  # Remove PSBT free RAM
         gc.collect()
+
+        if self.qr_format == FORMAT_BBQR:
+            from .bbqr import encode_bbqr
+
+            psbt_data = encode_bbqr(psbt_data, file_type="P")
+            return psbt_data, self.qr_format
 
         if self.base_encoding is not None:
             from .baseconv import base_encode

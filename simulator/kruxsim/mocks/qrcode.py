@@ -22,14 +22,25 @@
 import sys
 from unittest import mock
 import pyqrcode
+import re
 
 
 def encode(data):
     # Uses string encoded qr as it already cleaned up the frames
     # PyQRcode also doesn't offer any binary output
 
+    def is_qr_alphanumeric(string):
+        return bool(re.match('^[A-Z0-9 $%*+\-./:]+$', string))
+    
+    mode = "binary"
+    if isinstance(data, str):
+        if data.isnumeric():
+            mode = "numeric"
+        elif is_qr_alphanumeric(data):
+            mode = "alphanumeric"
+
     try:
-        code_str = pyqrcode.create(data, error="L", mode="binary").text(quiet_zone=0)
+        code_str = pyqrcode.create(data, error="L", mode=mode).text(quiet_zone=0)
     except:
         # pre-decode if binary (SeedQR)
         data = data.decode("latin-1")

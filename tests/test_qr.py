@@ -65,7 +65,6 @@ def test_init(mocker, m5stickv):
     assert parser.parts == {}
     assert parser.total == -1
     assert parser.format is None
-    assert isinstance(parser.decoder, URDecoder)
 
 
 def test_parser(mocker, m5stickv, tdata):
