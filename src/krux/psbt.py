@@ -36,6 +36,23 @@ SPEND = 2
 
 # We always uses thin spaces after the ₿ in this file
 
+# Consts to calculate fees/vB:
+P2PKH_IN_SIZE = 148
+P2PKH_OUT_SIZE = 34
+P2SH_OUT_SIZE = P2SH_P2WPKH_OUT_SIZE = P2SH_P2WSH_OUT_SIZE = 32
+
+# All segwit input sizes are reduced by 1 WU to account for the witness item
+# counts being added for every input per the transaction header
+P2SH_P2WPKH_IN_SIZE = 90.75
+
+P2WPKH_IN_SIZE = 67.75
+P2WPKH_OUT_SIZE = 31
+P2WSH_OUT_SIZE = P2TR_OUT_SIZE = 43
+P2TR_IN_SIZE = 57.25
+
+PUBKEY_SIZE = 33
+SIGNATURE_SIZE = 72
+
 
 class Counter(dict):
     """Helper class for dict"""
@@ -222,7 +239,10 @@ class PSBTSigner:
             return 2
         if length <= 65535:
             return 3
-        return 5
+        if length <= 4294967295:
+            return 5
+        # Size of redeem script is too large
+        return 6
 
     def _get_size_of_var_int(self, length):
         """Get size of int in bytes for fees/vB"""
@@ -232,7 +252,10 @@ class PSBTSigner:
             return 3
         if length < 4294967295:
             return 5
-        return 9
+        if length < 18446744073709551615:
+            return 9
+        # Invalid var int
+        return 10
 
     def _get_tx_overhead_vbytes(self, input_script, input_count, output_count):
         """Get tx size overhead in bytes for fees/vB."""
@@ -261,7 +284,7 @@ class PSBTSigner:
         """Get Redeem script in bytes for fees/vB"""
         return (
             1
-            + self.policy["n"] * (1 + 33)  # OP_M; PUBKEY_SIZE = 33
+            + self.policy["n"] * (1 + PUBKEY_SIZE)  # OP_M
             + 1  # OP_PUSH33 <pubkey>
             + 1  # OP_N  # OP_CHECKMULTISIG
         )
@@ -270,7 +293,7 @@ class PSBTSigner:
         """Get Script signature size for fees/vB"""
         return (
             1
-            + self.policy["m"] * (1 + 72)  # size(0); SIGNATURE_SIZE = 72
+            + self.policy["m"] * (1 + SIGNATURE_SIZE)  # size(0)
             + self._get_size_of_script_length_element(  # size(SIGNATURE_SIZE) + signature
                 redeem_script_size
             )
@@ -279,21 +302,6 @@ class PSBTSigner:
 
     def _get_vbytes(self, output_policy_count):
         """Get PSBT virtual bytes (vB)"""
-
-        # Consts to calculate fees/vB:
-        p2pkh_in_size = 148
-        p2pkh_out_size = 34
-        p2sh_out_size = p2sh_p2wpkh_out_size = p2sh_p2wsh_out_size = 32
-
-        # All segwit input sizes are reduced by 1 WU to account for the witness item
-        # counts being added for every input per the transaction header
-        p2sh_p2wpkh_in_size = 90.75
-
-        p2wpkh_in_size = 67.75
-        p2wpkh_out_size = 31
-        p2wsh_out_size = p2tr_out_size = 43
-        p2tr_in_size = 57.25
-
         # In most cases the input size is predictable.
         # For multisig inputs we need to perform a detailed calculation
         input_size = 0  # in virtual bytes
@@ -301,16 +309,16 @@ class PSBTSigner:
         # We do not allow mixed inputs in the PSBT,
         # otherwise we would need to add size for each input policy
         if self.policy["type"] == P2PKH:
-            input_size += p2pkh_in_size
+            input_size += P2PKH_IN_SIZE
         elif self.policy["type"] == P2SH_P2WPKH:
-            input_size += p2sh_p2wpkh_in_size
+            input_size += P2SH_P2WPKH_IN_SIZE
         elif self.policy["type"] == P2WPKH:
-            input_size += p2wpkh_in_size
+            input_size += P2WPKH_IN_SIZE
 
         # Only consider the cooperative taproot signing path;
         # assume multisig is done via aggregate signatures
         elif self.policy["type"] == P2TR:
-            input_size += p2tr_in_size
+            input_size += P2TR_IN_SIZE
         elif self.policy["type"] == P2SH:
             redeem_script_size = self._get_redeem_script_size()
             script_sig_size = self._get_script_signature_size(redeem_script_size)
@@ -336,19 +344,19 @@ class PSBTSigner:
         policy_size = 0
         for policy, v in output_policy_count.items():
             if policy == P2PKH:
-                policy_size += p2pkh_out_size * v
+                policy_size += P2PKH_OUT_SIZE * v
             elif policy == P2SH:
-                policy_size += p2sh_out_size * v
+                policy_size += P2SH_OUT_SIZE * v
             elif policy == P2SH_P2WPKH:
-                policy_size += p2sh_p2wpkh_out_size * v
+                policy_size += P2SH_P2WPKH_OUT_SIZE * v
             elif policy == P2SH_P2WSH:
-                policy_size += p2sh_p2wsh_out_size * v
+                policy_size += P2SH_P2WSH_OUT_SIZE * v
             elif policy == P2WPKH:
-                policy_size += p2wpkh_out_size * v
+                policy_size += P2WPKH_OUT_SIZE * v
             elif policy == P2WSH:
-                policy_size += p2wsh_out_size * v
+                policy_size += P2WSH_OUT_SIZE * v
             elif policy == P2TR:
-                policy_size += p2tr_out_size * v
+                policy_size += P2TR_OUT_SIZE * v
 
         output_count = len(self.psbt.outputs)
         input_count = len(self.psbt.inputs)
