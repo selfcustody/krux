@@ -80,7 +80,7 @@ RUN pip3 install pyserial==3.4
 # copy vendor, firmware and Kurx (src) files
 # install embit dependency
 ############
-FROM build-base as build-software
+FROM build-base AS build-software
 ARG DEVICE="maixpy_m5stickv"
 ENV DEVICE_BUILTIN="firmware/MaixPy/projects/${DEVICE}/builtin_py"
 RUN mkdir /src
