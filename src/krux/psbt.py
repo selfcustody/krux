@@ -28,6 +28,7 @@ from .baseconv import base_decode
 from .krux_settings import t
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
+from .sats_vb import SatsVB
 
 # PSBT Output Types:
 CHANGE = 0
@@ -35,23 +36,6 @@ SELF_TRANSFER = 1
 SPEND = 2
 
 # We always uses thin spaces after the ₿ in this file
-
-# Consts to calculate fees/vB:
-P2PKH_IN_SIZE = 148
-P2PKH_OUT_SIZE = 34
-P2SH_OUT_SIZE = P2SH_P2WPKH_OUT_SIZE = P2SH_P2WSH_OUT_SIZE = 32
-
-# All segwit input sizes are reduced by 1 WU to account for the witness item
-# counts being added for every input per the transaction header
-P2SH_P2WPKH_IN_SIZE = 90.75
-
-P2WPKH_IN_SIZE = 67.75
-P2WPKH_OUT_SIZE = 31
-P2WSH_OUT_SIZE = P2TR_OUT_SIZE = 43
-P2TR_IN_SIZE = 57.25
-
-PUBKEY_SIZE = 33
-SIGNATURE_SIZE = 72
 
 
 class Counter(dict):
@@ -242,147 +226,6 @@ class PSBTSigner:
             return SELF_TRANSFER
         return SPEND
 
-    def _get_size_of_script_length_element(self, length):
-        """Get size of script in bytes for fees/vB"""
-        if length < 75:
-            return 1
-        if length <= 255:
-            return 2
-        if length <= 65535:
-            return 3
-        if length <= 4294967295:
-            return 5
-        # Size of redeem script is too large
-        return 6
-
-    def _get_size_of_var_int(self, length):
-        """Get size of int in bytes for fees/vB"""
-        if length < 253:
-            return 1
-        if length < 65535:
-            return 3
-        if length < 4294967295:
-            return 5
-        if length < 18446744073709551615:
-            return 9
-        # Invalid var int
-        return 10
-
-    def _get_tx_overhead_vbytes(self, input_script, input_count, output_count):
-        """Get tx size overhead in bytes for fees/vB."""
-        return (
-            4  # nVersion
-            + self._get_size_of_var_int(input_count)  # number of inputs
-            + self._get_size_of_var_int(output_count)  # number of outputs
-            + 4  # nLockTime
-            + self._get_witness_bytes(input_script, input_count)
-        )
-
-    def _get_witness_bytes(self, input_script, input_count):
-        """Get witness bytes for fees/vB. We do not allow mixed inputs in the PSBT,
-        otherwise this would need to be revised"""
-        if input_script in (P2PKH, P2SH):
-            return 0
-
-        # Transactions with segwit inputs have extra overhead
-        return (
-            0.25  # segwit marker
-            + 0.25  # segwit flag
-            + input_count / 4  # witness element count per input
-        )
-
-    def _get_redeem_script_size(self):
-        """Get Redeem script in bytes for fees/vB"""
-        return (
-            1
-            + self.policy["n"] * (1 + PUBKEY_SIZE)  # OP_M
-            + 1  # OP_PUSH33 <pubkey>
-            + 1  # OP_N  # OP_CHECKMULTISIG
-        )
-
-    def _get_script_signature_size(self, redeem_script_size):
-        """Get Script signature size for fees/vB"""
-        return (
-            1
-            + self.policy["m"] * (1 + SIGNATURE_SIZE)  # size(0)
-            + self._get_size_of_script_length_element(  # size(SIGNATURE_SIZE) + signature
-                redeem_script_size
-            )
-            + redeem_script_size
-        )
-
-    def _get_vbytes(self, output_policy_count):
-        """Get PSBT virtual bytes (vB)"""
-        # In most cases the input size is predictable.
-        # For multisig inputs we need to perform a detailed calculation
-        input_size = 0  # in virtual bytes
-
-        # We do not allow mixed inputs in the PSBT,
-        # otherwise we would need to add size for each input policy
-        if self.policy["type"] == P2PKH:
-            input_size += P2PKH_IN_SIZE
-        elif self.policy["type"] == P2SH_P2WPKH:
-            input_size += P2SH_P2WPKH_IN_SIZE
-        elif self.policy["type"] == P2WPKH:
-            input_size += P2WPKH_IN_SIZE
-
-        # Only consider the cooperative taproot signing path;
-        # assume multisig is done via aggregate signatures
-        elif self.policy["type"] == P2TR:
-            input_size += P2TR_IN_SIZE
-        elif self.policy["type"] == P2SH:
-            redeem_script_size = self._get_redeem_script_size()
-            script_sig_size = self._get_script_signature_size(redeem_script_size)
-            input_size += (
-                32
-                + 4
-                + self._get_size_of_var_int(script_sig_size)
-                + script_sig_size
-                + 4
-            )
-        elif self.policy["type"] in (P2SH_P2WSH, P2WSH):
-            redeem_script_size = self._get_redeem_script_size()
-            input_witness_size = self._get_script_signature_size(redeem_script_size)
-            input_size += (
-                36
-                + input_witness_size / 4  # outpoint (spent UTXO ID)
-                + 4  # witness program  # nSequence
-            )
-            if self.policy["type"] == P2SH_P2WSH:
-                input_size += 32 + 3
-                # P2SH wrapper (redeemscript hash) + overhead?
-
-        policy_size = 0
-        for policy, v in output_policy_count.items():
-            if policy == P2PKH:
-                policy_size += P2PKH_OUT_SIZE * v
-            elif policy == P2SH:
-                policy_size += P2SH_OUT_SIZE * v
-            elif policy == P2SH_P2WPKH:
-                policy_size += P2SH_P2WPKH_OUT_SIZE * v
-            elif policy == P2SH_P2WSH:
-                policy_size += P2SH_P2WSH_OUT_SIZE * v
-            elif policy == P2WPKH:
-                policy_size += P2WPKH_OUT_SIZE * v
-            elif policy == P2WSH:
-                policy_size += P2WSH_OUT_SIZE * v
-            elif policy == P2TR:
-                policy_size += P2TR_OUT_SIZE * v
-
-        output_count = len(self.psbt.outputs)
-        input_count = len(self.psbt.inputs)
-        vbytes = (
-            self._get_tx_overhead_vbytes(self.policy["type"], input_count, output_count)
-            # We do not allow mixed inputs in the PSBT,
-            # otherwise we would not multiply here by input_count
-            + input_size * input_count
-            + policy_size
-        )
-
-        import math
-
-        return math.ceil(vbytes)
-
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
         from .format import format_btc, replace_decimal_separator
@@ -467,7 +310,12 @@ class PSBTSigner:
             )
 
         fee = inp_amount - spend_amount - self_amount - change_amount
-        satvb = fee / self._get_vbytes(output_policy_count)
+        satvb = fee / SatsVB.get_vbytes(
+            self.policy,
+            output_policy_count,
+            len(self.psbt.inputs),
+            len(self.psbt.outputs),
+        )
 
         # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
         fee_percent = max(
