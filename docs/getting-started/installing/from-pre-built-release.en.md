@@ -28,7 +28,7 @@ Connect the device to your computer via USB (for Maix Amigo, make sure you’re 
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
 
-For `dock` the `-B` parameter changes, so run:
+For `dock` use the `-B dan` parameter:
 ```bash
 ./ktool -B dan -b 1500000 maixpy_dock/kboot.kfpkg
 ```
@@ -48,21 +48,24 @@ If the flashing process fails midway through, check the connection, restart the 
 
 Two serial ports are created when `Amigo` and `Bit` are connected to a PC. Sometimes Ktool will pick the wrong and flash will fail. Manually specify the serial port to overcome this issue using `-p` argument:
 
+##### Linux
+See the correct port using `ls /dev/ttyUSB*`, in the example below we use `/dev/ttyUSB0`:
 ```bash
 ./ktool-linux -B goE -b 1500000 maixpy_amigo/kboot.kfpkg -p /dev/ttyUSB1
 ```
 
-Check por names of devices manager on Windows (e.g. COM1, COM9), or list the ports on linux
-
-```bash
-ls /dev/ttyUSB*
+##### Windows
+See the correct port at Device Manager > Ports (COM & LPT), in the example below we use `COM6`:
+```pwsh
+.\ktool-win.exe -B goE -b 1500000 maixpy_amigo\kboot.kfpkg -p COM6
 ```
 
-List ports on Mac
-
+##### Mac
+See the correct port using the command line: `ls /dev/cu.usbserial*`, in the example below we use `/dev/cu.usbserial-10`:
 ```bash
-ls /dev/cu.usbserial*
+./ktool-mac -B goE -b 1500000 maixpy_amigo/kboot.kfpkg -p /dev/cu.usbserial-10
 ```
+
 Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue. See [FAQ](../../faq.md/#why-isnt-my-device-charging-or-being-recognized-when-connected-to-the-computers-usb) for more info.
 
 ----8<----
