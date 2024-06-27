@@ -412,7 +412,7 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
 ############### load words from text tests
 
 
-def test_load_key_from_text(m5stickv, mocker, mocker_printer):
+def test_load_key_from_text(m5stickv, mocker):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -560,6 +560,66 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
 
         login = Login(ctx)
         login.load_key_from_text()
+
+        assert ctx.input.wait_for_button.call_count == len(case[0])
+        assert ctx.wallet.key.mnemonic == case[1]
+
+
+def test_create_key_from_text(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    cases = [
+        (
+            [BUTTON_ENTER]  # 12 words
+            + [BUTTON_ENTER]  # Proceed
+            + (
+                # A
+                [BUTTON_ENTER]
+                +
+                # B
+                [BUTTON_ENTER]
+                +
+                # I
+                [BUTTON_ENTER]
+                +
+                # Confirm
+                [BUTTON_ENTER]
+            )
+            * 11
+            + [BUTTON_ENTER]  # Skip blank message
+            + (
+                # N
+                [BUTTON_PAGE for _ in range(13)]
+                + [BUTTON_ENTER]
+                +
+                # O
+                [BUTTON_ENTER]
+                +
+                # R
+                [BUTTON_ENTER]
+                +
+                # Confirm "North"
+                [BUTTON_ENTER]
+            )
+            + [
+                BUTTON_ENTER,  # 12 word confirm
+                BUTTON_ENTER,  # Load wallet
+            ],
+            "ability ability ability ability ability ability ability ability ability ability ability north",
+        ),
+    ]
+    num = 0
+    for case in cases:
+        print(num)
+        num += 1
+        ctx = create_ctx(mocker, case[0])
+        login = Login(ctx)
+
+        login.load_key_from_text(new=True)
 
         assert ctx.input.wait_for_button.call_count == len(case[0])
         assert ctx.wallet.key.mnemonic == case[1]
@@ -1093,6 +1153,33 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
     login.load_key_from_1248()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_customization_while_loading_wallet(amigo, mocker):
+    import sys
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # Confirm words
+        + [BUTTON_PAGE] * 2  # Move to "Customize"
+        + [BUTTON_ENTER]  # Select "Customize"
+        + [BUTTON_PAGE_PREV]  # Move to Back
+        + [BUTTON_ENTER]  # Select Back
+        + [BUTTON_PAGE_PREV]  # Move to Back
+        + [BUTTON_ENTER]  # Select Back to leave
+        + [BUTTON_ENTER]  # Confirm
+    )
+
+    MNEMONIC = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo daring"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login._load_key_from_words(MNEMONIC.split())
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    # Assert that the wallet settings module was loaded
+    assert "krux.pages.wallet_settings" in sys.modules
 
 
 def test_about(mocker, m5stickv):
