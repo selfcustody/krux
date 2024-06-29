@@ -15,6 +15,7 @@ def mock_file_operations(mocker):
 def test_file_exploring(m5stickv, mocker, mock_file_operations):
     from krux.pages.file_manager import FileManager
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    import time
 
     BTN_SEQUENCE = (
         [BUTTON_PAGE]  # Move to second file
@@ -23,6 +24,11 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
         + [BUTTON_PAGE]  # Go to "back"
         + [BUTTON_ENTER]  # Leave file explorer
     )
+
+    def mock_localtime(timestamp):
+        return time.gmtime(timestamp)
+
+    mocker.patch("time.localtime", side_effect=mock_localtime)
     mocker.patch(
         "krux.sd_card.SDHandler.dir_exists", mocker.MagicMock(side_effect=[True, False])
     )
@@ -35,7 +41,7 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "second_file\n\nSize: 1.1 KB\n\nCreated: 1969-12-31 21:00\n\nModified: 1969-12-31 21:00"
+                "second_file\n\nSize: 1.1 KB\n\nCreated: 1970-01-01 00:00\n\nModified: 1970-01-01 00:00"
             )
         ]
     )
