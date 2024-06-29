@@ -2,8 +2,9 @@ from Crypto.Cipher import AES
 import pytest
 from .shared_mocks import (
     DeflateIO,
-    board_amigo_tft,
+    board_amigo,
     board_dock,
+    board_cube,
     board_m5stickv,
     encode_to_string,
     encode,
@@ -70,7 +71,7 @@ def m5stickv(monkeypatch, mp_modules):
 def amigo(monkeypatch, mp_modules):
     import sys
 
-    monkeypatch.setitem(sys.modules, "board", board_amigo_tft())
+    monkeypatch.setitem(sys.modules, "board", board_amigo())
     reset_krux_modules()
 
 
@@ -80,3 +81,16 @@ def dock(monkeypatch, mp_modules):
 
     monkeypatch.setitem(sys.modules, "board", board_dock())
     reset_krux_modules()
+
+
+@pytest.fixture
+def cube(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_cube())
+    reset_krux_modules()
+
+
+@pytest.fixture(params=["amigo", "m5stickv", "dock", "cube"])
+def all_devices(request):
+    return request.getfixturevalue(request.param)
