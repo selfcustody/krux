@@ -383,10 +383,9 @@ class SettingsPage(Page):
                 self.ctx.display.clear()
                 self.ctx.power_manager.reboot()
                 return MENU_EXIT  # In case reboot fails
-            else:
-                # Restore previous theme
-                setting.__set__(settings_namespace, starting_category)
-                theme.update()
+            # Restore previous theme
+            setting.__set__(settings_namespace, starting_category)
+            theme.update()
 
         return MENU_CONTINUE
 
