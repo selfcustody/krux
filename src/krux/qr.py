@@ -300,12 +300,14 @@ def find_min_num_parts(data, max_width, qr_format):
         # UR will add a bunch of info (some duplicated) on the body of each QR
         # Info's lenght is multiplied by 2 in Bytewords.encode step
         qr_capacity -= (UR_CBOR_PREFIX_LEN + UR_BYTEWORDS_CRC_LEN) * 2
+        qr_capacity = max(UR_MIN_FRAGMENT_LENGTH, qr_capacity)
         data_length = len(data.cbor)
         data_length *= 2  # UR will Bytewords.encode, which multiply bytes length by 2
         num_parts = (data_length + qr_capacity - 1) // qr_capacity
         # For UR, part size will be the input for "max_fragment_len"
         part_size = len(data.cbor) // num_parts
         part_size = max(part_size, UR_MIN_FRAGMENT_LENGTH)
+        # UR won't use "num_parts", will use encoder.fountain_encoder.seq_len() instead
     elif qr_format == FORMAT_BBQR:
         data_length = len(data.payload)
         max_part_size = qr_capacity - BBQR_PREFIX_LENGTH

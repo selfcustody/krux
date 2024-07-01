@@ -3,7 +3,7 @@ TEST_QR = bytearray(
 )
 
 
-def test_init(mocker, m5stickv):
+def test_init(mocker, all_devices):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -18,29 +18,15 @@ def test_init(mocker, m5stickv):
     d.initialize_lcd.assert_called()
 
     krux.display.lcd.init.assert_called_once()
-    assert "type" in krux.display.lcd.init.call_args.kwargs
-    assert (
-        krux.display.lcd.init.call_args.kwargs["type"]
-        == board.config["lcd"]["lcd_type"]
-    )
-
-
-def test_init_amigo(mocker, amigo):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
-    import krux
-    from krux.display import Display
-
-    mocker.spy(Display, "initialize_lcd")
-
-    d = Display()
-    d.initialize_lcd()
-
-    assert isinstance(d, Display)
-    d.initialize_lcd.assert_called()
-
-    krux.display.lcd.init.assert_called_once()
-    assert "invert" in krux.display.lcd.init.call_args.kwargs
-    assert krux.display.lcd.init.call_args.kwargs["invert"] == True
+    if board.config["type"] == "m5stickv":
+        assert "type" in krux.display.lcd.init.call_args.kwargs
+        assert (
+            krux.display.lcd.init.call_args.kwargs["type"]
+            == board.config["lcd"]["lcd_type"]
+        )
+    elif board.config["type"] == "amigo":
+        assert "invert" in krux.display.lcd.init.call_args.kwargs
+        assert krux.display.lcd.init.call_args.kwargs["invert"] == True
 
 
 def test_width(mocker, m5stickv):

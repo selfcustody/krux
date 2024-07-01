@@ -54,7 +54,9 @@ If you build from the `main` branch of the source code, you should be able to re
 
 To extract and verify the firmware.bin contained in kboot.kfpkg, you can use the following command:
 
-```unzip kboot.kfpkg -d ./kboot/```
+```bash
+unzip kboot.kfpkg -d ./kboot/
+```
 
 ### Flash the firmware onto the device
 Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `dock`, `bit` or `yahboom`:
@@ -78,7 +80,7 @@ You can sign the firmware to [perform airgapped upgrades](#prerequisite-for-upgr
 #### Method 1: Signing from Krux
 First, calculate the SHA256 hash of the new firmware by running:
 ```bash
-./krux sha256 build/firmware.bin'
+./krux sha256 build/firmware.bin
 ```
 
 Copy this hex string and turn it into a QR code using whichever QR code generator you'd like.
@@ -95,7 +97,7 @@ This will generate a `firmware.bin.sig` file containing a signature of the firmw
 #### Method 2: Signing from your computer with OpenSSL
 With the keypair [you generated before](#prerequisite-for-upgrading-via-microsd), you can now run:
 ```bash
-./krux sign build/firmware.bin privkey.pem'
+./krux sign build/firmware.bin privkey.pem
 ```
 
 This will generate a `firmware.bin.sig` file containing a signature of the firmware's SHA256 hash.
