@@ -564,7 +564,7 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
         (
             tdata.P2TR_PSBT,
             [
-                "Inputs (1): ₿ 0.00 010 111\n\nSpend (1): ₿ 0.00 007 024\n\nFee: ₿ 0.00 003 087 (44.0%)",
+                "Inputs (1): ₿ 0.00 010 111\n\nSpend (1): ₿ 0.00 007 024\n\nFee: ₿ 0.00 003 087 (44.0%) ~31.2 sat/vB",
                 "1. Spend: \n\ntb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl\n\n₿ 0.00 007 024",
             ],
         ),
