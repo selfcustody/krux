@@ -133,14 +133,14 @@ class WalletDescriptor(Page):
 
         if wallet.is_loaded():
             self.ctx.display.clear()
-            self.display_wallet(wallet, include_qr=False)
+            self.display_wallet(wallet, is_loading=True)
             if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                 self.ctx.wallet = wallet
                 self.flash_text(t("Wallet output descriptor loaded!"))
 
         return MENU_CONTINUE
 
-    def display_wallet(self, wallet, include_qr=True):
+    def display_wallet(self, wallet, is_loading=False):
         """Displays a wallet, including its label and abbreviated xpubs.
         If include_qr is True, a QR code of the wallet will be shown
         which will contain the same data as was originally loaded, in
@@ -152,42 +152,43 @@ class WalletDescriptor(Page):
         fingerprints = []
         for i, key in enumerate(wallet.descriptor.keys):
             label = str(i + 1) + ". " if wallet.is_multisig() else ""
-            fingerprints.append(label + binascii.hexlify(key.fingerprint).decode())
+            fingerprints.append(
+                label + "⊚ " + binascii.hexlify(key.fingerprint).decode()
+            )
         about.extend(fingerprints)
         if not wallet.is_multisig():
             about.append(self.fit_to_line(str(wallet.descriptor.keys[0].key)))
 
-        if not wallet.is_multisig() and include_qr:
-            wallet_data, qr_format = wallet.wallet_qr()
-            self.display_qr_codes(wallet_data, qr_format, title=about)
+        if not wallet.is_multisig():
+            if is_loading:
+                self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+            else:
+                wallet_data, qr_format = wallet.wallet_qr()
+                self.display_qr_codes(wallet_data, qr_format, title=about)
         else:
+            # Display fingerprints
             self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+            self.ctx.input.wait_for_button()
 
-        # If multisig, show loaded wallet again with all XPUB
-        if wallet.is_multisig():
+            # Display XPUBs
             about = [wallet.label]
             xpubs = []
             for i, xpub in enumerate(wallet.policy["cosigners"]):
                 xpubs.append(self.fit_to_line(xpub, str(i + 1) + ". "))
             about.extend(xpubs)
-
-            if include_qr:
-                self.ctx.input.wait_for_button()
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+            if is_loading:
+                # Skip the QR code if we're loading the wallet
+                return
+            self.ctx.input.wait_for_button()
+            # Try to show the wallet output descriptor as a QRCode
+            try:
+                wallet_data, qr_format = wallet.wallet_qr()
+                self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
+            except Exception as e:
                 self.ctx.display.clear()
-                self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+                self.ctx.display.draw_centered_text(
+                    t("Error:") + "\n%s" % repr(e), theme.error_color
+                )
                 self.ctx.input.wait_for_button()
-
-                # Try to show the wallet output descriptor as a QRCode
-                try:
-                    wallet_data, qr_format = wallet.wallet_qr()
-                    self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
-                except Exception as e:
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(
-                        t("Error:") + "\n%s" % repr(e), theme.error_color
-                    )
-                    self.ctx.input.wait_for_button()
-            else:
-                self.ctx.input.wait_for_button()
-                self.ctx.display.clear()
-                self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
