@@ -1,3 +1,5 @@
+import pytest
+
 from .shared_mocks import (
     snapshot_generator,
     MockQRPartParser,
@@ -70,7 +72,7 @@ def test_initialize_sensor_ov2640(mocker, m5stickv):
     krux.camera.sensor.set_vflip.assert_called()
 
 
-def test_capture_qr_code_loop(mocker, m5stickv):
+def test_capture_qr_code_loop(mocker, all_devices):
     mocker.patch(
         "krux.camera.sensor.snapshot", new=snapshot_generator(outcome=SNAP_SUCCESS)
     )

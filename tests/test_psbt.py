@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import MagicMock
 
 
 @pytest.fixture
@@ -50,6 +51,19 @@ def tdata(mocker):
     SIGNED_P2SH_P2WPKH_PSBT_UR_PSBT = UR(
         "crypto-psbt", PSBT(SIGNED_P2SH_P2WPKH_PSBT).to_cbor()
     )
+
+    # Taproot Singlesig
+    P2TR_PSBT = b"psbt\xff\x01\x00R\x02\x00\x00\x00\x01\xf9\xfe\xa6\x15\x16\xa0\x07\xe4v2WHAq\x8d\xc0\xda\\\x1a\xf6\xd9\x173\x7f\x06\x8eT\xda\xbeI\xbe?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01p\x1b\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hl\x00\x00\x00\x00O\x01\x045\x87\xcf\x03\xe0\x17\xd1\xbb\x80\x00\x00\x00\x01\x83\\\x0bQ!\x83v\xc6\x14UB\x8a\x9fG\xbf\xcc\xe1\xf6\xce\x83\x97\xea\xd7\xb0\x03\x87\xe9\xd9\xeaV\x83\x02\xcf\xbdq\x001\x1e\x0e\x85\x84L78r\x83\x149N\xb80*kPp\xd6\x92\xe4\x1b\x14\xba\x81\x80\x90\x10s\xc5\xda\nV\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x01\x01+\x7f'\x00\x00\x00\x00\x00\x00\"Q \x06\xac\x82\xfc6\xdb\xb6\rHy\x1d\x81\xc3\xc1\xeb9\x7f\xa9s\xe4V\xc8\xc6\xfbT\xc1\x04!\x1f\x04{\x1a\x01\x03\x04\x00\x00\x00\x00!\x16E\xc6\xb1\xe44\x82<\xe9\xe6\xb4H\xfb\xc1\xe4\x05' 8:\r!(\x82\xbc\xbavSMwR\x8a\xad\x19\x00s\xc5\xda\nV\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\t\x00\x00\x00\x01\x17 E\xc6\xb1\xe44\x82<\xe9\xe6\xb4H\xfb\xc1\xe4\x05' 8:\r!(\x82\xbc\xbavSMwR\x8a\xad\x00\x00"
+    P2TR_PSBT_B43 = "1J9.KMD$RF:I-2.Z3XLTF$EIOE70-F95GV*K*+:.5+7MJI9W9H94-06YXL+FQ/9HOP*H3..:EZKJ./NXXRSPMCA6QOVI.E95Y9E0PHD-I2KE3QFKEDD/K+0OLR547IVIGZ67TR2P*Y7YAC.4NQM0RAO*G8H9L7WGFQ./JZM89Z632AOBB02R8+H-BC8XJUQC$54S4Q6VGZ5WT14/Y/2.5BD632*C:Y3MD/BNLBV-Y-W.L-*XB5JB3XJ409K77634JBGF249GHP3R450M49TB11FK9J0X3WA-MQEO59D8.NNQSND1450:G-ZZ-OZ0F/0/T+*BT1IX3GJCZI3.T-*/+GIGP6RF904W$WL08LAFK922MPFDI5W47-Y*N/DB.TTKN4R71CV:DKZP1+WLIG:TND+H.XL6PDZJSTW$BV848DCVENOUJ98ZW4405VZZJ6AC+P.DVKI3WNZSUUSU9F7B75TWG+NUQS83+KRK-1VBCDWN/+ZS8FR"
+    P2TR_PSBT_B58 = "5sTYv86qkTXQCrzzzfv82bpvs9D1UWoTpGpyRrAvsHf3jDswsBQcn96wCmV7Dzy3xvhWNxbK76sffkhqZ2mVj1TEgXxAyKPuJJgCs72aQcJ8X1kUpneWyEkDY9dzSaTeWD3SMH78E8hfMXb2dKsdUDaLDcpATaAV5atG7dDURZ1xo5Mbj19JFGu5PWLm3yv61TLZEA1XsvZu6xTPeHdHeUYb8d9RcsVE4Nq7ihexRMiMCePTC8GteGGyPdTjVVMjYoatktXS2VjiRyCvZBurnUa4xXWWtS8yfwLr3Ecw1cqW5CBbDwkuWFoohov4gNBaRdYd72XKhUJzFtuzxXJ94sKtQqkkW5eTHD7KWAw3Brmz2fE2kxs5ywMwcS6X8hdsnQQatBurkDdVsHCRtD5N4f9pxwEhPkHAomof7UifL6JJZvCoXBWZsuQLEWDTvs2sh5j5fQirjkzHhR"
+    P2TR_PSBT_B64 = "cHNidP8BAFICAAAAAfn+phUWoAfkdjJXSEFxjcDaXBr22RczfwaOVNq+Sb4/AAAAAAAAAAAAAXAbAAAAAAAAFgAUrs0e3D7/ZaognQIV5z1wkF3BaGwAAAAATwEENYfPA+AX0buAAAAAAYNcC1Ehg3bGFFVCip9Hv8zh9s6Dl+rXsAOH6dnqVoMCz71xADEeDoWETDc4coMUOU64MCprUHDWkuQbFLqBgJAQc8XaClYAAIABAACAAAAAgAABASt/JwAAAAAAACJRIAasgvw227YNSHkdgcPB6zl/qXPkVsjG+1TBBCEfBHsaAQMEAAAAACEWRcax5DSCPOnmtEj7weQFJyA4Og0hKIK8unZTTXdSiq0ZAHPF2gpWAACAAQAAgAAAAIAAAAAACQAAAAEXIEXGseQ0gjzp5rRI+8HkBScgODoNISiCvLp2U013UoqtAAA="
+    P2TR_PSBT_UR_PSBT = UR("crypto-psbt", PSBT(P2TR_PSBT).to_cbor())
+
+    SIGNED_P2TR_PSBT = b"psbt\xff\x01\x00R\x02\x00\x00\x00\x01\xf9\xfe\xa6\x15\x16\xa0\x07\xe4v2WHAq\x8d\xc0\xda\\\x1a\xf6\xd9\x173\x7f\x06\x8eT\xda\xbeI\xbe?\x00\x00\x00\x00\x00\xff\xff\xff\xff\x01p\x1b\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hl\x00\x00\x00\x00\x00\x01\x01+\x7f'\x00\x00\x00\x00\x00\x00\"Q \x06\xac\x82\xfc6\xdb\xb6\rHy\x1d\x81\xc3\xc1\xeb9\x7f\xa9s\xe4V\xc8\xc6\xfbT\xc1\x04!\x1f\x04{\x1a\x01\x08B\x01@\xb6\xab\xb2\"\x9f\xfe1\x91\xfbe@\rb\x1b\xa6\xde\x11\nSsi\xcb\xb1\xdaj\x81\xe7'K\xc0?\xdfU\x8d\n\xe9;\xee,\xc5\xa1\xe9\xa7\x83\x0c\xaa\xde\xa3\x05$\xab\xb6\xc9\x9a\xb6\xfd\xbaFZ]$\x9d<\xb1\x00\x00"
+    SIGNED_P2TR_PSBT_B43 = "589/RZ9*LRRWPJ7+24ICD9B48T:T6-7E74E+4O/8*PR*$4HP*G1+7/YVPS8ZOGQ*DERVYZTZB$YGWSWI1G+NIJ-KS:-8QOU7J*4.TSNLD.MM:YD0GCWP.S$D*C6FG5Q$+MCHZSI984BQ0N+I2W2GL06I82TWLY68LLMY3CJTH8R$-MRLY-GEPEK52I4ZPWO++TNW4NX0A0WM4/0+R-OIA3AKRW4XV1G-PRL3O7A4FDO$BYR4S0D$-MG/O8.PE0EPTY$OP*ER0ART-E5O$9HUQYYCFHY-76FHPBT5*MVFE1NZ3KFAQ+F"
+    SIGNED_P2TR_PSBT_B58 = "Z6qMTcouFXYdFFD8HhtJ4xeEQ3g9N5WkVYWF8NsAXy3sjAwRA6TY93R4stCye1PQWtCQf9AZCNDUdYE6keAWvCppVj4HxfWA4BrjsS1LeEtMSY34jUo7cfsoxUt2UK9UwqBCQS1XDw2pF7G6KZPYrZ2AtxDmE7dBG3VSoacxHiM8TwSBSWdikgkAuUvVDhTUonnbFXVbTseF3kUnX6oDzfKUA6Hz8MzjF3vCeBBjcEuuDLzhtmdJABQRMVoDDwnr8VTnsWGuDAih1JijR7VRZxfPffSo"
+    SIGNED_P2TR_PSBT_B64 = "cHNidP8BAFICAAAAAfn+phUWoAfkdjJXSEFxjcDaXBr22RczfwaOVNq+Sb4/AAAAAAD/////AXAbAAAAAAAAFgAUrs0e3D7/ZaognQIV5z1wkF3BaGwAAAAAAAEBK38nAAAAAAAAIlEgBqyC/Dbbtg1IeR2Bw8HrOX+pc+RWyMb7VMEEIR8EexoBCEIBQLarsiKf/jGR+2VADWIbpt4RClNzacux2mqB5ydLwD/fVY0K6TvuLMWh6aeDDKreowUkq7bJmrb9ukZaXSSdPLEAAA=="
+    SIGNED_P2TR_PSBT_UR_PSBT = UR("crypto-psbt", PSBT(SIGNED_P2TR_PSBT).to_cbor())
 
     # Native Segwit Multisig
     P2WSH_PSBT = b'psbt\xff\x01\x00\xb2\x02\x00\x00\x00\x02\xadC\x87\x14J\xfae\x07\xe1>\xaeP\xda\x1b\xf1\xb5\x1ag\xb3\x0f\xfb\x8e\x0c[\x8f\x98\xf5\xb3\xb1\xa68Y\x00\x00\x00\x00\x00\xfd\xff\xff\xffig%Y\x0f\xb8\xe4r\xab#N\xeb\xf3\xbf\x04\xd9J\xc0\xba\x94\xf6\xa5\xa4\xf8B\xea\xdb\x9a\xd3c`\xd4\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x02@B\x0f\x00\x00\x00\x00\x00"\x00 \xa9\x903\xc3\x86b3>Y\t\xae<=\x03\xbdq\x8d\xb2\x14Y\xfd\xd5P\x1e\xe8\xa0RaMY\xb4\xe2\xd8\xd2!\x01\x00\x00\x00\x00"\x00 \x8d\x02\x85\r\xab\x88^\xc5y\xbbm\xcb\x05\xd6 ;\x05\xf5\x17\x01\x86\xac\xb8\x90}l\xc1\xb4R\x99\xed\xd2\x00\x00\x00\x00O\x01\x045\x87\xcf\x04>b\xdf~\x80\x00\x00\x02A+I\x84\xd5I\xba^\xef\x1c\xa6\xe8\xf3u]\x9a\xe0\x16\xdam\x16ir\xca\x0eQ@6~\xddP\xda\x025\xb8K1\xdc8*|\xfbC\xba:{\x17K\xe9AaA\xe8\x16\xf6r[\xd1%\x12\xb5\xb2\xc4\xa5\xac\x14\x02\x08\xcbw0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80O\x01\x045\x87\xcf\x04\x9d\xb1\xd0\x00\x80\x00\x00\x02?\xd8\xd7;\xc7\xb8\x8c\xa4\x93Z\xa57\xbf8\x94\xd5\xe2\x88\x9f\xab4\x1ca\x8fJWo\x8f\x19\x18\xc2u\x02h\xc3\rV\x9d#j}\xccW\x1b+\xb1\xd2\xadO\xa9\xf9\xb3R\xa8\t6\xa2\x89\n\x99\xaa#\xdbx\xec\x14&\xbb\x83\xc40\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80O\x01\x045\x87\xcf\x04\xba\xc1H9\x80\x00\x00\x02\x1dO\xbe\xbd\xd9g\xe1\xafqL\t\x97\xd3\x8f\xcfg\x0b\\\xe9\xd3\x01\xc0D\x0b\xbc\xc3\xb6\xa2\x0e\xb7r\x1c\x03V\x8e\xa1\xf3`Q\x91n\xd1\xb6\x90\xc3\x9e\x12\xa8\xe7\x06\x03\xb2\x80\xbd0\xce_(\x1f)\x18\xa5Sc\xaa\x14s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x01\x01+\x80\x96\x98\x00\x00\x00\x00\x00"\x00 \x89\x801pn\xdd\x9e\xb1"g\x85G\x15Q\xce\xa3_\x17\t\xa9o\x85\x96.2\xa0k\xf6~\xc7\x11$\x01\x05iR!\x02N\x8d\x08\x0c}}\xba\\G\xfe\xb6\xb1\xc8\x12M\xebbA\x17\xe5\x8d\x8d~\xb1J@\x04Oq\xdd\x97\xf2!\x03\x05a\xd4\x82\xad\xb9=\xf1\xef\x13\xe8ep\x1a\xf2$n\xf0\xa3l\xbc\x8c\xa5\x12=\x8e\xecw\xceN8\xc7!\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87S\xae"\x06\x02N\x8d\x08\x0c}}\xba\\G\xfe\xb6\xb1\xc8\x12M\xebbA\x17\xe5\x8d\x8d~\xb1J@\x04Oq\xdd\x97\xf2\x1c&\xbb\x83\xc40\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x01\x00\x00\x00"\x06\x03\x05a\xd4\x82\xad\xb9=\xf1\xef\x13\xe8ep\x1a\xf2$n\xf0\xa3l\xbc\x8c\xa5\x12=\x8e\xecw\xceN8\xc7\x1c\x02\x08\xcbw0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x01\x00\x00\x00"\x06\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87\x1cs\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x01\x00\x00\x00\x00\x01\x01+\x80\x96\x98\x00\x00\x00\x00\x00"\x00 3w\xad03\xd1\x05\x9c\xf1\xd25\xbb\x12%\xfc\xa2\xa4\xbf&\xc9R\xd5?o\xef\xc3:-UD\x8d\xc5\x01\x05iR!\x02"\x821\x12\xe5\xcc\x88K\x91\x16\xcb!B\x0c\xc7\x92\x98$\xcd/\xe8\xb7#[\xf9\x92\xe8\xae\xde\x14l"!\x02\x83\xcdG\xe5Sm\xcby\xe7\x11\x830\xe8\xe4\x80B\x12\xf6\x96\x19\xf1\xd6\xec\x99\r\xc75\xef\xb9\xce\xc5t!\x03\x0b\x90\xed.\x86\xba\xd7\xf2\xa4\xfe\x97i\xbbA}{\xa9\xca\xa1\x12H\x07\xdb\xfb6-\xfb\xee\xb6^~\x01S\xae"\x06\x02"\x821\x12\xe5\xcc\x88K\x91\x16\xcb!B\x0c\xc7\x92\x98$\xcd/\xe8\xb7#[\xf9\x92\xe8\xae\xde\x14l"\x1c\x02\x08\xcbw0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00"\x06\x02\x83\xcdG\xe5Sm\xcby\xe7\x11\x830\xe8\xe4\x80B\x12\xf6\x96\x19\xf1\xd6\xec\x99\r\xc75\xef\xb9\xce\xc5t\x1c&\xbb\x83\xc40\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00"\x06\x03\x0b\x90\xed.\x86\xba\xd7\xf2\xa4\xfe\x97i\xbbA}{\xa9\xca\xa1\x12H\x07\xdb\xfb6-\xfb\xee\xb6^~\x01\x1cs\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01iR!\x02\xad!\xd9\xad(\xab\x99\xac~\xdf\xd9\x1e"!O\x11YS\xab\t\xd1\xd5X\x10\x92\xfbG\xbd\xa5\x92r\xfe!\x03\xa0};\xe0\xba\xd6<\x805\xd2\x1c\x97\xb4\x10\x89\r=:\x19\xd2\xe4\x03\xaf\xb3\xfc\xfch&\xaa&<v!\x03\xa1\xa8C\xfa-A\xd9;\xd6u)a\x91_nD\x8at\x19$J>\x02\xb8\xf4\xcfb\xbc\xc6\xa7\xa2kS\xae"\x02\x02\xad!\xd9\xad(\xab\x99\xac~\xdf\xd9\x1e"!O\x11YS\xab\t\xd1\xd5X\x10\x92\xfbG\xbd\xa5\x92r\xfe\x1c\x02\x08\xcbw0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x00\x00\x00\x00"\x02\x03\xa0};\xe0\xba\xd6<\x805\xd2\x1c\x97\xb4\x10\x89\r=:\x19\xd2\xe4\x03\xaf\xb3\xfc\xfch&\xaa&<v\x1cs\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x00\x00\x00\x00"\x02\x03\xa1\xa8C\xfa-A\xd9;\xd6u)a\x91_nD\x8at\x19$J>\x02\xb8\xf4\xcfb\xbc\xc6\xa7\xa2k\x1c&\xbb\x83\xc40\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00'
@@ -115,6 +129,16 @@ def tdata(mocker):
             "SIGNED_P2SH_P2WPKH_PSBT_B58",
             "SIGNED_P2SH_P2WPKH_PSBT_B64",
             "SIGNED_P2SH_P2WPKH_PSBT_UR_PSBT",
+            "P2TR_PSBT",
+            "P2TR_PSBT_B43",
+            "P2TR_PSBT_B58",
+            "P2TR_PSBT_B64",
+            "P2TR_PSBT_UR_PSBT",
+            "SIGNED_P2TR_PSBT",
+            "SIGNED_P2TR_PSBT_B43",
+            "SIGNED_P2TR_PSBT_B58",
+            "SIGNED_P2TR_PSBT_B64",
+            "SIGNED_P2TR_PSBT_UR_PSBT",
             "P2WSH_PSBT",
             "P2WSH_PSBT_B43",
             "P2WSH_PSBT_B58",
@@ -169,6 +193,16 @@ def tdata(mocker):
         SIGNED_P2SH_P2WPKH_PSBT_B58,
         SIGNED_P2SH_P2WPKH_PSBT_B64,
         SIGNED_P2SH_P2WPKH_PSBT_UR_PSBT,
+        P2TR_PSBT,
+        P2TR_PSBT_B43,
+        P2TR_PSBT_B58,
+        P2TR_PSBT_B64,
+        P2TR_PSBT_UR_PSBT,
+        SIGNED_P2TR_PSBT,
+        SIGNED_P2TR_PSBT_B43,
+        SIGNED_P2TR_PSBT_B58,
+        SIGNED_P2TR_PSBT_B64,
+        SIGNED_P2TR_PSBT_UR_PSBT,
         P2WSH_PSBT,
         P2WSH_PSBT_B43,
         P2WSH_PSBT_B58,
@@ -191,6 +225,39 @@ def tdata(mocker):
         SIGNED_P2SH_P2WSH_PSBT_UR_PSBT,
         MISSING_GLOBAL_XPUBS_PSBT,
     )
+
+
+class MockFile:
+    """Custom mock file class that supports read, write, seek, and other file methods"""
+
+    def __init__(self, data=b""):
+        self.data = data
+        self.file = MagicMock()
+        self.file.read.side_effect = self.read
+        self.file.write.side_effect = self.write
+        self.file.seek.side_effect = self.seek
+        self.position = 0
+        self.write_data = b""
+
+    def seek(self, pos):
+        self.position = pos
+
+    def read(self, size=None):
+        if size is None:
+            size = len(self.data) - self.position
+        result = self.data[self.position : self.position + size]
+        self.position += size
+        return result
+
+    def write(self, content):
+        self.write_data += content
+        return len(content)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
 
 
 def test_init_singlesig(mocker, m5stickv, tdata):
@@ -217,10 +284,37 @@ def test_init_singlesig(mocker, m5stickv, tdata):
         (tdata.P2SH_P2WPKH_PSBT_B58, FORMAT_PMOFN),
         (tdata.P2SH_P2WPKH_PSBT_B64, FORMAT_PMOFN),
         (tdata.P2SH_P2WPKH_PSBT_UR_PSBT, FORMAT_UR),
+        (tdata.P2TR_PSBT, FORMAT_NONE),
+        (tdata.P2TR_PSBT_B43, FORMAT_PMOFN),
+        (tdata.P2TR_PSBT_B58, FORMAT_PMOFN),
+        (tdata.P2TR_PSBT_B64, FORMAT_PMOFN),
+        (tdata.P2TR_PSBT_UR_PSBT, FORMAT_UR),
     ]
 
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
+        assert isinstance(signer, PSBTSigner)
+
+
+def test_init_singlesig_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    cases = [
+        (tdata.P2PKH_PSBT, FORMAT_NONE),
+        (tdata.P2WPKH_PSBT, FORMAT_NONE),
+        (tdata.P2SH_P2WPKH_PSBT, FORMAT_NONE),
+        (tdata.P2TR_PSBT, FORMAT_NONE),
+    ]
+
+    for case in cases:
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", return_value=mock_file)
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
         assert isinstance(signer, PSBTSigner)
 
 
@@ -247,6 +341,26 @@ def test_init_multisig(mocker, m5stickv, tdata):
 
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
+        assert isinstance(signer, PSBTSigner)
+
+
+def test_init_multisig_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    cases = [
+        (tdata.P2WSH_PSBT, FORMAT_NONE),
+        (tdata.P2SH_P2WSH_PSBT, FORMAT_NONE),
+    ]
+
+    for case in cases:
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", return_value=mock_file)
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
         assert isinstance(signer, PSBTSigner)
 
 
@@ -297,6 +411,11 @@ def test_sign_singlesig(mocker, m5stickv, tdata):
             FORMAT_UR,
             tdata.SIGNED_P2SH_P2WPKH_PSBT_UR_PSBT,
         ),
+        (tdata.P2TR_PSBT, FORMAT_NONE, tdata.SIGNED_P2TR_PSBT),
+        (tdata.P2TR_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_P2TR_PSBT_B43),
+        (tdata.P2TR_PSBT_B58, FORMAT_PMOFN, tdata.SIGNED_P2TR_PSBT_B58),
+        (tdata.P2TR_PSBT_B64, FORMAT_PMOFN, tdata.SIGNED_P2TR_PSBT_B64),
+        (tdata.P2TR_PSBT_UR_PSBT, FORMAT_UR, tdata.SIGNED_P2TR_PSBT_UR_PSBT),
         (tdata.P2WPKH_PSBT, FORMAT_PMOFN, tdata.SIGNED_P2WPKH_PSBT_B64),
         (tdata.P2SH_P2WPKH_PSBT, FORMAT_PMOFN, tdata.SIGNED_P2SH_P2WPKH_PSBT_B64),
     ]
@@ -308,6 +427,34 @@ def test_sign_singlesig(mocker, m5stickv, tdata):
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
         assert signer.psbt_qr() == (case[2], case[1])
+
+
+def test_sign_singlesig_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    cases = [
+        (tdata.P2PKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2PKH_PSBT),
+        (tdata.P2WPKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2WPKH_PSBT),
+        (tdata.P2SH_P2WPKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2SH_P2WPKH_PSBT),
+        (tdata.P2TR_PSBT, FORMAT_NONE, tdata.SIGNED_P2TR_PSBT),
+    ]
+
+    num = 0
+    for case in cases:
+        print("test_sign_singlesig case: ", num)
+        num += 1
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", return_value=mock_file)
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
+        signer.sign()
+        with open("dummy-signed.psbt", "wb") as f:
+            signer.psbt.write_to(f)
+        assert mock_file.write_data == case[2]
 
 
 def test_sign_multisig(mocker, m5stickv, tdata):
@@ -341,6 +488,29 @@ def test_sign_multisig(mocker, m5stickv, tdata):
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
         assert signer.psbt_qr() == (case[2], case[1])
+
+
+def test_sign_multisig_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    cases = [
+        (tdata.P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2WSH_PSBT),
+        (tdata.P2SH_P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2SH_P2WSH_PSBT),
+    ]
+
+    for case in cases:
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", return_value=mock_file)
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
+        signer.sign()
+        with open("dummy-signed.psbt", "wb") as f:
+            signer.psbt.write_to(f)
+        assert mock_file.write_data == case[2]
 
 
 def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
@@ -389,6 +559,13 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
                 "Inputs (1): ₿ 1.00 000 000\n\nSpend (1): ₿ 0.10 000 000\n\nSelf-transfer or Change (1): ₿ 0.89 996 700\n\nFee: ₿ 0.00 003 300 (0.1%) ~20.0 sat/vB",
                 "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10 000 000",
                 "1. Change: \n\n2MvdUi5o3f2tnEFh9yGvta6FzptTZtkPJC8\n\n₿ 0.89 996 700",
+            ],
+        ),
+        (
+            tdata.P2TR_PSBT,
+            [
+                "Inputs (1): ₿ 0.00 010 111\n\nSpend (1): ₿ 0.00 007 024\n\nFee: ₿ 0.00 003 087 (44.0%)",
+                "1. Spend: \n\ntb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl\n\n₿ 0.00 007 024",
             ],
         ),
     ]

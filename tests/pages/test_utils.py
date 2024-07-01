@@ -1,0 +1,46 @@
+from . import create_ctx
+from .test_tools import mock_file_operations, SEEDS_JSON
+
+
+def test_load_file(m5stickv, mocker, mock_file_operations):
+    from krux.pages.utils import Utils
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Pick first file
+        BUTTON_ENTER,  # Confirm load
+    ]
+    ONLY_GET_FILENAME_OPTIONS = [True, False]
+    for only_get_filename in ONLY_GET_FILENAME_OPTIONS:
+        mocker.patch(
+            "krux.sd_card.SDHandler.dir_exists",
+            mocker.MagicMock(side_effect=[True, False]),
+        )
+        ctx = create_ctx(mocker, BTN_SEQUENCE)
+        utils = Utils(ctx)
+        file_name, data = utils.load_file(
+            prompt=False, only_get_filename=only_get_filename
+        )
+
+        assert len(BTN_SEQUENCE) == ctx.input.wait_for_button.call_count
+        assert file_name == "otherfile"
+        if only_get_filename:
+            assert data is None
+        else:
+            assert data == SEEDS_JSON
+
+
+def test_load_file_with_no_sd(m5stickv, mocker):
+    from krux.pages.utils import Utils
+    from krux.input import BUTTON_PAGE
+
+    mocker.patch(
+        "krux.sd_card.SDHandler.dir_exists",
+        mocker.MagicMock(return_value=False),
+    )
+    ctx = create_ctx(mocker, None)
+    utils = Utils(ctx)
+    file_name, data = utils.load_file(prompt=False)
+
+    assert file_name == ""
+    assert data is None
