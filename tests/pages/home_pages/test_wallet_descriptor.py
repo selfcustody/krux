@@ -123,6 +123,14 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
+        # 1 Load, from SD card, good data, accept
+        (
+            False,
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
+            None,
+            [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER, BUTTON_ENTER],
+        ),
     ]
 
     num = 0
@@ -135,6 +143,7 @@ def test_wallet(mocker, m5stickv, tdata):
 
         ctx = create_ctx(mocker, case[4], wallet, case[3])
         wallet_descriptor = WalletDescriptor(ctx)
+        mocker.patch.object(wallet_descriptor, "has_sd_card", return_value=True)
         mocker.patch.object(
             wallet_descriptor, "capture_qr_code", new=lambda: (case[2], FORMAT_PMOFN)
         )
@@ -146,13 +155,23 @@ def test_wallet(mocker, m5stickv, tdata):
         mocker.spy(wallet_descriptor, "capture_qr_code")
         mocker.spy(wallet_descriptor, "display_wallet")
 
+        # Mock SD card descriptor loading
+        if case[4][:3] == [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]:
+            mock_utils = mocker.patch("krux.pages.utils.Utils")
+            mock_utils.return_value.load_file.return_value = (None, case[2])
+
         wallet_descriptor.wallet()
 
         if case[0]:
             wallet_descriptor.display_wallet.assert_called_once()
         else:
-            if case[4][0] == BUTTON_ENTER:
+            # If accepted the message and choose to load from camera
+            if case[4][:2] == [BUTTON_ENTER, BUTTON_ENTER]:
                 wallet_descriptor.capture_qr_code.assert_called_once()
+                if case[2] is not None and case[2] != "{}":
+                    wallet_descriptor.display_wallet.assert_called_once()
+            # If accepted the message and choose to load from SD
+            elif case[4][:3] == [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]:
                 if case[2] is not None and case[2] != "{}":
                     wallet_descriptor.display_wallet.assert_called_once()
         assert ctx.input.wait_for_button.call_count == len(case[4])
