@@ -120,7 +120,7 @@ When you select this option for the first time, you will be prompted to load a w
 <img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-fingerprints-150.png" align="top">
 <img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-xpubs-150.png" align="top">
 
-If you access this option again after having loaded your wallet, you will see the wallet's name, fingerprints and the abbreviated xPubs of all cosigners, along with a QR code containing the exact data that was initially loaded. If an SD card is inserted, you can save the descriptor to it. Additionally, if you have a thermal printer attached, you can print this QR code.
+If you access this option again after having loaded your wallet, you will see the wallet's name, fingerprints and the abbreviated XPUBs of all cosigners, along with a QR code containing the exact data that was initially loaded. If an SD card is inserted, you can save the descriptor to it. Additionally, if you have a thermal printer attached, you can print this QR code.
 
 Please note that once a wallet is loaded, it cannot be changed. To load a different wallet, you will need to restart the device and re-enter your mnemonic.
 
