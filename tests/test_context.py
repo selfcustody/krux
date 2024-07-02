@@ -63,5 +63,5 @@ def test_is_logged_in(mocker, m5stickv):
     c.wallet = Wallet(None)
     assert c.is_logged_in() == False
 
-    c.wallet = Wallet(Key(mnemonic="abandon "*11 + "about", multisig=False))
+    c.wallet = Wallet(Key(mnemonic="abandon " * 11 + "about", multisig=False))
     assert c.is_logged_in() == True
