@@ -1,3 +1,4 @@
+import pytest
 from unittest import mock
 import pyqrcode
 import zlib
@@ -304,7 +305,7 @@ def board_m5stickv():
     )
 
 
-def board_amigo_tft():
+def board_amigo():
     return mock.MagicMock(
         config={
             "type": "amigo",
@@ -379,6 +380,39 @@ def board_dock():
     )
 
 
+def board_cube():
+    return mock.MagicMock(
+        config={
+            "type": "cube",
+            "lcd": {"height": 240, "width": 240, "invert": 1, "lcd_type": 0},
+            "sdcard": {"sclk": 27, "mosi": 28, "miso": 26, "cs": 29},
+            "board_info": {
+                "BOOT_KEY": 16,
+                "LED_R": 13,
+                "LED_G": 12,
+                "LED_B": 14,
+                "MIC0_WS": 19,
+                "MIC0_DATA": 20,
+                "MIC0_BCK": 18,
+            },
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 10,
+                    "BUTTON_B": 16,
+                    "BUTTON_C": 11,
+                    "I2C_SDA": 27,
+                    "I2C_SCL": 24,
+                    "BACKLIGHT": 17,
+                },
+                "display": {
+                    "touch": False,
+                    "font": [8, 14],
+                },
+            },
+        }
+    )
+
+
 def mock_context(mocker):
     import board
 
@@ -424,7 +458,7 @@ def mock_context(mocker):
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
-    elif board.config["type"].startswith("amigo"):
+    elif board.config["type"] == "amigo":
         return mocker.MagicMock(
             display=mocker.MagicMock(
                 font_width=12,
@@ -435,6 +469,27 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
+            ),
+        )
+    elif board.config["type"] == "cube":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=None,
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=14,
+                total_lines=17,  # 240 / 14
+                width=mocker.MagicMock(return_value=240),
+                height=mocker.MagicMock(return_value=240),
+                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=7),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )

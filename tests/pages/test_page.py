@@ -80,7 +80,7 @@ def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
 
 
 def test_camera_antiglare_7740(mocker, m5stickv, mock_page_cls):
-    from krux.camera import OV7740_ID
+    from krux.camera import Camera, OV7740_ID, OV2640_ID, GC2145_ID
 
     time_mocker = TimeMocker(1001)
 
@@ -88,67 +88,32 @@ def test_camera_antiglare_7740(mocker, m5stickv, mock_page_cls):
         "krux.camera.sensor.snapshot",
         new=snapshot_generator(outcome=DONT_FIND_ANYTHING),
     )
-    mocker.patch("krux.camera.sensor.get_id", lambda: OV7740_ID)
-    mocker.patch("krux.camera.QRPartParser", new=MockQRPartParser)
-    from krux.camera import Camera
+    cameras = [OV7740_ID, OV2640_ID, GC2145_ID]
+    for cam_id in cameras:
+        mocker.patch("krux.camera.sensor.get_id", lambda: cam_id)
+        mocker.patch("krux.camera.QRPartParser", new=MockQRPartParser)
 
-    ctx = mock_context(mocker)
-    ENTER_SEQ = [False, True, False, True, False]
-    PAGE_PREV_SEQ = [False, False, False, True]
-    mocker.patch("time.ticks_ms", time_mocker.tick)
-    ctx.input.enter_event = mocker.MagicMock(side_effect=ENTER_SEQ)
-    ctx.input.page_event = mocker.MagicMock(side_effect=ENTER_SEQ)
-    ctx.input.page_prev_event = mocker.MagicMock(side_effect=PAGE_PREV_SEQ)
-    ctx.camera = Camera()
-    ctx.camera.cam_id = OV7740_ID
-    mocker.spy(ctx.camera, "disable_antiglare")
-    mocker.spy(ctx.camera, "enable_antiglare")
-    mocker.spy(ctx.light, "turn_on")
-    mocker.spy(ctx.light, "turn_off")
-    page = mock_page_cls(ctx)
+        ctx = mock_context(mocker)
+        ENTER_SEQ = [False, True, False, True, False]
+        PAGE_PREV_SEQ = [False, False, False, True]
+        mocker.patch("time.ticks_ms", time_mocker.tick)
+        ctx.input.enter_event = mocker.MagicMock(side_effect=ENTER_SEQ)
+        ctx.input.page_event = mocker.MagicMock(side_effect=ENTER_SEQ)
+        ctx.input.page_prev_event = mocker.MagicMock(side_effect=PAGE_PREV_SEQ)
+        ctx.camera = Camera()
+        ctx.camera.cam_id = OV7740_ID
+        mocker.spy(ctx.camera, "disable_antiglare")
+        mocker.spy(ctx.camera, "enable_antiglare")
+        mocker.spy(ctx.light, "turn_on")
+        mocker.spy(ctx.light, "turn_off")
+        page = mock_page_cls(ctx)
 
-    qr_code, _ = page.capture_qr_code()
-    assert qr_code == None
-    ctx.camera.disable_antiglare.assert_called_once()
-    ctx.camera.enable_antiglare.assert_called_once()
-    ctx.light.turn_on.call_count == 2
-    ctx.light.turn_off.call_count == 2
-
-
-def test_camera_antiglare_ov2640(mocker, m5stickv, mock_page_cls):
-    from krux.camera import OV2640_ID
-
-    time_mocker = TimeMocker(1001)
-
-    mocker.patch(
-        "krux.camera.sensor.snapshot",
-        new=snapshot_generator(outcome=DONT_FIND_ANYTHING),
-    )
-    mocker.patch("krux.camera.sensor.get_id", lambda: OV2640_ID)
-    mocker.patch("krux.camera.QRPartParser", new=MockQRPartParser)
-    from krux.camera import Camera
-
-    ctx = mock_context(mocker)
-    ENTER_SEQ = [False, True, False, True, False]
-    PAGE_PREV_SEQ = [False, False, False, True]
-    mocker.patch("time.ticks_ms", time_mocker.tick)
-    ctx.input.enter_event = mocker.MagicMock(side_effect=ENTER_SEQ)
-    ctx.input.page_event = mocker.MagicMock(side_effect=ENTER_SEQ)
-    ctx.input.page_prev_event = mocker.MagicMock(side_effect=PAGE_PREV_SEQ)
-    ctx.camera = Camera()
-    ctx.camera.cam_id = OV2640_ID
-    mocker.spy(ctx.camera, "disable_antiglare")
-    mocker.spy(ctx.camera, "enable_antiglare")
-    mocker.spy(ctx.light, "turn_on")
-    mocker.spy(ctx.light, "turn_off")
-    page = mock_page_cls(ctx)
-
-    qr_code, _ = page.capture_qr_code()
-    assert qr_code == None
-    ctx.camera.disable_antiglare.assert_called_once()
-    ctx.camera.enable_antiglare.assert_called_once()
-    ctx.light.turn_on.call_count == 2
-    ctx.light.turn_off.call_count == 2
+        qr_code, _ = page.capture_qr_code()
+        assert qr_code == None
+        ctx.camera.disable_antiglare.assert_called_once()
+        ctx.camera.enable_antiglare.assert_called_once()
+        ctx.light.turn_on.call_count == 2
+        ctx.light.turn_off.call_count == 2
 
 
 def test_prompt_m5stickv(mocker, m5stickv, mock_page_cls):
