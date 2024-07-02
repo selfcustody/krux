@@ -85,6 +85,8 @@ nav:
     - Navigation Overview: getting-started/navigation.en.md
   - Devices and Parts List: parts.en.md
   - FAQ: faq.en.md
+  - Troubleshooting: troubleshooting.en.md
+  - Uncommon Questions: uncommon-questions.en.md
   - Support the Project: support.en.md
 
 plugins:

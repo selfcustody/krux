@@ -80,6 +80,7 @@ def dock(monkeypatch, mp_modules):
     import sys
 
     monkeypatch.setitem(sys.modules, "board", board_dock())
+    monkeypatch.setitem(sys.modules, "pmu", None)
     reset_krux_modules()
 
 

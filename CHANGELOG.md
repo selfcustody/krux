@@ -1,3 +1,77 @@
+# Changelog 24.07.0 - July 15, 2024
+
+### Frozen Code - Speed and Security Improvement
+Krux now runs cross-compiled (frozen) Python code instead of real-time compiled code. The Python real-time compiler and REPL have been disabled.
+
+### More Single-sig Script Types Support
+Beyond Native Segwit, users can now load Legacy, Nested Segwit, and Taproot script type wallets.
+
+### Accounts Support
+Users can now use custom account derivation indexes.
+
+### Wallet Customization Options
+New workflow to load wallets, faster for default settings and with more options when custom settings are needed. Wallet's network, script type, single/multisig, and account can be changed during and after loading a wallet.
+
+### BIP85 Support
+Generate, export, and load BIP85 child mnemonics.
+
+### Wallet Sans Key
+Krux now has a tool to load a trusted wallet descriptor to view addresses without the need for private keys.
+
+### Add BBQr Support
+Scan and export PSBTs and wallet descriptors in the compact and efficient BBQr format.
+
+### Update Embit
+Embit updated to 0.8.
+
+### Auto Shutdown - Security and Battery Saving Feature
+The device will automatically shut down at a configurable time if left on.
+
+### Hide Mnemonics - Security Feature
+Disable backup tools and hide private key data when a wallet is loaded.
+
+### PSBT Path Mismatch
+Detect and warn the user if the PSBT path differs from the loaded wallet's path. This is useful for users who use multiple script types with the same key, ensuring they use the correct account when sending transactions.
+
+### Show Multisig PSBT Policy When Descriptor is Not Loaded
+Ensure you are signing for the correct multisig setup by inspecting PSBT's fingerprints if the wallet descriptor is not loaded. If the descriptor is loaded, verification is done by Krux.
+
+### Status Bar Shows Loaded Fingerprint
+The loaded key's fingerprint is now shown in the status bar.
+
+### Fee Percentage of Transaction
+Show the fee as a proportion of the transaction cost, warning if it is greater than 30%.
+
+### Brightness Control for Maix Cube and M5stickV
+Adjust backlight intensity for better viewing and scanning from your Cube or M5stickV.
+
+### Fast Forward for Buttons
+Hold the NEXT or PREVIOUS buttons when typing text to fast forward or backward.
+
+### Add Display Settings for Maix Amigo
+Add more display settings for Amigo to allow different display models to work properly.
+
+### Faster Address Scanning and Exploring
+The time to scan or display wallet addresses is now less than half compared to the previous version.
+
+### Sign PSBTs Without Fingerprints
+Krux will now sign PSBTs even if a fingerprint is not properly set on the coordinator. Krux will still warn the user to set it correctly or use Krux-exported public keys to set their coordinators.
+
+### Dice Rolls Pattern Detection
+Krux will detect and warn the user in case arithmetic progression patterns in dice rolls by evaluating Shannon's entropy of the rolls derivative.
+
+### Optimized SD Card Signing
+Better suited for large transactions, SD card signing is now more RAM efficient, allowing transactions with more than 100 inputs or outputs to be signed in less than a minute.
+
+### Stand Alone Verifiable Signed PSBTs
+Signed PSBT QR codes and SD card files now contain all the required data to verify the signatures without needing the original, unsigned PSBT.
+
+### Camera Optimizations for Yahboom With GC2145 Camera
+Recent Yahboom K210 devices now come with the GC2145 camera instead of the OV2640. Optimizations and features, such as anti-glare, have been added for the new camera.
+
+### Yahboom and Cube Devices Added to Simulator
+Simulator can now run as M5stickV, Amigo, Dock, Yahboom, and Cube.
+
 # Changelog 24.03.0 - March 12, 2024
 
 ## Changes
