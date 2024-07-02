@@ -57,7 +57,8 @@ class Camera:
                 sensor.set_vflip(1)
         else:
             sensor.reset()
-        if grayscale:
+        if grayscale and self.cam_id != GC2145_ID:
+            # GC2145 does not support grayscale
             sensor.set_pixformat(sensor.GRAYSCALE)
         else:
             sensor.set_pixformat(sensor.RGB565)

@@ -45,6 +45,7 @@ class PSBTSigner:
         self.base_encoding = None
         self.ur_type = None
         self.qr_format = qr_format
+        self.policy = None
         # Parse the PSBT
         if psbt_filename:
             gc.collect()
@@ -54,6 +55,14 @@ class PSBTSigner:
                 file_path = "/%s/%s" % (SD_PATH, psbt_filename)
                 with open(file_path, "rb") as file:
                     self.psbt = PSBT.read_from(file, compress=1)
+                    try:
+                        self.validate()
+                    except:
+                        # Legacy will fail to get policy from compressed PSBT
+                        # so we load it uncompressed
+                        self.policy = None  # Reset policy
+                        file.seek(0)  # Reset the file pointer to the beginning
+                        self.psbt = PSBT.read_from(file)
                 self.base_encoding = 64  # In case it is exported as QR code
             except Exception as e:
                 raise ValueError("Error loading PSBT file: %s" % e)
@@ -89,10 +98,17 @@ class PSBTSigner:
                             self.base_encoding = 43
                         except:
                             raise ValueError("invalid PSBT")
-        # Validate the PSBT
+        if self.policy is None:
+            # If not yet validated (e.g. from file and compressed), validate now
+            try:
+                self.validate()
+            except Exception as e:
+                raise ValueError("Invalid PSBT: %s" % e)
+
+    def validate(self):
+        """Validates the PSBT"""
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
         xpubs = self.xpubs()
-        self.policy = None
         for inp in self.psbt.inputs:
             # get policy of the input
             try:

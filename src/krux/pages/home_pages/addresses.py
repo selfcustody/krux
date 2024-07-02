@@ -58,72 +58,66 @@ class Addresses(Page):
 
     def list_address_type(self, addr_type=0):
         """Handler for the 'receive addresses' or 'change addresses' menu item"""
-        # only show address for single-sig or multisig with wallet output descriptor loaded
-        if self.ctx.wallet.is_loaded() or not self.ctx.wallet.is_multisig():
-            loading_txt = t("Loading receive addresses..")
-            if addr_type == 1:
-                loading_txt = t("Loading change addresses..")
+        if self.ctx.wallet.is_multisig() and not self.ctx.wallet.is_loaded():
+            return MENU_CONTINUE
 
-            max_addresses = self.ctx.display.max_menu_lines() - 3
-
-            address_index = 0
-            while True:
-                items = []
-                if address_index >= max_addresses:
-                    items.append(
-                        (
-                            "%d..%d"
-                            % (address_index - max_addresses, address_index - 1),
-                            lambda: MENU_EXIT,
-                        )
-                    )
-
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(loading_txt)
-                for addr in self.ctx.wallet.obtain_addresses(
-                    address_index, limit=max_addresses, branch_index=addr_type
-                ):
-
-                    pos_str = str(address_index) + "." + " "  # thin space
-                    qr_title = pos_str + addr
-                    items.append(
-                        (
-                            self.fit_to_line(addr, pos_str, fixed_chars=3),
-                            lambda address=addr, title=qr_title: self.show_address(
-                                address, title
-                            ),
-                        )
-                    )
-
-                    address_index += 1
-
+        loading_txt = (
+            t("Loading change addresses..")
+            if addr_type == 1
+            else t("Loading receive addresses..")
+        )
+        max_addresses = self.ctx.display.max_menu_lines() - 3
+        address_index = 0
+        while True:
+            items = []
+            if address_index >= max_addresses:
                 items.append(
                     (
-                        "%d..%d" % (address_index, address_index + max_addresses - 1),
+                        "%d..%d" % (address_index - max_addresses, address_index - 1),
                         lambda: MENU_EXIT,
                     )
                 )
-                items.append((t("Back"), lambda: MENU_EXIT))
 
-                submenu = Menu(self.ctx, items)
-                stay_on_this_addr_menu = True
-                while stay_on_this_addr_menu:
-                    index, _ = submenu.run_loop()
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(loading_txt)
+            addresses = self.ctx.wallet.obtain_addresses(
+                address_index, limit=max_addresses, branch_index=addr_type
+            )
+            for addr in addresses:
+                pos_str = str(address_index) + ". "  # . + thin space
+                qr_title = pos_str + addr
+                items.append(
+                    (
+                        self.fit_to_line(addr, pos_str, fixed_chars=3),
+                        lambda address=addr, title=qr_title: self.show_address(
+                            address, title
+                        ),
+                    )
+                )
+                address_index += 1
 
-                    # Back
-                    if index == len(submenu.menu) - 1:
-                        del submenu, items
-                        gc.collect()
-                        return MENU_CONTINUE
-                    # Next
-                    if index == len(submenu.menu) - 2:
-                        stay_on_this_addr_menu = False
-                    # Prev
-                    if index == 0 and address_index > max_addresses:
-                        stay_on_this_addr_menu = False
-                        address_index -= 2 * max_addresses
+            items.append(
+                (
+                    "%d..%d" % (address_index, address_index + max_addresses - 1),
+                    lambda: MENU_EXIT,
+                )
+            )
+            items.append((t("Back"), lambda: MENU_EXIT))
 
-        return MENU_CONTINUE
+            submenu = Menu(self.ctx, items)
+            stay_on_this_addr_menu = True
+            while stay_on_this_addr_menu:
+                index, _ = submenu.run_loop()
+
+                if index == len(submenu.menu) - 1:  # Back
+                    del submenu, items
+                    gc.collect()
+                    return MENU_CONTINUE
+                if index == len(submenu.menu) - 2:  # Next
+                    stay_on_this_addr_menu = False
+                if index == 0 and address_index > max_addresses:  # Prev
+                    stay_on_this_addr_menu = False
+                    address_index -= 2 * max_addresses
 
     def show_address(self, addr, title="", quick_exit=False):
         """Show addr provided as a QRCode"""
@@ -137,10 +131,6 @@ class Addresses(Page):
 
     def pre_scan_address(self):
         """Handler for the 'scan address' menu item"""
-        # only show address for single-sig or multisig with wallet output descriptor loaded
-        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
-            self.flash_error(t("Please load a wallet output descriptor"))
-            return MENU_CONTINUE
 
         submenu = Menu(
             self.ctx,
