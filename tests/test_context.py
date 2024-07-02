@@ -17,8 +17,10 @@ def test_init(mocker, m5stickv):
 def test_clear(mocker, m5stickv):
     mock_modules(mocker)
     from krux.context import Context
+    from krux.wallet import Wallet
 
     c = Context()
+    c.wallet = Wallet(None)
 
     c.clear()
 
@@ -37,19 +39,6 @@ def test_clear_clears_printer(mocker, m5stickv):
 
     assert c.wallet is None
     c.printer.clear.assert_called()
-
-
-def test_clear_clears_wallet(mocker, m5stickv):
-    mock_modules(mocker)
-    from krux.context import Context
-    from krux.wallet import Wallet
-
-    c = Context()
-    c.wallet = Wallet(None)
-
-    c.clear()
-
-    assert c.wallet is None
 
 
 def test_is_logged_in(mocker, m5stickv):
