@@ -41,9 +41,9 @@ SPEND = 2
 class Counter(dict):
     """Helper class for dict"""
 
-    def __missing__(self, key):
+    def __getitem__(self, key):
         """Avoids error when key is missing"""
-        return 0
+        return self.get(key, 0)
 
 
 class PSBTSigner:
