@@ -28,6 +28,7 @@ from .baseconv import base_decode
 from .krux_settings import t
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
+from .sats_vb import SatsVB
 
 # PSBT Output Types:
 CHANGE = 0
@@ -35,6 +36,14 @@ SELF_TRANSFER = 1
 SPEND = 2
 
 # We always uses thin spaces after the ₿ in this file
+
+
+class Counter(dict):
+    """Helper class for dict"""
+
+    def __getitem__(self, key):
+        """Avoids error when key is missing"""
+        return self.get(key, 0)
 
 
 class PSBTSigner:
@@ -260,9 +269,12 @@ class PSBTSigner:
         resume_spend_str = ""
         resume_self_or_change_str = ""
 
+        output_policy_count = Counter()
+
         xpubs = self.xpubs()
         for i, out in enumerate(self.psbt.outputs):
             out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs)
+            output_policy_count[out_policy["type"]] += 1
             output_type = self._classify_output(out_policy, i, out)
 
             if output_type == CHANGE:
@@ -314,6 +326,12 @@ class PSBTSigner:
             )
 
         fee = inp_amount - spend_amount - self_amount - change_amount
+        satvb = fee / SatsVB.get_vbytes(
+            self.policy,
+            output_policy_count,
+            len(self.psbt.inputs),
+            len(self.psbt.outputs),
+        )
 
         # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
         fee_percent = max(
@@ -328,6 +346,8 @@ class PSBTSigner:
             + " ("
             + replace_decimal_separator("%.1f" % fee_percent)
             + "%)"
+            + (" ~%.1f" % satvb)
+            + " sat/vB"
         )
 
         messages = []
