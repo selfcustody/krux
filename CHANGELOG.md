@@ -61,7 +61,7 @@ Krux will now sign PSBTs even if a fingerprint is not properly set on the coordi
 Krux will detect and warn the user in case arithmetic progression patterns in dice rolls by evaluating Shannon's entropy of the rolls derivative.
 
 ### Optimized SD Card Signing
-Better suited for large transactions, SD card signing is now more RAM efficient, allowing transactions with more than 100 inputs or outputs to be signed in less than a minute.
+Better suited for large transactions, SD card signing is now more RAM efficient, allowing transactions with  100 inputs or more to be signed in less than a minute.
 
 ### Stand Alone Verifiable Signed PSBTs
 Signed PSBT QR codes and SD card files now contain all the required data to verify the signatures without needing the original, unsigned PSBT.
