@@ -1,16 +1,15 @@
 include _load-12-word-mnemonic.txt
-press BUTTON_A
-wait 1
 
-# Navigate to Wallet
-x3 press BUTTON_B
-press BUTTON_A
+# Navigate to Wallet Descriptor
+x2 press BUTTON_B
+x2 press BUTTON_A
 
 screenshot wallet-load-prompt.png
 
-press BUTTON_A
+#Load from QR code
+x2 press BUTTON_A
 qrcode specter-desktop-singlesig-wallet.png
-wait 0.5
+wait 0.1
 
 screenshot wallet-wpkh-load-prompt.png
 

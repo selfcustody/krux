@@ -52,9 +52,8 @@ poetry run python simulator.py --sequence sequences/home-options.txt  --device $
 poetry run python simulator.py --sequence sequences/encrypt-mnemonic.txt --sd --device $device
 poetry run python simulator.py --sequence sequences/extended-public-key-wpkh.txt  --device $device
 poetry run python simulator.py --sequence sequences/extended-public-key-wsh.txt  --device $device
-poetry run python simulator.py --sequence sequences/wallet-wsh.txt  --device $device
-poetry run python simulator.py --sequence sequences/wallet-wpkh.txt  --device $device
-poetry run python simulator.py --sequence sequences/wallet-type-options.txt  --device $device
+poetry run python simulator.py --sequence sequences/wallet-descriptor-wsh.txt  --device $device
+poetry run python simulator.py --sequence sequences/wallet-descriptor-wpkh.txt  --device $device
 poetry run python simulator.py --sequence sequences/scan-address.txt --device $device
 poetry run python simulator.py --sequence sequences/list-address.txt --device $device
 poetry run python simulator.py --sequence sequences/sign-psbt.txt  --sd --device $device

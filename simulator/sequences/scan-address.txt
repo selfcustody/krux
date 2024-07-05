@@ -1,13 +1,11 @@
 include _load-12-word-mnemonic.txt
-press BUTTON_A
-wait 1
 
 # Navigate to Scan Address
-x4 press BUTTON_B
+x3 press BUTTON_B
 x3 press BUTTON_A
 
 qrcode specter-desktop-singlesig-wallet-receive-address.png
-wait 0.5
+wait 0.1
 
 screenshot scan-address-scanned-address.png
 
@@ -15,7 +13,7 @@ press BUTTON_A
 
 press BUTTON_A
 
-wait 1
+wait 0.1
 # screenshot scan-address-valid-address.png
 
 press BUTTON_A
@@ -23,7 +21,7 @@ press BUTTON_A
 press BUTTON_A
 
 qrcode invalid-receive-address.png
-wait 0.5
+wait 0.1
 
 press BUTTON_A
 
@@ -32,6 +30,7 @@ press BUTTON_A
 # screenshot scan-address-searching.png
 
 press BUTTON_B
+press_amigo_only BUTTON_A
 
 # screenshot scan-address-invalid-address.png
 

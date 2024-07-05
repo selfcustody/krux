@@ -5,7 +5,7 @@ x3 press BUTTON_B
 press BUTTON_A
 
 # Wipe Device
-x4 press BUTTON_B
+x5 press BUTTON_B
 press BUTTON_A
 
 screenshot wipe-device.png

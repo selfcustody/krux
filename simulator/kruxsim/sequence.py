@@ -28,7 +28,7 @@ from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
 
 COMMANDS = ["press", "press_amigo_only", "touch", "qrcode", "screenshot", "wait", "include", "x"]
-THREAD_PERIOD = 0.1
+THREAD_PERIOD = 0.05
 
 
 class SequenceExecutor:
@@ -77,6 +77,9 @@ class SequenceExecutor:
             elif cmd == "wait":
                 self.command_timer += float(params[0])
                 self.command_fn = self.wait
+
+        # Pause this thread to give other threads time to execute
+        time.sleep(THREAD_PERIOD)
 
     def press_key(self):
         key = self.command_params[0]
