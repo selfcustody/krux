@@ -21,34 +21,4 @@ Help others get to know Krux.
 
 ### Donations
 
-Krux won't ask for, receive, manage or distribute donations. Instead, you can donate directly to a Krux contributor of your choice below:
-
-**Firmware: Odudex, Tadeu, JD**
-
-**Krux-Installer: qlrd**
-
-✅ Odudex
-
-🔗 bc1q5jqsrc76xd94jz6ad996jy59ye3kn0j26j0gcy
-
-⚡️ odudex@zeuspay.com
-
-✅ Tadeu
-
-🔗 bc1qqrmsnz8gejge2pk4g5w7srpr8ta3p8q7vds9ma
-
-⚡️ tads@getalby.com
-
-✅ JD
-
-🔗  bc1qs2p23wl6yzm33udp8sxm3xm8nqzath5wet0h0s
-
-⚡️ jdlcdl@ln.tips
-
-✅ qlrd
-
-🔗 bc1qdlzrc4sslcx9y0t48u3gcpfytyc8pw3acngk7k
-
-⚡️ qlrddev@getalby.com
-
-**₿**
+Krux won't ask for, receive, manage or distribute donations. You can donate directly to a Krux contributor of your choice.
