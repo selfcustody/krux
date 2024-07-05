@@ -1,48 +1,24 @@
 ## Is Krux a hardware wallet?
+The term "hardware wallet" typically refers to devices dedicated to storing private keys and signing transactions. These devices often feature specific security components like secure element chips.
 
-No, Krux is a bitcoin wallet which is called a hardware signer. A hardware wallet is able to sign and broacast the transaction. Whereas, a hardware signer device, for security purposes, remains offline and only signs the `PSBT` (partially-signed-bitcoin-transaction). Using QR codes, hardware signers are used in conjuction with wallet coordinators which are able to broadcast the `PSBT` QR codes from Krux. For example, [Sparrow Wallet](https://sparrowwallet.com/) for desktop or [Nunchuk](https://nunchuk.io/) for mobile. 
+Krux was initially developed as a signer, operating exclusively in amnesic mode, which requires users to load their keys each time the device is powered on. However, Krux has evolved and now offers the option to store mnemonics, similar to traditional hardware wallets. These mnemonics can be stored in the device's internal memory or on SD cards.
 
-## Derivation Paths
+Krux does not include hardware secure elements. The security of stored data relies on encryption.
 
-Imagine your bitcoin wallet is like a treasure chest with many compartments, each needing a special key to open.
+Note: Due to the inherent fragility of electronic components, never use your Krux device or SD card encrypted storage as your sole backup method. Always maintain a physical backup for added security.
 
-- **Extended Public Key (XPUB)**: This is like a main key that allows you to derive public keys but not private keys.
+## What is Beta version?
+The Beta version includes the latest and most experimental features, which we occasionally share on our social media. These can be found exclusively in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Use and flash the beta firmware if you are curious about new features or want to participate in the development process by hunting bugs, providing feedback, and sharing ideas in our Telegram groups or other social media platforms.
 
-- **Derivation Path**: Think of it as a set of instructions that tells you how to find a specific public key to open a compartment, including the script type (like BIP44, BIP49, or BIP84).
+For regular use, flash the official releases, which are signed, thoroughly tested, and well-documented.
 
-**Example**:
+## What is Krux Android app?
 
-- **Extended Public Key (XPUB)**: `xpub6BosfCnifzxcF.......SoekkudhUd9yLb6qx39T9nMdj`
-- **Derivation Path (BIP44)**: `m/44'/0'/0'/0/1`
+### How can I find it?
+The Krux Android app is available as an APK in the [test (beta) repository](https://github.com/odudex/krux_binaries/tree/main/Android). It requires Android 6.0 or above.
 
-In this example the derivation path `m/44'/0'/0'/0/1` tells you how to find the public key to open the second compartment (`1`) in the first level (`0`) of your treasure chest, following the BIP44 standard.
+### How can I install it?
+The APK is not available on the Play Store. You can download the APK directly or transfer it to your Android device via SD card or USB cable. To install it, you may need to configure your Android device to allow installations from unknown sources.
 
-Derivation paths help organize and manage different parts of your bitcoin securely, like different compartments in a treasure chest, according to specific standards like BIP44, BIP49, or BIP84.
-
-## Descriptors
-
-The `xpub` that Krux displays follows the [bitcoin core descriptors spec](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md/#key-origin-identification) and includes key origin and [derivation path](https://selfcustody.github.io/krux/faq/#derivation-path) info. Descriptors allow you to import and export seeds and keys. That's useful if you want to move between different wallets, and create backups. 
-
-**Extended Public Key (XPUB) [examples](https://github.com/satoshilabs/slips/blob/master/slip-0132.md#bitcoin-test-vectors):**
-
->`xpub6BosfCnifzxcF.......SoekkudhUd9yLb6qx39T9nMdj`
->>`ypub6Ww3ibxVfGzLr.......WxHcrArf3zbeJJJUZPf663zsP`
->>>`zpub6rFR7y4Q2AijB.......DKf31mGDtKsAYz2oz2AGutZYs`
-
-
-**Extended Descriptor example:**
-
-> `[d34db33f/44'/0'/0']xpub6ERApfZwUNrhL.......rBGRjaDMzQLcgJvLJuZZvRcEL/0/*`
-
-
-However, in practice not all wallet software supports this extended format, so Krux still provides a `zpub` as a fallback.
-
-For more information, check out https://bitcoindevkit.org/descriptors/#descriptors.
-
-## Beta version?
-
-The latest and most experimental features, which we sometimes share on our social media, can be found only in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Only official releases are signed, Test or Beta is just for trying new things and providing feedback.
-
-## Android app?
-
-Krux Android app is available as an `apk` on the [test (beta) repository](https://github.com/odudex/krux_binaries/) (requires Android 6.0 or above).
+### Is it safe to use?
+The Krux Android app is designed for learning about Krux and Bitcoin air-gapped transactions. Due to the numerous potential vulnerabilities inherent in smartphones, such as the lack of control over the operating system, libraries, and hardware peripherals, the Krux app should NOT be used to manage wallets containing savings or important keys and mnemonics. For secure management of your keys, a dedicated device is recommended.

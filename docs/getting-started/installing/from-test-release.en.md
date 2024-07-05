@@ -7,7 +7,7 @@ Keep in mind that these are unsigned binaries.
 Download experimental compiled firmware or the Android app `apk` from our [test (beta) repository](https://github.com/odudex/krux_binaries).
 
 #### Android
-Krux Android app is intended for learning about Krux and Bitcoin airgapped transactions (requires Android 6.0 or above). Vulnerabilities inherent to Android phones such as the OS, other apps and wireless / CDMA / GSM / Bluetooth connectivity make using any phone insecure. Krux app should NOT be used to manage savings or important keys and mnemonics. For that, a dedicated device is recommended.
+The Krux Android app is designed for learning about Krux and Bitcoin air-gapped transactions. Due to the numerous potential vulnerabilities inherent in smartphones, such as the lack of control over the operating system, libraries, and hardware peripherals, the Krux app should NOT be used to manage wallets containing savings or important keys and mnemonics. For secure management of your keys, a dedicated device is recommended. [More](../../faq.md#what-is-krux-android-app)
 
 #### Compiled firmware for Kendryte K210 devices
 #### M5StickV
