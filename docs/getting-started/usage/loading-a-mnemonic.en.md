@@ -95,7 +95,7 @@ You can retrieve mnemonics previously stored on device's internal flash or exter
 
 <div style="clear: both"></div>
 
-## Wallet loading sequence
+## Wallet Loading
 
 ### Confirm Mnemonic Words
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-125.png" align="right">
@@ -105,29 +105,71 @@ Once you have entered your mnemonic, you will be presented with the full list of
 
 <div style="clear: both"></div>
 
-### Passphrase
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-passphrase-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-passphrase-150.png" align="right">
+### Confirm Wallet Attributes
 
-After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes if your device has a touchscreen. For scanning, you can also create a QR code from your offline passphrase in [Tools](../features/tools.md/#create-qr-code).
+You will be present to a screen containing wallet attributes, if they are as expected just press `Load Wallet` and you'll be ready to use your loaded key.
 
-<div style="clear: both"></div>
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-125.png" align="bottom">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-150.png" align="bottom">
 
-### Fingerprint
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-fingerprint-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-fingerprint-150.png" align="right">
+#### Attributes
+
+**Fingerprint**
 
 The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.
 
+**Network**
+
+Check if you are loading a `Testnet` or `Mainnet` wallet.
+
+**Derivation Path**
+
+The derivation path is a sequence of numbers, or "nodes," that define the script type, network, and account index of your wallet.
+
+1. Script Type: The first number defines the script type. The default is 84', corresponding to a Native Segwit wallet. Other values include:
+
+    44' for Legacy
+
+    49' for Nested Segwit
+
+    48' for Multisig
+
+
+2. Network: The second number defines the network:
+
+    0' for Mainnet
+
+    1' for Testnet
+
+
+3. Account Index: The third number is the account index, with 0' being the default.
+
+For multisig wallets, a fourth node with the value 2' is added to the derivation path.
+
+**Passphrase**
+
+Informs if the wallet has a loaded passphrase.
+
+### Changing Wallet Attributes
+
+You can change any of the attributes while and after loading a wallet.
+It is also possible to chang default settings for `Network` and `Single/Multisig` on settings.
+
+#### Passphrase
+
+You can optionally choose to type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. For scanning, you can also create a QR code from your offline passphrase in [Tools](../features/tools.md/#create-qr-code).
+
 <div style="clear: both"></div>
 
-### Single-sig or Multisig
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-single-multi-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-single-multi-150.png" align="right">
+### Customize
 
-After loading your mnemonic and passphrase (optional), you will be asked if you want to use it as part of a `Single-sig` or `Multisig` wallet.
+<img src="../../../img/maixpy_m5stickv/wallet-customization-options-125.png" align="right">
+<img src="../../../img/maixpy_amigo/wallet-customization-options-150.png" align="right">
 
-Your choice here will subtly change the generated xpub that is used to set up your device in your wallet coordinator software. You can learn more about the difference in the following guides for using [single-sig](using-a-single-sig-wallet.md) and [multisig](using-a-multisig-wallet.md) wallets.
+Press `Customize` to open a menu where you can change the `Network`, `Single/Multisig`, `Script Type` and `Account`.
+
+
+<div style="clear: both"></div>
 
 Now, onto the main menu...
 

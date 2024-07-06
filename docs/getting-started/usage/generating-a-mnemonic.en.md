@@ -1,5 +1,6 @@
-Krux has support for creating 12 and 24-word mnemonic seed phrases. Since true entropy is difficult to produce, especially with an embedded device, we recommend to outsource entropy generation using dice rolls, but it is also possible to use camera as a source of entropy to quickly create a mnemonic.
-At the start screen, once you select `New Mnemonic`, you will be taken to a second menu where you can choose to create a mnemonic via camera, via rolls of a D6 (standard six-sided die) or D20 (20-sided die).
+Krux supports creating 12 and 24-word mnemonic seed phrases. Since generating true entropy is challenging, especially with an embedded device, we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
+
+At the start screen, after selecting New Mnemonic, you will be taken to a second menu where you can choose to create a mnemonic via the camera, words, rolls of a D6 (standard six-sided die), or a D20 (20-sided die).
 
 <img src="../../../img/maixpy_amigo/new-mnemonic-options-150.png">
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-options-125.png">
@@ -15,7 +16,7 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 
 <div style="clear: both"></div>
 
-### Image Entropy Quality Estimation
+#### Image Entropy Quality Estimation
 
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-entropy-estimation-125.png" align="right">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-entropy-estimation-150.png" align="right">
@@ -23,6 +24,11 @@ At the start screen, once you select `New Mnemonic`, you will be taken to a seco
 During image capture, entropy quality estimation is displayed to assist you in obtaining a high-quality image source for your key. After a snapshot is taken, Shannon's entropy and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation. It's important to note that these values serve as indicators or estimations of entropy quality, but they are not absolute entropy values in a cryptographic context.
 
 <div style="clear: both"></div>
+
+## Words
+
+Print the BIP39 word list in 3D or on paper, then cut out the words and place them in a bucket. Manually draw 11 or 23 words from the bucket.
+For the final word, Krux will assist you in picking a valid 12th or 24th word by adjusting its smart keypad to only allow typing words with a valid checksum. Alternatively, you can leave it empty, and Krux will select a final, valid checksum word for you.
 
 ## Dice Rolls
  
