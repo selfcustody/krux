@@ -115,38 +115,59 @@ You will be present to a screen containing wallet attributes, if they are as exp
 #### Attributes
 
 **Fingerprint**
+<p align="center">
+    <code>73c5da0a</code>
+</p>
 
 The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.
 
 **Network**
+<p align="center">
+    <code>Mainnet</code>
+</p>
 
 Check if you are loading a `Testnet` or `Mainnet` wallet.
 
-**Derivation Path**
+**Single/Multisig**
+<p align="center">
+    <code>Single-sig</code>
+</p>
 
-The derivation path is a sequence of numbers, or "nodes," that define the script type, network, and account index of your wallet.
+Check if you are loading a `Single-sig` or `Multisig` wallet.
+
+**Derivation Path**
+<p align="center">
+    <code>m/84'/0'/0'</code>
+</p>
+
+The derivation path is a sequence of numbers, or "nodes", that define the script type, network, and account index of your wallet.
 
 1. Script Type: The first number defines the script type. The default is 84', corresponding to a Native Segwit wallet. Other values include:
 
-    44' for Legacy
+    `44'` for Legacy
 
-    49' for Nested Segwit
+    `49'` for Nested Segwit
 
-    48' for Multisig
+    `86'` for Taproot
+
+    `48'` for Multisig
 
 
 2. Network: The second number defines the network:
 
-    0' for Mainnet
+    `0'` for Mainnet
 
-    1' for Testnet
+    `1'` for Testnet
 
 
-3. Account Index: The third number is the account index, with 0' being the default.
+3. Account Index: The third number is the account index, with `0'` being the default.
 
-For multisig wallets, a fourth node with the value 2' is added to the derivation path.
+For multisig wallets, a fourth node with the value `2'` is added to the derivation path.
 
 **Passphrase**
+<p align="center">
+    <code>No Passphrase</code>
+</p>
 
 Informs if the wallet has a loaded passphrase.
 
@@ -161,7 +182,7 @@ You can optionally choose to type or scan a BIP-39 passphrase. When typing, swip
 
 <div style="clear: both"></div>
 
-### Customize
+#### Customize
 
 <img src="../../../img/maixpy_m5stickv/wallet-customization-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/wallet-customization-options-150.png" align="right">

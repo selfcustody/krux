@@ -5,31 +5,20 @@ After entering your mnemonic, and loading a wallet, you will find yourself on Kr
 
 <div style="clear: both"></div>
 
-### Mnemonic
+### Backup Mnemonic
 <img src="../../../img/maixpy_m5stickv/backup-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-options-150.png" align="right">
 
-This will open a new submenu with the following options to backup your mnemonic. If you set a [printer driver](../../settings/#driver), it will also give the option to print the backup!
+This will open a new submenu with different types of backups. `QR Code` based, `Encrypted`  and `Other Formats`
+
+If you set a [printer driver](../../settings/#driver), it will also give the option to print them!
 
 <div style="clear: both"></div>
 
-#### Words
-<img src="../../../img/maixpy_m5stickv/backup-mnemonic-words-125.png" align="right">
-<img src="../../../img/maixpy_amigo/backup-mnemonic-words-150.png" align="right">
+#### QR Code
 
-Display the mnemonic words as text so you can write them down.
+- **Plaintext QR**
 
-<div style="clear: both"></div>
-
-#### Numbers
-<img src="../../../img/maixpy_m5stickv/backup-mnemonic-numbers-125.png" align="right">
-<img src="../../../img/maixpy_amigo/backup-mnemonic-numbers-150.png" align="right">
-
-Display the mnemonic word numbers in decimal, hex, or octal format.
-
-<div style="clear: both"></div>
-
-#### Plaintext QR
 <img src="../../../img/maixpy_m5stickv/backup-qr-plain-text-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-qr-plain-text-150.png" align="right">
 
@@ -37,7 +26,8 @@ Generate a QR containing the mnemonic words as regular text, where words are sep
 
 <div style="clear: both"></div>
 
-#### Compact SeedQR
+- **Compact SeedQR**
+
 <img src="../../../img/maixpy_m5stickv/backup-compact-qr-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-compact-qr-150.png" align="right">
 
@@ -45,7 +35,8 @@ A QR code is created from a binary representation of mnemonic words. Format crea
 
 <div style="clear: both"></div>
 
-#### SeedQR
+- **SeedQR**
+
 <img src="../../../img/maixpy_m5stickv/backup-seed-qr-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-seed-qr-150.png" align="right">
 
@@ -53,23 +44,15 @@ Words are converted to their BIP-39 numeric indexes, those numbers are then conc
 
 <div style="clear: both"></div>
 
-#### Stackbit 1248
-<img src="../../../img/maixpy_m5stickv/backup-stackbit-125.png" align="right">
-<img src="../../../img/maixpy_amigo/backup-stackbit-150.png" align="right">
+- **Encrypted QR Code**
 
-This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
+This option converts the encrypted mnemonic into a QR code. Enter an encryption key and, optionally, a custom ID. When you scan this QR code through "Load Mnemonic" -> "Via Camera" -> "QR Code," you will be prompted to enter the decryption key to load the mnemonic stored in it. Like any QR code, it can be printed if a thermal printer driver is set up.
 
-<div style="clear: both"></div>
-
-#### Tiny Seed
-<img src="../../../img/maixpy_m5stickv/backup-tiny-seed-125.png" align="right">
-<img src="../../../img/maixpy_amigo/backup-tiny-seed-150.png" align="right">
-
-This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format if a thermal printer driver is set.
+See this page to find out more about: [Krux Mnemonics Encryption](../../getting-started/features/encrypted-mnemonics.md).
 
 <div style="clear: both"></div>
 
-### Encrypt Mnemonic
+#### Encrypted
 <img src="../../../img/maixpy_m5stickv/home-encrypt-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/home-encrypt-options-150.png" align="right">
 
@@ -80,19 +63,52 @@ For convenience, you may choose to store the encrypted mnemonic on flash memory 
 When using any of the encryption methods, you will be prompted to enter an encryption key. This key can be provided in text or QR code format. Additionally, you have the option to set a custom ID for easier management of your mnemonics. If a custom key is not specified, the device's current loaded wallet fingerprint will be used as the ID.
 
 
-#### Store on Flash
+- **Store on Flash**
 
 This option stores the encrypted mnemonic in the device's flash memory. You can decrypt and load it later through the "Load Mnemonic" -> "From Storage" option.
 
-#### Store on SD Card
+- **Store on SD Card**
 
 If an SD card is available, this option stores the encrypted mnemonic on it. You can decrypt and load it later through the "Load Mnemonic" -> "From Storage" option.
 
-#### Encrypted QR Code
+- **Encrypted QR Code**
+It's another path for the same functionality present on QR Code backups, described above.
 
-This option converts the encrypted mnemonic into a QR code. When you scan this QR code through "Load Mnemonic" -> "Via Camera" -> "QR Code," you will be prompted to enter the decryption key to load the mnemonic stored in it. As any QR code, it can be printed if a thermal printer driver is set.
+#### Other Formats
 
-See this page to find out more about: [Krux Mnemonics Encryption](../../getting-started/features/encrypted-mnemonics.md).
+- **Words**
+<img src="../../../img/maixpy_m5stickv/backup-mnemonic-words-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-mnemonic-words-150.png" align="right">
+
+Display the mnemonic words as text so you can write them down.
+
+<div style="clear: both"></div>
+
+- **Numbers**
+<img src="../../../img/maixpy_m5stickv/backup-mnemonic-numbers-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-mnemonic-numbers-150.png" align="right">
+
+Display the mnemonic word numbers in decimal, hex, or octal format.
+
+<div style="clear: both"></div>
+
+
+
+<div style="clear: both"></div>
+
+- **Stackbit 1248**
+<img src="../../../img/maixpy_m5stickv/backup-stackbit-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-stackbit-150.png" align="right">
+
+This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
+
+<div style="clear: both"></div>
+
+- **Tiny Seed**
+<img src="../../../img/maixpy_m5stickv/backup-tiny-seed-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-tiny-seed-150.png" align="right">
+
+This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format if a thermal printer driver is set.
 
 <div style="clear: both"></div>
 
