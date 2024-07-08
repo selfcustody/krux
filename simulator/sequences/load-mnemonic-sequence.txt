@@ -12,7 +12,16 @@ press BUTTON_A
 
 screenshot load-mnemonic-seq-overview.png
 
-# No passphrase
+press BUTTON_B
+press BUTTON_A
+
+screenshot passphrase-load-options.png
+
+# Leave passphrase
+press BUTTON_C
+press BUTTON_A
+
+# Go to Customization Options
 x2 press BUTTON_B
 press BUTTON_A
 

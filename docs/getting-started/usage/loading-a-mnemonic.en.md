@@ -178,7 +178,10 @@ It is also possible to chang default settings for `Network` and `Single/Multisig
 
 #### Passphrase
 
-You can optionally choose to type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. For scanning, you can also create a QR code from your offline passphrase in [Tools](../features/tools.md/#create-qr-code).
+<img src="../../../img/maixpy_m5stickv/passphrase-load-options-125.png" align="right">
+<img src="../../../img/maixpy_amigo/passphrase-load-options-150.png" align="right">
+
+You can type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. For scanning, you can also create a QR code from your offline passphrase in [Tools](../features/tools.md/#create-qr-code).
 
 <div style="clear: both"></div>
 
