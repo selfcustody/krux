@@ -27,6 +27,10 @@ Enter a text input to create, print or transcript a QR code that can be later us
 
 <div style="clear: both"></div>
 
+### Descriptor Addresses
+
+Verify if an address or list of addresses belong to a wallet without needing to load private keys. Simply load a trusted wallet descriptor from a QR code or SD card.
+
 ### Remove Mnemonic
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-150.png" align="right">

@@ -1,13 +1,8 @@
 This guide assumes you have already created a mnemonic. If that is not the case, head over to the [Generating a Mnemonic](generating-a-mnemonic.md) page and complete those steps first.
 
-When entering your mnemonic into Krux, make sure to select `Single-sig` before proceeding. The choice of `Single-sig` vs. `Multisig` at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
+When entering your mnemonic into Krux, make sure to `Single-sig` is set in wallet attributes before proceeding. The choice of `Single-sig` vs. `Multisig` will change the derivation path used to generate your master extended public key (xpub) which will affect how coordinator software handles it.
 
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-single-multi-125.png">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-single-multi-150.png">
-
-Selecting `Single-sig` will derive an xpub using the derivation path `m/84'/0'/0'` on mainnet and `m/84'/1'/0'` on testnet, which indicates to wallet software that a [Segregated Witness (Segwit) script type](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) should be used. For single-sig wallets, this script is `P2WPKH`, or just `wpkh`.
-
-**Note:** The load of the `Wallet Descriptor` step is unnecessary for signing PSBTs with Single-sig wallets since the script type (`wpkh`) and key are already known. However, this can be useful if you wish to [print a backup](../features/printing.md) of the wallet or want an additional sanity check.
+**Note:** The load of the `Wallet Descriptor` step is unnecessary for signing PSBTs with Single-sig wallets. However, this can be useful if you wish to save or [print a backup](../features/printing.md) of the wallet or want an additional sanity check.
 
 ## Specter Desktop
 ### Create the wallet

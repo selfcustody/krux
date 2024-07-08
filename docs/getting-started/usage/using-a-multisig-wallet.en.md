@@ -1,13 +1,14 @@
 This guide assumes you have already created a mnemonic for each cosigner that will be in your multisig wallet. If that is not the case, head over to the [Generating a Mnemonic](generating-a-mnemonic.md) page and complete those steps first.
 
-When entering your mnemonics into Krux, make sure to select `Multisig` for all keys in your multisignature scheme. The choice of `Single-sig` vs. `Multisig` at this point will change the derivation path used to generate your master extended public key (xpub) which will affect how wallet software handles it.
+When entering your mnemonics into Krux, make sure to set the "Multisig" attribute when loading keys to be used in multi-signature schemes. To do this, when presented with the wallet attributes screen, navigate to "Customize" -> "Single/Multisig" and choose "Multisig."
 
-<img src="../../../img/maixpy_m5stickv/wallet-type-options-multisig-125.png">
-<img src="../../../img/maixpy_amigo/wallet-type-options-multisig-150.png">
+You can change a loaded wallet to multisig or single-sig after the wallet is loaded by navigating to "Wallet" -> "Customize" -> "Single/Multisig."
+
+It's also possible to make multisig the default option when loading wallets by navigating to "Settings" -> "Default Wallet" -> "Multisig" and setting it to "True".
 
 Selecting `Multisig` will derive an xpub using the derivation path `m/48'/0'/0'/2'` on mainnet and `m/48'/1'/0'/2'` on testnet, which indicates to wallet software that a [Multisig Wallet script type](https://github.com/bitcoin/bips/blob/master/bip-0048.mediawiki) should be used, specifically the Native Segwit script `P2WSH`, or just `wsh`.
 
-**Note:** While not required, the load of the `Wallet Descriptor` is strongly recommended to load your multisig wallet into Krux before signing a PSBT as it will allow the device to verify that the transaction it is signing has the correct list of cosigners as defined in the wallet. It is also useful if you wish to [print a backup](../features/printing.md) of the wallet or visually inspect the list of cosigners being output by your wallet coordinator.
+**Note:** While not required, the load of the `Wallet Descriptor` is strongly recommended to load your multisig wallet into Krux before signing a PSBT as it will allow the device to verify that the transaction it is signing has the correct list of cosigners as defined in the wallet. It is also useful save or [print a backup](../features/printing.md) of the wallet later check addresses or visually inspect the list of cosigners being output by your wallet coordinator.
 
 ## Specter Desktop
 ### Create the wallet

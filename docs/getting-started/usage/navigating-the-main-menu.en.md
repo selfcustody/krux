@@ -193,7 +193,7 @@ Bitcoin BIP85, also known as the Deterministic Entropy From BIP32 Keychains, all
 
 Choose between a 12 or 24 words child then type the desired index to export a child mnemonic. After being presented to the new mnemonic, you can choose to load and use it right away.
 
-Please note passphrases will be removed when loading a BIP856 child.
+Please note passphrases will be removed when loading a BIP85 child.
 
 <div style="clear: both"></div>
 

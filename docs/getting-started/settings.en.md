@@ -3,7 +3,17 @@ In the Krux home menu, there is a `Settings` entry. Some submenu entries have to
 <img src="../../img/maixpy_amigo/settings-options-150.png">
 <img src="../../img/maixpy_m5stickv/settings-options-125.png">
 
-### Bitcoin - Network
+### Default Wallet
+
+Set the default attributes for wallet loading.
+
+#### Multisig
+
+Set this to true if you are more likely to use Krux for multisig setups. This way, you won't need to "Customize" your wallet attributes every time you load a key.
+
+<div style="clear: both"></div>
+
+#### Network
 <img src="../../img/maixpy_m5stickv/network-options-125.png" align="right">
 <img src="../../img/maixpy_amigo/network-options-150.png" align="right">
 
@@ -108,6 +118,17 @@ Here you can change Krux to your desired language.
 Choose between flash (device's internal memory) or SD card for the place where your settings will be stored.
 
 <div style="clear: both"></div>
+
+### Security
+Adjust settings that may impact your security protocols.
+
+#### Shutdown Time
+Set the time it takes for Krux to automatically shut down. This feature not only conserves your device's battery, if it has one, but also serves as an important security measure. If you forget your device with private keys loaded, it will shut down automatically after the set time.
+
+Please note that devices without batteries and power management will not shut down but will reboot instead, which is sufficient to unload private keys.
+
+#### Hide Mnemonics
+When "Hide Mnemonics" mode is set to "True", your device will not display private key data or backup tools when a key is loaded. It will only show public key information and allow signing operations.
 
 ### Appearance
 <img src="../../img/maixpy_m5stickv/settings-options-appearance-125.png" align="right">
