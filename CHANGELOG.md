@@ -1,5 +1,8 @@
 # Changelog 24.07.0 - July 15, 2024
 
+### Maix Cube Support
+The Maix Cube now has its first official release. This affordable and compact cube-shaped device, equipped with a built-in battery, is an excellent choice for those seeking a discreet option.
+
 ### Frozen Code - Speed and Security Improvement
 Krux now runs cross-compiled (frozen) Python code instead of real-time compiled code. The Python real-time compiler and REPL have been disabled.
 
@@ -40,7 +43,10 @@ Ensure you are signing for the correct multisig setup by inspecting PSBT's finge
 The loaded key's fingerprint is now shown in the status bar.
 
 ### Fee Percentage of Transaction
-Show the fee as a proportion of the transaction cost, warning if it is greater than 30%.
+Show the transaction's fee as a proportion of the transaction cost, warning if it is greater than 30%.
+
+### Sats/vB
+PSBT now displays an accurate estimation of the transaction’s fee rate.
 
 ### Brightness Control for Maix Cube and M5stickV
 Adjust backlight intensity for better viewing and scanning from your Cube or M5stickV.

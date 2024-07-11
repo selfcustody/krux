@@ -64,7 +64,7 @@ Since a D20 has more possible outcomes, the entropy is increased per roll to 4.3
 When you input your dice rolls, you'll see two progress bars filling up. The top progress bar shows how many rolls you've entered compared to the minimum number needed. The bottom progress bar shows the real-time calculated Shannon's entropy compared to the required minimum (128 bits for 12 words and 256 bits for 24 words). When the Shannon's entropy estimation reaches the recommended level, the progress bar will be full, and its frame will change color. If you've met the minimum number of rolls but the entropy estimation is still below the recommended level, a warning will appear, suggesting you add more rolls to increase entropy.
 Note: Similar to image entropy quality estimation, dice rolls Shannon's entropy serves as an indicator and should not be considered an absolute measure of cryptographic entropy.
 
-Learn more about [Krux Entropy Quality Estimation](../entropy.md)
+Learn more about [Krux Entropy Quality Estimation](../features/entropy.md)
 
 ### Stats for Nerds
 

@@ -66,7 +66,7 @@ See the correct port using the command line: `ls /dev/cu.usbserial*`, in the exa
 ./ktool-mac -B goE -b 1500000 maixpy_amigo/kboot.kfpkg -p /dev/cu.usbserial-10
 ```
 
-Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue. See [FAQ](../../faq.md/#why-isnt-my-device-charging-or-being-recognized-when-connected-to-the-computers-usb) for more info.
+Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue. See [Troubleshooting](../../troubleshooting.md/#device-not-charging-or-being-recognized) for more info.
 
 ----8<----
 tips-after-install.en.txt

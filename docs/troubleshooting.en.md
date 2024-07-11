@@ -141,3 +141,7 @@ You can toggle brightness of QR codes from public keys and PSBTs by pressing `PA
 In the future, more work will be done to support displaying lower density QR codes. If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays.
 
 For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes. You can also save the PSBT on a microSD card for Krux to sign and then save the signed transaction to the microSD card to transfer the file to the computer or phone.
+
+### Why Does Krux Say the Entropy of My Fifty Dice Rolls Does Not Contain 128 Bits of Entropy?
+
+Please check how [entropy measurement](getting-started/features/entropy.md) works.

@@ -2,7 +2,7 @@
 warning-printer.en.txt
 ----8<----
 
-Krux has the ability to print mnemonic backup (Words, Numbers, Tiny Seed template; but not Stackbit 1248) and any QR code (SeedQR, signed PSBT, Address, XPUB, Wallet output descriptor, ...) via a locally-connected TTL serial thermal printer. Consult the [parts list](../../parts.md/#optional-thermal-printer) page for supported printers.
+Krux has the ability to print mnemonic backup (Words, Numbers, Tiny Seed template; but not Stackbit 1248) and any QR code (SeedQR, signed PSBT, Address, XPUB, Wallet output descriptor, ...) via a locally-connected TTL serial thermal printer. Consult the [parts list](../../parts.md/#optional-ttl-serial-thermal-printer) page for supported printers.
 
 <img src="../../../img/maixpy_amigo/print-qr-printing-150.png">
 <img src="../../../img/maixpy_m5stickv/print-qr-printing-125.png">
@@ -23,7 +23,7 @@ Krux has the ability to print mnemonic backup (Words, Numbers, Tiny Seed templat
 <img src="../../../img/maixpy_m5stickv/print-qr-prompt-125.png" align="right">
 <img src="../../../img/maixpy_amigo/print-qr-prompt-150.png" align="right">
 
-Once enabled the printer driver to thermal in the [Krux settings](./getting-started/settings.md/#thermal), all screens that display a QR code will offer the option to `Print to QR`. Other formats of mnemonic backup will also ask if you want to `Print to QR?`. 
+Once enabled the printer driver to thermal in the [Krux settings](../settings.md/#thermal), all screens that display a QR code will offer the option to `Print to QR`. Other formats of mnemonic backup will also ask if you want to `Print to QR?`. 
 
 There are many ways you can use this functionality, including:
 
