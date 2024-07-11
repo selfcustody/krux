@@ -1,6 +1,9 @@
 markdown_extensions:
   - attr_list
   - meta
+  - admonition
+  - pymdownx.arithmatex
+  - pymdownx.mark
   - toc:
       permalink: true
   - pymdownx.mark
@@ -14,8 +17,14 @@ markdown_extensions:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML
+
 extra_css:
   - css/custom.css
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.css
 
 theme:
   name: material
