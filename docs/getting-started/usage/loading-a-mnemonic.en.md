@@ -1,4 +1,4 @@
-Once you have either a 12- or 24-word mnemonic, choose `Load Mnemonic` on Krux's start menu, and you will be presented with several input methods:
+Once you have either a 12- or 24-word BIP-39 mnemonic, choose `Load Mnemonic` on Krux's start menu, and you will be presented with several input methods:
 
 <img src="../../../img/maixpy_amigo/load-mnemonic-options-150.png">
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-options-125.png">
@@ -48,10 +48,6 @@ Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) 
 
 Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
 
-----8<----
-12th-24th-word-generate.en.txt
-----8<----
-
 <div style="clear: both"></div>
 
 #### Word Numbers
@@ -59,15 +55,10 @@ Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossi
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-150.png" align="right">
 
 ##### Decimal
-Enter each word of your BIP-39 mnemonic as a number from 1 to 2048 one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
+Enter each word of your BIP-39 mnemonic as a number (1-2048) one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
 
 ##### Hexadecimal and Octal
 You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal format, with values ranging from 0x1 to 0x800, or in octal format, with values ranging from 01 to 04000. This is useful with some metal plate backups that uses those formats.
-
-##### Final checksum word
-----8<----
-12th-24th-word-generate.en.txt
-----8<----
 
 <div style="clear: both"></div>
 
@@ -107,7 +98,7 @@ Once you have entered your mnemonic, you will be presented with the full list of
 
 ### Confirm Wallet Attributes
 
-You will be present to a screen containing wallet attributes, if they are as expected just press `Load Wallet` and you'll be ready to use your loaded key.
+You will be presented with a screen containing wallet attributes, if they are as expected just press `Load Wallet` and you'll be ready to use your loaded key.
 
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-125.png" align="bottom">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-150.png" align="bottom">
@@ -119,7 +110,7 @@ You will be present to a screen containing wallet attributes, if they are as exp
     <code>73c5da0a</code>
 </p>
 
-The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.
+The BIP-32 master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.
 
 **Network**
 <p align="center">
@@ -173,8 +164,8 @@ Informs if the wallet has a loaded passphrase.
 
 ### Changing Wallet Attributes
 
-You can change any of the attributes while and after loading a wallet.
-It is also possible to chang default settings for `Network` and `Single/Multisig` on settings.
+You can change any of the attributes before and after loading a wallet.
+It is also possible to change default settings for `Network` and `Single/Multisig` on settings.
 
 #### Passphrase
 

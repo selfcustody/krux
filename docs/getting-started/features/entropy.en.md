@@ -44,7 +44,7 @@ When calculating the entropy of dice rolls, the difference between real and theo
 
 The theoretical entropy calculation assumes that the dice are perfectly fair, meaning each face has an equal probability of landing face up.
 
-Consider a fair six-sided die. The possible outcomes when rolling one die are {1, 2, 3, 4, 5, 6}, each with an equal probability of $\frac{1}{6} $.
+Consider a fair six-sided die. The possible outcomes when rolling one die are {1, 2, 3, 4, 5, 6}, each with an equal probability of $\frac{1}{6}$.
 
 1. **Single Die Roll:**
    - Each outcome has a probability $p_i = \frac{1}{6}$.
@@ -64,12 +64,11 @@ $$
    - For multiple dice, the entropy increases as the number of possible outcomes increases. For $k$ fair dice, the number of possible outcomes is $6^k$.
    - The entropy $S$ for $k$ dice is:
 
-     $S = \log_2(6^k) = k \log_2(6) \approx 2.585k \text{ bits} $
+     $S = \log_2(6^k) = k \log_2(6) \approx 2.585k \text{ bits}$
 
-   
-   For example, entropy for the roll of 50 fair dice is calculated as:
+   - For example, entropy for the roll of 50 fair dice is calculated as:
 
-     $S = \log_2(6^{50}) = 50 \log_2(6) \approx 2.585 \times 50 \approx 129.25 \text{ bits} $
+     $S = \log_2(6^{50}) = 50 \log_2(6) \approx 2.585 \times 50 \approx 129.25 \text{ bits}$
 
    This calculation assumes that every outcome (each face of the die) has an equal likelihood, leading to a uniform distribution.
 

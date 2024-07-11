@@ -80,7 +80,7 @@ It's another path for the same functionality present on QR Code backups, describ
 <img src="../../../img/maixpy_m5stickv/backup-mnemonic-words-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-mnemonic-words-150.png" align="right">
 
-Display the mnemonic words as text so you can write them down.
+Display the BIP-39 mnemonic words as text so you can write them down.
 
 <div style="clear: both"></div>
 
@@ -88,7 +88,7 @@ Display the mnemonic words as text so you can write them down.
 <img src="../../../img/maixpy_m5stickv/backup-mnemonic-numbers-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-mnemonic-numbers-150.png" align="right">
 
-Display the mnemonic word numbers in decimal, hex, or octal format.
+Display the BIP-39 mnemonic word numbers (1-2048) in decimal, hex, or octal format.
 
 <div style="clear: both"></div>
 
@@ -130,17 +130,17 @@ Always prefer to import extended public keys directly from Krux when setting up 
 <div style="clear: both"></div>
 
 ### Wallet
-Here you can load view and save wallet descriptors, add or change passphrases, customize wallet's attributes,  generate and load a BIP85 child mnemonics.
+Here you can load view and save wallet descriptors, add or change passphrases, customize wallet's attributes, generate and load a BIP85 child mnemonic.
 
 #### Wallet Descriptor
 
-A Bitcoin Wallet Output Descriptor defines a set of addresses in a wallet. It includes the following information:
+A Bitcoin Wallet Output Script Descriptor defines a set of addresses in a wallet. It includes the following information:
 
 - Script Type: Specifies the type of script (e.g., P2PKH, P2SH, P2WPKH).
 
-- Derivation Path: Defines the path used to derive keys.
+- Origin Info: Defines the master fingerprint and derivation path used to derive keys.
 
-- Public Keys or Extended Public Keys: Includes xPub, yPub, zPub.
+- Extended Public Keys: usually represented as an xpub, but could be ypub, zpub, etc.
 
 Output descriptors standardize how wallets generate addresses, ensuring compatibility and security. They help wallets and other software understand how to derive and verify the addresses used in transactions.
 
@@ -178,7 +178,7 @@ Don't forget to verify the resulting fingerprint in the status bar to ensure you
 <img src="../../../img/maixpy_m5stickv/wallet-customization-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/wallet-customization-options-150.png" align="right">
 
-Here you are presented to the exact same customization options you have while loading a key and wallet. You can change the Network, Single/Multisig, Script Type and account. [More about wallet attributes](./loading-a-mnemonic.md/#attributes)
+Here you are presented to the exact same customization options you have while loading a key and wallet. You can change the Network, Single/Multisig, Script Type and Account. [More about wallet attributes](./loading-a-mnemonic.md/#attributes)
 
 <div style="clear: both"></div>
 

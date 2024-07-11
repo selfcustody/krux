@@ -23,7 +23,7 @@ Krux has the ability to print mnemonic backup (Words, Numbers, Tiny Seed templat
 <img src="../../../img/maixpy_m5stickv/print-qr-prompt-125.png" align="right">
 <img src="../../../img/maixpy_amigo/print-qr-prompt-150.png" align="right">
 
-Once enabled the printer driver to thermal in the [Krux settings](../settings.md/#thermal), all screens that display a QR code will offer the option to `Print to QR`. Other formats of mnemonic backup will also ask if you want to `Print to QR?`. 
+Once a thermal printer and driver have been enabled in [Krux settings](../settings.md/#thermal), all screens that display a QR code will offer the option to `Print to QR`. Other formats of mnemonic backup will also ask if you want to `Print to QR?`. 
 
 There are many ways you can use this functionality, including:
 

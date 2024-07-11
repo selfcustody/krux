@@ -1,4 +1,4 @@
-Krux supports creating 12 and 24-word mnemonic seed phrases. Since generating true entropy is challenging, especially with an embedded device, we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
+Krux supports creating 12 and 24-word BIP-39 mnemonic seed phrases. Since generating true entropy is challenging, especially with an embedded device, we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
 
 At the start screen, after selecting New Mnemonic, you will be taken to a second menu where you can choose to create a mnemonic via the camera, words, rolls of a D6 (standard six-sided die), or a D20 (20-sided die).
 
@@ -99,4 +99,4 @@ Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128
 
 ### How to verify
 
-Don't trust, verify. We encourage you not to trust any claim you cannot verify yourself. Therefore, there are wallets that use compatible algorithms to calculate the entropy derived from dice rolls. You can use the [SeedSigner](https://seedsigner.com/) or Coldcard hardware wallets, or even the [Bitcoiner Guide website](https://bitcoiner.guide/seed/), they share the same logic that Krux uses and will give the same mnemonic for the dice roll method.
+Don't trust, verify. We encourage you not to trust any claim you cannot verify yourself. Therefore, there are wallets that use compatible algorithms to calculate the entropy derived from dice rolls. You can use the [SeedSigner](https://seedsigner.com/) or [Coldcard](https://coldcard.com/) hardware wallets, or even the [Bitcoiner Guide website](https://bitcoiner.guide/seed/), they share the same logic that Krux uses and will give the same mnemonic for the dice roll method.
