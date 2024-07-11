@@ -1,4 +1,4 @@
-Krux supports creating 12 and 24-word mnemonic seed phrases. Since generating true entropy is challenging, especially with an embedded device, we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
+Krux supports creating 12 and 24-word BIP-39 mnemonic seed phrases. Since generating true entropy is challenging, especially with an embedded device, we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
 
 At the start screen, after selecting New Mnemonic, you will be taken to a second menu where you can choose to create a mnemonic via the camera, words, rolls of a D6 (standard six-sided die), or a D20 (20-sided die).
 

@@ -59,7 +59,7 @@ unzip kboot.kfpkg -d ./kboot/
 ```
 
 ### Flash the firmware onto the device
-Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `dock`, `bit` or `yahboom`:
+Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube`, `dock` or `yahboom`:
 ```bash
 # build firmware for DEVICE
 ./krux flash maixpy_DEVICE
