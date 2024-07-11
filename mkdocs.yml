@@ -81,6 +81,7 @@ nav:
       - SD Card Updates: getting-started/features/sd-card-update.en.md
       - Tools: getting-started/features/tools.en.md
       - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
+      - Empirical Entropy Measurement: getting-started/features/entropy.en.md
     - Settings: getting-started/settings.en.md
     - Navigation Overview: getting-started/navigation.en.md
   - Devices and Parts List: parts.en.md
@@ -90,8 +91,11 @@ nav:
   - Support the Project: support.en.md
 
 plugins:
-  - search
-  - i18n:
-      default_language: en
-      languages:
-        en: English
+ - search
+ - i18n:
+    docs_structure: suffix
+    languages:
+      - locale: en
+        default: true
+        name: English
+        build: true

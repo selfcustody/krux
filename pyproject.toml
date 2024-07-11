@@ -34,11 +34,10 @@ ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
 
 # Docs site dependencies. Optional extras
-mkdocs = { version = "^1.5.2", optional = true }
-mkdocs-material = { version = "^9.4.14", optional = true }
-urllib3 = "^2.1.0"  # Used by mkdocs-material, forces updated secure version
-mkdocs-static-i18n = { version = "^0.46", optional = true }
-pymdown-extensions = { version = "^10.0", optional = true }
+mkdocs = "^1.6.0"
+mkdocs-material = "^9.5.28"
+mkdocs-static-i18n = "^1.2.3"
+pymdown-extensions = "^10.8.1"
 
 # Simulator dependencies. Optional extras
 numpy = { version = "^1.25.2", optional = true }
@@ -51,11 +50,11 @@ pyzbar = { version = "^0.1.9", optional = true }
 pyserial = { version = "^3.5", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.1.1"
-pylint = "^2.12.2"
-pytest = "^8.1.1"
-pytest-cov = "^4.1.0"
-pytest-mock = "^3.12.0"
+black = "^24.4.2"
+pylint = "^3.2.5"
+pytest = "^8.2.2"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.17.0"
 poethepoet = "^0.24.4"
