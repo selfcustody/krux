@@ -68,6 +68,24 @@ To Flash Maix Bit run the following.
 .\ktool-win.exe -B goE -b 1500000 maixpy_bit\kboot.kfpkg
 ```
 
+#### Sipeed Maix Cube
+To Flash Maix Cube run the following.
+
+##### Linux
+```bash
+./ktool-linux -B goE -b 1500000 maixpy_cube/kboot.kfpkg
+```
+
+##### Mac
+```bash
+./ktool-mac -B goE -b 1500000 maixpy_cube/kboot.kfpkg
+```
+
+##### Windows
+```pwsh
+.\ktool-win.exe -B goE -b 1500000 maixpy_cube\kboot.kfpkg
+```
+
 #### Sipeed Maix Dock
 To Flash Maix Dock you need to pass the `-B dan` parameter.
 
