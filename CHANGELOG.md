@@ -78,6 +78,9 @@ Recent Yahboom K210 devices (ver:1.1) come with the GC2145 camera instead of the
 ### Yahboom and Cube Devices Added to Simulator
 Simulator can now run as M5stickV, Amigo, Dock, Yahboom, and Cube.
 
+### Files sorted in SD file explorer
+The SD file explorer now sorts files in ascending order, showing directories first.
+
 # Changelog 24.03.0 - March 12, 2024
 
 ## Changes
