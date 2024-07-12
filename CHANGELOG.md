@@ -81,6 +81,9 @@ Simulator can now run as M5stickV, Amigo, Dock, Yahboom, and Cube.
 ### Files sorted in SD file explorer
 The SD file explorer now sorts files in ascending order, showing directories first.
 
+### Receive or change address now starts with the index 0
+Address explorer now shows receive and change address starting at index 0 instead of number 1.
+
 # Changelog 24.03.0 - March 12, 2024
 
 ## Changes
