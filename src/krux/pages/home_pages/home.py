@@ -330,8 +330,8 @@ class Home(Page):
         self.ctx.display.draw_centered_text(t("Processing ..."))
         outputs, fee_percent = signer.outputs()
 
-        # Warn if fees greater than 30% of what is spent
-        if fee_percent >= 30.0:
+        # Warn if fees greater than 10% of what is spent
+        if fee_percent >= 10.0:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Warning:")
