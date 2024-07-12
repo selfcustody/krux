@@ -84,6 +84,9 @@ The SD file explorer now sorts files in ascending order, showing directories fir
 ### Receive or change address now starts with the index 0
 Address explorer now shows receive and change address starting at index 0 instead of number 1.
 
+### Other Small Fixes and Code Optimizations
+Bugfixes, optimizations and code refactoring.
+
 # Changelog 24.03.0 - March 12, 2024
 
 ## Changes
