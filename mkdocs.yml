@@ -82,8 +82,8 @@ nav:
       - Generating a Mnemonic: getting-started/usage/generating-a-mnemonic.en.md
       - Loading a Mnemonic: getting-started/usage/loading-a-mnemonic.en.md
       - Navigating the Main Menu: getting-started/usage/navigating-the-main-menu.en.md
-      - Using a Single-sig Wallet: getting-started/usage/using-a-single-sig-wallet.en.md
-      - Using a Multisig Wallet: getting-started/usage/using-a-multisig-wallet.en.md
+      - Setting a Coordinator and Signing: getting-started/usage/setting-a-coordinator-and-signing.en.md
+      - Video Tutorials: getting-started/usage/video-tutorials.en.md
     - Features:
       - Encrypted Mnemonics: getting-started/features/encrypted-mnemonics.en.md
       - Printing: getting-started/features/printing.en.md
