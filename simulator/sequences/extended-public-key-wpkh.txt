@@ -2,6 +2,9 @@ include _load-12-word-mnemonic.txt
 
 # Navigate to Extended Public Key
 press BUTTON_B
+
+screenshot extended-public-key-selected.png
+
 press BUTTON_A
 
 screenshot extended-public-key-menu.png
@@ -16,6 +19,9 @@ press BUTTON_A
 
 # Enter to xpub QR code
 press BUTTON_B
+
+screenshot extended-public-key-xpub-qr-menu-selected.png
+
 press BUTTON_A
 
 # Give time to render QR code - slow computer?
