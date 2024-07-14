@@ -15,6 +15,11 @@ You can either do this manually or with the `krux` shell script, which contains 
 ./krux verify krux-vX.Y.Z.zip selfcustody.pem
 ```
 
+On Mac you may need to install `coreutils` to be able to use `sha256sum`
+```
+brew install coreutils
+```
+
 Fun fact: Each Krux release is signed with Krux!
 
 ### Flash the firmware onto the device
@@ -61,6 +66,11 @@ See the correct port at Device Manager > Ports (COM & LPT), in the example below
 ```
 
 ##### Mac
+Remove the Gatekeeper quarantine extended attribute from ktool-mac:
+```bash
+xattr -d com.apple.quarantine ktool-mac
+```
+
 See the correct port using the command line: `ls /dev/cu.usbserial*`, in the example below we use `/dev/cu.usbserial-10` (If the output isn't what you expect try a different cable, preferably a smartphone usb-c charger cable):
 ```bash
 ./ktool-mac -B goE -b 1500000 maixpy_amigo/kboot.kfpkg -p /dev/cu.usbserial-10
