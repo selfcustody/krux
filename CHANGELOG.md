@@ -64,13 +64,13 @@ The time to scan or display wallet addresses is now less than half compared to t
 Krux will now sign PSBTs even if a fingerprint is not properly set on the coordinator. Krux will still warn the user to set it correctly or use Krux-exported public keys to set their coordinators.
 
 ### Dice Rolls Pattern Detection
-Krux will detect and warn the user in case arithmetic progression patterns in dice rolls by evaluating Shannon's entropy of the rolls derivative.
+Krux warns the user if it suspects there are patterns within the actual rolls
 
 ### Optimized SD Card Signing
 Better suited for large transactions, SD card signing is now more RAM efficient, allowing transactions with +100 inputs to be signed in less than a minute.
 
 ### Stand Alone Verifiable Signed PSBTs
-Signed PSBT QR codes and SD card files now contain all the required data to verify the signatures without needing the original, unsigned PSBT.
+As required in BIP174, signed PSBT QR codes and SD card files now contain all the required data to verify the signatures without needing the original, unsigned PSBT.
 
 ### Camera Optimizations for Yahboom (ver:1.1) With GC2145 Camera
 Recent Yahboom K210 devices (ver:1.1) come with the GC2145 camera instead of the OV2640 (ver:1.0). Optimizations and features, such as anti-glare, have been added for the new camera.
