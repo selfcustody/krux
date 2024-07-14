@@ -14,6 +14,6 @@ Krux is an open-source firmware that transforms off-the-shelf Kendryte K210 devi
 
 Devices like the Maix Amigo and Yahboom come ready to use, with large touchscreens that make it easy and user-friendly to operate. These devices are ideal for those looking for a plug-and-play solution. On the other hand, Krux also supports development board kits, which are perfect for DIY enthusiasts who enjoy customizing and building their own hardware setups.
 
-Interacting seamlessly with leading coordinator wallets through QR codes, SD cards, and even thermal printers, the firmware is continuously evolving to become a Swiss Army knife for self-custody, offering an array of features to support transactions and backups in a user-friendly and airgapped environment.
+Interacting seamlessly with leading coordinator wallets through QR codes, SD cards, and even thermal printers, the user-friendly firmware offers unique features to support transactions and mnemonic backups in an offline environment.
 
 To learn more about Krux, check out [Getting Started](getting-started/index.md).
