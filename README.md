@@ -181,6 +181,8 @@ poetry run poe simulator --sequence sequences/home-options.txt --no-screenshot-s
 ```
 
 ## Live debug a device (Linux)
+It is not possible to drop into a live Python REPL anymore as we disabled the `MICROPY_ENABLE_COMPILER` flag in `firmware\MaixPy\components\micropython\port\include\mpconfigport.h`. If you enable it again it will be possible to drop into a live Python REPL by issuing an interrupt with Ctrl-C:
+
 If you've made a fresh build and flashed it to your device, you can connect to the device over serial connection with:
 ```bash
 screen /dev/tty.usbserial-device-name 115200
@@ -245,8 +247,6 @@ machine.reset()
 ```
 
 Now, with watchdog disabled, you can use debug the device normally. Also remember to disable the `Settings > Security > Shutdown Time` setting it to `0` to no more automatic resets, and if you added any print statements to the code, they should appear whenever your code is reached.
-
-It is not possible to drop into a live Python REPL anymore as we disabled the `MICROPY_ENABLE_COMPILER` flag in `firmware\MaixPy\components\micropython\port\include\mpconfigport.h`. If you enable it again it will be possible to drop into a live Python REPL by issuing an interrupt with Ctrl-C:
 
 ```bash
 Traceback (most recent call last):
