@@ -1,5 +1,32 @@
+import pytest
 from unittest import mock
 import pyqrcode
+import zlib
+
+
+class DeflateIO:
+    def __init__(self, stream) -> None:
+        self.stream = stream
+        self.data = stream.read()
+
+    def read(self):
+        return zlib.decompress(self.data, wbits=-10)
+
+    def write(self, input_data):
+        compressor = zlib.compressobj(wbits=-10)
+        compressed_data = compressor.compress(input_data)
+        compressed_data += compressor.flush()
+        self.stream.seek(0)  # Ensure we overwrite the stream from the beginning
+        self.stream.write(compressed_data)
+        self.stream.truncate()  # Remove any remaining part of the old data
+
+    def __enter__(self):
+        # Return the instance itself when entering the context
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # Handle cleanup here if necessary
+        pass
 
 
 def encode_to_string(data):
@@ -272,15 +299,13 @@ def board_m5stickv():
                 "display": {
                     "touch": False,
                     "font": [8, 14],
-                    "inverted_coordinates": False,
-                    "qr_colors": [16904, 61307],
                 },
             },
         }
     )
 
 
-def board_amigo_tft():
+def board_amigo():
     return mock.MagicMock(
         config={
             "type": "amigo",
@@ -323,8 +348,6 @@ def board_amigo_tft():
                 "display": {
                     "touch": True,
                     "font": [12, 24],
-                    "inverted_coordinates": True,
-                    "qr_colors": [0, 6342],
                 },
             },
         }
@@ -351,8 +374,39 @@ def board_dock():
                 "display": {
                     "touch": False,
                     "font": [8, 16],
-                    "inverted_coordinates": False,
-                    "qr_colors": [0, 6342],
+                },
+            },
+        }
+    )
+
+
+def board_cube():
+    return mock.MagicMock(
+        config={
+            "type": "cube",
+            "lcd": {"height": 240, "width": 240, "invert": 1, "lcd_type": 0},
+            "sdcard": {"sclk": 27, "mosi": 28, "miso": 26, "cs": 29},
+            "board_info": {
+                "BOOT_KEY": 16,
+                "LED_R": 13,
+                "LED_G": 12,
+                "LED_B": 14,
+                "MIC0_WS": 19,
+                "MIC0_DATA": 20,
+                "MIC0_BCK": 18,
+            },
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 10,
+                    "BUTTON_B": 16,
+                    "BUTTON_C": 11,
+                    "I2C_SDA": 27,
+                    "I2C_SCL": 24,
+                    "BACKLIGHT": 17,
+                },
+                "display": {
+                    "touch": False,
+                    "font": [8, 14],
                 },
             },
         }
@@ -380,6 +434,7 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(135 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=7),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
     elif board.config["type"] == "dock":
@@ -400,9 +455,10 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
-    elif board.config["type"].startswith("amigo"):
+    elif board.config["type"] == "amigo":
         return mocker.MagicMock(
             display=mocker.MagicMock(
                 font_width=12,
@@ -413,5 +469,27 @@ def mock_context(mocker):
                 usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
+            ),
+        )
+    elif board.config["type"] == "cube":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=None,
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=14,
+                total_lines=17,  # 240 / 14
+                width=mocker.MagicMock(return_value=240),
+                height=mocker.MagicMock(return_value=240),
+                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=7),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )

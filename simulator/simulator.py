@@ -26,6 +26,13 @@ import threading
 import pygame as pg
 from kruxsim import devices, events
 
+exec_folder = 'simulator'
+current_dir = os.getcwd()
+
+# check if is executing in exec_folder, if not, try to change to exec_folder
+if current_dir[len(current_dir) - len(exec_folder):] not in exec_folder:
+    os.chdir(exec_folder)
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--device",
@@ -92,6 +99,7 @@ from kruxsim.mocks import lcd
 from kruxsim.mocks import machine
 from kruxsim.mocks import image
 from kruxsim.mocks import pmu
+from kruxsim.mocks import deflate
 
 if args.printer:
     machine.simulate_printer()
@@ -122,6 +130,10 @@ def run_krux():
 
 # mock for SD
 if args.sd:
+    # create the sd folder if not exists
+    from krux.settings import SD_PATH
+    if not os.path.exists(SD_PATH):
+        os.makedirs(SD_PATH)
     from kruxsim.mocks import sd_card
 
 t = threading.Thread(target=run_krux)
@@ -135,35 +147,48 @@ pg.display.set_caption("Krux Simulator")
 
 device_image = devices.load_image(args.device)
 
-# Handle screenshots for docs scale
+# Scale screenshots for docs
 AMIGO_SIZE = (150, 252)
 M5STICKV_SIZE = (125, 247)
+DOCK_SIZE = (151, 258)
+YAHBOOM_SIZE = (156,220)
+CUBE_SIZE = (200,212)
 
+# Handle screenshots scale and alpha bg
+# When exporting the mask from GIMP uncheck "Save info about transparent pixels color"
 device_screenshot_size = AMIGO_SIZE
-if (args.device == devices.M5STICKV):
-    device_screenshot_size = M5STICKV_SIZE
-
-# Handle screenshots alpha bg
 mask_img = pg.image.load(
     os.path.join("assets", "maixpy_amigo_mask.png")
     ).convert_alpha()
 if (args.device == devices.M5STICKV):
+    device_screenshot_size = M5STICKV_SIZE
     mask_img = pg.image.load(
         os.path.join("assets", "maixpy_m5stickv_mask.png")
         ).convert_alpha()
+elif (args.device == devices.DOCK):
+    device_screenshot_size = DOCK_SIZE
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_dock_mask.png")
+        ).convert_alpha()
+elif (args.device == devices.YAHBOOM):
+    device_screenshot_size = YAHBOOM_SIZE
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_yahboom_mask.png")
+        ).convert_alpha()
+elif (args.device == devices.CUBE):
+    device_screenshot_size = CUBE_SIZE
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_cube_mask.png")
+        ).convert_alpha()
     
-# Handle screenshots filename suffix
+# Handle screenshots filename suffix when scaled
 from krux.krux_settings import Settings
 screenshot_suffix = ""
-if (args.screenshot_scale):
-    screenshot_suffix = "." + Settings().i18n.locale.split("-")[0]
-    if (args.device == devices.AMIGO):
-        screenshot_suffix = "-150" + screenshot_suffix
-    elif (args.device == devices.M5STICKV):
-        screenshot_suffix = "-125" + screenshot_suffix
+if args.screenshot_scale:
+    screenshot_suffix = "-" + str(device_screenshot_size[0]) + "." + Settings().i18n.locale.split("-")[0]
 
 
-if(args.device == devices.PC):
+if args.device == devices.PC:
     from kruxsim.mocks.board import BOARD_CONFIG
     BOARD_CONFIG["type"] = "amigo_like"
 
@@ -176,6 +201,31 @@ def shutdown():
 
     pg.quit()
     sys.exit()
+
+
+def update_screen():
+    if lcd.screen:
+        lcd_rect = lcd.screen.get_rect()
+        lcd_rect.center = buffer_image.get_rect().center
+        buffer_image.blit(lcd.screen, lcd_rect)
+
+    if device_image:
+        device_rect = device_image.get_rect()
+        device_rect.center = buffer_image.get_rect().center
+        buffer_image.blit(device_image, device_rect)
+
+    scaled_image = buffer_image
+    scaled_rect = scaled_image.get_rect()
+    scaled_rect.center = buffer_image.get_rect().center
+    if args.device == devices.M5STICKV:
+        scaled_image = pg.transform.smoothscale(
+            buffer_image, (screen.get_width() * 0.95, screen.get_height() * 0.85)
+        )
+        scaled_rect = scaled_image.get_rect()
+        scaled_rect.center = buffer_image.get_rect().center
+    screen.blit(scaled_image, scaled_rect)
+
+    pg.display.flip()
 
 
 try:
@@ -193,15 +243,20 @@ try:
                 shutdown()
             elif event.type >= pg.USEREVENT:
                 if event.type == events.SCREENSHOT_EVENT:
+                    SCREENSHOTS_DIR = "screenshots"
+                    if not os.path.exists(SCREENSHOTS_DIR):
+                        os.makedirs(SCREENSHOTS_DIR)
+
                     sub = screen.subsurface(devices.screenshot_rect(args.device)).convert_alpha()
                     sub.blit(mask_img, sub.get_rect(), None, pg.BLEND_RGBA_SUB)
                     if (args.screenshot_scale):
                         sub = pg.transform.smoothscale(sub, device_screenshot_size)
                     pg.image.save(
-                        sub, os.path.join("screenshots", event.dict["filename"].replace(".png", screenshot_suffix + ".png"))
+                        sub, os.path.join(SCREENSHOTS_DIR, event.dict["filename"].replace(".png", screenshot_suffix + ".png"))
                     )
                 else:
                     event.dict["f"]()
+                    update_screen()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_RETURN:
                     buttons.buttons_control.enter_event_flag = True
@@ -212,28 +267,5 @@ try:
             if event.type == pg.MOUSEBUTTONDOWN:
                 ft6x36.touch_control.trigger_event()
 
-
-        if lcd.screen:
-            lcd_rect = lcd.screen.get_rect()
-            lcd_rect.center = buffer_image.get_rect().center
-            buffer_image.blit(lcd.screen, lcd_rect)
-
-        if device_image:
-            device_rect = device_image.get_rect()
-            device_rect.center = buffer_image.get_rect().center
-            buffer_image.blit(device_image, device_rect)
-
-        scaled_image = buffer_image
-        scaled_rect = scaled_image.get_rect()
-        scaled_rect.center = buffer_image.get_rect().center
-        if args.device == devices.M5STICKV:
-            scaled_image = pg.transform.smoothscale(
-                buffer_image, (screen.get_width() * 0.95, screen.get_height() * 0.85)
-            )
-            scaled_rect = scaled_image.get_rect()
-            scaled_rect.center = buffer_image.get_rect().center
-        screen.blit(scaled_image, scaled_rect)
-
-        pg.display.flip()
 except KeyboardInterrupt:
     shutdown()

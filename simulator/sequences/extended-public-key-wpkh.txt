@@ -1,10 +1,10 @@
 include _load-12-word-mnemonic.txt
-wait 1
-press BUTTON_A
-wait 1
 
 # Navigate to Extended Public Key
-x2 press BUTTON_B
+press BUTTON_B
+
+screenshot extended-public-key-selected.png
+
 press BUTTON_A
 
 screenshot extended-public-key-menu.png
@@ -19,6 +19,9 @@ press BUTTON_A
 
 # Enter to xpub QR code
 press BUTTON_B
+
+screenshot extended-public-key-xpub-qr-menu-selected.png
+
 press BUTTON_A
 
 # Give time to render QR code - slow computer?

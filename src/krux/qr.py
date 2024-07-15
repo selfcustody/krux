@@ -23,15 +23,15 @@
 import io
 import math
 import qrcode
-from ur.ur_decoder import URDecoder
-from ur.ur import UR
 
 FORMAT_NONE = 0
 FORMAT_PMOFN = 1
 FORMAT_UR = 2
+FORMAT_BBQR = 3
 
 PMOFN_PREFIX_LENGTH_1D = 6
 PMOFN_PREFIX_LENGTH_2D = 8
+BBQR_PREFIX_LENGTH = 8
 UR_GENERIC_PREFIX_LENGTH = 22
 
 # CBOR_PREFIX = 6 bytes for tags, 1 for index, 1 for max_index, 2 for message len, 4 for checksum
@@ -44,7 +44,7 @@ UR_MIN_FRAGMENT_LENGTH = 10
 # List of capacities, based on versions
 # Version 1(index 0)=21x21px = 17 bytes, version 2=25x25px = 32 bytes ...
 # Limited to version 20
-QR_CAPACITY = [
+QR_CAPACITY_BYTE = [
     17,
     32,
     53,
@@ -67,6 +67,29 @@ QR_CAPACITY = [
     858,
 ]
 
+QR_CAPACITY_ALPHANUMERIC = [
+    25,
+    47,
+    77,
+    114,
+    154,
+    195,
+    224,
+    279,
+    335,
+    395,
+    468,
+    535,
+    619,
+    667,
+    758,
+    854,
+    938,
+    1046,
+    1153,
+    1249,
+]
+
 
 class QRPartParser:
     """Responsible for parsing either a singular or animated series of QR codes
@@ -77,7 +100,8 @@ class QRPartParser:
         self.parts = {}
         self.total = -1
         self.format = None
-        self.decoder = URDecoder()
+        self.decoder = None
+        self.bbqr = None
 
     def parsed_count(self):
         """Returns the number of parsed parts so far"""
@@ -109,7 +133,7 @@ class QRPartParser:
     def parse(self, data):
         """Parses the QR data, extracting part information"""
         if self.format is None:
-            self.format = detect_format(data)
+            self.format, self.bbqr = detect_format(data)
 
         if self.format == FORMAT_NONE:
             self.parts[1] = data
@@ -119,22 +143,45 @@ class QRPartParser:
             self.parts[index] = part
             self.total = total
         elif self.format == FORMAT_UR:
+            if not self.decoder:
+                from ur.ur_decoder import URDecoder
+
+                self.decoder = URDecoder()
             self.decoder.receive_part(data)
+        elif self.format == FORMAT_BBQR:
+            from .bbqr import parse_bbqr
+
+            part, index, total = parse_bbqr(data)
+            self.parts[index] = part
+            self.total = total
 
     def is_complete(self):
         """Returns a boolean indicating whether or not enough parts have been parsed"""
         if self.format == FORMAT_UR:
             return self.decoder.is_complete()
+        keys_check = (
+            sum(range(1, self.total + 1))
+            if self.format in (FORMAT_PMOFN, FORMAT_NONE)
+            else sum(range(self.total))
+        )
         return (
             self.total != -1
             and self.parsed_count() == self.total_count()
-            and sum(self.parts.keys()) == sum(range(1, self.total + 1))
+            and sum(self.parts.keys()) == keys_check
         )
 
     def result(self):
         """Returns the combined part data"""
         if self.format == FORMAT_UR:
+            from ur.ur import UR
+
             return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
+
+        if self.format == FORMAT_BBQR:
+            from .bbqr import decode_bbqr
+
+            return decode_bbqr(self.parts, self.bbqr.encoding, self.bbqr.file_type)
+
         code_buffer = io.StringIO("")
         for _, part in sorted(self.parts.items()):
             if isinstance(part, bytes):
@@ -179,6 +226,31 @@ def to_qr_codes(data, max_width, qr_format):
                 part = encoder.next_part()
                 code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
+        elif qr_format == FORMAT_BBQR:
+            from .bbqr import int2base36
+
+            part_index = 0
+            while True:
+                header = "B$%s%s%s%s" % (
+                    data.encoding,
+                    data.file_type,
+                    int2base36(num_parts),
+                    int2base36(part_index),
+                )
+                part = None
+                if part_index == num_parts - 1:
+                    part = header + data.payload[part_index * part_size :]
+                    part_index = 0
+                else:
+                    part = (
+                        header
+                        + data.payload[
+                            part_index * part_size : (part_index + 1) * part_size
+                        ]
+                    )
+                    part_index += 1
+                code = qrcode.encode(part)
+                yield (code, num_parts)
 
 
 def get_size(qr_code):
@@ -187,23 +259,29 @@ def get_size(qr_code):
     return int(size)
 
 
-def max_qr_bytes(max_width):
+def max_qr_bytes(max_width, encoding="byte"):
     """Calculates the maximum length, in bytes, a QR code of a given size can store"""
-    # Given qr_size =  17 + 4 * version + 2 * frame_size
+    # Given qr_size = 17 + 4 * version + 2 * frame_size
     max_width -= 2  # Subtract frame width
     qr_version = (max_width - 17) // 4
+    if encoding == "alphanumeric":
+        capacity_list = QR_CAPACITY_ALPHANUMERIC
+    else:
+        capacity_list = QR_CAPACITY_BYTE
+
     try:
-        return QR_CAPACITY[qr_version - 1]
+        return capacity_list[qr_version - 1]
     except:
         # Limited to version 20
-        return QR_CAPACITY[-1]
+        return capacity_list[-1]
 
 
 def find_min_num_parts(data, max_width, qr_format):
     """Finds the minimum number of QR parts necessary to encode the data in
     the specified format within the max_width constraint
     """
-    qr_capacity = max_qr_bytes(max_width)
+    encoding = "alphanumeric" if qr_format == FORMAT_BBQR else "byte"
+    qr_capacity = max_qr_bytes(max_width, encoding)
     if qr_format == FORMAT_PMOFN:
         data_length = len(data)
         part_size = qr_capacity - PMOFN_PREFIX_LENGTH_1D
@@ -222,12 +300,33 @@ def find_min_num_parts(data, max_width, qr_format):
         # UR will add a bunch of info (some duplicated) on the body of each QR
         # Info's lenght is multiplied by 2 in Bytewords.encode step
         qr_capacity -= (UR_CBOR_PREFIX_LEN + UR_BYTEWORDS_CRC_LEN) * 2
+        qr_capacity = max(UR_MIN_FRAGMENT_LENGTH, qr_capacity)
         data_length = len(data.cbor)
         data_length *= 2  # UR will Bytewords.encode, which multiply bytes length by 2
         num_parts = (data_length + qr_capacity - 1) // qr_capacity
         # For UR, part size will be the input for "max_fragment_len"
         part_size = len(data.cbor) // num_parts
         part_size = max(part_size, UR_MIN_FRAGMENT_LENGTH)
+        # UR won't use "num_parts", will use encoder.fountain_encoder.seq_len() instead
+    elif qr_format == FORMAT_BBQR:
+        data_length = len(data.payload)
+        max_part_size = qr_capacity - BBQR_PREFIX_LENGTH
+        if data_length < max_part_size:
+            return 1, data_length
+        # Round max_part_size to the nearest lower multiple of 8
+        max_part_size = (max_part_size // 8) * 8
+        # Calculate the number of parts required (rounded up)
+        num_parts = (data_length + max_part_size - 1) // max_part_size
+        # Calculate the optimal part size
+        part_size = data_length // num_parts
+        # Round to the nearest higher multiple of 8
+        part_size = ((part_size + 7) // 8) * 8
+        # Check if the part size is within the limits
+        if part_size > max_part_size:
+            num_parts += 1
+            part_size = data_length // num_parts
+            # Round to the nearest higher multiple of 8 again
+            part_size = ((part_size + 7) // 8) * 8
     else:
         raise ValueError("Invalid format type")
     return num_parts, part_size
@@ -250,6 +349,15 @@ def detect_format(data):
             qr_format = FORMAT_PMOFN
         elif data.lower().startswith("ur:"):
             qr_format = FORMAT_UR
+        elif data.startswith("B$"):
+            from .bbqr import BBQrCode, KNOWN_ENCODINGS, KNOWN_FILETYPES
+
+            if data[3] in KNOWN_FILETYPES:
+                bbqr_file_type = data[3]
+                if data[2] in KNOWN_ENCODINGS:
+                    bbqr_encoding = data[2]
+                    return FORMAT_BBQR, BBQrCode(None, bbqr_encoding, bbqr_file_type)
+
     except:
         pass
-    return qr_format
+    return qr_format, None

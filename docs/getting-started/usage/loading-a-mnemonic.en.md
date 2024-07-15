@@ -1,4 +1,4 @@
-Once you have either a 12- or 24-word mnemonic, choose `Load Mnemonic` on Krux's start menu, and you will be presented with several input methods:
+Once you have either a 12- or 24-word BIP-39 mnemonic, choose `Load Mnemonic` on Krux's start menu, and you will be presented with several input methods:
 
 <img src="../../../img/maixpy_amigo/load-mnemonic-options-150.png">
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-options-125.png">
@@ -11,16 +11,20 @@ Once you have either a 12- or 24-word mnemonic, choose `Load Mnemonic` on Krux's
 
 You can choose to use the camera to scan a `QR code` or `Tiny Seed` metal plate backup.
 
+----8<----
+camera-scan-tips.en.txt
+----8<----
+
 <div style="clear: both"></div>
 
 #### QR Code
 
 It's unpleasant having to manually enter 12 or 24 words every time you want to use Krux. To remedy this you can instead use the device's camera to read a QR code containing the words. Krux will decode QR codes of four types:
 
-1. **Plain text QR**: The mnemonic words encoded as text, with words separated by spaces.
-2. [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP-39 numbers concatenated, encoded as text.
-3. [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
-4. [Encrypted Mnemonic](../features/encrypted-mnemonics.md): A specification created by Krux that encrypts the mnemonic words bits and adds some information about the encryption used.
+- **Plain text QR**: The mnemonic words encoded as text, with words separated by spaces.
+- [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP-39 numbers concatenated, encoded as text.
+- [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
+- [Encrypted Mnemonic](../features/encrypted-mnemonics.md): A specification created by Krux that encrypts the mnemonic words bits and adds some information about the encryption used.
 
 After opening your wallet via one of the manual methods you can use Krux to create QR codes of all types above, transcript them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic. Check out the [Printing section](../features/printing.md) for more information.
 You can also use [an offline QR code generator for this](https://iancoleman.io/bip39/) (ideally on an airgapped device).
@@ -44,10 +48,6 @@ Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) 
 
 Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
 
-----8<----
-12th-24th-word-generate.md
-----8<----
-
 <div style="clear: both"></div>
 
 #### Word Numbers
@@ -55,15 +55,10 @@ Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossi
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-150.png" align="right">
 
 ##### Decimal
-Enter each word of your BIP-39 mnemonic as a number from 1 to 2048 one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
+Enter each word of your BIP-39 mnemonic as a number (1-2048) one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
 
 ##### Hexadecimal and Octal
 You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal format, with values ranging from 0x1 to 0x800, or in octal format, with values ranging from 01 to 04000. This is useful with some metal plate backups that uses those formats.
-
-##### Final checksum word
-----8<----
-12th-24th-word-generate.md
-----8<----
 
 <div style="clear: both"></div>
 
@@ -91,7 +86,7 @@ You can retrieve mnemonics previously stored on device's internal flash or exter
 
 <div style="clear: both"></div>
 
-## Wallet loading sequence
+## Wallet Loading
 
 ### Confirm Mnemonic Words
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-125.png" align="right">
@@ -101,29 +96,95 @@ Once you have entered your mnemonic, you will be presented with the full list of
 
 <div style="clear: both"></div>
 
-### Passphrase
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-passphrase-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-passphrase-150.png" align="right">
+### Confirm Wallet Attributes
 
-After confirming the mnemonic words, you can optionally choose to type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes if your device has a touchscreen. For scanning, you can also create a QR code from your offline passphrase in [Tools](../features/tools.md/#create-qr-code).
+You will be presented with a screen containing wallet attributes, if they are as expected just press `Load Wallet` and you'll be ready to use your loaded key.
+
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-125.png" align="bottom">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-150.png" align="bottom">
+
+#### Attributes
+
+**Fingerprint**
+<p align="center">
+    <code>73c5da0a</code>
+</p>
+
+The BIP-32 master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.
+
+**Network**
+<p align="center">
+    <code>Mainnet</code>
+</p>
+
+Check if you are loading a `Testnet` or `Mainnet` wallet.
+
+**Single/Multisig**
+<p align="center">
+    <code>Single-sig</code>
+</p>
+
+Check if you are loading a `Single-sig` or `Multisig` wallet.
+
+**Derivation Path**
+<p align="center">
+    <code>m/84'/0'/0'</code>
+</p>
+
+The derivation path is a sequence of numbers, or "nodes", that define the script type, network, and account index of your wallet.
+
+1. Script Type: The first number defines the script type. The default is 84', corresponding to a Native Segwit wallet. Other values include:
+
+    `44'` for Legacy
+
+    `49'` for Nested Segwit
+
+    `86'` for Taproot
+
+    `48'` for Multisig
+
+
+2. Network: The second number defines the network:
+
+    `0'` for Mainnet
+
+    `1'` for Testnet
+
+
+3. Account Index: The third number is the account index, with `0'` being the default.
+
+For multisig wallets, a fourth node with the value `2'` is added to the derivation path.
+
+**Passphrase**
+<p align="center">
+    <code>No Passphrase</code>
+</p>
+
+Informs if the wallet has a loaded passphrase.
+
+### Changing Wallet Attributes
+
+You can change any of the attributes before and after loading a wallet.
+It is also possible to change default settings for `Network` and `Single/Multisig` on settings.
+
+#### Passphrase
+
+<img src="../../../img/maixpy_m5stickv/passphrase-load-options-125.png" align="right">
+<img src="../../../img/maixpy_amigo/passphrase-load-options-150.png" align="right">
+
+You can type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. For scanning, you can also create a QR code from your offline passphrase in [Tools](../features/tools.md/#create-qr-code).
 
 <div style="clear: both"></div>
 
-### Fingerprint
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-fingerprint-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-fingerprint-150.png" align="right">
+#### Customize
 
-The wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.
+<img src="../../../img/maixpy_m5stickv/wallet-customization-options-125.png" align="right">
+<img src="../../../img/maixpy_amigo/wallet-customization-options-150.png" align="right">
+
+Press `Customize` to open a menu where you can change the `Network`, `Single/Multisig`, `Script Type` and `Account`.
+
 
 <div style="clear: both"></div>
-
-### Single-sig or Multisig
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-single-multi-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-single-multi-150.png" align="right">
-
-After loading your mnemonic and passphrase (optional), you will be asked if you want to use it as part of a `Single-sig` or `Multisig` wallet.
-
-Your choice here will subtly change the generated xpub that is used to set up your device in your wallet coordinator software. You can learn more about the difference in the following guides for using [single-sig](using-a-single-sig-wallet.md) and [multisig](using-a-multisig-wallet.md) wallets.
 
 Now, onto the main menu...
 

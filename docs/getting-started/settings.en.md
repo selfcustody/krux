@@ -1,9 +1,19 @@
-In the Krux home menu, there is a `Settings` entry. Below is a breakdown of the options you can change:
+In the Krux home menu, there is a `Settings` entry. Some submenu entries have too many options to fit on one screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens if your device has a touchscreen. Below is a breakdown of the options you can change:
 
 <img src="../../img/maixpy_amigo/settings-options-150.png">
 <img src="../../img/maixpy_m5stickv/settings-options-125.png">
 
-### Bitcoin - Network
+### Default Wallet
+
+Set the default attributes for wallet loading.
+
+#### Multisig
+
+Set this to true if you are more likely to use Krux for multisig setups. This way, you won't need to "Customize" your wallet attributes every time you load a key.
+
+<div style="clear: both"></div>
+
+#### Network
 <img src="../../img/maixpy_m5stickv/network-options-125.png" align="right">
 <img src="../../img/maixpy_amigo/network-options-150.png" align="right">
 
@@ -38,12 +48,12 @@ Values must be multiple of 10,000. This was done to save data space on QR codes.
 Choose between well known and widely used AES (Advanced Encryption Standard) modes:
 
 ##### AES-ECB
-ECB (Electronic Codebook), its a simpler method where encryption data blocks are encrypted individually. It will be faster and simpler to encrypt, QR codes will have a lower density and will be easier to transcribe.
+ECB (Electronic Codebook) is a simpler method where data blocks are encrypted individually. Compared to CBC, it will be faster and simpler to encrypt, QR codes will have a lower density and will be easier to transcribe.
 
 ##### AES-CBC
-CBC (Cipher-block Chaining) is considered more secure as in the first data block an initialization vector (IV) is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, ensuring chaining.
+CBC (Cipher-block Chaining) is considered more secure than ECB.  The first data block, an initialization vector (IV), is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, ensuring chaining.
 
-Encryption will take longer because a snapshot will be needed to generate the IV. This IV will be stored together with encrypted data, making encrypted QR codes denser and harder to transcribe.
+Encryption will take longer because a snapshot will be needed to generate the IV. This IV will be stored together with the encrypted data, making encrypted QR codes denser and harder to transcribe.
 
 <div style="clear: both"></div>
 
@@ -63,7 +73,7 @@ The caveat is low values can cause issues, such as double step and unexpected mo
 #### Display (Maix Amigo only)
 <img src="../../img/maixpy_amigo/settings-options-hardware-display-150.png" align="right">
 
-Some Maix Amigo screens are different, here you can customize the BGR Colors, Flipped X Coordinates and Inverted Colors. For more info see [FAQ](../faq.md/#why-are-the-buttons-on-my-amigo-in-the-wrong-order-why-is-my-amigo-screen-displaying-the-wrong-colors)
+Some Maix Amigo screens are different, here you can customize the `BGR Colors`, `Flipped X Coordinates`, `Inverted Colors` and `LCD Type`. For more info see [Troubleshooting](../troubleshooting.md/#troubleshooting-lcd-settings-on-maix-amigo)
 
 <div style="clear: both"></div>
 
@@ -71,7 +81,7 @@ Some Maix Amigo screens are different, here you can customize the BGR Colors, Fl
 <img src="../../img/maixpy_m5stickv/printer-options-125.png" align="right">
 <img src="../../img/maixpy_amigo/printer-options-150.png" align="right">
 
-You can set up a thermal printer or tell Krux to store a GRBL CNC instructions file on a SD card to machine QR codes
+You can set up a TTL serial thermal printer or tell Krux to store a GRBL CNC instructions file on a SD card to machine QR codes.
 
 #### CNC
 Define several machining parameters according to the desired size, material you'll use, and your CNC characteristics and capabilities.
@@ -79,7 +89,7 @@ Define several machining parameters according to the desired size, material you'
 #### Thermal
 Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can change it here.
 
-Also setup the TX Pin you'll use (e.g. 35 for M5stickV and 7 for Maix Amigo) and tweak other parameters according to your printer recommendations. For most printers you will only need to connect 2 cables, the device TX to the printer RX and ground. Consult the [part list](../parts.md/#optional-thermal-printer) page for supported printers.
+Also setup the TX Pin you'll use (e.g. 35 for M5StickV and 7 for Maix Amigo) and tweak other parameters according to your printer recommendations. For most printers you will only need to connect 2 cables, the device TX to the printer RX and ground. Current uses of printing are listed [here](features/printing.md). Consult the [parts list](../parts.md/#optional-ttl-serial-thermal-printer) for supported printers.
 
 #### Driver
 Here you choose between Thermal, CNC or none (default). Leave this setting to "none" if you won't use a printer and don't want to be bothered by print prompts.
@@ -108,6 +118,17 @@ Here you can change Krux to your desired language.
 Choose between flash (device's internal memory) or SD card for the place where your settings will be stored.
 
 <div style="clear: both"></div>
+
+### Security
+Adjust settings that may impact your security protocols.
+
+#### Shutdown Time
+Set the time it takes for Krux to automatically shut down. This feature not only conserves your device's battery, if it has one, but also serves as an important security measure. If you forget your device with private keys loaded, it will shut down automatically after the set time.
+
+Please note that devices without batteries and power management will not shut down but will reboot instead, which is sufficient to unload private keys.
+
+#### Hide Mnemonics
+When "Hide Mnemonics" mode is set to "True", your device will not display private key data or backup tools when a key is loaded. It will only show public key information and allow signing operations.
 
 ### Appearance
 <img src="../../img/maixpy_m5stickv/settings-options-appearance-125.png" align="right">

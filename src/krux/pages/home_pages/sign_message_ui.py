@@ -20,14 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import gc
 from embit import bip32, compact
 import hashlib
 import binascii
-from .. import Page, MENU_CONTINUE, Menu
+from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
 from ...themes import theme
-from ...display import DEFAULT_PADDING
+from ...display import (
+    DEFAULT_PADDING,
+    MINIMAL_DISPLAY,
+    FONT_HEIGHT,
+    TOTAL_LINES,
+    BOTTOM_PROMPT_LINE,
+)
 from ...baseconv import base_encode
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
@@ -39,38 +44,23 @@ from ...sd_card import (
 from ..utils import Utils
 
 
-class SignMessage(Page):
+class SignMessage(Utils):
     """Message Signing user interface"""
-
-    def __init__(self, ctx):
-        super().__init__(ctx, None)
-        self.utils = Utils(self.ctx)
 
     def load_message(self):
         """Loads a message from camera or SD card"""
 
-        load_menu = Menu(
-            self.ctx,
-            [
-                (t("Load from camera"), lambda: None),
-                (
-                    t("Load from SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
-                (t("Back"), lambda: None),
-            ],
-        )
-        index, _ = load_menu.run_loop()
+        load_method = self.load_method()
 
-        if index == 2:
+        if load_method > LOAD_FROM_SD:
             return (None, None, "")
 
-        if index == 0:
+        if load_method == LOAD_FROM_CAMERA:
             data, qr_format = self.capture_qr_code()
             return (data, qr_format, "")
 
-        # If index == 1
-        message_filename, data = self.utils.load_file(prompt=False)
+        # If load_method == LOAD_FROM_SD
+        message_filename, data = self.load_file(prompt=False)
         return (data, FORMAT_NONE, message_filename)
 
     def sign_at_address(self, data):
@@ -94,8 +84,8 @@ class SignMessage(Page):
                     )
 
                     # Maximum lines available for message
-                    max_lines = self.ctx.display.total_lines
-                    if board.config["type"] == "m5stickv":
+                    max_lines = TOTAL_LINES
+                    if MINIMAL_DISPLAY:
                         max_lines -= 7
                     else:
                         max_lines -= 10
@@ -105,22 +95,22 @@ class SignMessage(Page):
                         self.ctx.display.draw_hcentered_text(
                             t("Message:"), offset_y, theme.highlight_color
                         )
-                        * self.ctx.display.font_height
+                        * FONT_HEIGHT
                     )
                     offset_y += (
                         self.ctx.display.draw_hcentered_text(
                             message.decode(), offset_y, max_lines=max_lines
                         )
                         + 1
-                    ) * self.ctx.display.font_height
+                    ) * FONT_HEIGHT
                     offset_y += (
                         self.ctx.display.draw_hcentered_text(
-                            t("Address:"), offset_y, theme.highlight_color
+                            t("Address") + ":", offset_y, theme.highlight_color
                         )
-                        * self.ctx.display.font_height
+                        * FONT_HEIGHT
                     )
                     self.ctx.display.draw_hcentered_text(short_address, offset_y)
-                    if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
+                    if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
                         return ""
                     message_hash = hashlib.sha256(
                         hashlib.sha256(
@@ -164,9 +154,9 @@ class SignMessage(Page):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            t("SHA256:\n%s") % binascii.hexlify(message_hash).decode()
+            "SHA256:\n%s" % binascii.hexlify(message_hash).decode()
         )
-        if not self.prompt(t("Sign?"), self.ctx.display.bottom_prompt_line):
+        if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return ""
 
         # User confirmed to sign!
@@ -186,7 +176,7 @@ class SignMessage(Page):
         data, qr_format, message_filename = self.load_message()
 
         if data is None:
-            self.flash_text(t("Failed to load message"), theme.error_color)
+            self.flash_error(t("Failed to load message"))
             return MENU_CONTINUE
 
         # message read OK!
@@ -224,7 +214,7 @@ class SignMessage(Page):
             title = t("Signed Message")
             encoded_sig = base_encode(sig, 64).strip().decode()
             self.display_qr_codes(encoded_sig, qr_format, title)
-            self.utils.print_standard_qr(encoded_sig, qr_format, title)
+            self.print_standard_qr(encoded_sig, qr_format, title)
 
             if not sign_at_address:
                 # Show the public key as a QRCode
@@ -235,7 +225,7 @@ class SignMessage(Page):
 
                 # Show the public key in hexadecimal format as a QRCode
                 self.display_qr_codes(pubkey, qr_format, title)
-                self.utils.print_standard_qr(pubkey, qr_format, title)
+                self.print_standard_qr(pubkey, qr_format, title)
             return MENU_CONTINUE
 
         # If index == 1 save the signature file on the SD card

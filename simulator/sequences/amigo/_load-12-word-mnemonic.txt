@@ -9,9 +9,5 @@ wait 0.5
 # Confirm words
 press BUTTON_A
 
-# Don't add a passphrase
-press BUTTON_C
-press BUTTON_A
-
-# Confirm fingerprint
+# Confirm wallet
 press BUTTON_A

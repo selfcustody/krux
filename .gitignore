@@ -75,7 +75,9 @@ simulator/krux-screenshots
 simulator/screenshots
 simulator/sd
 
-!tests/firmware-v0.0.0.bin
-!tests/firmware-v0.0.0.bin.badsig
-!tests/firmware-v0.0.0.bin.sha256.txt
-!tests/firmware-v0.0.0.bin.sig
+# allow files: firmware.bin, .sig, .sha256.txt
+!tests/*
+!tests/files/*
+
+# ignore build-release files
+krux-*/ktool*

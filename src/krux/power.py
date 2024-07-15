@@ -48,7 +48,8 @@ class PowerManager:
     def has_battery(self):
         """Returns if the device has a battery"""
         try:
-            assert int(self.pmu.get_battery_voltage()) > 0
+            if int(self.pmu.get_battery_voltage()) <= 0:
+                return False
         except:
             return False
         return True
@@ -58,7 +59,7 @@ class PowerManager:
         mv = int(self.pmu.get_battery_voltage())
         if board.config["type"] == "amigo":
             charge = max(0, (mv - 3394.102415024943) / 416.73204356)
-        elif board.config["type"] == "m5stickv":
+        elif board.config["type"] in ("m5stickv", "cube"):
             charge = max(0, (mv - 3131.427782118631) / 790.56172897)
         else:
             charge = max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))

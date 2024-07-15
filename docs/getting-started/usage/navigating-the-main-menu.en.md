@@ -5,72 +5,52 @@ After entering your mnemonic, and loading a wallet, you will find yourself on Kr
 
 <div style="clear: both"></div>
 
-### Mnemonic
+### Backup Mnemonic
 <img src="../../../img/maixpy_m5stickv/backup-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-options-150.png" align="right">
 
-This will open a new submenu with the following options to backup your mnemonic. If you set a [printer driver](../../settings/#driver), it will also give the option to print the backup!
+This will open a new submenu with different types of backups. `QR Code` based, `Encrypted`  and `Other Formats`
+
+If you set a [printer](../settings.md/#printer), it will also give the option to print them!
 
 <div style="clear: both"></div>
 
-#### Words
-<img src="../../../img/maixpy_m5stickv/backup-mnemonic-words-125.png" align="right">
-<img src="../../../img/maixpy_amigo/backup-mnemonic-words-150.png" align="right">
+#### QR Code
 
-Display the mnemonic words as text so you can write them down.
+- **Plaintext QR**
 
-<div style="clear: both"></div>
-
-#### Numbers
-<img src="../../../img/maixpy_m5stickv/backup-mnemonic-numbers-125.png" align="right">
-<img src="../../../img/maixpy_amigo/backup-mnemonic-numbers-150.png" align="right">
-
-Display the mnemonic word numbers in decimal, hex, or octal format.
-
-<div style="clear: both"></div>
-
-#### Plaintext QR
 <img src="../../../img/maixpy_m5stickv/backup-qr-plain-text-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-qr-plain-text-150.png" align="right">
 
-Generate a QR containing the mnemonic words as regular text, where words are separated by spaces.
+Generate a QR containing the mnemonic words as regular text, where words are separated by spaces. Any QR code can be printed if a thermal printer driver is set.
 
 <div style="clear: both"></div>
 
-#### Compact SeedQR
+- **Compact SeedQR**
+
 <img src="../../../img/maixpy_m5stickv/backup-compact-qr-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-compact-qr-150.png" align="right">
 
-A QR code is created from a binary representation of mnemonic words. Format created by SeedSigner
-backup-qr-compact
+A QR code is created from a binary representation of mnemonic words. Format created by SeedSigner, more info [here](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md#compactseedqr-specification).
 
 <div style="clear: both"></div>
 
-#### SeedQR
+- **SeedQR**
+
 <img src="../../../img/maixpy_m5stickv/backup-seed-qr-125.png" align="right">
 <img src="../../../img/maixpy_amigo/backup-seed-qr-150.png" align="right">
 
-Words are converted to their BIP-39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner
+Words are converted to their BIP-39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner, more info [here](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md).
 
 <div style="clear: both"></div>
 
-#### Stackbit 1248
-<img src="../../../img/maixpy_m5stickv/backup-stackbit-125.png" align="right">
-<img src="../../../img/maixpy_amigo/backup-stackbit-150.png" align="right">
+- **Encrypted QR Code**
 
-This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
+This option converts the encrypted mnemonic into a QR code. Enter an encryption key and, optionally, a custom ID. When you scan this QR code through "Load Mnemonic" -> "Via Camera" -> "QR Code," you will be prompted to enter the decryption key to load the mnemonic stored in it. Like any QR code, it can be printed if a thermal printer driver is set up.
 
 <div style="clear: both"></div>
 
-#### Tiny Seed
-<img src="../../../img/maixpy_m5stickv/backup-tiny-seed-125.png" align="right">
-<img src="../../../img/maixpy_amigo/backup-tiny-seed-150.png" align="right">
-
-This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact.
-
-<div style="clear: both"></div>
-
-### Encrypt Mnemonic
+#### Encrypted
 <img src="../../../img/maixpy_m5stickv/home-encrypt-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/home-encrypt-options-150.png" align="right">
 
@@ -80,26 +60,61 @@ For convenience, you may choose to store the encrypted mnemonic on flash memory 
 
 When using any of the encryption methods, you will be prompted to enter an encryption key. This key can be provided in text or QR code format. Additionally, you have the option to set a custom ID for easier management of your mnemonics. If a custom key is not specified, the device's current loaded wallet fingerprint will be used as the ID.
 
+See this page to find out more about: [Krux Mnemonics Encryption](../../getting-started/features/encrypted-mnemonics.md).
 
-#### Store on Flash
+
+- **Store on Flash**
 
 This option stores the encrypted mnemonic in the device's flash memory. You can decrypt and load it later through the "Load Mnemonic" -> "From Storage" option.
 
-#### Store on SD Card
+- **Store on SD Card**
 
 If an SD card is available, this option stores the encrypted mnemonic on it. You can decrypt and load it later through the "Load Mnemonic" -> "From Storage" option.
 
-#### Encrypted QR Code
+- **Encrypted QR Code**
+It's another path for the same functionality present on QR Code backups, described above.
 
-This option converts the encrypted mnemonic into a QR code. When you scan this QR code through "Load Mnemonic" -> "Via Camera" -> "QR Code," you will be prompted to enter the decryption key to load the mnemonic stored in it.
+#### Other Formats
 
-[Learn more about Krux Mnemonics Encryption](../../getting-started/features/encrypted-mnemonics.md)
+- **Words**
+<img src="../../../img/maixpy_m5stickv/backup-mnemonic-words-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-mnemonic-words-150.png" align="right">
+
+Display the BIP-39 mnemonic words as text so you can write them down.
+
+<div style="clear: both"></div>
+
+- **Numbers**
+<img src="../../../img/maixpy_m5stickv/backup-mnemonic-numbers-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-mnemonic-numbers-150.png" align="right">
+
+Display the BIP-39 mnemonic word numbers (1-2048) in decimal, hex, or octal format.
+
+<div style="clear: both"></div>
+
+
+
+<div style="clear: both"></div>
+
+- **Stackbit 1248**
+<img src="../../../img/maixpy_m5stickv/backup-stackbit-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-stackbit-150.png" align="right">
+
+This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
+
+<div style="clear: both"></div>
+
+- **Tiny Seed**
+<img src="../../../img/maixpy_m5stickv/backup-tiny-seed-125.png" align="right">
+<img src="../../../img/maixpy_amigo/backup-tiny-seed-150.png" align="right">
+
+This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format if a thermal printer driver is set.
 
 <div style="clear: both"></div>
 
 ### Extended Public Key
 
-A menu will be presented with options to display your master extended public key (xPub) as text and as a QR code. Depending on whether a single-sig or multisig wallet was loaded, the options shown will be xPub, zPub, or ZPub. When displayed as text, the extended public key can be stored on an SD card if available. If you choose to export a QR code, you can not only scan it but also save it as an image on an SD card or print it if a thermal printer is attached.
+A menu will be presented with options to display your master extended public key (xPub) as text and as a QR code. Depending on the script type or whether a single-sig or multisig wallet was loaded, the options shown will be xPub, yPub, zPub, or ZPub. When displayed as text, the extended public key can be stored on an SD card if available. If you choose to export a QR code, you can not only scan it but also save it as an image on an SD card or print it if a thermal printer is attached.
 
 <img src="../../../img/maixpy_m5stickv/extended-public-key-menu-125.png" align="bottom">
 <img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-125.png" align="bottom">
@@ -108,22 +123,77 @@ A menu will be presented with options to display your master extended public key
 <img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-text-150.png" align="bottom">
 <img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-150.png" align="bottom">
 
-All QR codes will contain [key origin information in key expressions](https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#Key_Expressions). If your coordinator cannot parse this information, it will not be capable of importing the wallet's fingerprint. As a result, Krux will not be able to sign transactions created by it unless you manually add the fingerprint so that it can be used to create Krux compatible PSBTs.
+All QR codes will contain [key origin information in key expressions](https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#Key_Expressions). If your coordinator cannot parse this information, it will not be capable of importing the wallet's fingerprint. As a result, Krux will not perform important verifications when signing transactions created by it unless you manually add the fingerprint so that it can be used to create Krux-compatible PSBTs.
+
+Always prefer to import extended public keys directly from Krux when setting up a coordinator instead of copying it (or parts of it) from other sources.
 
 <div style="clear: both"></div>
 
-### Wallet Descriptor
+### Wallet
+Here you can load view and save wallet descriptors, add or change passphrases, customize wallet's attributes, generate and load a BIP85 child mnemonic.
 
-When you select this option for the first time, you will be prompted to load a wallet. The camera will activate, and you will need to scan a wallet backup QR code generated by your wallet coordinator software. If the scan is successful, a preview of the wallet will be displayed for confirmation. If you abort the scan, you can alternatively load the wallet descriptor from an SD card.
+#### Wallet Descriptor
+
+A Bitcoin Wallet Output Script Descriptor defines a set of addresses in a wallet. It includes the following information:
+
+- Script Type: Specifies the type of script (e.g., P2PKH, P2SH, P2WPKH).
+
+- Origin Info: Defines the master fingerprint and derivation path used to derive keys.
+
+- Extended Public Keys: usually represented as an xpub, but could be ypub, zpub, etc.
+
+Output descriptors standardize how wallets generate addresses, ensuring compatibility and security. They help wallets and other software understand how to derive and verify the addresses used in transactions.
+
+For multisig wallets, it is essential to load a descriptor to check addresses and perform full PSBT verification. For single-sig wallets, loading a descriptor is optional and serves as a redundancy check of the coordinator's wallet attributes.
+
+When you select the "Wallet Descriptor" option for the first time, you will be prompted to load a wallet descriptor via QR code or SD card. After loading, a preview of the wallet attributes will be displayed for confirmation.
 
 <img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-fingerprints-125.png" align="top">
 <img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png" align="top">
 <img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-fingerprints-150.png" align="top">
 <img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-xpubs-150.png" align="top">
 
-If you access this option again after having loaded your wallet, you will see the wallet's name, fingerprints and the abbreviated xPubs of all cosigners, along with a QR code containing the exact data that was initially loaded. If an SD card is inserted, you can save the descriptor to it. Additionally, if you have a thermal printer attached, you can print this QR code.
+If you access the "Wallet Descriptor" option again after loading your wallet, you will see the wallet's name, fingerprints, and the abbreviated XPUBs of all cosigners, along with a QR code containing the exact data that was initially loaded. If an SD card is inserted, you can save the descriptor to it for later use without the assistance of a coordinator. Additionally, if you have a thermal printer attached, you can print this QR code.
 
-Please note that once a wallet is loaded, it cannot be changed. To load a different wallet, you will need to restart the device and re-enter your mnemonic.
+Krux also allows you to verify a descriptor's receive and change addresses without the need to load private keys. Simply turn on your Krux, access "Tools" -> "Descriptor Addresses," and load a trusted descriptor from a QR code or SD card.
+
+Please note that if you customize the wallet parameters or restart the device, the descriptor will be unloaded, and you may need to load it again to check addresses.
+
+<div style="clear: both"></div>
+
+#### Passphrase
+
+<img src="../../../img/maixpy_m5stickv/passphrase-load-options-125.png" align="right">
+<img src="../../../img/maixpy_amigo/passphrase-load-options-150.png" align="right">
+
+If you forgot to load a passphrase while loading your wallet, or if you use multiple passphrases with the same mnemonic, you can add, replace, or remove a passphrase here. Simply choose between typing or scanning it.
+
+To remove a passphrase, select "Type BIP39 Passphrase," leave the field blank, and press "Go."
+
+Don't forget to verify the resulting fingerprint in the status bar to ensure you've loaded the correct key.
+
+<div style="clear: both"></div>
+
+#### Customize
+<img src="../../../img/maixpy_m5stickv/wallet-customization-options-125.png" align="right">
+<img src="../../../img/maixpy_amigo/wallet-customization-options-150.png" align="right">
+
+Here you are presented to the exact same customization options you have while loading a key and wallet. You can change the Network, Single/Multisig, Script Type and Account. [More about wallet attributes](./loading-a-mnemonic.md/#attributes)
+
+<div style="clear: both"></div>
+
+#### BIP85
+
+Bitcoin BIP85, also known as the Deterministic Entropy From BIP32 Keychains, allows for the generation of deterministic entropy using a BIP32 master key. This entropy can then be used to create various cryptographic keys and mnemonics (e.g., BIP39 seed phrases). BIP85 ensures that all derived keys and mnemonics are deterministic and reproducible, meaning they can be recreated from the same master key. This feature is useful for securely managing multiple child keys from a single master key without the need to store each one separately.
+
+<img src="../../../img/maixpy_amigo/bip85-child-index-150.png" align="bottom">
+<img src="../../../img/maixpy_amigo/bip85-load-child-150.png" align="bottom">
+<img src="../../../img/maixpy_m5stickv/bip85-child-index-125.png" align="bottom">
+<img src="../../../img/maixpy_m5stickv/bip85-load-child-125.png" align="bottom">
+
+Choose between a 12 or 24 words child then type the desired index to export a child mnemonic. After being presented to the new mnemonic, you can choose to load and use it right away.
+
+Please note passphrases will be removed when loading a BIP85 child.
 
 <div style="clear: both"></div>
 
@@ -139,9 +209,7 @@ Scan, verify, export or print your wallet addresses.
 <img src="../../../img/maixpy_m5stickv/scan-address-scanned-address-125.png" align="right">
 <img src="../../../img/maixpy_amigo/scan-address-scanned-address-150.png" align="right">
 
-This option turns on the camera and allows you to scan in a QR code of a receive address. Upon scanning, it will render its own QR code of the address back to the display along with the (text) address below it. You could use this feature to scan the address of someone you want to send coins to and display the QR back to your wallet coordinator rather than copy-pasting an address.
-
-If you have a thermal printer attached, you can also print this QR code. 
+This option turns on the camera and allows you to scan in a QR code of a receive address. Upon scanning, it will render its own QR code of the address back to the display along with the (text) address below it. You could use this feature to scan the address of someone you want to send coins to and display the QR back to your wallet coordinator rather than copy-pasting an address. If you have a thermal printer attached, you can also print this QR code. 
 
 After proceeding through this screen, you will be asked if you want to check that the address belongs to your wallet. If you confirm, it will exhaustively search through as many addresses derived from your wallet as you want in order to find a match.
 
@@ -153,7 +221,7 @@ This option exists as an extra security check to verify that the address your wa
 <img src="../../../img/maixpy_m5stickv/list-address-receive-125.png" align="right">
 <img src="../../../img/maixpy_amigo/list-address-receive-150.png" align="right">
 
-List your wallet receiving addresses, you can browse to select an arbitrary address to show your QRCode and print if you want
+List your wallet receiving addresses, you can browse to select an arbitrary address to show your QR code and print if you want.
 
 <div style="clear: both"></div>
 
@@ -161,7 +229,7 @@ List your wallet receiving addresses, you can browse to select an arbitrary addr
 <img src="../../../img/maixpy_m5stickv/list-address-change-125.png" align="right">
 <img src="../../../img/maixpy_amigo/list-address-change-150.png" align="right">
 
-List your wallet change addresses, you can browse to select an arbitrary address to show your QRCode and print if you want
+List your wallet change addresses, you can browse to select an arbitrary address to show your QR code and print if you want.
 
 <div style="clear: both"></div>
 
@@ -179,15 +247,15 @@ Under *Sign*, you can choose to sign a PSBT or a message. You can load both PSBT
 
 To sign a Bitcoin PSBT, you have the following options:
 
-1. Scan an Animated QR Code: Turn on the camera and scan an animated QR code of a PSBT generated by your wallet coordinator software.
-2. Load from SD Card: Load an unsigned PSBT file from your SD card.
+- **Scan an Animated QR Code**: Turn on the camera and scan an animated QR code of a PSBT generated by your wallet coordinator software. If you have any issues, see [Troubleshooting](../../troubleshooting.md/#why-isnt-krux-scanning-the-qr-code).
+- **Load from SD Card**: Load an unsigned PSBT file from your SD card.
 
 Upon loading the PSBT, you will be presented with a preview showing the amount of BTC being sent, the recipient's address, and the transaction fee. Amounts are displayed according to your locale and the International Bureau of Weights and Measures, while still adhering to the concept of the [Satcomma standard format](https://medium.com/coinmonks/the-satcomma-standard-89f1e7c2aede).
 
 If you choose to proceed and sign the transaction, the signed PSBT can be exported in two ways:
 
-1. As an animated QR code, which can be scanned back into your coordinator wallet.
-2. As a signed PSBT file, which can be saved to your SD card and then loaded back into your coordinator wallet for broadcasting.
+- *As an animated QR code*, which can be scanned back into your coordinator wallet.
+- *As a signed PSBT file*, which can be saved to your SD card and then loaded back into your coordinator wallet for broadcasting.
 
 If a thermal printer is attached to your device, you can also print the PSBT QR codes for record-keeping or further processing.
 

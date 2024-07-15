@@ -3,7 +3,7 @@ TEST_QR = bytearray(
 )
 
 
-def test_init(mocker, m5stickv):
+def test_init(mocker, all_devices):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -18,30 +18,15 @@ def test_init(mocker, m5stickv):
     d.initialize_lcd.assert_called()
 
     krux.display.lcd.init.assert_called_once()
-    assert "type" in krux.display.lcd.init.call_args.kwargs
-    assert (
-        krux.display.lcd.init.call_args.kwargs["type"]
-        == board.config["lcd"]["lcd_type"]
-    )
-
-
-def test_init_amigo(mocker, amigo):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
-    import krux
-    from krux.display import Display
-    import board
-
-    mocker.spy(Display, "initialize_lcd")
-
-    d = Display()
-    d.initialize_lcd()
-
-    assert isinstance(d, Display)
-    d.initialize_lcd.assert_called()
-
-    krux.display.lcd.init.assert_called_once()
-    assert "invert" in krux.display.lcd.init.call_args.kwargs
-    assert krux.display.lcd.init.call_args.kwargs["invert"] == True
+    if board.config["type"] == "m5stickv":
+        assert "type" in krux.display.lcd.init.call_args.kwargs
+        assert (
+            krux.display.lcd.init.call_args.kwargs["type"]
+            == board.config["lcd"]["lcd_type"]
+        )
+    elif board.config["type"] == "amigo":
+        assert "invert" in krux.display.lcd.init.call_args.kwargs
+        assert krux.display.lcd.init.call_args.kwargs["invert"] == True
 
 
 def test_width(mocker, m5stickv):
@@ -496,8 +481,8 @@ def test_draw_hcentered_text_on_inverted_display(mocker, amigo):
 def test_draw_infobox(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
-    from krux.display import Display, DEFAULT_PADDING
-    from krux.themes import WHITE, BLACK, GREY
+    from krux.display import Display, DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
+    from krux.themes import WHITE, BLACK, DARKGREY
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 320)
@@ -510,16 +495,16 @@ def test_draw_infobox(mocker, amigo):
         DEFAULT_PADDING - 3,
         DEFAULT_PADDING - 1,
         d.width() - 2 * DEFAULT_PADDING + 6,
-        d.font_height + 2,
-        GREY,
-        d.font_width,
+        FONT_HEIGHT + 2,
+        DARKGREY,
+        FONT_WIDTH,
     )
     d.draw_string.assert_called_with(
-        (d.width() - len("Hello world") * d.font_width) // 2,
+        (d.width() - len("Hello world") * FONT_WIDTH) // 2,
         DEFAULT_PADDING,
         "Hello world",
         WHITE,
-        GREY,
+        DARKGREY,
     )
 
 
@@ -553,3 +538,21 @@ def test_draw_qr_code(mocker, m5stickv):
     krux.display.lcd.draw_qr_code_binary.assert_called_with(
         0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
     )
+
+
+def test_flash_text(mocker, m5stickv):
+    from krux.display import Display, FLASH_MSG_TIME
+    from krux.themes import WHITE
+    import time
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.patch.object(d, "height", new=lambda: 240)
+    mocker.spy(d, "clear")
+    mocker.spy(d, "draw_centered_text")
+
+    d.flash_text("test", WHITE)
+
+    d.clear.assert_called()
+    d.draw_centered_text.assert_called_with("test", WHITE)
+    time.sleep_ms.assert_called_with(FLASH_MSG_TIME)

@@ -2,7 +2,7 @@ from .. import create_ctx
 from embit import bip39
 
 # rolls which will result in good entropy
-GOOD_ROLLS_TOUCH_SEQUENCE = (
+PATTERN_ROLLS_TOUCH_SEQUENCE = (
     [0] * 9  # 9 number 1 presses
     + [1] * 9  # 9 number 2 presses
     + [2] * 6  # 6 number 3 presses
@@ -20,6 +20,59 @@ POOR_ROLLS_TOUCH_SEQUENCE = (
     + [4] * 6  # 2 number 5 presses
     + [5] * 4  # 2 number 6 presses
 )
+
+GOOD_ROLLS_SEQUENCE = [
+    1,
+    4,
+    5,
+    2,
+    0,
+    3,
+    2,
+    4,
+    4,
+    5,
+    5,
+    5,
+    0,
+    5,
+    2,
+    3,
+    2,
+    5,
+    2,
+    5,
+    0,
+    5,
+    2,
+    1,
+    4,
+    3,
+    0,
+    5,
+    3,
+    4,
+    1,
+    0,
+    3,
+    0,
+    3,
+    5,
+    5,
+    4,
+    2,
+    1,
+    4,
+    1,
+    5,
+    4,
+    5,
+    2,
+    0,
+    3,
+    3,
+    0,
+]
 
 
 def test_new_12w_from_d6(m5stickv, mocker):
@@ -326,12 +379,12 @@ def test_low_shannon_entropy_warning(amigo, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     # Assert ctx.display.draw_centered_text was called with poor entropy warning"
-    call_message = mocker.call("Poor entropy detected. More rolls are recommended")
-    ctx.display.draw_hcentered_text.assert_has_calls([call_message])
+    call_message = mocker.call("Poor entropy detected!\nPattern detected!")
+    ctx.display.draw_centered_text.assert_has_calls([call_message])
 
 
 # Test low entropy warning is not shown when Shannon's entropy is good
-def test_rolls_with_good_shannon_entropy(amigo, mocker):
+def test_good_rolls(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
@@ -355,7 +408,7 @@ def test_rolls_with_good_shannon_entropy(amigo, mocker):
         ]
     )
 
-    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_TOUCH_SEQUENCE)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_SEQUENCE)
     dice_entropy = DiceEntropy(ctx)
     dice_entropy.new_key()
 
@@ -391,7 +444,7 @@ def test_stats_for_nerds(amigo, mocker):
         ]
     )
 
-    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_TOUCH_SEQUENCE)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_SEQUENCE)
     dice_entropy = DiceEntropy(ctx)
     mocker.spy(dice_entropy, "stats_for_nerds")
     dice_entropy.new_key()

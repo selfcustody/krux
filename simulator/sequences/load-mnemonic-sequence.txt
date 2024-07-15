@@ -10,16 +10,19 @@ screenshot load-mnemonic-seq-mnemonic.png
 
 press BUTTON_A
 
-screenshot load-mnemonic-seq-passphrase.png
+screenshot load-mnemonic-seq-overview.png
 
-# No passphrase
+press BUTTON_B
+press BUTTON_A
+
+screenshot passphrase-load-options.png
+
+# Leave passphrase
 press BUTTON_C
 press BUTTON_A
 
-screenshot load-mnemonic-seq-fingerprint.png
-
+# Go to Customization Options
+x2 press BUTTON_B
 press BUTTON_A
 
-wait 0.1
-screenshot load-mnemonic-seq-single-multi.png
-
+screenshot wallet-customization-options.png

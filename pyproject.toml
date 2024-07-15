@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "24.03.0"
+version = "24.07.0"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
@@ -34,11 +34,10 @@ ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
 
 # Docs site dependencies. Optional extras
-mkdocs = { version = "^1.5.2", optional = true }
-mkdocs-material = { version = "^9.4.14", optional = true }
-urllib3 = "^2.1.0"  # Used by mkdocs-material, forces updated secure version
-mkdocs-static-i18n = { version = "^0.46", optional = true }
-pymdown-extensions = { version = "^10.0", optional = true }
+mkdocs = "^1.6.0"
+mkdocs-material = "^9.5.28"
+mkdocs-static-i18n = "^1.2.3"
+pymdown-extensions = "^10.8.1"
 
 # Simulator dependencies. Optional extras
 numpy = { version = "^1.25.2", optional = true }
@@ -47,12 +46,15 @@ Pillow = { version = "^10.0.1", optional = true }
 pygame = { version = "^2.5.0", optional = true }
 pyzbar = { version = "^0.1.9", optional = true }
 
+# Flash dependencies. Optional extras
+pyserial = { version = "^3.5", optional = true }
+
 [tool.poetry.group.dev.dependencies]
-black = "^24.1.1"
-pylint = "^2.12.2"
-pytest = "^7.4.3"
-pytest-cov = "^3.0.0"
-pytest-mock = "^3.6.1"
+black = "^24.4.2"
+pylint = "^3.2.5"
+pytest = "^8.2.2"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.17.0"
 poethepoet = "^0.24.4"
@@ -60,24 +62,70 @@ poethepoet = "^0.24.4"
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
 simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
+flash = ["pyserial"]
 
 [tool.poe.tasks]
-# tasks for format code with black
-# all tasks that start with `_` are'nt callable
-format-src = "black ./src"
-format-tests = "black ./tests"
-format = ["format-src", "format-tests"]
+# format tasks
+format-src = "black src"
+format-tests = "black tests"
+format-scripts = "black firmware/font firmware/scripts i18n/*.py"
+format = ["format-src", "format-tests", "format-scripts"]
+# aliases
+black.ref = "format"
+format-test.ref = "format-tests"
 
-# tasks for lint code with pylint
-# all tasks that start with `_` are'nt callable
-lint = "pylint ./src"
+# pylint tasks
+lint-src = "pylint src"
+lint-scripts = "pylint firmware/font/*.py firmware/scripts/*.py i18n/*.py"
+lint = ["lint-src", "lint-scripts"]
+# aliases
+pylint.ref = "lint"
 
-# tasks for test code
-test = "poetry run pytest --cache-clear --cov src/krux --cov-report html ./tests"
-test-verbose = "poetry run pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests"
+# test tasks
+test = "pytest --cache-clear --cov src/krux --cov-report html ./tests"
+test-verbose = "pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests"
+test-simple = "pytest --cache-clear ./tests"
+# aliases
+tests.ref = "test"
+pytest.ref = "test"
 
-# pre commit (do formatting, linting and tests)
-pre-commit = ["format", "lint", "test"]
+# pre commit task (do formatting, linting and tests)
+pre-commit = ["format", "lint", "i18n validate", "test-simple"]
 
 # run docs locally
 docs = "poetry run mkdocs serve"
+
+# translations tasks
+i18n = "python i18n/i18n.py"
+i18n-bake = "python i18n/i18n.py clean prettify bake"
+format-translations = "black src/krux/translations.py"
+i18n-build = ["i18n-bake", "format-translations", "i18n validate"]
+# aliases
+translations.ref = "i18n-build"
+
+# simulator tasks
+# tasks below accept additional arguments
+simulator-amigo = "python simulator/simulator.py --device maixpy_amigo"
+simulator-m5stickv = "python simulator/simulator.py --device maixpy_m5stickv"
+simulator-dock = "python simulator/simulator.py --device maixpy_dock"
+simulator-yahboom = "python simulator/simulator.py --device maixpy_yahboom"
+simulator-cube = "python simulator/simulator.py --device maixpy_cube"
+# aliases
+simulator.ref = "simulator-amigo"
+simulator-m5.ref = "simulator-m5stickv"
+
+# git tasks
+git-update = "git submodule update --init --recursive"
+git-pull = "git pull git@github.com:selfcustody/krux.git"
+git-pull-https = "git pull https://github.com/selfcustody/krux.git"
+
+# flash tasks
+flash-cmd = "python firmware/Kboot/build/ktool.py -b 1500000 build/kboot.kfpkg"
+flash.ref = "flash-cmd -B goE"
+flash-dock.ref = "flash-cmd -B dan"
+
+# task for bdftokff?
+# python bdftokff.py True
+
+# task for sign_release?
+# python sign_release.py

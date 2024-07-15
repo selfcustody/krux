@@ -5,13 +5,12 @@ on:
     branches:
       - main
       - develop
-  pull_request:
 
 jobs:
   build:
     strategy:
       matrix:
-        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock, maixpy_yahboom]
+        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock, maixpy_yahboom, maixpy_cube]
     runs-on: ubuntu-latest
     services:
       registry:
@@ -43,7 +42,7 @@ jobs:
 
       - name: Build for M5StickV
         if: matrix.device == 'maixpy_m5stickv'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           build-args: DEVICE=maixpy_m5stickv
@@ -67,7 +66,7 @@ jobs:
 
       - name: Build for Amigo
         if: matrix.device == 'maixpy_amigo'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           build-args: DEVICE=maixpy_amigo
@@ -91,7 +90,7 @@ jobs:
 
       - name: Build for Bit
         if: matrix.device == 'maixpy_bit'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           build-args: DEVICE=maixpy_bit
@@ -115,7 +114,7 @@ jobs:
 
       - name: Build for Dock
         if: matrix.device == 'maixpy_dock'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           build-args: DEVICE=maixpy_dock
@@ -139,7 +138,7 @@ jobs:
 
       - name: Build for Yahboom
         if: matrix.device == 'maixpy_yahboom'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           build-args: DEVICE=maixpy_yahboom
@@ -160,6 +159,30 @@ jobs:
         with:
           path: ${{ steps.extract-yahboom.outputs.destination }}
           name: build-yahboom
+
+      - name: Build for Cube
+        if: matrix.device == 'maixpy_cube'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: DEVICE=maixpy_cube
+          push: true
+          tags: localhost:5000/selfcustody/krux-builder-cube:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Extract firmware for Cube
+        id: extract-cube
+        if: matrix.device == 'maixpy_cube'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: localhost:5000/selfcustody/krux-builder-cube:latest
+          path: /src/firmware/Kboot/build/.
+      - name: Upload firmware for Cube
+        if: matrix.device == 'maixpy_cube'
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ steps.extract-cube.outputs.destination }}
+          name: build-cube
           
       - name: Move cache
         run: |

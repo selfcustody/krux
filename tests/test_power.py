@@ -1,4 +1,4 @@
-def test_init(mocker, m5stickv):
+def test_init(mocker, all_devices):
     from krux.power import PowerManager
 
     manager = PowerManager()
@@ -6,38 +6,33 @@ def test_init(mocker, m5stickv):
     assert isinstance(manager, PowerManager)
 
 
-def test_init_with_amigo(mocker, amigo):
+def test_pmu(mocker, all_devices):
     from krux.power import PowerManager
+    import board
 
     manager = PowerManager()
 
-    assert isinstance(manager, PowerManager)
+    if board.config["type"] == "dock":
+        assert manager.pmu is None
+        manager.has_battery() is False
+    else:
+        assert manager.pmu is not None
+        manager.has_battery() is True
 
 
-def test_init_without_pmu(mocker, m5stickv):
-    import sys
-
-    if "pmu" in sys.modules:
-        del sys.modules["pmu"]
+def test_charge_remaining(mocker, all_devices):
     from krux.power import PowerManager
+    import board
 
     manager = PowerManager()
 
-    assert isinstance(manager, PowerManager)
-    assert manager.pmu is None
+    if manager.pmu is not None:
+        manager.pmu.get_battery_voltage = mocker.MagicMock(return_value=4000)
 
-
-def test_init_with_amigo_without_pmu(mocker, amigo):
-    import sys
-
-    if "pmu" in sys.modules:
-        del sys.modules["pmu"]
-    from krux.power import PowerManager
-
-    manager = PowerManager()
-
-    assert isinstance(manager, PowerManager)
-    assert manager.pmu is None
+    if board.config["type"] == "amigo":
+        assert manager.battery_charge_remaining() == 0.9
+    elif board.config["type"] in ("m5stickv", "cube"):
+        assert round(manager.battery_charge_remaining(), 2) == 0.75
 
 
 def test_shutdown(mocker, m5stickv):

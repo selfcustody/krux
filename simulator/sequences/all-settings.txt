@@ -12,12 +12,16 @@ screenshot settings-options.png
 
 # Navigate to Bitcoin
 press BUTTON_A
+press BUTTON_B
+press BUTTON_A
 
 screenshot network-options.png
 
 # screenshot bitcoin-options-mainnet.png
 
 # Return
+press BUTTON_A
+press BUTTON_B
 press BUTTON_A
 
 # Navigate to Encryption
@@ -57,7 +61,7 @@ press_amigo_only BUTTON_C
 press_amigo_only BUTTON_A
 
 # Move to printer
-press_amigo_only BUTTON_B
+x2 press_amigo_only BUTTON_B
 press_amigo_only BUTTON_A
 
 screenshot printer-options.png
@@ -100,7 +104,7 @@ screenshot persist-options.png
 press BUTTON_A
 
 # Navigate to Appearance
-press BUTTON_B
+x2 press BUTTON_B
 press BUTTON_A
 
 screenshot settings-options-appearance.png

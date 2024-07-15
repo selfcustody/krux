@@ -20,7 +20,7 @@ qrcode arara.png
 
 screenshot new-mnemonic-via-snapshot-capturing.png
 
-wait 0.5
+wait 0.3
 
 press BUTTON_A
 
@@ -36,7 +36,7 @@ press BUTTON_B
 press_amigo_only BUTTON_A
 
 # Move to D6
-press BUTTON_B
+x2 press BUTTON_B
 press BUTTON_A
 
 # 12 words - intro ok
