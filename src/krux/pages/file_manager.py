@@ -61,7 +61,7 @@ class FileManager(Page):
 
                 if path != SD_ROOT_PATH:
                     items.append("..")
-                    menu_items.append(("..", lambda: MENU_EXIT))
+                    menu_items.append(("../", lambda: MENU_EXIT))
 
                 # sorts by name ignorecase
                 dir_files = sorted(os.listdir(path), key=str.lower)
@@ -97,7 +97,10 @@ class FileManager(Page):
                         or SDHandler.dir_exists(path + "/" + filename)
                     ):
                         items.append(filename)
-                        display_filename = filename
+                        display_filename = (
+                            filename + "/" if filename in directories else filename
+                        )
+
                         if len(filename) >= custom_start_digits + 2 + custom_end_digts:
                             display_filename = (
                                 filename[:custom_start_digits]
