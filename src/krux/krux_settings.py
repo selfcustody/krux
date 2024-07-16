@@ -19,7 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-
+import board
+import binascii
 from .settings import (
     SettingsNamespace,
     CategorySetting,
@@ -29,9 +30,8 @@ from .settings import (
     MAIN_TXT,
     TEST_TXT,
 )
-import board
-import binascii
 from .translations import translation_table
+from .key import SCRIPT_LONG_NAMES
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
@@ -50,7 +50,6 @@ DEFAULT_RX_PIN = (
 # Encription Versions
 PBKDF2_HMAC_ECB = 0
 PBKDF2_HMAC_CBC = 1
-AES_BLOCK_SIZE = 16
 
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 
@@ -77,12 +76,16 @@ class DefaultWallet(SettingsNamespace):
     namespace = "settings.wallet"
     network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
     multisig = CategorySetting("multisig", False, [False, True])
+    script_type = CategorySetting(
+        "script_type", "Native Segwit - 84", list(SCRIPT_LONG_NAMES.keys())
+    )
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "network": t("Network"),
             "multisig": t("Multisig"),
+            "script_type": t("Script Type"),
         }[attr]
 
 

@@ -65,6 +65,13 @@ P2WSH = "p2wsh"
 # address starts with bc1p (mainnet) or tb1p (testnet)
 P2TR = "p2tr"
 
+SCRIPT_LONG_NAMES = {
+    "Legacy - 44": P2PKH,
+    "Nested Segwit - 49": P2SH_P2WPKH,
+    "Native Segwit - 84": P2WPKH,
+    "Taproot - 86": P2TR,
+}
+
 SINGLESIG_SCRIPT_PURPOSE = {
     P2PKH: 44,
     P2SH_P2WPKH: 49,
