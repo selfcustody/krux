@@ -802,6 +802,8 @@ class Menu:
         Page.y_keypad_map = [
             int(n * height_multiplier) + self.menu_offset for n in Page.y_keypad_map
         ]
+        # Expand last region to the bottom of the screen
+        Page.y_keypad_map[-1] = self.ctx.display.height()
         self.ctx.input.touch.y_regions = Page.y_keypad_map
 
         # draw dividers and outline
@@ -816,6 +818,9 @@ class Menu:
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             offset_y = Page.y_keypad_map[i + 1] - Page.y_keypad_map[i]
             offset_y -= len(menu_item_lines) * FONT_HEIGHT
+            if i == len(self.menu_view) - 1:
+                # Compensate for the expanded last region
+                offset_y -= DEFAULT_PADDING
             offset_y //= 2
             offset_y += Page.y_keypad_map[i]
             fg_color = (
