@@ -169,7 +169,7 @@ class Home(Page):
                 (t("Passphrase"), self.passphrase),
                 (t("Customize"), self.customize),
                 ("BIP85", self.bip85),
-                (t("Back"), lambda: MENU_EXIT),
+                ("< " + t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()
@@ -189,7 +189,7 @@ class Home(Page):
             [
                 ("PSBT", self.sign_psbt),
                 (t("Message"), self.sign_message),
-                (t("Back"), lambda: MENU_EXIT),
+                ("< " + t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, status = submenu.run_loop()
@@ -228,7 +228,7 @@ class Home(Page):
                     t("Sign to SD card"),
                     None if not self.has_sd_card() else lambda: None,
                 ),
-                (t("Back"), lambda: None),
+                ("< " + t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, _ = sign_menu.run_loop()

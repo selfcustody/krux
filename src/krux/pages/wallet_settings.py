@@ -62,7 +62,7 @@ class PassphraseEditor(Page):
                 [
                     (t("Type BIP39 Passphrase"), self._load_passphrase),
                     (t("Scan BIP39 Passphrase"), self._load_qr_passphrase),
-                    (t("Back"), lambda: MENU_EXIT),
+                    ("< " + t("Back"), lambda: MENU_EXIT),
                 ],
                 disable_statusbar=True,
             )
@@ -134,7 +134,7 @@ class WalletSettings(Page):
                     ("Single/Multisig", lambda: None),
                     (t("Script Type"), (lambda: None) if not multisig else None),
                     (t("Account"), lambda: None),
-                    (t("Back"), lambda: MENU_EXIT),
+                    ("< " + t("Back"), lambda: MENU_EXIT),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )

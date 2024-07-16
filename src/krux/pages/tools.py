@@ -55,7 +55,7 @@ class Tools(Page):
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("Wipe Device"), self.wipe_device),
-                    (t("Back"), lambda: MENU_EXIT),
+                    ("< " + t("Back"), lambda: MENU_EXIT),
                 ],
             ),
         )

@@ -109,7 +109,7 @@ class Page:
                     t("Load from SD card"),
                     None if not self.has_sd_card() else lambda: None,
                 ),
-                (t("Back"), lambda: None),
+                ("< " + t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, _ = load_menu.run_loop()
@@ -904,7 +904,7 @@ def choose_len_mnemonic(ctx):
         [
             (t("12 words"), lambda: MENU_EXIT),
             (t("24 words"), lambda: MENU_EXIT),
-            (t("Back"), lambda: MENU_EXIT),
+            ("< " + t("Back"), lambda: MENU_EXIT),
         ],
     )
     index, _ = submenu.run_loop()

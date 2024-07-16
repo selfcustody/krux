@@ -199,7 +199,7 @@ class SignMessage(Utils):
                     t("Sign to SD card"),
                     None if not self.has_sd_card() else lambda: None,
                 ),
-                (t("Back"), lambda: None),
+                ("< " + t("Back"), lambda: None),
             ],
         )
         index, _ = sign_menu.run_loop()

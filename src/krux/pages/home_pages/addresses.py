@@ -50,7 +50,7 @@ class Addresses(Page):
                 (t("Scan Address"), self.pre_scan_address),
                 (t("Receive Addresses"), self.list_address_type),
                 (t("Change Addresses"), lambda: self.list_address_type(1)),
-                (t("Back"), lambda: None),
+                ("< " + t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()
@@ -102,7 +102,7 @@ class Addresses(Page):
                     lambda: MENU_EXIT,
                 )
             )
-            items.append((t("Back"), lambda: MENU_EXIT))
+            items.append(("< " + t("Back"), lambda: MENU_EXIT))
 
             submenu = Menu(self.ctx, items)
             stay_on_this_addr_menu = True
@@ -137,7 +137,7 @@ class Addresses(Page):
             [
                 (t("Receive"), self.scan_address),
                 (t("Change"), lambda: self.scan_address(1)),
-                (t("Back"), lambda: MENU_EXIT),
+                ("< " + t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()

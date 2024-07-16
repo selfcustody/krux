@@ -414,7 +414,7 @@ class SeedQRView(Page):
                     ),
                 )
             )
-        qr_menu.append((t("Back"), lambda: None))
+        qr_menu.append(("< " + t("Back"), lambda: MENU_EXIT))
         submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT)
         submenu.run_loop()
         return MENU_CONTINUE

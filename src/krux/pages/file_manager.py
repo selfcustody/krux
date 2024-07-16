@@ -115,7 +115,7 @@ class FileManager(Page):
 
                 # We need to add this option because /sd can be empty!
                 items.append("Back")
-                menu_items.append((t("Back"), lambda: MENU_EXIT))
+                menu_items.append(("< " + t("Back"), lambda: MENU_EXIT))
 
                 submenu = Menu(self.ctx, menu_items)
                 index, _ = submenu.run_loop()
