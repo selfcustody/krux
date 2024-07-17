@@ -912,6 +912,6 @@ def choose_len_mnemonic(ctx):
     return num_words
 
 
-def cta_back(status=MENU_EXIT, tlabel="Back"):
+def cta_back(status=MENU_EXIT, label=t("Back")):
     """Reusable 'call-to-action: go back'.  Currently a menu item tuple"""
-    return ("< " + t(tlabel), lambda: status)
+    return ("< " + label, lambda: status)

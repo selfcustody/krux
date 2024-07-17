@@ -487,11 +487,8 @@ class SeedQRView(Page):
                     ),
                 ),
                 (t("Print to QR"), printer_func),
-                cta_back(tlabel="Back to Menu"),
+                cta_back(label=t("Back to Menu")),
             ]
-            _ = t(
-                "Back to Menu"
-            )  # TODO: a better way to do this (food for i18n tooling)
             submenu = Menu(self.ctx, qr_menu)
             _, status = submenu.run_loop()
             if status == MENU_EXIT:
