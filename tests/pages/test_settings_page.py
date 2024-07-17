@@ -309,6 +309,7 @@ def test_change_display_type_on_amigo(amigo, mocker):
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 2),  # Move to "Hardware"
         BUTTON_ENTER,  # Enter "Hardware"
+        BUTTON_PAGE,  # Change to "Display"
         BUTTON_ENTER,  # Enter "Display"
         BUTTON_ENTER,  # Enter "BGR colors"
         BUTTON_PAGE,  # Change "BGR Type"
@@ -329,7 +330,7 @@ def test_change_display_type_on_amigo(amigo, mocker):
         BUTTON_ENTER,  # Confirm "Type"
         BUTTON_PAGE,  # Move to "Back"
         BUTTON_ENTER,  # Confirm "Back" from display
-        BUTTON_PAGE_PREV,  # Move to "Back"
+        *([BUTTON_PAGE_PREV] * 2),  # Move to "Back"
         BUTTON_ENTER,  # Confirm "Back" from hardware
         *([BUTTON_PAGE_PREV] * 3),  # Move to "Back"
         BUTTON_ENTER,  # Confirm "Back" from settings

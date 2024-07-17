@@ -204,7 +204,8 @@ def test_all_labels(mocker, m5stickv):
         ThemeSettings,
         TouchSettings,
         ButtonsSettings,
-        AmgDisplaySettings,
+        DisplayAmgSettings,
+        DisplaySettings,
     )
 
     bitcoin = DefaultWallet()
@@ -219,7 +220,8 @@ def test_all_labels(mocker, m5stickv):
     appearance = ThemeSettings()
     touch = TouchSettings()
     buttons = ButtonsSettings()
-    amigo_display = AmgDisplaySettings()
+    amigo_display = DisplayAmgSettings()
+    display = DisplaySettings()
 
     assert bitcoin.label("network")
     assert i18n.label("locale")
@@ -235,3 +237,4 @@ def test_all_labels(mocker, m5stickv):
     assert touch.label("threshold")
     assert buttons.label("debounce")
     assert amigo_display.label("flipped_x")
+    assert display.label("brightness")

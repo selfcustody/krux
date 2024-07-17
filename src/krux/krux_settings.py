@@ -245,10 +245,10 @@ class TouchSettings(SettingsNamespace):
         }[attr]
 
 
-class AmgDisplaySettings(SettingsNamespace):
+class DisplayAmgSettings(SettingsNamespace):
     """Custom display settings for Maix Amigo"""
 
-    namespace = "settings.amg_display"
+    namespace = "settings.display_amg"
     flipped_x_coordinates = CategorySetting("flipped_x", True, [False, True])
     inverted_colors = CategorySetting("inverted_colors", True, [False, True])
     bgr_colors = CategorySetting("bgr_colors", True, [False, True])
@@ -291,7 +291,7 @@ class HardwareSettings(SettingsNamespace):
         if board.config["type"] in ["amigo", "yahboom"]:
             self.touch = TouchSettings()
         if board.config["type"] == "amigo":
-            self.display = AmgDisplaySettings()
+            self.display = DisplayAmgSettings()
         elif board.config["type"] in ["cube", "m5stickv"]:
             self.display = DisplaySettings()
 
@@ -305,7 +305,7 @@ class HardwareSettings(SettingsNamespace):
         if board.config["type"] in ["amigo", "yahboom"]:
             hardware_menu["touchscreen"] = t("Touchscreen")
         if board.config["type"] == "amigo":
-            hardware_menu["amg_display"] = t("Display")
+            hardware_menu["display_amg"] = t("Display")
         elif board.config["type"] in ["cube", "m5stickv"]:
             hardware_menu["display"] = t("Display")
 
