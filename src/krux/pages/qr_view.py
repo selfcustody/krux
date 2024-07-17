@@ -53,7 +53,7 @@ class SeedQRView(Page):
         self.ctx = ctx
         self.binary = binary
         if data:
-            self.code = qrcode.encode(data)
+            self.code = qrcode.encode(data)  # pylint: disable=E1101
             self.title = title
         else:
             if self.binary:
@@ -73,11 +73,11 @@ class SeedQRView(Page):
         numbers = ""
         for word in words:
             numbers += str("%04d" % WORDLIST.index(word))
-        return qrcode.encode(numbers)
+        return qrcode.encode(numbers)  # pylint: disable=E1101
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
-        return qrcode.encode(binary_seed)
+        return qrcode.encode(binary_seed)  # pylint: disable=E1101
 
     def _to_compact_seed_qr(self, mnemonic):
         mnemonic = mnemonic.split(" ")
