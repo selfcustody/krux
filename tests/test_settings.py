@@ -206,24 +206,30 @@ def test_all_labels(mocker, m5stickv):
         ButtonsSettings,
         DisplayAmgSettings,
         DisplaySettings,
+        HardwareSettings,
+        SecuritySettings,
+        Settings,
     )
 
-    bitcoin = DefaultWallet()
+    wallet = DefaultWallet()
     i18n = I18nSettings()
-    encryption = EncryptionSettings()
-    printer = PrinterSettings()
     thermal = ThermalSettings()
     adafruit = AdafruitPrinterSettings()
     cnc = CNCSettings()
     gbrl = GRBLSettings()
-    persist = PersistSettings()
-    appearance = ThemeSettings()
-    touch = TouchSettings()
+    printer = PrinterSettings()
     buttons = ButtonsSettings()
+    touch = TouchSettings()
     amigo_display = DisplayAmgSettings()
     display = DisplaySettings()
+    hardware = HardwareSettings()
+    persist = PersistSettings()
+    encryption = EncryptionSettings()
+    appearance = ThemeSettings()
+    security = SecuritySettings()
+    settings = Settings()
 
-    assert bitcoin.label("network")
+    assert wallet.label("network")
     assert i18n.label("locale")
     assert encryption.label("version")
     assert printer.label("thermal")
@@ -238,3 +244,6 @@ def test_all_labels(mocker, m5stickv):
     assert buttons.label("debounce")
     assert amigo_display.label("flipped_x")
     assert display.label("brightness")
+    assert hardware.label("printer")
+    assert security.label("auto_shutdown")
+    assert settings.label("persist")
