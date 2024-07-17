@@ -56,7 +56,6 @@ ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
 ANTI_GLARE_WAIT_TIME = 500
-QR_CODE_STEP_TIME = 100
 SHUTDOWN_WAIT_TIME = 300
 
 TOGGLE_BRIGHTNESS = (BUTTON_PAGE, BUTTON_PAGE_PREV)
@@ -266,7 +265,6 @@ class Page:
                     15,
                     theme.fg_color,
                 )
-                time.sleep_ms(QR_CODE_STEP_TIME)
                 self.ctx.display.to_landscape()
 
             return 0
