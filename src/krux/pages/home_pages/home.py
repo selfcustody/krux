@@ -29,10 +29,10 @@ from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
-    MENU_EXIT,
     ESC_KEY,
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
+    cta_back,
 )
 
 MAX_POLICY_COSIGNERS_DISPLAYED = 5
@@ -169,7 +169,7 @@ class Home(Page):
                 (t("Passphrase"), self.passphrase),
                 (t("Customize"), self.customize),
                 ("BIP85", self.bip85),
-                ("< " + t("Back"), lambda: MENU_EXIT),
+                cta_back(),
             ],
         )
         submenu.run_loop()
@@ -189,7 +189,7 @@ class Home(Page):
             [
                 ("PSBT", self.sign_psbt),
                 (t("Message"), self.sign_message),
-                ("< " + t("Back"), lambda: MENU_EXIT),
+                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -228,7 +228,7 @@ class Home(Page):
                     t("Sign to SD card"),
                     None if not self.has_sd_card() else lambda: None,
                 ),
-                ("< " + t("Back"), lambda: None),
+                cta_back(None),
             ],
         )
         index, _ = sign_menu.run_loop()

@@ -27,6 +27,7 @@ from .. import (
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
+    cta_back,
 )
 from ...sd_card import PUBKEY_FILE_EXTENSION
 from ...key import P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH
@@ -68,7 +69,7 @@ class PubkeyView(Page):
                         else lambda: _save_xpub_to_sd(version)
                     ),
                 ),
-                ("< " + t("Back"), lambda: MENU_EXIT),
+                cta_back(),
             ]
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
             menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
@@ -116,7 +117,7 @@ class PubkeyView(Page):
             pub_key_menu_items.append(
                 (title + " - " + t("QR Code"), lambda ver=version: _pub_key_qr(ver))
             )
-        pub_key_menu_items.append(("< " + t("Back"), lambda: MENU_EXIT))
+        pub_key_menu_items.append(cta_back())
         pub_key_menu = Menu(self.ctx, pub_key_menu_items)
         while True:
             _, status = pub_key_menu.run_loop()

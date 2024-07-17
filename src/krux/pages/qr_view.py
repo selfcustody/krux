@@ -22,7 +22,7 @@
 
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
+from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY, cta_back
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
 from ..qr import get_size
@@ -414,7 +414,7 @@ class SeedQRView(Page):
                     ),
                 )
             )
-        qr_menu.append(("< " + t("Back"), lambda: MENU_EXIT))
+        qr_menu.append(cta_back())
         submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT)
         submenu.run_loop()
         return MENU_CONTINUE
@@ -487,8 +487,11 @@ class SeedQRView(Page):
                     ),
                 ),
                 (t("Print to QR"), printer_func),
-                (t("Back to Menu"), lambda: MENU_EXIT),
+                cta_back(tlabel="Back to Menu"),
             ]
+            _ = t(
+                "Back to Menu"
+            )  # TODO: a better way to do this (food for i18n tooling)
             submenu = Menu(self.ctx, qr_menu)
             _, status = submenu.run_loop()
             if status == MENU_EXIT:
