@@ -79,9 +79,8 @@ class FileManager(Page):
                 del dir_files
 
                 # show sorted folders first then sorted files
-                for filename, is_directory in [(x, True) for x in directories] + [
-                    (x, False) for x in files
-                ]:
+                for i, filename in enumerate(directories + files):
+                    is_directory = i < len(directories)
 
                     extension_match = False
                     if isinstance(file_extension, str):
