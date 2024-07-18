@@ -22,7 +22,7 @@
 
 import board
 import gc
-from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
+from . import Page, Menu, MENU_EXIT, MENU_CONTINUE, cta_back
 from ..sd_card import SDHandler
 from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
@@ -115,7 +115,7 @@ class FileManager(Page):
 
                 # We need to add this option because /sd can be empty!
                 items.append("Back")
-                menu_items.append((t("Back"), lambda: MENU_EXIT))
+                menu_items.append(cta_back())
 
                 submenu = Menu(self.ctx, menu_items)
                 index, _ = submenu.run_loop()

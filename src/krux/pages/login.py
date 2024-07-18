@@ -37,6 +37,7 @@ from . import (
     ESC_KEY,
     LETTERS,
     choose_len_mnemonic,
+    cta_back,
 )
 
 DIGITS = "0123456789"
@@ -74,7 +75,7 @@ class Login(Page):
                 (t("Via Camera"), self.load_key_from_camera),
                 (t("Via Manual Input"), self.load_key_from_manual_input),
                 (t("From Storage"), self.load_mnemonic_from_storage),
-                (t("Back"), lambda: MENU_EXIT),
+                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -92,7 +93,7 @@ class Login(Page):
                     "Tiny Seed",
                     self.load_key_from_tiny_seed_image,
                 ),
-                (t("Back"), lambda: MENU_EXIT),
+                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -109,7 +110,7 @@ class Login(Page):
                 (t("Word Numbers"), self.pre_load_key_from_digits),
                 ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
                 ("Stackbit 1248", self.load_key_from_1248),
-                (t("Back"), lambda: MENU_EXIT),
+                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -136,7 +137,7 @@ class Login(Page):
                 (t("Via Words"), lambda: self.load_key_from_text(new=True)),
                 (t("Via D6"), self.new_key_from_dice),
                 (t("Via D20"), lambda: self.new_key_from_dice(True)),
-                (t("Back"), lambda: MENU_EXIT),
+                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -244,7 +245,7 @@ class Login(Page):
                     (t("Load Wallet"), lambda: None),
                     (t("Passphrase"), lambda: None),
                     (t("Customize"), lambda: None),
-                    (t("Back"), lambda: MENU_EXIT),
+                    cta_back(),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
@@ -551,7 +552,7 @@ class Login(Page):
                 (t("Decimal"), self.load_key_from_digits),
                 (t("Hexadecimal"), self.load_key_from_hexadecimal),
                 (t("Octal"), self.load_key_from_octal),
-                (t("Back"), lambda: MENU_EXIT),
+                cta_back(),
             ],
         )
         index, status = submenu.run_loop()

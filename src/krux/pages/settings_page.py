@@ -51,6 +51,7 @@ from . import (
     MENU_EXIT,
     ESC_KEY,
     DEFAULT_PADDING,
+    cta_back,
 )
 import os
 
@@ -233,9 +234,9 @@ class SettingsPage(Page):
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
                 items.append((t("Factory Settings"), self.restore_settings))
-                items.append((t("Back"), self._settings_exit_check))
+                items.append(cta_back(self._settings_exit_check))
             else:
-                items.append((t("Back"), lambda: MENU_EXIT))
+                items.append(cta_back())
 
             submenu = Menu(self.ctx, items)
             index, status = submenu.run_loop()
