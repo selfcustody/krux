@@ -109,7 +109,7 @@ class Page:
                     t("Load from SD card"),
                     None if not self.has_sd_card() else lambda: None,
                 ),
-                cta_back(None),
+                cta_back(lambda: None),
             ],
         )
         index, _ = load_menu.run_loop()
@@ -904,7 +904,7 @@ def choose_len_mnemonic(ctx):
         [
             (t("12 words"), lambda: 12),
             (t("24 words"), lambda: 24),
-            cta_back(None),
+            cta_back(lambda: None),
         ],
     )
     _, num_words = submenu.run_loop()
@@ -912,6 +912,6 @@ def choose_len_mnemonic(ctx):
     return num_words
 
 
-def cta_back(status=MENU_EXIT, label=t("Back")):
+def cta_back(status=lambda: MENU_EXIT, label=t("Back")):
     """Reusable 'call-to-action: go back'.  Currently a menu item tuple"""
-    return ("< " + label, lambda: status)
+    return ("< " + label, status)

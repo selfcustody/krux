@@ -234,9 +234,7 @@ class SettingsPage(Page):
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
                 items.append((t("Factory Settings"), self.restore_settings))
-                # TODO: solve below so tests don't fail "assert_has_calls" checks
-                # items.append(cta_back(self._settings_exit_check))
-                items.append(("< " + t("Back"), self._settings_exit_check))
+                items.append(cta_back(self._settings_exit_check))
             else:
                 items.append(cta_back())
 
