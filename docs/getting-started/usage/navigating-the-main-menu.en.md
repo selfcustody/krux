@@ -114,7 +114,7 @@ This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) 
 
 ### Extended Public Key
 
-A menu will be presented with options to display your master extended public key (xPub) as text and as a QR code. Depending on the script type or whether a single-sig or multisig wallet was loaded, the options shown will be xPub, yPub, zPub, or ZPub. When displayed as text, the extended public key can be stored on an SD card if available. If you choose to export a QR code, you can not only scan it but also save it as an image on an SD card or print it if a thermal printer is attached.
+A menu will be presented with options to display your master extended public key (xpub) as text and as a QR code. Depending on the script type or whether a single-sig or multisig wallet was loaded, the options shown will be xpub, ypub, zpub, or Zpub. When displayed as text, the extended public key can be stored on an SD card if available. If you choose to export a QR code, you can not only scan it but also save it as an image on an SD card or print it if a thermal printer is attached.
 
 <img src="../../../img/maixpy_m5stickv/extended-public-key-menu-125.png" align="bottom">
 <img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-125.png" align="bottom">
