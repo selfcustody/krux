@@ -97,11 +97,16 @@ class FileManager(Page):
                         items.append(filename)
                         display_filename = filename + "/" if is_directory else filename
 
-                        if len(filename) >= custom_start_digits + 2 + custom_end_digts:
+                        if (
+                            len(display_filename)
+                            >= custom_start_digits + 2 + custom_end_digts
+                        ):
                             display_filename = (
                                 display_filename[:custom_start_digits]
                                 + ".."
-                                + display_filename[len(filename) - custom_end_digts :]
+                                + display_filename[
+                                    len(display_filename) - custom_end_digts :
+                                ]
                             )
                         menu_items.append(
                             (
