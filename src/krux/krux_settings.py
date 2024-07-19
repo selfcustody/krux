@@ -19,7 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-
+import board
+import binascii
 from .settings import (
     SettingsNamespace,
     CategorySetting,
@@ -29,9 +30,8 @@ from .settings import (
     MAIN_TXT,
     TEST_TXT,
 )
-import board
-import binascii
 from .translations import translation_table
+from .key import SCRIPT_LONG_NAMES
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
@@ -50,7 +50,6 @@ DEFAULT_RX_PIN = (
 # Encription Versions
 PBKDF2_HMAC_ECB = 0
 PBKDF2_HMAC_CBC = 1
-AES_BLOCK_SIZE = 16
 
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 
@@ -77,12 +76,16 @@ class DefaultWallet(SettingsNamespace):
     namespace = "settings.wallet"
     network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
     multisig = CategorySetting("multisig", False, [False, True])
+    script_type = CategorySetting(
+        "script_type", "Native Segwit - 84", list(SCRIPT_LONG_NAMES.keys())
+    )
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "network": t("Network"),
             "multisig": t("Multisig"),
+            "script_type": t("Script Type"),
         }[attr]
 
 
@@ -242,10 +245,10 @@ class TouchSettings(SettingsNamespace):
         }[attr]
 
 
-class AmgDisplaySettings(SettingsNamespace):
+class DisplayAmgSettings(SettingsNamespace):
     """Custom display settings for Maix Amigo"""
 
-    namespace = "settings.amg_display"
+    namespace = "settings.display_amg"
     flipped_x_coordinates = CategorySetting("flipped_x", True, [False, True])
     inverted_colors = CategorySetting("inverted_colors", True, [False, True])
     bgr_colors = CategorySetting("bgr_colors", True, [False, True])
@@ -288,7 +291,7 @@ class HardwareSettings(SettingsNamespace):
         if board.config["type"] in ["amigo", "yahboom"]:
             self.touch = TouchSettings()
         if board.config["type"] == "amigo":
-            self.display = AmgDisplaySettings()
+            self.display = DisplayAmgSettings()
         elif board.config["type"] in ["cube", "m5stickv"]:
             self.display = DisplaySettings()
 
@@ -302,7 +305,7 @@ class HardwareSettings(SettingsNamespace):
         if board.config["type"] in ["amigo", "yahboom"]:
             hardware_menu["touchscreen"] = t("Touchscreen")
         if board.config["type"] == "amigo":
-            hardware_menu["amg_display"] = t("Display")
+            hardware_menu["display_amg"] = t("Display")
         elif board.config["type"] in ["cube", "m5stickv"]:
             hardware_menu["display"] = t("Display")
 

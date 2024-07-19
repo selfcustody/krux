@@ -24,7 +24,7 @@ import gc
 from embit import bip32, compact
 import hashlib
 import binascii
-from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
+from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu, cta_back
 from ...themes import theme
 from ...display import (
     DEFAULT_PADDING,
@@ -199,7 +199,7 @@ class SignMessage(Utils):
                     t("Sign to SD card"),
                     None if not self.has_sd_card() else lambda: None,
                 ),
-                (t("Back"), lambda: None),
+                cta_back(lambda: None),
             ],
         )
         index, _ = sign_menu.run_loop()

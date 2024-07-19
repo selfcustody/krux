@@ -56,7 +56,6 @@ ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
 ANTI_GLARE_WAIT_TIME = 500
-QR_CODE_STEP_TIME = 100
 SHUTDOWN_WAIT_TIME = 300
 
 TOGGLE_BRIGHTNESS = (BUTTON_PAGE, BUTTON_PAGE_PREV)
@@ -109,7 +108,7 @@ class Page:
                     t("Load from SD card"),
                     None if not self.has_sd_card() else lambda: None,
                 ),
-                (t("Back"), lambda: None),
+                cta_back(lambda: None),
             ],
         )
         index, _ = load_menu.run_loop()
@@ -266,7 +265,6 @@ class Page:
                     15,
                     theme.fg_color,
                 )
-                time.sleep_ms(QR_CODE_STEP_TIME)
                 self.ctx.display.to_landscape()
 
             return 0
@@ -405,9 +403,9 @@ class Page:
         self.x_keypad_map.append(DEFAULT_PADDING)
         self.x_keypad_map.append(self.ctx.display.width() // 2)
         self.x_keypad_map.append(self.ctx.display.width() - DEFAULT_PADDING)
-        y_key_map = offset_y - FONT_HEIGHT // 2
+        y_key_map = offset_y - (3 * FONT_HEIGHT // 2)
         self.y_keypad_map.append(y_key_map)
-        y_key_map += 2 * FONT_HEIGHT
+        y_key_map += 4 * FONT_HEIGHT
         self.y_keypad_map.append(y_key_map)
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
@@ -448,9 +446,9 @@ class Page:
                 for region in self.x_keypad_map:
                     self.ctx.display.draw_line(
                         region,
-                        self.y_keypad_map[0],
+                        self.y_keypad_map[0] + FONT_HEIGHT,
                         region,
-                        self.y_keypad_map[0] + 2 * FONT_HEIGHT,
+                        self.y_keypad_map[0] + 3 * FONT_HEIGHT,
                         theme.frame_color,
                     )
             btn = self.ctx.input.wait_for_button()
@@ -802,6 +800,8 @@ class Menu:
         Page.y_keypad_map = [
             int(n * height_multiplier) + self.menu_offset for n in Page.y_keypad_map
         ]
+        # Expand last region to the bottom of the screen
+        Page.y_keypad_map[-1] = self.ctx.display.height()
         self.ctx.input.touch.y_regions = Page.y_keypad_map
 
         # draw dividers and outline
@@ -816,6 +816,9 @@ class Menu:
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             offset_y = Page.y_keypad_map[i + 1] - Page.y_keypad_map[i]
             offset_y -= len(menu_item_lines) * FONT_HEIGHT
+            if i == len(self.menu_view) - 1:
+                # Compensate for the expanded last region
+                offset_y -= DEFAULT_PADDING
             offset_y //= 2
             offset_y += Page.y_keypad_map[i]
             fg_color = (
@@ -902,15 +905,16 @@ def choose_len_mnemonic(ctx):
     submenu = Menu(
         ctx,
         [
-            (t("12 words"), lambda: MENU_EXIT),
-            (t("24 words"), lambda: MENU_EXIT),
-            (t("Back"), lambda: MENU_EXIT),
+            (t("12 words"), lambda: 12),
+            (t("24 words"), lambda: 24),
+            cta_back(lambda: None),
         ],
     )
-    index, _ = submenu.run_loop()
+    _, num_words = submenu.run_loop()
     ctx.display.clear()
-    if index == 0:
-        return 12
-    if index == 1:
-        return 24
-    return None
+    return num_words
+
+
+def cta_back(status=lambda: MENU_EXIT, label=t("Back")):
+    """Reusable 'call-to-action: go back'.  Currently a menu item tuple"""
+    return ("< " + label, status)

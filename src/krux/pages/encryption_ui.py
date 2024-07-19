@@ -21,7 +21,8 @@
 # THE SOFTWARE.
 
 from ..display import BOTTOM_PROMPT_LINE
-from ..krux_settings import t, Settings, AES_BLOCK_SIZE
+from ..krux_settings import t, Settings
+from ..encryption import AES_BLOCK_SIZE
 from . import (
     Page,
     Menu,

@@ -28,7 +28,7 @@ import hashlib
 import ucryptolib
 from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
-from .krux_settings import Settings, PBKDF2_HMAC_ECB, PBKDF2_HMAC_CBC, AES_BLOCK_SIZE
+from .krux_settings import Settings, PBKDF2_HMAC_ECB, PBKDF2_HMAC_CBC
 from embit.wordlists.bip39 import WORDLIST
 
 
@@ -47,6 +47,7 @@ VERSION_NUMBER = {
     "AES-CBC": PBKDF2_HMAC_CBC,
 }
 
+AES_BLOCK_SIZE = 16
 QR_CODE_ITER_MULTIPLE = 10000
 
 
