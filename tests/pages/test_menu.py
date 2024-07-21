@@ -29,6 +29,7 @@ def test_run_loop(mocker, m5stickv):
             ("Longer Option", lambda: MENU_SHUTDOWN),
             ("The Longest Option", exception_raiser),
         ],
+        back_label=None,
     )
 
     ctx.input.wait_for_button.side_effect = [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]
@@ -79,6 +80,7 @@ def test_run_loop_on_amigo_tft(mocker, amigo):
             ("Longer Option", lambda: MENU_SHUTDOWN),
             ("The Longest Option", exception_raiser),
         ],
+        back_label=None,
     )
 
     ctx.input.wait_for_button.side_effect = [

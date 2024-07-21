@@ -22,7 +22,7 @@
 
 import board
 import gc
-from . import Page, Menu, MENU_EXIT, MENU_CONTINUE, cta_back
+from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
 from ..sd_card import SDHandler
 from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
@@ -56,8 +56,8 @@ class FileManager(Page):
         while True:
             # if is a dir then list all files in it
             if SDHandler.dir_exists(path):
-                items = []
-                menu_items = []
+                items = []  # simple reference for the files shown on the menu_items
+                menu_items = []  # the user menu to interact
 
                 if path != SD_ROOT_PATH:
                     items.append("..")
@@ -115,7 +115,6 @@ class FileManager(Page):
 
                 # We need to add this option because /sd can be empty!
                 items.append("Back")
-                menu_items.append(cta_back())
 
                 submenu = Menu(self.ctx, menu_items)
                 index, _ = submenu.run_loop()

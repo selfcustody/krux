@@ -22,7 +22,7 @@
 
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY, cta_back
+from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
 from ..qr import get_size
@@ -414,8 +414,7 @@ class SeedQRView(Page):
                     ),
                 )
             )
-        qr_menu.append(cta_back())
-        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT)
+        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT, back_label=None)
         submenu.run_loop()
         return MENU_CONTINUE
         # return MENU_EXIT  # Use this to exit QR Viewer after saving
@@ -487,9 +486,8 @@ class SeedQRView(Page):
                     ),
                 ),
                 (t("Print to QR"), printer_func),
-                cta_back(label=t("Back to Menu")),
             ]
-            submenu = Menu(self.ctx, qr_menu)
+            submenu = Menu(self.ctx, qr_menu, back_label=t("Back to Menu"))
             _, status = submenu.run_loop()
             if status == MENU_EXIT:
                 return MENU_CONTINUE

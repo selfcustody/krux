@@ -37,7 +37,6 @@ from . import (
     ESC_KEY,
     LETTERS,
     choose_len_mnemonic,
-    cta_back,
 )
 
 DIGITS = "0123456789"
@@ -64,6 +63,7 @@ class Login(Page):
                     (t("About"), self.about),
                     (t("Shutdown"), self.shutdown),
                 ],
+                back_label=None,
             ),
         )
 
@@ -75,7 +75,6 @@ class Login(Page):
                 (t("Via Camera"), self.load_key_from_camera),
                 (t("Via Manual Input"), self.load_key_from_manual_input),
                 (t("From Storage"), self.load_mnemonic_from_storage),
-                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -93,7 +92,6 @@ class Login(Page):
                     "Tiny Seed",
                     self.load_key_from_tiny_seed_image,
                 ),
-                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -110,7 +108,6 @@ class Login(Page):
                 (t("Word Numbers"), self.pre_load_key_from_digits),
                 ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
                 ("Stackbit 1248", self.load_key_from_1248),
-                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -137,7 +134,6 @@ class Login(Page):
                 (t("Via Words"), lambda: self.load_key_from_text(new=True)),
                 (t("Via D6"), self.new_key_from_dice),
                 (t("Via D20"), lambda: self.new_key_from_dice(True)),
-                cta_back(),
             ],
         )
         index, status = submenu.run_loop()
@@ -245,7 +241,6 @@ class Login(Page):
                     (t("Load Wallet"), lambda: None),
                     (t("Passphrase"), lambda: None),
                     (t("Customize"), lambda: None),
-                    cta_back(),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
@@ -552,7 +547,6 @@ class Login(Page):
                 (t("Decimal"), self.load_key_from_digits),
                 (t("Hexadecimal"), self.load_key_from_hexadecimal),
                 (t("Octal"), self.load_key_from_octal),
-                cta_back(),
             ],
         )
         index, status = submenu.run_loop()

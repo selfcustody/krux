@@ -309,6 +309,7 @@ class DiceEntropy(Page):
                     (t("Generate Mnemonic"), lambda: MENU_EXIT),
                 ],
                 offset=menu_offset,
+                back_label=None,
             )
             index, _ = submenu.run_loop()
             if index == 0:
