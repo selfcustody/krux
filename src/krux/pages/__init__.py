@@ -108,8 +108,8 @@ class Page:
                     t("Load from SD card"),
                     None if not self.has_sd_card() else lambda: None,
                 ),
-                cta_back(lambda: None),
             ],
+            back_status=lambda: None,
         )
         index, _ = load_menu.run_loop()
         return index
@@ -569,9 +569,17 @@ class Menu:
     and invoke menu item callbacks that return a status
     """
 
-    def __init__(self, ctx, menu, offset=None, disable_statusbar=False):
+    def __init__(
+        self,
+        ctx,
+        menu,
+        offset=None,
+        disable_statusbar=False,
+        back_label=t("Back"),
+        back_status=lambda: MENU_EXIT,
+    ):
         self.ctx = ctx
-        self.menu = menu
+        self.menu = menu + [("< " + back_label, back_status)] if back_label else menu
         self.disable_statusbar = disable_statusbar
         if offset is None:
             # Default offset for status bar
@@ -907,14 +915,9 @@ def choose_len_mnemonic(ctx):
         [
             (t("12 words"), lambda: 12),
             (t("24 words"), lambda: 24),
-            cta_back(lambda: None),
         ],
+        back_status=lambda: None,
     )
     _, num_words = submenu.run_loop()
     ctx.display.clear()
     return num_words
-
-
-def cta_back(status=lambda: MENU_EXIT, label=t("Back")):
-    """Reusable 'call-to-action: go back'.  Currently a menu item tuple"""
-    return ("< " + label, status)
