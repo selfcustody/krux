@@ -34,7 +34,6 @@ from . import (
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
-    cta_back,
 )
 from .file_manager import SD_ROOT_PATH
 from ..format import generate_thousands_separator
@@ -55,7 +54,6 @@ class Tools(Page):
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("Wipe Device"), self.wipe_device),
-                    cta_back(),
                 ],
             ),
         )

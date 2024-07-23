@@ -27,7 +27,6 @@ from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
-    cta_back,
 )
 
 
@@ -42,7 +41,6 @@ class MnemonicsView(Page):
                 (t("QR Code"), self.qr_code_backup),
                 (t("Encrypted"), self.encrypt_mnemonic_menu),
                 (t("Other Formats"), self.other_backup_formats),
-                cta_back(),
             ],
         )
         submenu.run_loop()
@@ -57,7 +55,6 @@ class MnemonicsView(Page):
                 ("Compact SeedQR", lambda: self.display_seed_qr(True)),
                 ("SeedQR", self.display_seed_qr),
                 (t("Encrypted QR Code"), self.encrypt_qr_code),
-                cta_back(),
             ],
         )
         submenu.run_loop()
@@ -77,7 +74,6 @@ class MnemonicsView(Page):
                 (t("Numbers"), self.display_mnemonic_numbers),
                 ("Stackbit 1248", self.stackbit),
                 ("Tiny Seed", self.tiny_seed),
-                cta_back(),
             ],
         )
         submenu.run_loop()
@@ -149,7 +145,6 @@ class MnemonicsView(Page):
                         Utils.BASE_OCT_SUFFIX,
                     ),
                 ),
-                cta_back(),
             ],
         )
         submenu.run_loop()

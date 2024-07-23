@@ -34,7 +34,6 @@ from . import (
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
-    cta_back,
 )
 from .settings_page import DIGITS
 from ..key import SINGLESIG_SCRIPT_PURPOSE, MULTISIG_SCRIPT_PURPOSE
@@ -63,7 +62,6 @@ class PassphraseEditor(Page):
                 [
                     (t("Type BIP39 Passphrase"), self._load_passphrase),
                     (t("Scan BIP39 Passphrase"), self._load_qr_passphrase),
-                    cta_back(),
                 ],
                 disable_statusbar=True,
             )
@@ -135,7 +133,6 @@ class WalletSettings(Page):
                     ("Single/Multisig", lambda: None),
                     (t("Script Type"), (lambda: None) if not multisig else None),
                     (t("Account"), lambda: None),
-                    cta_back(),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
@@ -168,6 +165,7 @@ class WalletSettings(Page):
                 ("Testnet", lambda: None),
             ],
             disable_statusbar=True,
+            back_label=None,
         )
         index, _ = submenu.run_loop()
         return NETWORKS[TEST_TXT] if index == 1 else NETWORKS[MAIN_TXT]
@@ -181,6 +179,7 @@ class WalletSettings(Page):
                 (t("Multisig"), lambda: MENU_EXIT),
             ],
             disable_statusbar=True,
+            back_label=None,
         )
         index, _ = submenu.run_loop()
         return index == 1
@@ -196,6 +195,7 @@ class WalletSettings(Page):
                 ("Taproot - 86 (Experimental)", lambda: P2TR),
             ],
             disable_statusbar=True,
+            back_label=None,
         )
         _, script_type = submenu.run_loop()
         return script_type
