@@ -49,7 +49,7 @@ class Camera:
         self.initialized = False
         self.antiglare_enabled = False
         self.cam_id = sensor.get_id()
-        if self.cam_id == OV7740_ID:
+        if self.cam_id in (OV7740_ID, GC2145_ID):
             sensor.reset(freq=18200000)
             if board.config["type"] == "cube":
                 # Rotate camera 180 degrees on Cube
