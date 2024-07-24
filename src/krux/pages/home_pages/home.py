@@ -365,18 +365,18 @@ class Home(Page):
         title = t("Signed PSBT")
         if index == 0:
             # Sign to QR code
-            qr_signed_psbt, qr_format = signer.psbt_qr()
+            signed_psbt, qr_format = signer.psbt_qr()
 
             # memory management
             del signer
             gc.collect()
 
-            self.display_qr_codes(qr_signed_psbt, qr_format)
+            self.display_qr_codes(signed_psbt, qr_format)
 
             from ..utils import Utils
 
             utils = Utils(self.ctx)
-            utils.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
+            utils.print_standard_qr(signed_psbt, qr_format, title, width=45)
             return MENU_CONTINUE
 
         # index == 1: Sign to SD card
@@ -393,9 +393,14 @@ class Home(Page):
         gc.collect()
 
         if psbt_filename and psbt_filename != ESC_KEY:
-            with open("/sd/" + psbt_filename, "wb") as f:
-                # Write PSBT data directly to the file
-                signer.psbt.write_to(f)
+            if signer.is_b64_file:
+                signed_psbt, _ = signer.psbt_qr()
+                with open("/sd/" + psbt_filename, "w") as f:
+                    f.write(signed_psbt)
+            else:
+                with open("/sd/" + psbt_filename, "wb") as f:
+                    # Write PSBT data directly to the file
+                    signer.psbt.write_to(f)
             self.flash_text(t("Saved to SD card") + ":\n%s" % psbt_filename)
 
         return MENU_CONTINUE

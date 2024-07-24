@@ -55,23 +55,34 @@ class PSBTSigner:
         self.ur_type = None
         self.qr_format = qr_format
         self.policy = None
+        self.is_b64_file = False
+
         # Parse the PSBT
         if psbt_filename:
             gc.collect()
             from .sd_card import SD_PATH
 
+            file_path = "/%s/%s" % (SD_PATH, psbt_filename)
             try:
-                file_path = "/%s/%s" % (SD_PATH, psbt_filename)
-                with open(file_path, "rb") as file:
-                    self.psbt = PSBT.read_from(file, compress=1)
-                    try:
-                        self.validate()
-                    except:
-                        # Legacy will fail to get policy from compressed PSBT
-                        # so we load it uncompressed
-                        self.policy = None  # Reset policy
-                        file.seek(0)  # Reset the file pointer to the beginning
-                        self.psbt = PSBT.read_from(file)
+                self.is_b64_file = self.file_is_base64_encoded(file_path)
+                if self.is_b64_file:
+                    # BlueWallet exports PSBTs as base64 encoded files
+                    from .sd_card import SDHandler
+
+                    with SDHandler() as sd:
+                        psbt_data = sd.read(psbt_filename)
+                    self.psbt = PSBT.parse(base_decode(psbt_data, 64))
+                else:
+                    with open(file_path, "rb") as file:
+                        self.psbt = PSBT.read_from(file, compress=1)
+                        try:
+                            self.validate()
+                        except:
+                            # Legacy will fail to get policy from compressed PSBT
+                            # so we load it uncompressed
+                            self.policy = None  # Reset policy
+                            file.seek(0)  # Reset the file pointer to the beginning
+                            self.psbt = PSBT.read_from(file)
                 self.base_encoding = 64  # In case it is exported as QR code
             except Exception as e:
                 raise ValueError("Error loading PSBT file: %s" % e)
@@ -113,6 +124,24 @@ class PSBTSigner:
                 self.validate()
             except Exception as e:
                 raise ValueError("Invalid PSBT: %s" % e)
+
+    def file_is_base64_encoded(self, file_path, chunk_size=64):
+        """Checks if a file is base64 encoded"""
+        try:
+            with open(file_path, "rb") as file:
+                chunk = file.read(chunk_size)
+                # Check if chunk length is divisible by 4
+                if len(chunk) % 4 != 0:
+                    return False
+                try:
+                    # Try to decode the chunk as base64
+                    base_decode(chunk, 64)
+                    return True
+                except Exception:
+                    return False
+        except Exception as e:
+            print("Error opening file:", e)
+            return False
 
     def validate(self):
         """Validates the PSBT"""
