@@ -77,7 +77,11 @@ class EncryptionKey(Page):
 
     def load_qr_encryption_key(self):
         """Loads and returns a key from a QR code"""
-        data, _ = self.capture_qr_code()
+
+        from .qr_capture import QRCodeCapture
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, _ = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load key"))
             return None

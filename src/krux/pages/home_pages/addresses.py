@@ -142,7 +142,10 @@ class Addresses(Page):
 
     def scan_address(self, addr_type=0):
         """Handler for the 'receive' or 'change' menu item"""
-        data, qr_format = self.capture_qr_code()
+        from ..qr_capture import QRCodeCapture
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, qr_format = qr_capture.qr_capture_loop()
         if data is None or qr_format != FORMAT_NONE:
             self.flash_error(t("Failed to load address"))
             return MENU_CONTINUE
