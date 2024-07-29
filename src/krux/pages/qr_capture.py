@@ -119,7 +119,7 @@ class QRCodeCapture(Page):
 
             if new_part is not None and new_part != previous_part:
                 self.update_progress(parser, new_part, previous_part)
-                previous_part = new_part
+                previous_part = new_part if parser.format != FORMAT_UR else None
                 new_part = None
 
             img = self.ctx.camera.snapshot()
