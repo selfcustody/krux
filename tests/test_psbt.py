@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock
+from .shared_mocks import MockFile, mock_open
 
 
 @pytest.fixture
@@ -233,65 +233,6 @@ def tdata(mocker):
     )
 
 
-class MockFile:
-    """Custom mock file class that supports read, write, seek, and other file methods"""
-
-    def __init__(self, data=b""):
-        self.data = data if isinstance(data, bytes) else data.encode()
-        self.position = 0
-        self.write_data = bytearray()
-        self.mode = "rb"
-        self.file = MagicMock()
-        self.file.read.side_effect = self.read
-        self.file.write.side_effect = self.write
-        self.file.seek.side_effect = self.seek
-
-    def set_mode(self, mode):
-        self.mode = mode
-        if "b" not in mode:
-            self.write_data = ""
-
-    def seek(self, pos):
-        self.position = pos
-
-    def read(self, size=None):
-        if size is None:
-            size = len(self.data) - self.position
-        result = self.data[self.position : self.position + size]
-        self.position += size
-        if "b" not in self.mode:
-            return result.decode()
-        return result
-
-    def write(self, content):
-        if "b" not in self.mode:
-            if isinstance(content, str):
-                self.write_data += content
-            else:
-                raise TypeError("write() argument must be str")
-        else:
-            if isinstance(content, bytearray) or isinstance(content, bytes):
-                self.write_data.extend(content)
-            else:
-                raise TypeError("A bytes-like object is required, not 'str'")
-        return len(content)
-
-    def __enter__(self):
-        self.position = 0
-        return self.file
-
-    def __exit__(self, *args):
-        pass
-
-
-def mock_open(mock_file):
-    def _open(file, mode="r", *args, **kwargs):
-        mock_file.set_mode(mode)
-        return mock_file
-
-    return _open
-
-
 def test_init_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
@@ -334,7 +275,7 @@ def test_init_singlesig_from_sdcard(mocker, m5stickv, tdata):
     from krux.psbt import PSBTSigner
     from krux.key import Key
     from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
     cases = [
@@ -348,6 +289,19 @@ def test_init_singlesig_from_sdcard(mocker, m5stickv, tdata):
         mocker.patch("builtins.open", mock_open(MockFile(case[0])))
         signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
         assert isinstance(signer, PSBTSigner)
+
+
+def test_init_empty_file_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    mocker.patch("builtins.open", mock_open(MockFile()))
+    with pytest.raises(ValueError):
+        PSBTSigner(wallet, None, FORMAT_NONE, "dummy.psbt")
 
 
 def test_init_multisig(mocker, m5stickv, tdata):
@@ -413,6 +367,22 @@ def test_init_fails_on_invalid_psbt(mocker, m5stickv, tdata):
     for case in cases:
         with pytest.raises(ValueError):
             PSBTSigner(wallet, case[0], case[1])
+
+
+def test_init_fails_on_invalid_psbt_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from ur.ur import UR
+    from krux.psbt import PSBTSigner
+    from krux.key import Key
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_UR
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+
+    mock_file = MockFile("thisisnotavalidpsbt")
+    mocker.patch("builtins.open", return_value=mock_file)
+    with pytest.raises(ValueError):
+        PSBTSigner(wallet, None, FORMAT_NONE, "dummy.psbt")
 
 
 def test_sign_singlesig(mocker, m5stickv, tdata):

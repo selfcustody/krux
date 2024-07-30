@@ -127,20 +127,19 @@ class PSBTSigner:
 
     def file_is_base64_encoded(self, file_path, chunk_size=64):
         """Checks if a file is base64 encoded"""
-        try:
-            with open(file_path, "rb") as file:
-                chunk = file.read(chunk_size)
-                # Check if chunk length is divisible by 4
-                if not chunk or len(chunk) % 4 != 0:
-                    return False
-                try:
-                    # Try to decode the chunk as base64
-                    base_decode(chunk, 64)
-                    return True
-                except Exception:
-                    return False
-        except Exception:
-            return False
+        with open(file_path, "rb") as file:
+            chunk = file.read(chunk_size)
+            if not chunk:
+                raise ValueError("Empty file")
+            # Check if chunk length is divisible by 4
+            if len(chunk) % 4 != 0:
+                return False
+            try:
+                # Try to decode the chunk as base64
+                base_decode(chunk, 64)
+                return True
+            except Exception:
+                return False
 
     def validate(self):
         """Validates the PSBT"""

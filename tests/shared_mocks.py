@@ -1,7 +1,67 @@
 import pytest
 from unittest import mock
+from unittest.mock import MagicMock
 import pyqrcode
 import zlib
+
+
+class MockFile:
+    """Custom mock file class that supports read, write, seek, and other file methods"""
+
+    def __init__(self, data=b""):
+        self.data = data if isinstance(data, bytes) else data.encode()
+        self.position = 0
+        self.write_data = bytearray()
+        self.mode = "rb"
+        self.file = MagicMock()
+        self.file.read.side_effect = self.read
+        self.file.write.side_effect = self.write
+        self.file.seek.side_effect = self.seek
+
+    def set_mode(self, mode):
+        self.mode = mode
+        if "b" not in mode:
+            self.write_data = ""
+
+    def seek(self, pos):
+        self.position = pos
+
+    def read(self, size=None):
+        if size is None:
+            size = len(self.data) - self.position
+        result = self.data[self.position : self.position + size]
+        self.position += size
+        if "b" not in self.mode:
+            return result.decode()
+        return result
+
+    def write(self, content):
+        if "b" not in self.mode:
+            if isinstance(content, str):
+                self.write_data += content
+            else:
+                raise TypeError("write() argument must be str")
+        else:
+            if isinstance(content, bytearray) or isinstance(content, bytes):
+                self.write_data.extend(content)
+            else:
+                raise TypeError("A bytes-like object is required, not 'str'")
+        return len(content)
+
+    def __enter__(self):
+        self.position = 0
+        return self.file
+
+    def __exit__(self, *args):
+        pass
+
+
+def mock_open(mock_file):
+    def _open(file, mode="r", *args, **kwargs):
+        mock_file.set_mode(mode)
+        return mock_file
+
+    return _open
 
 
 class DeflateIO:
