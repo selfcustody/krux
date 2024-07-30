@@ -264,7 +264,6 @@ class MockFile:
         return result
 
     def write(self, content):
-        print("mode", self.mode)
         if "b" not in self.mode:
             if isinstance(content, str):
                 self.write_data += content
