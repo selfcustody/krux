@@ -209,11 +209,13 @@ class Home(Page):
 
         # If load_method == LOAD_FROM_SD
         from ..utils import Utils
-        from ...sd_card import PSBT_FILE_EXTENSION
+        from ...sd_card import PSBT_FILE_EXTENSION, B64_PSBT_FILE_EXTENSION
 
         utils = Utils(self.ctx)
         psbt_filename, _ = utils.load_file(
-            PSBT_FILE_EXTENSION, prompt=False, only_get_filename=True
+            [PSBT_FILE_EXTENSION, B64_PSBT_FILE_EXTENSION],
+            prompt=False,
+            only_get_filename=True,
         )
         return (None, FORMAT_NONE, psbt_filename)
 
@@ -232,12 +234,35 @@ class Home(Page):
         index, _ = sign_menu.run_loop()
         return index
 
-    def sign_psbt(self):
-        """Handler for the 'sign psbt' menu item"""
+    def _format_psbt_file_extension(self, psbt_filename=""):
+        """Formats the PSBT filename"""
         from ...sd_card import (
             PSBT_FILE_EXTENSION,
+            B64_PSBT_FILE_EXTENSION,
             SIGNED_FILE_SUFFIX,
         )
+        from ..file_operations import SaveFile
+
+        if psbt_filename.endswith(B64_PSBT_FILE_EXTENSION):
+            # Remove chained extensions
+            psbt_filename = psbt_filename[: -len(B64_PSBT_FILE_EXTENSION)]
+            if psbt_filename.endswith(PSBT_FILE_EXTENSION):
+                psbt_filename = psbt_filename[: -len(PSBT_FILE_EXTENSION)]
+            extension = PSBT_FILE_EXTENSION + B64_PSBT_FILE_EXTENSION
+        else:
+            extension = PSBT_FILE_EXTENSION
+
+        save_page = SaveFile(self.ctx)
+        psbt_filename = save_page.set_filename(
+            psbt_filename,
+            "QRCode",
+            SIGNED_FILE_SUFFIX,
+            extension,
+        )
+        return psbt_filename
+
+    def sign_psbt(self):
+        """Handler for the 'sign psbt' menu item"""
 
         # Warns in case multisig wallet descriptor is not loaded
         if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
@@ -365,37 +390,33 @@ class Home(Page):
         title = t("Signed PSBT")
         if index == 0:
             # Sign to QR code
-            qr_signed_psbt, qr_format = signer.psbt_qr()
+            signed_psbt, qr_format = signer.psbt_qr()
 
             # memory management
             del signer
             gc.collect()
 
-            self.display_qr_codes(qr_signed_psbt, qr_format)
+            self.display_qr_codes(signed_psbt, qr_format)
 
             from ..utils import Utils
 
             utils = Utils(self.ctx)
-            utils.print_standard_qr(qr_signed_psbt, qr_format, title, width=45)
+            utils.print_standard_qr(signed_psbt, qr_format, title, width=45)
             return MENU_CONTINUE
 
         # index == 1: Sign to SD card
-        from ..file_operations import SaveFile
-
-        save_page = SaveFile(self.ctx)
-        psbt_filename = save_page.set_filename(
-            psbt_filename,
-            "QRCode",
-            SIGNED_FILE_SUFFIX,
-            PSBT_FILE_EXTENSION,
-        )
-        del save_page
+        psbt_filename = self._format_psbt_file_extension(psbt_filename)
         gc.collect()
 
         if psbt_filename and psbt_filename != ESC_KEY:
-            with open("/sd/" + psbt_filename, "wb") as f:
-                # Write PSBT data directly to the file
-                signer.psbt.write_to(f)
+            if signer.is_b64_file:
+                signed_psbt, _ = signer.psbt_qr()
+                with open("/sd/" + psbt_filename, "w") as f:
+                    f.write(signed_psbt)
+            else:
+                with open("/sd/" + psbt_filename, "wb") as f:
+                    # Write PSBT data directly to the file
+                    signer.psbt.write_to(f)
             self.flash_text(t("Saved to SD card") + ":\n%s" % psbt_filename)
 
         return MENU_CONTINUE
