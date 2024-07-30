@@ -207,6 +207,15 @@ def parse_wallet(wallet_data, allow_assumption=None):
         except:
             pass
 
+        # Try to parse as a Crypto-Account type
+        try:
+            account = urtypes.crypto.Account.from_cbor(
+                wallet_data.cbor
+            ).output_descriptors[0]
+            return Descriptor.from_string(account.descriptor()), None
+        except:
+            pass
+
         # Treat the UR as a generic UR bytes object and extract the data for further processing
         wallet_data = urtypes.Bytes.from_cbor(wallet_data.cbor).data
 

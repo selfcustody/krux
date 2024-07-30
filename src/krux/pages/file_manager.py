@@ -61,7 +61,7 @@ class FileManager(Page):
 
                 if path != SD_ROOT_PATH:
                     items.append("..")
-                    menu_items.append(("..", lambda: MENU_EXIT))
+                    menu_items.append(("../", lambda: MENU_EXIT))
 
                 # sorts by name ignorecase
                 dir_files = sorted(os.listdir(path), key=str.lower)
@@ -78,8 +78,10 @@ class FileManager(Page):
 
                 del dir_files
 
-                # show sorted folders first than sorted files
-                for filename in directories + files:
+                # show sorted folders first then sorted files
+                for i, filename in enumerate(directories + files):
+                    is_directory = i < len(directories)
+
                     extension_match = False
                     if isinstance(file_extension, str):
                         # No extension filter or matches
@@ -91,18 +93,20 @@ class FileManager(Page):
                                 extension_match = True
                                 break
 
-                    if (
-                        extension_match
-                        # Is a directory
-                        or SDHandler.dir_exists(path + "/" + filename)
-                    ):
+                    if extension_match or is_directory:
                         items.append(filename)
-                        display_filename = filename
-                        if len(filename) >= custom_start_digits + 2 + custom_end_digts:
+                        display_filename = filename + "/" if is_directory else filename
+
+                        if (
+                            len(display_filename)
+                            >= custom_start_digits + 2 + custom_end_digts
+                        ):
                             display_filename = (
-                                filename[:custom_start_digits]
+                                display_filename[:custom_start_digits]
                                 + ".."
-                                + filename[len(filename) - custom_end_digts :]
+                                + display_filename[
+                                    len(display_filename) - custom_end_digts :
+                                ]
                             )
                         menu_items.append(
                             (
