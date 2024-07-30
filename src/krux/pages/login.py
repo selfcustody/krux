@@ -726,11 +726,16 @@ class Login(Page):
     def about(self):
         """Handler for the 'about' menu item"""
 
+        import board
         from ..metadata import VERSION
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            "Krux\n\n\n" + t("Version") + "\n%s" % VERSION
+            "Krux\n\n"
+            + t("Hardware")
+            + "\n%s\n\n" % board.config["type"]
+            + t("Version")
+            + "\n%s" % VERSION
         )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

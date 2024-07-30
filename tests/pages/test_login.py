@@ -1185,6 +1185,7 @@ def test_customization_while_loading_wallet(amigo, mocker):
 def test_about(mocker, m5stickv):
     import krux
     from krux.pages.login import Login
+    import board
     from krux.metadata import VERSION
     from krux.input import BUTTON_ENTER
 
@@ -1197,4 +1198,6 @@ def test_about(mocker, m5stickv):
     login.about()
 
     ctx.input.wait_for_button.assert_called_once()
-    ctx.display.draw_centered_text.assert_called_with("Krux\n\n\nVersion\n" + VERSION)
+    ctx.display.draw_centered_text.assert_called_with(
+        "Krux\n\nHardware\n" + board.config["type"] + "\n\nVersion\n" + VERSION
+    )
