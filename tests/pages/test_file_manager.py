@@ -6,7 +6,14 @@ from . import create_ctx
 def mock_file_operations(mocker):
     mocker.patch(
         "os.listdir",
-        new=mocker.MagicMock(return_value=["first_file", "second_file"]),
+        new=mocker.MagicMock(
+            return_value=[
+                "file1",  # third entry
+                "file2_has_a_long_name",  # fourth entry
+                "subdir2",  # second entry
+                "subdir1_has_a_long_name",  # first entry
+            ]
+        ),
     )
     mocker.patch("builtins.open", mocker.mock_open(read_data=""))
     mocker.patch("os.remove", mocker.mock_open(read_data=""))
@@ -18,19 +25,29 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
     import time
 
     BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # Move to second file
+        [BUTTON_PAGE]  # move to second entry, last directory
+        + [BUTTON_PAGE]  # move to third entry, first file
+        + [BUTTON_PAGE]  # move to fourth entry, last file
         + [BUTTON_ENTER]  # Check file details
         + [BUTTON_ENTER]  # Leave file details
-        + [BUTTON_PAGE]  # Go to "back"
+        + [BUTTON_PAGE]  # move to Back
         + [BUTTON_ENTER]  # Leave file explorer
     )
 
     def mock_localtime(timestamp):
         return time.gmtime(timestamp)
 
+    # selected file has this timestamp
     mocker.patch("time.localtime", side_effect=mock_localtime)
+
+    # to view this directory, selected file isn't a directory
     mocker.patch(
         "krux.sd_card.SDHandler.dir_exists", mocker.MagicMock(side_effect=[True, False])
+    )
+    # first 2 entries are files, next 2 are directories
+    mocker.patch(
+        "krux.sd_card.SDHandler.file_exists",
+        mocker.MagicMock(side_effect=[True, True, False, False]),
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     file_manager = FileManager(ctx)
@@ -41,8 +58,34 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "second_file\n\nSize: 1.1 KB\n\nCreated: 1970-01-01 00:00\n\nModified: 1970-01-01 00:00"
+                "file2_has_a_long_name\n\nSize: 1.1 KB\n\nCreated: 1970-01-01 00:00\n\nModified: 1970-01-01 00:00"
             )
+        ]
+    )
+
+
+def test_files_and_folders_with_long_filenames(m5stickv, mocker, mock_file_operations):
+    from krux.pages.file_manager import FileManager
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    # to view this directory
+    mocker.patch(
+        "krux.sd_card.SDHandler.dir_exists", mocker.MagicMock(side_effect=[True])
+    )
+    # first 2 entries are files, next 2 are directories
+    mocker.patch(
+        "krux.sd_card.SDHandler.file_exists",
+        mocker.MagicMock(side_effect=[True, True, False, False]),
+    )
+    ctx = create_ctx(mocker, ([BUTTON_PAGE_PREV, BUTTON_ENTER]))  # to back and out
+    file_manager = FileManager(ctx)
+    file_manager.select_file()
+    ctx.display.to_lines.assert_has_calls(
+        [
+            mocker.call("subdi..ong_name/"),
+            mocker.call("subdir2/"),
+            mocker.call("file1"),
+            mocker.call("file2..long_name"),
         ]
     )
 
