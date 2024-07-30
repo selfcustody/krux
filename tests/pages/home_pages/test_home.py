@@ -624,13 +624,22 @@ def test_sign_psbt(mocker, m5stickv, tdata):
     # [7] Button Sequence
     # [8] Signed PSBT Data exported to SD card
 
-    PSBT_FILE_NAME = "test.psbt"
-    SIGNED_PSBT_FILE_NAME = "test-signed.psbt"
+    PSBT_FILE_NAME_NO_EXT = "test"
+    PSBT_FILE_NAME = PSBT_FILE_NAME_NO_EXT + PSBT_FILE_EXTENSION
+    B64_PSBT_FILE_NAME = (
+        PSBT_FILE_NAME_NO_EXT + PSBT_FILE_EXTENSION + B64_PSBT_FILE_EXTENSION
+    )
+    SIGNED_PSBT_FILE_NAME = PSBT_FILE_NAME_NO_EXT + "-signed" + PSBT_FILE_EXTENSION
+    B64_SIGNED_PSBT_FILE_NAME = (
+        PSBT_FILE_NAME_NO_EXT
+        + "-signed"
+        + PSBT_FILE_EXTENSION
+        + B64_PSBT_FILE_EXTENSION
+    )
 
     num = 0
     for case in cases:
         print("test_sign_psbt", num)
-        num += 1
         wallet = Wallet(case[0])
         if case[1] is not None:
             wallet.load(case[1], FORMAT_PMOFN)
@@ -654,13 +663,23 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         if case[8] is not None:
             mocker.patch.object(home, "has_sd_card", new=lambda: True)
             mock_utils = mocker.patch("krux.pages.utils.Utils")
-            mock_utils.return_value.load_file.return_value = (PSBT_FILE_NAME, None)
             mock_file = MockFile(case[2])
             mocker.patch("builtins.open", mock_open(mock_file))
-            mock_set_filename = mocker.patch(
-                "krux.pages.file_operations.SaveFile.set_filename",
-                return_value=SIGNED_PSBT_FILE_NAME,
-            )
+            if num == 12:  # test a B64 .psbt.txt file extension
+                mock_utils.return_value.load_file.return_value = (
+                    B64_PSBT_FILE_NAME,
+                    None,
+                )
+                mock_set_filename = mocker.patch(
+                    "krux.pages.file_operations.SaveFile.set_filename",
+                    return_value=B64_SIGNED_PSBT_FILE_NAME,
+                )
+            else:
+                mock_utils.return_value.load_file.return_value = (PSBT_FILE_NAME, None)
+                mock_set_filename = mocker.patch(
+                    "krux.pages.file_operations.SaveFile.set_filename",
+                    return_value=SIGNED_PSBT_FILE_NAME,
+                )
         home.sign_psbt()
 
         assert ctx.input.wait_for_button.call_count == len(case[7])
@@ -682,12 +701,20 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 prompt=False,
                 only_get_filename=True,
             )
-            mock_set_filename.assert_called_once_with(
-                PSBT_FILE_NAME,
-                "QRCode",
-                SIGNED_FILE_SUFFIX,
-                PSBT_FILE_EXTENSION,
-            )
+            if num == 12:  # test a B64 .psbt.txt file extension
+                mock_set_filename.assert_called_once_with(
+                    PSBT_FILE_NAME_NO_EXT,
+                    "QRCode",
+                    SIGNED_FILE_SUFFIX,
+                    PSBT_FILE_EXTENSION + B64_PSBT_FILE_EXTENSION,
+                )
+            else:
+                mock_set_filename.assert_called_once_with(
+                    PSBT_FILE_NAME,
+                    "QRCode",
+                    SIGNED_FILE_SUFFIX,
+                    PSBT_FILE_EXTENSION,
+                )
             assert mock_file.write_data == case[8]
             home.display_qr_codes.assert_not_called()
 
@@ -696,6 +723,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 mock_send_to_printer.assert_called()
             else:  # if declined to print
                 mock_send_to_printer.assert_not_called()
+        num += 1
 
     # TODO: Create cross test cases: Load from QR code, sign, save to SD card and vice versa
     # TODO: Import wallet descriptor and test signing
