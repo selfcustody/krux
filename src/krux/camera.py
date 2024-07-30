@@ -23,10 +23,7 @@
 
 import gc
 import sensor
-import lcd
 import board
-from .qr import QRPartParser
-from .wdt import wdt
 
 OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
 OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
