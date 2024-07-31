@@ -45,8 +45,9 @@ from ..display import (
     STATUS_BAR_HEIGHT,
 )
 from ..qr import to_qr_codes
-from ..krux_settings import t, Settings, DefaultWallet
+from ..krux_settings import t, Settings
 from ..sd_card import SDHandler
+from ..wallet import is_double_mnemonic
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -341,13 +342,18 @@ class Page:
                 done = True
             # interval done in input.py using timers
 
-    def display_mnemonic(self, mnemonic, suffix=""):
+    def display_mnemonic(self, mnemonic: str, suffix="", display_mnemonic: str = None):
         """Displays the 12 or 24-word list of words to the user"""
-        words = mnemonic.split(" ")
+        if display_mnemonic is None:
+            display_mnemonic = mnemonic
+        words = display_mnemonic.split(" ")
         word_list = [
             str(i + 1) + "." + ("  " if i + 1 < 10 else " ") + word
             for i, word in enumerate(words)
         ]
+
+        if is_double_mnemonic(mnemonic):
+            suffix += "*"
         header = "BIP39" + " " + suffix
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
