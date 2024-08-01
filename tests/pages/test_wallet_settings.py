@@ -37,47 +37,50 @@ def test_type_passphrase_esc(m5stickv, mocker):
 
 def test_qr_passphrase(m5stickv, mocker):
     from krux.pages.wallet_settings import PassphraseEditor
+    from krux.pages.qr_capture import QRCodeCapture
 
     TEST_VALUE = "Test value"
     QR_DATA = (TEST_VALUE, None)
     ctx = create_ctx(mocker, None)
     passphrase_editor = PassphraseEditor(ctx)
-    mocker.patch.object(
-        passphrase_editor, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
-    )
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (QR_DATA))
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     test_passphrase = passphrase_editor._load_qr_passphrase()
 
     assert test_passphrase == TEST_VALUE
+    qr_capturer.assert_called_once()
 
 
 def test_qr_passphrase_too_long(m5stickv, mocker):
     from krux.pages.wallet_settings import PassphraseEditor, MENU_CONTINUE
+    from krux.pages.qr_capture import QRCodeCapture
 
     TEST_VALUE = "Test value" * 25
     QR_DATA = (TEST_VALUE, None)
     ctx = create_ctx(mocker, None)
     passphrase_editor = PassphraseEditor(ctx)
-    mocker.patch.object(
-        passphrase_editor, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
-    )
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (QR_DATA))
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     test_passphrase = passphrase_editor._load_qr_passphrase()
 
     assert test_passphrase == MENU_CONTINUE
+    qr_capturer.assert_called_once()
 
 
 def test_qr_passphrase_fail(m5stickv, mocker):
     from krux.pages.wallet_settings import PassphraseEditor, MENU_CONTINUE
+    from krux.pages.qr_capture import QRCodeCapture
 
     TEST_VALUE = None
     QR_DATA = (TEST_VALUE, None)
     ctx = create_ctx(mocker, None)
     passphrase_editor = PassphraseEditor(ctx)
-    mocker.patch.object(
-        passphrase_editor, "capture_qr_code", mocker.MagicMock(return_value=QR_DATA)
-    )
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (QR_DATA))
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     test_passphrase = passphrase_editor._load_qr_passphrase()
 
     assert test_passphrase == MENU_CONTINUE
+    qr_capturer.assert_called_once()
 
 
 def test_change_multisig_changes(m5stickv, mocker, tdata):
