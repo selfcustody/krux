@@ -276,7 +276,7 @@ class MockStats:
 
 
 SNAP_SUCCESS = 0
-SNAP_HISTOGRAM_FAIL = 1
+SNAP_ANIMATED_QR = 1
 SNAP_FIND_QRCODES_FAIL = 2
 SNAP_REPEAT_QRCODE = 3
 DONT_FIND_ANYTHING = 4
@@ -284,16 +284,16 @@ DONT_FIND_ANYTHING = 4
 IMAGE_TO_HASH = b"\x12" * 1024  # Dummy bytes
 
 
-def snapshot_generator(outcome=SNAP_SUCCESS):
+def snapshot_generator(outcome=SNAP_SUCCESS, animated_qr=[]):
     count = 0
+    qr_frames = animated_qr
 
     def snapshot():
         nonlocal count
         count += 1
         m = mock.MagicMock()
-        if outcome == SNAP_HISTOGRAM_FAIL and count == 2:
-            m.get_histogram.return_value = "failed"
-            m.find_qrcodes.return_value = [Mockqrcode(str(count))]
+        if outcome == SNAP_ANIMATED_QR:
+            m.find_qrcodes.return_value = [Mockqrcode(qr_frames[count - 1])]
         elif outcome == SNAP_FIND_QRCODES_FAIL and count == 2:
             m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = []
