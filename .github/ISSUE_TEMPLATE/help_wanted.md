@@ -1,10 +1,10 @@
 ---
-name: 🥺 Help wanted
-about: Help needed to use a feature, perform or understand a procedure
-title: "[Help] the title of help wanted report"
-labels: help wanted
+name: 🥺 Other
+about: Anything not related to a bug or feature
+title: "[Other] summarize what is"
+labels: other
 assignees: ''
 
 ---
 
-#### Describe the problem you need help
+#### Describe what it is
