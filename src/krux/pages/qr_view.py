@@ -26,7 +26,7 @@ from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
 from ..qr import get_size
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH, THIN_SPACE
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -381,9 +381,8 @@ class SeedQRView(Page):
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
 
-        suggested_file_name = self.title.replace(" ", "_")
-        # Replaces thin spaces too
-        suggested_file_name = suggested_file_name.replace(" ", "_")
+        # Replaces spaces and thin spaces
+        suggested_file_name = self.title.replace(" ", "_").replace(THIN_SPACE, "_")
         if len(suggested_file_name) > 10:  # Crop file name
             suggested_file_name = suggested_file_name[:10]
 
@@ -424,7 +423,7 @@ class SeedQRView(Page):
         from .utils import Utils
 
         utils = Utils(self.ctx)
-        title = self.title.replace(" ", " ")  # Replaces thin spaces
+        title = self.title.replace(THIN_SPACE, " ")  # Replaces thin spaces
         utils.print_standard_qr(self.code, title=title, is_qr=True)
         # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
