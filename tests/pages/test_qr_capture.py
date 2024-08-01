@@ -1,6 +1,5 @@
 from . import create_ctx
 from ..test_qr import tdata
-from krux.qr import FORMAT_PMOFN
 
 from ..shared_mocks import (
     snapshot_generator,
@@ -13,6 +12,7 @@ from ..shared_mocks import (
 
 def test_capture_qr_code(mocker, m5stickv, tdata):
     from krux.pages.qr_capture import QRCodeCapture
+    from krux.qr import FORMAT_PMOFN
 
     ctx = create_ctx(mocker, None)
 
