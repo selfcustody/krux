@@ -81,6 +81,9 @@ SINGLESIG_SCRIPT_PURPOSE = {
 
 MULTISIG_SCRIPT_PURPOSE = 48
 
+FINGERPRINT_SYMBOL = "⊚"
+DERIVATION_PATH_SYMBOL = "↳"
+
 
 class Key:
     """Represents a BIP-39 mnemonic-based private key"""
@@ -136,15 +139,11 @@ class Key:
 
     def fingerprint_hex_str(self, pretty=False):
         """Returns the master key fingerprint in hex format"""
-        formatted_txt = "⊚ %s" if pretty else "%s"
-        return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
+        return Key.format_fingerprint(self.fingerprint, pretty)
 
     def derivation_str(self, pretty=False):
-        """Returns the derivation path for the Hierarchical Deterministic Wallet to
-        be displayed as string
-        """
-        formatted_txt = "↳ %s" if pretty else "%s"
-        return (formatted_txt % self.derivation).replace("h", HARDENED_STR_REPLACE)
+        """Returns the derivation path for the HD Wallet as string"""
+        return Key.format_derivation(self.derivation, pretty)
 
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
@@ -192,13 +191,13 @@ class Key:
     @staticmethod
     def format_derivation(derivation, pretty=False):
         """Helper method to display the derivation path formatted"""
-        formatted_txt = "↳ %s" if pretty else "%s"
+        formatted_txt = DERIVATION_PATH_SYMBOL + " %s" if pretty else "%s"
         return (formatted_txt % derivation).replace("h", HARDENED_STR_REPLACE)
 
     @staticmethod
     def format_fingerprint(fingerprint, pretty=False):
         """Helper method to display the fingerprint formatted"""
-        formatted_txt = "⊚ %s" if pretty else "%s"
+        formatted_txt = FINGERPRINT_SYMBOL + " %s" if pretty else "%s"
         return formatted_txt % hexlify(fingerprint).decode("utf-8")
 
     @staticmethod
