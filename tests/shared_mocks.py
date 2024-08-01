@@ -277,7 +277,7 @@ class MockStats:
 
 SNAP_SUCCESS = 0
 SNAP_ANIMATED_QR = 1
-SNAP_FIND_QRCODES_FAIL = 2
+SNAP_FIND_ANIMATED_SKIPPING = 2
 SNAP_REPEAT_QRCODE = 3
 DONT_FIND_ANYTHING = 4
 
@@ -294,17 +294,18 @@ def snapshot_generator(outcome=SNAP_SUCCESS, animated_qr=[]):
         m = mock.MagicMock()
         if outcome == SNAP_ANIMATED_QR:
             m.find_qrcodes.return_value = [Mockqrcode(qr_frames[count - 1])]
-        elif outcome == SNAP_FIND_QRCODES_FAIL and count == 2:
-            m.get_histogram.return_value = Mockhistogram()
-            m.find_qrcodes.return_value = []
-        elif outcome == SNAP_REPEAT_QRCODE and count == 2:
-            m.get_histogram.return_value = Mockhistogram()
-            m.find_qrcodes.return_value = [Mockqrcode(str(count - 1))]
+        elif outcome == SNAP_FIND_ANIMATED_SKIPPING:
+            # Skips every other frame
+            if count % 2 == 0:
+                m.find_qrcodes.return_value = []
+            else:
+                m.find_qrcodes.return_value = [Mockqrcode(qr_frames[(count - 1) // 2])]
+        elif outcome == SNAP_REPEAT_QRCODE:
+            # Send every frame two times
+            m.find_qrcodes.return_value = [Mockqrcode(qr_frames[count // 2])]
         elif outcome == DONT_FIND_ANYTHING:
-            m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = []
         else:
-            m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = [Mockqrcode(str(count))]
             m.to_bytes.return_value = IMAGE_TO_HASH
             m.find_blobs.return_value = [MockBlob()]
@@ -517,9 +518,17 @@ def mock_context(mocker):
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
+            light=None,
         )
     elif board.config["type"] == "amigo":
         return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=mocker.MagicMock(),
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
             display=mocker.MagicMock(
                 font_width=12,
                 font_height=24,
@@ -552,4 +561,5 @@ def mock_context(mocker):
                 max_menu_lines=mocker.MagicMock(return_value=7),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
+            light=None,
         )

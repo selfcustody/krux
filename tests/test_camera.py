@@ -1,13 +1,5 @@
 import pytest
 
-from .shared_mocks import (
-    snapshot_generator,
-    MockQRPartParser,
-    SNAP_SUCCESS,
-    SNAP_REPEAT_QRCODE,
-    SNAP_FIND_QRCODES_FAIL,
-)
-
 
 def test_init(mocker, m5stickv):
     from krux.camera import Camera
