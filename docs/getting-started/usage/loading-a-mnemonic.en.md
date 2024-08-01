@@ -25,10 +25,20 @@ It's unpleasant having to manually enter 12 or 24 words every time you want to u
 After opening your wallet via one of the manual methods you can use Krux to create QR codes of all types above, transcript them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic. Check out the [Printing section](../features/printing.md) for more information.
 You can also use [an offline QR code generator for this](https://iancoleman.io/bip39/) (ideally on an airgapped device).
 
-#### Tiny Seed
+#### Tiny Seed, OneKey KeyTag or Binary Grid
+Tiny Seed (and similar methods) directly encode a seed as binary, allowing for a very compact mnemonic storage method when compared to SeedQR and Compact SeedQR.
 
-[Tiny Seed](https://tinyseed.io/) is a compact metal plate mnemonic backup method.
-Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them. To properly scan them place the Tiny Seed over a black background and paint the punched bits black to increase contrast. You can also scan the thermally printed version, or a filled template. Find templates to scan or print [here](https://github.com/odudex/krux_binaries/tree/main/templates).
+Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them. (This feature is not available in Krux on Android)
+
+To properly scan them place the Tiny Seed (or similar) over a black background and paint the punched bits black to increase contrast. You can also scan the thermally printed version, or a filled template.
+
+[You can find some examples of seeds encoded with each of the supported formats here.](../features/tinyseed.md)
+
+Retail versions of this type of seed can be purchased here:
+[Tiny Seed](https://tinyseed.io/)
+[Onekey KeyTag](https://onekey.so/products/onekey-keytag/)
+
+Alternatively, you can find templates to scan or print [here](https://github.com/odudex/krux_binaries/tree/main/templates).
 
 ### Via Manual Input
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-125.png" align="right">

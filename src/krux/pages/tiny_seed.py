@@ -572,34 +572,40 @@ class TinyScanner(Page):
     binary_grid_settings = {
         'TinySeed' : {'xpad_factor' : (240 / (12 * 345)),
                       'ypad_factor' : (210 / (12 * 272)),
-                      'x_offset_tweak_amigo' : 0,
-                      'y_offset_tweak_amigo' : 0,
-                      'x_offset_tweak_p0' : 0,
-                      'y_offset_tweak_p0' : 0,
-                      'x_offset_tweak_p1' : 0,
-                      'y_offset_tweak_p1' : 0,
+                      'x_offset_factor_amigo_p0': 39 / 345,
+                      'y_offset_factor_amigo_p0': 44 / 272,
+                      'x_offset_factor_amigo_p1' : 42 / 345,
+                      'y_offset_factor_amigo_p1' : 41 / 272,
+                      'x_offset_factor_p0' : 65 / 345,
+                      'y_offset_factor_p0' : 17 / 272,
+                      'x_offset_factor_p1' : 62 / 345,
+                      'y_offset_factor_p1' : 22 / 272,
                       'aspect_high' : 1.3,
                       'aspect_low' : 1.1},
-        'OneKey KeyTag': {'xpad_factor': 250 / (13 * 345),
-                     'ypad_factor': 210 / (13 * 272),
-                     'x_offset_tweak_amigo': 5,
-                     'y_offset_tweak_amigo': 8,
-                     'x_offset_tweak_p0' : 3,
-                     'y_offset_tweak_p0' : 5,
-                     'x_offset_tweak_p0': 0,
-                     'y_offset_tweak_p0': 2,
+        'OneKey KeyTag': {'xpad_factor': 240 / (12 * 360),
+                     'ypad_factor': 256 / (12 * 360),
+                     'x_offset_factor_amigo_p0': 50/360,
+                     'y_offset_factor_amigo_p0': 70/335,
+                     'x_offset_factor_amigo_p1': 50/360,
+                     'y_offset_factor_amigo_p1': 70/335,
+                     'x_offset_factor_p0' : 60/360,
+                     'y_offset_factor_p0' : 40/335,
+                     'x_offset_factor_p1' : 60/360,
+                     'y_offset_factor_p1' : 40/335,
                      'aspect_high' : 1.1,
                      'aspect_low' : 0.9},
-        'GridPaper': {'xpad_factor': 250 / (13 * 345),
-                     'ypad_factor': 210 / (13 * 272),
-                     'x_offset_tweak_amigo': 5,
-                     'y_offset_tweak_amigo': 8,
-                     'x_offset_tweak_p0': 3,
-                     'y_offset_tweak_p0': 5,
-                     'x_offset_tweak_p0': 0,
-                     'y_offset_tweak_p0': 2,
-                     'aspect_high': 1.3,
-                     'aspect_low': 1.1},
+        'Binary Grid': {'xpad_factor': 1/14,
+                     'ypad_factor': 1/14,
+                     'x_offset_factor_amigo_p0': 1/14,
+                     'y_offset_factor_amigo_p0': 1/14,
+                     'x_offset_factor_amigo_p1': 1/14,
+                     'y_offset_factor_amigo_p1': 1/14,
+                     'x_offset_factor_p0': 1/14,
+                     'y_offset_factor_p0': 1/14,
+                     'x_offset_factor_p1': 1/14,
+                     'y_offset_factor_p1': 1/14,
+                     'aspect_high': 1.1,
+                     'aspect_low': 0.9},
     }
 
     grid_settings = None
@@ -624,18 +630,18 @@ class TinyScanner(Page):
         if not page:
             if board.config["type"] == "amigo":
                 # Amigo has mirrored coordinates
-                x_offset = rect_size[0] + (rect_size[2] * 39) / 345 + self.grid_settings['x_offset_tweak_amigo']
-                y_offset = rect_size[1] + (rect_size[3] * 44) / 272 + self.grid_settings['y_offset_tweak_amigo']
+                x_offset = rect_size[0] + rect_size[2] * self.grid_settings['x_offset_factor_amigo_p0']
+                y_offset = rect_size[1] + rect_size[3] * self.grid_settings['y_offset_factor_amigo_p0']
             else:
-                x_offset = rect_size[0] + (rect_size[2] * 65) / 345 + self.grid_settings['x_offset_tweak_p0']
-                y_offset = rect_size[1] + (rect_size[3] * 17) / 272 + self.grid_settings['y_offset_tweak_p0']
+                x_offset = rect_size[0] + rect_size[2] * self.grid_settings['x_offset_factor_p0']
+                y_offset = rect_size[1] + rect_size[3] * self.grid_settings['y_offset_tweak_p0']
         else:
             if board.config["type"] == "amigo":
-                x_offset = rect_size[0] + (rect_size[2] * 42) / 345 + self.grid_settings['x_offset_tweak_amigo']
-                y_offset = rect_size[1] + (rect_size[3] * 41) / 272 + self.grid_settings['y_offset_tweak_amigo']
+                x_offset = rect_size[0] + rect_size[2] * self.grid_settings['x_offset_factor_amigo_p1']
+                y_offset = rect_size[1] + rect_size[3] * self.grid_settings['y_offset_factor_amigo_p1']
             else:
-                x_offset = rect_size[0] + (rect_size[2] * 62) / 345 + self.grid_settings['x_offset_tweak_p1']
-                y_offset = rect_size[1] + (rect_size[3] * 22) / 272 + self.grid_settings['y_offset_tweak_p1']
+                x_offset = rect_size[0] + rect_size[2] * self.grid_settings['x_offset_factor_p1']
+                y_offset = rect_size[1] + rect_size[3] * self.grid_settings['y_offset_factor_p1']
         self.x_regions.append(int(x_offset))
         self.y_regions.append(int(y_offset))
         x_pad = rect_size[2] * self.grid_settings['xpad_factor']
