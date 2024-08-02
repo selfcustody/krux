@@ -9,3 +9,10 @@ The examples below have been crated so that you can test the workflow for scanni
 
 ### Binary Grid
 ![](../../img/tinyseed_binarygrid/binarygrid.jpg)
+
+## Size, Offset and Padding Reference
+If you have a different type of grid that you want to use, you will need to edit the offsets and padding numbers in tiny_seed.py
+
+You can match the pre-sets for supported key-types to the physical dimensions of the tag as shown below.
+
+![](../../img/tinyseed_binarygrid/size_reference.jpg)

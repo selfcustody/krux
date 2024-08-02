@@ -583,15 +583,15 @@ class TinyScanner(Page):
                       'aspect_high' : 1.3,
                       'aspect_low' : 1.1},
         'OneKey KeyTag': {'xpad_factor': 240 / (12 * 360),
-                     'ypad_factor': 256 / (12 * 360),
+                     'ypad_factor': 240 / (12 * 335),
                      'x_offset_factor_amigo_p0': 50/360,
-                     'y_offset_factor_amigo_p0': 70/335,
+                     'y_offset_factor_amigo_p0': 67/335,
                      'x_offset_factor_amigo_p1': 50/360,
-                     'y_offset_factor_amigo_p1': 70/335,
-                     'x_offset_factor_p0' : 60/360,
-                     'y_offset_factor_p0' : 40/335,
-                     'x_offset_factor_p1' : 60/360,
-                     'y_offset_factor_p1' : 40/335,
+                     'y_offset_factor_amigo_p1': 67/335,
+                     'x_offset_factor_p0' : 68/360,
+                     'y_offset_factor_p0' : 30/335,
+                     'x_offset_factor_p1' : 68/360,
+                     'y_offset_factor_p1' : 30/335,
                      'aspect_high' : 1.1,
                      'aspect_low' : 0.9},
         'Binary Grid': {'xpad_factor': 1/14,
@@ -634,7 +634,7 @@ class TinyScanner(Page):
                 y_offset = rect_size[1] + rect_size[3] * self.grid_settings['y_offset_factor_amigo_p0']
             else:
                 x_offset = rect_size[0] + rect_size[2] * self.grid_settings['x_offset_factor_p0']
-                y_offset = rect_size[1] + rect_size[3] * self.grid_settings['y_offset_tweak_p0']
+                y_offset = rect_size[1] + rect_size[3] * self.grid_settings['y_offset_factor_p0']
         else:
             if board.config["type"] == "amigo":
                 x_offset = rect_size[0] + rect_size[2] * self.grid_settings['x_offset_factor_amigo_p1']
