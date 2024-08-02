@@ -55,17 +55,22 @@ if [ "$1" == "build" ]; then
     if [ -z "$device" ]; then
         echo "Missing device"
     else
-        declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
-        sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
+        if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]||
+        [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]||[ "$device" == "maixpy_cube" ]; then
+            declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
+            sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
 
-        mkdir -p build
-        docker build . -t krux-builder --build-arg DEVICE=$device
+            mkdir -p build
+            docker build . -t krux-builder --build-arg DEVICE=$device
 
-        # Create a container to extract the built firmware
-        docker create --name extract-firmware krux-builder
-        docker cp extract-firmware:$BUILD_DIR/firmware.bin build/firmware.bin
-        docker cp extract-firmware:$BUILD_DIR/kboot.kfpkg build/kboot.kfpkg
-        docker rm extract-firmware
+            # Create a container to extract the built firmware
+            docker create --name extract-firmware krux-builder
+            docker cp extract-firmware:$BUILD_DIR/firmware.bin build/firmware.bin
+            docker cp extract-firmware:$BUILD_DIR/kboot.kfpkg build/kboot.kfpkg
+            docker rm extract-firmware
+        else
+            echo "Wrong device name, use maixpy_devicename"
+        fi
     fi
 elif [ "$1" == "flash" ]; then
     device="$2"
@@ -76,7 +81,7 @@ elif [ "$1" == "flash" ]; then
         if [ "$device" == "maixpy_m5stickv" ]; then
             # https://devicehunt.com/view/type/usb/vendor/0403/device/6001
             device_vendor_product_id="0403:6001"
-        elif [ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]; then
+        elif [ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]||[ "$device" == "maixpy_cube" ]; then
             # https://devicehunt.com/view/type/usb/vendor/0403/device/6010
             device_vendor_product_id="0403:6010"
         elif [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]; then
@@ -103,7 +108,7 @@ elif [ "$1" == "flash" ]; then
             # M5stickV has only one serial port
             # Bit has two serial ports and uses first for flash
             # Amigo has two ports and uses second port to flash
-            if [ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]; then
+            if [ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]||[ "$device" == "maixpy_cube" ]; then
                 usb_device_name_cmd="getdevice $device_vendor_product_id 2"
                 usb_device_name=$($usb_device_name_cmd)
                 if [ -z "$usb_device_name" ]; then
@@ -233,7 +238,7 @@ elif [ "$1" == "build-release" ]; then
     cp -f ktool-win.exe ../$release_dir/ktool-win.exe
     cd ..
 
-    devices=("maixpy_m5stickv" "maixpy_amigo" "maixpy_bit" "maixpy_dock" "maixpy_yahboom")
+    devices=("maixpy_m5stickv" "maixpy_amigo" "maixpy_bit" "maixpy_dock" "maixpy_yahboom" "maixpy_cube")
     for device in ${devices[@]}; do
         ./krux build $device
         mkdir -p $release_dir/$device

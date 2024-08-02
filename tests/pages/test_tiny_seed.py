@@ -3,7 +3,7 @@ from .home_pages.test_home import tdata, create_ctx
 
 
 def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
-    from krux.pages.home_pages.mnemonic_view import MnemonicsView
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -15,15 +15,17 @@ def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
         [
             BUTTON_PAGE,
             BUTTON_PAGE,
-            BUTTON_PAGE,
+            BUTTON_ENTER,  # Other
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_PAGE,
             BUTTON_ENTER,  # Open TinySeed
-            BUTTON_ENTER,  # go to page 2
+            BUTTON_ENTER,  # PG2
             BUTTON_ENTER,  # Leave
             BUTTON_ENTER,  # Print
             BUTTON_PAGE,  # Go to "Back"
+            BUTTON_ENTER,  # click on back to return Mnemonic Backup
+            BUTTON_PAGE,
             BUTTON_ENTER,  # click on back to return to home init screen
         ],
     ]
@@ -271,7 +273,7 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     assert " ".join(words) == TEST_12_WORDS
 
 
-def test_scan_tiny_seed_24w(m5stickv, mocker):
+def test_scan_tiny_seed_24w(all_devices, mocker):
     # This will be used when scanning 24 TinySeed
     # First scanned page will be loaded to be edited, then proceed to scan second page
     # Seed will be returned as its word index
@@ -317,65 +319,6 @@ def test_scan_tiny_seed_24w(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     mocker.patch.object(ctx.input, "page_event", new=lambda: False)
     mocker.patch.object(ctx.input, "page_prev_event", new=lambda: False)
-    ctx.input.enter_event = mocker.MagicMock(side_effect=ENTER_SEQ)
-    tiny_seed = TinyScanner(ctx)
-    mocker.patch.object(
-        tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
-    )
-    tiny_seed._detect_and_draw_punches = mocker.MagicMock(side_effect=NUMBERS_SEQUENCE)
-    words = tiny_seed.scanner(w24=True)
-
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert " ".join(words) == TEST_24_WORDS
-
-
-def test_scan_tiny_seed_24w_amigo(amigo, mocker):
-    # This will be used when scanning 24 TinySeed
-    # First scanned page will be loaded to be edited, then proceed to scan second page
-    # Seed will be returned as its word index
-    import time
-    from krux.pages.tiny_seed import TinyScanner
-    from krux.input import BUTTON_ENTER, PRESSED, RELEASED
-
-    BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
-    ENTER_SEQ = [False] + [True] + [False] * 3
-    TIME_STAMPS = (0, 1, 1000, 2000, 3000, 4000, 5000)
-    TINYSEED_RECTANGLE = (10, 10, 100, 100)
-    TEST_WORDS_NUMBERS_1_12 = [
-        1090,
-        792,
-        1005,
-        1978,
-        408,
-        569,
-        1498,
-        589,
-        192,
-        134,
-        617,
-        663,
-    ]
-    TEST_WORDS_NUMBERS_13_24 = [
-        1275,
-        1982,
-        1747,
-        978,
-        509,
-        1588,
-        1456,
-        15,
-        1592,
-        1612,
-        1056,
-        771,
-    ]
-    NUMBERS_SEQUENCE = [TEST_WORDS_NUMBERS_1_12] * 3 + [TEST_WORDS_NUMBERS_13_24] * 2
-    TEST_24_WORDS = "market glass laugh warm cream either robot end blood awful escape fan palm waste surge kick display shoe remove achieve shoulder siren loop gate"
-    mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    mocker.patch.object(ctx.input, "page_event", new=lambda: False)
-    mocker.patch.object(ctx.input, "page_prev_event", new=lambda: False)
-    mocker.patch.object(ctx.input, "touch_event", new=lambda: False)
     ctx.input.enter_event = mocker.MagicMock(side_effect=ENTER_SEQ)
     tiny_seed = TinyScanner(ctx)
     mocker.patch.object(

@@ -20,23 +20,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ..sd_card import SDHandler
 import uos
+from ..sd_card import SDHandler
+from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
-from ..themes import theme
 from ..qr import FORMAT_NONE
 from . import (
     Page,
     Menu,
     MENU_CONTINUE,
-    MENU_EXIT,
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from .file_manager import SD_ROOT_PATH, THOUSANDS_SEPARATOR
+from .file_manager import SD_ROOT_PATH
+from ..format import generate_thousands_separator
 
 
 class Tools(Page):
@@ -51,9 +51,9 @@ class Tools(Page):
                     (t("Check SD Card"), self.sd_check),
                     (t("Print Test QR"), self.print_test),
                     (t("Create QR Code"), self.create_qr),
+                    (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("Wipe Device"), self.wipe_device),
-                    (t("Back"), lambda: MENU_EXIT),
                 ],
             ),
         )
@@ -74,23 +74,22 @@ class Tools(Page):
                 self.ctx.display.draw_hcentered_text(
                     t("SD card")
                     + "\n\n"
-                    + t("Size: ")
-                    + "{:,}".format(sd_total_MB).replace(",", THOUSANDS_SEPARATOR)
+                    + t("Size:")
+                    + " "
+                    + generate_thousands_separator(sd_total_MB)
                     + " MB"
                     + "\n\n"
-                    + t("Used: ")
-                    + "{:,}".format(sd_total_MB - sd_free_MB).replace(
-                        ",", THOUSANDS_SEPARATOR
-                    )
+                    + t("Used:")
+                    + " "
+                    + generate_thousands_separator(sd_total_MB - sd_free_MB)
                     + " MB"
                     + "\n\n"
-                    + t("Free: ")
-                    + "{:,}".format(sd_free_MB).replace(",", THOUSANDS_SEPARATOR)
+                    + t("Free:")
+                    + " "
+                    + generate_thousands_separator(sd_free_MB)
                     + " MB"
                 )
-                if self.prompt(
-                    t("Explore files?"), self.ctx.display.bottom_prompt_line
-                ):
+                if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
                     from .file_manager import FileManager
 
                     file_manager = FileManager(self.ctx)
@@ -98,7 +97,7 @@ class Tools(Page):
                         select_file_handler=file_manager.show_file_details
                     )
         except OSError:
-            self.flash_text(t("SD card not detected"), theme.error_color)
+            self.flash_error(t("SD card not detected"))
 
         return MENU_CONTINUE
 
@@ -175,3 +174,15 @@ class Tools(Page):
             seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
             return seed_qr_view.display_qr(allow_export=True)
         return MENU_CONTINUE
+
+    def descriptor_addresses(self):
+        """Handler for the 'Descriptor Addresses' menu item"""
+        from .home_pages.wallet_descriptor import WalletDescriptor
+        from .home_pages.addresses import Addresses
+        from krux.wallet import Wallet
+
+        self.ctx.wallet = Wallet(None)
+        menu_result = WalletDescriptor(self.ctx).wallet()
+        if self.ctx.wallet.is_loaded():
+            menu_result = Addresses(self.ctx).addresses_menu()
+        return menu_result

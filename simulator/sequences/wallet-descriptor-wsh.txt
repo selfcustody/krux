@@ -1,0 +1,36 @@
+include _load-12-word-mnemonic.txt
+
+include set_to_multisig.txt
+
+# Navigate to Wallet Descriptor
+x2 press BUTTON_B
+x2 press BUTTON_A
+
+screenshot wallet-load-prompt.png
+
+#Load from QR code
+x2 press BUTTON_A
+
+qrcode specter-desktop-multisig-wallet-p1of8.png
+wait 0.1
+qrcode specter-desktop-multisig-wallet-p2of8.png
+wait 0.1
+qrcode specter-desktop-multisig-wallet-p3of8.png
+wait 0.1
+qrcode specter-desktop-multisig-wallet-p4of8.png
+wait 0.1
+qrcode specter-desktop-multisig-wallet-p5of8.png
+wait 0.1
+qrcode specter-desktop-multisig-wallet-p6of8.png
+wait 0.1
+qrcode specter-desktop-multisig-wallet-p7of8.png
+wait 0.1
+qrcode specter-desktop-multisig-wallet-p8of8.png
+wait 0.1
+
+screenshot wallet-wsh-load-prompt-fingerprints.png
+
+press BUTTON_A
+
+screenshot wallet-wsh-load-prompt-xpubs.png
+

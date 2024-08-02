@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
-import time
 from unittest import mock
 import pygame as pg
 
@@ -64,7 +63,7 @@ class PMUController:
         pass
 
     def get_battery_voltage(self):
-        return 3400
+        return 3820
 
     def get_usb_voltage(self):
         return 0

@@ -2,11 +2,17 @@
 
 
 def test_init(mocker, m5stickv):
-    from krux.krux_settings import Settings
+    from krux.krux_settings import Settings, SettingsNamespace
+    import pytest
 
     s = Settings()
 
     assert isinstance(s, Settings)
+
+    sn = SettingsNamespace()
+
+    with pytest.raises(NotImplementedError):
+        sn.label("test")
 
 
 def test_store_init(mocker, m5stickv):
@@ -186,7 +192,7 @@ def test_setting(mocker, m5stickv):
 
 def test_all_labels(mocker, m5stickv):
     from krux.krux_settings import (
-        BitcoinSettings,
+        DefaultWallet,
         I18nSettings,
         EncryptionSettings,
         PrinterSettings,
@@ -197,23 +203,33 @@ def test_all_labels(mocker, m5stickv):
         PersistSettings,
         ThemeSettings,
         TouchSettings,
-        EncoderSettings,
+        ButtonsSettings,
+        DisplayAmgSettings,
+        DisplaySettings,
+        HardwareSettings,
+        SecuritySettings,
+        Settings,
     )
 
-    bitcoin = BitcoinSettings()
+    wallet = DefaultWallet()
     i18n = I18nSettings()
-    encryption = EncryptionSettings()
-    printer = PrinterSettings()
     thermal = ThermalSettings()
     adafruit = AdafruitPrinterSettings()
     cnc = CNCSettings()
     gbrl = GRBLSettings()
-    persist = PersistSettings()
-    appearance = ThemeSettings()
+    printer = PrinterSettings()
+    buttons = ButtonsSettings()
     touch = TouchSettings()
-    encoder = EncoderSettings()
+    amigo_display = DisplayAmgSettings()
+    display = DisplaySettings()
+    hardware = HardwareSettings()
+    persist = PersistSettings()
+    encryption = EncryptionSettings()
+    appearance = ThemeSettings()
+    security = SecuritySettings()
+    settings = Settings()
 
-    assert bitcoin.label("network")
+    assert wallet.label("network")
     assert i18n.label("locale")
     assert encryption.label("version")
     assert printer.label("thermal")
@@ -225,4 +241,9 @@ def test_all_labels(mocker, m5stickv):
     assert appearance.label("theme")
     assert appearance.label("screensaver_time")
     assert touch.label("threshold")
-    assert encoder.label("debounce")
+    assert buttons.label("debounce")
+    assert amigo_display.label("flipped_x")
+    assert display.label("brightness")
+    assert hardware.label("printer")
+    assert security.label("auto_shutdown")
+    assert settings.label("persist")

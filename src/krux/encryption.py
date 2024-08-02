@@ -28,11 +28,12 @@ import hashlib
 import ucryptolib
 from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
-from .krux_settings import Settings, PBKDF2_HMAC_ECB, PBKDF2_HMAC_CBC, AES_BLOCK_SIZE
+from .krux_settings import Settings, PBKDF2_HMAC_ECB, PBKDF2_HMAC_CBC
 from embit.wordlists.bip39 import WORDLIST
 
 
 MNEMONICS_FILE = "seeds.json"
+FLASH_PATH = "/flash/"
 
 VERSION_MODE = {
     "AES-ECB": ucryptolib.MODE_ECB,
@@ -46,6 +47,7 @@ VERSION_NUMBER = {
     "AES-CBC": PBKDF2_HMAC_CBC,
 }
 
+AES_BLOCK_SIZE = 16
 QR_CODE_ITER_MULTIPLE = 10000
 
 
@@ -100,7 +102,7 @@ class MnemonicStorage:
         except:
             pass
         try:
-            with open("/flash/" + MNEMONICS_FILE, "r") as f:
+            with open(FLASH_PATH + MNEMONICS_FILE, "r") as f:
                 self.stored = json.loads(f.read())
         except:
             pass
@@ -175,13 +177,13 @@ class MnemonicStorage:
         else:
             try:
                 # load current MNEMONICS_FILE
-                with open("/flash/" + MNEMONICS_FILE, "r") as f:
+                with open(FLASH_PATH + MNEMONICS_FILE, "r") as f:
                     mnemonics = json.loads(f.read())
             except:
                 pass
             try:
                 # save the new MNEMONICS_FILE
-                with open("/flash/" + MNEMONICS_FILE, "w") as f:
+                with open(FLASH_PATH + MNEMONICS_FILE, "w") as f:
                     mnemonics[mnemonic_id] = {}
                     mnemonics[mnemonic_id]["version"] = VERSION_NUMBER[
                         Settings().encryption.version
@@ -208,7 +210,7 @@ class MnemonicStorage:
                 sd.write(MNEMONICS_FILE, contents)
         else:
             self.stored.pop(mnemonic_id)
-            with open("/flash/" + MNEMONICS_FILE, "w") as f:
+            with open(FLASH_PATH + MNEMONICS_FILE, "w") as f:
                 f.write(json.dumps(self.stored))
 
 

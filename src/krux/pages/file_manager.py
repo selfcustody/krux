@@ -24,13 +24,13 @@ import board
 import gc
 from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
 from ..sd_card import SDHandler
-from ..krux_settings import t, Settings
+from ..krux_settings import t
+from ..format import generate_thousands_separator, render_decimal_separator
 
 LIST_FILE_DIGITS = 9  # len on large devices per menu item
 LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
 
 SD_ROOT_PATH = "/sd"
-THOUSANDS_SEPARATOR = " "
 
 
 class FileManager(Page):
@@ -56,15 +56,32 @@ class FileManager(Page):
         while True:
             # if is a dir then list all files in it
             if SDHandler.dir_exists(path):
-                items = []
-                menu_items = []
+                items = []  # simple reference for the files shown on the menu_items
+                menu_items = []  # the user menu to interact
 
                 if path != SD_ROOT_PATH:
                     items.append("..")
-                    menu_items.append(("..", lambda: MENU_EXIT))
+                    menu_items.append(("../", lambda: MENU_EXIT))
 
-                dir_files = os.listdir(path)
+                # sorts by name ignorecase
+                dir_files = sorted(os.listdir(path), key=str.lower)
+
+                # separate directories from files
+                directories = []
+                files = []
+
                 for filename in dir_files:
+                    if SDHandler.file_exists(path + "/" + filename):
+                        files.append(filename)
+                    else:
+                        directories.append(filename)
+
+                del dir_files
+
+                # show sorted folders first then sorted files
+                for i, filename in enumerate(directories + files):
+                    is_directory = i < len(directories)
+
                     extension_match = False
                     if isinstance(file_extension, str):
                         # No extension filter or matches
@@ -76,18 +93,20 @@ class FileManager(Page):
                                 extension_match = True
                                 break
 
-                    if (
-                        extension_match
-                        # Is a directory
-                        or SDHandler.dir_exists(path + "/" + filename)
-                    ):
+                    if extension_match or is_directory:
                         items.append(filename)
-                        display_filename = filename
-                        if len(filename) >= custom_start_digits + 2 + custom_end_digts:
+                        display_filename = filename + "/" if is_directory else filename
+
+                        if (
+                            len(display_filename)
+                            >= custom_start_digits + 2 + custom_end_digts
+                        ):
                             display_filename = (
-                                filename[:custom_start_digits]
+                                display_filename[:custom_start_digits]
                                 + ".."
-                                + filename[len(filename) - custom_end_digts :]
+                                + display_filename[
+                                    len(display_filename) - custom_end_digts :
+                                ]
                             )
                         menu_items.append(
                             (
@@ -100,7 +119,6 @@ class FileManager(Page):
 
                 # We need to add this option because /sd can be empty!
                 items.append("Back")
-                menu_items.append((t("Back"), lambda: MENU_EXIT))
 
                 submenu = Menu(self.ctx, menu_items)
                 index, _ = submenu.run_loop()
@@ -129,10 +147,6 @@ class FileManager(Page):
 
         self.display_file(file)
         self.ctx.input.wait_for_button()
-        # if self.prompt(t("Delete File?"), self.ctx.display.bottom_prompt_line):
-        #     with SDHandler() as sd:
-        #         sd.delete(file)
-        #     return MENU_EXIT
         return MENU_CONTINUE
 
     def display_file(self, file):
@@ -145,28 +159,25 @@ class FileManager(Page):
         size_KB_fraction = str(int(size_KB * 100))[-2:]
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
+        format_datetime = " %s-%02d-%02d %02d:%02d"
         file = file[4:]  # remove "/sd/" prefix
-        decimal_separator = ","
-        if Settings().i18n.locale == "en-US":
-            decimal_separator = "."
 
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             file
             + "\n\n"
-            + t("Size: ")
-            + "{:,}".format(int(size_KB)).replace(",", THOUSANDS_SEPARATOR)
-            + decimal_separator
+            + t("Size:")
+            + " "
+            + generate_thousands_separator(int(size_KB))
+            + render_decimal_separator()
             + size_KB_fraction
             + " KB"
             + "\n\n"
-            + t("Created: ")
-            + "%s-%s-%s %s:%s"
-            % (created[0], created[1], created[2], created[3], created[4])
+            + t("Created:")
+            + format_datetime % created[:5]
             + "\n\n"
-            + t("Modified: ")
-            + "%s-%s-%s %s:%s"
-            % (modified[0], modified[1], modified[2], modified[3], modified[4])
+            + t("Modified:")
+            + format_datetime % modified[:5]
         )
 
         return file

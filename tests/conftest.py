@@ -1,8 +1,10 @@
 from Crypto.Cipher import AES
 import pytest
 from .shared_mocks import (
-    board_amigo_tft,
+    DeflateIO,
+    board_amigo,
     board_dock,
+    board_cube,
     board_m5stickv,
     encode_to_string,
     encode,
@@ -54,6 +56,7 @@ def mp_modules(mocker, monkeypatch):
         "uos",
         mocker.MagicMock(statvfs=statvfs),
     )
+    monkeypatch.setitem(sys.modules, "deflate", mocker.MagicMock(DeflateIO=DeflateIO))
 
 
 @pytest.fixture
@@ -68,7 +71,7 @@ def m5stickv(monkeypatch, mp_modules):
 def amigo(monkeypatch, mp_modules):
     import sys
 
-    monkeypatch.setitem(sys.modules, "board", board_amigo_tft())
+    monkeypatch.setitem(sys.modules, "board", board_amigo())
     reset_krux_modules()
 
 
@@ -77,4 +80,18 @@ def dock(monkeypatch, mp_modules):
     import sys
 
     monkeypatch.setitem(sys.modules, "board", board_dock())
+    monkeypatch.setitem(sys.modules, "pmu", None)
     reset_krux_modules()
+
+
+@pytest.fixture
+def cube(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_cube())
+    reset_krux_modules()
+
+
+@pytest.fixture(params=["amigo", "m5stickv", "dock", "cube"])
+def all_devices(request):
+    return request.getfixturevalue(request.param)

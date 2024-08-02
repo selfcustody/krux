@@ -1,6 +1,4 @@
 include _load-12-word-mnemonic.txt
-press BUTTON_A
-wait 1
 
 # Navigate to Sign
 x2 press BUTTON_C
@@ -12,6 +10,6 @@ press BUTTON_B
 x2 press BUTTON_A
 
 qrcode message-at-address.png
-wait 0.5
+wait 0.1
 
 screenshot sign-message-at-address-prompt.png

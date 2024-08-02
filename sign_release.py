@@ -38,6 +38,7 @@ DEVICES = [
     "maixpy_bit",
     "maixpy_dock",
     "maixpy_yahboom",
+    "maixpy_cube",
 ]
 
 
@@ -89,14 +90,15 @@ def scan():
 
 def verify(file_to_verify, key_to_verify, signature_to_verify):
     """Uses openssl to verify the signature and public key"""
-    print("Verifying signature of",file_to_verify.split("/")[1] )
+
+    print("Verifying signature of", os.path.basename(file_to_verify))
     verification = subprocess.run(
         "openssl sha256 <%s -binary | openssl pkeyutl -verify -pubin -inkey %s -sigfile %s"
         % (file_to_verify, key_to_verify, signature_to_verify),
         shell=True,
         capture_output=True,
         text=True,
-        check=True
+        check=True,
     )
     print(verification.stdout)
 
@@ -139,3 +141,36 @@ for device in DEVICES:
     file_name = os.path.join(folder, device, "firmware.bin")
     signature_file = os.path.join(folder, device, "firmware.bin.sig")
     verify(file_name, PUBLIC_KEY_FILE, signature_file)
+
+# Compress release folder
+print("Compressing release folder")
+compressed_folder = folder + ".zip"
+subprocess.run(["zip", "-r", compressed_folder, folder], check=True)
+print("Release compressed as " + compressed_folder)
+# Create sha256 hash of the compressed release
+print("Creating sha256 hash of the compressed release")
+with open(compressed_folder, "rb") as f:
+    sig_bytes = f.read()  # read file as bytes
+    hash_string = hashlib.sha256(sig_bytes).hexdigest()
+    print("Hash of", compressed_folder, ":")
+    print(hash_string + "\n")
+    std_hash_string = hash_string + "  " + compressed_folder
+    with open(compressed_folder + ".sha256", "w") as f:
+        f.write(std_hash_string)
+
+# Sign the compressed release
+print("Signing the compressed release")
+print_qr_code(hash_string)
+_ = input("Press enter to scan signature")
+signature = scan()
+binary_signature = base64.b64decode(signature.encode())
+# Prints signature
+print("Signature:", signature)
+# Saves a signature file
+signature_file = compressed_folder + ".sig"
+print("Saving a signature file:", signature_file, "\n\n")
+with open(signature_file, "wb") as f:
+    f.write(binary_signature)
+
+# Verify signature
+verify(compressed_folder, PUBLIC_KEY_FILE, signature_file)

@@ -1,4 +1,5 @@
 import pytest
+from ur.ur_decoder import URDecoder
 
 
 @pytest.fixture
@@ -7,7 +8,7 @@ def tdata(mocker):
     from collections import namedtuple
     from ur.ur import UR
     from embit.networks import NETWORKS
-    from krux.key import Key
+    from krux.key import Key, P2PKH, P2SH_P2WPKH, P2TR
 
     TEST_MNEMONIC1 = (
         "olympic term tissue route sense program under choose bean emerge velvet absurd"
@@ -15,7 +16,12 @@ def tdata(mocker):
     TEST_MNEMONIC2 = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
-    SINGLESIG_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"])
+    SINGLESIG_KEY = Key(
+        TEST_MNEMONIC1, False, NETWORKS["main"]
+    )  # default account=0, script=P2WPKH
+    LEGACY1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2PKH)
+    NESTEDSW1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2SH_P2WPKH)
+    TAPROOT1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2TR)
     MULTISIG_KEY1 = Key(TEST_MNEMONIC1, True, NETWORKS["main"])
     MULTISIG_KEY2 = Key(TEST_MNEMONIC2, True, NETWORKS["main"])
     MULTISIG_KEY3 = Key(TEST_MNEMONIC3, True, NETWORKS["main"])
@@ -25,6 +31,20 @@ def tdata(mocker):
     # MULTISIG_KEY2 [3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
     # MULTISIG_KEY3 [d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
 
+    KRUX_LEGACY1_DESCRIPTOR = "pkh([55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE)"
+    KRUX_LEGACY1_XPUB = "[55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
+
+    KRUX_NESTEDSW1_DESCRIPTOR = "sh(wpkh([55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV))"
+    KRUX_NESTEDSW1_XPUB = "[55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV"
+    KRUX_NESTEDSW1_YPUB = "[55f8fc5d/49h/0h/1h]ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
+
+    KRUX_NATIVESW1_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/1h]xpub6DPMTPxGMqdu43FvwYdC6eHCPJWckCkx1rLJ1HEG7259GyWQD5P17WB2oowP9SpQdC8ogrmXfwfoazvf6Te8svtxWh4UTwTqyRdG5G54FxW)"
+    KRUX_NATIVESW1_XPUB = "[55f8fc5d/84h/0h/1h]xpub6DPMTPxGMqdu43FvwYdC6eHCPJWckCkx1rLJ1HEG7259GyWQD5P17WB2oowP9SpQdC8ogrmXfwfoazvf6Te8svtxWh4UTwTqyRdG5G54FxW"
+    KRUX_NATIVESW1_ZPUB = "[55f8fc5d/84h/0h/1h]zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
+
+    KRUX_TAPROOT1_DESCRIPTOR = "tr([55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q)"
+    KRUX_TAPROOT1_XPUB = "[55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q"
+
     SPECTER_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)"
     SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
 
@@ -33,6 +53,12 @@ def tdata(mocker):
 
     BLUEWALLET_SINGLESIG_DESCRIPTOR = "wpkh(xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
     BLUEWALLET_SINGLESIG_WALLET_DATA = "zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw"
+
+    BLUEWALLET_LEGACY_DESCRIPTOR = "pkh(xpub6C1dUaopHgps26SpkdwL28cS5WFH7Xyaut4HLKZq8Jgiisp5VZK8o1HJLoDRiQyAbdMpBJSpgc8eToiJay4XAnSSvxDVvMuMTnBoTAR26Gb)"
+    BLUEWALLET_LEGACY_WALLET_DATA = "xpub6C1dUaopHgps26SpkdwL28cS5WFH7Xyaut4HLKZq8Jgiisp5VZK8o1HJLoDRiQyAbdMpBJSpgc8eToiJay4XAnSSvxDVvMuMTnBoTAR26Gb"
+
+    BLUEWALLET_NESTEDSW_DESCRIPTOR = "sh(wpkh(xpub6Ca1JGnSFNZ7g8zXNjwY1Li1GKEJPQnbq8Lcev7qoXj33PzMkwWnRKjwqSPo1ArJ2KY3GYAcYhJvcZTwvb99yWuQ5eH4rPEd5mvazBhKiTn))"
+    BLUEWALLET_NESTEDSW_WALLET_DATA = "ypub6XQGbwTMQ46bXSBeD6jADRoWSHNkL2n6kErqSK1jBY6v6Vob1bgM3PQ5reMP15WDRxer21mB1MfUVr5WeHZAmkazwyyVSJ47MVzENnCyRcP"
 
     BLUEWALLET_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
     BLUEWALLET_MULTISIG_WALLET_DATA = """
@@ -136,15 +162,32 @@ def tdata(mocker):
             "TEST_MNEMONIC2",
             "TEST_MNEMONIC3",
             "SINGLESIG_KEY",
+            "LEGACY1_KEY",
+            "NESTEDSW1_KEY",
+            "TAPROOT1_KEY",
             "MULTISIG_KEY1",
             "MULTISIG_KEY2",
             "MULTISIG_KEY3",
+            "KRUX_LEGACY1_DESCRIPTOR",
+            "KRUX_LEGACY1_XPUB",
+            "KRUX_NESTEDSW1_DESCRIPTOR",
+            "KRUX_NESTEDSW1_XPUB",
+            "KRUX_NESTEDSW1_YPUB",
+            "KRUX_NATIVESW1_DESCRIPTOR",
+            "KRUX_NATIVESW1_XPUB",
+            "KRUX_NATIVESW1_ZPUB",
+            "KRUX_TAPROOT1_DESCRIPTOR",
+            "KRUX_TAPROOT1_XPUB",
             "SPECTER_SINGLESIG_DESCRIPTOR",
             "SPECTER_SINGLESIG_WALLET_DATA",
             "SPECTER_MULTISIG_DESCRIPTOR",
             "SPECTER_MULTISIG_WALLET_DATA",
             "BLUEWALLET_SINGLESIG_DESCRIPTOR",
             "BLUEWALLET_SINGLESIG_WALLET_DATA",
+            "BLUEWALLET_LEGACY_DESCRIPTOR",
+            "BLUEWALLET_LEGACY_WALLET_DATA",
+            "BLUEWALLET_NESTEDSW_DESCRIPTOR",
+            "BLUEWALLET_NESTEDSW_WALLET_DATA",
             "BLUEWALLET_MULTISIG_DESCRIPTOR",
             "BLUEWALLET_MULTISIG_WALLET_DATA",
             "BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT",
@@ -167,15 +210,32 @@ def tdata(mocker):
         TEST_MNEMONIC2,
         TEST_MNEMONIC3,
         SINGLESIG_KEY,
+        LEGACY1_KEY,
+        NESTEDSW1_KEY,
+        TAPROOT1_KEY,
         MULTISIG_KEY1,
         MULTISIG_KEY2,
         MULTISIG_KEY3,
+        KRUX_LEGACY1_DESCRIPTOR,
+        KRUX_LEGACY1_XPUB,
+        KRUX_NESTEDSW1_DESCRIPTOR,
+        KRUX_NESTEDSW1_XPUB,
+        KRUX_NESTEDSW1_YPUB,
+        KRUX_NATIVESW1_DESCRIPTOR,
+        KRUX_NATIVESW1_XPUB,
+        KRUX_NATIVESW1_ZPUB,
+        KRUX_TAPROOT1_DESCRIPTOR,
+        KRUX_TAPROOT1_XPUB,
         SPECTER_SINGLESIG_DESCRIPTOR,
         SPECTER_SINGLESIG_WALLET_DATA,
         SPECTER_MULTISIG_DESCRIPTOR,
         SPECTER_MULTISIG_WALLET_DATA,
         BLUEWALLET_SINGLESIG_DESCRIPTOR,
         BLUEWALLET_SINGLESIG_WALLET_DATA,
+        BLUEWALLET_LEGACY_DESCRIPTOR,
+        BLUEWALLET_LEGACY_WALLET_DATA,
+        BLUEWALLET_NESTEDSW_DESCRIPTOR,
+        BLUEWALLET_NESTEDSW_WALLET_DATA,
         BLUEWALLET_MULTISIG_DESCRIPTOR,
         BLUEWALLET_MULTISIG_WALLET_DATA,
         BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_SCRIPT,
@@ -196,21 +256,66 @@ def tdata(mocker):
 
 
 def test_init_singlesig(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
+    from embit.descriptor import Descriptor
+    from krux.wallet import Wallet, to_unambiguous_descriptor
+    from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(tdata.SINGLESIG_KEY)
+    cases = [
+        # key, descriptor, label, policy
+        (None, None, None, None),
+        (
+            tdata.SINGLESIG_KEY,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
+            "Single-sig",
+            {"type": "p2wpkh"},
+        ),
+        (
+            tdata.LEGACY1_KEY,
+            tdata.KRUX_LEGACY1_DESCRIPTOR,
+            "Single-sig",
+            {"type": "p2pkh"},
+        ),
+        (
+            tdata.NESTEDSW1_KEY,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+            "Single-sig",
+            {"type": "p2sh"},
+        ),
+        (
+            tdata.TAPROOT1_KEY,
+            tdata.KRUX_TAPROOT1_DESCRIPTOR,
+            "Single-sig",
+            {"type": "p2tr"},
+        ),
+    ]
 
-    assert isinstance(wallet, Wallet)
-    assert wallet.descriptor.to_string() == tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR
-    assert wallet.label == "Single-sig"
-    assert wallet.policy == {"type": "p2wpkh"}
+    for _case in cases:
+        wallet = Wallet(_case[0])
+        assert isinstance(wallet, Wallet)
+        if wallet.descriptor:
+            # don't fail simply because of a difference between ambiguous and unambiguous
+            try:
+                assert wallet.descriptor.to_string() == _case[1]
+            except AssertionError:
+                test_descr = to_unambiguous_descriptor(
+                    Descriptor.from_string(_case[1])
+                ).to_string()
+                assert wallet.descriptor.to_string() == test_descr
+        assert wallet.label == _case[2]
+        assert wallet.policy == _case[3]
 
 
 def test_init_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(tdata.MULTISIG_KEY1)
+    assert isinstance(wallet, Wallet)
+    assert wallet.descriptor is None
+    assert wallet.label is None
+    assert wallet.policy is None
 
+    wallet = Wallet(None)
     assert isinstance(wallet, Wallet)
     assert wallet.descriptor is None
     assert wallet.label is None
@@ -221,11 +326,16 @@ def test_is_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
     wallet = Wallet(tdata.SINGLESIG_KEY)
-
     assert not wallet.is_multisig()
 
     wallet = Wallet(tdata.MULTISIG_KEY1)
+    assert wallet.is_multisig()
 
+    wallet = Wallet(None)
+    assert not wallet.is_multisig()
+    from krux.qr import FORMAT_NONE
+
+    wallet.load(tdata.SPECTER_MULTISIG_DESCRIPTOR, FORMAT_NONE)
     assert wallet.is_multisig()
 
 
@@ -233,30 +343,30 @@ def test_is_loaded(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
     wallet = Wallet(tdata.SINGLESIG_KEY)
-
     assert not wallet.is_loaded()
 
     wallet = Wallet(tdata.MULTISIG_KEY1)
-
     assert not wallet.is_loaded()
 
     wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
-
     assert wallet.is_loaded()
+
+    wallet = Wallet(None)
+    assert not wallet.is_loaded()
 
 
 def test_wallet_qr(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_UR
 
-    wallet = Wallet(tdata.MULTISIG_KEY1)
-    wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
-    wallet.wallet_qr_format = FORMAT_UR
+    for wallet in (Wallet(tdata.MULTISIG_KEY1), Wallet(None)):
+        wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
+        wallet.wallet_qr_format = FORMAT_UR
 
-    wallet_data, wallet_qr_format = wallet.wallet_qr()
+        wallet_data, wallet_qr_format = wallet.wallet_qr()
 
-    assert wallet_data == tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
-    assert wallet_qr_format == FORMAT_UR
+        assert wallet_data == tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
+        assert wallet_qr_format == FORMAT_UR
 
 
 def test_receive_addresses(mocker, m5stickv, tdata):
@@ -303,15 +413,16 @@ def test_receive_addresses(mocker, m5stickv, tdata):
     for case in cases:
         wallet = Wallet(case[0])
         wallet.load(case[1], case[2])
+        assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 
+        wallet = Wallet(None)
+        wallet.load(case[1], case[2])
         assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 
 
 def test_load_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
-
-    wallet = Wallet(tdata.MULTISIG_KEY1)
 
     cases = [
         (
@@ -346,14 +457,23 @@ def test_load_multisig(mocker, m5stickv, tdata):
                 ],
             },
         ),
-        # TODO: Fix - ValueError: xpub not a cosigner
-        # (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR, tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR, '2 of 3', {
-        #     'type': 'p2wsh', 'm': 2, 'n': 3, 'cosigners': [
-        #         tdata.MULTISIG_KEY1.xpub(),
-        #         tdata.MULTISIG_KEY2.xpub(),
-        #         tdata.MULTISIG_KEY3.xpub()
-        #     ]
-        # }),
+        # TODO: Fix AssertionError (see previous "TODO: Switch to 2-of-3 from keys defined above")
+        # (
+        #    tdata.UR_OUTPUT_MULTISIG_WALLET_DATA,
+        #    FORMAT_UR,
+        #    tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR,
+        #    '2 of 3',
+        #    {
+        #        'type': 'p2wsh',
+        #        'm': 2,
+        #        'n': 3,
+        #        'cosigners': [
+        #            tdata.MULTISIG_KEY1.xpub(),
+        #            tdata.MULTISIG_KEY2.xpub(),
+        #            tdata.MULTISIG_KEY3.xpub()
+        #        ],
+        #    },
+        # ),
         (
             tdata.UR_BYTES_MULTISIG_WALLET_DATA,
             FORMAT_UR,
@@ -387,20 +507,19 @@ def test_load_multisig(mocker, m5stickv, tdata):
             },
         ),
     ]
-    for case in cases:
-        wallet.load(case[0], case[1])
-        assert wallet.wallet_data == case[0]
-        assert wallet.wallet_qr_format == case[1]
-        assert wallet.descriptor.to_string() == case[2]
-        assert wallet.label == case[3]
-        assert wallet.policy == case[4]
+    for wallet in (Wallet(None), Wallet(tdata.MULTISIG_KEY1)):
+        for case in cases:
+            wallet.load(case[0], case[1])
+            assert wallet.wallet_data == case[0]
+            assert wallet.wallet_qr_format == case[1]
+            assert wallet.descriptor.to_string() == case[2]
+            assert wallet.label == case[3]
+            assert wallet.policy == case[4]
 
 
 def test_load_singlesig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN
-
-    wallet = Wallet(tdata.SINGLESIG_KEY)
 
     cases = [
         (
@@ -418,13 +537,14 @@ def test_load_singlesig(mocker, m5stickv, tdata):
             {"type": "p2wpkh"},
         ),
     ]
-    for case in cases:
-        wallet.load(case[0], case[1])
-        assert wallet.wallet_data == case[0]
-        assert wallet.wallet_qr_format == case[1]
-        assert wallet.descriptor.to_string() == case[2]
-        assert wallet.label == case[3]
-        assert wallet.policy == case[4]
+    for wallet in (Wallet(None), Wallet(tdata.SINGLESIG_KEY)):
+        for case in cases:
+            wallet.load(case[0], case[1])
+            assert wallet.wallet_data == case[0]
+            assert wallet.wallet_qr_format == case[1]
+            assert wallet.descriptor.to_string() == case[2]
+            assert wallet.label == case[3]
+            assert wallet.policy == case[4]
 
 
 def test_load_singlesig_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
@@ -480,10 +600,39 @@ def test_load_multisig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata)
 
 
 def test_parse_wallet(mocker, m5stickv, tdata):
-    from krux.wallet import parse_wallet
-    from embit.networks import NETWORKS
+    from krux.wallet import parse_wallet, AssumptionWarning
 
     cases = [
+        (
+            tdata.KRUX_LEGACY1_XPUB,
+            tdata.KRUX_LEGACY1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_NESTEDSW1_XPUB,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_NESTEDSW1_YPUB,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_NATIVESW1_XPUB,
+            tdata.KRUX_NATIVESW1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_NATIVESW1_ZPUB,
+            tdata.KRUX_NATIVESW1_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.KRUX_TAPROOT1_XPUB,
+            tdata.KRUX_TAPROOT1_DESCRIPTOR,
+            None,
+        ),
         (
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             tdata.SPECTER_SINGLESIG_DESCRIPTOR,
@@ -497,6 +646,16 @@ def test_parse_wallet(mocker, m5stickv, tdata):
         (
             tdata.BLUEWALLET_SINGLESIG_WALLET_DATA,
             tdata.BLUEWALLET_SINGLESIG_DESCRIPTOR,
+            None,
+        ),
+        # ( BlueWallet legacy bip44 xpub w/o key-origin is not supported, will default to bip84
+        #    tdata.BLUEWALLET_LEGACY_WALLET_DATA,
+        #    tdata.BLUEWALLET_LEGACY_DESCRIPTOR,
+        #    None,
+        # ),
+        (
+            tdata.BLUEWALLET_NESTEDSW_WALLET_DATA,
+            tdata.BLUEWALLET_NESTEDSW_DESCRIPTOR,
             None,
         ),
         (
@@ -540,14 +699,16 @@ def test_parse_wallet(mocker, m5stickv, tdata):
     for case in cases:
         print(case_n)
         case_n += 1
-        descriptor, label = parse_wallet(case[0], NETWORKS["main"])
+        try:
+            descriptor, label = parse_wallet(case[0])
+        except AssumptionWarning as e:
+            descriptor, label = parse_wallet(case[0], allow_assumption=e.args[1])
         assert descriptor.to_string() == case[1]
         assert label == case[2]
 
 
 def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
     from krux.wallet import parse_wallet
-    from embit.networks import NETWORKS
     from ur.ur import UR
 
     cases = [
@@ -560,7 +721,7 @@ def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
     ]
     for case in cases:
         with pytest.raises(ValueError):
-            parse_wallet(case, NETWORKS["main"])
+            parse_wallet(case)
 
 
 def test_parse_address(mocker, m5stickv, tdata):
@@ -672,3 +833,206 @@ def test_to_unambiguous_descriptor(mocker, m5stickv, tdata):
             Descriptor.from_string(case[0])
         )
         assert unambiguous_descriptor.to_string() == case[1]
+
+
+def test_version_to_network_versiontype():
+    from embit.networks import NETWORKS
+    from krux.wallet import version_to_network_versiontype
+
+    for network_name, version_dict in [
+        (k, v) for k, v in NETWORKS.items() if k in ("main", "test")
+    ]:
+        for versiontype, version in version_dict.items():
+            assert version_to_network_versiontype(version) == (
+                network_name,
+                versiontype,
+            )
+
+
+def test_xpub_data_to_derivation():
+    from krux.wallet import xpub_data_to_derivation, AssumptionWarning
+
+    # purpose
+    LEGACY = 44 + 2**31
+    NATSW = 84 + 2**31
+    NESSW = 49 + 2**31
+    TAPROOT = 86 + 2**31
+    MULTISIG = 48 + 2**31
+
+    # network
+    MAIN = 0 + 2**31
+    TEST = 1 + 2**31
+
+    # account
+    ACCT0 = 0 + 2**31
+    ACCT1 = 1 + 2**31
+
+    # multisig script type
+    MULTINESSW = 1 + 2**31
+    MULTINATSW = 2 + 2**31
+
+    cases = [
+        # versiontype, network, child, depth, allow_assumption, expected_return
+        ("xpub", "main", ACCT0, 3, None, AssumptionWarning),  # don't assume
+        ("xpub", "main", ACCT0, 3, [NATSW, MAIN, ACCT0], [NATSW, MAIN, ACCT0]),
+        ("xpub", "test", ACCT0, 3, [NATSW, TEST, ACCT0], [NATSW, TEST, ACCT0]),
+        ("xpub", "main", ACCT1, 3, [NATSW, MAIN, ACCT1], [NATSW, MAIN, ACCT1]),
+        ("xpub", "main", ACCT0, 4, [NATSW, MAIN, ACCT0], None),  # wrong depth
+        ("ypub", "main", ACCT0, 3, None, [NESSW, MAIN, ACCT0]),
+        ("ypub", "test", ACCT0, 3, None, [NESSW, TEST, ACCT0]),
+        ("ypub", "main", ACCT1, 3, None, [NESSW, MAIN, ACCT1]),
+        ("ypub", "test", ACCT1, 3, None, [NESSW, TEST, ACCT1]),
+        ("ypub", "main", ACCT0, 4, None, None),  # wrong depth
+        ("zpub", "main", ACCT0, 3, None, [NATSW, MAIN, ACCT0]),
+        ("zpub", "test", ACCT0, 3, None, [NATSW, TEST, ACCT0]),
+        ("zpub", "main", ACCT1, 3, None, [NATSW, MAIN, ACCT1]),
+        ("zpub", "test", ACCT1, 3, None, [NATSW, TEST, ACCT1]),
+        ("zpub", "main", ACCT0, 4, None, None),  # wrong depth
+        ("Ypub", "main", MULTINESSW, 4, None, AssumptionWarning),  # don't assume
+        ("Ypub", "test", MULTINESSW, 4, None, AssumptionWarning),
+        (
+            "Ypub",
+            "main",
+            MULTINESSW,
+            4,
+            [MULTISIG, MAIN, ACCT0, MULTINESSW],
+            [MULTISIG, MAIN, ACCT0, MULTINESSW],
+        ),
+        (
+            "Ypub",
+            "test",
+            MULTINESSW,
+            4,
+            [MULTISIG, TEST, ACCT0, MULTINESSW],
+            [MULTISIG, TEST, ACCT0, MULTINESSW],
+        ),
+        ("Ypub", "main", MULTINESSW, 3, None, None),  # wrong depth
+        ("Zpub", "main", MULTINATSW, 4, None, AssumptionWarning),  # don't assume
+        ("Zpub", "test", MULTINATSW, 4, None, AssumptionWarning),
+        (
+            "Zpub",
+            "main",
+            MULTINATSW,
+            4,
+            [MULTISIG, MAIN, ACCT0, MULTINATSW],
+            [MULTISIG, MAIN, ACCT0, MULTINATSW],
+        ),
+        (
+            "Zpub",
+            "test",
+            MULTINATSW,
+            4,
+            [MULTISIG, TEST, ACCT0, MULTINATSW],
+            [MULTISIG, TEST, ACCT0, MULTINATSW],
+        ),
+        ("Zpub", "main", MULTINATSW, 3, None, None),  # wrong depth
+    ]
+
+    for _case in cases:
+        if type(_case[5]) == type and issubclass(_case[5], Exception):
+            with pytest.raises(_case[5]):
+                xpub_data_to_derivation(*_case[:5])
+        else:
+            assert xpub_data_to_derivation(*_case[:5]) == _case[5]
+
+
+def test_derivation_to_script_wrapper():
+    from krux.wallet import derivation_to_script_wrapper
+
+    # purpose
+    LEGACY = 44 + 2**31
+    NATSW = 84 + 2**31
+    NESSW = 49 + 2**31
+    TAPROOT = 86 + 2**31
+
+    # network
+    MAIN = 0 + 2**31
+    TEST = 1 + 2**31
+
+    # account
+    HARD = 0 + 2**31
+
+    NOTHARD = 2**31 - 1
+
+    cases = [
+        # derivation list as the only function param and expected return
+        ([HARD, MAIN], None),
+        ([HARD, TEST], None),
+        ([HARD, MAIN, HARD], None),
+        ([NOTHARD, MAIN, HARD], None),
+        ([LEGACY, MAIN, HARD], "pkh({})"),
+        ([LEGACY, TEST, HARD], "pkh({})"),
+        ([LEGACY, MAIN, NOTHARD], None),
+        ([LEGACY, NOTHARD, HARD], None),
+        ([NESSW, MAIN, HARD], "sh(wpkh({}))"),
+        ([NESSW, TEST, HARD], "sh(wpkh({}))"),
+        ([NESSW, MAIN, NOTHARD], None),
+        ([NESSW, NOTHARD, HARD], None),
+        ([NATSW, MAIN, HARD], "wpkh({})"),
+        ([NATSW, TEST, HARD], "wpkh({})"),
+        ([NATSW, MAIN, NOTHARD], None),
+        ([NATSW, NOTHARD, HARD], None),
+        ([TAPROOT, MAIN, HARD], "tr({})"),
+        ([TAPROOT, TEST, HARD], "tr({})"),
+        ([TAPROOT, MAIN, NOTHARD], None),
+        ([TAPROOT, NOTHARD, HARD], None),
+    ]
+
+    for _case in cases:
+        assert derivation_to_script_wrapper(_case[0]) == _case[1]
+
+
+def test_parse_wallet_via_ur_output(mocker, m5stickv):
+    from krux.wallet import parse_wallet
+
+    # sparrow uses this ur format
+    QRDATA = [
+        # testnet legacy p2pkh
+        "UR:CRYPTO-OUTPUT/TAADMUTAADDLOSAOWKAXHDCLAXJPDPECBNTOVEKOVOADIHWDDIBKHTHYAECWBSWPDEYTMSLEDRBSPMAMDEVAURWFDWAAHDCXKKSGMELBWMKOFRDMOEDAUEMUQDVDVANEBGVOMYGLKOVSFDSKDEJYKOGDGTINETTOAHTAADEHOEADAEAOADAMTAADDYOTADLNCSDWYKADYKAEYKAOCYTBFSSSOSAXAXAYCYLBZMISPFASIMGUIHIHIEGUINIOJTIHJPMEZMDWFY",
+        # testnet nested segwit
+        "UR:CRYPTO-OUTPUT/TAADMHTAADMWTAADDLOSAOWKAXHDCLAXPKGWJSLTINFRRELGGHECCMJLLKADKSHDRLDNDARLBZBACHSNAHHGNLDLLBGSTICFAAHDCXRPEETDCMQDWKBDPSBYJETBLGKTDNDRMSHHRFDIBEDREOLEKTBGMTBBOTKPFPWFWNAHTAADEHOEADAEAOADAMTAADDYOTADLNCSEHYKADYKAEYKAOCYTBFSSSOSAXAXAYCYINOTTORLASIEGRJPKPKSRYCEWNPF",
+        # testnet native segwit
+        "UR:CRYPTO-OUTPUT/TAADMWTAADDLOSAOWKAXHDCLAXRFBBVARYHNRLIMTLFEASUEOSGSRYOLBTCTSAHTIHKIDAMNPKLKFZTBHHMKKGKKGUAAHDCXHKMEMSKTVLNLSWDLUOGRDYBSFYIYIEJLCYVSJLNLMDLPJPNNGSSFMEIHHYCHLGENAHTAADEHOEADAEAOADAMTAADDYOTADLNCSGHYKADYKAEYKAOCYTBFSSSOSAXAXAYCYIDWEJPPKASIHFWGAGDEOESYKNYPEOT",
+        # testnet taproot
+        "UR:CRYPTO-OUTPUT/TAADNLTAADDLOSAOWKAXHDCLAOUYWTLNPRWYDIBNZCWEMHVWSTJYLGCNISEOPSEETEDMZTBSYTATJLAEZMNYDEEHCAAAHDCXHTRLUYDIRDNLDSYAZEKESWDYMTWNGSVAKTVWFGFEGUCSDNPDDTFRZMRTUTNSBSGTAHTAADEHOEADAEAOADAMTAADDYOTADLNCSHFYKADYKADYKAOCYTBFSSSOSAXAXAYCYOEWNPFHKASIMGUIHIHIEGUINIOJTIHJPDKZSVSIS",
+    ]
+    DESCRIPTORS = [
+        "pkh([d63dc4a7/44h/1h/0h]tpubDCxxwY2QwiUCq8ievg9BurvmxfSa8LStd6XLh6meDBjK2BWynxq8M7d99P9yNBaCxSkUcxZrvnwgUsXbqP8SyJZY21C7Cm1R7M36xxSeiS6)",
+        "sh(wpkh([d63dc4a7/49h/1h/0h]tpubDCoS7zq26q1CC75oB7zcNRvbXbQwAUf9gnhaS5vDYEZA2F8Maz7taNiKGbEWGY1fxEyWQgvCCQRGNBz87qej9XuyMXpTCtDbbKP6fXGtio1))",
+        "wpkh([d63dc4a7/84h/1h/0h]tpubDCka9mfAaAN3cit16QqK2RCRVBpA2B7b8RFWUCLdyKR8eA48pjX7kZ5RAM6bSdwD9ivwh33KES7Q4DcqzNwkNUyyadZTTLf36Xp955vUBdf)",
+        "tr([d63dc4a7/86h/1h/1h]tpubDDDs2UVFbhXBRTW4EJEH74qDcdVetqn5pF2AMcpMCfwvU561GJiY4BZoLPSpw4d6cb7wVHyu1JNa3dVjhKgmTKZ6m8M4L6wv763gHjhYAfd)",
+    ]
+
+    for i, QRDATUM in enumerate(QRDATA):
+        wallet_data = URDecoder().decode(QRDATUM)
+        descriptor, label = parse_wallet(wallet_data)
+        assert str(descriptor) == DESCRIPTORS[i]
+        print(DESCRIPTORS[i])
+
+
+def test_parse_wallet_via_ur_account(mocker, m5stickv):
+    from krux.wallet import parse_wallet
+
+    # seedsigner uses this ur format when exporting for sparrow
+    QRDATA = [
+        # mainnet legacy p2pkh
+        "UR:CRYPTO-ACCOUNT/OEADCYTBFSSSOSAOLYTAADMUTAADDLOXAXHDCLAODNLFAHCFGUJOYLESGDYNVANSDRGYTISWRTMWTTIAGUADAMPLONLAAEKPZOLGHSPMAAHDCXOLEOFRMSGELTHFPRJNVEECBBHDGOONEHMHBBTDVDAMCXVDMDROBZCWUYLDRERNHSAMTAADDYOTADLNCSDWYKAEYKAEYKAOCYTBFSSSOSAXAXAYCYBTWMBGPTAXUOCEVY",
+        # mainnet nested segwit
+        "UR:CRYPTO-ACCOUNT/OEADCYTBFSSSOSAOLYTAADMHTAADMWTAADDLOXAXHDCLAOFNVAJKFZAXCPCMJSAYYNYLCHEYESNLWDISVTVODAVTFZVEWLAMWYLDBNNTBEKECTAAHDCXSPYLEYCFMSHKJLGOMTTTEHCMNEPYSEIADTKPNBPMPKONIEWYAHPRADWDONYNGMSKAMTAADDYOTADLNCSEHYKAEYKAEYKAOCYTBFSSSOSAXAXAYCYVEZSGMCXTKYTCMKN",
+        # mainnet native segwit
+        "UR:CRYPTO-ACCOUNT/OEADCYTBFSSSOSAOLYTAADMWTAADDLOXAXHDCLAXZOCTGEIDHKEHSBHSDEZTJZWZJLFLMYAARSRFBWCLIDNELEVDDTWEDAMYURAECKSAAAHDCXGOSKCMDTKPFZJZSRJZHFHDQZJYLTIAZTQZMTZOCAIOCEECUESKAYECWFKPJZGOSPAMTAADDYOTADLNCSGHYKAEYKAEYKAOCYTBFSSSOSAXAXAYCYTBTEAXAODTCFGMBK",
+        # mainnet taproot
+        "UR:CRYPTO-ACCOUNT/OEADCYTBFSSSOSAOLYTAADNLTAADDLOXAXHDCLAXLKOENLDTDIFXOYDYUYHGOLFXSESOQZOXWSRTMHINPMSGKPNSHYIEBZVYVYRODKCEAAHDCXFTIDJNMSDWWPFDZSBNLSAORSKGGHTPGYFERSQDSFVSFWFYCYAOINCLWFLKSPMHFYAMTAADDYOTADLNCSHFYKAEYKAEYKAOCYTBFSSSOSAXAXAYCYKIWKJKVDYKTDJNUY",
+    ]
+    DESCRIPTORS = [
+        "pkh([d63dc4a7/44h/0h/0h]xpub6Bkhh15pTDsqX2kEBaqLL9YTNwMBNkn8eL4vPEzPkKPG3dU1CtgNEfz6qMRH7ek8gonFWUe73Jg6Z2zVpYZMMgoXKsAnsuyFF6B3kZX81ed)",
+        "sh(wpkh([d63dc4a7/49h/0h/0h]xpub6DLPFknTv1YuRkTAmXXkrdcMVtsWjwMG1WkCKgQqP2LbEfhbn4EyYGo8gxgqF6jozRfQEVafJRnt57Ua2gXXBqyPvKPzuQRQpfYbyEUh8Z1))",
+        "wpkh([d63dc4a7/84h/0h/0h]xpub6DEMJ2Yce8xR9qAD4ZNfV4HuhhYCgNYbjDoZnuJprRQBtZCE7fgTLfLYdao26s3Pva1PBySwnSx9AtRtpSC3AsJ6LYuhKy1brMoc3Qe16t7)",
+        "tr([d63dc4a7/86h/0h/0h]xpub6CaTuhnAha3kjK1bZQxYbmyw8PcM6UypdK9MTdJY41Xxyg2dVws9LwuB5bL1fFPqJiAkBAoSwpcfEjEwwJ2byNeM4xxXKSa45TcHxLhQKPh)",
+    ]
+
+    for i, QRDATUM in enumerate(QRDATA):
+        wallet_data = URDecoder().decode(QRDATUM)
+        descriptor, label = parse_wallet(wallet_data)
+        assert str(descriptor) == DESCRIPTORS[i]
+        print(DESCRIPTORS[i])

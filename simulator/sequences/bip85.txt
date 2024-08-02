@@ -1,0 +1,16 @@
+include _load-12-word-mnemonic.txt
+
+# Navigate to BIP85
+x2 press BUTTON_B
+press BUTTON_A
+
+x2 press BUTTON_C
+x3 press BUTTON_A
+
+screenshot bip85-child-index.png
+
+press BUTTON_A
+press BUTTON_C
+press BUTTON_A
+
+screenshot bip85-load-child.png

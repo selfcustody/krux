@@ -24,11 +24,10 @@ import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
-from .utils import Utils
-from ..themes import theme
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
-from ..key import Key
+from ..key import Key, P2WSH, SCRIPT_LONG_NAMES
 from ..krux_settings import t
 from . import (
     Page,
@@ -37,18 +36,12 @@ from . import (
     MENU_EXIT,
     ESC_KEY,
     LETTERS,
-    UPPERCASE_LETTERS,
-    NUM_SPECIAL_1,
-    NUM_SPECIAL_2,
+    choose_len_mnemonic,
 )
 
 DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
-
-SD_MSG_TIME = 2500
-
-PASSPHRASE_MAX_LEN = 200
 
 
 class Login(Page):
@@ -70,6 +63,7 @@ class Login(Page):
                     (t("About"), self.about),
                     (t("Shutdown"), self.shutdown),
                 ],
+                back_label=None,
             ),
         )
 
@@ -81,7 +75,6 @@ class Login(Page):
                 (t("Via Camera"), self.load_key_from_camera),
                 (t("Via Manual Input"), self.load_key_from_manual_input),
                 (t("From Storage"), self.load_mnemonic_from_storage),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, status = submenu.run_loop()
@@ -90,15 +83,14 @@ class Login(Page):
         return status
 
     def load_key_from_camera(self):
-        """Handler for the 'via camera' menu item"""
+        """Handler for the 'load mnemonic'>'via camera' menu item"""
         submenu = Menu(
             self.ctx,
             [
                 (t("QR Code"), self.load_key_from_qr_code),
-                (t("Tiny Seed"), lambda: self.load_key_from_tiny_seed_image("TinySeed")),
-                (t("OneKey KeyTag"), lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag")),
+                ("Tiny Seed", lambda: self.load_key_from_tiny_seed_image("TinySeed")),
+                ("OneKey KeyTag", lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag")),
                 (t("Binary Grid"), lambda: self.load_key_from_tiny_seed_image("Binary Grid")),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, status = submenu.run_loop()
@@ -107,15 +99,14 @@ class Login(Page):
         return status
 
     def load_key_from_manual_input(self):
-        """Handler for the 'via manual input' menu item"""
+        """Handler for the 'load mnemonic'>'via manual input' menu item"""
         submenu = Menu(
             self.ctx,
             [
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
-                (t("Tiny Seed (Bits)"), self.load_key_from_tiny_seed),
-                (t("Stackbit 1248"), self.load_key_from_1248),
-                (t("Back"), lambda: MENU_EXIT),
+                ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
+                ("Stackbit 1248", self.load_key_from_1248),
             ],
         )
         index, status = submenu.run_loop()
@@ -124,7 +115,7 @@ class Login(Page):
         return status
 
     def load_mnemonic_from_storage(self):
-        """Handler to load mnemonic from storage"""
+        """Handler to 'load mnemonic'>'from storage"""
         from .encryption_ui import LoadEncryptedMnemonic
 
         encrypted_mnemonics = LoadEncryptedMnemonic(self.ctx)
@@ -139,9 +130,9 @@ class Login(Page):
             self.ctx,
             [
                 (t("Via Camera"), self.new_key_from_snapshot),
+                (t("Via Words"), lambda: self.load_key_from_text(new=True)),
                 (t("Via D6"), self.new_key_from_dice),
                 (t("Via D20"), lambda: self.new_key_from_dice(True)),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, status = submenu.run_loop()
@@ -150,7 +141,7 @@ class Login(Page):
         return status
 
     def new_key_from_dice(self, d_20=False):
-        """Handler for the 'via DX' menu item. Default is D6"""
+        """Handler for both 'new mnemonic'>'via D6/D20' menu items. Default is D6"""
         from .new_mnemonic.dice_rolls import DiceEntropy
 
         dice_entropy = DiceEntropy(self.ctx, d_20)
@@ -162,26 +153,16 @@ class Login(Page):
 
     def new_key_from_snapshot(self):
         """Use camera's entropy to create a new mnemonic"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        if index == 2:
+        len_mnemonic = choose_len_mnemonic(self.ctx)
+        if not len_mnemonic:
             return MENU_CONTINUE
-
-        self.ctx.display.clear()
 
         self.ctx.display.draw_hcentered_text(
             t("Use camera's entropy to create a new mnemonic")
             + ". "
             + t("(Experimental)")
         )
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             from .capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
@@ -192,31 +173,20 @@ class Login(Page):
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    t("SHA256 of snapshot:\n\n%s") % entropy_hash
+                    t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash
                 )
                 self.ctx.input.wait_for_button()
-                num_bytes = 16 if index == 0 else 32
+                num_bytes = 16 if len_mnemonic == 12 else 32
                 words = bip39.mnemonic_from_bytes(entropy_bytes[:num_bytes]).split()
                 return self._load_key_from_words(words)
         return MENU_CONTINUE
-
-    def _load_qr_passphrase(self):
-        data, _ = self.capture_qr_code()
-        if data is None:
-            self.flash_text(t("Failed to load passphrase"), theme.error_color)
-            return MENU_CONTINUE
-        if len(data) > PASSPHRASE_MAX_LEN:
-            self.flash_text(
-                t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN,
-                theme.error_color,
-            )
-            return MENU_CONTINUE
-        return data
 
     def _load_key_from_words(self, words, charset=LETTERS):
         mnemonic = " ".join(words)
 
         if charset != LETTERS:
+            from .utils import Utils
+
             charset_type = {
                 DIGITS: Utils.BASE_DEC,
                 DIGITS_HEX: Utils.BASE_HEX,
@@ -229,99 +199,76 @@ class Login(Page):
             }
             numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
             self.display_mnemonic(numbers_str, suffix_dict[charset])
-            if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
+            if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
             self.ctx.display.clear()
 
         self.display_mnemonic(mnemonic, t("Mnemonic"))
-        if not self.prompt(t("Continue?"), self.ctx.display.bottom_prompt_line):
+        if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
         self.ctx.display.clear()
 
-        # Test mnemonic Checksum verification before asking for passphrase
-        temp_key = Key(
-            mnemonic,
-            False,
-            NETWORKS[Settings().bitcoin.network],
-        )
+        passphrase = ""
+        multisig = Settings().wallet.multisig
+        network = NETWORKS[Settings().wallet.network]
+        account = 0
+        if multisig:
+            script_type = P2WSH
+        else:
+            script_type = SCRIPT_LONG_NAMES.get(Settings().wallet.script_type)
+        from ..wallet import Wallet
 
         while True:
+            key = Key(mnemonic, multisig, network, passphrase, account, script_type)
+
+            wallet_info = key.fingerprint_hex_str(True) + "\n"
+            wallet_info += network["name"] + "\n"
+            wallet_info += (
+                t("Single-sig") + "\n" if not multisig else t("Multisig") + "\n"
+            )
+            wallet_info += (
+                self.fit_to_line(key.derivation_str(True), crop_middle=False) + "\n"
+            )
+            wallet_info += (
+                t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
+            )
+
+            info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Type BIP39 passphrase"), self.load_passphrase),
-                    (t("Scan BIP39 passphrase"), self._load_qr_passphrase),
-                    (t("No BIP39 passphrase"), lambda: ""),
+                    (t("Load Wallet"), lambda: None),
+                    (t("Passphrase"), lambda: None),
+                    (t("Customize"), lambda: None),
                 ],
+                offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
-            _, passphrase = submenu.run_loop()
-            if passphrase in (ESC_KEY, MENU_CONTINUE):
-                continue
-
-            self.ctx.display.clear()
-
-            # Temporary key, just to show the fingerprint
-            temp_key = Key(
-                mnemonic,
-                False,
-                NETWORKS[Settings().bitcoin.network],
-                passphrase,
-            )
-
-            # Show fingerprint again because password can change the fingerprint,
-            # and user needs to confirm not just the words, but the fingerprint too
-            continue_string = ""
-            if passphrase:
-                continue_string += t("Passphrase: ") + passphrase + "\n\n"
-            continue_string += (
-                temp_key.fingerprint_hex_str(True) + "\n\n" + t("Continue?")
-            )
-
-            if self.prompt(
-                continue_string,
-                self.ctx.display.height() // 2,
-            ):
+            index, _ = submenu.run_loop()
+            if index == len(submenu.menu) - 1:
+                if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                    del key
+                    return MENU_CONTINUE
+            if index == 0:
                 break
+            if index == 1:
+                from .wallet_settings import PassphraseEditor
 
-        submenu = Menu(
-            self.ctx,
-            [
-                (
-                    t("Single-sig")
-                    + "\n"
-                    + Key.get_default_derivation_str(
-                        False, NETWORKS[Settings().bitcoin.network]
-                    ),
-                    lambda: MENU_EXIT,
-                ),
-                (
-                    t("Multisig")
-                    + "\n"
-                    + Key.get_default_derivation_str(
-                        True, NETWORKS[Settings().bitcoin.network]
-                    ),
-                    lambda: MENU_EXIT,
-                ),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        multisig = index == 1
+                passphrase_editor = PassphraseEditor(self.ctx)
+                temp_passphrase = passphrase_editor.load_passphrase_menu()
+                if temp_passphrase is not None:
+                    passphrase = temp_passphrase
+            elif index == 2:
+                from .wallet_settings import WalletSettings
+
+                wallet_settings = WalletSettings(self.ctx)
+                network, multisig, script_type, account = (
+                    wallet_settings.customize_wallet(key)
+                )
+
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Loading.."))
 
-        del temp_key
-
-        # Permanent wallet loaded
-        from ..wallet import Wallet
-
-        self.ctx.wallet = Wallet(
-            Key(
-                mnemonic,
-                multisig,
-                NETWORKS[Settings().bitcoin.network],
-                passphrase,
-            )
-        )
+        self.ctx.wallet = Wallet(key)
         return MENU_EXIT
 
     def _encrypted_qr_code(self, data):
@@ -340,13 +287,13 @@ class Login(Page):
                 key_capture = EncryptionKey(self.ctx)
                 key = key_capture.encryption_key()
                 if key in (None, "", ESC_KEY):
-                    self.flash_text(t("Key was not provided"), theme.error_color)
+                    self.flash_error(t("Key was not provided"))
                     return MENU_CONTINUE
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(t("Processing ..."))
                 word_bytes = encrypted_qr.decrypt(key)
                 if word_bytes is None:
-                    self.flash_text(t("Failed to decrypt"), theme.error_color)
+                    self.flash_error(t("Failed to decrypt"))
                     return MENU_CONTINUE
                 return bip39.mnemonic_from_bytes(word_bytes).split()
             return MENU_CONTINUE  # prompt NO
@@ -356,7 +303,7 @@ class Login(Page):
         """Handler for the 'via qr code' menu item"""
         data, qr_format = self.capture_qr_code()
         if data is None:
-            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_error(t("Failed to load mnemonic"))
             return MENU_CONTINUE
 
         words = []
@@ -400,7 +347,7 @@ class Login(Page):
                 if words == MENU_CONTINUE:
                     return MENU_CONTINUE
         if not words or (len(words) != 12 and len(words) != 24):
-            self.flash_text(t("Invalid mnemonic length"), theme.error_color)
+            self.flash_error(t("Invalid mnemonic length"))
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -411,38 +358,58 @@ class Login(Page):
         to_word,
         autocomplete_fn=None,
         possible_keys_fn=None,
+        new=False,
+        len_mnemonic=None,
     ):
         words = []
         self.ctx.display.draw_hcentered_text(title)
-        if self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             while len(words) < 24:
-                if len(words) in (11, 23):
-                    self.ctx.display.clear()
-                    self.ctx.display.draw_centered_text(
-                        t("Leave blank if you'd like Krux to pick a valid final word")
-                    )
-                    self.ctx.input.wait_for_button()
-                if len(words) == 12:
-                    self.ctx.display.clear()
-                    if self.prompt(t("Done?"), self.ctx.display.height() // 2):
+                if new:
+                    if len(words) == len_mnemonic - 1:
+                        self.ctx.display.clear()
+                        self.ctx.display.draw_centered_text(
+                            t(
+                                "Leave blank if you'd like Krux to pick a valid final word"
+                            )
+                        )
+                        self.ctx.input.wait_for_button()
+                    elif len(words) == len_mnemonic:
                         break
+                else:
+                    if len(words) == 12:
+                        self.ctx.display.clear()
+                        if self.prompt(t("Done?"), self.ctx.display.height() // 2):
+                            break
 
                 word = ""
                 word_num = ""
                 while True:
                     word_num = ""
-                    word = self.capture_from_keypad(
-                        t("Word %d") % (len(words) + 1),
-                        [charset],
-                        autocomplete_fn,
-                        possible_keys_fn,
-                    )
+
+                    # if new and last word, lead input to a valid mnemonic
+                    if new and len(words) == len_mnemonic - 1:
+                        finalwords = Key.get_final_word_candidates(words)
+                        word = self.capture_from_keypad(
+                            t("Word %d") % (len(words) + 1),
+                            [charset],
+                            lambda x: autocomplete_fn(x, finalwords),
+                            lambda x: possible_keys_fn(x, finalwords),
+                        )
+                    else:
+                        word = self.capture_from_keypad(
+                            t("Word %d") % (len(words) + 1),
+                            [charset],
+                            autocomplete_fn,
+                            possible_keys_fn,
+                        )
+
                     if word == ESC_KEY:
                         return MENU_CONTINUE
 
-                    # If the last 'word' is blank,
+                    # If 'new' and the last 'word' is blank,
                     # pick a random final word that is a valid checksum
-                    if (len(words) in (11, 23)) and word == "":
+                    if new and word == "" and len(words) == len_mnemonic - 1:
                         break
 
                     if word != "":
@@ -469,41 +436,63 @@ class Login(Page):
 
         return MENU_CONTINUE
 
-    def load_key_from_text(self):
-        """Handler for the 'via text' menu item"""
-        title = t("Enter each word of your BIP-39 mnemonic.")
+    def load_key_from_text(self, new=False):
+        """Handler for both 'new/load mnemonic'>[...]>'via words' menu items"""
+
+        if new:
+            len_mnemonic = choose_len_mnemonic(self.ctx)
+            if not len_mnemonic:
+                return MENU_CONTINUE
+            title = t("Enter %d BIP-39 words.") % len_mnemonic
+        else:
+            len_mnemonic = None
+            title = t("Enter each word of your BIP-39 mnemonic.")
 
         # Precompute start and stop indexes for each letter in the wordlist
         # to reduce the search space for autocomplete, possible_letters, etc.
         # This is much cheaper (memory-wise) than a trie.
-        search_ranges = {}
-        i = 0
-        while i < len(WORDLIST):
-            start_word = WORDLIST[i]
-            start_letter = start_word[0]
-            j = i + 1
-            while j < len(WORDLIST):
-                end_word = WORDLIST[j]
-                end_letter = end_word[0]
-                if end_letter != start_letter:
+        def compute_search_ranges(alt_wordlist=None):
+            if alt_wordlist:
+                wordlist = alt_wordlist
+            else:
+                wordlist = WORDLIST
+            search_ranges = {}
+            i = 0
+            while i < len(wordlist):
+                start_word = wordlist[i]
+                start_letter = start_word[0]
+                j = i + 1
+                while j < len(wordlist):
+                    end_word = wordlist[j]
+                    end_letter = end_word[0]
+                    if end_letter != start_letter:
+                        search_ranges[start_letter] = (i, j)
+                        i = j - 1
+                        break
+                    j += 1
+                if start_letter not in search_ranges:
                     search_ranges[start_letter] = (i, j)
-                    i = j - 1
-                    break
-                j += 1
-            if start_letter not in search_ranges:
-                search_ranges[start_letter] = (i, j)
-            i += 1
+                i += 1
+            return search_ranges
 
-        def autocomplete(prefix):
+        search_ranges = compute_search_ranges()
+
+        def autocomplete(prefix, alt_wordlist=None):
+            if alt_wordlist:
+                wordlist = alt_wordlist
+                search = compute_search_ranges(wordlist)
+            else:
+                wordlist = WORDLIST
+                search = search_ranges
             if len(prefix) > 0:
                 letter = prefix[0]
-                if letter not in search_ranges:
+                if letter not in search:
                     return None
-                start, stop = search_ranges[letter]
+                start, stop = search[letter]
                 matching_words = list(
                     filter(
                         lambda word: word.startswith(prefix),
-                        WORDLIST[start:stop],
+                        wordlist[start:stop],
                     )
                 )
                 if len(matching_words) == 1:
@@ -520,32 +509,43 @@ class Login(Page):
                     return user_input
             return ""
 
-        def possible_letters(prefix):
+        def possible_letters(prefix, alt_wordlist=None):
+            if alt_wordlist:
+                wordlist = alt_wordlist
+                search = compute_search_ranges(wordlist)
+            else:
+                wordlist = WORDLIST
+                search = search_ranges
             if len(prefix) == 0:
-                return LETTERS.replace("x", "")
+                return search.keys()
             letter = prefix[0]
-            if letter not in search_ranges:
+            if letter not in search:
                 return ""
-            start, stop = search_ranges[letter]
+            start, stop = search[letter]
             return {
                 word[len(prefix)]
-                for word in WORDLIST[start:stop]
+                for word in wordlist[start:stop]
                 if word.startswith(prefix) and len(word) > len(prefix)
             }
 
         return self._load_key_from_keypad(
-            title, LETTERS, to_word, autocomplete, possible_letters
+            title,
+            LETTERS,
+            to_word,
+            autocomplete_fn=autocomplete,
+            possible_keys_fn=possible_letters,
+            new=new,
+            len_mnemonic=len_mnemonic,
         )
 
     def pre_load_key_from_digits(self):
-        """Handler for the 'via numbers' menu item"""
+        """Handler for the 'load mnemonic'>'via numbers' menu item"""
         submenu = Menu(
             self.ctx,
             [
                 (t("Decimal"), self.load_key_from_digits),
                 (t("Hexadecimal"), self.load_key_from_hexadecimal),
                 (t("Octal"), self.load_key_from_octal),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         index, status = submenu.run_loop()
@@ -554,7 +554,7 @@ class Login(Page):
         return status
 
     def load_key_from_octal(self):
-        """Handler for the 'via numbers'>'Octal' submenu item"""
+        """Handler for the 'load mnemonic'>'via numbers'>'octal' submenu item"""
         title = t(
             "Enter each word of your BIP-39 mnemonic as a number in octal from 1 to 4000."
         )
@@ -587,7 +587,7 @@ class Login(Page):
         )
 
     def load_key_from_hexadecimal(self):
-        """Handler for the 'via numbers'>'Hexadecimal' submenu item"""
+        """Handler for the 'load mnemonic'>'via numbers'>'hexadecimal' submenu item"""
         title = t(
             "Enter each word of your BIP-39 mnemonic as a number in hexadecimal from 1 to 800."
         )
@@ -620,7 +620,7 @@ class Login(Page):
         )
 
     def load_key_from_digits(self):
-        """Handler for the 'via numbers'>'Decimal' submenu item"""
+        """Handler for the 'load mnemonic'>'via numbers'>'decimal' submenu item"""
         title = t("Enter each word of your BIP-39 mnemonic as a number from 1 to 2048.")
 
         def autocomplete(prefix):
@@ -664,22 +664,12 @@ class Login(Page):
         """Menu handler to manually load key from Tiny Seed sheet metal storage method"""
         from .tiny_seed import TinySeed
 
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        self.ctx.display.clear()
-        if index == 2:
+        len_mnemonic = choose_len_mnemonic(self.ctx)
+        if not len_mnemonic:
             return MENU_CONTINUE
 
-        w24 = index == 1
         tiny_seed = TinySeed(self.ctx)
-        words = tiny_seed.enter_tiny_seed(w24)
+        words = tiny_seed.enter_tiny_seed(len_mnemonic == 24)
         del tiny_seed
         if words is not None:
             return self._load_key_from_words(words)
@@ -689,24 +679,15 @@ class Login(Page):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
         from .tiny_seed import TinyScanner
 
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("12 words"), lambda: MENU_EXIT),
-                (t("24 words"), lambda: MENU_EXIT),
-                (t("Back"), lambda: MENU_EXIT),
-            ],
-        )
-        index, _ = submenu.run_loop()
-        self.ctx.display.clear()
-        if index == 2:
+        len_mnemonic = choose_len_mnemonic(self.ctx)
+        if not len_mnemonic:
             return MENU_CONTINUE
 
         intro = t("Paint punched dots black so they can be detected.") + " "
         intro += t("Use a black background surface.") + " "
         intro += t("Align camera and Tiny Seed properly.")
         self.ctx.display.draw_hcentered_text(intro)
-        if not self.prompt(t("Proceed?"), self.ctx.display.bottom_prompt_line):
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
         w24 = index == 1
@@ -714,15 +695,9 @@ class Login(Page):
         words = tiny_scanner.scanner(w24)
         del tiny_scanner
         if words is None:
-            self.flash_text(t("Failed to load mnemonic"), theme.error_color)
+            self.flash_error(t("Failed to load mnemonic"))
             return MENU_CONTINUE
         return self._load_key_from_words(words)
-
-    def load_passphrase(self):
-        """Loads and returns a passphrase from keypad"""
-        return self.capture_from_keypad(
-            t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-        )
 
     def tools(self):
         """Handler for the 'Tools' menu item"""
@@ -748,9 +723,16 @@ class Login(Page):
     def about(self):
         """Handler for the 'about' menu item"""
 
+        import board
         from ..metadata import VERSION
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Krux\n\n\nVersion\n%s") % VERSION)
+        self.ctx.display.draw_centered_text(
+            "Krux\n\n"
+            + t("Hardware")
+            + "\n%s\n\n" % board.config["type"]
+            + t("Version")
+            + "\n%s" % VERSION
+        )
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

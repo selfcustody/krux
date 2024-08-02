@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 from . import Page
+from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..sd_card import SDHandler
 from embit.wordlists.bip39 import WORDLIST
@@ -43,13 +44,13 @@ class Utils(Page):
     def print_standard_qr(self, data, qr_format=None, title="", width=33, is_qr=False):
         """Loads printer driver and UI"""
         # Only loads printer related modules if needed
-        if self.print_qr_prompt():
+        if self.print_prompt(t("Print to QR?")):
             from .print_page import PrintPage
 
             print_page = PrintPage(self.ctx)
             print_page.print_qr(data, qr_format, title, width, is_qr)
 
-    def load_file(self, file_ext="", prompt=True):
+    def load_file(self, file_ext="", prompt=True, only_get_filename=False):
         """Load a file from SD card"""
         if self.has_sd_card():
             with SDHandler() as sd:
@@ -65,7 +66,9 @@ class Utils(Page):
                     if filename:
                         filename = file_manager.display_file(filename)
 
-                        if self.prompt(t("Load?"), self.ctx.display.bottom_prompt_line):
+                        if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
+                            if only_get_filename:
+                                return filename, None
                             return filename, sd.read_binary(filename)
         return "", None
 

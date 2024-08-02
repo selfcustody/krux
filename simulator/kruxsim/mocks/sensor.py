@@ -25,6 +25,9 @@ from pyzbar.pyzbar import decode
 from cv2 import split, VideoCapture, cvtColor, COLOR_BGR2RGB, COLOR_BGR2LAB
 from numpy import std
 from PIL import Image
+import time
+
+THREAD_DROP_PERIOD = 0.01
 
 sequence_executor = None
 
@@ -97,6 +100,9 @@ def find_qrcodes(img):
 
 
 def snapshot():
+    # Temporarily yield execution to allow other threads to run
+    time.sleep(THREAD_DROP_PERIOD)
+    
     m = mock.MagicMock()
     if sequence_executor:
         if sequence_executor.camera_image is not None:
@@ -127,7 +133,6 @@ def snapshot():
         m.get_statistics.return_value = MockStatistics(lab_frame)
         m.width.return_value = frame.shape[1]
         m.height.return_value = frame.shape[0]
-
     return m
 
 

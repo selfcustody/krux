@@ -28,17 +28,15 @@ import flash
 from embit import ec
 from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
 from .metadata import SIGNER_PUBKEY
-from .display import Display
+from .display import display
 from .krux_settings import t
 from .wdt import wdt
-
-FLASH_MSG_TIME = 2000
 
 FLASH_SIZE = 2**24
 MAX_FIRMWARE_SIZE = 0x300000
 
 FIRMWARE_SLOT_1 = 0x00080000
-FIRMWARE_SLOT_2 = 0x00280000  # TODO: Move to 0x00390000 - Test all possible cases
+FIRMWARE_SLOT_2 = 0x00390000
 SPIFFS_ADDR = 0xD00000
 
 MAIN_BOOT_CONFIG_SECTOR_ADDRESS = 0x00004000
@@ -177,13 +175,6 @@ def sha256(firmware_filename, firmware_size=None):
 def upgrade():
     """Installs new firmware from SD card"""
 
-    def flash_text(text):
-        """Flashes text centered on the display for duration ms"""
-        display.clear()
-        display.draw_centered_text(text)
-        time.sleep_ms(FLASH_MSG_TIME)
-        display.clear()
-
     firmware_path = ""
     try:
         firmware_filenames = list(
@@ -200,8 +191,12 @@ def upgrade():
     except:
         return False
 
-    display = Display()
     inp = Input()
+
+    display.clear()
+    display.draw_centered_text(
+        t("New firmware detected on SD card.") + "\n\n" + t("Verifying..")
+    )
 
     new_size = fsize(firmware_path)
     firmware_hash = sha256(firmware_path)
@@ -209,39 +204,43 @@ def upgrade():
 
     display.clear()
     display.draw_centered_text(
-        t("New firmware detected.\n\nSHA256:\n%s\n\n\n\nInstall?")
-        % binascii.hexlify(firmware_hash).decode()
+        t("New firmware detected.")
+        + "\n\n"
+        + "SHA256:\n"
+        + binascii.hexlify(firmware_hash).decode()
+        + "\n\n\n\n"
+        + t("Install?")
     )
     inp.buttons_active = True
     if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
         return False
 
     if new_size > MAX_FIRMWARE_SIZE:
-        flash_text(t("Firmware exceeds max size: %d") % MAX_FIRMWARE_SIZE)
+        display.flash_text(t("Firmware exceeds max size: %d") % MAX_FIRMWARE_SIZE)
         return False
 
     pubkey = None
     try:
         pubkey = ec.PublicKey.from_string(SIGNER_PUBKEY)
     except:
-        flash_text(t("Invalid public key"))
+        display.flash_text(t("Invalid public key"))
         return False
 
     sig = None
     try:
         sig = open(firmware_path + ".sig", "rb").read()
     except:
-        flash_text(t("Missing signature file"))
+        display.flash_text(t("Missing signature file"))
         return False
 
     try:
         # Parse, serialize, and reparse to ensure signature is compact prior to verification
         sig = ec.Signature.parse(ec.Signature.parse(sig).serialize())
         if not pubkey.verify(sig, firmware_hash):
-            flash_text(t("Bad signature"))
+            display.flash_text(t("Bad signature"))
             return False
     except:
-        flash_text(t("Bad signature"))
+        display.flash_text(t("Bad signature"))
         return False
 
     boot_config_sector = flash.read(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
@@ -250,7 +249,7 @@ def upgrade():
         boot_config_sector = flash.read(BACKUP_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
         address, _, entry_index = find_active_firmware(boot_config_sector)
         if address is None:
-            flash_text(t("Invalid bootloader"))
+            display.flash_text(t("Invalid bootloader"))
             return False
 
     # Write new firmware to the opposite slot
@@ -261,7 +260,9 @@ def upgrade():
         display.draw_centered_text(text)
 
     write_data(
-        lambda pct: status_text(t("Upgrading firmware..\n\n%d%%") % int(pct * 100)),
+        lambda pct: status_text(
+            t("Upgrading firmware..") + "\n\n%d%%" % int(pct * 100)
+        ),
         new_address,
         open(firmware_path, "rb", buffering=0),
         new_size,
@@ -271,7 +272,9 @@ def upgrade():
     )
 
     write_data(
-        lambda pct: status_text(t("Backing up bootloader..\n\n%d%%") % int(pct * 100)),
+        lambda pct: status_text(
+            t("Backing up bootloader..") + "\n\n%d%%" % int(pct * 100)
+        ),
         BACKUP_BOOT_CONFIG_SECTOR_ADDRESS,
         io.BytesIO(boot_config_sector),
         len(boot_config_sector),
@@ -282,12 +285,23 @@ def upgrade():
         boot_config_sector, entry_index, new_address, new_size
     )
     write_data(
-        lambda pct: status_text(t("Updating bootloader..\n\n%d%%") % int(pct * 100)),
+        lambda pct: status_text(
+            t("Updating bootloader..") + "\n\n%d%%" % int(pct * 100)
+        ),
         MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
         io.BytesIO(new_boot_config_sector),
         len(new_boot_config_sector),
         4096,
     )
 
-    flash_text(t("Upgrade complete.\n\nShutting down.."))
+    display.clear()
+    display.draw_centered_text(
+        t("Upgrade complete.") + "\n" + t("Remove firmware files from SD Card?")
+    )
+    inp.buttons_active = True
+    if not inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
+        os.remove(firmware_path)
+        os.remove(firmware_path + ".sig")
+
+    display.flash_text(t("Shutting down.."))
     return True
