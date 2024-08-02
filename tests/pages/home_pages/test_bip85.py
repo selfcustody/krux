@@ -149,7 +149,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
 
         if case[2]:
             bip85_ui.display_mnemonic.assert_called_with(
-                case[2], suffix="Words" + "\n⊚ %s" % case[3]
+                case[2], suffix="Words", fingerprint="⊚ %s" % case[3]
             )
         else:
             bip85_ui.display_mnemonic.assert_not_called()

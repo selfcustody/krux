@@ -342,7 +342,9 @@ class Page:
                 done = True
             # interval done in input.py using timers
 
-    def display_mnemonic(self, mnemonic: str, suffix="", display_mnemonic: str = None):
+    def display_mnemonic(
+        self, mnemonic: str, suffix="", display_mnemonic: str = None, fingerprint=""
+    ):
         """Displays the 12 or 24-word list of words to the user"""
         if display_mnemonic is None:
             display_mnemonic = mnemonic
@@ -354,7 +356,9 @@ class Page:
 
         if is_double_mnemonic(mnemonic):
             suffix += "*"
-        header = "BIP39" + " " + suffix
+        if fingerprint:
+            fingerprint = "\n" + fingerprint
+        header = "BIP39" + " " + suffix + fingerprint
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (
