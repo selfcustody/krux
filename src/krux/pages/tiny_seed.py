@@ -621,8 +621,8 @@ class TinyScanner(Page):
             "y_offset_factor_p0": 1 / 14,
             "x_offset_factor_p1": 1 / 14,
             "y_offset_factor_p1": 1 / 14,
-            "aspect_high": 1.1,
-            "aspect_low": 0.9,
+            "aspect_high": 1.3,
+            "aspect_low": 0.7,
         },
     }
 
