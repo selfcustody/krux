@@ -580,7 +580,55 @@ class TinySeed(Page):
 class TinyScanner(Page):
     """Uses camera sensor to detect punch pattern on a Tiny Seed, in metal or paper"""
 
-    def __init__(self, ctx):
+    # Settings for different binary grid types
+    binary_grid_settings = {
+        "TinySeed": {
+            "xpad_factor": (240 / (12 * 345)),
+            "ypad_factor": (210 / (12 * 272)),
+            "x_offset_factor_amigo_p0": 39 / 345,
+            "y_offset_factor_amigo_p0": 44 / 272,
+            "x_offset_factor_amigo_p1": 42 / 345,
+            "y_offset_factor_amigo_p1": 41 / 272,
+            "x_offset_factor_p0": 65 / 345,
+            "y_offset_factor_p0": 17 / 272,
+            "x_offset_factor_p1": 62 / 345,
+            "y_offset_factor_p1": 22 / 272,
+            "aspect_high": 1.3,
+            "aspect_low": 1.1,
+        },
+        "OneKey KeyTag": {
+            "xpad_factor": 240 / (12 * 360),
+            "ypad_factor": 240 / (12 * 335),
+            "x_offset_factor_amigo_p0": 50 / 360,
+            "y_offset_factor_amigo_p0": 67 / 335,
+            "x_offset_factor_amigo_p1": 50 / 360,
+            "y_offset_factor_amigo_p1": 67 / 335,
+            "x_offset_factor_p0": 68 / 360,
+            "y_offset_factor_p0": 30 / 335,
+            "x_offset_factor_p1": 68 / 360,
+            "y_offset_factor_p1": 30 / 335,
+            "aspect_high": 1.1,
+            "aspect_low": 0.9,
+        },
+        "Binary Grid": {
+            "xpad_factor": 1 / 14,
+            "ypad_factor": 1 / 14,
+            "x_offset_factor_amigo_p0": 1 / 14,
+            "y_offset_factor_amigo_p0": 1 / 14,
+            "x_offset_factor_amigo_p1": 1 / 14,
+            "y_offset_factor_amigo_p1": 1 / 14,
+            "x_offset_factor_p0": 1 / 14,
+            "y_offset_factor_p0": 1 / 14,
+            "x_offset_factor_p1": 1 / 14,
+            "y_offset_factor_p1": 1 / 14,
+            "aspect_high": 1.1,
+            "aspect_low": 0.9,
+        },
+    }
+
+    grid_settings = None
+
+    def __init__(self, ctx, grid_type="TinySeed"):
         super().__init__(ctx, None)
         self.ctx = ctx
         # Capturing flag used for first page of 24 words seed
@@ -591,6 +639,7 @@ class TinyScanner(Page):
         self.time_frame = time.ticks_ms()
         self.previous_seed_numbers = [1] * 12
         self.tiny_seed = TinySeed(self.ctx)
+        self.grid_settings = self.binary_grid_settings[grid_type]
 
     def _map_punches_region(self, rect_size, page=0):
         # Think in portrait mode, with Tiny Seed tilted 90 degrees
@@ -599,22 +648,46 @@ class TinyScanner(Page):
         if not page:
             if board.config["type"] == "amigo":
                 # Amigo has mirrored coordinates
-                x_offset = rect_size[0] + (rect_size[2] * 39) / 345
-                y_offset = rect_size[1] + (rect_size[3] * 44) / 272
+                x_offset = (
+                    rect_size[0]
+                    + rect_size[2] * self.grid_settings["x_offset_factor_amigo_p0"]
+                )
+                y_offset = (
+                    rect_size[1]
+                    + rect_size[3] * self.grid_settings["y_offset_factor_amigo_p0"]
+                )
             else:
-                x_offset = rect_size[0] + (rect_size[2] * 65) / 345
-                y_offset = rect_size[1] + (rect_size[3] * 17) / 272
+                x_offset = (
+                    rect_size[0]
+                    + rect_size[2] * self.grid_settings["x_offset_factor_p0"]
+                )
+                y_offset = (
+                    rect_size[1]
+                    + rect_size[3] * self.grid_settings["y_offset_factor_p0"]
+                )
         else:
             if board.config["type"] == "amigo":
-                x_offset = rect_size[0] + (rect_size[2] * 42) / 345
-                y_offset = rect_size[1] + (rect_size[3] * 41) / 272
+                x_offset = (
+                    rect_size[0]
+                    + rect_size[2] * self.grid_settings["x_offset_factor_amigo_p1"]
+                )
+                y_offset = (
+                    rect_size[1]
+                    + rect_size[3] * self.grid_settings["y_offset_factor_amigo_p1"]
+                )
             else:
-                x_offset = rect_size[0] + (rect_size[2] * 62) / 345
-                y_offset = rect_size[1] + (rect_size[3] * 22) / 272
+                x_offset = (
+                    rect_size[0]
+                    + rect_size[2] * self.grid_settings["x_offset_factor_p1"]
+                )
+                y_offset = (
+                    rect_size[1]
+                    + rect_size[3] * self.grid_settings["y_offset_factor_p1"]
+                )
         self.x_regions.append(int(x_offset))
         self.y_regions.append(int(y_offset))
-        x_pad = rect_size[2] * 240 / (12 * 345)
-        y_pad = rect_size[3] * 210 / (12 * 272)
+        x_pad = rect_size[2] * self.grid_settings["xpad_factor"]
+        y_pad = rect_size[3] * self.grid_settings["ypad_factor"]
         for _ in range(12):
             x_offset += x_pad
             y_offset += y_pad
@@ -744,6 +817,10 @@ class TinyScanner(Page):
     def _detect_tiny_seed(self, img):
         """Detects Tiny Seed as a bright blob against a dark surface"""
 
+        # Load Settings for the grid type we are using
+        aspect_low = self.grid_settings["aspect_low"]
+        aspect_high = self.grid_settings["aspect_high"]
+
         def _choose_rect(rects):
             for rect in rects:
                 aspect = rect[2] / rect[3]
@@ -752,13 +829,15 @@ class TinyScanner(Page):
                     and rect[1]
                     and (rect[0] + rect[2]) < img.width()
                     and (rect[1] + rect[3]) < img.height()
-                    and aspect_low < aspect < 1.3
+                    and aspect_low < aspect < aspect_high
                 ):
                     return rect
             return None
 
-        # Big lenses cameras seems to distor aspect ratio to 1.1
-        aspect_low = 1.1 if self.ctx.camera.cam_id in (OV2640_ID, OV5642_ID) else 1.2
+        # Big lenses cameras seems to distort aspect ratio
+        if self.ctx.camera.cam_id not in (OV2640_ID, OV5642_ID):
+            aspect_low += 0.1
+
         stats = img.get_statistics()
         # # Debug stats
         # img.draw_string(10,10,"Mean:"+str(stats.mean()))
