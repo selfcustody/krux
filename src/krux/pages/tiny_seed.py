@@ -59,6 +59,7 @@ class TinySeed(Page):
     def __init__(self, ctx, label=None):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.label = label
         self.x_offset = MINIMAL_PADDING + 2 * FONT_WIDTH
         self.printer = None
         if self.ctx.display.width() > SMALLEST_WIDTH:
@@ -71,10 +72,6 @@ class TinySeed(Page):
             self.y_offset = DEFAULT_PADDING + 3 * FONT_HEIGHT
         else:
             self.y_offset = 2 * FONT_HEIGHT
-        if label == "Binary Grid":
-            self.label = t("Binary Grid")
-        else:
-            self.label = label
 
     def _draw_grid(self):
         """Draws grid for import and export Tinyseed UI"""
@@ -642,8 +639,12 @@ class TinyScanner(Page):
         self.y_regions = []
         self.time_frame = time.ticks_ms()
         self.previous_seed_numbers = [1] * 12
-        self.tiny_seed = TinySeed(self.ctx, label=grid_type)
         self.grid_settings = self.binary_grid_settings[grid_type]
+        if grid_type == "Binary Grid":
+            label = t("Binary Grid")
+        else:
+            label = grid_type
+        self.tiny_seed = TinySeed(self.ctx, label=label)
 
     def _map_punches_region(self, rect_size, page=0):
         # Think in portrait mode, with Tiny Seed tilted 90 degrees
