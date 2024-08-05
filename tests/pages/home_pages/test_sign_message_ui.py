@@ -245,10 +245,11 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
     mocker.patch.object(ctx.display, "width", new=lambda: 135)
     message_signer = SignMessage(ctx)
     mocker.spy(message_signer, "display_qr_codes")
+
     mocker.patch.object(
-        message_signer,
-        "capture_qr_code",
-        new=lambda: (
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
             "signmessage m/84h/1h/0h/0/3 ascii:a test message with a colon ':' character.",
             FORMAT_NONE,
         ),
