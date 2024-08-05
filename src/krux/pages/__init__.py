@@ -491,11 +491,15 @@ class Menu:
         menu,
         offset=None,
         disable_statusbar=False,
-        back_label=t("Back"),
+        back_label="Back",
         back_status=lambda: MENU_EXIT,
     ):
         self.ctx = ctx
-        self.menu = menu + [("< " + back_label, back_status)] if back_label else menu
+        self.menu = menu
+        if back_label:
+            back_label = t("Back") if back_label == "Back" else back_label
+            self.menu += [("< " + back_label, back_status)]
+
         self.disable_statusbar = disable_statusbar
         if offset is None:
             # Default offset for status bar

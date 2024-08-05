@@ -80,7 +80,7 @@ class Bip85(Page):
             )
         else:
             self.ctx.display.draw_centered_text(key.fingerprint_hex_str(True))
-        if self.prompt(t("Load child?"), BOTTOM_PROMPT_LINE):
+        if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
             from ...wallet import Wallet
 
             self.ctx.wallet = Wallet(key)

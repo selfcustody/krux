@@ -31,6 +31,7 @@ from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
+from ...key import FINGERPRINT_SYMBOL
 
 
 class WalletDescriptor(Page):
@@ -156,7 +157,10 @@ class WalletDescriptor(Page):
         for i, key in enumerate(wallet.descriptor.keys):
             label = str(i + 1) + ". " if wallet.is_multisig() else ""
             fingerprints.append(
-                label + "⊚ " + binascii.hexlify(key.fingerprint).decode()
+                label
+                + FINGERPRINT_SYMBOL
+                + " "
+                + binascii.hexlify(key.fingerprint).decode()
             )
         about.extend(fingerprints)
         if not wallet.is_multisig():

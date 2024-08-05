@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 import gc
-from ...display import BOTTOM_PROMPT_LINE
+from ...display import BOTTOM_PROMPT_LINE, THIN_SPACE
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from .. import (
@@ -83,7 +83,7 @@ class Addresses(Page):
                 address_index, limit=max_addresses, branch_index=addr_type
             )
             for addr in addresses:
-                pos_str = str(address_index) + ". "  # . + thin space
+                pos_str = str(address_index) + "." + THIN_SPACE
                 qr_title = pos_str + addr
                 items.append(
                     (

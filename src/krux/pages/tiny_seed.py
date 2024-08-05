@@ -56,9 +56,10 @@ TS_GO_POSITION = 167
 class TinySeed(Page):
     """Class for handling Tinyseed fomat"""
 
-    def __init__(self, ctx):
+    def __init__(self, ctx, label=None):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.label = label
         self.x_offset = MINIMAL_PADDING + 2 * FONT_WIDTH
         self.printer = None
         if self.ctx.display.width() > SMALLEST_WIDTH:
@@ -96,7 +97,7 @@ class TinySeed(Page):
 
     def _draw_labels(self, page):
         """Draws labels for import and export Tinyseed UI"""
-        self.ctx.display.draw_hcentered_text("Tiny Seed")
+        self.ctx.display.draw_hcentered_text(self.label)
 
         # case for non m5stickv, cube
         if not MINIMAL_DISPLAY:
@@ -582,7 +583,7 @@ class TinyScanner(Page):
 
     # Settings for different binary grid types
     binary_grid_settings = {
-        "TinySeed": {
+        "Tiny Seed": {
             "xpad_factor": (240 / (12 * 345)),
             "ypad_factor": (210 / (12 * 272)),
             "x_offset_factor_amigo_p0": 39 / 345,
@@ -628,7 +629,7 @@ class TinyScanner(Page):
 
     grid_settings = None
 
-    def __init__(self, ctx, grid_type="TinySeed"):
+    def __init__(self, ctx, grid_type="Tiny Seed"):
         super().__init__(ctx, None)
         self.ctx = ctx
         # Capturing flag used for first page of 24 words seed
@@ -638,8 +639,12 @@ class TinyScanner(Page):
         self.y_regions = []
         self.time_frame = time.ticks_ms()
         self.previous_seed_numbers = [1] * 12
-        self.tiny_seed = TinySeed(self.ctx)
         self.grid_settings = self.binary_grid_settings[grid_type]
+        if grid_type == "Binary Grid":
+            label = t("Binary Grid")
+        else:
+            label = grid_type
+        self.tiny_seed = TinySeed(self.ctx, label=label)
 
     def _map_punches_region(self, rect_size, page=0):
         # Think in portrait mode, with Tiny Seed tilted 90 degrees

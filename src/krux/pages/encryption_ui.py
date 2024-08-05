@@ -120,10 +120,12 @@ class EncryptMnemonic(Page):
     def _get_user_inputs(self):
         """Ask user for the key, mnemonic_id and i_vector"""
 
+        error_txt = t("Mnemonic was not encrypted")
+
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
-            self.flash_text(t("Mnemonic was not encrypted"))
+            self.flash_text(error_txt)
             return None
 
         version = Settings().encryption.version
@@ -134,14 +136,14 @@ class EncryptMnemonic(Page):
                 t("Additional entropy from camera required for AES-CBC mode")
             )
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                self.flash_text(t("Mnemonic was not encrypted"))
+                self.flash_text(error_txt)
                 return None
             from .capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
             entropy = camera_entropy.capture(show_entropy_details=False)
             if entropy is None:
-                self.flash_text(t("Mnemonic was not encrypted"))
+                self.flash_text(error_txt)
                 return None
             i_vector = entropy[:AES_BLOCK_SIZE]
 
