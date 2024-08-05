@@ -1098,7 +1098,6 @@ translation_table = {
         2820726296: "Geheugensteun laden",
         2369474953: "Portemonnee laden",
         2256441194: "Een vertrouwde portemonnee descriptor laden om adressen te bekijken?",
-        3490393896: "Afgeleide geheugensteun laden?",
         237136240: "Laden vanaf SD kaart",
         879727077: "Laden vanaf SD kaart?",
         1936877965: "Laden van camera",
