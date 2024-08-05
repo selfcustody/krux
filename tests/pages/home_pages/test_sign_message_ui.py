@@ -244,7 +244,10 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
     mocker.patch.object(
         message_signer,
         "capture_qr_code",
-        new=lambda: ("signmessage m/84h/1h/0h/0/3 ascii:a test message", FORMAT_NONE),
+        new=lambda: (
+            "signmessage m/84h/1h/0h/0/3 ascii:a test message with a colon ':' character.",
+            FORMAT_NONE,
+        ),
     )
     message_signer.sign_message()
 
@@ -252,7 +255,11 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         [mocker.call("Message:", 10, theme.highlight_color)]
     )
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("a test message", mocker.ANY, max_lines=10)]
+        [
+            mocker.call(
+                "a test message with a colon ':' character.", mocker.ANY, max_lines=10
+            )
+        ]
     )
     ctx.display.draw_hcentered_text.assert_has_calls(
         [mocker.call("Address:", mocker.ANY, theme.highlight_color)]
@@ -261,7 +268,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         [mocker.call("3. bc1qgl..cn3", mocker.ANY)],
     )
     message_signer.display_qr_codes.assert_called_once_with(
-        "HzRkfdy2sqvszgCn1jLkq3KfqP6Zd1wwG0v+95zfIz0WNizoXjjFBmB7ZxOHXSj4qAhwoNgUPJHDqzFaOq30URA=",
+        "IHx1+DGW83eZZpV8rOT/9l/yUYa2ncmCr/Mnq7XBJmmyFCUWKceHZQqUZAk60XuwlBox3d3hAa4FU59AXOjbALo=",
         0,
         "Signed Message",
     )
