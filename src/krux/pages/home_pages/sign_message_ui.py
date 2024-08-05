@@ -74,7 +74,7 @@ class SignMessage(Utils):
             if len(data_blocks) >= 3:
                 derivation = data_blocks[1].decode()
                 message = b" ".join(data_blocks[2:])
-                message = message.split(b":")
+                message = message.split(b":", 1)
                 if len(message) >= 2 and message[0] == b"ascii":
                     message = b" ".join(message[1:])
                     derivation = bip32.parse_path(derivation)
