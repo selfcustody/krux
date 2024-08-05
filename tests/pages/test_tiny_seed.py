@@ -329,3 +329,30 @@ def test_scan_tiny_seed_24w(all_devices, mocker):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert " ".join(words) == TEST_24_WORDS
+
+
+def test_tinyscanner_initializes_tinyseed_with_label(all_devices, mocker):
+    import pytest
+    from krux.pages.tiny_seed import TinyScanner
+
+    test_cases = [
+        # TinyScanner grid_type param, expected exception, expected TinySeed label
+        (None, None, "Tiny Seed"),
+        ("Tiny Seed", None, "Tiny Seed"),
+        ("OneKey KeyTag", None, "OneKey KeyTag"),
+        ("Binary Grid", None, "Binary Grid"),
+        ("Unsupported Format", KeyError, None),
+    ]
+
+    for i, (grid_type, expected_exception, expected_label) in enumerate(test_cases):
+        print(i, (grid_type, expected_exception, expected_label))
+        ctx = create_ctx(mocker, [])
+        if not expected_exception:
+            if grid_type:
+                tiny_scanner = TinyScanner(ctx, grid_type=grid_type)
+            else:
+                tiny_scanner = TinyScanner(ctx)
+            assert tiny_scanner.tiny_seed.label == expected_label
+        else:
+            with pytest.raises(expected_exception):
+                tiny_scanner = TinyScanner(ctx, grid_type=grid_type)

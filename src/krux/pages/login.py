@@ -88,9 +88,14 @@ class Login(Page):
             self.ctx,
             [
                 (t("QR Code"), self.load_key_from_qr_code),
+                ("Tiny Seed", lambda: self.load_key_from_tiny_seed_image("Tiny Seed")),
                 (
-                    "Tiny Seed",
-                    self.load_key_from_tiny_seed_image,
+                    "OneKey KeyTag",
+                    lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
+                ),
+                (
+                    t("Binary Grid"),
+                    lambda: self.load_key_from_tiny_seed_image("Binary Grid"),
                 ),
             ],
         )
@@ -676,7 +681,7 @@ class Login(Page):
             return self._load_key_from_words(words)
         return MENU_CONTINUE
 
-    def load_key_from_tiny_seed_image(self):
+    def load_key_from_tiny_seed_image(self, grid_type="Tiny Seed"):
         """Menu handler to scan key from Tiny Seed sheet metal storage method"""
         from .tiny_seed import TinyScanner
 
@@ -691,7 +696,7 @@ class Login(Page):
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
-        tiny_scanner = TinyScanner(self.ctx)
+        tiny_scanner = TinyScanner(self.ctx, grid_type)
         words = tiny_scanner.scanner(len_mnemonic == 24)
         del tiny_scanner
         if words is None:
