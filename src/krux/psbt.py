@@ -29,6 +29,7 @@ from .krux_settings import t
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 from .sats_vb import SatsVB
+from .display import THIN_SPACE
 
 # PSBT Output Types:
 CHANGE = 0
@@ -36,6 +37,7 @@ SELF_TRANSFER = 1
 SPEND = 2
 
 # We always uses thin spaces after the ₿ in this file
+BTC_SYMBOL = "₿"
 
 
 class Counter(dict):
@@ -282,7 +284,7 @@ class PSBTSigner:
                 inp_amount += inp.non_witness_utxo.vout[inp.vout].value
         resume_inputs_str = (
             (t("Inputs (%d):") % len(self.psbt.inputs))
-            + (" ₿ %s" % format_btc(inp_amount))
+            + (" " + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(inp_amount))
             + "\n\n"
         )
 
@@ -338,7 +340,7 @@ class PSBTSigner:
         if len(spend_list) > 0:
             resume_spend_str = (
                 (t("Spend (%d):") % len(spend_list))
-                + (" ₿ %s" % format_btc(spend_amount))
+                + (" " + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(spend_amount))
                 + "\n\n"
             )
 
@@ -348,7 +350,12 @@ class PSBTSigner:
                     t("Self-transfer or Change (%d):")
                     % (len(self_transfer_list) + len(change_list))
                 )
-                + (" ₿ %s" % format_btc(self_amount + change_amount))
+                + (
+                    " "
+                    + BTC_SYMBOL
+                    + THIN_SPACE
+                    + "%s" % format_btc(self_amount + change_amount)
+                )
                 + "\n\n"
             )
 
@@ -369,7 +376,7 @@ class PSBTSigner:
 
         resume_fee_str = (
             t("Fee:")
-            + (" ₿ %s" % format_btc(fee))
+            + (" " + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(fee))
             + " ("
             + replace_decimal_separator("%.1f" % fee_percent)
             + "%)"
@@ -390,21 +397,21 @@ class PSBTSigner:
         for i, out in enumerate(spend_list):
             messages.append(
                 ((t("%d. Spend:") + " \n\n%s\n\n") % (i + 1, out[0]))
-                + ("₿ %s" % format_btc(out[1]))
+                + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 
         # sequence of self_transfer
         for i, out in enumerate(self_transfer_list):
             messages.append(
                 ((t("%d. Self-transfer:") + " \n\n%s\n\n") % (i + 1, out[0]))
-                + ("₿ %s" % format_btc(out[1]))
+                + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 
         # sequence of change
         for i, out in enumerate(change_list):
             messages.append(
                 ((t("%d. Change:") + " \n\n%s\n\n") % (i + 1, out[0]))
-                + ("₿ %s" % format_btc(out[1]))
+                + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 
         return messages, fee_percent
