@@ -56,7 +56,7 @@ TS_GO_POSITION = 167
 class TinySeed(Page):
     """Class for handling Tinyseed fomat"""
 
-    def __init__(self, ctx, label=None):
+    def __init__(self, ctx, label="Tiny Seed"):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.label = label
