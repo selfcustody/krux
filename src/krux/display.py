@@ -339,7 +339,8 @@ class Display:
         """Draws a string to the screen"""
         if self.flipped_x_coordinates:
             x = self.width() - x
-            x -= len(text) * FONT_WIDTH
+            x -= lcd.string_width_px(text)
+            x = max(0, x)
         lcd.draw_string(x, y, text, color, bg_color)
 
     def draw_hcentered_text(

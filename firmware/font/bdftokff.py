@@ -32,6 +32,7 @@ FONT14 = "ter-u14n"
 FONT16 = "ter-u16n"
 FONT24 = "ter-u24b"
 KO_16 = "unifont-16"
+KO_24 = "NanumGothic-24"
 
 
 def open_bdf_save_kff(filename, width, height):
@@ -44,6 +45,8 @@ def open_bdf_save_kff(filename, width, height):
         filename_kff = "amigo"
     elif filename == KO_16:
         filename_kff = "bit_dock_yahboom_ko"
+    elif filename == KO_24:
+        filename_kff = "amigo_ko"
 
     # Create hexfile based on bdf
     font_hex = "\n".join(bdftohex.bdftohex(filename + ".bdf")) + "\n"
@@ -67,7 +70,7 @@ def open_bdf_save_kff(filename, width, height):
     # in order to replace the contents of the unicode[] variable
     #  in the font.c
     single_language = None
-    if filename == KO_16:
+    if filename in (KO_16, KO_24):
         single_language = "ko-KR"
     font_kff = hextokff.hextokff(filename + ".hex", width, height, single_language)
     with open(filename_kff + ".kff", "w", encoding="utf-8", newline="\n") as save_file:
@@ -91,6 +94,9 @@ def save_new_fontc(font_name, overwrite=False):
     elif font_name == KO_16:
         filename_kff = "bit_dock_yahboom_ko"
         device_name = "dock"
+    elif font_name == KO_24:
+        device_name = "amigo"
+        filename_kff = "amigo_ko"
 
     maixpy_path_start = "../MaixPy/projects/maixpy_"
     maixpy_path_end = (
@@ -100,7 +106,7 @@ def save_new_fontc(font_name, overwrite=False):
     with open(filename_kff + ".kff", "r", encoding="utf-8") as read_file:
         content_kff = read_file.read()
 
-    if font_name == KO_16:
+    if font_name in (KO_16, KO_24):
         re_escape_str = "static uint8_t unicode_ko[] = {\n"
         content_kff = re_escape_str + content_kff + "\n};"
     else:
@@ -152,13 +158,15 @@ if __name__ == "__main__":
         replace = True
 
     # generate kff files
-    open_bdf_save_kff(FONT14, 8, 14)
-    open_bdf_save_kff(FONT16, 8, 16)
-    open_bdf_save_kff(FONT24, 12, 24)
-    open_bdf_save_kff(KO_16, 16, 16)
+    # open_bdf_save_kff(FONT14, 8, 14)
+    # open_bdf_save_kff(FONT16, 8, 16)
+    # open_bdf_save_kff(FONT24, 12, 24)
+    # open_bdf_save_kff(KO_16, 16, 16)
+    open_bdf_save_kff(KO_24, 24, 24)
 
     # generate new font.c files (delete kff files)
-    save_new_fontc(FONT14, replace)
-    save_new_fontc(FONT16, replace)
-    save_new_fontc(FONT24, replace)
-    save_new_fontc(KO_16, replace)
+    # save_new_fontc(FONT14, replace)
+    # save_new_fontc(FONT16, replace)
+    # save_new_fontc(FONT24, replace)
+    # save_new_fontc(KO_16, replace)
+    save_new_fontc(KO_24, replace)
