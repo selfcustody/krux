@@ -1,12 +1,8 @@
-<!-- Thank you for contributing! -->
+### What is this PR for?
 
-### Description
 
-<!-- Please insert your description here and provide especially info about the "what" this PR is solving -->
-
-### What is the purpose of this pull request? <!-- (put an "X" next to an item) -->
-
+### What is the purpose of this pull request?
 - [ ] Bug fix
-- [ ] New Feature
-- [ ] Documentation update
+- [ ] New feature
+- [ ] Docs update
 - [ ] Other
