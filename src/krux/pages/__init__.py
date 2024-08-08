@@ -23,6 +23,7 @@ import gc
 import math
 import time
 import board
+import lcd
 from .keypads import Keypad
 from ..themes import theme, WHITE, GREEN
 from ..input import (
@@ -32,7 +33,6 @@ from ..input import (
     BUTTON_TOUCH,
     SWIPE_DOWN,
     SWIPE_UP,
-    PRESSED,
     ONE_MINUTE,
 )
 from ..display import (
@@ -332,12 +332,12 @@ class Page:
         answer = True
         while btn != BUTTON_ENTER:
             offset_x = self.ctx.display.width() // 4
-            offset_x -= (len(t("Yes")) * FONT_WIDTH) // 2
+            offset_x -= (lcd.string_width_px(t("Yes"))) // 2
             self.ctx.display.draw_string(
                 offset_x, offset_y, t("Yes"), theme.go_color, theme.bg_color
             )
             offset_x = (self.ctx.display.width() * 3) // 4
-            offset_x -= (len(t("No")) * FONT_WIDTH) // 2
+            offset_x -= (lcd.string_width_px(t("No"))) // 2
             self.ctx.display.draw_string(
                 offset_x, offset_y, t("No"), theme.no_esc_color, theme.bg_color
             )

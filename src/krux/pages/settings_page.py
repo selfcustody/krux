@@ -127,7 +127,7 @@ class SettingsPage(Page):
                     theme.frame_color,
                 )
                 offset_x = x
-                offset_x += (button_width - len(keys[i]) * FONT_WIDTH) // 2
+                offset_x += (button_width - lcd.string_width_px(keys[i])) // 2
                 self.ctx.display.draw_string(
                     offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
                 )

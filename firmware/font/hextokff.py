@@ -36,8 +36,11 @@ DEFAULT_CODEPOINTS = [
 ]
 TRANSLATIONS_DIR = "../../i18n/translations"
 
+KOREAN_MIN_CODEPOINT = 0xAC00
+KOREAN_MAX_CODEPOINT = 0xD7A3
 
-def hextokff(filename=None, width=None, height=None):
+
+def hextokff(filename=None, width=None, height=None, single_language=None):
     """Convert a hex formatted bitmap font file to a kff file"""
 
     if filename is None or width is None or height is None:
@@ -52,16 +55,26 @@ def hextokff(filename=None, width=None, height=None):
 
     # Scan the translations folder and build a set of unique codepoints used
     # across all translations
-    used_codepoints = set(DEFAULT_CODEPOINTS)
+    if not single_language:
+        used_codepoints = set(DEFAULT_CODEPOINTS)
+    else:
+        used_codepoints = set()
     for translation_file in os.listdir(TRANSLATIONS_DIR):
-        file_path = os.path.join(TRANSLATIONS_DIR, translation_file)
+        if not single_language or single_language == translation_file[:5]:
+            file_path = os.path.join(TRANSLATIONS_DIR, translation_file)
 
-        with open(file_path, "r", encoding="utf-8") as file:
-            translations = json.load(file)
+            with open(file_path, "r", encoding="utf-8") as file:
+                translations = json.load(file)
 
-        for translation in translations.values():
-            for char in translation:
-                used_codepoints.add(ord(char))
+            for translation in translations.values():
+                for char in translation:
+                    # If is Korean codepoint
+                    if KOREAN_MIN_CODEPOINT <= ord(char) <= KOREAN_MAX_CODEPOINT:
+                        # only include if single_language is ko-KR
+                        if single_language == "ko-KR":
+                            used_codepoints.add(ord(char))
+                    elif single_language is None:
+                        used_codepoints.add(ord(char))
 
     with open(filename, "r", encoding="utf-8") as input_file:
         # Read in a hex formatted bitmap font file
