@@ -240,14 +240,11 @@ class Display:
         lines = []
         start = 0
         line_count = 0
-        if self.width() > SMALLEST_WIDTH:
-            # TODO: Create a better method to break text when in Korean
-            if Settings().i18n.locale == "ko-KR":
-                columns = self.usable_width() // FONT_WIDTH_KO
-            else:
-                columns = self.usable_width() // FONT_WIDTH
+        columns = self.usable_width() if self.width() > SMALLEST_WIDTH else self.width()
+        if Settings().i18n.locale == "ko-KR" and lcd.string_has_korean(text):
+            columns //= FONT_WIDTH_KO
         else:
-            columns = self.width() // FONT_WIDTH
+            columns //= FONT_WIDTH
 
         # Quick return if content fits in one line
         if len(text) <= columns and "\n" not in text:
@@ -369,11 +366,21 @@ class Display:
                 bg_color,
                 FONT_WIDTH,  # radius
             )
+        
+        # Workaround for Korean vertical padding with 14px font
+        ko_extra_offset = 0
+        if Settings().i18n.locale == "ko-KR" and FONT_HEIGHT == 14 and lcd.string_has_korean("".join(lines)):
+            ko_extra_offset = 2
+
         for i, line in enumerate(lines):
             if len(line) > 0:
                 offset_x = max(0, (self.width() - lcd.string_width_px(line)) // 2)
                 self.draw_string(
-                    offset_x, offset_y + (i * FONT_HEIGHT), line, color, bg_color
+                    offset_x,
+                    offset_y + (i * (FONT_HEIGHT + ko_extra_offset)),
+                    line,
+                    color,
+                    bg_color,
                 )
         return len(lines)  # return number of lines drawn
 

@@ -67,13 +67,15 @@ def main(kff_filename, height, chars=[]):
         if chars and chr(codepoint) not in chars:
             continue
 
-        print(f'\n"{chr(codepoint)}" is unicode: U+{codepoint:04X}, decimal: {codepoint:d}')
+        print(
+            f'\n"{chr(codepoint)}" is unicode: U+{codepoint:04X}, decimal: {codepoint:d}'
+        )
         if len(byte_map) == height:
             # one 8 bit column
             for i in range(0, len(bit_map), 8):
                 print("".join(one if x == "1" else zero for x in bit_map[i : i + 8]))
 
-        elif len(byte_map) == height*2:
+        elif len(byte_map) == height * 2:
             # two 8 bit columns
             half = int(len(bit_map) / 2)
             for i in range(0, half, 8):
@@ -83,7 +85,7 @@ def main(kff_filename, height, chars=[]):
                         for x in bit_map[i : i + 8] + bit_map[half + i : half + i + 8]
                     )
                 )
-        elif len(byte_map) == height*3:
+        elif len(byte_map) == height * 3:
             # three 8 bit columns
             third = int(len(bit_map) / 3)
             for i in range(0, third, 8):
@@ -91,13 +93,13 @@ def main(kff_filename, height, chars=[]):
                     "".join(
                         one if x == "1" else zero
                         for x in (
-                            bit_map[i : i + 8] +
-                            bit_map[third + i : third + i + 8] +
-                            bit_map[2 * third + i : 2 * third + i + 8]
+                            bit_map[i : i + 8]
+                            + bit_map[third + i : third + i + 8]
+                            + bit_map[2 * third + i : 2 * third + i + 8]
                         )
                     )
                 )
-        elif len(byte_map) == height*4:
+        elif len(byte_map) == height * 4:
             # four 8 bit columns
             qtr = int(len(bit_map) / 4)
             for i in range(0, qtr, 8):
@@ -105,10 +107,10 @@ def main(kff_filename, height, chars=[]):
                     "".join(
                         one if x == "1" else zero
                         for x in (
-                            bit_map[i : i + 8] +
-                            bit_map[qtr + i : qtr + i + 8] +
-                            bit_map[2 * qtr + i : 2 * qtr + i + 8] +
-                            bit_map[3 * qtr + i : 3 * qtr + i + 8]
+                            bit_map[i : i + 8]
+                            + bit_map[qtr + i : qtr + i + 8]
+                            + bit_map[2 * qtr + i : 2 * qtr + i + 8]
+                            + bit_map[3 * qtr + i : 3 * qtr + i + 8]
                         )
                     )
                 )
