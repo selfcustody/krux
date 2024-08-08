@@ -7,8 +7,6 @@ def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
-    PRINT_LINES_24W = 312
-
     case = [
         Wallet(tdata.SINGLESIG_24_WORD_KEY),
         MockPrinter(),
@@ -257,14 +255,8 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tiny_seed = TinyScanner(ctx)
-    # mocker.patch.object(
-    #     tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
-    # )
-    ctx.camera.snapshot = snapshot_generator()
+    mocker.patch.object(ctx.camera, "snapshot", new=snapshot_generator())
     ctx.camera.cam_id = OV7740_ID
-    # mocker.patch.object(
-    #     tiny_seed, "_detect_and_draw_punches", new=lambda image, corners: TEST_12_WORDS_NUMBERS
-    # )
     tiny_seed._gradient_corners = mocker.MagicMock(return_value=(50, 50, 50, 50))
     mocker.patch.object(tiny_seed, "_check_buttons", new=lambda w24, page: None)
     words = tiny_seed.scanner()

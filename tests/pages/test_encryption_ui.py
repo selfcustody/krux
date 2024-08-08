@@ -74,6 +74,7 @@ def test_esc_loading_key_from_keypad_is_none(m5stickv, mocker):
 def test_load_key_from_qr_code(m5stickv, mocker):
     from krux.pages.encryption_ui import EncryptionKey, ENCRYPTION_KEY_MAX_LEN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.pages.qr_capture import QRCodeCapture
 
     print("case 1: load_key_from_qr_code")
     BTN_SEQUENCE = (
@@ -84,9 +85,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     key_generator = EncryptionKey(ctx)
     mocker.patch.object(
-        key_generator,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=(("qr key", None))),
+        QRCodeCapture, "qr_capture_loop", new=lambda self: ("qr key", None)
     )
     key = key_generator.encryption_key()
     assert key == "qr key"
@@ -100,9 +99,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     key_generator = EncryptionKey(ctx)
     too_long_text = "l" * (ENCRYPTION_KEY_MAX_LEN + 1)
     mocker.patch.object(
-        key_generator,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=((too_long_text, None))),
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (too_long_text, None)
     )
     key = key_generator.encryption_key()
     assert key == None
@@ -278,8 +275,9 @@ def test_load_encrypted_from_flash_wrong_key(m5stickv, mocker):
 
 def test_load_encrypted_qr_code(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = (
         # Decrypt? Yes
@@ -300,9 +298,9 @@ def test_load_encrypted_qr_code(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=(ENCRYPTED_QR_DATA_CBC, QR_FORMAT)),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (ENCRYPTED_QR_DATA_CBC, QR_FORMAT),
     )
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",

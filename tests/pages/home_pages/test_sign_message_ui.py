@@ -9,6 +9,7 @@ def test_sign_message(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     cases = [
         # 0 Hex-encoded hash, Sign, No print prompt
@@ -179,13 +180,15 @@ def test_sign_message(mocker, m5stickv, tdata):
 
         ctx = create_ctx(mocker, case[3], wallet, case[2])
         home = SignMessage(ctx)
-        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
+        mocker.patch.object(
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (case[0], case[1])
+        )
+        qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
         mocker.patch.object(
             home,
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
         if case[6] is not None:
             mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
@@ -203,7 +206,7 @@ def test_sign_message(mocker, m5stickv, tdata):
 
         home.sign_message()
 
-        home.capture_qr_code.assert_called_once()
+        qr_capturer.assert_called_once()
         signed_qr_message = (
             len(case[3]) > 1
             and case[3][0] == BUTTON_ENTER
@@ -228,6 +231,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
     from krux.themes import theme
+    from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Load from camera
@@ -241,16 +245,19 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
     mocker.patch.object(ctx.display, "width", new=lambda: 135)
     message_signer = SignMessage(ctx)
     mocker.spy(message_signer, "display_qr_codes")
+
     mocker.patch.object(
-        message_signer,
-        "capture_qr_code",
-        new=lambda: (
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
             "signmessage m/84h/1h/0h/0/3 ascii:a test message with a colon ':' character.",
             FORMAT_NONE,
         ),
     )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     message_signer.sign_message()
 
+    qr_capturer.assert_called_once()
     ctx.display.draw_hcentered_text.assert_has_calls(
         [mocker.call("Message:", 10, theme.highlight_color)]
     )

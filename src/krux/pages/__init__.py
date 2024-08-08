@@ -45,7 +45,7 @@ from ..display import (
     STATUS_BAR_HEIGHT,
 )
 from ..qr import to_qr_codes
-from ..krux_settings import t, Settings, DefaultWallet
+from ..krux_settings import t, Settings
 from ..sd_card import SDHandler
 
 MENU_CONTINUE = 0
@@ -55,7 +55,6 @@ MENU_SHUTDOWN = 2
 ESC_KEY = 1
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
-ANTI_GLARE_WAIT_TIME = 500
 SHUTDOWN_WAIT_TIME = 300
 
 TOGGLE_BRIGHTNESS = (BUTTON_PAGE, BUTTON_PAGE_PREV)
@@ -83,7 +82,6 @@ class Page:
     def __init__(self, ctx, menu=None):
         self.ctx = ctx
         self.menu = menu
-        self._time_frame = 0
         # context has its own keypad mapping in case touch is not used
         self.y_keypad_map = []
         self.x_keypad_map = []
@@ -202,88 +200,6 @@ class Page:
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
         return buffer
-
-    def capture_qr_code(self):
-        """Captures a singular or animated series of QR codes and displays progress to the user.
-        Returns the contents of the QR code(s).
-        """
-        self._time_frame = time.ticks_ms()
-
-        def callback(part_total, num_parts_captured, new_part):
-            # Turn on the light as long as the enter button is held down (M5stickV and Amigo)
-            if self.ctx.light:
-                if self.ctx.input.enter_value() == PRESSED:
-                    self.ctx.light.turn_on()
-                else:
-                    self.ctx.light.turn_off()
-            # If board don't have light, ENTER stops the capture
-            elif self.ctx.input.enter_event():
-                return 1
-
-            # Anti-glare mode
-            if self.ctx.input.page_event() or (
-                # Yahboom may have page or page_prev mapped to its single button
-                board.config["type"] == "yahboom"
-                and self.ctx.input.page_prev_event()
-            ):
-                if self.ctx.camera.has_antiglare():
-                    self._time_frame = time.ticks_ms()
-                    self.ctx.display.to_portrait()
-                    if not self.ctx.camera.antiglare_enabled:
-                        self.ctx.camera.enable_antiglare()
-                        self.ctx.display.draw_centered_text(t("Anti-glare enabled"))
-                    else:
-                        self.ctx.camera.disable_antiglare()
-                        self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
-                    time.sleep_ms(ANTI_GLARE_WAIT_TIME)
-                    self.ctx.display.to_landscape()
-                    self.ctx.input.reset_ios_state()
-                    return 0
-                return 1
-
-            # Exit the capture loop with PAGE_PREV or TOUCH
-            if self.ctx.input.page_prev_event() or self.ctx.input.touch_event():
-                return 1
-
-            # Indicate progress to the user that a new part was captured
-            if new_part:
-                self.ctx.display.to_portrait()
-                filled = self.ctx.display.width() * num_parts_captured
-                filled //= part_total
-                if board.config["type"] == "cube":
-                    height = 225
-                elif self.ctx.display.height() < 320:  # M5StickV
-                    height = 210
-                elif self.ctx.display.height() > 320:  # Amigo
-                    height = 380
-                else:
-                    height = 305
-                self.ctx.display.fill_rectangle(
-                    0,
-                    height,
-                    filled,
-                    15,
-                    theme.fg_color,
-                )
-                self.ctx.display.to_landscape()
-
-            return 0
-
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading Camera.."))
-        self.ctx.display.to_landscape()
-        code = None
-        qr_format = None
-        try:
-            code, qr_format = self.ctx.camera.capture_qr_code_loop(
-                callback, self.ctx.display.flipped_x_coordinates
-            )
-        except:
-            print("Camera error")
-        if self.ctx.light:
-            self.ctx.light.turn_off()
-        self.ctx.display.to_portrait()
-        return (code, qr_format)
 
     def display_qr_codes(self, data, qr_format, title=""):
         """Displays a QR code or an animated series of QR codes to the user, encoding them

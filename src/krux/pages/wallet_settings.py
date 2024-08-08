@@ -82,7 +82,10 @@ class PassphraseEditor(Page):
         )
 
     def _load_qr_passphrase(self):
-        data, _ = self.capture_qr_code()
+        from .qr_capture import QRCodeCapture
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, _ = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load passphrase"))
             return MENU_CONTINUE

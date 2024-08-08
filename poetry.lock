@@ -293,7 +293,7 @@ profile = ["gprof2dot (>=2022.7.29)"]
 
 [[package]]
 name = "embit"
-version = "0.7.0"
+version = "0.8.0"
 description = "A minimal bitcoin library for MicroPython and Python3 with a focus on embedded systems."
 optional = false
 python-versions = "*"
