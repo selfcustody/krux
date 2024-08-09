@@ -220,8 +220,11 @@ class Login(Page):
                             mnemonic_from_bytes = first_12 + " " + second_12
                             double_mnemonic = mnemonic_is_valid(mnemonic_from_bytes)
 
-                        post_t = time.ticks_ms()
-                        print("Tries: %d" % tries, "/ %d" % (post_t - pre_t), "ms")
+                        print(
+                            "Tries: %d" % tries,
+                            "/ %d" % (time.ticks_ms() - pre_t),
+                            "ms",
+                        )
 
                 return self._load_key_from_words(mnemonic_from_bytes.split())
         return MENU_CONTINUE
