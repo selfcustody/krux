@@ -462,7 +462,7 @@ def is_double_mnemonic(mnemonic: str):
 
     words = mnemonic.split(" ")
     if len(words) > 12:
-        from embit.bip39 import mnemonic_is_valid
+        from krux.bip39 import mnemonic_is_valid
 
         if (
             mnemonic_is_valid(" ".join(words[:12]))
