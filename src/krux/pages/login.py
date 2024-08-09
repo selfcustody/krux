@@ -159,7 +159,7 @@ class Login(Page):
 
     def new_key_from_snapshot(self):
         """Use camera's entropy to create a new mnemonic"""
-        len_mnemonic = choose_len_mnemonic(self.ctx)
+        len_mnemonic = choose_len_mnemonic(self.ctx, True)
         if not len_mnemonic:
             return MENU_CONTINUE
 
@@ -182,9 +182,48 @@ class Login(Page):
                     t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash
                 )
                 self.ctx.input.wait_for_button()
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Processing.."))
+
                 num_bytes = 16 if len_mnemonic == 12 else 32
-                words = bip39.mnemonic_from_bytes(entropy_bytes[:num_bytes]).split()
-                return self._load_key_from_words(words)
+                mnemonic_from_bytes = bip39.mnemonic_from_bytes(
+                    entropy_bytes[:num_bytes]
+                )
+
+                # Double mnemonic check
+                if len_mnemonic == 48:
+                    from ..wallet import is_double_mnemonic
+
+                    if not is_double_mnemonic(mnemonic_from_bytes):
+                        from embit.bip39 import mnemonic_is_valid
+                        from ..wdt import wdt
+                        import time
+
+                        pre_t = time.ticks_ms()
+                        tries = 0
+
+                        # create two 12w mnemonic with the provided entropy
+                        first_12 = bip39.mnemonic_from_bytes(entropy_bytes[:16])
+                        second_mnemonic_entropy = entropy_bytes[16:32]
+                        double_mnemonic = False
+                        while not double_mnemonic:
+                            wdt.feed()
+                            tries += 1
+                            # increment the second mnemonic entropy
+                            second_mnemonic_entropy = (
+                                int.from_bytes(second_mnemonic_entropy, "big") + 1
+                            ).to_bytes(16, "big")
+                            second_12 = bip39.mnemonic_from_bytes(
+                                second_mnemonic_entropy
+                            )
+                            mnemonic_from_bytes = first_12 + " " + second_12
+                            double_mnemonic = mnemonic_is_valid(mnemonic_from_bytes)
+
+                        post_t = time.ticks_ms()
+                        print("Tries: %d" % tries, "/ %d" % (post_t - pre_t), "ms")
+
+                return self._load_key_from_words(mnemonic_from_bytes.split())
         return MENU_CONTINUE
 
     def _load_key_from_words(self, words, charset=LETTERS):
@@ -296,7 +335,7 @@ class Login(Page):
                     self.flash_error(t("Key was not provided"))
                     return MENU_CONTINUE
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Processing ..."))
+                self.ctx.display.draw_centered_text(t("Processing.."))
                 word_bytes = encrypted_qr.decrypt(key)
                 if word_bytes is None:
                     self.flash_error(t("Failed to decrypt"))
