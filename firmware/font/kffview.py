@@ -39,7 +39,7 @@ def str_to_bytes(comma_separated_bytes_string):
     return bytes([int(x[2:], 16) for x in bytestr_list])
 
 
-def main(kff_filename, height, chars=[]):
+def main(kff_filename, height, chars=None):
     """
     receives a kff-filename, height and optionally a string of characters
     prints all kff bitmap fonts, or those requested, to stdout.

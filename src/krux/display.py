@@ -366,10 +366,14 @@ class Display:
                 bg_color,
                 FONT_WIDTH,  # radius
             )
-        
+
         # Workaround for Korean vertical padding with 14px font
         ko_extra_offset = 0
-        if Settings().i18n.locale == "ko-KR" and FONT_HEIGHT == 14 and lcd.string_has_korean("".join(lines)):
+        if (
+            Settings().i18n.locale == "ko-KR"
+            and FONT_HEIGHT == 14
+            and lcd.string_has_korean("".join(lines))
+        ):
             ko_extra_offset = 2
 
         for i, line in enumerate(lines):

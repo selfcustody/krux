@@ -153,20 +153,19 @@ def save_new_fontc(font_name, overwrite=False):
 
 
 if __name__ == "__main__":
-    replace = False
-    if len(sys.argv) > 1:
-        replace = True
+
+    replace = len(sys.argv) > 1 and sys.argv[1] == "True"
 
     # generate kff files
-    # open_bdf_save_kff(FONT14, 8, 14)
-    # open_bdf_save_kff(FONT16, 8, 16)
-    # open_bdf_save_kff(FONT24, 12, 24)
-    # open_bdf_save_kff(KO_16, 16, 16)
+    open_bdf_save_kff(FONT14, 8, 14)
+    open_bdf_save_kff(FONT16, 8, 16)
+    open_bdf_save_kff(FONT24, 12, 24)
+    open_bdf_save_kff(KO_16, 16, 16)
     open_bdf_save_kff(KO_24, 24, 24)
 
     # generate new font.c files (delete kff files)
-    # save_new_fontc(FONT14, replace)
-    # save_new_fontc(FONT16, replace)
-    # save_new_fontc(FONT24, replace)
-    # save_new_fontc(KO_16, replace)
+    save_new_fontc(FONT14, replace)
+    save_new_fontc(FONT16, replace)
+    save_new_fontc(FONT24, replace)
+    save_new_fontc(KO_16, replace)
     save_new_fontc(KO_24, replace)
