@@ -93,9 +93,9 @@ class MnemonicsView(Page):
         encrypt_qr_code = EncryptMnemonic(self.ctx)
         return encrypt_qr_code.encrypted_qr_code()
 
-    def show_mnemonic(self, mnemonic, suffix=""):
+    def show_mnemonic(self, mnemonic, suffix="", display_mnemonic=None):
         """Displays only the mnemonic words or indexes"""
-        self.display_mnemonic(mnemonic, suffix)
+        self.display_mnemonic(mnemonic, suffix, display_mnemonic)
         self.ctx.input.wait_for_button()
 
         # Avoid printing text on a cnc
@@ -121,28 +121,31 @@ class MnemonicsView(Page):
                 (
                     t("Decimal"),
                     lambda: self.show_mnemonic(
+                        self.ctx.wallet.key.mnemonic,
+                        Utils.BASE_DEC_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_DEC
                         ),
-                        Utils.BASE_DEC_SUFFIX,
                     ),
                 ),
                 (
                     t("Hexadecimal"),
                     lambda: self.show_mnemonic(
+                        self.ctx.wallet.key.mnemonic,
+                        Utils.BASE_HEX_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_HEX
                         ),
-                        Utils.BASE_HEX_SUFFIX,
                     ),
                 ),
                 (
                     t("Octal"),
                     lambda: self.show_mnemonic(
+                        self.ctx.wallet.key.mnemonic,
+                        Utils.BASE_OCT_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_OCT
                         ),
-                        Utils.BASE_OCT_SUFFIX,
                     ),
                 ),
             ],

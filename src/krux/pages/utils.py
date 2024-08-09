@@ -73,10 +73,10 @@ class Utils(Page):
         return "", None
 
     @staticmethod
-    def get_mnemonic_numbers(words, base=BASE_DEC):
+    def get_mnemonic_numbers(mnemonic: str, base=BASE_DEC):
         """Returns the mnemonic as indexes in decimal, hexadecimal, or octal"""
         word_numbers = []
-        for word in words.split(" "):
+        for word in mnemonic.split(" "):
             word_numbers.append(WORDLIST.index(word) + 1)
 
         if base == Utils.BASE_HEX:

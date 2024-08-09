@@ -26,10 +26,10 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
+from .settings import THIN_SPACE
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 from .sats_vb import SatsVB
-from .display import THIN_SPACE
 
 # PSBT Output Types:
 CHANGE = 0

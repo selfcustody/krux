@@ -21,8 +21,9 @@
 # THE SOFTWARE.
 
 import gc
-from ...display import BOTTOM_PROMPT_LINE, THIN_SPACE
+from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
+from ...settings import THIN_SPACE
 from ...qr import FORMAT_NONE
 from .. import (
     Page,

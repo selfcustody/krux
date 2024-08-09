@@ -3,6 +3,7 @@ from .test_home import tdata, create_ctx
 
 def test_bip85_wallet_creation(mocker, amigo, tdata):
     from krux.krux_settings import Settings
+    from krux.settings import THIN_SPACE
     from krux.pages.home_pages.bip85 import Bip85
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -149,7 +150,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
 
         if case[2]:
             bip85_ui.display_mnemonic.assert_called_with(
-                case[2], suffix="Words" + "\n⊚ %s" % case[3]
+                case[2], suffix="Words", fingerprint="⊚" + THIN_SPACE + "%s" % case[3]
             )
         else:
             bip85_ui.display_mnemonic.assert_not_called()
@@ -166,4 +167,4 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
     bip85_ui = Bip85(ctx)
     mocker.spy(bip85_ui, "display_mnemonic")
     bip85_ui.export()
-    ctx.display.draw_centered_text.assert_called_with("⊚ %s" % case[3])
+    ctx.display.draw_centered_text.assert_called_with("⊚" + THIN_SPACE + "%s" % case[3])

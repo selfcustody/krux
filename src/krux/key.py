@@ -31,7 +31,7 @@ from hashlib import sha256
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
-from .settings import TEST_TXT
+from .settings import TEST_TXT, THIN_SPACE
 
 DER_SINGLE = "m/%dh/%dh/%dh"
 DER_MULTI = "m/%dh/%dh/%dh/2h"
@@ -191,13 +191,13 @@ class Key:
     @staticmethod
     def format_derivation(derivation, pretty=False):
         """Helper method to display the derivation path formatted"""
-        formatted_txt = DERIVATION_PATH_SYMBOL + " %s" if pretty else "%s"
+        formatted_txt = DERIVATION_PATH_SYMBOL + THIN_SPACE + "%s" if pretty else "%s"
         return (formatted_txt % derivation).replace("h", HARDENED_STR_REPLACE)
 
     @staticmethod
     def format_fingerprint(fingerprint, pretty=False):
         """Helper method to display the fingerprint formatted"""
-        formatted_txt = FINGERPRINT_SYMBOL + " %s" if pretty else "%s"
+        formatted_txt = FINGERPRINT_SYMBOL + THIN_SPACE + "%s" if pretty else "%s"
         return formatted_txt % hexlify(fingerprint).decode("utf-8")
 
     @staticmethod

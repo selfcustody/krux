@@ -76,7 +76,8 @@ class Bip85(Page):
         if not Settings().security.hide_mnemonic:
             self.display_mnemonic(
                 bip85_words,
-                suffix=t("Words") + "\n%s" % key.fingerprint_hex_str(True),
+                suffix=t("Words"),
+                fingerprint=key.fingerprint_hex_str(True),
             )
         else:
             self.ctx.display.draw_centered_text(key.fingerprint_hex_str(True))

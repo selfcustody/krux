@@ -738,6 +738,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
         B64_PSBT_FILE_EXTENSION,
         SIGNED_FILE_SUFFIX,
     )
+    from krux.settings import THIN_SPACE
 
     PSBT_FILE_NAME = "test.psbt"
     SIGNED_PSBT_FILE_NAME = "test-signed.psbt"
@@ -805,7 +806,13 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
                 "Warning: Path mismatch\nWallet: m/48'/0'/0'/2'\nPSBT: m/48'/1'/0'/2'"
             ),
             mocker.call(
-                "PSBT policy:\np2wsh\n2 of 3\n⊚ 26bb83c4\n⊚ 0208cb77\n⊚ 73c5da0a"
+                "PSBT policy:\np2wsh\n2 of 3\n⊚"
+                + THIN_SPACE
+                + "26bb83c4\n⊚"
+                + THIN_SPACE
+                + "0208cb77\n⊚"
+                + THIN_SPACE
+                + "73c5da0a"
             ),
         ]
     )
@@ -1021,7 +1028,7 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
             mocker.call(
                 "Warning: Path mismatch\nWallet: m/84'/0'/0'\nPSBT: m/84'/1'/0'"
             ),
-            mocker.call("Processing ..."),
+            mocker.call("Processing.."),
             mocker.call("Warning: High fees!\n799.7% of the amount."),
         ]
     )
@@ -1069,7 +1076,7 @@ def test_sign_self(mocker, m5stickv, tdata):
             mocker.call(
                 "Warning: Path mismatch\nWallet: m/84'/0'/0'\nPSBT: m/84'/1'/0'"
             ),
-            mocker.call("Processing ..."),
+            mocker.call("Processing.."),
             mocker.call("Warning: High fees!\n799.7% of the amount."),
         ]
     )
@@ -1118,7 +1125,7 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
             mocker.call(
                 "Warning: Path mismatch\nWallet: m/84'/0'/0'\nPSBT: m/84'/1'/0'"
             ),
-            mocker.call("Processing ..."),
+            mocker.call("Processing.."),
             mocker.call("Warning: High fees!\n235.9% of the amount."),
         ]
     )

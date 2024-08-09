@@ -25,8 +25,9 @@ from embit.wordlists.bip39 import WORDLIST
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
+from ..settings import THIN_SPACE
 from ..qr import get_size
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH, THIN_SPACE
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -373,7 +374,7 @@ class SeedQRView(Page):
             return
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Saving ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
 
         bmp_img.save("/sd/" + file_name)
         self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)

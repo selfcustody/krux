@@ -38,6 +38,8 @@ FLASH_PATH = "flash"
 MAIN_TXT = "main"
 TEST_TXT = "test"
 
+THIN_SPACE = " "
+
 
 class SettingsNamespace:
     """Represents a settings namespace containing settings and child namespaces"""
