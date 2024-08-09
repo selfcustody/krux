@@ -242,7 +242,7 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                                 y,
                             ),
                         )
-                x_position -= char_width(c)
+                x_position += char_width(c) if BOARD_CONFIG["type"] != "amigo" else -char_width(c)
                 
 
 
