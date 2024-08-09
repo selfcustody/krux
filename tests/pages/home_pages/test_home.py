@@ -806,7 +806,13 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
                 "Warning: Path mismatch\nWallet: m/48'/0'/0'/2'\nPSBT: m/48'/1'/0'/2'"
             ),
             mocker.call(
-                "PSBT policy:\np2wsh\n2 of 3\n⊚"+THIN_SPACE+"26bb83c4\n⊚"+THIN_SPACE+"0208cb77\n⊚"+THIN_SPACE+"73c5da0a"
+                "PSBT policy:\np2wsh\n2 of 3\n⊚"
+                + THIN_SPACE
+                + "26bb83c4\n⊚"
+                + THIN_SPACE
+                + "0208cb77\n⊚"
+                + THIN_SPACE
+                + "73c5da0a"
             ),
         ]
     )
