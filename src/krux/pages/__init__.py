@@ -47,7 +47,6 @@ from ..display import (
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings
 from ..sd_card import SDHandler
-from ..wallet import is_double_mnemonic
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -346,6 +345,8 @@ class Page:
         self, mnemonic: str, suffix="", display_mnemonic: str = None, fingerprint=""
     ):
         """Displays the 12 or 24-word list of words to the user"""
+        from ..wallet import is_double_mnemonic
+
         if display_mnemonic is None:
             display_mnemonic = mnemonic
         words = display_mnemonic.split(" ")
