@@ -329,6 +329,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.sd_card import (
         PSBT_FILE_EXTENSION,
         B64_PSBT_FILE_EXTENSION,
@@ -646,13 +647,15 @@ def test_sign_psbt(mocker, m5stickv, tdata):
 
         ctx = create_ctx(mocker, case[7], wallet, case[6])
         home = Home(ctx)
-        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[2], case[3]))
+        mocker.patch.object(
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (case[2], case[3])
+        )
+        qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
         mocker.patch.object(
             home,
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
         if case[6]:
             mock_send_to_printer = mocker.patch(
@@ -690,7 +693,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             and case[7][1] == BUTTON_ENTER
         )
         if loaded_via_sd:
-            home.capture_qr_code.assert_not_called()
+            qr_capturer.assert_not_called()
 
         if case[4] and case[8] is None:  # if signed from/to QR codes
             home.display_qr_codes.assert_called_once_with(case[5], FORMAT_PMOFN)
@@ -831,7 +834,8 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
-    from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
@@ -845,14 +849,16 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home, "capture_qr_code", new=lambda: (tdata.P2WPKH_PSBT_B64, FORMAT_NONE)
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_PSBT_B64, FORMAT_NONE),
     )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
     mocker.spy(home, "display_qr_codes")
 
     # Wrong key, will raise error "cannot sign"
@@ -860,6 +866,7 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
         home.sign_psbt()
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    qr_capturer.assert_called_once()
 
     # ERROR raised: no qrcode
     home.display_qr_codes.assert_not_called()
@@ -870,6 +877,7 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
@@ -885,16 +893,16 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home,
-        "capture_qr_code",
-        new=lambda: (tdata.P2WPKH_PSBT_B64_ZEROES_FINGERPRINT, FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_PSBT_B64_ZEROES_FINGERPRINT, FORMAT_NONE),
     )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
     mocker.spy(home, "display_qr_codes")
 
     home.sign_psbt()
@@ -902,6 +910,7 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
     # Signed normally even with zeroes in fingerprint
+    qr_capturer.assert_called_once()
     home.display_qr_codes.assert_called_once_with(
         tdata.SIGNED_P2WPKH_PSBT_B64, FORMAT_PMOFN
     )
@@ -985,7 +994,8 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
-    from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
@@ -1000,20 +1010,21 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home,
-        "capture_qr_code",
-        new=lambda: (tdata.P2WPKH_HIGH_FEE_PSBT, FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_HIGH_FEE_PSBT, FORMAT_NONE),
     )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
 
     home.sign_psbt()
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    qr_capturer.assert_called_once()
 
     # These three calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
@@ -1031,7 +1042,8 @@ def test_sign_self(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
-    from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     psbt_action_key = "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"
 
@@ -1048,20 +1060,21 @@ def test_sign_self(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home,
-        "capture_qr_code",
-        new=lambda: (psbt_action_key, FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (psbt_action_key, FORMAT_NONE),
     )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
 
     home.sign_psbt()
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    qr_capturer.assert_called_once()
 
     # These three calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
@@ -1079,7 +1092,8 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
-    from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     psbt_action_key = "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"
 
@@ -1097,20 +1111,21 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home,
-        "capture_qr_code",
-        new=lambda: (psbt_action_key, FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (psbt_action_key, FORMAT_NONE),
     )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
 
     home.sign_psbt()
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    qr_capturer.assert_called_once()
 
     # These three calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
