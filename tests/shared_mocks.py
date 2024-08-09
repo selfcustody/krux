@@ -360,6 +360,7 @@ def board_m5stickv():
                 "display": {
                     "touch": False,
                     "font": [8, 14],
+                    "font_ko": [14, 14],
                 },
             },
         }
@@ -409,6 +410,7 @@ def board_amigo():
                 "display": {
                     "touch": True,
                     "font": [12, 24],
+                    "font_ko": [24, 24],
                 },
             },
         }
@@ -435,6 +437,7 @@ def board_dock():
                 "display": {
                     "touch": False,
                     "font": [8, 16],
+                    "font_ko": [16, 16],
                 },
             },
         }
@@ -468,6 +471,7 @@ def board_cube():
                 "display": {
                     "touch": False,
                     "font": [8, 14],
+                    "font_ko": [14, 14],
                 },
             },
         }

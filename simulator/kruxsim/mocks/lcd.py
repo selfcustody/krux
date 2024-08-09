@@ -34,6 +34,9 @@ COLOR_WHITE = (255, 255, 255)
 WIDTH = BOARD_CONFIG["lcd"]["width"]
 HEIGHT = BOARD_CONFIG["lcd"]["height"]
 
+KOREAN_CODEPOINT_MIN = 0xAC00
+KOREAN_CODEPOINT_MAX = 0xD7A3
+
 screen = None
 portrait = True
 landscape = False
@@ -141,31 +144,107 @@ def _is_x_flipped():
         flipped_x = Settings().hardware.display.flipped_x_coordinates
     return flipped_x
 
+def string_width_px(string):
+    standard_width = BOARD_CONFIG["krux"]["display"]["font"][0]
+    ko_width = BOARD_CONFIG["krux"]["display"]["font_ko"][0]
+    string_width = 0
+
+    for c in string:
+        if KOREAN_CODEPOINT_MIN < ord(c) < KOREAN_CODEPOINT_MAX:
+            string_width += ko_width
+        else:
+            string_width += standard_width
+
+    return string_width
+
+def string_has_korean(string):
+    for c in string:
+        if KOREAN_CODEPOINT_MIN < ord(c) < KOREAN_CODEPOINT_MAX:
+            return True
+    return False
+
+def is_korean(c):
+    return KOREAN_CODEPOINT_MIN < ord(c) < KOREAN_CODEPOINT_MAX
+
+def char_width(c):
+    if KOREAN_CODEPOINT_MIN < ord(c) < KOREAN_CODEPOINT_MAX:
+        return BOARD_CONFIG["krux"]["display"]["font_ko"][0]
+    else:
+        return BOARD_CONFIG["krux"]["display"]["font"][0]
 
 def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
 
     def run():
         from kruxsim import devices
 
-        text, _ = devices.load_font(BOARD_CONFIG["type"]).render(s, color, bgcolor)
-        if landscape:
-            text = pg.transform.rotate(text, 90)
-            screen.blit(
-                text,
-                (
-                    height() - text.get_width() - y,
-                    x,
-                ),
-            )
+        x_position = x
+        if not string_has_korean(s):
+            text, _ = devices.load_font(BOARD_CONFIG["type"])[0].render(s, color, bgcolor)
+            if landscape:
+                text = pg.transform.rotate(text, 90)
+                screen.blit(
+                    text,
+                    (
+                        height() - text.get_width() - y,
+                        x_position,
+                    ),
+                )
+            else:
+                x_val = x_position if BOARD_CONFIG["type"] != "amigo" else width() - text.get_width() - x_position
+                screen.blit(
+                    text,
+                    (
+                        x_val,
+                        y,
+                    ),
+                )
         else:
-            x_val = x if BOARD_CONFIG["type"] != "amigo" else width() - text.get_width() - x
-            screen.blit(
-                text,
-                (
-                    x_val,
-                    y,
-                ),
-            )
+            # draw korean text char by char
+            total_with =  string_width_px(s)
+            for c in s:
+                char_w = char_width(c)
+                x_val = x_position if BOARD_CONFIG["type"] != "amigo" else width() - x_position - total_with
+                if is_korean(c):
+                    text, _ = devices.load_font(BOARD_CONFIG["type"])[1].render(c, color, bgcolor)
+                    if landscape:
+                        text = pg.transform.rotate(text, 90)
+                        screen.blit(
+                            text,
+                            (
+                                height() - text.get_width() - y,
+                                x_position,
+                            ),
+                        )
+                    else:
+                        screen.blit(
+                            text,
+                            (
+                                x_val,
+                                y,
+                            ),
+                        )
+                else:
+                    text, _ = devices.load_font(BOARD_CONFIG["type"])[0].render(c, color, bgcolor)
+                    if landscape:
+                        text = pg.transform.rotate(text, 90)
+                        screen.blit(
+                            text,
+                            (
+                                height() - text.get_width() - y,
+                                x_position,
+                            ),
+                        )
+                    else:
+                        screen.blit(
+                            text,
+                            (
+                                x_val,
+                                y,
+                            ),
+                        )
+                x_position -= char_width(c)
+                
+
 
     color = rgb565torgb888(color)
     bgcolor = rgb565torgb888(bgcolor)
@@ -327,6 +406,7 @@ if "lcd" not in sys.modules:
         rotation=rotation,
         width=width,
         height=height,
+        string_width_px=string_width_px,
         draw_string=draw_string,
         draw_qr_code=draw_qr_code,
         draw_qr_code_binary=draw_qr_code_binary,
