@@ -373,7 +373,7 @@ class SeedQRView(Page):
             return
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Saving ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
 
         bmp_img.save("/sd/" + file_name)
         self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
