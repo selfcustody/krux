@@ -182,6 +182,7 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
             new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[2])),
         )
         display = Display()
+        display.to_portrait()
         qr_data_width = display.qr_data_width()
         fmt = case[0]
         data = case[1]
