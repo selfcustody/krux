@@ -39,9 +39,9 @@ class Camera:
         self.initialized = False
         self.cam_id = None
         self.antiglare_enabled = False
-        self.initialize_sensor()
+        self._initialize_sensor()
 
-    def initialize_sensor(self, grayscale=False):
+    def _initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
         self.initialized = False
         self.antiglare_enabled = False
@@ -191,7 +191,7 @@ class Camera:
 
     def initialize_run(self):
         """Initializes and runs sensor"""
-        self.initialize_sensor()
+        self._initialize_sensor()
         sensor.run(1)
 
     def stop_sensor(self):

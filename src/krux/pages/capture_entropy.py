@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import lcd
 import board
 import math
 from ..display import FONT_HEIGHT, BOTTOM_LINE, BOTTOM_PROMPT_LINE
@@ -40,22 +39,6 @@ class CameraEntropy(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
-
-    def display_image(self, img):
-        """Displays the image based on the board type."""
-        board_type = board.config["type"]
-
-        if board_type == "m5stickv":
-            img.lens_corr(strength=1.0, zoom=0.56)
-            lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
-        elif board_type == "amigo":
-            # Offset x = 480 - 320 - 40 = 120 if not flipped
-            oft_x = 40 if self.ctx.display.flipped_x_coordinates else 120
-            lcd.display(img, oft=(oft_x, 40))
-        elif board_type == "cube":
-            lcd.display(img, oft=(0, 0), roi=(0, 0, 220, 240))
-        else:
-            lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
 
     def _callback(self):
         """
@@ -90,18 +73,22 @@ class CameraEntropy(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))
         self.ctx.display.to_landscape()
-        self.ctx.camera.initialize_sensor()
-        sensor.run(1)
-        self.ctx.display.clear()
+        self.ctx.camera.initialize_run()
+
         command = 0
         y_label_offset = BOTTOM_LINE
         if board.config["type"] == "amigo":
             y_label_offset = BOTTOM_PROMPT_LINE
+
         # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
         while True:
             wdt.feed()
+
+            self.ctx.display.to_landscape()
             img = sensor.snapshot()
+            self.ctx.display.render_image(img)
+
             stdev_index = self.rms_value(
                 [
                     img.get_statistics().l_stdev(),
@@ -109,6 +96,11 @@ class CameraEntropy(Page):
                     img.get_statistics().b_stdev(),
                 ]
             )
+
+            command = self._callback()
+            if command != NOT_PRESSED:
+                break
+
             self.ctx.display.to_portrait()
             self.ctx.display.fill_rectangle(
                 0,
@@ -129,12 +121,6 @@ class CameraEntropy(Page):
                 self.ctx.display.draw_hcentered_text(
                     t("Insufficient entropy"), y_label_offset, theme.error_color
                 )
-            self.ctx.display.to_landscape()
-            command = self._callback()
-            if command != NOT_PRESSED:
-                break
-
-            self.display_image(img)
 
         self.ctx.display.to_portrait()
         gc.collect()
@@ -145,7 +131,7 @@ class CameraEntropy(Page):
             self.flash_text(t("Capture cancelled"))
             return None
 
-        self.ctx.display.draw_centered_text(t("Calculating Shannon's entropy"))
+        self.ctx.display.draw_centered_text(t("Processing ..."))
 
         img_bytes = img.to_bytes()
         img_pixels = img.width() * img.height()

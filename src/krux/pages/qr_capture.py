@@ -19,17 +19,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import lcd
 import board
 import time
 from . import Page
 from ..input import PRESSED
 from ..themes import theme
-from ..qr import QRPartParser, FORMAT_UR
+from ..qr import QRPartParser, FORMAT_UR, FORMAT_PMOFN
 from ..wdt import wdt
 from ..krux_settings import t
 
 ANTI_GLARE_WAIT_TIME = 500
+
+PROGRESS_BAR_HEIGHT = 15
 
 
 class QRCodeCapture(Page):
@@ -67,17 +68,29 @@ class QRCodeCapture(Page):
             filled = (
                 self.ctx.display.width() * parser.parsed_count()
             ) // parser.total_count()
-            self.ctx.display.fill_rectangle(0, height, filled, 15, theme.fg_color)
-        else:
-            block_size = self.ctx.display.width() // parser.total_count()
-            x_offset = block_size * index
             self.ctx.display.fill_rectangle(
-                x_offset, height, block_size, 15, theme.highlight_color
+                0, height, filled, PROGRESS_BAR_HEIGHT, theme.fg_color
+            )
+        else:
+            if parser.format == FORMAT_PMOFN:
+                index -= 1
+            block_size = self.ctx.display.width() / parser.total_count()
+            self.ctx.display.fill_rectangle(
+                int(block_size * index),
+                height,
+                int(block_size),
+                PROGRESS_BAR_HEIGHT,
+                theme.highlight_color,
             )
             if previous_index is not None:
-                x_offset = block_size * previous_index
+                if parser.format == FORMAT_PMOFN:
+                    previous_index -= 1
                 self.ctx.display.fill_rectangle(
-                    x_offset, height, block_size, 15, theme.fg_color
+                    int(block_size * previous_index),
+                    height,
+                    int(block_size),
+                    PROGRESS_BAR_HEIGHT,
+                    theme.fg_color,
                 )
 
         self.ctx.display.to_landscape()
@@ -95,6 +108,7 @@ class QRCodeCapture(Page):
         new_part = None
         previous_part = None
 
+        # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
         while True:
             wdt.feed()
@@ -123,19 +137,9 @@ class QRCodeCapture(Page):
                 new_part = None
 
             img = self.ctx.camera.snapshot()
+            self.ctx.display.render_image(img)
+
             res = img.find_qrcodes()
-
-            if board.config["type"] == "m5stickv":
-                img.lens_corr(strength=1.0, zoom=0.56)
-                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
-            elif board.config["type"] == "amigo":
-                x_offset = 40 if self.ctx.display.flipped_x_coordinates else 120
-                lcd.display(img, oft=(x_offset, 40))
-            elif board.config["type"] == "cube":
-                lcd.display(img, oft=(0, 0), roi=(0, 0, 224, 240))
-            else:
-                lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
-
             if res:
                 data = res[0].payload()
                 new_part = parser.parse(data)
