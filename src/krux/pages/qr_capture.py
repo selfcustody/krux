@@ -61,42 +61,43 @@ class QRCodeCapture(Page):
         self.ctx.display.to_landscape()
         self.ctx.input.reset_ios_state()
 
-    def update_progress(self, parser, index, previous_index):
-        """Updates the progress bar based on parts parsed"""
+    def update_progress_ur(self, parser, color):
+        """Fill the progress bar according to FORMAT_UR"""
         self.ctx.display.to_portrait()
 
-        if parser.format == FORMAT_UR:
-            filled = (
-                self.ctx.display.width() * parser.parsed_count()
-            ) // parser.total_count()
-            self.ctx.display.fill_rectangle(
-                0,
-                self.progress_bar_offset_y,
-                filled,
-                PROGRESS_BAR_HEIGHT,
-                theme.fg_color,
+        filled = (
+            self.ctx.display.width() * parser.parsed_count()
+        ) // parser.total_count()
+        self.ctx.display.fill_rectangle(
+            0, self.progress_bar_offset_y, filled, PROGRESS_BAR_HEIGHT, color
+        )
+
+        self.ctx.display.to_landscape()
+
+    def update_progress_other(self, parser, index, previous_index):
+        """Updates the progress bar for pMofN and BBQR"""
+        self.ctx.display.to_portrait()
+
+        block_size = self.ctx.display.width() / parser.total_count()
+        fill_size = int(block_size * (index + 1)) - int(block_size * index)
+        self.ctx.display.fill_rectangle(
+            int(block_size * index),
+            self.progress_bar_offset_y,
+            fill_size,
+            PROGRESS_BAR_HEIGHT,
+            theme.highlight_color,
+        )
+        if previous_index is not None:
+            fill_size = int(block_size * (previous_index + 1)) - int(
+                block_size * previous_index
             )
-        else:
-            block_size = self.ctx.display.width() / parser.total_count()
-            fill_size = int(block_size * (index + 1)) - int(block_size * index)
             self.ctx.display.fill_rectangle(
-                int(block_size * index),
+                int(block_size * previous_index),
                 self.progress_bar_offset_y,
                 fill_size,
                 PROGRESS_BAR_HEIGHT,
-                theme.highlight_color,
+                theme.fg_color,
             )
-            if previous_index is not None:
-                fill_size = int(block_size * (previous_index + 1)) - int(
-                    block_size * previous_index
-                )
-                self.ctx.display.fill_rectangle(
-                    int(block_size * previous_index),
-                    self.progress_bar_offset_y,
-                    fill_size,
-                    PROGRESS_BAR_HEIGHT,
-                    theme.fg_color,
-                )
 
         self.ctx.display.to_landscape()
 
@@ -112,6 +113,7 @@ class QRCodeCapture(Page):
         prev_parsed_count = 0
         new_part = None
         previous_part = None
+        ur_highlighted = False
 
         # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
@@ -135,9 +137,17 @@ class QRCodeCapture(Page):
                 break
 
             if new_part is not None and new_part != previous_part:
-                self.update_progress(parser, new_part, previous_part)
-                previous_part = new_part if parser.format != FORMAT_UR else None
+                if parser.format == FORMAT_UR:
+                    self.update_progress_ur(parser, theme.highlight_color)
+                    ur_highlighted = True
+                    previous_part = None
+                else:
+                    self.update_progress_other(parser, new_part, previous_part)
+                    previous_part = new_part
                 new_part = None
+            elif ur_highlighted:
+                self.update_progress_ur(parser, theme.fg_color)
+                ur_highlighted = False
 
             img = self.ctx.camera.snapshot()
             self.ctx.display.render_image(img)
