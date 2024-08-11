@@ -24,7 +24,7 @@ import time
 from . import Page
 from ..input import PRESSED
 from ..themes import theme
-from ..qr import QRPartParser, FORMAT_UR, FORMAT_PMOFN
+from ..qr import QRPartParser, FORMAT_UR
 from ..wdt import wdt
 from ..krux_settings import t
 
@@ -39,6 +39,9 @@ class QRCodeCapture(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.progress_bar_offset_y = {"cube": 225, "m5stickv": 210, "amigo": 380}.get(
+            board.config["type"], 305
+        )
 
     def light_control(self):
         """Controls the light based on the user input"""
@@ -61,34 +64,32 @@ class QRCodeCapture(Page):
     def update_progress(self, parser, index, previous_index):
         """Updates the progress bar based on parts parsed"""
         self.ctx.display.to_portrait()
-        height = {"cube": 225, "m5stickv": 210, "amigo": 380}.get(
-            board.config["type"], 305
-        )
+
         if parser.format == FORMAT_UR:
             filled = (
                 self.ctx.display.width() * parser.parsed_count()
             ) // parser.total_count()
             self.ctx.display.fill_rectangle(
-                0, height, filled, PROGRESS_BAR_HEIGHT, theme.fg_color
+                0, self.progress_bar_offset_y, filled, PROGRESS_BAR_HEIGHT, theme.fg_color
             )
         else:
-            if parser.format == FORMAT_PMOFN:
-                index -= 1
             block_size = self.ctx.display.width() / parser.total_count()
+            fill_size = int(block_size * (index + 1)) - int(block_size * index)
             self.ctx.display.fill_rectangle(
                 int(block_size * index),
-                height,
-                int(block_size),
+                self.progress_bar_offset_y,
+                fill_size,
                 PROGRESS_BAR_HEIGHT,
                 theme.highlight_color,
             )
             if previous_index is not None:
-                if parser.format == FORMAT_PMOFN:
-                    previous_index -= 1
+                fill_size = int(block_size * (previous_index + 1)) - int(
+                    block_size * previous_index
+                )
                 self.ctx.display.fill_rectangle(
                     int(block_size * previous_index),
-                    height,
-                    int(block_size),
+                    self.progress_bar_offset_y,
+                    fill_size,
                     PROGRESS_BAR_HEIGHT,
                     theme.fg_color,
                 )
@@ -119,9 +120,7 @@ class QRCodeCapture(Page):
                 break
 
             # Anti-glare mode
-            if self.ctx.input.page_event() or (
-                board.config["type"] == "yahboom" and self.ctx.input.page_prev_event()
-            ):
+            if self.ctx.input.page_event():
                 if self.ctx.camera.has_antiglare():
                     self.anti_glare_control()
                 else:
