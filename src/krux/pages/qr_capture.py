@@ -70,7 +70,11 @@ class QRCodeCapture(Page):
                 self.ctx.display.width() * parser.parsed_count()
             ) // parser.total_count()
             self.ctx.display.fill_rectangle(
-                0, self.progress_bar_offset_y, filled, PROGRESS_BAR_HEIGHT, theme.fg_color
+                0,
+                self.progress_bar_offset_y,
+                filled,
+                PROGRESS_BAR_HEIGHT,
+                theme.fg_color,
             )
         else:
             block_size = self.ctx.display.width() / parser.total_count()
