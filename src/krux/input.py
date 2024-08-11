@@ -153,14 +153,18 @@ class Input:
 
     def page_event(self):
         """Intermediary method to pull button PAGE event"""
+        event_val = False
         if self.page is not None:
-            return self.page.event()
-        return False
+            event_val = self.page.event()
+        if board.config["type"] == "yahboom":
+            event_val = event_val or self.page_prev_event()
+        return event_val
 
     def page_prev_event(self):
         """Intermediary method to pull button PAGE_PREV event"""
-        if self.page_prev is not None:
-            return self.page_prev.event()
+        if board.config["type"] != "yahboom":
+            if self.page_prev is not None:
+                return self.page_prev.event()
         return False
 
     def touch_event(self):
