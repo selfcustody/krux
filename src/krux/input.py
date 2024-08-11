@@ -157,12 +157,12 @@ class Input:
         if self.page is not None:
             event_val = self.page.event()
         if board.config["type"] == "yahboom":
-            event_val = event_val or self.page_prev_event()
+            event_val = event_val or self.page_prev_event(check_yahboom=True)
         return event_val
 
-    def page_prev_event(self):
+    def page_prev_event(self, check_yahboom=False):
         """Intermediary method to pull button PAGE_PREV event"""
-        if board.config["type"] != "yahboom":
+        if board.config["type"] != "yahboom" or check_yahboom:
             if self.page_prev is not None:
                 return self.page_prev.event()
         return False
