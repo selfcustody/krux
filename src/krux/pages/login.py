@@ -24,6 +24,7 @@ import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
 from embit import bip39
+from krux import bip39 as kruxbip39
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
@@ -196,7 +197,6 @@ class Login(Page):
                     from ..wallet import is_double_mnemonic
 
                     if not is_double_mnemonic(mnemonic_from_bytes):
-                        from embit.bip39 import mnemonic_is_valid
                         from ..wdt import wdt
                         import time
 
@@ -218,7 +218,9 @@ class Login(Page):
                                 second_mnemonic_entropy
                             )
                             mnemonic_from_bytes = first_12 + " " + second_12
-                            double_mnemonic = mnemonic_is_valid(mnemonic_from_bytes)
+                            double_mnemonic = kruxbip39.mnemonic_is_valid(
+                                mnemonic_from_bytes
+                            )
 
                         print(
                             "Tries: %d" % tries,
