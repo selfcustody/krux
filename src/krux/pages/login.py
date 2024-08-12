@@ -188,7 +188,7 @@ class Login(Page):
                 self.ctx.display.draw_centered_text(t("Processing.."))
 
                 num_bytes = 16 if len_mnemonic == 12 else 32
-                mnemonic_from_bytes = kruxbip39.mnemonic_from_bytes(
+                mnemonic_from_bytes = bip39.mnemonic_from_bytes(
                     entropy_bytes[:num_bytes]
                 )
 
@@ -204,7 +204,7 @@ class Login(Page):
                         tries = 0
 
                         # create two 12w mnemonic with the provided entropy
-                        first_12 = kruxbip39.mnemonic_from_bytes(entropy_bytes[:16])
+                        first_12 = bip39.mnemonic_from_bytes(entropy_bytes[:16])
                         second_mnemonic_entropy = entropy_bytes[16:32]
                         double_mnemonic = False
                         while not double_mnemonic:
@@ -214,11 +214,13 @@ class Login(Page):
                             second_mnemonic_entropy = (
                                 int.from_bytes(second_mnemonic_entropy, "big") + 1
                             ).to_bytes(16, "big")
-                            second_12 = kruxbip39.mnemonic_from_bytes(
+                            second_12 = bip39.mnemonic_from_bytes(
                                 second_mnemonic_entropy
                             )
                             mnemonic_from_bytes = first_12 + " " + second_12
-                            double_mnemonic = kruxbip39.mnemonic_is_valid(mnemonic_from_bytes)
+                            double_mnemonic = kruxbip39.mnemonic_is_valid(
+                                mnemonic_from_bytes
+                            )
 
                         print(
                             "Tries: %d" % tries,
