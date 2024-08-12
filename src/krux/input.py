@@ -167,10 +167,10 @@ class Input:
                 return self.page_prev.event()
         return False
 
-    def touch_event(self):
+    def touch_event(self, validate_position=True):
         """Intermediary method to pull button TOUCH event"""
         if self.touch is not None:
-            return self.touch.event()
+            return self.touch.event(validate_position)
         return False
 
     def swipe_right_value(self):
