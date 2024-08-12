@@ -346,7 +346,10 @@ class Login(Page):
 
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
-        data, qr_format = self.capture_qr_code()
+        from .qr_capture import QRCodeCapture
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, qr_format = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load mnemonic"))
             return MENU_CONTINUE
