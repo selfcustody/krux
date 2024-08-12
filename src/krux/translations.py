@@ -712,6 +712,7 @@ translation_table = {
         3278654271: "Affichage",
         3895447625: "Ne pas éteindre, cela peut prendre un certain temps.",
         3836852788: "Terminé\u2009?",
+        690625786: "Double mnémonique",
         382368239: "Conducteur",
         3582575312: "Chiffré",
         1244124409: "Code QR crypté",
