@@ -85,7 +85,10 @@ class WalletDescriptor(Page):
         persisted = False
         load_method = self.load_method()
         if load_method == LOAD_FROM_CAMERA:
-            wallet_data, qr_format = self.capture_qr_code()
+            from ..qr_capture import QRCodeCapture
+
+            qr_capture = QRCodeCapture(self.ctx)
+            wallet_data, qr_format = qr_capture.qr_capture_loop()
         elif load_method == LOAD_FROM_SD:
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE

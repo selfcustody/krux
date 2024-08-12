@@ -23,10 +23,7 @@
 
 import gc
 import sensor
-import lcd
 import board
-from .qr import QRPartParser
-from .wdt import wdt
 
 OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
 OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
@@ -42,9 +39,9 @@ class Camera:
         self.initialized = False
         self.cam_id = None
         self.antiglare_enabled = False
-        self.initialize_sensor()
+        self._initialize_sensor()
 
-    def initialize_sensor(self, grayscale=False):
+    def _initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
         self.initialized = False
         self.antiglare_enabled = False
@@ -176,6 +173,14 @@ class Camera:
         sensor.skip_frames()
         self.antiglare_enabled = False
 
+    def toggle_antiglare(self):
+        """Toggles anti-glare mode and returns the new state"""
+        if self.antiglare_enabled:
+            self.disable_antiglare()
+            return False
+        self.enable_antiglare()
+        return True
+
     def snapshot(self):
         """Helper to take a customized snapshot from sensor"""
         img = sensor.snapshot()
@@ -186,66 +191,10 @@ class Camera:
 
     def initialize_run(self):
         """Initializes and runs sensor"""
-        self.initialize_sensor()
+        self._initialize_sensor()
         sensor.run(1)
 
     def stop_sensor(self):
         """Stops capturing from sensor"""
         gc.collect()
         sensor.run(0)
-
-    def capture_qr_code_loop(self, callback, flipped_x_coordinates=False):
-        """Captures either singular or animated QRs and parses their contents until
-        all parts of the message have been captured. The part data are then ordered
-        and assembled into one message and returned.
-        """
-        self.initialize_run()
-
-        parser = QRPartParser()
-
-        prev_parsed_count = 0
-        new_part = False
-        while True:
-            wdt.feed()
-            command = callback(parser.total_count(), parser.parsed_count(), new_part)
-            if not self.initialized:
-                # Ignores first callback as it may contain unintentional events
-                self.initialized = True
-                command = 0
-            if command == 1:
-                break
-            new_part = False
-
-            img = self.snapshot()
-            res = img.find_qrcodes()
-
-            # different cases of lcd.display to show a progress bar on different devices!
-            if board.config["type"] == "m5stickv":
-                img.lens_corr(strength=1.0, zoom=0.56)
-                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
-            elif board.config["type"] == "amigo":
-                if flipped_x_coordinates:
-                    lcd.display(img, oft=(40, 40))
-                else:
-                    lcd.display(img, oft=(120, 40))  # X and Y are swapped
-            elif board.config["type"] == "cube":
-                lcd.display(img, oft=(0, 0), roi=(0, 0, 224, 240))
-            else:
-                lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
-
-            if len(res) > 0:
-                data = res[0].payload()
-
-                parser.parse(data)
-
-                if parser.processed_parts_count() > prev_parsed_count:
-                    prev_parsed_count = parser.processed_parts_count()
-                    new_part = True
-
-            if parser.is_complete():
-                break
-        self.stop_sensor()
-
-        if parser.is_complete():
-            return (parser.result(), parser.format)
-        return (None, None)

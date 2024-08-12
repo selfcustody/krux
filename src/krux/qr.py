@@ -142,6 +142,7 @@ class QRPartParser:
             part, index, total = parse_pmofn_qr_part(data)
             self.parts[index] = part
             self.total = total
+            return index - 1
         elif self.format == FORMAT_UR:
             if not self.decoder:
                 from ur.ur_decoder import URDecoder
@@ -154,6 +155,8 @@ class QRPartParser:
             part, index, total = parse_bbqr(data)
             self.parts[index] = part
             self.total = total
+            return index
+        return None
 
     def is_complete(self):
         """Returns a boolean indicating whether or not enough parts have been parsed"""

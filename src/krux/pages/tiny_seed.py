@@ -622,8 +622,8 @@ class TinyScanner(Page):
             "y_offset_factor_p0": 1 / 14,
             "x_offset_factor_p1": 1 / 14,
             "y_offset_factor_p1": 1 / 14,
-            "aspect_high": 1.1,
-            "aspect_low": 0.9,
+            "aspect_high": 1.3,
+            "aspect_low": 0.7,
         },
     }
 
@@ -999,7 +999,9 @@ class TinyScanner(Page):
         self.ctx.display.clear()
 
     def _check_buttons(self, w24, page):
-        enter_or_touch = self.ctx.input.enter_event() or self.ctx.input.touch_event()
+        enter_or_touch = self.ctx.input.enter_event() or self.ctx.input.touch_event(
+            validate_position=False
+        )
         if w24:
             if page == 0 and enter_or_touch:
                 self.capturing = True
