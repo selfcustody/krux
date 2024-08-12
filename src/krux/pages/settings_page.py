@@ -23,7 +23,7 @@
 
 import board
 import lcd
-from ..display import FONT_HEIGHT, FONT_WIDTH
+from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
 from ..themes import theme, GREEN, ORANGE
 from ..settings import (
     CategorySetting,
@@ -281,6 +281,12 @@ class SettingsPage(Page):
 
             encoder.debounce = Settings().hardware.buttons.debounce
 
+    def _amigo_lcd_reconfigure(self):
+        """reconfigure the display after re-initializing it"""
+        lcd.mirror(True)
+        lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
+        lcd.rotation(PORTRAIT)  # Portrait mode
+
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""
         categories = setting.categories
@@ -336,10 +342,8 @@ class SettingsPage(Page):
                 lcd.init(
                     invert=new_category, lcd_type=Settings().hardware.display.lcd_type
                 )
-                # re-configuring the display after re-initializing it
-                lcd.mirror(True)
-                lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
-                lcd.rotation(1)  # Portrait mode
+                self._amigo_lcd_reconfigure()
+
             if setting.attr == "lcd_type" and new_category is not None:
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
@@ -353,10 +357,8 @@ class SettingsPage(Page):
                     invert=Settings().hardware.display.inverted_colors,
                     lcd_type=new_category,
                 )
-                # re-configuring the display after re-initializing it
-                lcd.mirror(True)
-                lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
-                lcd.rotation(1)  # Portrait mode
+                self._amigo_lcd_reconfigure()
+
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
                     t('Press "PREVIOUS" (up arrow) button to keep this setting.')

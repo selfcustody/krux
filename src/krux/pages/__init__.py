@@ -603,6 +603,7 @@ class Menu:
             if status != MENU_CONTINUE:
                 return status
         except Exception as e:
+            self.ctx.display.to_portrait()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Error:") + "\n%s" % repr(e), theme.error_color

@@ -58,6 +58,7 @@ pytest-mock = "^3.14.0"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.17.0"
 poethepoet = "^0.24.4"
+dill = "^0.3.8"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]

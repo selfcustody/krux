@@ -1635,4 +1635,4 @@ simulator = ["Pillow", "numpy", "opencv-python", "pygame", "pyzbar"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9.1"
-content-hash = "e3b4b75193b5abd3c5242c1816d6562e8381332a498cf8657c851bfc37b0f482"
+content-hash = "235e193b46ca306b56a2055685ac78418466ac23acfd19b3ac8c2bdf329024d5"
