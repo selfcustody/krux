@@ -35,7 +35,7 @@ from ..input import (
     FAST_BACKWARD,
     PRESSED,
 )
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
