@@ -142,7 +142,7 @@ class QRPartParser:
             part, index, total = parse_pmofn_qr_part(data)
             self.parts[index] = part
             self.total = total
-            return index
+            return index - 1
         elif self.format == FORMAT_UR:
             if not self.decoder:
                 from ur.ur_decoder import URDecoder
