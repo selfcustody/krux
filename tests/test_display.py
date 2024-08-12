@@ -88,25 +88,26 @@ def test_qr_data_width(mocker, m5stickv):
 def test_to_landscape(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
-    from krux.display import Display
+    from krux.display import Display, LANDSCAPE
 
     d = Display()
 
+    d.to_portrait()
     d.to_landscape()
 
-    krux.display.lcd.rotation.assert_called()
+    krux.display.lcd.rotation.assert_called_with(LANDSCAPE)
 
 
 def test_to_portrait(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
-    from krux.display import Display
+    from krux.display import Display, PORTRAIT
 
     d = Display()
 
     d.to_portrait()
 
-    krux.display.lcd.rotation.assert_called()
+    krux.display.lcd.rotation.assert_called_with(PORTRAIT)
 
 
 def test_to_lines(mocker, m5stickv):
@@ -186,7 +187,7 @@ def test_to_lines(mocker, m5stickv):
         (240, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
         (240, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
         (240, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (240, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
+        (240, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # 25
         (240, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
         (240, "More Than Two Words", ["More Than Two Words"]),
         (
@@ -216,7 +217,7 @@ def test_to_lines(mocker, m5stickv):
                 "cpm6nLxgFapCZyhKgqwcEGv1BVp",
                 "D7s",
             ],
-        ),
+        ),  # 30
         (240, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             240,
@@ -235,15 +236,21 @@ def test_to_lines(mocker, m5stickv):
             ],
         ),
     ]
-    for case in cases:
+    for i, case in enumerate(cases):
+        print("case:", i)
         mocker.patch(
             "krux.display.lcd",
             new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
         )
-        # print(case[0])
+
         d = Display()
+        d.to_portrait()
+
         lines = d.to_lines(case[1])
+
         assert lines == case[2]
+
+    print("Extra test outside above cases...")
 
     # Test a text that don't fit in the screen
     LCD_WIDTH = 240
@@ -254,6 +261,7 @@ def test_to_lines(mocker, m5stickv):
     )
     long_text = "A really long text. " * 6
     d = Display()
+    d.to_portrait()
     lines = d.to_lines(long_text, max_lines=MAX_LINES)
     cut_text = [
         "A really long text. A",
@@ -301,12 +309,14 @@ def test_to_lines_exact_match_amigo(mocker, amigo):
             ["01 345", "0123456789012345678", "01234 0123456789012345678"],
         ),
     ]
-    for case in cases:
+    for i, case in enumerate(cases):
+        print("case:", i)
         mocker.patch(
             "krux.display.lcd",
             new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
         )
         d = Display()
+        d.to_portrait()
         lines = d.to_lines(case[1])
         print(lines)
         assert lines == case[2]

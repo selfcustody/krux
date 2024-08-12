@@ -160,13 +160,15 @@ class Touch:
             print("Touch error")
         return self.state
 
-    def event(self):
+    def event(self, validate_position=True):
         """Checks if a touch happened and stores the point"""
         current_time = time.ticks_ms()
         if current_time > self.sample_time + TOUCH_S_PERIOD:
             if self.touch_driver.event():
                 # Resets touch and gets irq point
                 self.state = IDLE
+                if not validate_position:
+                    return True
                 if isinstance(self.touch_driver.irq_point, tuple):
                     if self.valid_position(self.touch_driver.irq_point):
                         self._store_points(self.touch_driver.irq_point)

@@ -153,20 +153,24 @@ class Input:
 
     def page_event(self):
         """Intermediary method to pull button PAGE event"""
+        event_val = False
         if self.page is not None:
-            return self.page.event()
-        return False
+            event_val = self.page.event()
+        if board.config["type"] == "yahboom":
+            event_val = event_val or self.page_prev_event(check_yahboom=True)
+        return event_val
 
-    def page_prev_event(self):
+    def page_prev_event(self, check_yahboom=False):
         """Intermediary method to pull button PAGE_PREV event"""
-        if self.page_prev is not None:
-            return self.page_prev.event()
+        if board.config["type"] != "yahboom" or check_yahboom:
+            if self.page_prev is not None:
+                return self.page_prev.event()
         return False
 
-    def touch_event(self):
+    def touch_event(self, validate_position=True):
         """Intermediary method to pull button TOUCH event"""
         if self.touch is not None:
-            return self.touch.event()
+            return self.touch.event(validate_position)
         return False
 
     def swipe_right_value(self):
