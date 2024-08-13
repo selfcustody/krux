@@ -999,9 +999,7 @@ class TinyScanner(Page):
         self.ctx.display.clear()
 
     def _check_buttons(self, w24, page):
-        enter_or_touch = self.ctx.input.enter_event() or self.ctx.input.touch_event(
-            validate_position=False
-        )
+        enter_or_touch = self.ctx.input.enter_event() or self.ctx.input.touch_event()
         if w24:
             if page == 0 and enter_or_touch:
                 self.capturing = True
