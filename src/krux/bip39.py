@@ -10,7 +10,7 @@ WORDINDEX = {word: i for i, word in enumerate(WORDLIST)}
 def mnemonic_to_bytes(mnemonic: str, ignore_checksum: bool = False, wordlist=WORDLIST):
     """Verifies the mnemonic checksum and returns it in bytes"""
     words = mnemonic.strip().split()
-    if len(words) % 3 != 0 or len(words) < 12:
+    if len(words) % 3 != 0 or not 12 <= len(words) <= 24:
         raise ValueError("Invalid recovery phrase")
 
     accumulator = 0
