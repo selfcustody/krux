@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import lcd
 import board
 import time
 from . import Page
@@ -31,6 +30,8 @@ from ..krux_settings import t
 
 ANTI_GLARE_WAIT_TIME = 500
 
+PROGRESS_BAR_HEIGHT = 15
+
 
 class QRCodeCapture(Page):
     """UI to capture an encryption key"""
@@ -38,6 +39,9 @@ class QRCodeCapture(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.progress_bar_offset_y = {"cube": 225, "m5stickv": 210, "amigo": 380}.get(
+            board.config["type"], 305
+        )
 
     def light_control(self):
         """Controls the light based on the user input"""
@@ -57,28 +61,43 @@ class QRCodeCapture(Page):
         self.ctx.display.to_landscape()
         self.ctx.input.reset_ios_state()
 
-    def update_progress(self, parser, index, previous_index):
-        """Updates the progress bar based on parts parsed"""
+    def update_progress_ur(self, parser, color):
+        """Fill the progress bar according to FORMAT_UR"""
         self.ctx.display.to_portrait()
-        height = {"cube": 225, "m5stickv": 210, "amigo": 380}.get(
-            board.config["type"], 305
+
+        filled = (
+            self.ctx.display.width() * parser.parsed_count()
+        ) // parser.total_count()
+        self.ctx.display.fill_rectangle(
+            0, self.progress_bar_offset_y, filled, PROGRESS_BAR_HEIGHT, color
         )
-        if parser.format == FORMAT_UR:
-            filled = (
-                self.ctx.display.width() * parser.parsed_count()
-            ) // parser.total_count()
-            self.ctx.display.fill_rectangle(0, height, filled, 15, theme.fg_color)
-        else:
-            block_size = self.ctx.display.width() // parser.total_count()
-            x_offset = block_size * index
-            self.ctx.display.fill_rectangle(
-                x_offset, height, block_size, 15, theme.highlight_color
+
+        self.ctx.display.to_landscape()
+
+    def update_progress_other(self, parser, index, previous_index):
+        """Updates the progress bar for pMofN and BBQR"""
+        self.ctx.display.to_portrait()
+
+        block_size = self.ctx.display.width() / parser.total_count()
+        fill_size = int(block_size * (index + 1)) - int(block_size * index)
+        self.ctx.display.fill_rectangle(
+            int(block_size * index),
+            self.progress_bar_offset_y,
+            fill_size,
+            PROGRESS_BAR_HEIGHT,
+            theme.highlight_color,
+        )
+        if previous_index is not None:
+            fill_size = int(block_size * (previous_index + 1)) - int(
+                block_size * previous_index
             )
-            if previous_index is not None:
-                x_offset = block_size * previous_index
-                self.ctx.display.fill_rectangle(
-                    x_offset, height, block_size, 15, theme.fg_color
-                )
+            self.ctx.display.fill_rectangle(
+                int(block_size * previous_index),
+                self.progress_bar_offset_y,
+                fill_size,
+                PROGRESS_BAR_HEIGHT,
+                theme.fg_color,
+            )
 
         self.ctx.display.to_landscape()
 
@@ -94,7 +113,9 @@ class QRCodeCapture(Page):
         prev_parsed_count = 0
         new_part = None
         previous_part = None
+        ur_highlighted = False
 
+        # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
         while True:
             wdt.feed()
@@ -105,9 +126,7 @@ class QRCodeCapture(Page):
                 break
 
             # Anti-glare mode
-            if self.ctx.input.page_event() or (
-                board.config["type"] == "yahboom" and self.ctx.input.page_prev_event()
-            ):
+            if self.ctx.input.page_event():
                 if self.ctx.camera.has_antiglare():
                     self.anti_glare_control()
                 else:
@@ -118,24 +137,22 @@ class QRCodeCapture(Page):
                 break
 
             if new_part is not None and new_part != previous_part:
-                self.update_progress(parser, new_part, previous_part)
-                previous_part = new_part if parser.format != FORMAT_UR else None
+                if parser.format == FORMAT_UR:
+                    self.update_progress_ur(parser, theme.highlight_color)
+                    ur_highlighted = True
+                    previous_part = None
+                else:
+                    self.update_progress_other(parser, new_part, previous_part)
+                    previous_part = new_part
                 new_part = None
+            elif ur_highlighted:
+                self.update_progress_ur(parser, theme.fg_color)
+                ur_highlighted = False
 
             img = self.ctx.camera.snapshot()
+            self.ctx.display.render_image(img)
+
             res = img.find_qrcodes()
-
-            if board.config["type"] == "m5stickv":
-                img.lens_corr(strength=1.0, zoom=0.56)
-                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
-            elif board.config["type"] == "amigo":
-                x_offset = 40 if self.ctx.display.flipped_x_coordinates else 120
-                lcd.display(img, oft=(x_offset, 40))
-            elif board.config["type"] == "cube":
-                lcd.display(img, oft=(0, 0), roi=(0, 0, 224, 240))
-            else:
-                lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
-
             if res:
                 data = res[0].payload()
                 new_part = parser.parse(data)

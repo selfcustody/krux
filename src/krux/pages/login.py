@@ -694,7 +694,7 @@ class Login(Page):
 
         intro = t("Paint punched dots black so they can be detected.") + " "
         intro += t("Use a black background surface.") + " "
-        intro += t("Align camera and Tiny Seed properly.")
+        intro += t("Align camera and backup plate properly.")
         self.ctx.display.draw_hcentered_text(intro)
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
