@@ -462,7 +462,6 @@ def is_double_mnemonic(mnemonic: str):
 
     words = mnemonic.split(" ")
     if len(words) > 12:
-        from embit import bip39
         from krux import bip39 as kruxbip39
 
         # use an optimized version of mnemonic_to_bytes() via kruxbip39
@@ -471,12 +470,6 @@ def is_double_mnemonic(mnemonic: str):
             and kruxbip39.mnemonic_is_valid(" ".join(words[12:]))
             and kruxbip39.mnemonic_is_valid(mnemonic)
         ):
-            # verify the well-known/well-tested version from embit.bip39
-            if (
-                bip39.mnemonic_is_valid(" ".join(words[:12]))
-                and bip39.mnemonic_is_valid(" ".join(words[12:]))
-                and bip39.mnemonic_is_valid(mnemonic)
-            ):
-                return True
+            return True
 
     return False

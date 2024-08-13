@@ -1,5 +1,5 @@
 # Mnemonic convertion to seed and to/from bytes
-#pylint: disable=W0102
+# pylint: disable=W0102
 
 import hashlib
 from embit.wordlists.bip39 import WORDLIST
@@ -7,9 +7,7 @@ from embit.wordlists.bip39 import WORDLIST
 WORDINDEX = {word: i for i, word in enumerate(WORDLIST)}
 
 
-def mnemonic_to_bytes(
-    mnemonic: str, ignore_checksum: bool = False, wordlist=WORDLIST
-):
+def mnemonic_to_bytes(mnemonic: str, ignore_checksum: bool = False, wordlist=WORDLIST):
     """Verifies the mnemonic checksum and returns it in bytes"""
     words = mnemonic.strip().split()
     if len(words) % 3 != 0 or len(words) < 12:
