@@ -51,6 +51,7 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
+  latest_installer: krux-installer_0.0.13
   social:
     - icon: fontawesome/solid/bullhorn
       link: https://bitcointalk.org/index.php?topic=5489022.0
@@ -101,6 +102,7 @@ nav:
 
 plugins:
  - search
+ - macros
  - i18n:
     docs_structure: suffix
     languages:
