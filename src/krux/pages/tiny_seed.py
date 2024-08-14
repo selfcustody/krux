@@ -179,7 +179,7 @@ class TinySeed(Page):
         pad_y = 8  # 2mm*8px
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Printing") + " ...", self.ctx.display.height() // 2
+            t("Printing") + "..", self.ctx.display.height() // 2
         )
         self.printer.print_string("Tiny Seed\n\n")
         for page in range(len(words) // 12):

@@ -71,7 +71,7 @@ class PrintPage(Page):
         """Prints Mnemonics words as text"""
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Printing") + " ...", self.ctx.display.height() // 2
+            t("Printing") + "..", self.ctx.display.height() // 2
         )
         self.printer.print_string("BIP39" + " " + suffix + "\n\n")
         words = mnemonic.split(" ")
