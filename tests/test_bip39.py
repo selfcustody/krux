@@ -17,8 +17,8 @@ def test_one_word_mnemonics():
 def test_edge_cases():
     cases = [16, 20, 24, 28, 32]  # 12w, 15w, 18w, 21w and 24w
     for case in cases:
-        ALL_ZERO_BYTES = b'\x00' * case
-        ALL_ONE_BYTES = b'\xff' * case
+        ALL_ZERO_BYTES = b"\x00" * case
+        ALL_ONE_BYTES = b"\xff" * case
 
         assert (
             kruxbip39.mnemonic_to_bytes(bip39.mnemonic_from_bytes(ALL_ZERO_BYTES))
