@@ -205,16 +205,18 @@ class Login(Page):
 
                         # create two 12w mnemonic with the provided entropy
                         first_12 = mnemonic_from_bytes(entropy_bytes[:16])
-                        second_entropy_mnemonic = entropy_bytes[16:32]
+                        second_entropy_mnemonic_int = int.from_bytes(
+                            entropy_bytes[16:32], "big"
+                        )
                         double_mnemonic = False
                         while not double_mnemonic:
                             wdt.feed()
                             tries += 1
                             # increment the second mnemonic entropy
-                            second_entropy_mnemonic = (
-                                int.from_bytes(second_entropy_mnemonic, "big") + 1
-                            ).to_bytes(16, "big")
-                            second_12 = mnemonic_from_bytes(second_entropy_mnemonic)
+                            second_entropy_mnemonic_int += 1
+                            second_12 = mnemonic_from_bytes(
+                                second_entropy_mnemonic_int.to_bytes(16, "big")
+                            )
                             entropy_mnemonic = first_12 + " " + second_12
                             double_mnemonic = mnemonic_is_valid(entropy_mnemonic)
 
