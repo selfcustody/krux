@@ -26,7 +26,7 @@ It is the combination of two 12-word mnemonics that also forms a valid 24-word B
 
 Some might say that the name double mnemonic is incorrect because we end up with two 12-word plus a 24-word mnemonic (12 + 12 + 24), so it's a triple mnemonic! But we only use entropy for the two 12-word ones, hence the name double mnemonic. Also, this name has already been used in this [double mnemonic generator](https://stepansnigirev.github.io/seed-tools/double_mnemonic.html) since July 2023.
 
-Some may wonder what is the use of this, it may be useful to some [plausible denyability](https://en.bitcoin.it/wiki/Privacy) or even a way to improve your [OPSEC](https://en.wikipedia.org/wiki/Operations_security).
+Some may wonder what is the use of this, it may be useful to some [plausible deniability](https://en.bitcoin.it/wiki/Privacy) or even a way to improve your [OPSEC](https://en.wikipedia.org/wiki/Operations_security).
 
 ## Words
 Print the BIP39 word list in 3D or on paper, then cut out the words and place them in a bucket. Manually draw 11 or 23 words from the bucket.
