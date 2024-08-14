@@ -260,7 +260,7 @@ def upgrade():
 
     write_data(
         lambda pct: status_text(
-            t("Processing ...") + "1/3" + "\n\n%d%%" % int(pct * 100)
+            t("Processing..") + "1/3" + "\n\n%d%%" % int(pct * 100)
         ),
         new_address,
         open(firmware_path, "rb", buffering=0),
@@ -272,7 +272,7 @@ def upgrade():
 
     write_data(
         lambda pct: status_text(
-            t("Processing ...") + "2/3" + "\n\n%d%%" % int(pct * 100)
+            t("Processing..") + "2/3" + "\n\n%d%%" % int(pct * 100)
         ),
         BACKUP_BOOT_CONFIG_SECTOR_ADDRESS,
         io.BytesIO(boot_config_sector),
@@ -285,7 +285,7 @@ def upgrade():
     )
     write_data(
         lambda pct: status_text(
-            t("Processing ...") + "3/3" + "\n\n%d%%" % int(pct * 100)
+            t("Processing..") + "3/3" + "\n\n%d%%" % int(pct * 100)
         ),
         MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
         io.BytesIO(new_boot_config_sector),
