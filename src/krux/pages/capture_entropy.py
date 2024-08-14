@@ -61,9 +61,7 @@ class CameraEntropy(Page):
         Returns PROCEED if user pressed ENTER or touched the screen,
         CANCEL if user pressed PAGE or PAGE_PREV, 0 otherwise
         """
-        if self.ctx.input.enter_event() or self.ctx.input.touch_event(
-            validate_position=False
-        ):
+        if self.ctx.input.enter_event() or self.ctx.input.touch_event():
             return PROCEED_PRESSED
         if self.ctx.input.page_event() or self.ctx.input.page_prev_event():
             return CANCEL_PRESSED

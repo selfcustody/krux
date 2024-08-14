@@ -23,8 +23,6 @@
 import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
-from embit import bip39
-from krux import bip39 as kruxbip39
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
@@ -154,7 +152,9 @@ class Login(Page):
         dice_entropy = DiceEntropy(self.ctx, d_20)
         captured_entropy = dice_entropy.new_key()
         if captured_entropy is not None:
-            words = bip39.mnemonic_from_bytes(captured_entropy).split()
+            from embit.bip39 import mnemonic_from_bytes
+
+            words = mnemonic_from_bytes(captured_entropy).split()
             return self._load_key_from_words(words)
         return MENU_CONTINUE
 
@@ -176,6 +176,7 @@ class Login(Page):
             entropy_bytes = camera_entropy.capture()
             if entropy_bytes is not None:
                 import binascii
+                from embit.bip39 import mnemonic_from_bytes
 
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
@@ -188,39 +189,34 @@ class Login(Page):
                 self.ctx.display.draw_centered_text(t("Processing.."))
 
                 num_bytes = 16 if len_mnemonic == 12 else 32
-                mnemonic_from_bytes = bip39.mnemonic_from_bytes(
-                    entropy_bytes[:num_bytes]
-                )
+                entropy_mnemonic = mnemonic_from_bytes(entropy_bytes[:num_bytes])
 
                 # Double mnemonic check
                 if len_mnemonic == 48:
                     from ..wallet import is_double_mnemonic
 
-                    if not is_double_mnemonic(mnemonic_from_bytes):
+                    if not is_double_mnemonic(entropy_mnemonic):
                         from ..wdt import wdt
                         import time
+                        from krux.bip39 import mnemonic_is_valid
 
                         pre_t = time.ticks_ms()
                         tries = 0
 
                         # create two 12w mnemonic with the provided entropy
-                        first_12 = bip39.mnemonic_from_bytes(entropy_bytes[:16])
-                        second_mnemonic_entropy = entropy_bytes[16:32]
+                        first_12 = mnemonic_from_bytes(entropy_bytes[:16])
+                        second_entropy_mnemonic = entropy_bytes[16:32]
                         double_mnemonic = False
                         while not double_mnemonic:
                             wdt.feed()
                             tries += 1
                             # increment the second mnemonic entropy
-                            second_mnemonic_entropy = (
-                                int.from_bytes(second_mnemonic_entropy, "big") + 1
+                            second_entropy_mnemonic = (
+                                int.from_bytes(second_entropy_mnemonic, "big") + 1
                             ).to_bytes(16, "big")
-                            second_12 = bip39.mnemonic_from_bytes(
-                                second_mnemonic_entropy
-                            )
-                            mnemonic_from_bytes = first_12 + " " + second_12
-                            double_mnemonic = kruxbip39.mnemonic_is_valid(
-                                mnemonic_from_bytes
-                            )
+                            second_12 = mnemonic_from_bytes(second_entropy_mnemonic)
+                            entropy_mnemonic = first_12 + " " + second_12
+                            double_mnemonic = mnemonic_is_valid(entropy_mnemonic)
 
                         print(
                             "Tries: %d" % tries,
@@ -228,7 +224,7 @@ class Login(Page):
                             "ms",
                         )
 
-                return self._load_key_from_words(mnemonic_from_bytes.split())
+                return self._load_key_from_words(entropy_mnemonic.split())
         return MENU_CONTINUE
 
     def _load_key_from_words(self, words, charset=LETTERS):
@@ -333,6 +329,7 @@ class Login(Page):
                 public_data + "\n\n" + t("Decrypt?"), self.ctx.display.height() // 2
             ):
                 from .encryption_ui import EncryptionKey
+                from embit.bip39 import mnemonic_from_bytes
 
                 key_capture = EncryptionKey(self.ctx)
                 key = key_capture.encryption_key()
@@ -345,7 +342,7 @@ class Login(Page):
                 if word_bytes is None:
                     self.flash_error(t("Failed to decrypt"))
                     return MENU_CONTINUE
-                return bip39.mnemonic_from_bytes(word_bytes).split()
+                return mnemonic_from_bytes(word_bytes).split()
             return MENU_CONTINUE  # prompt NO
         return None
 
@@ -386,9 +383,11 @@ class Login(Page):
                     except:
                         pass
 
+                # CompactSeedQR format
                 if len(data_bytes) in (16, 32):
-                    # CompactSeedQR format
-                    words = bip39.mnemonic_from_bytes(data_bytes).split()
+                    from embit.bip39 import mnemonic_from_bytes
+
+                    words = mnemonic_from_bytes(data_bytes).split()
                 # SeedQR format
                 elif len(data_bytes) in (48, 96):
                     words = [

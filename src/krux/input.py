@@ -167,7 +167,7 @@ class Input:
                 return self.page_prev.event()
         return False
 
-    def touch_event(self, validate_position=True):
+    def touch_event(self, validate_position=False):
         """Intermediary method to pull button TOUCH event"""
         if self.touch is not None:
             return self.touch.event(validate_position)
@@ -231,7 +231,7 @@ class Input:
                 return BUTTON_PAGE
             if self.page_prev_event():
                 return BUTTON_PAGE_PREV
-            if self.touch_event():
+            if self.touch_event(validate_position=True):
                 return BUTTON_TOUCH
 
             self.wdt_feed_inc_entropy()

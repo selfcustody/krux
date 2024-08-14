@@ -51,6 +51,9 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
+  latest_krux: krux-v24.07.0
+  latest_installer: krux-installer-0.0.13
+  latest_installer_underline: krux-installer_0.0.13
   social:
     - icon: fontawesome/solid/bullhorn
       link: https://bitcointalk.org/index.php?topic=5489022.0
@@ -91,6 +94,7 @@ nav:
       - Tools: getting-started/features/tools.en.md
       - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
       - Empirical Entropy Measurement: getting-started/features/entropy.en.md
+      - Tiny Seed and other metal plates: getting-started/features/tinyseed.en.md
     - Settings: getting-started/settings.en.md
     - Navigation Overview: getting-started/navigation.en.md
   - Devices and Parts List: parts.en.md
@@ -101,6 +105,7 @@ nav:
 
 plugins:
  - search
+ - macros
  - i18n:
     docs_structure: suffix
     languages:

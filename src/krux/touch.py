@@ -160,7 +160,7 @@ class Touch:
             print("Touch error")
         return self.state
 
-    def event(self, validate_position=True):
+    def event(self, validate_position=False):
         """Checks if a touch happened and stores the point"""
         current_time = time.ticks_ms()
         if current_time > self.sample_time + TOUCH_S_PERIOD:

@@ -17,7 +17,7 @@
 
 
 <i style="font-size: 85%">:material-information:{id="camera-info"}:
-Only `OV7740` and `OV2640` have an anti-glare mode to better capture images from high brightness screens or with incident light.
+Only `OV7740`, `OV2640` and `GC2145` have an anti-glare mode to better capture images from high brightness screens or with incident light.
 </i>
 
 <i style="font-size: 85%">:material-numeric-1-circle:{id="m5stickv-info"}:
