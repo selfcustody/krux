@@ -174,7 +174,7 @@ class SettingsPage(Page):
                 with SDHandler():
                     if store.save_settings():
                         self.flash_text(
-                            t("Changes persisted to SD card!"),
+                            t("Settings stored on SD card."),
                             duration=PERSIST_MSG_TIME,
                         )
             except OSError:
@@ -189,7 +189,7 @@ class SettingsPage(Page):
             try:
                 if store.save_settings():
                     self.flash_text(
-                        t("Changes persisted to Flash!"),
+                        t("Settings stored on Flash."),
                         duration=PERSIST_MSG_TIME,
                     )
             except:
