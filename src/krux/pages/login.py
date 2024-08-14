@@ -205,12 +205,12 @@ class Login(Page):
             }
             numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
             self.display_mnemonic(numbers_str, suffix_dict[charset])
-            if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
             self.ctx.display.clear()
 
         self.display_mnemonic(mnemonic, t("Mnemonic"))
-        if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
         self.ctx.display.clear()
 
