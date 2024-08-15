@@ -69,7 +69,7 @@ def load_font(device):
                    os.path.join("..", "firmware", "font", "ter-u14n.bdf"),
                 ),
                 pg.freetype.Font(
-                   os.path.join("..", "firmware", "font", "ter-u14n.bdf"),
+                   os.path.join("..", "firmware", "font", "FusionPixel-14.bdf"),
                 ),
             ]
         elif device == DOCK or device == YAHBOOM:

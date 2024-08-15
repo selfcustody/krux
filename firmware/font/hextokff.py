@@ -71,10 +71,10 @@ def hextokff(filename=None, width=None, height=None, wide_glyphs=None):
 
             for translation in translations.values():
                 for char in translation:
-                    # If is Korean codepoint
+                    # If is Chinese or Korean codepoint
                     if CHINESE_MIN_CODEPOINT <= ord(char) <= KOREAN_MAX_CODEPOINT:
                         # only include if wide_glyphs is ko-KR
-                        if current_translation in wide_glyphs:
+                        if wide_glyphs and current_translation in wide_glyphs:
                             used_codepoints.add(ord(char))
                     elif wide_glyphs is None:
                         used_codepoints.add(ord(char))
