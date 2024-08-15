@@ -36,11 +36,13 @@ DEFAULT_CODEPOINTS = [
 ]
 TRANSLATIONS_DIR = "../../i18n/translations"
 
+CHINESE_MIN_CODEPOINT = 0x4E00
+CHINESE_MAX_CODEPOINT = 0x9FFF
 KOREAN_MIN_CODEPOINT = 0xAC00
 KOREAN_MAX_CODEPOINT = 0xD7A3
 
 
-def hextokff(filename=None, width=None, height=None, single_language=None):
+def hextokff(filename=None, width=None, height=None, wide_glyphs=None):
     """Convert a hex formatted bitmap font file to a kff file"""
 
     if filename is None or width is None or height is None:
@@ -55,12 +57,13 @@ def hextokff(filename=None, width=None, height=None, single_language=None):
 
     # Scan the translations folder and build a set of unique codepoints used
     # across all translations
-    if not single_language:
+    if not wide_glyphs:
         used_codepoints = set(DEFAULT_CODEPOINTS)
     else:
         used_codepoints = set()
     for translation_file in os.listdir(TRANSLATIONS_DIR):
-        if not single_language or single_language == translation_file[:5]:
+        current_translation = translation_file[:5]
+        if not wide_glyphs or current_translation in wide_glyphs:
             file_path = os.path.join(TRANSLATIONS_DIR, translation_file)
 
             with open(file_path, "r", encoding="utf-8") as file:
@@ -69,11 +72,11 @@ def hextokff(filename=None, width=None, height=None, single_language=None):
             for translation in translations.values():
                 for char in translation:
                     # If is Korean codepoint
-                    if KOREAN_MIN_CODEPOINT <= ord(char) <= KOREAN_MAX_CODEPOINT:
-                        # only include if single_language is ko-KR
-                        if single_language == "ko-KR":
+                    if CHINESE_MIN_CODEPOINT <= ord(char) <= KOREAN_MAX_CODEPOINT:
+                        # only include if wide_glyphs is ko-KR
+                        if current_translation in wide_glyphs:
                             used_codepoints.add(ord(char))
-                    elif single_language is None:
+                    elif wide_glyphs is None:
                         used_codepoints.add(ord(char))
 
     with open(filename, "r", encoding="utf-8") as input_file:

@@ -87,7 +87,7 @@ def load_font(device):
                     os.path.join("..", "firmware", "font", "ter-u24b.bdf")
                 ),
                 pg.freetype.Font(
-                    os.path.join("..", "firmware", "font", "NanumGothic-24.bdf")
+                    os.path.join("..", "firmware", "font", "NotoSansCJK-24.bdf")
                 ),
             ]
 

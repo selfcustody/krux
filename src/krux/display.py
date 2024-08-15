@@ -28,7 +28,7 @@ from .krux_settings import Settings
 DEFAULT_PADDING = 10
 MINIMAL_PADDING = 5
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
-FONT_WIDTH_KO, FONT_HEIGHT_KO = board.config["krux"]["display"]["font_ko"]
+FONT_WIDTH_WIDE, FONT_HEIGHT_KO = board.config["krux"]["display"]["font_ko"]
 PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = (
     [16904, 61307] if board.config["type"] == "m5stickv" else [0, 6342]
@@ -243,8 +243,8 @@ class Display:
         start = 0
         line_count = 0
         columns = self.usable_width() if self.width() > SMALLEST_WIDTH else self.width()
-        if Settings().i18n.locale == "ko-KR" and lcd.string_has_korean(text):
-            columns //= FONT_WIDTH_KO
+        if Settings().i18n.locale in ["ko-KR", "zh-CN"] and lcd.string_has_wide_glyph(text):
+            columns //= FONT_WIDTH_WIDE
         else:
             columns //= FONT_WIDTH
 
@@ -374,7 +374,7 @@ class Display:
         if (
             Settings().i18n.locale == "ko-KR"
             and FONT_HEIGHT == 14
-            and lcd.string_has_korean("".join(lines))
+            and lcd.string_has_wide_glyph("".join(lines))
         ):
             ko_extra_offset = 2
 
