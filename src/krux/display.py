@@ -369,21 +369,12 @@ class Display:
                 FONT_WIDTH,  # radius
             )
 
-        # Workaround for Korean vertical padding with 14px font
-        ko_extra_offset = 0
-        if (
-            Settings().i18n.locale == "ko-KR"
-            and FONT_HEIGHT == 14
-            and lcd.string_has_wide_glyph("".join(lines))
-        ):
-            ko_extra_offset = 2
-
         for i, line in enumerate(lines):
             if len(line) > 0:
                 offset_x = max(0, (self.width() - lcd.string_width_px(line)) // 2)
                 self.draw_string(
                     offset_x,
-                    offset_y + (i * (FONT_HEIGHT + ko_extra_offset)),
+                    offset_y + (i * (FONT_HEIGHT)),
                     line,
                     color,
                     bg_color,
