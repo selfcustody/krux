@@ -209,6 +209,13 @@ class Login(Page):
                 return MENU_CONTINUE
             self.ctx.display.clear()
 
+        from .mnemonic_editor import MnemonicEditor
+
+        mnemonic_editor = MnemonicEditor(self.ctx, mnemonic)
+        print("editing mnemonic")
+        mnemonic_editor.edit()
+        print("edited mnemonic")
+
         self.display_mnemonic(mnemonic, t("Mnemonic"))
         if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE

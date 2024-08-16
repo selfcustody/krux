@@ -326,6 +326,14 @@ class Display:
             x_end = x_1
         lcd.draw_line(x_start, y_0, x_end, y_1, color)
 
+    def draw_hline(self, x, y, width, color=theme.fg_color):
+        """Draws a horizontal line to the screen"""
+        self.draw_line(x, y, x + width, y, color)
+
+    def draw_vline(self, x, y, height, color=theme.fg_color):
+        """Draws a vertical line to the screen"""
+        self.draw_line(x, y, x, y + height, color)
+
     def draw_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
         """
         Draws a circle to the screen.
