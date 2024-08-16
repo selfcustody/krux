@@ -318,7 +318,7 @@ class SettingsPage(Page):
                 btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
-            new_category = None
+            new_category = current_category
             for i, category in enumerate(categories):
                 if current_category == category:
                     if btn in (BUTTON_PAGE, None):
