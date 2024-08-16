@@ -243,7 +243,9 @@ class Display:
         start = 0
         line_count = 0
         columns = self.usable_width() if self.width() > SMALLEST_WIDTH else self.width()
-        if Settings().i18n.locale in ["ko-KR", "zh-CN"] and lcd.string_has_wide_glyph(text):
+        if Settings().i18n.locale in ["ko-KR", "zh-CN"] and lcd.string_has_wide_glyph(
+            text
+        ):
             columns //= FONT_WIDTH_WIDE
         else:
             columns //= FONT_WIDTH

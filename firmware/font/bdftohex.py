@@ -66,7 +66,9 @@ def bdftohex(filename=None):
                                 bitmap = row * top_padding + bitmap
                             if bottom_padding > 0:
                                 bitmap = bitmap + row * bottom_padding
-                    glyph_trimmer = math.ceil(font_bbox.width / 8) * font_bbox.height * 2
+                    glyph_trimmer = (
+                        math.ceil(font_bbox.width / 8) * font_bbox.height * 2
+                    )
                     bitmap = bitmap[:glyph_trimmer]
                     codepoint_list.append(f"{codepoint:04X}:{bitmap}")
                 parsing_bitmap = False
