@@ -429,6 +429,9 @@ class Login(Page):
                         word_num = word
                         word = to_word(word)
 
+                    if word not in WORDLIST:
+                        word = ""
+
                     if word != "":
                         break
 

@@ -167,22 +167,23 @@ class MnemonicEditor(Page):
             y_region = self.header_offset
             y_region += (word_v_padding - FONT_HEIGHT) // 2
             word_index = 0
-            while word_index < self.mnemonic_length:
+            while word_index < 12:
                 self.ctx.display.draw_string(
                     MINIMAL_PADDING,
                     y_region,
                     str(word_index + 1) + "." + self.current_mnemonic[word_index],
                     word_color(word_index),
                 )
-                word_index += 1
                 if self.mnemonic_length == 24:
                     self.ctx.display.draw_string(
                         MINIMAL_PADDING + self.ctx.display.width() // 2,
                         y_region,
-                        str(word_index + 1) + "." + self.current_mnemonic[word_index],
-                        word_color(word_index),
+                        str(word_index + 13)
+                        + "."
+                        + self.current_mnemonic[word_index + 12],
+                        word_color(word_index + 12),
                     )
-                    word_index += 1
+                word_index += 1
                 y_region += word_v_padding
 
             go_txt = t("Go")
@@ -215,16 +216,19 @@ class MnemonicEditor(Page):
 
     def edit_word(self, index):
         """Edit a word"""
-        self.compute_search_ranges()
-        word = self.capture_from_keypad(
-            t("Word %d") % (index + 1),
-            [LETTERS],
-            self.autocomplete,
-            self.possible_letters,
-        )
-        if word == ESC_KEY:
-            return None
-        return word
+        while True:
+            self.compute_search_ranges()
+            word = self.capture_from_keypad(
+                t("Word %d") % (index + 1),
+                [LETTERS],
+                self.autocomplete,
+                self.possible_letters,
+            )
+            if word == ESC_KEY:
+                return None
+            if word in WORDLIST:
+                return word
+            word = ""
 
     def edit(self):
         """Edit the mnemonic"""
@@ -236,13 +240,19 @@ class MnemonicEditor(Page):
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 button_index = self.ctx.input.touch.current_index()
-                if self.mnemonic_length == 12 and button_index < 24:
-                    button_index //= 2
+                if button_index < 24:
+                    if self.mnemonic_length == 24 and button_index % 2 == 1:
+                        button_index //= 2
+                        button_index += 12
+                    else:
+                        button_index //= 2
                 btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == 24:
+                    # Done
                     break
                 if button_index == 25:
+                    # Cancel
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                         return None
