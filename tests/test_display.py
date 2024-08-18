@@ -10,7 +10,7 @@ def string_width_px(string):
     import board
 
     standard_width = board.config["krux"]["display"]["font"][0]
-    ko_width = board.config["krux"]["display"]["font_ko"][0]
+    ko_width = board.config["krux"]["display"]["font_wide"][0]
     print("standard_width:", standard_width)
     print("ko_width:", ko_width)
     string_width = 0
