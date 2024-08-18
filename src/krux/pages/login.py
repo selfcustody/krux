@@ -212,13 +212,10 @@ class Login(Page):
         from .mnemonic_editor import MnemonicEditor
 
         mnemonic_editor = MnemonicEditor(self.ctx, mnemonic)
-        print("editing mnemonic")
-        mnemonic_editor.edit()
-        print("edited mnemonic")
-
-        self.display_mnemonic(mnemonic, t("Mnemonic"))
-        if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
+        mnemonic = mnemonic_editor.edit()
+        if mnemonic is None:
             return MENU_CONTINUE
+
         self.ctx.display.clear()
 
         passphrase = ""
@@ -428,11 +425,12 @@ class Login(Page):
                     if new and word == "" and len(words) == len_mnemonic - 1:
                         break
 
-                    if word != "":
+                    if to_word is not None:
                         word_num = word
                         word = to_word(word)
-                        if word != "":
-                            break
+
+                    if word != "":
+                        break
 
                 if word not in WORDLIST and word == "":
                     word = Key.pick_final_word(self.ctx.input.entropy, words)
@@ -454,6 +452,7 @@ class Login(Page):
 
     def load_key_from_text(self, new=False):
         """Handler for both 'new/load mnemonic'>[...]>'via words' menu items"""
+        from .mnemonic_editor import MnemonicEditor
 
         if new:
             len_mnemonic = choose_len_mnemonic(self.ctx)
@@ -464,92 +463,15 @@ class Login(Page):
             len_mnemonic = None
             title = t("Enter each word of your BIP-39 mnemonic.")
 
-        # Precompute start and stop indexes for each letter in the wordlist
-        # to reduce the search space for autocomplete, possible_letters, etc.
-        # This is much cheaper (memory-wise) than a trie.
-        def compute_search_ranges(alt_wordlist=None):
-            if alt_wordlist:
-                wordlist = alt_wordlist
-            else:
-                wordlist = WORDLIST
-            search_ranges = {}
-            i = 0
-            while i < len(wordlist):
-                start_word = wordlist[i]
-                start_letter = start_word[0]
-                j = i + 1
-                while j < len(wordlist):
-                    end_word = wordlist[j]
-                    end_letter = end_word[0]
-                    if end_letter != start_letter:
-                        search_ranges[start_letter] = (i, j)
-                        i = j - 1
-                        break
-                    j += 1
-                if start_letter not in search_ranges:
-                    search_ranges[start_letter] = (i, j)
-                i += 1
-            return search_ranges
-
-        search_ranges = compute_search_ranges()
-
-        def autocomplete(prefix, alt_wordlist=None):
-            if alt_wordlist:
-                wordlist = alt_wordlist
-                search = compute_search_ranges(wordlist)
-            else:
-                wordlist = WORDLIST
-                search = search_ranges
-            if len(prefix) > 0:
-                letter = prefix[0]
-                if letter not in search:
-                    return None
-                start, stop = search[letter]
-                matching_words = list(
-                    filter(
-                        lambda word: word.startswith(prefix),
-                        wordlist[start:stop],
-                    )
-                )
-                if len(matching_words) == 1:
-                    return matching_words[0]
-            return None
-
-        def to_word(user_input):
-            if len(user_input) > 0:
-                letter = user_input[0]
-                if letter not in search_ranges:
-                    return ""
-                start, stop = search_ranges[letter]
-                if user_input in WORDLIST[start:stop]:
-                    return user_input
-            return ""
-
-        def possible_letters(prefix, alt_wordlist=None):
-            if alt_wordlist:
-                wordlist = alt_wordlist
-                search = compute_search_ranges(wordlist)
-            else:
-                wordlist = WORDLIST
-                search = search_ranges
-            if len(prefix) == 0:
-                return search.keys()
-            letter = prefix[0]
-            if letter not in search:
-                return ""
-            start, stop = search[letter]
-            return {
-                word[len(prefix)]
-                for word in wordlist[start:stop]
-                if word.startswith(prefix) and len(word) > len(prefix)
-            }
+        mnemonic_editor = MnemonicEditor(self.ctx)
+        mnemonic_editor.compute_search_ranges()
 
         return self._load_key_from_keypad(
             title,
             LETTERS,
-            to_word,
-            autocomplete_fn=autocomplete,
-            possible_keys_fn=possible_letters,
+            None,
+            autocomplete_fn=mnemonic_editor.autocomplete,
+            possible_keys_fn=mnemonic_editor.possible_letters,
             new=new,
             len_mnemonic=len_mnemonic,
         )

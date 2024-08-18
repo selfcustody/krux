@@ -21,26 +21,102 @@
 # THE SOFTWARE.
 
 import lcd
-from . import Page, LETTERS
+from embit import bip39
+from embit.wordlists.bip39 import WORDLIST
+from . import Page, ESC_KEY, LETTERS
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
 from ..krux_settings import t
 from ..themes import theme
-from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+from ..input import BUTTON_TOUCH, BUTTON_ENTER
 
 
 class MnemonicEditor(Page):
     """Mnemonic Editor UI"""
 
-    def __init__(self, ctx, mnemonic):
+    def __init__(self, ctx, mnemonic=None):
         super().__init__(ctx, None)
         self.ctx = ctx
-        self.initial_mnemonic = mnemonic
-        self.current_mnemonic = mnemonic.split(" ")
+        self.initial_mnemonic = []
+        self.current_mnemonic = []
+        if mnemonic:
+            self.initial_mnemonic = mnemonic.split(" ")
+            self.current_mnemonic = self.initial_mnemonic.copy()
         self.mnemonic_length = len(self.current_mnemonic)
         self.header_offset = DEFAULT_PADDING
-        # Words occupy 75% of the screen
-        self.word_v_padding = self.ctx.display.height() * 3 // 4
-        self.word_v_padding //= 12
+        self.search_ranges = {}
+
+    def compute_search_ranges(self, alt_wordlist=None):
+        """Compute search ranges for the autocomplete and possible_letters functions"""
+        if alt_wordlist:
+            wordlist = alt_wordlist
+        else:
+            wordlist = WORDLIST
+        search_ranges = {}
+        i = 0
+        while i < len(wordlist):
+            start_word = wordlist[i]
+            start_letter = start_word[0]
+            j = i + 1
+            while j < len(wordlist):
+                end_word = wordlist[j]
+                end_letter = end_word[0]
+                if end_letter != start_letter:
+                    search_ranges[start_letter] = (i, j)
+                    i = j - 1
+                    break
+                j += 1
+            if start_letter not in search_ranges:
+                search_ranges[start_letter] = (i, j)
+            i += 1
+        self.search_ranges = search_ranges
+
+    def autocomplete(self, prefix, alt_wordlist=None):
+        """Autocomplete a word"""
+        if alt_wordlist:
+            wordlist = alt_wordlist
+            self.compute_search_ranges(wordlist)
+        else:
+            wordlist = WORDLIST
+        if len(prefix) > 0:
+            letter = prefix[0]
+            if letter not in self.search_ranges:
+                return None
+            start, stop = self.search_ranges[letter]
+            matching_words = list(
+                filter(
+                    lambda word: word.startswith(prefix),
+                    wordlist[start:stop],
+                )
+            )
+            if len(matching_words) == 1:
+                return matching_words[0]
+        return None
+
+    def possible_letters(self, prefix, alt_wordlist=None):
+        """Possible next letters for a BIP39 word given a prefix"""
+        if alt_wordlist:
+            wordlist = alt_wordlist
+            self.compute_search_ranges(wordlist)
+        else:
+            wordlist = WORDLIST
+        if len(prefix) == 0:
+            return self.search_ranges.keys()
+        letter = prefix[0]
+        if letter not in self.search_ranges:
+            return ""
+        start, stop = self.search_ranges[letter]
+        return {
+            word[len(prefix)]
+            for word in wordlist[start:stop]
+            if word.startswith(prefix) and len(word) > len(prefix)
+        }
+
+    def recalculate_checksum(self):
+        """Recalculate the checksum of the mnemonic"""
+        entropy = bip39.mnemonic_to_bytes(
+            " ".join(self.current_mnemonic), ignore_checksum=True
+        )
+        self.current_mnemonic = bip39.mnemonic_from_bytes(entropy).split(" ")
 
     def _draw_header(self):
         """Draw current mnemonic words"""
@@ -53,10 +129,17 @@ class MnemonicEditor(Page):
         )
 
     def _map_words(self):
-        word_list = [
-            str(i + 1) + "." + ("  " if i + 1 < 10 else " ") + word
-            for i, word in enumerate(self.current_mnemonic)
-        ]
+        """Map words to the screen"""
+
+        def word_color(index):
+            if self.current_mnemonic[index] != self.initial_mnemonic[index]:
+                return theme.highlight_color
+            return theme.fg_color
+
+        # Words occupy 75% of the screen
+        word_v_padding = self.ctx.display.height() * 3 // 4
+        word_v_padding //= 12
+
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
             self.ctx.input.touch.x_regions.append(MINIMAL_PADDING)
@@ -68,7 +151,7 @@ class MnemonicEditor(Page):
                 self.ctx.display.draw_vline(
                     self.ctx.display.width() // 2,
                     self.header_offset,
-                    12 * self.word_v_padding,
+                    12 * word_v_padding,
                     theme.frame_color,
                 )
             y_region = self.header_offset
@@ -80,25 +163,27 @@ class MnemonicEditor(Page):
                     theme.frame_color,
                 )
                 self.ctx.input.touch.y_regions.append(y_region)
-                y_region += self.word_v_padding
+                y_region += word_v_padding
             y_region = self.header_offset
-            y_region += (self.word_v_padding - FONT_HEIGHT) // 2
+            y_region += (word_v_padding - FONT_HEIGHT) // 2
             word_index = 0
             while word_index < self.mnemonic_length:
                 self.ctx.display.draw_string(
                     MINIMAL_PADDING,
                     y_region,
-                    str(word_index) + "." + self.current_mnemonic[word_index],
+                    str(word_index + 1) + "." + self.current_mnemonic[word_index],
+                    word_color(word_index),
                 )
                 word_index += 1
                 if self.mnemonic_length == 24:
                     self.ctx.display.draw_string(
                         MINIMAL_PADDING + self.ctx.display.width() // 2,
                         y_region,
-                        str(word_index) + "." + self.current_mnemonic[word_index],
+                        str(word_index + 1) + "." + self.current_mnemonic[word_index],
+                        word_color(word_index),
                     )
                     word_index += 1
-                y_region += self.word_v_padding
+                y_region += word_v_padding
 
             go_txt = t("Go")
             esc_txt = t("Esc")
@@ -130,14 +215,15 @@ class MnemonicEditor(Page):
 
     def edit_word(self, index):
         """Edit a word"""
-        # from .login import autocomplete, possible_keys
-
+        self.compute_search_ranges()
         word = self.capture_from_keypad(
             t("Word %d") % (index + 1),
             [LETTERS],
-            None,
-            None,
+            self.autocomplete,
+            self.possible_letters,
         )
+        if word == ESC_KEY:
+            return None
         return word
 
     def edit(self):
@@ -152,13 +238,22 @@ class MnemonicEditor(Page):
                 button_index = self.ctx.input.touch.current_index()
                 if self.mnemonic_length == 12 and button_index < 24:
                     button_index //= 2
-                if button_index >= 24:
-                    break
                 btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
-                if button_index >= 24:
+                if button_index == 24:
                     break
-                # self.current_mnemonic[button_index] = self.edit_word(button_index)
-                self.edit_word(button_index)
-
-            print(button_index)
+                if button_index == 25:
+                    self.ctx.display.clear()
+                    if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                        return None
+                    continue
+                new_word = self.edit_word(button_index)
+                if new_word is not None:
+                    self.ctx.display.clear()
+                    if self.prompt(
+                        str(button_index + 1) + ".\n\n" + new_word + "\n\n",
+                        self.ctx.display.height() // 2,
+                    ):
+                        self.current_mnemonic[button_index] = new_word
+                        self.recalculate_checksum()
+        return " ".join(self.current_mnemonic)
