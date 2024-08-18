@@ -148,7 +148,7 @@ def _is_x_flipped():
 
 def string_width_px(string):
     standard_width = BOARD_CONFIG["krux"]["display"]["font"][0]
-    ko_width = BOARD_CONFIG["krux"]["display"]["font_ko"][0]
+    ko_width = BOARD_CONFIG["krux"]["display"]["font_wide"][0]
     string_width = 0
 
     for c in string:
@@ -165,12 +165,12 @@ def string_has_wide_glyph(string):
             return True
     return False
 
-def is_korean(c):
+def is_wide(c):
     return CHINESE_MIN_CODEPOINT < ord(c) < KOREAN_CODEPOINT_MAX
 
 def char_width(c):
     if CHINESE_MIN_CODEPOINT < ord(c) < KOREAN_CODEPOINT_MAX:
-        return BOARD_CONFIG["krux"]["display"]["font_ko"][0]
+        return BOARD_CONFIG["krux"]["display"]["font_wide"][0]
     else:
         return BOARD_CONFIG["krux"]["display"]["font"][0]
 
@@ -201,12 +201,11 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                     ),
                 )
         else:
-            # draw korean text char by char
+            # draw wide text char by char
             total_with =  string_width_px(s)
             for c in s:
-                char_w = char_width(c)
                 x_val = x_position if BOARD_CONFIG["type"] != "amigo" else width() - x_position - total_with
-                if is_korean(c):
+                if is_wide(c):
                     text, _ = devices.load_font(BOARD_CONFIG["type"])[1].render(c, color, bgcolor)
                     if landscape:
                         text = pg.transform.rotate(text, 90)
