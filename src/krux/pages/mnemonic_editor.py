@@ -24,10 +24,10 @@ import lcd
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
 from . import Page, ESC_KEY, LETTERS
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, MINIMAL_DISPLAY
 from ..krux_settings import t
 from ..themes import theme
-from ..input import BUTTON_TOUCH, BUTTON_ENTER
+from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
 
 class MnemonicEditor(Page):
@@ -136,7 +136,7 @@ class MnemonicEditor(Page):
             len(self.ctx.display.to_lines(header)) * FONT_HEIGHT
         )
 
-    def _map_words(self):
+    def _map_words(self, button_index=0, page=0):
         """Map words to the screen"""
 
         def word_color(index):
@@ -154,13 +154,11 @@ class MnemonicEditor(Page):
         word_v_padding = self.ctx.display.height() * 3 // 4
         word_v_padding //= 12
 
-        if self.ctx.input.touch is not None:
+        if self.ctx.input.touch is not None and not self.ctx.input.buttons_active:
             self.ctx.input.touch.clear_regions()
-            self.ctx.input.touch.x_regions.append(MINIMAL_PADDING)
+            self.ctx.input.touch.x_regions.append(0)
             self.ctx.input.touch.x_regions.append(self.ctx.display.width() // 2)
-            self.ctx.input.touch.x_regions.append(
-                self.ctx.display.width() - MINIMAL_PADDING
-            )
+            self.ctx.input.touch.x_regions.append(self.ctx.display.width())
             if self.mnemonic_length == 24:
                 self.ctx.display.draw_vline(
                     self.ctx.display.width() // 2,
@@ -178,17 +176,43 @@ class MnemonicEditor(Page):
                 )
                 self.ctx.input.touch.y_regions.append(y_region)
                 y_region += word_v_padding
-            y_region = self.header_offset
-            y_region += (word_v_padding - FONT_HEIGHT) // 2
-            word_index = 0
-            while word_index < 12:
+            self.ctx.input.touch.y_regions.append(self.ctx.display.height())
+        y_region = self.header_offset
+        y_region += (word_v_padding - FONT_HEIGHT) // 2
+        word_index = 0
+        if MINIMAL_DISPLAY or self.mnemonic_length == 12:
+            x_padding = DEFAULT_PADDING
+        else:
+            x_padding = MINIMAL_PADDING
+        while word_index < 12:
+            paged_index = word_index + page * 12
+            if word_index == button_index and self.ctx.input.buttons_active:
                 self.ctx.display.draw_string(
-                    MINIMAL_PADDING,
+                    x_padding,
                     y_region,
-                    str(word_index + 1) + "." + self.current_mnemonic[word_index],
-                    word_color(word_index),
+                    str(paged_index + 1) + "." + self.current_mnemonic[paged_index],
+                    theme.bg_color,
+                    word_color(paged_index),
                 )
-                if self.mnemonic_length == 24:
+            else:
+                self.ctx.display.draw_string(
+                    x_padding,
+                    y_region,
+                    str(paged_index + 1) + "." + self.current_mnemonic[paged_index],
+                    word_color(paged_index),
+                )
+            if self.mnemonic_length == 24 and not MINIMAL_DISPLAY:
+                if word_index + 12 == button_index and self.ctx.input.buttons_active:
+                    self.ctx.display.draw_string(
+                        MINIMAL_PADDING + self.ctx.display.width() // 2,
+                        y_region,
+                        str(word_index + 13)
+                        + "."
+                        + self.current_mnemonic[word_index + 12],
+                        theme.bg_color,
+                        word_color(word_index + 12),
+                    )
+                else:
                     self.ctx.display.draw_string(
                         MINIMAL_PADDING + self.ctx.display.width() // 2,
                         y_region,
@@ -197,28 +221,48 @@ class MnemonicEditor(Page):
                         + self.current_mnemonic[word_index + 12],
                         word_color(word_index + 12),
                     )
-                word_index += 1
-                y_region += word_v_padding
+            word_index += 1
+            y_region += word_v_padding
 
+        if self.mnemonic_length == 24 and MINIMAL_DISPLAY and page == 0:
+            go_txt = "13-24"
+        else:
             go_txt = t("Go")
-            esc_txt = t("Esc")
-            go_x_offset = self.ctx.display.width() // 2
-            go_x_offset -= lcd.string_width_px(go_txt)
-            go_x_offset //= 2
-            esc_x_offset = self.ctx.display.width() // 2
-            esc_x_offset -= lcd.string_width_px(esc_txt)
-            esc_x_offset //= 2
-            esc_x_offset += self.ctx.display.width() // 2
-            go_esc_y_offset = self.ctx.display.height()
-            go_esc_y_offset -= y_region + FONT_HEIGHT + MINIMAL_PADDING
-            go_esc_y_offset //= 2
-            go_esc_y_offset += y_region
-            self.ctx.display.draw_string(
-                go_x_offset, go_esc_y_offset, go_txt, theme.go_color
+        esc_txt = t("Esc")
+        go_x_offset = self.ctx.display.width() // 2
+        go_x_offset -= lcd.string_width_px(go_txt)
+        go_x_offset //= 2
+        esc_x_offset = self.ctx.display.width() // 2
+        esc_x_offset -= lcd.string_width_px(esc_txt)
+        esc_x_offset //= 2
+        esc_x_offset += self.ctx.display.width() // 2
+        go_esc_y_offset = self.ctx.display.height()
+        go_esc_y_offset -= y_region + FONT_HEIGHT + MINIMAL_PADDING
+        go_esc_y_offset //= 2
+        go_esc_y_offset += y_region
+        if button_index == 24 and self.ctx.input.buttons_active:
+            self.ctx.display.outline(
+                DEFAULT_PADDING,
+                go_esc_y_offset - FONT_HEIGHT // 2,
+                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+                FONT_HEIGHT + FONT_HEIGHT,
+                theme.go_color,
             )
-            self.ctx.display.draw_string(
-                esc_x_offset, go_esc_y_offset, esc_txt, theme.error_color
+        self.ctx.display.draw_string(
+            go_x_offset, go_esc_y_offset, go_txt, theme.go_color
+        )
+        if button_index == 25 and self.ctx.input.buttons_active:
+            self.ctx.display.outline(
+                self.ctx.display.width() // 2 + DEFAULT_PADDING,
+                go_esc_y_offset - FONT_HEIGHT // 2,
+                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+                FONT_HEIGHT + FONT_HEIGHT,
+                theme.error_color,
             )
+        self.ctx.display.draw_string(
+            esc_x_offset, go_esc_y_offset, esc_txt, theme.error_color
+        )
+        if not self.ctx.input.buttons_active:
             self.ctx.display.draw_vline(
                 self.ctx.display.width() // 2,
                 go_esc_y_offset,
@@ -226,12 +270,12 @@ class MnemonicEditor(Page):
                 theme.frame_color,
             )
 
-            self.ctx.input.touch.y_regions.append(self.ctx.display.height())
-
     def edit_word(self, index):
         """Edit a word"""
         while True:
             self.compute_search_ranges()
+            word_txt = str(index + 1) + ". " + self.current_mnemonic[index]
+            self.ctx.display.flash_text(word_txt)
             # if new and last word, lead input to a valid mnemonic
             if self.new_mnemonic and index == self.mnemonic_length - 1:
                 from ..key import Key
@@ -242,7 +286,6 @@ class MnemonicEditor(Page):
                     [LETTERS],
                     lambda x: self.autocomplete(x, final_words),
                     lambda x: self.possible_letters(x, final_words),
-                    starting_buffer=self.current_mnemonic[index],
                 )
             else:
                 word = self.capture_from_keypad(
@@ -250,7 +293,6 @@ class MnemonicEditor(Page):
                     [LETTERS],
                     self.autocomplete,
                     self.possible_letters,
-                    starting_buffer=self.current_mnemonic[index],
                 )
             if word == ESC_KEY:
                 return None
@@ -260,12 +302,13 @@ class MnemonicEditor(Page):
 
     def edit(self):
         """Edit the mnemonic"""
-        button_index = 0
+        button_index = 24  # start at "Go"
         self.calculate_checksum()
+        page = 0
         while True:
             self.ctx.display.clear()
             self._draw_header()
-            self._map_words()
+            self._map_words(button_index, page)
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 button_index = self.ctx.input.touch.current_index()
@@ -278,6 +321,9 @@ class MnemonicEditor(Page):
                 btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == 24:
+                    if self.mnemonic_length == 24 and MINIMAL_DISPLAY and page == 0:
+                        page = 1
+                        continue
                     # Done
                     break
                 if button_index == 25:
@@ -286,13 +332,32 @@ class MnemonicEditor(Page):
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                         return None
                     continue
-                new_word = self.edit_word(button_index)
+                new_word = self.edit_word(button_index + page * 12)
                 if new_word is not None:
                     self.ctx.display.clear()
                     if self.prompt(
                         str(button_index + 1) + ".\n\n" + new_word + "\n\n",
                         self.ctx.display.height() // 2,
                     ):
-                        self.current_mnemonic[button_index] = new_word
+                        self.current_mnemonic[button_index + page * 12] = new_word
                         self.calculate_checksum()
+            elif btn == BUTTON_PAGE:
+                button_index += 1
+                if (
+                    MINIMAL_DISPLAY
+                    and self.mnemonic_length == 24
+                    and button_index == 12
+                ):
+                    button_index += 12
+                button_index %= 26
+            elif btn == BUTTON_PAGE_PREV:
+                button_index -= 1
+                if (
+                    MINIMAL_DISPLAY
+                    and self.mnemonic_length == 24
+                    and button_index == 23
+                ):
+                    button_index -= 12
+                button_index %= 26
+
         return " ".join(self.current_mnemonic)
