@@ -105,7 +105,7 @@ THEMES = {
     ThemeSettings.GREEN_THEME_NAME: {
         "background": BLACK,
         "info_background": LIGHTBLACK,
-        "foreground": LIGHT_GREEN,
+        "foreground": GREEN,
         "frame": DARKGREEN,
         "disabled": DARKGREY,
         "go": GREEN,
@@ -113,7 +113,7 @@ THEMES = {
         "del": YELLOW,
         "toggle": CYAN,
         "error": RED,
-        "highlight": GREEN,
+        "highlight": CYAN,
     },
 }
 

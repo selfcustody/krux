@@ -154,7 +154,7 @@ class Login(Page):
         captured_entropy = dice_entropy.new_key()
         if captured_entropy is not None:
             words = bip39.mnemonic_from_bytes(captured_entropy).split()
-            return self._load_key_from_words(words)
+            return self._load_key_from_words(words, new=True)
         return MENU_CONTINUE
 
     def new_key_from_snapshot(self):
@@ -184,10 +184,10 @@ class Login(Page):
                 self.ctx.input.wait_for_button()
                 num_bytes = 16 if len_mnemonic == 12 else 32
                 words = bip39.mnemonic_from_bytes(entropy_bytes[:num_bytes]).split()
-                return self._load_key_from_words(words)
+                return self._load_key_from_words(words, new=True)
         return MENU_CONTINUE
 
-    def _load_key_from_words(self, words, charset=LETTERS):
+    def _load_key_from_words(self, words, charset=LETTERS, new=False):
         mnemonic = " ".join(words)
 
         if charset != LETTERS:
@@ -211,7 +211,7 @@ class Login(Page):
 
         from .mnemonic_editor import MnemonicEditor
 
-        mnemonic_editor = MnemonicEditor(self.ctx, mnemonic)
+        mnemonic_editor = MnemonicEditor(self.ctx, mnemonic, new)
         mnemonic = mnemonic_editor.edit()
         if mnemonic is None:
             return MENU_CONTINUE
@@ -243,7 +243,6 @@ class Login(Page):
                 t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
             )
 
-            info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
             submenu = Menu(
                 self.ctx,
                 [
@@ -251,7 +250,11 @@ class Login(Page):
                     (t("Passphrase"), lambda: None),
                     (t("Customize"), lambda: None),
                 ],
-                offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
+                offset=(
+                    self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
+                    * FONT_HEIGHT
+                    + DEFAULT_PADDING
+                ),
             )
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
@@ -449,7 +452,7 @@ class Login(Page):
                 ):
                     words.append(word)
 
-            return self._load_key_from_words(words, charset)
+            return self._load_key_from_words(words, charset, new)
 
         return MENU_CONTINUE
 

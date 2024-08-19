@@ -33,9 +33,11 @@ from ..input import BUTTON_TOUCH, BUTTON_ENTER
 class MnemonicEditor(Page):
     """Mnemonic Editor UI"""
 
-    def __init__(self, ctx, mnemonic=None):
+    def __init__(self, ctx, mnemonic=None, new=False):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.new_mnemonic = new
+        self.valid_checksum = False
         self.initial_mnemonic = []
         self.current_mnemonic = []
         if mnemonic:
@@ -111,12 +113,18 @@ class MnemonicEditor(Page):
             if word.startswith(prefix) and len(word) > len(prefix)
         }
 
-    def recalculate_checksum(self):
+    def calculate_checksum(self):
         """Recalculate the checksum of the mnemonic"""
-        entropy = bip39.mnemonic_to_bytes(
-            " ".join(self.current_mnemonic), ignore_checksum=True
-        )
-        self.current_mnemonic = bip39.mnemonic_from_bytes(entropy).split(" ")
+        if self.new_mnemonic:
+            entropy = bip39.mnemonic_to_bytes(
+                " ".join(self.current_mnemonic), ignore_checksum=True
+            )
+            self.current_mnemonic = bip39.mnemonic_from_bytes(entropy).split(" ")
+            self.valid_checksum = True
+        else:
+            self.valid_checksum = bip39.mnemonic_is_valid(
+                " ".join(self.current_mnemonic)
+            )
 
     def _draw_header(self):
         """Draw current mnemonic words"""
@@ -132,6 +140,12 @@ class MnemonicEditor(Page):
         """Map words to the screen"""
 
         def word_color(index):
+            if (
+                index == self.mnemonic_length - 1
+                and not self.new_mnemonic
+                and not self.valid_checksum
+            ):
+                return theme.error_color
             if self.current_mnemonic[index] != self.initial_mnemonic[index]:
                 return theme.highlight_color
             return theme.fg_color
@@ -218,12 +232,26 @@ class MnemonicEditor(Page):
         """Edit a word"""
         while True:
             self.compute_search_ranges()
-            word = self.capture_from_keypad(
-                t("Word %d") % (index + 1),
-                [LETTERS],
-                self.autocomplete,
-                self.possible_letters,
-            )
+            # if new and last word, lead input to a valid mnemonic
+            if self.new_mnemonic and index == self.mnemonic_length - 1:
+                from ..key import Key
+
+                final_words = Key.get_final_word_candidates(self.current_mnemonic[:-1])
+                word = self.capture_from_keypad(
+                    t("Word %d") % (index + 1),
+                    [LETTERS],
+                    lambda x: self.autocomplete(x, final_words),
+                    lambda x: self.possible_letters(x, final_words),
+                    starting_buffer=self.current_mnemonic[index],
+                )
+            else:
+                word = self.capture_from_keypad(
+                    t("Word %d") % (index + 1),
+                    [LETTERS],
+                    self.autocomplete,
+                    self.possible_letters,
+                    starting_buffer=self.current_mnemonic[index],
+                )
             if word == ESC_KEY:
                 return None
             if word in WORDLIST:
@@ -233,6 +261,7 @@ class MnemonicEditor(Page):
     def edit(self):
         """Edit the mnemonic"""
         button_index = 0
+        self.calculate_checksum()
         while True:
             self.ctx.display.clear()
             self._draw_header()
@@ -265,5 +294,5 @@ class MnemonicEditor(Page):
                         self.ctx.display.height() // 2,
                     ):
                         self.current_mnemonic[button_index] = new_word
-                        self.recalculate_checksum()
+                        self.calculate_checksum()
         return " ".join(self.current_mnemonic)
