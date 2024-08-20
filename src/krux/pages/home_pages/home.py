@@ -353,7 +353,7 @@ class Home(Page):
                 return MENU_CONTINUE
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
         outputs, fee_percent = signer.outputs()
 
         # Warn if fees greater than 10% of what is spent

@@ -29,6 +29,6 @@ def test_touch_event(mocker, amigo):
     touch.touch_driver.irq_point = TOUCH_POINT_1  # Simulate touch event
 
     for _ in range(len(EVENTS)):
-        event = touch.event()
+        event = touch.event(validate_position=True)
     assert event == False
     assert touch.current_index() == 3

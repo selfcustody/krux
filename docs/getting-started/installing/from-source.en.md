@@ -29,7 +29,7 @@ The first command will create `privkey.pem` and `pubkey.pem` files you can use w
 Once you've updated the `SIGNER_PUBKEY` with this value, you can proceed with the regular build process.
 
 ### Build the firmware (Linux or WSL)
-The [krux](https://github.com/selfcustody/krux/blob/main/krux) bash script contains commands for common development tasks. It assumes a Linux host, you will need to have [Docker Desktop or Docker Engine](https://docs.docker.com/desktop/), `openssl`, and `wget` installed at a minimum for the commands to work as expected. It works on Windows using WSL. The channel Crypto Guide from Youtube made a step-by-step video - [Krux DIY Bitcoin Signer: Build From Source & Verify (With Windows + WSL2 + Docker)](https://www.youtube.com/watch?v=Vmr_TFy2TfQ)
+The [krux bash script](https://github.com/selfcustody/krux/blob/main/krux) contains commands for common development tasks. It assumes a Linux host, you will need to have [Docker Desktop or Docker Engine](https://docs.docker.com/desktop/), `openssl`, and `wget` installed at a minimum for the commands to work as expected. It works on Windows using WSL. The channel Crypto Guide from Youtube made a step-by-step video - [Krux DIY Bitcoin Signer: Build From Source & Verify (With Windows + WSL2 + Docker)](https://www.youtube.com/watch?v=Vmr_TFy2TfQ)
 
 To build and flash the firmware:
 ```bash

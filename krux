@@ -59,6 +59,9 @@ if [ "$1" == "build" ]; then
         [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]||[ "$device" == "maixpy_cube" ]; then
             declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
             sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
+            
+            # docs: latest_krux version
+            sed -i -- 's/  latest_krux: krux-v.*/  latest_krux: krux-v'$version'/g' mkdocs.yml
 
             mkdir -p build
             docker build . -t krux-builder --build-arg DEVICE=$device

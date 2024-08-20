@@ -167,7 +167,7 @@ def test_new_12w_from_snapshot(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     # mocks a result of a hashed image
-    mock_capture_entropy = mocker.patch(
+    mocker.patch(
         "krux.pages.capture_entropy.CameraEntropy.capture", return_value=b"\x01" * 32
     )
 
@@ -194,6 +194,79 @@ def test_new_12w_from_snapshot(m5stickv, mocker):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_new_24w_from_snapshot(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    # mocks a result of a hashed image
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture", return_value=b"\x01" * 32
+    )
+
+    BTN_SEQUENCE = (
+        # 1 move to select 24 words, 1 press  to proceed
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # SHA256
+        [BUTTON_ENTER]
+        +
+        # Words 2x
+        [BUTTON_ENTER, BUTTON_ENTER]
+        +
+        # Load Wallet
+        [BUTTON_ENTER]
+    )
+    MNEMONIC = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic avoid letter advice comic"
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login.new_key_from_snapshot()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_new_double_mnemonic_from_snapshot(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.wallet import is_double_mnemonic
+    from krux.display import DEFAULT_PADDING
+    from krux.themes import WHITE, BLACK
+
+    # mocks a result of a hashed image
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture", return_value=b"\x01" * 32
+    )
+
+    BTN_SEQUENCE = (
+        # 2 moves to select double mnemonic, 1 press  to proceed
+        [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # SHA256
+        [BUTTON_ENTER]
+        +
+        # Words 2x
+        [BUTTON_ENTER, BUTTON_ENTER]
+        +
+        # Load Wallet
+        [BUTTON_ENTER]
+    )
+    MNEMONIC = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust absurd amount doctor acoustic avoid letter advice cage absurd amount doll fancy"
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login.new_key_from_snapshot()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert is_double_mnemonic(MNEMONIC) == True
+    ctx.display.draw_hcentered_text.assert_has_calls([mocker.call("BIP39 Mnemonic*")])
 
 
 ########## load words from qrcode tests

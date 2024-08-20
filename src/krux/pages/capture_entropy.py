@@ -173,7 +173,7 @@ class CameraEntropy(Page):
             self.flash_text(t("Capture cancelled"))
             return None
 
-        self.ctx.display.draw_centered_text(t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
 
         self.entropy_measurement_update(img, all_at_once=True)
 

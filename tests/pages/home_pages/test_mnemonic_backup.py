@@ -89,7 +89,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
         mnemonics.mnemonic()
 
         mnemonics.display_mnemonic.assert_called_with(
-            ctx.wallet.key.mnemonic, "Mnemonic"
+            ctx.wallet.key.mnemonic, "Mnemonic", None
         )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 

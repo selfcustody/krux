@@ -38,6 +38,7 @@ mkdocs = "^1.6.0"
 mkdocs-material = "^9.5.28"
 mkdocs-static-i18n = "^1.2.3"
 pymdown-extensions = "^10.8.1"
+mkdocs-macros-plugin = "^1.0.5"
 
 # Simulator dependencies. Optional extras
 numpy = { version = "^1.25.2", optional = true }

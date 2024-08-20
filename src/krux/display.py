@@ -24,6 +24,7 @@ import board
 import time
 from .themes import theme
 from .krux_settings import Settings
+from .settings import THIN_SPACE
 
 DEFAULT_PADDING = 10
 MINIMAL_PADDING = 5
@@ -51,8 +52,6 @@ FLASH_MSG_TIME = 2000
 
 SMALLEST_WIDTH = 135
 SMALLEST_HEIGHT = 240
-
-THIN_SPACE = " "
 
 # Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
 SPLASH = [
