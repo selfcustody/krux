@@ -257,14 +257,25 @@ class Page:
                 done = True
             # interval done in input.py using timers
 
-    def display_mnemonic(self, mnemonic, suffix=""):
+    def display_mnemonic(
+        self, mnemonic: str, suffix="", display_mnemonic: str = None, fingerprint=""
+    ):
         """Displays the 12 or 24-word list of words to the user"""
-        words = mnemonic.split(" ")
+        from ..wallet import is_double_mnemonic
+
+        if display_mnemonic is None:
+            display_mnemonic = mnemonic
+        words = display_mnemonic.split(" ")
         word_list = [
             str(i + 1) + "." + ("  " if i + 1 < 10 else " ") + word
             for i, word in enumerate(words)
         ]
-        header = "BIP39" + " " + suffix
+
+        if is_double_mnemonic(mnemonic):
+            suffix += "*"
+        if fingerprint:
+            fingerprint = "\n" + fingerprint
+        header = "BIP39" + " " + suffix + fingerprint
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (
@@ -829,14 +840,17 @@ class Menu:
             offset_y += delta_y
 
 
-def choose_len_mnemonic(ctx):
+def choose_len_mnemonic(ctx, double_mnemonic=False):
     """Reusable '12 or 24 words?" menu choice"""
+    items = [
+        (t("12 words"), lambda: 12),
+        (t("24 words"), lambda: 24),
+    ]
+    if double_mnemonic:
+        items += [(t("Double mnemonic"), lambda: 48)]
     submenu = Menu(
         ctx,
-        [
-            (t("12 words"), lambda: 12),
-            (t("24 words"), lambda: 24),
-        ],
+        items,
         back_status=lambda: None,
     )
     _, num_words = submenu.run_loop()

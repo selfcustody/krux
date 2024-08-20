@@ -455,3 +455,20 @@ def derivation_to_script_wrapper(derivation):
                 format_str = "tr({})"
 
     return format_str
+
+
+def is_double_mnemonic(mnemonic: str):
+    """Check if the mnemonic is a double mnemonic (12+12+24)"""
+
+    words = mnemonic.split(" ")
+    if len(words) > 12:
+        from krux.bip39 import mnemonic_is_valid
+
+        if (
+            mnemonic_is_valid(" ".join(words[:12]))
+            and mnemonic_is_valid(" ".join(words[12:]))
+            and mnemonic_is_valid(mnemonic)
+        ):
+            return True
+
+    return False

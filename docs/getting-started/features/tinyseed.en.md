@@ -12,6 +12,7 @@ The examples below have been crated so that you can test the workflow for scanni
 
 ## Size, Offset and Padding Reference
 The general logic for how these are processed is:
+
 1. Krux first looks for a square (Which works best if with a well lit square, with clean edges, on a dark background)
 2. This square is checked and if the ratio of length to height is within a defined range for the given seed type, the square is further processed. (Uses the aspect_high and aspect_low variables)
 3. An X and Y offset are applied to work out the corner of the seed grid within the seed plate. Some devices like the Maix Amigo use a mirrored coordinate system and some seed types will have a slightly different layout on the front and back of the plate. (Uses the x_offset and y_offset variables, p0 for the front face and p1 for the reverse face)

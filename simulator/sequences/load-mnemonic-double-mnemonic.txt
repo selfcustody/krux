@@ -1,0 +1,9 @@
+include _wait-for-logo.txt
+
+# Navigate to via QR
+x3 press BUTTON_A
+
+qrcode double-mnemonic.png
+wait 0.5
+
+screenshot load-mnemonic-seq-double-mnemonic.png

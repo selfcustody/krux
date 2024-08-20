@@ -5,3 +5,8 @@
 .md-typeset img.twemoji {
   margin: 0 !important;
 }
+
+.md-typeset h5 {
+  color: black;
+  text-transform: none;
+}

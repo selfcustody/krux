@@ -105,6 +105,7 @@ RUN rm -rf vendor/embit/src/embit/util/prebuilt && \
     rm -f vendor/embit/src/embit/wordlists/slip39.py && \
     rm -f vendor/embit/src/embit/util/ctypes_secp256k1.py && \
     rm -f vendor/embit/src/embit/util/py_secp256k1.py && \
+    rm -f vendor/embit/src/embit/util/py_ripemd160.py && \
     find vendor/embit -type d -name '__pycache__' -exec rm -rv {} + -depth
 
 # copy firmware to WORKDIR (src)
