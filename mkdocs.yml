@@ -51,7 +51,7 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
-  latest_krux: krux-v24.07.0
+  latest_krux: krux-v24.09.beta7
   latest_installer: krux-installer-0.0.13
   latest_installer_underline: krux-installer_0.0.13
   social:

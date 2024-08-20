@@ -128,8 +128,11 @@ class MnemonicEditor(Page):
 
     def _draw_header(self):
         """Draw current mnemonic words"""
+        from ..wallet import is_double_mnemonic
 
         header = "BIP39" + " " + t("Mnemonic")
+        if is_double_mnemonic(" ".join(self.current_mnemonic)):
+            header += "*"
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header, MINIMAL_PADDING)
         self.header_offset = MINIMAL_PADDING * 2 + (

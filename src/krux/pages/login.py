@@ -189,8 +189,44 @@ class Login(Page):
                 self.ctx.display.draw_centered_text(t("Processing.."))
 
                 num_bytes = 16 if len_mnemonic == 12 else 32
-                words = bip39.mnemonic_from_bytes(entropy_bytes[:num_bytes]).split()
-                return self._load_key_from_words(words)
+                entropy_mnemonic = mnemonic_from_bytes(entropy_bytes[:num_bytes])
+
+                # Double mnemonic check
+                if len_mnemonic == 48:
+                    from ..wallet import is_double_mnemonic
+
+                    if not is_double_mnemonic(entropy_mnemonic):
+                        from ..wdt import wdt
+                        import time
+                        from krux.bip39 import mnemonic_is_valid
+
+                        pre_t = time.ticks_ms()
+                        tries = 0
+
+                        # create two 12w mnemonic with the provided entropy
+                        first_12 = mnemonic_from_bytes(entropy_bytes[:16])
+                        second_entropy_mnemonic_int = int.from_bytes(
+                            entropy_bytes[16:32], "big"
+                        )
+                        double_mnemonic = False
+                        while not double_mnemonic:
+                            wdt.feed()
+                            tries += 1
+                            # increment the second mnemonic entropy
+                            second_entropy_mnemonic_int += 1
+                            second_12 = mnemonic_from_bytes(
+                                second_entropy_mnemonic_int.to_bytes(16, "big")
+                            )
+                            entropy_mnemonic = first_12 + " " + second_12
+                            double_mnemonic = mnemonic_is_valid(entropy_mnemonic)
+
+                        print(
+                            "Tries: %d" % tries,
+                            "/ %d" % (time.ticks_ms() - pre_t),
+                            "ms",
+                        )
+
+                return self._load_key_from_words(entropy_mnemonic.split(), new=True)
         return MENU_CONTINUE
 
     def _load_key_from_words(self, words, charset=LETTERS, new=False):
@@ -221,7 +257,6 @@ class Login(Page):
         mnemonic = mnemonic_editor.edit()
         if mnemonic is None:
             return MENU_CONTINUE
-
         self.ctx.display.clear()
 
         passphrase = ""
