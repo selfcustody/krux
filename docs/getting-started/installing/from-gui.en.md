@@ -6,13 +6,13 @@ available for Linux and Windows.
 Download the installer by choosing the right asset for your operating system from our 
 [Github releases page](https://github.com/selfcustody/krux-installer/releases):
 
-| **Operational System**                                     | **File**                           |
-|------------------------------------------------------------|:----------------------------------:|
-| Windows                                                    | `krux-installer_0.0.13.exe*`       |
-| Debian-based: Ubuntu, PopOS, etc...                        | `krux-installer_0.0.13_amd64.deb*` | 
-| RedHat-based: Fedora, etc...                               | `krux-installer-0.0.13.x86_64.rpm*`|
-| Any linux distribution                                     | `krux-installer-0.0.13.AppImage*`  |
-| Package for Archlinux on [AUR](https://aur.archlinux.org/).| `krux-installer-bin`               |
+| **Operational System**                                     | **File**                                   |
+|------------------------------------------------------------|:------------------------------------------:|
+| Windows                                                    | `{{latest_installer_underline}}.exe`       |
+| Debian-based: Ubuntu, PopOS, etc...                        | `{{latest_installer_underline}}_amd64.deb` | 
+| RedHat-based: Fedora, etc...                               | `{{latest_installer}}.x86_64.rpm`          |
+| Any linux distribution                                     | `{{latest_installer}}.AppImage`            |
+| Package for Archlinux on [AUR](https://aur.archlinux.org/).| `krux-installer-bin`                       |
 
 ### Verify files
 If you trust the project developers, you can skip to [install](#install):
@@ -33,10 +33,10 @@ If you trust the project developers, you can skip to [install](#install):
             <td>
                 ```pwsh
                 # Compare this output:
-                (Get-FileHash 'krux-installer_0.0.13.exe').Hash
+                (Get-FileHash '{{latest_installer_underline}}.exe').Hash
                 
                 # With this:
-                Get-Content 'krux-installer_0.0.13.exe.sha256.txt'
+                Get-Content '{{latest_installer_underline}}.exe.sha256.txt'
                 ``` 
             </td>
         </tr>
@@ -44,7 +44,7 @@ If you trust the project developers, you can skip to [install](#install):
             <td>Debian-based</td>        
             <td>
                 ```bash
-                sha256sum --check ./krux-installer_0.0.13_amd64.deb.sha256.txt
+                sha256sum --check ./{{latest_installer_underline}}_amd64.deb.sha256.txt
                 ``` 
             </td>
         </tr>
@@ -52,7 +52,7 @@ If you trust the project developers, you can skip to [install](#install):
             <td>RedHat-based</td>        
             <td>
                 ```bash
-                sha256txt --check ./krux-installer-0.0.13.x86_64.rpm.sha256.txt
+                sha256txt --check ./{{latest_installer}}.x86_64.rpm.sha256.txt
                 ``` 
             </td>
         </tr>
@@ -60,7 +60,7 @@ If you trust the project developers, you can skip to [install](#install):
             <td>Any Linux distribution</td>
             <td>
                 ```bash
-                sha256sum --check ./krux-installer-0.0.13.AppImage.sha256.txt
+                sha256sum --check ./{{latest_installer}}.AppImage.sha256.txt
                 ``` 
             </td>
         </tr>
@@ -80,10 +80,10 @@ Then you can verify:
 
 | System                 | Command                                               |
 |------------------------|-------------------------------------------------------|
-| Windows (powershell)   | `gpg --verify krux-installer_0.0.13.exe.sig`          |
-| Debian-based           | `gpg --verify ./krux-installer_0.0.13_amd64.deb.sig`  |
-| RedHat-based           | `gpg --verify ./krux-installer-0.0.13.x86_64.rpm.sig` |
-| Any Linux distribution | `gpg --verify ./krux-installer-0.0.13.AppImage.sig`   |
+| Windows (powershell)   | `gpg --verify {{latest_installer_underline}}.exe.sig`          |
+| Debian-based           | `gpg --verify ./{{latest_installer_underline}}_amd64.deb.sig`  |
+| RedHat-based           | `gpg --verify ./{{latest_installer}}.x86_64.rpm.sig` |
+| Any Linux distribution | `gpg --verify ./{{latest_installer}}.AppImage.sig`   |
 
 > ⚠️  TIP: If the verification was successful, you may get a message similar to: `Good signature from "qlrddev <qlrddev@gmail.com>"`
 
@@ -102,7 +102,7 @@ Each system require different steps to install:
             <td>Windows</td>
             <td>
                 <ul>
-                    <li>The <code>krux-installer_0.0.13.exe</code> is a <a href="https://nsis.sourceforge.io/Main_Page">NSIS</a> installer;</li>
+                    <li>The <code>{{latest_installer_underline}}.exe</code> is a <a href="https://nsis.sourceforge.io/Main_Page">NSIS</a> installer;</li>
                     <li>The first time you run the <code>.exe</code> file the system will ask you to trust the application;</li>
                     <li>See <a href="/krux/getting-started/installing/from-gui/#windows">windows section below</a> for more information</li>
             </td>             
@@ -111,8 +111,8 @@ Each system require different steps to install:
             <td>Debian-based</td>
             <td>
                 <ul>
-                    <li>Install with dpkg: <code>sudo dpkg -i krux-installer_0.0.13_amd64.deb</code>;</li>
-                    <li>Update it with apt-get: <code>sudo apt-get install -f krux-installer_0.0.13_amd64.deb</code>.</li>
+                    <li>Install with dpkg: <code>sudo dpkg -i {{latest_installer_underline}}_amd64.deb</code>;</li>
+                    <li>Update it with apt-get: <code>sudo apt-get install -f {{latest_installer_underline}}_amd64.deb</code>.</li>
                 </ul>
             </td>             
         </tr>
@@ -120,8 +120,8 @@ Each system require different steps to install:
             <td>RedHat-based</td>                
             <td>
                 <ul>
-                    <li>Fedora: <code>sudo  dnf install krux-installer-0.0.13.x86_64.rpm</code>;</li>
-                    <li>Other RedHat based distros: <code>sudo yum localinstall krux-installer-0.0.13.x86_64.rpm</code>.</li>
+                    <li>Fedora: <code>sudo  dnf install {{latest_installer}}.x86_64.rpm</code>;</li>
+                    <li>Other RedHat based distros: <code>sudo yum localinstall {{latest_installer}}.x86_64.rpm</code>.</li>
                 </ul>
             </td>
         </tr>
@@ -129,9 +129,9 @@ Each system require different steps to install:
             <td>Any Linux distribution</td>
             <td>
                 <ul>
-                    <li>Place the <code>krux-installer-0.0.13.AppImage</code> where you want;</li>
-                    <li>Modify permision to execute: <code>chmod +x krux-installer-0.0.13.AppImage</code>;</li>
-                    <li>Run it: <code>./krux-installer-0.0.13.AppImage</code>.</li>
+                    <li>Place the <code>{{latest_installer}}.AppImage</code> where you want;</li>
+                    <li>Modify permision to execute: <code>chmod +x {{latest_installer}}.AppImage</code>;</li>
+                    <li>Run it: <code>./{{latest_installer}}.AppImage</code>.</li>
                 </ul>
             </td>
         </tr>

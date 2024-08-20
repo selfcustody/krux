@@ -183,7 +183,7 @@ class EncryptMnemonic(Page):
             return
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
         words = self.ctx.wallet.key.mnemonic
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, i_vector):
             self.ctx.display.clear()
@@ -205,7 +205,7 @@ class EncryptMnemonic(Page):
         key, mnemonic_id, i_vector = user_inputs
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
 
         from ..encryption import EncryptedQRCode
 
@@ -275,7 +275,7 @@ class LoadEncryptedMnemonic(Page):
             self.flash_error(t("Key was not provided"))
             return MENU_CONTINUE
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
         mnemonic_storage = MnemonicStorage()
         try:
             words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()
