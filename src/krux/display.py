@@ -139,7 +139,7 @@ class Display:
                 ],
             )
             self.set_pmu_backlight(Settings().hardware.display.brightness)
-        elif board.config["type"] == "yahboom":
+        elif board.config["type"] in ["yahboom", "wonder_mv"]:
             lcd.init(
                 invert=True,
                 rst=board.config["lcd"]["rst"],
@@ -179,14 +179,16 @@ class Display:
                 pin=board.config["krux"]["pins"]["BACKLIGHT"],
                 enable=True,
             )
-
+        # Calculate duty cycle
         if board.config["type"] == "cube":
-            # Calculate duty cycle
-            # Ranges from 0% to 80% duty cycle
+            # Ranges from 80% to 0% duty cycle
             # 100 is 0% duty cycle (off, not used here)
             pwm_value = 5 - int(brightness)
-            pwm_value *= 20
-            self.blk_ctrl.duty(pwm_value)
+        else:
+            # Ranges from 20% to 100% duty cycle
+            pwm_value = int(brightness)
+        pwm_value *= 20
+        self.blk_ctrl.duty(pwm_value)
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""

@@ -330,7 +330,7 @@ class SettingsPage(Page):
             if setting.attr == "theme":
                 theme.update()
             if setting.attr == "brightness":
-                if board.config["type"] == "cube":
+                if board.config["type"] in ["cube", "wonder_mv"]:
                     self.ctx.display.gpio_backlight_ctrl(new_category)
                 elif board.config["type"] == "m5stickv":
                     self.ctx.display.set_pmu_backlight(new_category)
