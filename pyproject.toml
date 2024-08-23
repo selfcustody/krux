@@ -84,12 +84,14 @@ lint = ["lint-src", "lint-scripts"]
 pylint.ref = "lint"
 
 # test tasks
-test = "pytest --cache-clear --cov src/krux --cov-report html ./tests --cov-context=test --cov-report term-missing"
+test-clean = """python -c 'import shutil; shutil.rmtree("htmlcov")'"""
+test-cov = "pytest --cache-clear --cov src/krux --cov-report html ./tests --cov-context=test --cov-report term-missing"
 test-verbose = "pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests"
 test-simple = "pytest --cache-clear ./tests"
 # aliases
-tests.ref = "test"
-pytest.ref = "test"
+tests = ["test-clean", "test-cov"]
+test.ref = "tests"
+pytest.ref = "tests"
 
 # pre commit task (do formatting, linting and tests)
 pre-commit = ["format", "lint", "i18n validate", "test-simple"]
