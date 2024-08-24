@@ -97,7 +97,7 @@ class Tools(Page):
                         select_file_handler=file_manager.show_file_details
                     )
         except OSError:
-            self.flash_error(t("SD card not detected"))
+            self.flash_error(t("SD card not detected."))
 
         return MENU_CONTINUE
 

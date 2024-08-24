@@ -246,8 +246,8 @@ class Login(Page):
                 DIGITS_OCT: Utils.BASE_OCT_SUFFIX,
             }
             numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
-            self.display_mnemonic(mnemonic, suffix_dict[charset], numbers_str)
-            if not self.prompt(t("Continue?"), BOTTOM_PROMPT_LINE):
+            self.display_mnemonic(numbers_str, suffix_dict[charset])
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
             self.ctx.display.clear()
 

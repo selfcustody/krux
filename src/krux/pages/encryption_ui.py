@@ -61,7 +61,7 @@ class EncryptionKey(Page):
         if key:
             self.ctx.display.clear()
             continue_string = t("Key") + ": " + key + "\n\n"
-            continue_string += t("Continue?")
+            continue_string += t("Proceed?")
             if self.prompt(
                 continue_string,
                 self.ctx.display.height() // 2,
@@ -297,17 +297,15 @@ class LoadEncryptedMnemonic(Page):
         self.ctx.display.clear()
         if self.prompt(t("Remove %s?") % mnemonic_id, self.ctx.display.height() // 2):
             mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
-            self.ctx.display.clear()
+            message = t("%s removed.") % mnemonic_id
+            message += "\n\n"
             if sd_card:
-                message = t("%s was removed from SD card") % mnemonic_id
-                message += "\n\n"
                 message += t(
                     "Fully erase your SD card in another device to ensure data is unrecoverable"
                 )
             else:
-                message = t("%s was removed from flash") % mnemonic_id
-                message += "\n\n"
                 message += t("To ensure data is unrecoverable use Wipe Device feature")
+            self.ctx.display.clear()
             self.ctx.display.draw_centered_text(message)
             self.ctx.input.wait_for_button()
         del mnemonic_storage

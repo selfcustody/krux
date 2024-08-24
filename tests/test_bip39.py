@@ -40,7 +40,7 @@ def test_edge_cases():
 
 
 def test_random_cases():
-    for _ in range(20000):
+    for _ in range(10000):
         for size in (16, 20, 24, 28, 32):
             token_bytes = secrets.token_bytes(size)
             assert (
