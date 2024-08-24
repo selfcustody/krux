@@ -37,6 +37,7 @@ from ..input import (
 )
 from ..display import (
     DEFAULT_PADDING,
+    MINIMAL_PADDING,
     MINIMAL_DISPLAY,
     FLASH_MSG_TIME,
     FONT_HEIGHT,
@@ -856,3 +857,44 @@ def choose_len_mnemonic(ctx, double_mnemonic=False):
     _, num_words = submenu.run_loop()
     ctx.display.clear()
     return num_words
+
+
+def proceed_menu(ctx, y_offset=0, menu_index=None, proceed_txt="Go", esc_txt="Esc"):
+    """Reusable 'Esc' and 'Go' menu choice"""
+
+    go_x_offset = ctx.display.width() // 2
+    go_x_offset -= lcd.string_width_px(proceed_txt)
+    go_x_offset //= 2
+    go_x_offset += ctx.display.width() // 2
+    esc_x_offset = ctx.display.width() // 2
+    esc_x_offset -= lcd.string_width_px(esc_txt)
+    esc_x_offset //= 2
+    go_esc_y_offset = ctx.display.height()
+    go_esc_y_offset -= y_offset + FONT_HEIGHT + MINIMAL_PADDING
+    go_esc_y_offset //= 2
+    go_esc_y_offset += y_offset
+    if menu_index == 0 and ctx.input.buttons_active:
+        ctx.display.outline(
+            DEFAULT_PADDING,
+            go_esc_y_offset - FONT_HEIGHT // 2,
+            ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+            FONT_HEIGHT + FONT_HEIGHT,
+            theme.error_color,
+        )
+    ctx.display.draw_string(esc_x_offset, go_esc_y_offset, esc_txt, theme.error_color)
+    if menu_index == 1 and ctx.input.buttons_active:
+        ctx.display.outline(
+            ctx.display.width() // 2 + DEFAULT_PADDING,
+            go_esc_y_offset - FONT_HEIGHT // 2,
+            ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+            FONT_HEIGHT + FONT_HEIGHT,
+            theme.go_color,
+        )
+    ctx.display.draw_string(go_x_offset, go_esc_y_offset, proceed_txt, theme.go_color)
+    if not ctx.input.buttons_active:
+        ctx.display.draw_vline(
+            ctx.display.width() // 2,
+            go_esc_y_offset,
+            FONT_HEIGHT,
+            theme.frame_color,
+        )

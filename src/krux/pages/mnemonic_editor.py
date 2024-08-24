@@ -20,14 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import lcd
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, ESC_KEY, LETTERS
+from . import Page, ESC_KEY, LETTERS, proceed_menu
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, MINIMAL_DISPLAY
 from ..krux_settings import t
 from ..themes import theme
 from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+GO_INDEX = 25
+ESC_INDEX = 24
 
 
 class MnemonicEditor(Page):
@@ -232,46 +234,10 @@ class MnemonicEditor(Page):
         else:
             go_txt = t("Go")
         esc_txt = t("Esc")
-        go_x_offset = self.ctx.display.width() // 2
-        go_x_offset -= lcd.string_width_px(go_txt)
-        go_x_offset //= 2
-        esc_x_offset = self.ctx.display.width() // 2
-        esc_x_offset -= lcd.string_width_px(esc_txt)
-        esc_x_offset //= 2
-        esc_x_offset += self.ctx.display.width() // 2
-        go_esc_y_offset = self.ctx.display.height()
-        go_esc_y_offset -= y_region + FONT_HEIGHT + MINIMAL_PADDING
-        go_esc_y_offset //= 2
-        go_esc_y_offset += y_region
-        if button_index == 24 and self.ctx.input.buttons_active:
-            self.ctx.display.outline(
-                DEFAULT_PADDING,
-                go_esc_y_offset - FONT_HEIGHT // 2,
-                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
-                FONT_HEIGHT + FONT_HEIGHT,
-                theme.go_color,
-            )
-        self.ctx.display.draw_string(
-            go_x_offset, go_esc_y_offset, go_txt, theme.go_color
-        )
-        if button_index == 25 and self.ctx.input.buttons_active:
-            self.ctx.display.outline(
-                self.ctx.display.width() // 2 + DEFAULT_PADDING,
-                go_esc_y_offset - FONT_HEIGHT // 2,
-                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
-                FONT_HEIGHT + FONT_HEIGHT,
-                theme.error_color,
-            )
-        self.ctx.display.draw_string(
-            esc_x_offset, go_esc_y_offset, esc_txt, theme.error_color
-        )
-        if not self.ctx.input.buttons_active:
-            self.ctx.display.draw_vline(
-                self.ctx.display.width() // 2,
-                go_esc_y_offset,
-                FONT_HEIGHT,
-                theme.frame_color,
-            )
+        menu_index = None
+        if self.ctx.input.buttons_active and button_index >= ESC_INDEX:
+            menu_index = button_index - ESC_INDEX
+        proceed_menu(self.ctx, y_region, menu_index, go_txt, esc_txt)
 
     def edit_word(self, index):
         """Edit a word"""
@@ -305,7 +271,7 @@ class MnemonicEditor(Page):
 
     def edit(self):
         """Edit the mnemonic"""
-        button_index = 24  # start at "Go"
+        button_index = GO_INDEX  # start at "Go"
         self.calculate_checksum()
         page = 0
         while True:
@@ -315,7 +281,7 @@ class MnemonicEditor(Page):
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 button_index = self.ctx.input.touch.current_index()
-                if button_index < 24:
+                if button_index < ESC_INDEX:
                     if self.mnemonic_length == 24 and button_index % 2 == 1:
                         button_index //= 2
                         button_index += 12
@@ -323,13 +289,13 @@ class MnemonicEditor(Page):
                         button_index //= 2
                 btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
-                if button_index == 24:
+                if button_index == GO_INDEX:
                     if self.mnemonic_length == 24 and MINIMAL_DISPLAY and page == 0:
                         page = 1
                         continue
                     # Done
                     break
-                if button_index == 25:
+                if button_index == ESC_INDEX:
                     # Cancel
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
@@ -350,7 +316,7 @@ class MnemonicEditor(Page):
                     MINIMAL_DISPLAY
                     and self.mnemonic_length == 24
                     and button_index == 12
-                ):
+                ) or (self.mnemonic_length == 12 and button_index == 12):
                     button_index += 12
                 button_index %= 26
             elif btn == BUTTON_PAGE_PREV:
@@ -359,7 +325,7 @@ class MnemonicEditor(Page):
                     MINIMAL_DISPLAY
                     and self.mnemonic_length == 24
                     and button_index == 23
-                ):
+                ) or (self.mnemonic_length == 12 and button_index == 23):
                     button_index -= 12
                 button_index %= 26
 

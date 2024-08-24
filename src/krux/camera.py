@@ -122,7 +122,7 @@ class Camera:
         sensor.__write_reg(0x60, 0xFF)
 
     def config_gc_2145(self):
-        '''Specialized config for GC2145 sensor'''
+        """Specialized config for GC2145 sensor"""
         # Set register bank 1
         sensor.__write_reg(0xFE, 0x01)
         # Center weight mode = 7, default=0x01 (center mode = 0)

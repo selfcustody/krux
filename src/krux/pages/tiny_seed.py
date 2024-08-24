@@ -27,7 +27,7 @@ import image
 import sensor
 import time
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, FLASH_MSG_TIME
+from . import Page, FLASH_MSG_TIME, proceed_menu
 from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
@@ -48,9 +48,9 @@ TS_LAST_BIT_NO_CS = 143
 TS_LAST_BIT_12W_CS = 139
 TS_LAST_BIT_24W_CS = 135
 
-TS_ESC_START_POSITION = 156
-TS_ESC_END_POSITION = 161
-TS_GO_POSITION = 167
+TS_ESC_START_POSITION = TS_LAST_BIT_NO_CS + 1
+TS_ESC_END_POSITION = TS_ESC_START_POSITION + 5
+TS_GO_POSITION = TS_ESC_START_POSITION + 11
 
 
 class TinySeed(Page):
@@ -287,74 +287,18 @@ class TinySeed(Page):
         y_position = index // 12
         y_position *= self.y_pad
         y_position += self.y_offset + 1
-        if index >= TS_ESC_START_POSITION:
-            y_position -= 3 * self.y_pad // 4
-            height = 2 * self.y_pad - self.y_pad // 4 - 2
-
-        if index > TS_ESC_END_POSITION:
-            x_position = self.x_offset + 6 * self.x_pad + 1
-        elif index >= TS_ESC_START_POSITION:
-            x_position = self.x_offset + 1
-        else:
+        if index < TS_LAST_BIT_NO_CS:
             x_position = index % 12
             x_position *= self.x_pad
             x_position += self.x_offset + 1
             width = self.x_pad - 2
-        self.ctx.display.outline(
-            x_position,
-            y_position,
-            width,
-            height,
-            theme.fg_color,
-        )
-
-    def _draw_menu(self):
-        """Draws options to leave and proceed"""
-        if self.ctx.input.touch is not None:
-            y_offset = self.ctx.input.touch.y_regions[13]
-            y_pad = self.ctx.input.touch.y_regions[14] - y_offset
-        else:
-            y_offset = self.y_offset + 13 * self.y_pad
-            y_pad = self.y_pad // 3
-        x_offset = self.x_offset
-        esc_x_offset = round(x_offset + 1.9 * self.x_pad)
-
-        # case for non m5stickv, cube
-        if not MINIMAL_DISPLAY:
-            esc_x_offset = round(x_offset + 2.3 * self.x_pad)
-
-        text_offset = y_offset + y_pad // 2 - FONT_HEIGHT // 2
-        self.ctx.display.draw_string(
-            esc_x_offset, text_offset, t("Esc"), theme.no_esc_color
-        )
-        self.ctx.display.draw_string(
-            round(x_offset + 8.4 * self.x_pad), text_offset, t("Go"), theme.go_color
-        )
-        # print border around buttons only on touch devices
-        if self.ctx.input.touch is not None:
-            self.ctx.display.draw_line(
-                x_offset,
-                y_offset,
-                x_offset + 12 * self.x_pad,
-                y_offset,
-                theme.frame_color,
+            self.ctx.display.outline(
+                x_position,
+                y_position,
+                width,
+                height,
+                theme.fg_color,
             )
-            self.ctx.display.draw_line(
-                x_offset,
-                y_offset + y_pad,
-                x_offset + 12 * self.x_pad,
-                y_offset + y_pad,
-                theme.frame_color,
-            )
-            for _ in range(3):
-                self.ctx.display.draw_line(
-                    x_offset,
-                    y_offset,
-                    x_offset,
-                    y_offset + y_pad,
-                    theme.frame_color,
-                )
-                x_offset += 6 * self.x_pad
 
     def _map_keys_array(self):
         """Maps an array of regions for keys to be placed in"""
@@ -364,14 +308,10 @@ class TinySeed(Page):
                 self.ctx.input.touch.x_regions.append(x_region)
                 x_region += self.x_pad
             y_region = self.y_offset
-            for count in range(15):
+            for _ in range(13):
                 self.ctx.input.touch.y_regions.append(y_region)
-                if count == 12:
-                    y_region += self.y_pad // 4
-                elif count == 13:
-                    y_region += self.y_pad * 7 // 4
-                else:
-                    y_region += self.y_pad
+                y_region += self.y_pad
+            self.ctx.input.touch.y_regions.append(self.ctx.display.height())
 
     def _draw_disabled(self, w24=False):
         """Draws disabled section where checksum is automatically filled"""
@@ -536,6 +476,7 @@ class TinySeed(Page):
         btn = None
         self._map_keys_array()
         page = 0
+        menu_offset = self.y_offset + 12 * self.y_pad
         while True:
             self._draw_labels(page)
             self._draw_grid()
@@ -543,7 +484,12 @@ class TinySeed(Page):
                 self._draw_disabled(w24)
                 tiny_seed_numbers = self._auto_checksum(tiny_seed_numbers)
             self._draw_punched(tiny_seed_numbers, page)
-            self._draw_menu()
+            menu_index = None
+            if index >= TS_GO_POSITION:
+                menu_index = 1
+            elif index >= TS_ESC_END_POSITION:
+                menu_index = 0
+            proceed_menu(self.ctx, menu_offset, menu_index, t("Go"), t("Esc"))
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
             btn = self.ctx.input.wait_for_button()
