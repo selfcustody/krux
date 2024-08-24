@@ -132,8 +132,9 @@ def test_enter_tiny_seed_24w_m5stickv(m5stickv, mocker):
 
 
 def test_enter_tiny_seed_24w_amigo(amigo, mocker):
-    from krux.pages.tiny_seed import TinySeed
+    from krux.pages.tiny_seed import TinySeed, TS_GO_POSITION, TS_ESC_START_POSITION
     from krux.input import BUTTON_TOUCH
+
 
     TOUCH_SEQUENCE = (
         # Toggle line 1 bit "1024"
@@ -143,19 +144,17 @@ def test_enter_tiny_seed_24w_amigo(amigo, mocker):
         # On line 2 and toggle bit "512"
         + [14]
         # "Go" and proceed to next page
-        + [165]
+        + [TS_GO_POSITION]
         # Toggle line 1 bit "256"
         + [3]
         # Toggle to last editable bit
         + [135]
-        # Press on invalid location
-        + [146]
         # Press ESC
-        + [158]
+        + [TS_ESC_START_POSITION]
         # Give up from ESC
         + [1]  # Press "No"
         # "Go" and proceed
-        + [165]
+        + [TS_GO_POSITION]
     )
     BTN_SEQUENCE = [BUTTON_TOUCH] * len(TOUCH_SEQUENCE)
 
