@@ -170,21 +170,10 @@ class Addresses(Page):
             ):
                 return MENU_CONTINUE
 
-            checking_match_txt = t("Checking receive address from %d to %d for match..")
-            checked_no_match_txt = t("Checked %d receive addresses with no matches.")
-            is_valid_txt = "%s\n\n" + t("is a valid receive address!")
-            not_found_txt = "%s\n\n" + t(
-                "was NOT FOUND in the first %d receive addresses"
-            )
-            if addr_type == 1:
-                checking_match_txt = t(
-                    "Checking change address from %d to %d for match.."
-                )
-                checked_no_match_txt = t("Checked %d change addresses with no matches.")
-                is_valid_txt = "%s\n\n" + t("is a valid change address!")
-                not_found_txt = "%s\n\n" + t(
-                    "was NOT FOUND in the first %d change addresses"
-                )
+            checking_match_txt = t("Verifying..") + " " + t("%d to %d")
+            checked_no_match_txt = t("Checked %d addresses with no matches.")
+            is_valid_txt = "%s\n\n" + t("is a valid address!")
+            not_found_txt = "%s\n\n" + t("was NOT FOUND in the first %d addresses")
 
             found = False
             num_checked = 0

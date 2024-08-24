@@ -74,36 +74,6 @@ class SettingsPage(Page):
 
     def settings(self):
         """Handler for the settings"""
-        location = Settings().persist.location
-        if location == SD_PATH:
-            if self.has_sd_card():
-                self.flash_text(
-                    t("Your changes will be kept on the SD card."),
-                    duration=PERSIST_MSG_TIME,
-                )
-            else:
-                self.flash_text(
-                    t("SD card not detected.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
-                    duration=PERSIST_MSG_TIME,
-                )
-        else:
-            try:
-                # Check for flash
-                os.listdir("/" + FLASH_PATH + "/.")
-                self.flash_text(
-                    t("Your changes will be kept on device flash storage."),
-                    duration=PERSIST_MSG_TIME,
-                )
-            except OSError:
-                self.flash_text(
-                    t("Device flash storage not detected.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
-                    duration=PERSIST_MSG_TIME,
-                )
-
         return self.namespace(Settings())()
 
     def _draw_settings_pad(self):
@@ -174,7 +144,7 @@ class SettingsPage(Page):
                 with SDHandler():
                     if store.save_settings():
                         self.flash_text(
-                            t("Changes persisted to SD card!"),
+                            t("Settings stored on SD card."),
                             duration=PERSIST_MSG_TIME,
                         )
             except OSError:
@@ -186,17 +156,9 @@ class SettingsPage(Page):
                 )
         else:
             self.ctx.display.clear()
-            try:
-                if store.save_settings():
-                    self.flash_text(
-                        t("Changes persisted to Flash!"),
-                        duration=PERSIST_MSG_TIME,
-                    )
-            except:
+            if store.save_settings():
                 self.flash_text(
-                    t("Unexpected error saving to Flash.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
+                    t("Settings stored internally on flash."),
                     duration=PERSIST_MSG_TIME,
                 )
 

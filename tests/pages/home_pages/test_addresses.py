@@ -273,12 +273,12 @@ def test_scan_address(mocker, m5stickv, tdata):
             if can_search:
                 if case[6]:  # If search should be successful
                     ctx.display.draw_centered_text.assert_called_with(
-                        "0. \n\n%s\n\nis a valid receive address!" % case[3]
+                        "0. \n\n%s\n\nis a valid address!" % case[3]
                     )
                 else:
                     attempts = 50 * (len(case[5]) - 3)
                     ctx.display.draw_centered_text.assert_called_with(
-                        "%s\n\nwas NOT FOUND in the first %s receive addresses"
+                        "%s\n\nwas NOT FOUND in the first %s addresses"
                         % (case[3], attempts)
                     )
         else:
@@ -344,7 +344,7 @@ def test_scan_change_address(mocker, m5stickv, tdata):
             if can_search:
                 if case[6]:  # If search should be successful
                     ctx.display.draw_centered_text.assert_called_with(
-                        "0. \n\n%s\n\nis a valid change address!" % case[3]
+                        "0. \n\n%s\n\nis a valid address!" % case[3]
                     )
                 else:
                     attempts = 50 * (len(case[5]) - 3)

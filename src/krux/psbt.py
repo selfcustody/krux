@@ -396,21 +396,21 @@ class PSBTSigner:
         # sequence of spend
         for i, out in enumerate(spend_list):
             messages.append(
-                ((t("%d. Spend:") + " \n\n%s\n\n") % (i + 1, out[0]))
+                (("%d. " + t("Spend:") + " \n\n%s\n\n") % (i + 1, out[0]))
                 + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 
         # sequence of self_transfer
         for i, out in enumerate(self_transfer_list):
             messages.append(
-                ((t("%d. Self-transfer:") + " \n\n%s\n\n") % (i + 1, out[0]))
+                (("%d. " + t("Self-transfer:") + " \n\n%s\n\n") % (i + 1, out[0]))
                 + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 
         # sequence of change
         for i, out in enumerate(change_list):
             messages.append(
-                ((t("%d. Change:") + " \n\n%s\n\n") % (i + 1, out[0]))
+                (("%d. " + t("Change:") + " \n\n%s\n\n") % (i + 1, out[0]))
                 + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 
