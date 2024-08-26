@@ -151,7 +151,7 @@ def test_enter_tiny_seed_24w_amigo(amigo, mocker):
         # Press ESC
         + [TS_ESC_START_POSITION]
         # Give up from ESC
-        + [1]  # Press "No"
+        + [0]  # Press "No"
         # "Go" and proceed
         + [TS_GO_POSITION]
     )

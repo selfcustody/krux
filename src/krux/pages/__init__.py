@@ -354,12 +354,12 @@ class Page:
         btn = None
         answer = True
         while btn != BUTTON_ENTER:
-            offset_x = self.ctx.display.width() // 4
+            offset_x = (self.ctx.display.width() * 3) // 4
             offset_x -= (lcd.string_width_px(t("Yes"))) // 2
             self.ctx.display.draw_string(
                 offset_x, offset_y, t("Yes"), theme.go_color, theme.bg_color
             )
-            offset_x = (self.ctx.display.width() * 3) // 4
+            offset_x = self.ctx.display.width() // 4
             offset_x -= (lcd.string_width_px(t("No"))) // 2
             self.ctx.display.draw_string(
                 offset_x, offset_y, t("No"), theme.no_esc_color, theme.bg_color
@@ -367,7 +367,7 @@ class Page:
             if self.ctx.input.buttons_active:
                 if answer:
                     self.ctx.display.outline(
-                        DEFAULT_PADDING,
+                        self.ctx.display.width() // 2,
                         offset_y - FONT_HEIGHT // 2,
                         self.ctx.display.usable_width() // 2,
                         2 * FONT_HEIGHT - 2,
@@ -375,7 +375,7 @@ class Page:
                     )
                 else:
                     self.ctx.display.outline(
-                        self.ctx.display.width() // 2,
+                        DEFAULT_PADDING,
                         offset_y - FONT_HEIGHT // 2,
                         self.ctx.display.usable_width() // 2,
                         2 * FONT_HEIGHT - 2,
@@ -403,11 +403,11 @@ class Page:
                 )
             elif btn == BUTTON_TOUCH:
                 self.ctx.input.touch.clear_regions()
-                # index 0 = Yes
-                # index 1 = No
+                # index 0 = No
+                # index 1 = Yes
                 if self.ctx.input.touch.current_index():
-                    return False
-                return True
+                    return True
+                return False
         # BUTTON_ENTER
         return answer
 

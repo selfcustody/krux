@@ -621,7 +621,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
                 BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
-            [13, 14, 17, 27, 26, 17, 19, 0],
+            [13, 14, 17, 27, 26, 17, 19, 1],
         ),
     ]
 

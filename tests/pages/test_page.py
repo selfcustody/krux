@@ -79,12 +79,12 @@ def test_prompt_amigo(mocker, amigo, mock_page_cls):
     assert page.prompt("test prompt") == False
 
     ctx.input.buttons_active = False
-    # Index 0 = YES pressed
-    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[0]))
+    # Index 1 = YES pressed
+    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[1]))
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
     assert page.prompt("test prompt") == True
 
-    # Index 1 = No pressed
-    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[1]))
+    # Index 0 = No pressed
+    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[0]))
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
     assert page.prompt("test prompt") == False
