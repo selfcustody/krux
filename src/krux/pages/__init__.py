@@ -25,7 +25,7 @@ import time
 import board
 import lcd
 from .keypads import Keypad
-from ..themes import theme, WHITE, GREEN
+from ..themes import theme, WHITE, GREEN, DARKGREY
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -210,11 +210,16 @@ class Page:
         i = 0
         code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
         self.ctx.display.clear()
-        bright = theme.bg_color == WHITE
+        if theme.bg_color == WHITE:
+            qr_custom_foreground = WHITE
+        else:
+            qr_custom_foreground = None
         extra_debounce_flag = True
+        self.ctx.input.buttons_active = True
         while not done:
             code = None
             num_parts = 0
+            btn = None
             try:
                 code, num_parts = next(code_generator)
             except:
@@ -222,8 +227,8 @@ class Page:
                     data, self.ctx.display.qr_data_width(), qr_format
                 )
                 code, num_parts = next(code_generator)
-            if bright:
-                self.ctx.display.draw_qr_code(0, code, light_color=WHITE)
+            if qr_custom_foreground:
+                self.ctx.display.draw_qr_code(0, code, light_color=qr_custom_foreground)
             else:
                 self.ctx.display.draw_qr_code(0, code)
             subtitle = (
@@ -242,16 +247,22 @@ class Page:
                 )
                 self.ctx.display.draw_hcentered_text(subtitle, offset_y)
                 i = (i + 1) % num_parts
-            self.ctx.input.buttons_active = True
             if extra_debounce_flag:
                 # Animated QR codes disable debounce
                 # so this is required to avoid double presses
                 time.sleep_ms(self.ctx.input.debounce_value)
                 self.ctx.input.reset_ios_state()
                 extra_debounce_flag = False
+                continue
             btn = self.ctx.input.wait_for_button(num_parts == 1)
             if btn in TOGGLE_BRIGHTNESS:
-                bright = not bright
+                if qr_custom_foreground == WHITE:
+                    qr_custom_foreground = DARKGREY
+                elif not qr_custom_foreground:
+                    qr_custom_foreground = WHITE
+                elif qr_custom_foreground == DARKGREY:
+                    qr_custom_foreground = None
+                extra_debounce_flag = True
             elif btn in PROCEED:
                 if self.ctx.input.touch is not None:
                     self.ctx.input.buttons_active = False

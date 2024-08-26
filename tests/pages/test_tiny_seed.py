@@ -135,7 +135,6 @@ def test_enter_tiny_seed_24w_amigo(amigo, mocker):
     from krux.pages.tiny_seed import TinySeed, TS_GO_POSITION, TS_ESC_START_POSITION
     from krux.input import BUTTON_TOUCH
 
-
     TOUCH_SEQUENCE = (
         # Toggle line 1 bit "1024"
         [1]
