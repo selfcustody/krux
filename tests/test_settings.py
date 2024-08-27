@@ -25,7 +25,7 @@ def test_stored_i18n_settings(mocker, m5stickv):
 
     i18n = I18nSettings()
 
-    assert i18n.locale == "pl-PL"
+    assert i18n.locale == "pt-BR"
 
 
 def test_wrong_stored_i18n_settings(mocker, m5stickv):
