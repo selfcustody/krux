@@ -15,6 +15,122 @@ def test_init(mocker, m5stickv):
         sn.label("test")
 
 
+def test_stored_i18n_settings(mocker, m5stickv):
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"i18n": {"locale": "pl-PL"}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import I18nSettings
+
+    i18n = I18nSettings()
+
+    assert i18n.locale == "pl-PL"
+
+
+def test_wrong_stored_i18n_settings(mocker, m5stickv):
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"i18n": {"locale": "aa-AA"}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import I18nSettings
+
+    i18n = I18nSettings()
+
+    assert i18n.locale == "en-US"
+
+
+def test_stored_adafruit_printer_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = (
+        """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 35}}}}}"""
+    )
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import AdafruitPrinterSettings
+
+    ada = AdafruitPrinterSettings()
+    assert ada.line_delay == 35
+
+
+def test_wrong_stored_adafruit_printer_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = (
+        """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 511}}}}}"""
+    )
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import AdafruitPrinterSettings
+
+    ada = AdafruitPrinterSettings()
+    assert ada.line_delay == 20
+
+
+def test_float_stored_adafruit_printer_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = (
+        """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 21.2}}}}}"""
+    )
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import AdafruitPrinterSettings
+
+    ada = AdafruitPrinterSettings()
+    assert ada.line_delay == 20
+
+
+def test_string_stored_adafruit_printer_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 1,abc}}}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import AdafruitPrinterSettings
+
+    ada = AdafruitPrinterSettings()
+    assert ada.line_delay == 20
+
+
+def test_stored_cnc_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"printer": {"cnc": {"border_padding": 127}}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import CNCSettings
+
+    cnc = CNCSettings()
+    assert cnc.border_padding == 127
+
+
+def test_wrong_stored_cnc_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 1.abc}}}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import CNCSettings
+
+    cnc = CNCSettings()
+    assert cnc.border_padding == 0.0625
+
+
 def test_store_init(mocker, m5stickv):
     from krux.settings import Store, SETTINGS_FILENAME, SD_PATH
 
