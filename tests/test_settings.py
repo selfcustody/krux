@@ -17,7 +17,7 @@ def test_init(mocker, m5stickv):
 
 def test_stored_i18n_settings(mocker, m5stickv):
     # mock store singleton creation before import
-    stored_settings = """{"settings": {"i18n": {"locale": "pl-PL"}}}"""
+    stored_settings = """{"settings": {"i18n": {"locale": "pt-BR"}}}"""
     mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
 
     # import will create store singleton with mocked values
