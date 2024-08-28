@@ -34,8 +34,8 @@ COLOR_WHITE = (255, 255, 255)
 WIDTH = BOARD_CONFIG["lcd"]["width"]
 HEIGHT = BOARD_CONFIG["lcd"]["height"]
 
-CHINESE_MIN_CODEPOINT = 0x4E00
-CHINESE_MAX_CODEPOINT = 0x9FFF
+CHINESE_CODEPOINT_MIN = 0x4E00
+CHINESE_CODEPOINT_MAX = 0x9FFF
 KOREAN_CODEPOINT_MIN = 0xAC00
 KOREAN_CODEPOINT_MAX = 0xD7A3
 
@@ -148,12 +148,15 @@ def _is_x_flipped():
 
 def string_width_px(string):
     standard_width = BOARD_CONFIG["krux"]["display"]["font"][0]
-    ko_width = BOARD_CONFIG["krux"]["display"]["font_wide"][0]
+    wide_width = BOARD_CONFIG["krux"]["display"]["font_wide"][0]
     string_width = 0
 
     for c in string:
-        if CHINESE_MIN_CODEPOINT < ord(c) < KOREAN_CODEPOINT_MAX:
-            string_width += ko_width
+        if (
+            CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+            or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
+        ):
+            string_width += wide_width
         else:
             string_width += standard_width
 
@@ -161,15 +164,24 @@ def string_width_px(string):
 
 def string_has_wide_glyph(string):
     for c in string:
-        if CHINESE_MIN_CODEPOINT < ord(c) < KOREAN_CODEPOINT_MAX:
+        if (
+            CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+            or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
+        ):
             return True
     return False
 
 def is_wide(c):
-    return CHINESE_MIN_CODEPOINT < ord(c) < KOREAN_CODEPOINT_MAX
+    return (
+            CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+            or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
+    )
 
 def char_width(c):
-    if CHINESE_MIN_CODEPOINT < ord(c) < KOREAN_CODEPOINT_MAX:
+    if (
+        CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+        or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
+    ):
         return BOARD_CONFIG["krux"]["display"]["font_wide"][0]
     else:
         return BOARD_CONFIG["krux"]["display"]["font"][0]
@@ -244,8 +256,6 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                             ),
                         )
                 x_position += char_width(c) if BOARD_CONFIG["type"] != "amigo" else -char_width(c)
-                
-
 
     color = rgb565torgb888(color)
     bgcolor = rgb565torgb888(bgcolor)

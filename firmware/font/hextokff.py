@@ -36,10 +36,10 @@ DEFAULT_CODEPOINTS = [
 ]
 TRANSLATIONS_DIR = "../../i18n/translations"
 
-CHINESE_MIN_CODEPOINT = 0x4E00
-CHINESE_MAX_CODEPOINT = 0x9FFF
-KOREAN_MIN_CODEPOINT = 0xAC00
-KOREAN_MAX_CODEPOINT = 0xD7A3
+CHINESE_CODEPOINT_MIN = 0x4E00
+CHINESE_CODEPOINT_MAX = 0x9FFF
+KOREAN_CODEPOINT_MIN = 0xAC00
+KOREAN_CODEPOINT_MAX = 0xD7A3
 
 
 def hextokff(filename=None, width=None, height=None, wide_glyphs=None):
@@ -72,7 +72,10 @@ def hextokff(filename=None, width=None, height=None, wide_glyphs=None):
             for translation in translations.values():
                 for char in translation:
                     # If is Chinese or Korean codepoint
-                    if CHINESE_MIN_CODEPOINT <= ord(char) <= KOREAN_MAX_CODEPOINT:
+                    if (
+                        CHINESE_CODEPOINT_MIN <= ord(char) <= CHINESE_CODEPOINT_MAX
+                        or KOREAN_CODEPOINT_MIN <= ord(char) <= KOREAN_CODEPOINT_MAX
+                    ):
                         # only include if wide_glyphs is ko-KR
                         if wide_glyphs and current_translation in wide_glyphs:
                             used_codepoints.add(ord(char))
