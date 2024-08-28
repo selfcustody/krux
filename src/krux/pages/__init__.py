@@ -211,9 +211,9 @@ class Page:
         code_generator = to_qr_codes(data, self.ctx.display.qr_data_width(), qr_format)
         self.ctx.display.clear()
         if theme.bg_color == WHITE:
-            qr_custom_foreground = WHITE
+            qr_foreground = WHITE
         else:
-            qr_custom_foreground = None
+            qr_foreground = None
         extra_debounce_flag = True
         self.ctx.input.buttons_active = True
         while not done:
@@ -227,8 +227,8 @@ class Page:
                     data, self.ctx.display.qr_data_width(), qr_format
                 )
                 code, num_parts = next(code_generator)
-            if qr_custom_foreground:
-                self.ctx.display.draw_qr_code(0, code, light_color=qr_custom_foreground)
+            if qr_foreground:
+                self.ctx.display.draw_qr_code(0, code, light_color=qr_foreground)
             else:
                 self.ctx.display.draw_qr_code(0, code)
             subtitle = (
@@ -256,12 +256,12 @@ class Page:
                 continue
             btn = self.ctx.input.wait_for_button(num_parts == 1)
             if btn in TOGGLE_BRIGHTNESS:
-                if qr_custom_foreground == WHITE:
-                    qr_custom_foreground = DARKGREY
-                elif not qr_custom_foreground:
-                    qr_custom_foreground = WHITE
-                elif qr_custom_foreground == DARKGREY:
-                    qr_custom_foreground = None
+                if qr_foreground == WHITE:
+                    qr_foreground = DARKGREY
+                elif not qr_foreground:
+                    qr_foreground = WHITE
+                elif qr_foreground == DARKGREY:
+                    qr_foreground = None
                 extra_debounce_flag = True
             elif btn in PROCEED:
                 if self.ctx.input.touch is not None:
@@ -870,7 +870,9 @@ def choose_len_mnemonic(ctx, double_mnemonic=False):
     return num_words
 
 
-def proceed_menu(ctx, y_offset=0, menu_index=None, proceed_txt="Go", esc_txt="Esc"):
+def proceed_menu(
+    ctx, y_offset=0, menu_index=None, proceed_txt="Go", esc_txt="Esc", go_enabled=True
+):
     """Reusable 'Esc' and 'Go' menu choice"""
 
     go_x_offset = ctx.display.width() // 2
@@ -901,7 +903,8 @@ def proceed_menu(ctx, y_offset=0, menu_index=None, proceed_txt="Go", esc_txt="Es
             FONT_HEIGHT + FONT_HEIGHT,
             theme.go_color,
         )
-    ctx.display.draw_string(go_x_offset, go_esc_y_offset, proceed_txt, theme.go_color)
+    go_color = theme.go_color if go_enabled else theme.disabled_color
+    ctx.display.draw_string(go_x_offset, go_esc_y_offset, proceed_txt, go_color)
     if not ctx.input.buttons_active:
         ctx.display.draw_vline(
             ctx.display.width() // 2,

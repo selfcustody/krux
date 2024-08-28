@@ -237,14 +237,16 @@ class MnemonicEditor(Page):
         menu_index = None
         if self.ctx.input.buttons_active and button_index >= ESC_INDEX:
             menu_index = button_index - ESC_INDEX
-        proceed_menu(self.ctx, y_region, menu_index, go_txt, esc_txt)
+        proceed_menu(
+            self.ctx, y_region, menu_index, go_txt, esc_txt, self.valid_checksum
+        )
 
     def edit_word(self, index):
         """Edit a word"""
+        word_txt = str(index + 1) + ". " + self.current_mnemonic[index]
+        self.flash_text(word_txt)
         while True:
             self.compute_search_ranges()
-            word_txt = str(index + 1) + ". " + self.current_mnemonic[index]
-            self.ctx.display.flash_text(word_txt)
             # if new and last word, lead input to a valid mnemonic
             if self.new_mnemonic and index == self.mnemonic_length - 1:
                 from ..key import Key
@@ -294,7 +296,9 @@ class MnemonicEditor(Page):
                         page = 1
                         continue
                     # Done
-                    break
+                    if self.valid_checksum:
+                        break
+                    continue
                 if button_index == ESC_INDEX:
                     # Cancel
                     self.ctx.display.clear()
