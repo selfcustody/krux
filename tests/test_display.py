@@ -2,6 +2,8 @@ TEST_QR = bytearray(
     b"\x7fn\xfd\x830\x08v9\xd6\xedj\xa0\xdbUU7\xc8\xa0\xe0_U\x7f\x00i\x00\xe3\xd61P\x08\xf5Q\xef^\xfe`\xe8\xc1\x7f\xdex\x936Y\x91\xb8\xeb\xd29c\xd5\xd4\x7f\x00\n#\xfe\xcd\xd7\rJ\x8e\xd9\xe5\xf8\xb9K\xe6x\x17\xb9\xca\xa0\x9a\x9a\x7f\xbb\x1b\x01"
 )
 
+CHINESE_CODEPOINT_MIN = 0x4E00
+CHINESE_CODEPOINT_MAX = 0x9FFF
 KOREAN_CODEPOINT_MIN = 0xAC00
 KOREAN_CODEPOINT_MAX = 0xD7A3
 
@@ -10,14 +12,17 @@ def string_width_px(string):
     import board
 
     standard_width = board.config["krux"]["display"]["font"][0]
-    ko_width = board.config["krux"]["display"]["font_wide"][0]
+    wide_width = board.config["krux"]["display"]["font_wide"][0]
     print("standard_width:", standard_width)
-    print("ko_width:", ko_width)
+    print("wide_width:", wide_width)
     string_width = 0
 
     for c in string:
-        if KOREAN_CODEPOINT_MIN < ord(c) < KOREAN_CODEPOINT_MAX:
-            string_width += ko_width
+        if (
+            CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+            or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
+        ):
+            string_width += wide_width
         else:
             string_width += standard_width
 
