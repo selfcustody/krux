@@ -101,11 +101,8 @@ class Page:
         load_menu = Menu(
             self.ctx,
             [
-                (t("Load from camera"), lambda: None),
-                (
-                    t("Load from SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
+                MenuItem(t("Load from camera"), lambda: None),
+                MenuItemSD(t("Load from SD card"), lambda: None),
             ],
             back_status=lambda: None,
         )
@@ -425,12 +422,7 @@ class Page:
         """Checks if the device has a SD card inserted"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Checking for SD card.."))
-        try:
-            # Check for SD hot-plug
-            with SDHandler():
-                return True
-        except:
-            return False
+        return SDHandler.sd_card_available()
 
     def shutdown(self):
         """Handler for the 'shutdown' menu item"""
@@ -499,17 +491,15 @@ class Menu:
     def __init__(
         self,
         ctx,
-        menu,
+        menu_list,
         offset=None,
         disable_statusbar=False,
         back_label="Back",
         back_status=lambda: MENU_EXIT,
     ):
         self.ctx = ctx
-        self.menu = menu
         if back_label:
-            back_label = t("Back") if back_label == "Back" else back_label
-            self.menu += [("< " + back_label, back_status)]
+            menu_list += [MenuItem.back(back_label, back_status)]
 
         self.disable_statusbar = disable_statusbar
         if offset is None:
@@ -521,16 +511,10 @@ class Menu:
             self.menu_offset = offset
         max_viewable = min(
             self.ctx.display.max_menu_lines(self.menu_offset),
-            len(self.menu),
+            len(menu_list),
         )
-        self.menu_view = ListView(self.menu, max_viewable)
-
-    def screensaver(self):
-        """Loads and starts screensaver"""
-        from .screensaver import ScreenSaver
-
-        screen_saver = ScreenSaver(self.ctx)
-        screen_saver.start()
+        self.menu_view = ListView(menu_list, max_viewable)
+        self.back_index = len(menu_list) - 1
 
     def run_loop(self, start_from_index=None):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
@@ -603,14 +587,16 @@ class Menu:
                     self.menu_view.move_backward()
                 elif btn is None and self.menu_offset == STATUS_BAR_HEIGHT:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
-                    self.screensaver()
+                    from .screensaver import start_screen_saver
+
+                    start_screen_saver(self.ctx)
 
     def _clicked_item(self, selected_item_index):
-        if self.menu_view[selected_item_index][1] is None:
+        if not self.menu_view[selected_item_index].enabled():
             return MENU_CONTINUE
         try:
             self.ctx.display.clear()
-            status = self.menu_view[selected_item_index][1]()
+            status = self.menu_view[selected_item_index].action()
             if status != MENU_CONTINUE:
                 return status
         except Exception as e:
@@ -731,7 +717,7 @@ class Menu:
         offset_y = 0
         Page.y_keypad_map = [offset_y]
         for menu_item in self.menu_view:
-            offset_y += len(self.ctx.display.to_lines(menu_item[0])) + 1
+            offset_y += len(self.ctx.display.to_lines(menu_item.label)) + 1
             Page.y_keypad_map.append(offset_y)
         height_multiplier = self.ctx.display.height()
         height_multiplier -= self.menu_offset  # Top offset
@@ -753,7 +739,7 @@ class Menu:
 
         # draw centralized strings in regions
         for i, menu_item in enumerate(self.menu_view):
-            menu_item_lines = self.ctx.display.to_lines(menu_item[0])
+            menu_item_lines = self.ctx.display.to_lines(menu_item.label)
             offset_y = Page.y_keypad_map[i + 1] - Page.y_keypad_map[i]
             offset_y -= len(menu_item_lines) * FONT_HEIGHT
             if i == len(self.menu_view) - 1:
@@ -761,9 +747,7 @@ class Menu:
                 offset_y -= DEFAULT_PADDING
             offset_y //= 2
             offset_y += Page.y_keypad_map[i]
-            fg_color = (
-                theme.fg_color if menu_item[1] is not None else theme.disabled_color
-            )
+            fg_color = theme.fg_color if menu_item.enabled() else theme.disabled_color
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.fill_rectangle(
                     0,
@@ -789,7 +773,7 @@ class Menu:
         extra_lines = 0
         for menu_item in self.menu_view:
             # Count extra lines for multi-line menu items
-            extra_lines += len(self.ctx.display.to_lines(menu_item[0])) - 1
+            extra_lines += len(self.ctx.display.to_lines(menu_item.label)) - 1
         if self.menu_offset > STATUS_BAR_HEIGHT:
             offset_y = self.menu_offset + FONT_HEIGHT
         else:
@@ -811,10 +795,8 @@ class Menu:
         # Limit padding to font height
         items_pad = min(items_pad, FONT_HEIGHT)
         for i, menu_item in enumerate(self.menu_view):
-            fg_color = (
-                theme.fg_color if menu_item[1] is not None else theme.disabled_color
-            )
-            menu_item_lines = self.ctx.display.to_lines(menu_item[0])
+            fg_color = theme.fg_color if menu_item.enabled() else theme.disabled_color
+            menu_item_lines = self.ctx.display.to_lines(menu_item.label)
             delta_y = len(menu_item_lines) * FONT_HEIGHT
             delta_y += items_pad
             if selected_item_index == i:
@@ -840,14 +822,36 @@ class Menu:
             offset_y += delta_y
 
 
+class MenuItem:
+    """Handle items for the Menu"""
+
+    def __init__(self, text, action, enabled=lambda: True):
+        self.label = text
+        self.action = action
+        self.enabled = enabled
+
+    @staticmethod
+    def back(text="Back", action=lambda: MENU_EXIT):
+        """Create a standard back MenuItem"""
+        text = t("Back") if text == "Back" else text
+        return MenuItem("< " + text, action)
+
+
+class MenuItemSD(MenuItem):
+    """Reusable MenuItem for the Menu that automatic disables when SD card not detected"""
+
+    def __init__(self, text, action):
+        super().__init__(text, action, SDHandler.sd_card_available)
+
+
 def choose_len_mnemonic(ctx, double_mnemonic=False):
     """Reusable '12 or 24 words?" menu choice"""
     items = [
-        (t("12 words"), lambda: 12),
-        (t("24 words"), lambda: 24),
+        MenuItem(t("12 words"), lambda: 12),
+        MenuItem(t("24 words"), lambda: 24),
     ]
     if double_mnemonic:
-        items += [(t("Double mnemonic"), lambda: 48)]
+        items += [MenuItem(t("Double mnemonic"), lambda: 48)]
     submenu = Menu(
         ctx,
         items,

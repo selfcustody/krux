@@ -23,6 +23,7 @@
 from .. import (
     Page,
     Menu,
+    MenuItem,
     MENU_EXIT,
     ESC_KEY,
     choose_len_mnemonic,
@@ -305,8 +306,8 @@ class DiceEntropy(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Stats for Nerds"), lambda: MENU_EXIT),
-                    (t("Generate Mnemonic"), lambda: MENU_EXIT),
+                    MenuItem(t("Stats for Nerds"), lambda: MENU_EXIT),
+                    MenuItem(t("Generate Mnemonic"), lambda: MENU_EXIT),
                 ],
                 offset=menu_offset,
                 back_label=None,

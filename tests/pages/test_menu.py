@@ -13,7 +13,7 @@ def test_init(mocker, m5stickv):
 
 
 def test_run_loop(mocker, m5stickv):
-    from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
+    from krux.pages import Menu, MenuItem, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     ctx = mock_context(mocker)
@@ -24,10 +24,10 @@ def test_run_loop(mocker, m5stickv):
     menu = Menu(
         ctx,
         [
-            ("Option", lambda: MENU_CONTINUE),
-            ("Long Option", lambda: MENU_EXIT),
-            ("Longer Option", lambda: MENU_SHUTDOWN),
-            ("The Longest Option", exception_raiser),
+            MenuItem("Option", lambda: MENU_CONTINUE),
+            MenuItem("Long Option", lambda: MENU_EXIT),
+            MenuItem("Longer Option", lambda: MENU_SHUTDOWN),
+            MenuItem("The Longest Option", exception_raiser),
         ],
         back_label=None,
     )
@@ -64,7 +64,7 @@ def test_run_loop(mocker, m5stickv):
 
 
 def test_run_loop_on_amigo_tft(mocker, amigo):
-    from krux.pages import Menu, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
+    from krux.pages import Menu, MenuItem, MENU_CONTINUE, MENU_EXIT, MENU_SHUTDOWN
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
     ctx = mock_context(mocker)
@@ -75,10 +75,10 @@ def test_run_loop_on_amigo_tft(mocker, amigo):
     menu = Menu(
         ctx,
         [
-            ("Option", lambda: MENU_CONTINUE),
-            ("Long Option", lambda: MENU_EXIT),
-            ("Longer Option", lambda: MENU_SHUTDOWN),
-            ("The Longest Option", exception_raiser),
+            MenuItem("Option", lambda: MENU_CONTINUE),
+            MenuItem("Long Option", lambda: MENU_EXIT),
+            MenuItem("Longer Option", lambda: MENU_SHUTDOWN),
+            MenuItem("The Longest Option", exception_raiser),
         ],
         back_label=None,
     )

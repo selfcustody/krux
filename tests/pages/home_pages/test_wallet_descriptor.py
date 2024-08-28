@@ -124,7 +124,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # 1 Load, from SD card, good data, accept
+        # 15 Load, from SD card, good data, accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -144,7 +144,12 @@ def test_wallet(mocker, m5stickv, tdata):
 
         ctx = create_ctx(mocker, case[4], wallet, case[3])
         wallet_descriptor = WalletDescriptor(ctx)
-        mocker.patch.object(wallet_descriptor, "has_sd_card", return_value=True)
+
+        # case that uses SD card
+        if num == 15:
+            mockSD = mocker.patch("krux.sd_card.SDHandler")
+            mockSD.return_value.sd_card_available.return_value = True
+
         mocker.patch.object(
             QRCodeCapture, "qr_capture_loop", new=lambda self: (case[2], FORMAT_PMOFN)
         )

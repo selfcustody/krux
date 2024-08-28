@@ -664,7 +664,8 @@ def test_sign_psbt(mocker, m5stickv, tdata):
 
         # case SD available
         if case[8] is not None:
-            mocker.patch.object(home, "has_sd_card", new=lambda: True)
+            mockSD = mocker.patch("krux.sd_card.SDHandler")
+            mockSD.return_value.sd_card_available.return_value = True
             mock_utils = mocker.patch("krux.pages.utils.Utils")
             mock_file = MockFile(case[2])
             mocker.patch("builtins.open", mock_open(mock_file))
@@ -768,7 +769,8 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
     mocker.spy(ctx.display, "draw_centered_text")
 
     # SD available
-    mocker.patch.object(home, "has_sd_card", new=lambda: True)
+    mockSD = mocker.patch("krux.sd_card.SDHandler")
+    mockSD.return_value.sd_card_available.return_value = True
     mock_utils = mocker.patch("krux.pages.utils.Utils")
     mock_utils.return_value.load_file.return_value = (PSBT_FILE_NAME, None)
     # Mock for reading from input file
@@ -954,7 +956,8 @@ def test_sign_p2tr_zeroes_fingerprint(mocker, m5stickv, tdata):
     mocker.spy(ctx.display, "draw_centered_text")
 
     # SD available
-    mocker.patch.object(home, "has_sd_card", new=lambda: True)
+    mockSD = mocker.patch("krux.sd_card.SDHandler")
+    mockSD.return_value.sd_card_available.return_value = True
     mock_utils = mocker.patch("krux.pages.utils.Utils")
     mock_utils.return_value.load_file.return_value = (PSBT_FILE_NAME, None)
     # Mock for reading from input file

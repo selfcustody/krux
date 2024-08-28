@@ -31,6 +31,7 @@ from ..krux_settings import t
 from . import (
     Page,
     Menu,
+    MenuItem,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -55,12 +56,12 @@ class Login(Page):
             Menu(
                 ctx,
                 [
-                    (t("Load Mnemonic"), self.load_key),
-                    (t("New Mnemonic"), self.new_key),
-                    (t("Settings"), self.settings),
-                    (t("Tools"), self.tools),
-                    (t("About"), self.about),
-                    (t("Shutdown"), self.shutdown),
+                    MenuItem(t("Load Mnemonic"), self.load_key),
+                    MenuItem(t("New Mnemonic"), self.new_key),
+                    MenuItem(t("Settings"), self.settings),
+                    MenuItem(t("Tools"), self.tools),
+                    MenuItem(t("About"), self.about),
+                    MenuItem(t("Shutdown"), self.shutdown),
                 ],
                 back_label=None,
             ),
@@ -71,13 +72,13 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via Camera"), self.load_key_from_camera),
-                (t("Via Manual Input"), self.load_key_from_manual_input),
-                (t("From Storage"), self.load_mnemonic_from_storage),
+                MenuItem(t("Via Camera"), self.load_key_from_camera),
+                MenuItem(t("Via Manual Input"), self.load_key_from_manual_input),
+                MenuItem(t("From Storage"), self.load_mnemonic_from_storage),
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -86,20 +87,22 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("QR Code"), self.load_key_from_qr_code),
-                ("Tiny Seed", lambda: self.load_key_from_tiny_seed_image("Tiny Seed")),
-                (
+                MenuItem(t("QR Code"), self.load_key_from_qr_code),
+                MenuItem(
+                    "Tiny Seed", lambda: self.load_key_from_tiny_seed_image("Tiny Seed")
+                ),
+                MenuItem(
                     "OneKey KeyTag",
                     lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
                 ),
-                (
+                MenuItem(
                     t("Binary Grid"),
                     lambda: self.load_key_from_tiny_seed_image("Binary Grid"),
                 ),
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -108,14 +111,14 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Words"), self.load_key_from_text),
-                (t("Word Numbers"), self.pre_load_key_from_digits),
-                ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
-                ("Stackbit 1248", self.load_key_from_1248),
+                MenuItem(t("Words"), self.load_key_from_text),
+                MenuItem(t("Word Numbers"), self.pre_load_key_from_digits),
+                MenuItem("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
+                MenuItem("Stackbit 1248", self.load_key_from_1248),
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -134,14 +137,14 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via Camera"), self.new_key_from_snapshot),
-                (t("Via Words"), lambda: self.load_key_from_text(new=True)),
-                (t("Via D6"), self.new_key_from_dice),
-                (t("Via D20"), lambda: self.new_key_from_dice(True)),
+                MenuItem(t("Via Camera"), self.new_key_from_snapshot),
+                MenuItem(t("Via Words"), lambda: self.load_key_from_text(new=True)),
+                MenuItem(t("Via D6"), self.new_key_from_dice),
+                MenuItem(t("Via D20"), lambda: self.new_key_from_dice(True)),
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -285,14 +288,14 @@ class Login(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Load Wallet"), lambda: None),
-                    (t("Passphrase"), lambda: None),
-                    (t("Customize"), lambda: None),
+                    MenuItem(t("Load Wallet"), lambda: None),
+                    MenuItem(t("Passphrase"), lambda: None),
+                    MenuItem(t("Customize"), lambda: None),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
             index, _ = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
+            if index == submenu.back_index:
                 if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                     del key
                     return MENU_CONTINUE
@@ -597,13 +600,13 @@ class Login(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Decimal"), self.load_key_from_digits),
-                (t("Hexadecimal"), self.load_key_from_hexadecimal),
-                (t("Octal"), self.load_key_from_octal),
+                MenuItem(t("Decimal"), self.load_key_from_digits),
+                MenuItem(t("Hexadecimal"), self.load_key_from_hexadecimal),
+                MenuItem(t("Octal"), self.load_key_from_octal),
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 

@@ -28,6 +28,7 @@ from ..qr import FORMAT_NONE
 from . import (
     Page,
     Menu,
+    MenuItem,
     MENU_CONTINUE,
     ESC_KEY,
     LETTERS,
@@ -48,12 +49,12 @@ class Tools(Page):
             Menu(
                 ctx,
                 [
-                    (t("Check SD Card"), self.sd_check),
-                    (t("Print Test QR"), self.print_test),
-                    (t("Create QR Code"), self.create_qr),
-                    (t("Descriptor Addresses"), self.descriptor_addresses),
-                    (t("Remove Mnemonic"), self.rm_stored_mnemonic),
-                    (t("Wipe Device"), self.wipe_device),
+                    MenuItem(t("Check SD Card"), self.sd_check),
+                    MenuItem(t("Print Test QR"), self.print_test),
+                    MenuItem(t("Create QR Code"), self.create_qr),
+                    MenuItem(t("Descriptor Addresses"), self.descriptor_addresses),
+                    MenuItem(t("Remove Mnemonic"), self.rm_stored_mnemonic),
+                    MenuItem(t("Wipe Device"), self.wipe_device),
                 ],
             ),
         )

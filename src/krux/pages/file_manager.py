@@ -22,7 +22,7 @@
 
 import board
 import gc
-from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
+from . import Page, Menu, MenuItem, MENU_EXIT, MENU_CONTINUE
 from ..sd_card import SDHandler
 from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
@@ -61,7 +61,7 @@ class FileManager(Page):
 
                 if path != SD_ROOT_PATH:
                     items.append("..")
-                    menu_items.append(("../", lambda: MENU_EXIT))
+                    menu_items.append(MenuItem("../", lambda: MENU_EXIT))
 
                 # sorts by name ignorecase
                 dir_files = sorted(os.listdir(path), key=str.lower)
@@ -109,7 +109,7 @@ class FileManager(Page):
                                 ]
                             )
                         menu_items.append(
-                            (
+                            MenuItem(
                                 display_filename,
                                 lambda file=filename: select_file_handler(
                                     path + "/" + file

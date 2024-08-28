@@ -254,7 +254,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,  # Move to Compact SeedQR
                 BUTTON_ENTER,  # Compact SeedQR
                 BUTTON_ENTER,  # Enter QR Menu
-                *([BUTTON_PAGE] * 3),  # Move to Print
+                *([BUTTON_PAGE] * 2),  # Move to Print
                 BUTTON_ENTER,  # Print
                 BUTTON_ENTER,  # Confirm Print
                 BUTTON_ENTER,  # Enter QR Menu again
@@ -275,7 +275,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,  # Move to Compact SeedQR
                 BUTTON_ENTER,  # Compact SeedQR
                 BUTTON_ENTER,  # Enter QR Menu
-                *([BUTTON_PAGE] * 3),  # Move to Print
+                *([BUTTON_PAGE] * 2),  # Move to Print
                 BUTTON_ENTER,  # Print
                 BUTTON_ENTER,  # Confirm Print
                 BUTTON_ENTER,  # Enter QR Menu again
@@ -296,7 +296,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,  # Move to Compact SeedQR
                 BUTTON_ENTER,  # Compact SeedQR
                 BUTTON_ENTER,  # Enter QR Menu
-                *([BUTTON_PAGE] * 3),  # Move to Print
+                *([BUTTON_PAGE] * 2),  # Move to Print
                 BUTTON_ENTER,  # Print
                 BUTTON_PAGE,  # Decline Print
                 BUTTON_ENTER,  # Enter QR Menu again
@@ -317,7 +317,7 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE,  # Move to Compact SeedQR
                 BUTTON_ENTER,  # Compact SeedQR
                 BUTTON_ENTER,  # Enter QR Menu
-                *([BUTTON_PAGE] * 3),  # Move to Print
+                *([BUTTON_PAGE] * 2),  # Move to Print
                 BUTTON_ENTER,  # Print
                 BUTTON_PAGE,  # Decline Print
                 BUTTON_ENTER,  # Enter QR Menu again

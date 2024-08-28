@@ -26,6 +26,7 @@ from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
 from .. import (
     Page,
     Menu,
+    MenuItem,
     MENU_CONTINUE,
 )
 
@@ -38,9 +39,9 @@ class MnemonicsView(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("QR Code"), self.qr_code_backup),
-                (t("Encrypted"), self.encrypt_mnemonic_menu),
-                (t("Other Formats"), self.other_backup_formats),
+                MenuItem(t("QR Code"), self.qr_code_backup),
+                MenuItem(t("Encrypted"), self.encrypt_mnemonic_menu),
+                MenuItem(t("Other Formats"), self.other_backup_formats),
             ],
         )
         submenu.run_loop()
@@ -51,10 +52,10 @@ class MnemonicsView(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Plaintext QR"), self.display_standard_qr),
-                ("Compact SeedQR", lambda: self.display_seed_qr(True)),
-                ("SeedQR", self.display_seed_qr),
-                (t("Encrypted QR Code"), self.encrypt_qr_code),
+                MenuItem(t("Plaintext QR"), self.display_standard_qr),
+                MenuItem("Compact SeedQR", lambda: self.display_seed_qr(True)),
+                MenuItem("SeedQR", self.display_seed_qr),
+                MenuItem(t("Encrypted QR Code"), self.encrypt_qr_code),
             ],
         )
         submenu.run_loop()
@@ -65,15 +66,15 @@ class MnemonicsView(Page):
         submenu = Menu(
             self.ctx,
             [
-                (
+                MenuItem(
                     t("Words"),
                     lambda: self.show_mnemonic(
                         self.ctx.wallet.key.mnemonic, t("Mnemonic")
                     ),
                 ),
-                (t("Numbers"), self.display_mnemonic_numbers),
-                ("Stackbit 1248", self.stackbit),
-                ("Tiny Seed", self.tiny_seed),
+                MenuItem(t("Numbers"), self.display_mnemonic_numbers),
+                MenuItem("Stackbit 1248", self.stackbit),
+                MenuItem("Tiny Seed", self.tiny_seed),
             ],
         )
         submenu.run_loop()
@@ -118,7 +119,7 @@ class MnemonicsView(Page):
         submenu = Menu(
             self.ctx,
             [
-                (
+                MenuItem(
                     t("Decimal"),
                     lambda: self.show_mnemonic(
                         self.ctx.wallet.key.mnemonic,
@@ -128,7 +129,7 @@ class MnemonicsView(Page):
                         ),
                     ),
                 ),
-                (
+                MenuItem(
                     t("Hexadecimal"),
                     lambda: self.show_mnemonic(
                         self.ctx.wallet.key.mnemonic,
@@ -138,7 +139,7 @@ class MnemonicsView(Page):
                         ),
                     ),
                 ),
-                (
+                MenuItem(
                     t("Octal"),
                     lambda: self.show_mnemonic(
                         self.ctx.wallet.key.mnemonic,

@@ -28,6 +28,7 @@ from ...qr import FORMAT_NONE
 from .. import (
     Page,
     Menu,
+    MenuItem,
     MENU_CONTINUE,
     MENU_EXIT,
 )
@@ -48,9 +49,9 @@ class Addresses(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Scan Address"), self.pre_scan_address),
-                (t("Receive Addresses"), self.list_address_type),
-                (t("Change Addresses"), lambda: self.list_address_type(1)),
+                MenuItem(t("Scan Address"), self.pre_scan_address),
+                MenuItem(t("Receive Addresses"), self.list_address_type),
+                MenuItem(t("Change Addresses"), lambda: self.list_address_type(1)),
             ],
         )
         submenu.run_loop()
@@ -72,7 +73,7 @@ class Addresses(Page):
             items = []
             if address_index >= max_addresses:
                 items.append(
-                    (
+                    MenuItem(
                         "%d..%d" % (address_index - max_addresses, address_index - 1),
                         lambda: MENU_EXIT,
                     )
@@ -87,7 +88,7 @@ class Addresses(Page):
                 pos_str = str(address_index) + "." + THIN_SPACE
                 qr_title = pos_str + addr
                 items.append(
-                    (
+                    MenuItem(
                         self.fit_to_line(addr, pos_str, fixed_chars=3),
                         lambda address=addr, title=qr_title: self.show_address(
                             address, title
@@ -97,7 +98,7 @@ class Addresses(Page):
                 address_index += 1
 
             items.append(
-                (
+                MenuItem(
                     "%d..%d" % (address_index, address_index + max_addresses - 1),
                     lambda: MENU_EXIT,
                 )
@@ -108,13 +109,14 @@ class Addresses(Page):
             while stay_on_this_addr_menu:
                 index, _ = submenu.run_loop()
 
-                if index == len(submenu.menu) - 1:  # Back
+                if index == submenu.back_index:  # Back
                     del submenu, items
                     gc.collect()
                     return MENU_CONTINUE
-                if index == len(submenu.menu) - 2:  # Next
+
+                if index == submenu.back_index - 1:  # Next
                     stay_on_this_addr_menu = False
-                if index == 0 and address_index > max_addresses:  # Prev
+                elif index == 0 and address_index > max_addresses:  # Prev
                     stay_on_this_addr_menu = False
                     address_index -= 2 * max_addresses
 
@@ -134,8 +136,8 @@ class Addresses(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Receive"), self.scan_address),
-                (t("Change"), lambda: self.scan_address(1)),
+                MenuItem(t("Receive"), self.scan_address),
+                MenuItem(t("Change"), lambda: self.scan_address(1)),
             ],
         )
         submenu.run_loop()

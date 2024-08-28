@@ -94,3 +94,13 @@ class SDHandler:
             return (os.stat(filename)[0] & 0x4000) == 0
         except OSError:
             return False
+
+    @staticmethod
+    def sd_card_available():
+        """Return True if the device has a SD card inserted"""
+        try:
+            # Check for SD hot-plug
+            with SDHandler():
+                return True
+        except:
+            return False

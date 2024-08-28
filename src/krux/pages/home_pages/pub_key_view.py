@@ -25,6 +25,8 @@ from ...krux_settings import t
 from .. import (
     Page,
     Menu,
+    MenuItem,
+    MenuItemSD,
     MENU_CONTINUE,
     MENU_EXIT,
 )
@@ -60,14 +62,7 @@ class PubkeyView(Page):
 
         def _pub_key_text(version):
             pub_text_menu_items = [
-                (
-                    t("Save to SD card"),
-                    (
-                        None
-                        if not self.has_sd_card()
-                        else lambda: _save_xpub_to_sd(version)
-                    ),
-                ),
+                MenuItemSD(t("Save to SD card"), lambda: _save_xpub_to_sd(version)),
             ]
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
             menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
@@ -110,10 +105,14 @@ class PubkeyView(Page):
                 :WALLET_XPUB_START
             ].upper()
             pub_key_menu_items.append(
-                (title + " - " + t("Text"), lambda ver=version: _pub_key_text(ver))
+                MenuItem(
+                    title + " - " + t("Text"), lambda ver=version: _pub_key_text(ver)
+                )
             )
             pub_key_menu_items.append(
-                (title + " - " + t("QR Code"), lambda ver=version: _pub_key_qr(ver))
+                MenuItem(
+                    title + " - " + t("QR Code"), lambda ver=version: _pub_key_qr(ver)
+                )
             )
         pub_key_menu = Menu(self.ctx, pub_key_menu_items)
         while True:

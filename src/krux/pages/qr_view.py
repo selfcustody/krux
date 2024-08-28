@@ -22,7 +22,7 @@
 
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
+from . import Page, Menu, MenuItem, MenuItemSD, MENU_CONTINUE, MENU_EXIT, ESC_KEY
 from ..themes import theme, WHITE, BLACK
 from ..krux_settings import t
 from ..settings import THIN_SPACE
@@ -400,14 +400,14 @@ class SeedQRView(Page):
         )
         qr_menu = []
         qr_menu.append(
-            (
+            MenuItem(
                 "%dx%d - PBM" % (size, size),
                 lambda: self.save_pbm_image(suggested_file_name),
             )
         )
         for bmp_resolution in bmp_resolutions:
             qr_menu.append(
-                (
+                MenuItem(
                     "%dx%d - BMP" % (bmp_resolution, bmp_resolution),
                     lambda res=bmp_resolution: self.save_bmp_image(
                         suggested_file_name, res
@@ -435,8 +435,10 @@ class SeedQRView(Page):
             label = self.title
         else:
             label = ""
+
         if transcript_tools and self.ctx.input.touch is not None:
             label += "\n" + t("Swipe to change mode")
+
         mode = 0
         while True:
             button = None
@@ -471,22 +473,26 @@ class SeedQRView(Page):
                     self.lr_index %= self.qr_size
                 elif mode in (REGION_MODE, ZOOMED_R_MODE):
                     self.lr_index %= self.columns * self.columns
+
             if quick_exit:
                 return MENU_CONTINUE
+
             printer_func = self.print_qr if self.has_printer() else None
             qr_menu = [
-                (t("Return to QR Viewer"), lambda: None),
-                (t("Toggle Brightness"), toggle_brightness),
-                (
-                    t("Save QR Image to SD Card"),
-                    (
-                        self.save_qr_image_menu
-                        if allow_export and self.has_sd_card()
-                        else None
-                    ),
-                ),
-                (t("Print to QR"), printer_func),
+                MenuItem(t("Return to QR Viewer"), lambda: None),
+                MenuItem(t("Toggle Brightness"), toggle_brightness),
+                MenuItem(t("Print to QR"), printer_func),
             ]
+
+            if allow_export:
+                qr_menu.insert(
+                    2,
+                    MenuItemSD(
+                        t("Save QR Image to SD Card"),
+                        self.save_qr_image_menu,
+                    ),
+                )
+
             submenu = Menu(self.ctx, qr_menu, back_label=t("Back to Menu"))
             _, status = submenu.run_loop()
             if status == MENU_EXIT:

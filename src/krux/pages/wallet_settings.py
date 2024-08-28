@@ -27,6 +27,7 @@ from ..krux_settings import t
 from . import (
     Page,
     Menu,
+    MenuItem,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -60,14 +61,15 @@ class PassphraseEditor(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Type BIP39 Passphrase"), self._load_passphrase),
-                    (t("Scan BIP39 Passphrase"), self._load_qr_passphrase),
+                    MenuItem(t("Type BIP39 Passphrase"), self._load_passphrase),
+                    MenuItem(t("Scan BIP39 Passphrase"), self._load_qr_passphrase),
                 ],
                 disable_statusbar=True,
             )
             _, passphrase = submenu.run_loop()
             if passphrase in (ESC_KEY, MENU_EXIT):
                 return None
+
             self.ctx.display.clear()
             if self.prompt(
                 t("Passphrase") + ": " + passphrase,
@@ -132,15 +134,15 @@ class WalletSettings(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Network"), lambda: None),
-                    ("Single/Multisig", lambda: None),
-                    (t("Script Type"), (lambda: None) if not multisig else None),
-                    (t("Account"), lambda: None),
+                    MenuItem(t("Network"), lambda: None),
+                    MenuItem("Single/Multisig", lambda: None),
+                    MenuItem(t("Script Type"), lambda: None, lambda: not multisig),
+                    MenuItem(t("Account"), lambda: None),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
             index, _ = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
+            if index == submenu.back_index:
                 break
             if index == 0:
                 network = self._coin_type()
@@ -164,8 +166,8 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                ("Mainnet", lambda: None),
-                ("Testnet", lambda: None),
+                MenuItem("Mainnet", lambda: None),
+                MenuItem("Testnet", lambda: None),
             ],
             disable_statusbar=True,
             back_label=None,
@@ -178,8 +180,8 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Single-sig"), lambda: MENU_EXIT),
-                (t("Multisig"), lambda: MENU_EXIT),
+                MenuItem(t("Single-sig"), lambda: MENU_EXIT),
+                MenuItem(t("Multisig"), lambda: MENU_EXIT),
             ],
             disable_statusbar=True,
             back_label=None,
@@ -192,10 +194,10 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                ("Legacy - 44", lambda: P2PKH),
-                ("Nested Segwit - 49", lambda: P2SH_P2WPKH),
-                ("Native Segwit - 84", lambda: P2WPKH),
-                ("Taproot - 86 (Experimental)", lambda: P2TR),
+                MenuItem("Legacy - 44", lambda: P2PKH),
+                MenuItem("Nested Segwit - 49", lambda: P2SH_P2WPKH),
+                MenuItem("Native Segwit - 84", lambda: P2WPKH),
+                MenuItem("Taproot - 86 (Experimental)", lambda: P2TR),
             ],
             disable_statusbar=True,
             back_label=None,

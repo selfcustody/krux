@@ -28,6 +28,8 @@ from ...format import replace_decimal_separator
 from .. import (
     Page,
     Menu,
+    MenuItem,
+    MenuItemSD,
     MENU_CONTINUE,
     ESC_KEY,
     LOAD_FROM_CAMERA,
@@ -41,24 +43,22 @@ class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
+        enabled = not Settings().security.hide_mnemonic
         super().__init__(
             ctx,
             Menu(
                 ctx,
                 [
-                    (
+                    MenuItem(
                         t("Backup Mnemonic"),
-                        (
-                            self.backup_mnemonic
-                            if not Settings().security.hide_mnemonic
-                            else None
-                        ),
+                        self.backup_mnemonic,
+                        lambda: enabled,
                     ),
-                    (t("Extended Public Key"), self.public_key),
-                    (t("Wallet"), self.wallet),
-                    (t("Address"), self.addresses_menu),
-                    (t("Sign"), self.sign),
-                    (t("Shutdown"), self.shutdown),
+                    MenuItem(t("Extended Public Key"), self.public_key),
+                    MenuItem(t("Wallet"), self.wallet),
+                    MenuItem(t("Address"), self.addresses_menu),
+                    MenuItem(t("Sign"), self.sign),
+                    MenuItem(t("Shutdown"), self.shutdown),
                 ],
                 back_label=None,
             ),
@@ -165,10 +165,10 @@ class Home(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Wallet Descriptor"), self.wallet_descriptor),
-                (t("Passphrase"), self.passphrase),
-                (t("Customize"), self.customize),
-                ("BIP85", self.bip85),
+                MenuItem(t("Wallet Descriptor"), self.wallet_descriptor),
+                MenuItem(t("Passphrase"), self.passphrase),
+                MenuItem(t("Customize"), self.customize),
+                MenuItem("BIP85", self.bip85),
             ],
         )
         submenu.run_loop()
@@ -186,12 +186,12 @@ class Home(Page):
         submenu = Menu(
             self.ctx,
             [
-                ("PSBT", self.sign_psbt),
-                (t("Message"), self.sign_message),
+                MenuItem("PSBT", self.sign_psbt),
+                MenuItem(t("Message"), self.sign_message),
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -226,11 +226,8 @@ class Home(Page):
         sign_menu = Menu(
             self.ctx,
             [
-                (t("Sign to QR code"), lambda: None),
-                (
-                    t("Sign to SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
+                MenuItem(t("Sign to QR code"), lambda: None),
+                MenuItemSD(t("Sign to SD card"), lambda: None),
             ],
             back_status=lambda: None,
         )

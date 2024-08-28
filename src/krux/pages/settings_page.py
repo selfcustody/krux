@@ -47,6 +47,7 @@ from ..encryption import QR_CODE_ITER_MULTIPLE
 from . import (
     Page,
     Menu,
+    MenuItem,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -171,7 +172,7 @@ class SettingsPage(Page):
             setting_list = settings_namespace.setting_list()
             namespace_list = settings_namespace.namespace_list()
             items = [
-                (
+                MenuItem(
                     settings_namespace.label(ns.namespace.split(".")[-1]),
                     self.namespace(ns),
                 )
@@ -179,7 +180,7 @@ class SettingsPage(Page):
             ]
             items.extend(
                 [
-                    (
+                    MenuItem(
                         settings_namespace.label(setting.attr),
                         self.setting(settings_namespace, setting),
                     )
@@ -190,17 +191,17 @@ class SettingsPage(Page):
             # If there is only one item in the namespace, don't show a submenu
             # and instead jump straight to the item's menu
             if len(items) == 1:
-                return items[0][1]()
+                return items[0].action()
 
             back_status = lambda: MENU_EXIT  # pylint: disable=C3001
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
-                items.append((t("Factory Settings"), self.restore_settings))
+                items.append(MenuItem(t("Factory Settings"), self.restore_settings))
                 back_status = self._settings_exit_check
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
+            if index == submenu.back_index:
                 return MENU_CONTINUE
             return status
 

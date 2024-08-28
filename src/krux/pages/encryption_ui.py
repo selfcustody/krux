@@ -26,6 +26,8 @@ from ..encryption import AES_BLOCK_SIZE
 from . import (
     Page,
     Menu,
+    MenuItem,
+    MenuItemSD,
     MENU_CONTINUE,
     ESC_KEY,
     LETTERS,
@@ -49,8 +51,8 @@ class EncryptionKey(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Type Key"), self.load_key),
-                (t("Scan Key QR Code"), self.load_qr_encryption_key),
+                MenuItem(t("Type Key"), self.load_key),
+                MenuItem(t("Scan Key QR Code"), self.load_qr_encryption_key),
             ],
             back_label=None,
         )
@@ -102,16 +104,11 @@ class EncryptMnemonic(Page):
         """Menu with mnemonic encryption output options"""
 
         encrypt_outputs_menu = [
-            (t("Store on Flash"), self.store_mnemonic_on_memory),
-            (
-                t("Store on SD Card"),
-                (
-                    None
-                    if not self.has_sd_card()
-                    else lambda: self.store_mnemonic_on_memory(True)
-                ),
+            MenuItem(t("Store on Flash"), self.store_mnemonic_on_memory),
+            MenuItemSD(
+                t("Store on SD Card"), lambda: self.store_mnemonic_on_memory(True)
             ),
-            (t("Encrypted QR Code"), self.encrypted_qr_code),
+            MenuItem(t("Encrypted QR Code"), self.encrypted_qr_code),
         ]
         submenu = Menu(self.ctx, encrypt_outputs_menu)
         _, _ = submenu.run_loop()
@@ -239,7 +236,7 @@ class LoadEncryptedMnemonic(Page):
 
         for mnemonic_id in mnemonics:
             mnemonic_ids_menu.append(
-                (
+                MenuItem(
                     mnemonic_id + "(flash)",
                     lambda m_id=mnemonic_id: (
                         self._remove_encrypted_mnemonic(m_id)
@@ -250,7 +247,7 @@ class LoadEncryptedMnemonic(Page):
             )
         for mnemonic_id in sd_mnemonics:
             mnemonic_ids_menu.append(
-                (
+                MenuItem(
                     mnemonic_id + "(SD card)",
                     lambda m_id=mnemonic_id: (
                         self._remove_encrypted_mnemonic(m_id, sd_card=True)
@@ -261,7 +258,7 @@ class LoadEncryptedMnemonic(Page):
             )
         submenu = Menu(self.ctx, mnemonic_ids_menu)
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
