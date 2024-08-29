@@ -1,0 +1,2 @@
+> ⚠️  TIP: If the verification was successful,
+> you may get a message similar to: `Good signature from "qlrddev <qlrddev@gmail.com>"`
