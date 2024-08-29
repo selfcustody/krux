@@ -29,6 +29,7 @@ from . import (
     Menu,
     MenuItem,
     MenuItemSwitch,
+    lambda_menuexit,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -181,8 +182,8 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                MenuItem(t("Single-sig"), MenuItem.action_menuexit),
-                MenuItem(t("Multisig"), MenuItem.action_menuexit),
+                MenuItem(t("Single-sig"), lambda_menuexit),
+                MenuItem(t("Multisig"), lambda_menuexit),
             ],
             disable_statusbar=True,
             back_label=None,

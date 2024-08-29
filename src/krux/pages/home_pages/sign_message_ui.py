@@ -24,7 +24,15 @@ import gc
 from embit import bip32, compact
 import hashlib
 import binascii
-from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu, MenuItem, MenuItemSD
+from .. import (
+    MENU_CONTINUE,
+    LOAD_FROM_CAMERA,
+    LOAD_FROM_SD,
+    Menu,
+    MenuItem,
+    MenuItemSD,
+    lambda_none,
+)
 from ...themes import theme
 from ...display import (
     DEFAULT_PADDING,
@@ -200,7 +208,7 @@ class SignMessage(Utils):
                 MenuItem(t("Sign to QR code")),
                 MenuItemSD(t("Sign to SD card")),
             ],
-            back_status=MenuItem.action_none,
+            back_status=lambda_none,
         )
         index, _ = sign_menu.run_loop()
 

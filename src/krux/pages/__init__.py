@@ -32,7 +32,6 @@ from ..input import (
     BUTTON_TOUCH,
     SWIPE_DOWN,
     SWIPE_UP,
-    PRESSED,
     ONE_MINUTE,
 )
 from ..display import (
@@ -72,6 +71,22 @@ LOAD_FROM_CAMERA = 0
 LOAD_FROM_SD = 1
 
 
+# Reusable lambda functions
+def lambda_none():
+    """Reusable lambda: None function"""
+    return None
+
+
+def lambda_true():
+    """Reusable lambda: True function"""
+    return True
+
+
+def lambda_menuexit():
+    """Reusable lambda: MENU_EXIT function"""
+    return MENU_EXIT
+
+
 class Page:
     """Represents a page in the app, with helper methods for common display and
     input operations.
@@ -104,7 +119,7 @@ class Page:
                 MenuItem(t("Load from camera")),
                 MenuItemSD(t("Load from SD card")),
             ],
-            back_status=MenuItem.action_none,
+            back_status=lambda_none,
         )
         index, _ = load_menu.run_loop()
         return index
@@ -487,27 +502,12 @@ class MenuItem:
     """Handle items for the Menu"""
 
     @staticmethod
-    def action_none():
-        """Reusable lambda: None function"""
-        return None
-
-    @staticmethod
-    def enabled_true():
-        """Reusable lambda: True function"""
-        return True
-
-    @staticmethod
-    def action_menuexit():
-        """Reusable lambda: MENU_EXIT function"""
-        return MENU_EXIT
-
-    @staticmethod
-    def back(text="Back", action=action_none):
+    def back(text="Back", action=lambda_none):
         """Create a standard back MenuItem"""
         text = t("Back") if text == "Back" else text
         return MenuItem("< " + text, action)
 
-    def __init__(self, text, action=action_none):
+    def __init__(self, text, action=lambda_none):
         self.label = text
         self.action = action
 
@@ -519,9 +519,7 @@ class MenuItem:
 class MenuItemSwitch(MenuItem):
     """Handles MenuItem that can switch between enabled/disabled"""
 
-    def __init__(
-        self, text, action=MenuItem.action_none, enabled=MenuItem.enabled_true
-    ):
+    def __init__(self, text, action=lambda_none, enabled=lambda_true):
         super().__init__(text, action)
         self.enabled = enabled
 
@@ -529,7 +527,7 @@ class MenuItemSwitch(MenuItem):
 class MenuItemSD(MenuItemSwitch):
     """Reusable MenuItem for the Menu that automatic disables when SD card not detected"""
 
-    def __init__(self, text, action=MenuItem.action_none):
+    def __init__(self, text, action=lambda_none):
         super().__init__(text, action, SDHandler.sd_card_available)
 
 
@@ -538,6 +536,10 @@ class Menu:
     and invoke menu item callbacks that return a status
     """
 
+    @staticmethod
+    def _get_fg_color(is_enabled):
+        return theme.fg_color if is_enabled else theme.disabled_color
+
     def __init__(
         self,
         ctx,
@@ -545,7 +547,7 @@ class Menu:
         offset=None,
         disable_statusbar=False,
         back_label="Back",
-        back_status=MenuItem.action_menuexit,
+        back_status=lambda_menuexit,
     ):
         self.ctx = ctx
         if back_label:
@@ -766,9 +768,11 @@ class Menu:
         self.ctx.input.touch.clear_regions()
         offset_y = 0
         Page.y_keypad_map = [offset_y]
+        enabled_items = []
         for menu_item in self.menu_view:
             offset_y += len(self.ctx.display.to_lines(menu_item.label)) + 1
             Page.y_keypad_map.append(offset_y)
+            enabled_items.append(menu_item.enabled())
         height_multiplier = self.ctx.display.height()
         height_multiplier -= self.menu_offset  # Top offset
         height_multiplier -= DEFAULT_PADDING  # Bottom padding
@@ -797,7 +801,7 @@ class Menu:
                 offset_y -= DEFAULT_PADDING
             offset_y //= 2
             offset_y += Page.y_keypad_map[i]
-            fg_color = theme.fg_color if menu_item.enabled() else theme.disabled_color
+            fg_color = Menu._get_fg_color(enabled_items[i])
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.fill_rectangle(
                     0,
@@ -821,9 +825,11 @@ class Menu:
 
     def _draw_menu(self, selected_item_index):
         extra_lines = 0
+        enabled_items = []
         for menu_item in self.menu_view:
             # Count extra lines for multi-line menu items
             extra_lines += len(self.ctx.display.to_lines(menu_item.label)) - 1
+            enabled_items.append(menu_item.enabled())
         if self.menu_offset > STATUS_BAR_HEIGHT:
             offset_y = self.menu_offset + FONT_HEIGHT
         else:
@@ -845,7 +851,7 @@ class Menu:
         # Limit padding to font height
         items_pad = min(items_pad, FONT_HEIGHT)
         for i, menu_item in enumerate(self.menu_view):
-            fg_color = theme.fg_color if menu_item.enabled() else theme.disabled_color
+            fg_color = Menu._get_fg_color(enabled_items[i])
             menu_item_lines = self.ctx.display.to_lines(menu_item.label)
             delta_y = len(menu_item_lines) * FONT_HEIGHT
             delta_y += items_pad
@@ -883,7 +889,7 @@ def choose_len_mnemonic(ctx, double_mnemonic=False):
     submenu = Menu(
         ctx,
         items,
-        back_status=MenuItem.action_none,
+        back_status=lambda_none,
     )
     _, num_words = submenu.run_loop()
     ctx.display.clear()

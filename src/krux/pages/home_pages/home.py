@@ -31,6 +31,7 @@ from .. import (
     MenuItem,
     MenuItemSwitch,
     MenuItemSD,
+    lambda_none,
     MENU_CONTINUE,
     ESC_KEY,
     LOAD_FROM_CAMERA,
@@ -230,7 +231,7 @@ class Home(Page):
                 MenuItem(t("Sign to QR code")),
                 MenuItemSD(t("Sign to SD card")),
             ],
-            back_status=MenuItem.action_none,
+            back_status=lambda_none,
         )
         index, _ = sign_menu.run_loop()
         return index

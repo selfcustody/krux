@@ -48,6 +48,7 @@ from . import (
     Page,
     Menu,
     MenuItem,
+    lambda_menuexit,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -193,7 +194,7 @@ class SettingsPage(Page):
             if len(items) == 1:
                 return items[0].action()
 
-            back_status = MenuItem.action_menuexit
+            back_status = lambda_menuexit
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
                 items.append(MenuItem(t("Factory Settings"), self.restore_settings))

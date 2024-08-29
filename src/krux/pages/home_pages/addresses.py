@@ -29,6 +29,7 @@ from .. import (
     Page,
     Menu,
     MenuItem,
+    lambda_menuexit,
     MENU_CONTINUE,
 )
 
@@ -74,7 +75,7 @@ class Addresses(Page):
                 items.append(
                     MenuItem(
                         "%d..%d" % (address_index - max_addresses, address_index - 1),
-                        MenuItem.action_menuexit,
+                        lambda_menuexit,
                     )
                 )
 
@@ -99,7 +100,7 @@ class Addresses(Page):
             items.append(
                 MenuItem(
                     "%d..%d" % (address_index, address_index + max_addresses - 1),
-                    MenuItem.action_menuexit,
+                    lambda_menuexit,
                 )
             )
 
