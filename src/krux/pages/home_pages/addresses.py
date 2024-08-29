@@ -30,7 +30,6 @@ from .. import (
     Menu,
     MenuItem,
     MENU_CONTINUE,
-    MENU_EXIT,
 )
 
 SCAN_ADDRESS_LIMIT = 50
@@ -75,7 +74,7 @@ class Addresses(Page):
                 items.append(
                     MenuItem(
                         "%d..%d" % (address_index - max_addresses, address_index - 1),
-                        lambda: MENU_EXIT,
+                        MenuItem.action_menuexit,
                     )
                 )
 
@@ -100,7 +99,7 @@ class Addresses(Page):
             items.append(
                 MenuItem(
                     "%d..%d" % (address_index, address_index + max_addresses - 1),
-                    lambda: MENU_EXIT,
+                    MenuItem.action_menuexit,
                 )
             )
 

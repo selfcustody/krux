@@ -61,7 +61,7 @@ class FileManager(Page):
 
                 if path != SD_ROOT_PATH:
                     items.append("..")
-                    menu_items.append(MenuItem("../", lambda: MENU_EXIT))
+                    menu_items.append(MenuItem("../", MenuItem.action_menuexit))
 
                 # sorts by name ignorecase
                 dir_files = sorted(os.listdir(path), key=str.lower)

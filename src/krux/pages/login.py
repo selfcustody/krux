@@ -288,9 +288,9 @@ class Login(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    MenuItem(t("Load Wallet"), lambda: None),
-                    MenuItem(t("Passphrase"), lambda: None),
-                    MenuItem(t("Customize"), lambda: None),
+                    MenuItem(t("Load Wallet")),
+                    MenuItem(t("Passphrase")),
+                    MenuItem(t("Customize")),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )

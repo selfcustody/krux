@@ -479,7 +479,7 @@ class SeedQRView(Page):
 
             printer_func = self.print_qr if self.has_printer() else None
             qr_menu = [
-                MenuItem(t("Return to QR Viewer"), lambda: None),
+                MenuItem(t("Return to QR Viewer")),
                 MenuItem(t("Toggle Brightness"), toggle_brightness),
                 MenuItem(t("Print to QR"), printer_func),
             ]

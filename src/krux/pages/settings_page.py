@@ -193,7 +193,7 @@ class SettingsPage(Page):
             if len(items) == 1:
                 return items[0].action()
 
-            back_status = lambda: MENU_EXIT  # pylint: disable=C3001
+            back_status = MenuItem.action_menuexit
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
                 items.append(MenuItem(t("Factory Settings"), self.restore_settings))

@@ -101,10 +101,10 @@ class Page:
         load_menu = Menu(
             self.ctx,
             [
-                MenuItem(t("Load from camera"), lambda: None),
-                MenuItemSD(t("Load from SD card"), lambda: None),
+                MenuItem(t("Load from camera")),
+                MenuItemSD(t("Load from SD card")),
             ],
-            back_status=lambda: None,
+            back_status=MenuItem.action_none,
         )
         index, _ = load_menu.run_loop()
         return index
@@ -483,6 +483,43 @@ class ListView:
         return self.offset + i
 
 
+class MenuItem:
+    """Handle items for the Menu"""
+
+    @staticmethod
+    def action_none():
+        """Reusable lambda: None function"""
+        return None
+
+    @staticmethod
+    def enabled_true():
+        """Reusable lambda: True function"""
+        return True
+
+    @staticmethod
+    def action_menuexit():
+        """Reusable lambda: MENU_EXIT function"""
+        return MENU_EXIT
+
+    def __init__(self, text, action=action_none, enabled=enabled_true):
+        self.label = text
+        self.action = action
+        self.enabled = enabled
+
+    @staticmethod
+    def back(text="Back", action=action_none):
+        """Create a standard back MenuItem"""
+        text = t("Back") if text == "Back" else text
+        return MenuItem("< " + text, action)
+
+
+class MenuItemSD(MenuItem):
+    """Reusable MenuItem for the Menu that automatic disables when SD card not detected"""
+
+    def __init__(self, text, action=MenuItem.action_none):
+        super().__init__(text, action, SDHandler.sd_card_available)
+
+
 class Menu:
     """Represents a menu that can render itself to the screen, handle item selection,
     and invoke menu item callbacks that return a status
@@ -495,7 +532,7 @@ class Menu:
         offset=None,
         disable_statusbar=False,
         back_label="Back",
-        back_status=lambda: MENU_EXIT,
+        back_status=MenuItem.action_menuexit,
     ):
         self.ctx = ctx
         if back_label:
@@ -822,28 +859,6 @@ class Menu:
             offset_y += delta_y
 
 
-class MenuItem:
-    """Handle items for the Menu"""
-
-    def __init__(self, text, action, enabled=lambda: True):
-        self.label = text
-        self.action = action
-        self.enabled = enabled
-
-    @staticmethod
-    def back(text="Back", action=lambda: MENU_EXIT):
-        """Create a standard back MenuItem"""
-        text = t("Back") if text == "Back" else text
-        return MenuItem("< " + text, action)
-
-
-class MenuItemSD(MenuItem):
-    """Reusable MenuItem for the Menu that automatic disables when SD card not detected"""
-
-    def __init__(self, text, action):
-        super().__init__(text, action, SDHandler.sd_card_available)
-
-
 def choose_len_mnemonic(ctx, double_mnemonic=False):
     """Reusable '12 or 24 words?" menu choice"""
     items = [
@@ -855,7 +870,7 @@ def choose_len_mnemonic(ctx, double_mnemonic=False):
     submenu = Menu(
         ctx,
         items,
-        back_status=lambda: None,
+        back_status=MenuItem.action_none,
     )
     _, num_words = submenu.run_loop()
     ctx.display.clear()

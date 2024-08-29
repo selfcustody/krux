@@ -226,10 +226,10 @@ class Home(Page):
         sign_menu = Menu(
             self.ctx,
             [
-                MenuItem(t("Sign to QR code"), lambda: None),
-                MenuItemSD(t("Sign to SD card"), lambda: None),
+                MenuItem(t("Sign to QR code")),
+                MenuItemSD(t("Sign to SD card")),
             ],
-            back_status=lambda: None,
+            back_status=MenuItem.action_none,
         )
         index, _ = sign_menu.run_loop()
         return index

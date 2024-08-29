@@ -134,10 +134,10 @@ class WalletSettings(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    MenuItem(t("Network"), lambda: None),
-                    MenuItem("Single/Multisig", lambda: None),
-                    MenuItem(t("Script Type"), lambda: None, lambda: not multisig),
-                    MenuItem(t("Account"), lambda: None),
+                    MenuItem(t("Network")),
+                    MenuItem("Single/Multisig"),
+                    MenuItem(t("Script Type"), enabled=lambda: not multisig),
+                    MenuItem(t("Account")),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
@@ -166,8 +166,8 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                MenuItem("Mainnet", lambda: None),
-                MenuItem("Testnet", lambda: None),
+                MenuItem("Mainnet"),
+                MenuItem("Testnet"),
             ],
             disable_statusbar=True,
             back_label=None,
@@ -180,8 +180,8 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                MenuItem(t("Single-sig"), lambda: MENU_EXIT),
-                MenuItem(t("Multisig"), lambda: MENU_EXIT),
+                MenuItem(t("Single-sig"), MenuItem.action_menuexit),
+                MenuItem(t("Multisig"), MenuItem.action_menuexit),
             ],
             disable_statusbar=True,
             back_label=None,
