@@ -28,6 +28,7 @@ from . import (
     Page,
     Menu,
     MenuItem,
+    MenuItemSwitch,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -136,7 +137,7 @@ class WalletSettings(Page):
                 [
                     MenuItem(t("Network")),
                     MenuItem("Single/Multisig"),
-                    MenuItem(t("Script Type"), enabled=lambda: not multisig),
+                    MenuItemSwitch(t("Script Type"), enabled=lambda: not multisig),
                     MenuItem(t("Account")),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,

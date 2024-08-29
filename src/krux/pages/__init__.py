@@ -501,19 +501,32 @@ class MenuItem:
         """Reusable lambda: MENU_EXIT function"""
         return MENU_EXIT
 
-    def __init__(self, text, action=action_none, enabled=enabled_true):
-        self.label = text
-        self.action = action
-        self.enabled = enabled
-
     @staticmethod
     def back(text="Back", action=action_none):
         """Create a standard back MenuItem"""
         text = t("Back") if text == "Back" else text
         return MenuItem("< " + text, action)
 
+    def __init__(self, text, action=action_none):
+        self.label = text
+        self.action = action
 
-class MenuItemSD(MenuItem):
+    def enabled(self):
+        """This simplifies handling by the Menu between MenuItem and MenuItemSwitch"""
+        return True
+
+
+class MenuItemSwitch(MenuItem):
+    """Handles MenuItem that can switch between enabled/disabled"""
+
+    def __init__(
+        self, text, action=MenuItem.action_none, enabled=MenuItem.enabled_true
+    ):
+        super().__init__(text, action)
+        self.enabled = enabled
+
+
+class MenuItemSD(MenuItemSwitch):
     """Reusable MenuItem for the Menu that automatic disables when SD card not detected"""
 
     def __init__(self, text, action=MenuItem.action_none):

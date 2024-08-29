@@ -29,6 +29,7 @@ from .. import (
     Page,
     Menu,
     MenuItem,
+    MenuItemSwitch,
     MenuItemSD,
     MENU_CONTINUE,
     ESC_KEY,
@@ -49,7 +50,7 @@ class Home(Page):
             Menu(
                 ctx,
                 [
-                    MenuItem(
+                    MenuItemSwitch(
                         t("Backup Mnemonic"),
                         self.backup_mnemonic,
                         lambda: enabled,
