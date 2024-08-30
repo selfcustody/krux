@@ -34,6 +34,8 @@ class IOCircuit:
 
     def is_on(self):
         """Returns a boolean indicating if the circuit is currently on"""
+        if board.config["type"] == "wonder_mv":
+            return self.circuit.value() == 1
         return self.circuit.value() == 0
 
     def turn_on(self):

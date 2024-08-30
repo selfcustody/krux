@@ -7,7 +7,7 @@ TEST_24_WORD_MNEMONIC = "brush badge sing still venue panther kitchen please hel
 MNEMONICS = [TEST_12_WORD_MNEMONIC, TEST_24_WORD_MNEMONIC]
 
 
-def test_confirm_given_words(mocker, all_devices):
+def test_confirm_given_words(mocker, multiple_devices):
     from krux.pages.mnemonic_editor import MnemonicEditor
     from krux.input import BUTTON_ENTER
     import board
@@ -16,6 +16,24 @@ def test_confirm_given_words(mocker, all_devices):
         btn_sequence = [BUTTON_ENTER]
         if board.config["type"] == "m5stickv" and len(mnemonic.split()) == 24:
             btn_sequence.append(BUTTON_ENTER)
+        ctx = create_ctx(mocker, btn_sequence)
+        mnemonic_editor = MnemonicEditor(ctx, mnemonic)
+        edited_mnemonic = mnemonic_editor.edit()
+        assert edited_mnemonic == mnemonic
+        assert ctx.input.wait_for_button.call_count == len(btn_sequence)
+
+
+def test_loop_through_words(mocker, cube):
+    from krux.pages.mnemonic_editor import MnemonicEditor
+    from krux.input import BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_ENTER
+
+    for mnemonic in MNEMONICS:
+        len_words = len(mnemonic.split())
+        btn_sequence = [
+            *([BUTTON_PAGE] * (len_words + 2)),  # Loop forward
+            *([BUTTON_PAGE_PREV] * (len_words + 2)),  # Loop backward
+            BUTTON_ENTER,  # Confirm
+        ]
         ctx = create_ctx(mocker, btn_sequence)
         mnemonic_editor = MnemonicEditor(ctx, mnemonic)
         edited_mnemonic = mnemonic_editor.edit()
@@ -193,6 +211,9 @@ def test_edit_existing_mnemonic_using_touch(mocker, amigo):
         1,
         1,
         1,  # Confirm cabbage
+        25,  # Try to "Go" with invalid checksum word
+        24,  # Press "Esc"
+        0,  # Give up to Esc
         22,  # index 23 = word 12
         21,  # Type v, e, n, d-> vendor
         4,
@@ -208,6 +229,7 @@ def test_edit_existing_mnemonic_using_touch(mocker, amigo):
         1,
         1,
         1,  # Confirm cabbage
+        25,  # Try to "Go" with invalid checksum word
         23,  # index 23 = word 24
         22,  # Type w, i, t -> witness
         8,

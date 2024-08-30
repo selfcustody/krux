@@ -29,7 +29,7 @@ def string_width_px(string):
     return string_width
 
 
-def test_init(mocker, all_devices):
+def test_init(mocker, multiple_devices):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display

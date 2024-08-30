@@ -1,4 +1,4 @@
-def test_init(mocker, all_devices):
+def test_init(mocker, multiple_devices):
     from krux.power import PowerManager
 
     manager = PowerManager()
@@ -6,7 +6,7 @@ def test_init(mocker, all_devices):
     assert isinstance(manager, PowerManager)
 
 
-def test_pmu(mocker, all_devices):
+def test_pmu(mocker, multiple_devices):
     from krux.power import PowerManager
     import board
 
@@ -20,7 +20,7 @@ def test_pmu(mocker, all_devices):
         manager.has_battery() is True
 
 
-def test_charge_remaining(mocker, all_devices):
+def test_charge_remaining(mocker, multiple_devices):
     from krux.power import PowerManager
     import board
 

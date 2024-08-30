@@ -263,7 +263,7 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     assert " ".join(words) == TEST_12_WORDS
 
 
-def test_scan_tiny_seed_24w(all_devices, mocker):
+def test_scan_tiny_seed_24w(multiple_devices, mocker):
     # This will be used when scanning 24 TinySeed
     # First scanned page will be loaded to be edited, then proceed to scan second page
     # Seed will be returned as its word index
@@ -321,7 +321,7 @@ def test_scan_tiny_seed_24w(all_devices, mocker):
     assert " ".join(words) == TEST_24_WORDS
 
 
-def test_tinyscanner_initializes_tinyseed_with_label(all_devices, mocker):
+def test_tinyscanner_initializes_tinyseed_with_label(multiple_devices, mocker):
     import pytest
     from krux.pages.tiny_seed import TinyScanner
 
