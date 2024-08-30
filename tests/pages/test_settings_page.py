@@ -17,9 +17,9 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
-    from krux.translations import translation_table
+    from krux.translations import translation_index
 
-    tlist = list(translation_table)
+    tlist = translation_index
     index_pt = tlist.index("pt-BR")
     index_next = (index_pt + 1) % (len(tlist))
 
@@ -187,16 +187,25 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_TOUCH
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
-    from krux.translations import translation_table
+    from krux.translations import translation_index
     from krux.themes import WHITE, RED, GREEN, ORANGE
 
-    tlist = list(translation_table)
+    tlist = translation_index
     index_pt = tlist.index("pt-BR")
     index_next = (index_pt + 1) % (len(tlist))
-    text_pt = translation_table[tlist[index_pt]][1177338798] + "\n" + tlist[index_pt]
-    text_next = (
-        translation_table[tlist[index_next]][1177338798] + "\n" + tlist[index_next]
+
+    locale_pt_import = tlist[index_pt].replace("-", "_")
+    locale_next_import = tlist[index_next].replace("-", "_")
+
+    translations_module = __import__(
+        "krux.translations", None, None, [locale_pt_import, locale_next_import]
     )
+
+    locale = getattr(translations_module, locale_pt_import)
+    locale_next = getattr(translations_module, locale_next_import)
+
+    text_pt = locale[1177338798] + "\n" + tlist[index_pt]
+    text_next = locale_next[1177338798] + "\n" + tlist[index_next]
 
     PREV_INDEX = 0
     GO_INDEX = 1

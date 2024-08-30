@@ -30,7 +30,7 @@ from .settings import (
     MAIN_TXT,
     TEST_TXT,
 )
-from .translations import translation_table
+from .translations import translation_index
 from .key import SCRIPT_LONG_NAMES
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
@@ -56,9 +56,13 @@ THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 
 def translations(locale):
     """Returns the translations map for the given locale"""
-    if locale in translation_table:
-        return translation_table[locale]
-    return None
+    if locale == "en-US":
+        return None
+
+    locale = locale.replace("-", "_")
+    translations_module = __import__("krux.translations", None, None, locale)
+
+    return getattr(translations_module, locale)
 
 
 def t(slug):
@@ -95,7 +99,7 @@ class I18nSettings(SettingsNamespace):
     namespace = "settings.i18n"
     DEFAULT_LOCALE = "en-US"
     locale = CategorySetting(
-        "locale", DEFAULT_LOCALE, list(translation_table.keys()) + [DEFAULT_LOCALE]
+        "locale", DEFAULT_LOCALE, translation_index + [DEFAULT_LOCALE]
     )
 
     def label(self, attr):

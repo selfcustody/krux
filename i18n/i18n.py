@@ -169,6 +169,7 @@ def remove_unnecessary():
 def bake_translations():
     """Bakes all translations into a translations.py file inside the krux namespace"""
     translation_table = {}
+    translation_index = []
     translation_filenames = [
         f
         for f in listdir(TRANSLATION_FILES_DIR)
@@ -183,7 +184,9 @@ def bake_translations():
             lookup = {}
             for slug, translation in list(translations.items()):
                 lookup[binascii.crc32(slug.encode("utf-8"))] = translation
-            translation_table[basename(translation_filename).split(".")[0]] = lookup
+            i18n_locale = basename(translation_filename).split(".")[0]
+            translation_index.append(i18n_locale)
+            translation_table[i18n_locale] = lookup
 
     with open(
         join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8", newline="\n"
@@ -209,12 +212,15 @@ def bake_translations():
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.\n"""
+# THE SOFTWARE.\n\n"""
         )
-        translations.write("# pylint: disable=C0301\n")
-        translations.write("translation_table = ")
-        translations.write(repr(translation_table))
-        translations.write("\n")
+        translations.write("translation_index = ")
+        translations.write(repr(translation_index))
+        translations.write("\n\n")
+        for key, value in translation_table.items():
+            translations.write(key.replace("-", "_") + " = ")
+            translations.write(repr(value))
+            translations.write("\n")
         print("Baked " + SRC_DIR + "/krux/" + "translations.py")
 
 
