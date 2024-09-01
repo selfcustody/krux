@@ -197,12 +197,18 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
     locale_pt_import = tlist[index_pt].replace("-", "_")
     locale_next_import = tlist[index_next].replace("-", "_")
 
-    translations_module = __import__(
-        "krux.translations", None, None, [locale_pt_import, locale_next_import]
+    translation_import_prefix = "krux.translations_"
+    translation_var = "translation_dict"
+    translations_module_pt = __import__(
+        translation_import_prefix + locale_pt_import, None, None, translation_var
     )
 
-    locale = getattr(translations_module, locale_pt_import)
-    locale_next = getattr(translations_module, locale_next_import)
+    translations_module_next = __import__(
+        translation_import_prefix + locale_next_import, None, None, translation_var
+    )
+
+    locale = getattr(translations_module_pt, translation_var)
+    locale_next = getattr(translations_module_next, translation_var)
 
     text_pt = locale[1177338798] + "\n" + tlist[index_pt]
     text_next = locale_next[1177338798] + "\n" + tlist[index_next]

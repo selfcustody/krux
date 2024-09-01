@@ -188,40 +188,59 @@ def bake_translations():
             translation_index.append(i18n_locale)
             translation_table[i18n_locale] = lookup
 
-    with open(
-        join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8", newline="\n"
-    ) as translations:
-        translations.write(
-            """# The MIT License (MIT)
+    file_header = """# The MIT License (MIT)
 
-# Copyright (c) 2021-2024 Krux contributors
+    # Copyright (c) 2021-2024 Krux contributors
 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+    # Permission is hereby granted, free of charge, to any person obtaining a copy
+    # of this software and associated documentation files (the "Software"), to deal
+    # in the Software without restriction, including without limitation the rights
+    # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    # copies of the Software, and to permit persons to whom the Software is
+    # furnished to do so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+    # The above copyright notice and this permission notice shall be included in
+    # all copies or substantial portions of the Software.
 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.\n\n"""
-        )
+    # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    # THE SOFTWARE.\n\n"""
+
+    translation_file_prefix = "translations"
+    translation_file_extension = ".py"
+
+    # Write translations index file
+    filepath = join(
+        SRC_DIR, "krux", translation_file_prefix + translation_file_extension
+    )
+    with open(filepath, "w", encoding="utf8", newline="\n") as translations:
+        translations.write(file_header)
         translations.write("translation_index = ")
         translations.write(repr(translation_index))
         translations.write("\n\n")
-        for key, value in translation_table.items():
-            translations.write(key.replace("-", "_") + " = ")
+        print("Baked", filepath)
+
+    # Write each translation file
+    for key, value in translation_table.items():
+        filepath = join(
+            SRC_DIR,
+            "krux",
+            translation_file_prefix
+            + "_"
+            + key.replace("-", "_")
+            + translation_file_extension,
+        )
+        with open(filepath, "w", encoding="utf8", newline="\n") as translations:
+            translations.write(file_header)
+            translations.write("# pylint: disable=C0301, C0103\n\n")
+            translations.write("translation_dict = ")
             translations.write(repr(value))
-            translations.write("\n")
-        print("Baked " + SRC_DIR + "/krux/" + "translations.py")
+            translations.write("\n\n")
+            print("Baked", filepath)
 
 
 def create_translation_file(locale):

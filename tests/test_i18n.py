@@ -21,7 +21,7 @@ def test_translations(mocker, m5stickv, tdata):
     ]
     for case in cases:
         mocker.patch("krux.krux_settings.translation_index", list(case[0].keys())[0])
-        mocker.patch("krux.translations.es_MX", case[1])
+        mocker.patch("krux.translations_es_MX.translation_dict", case[1])
         lookup = translations(list(case[0].keys())[0])
 
         assert lookup == case[1]

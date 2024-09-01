@@ -53,6 +53,8 @@ PBKDF2_HMAC_CBC = 1
 
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 
+TRANSLATION_LOOKUP_TABLE = "translation_dict"
+
 
 def translations(locale):
     """Returns the translations map for the given locale"""
@@ -60,9 +62,11 @@ def translations(locale):
         return None
 
     locale = locale.replace("-", "_")
-    translations_module = __import__("krux.translations", None, None, locale)
+    translations_module = __import__(
+        "krux.translations_" + locale, None, None, TRANSLATION_LOOKUP_TABLE
+    )
 
-    return getattr(translations_module, locale)
+    return getattr(translations_module, TRANSLATION_LOOKUP_TABLE)
 
 
 def t(slug):
