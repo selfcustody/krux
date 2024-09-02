@@ -20,11 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
 from . import Page, ESC_KEY, LETTERS, proceed_menu
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH
 from ..krux_settings import t
 from ..themes import theme
 from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -49,7 +48,7 @@ class MnemonicEditor(Page):
         self.mnemonic_length = len(self.current_mnemonic)
         self.header_offset = DEFAULT_PADDING
         self.search_ranges = {}
-        self.narrow_screen = board.config["type"] == "m5stickv"
+        self.narrow_screen = self.ctx.display.width() <= NARROW_SCREEN_WITH
 
     def compute_search_ranges(self, alt_wordlist=None):
         """Compute search ranges for the autocomplete and possible_letters functions"""

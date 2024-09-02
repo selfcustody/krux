@@ -42,7 +42,7 @@ from ..display import (
     FLASH_MSG_TIME,
     FONT_HEIGHT,
     FONT_WIDTH,
-    SMALLEST_WIDTH,
+    NARROW_SCREEN_WITH,
     STATUS_BAR_HEIGHT,
 )
 from ..qr import to_qr_codes
@@ -253,7 +253,6 @@ class Page:
                 time.sleep_ms(self.ctx.input.debounce_value)
                 self.ctx.input.reset_ios_state()
                 extra_debounce_flag = False
-                continue
             btn = self.ctx.input.wait_for_button(num_parts == 1)
             if btn in TOGGLE_BRIGHTNESS:
                 if qr_foreground == WHITE:
@@ -701,7 +700,7 @@ class Menu:
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
         if self.ctx.is_logged_in():
-            if self.ctx.display.width() > SMALLEST_WIDTH:
+            if self.ctx.display.width() > NARROW_SCREEN_WITH:
                 self.ctx.display.draw_hcentered_text(
                     self.ctx.wallet.key.fingerprint_hex_str(True),
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
@@ -720,7 +719,7 @@ class Menu:
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if self.ctx.is_logged_in() and self.ctx.wallet.key.network["name"] == "Testnet":
-            if self.ctx.display.width() > SMALLEST_WIDTH:
+            if self.ctx.display.width() > NARROW_SCREEN_WITH:
                 self.ctx.display.draw_string(
                     12,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,

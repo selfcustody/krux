@@ -1,5 +1,11 @@
 import pytest
 from ..shared_mocks import mock_context
+from . import create_ctx
+
+TEST_QR_DATA = "test"
+TEST_QR_DATA_IMAGE = bytearray(
+    b"\x7f\xd3?H\nvU\xdd\xae\xa4\xdbut\x83\x80\xe0_\xf5\x070\x00O%7\x97\xd2\xd6\xd1\xe7\xc6\x1ae\xe5\xb2\x00J\xd5\x1f\xd9\t\xd23]N\xbckdu\xb5\x94\xa0\xaf\xf9\xb7\t\x00"
+)
 
 
 @pytest.fixture
@@ -88,3 +94,64 @@ def test_prompt_amigo(mocker, amigo, mock_page_cls):
     ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[0]))
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
     assert page.prompt("test prompt") == False
+
+
+def test_display_qr_code(mocker, m5stickv, mock_page_cls):
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_NONE
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    page = mock_page_cls(ctx)
+
+    # Test QR code display
+    page.display_qr_codes(TEST_QR_DATA, FORMAT_NONE)
+
+    assert ctx.input.wait_for_button.call_count == 1
+    assert ctx.display.draw_qr_code.call_count == 1
+    assert ctx.display.draw_qr_code.call_args == mocker.call(0, TEST_QR_DATA_IMAGE)
+
+
+def test_display_qr_code_light_theme(mocker, m5stickv, mock_page_cls):
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_NONE
+    from krux.themes import theme, WHITE
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    page = mock_page_cls(ctx)
+
+    # Mock light theme background color
+    theme.bg_color = WHITE
+    # Test QR code display
+    page.display_qr_codes(TEST_QR_DATA, FORMAT_NONE)
+
+    assert ctx.input.wait_for_button.call_count == 1
+    assert ctx.display.draw_qr_code.call_count == 1
+    assert ctx.display.draw_qr_code.call_args == mocker.call(
+        0, TEST_QR_DATA_IMAGE, light_color=WHITE
+    )
+
+
+def test_display_qr_code_loop_through_brightness(mocker, m5stickv, mock_page_cls):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+    from krux.themes import WHITE, DARKGREY
+
+    BTN_SEQUENCE = [
+        *([BUTTON_PAGE] * 3),  # Loop through brightness
+        BUTTON_ENTER,  # Exit
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = mock_page_cls(ctx)
+
+    # Test QR code display
+    page.display_qr_codes(TEST_QR_DATA, FORMAT_NONE)
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.display.draw_qr_code.call_count == len(BTN_SEQUENCE)
+    assert ctx.display.draw_qr_code.call_args_list == [
+        mocker.call(0, TEST_QR_DATA_IMAGE),  # Default
+        mocker.call(0, TEST_QR_DATA_IMAGE, light_color=WHITE),  # Brighter
+        mocker.call(0, TEST_QR_DATA_IMAGE, light_color=DARKGREY),  # Darker
+        mocker.call(0, TEST_QR_DATA_IMAGE),  # Default
+    ]

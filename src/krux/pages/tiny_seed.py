@@ -37,7 +37,7 @@ from ..display import (
     MINIMAL_DISPLAY,
     FONT_HEIGHT,
     FONT_WIDTH,
-    SMALLEST_WIDTH,
+    NARROW_SCREEN_WITH,
     SMALLEST_HEIGHT,
 )
 from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
@@ -62,7 +62,7 @@ class TinySeed(Page):
         self.label = label
         self.x_offset = MINIMAL_PADDING + 2 * FONT_WIDTH
         self.printer = None
-        if self.ctx.display.width() > SMALLEST_WIDTH:
+        if self.ctx.display.width() > NARROW_SCREEN_WITH:
             self.x_pad = self.ctx.display.width() * 2 // 27
             self.y_pad = self.ctx.display.height() // 17
         else:
