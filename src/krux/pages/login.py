@@ -754,15 +754,17 @@ class Login(Page):
 
     def tools(self):
         """Handler for the 'Tools' menu item"""
-        from .tools import Tools
+        import krux.pages.tools
 
+        tools = krux.pages.tools.Tools(self.ctx)
         while True:
-            if Tools(self.ctx).run() == MENU_EXIT:
+            if tools.run() == MENU_EXIT:
                 break
 
         # Unimport tools
-        sys.modules.pop("krux.pages.tools")
-        del sys.modules["krux.pages"].tools
+        del tools
+        del krux.pages.tools
+        del sys.modules["krux.pages.tools"]
 
         return MENU_CONTINUE
 

@@ -44,38 +44,41 @@ def draw_splash():
 
 def check_for_updates():
     """Checks SD card, if a valid firmware is found asks if user wants to update the device"""
-    from krux import firmware
+    import krux.firmware
 
-    if firmware.upgrade():
+    if krux.firmware.upgrade():
         power_manager.shutdown()
 
     # Unimport firware
-    sys.modules.pop("krux.firmware")
-    del sys.modules["krux"].firmware
-    del firmware
+    del krux.firmware
+    del sys.modules["krux.firmware"]
 
 
 def login(ctx_login):
     """Loads and run the Login page"""
-    from krux.pages.login import Login
+    import krux.pages.login
 
     login_start_from = None
     while True:
-        if not Login(ctx_login).run(login_start_from):
+        login = krux.pages.login.Login(ctx_login)
+        if not login.run(login_start_from):
             break
 
         if ctx_login.wallet is not None:
             # Have a loaded wallet
+            del login
             break
+
         # Login closed due to change of locale at Settings
         login_start_from = (
-            Login.SETTINGS_MENU_INDEX
+            krux.pages.login.Login.SETTINGS_MENU_INDEX
         )  # will start Login again from Settings index
+        del login
 
-    # Unimport Login the free memory
-    sys.modules.pop("krux.pages.login")
-    del sys.modules["krux"].pages.login
-    del Login
+
+    # Unimport login
+    del krux.pages.login
+    del sys.modules["krux.pages.login"]
 
 
 def home(ctx_home):
