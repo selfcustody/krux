@@ -13,7 +13,7 @@ def tdata(mocker):
 
 def test_translations(mocker, m5stickv, tdata):
     import binascii
-    from krux.krux_settings import translations
+    from krux.krux_settings import _translations
 
     cases = [
         (tdata[0], None),
@@ -22,7 +22,7 @@ def test_translations(mocker, m5stickv, tdata):
     for case in cases:
         mocker.patch("krux.krux_settings.translation_index", list(case[0].keys())[0])
         mocker.patch("krux.translations_es_MX.translation_dict", case[1])
-        lookup = translations(list(case[0].keys())[0])
+        lookup = _translations(list(case[0].keys())[0])
 
         assert lookup == case[1]
 

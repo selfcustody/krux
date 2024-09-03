@@ -60,21 +60,20 @@ def login(ctx_login):
 
     login_start_from = None
     while True:
-        login = krux.pages.login.Login(ctx_login)
-        if not login.run(login_start_from):
+        login_page = krux.pages.login.Login(ctx_login)
+        if not login_page.run(login_start_from):
             break
 
         if ctx_login.wallet is not None:
             # Have a loaded wallet
-            del login
+            del login_page
             break
 
         # Login closed due to change of locale at Settings
         login_start_from = (
             krux.pages.login.Login.SETTINGS_MENU_INDEX
         )  # will start Login again from Settings index
-        del login
-
+        del login_page
 
     # Unimport login
     del krux.pages.login

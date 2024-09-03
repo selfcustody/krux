@@ -30,8 +30,8 @@ from .settings import (
     MAIN_TXT,
     TEST_TXT,
 )
-from .translations import translation_index
 from .key import SCRIPT_LONG_NAMES
+from krux.translations import translation_index
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
@@ -54,16 +54,21 @@ PBKDF2_HMAC_CBC = 1
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 
 TRANSLATION_LOOKUP_TABLE = "translation_dict"
+DEFAULT_LOCALE = "en-US"
 
 
-def translations(locale):
+def _get_locale_module(locale):
+    """Get the name of the module based on the locale"""
+    return "krux.translations_" + locale.replace("-", "_")
+
+
+def _translations(locale):
     """Returns the translations map for the given locale"""
-    if locale == "en-US":
+    if locale == DEFAULT_LOCALE:
         return None
 
-    locale = locale.replace("-", "_")
     translations_module = __import__(
-        "krux.translations_" + locale, None, None, TRANSLATION_LOOKUP_TABLE
+        _get_locale_module(locale), None, None, TRANSLATION_LOOKUP_TABLE
     )
 
     return getattr(translations_module, TRANSLATION_LOOKUP_TABLE)
@@ -72,7 +77,7 @@ def translations(locale):
 def t(slug):
     """Translates a slug according to the current locale"""
     slug_id = binascii.crc32(slug.encode("utf-8"))
-    lookup = translations(Settings().i18n.locale)
+    lookup = _translations(Settings().i18n.locale)
     if not lookup or slug_id not in lookup:
         return slug
     return lookup[slug_id]
@@ -101,9 +106,8 @@ class I18nSettings(SettingsNamespace):
     """I18n-specific settings"""
 
     namespace = "settings.i18n"
-    DEFAULT_LOCALE = "en-US"
     locale = CategorySetting(
-        "locale", DEFAULT_LOCALE, translation_index + [DEFAULT_LOCALE]
+        "locale", DEFAULT_LOCALE, list(translation_index) + [DEFAULT_LOCALE]
     )
 
     def label(self, attr):
@@ -405,6 +409,14 @@ class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
 
     namespace = "settings"
+
+    # Make sure only one instance is created (Singleton)
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self):
         self.wallet = DefaultWallet()
