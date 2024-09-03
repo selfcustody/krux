@@ -1,0 +1,7 @@
+The first step is import the developer's key:
+
+```bash
+gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974C90299326322
+```
+
+Then, to verify yourself, run this command on your terminal:
