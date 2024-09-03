@@ -167,7 +167,7 @@ Don't forget to verify the resulting fingerprint in the status bar to ensure you
 <img src="../../../img/maixpy_m5stickv/wallet-customization-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/wallet-customization-options-150.png" align="right">
 
-Here you are presented to the exact same customization options you have while loading a key and wallet. You can change the Network, Single/Multisig, Script Type and Account. [More about wallet attributes](./loading-a-mnemonic.md/#attributes)
+Here you are presented to the exact same customization options you have while loading a key and wallet. You can change the Network, Single/Multisig, Script Type and Account. [More about wallet attributes](./loading-a-mnemonic.md/#confirm-wallet-attributes)
 
 <div style="clear: both"></div>
 

@@ -4,7 +4,7 @@
 * [`{{latest_installer_win}}.sha256.txt`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_win}}.sha256.txt)
 * [`{{latest_installer_win}}.sig`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_win}}.sig)
 
-## Verify it's integrity
+## Verify the integrity
 
 ----8<----
 verify-the-integrity-explain.en.txt
@@ -14,7 +14,7 @@ verify-the-integrity-explain.en.txt
 (Get-FileHash '.\{{latest_installer_win}}').Hash -eq (Get-Content '.\{{latest_installer_win}}')
 ```
 
-## Verify it's authenticity
+## Verify the authenticity
     
 * You'll need have [GPG](https://gnupg.org/) installed;
 * We recommend installing [GPG4Win](https://www.gpg4win.org/).

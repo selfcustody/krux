@@ -6,7 +6,7 @@ For this installation, we'll use the `.deb` sources:
 * [`{{latest_installer_deb}}.sha256.txt`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_deb}}.sha256.txt)
 * [`{{latest_installer_deb}}.sig`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_deb}}.sig)
 
-## Verify it's integrity
+## Verify the integrity
 
 ----8<----
 verify-the-integrity-explain.en.txt
@@ -16,7 +16,7 @@ verify-the-integrity-explain.en.txt
 sha256sum --check ./{{latest_installer_deb}}.sha256.txt
 ```
     
-## Verify it's authenticity
+## Verify the authenticity
 
 ----8<----
 verify-the-signature-explain.en.txt
@@ -49,10 +49,10 @@ To do this you'll need two tools:
 ar xv {{latest_installer_deb}}
 ```
 
-- Extract the `data.tar.xz` contents:
+- Extract the `data.tar.zst` contents:
 
 ```bash
-bsdtar -xvf data.tar.xz
+bsdtar -xvf data.tar.zst
 ```
 
 The binary will be located at `./usr/local/bin/krux-installer`. 
