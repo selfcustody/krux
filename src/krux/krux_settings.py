@@ -90,7 +90,7 @@ class DefaultWallet(SettingsNamespace):
     network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
     multisig = CategorySetting("multisig", False, [False, True])
     script_type = CategorySetting(
-        "script_type", "Native Segwit - 84", list(SCRIPT_LONG_NAMES.keys())
+        "script_type", "Native Segwit - 84", tuple(SCRIPT_LONG_NAMES.keys())
     )
 
     def label(self, attr):
@@ -107,7 +107,7 @@ class I18nSettings(SettingsNamespace):
 
     namespace = "settings.i18n"
     locale = CategorySetting(
-        "locale", DEFAULT_LOCALE, list(translation_index) + [DEFAULT_LOCALE]
+        "locale", DEFAULT_LOCALE, translation_index + [DEFAULT_LOCALE]
     )
 
     def label(self, attr):
@@ -216,7 +216,7 @@ class PrinterSettings(SettingsNamespace):
         "cnc/file": ("cnc", "FilePrinter"),
     }
     namespace = "settings.printer"
-    driver = CategorySetting("driver", "none", list(PRINTERS.keys()))
+    driver = CategorySetting("driver", "none", tuple(PRINTERS.keys()))
 
     def __init__(self):
         self.thermal = ThermalSettings()
@@ -347,7 +347,7 @@ class EncryptionSettings(SettingsNamespace):
         PBKDF2_HMAC_CBC: AES_CBC_NAME,
     }
     namespace = "settings.encryption"
-    version = CategorySetting("version", AES_ECB_NAME, list(VERSION_NAMES.values()))
+    version = CategorySetting("version", AES_ECB_NAME, tuple(VERSION_NAMES.values()))
     pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [1, 500000])
 
     def label(self, attr):
@@ -379,7 +379,7 @@ class ThemeSettings(SettingsNamespace):
         PINK_THEME: PINK_THEME_NAME,
     }
     namespace = "settings.appearance"
-    theme = CategorySetting("theme", DARK_THEME_NAME, list(THEME_NAMES.values()))
+    theme = CategorySetting("theme", DARK_THEME_NAME, tuple(THEME_NAMES.values()))
     screensaver_time = NumberSetting(int, "screensaver_time", 5, [0, 30])
 
     def label(self, attr):
@@ -409,14 +409,6 @@ class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
 
     namespace = "settings"
-
-    # Make sure only one instance is created (Singleton)
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
 
     def __init__(self):
         self.wallet = DefaultWallet()

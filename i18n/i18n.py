@@ -220,7 +220,7 @@ def bake_translations():
     with open(filepath, "w", encoding="utf8", newline="\n") as translations:
         translations.write(file_header)
         translations.write("translation_index = ")
-        translations.write(repr(tuple(translation_index)))
+        translations.write(repr(translation_index))
         translations.write("\n\n")
         print("Baked", filepath)
 

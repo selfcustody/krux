@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-translation_index = (
+translation_index = [
     "de-DE",
     "es-MX",
     "fr-FR",
@@ -29,4 +29,4 @@ translation_index = (
     "ru-RU",
     "tr-TR",
     "vi-VN",
-)
+]
