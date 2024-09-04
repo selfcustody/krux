@@ -88,9 +88,25 @@ You can retrieve mnemonics previously stored on device's internal flash or exter
 ## Wallet Loading
 ### Confirm Mnemonic Words
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-125.png" align="right">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-double-mnemonic-150.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-150.png" align="right">
 
-Once you have entered your mnemonic, you will be presented with the full list of words to confirm. If you see an asterisk (`*`) in the header, it means this is a [double mnemonic](generating-a-mnemonic.md/#double-mnemonic).
+
+Once you have entered your mnemonic, you will be presented with the full list of words to confirm. 
+
+<div style="clear: both"></div>
+
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-double-mnemonic-125.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-double-mnemonic-150.png" align="right">
+If you see an asterisk (`*`) in the header, it means this is a [double mnemonic](generating-a-mnemonic.md/#double-mnemonic).
+
+<div style="clear: both"></div>
+
+### Edit Mnemonic - Optional
+
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-edited-wrong-125.png" align="right">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-edited-wrong-150.png" align="right">
+
+If you make a mistake while loading a mnemonic, you can easily edit it. Simply touch or navigate to the word you want to change and replace it. Edited words will be highlighted in a different color. If the final word contains an invalid checksum, it will appear in red. If your checksum word is red, please review your mnemonic carefully, as there may be an error.
 
 <div style="clear: both"></div>
 

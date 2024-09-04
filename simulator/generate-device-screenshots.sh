@@ -46,7 +46,8 @@ poetry run poe simulator --sequence sequences/logo.txt  --device $device
 poetry run poe simulator --sequence sequences/load-mnemonic-options.txt --sd --device $device
 poetry run poe simulator --sequence sequences/new-mnemonic-options.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/load-mnemonic-sequence.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/load-mnemonic-double-mnemonic.txt  --sd --device maixpy_amigo
+poetry run poe simulator --sequence sequences/edit-mnemonic.txt  --sd --device $device
+poetry run poe simulator --sequence sequences/load-mnemonic-double-mnemonic.txt  --sd --device $device
 
 # Home
 poetry run poe simulator --sequence sequences/home-options.txt  --device $device
