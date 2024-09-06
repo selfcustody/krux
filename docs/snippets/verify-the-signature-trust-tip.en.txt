@@ -1,0 +1,4 @@
+> 🛡️  TIP: If you followed the steps presented in [authenticity section](#verify-the-authenticity),
+you already  have the assurance that the software is from a verified and genuine software publisher.
+This will also help establish a chain of trust when you perform the firmware verification
+step before flashing.
