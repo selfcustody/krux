@@ -1,3 +1,65 @@
+# Changelog 24.09.0 - September 16, 2024
+
+### New Device Support: WonderMV
+Manufactured by HiWonder, the WonderMV is similar to Yahboom K210 Module, with a few differences, including a metal enclosure, USB-C port, and screen backlight control.
+
+### Added Support for East Asian Languages - Korean and Simplified Chinese
+After implementing low-level support for different glyph form factors, we were finally able to introduce the long-awaited Korean language translation. Simplified Chinese support followed shortly thereafter.
+
+### Faster PSBT Scanning
+Reduced the time required to scan larger PSBTs by optimizing processing speed.
+
+### Improved QR Code Scanning
+Enhanced scan success rates in challenging conditions, such as reduced focus or scanning from greater distances.
+
+### UI Standardization
+The positions of "Yes" and "No" in prompts have been inverted to standardize the UI. Affirmative actions, such as "Yes," "Go," and "Proceed," will now be positioned on the right, while "No," "Esc," and "Back" will be on the left.
+
+### Enhanced Scanning Progress Bars
+QR code progress bars now provide more detailed information. For UR PSBTs, the progress bar indicates when a valid frame is captured, while for BBQR, it displays the index or position of the last successfully scanned frame.
+
+### Mnemoniocs Editor - Loading Mnemonics
+When manually loading an existing mnemonic, you can now correct typos and mistakes during the review stage by simply tapping or navigating to the incorrect words. The checksum word will be highlighted in red if the entered mnemonic is invalid to help detect eventual problems.
+
+### Mnemonics Editor - New Mnemonic
+When generating new mnemonics through dice rolls or camera images, you can now modify the entropy by changing some of the mnemonic words. The final word will dynamically adjust to always produce a valid checksum.
+
+### Support for Scanning Various Binary Grid Formats
+In addition to TinySeed, the camera can now scan and load mnemonics from equivalent formats, such as OneKey KeyTag, or even generic binary grids, like spreadsheets with colored, squared cells.
+
+### Generate Double Mnemonics from Camera
+When generating a new mnemonic using the camera, users can now choose to create a "Double Mnemonic," in addition to the standard 12 and 24-word options. This feature generates a 24-word mnemonic that, when split in half, forms two valid 12-word mnemonics.
+
+### Increased Valid Touch Surface
+To improve touch accuracy, especially on small touchscreens, the touch surface area of buttons has been increased to make better use of the available screen space.
+
+### Add Account Descriptor Type Support 
+Krux now accepts urtype.Account type QR code descriptors.
+
+### Enhanced File Exploring
+File explorer now better differentiate files from folders.
+
+### Camera Adjustments for Yahboom and WondeMV
+Sensitivity and exposure adjustments were made to the GC2145 sensor, enhancing the scanning success rate for Yahboom and WondeMV devices.
+
+### About Shows Board Type
+Ensure you flashed the correct firmware for your device consulting the "About" menu item.
+
+### Simplified Translations
+Messages and terms were simplified to reduce firmware size and maintenance.
+
+### Bugfix - Signing Messages with ":" Character
+Fixed an issue where signing messages containing the ":" character would result in invalid signatures when signing at addresses.
+
+### Bugfix - Import of Base64 Encoded PSBTs from SD Card
+Fixed an issue where base64 encoded PSBTs imported from an SD card were not correctly detected and parsed.
+
+### Translation Removed: Polish
+Polish translation was removed due to the lack of maintainers and known users.
+
+### Code Refactor and Optimizations
+Several optimizations to increase performance and code quality.
+
 # Changelog 24.07.0 - July 15, 2024
 
 ### Maix Cube Support
