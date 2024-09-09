@@ -24,6 +24,7 @@ import math
 import time
 import board
 import lcd
+import _thread
 from .keypads import Keypad
 from ..themes import theme, WHITE, GREEN, DARKGREY
 from ..input import (
@@ -643,9 +644,10 @@ class Menu:
                 STATUS_BAR_HEIGHT,
                 theme.info_bg_color,
             )
-            self.draw_battery_indicator()
             self.draw_network_indicator()
             self.draw_wallet_indicator()
+            if self.ctx.power_manager.has_battery():
+                _thread.start_new_thread(self.draw_battery_indicator, ())
 
     #     self.draw_ram_indicator()
 
@@ -684,9 +686,6 @@ class Menu:
 
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
-        if not self.ctx.power_manager.has_battery():
-            return
-
         charge = self.ctx.power_manager.battery_charge_remaining()
         if self.ctx.power_manager.usb_connected():
             battery_color = theme.go_color
