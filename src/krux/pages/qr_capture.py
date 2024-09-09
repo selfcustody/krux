@@ -65,7 +65,7 @@ class QRCodeCapture(Page):
             (self.ctx.display.height() - FONT_HEIGHT) // 2,
             self.ctx.display.width(),
             FONT_HEIGHT,
-            theme.bg_color
+            theme.bg_color,
         )
         self.ctx.display.to_landscape()
         self.ctx.input.reset_ios_state()

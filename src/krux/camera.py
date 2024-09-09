@@ -39,7 +39,6 @@ class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
     def __init__(self):
-        self.initialized = False
         self.cam_id = None
         self.antiglare_enabled = False
         self.mode = None
@@ -51,9 +50,7 @@ class Camera:
 
     def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
-        self.initialized = False
         self.antiglare_enabled = False
-        self.mode = COLOR_MODE
         if self.cam_id in (OV7740_ID, GC2145_ID):
             sensor.reset(freq=18200000)
             if board.config["type"] == "cube":
@@ -63,6 +60,7 @@ class Camera:
         else:
             sensor.reset()
         self.cam_id = sensor.get_id()
+        self.mode = COLOR_MODE
         if grayscale and self.cam_id != GC2145_ID:
             # GC2145 does not support grayscale
             sensor.set_pixformat(sensor.GRAYSCALE)

@@ -43,6 +43,67 @@ def test_initialize_sensors(mocker, m5stickv):
     )
 
 
+def test_fail_to_initialize_sensor(mocker, m5stickv):
+    from krux.camera import Camera
+
+    # Mock sensor.reset to raise an exception
+    mocker.patch("sensor.reset", side_effect=Exception)
+    c = Camera()
+    with pytest.raises(Exception):
+        c.initialize_sensor()
+    assert c.mode == None
+
+
+def test_initialize_run_no_sensor(mocker, m5stickv):
+    from krux.camera import Camera
+
+    mocker.patch("sensor.reset", side_effect=Exception)
+    c = Camera()
+    try:
+        # Fails to initialize at boot
+        c.initialize_sensor()
+    except:
+        pass
+    with pytest.raises(ValueError, match="No camera found"):
+        c.initialize_run()
+    assert c.mode == None
+
+
+def test_initialize_run(mocker, m5stickv):
+    from krux.camera import Camera, COLOR_MODE
+
+    c = Camera()
+    c.initialize_sensor()
+    c.initialize_run()
+    assert c.mode == COLOR_MODE
+    assert c.cam_id is not None
+    assert c.antiglare_enabled == False
+
+
+def test_initialize_run_from_grayscale(mocker, m5stickv):
+    from krux.camera import Camera, COLOR_MODE, GRAYSCALE_MODE
+
+    c = Camera()
+    c.initialize_sensor()
+    c.mode = GRAYSCALE_MODE
+    c.initialize_run()
+    assert c.mode == COLOR_MODE
+    assert c.cam_id is not None
+    assert c.antiglare_enabled == False
+
+
+def test_initialize_run_with_anti_glair_enabled(mocker, m5stickv):
+    from krux.camera import Camera, COLOR_MODE, GRAYSCALE_MODE
+
+    c = Camera()
+    c.initialize_sensor()
+    c.antiglare_enabled = True
+    c.initialize_run()
+    assert c.mode == COLOR_MODE
+    assert c.cam_id is not None
+    assert c.antiglare_enabled == False
+
+
 def test_toggle_antiglare(mocker, m5stickv):
     import krux
     from krux.camera import Camera, OV7740_ID, OV2640_ID, GC0328_ID, GC2145_ID
