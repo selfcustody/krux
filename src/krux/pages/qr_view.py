@@ -23,11 +23,11 @@
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
-from ..themes import theme, WHITE, BLACK
+from ..themes import theme, WHITE, BLACK, DARKGREY
 from ..krux_settings import t
 from ..settings import THIN_SPACE
 from ..qr import get_size
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -67,7 +67,10 @@ class SeedQRView(Page):
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
-        self.bright = theme.bg_color == WHITE
+        if theme.bg_color == WHITE:
+            self.qr_foreground = WHITE
+        else:
+            self.qr_foreground = None
 
     def _seed_qr(self):
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -145,8 +148,8 @@ class SeedQRView(Page):
     def draw_grided_qr(self, mode):
         """Draws grided QR"""
         self.ctx.display.clear()
-        if self.ctx.display.width() > SMALLEST_WIDTH:
-            grid_size = self.ctx.display.width() // SMALLEST_WIDTH
+        if self.ctx.display.width() > NARROW_SCREEN_WITH:
+            grid_size = self.ctx.display.width() // NARROW_SCREEN_WITH
         else:
             grid_size = 1
         grid_offset = self.ctx.display.width() % (self.qr_size + 2)
@@ -154,8 +157,10 @@ class SeedQRView(Page):
         grid_pad = self.ctx.display.width() // (self.qr_size + 2)
         grid_offset += grid_pad
         if mode == STANDARD_MODE:
-            if self.bright:
-                self.ctx.display.draw_qr_code(0, self.code, light_color=WHITE)
+            if self.qr_foreground:
+                self.ctx.display.draw_qr_code(
+                    0, self.code, light_color=self.qr_foreground
+                )
             else:
                 self.ctx.display.draw_qr_code(0, self.code)
         elif mode == LINE_MODE:
@@ -443,7 +448,12 @@ class SeedQRView(Page):
             while button not in (SWIPE_DOWN, SWIPE_UP):
 
                 def toggle_brightness():
-                    self.bright = not self.bright
+                    if self.qr_foreground == WHITE:
+                        self.qr_foreground = DARKGREY
+                    elif not self.qr_foreground:
+                        self.qr_foreground = WHITE
+                    elif self.qr_foreground == DARKGREY:
+                        self.qr_foreground = None
 
                 self.draw_grided_qr(mode)
                 if self.ctx.display.height() > self.ctx.display.width():

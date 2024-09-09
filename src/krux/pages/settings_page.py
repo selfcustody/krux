@@ -97,7 +97,7 @@ class SettingsPage(Page):
                     theme.frame_color,
                 )
                 offset_x = x
-                offset_x += (button_width - len(keys[i]) * FONT_WIDTH) // 2
+                offset_x += (button_width - lcd.string_width_px(keys[i])) // 2
                 self.ctx.display.draw_string(
                     offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
                 )
@@ -292,7 +292,7 @@ class SettingsPage(Page):
             if setting.attr == "theme":
                 theme.update()
             if setting.attr == "brightness":
-                if board.config["type"] == "cube":
+                if board.config["type"] in ["cube", "wonder_mv"]:
                     self.ctx.display.gpio_backlight_ctrl(new_category)
                 elif board.config["type"] == "m5stickv":
                     self.ctx.display.set_pmu_backlight(new_category)

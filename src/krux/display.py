@@ -29,6 +29,7 @@ from .settings import THIN_SPACE
 DEFAULT_PADDING = 10
 MINIMAL_PADDING = 5
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
+FONT_WIDTH_WIDE, FONT_HEIGHT_WIDE = board.config["krux"]["display"]["font_wide"]
 PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = (
     [16904, 61307] if board.config["type"] == "m5stickv" else [0, 6342]
@@ -49,7 +50,7 @@ STATUS_BAR_HEIGHT = (
 
 FLASH_MSG_TIME = 2000
 
-SMALLEST_WIDTH = 135
+NARROW_SCREEN_WITH = 135
 SMALLEST_HEIGHT = 240
 
 # Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
@@ -138,7 +139,7 @@ class Display:
                 ],
             )
             self.set_pmu_backlight(Settings().hardware.display.brightness)
-        elif board.config["type"] == "yahboom":
+        elif board.config["type"] in ["yahboom", "wonder_mv"]:
             lcd.init(
                 invert=True,
                 rst=board.config["lcd"]["rst"],
@@ -178,14 +179,16 @@ class Display:
                 pin=board.config["krux"]["pins"]["BACKLIGHT"],
                 enable=True,
             )
-
+        # Calculate duty cycle
         if board.config["type"] == "cube":
-            # Calculate duty cycle
-            # Ranges from 0% to 80% duty cycle
+            # Ranges from 80% to 0% duty cycle
             # 100 is 0% duty cycle (off, not used here)
             pwm_value = 5 - int(brightness)
-            pwm_value *= 20
-            self.blk_ctrl.duty(pwm_value)
+        else:
+            # Ranges from 20% to 100% duty cycle
+            pwm_value = int(brightness)
+        pwm_value *= 20
+        self.blk_ctrl.duty(pwm_value)
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
@@ -240,10 +243,15 @@ class Display:
         lines = []
         start = 0
         line_count = 0
-        if self.width() > SMALLEST_WIDTH:
-            columns = self.usable_width() // FONT_WIDTH
+        columns = (
+            self.usable_width() if self.width() > NARROW_SCREEN_WITH else self.width()
+        )
+        if Settings().i18n.locale in ["ko-KR", "zh-CN"] and lcd.string_has_wide_glyph(
+            text
+        ):
+            columns //= FONT_WIDTH_WIDE
         else:
-            columns = self.width() // FONT_WIDTH
+            columns //= FONT_WIDTH
 
         # Quick return if content fits in one line
         if len(text) <= columns and "\n" not in text:
@@ -321,6 +329,14 @@ class Display:
             x_end = x_1
         lcd.draw_line(x_start, y_0, x_end, y_1, color)
 
+    def draw_hline(self, x, y, width, color=theme.fg_color):
+        """Draws a horizontal line to the screen"""
+        self.draw_line(x, y, x + width, y, color)
+
+    def draw_vline(self, x, y, height, color=theme.fg_color):
+        """Draws a vertical line to the screen"""
+        self.draw_line(x, y, x, y + height, color)
+
     def draw_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
         """
         Draws a circle to the screen.
@@ -335,7 +351,8 @@ class Display:
         """Draws a string to the screen"""
         if self.flipped_x_coordinates:
             x = self.width() - x
-            x -= len(text) * FONT_WIDTH
+            x -= lcd.string_width_px(text)
+            x = max(0, x)
         lcd.draw_string(x, y, text, color, bg_color)
 
     def draw_hcentered_text(
@@ -354,7 +371,9 @@ class Display:
         if info_box:
             bg_color = theme.info_bg_color
             padding = (
-                DEFAULT_PADDING if self.width() > SMALLEST_WIDTH else MINIMAL_PADDING
+                DEFAULT_PADDING
+                if self.width() > NARROW_SCREEN_WITH
+                else MINIMAL_PADDING
             )
             self.fill_rectangle(
                 padding - 3,
@@ -364,11 +383,16 @@ class Display:
                 bg_color,
                 FONT_WIDTH,  # radius
             )
+
         for i, line in enumerate(lines):
             if len(line) > 0:
-                offset_x = max(0, (self.width() - FONT_WIDTH * len(line)) // 2)
+                offset_x = max(0, (self.width() - lcd.string_width_px(line)) // 2)
                 self.draw_string(
-                    offset_x, offset_y + (i * FONT_HEIGHT), line, color, bg_color
+                    offset_x,
+                    offset_y + (i * (FONT_HEIGHT)),
+                    line,
+                    color,
+                    bg_color,
                 )
         return len(lines)  # return number of lines drawn
 

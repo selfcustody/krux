@@ -45,6 +45,7 @@ def bdftohex(filename=None):
         for line in input_file.readlines():
             if line.startswith("FONTBOUNDINGBOX"):
                 font_bbox = BBox(*[int(c) for c in line.split()[1:]])
+                line_size = math.ceil(font_bbox.width / 8) * 2
             elif line.startswith("BBX"):
                 glyph_bbox = BBox(*[int(c) for c in line.split()[1:]])
             elif line.startswith("ENCODING"):
@@ -65,13 +66,21 @@ def bdftohex(filename=None):
                                 bitmap = row * top_padding + bitmap
                             if bottom_padding > 0:
                                 bitmap = bitmap + row * bottom_padding
+                    glyph_trimmer = (
+                        math.ceil(font_bbox.width / 8) * font_bbox.height * 2
+                    )
+                    bitmap = bitmap[:glyph_trimmer]
                     codepoint_list.append(f"{codepoint:04X}:{bitmap}")
                 parsing_bitmap = False
                 hex_chars = []
                 codepoint = -1
                 glyph_bbox = None
             elif parsing_bitmap:
-                hex_chars.append(line.strip())
+                # Ensures each line has proper length
+                line = line.strip()
+                if len(line) < line_size:
+                    line += "0" * (line_size - len(line))
+                hex_chars.append(line)
     return codepoint_list
 
 

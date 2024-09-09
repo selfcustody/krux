@@ -64,17 +64,32 @@ def load_font(device):
     device = with_prefix(device)
     if device not in fonts:
         if device == M5STICKV or device == CUBE:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u14n.bdf")
-            )
+            fonts[device] = [
+                pg.freetype.Font(
+                   os.path.join("..", "firmware", "font", "ter-u14n.bdf"),
+                ),
+                pg.freetype.Font(
+                   os.path.join("..", "firmware", "font", "FusionPixel-14.bdf"),
+                ),
+            ]
         elif device == DOCK or device == YAHBOOM:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u16n.bdf")
-            )
+            fonts[device] = [
+                pg.freetype.Font(
+                    os.path.join("..", "firmware", "font", "ter-u16n.bdf")
+                ),
+                pg.freetype.Font(
+                    os.path.join("..", "firmware", "font", "unifont-16.bdf")
+                ),
+        ]
         else:
-            fonts[device] = pg.freetype.Font(
-                os.path.join("..", "firmware", "font", "ter-u24b.bdf")
-            )
+            fonts[device] = [
+                pg.freetype.Font(
+                    os.path.join("..", "firmware", "font", "ter-u24b.bdf")
+                ),
+                pg.freetype.Font(
+                    os.path.join("..", "firmware", "font", "NotoSansCJK-24.bdf")
+                ),
+            ]
 
     return fonts[device]
 

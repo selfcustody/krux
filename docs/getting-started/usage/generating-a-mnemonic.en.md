@@ -68,7 +68,14 @@ A low Shannon's entropy value could suggest that your dice are biased or that th
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-nerd-stats-125.png">
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-nerd-stats-125.png">
 
-## How it works
+
+## Editing a New Mnemonic - Optional
+After entering dice rolls, random words, or captured entropy through the camera, you can manually add custom entropy by editing some of the words. Edited words will be highlighted, and the final word will automatically update to ensure a valid checksum. However, proceed with caution, modifying words can negatively impact the natural entropy previously captured.
+
+<img src="../../../img/maixpy_amigo/new-mnemonic-edited-150.png">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-edited-125.png">
+
+## How Entropy Capture Works
 For dice rolls, Krux keeps track of every roll you enter and displays the cumulative string of outcomes after each roll. 
 
 When you have entered your final roll, Krux will hash this string using [SHA256](https://en.bitcoin.it/wiki/SHA-256) and output the resulting hash to the screen so that you can verify it for yourself.
@@ -84,5 +91,5 @@ Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/
 
 Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).
 
-### How to verify
+### How to Verify
 Don't trust, verify. We encourage you not to trust any claim you cannot verify yourself. Therefore, there are wallets that use compatible algorithms to calculate the entropy derived from dice rolls. You can use the [SeedSigner](https://seedsigner.com/) or [Coldcard](https://coldcard.com/) hardware wallets, or even the [Bitcoiner Guide website](https://bitcoiner.guide/seed/), they share the same logic that Krux uses and will give the same mnemonic for the dice roll method.

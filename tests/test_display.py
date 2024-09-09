@@ -2,8 +2,34 @@ TEST_QR = bytearray(
     b"\x7fn\xfd\x830\x08v9\xd6\xedj\xa0\xdbUU7\xc8\xa0\xe0_U\x7f\x00i\x00\xe3\xd61P\x08\xf5Q\xef^\xfe`\xe8\xc1\x7f\xdex\x936Y\x91\xb8\xeb\xd29c\xd5\xd4\x7f\x00\n#\xfe\xcd\xd7\rJ\x8e\xd9\xe5\xf8\xb9K\xe6x\x17\xb9\xca\xa0\x9a\x9a\x7f\xbb\x1b\x01"
 )
 
+CHINESE_CODEPOINT_MIN = 0x4E00
+CHINESE_CODEPOINT_MAX = 0x9FFF
+KOREAN_CODEPOINT_MIN = 0xAC00
+KOREAN_CODEPOINT_MAX = 0xD7A3
 
-def test_init(mocker, all_devices):
+
+def string_width_px(string):
+    import board
+
+    standard_width = board.config["krux"]["display"]["font"][0]
+    wide_width = board.config["krux"]["display"]["font_wide"][0]
+    print("standard_width:", standard_width)
+    print("wide_width:", wide_width)
+    string_width = 0
+
+    for c in string:
+        if (
+            CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+            or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
+        ):
+            string_width += wide_width
+        else:
+            string_width += standard_width
+
+    return string_width
+
+
+def test_init(mocker, multiple_devices):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -438,9 +464,11 @@ def test_draw_string(mocker, m5stickv):
 
 
 def test_draw_string_on_inverted_display(mocker, amigo):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
+
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 480)
@@ -453,9 +481,11 @@ def test_draw_string_on_inverted_display(mocker, amigo):
 
 
 def test_draw_hcentered_text(mocker, m5stickv):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
+
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)
@@ -471,9 +501,11 @@ def test_draw_hcentered_text(mocker, m5stickv):
 
 
 def test_draw_hcentered_text_on_inverted_display(mocker, amigo):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
+
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 480)
@@ -489,10 +521,11 @@ def test_draw_hcentered_text_on_inverted_display(mocker, amigo):
 
 
 def test_draw_infobox(mocker, amigo):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
-    import krux
     from krux.display import Display, DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
     from krux.themes import WHITE, BLACK, DARKGREY
+
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 320)
@@ -519,9 +552,11 @@ def test_draw_infobox(mocker, amigo):
 
 
 def test_draw_centered_text(mocker, m5stickv):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
+
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)
@@ -554,6 +589,9 @@ def test_flash_text(mocker, m5stickv):
     from krux.display import Display, FLASH_MSG_TIME
     from krux.themes import WHITE
     import time
+
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
 
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)

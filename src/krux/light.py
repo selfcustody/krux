@@ -34,15 +34,23 @@ class IOCircuit:
 
     def is_on(self):
         """Returns a boolean indicating if the circuit is currently on"""
+        if board.config["type"] == "wonder_mv":
+            return self.circuit.value() == 1
         return self.circuit.value() == 0
 
     def turn_on(self):
         """Turns on the circuit"""
-        self.circuit.value(0)
+        if board.config["type"] == "wonder_mv":
+            self.circuit.value(1)
+        else:
+            self.circuit.value(0)
 
     def turn_off(self):
         """Turns off the circuit"""
-        self.circuit.value(1)
+        if board.config["type"] == "wonder_mv":
+            self.circuit.value(0)
+        else:
+            self.circuit.value(1)
 
     def toggle(self):
         """Toggles the circuit on or off"""

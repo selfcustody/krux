@@ -12,7 +12,7 @@ from ..shared_mocks import (
 )
 
 
-def test_capture_qr_code(mocker, all_devices, tdata):
+def test_capture_qr_code(mocker, multiple_devices, tdata):
     from krux.pages.qr_capture import QRCodeCapture
     from krux.qr import FORMAT_PMOFN, FORMAT_UR
     from ur.ur import UR
@@ -114,7 +114,7 @@ def test_camera_antiglare(mocker, m5stickv):
         )
 
 
-def test_light_control(mocker, all_devices):
+def test_light_control(mocker, multiple_devices):
     from krux.pages.qr_capture import QRCodeCapture
 
     time_mocker = TimeMocker(1001)

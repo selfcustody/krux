@@ -288,11 +288,11 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
-        if board.config["type"] in ["amigo", "yahboom"]:
+        if board.config["type"] in ["amigo", "yahboom", "wonder_mv"]:
             self.touch = TouchSettings()
         if board.config["type"] == "amigo":
             self.display = DisplayAmgSettings()
-        elif board.config["type"] in ["cube", "m5stickv"]:
+        elif board.config["type"] in ["cube", "m5stickv", "wonder_mv"]:
             self.display = DisplaySettings()
 
     def label(self, attr):
@@ -302,11 +302,11 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
-        if board.config["type"] in ["amigo", "yahboom"]:
+        if board.config["type"] in ["amigo", "yahboom", "wonder_mv"]:
             hardware_menu["touchscreen"] = t("Touchscreen")
         if board.config["type"] == "amigo":
             hardware_menu["display_amg"] = t("Display")
-        elif board.config["type"] in ["cube", "m5stickv"]:
+        elif board.config["type"] in ["cube", "m5stickv", "wonder_mv"]:
             hardware_menu["display"] = t("Display")
 
         return hardware_menu[attr]

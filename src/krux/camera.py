@@ -72,6 +72,8 @@ class Camera:
             self.config_ov_7740()
         if self.cam_id == OV2640_ID:
             self.config_ov_2640()
+        if self.cam_id == GC2145_ID:
+            self.config_gc_2145()
         sensor.skip_frames()
 
     def config_ov_7740(self):
@@ -119,6 +121,14 @@ class Camera:
         # Regions 13,14,15,16
         sensor.__write_reg(0x60, 0xFF)
 
+    def config_gc_2145(self):
+        """Specialized config for GC2145 sensor"""
+        # Set register bank 1
+        sensor.__write_reg(0xFE, 0x01)
+        # Center weight mode = 7, default=0x01 (center mode = 0)
+        sensor.__write_reg(0x0C, 0x71)
+        self.disable_antiglare()
+
     def has_antiglare(self):
         """Returns whether the camera has anti-glare functionality"""
         return self.cam_id in (OV7740_ID, OV2640_ID, GC2145_ID)
@@ -165,11 +175,11 @@ class Camera:
             # Set register bank 1
             sensor.__write_reg(0xFE, 0x01)
             # Expected luminance level, default=0x50
-            sensor.__write_reg(0x13, 0x50)
+            sensor.__write_reg(0x13, 0x35)
             # luminance high level, default=0xF2
-            sensor.__write_reg(0x0E, 0xF2)
+            sensor.__write_reg(0x0E, 0x55)
             # luminance low level, default=0x20
-            sensor.__write_reg(0x0F, 0x20)
+            sensor.__write_reg(0x0F, 0x30)
         sensor.skip_frames()
         self.antiglare_enabled = False
 

@@ -1,0 +1,18 @@
+include _wait-for-logo.txt
+
+# Navigate to via QR
+x3 press BUTTON_A
+
+qrcode 12-word-mnemonic.png
+wait 0.5
+
+# Edit first word
+press BUTTON_B
+press BUTTON_A
+# wait flash text of word 1
+wait 2
+# Type "ability"
+x4 press BUTTON_A
+press BUTTON_C
+
+screenshot load-mnemonic-seq-mnemonic-edited-wrong.png

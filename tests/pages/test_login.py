@@ -266,7 +266,9 @@ def test_new_double_mnemonic_from_snapshot(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.wallet.key.mnemonic == MNEMONIC
     assert is_double_mnemonic(MNEMONIC) == True
-    ctx.display.draw_hcentered_text.assert_has_calls([mocker.call("BIP39 Mnemonic*")])
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("BIP39 Mnemonic*", 5)]
+    )
 
 
 ########## load words from qrcode tests
@@ -619,7 +621,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
                 BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
-            [13, 14, 17, 27, 26, 17, 19, 0],
+            [13, 14, 17, 27, 26, 17, 19, 1],
         ),
     ]
 
