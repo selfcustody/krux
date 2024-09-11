@@ -1,17 +1,38 @@
 # PIN and Anti-Tamper Mechanism (Experimental)
 
-## PIN
-"A PIN, with a minimum length of six digits, can be stored and required to boot main application on Krux devices."
-Before being stored in the device’s flash, the PIN is hashed together with the K210 chip’s unique ID. This ensures that the PIN is not retrievable via a flash dump. It can only be brute-forced outside the device if the attacker has access to the device’s unique ID.
-PIN will be disabled if the user wipes the device or flash an older firmware version.
+## Krux Security Model - Good Practices and Limitations
 
-## Flash Snapshot - Anti-tamper
+It is crucial for users to verify the authenticity of the firmware being flashed onto the device, especially when doing so via USB.
+
+Users can verify the firmware's signature by following the documentation and using OpenSSL command-line tool. Alternatively, when using Krux-Installer, users should verify Krux-Installer’s signature using GPG. This method is more user-friendly, as verification can be done through graphical user interfaces (GUIs) like Sparrow. Krux-Installer performs the firmware signature verification, informs the users of the results, and guides them through performing the verification manually, providing details about the firmware location and the necessary commands.
+
+Learning about verification methods and tools is highly recommended. Building the firmware from source and verifying its reproducibility are also excellent steps towards maintaining control and ensuring the security of your device.
+
+After the initial flash, it is advisable to perform subsequent updates through the SD card. SD card updates not only keep the device air-gapped but also ensure that the previous firmware verifies the signature of the update before installation.
+
+Keeping the device air-gapped is a highly recommended practice, as the USB port presents a significant attack surface.
+
+The PIN and flash snapshot anti-tamper features, described below, will only be effective under the assumption that the flashed firmware is legitimate and uncompromised.
+
+## PIN
+A PIN, with a minimum length of six digits, can be stored and required to boot main application on Krux devices.
+
+Before being stored in the device’s flash, the PIN is hashed together with the K210 chip’s unique ID. This ensures that the PIN is not retrievable via a flash dump. It can only be brute-forced outside the device if the attacker has access to the device’s unique ID.
+PIN requirement will be disabled if the user wipes the device or flash an older firmware version.
+
+## Flash Snapshot - Anti-tamper Tool
 ### Introduction
 Once a PIN is defined, users can generate a 'flash snapshot' to verify whether the flash content has been altered.
+
 The flash snapshot will translate the content of the flash, tied to user's PIN and micro-controller's unique ID to an easy to recognize image and two anti-tamper words.
+
 A single bit flip in flash will result in a completely different image and words.
+
 As the snapshot evaluates the whole flash, firmware updates, simple configuration changes, or new stored data, like an encrypted mnemonic, will result in new, completely different snapshot.
+
 In order to make the snapshot immune to being mocked, the PIN and K210 chip's unique ID are hashed previously than the flash.
+
+`hash(PIN -> UID -> Flash content)` -> Image + words
 
 ### Possible Attack Scenarios
 In a scenario where the attacker has replaced the firmware and the user inputs the correct PIN, it’s important to consider how the tampered firmware might try to bypass the verification process. Here's the key question you’re asking:

@@ -22,7 +22,6 @@
 
 from . import Page, MENU_CONTINUE, DEFAULT_PADDING
 from ..krux_settings import t
-from ..themes import theme
 from ..display import FONT_HEIGHT
 
 
@@ -54,9 +53,31 @@ class FlashSnapshot(Page):
                 self.ctx.display.draw_centered_text("%d%%" % (counter // 41))
         return sha256.digest()
 
+    def hash_to_random_color(self, hash_bytes):
+        """Generates a random color from part of the hash."""
+        # Extract the last 3 bytes of the hash
+        red = hash_bytes[-3] % 2  # 0 or 1
+        green = hash_bytes[-2] % 2
+        blue = hash_bytes[-1] % 2
+
+        # If all components are False, pick the highest value component and make it True
+        if not red and not green and not blue:
+            if hash_bytes[-3] >= hash_bytes[-2] and hash_bytes[-3] >= hash_bytes[-1]:
+                red = 1
+            elif hash_bytes[-2] >= hash_bytes[-3] and hash_bytes[-2] >= hash_bytes[-1]:
+                green = 1
+            else:
+                blue = 1
+        red = (0xFF >> 3) << 11 if red else 0
+        green = (0xFF >> 2) << 5 if green else 0
+        blue = 0xFF >> 3 if blue else 0
+
+        return red + green + blue
+
     def hash_to_fingerprint(self, hash_bytes, y_offset=DEFAULT_PADDING):
         """Generates a 5x5 pixelated fingerprint based on a 256-bit hash."""
 
+        fg_color = self.hash_to_random_color(hash_bytes)
         # Create a 5x5 grid, but we'll only compute the first 3 columns
         block_size = self.ctx.display.width() // 7
         for row in range(5):
@@ -65,7 +86,7 @@ class FlashSnapshot(Page):
                 bit_value = hash_bytes[byte_index] % 2  # 0 or 1
 
                 # Set the color based on the bit value
-                color = theme.fg_color if bit_value == 0 else theme.disabled_color
+                color = fg_color if bit_value == 0 else 0
 
                 # Calculate the position and draw the rectangle
                 x = (col + 1) * block_size
@@ -95,7 +116,7 @@ class FlashSnapshot(Page):
         self.ctx.display.draw_hcentered_text(t("Generating Flash Snapshot.."))
         binary_flash_hash = self.hash_pin_with_flash()
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Snapshot"))
+        self.ctx.display.draw_hcentered_text(t("Flash Snapshot"))
         y_offset = DEFAULT_PADDING + 2 * FONT_HEIGHT
         y_offset += self.hash_to_fingerprint(binary_flash_hash, y_offset)
         y_offset += FONT_HEIGHT
