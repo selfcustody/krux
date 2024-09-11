@@ -23,10 +23,10 @@ from embit import bip85
 from embit.bip32 import HARDENED_INDEX
 from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
-from ..settings_page import DIGITS
 from ...krux_settings import Settings
 from .. import (
     Page,
+    DIGITS,
     ESC_KEY,
     MENU_CONTINUE,
     choose_len_mnemonic,

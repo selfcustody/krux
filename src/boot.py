@@ -24,6 +24,7 @@
 import sys
 import time
 import gc
+import os
 
 sys.path.append("")
 sys.path.append(".")
@@ -53,6 +54,31 @@ def check_for_updates():
     sys.modules.pop("krux.firmware")
     del sys.modules["krux"].firmware
     del firmware
+
+
+def pin_verification(ctx_pin):
+    """Loads and run the Pin Verification page"""
+    PIN_PATH = "/flash/pin"
+
+    # Checks if there is a pin set
+    try:
+        if not (os.stat(PIN_PATH)[0] & 0x4000) == 0:
+            raise OSError
+    except OSError:
+        print("No pin set")
+        return True
+
+    from krux.pages.pin_verification import PinVerification
+
+    pin_verification_page = PinVerification(ctx_pin)
+    if not pin_verification_page.capture():
+        return False
+
+    # Unimport PinVerification the free memory
+    sys.modules.pop("krux.pages.pin_verification")
+    del sys.modules["krux"].pages.pin_verification
+    del PinVerification
+    return True
 
 
 def login(ctx_login):
@@ -106,6 +132,8 @@ postimport_ticks = time.ticks_ms()
 if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
     time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
+if not pin_verification(ctx):
+    power_manager.shutdown()
 login(ctx)
 gc.collect()
 home(ctx)

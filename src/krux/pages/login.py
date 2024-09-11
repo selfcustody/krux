@@ -31,6 +31,7 @@ from ..krux_settings import t
 from . import (
     Page,
     Menu,
+    DIGITS,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -38,7 +39,6 @@ from . import (
     choose_len_mnemonic,
 )
 
-DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
 

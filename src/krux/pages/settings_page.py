@@ -47,14 +47,13 @@ from ..encryption import QR_CODE_ITER_MULTIPLE
 from . import (
     Page,
     Menu,
+    DIGITS,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
     DEFAULT_PADDING,
 )
 import os
-
-DIGITS = "0123456789"
 
 PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
@@ -131,6 +130,53 @@ class SettingsPage(Page):
             self.ctx.power_manager.reboot()
         return MENU_CONTINUE
 
+    def enter_modify_pin(self):
+        """Handler for the 'PIN' menu item"""
+        import hashlib
+        from machine import unique_id
+        from ..krux_settings import PIN_PATH
+
+        if not self.prompt(t("Enter a 6+ digits PIN"), self.ctx.display.height() // 2):
+            return MENU_CONTINUE
+
+        try:
+            if (os.stat(PIN_PATH)[0] & 0x4000) == 0:
+                from .pin_verification import PinVerification
+
+                pin_verification = PinVerification(self.ctx)
+                if not pin_verification.capture(changing_pin=True):
+                    return MENU_CONTINUE
+        except:
+            pass
+
+        pin = pin_confirm = ""
+        while len(pin) < 6:
+            pin = self.capture_from_keypad("PIN", [DIGITS])
+            if pin == ESC_KEY:
+                return MENU_CONTINUE
+        while len(pin_confirm) < 6:
+            pin_confirm = self.capture_from_keypad(t("Confirm PIN"), [DIGITS])
+            if pin_confirm == ESC_KEY:
+                return MENU_CONTINUE
+        if pin != pin_confirm:
+            self.flash_error(t("PINs do not match"))
+            return MENU_CONTINUE
+        # Double hashes the PIN
+        pin_bytes = pin.encode()
+        pin_hash = hashlib.sha256(pin_bytes).digest()
+        sha256 = hashlib.sha256()
+        sha256.update(pin_hash)
+        sha256.update(unique_id())
+        secret_hash = sha256.digest()
+        # Saves the double hashed PIN in a file
+        try:
+            with open(PIN_PATH, "wb") as f:
+                f.write(secret_hash)
+            self.flash_text(t("PIN set successfully"))
+        except OSError:
+            self.flash_error(t("Error saving PIN"))
+        return MENU_CONTINUE
+
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
 
@@ -197,6 +243,10 @@ class SettingsPage(Page):
             if settings_namespace.namespace == Settings.namespace:
                 items.append((t("Factory Settings"), self.restore_settings))
                 back_status = self._settings_exit_check
+
+            # Case for security settings
+            if settings_namespace.namespace == "settings.security":
+                items.append((t("Set PIN"), self.enter_modify_pin))
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()

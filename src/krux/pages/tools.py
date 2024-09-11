@@ -21,10 +21,6 @@
 # THE SOFTWARE.
 
 import uos
-from ..sd_card import SDHandler
-from ..display import BOTTOM_PROMPT_LINE
-from ..krux_settings import t
-from ..qr import FORMAT_NONE
 from . import (
     Page,
     Menu,
@@ -37,6 +33,10 @@ from . import (
 )
 from .file_manager import SD_ROOT_PATH
 from ..format import generate_thousands_separator
+from ..sd_card import SDHandler
+from ..display import BOTTOM_PROMPT_LINE
+from ..krux_settings import t
+from ..qr import FORMAT_NONE
 
 
 class Tools(Page):
@@ -52,12 +52,36 @@ class Tools(Page):
                     (t("Print Test QR"), self.print_test),
                     (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
+                    (t("Flash Snapshot"), self.flash_snapshot),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("Wipe Device"), self.wipe_device),
                 ],
             ),
         )
         self.ctx = ctx
+
+    def flash_snapshot(self):
+        """Handler for the 'Flash Snapshot' menu item"""
+        import os
+        from ..krux_settings import PIN_PATH
+
+        try:
+            if (os.stat(PIN_PATH)[0] & 0x4000) == 0:
+                from .pin_verification import PinVerification
+
+                pin_verification = PinVerification(self.ctx)
+                pin_hash = pin_verification.capture(return_hash=True)
+                if not pin_hash:
+                    return MENU_CONTINUE
+        except:
+            self.flash_error(t("PIN required to generate flash snapshot"))
+
+        from .flash_snapshot import FlashSnapshot
+
+        flash_snapshot = FlashSnapshot(self.ctx, pin_hash)
+        flash_snapshot.generate()
+
+        return MENU_CONTINUE
 
     def sd_check(self):
         """Handler for the 'SD Check' menu item"""
