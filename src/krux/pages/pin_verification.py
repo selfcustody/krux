@@ -52,7 +52,7 @@ class PinVerification(Page):
             return False
         # Hashes the PIN
         pin_bytes = pin.encode()
-        # Pin hash will be used in "Flash Snapshot"
+        # Pin hash will be used in "Flash Hash"
         pin_hash = hashlib.sha256(pin_bytes).digest()
 
         # Read the contents of PIN file

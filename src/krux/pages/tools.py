@@ -52,7 +52,7 @@ class Tools(Page):
                     (t("Print Test QR"), self.print_test),
                     (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
-                    (t("Flash Snapshot"), self.flash_snapshot),
+                    (t("Flash Hash"), self.flash_hash),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("Wipe Device"), self.wipe_device),
                 ],
@@ -60,8 +60,8 @@ class Tools(Page):
         )
         self.ctx = ctx
 
-    def flash_snapshot(self):
-        """Handler for the 'Flash Snapshot' menu item"""
+    def flash_hash(self):
+        """Handler for the 'Flash Hash' menu item"""
 
         if self.ctx.pin_enabled:
             from .pin_verification import PinVerification
@@ -74,10 +74,10 @@ class Tools(Page):
             self.flash_error(t("Set a PIN first"))
             return MENU_CONTINUE
 
-        from .flash_snapshot import FlashSnapshot
+        from .flash_hash import FlashHash
 
-        flash_snapshot = FlashSnapshot(self.ctx, pin_hash)
-        flash_snapshot.generate()
+        flash_hash = FlashHash(self.ctx, pin_hash)
+        flash_hash.generate()
 
         return MENU_CONTINUE
 

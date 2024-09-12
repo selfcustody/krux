@@ -161,7 +161,9 @@ class SettingsPage(Page):
                 return MENU_CONTINUE
 
         self.ctx.display.clear()
-        if not self.prompt(t("Enter a 6+ characters PIN"), self.ctx.display.height() // 2):
+        if not self.prompt(
+            t("Enter a 6+ characters PIN"), self.ctx.display.height() // 2
+        ):
             return MENU_CONTINUE
 
         pin = pin_confirm = ""

@@ -29,7 +29,7 @@ from ..wdt import wdt
 BLOCK_SIZE = 0x1000
 
 
-class FlashSnapshot(Page):
+class FlashHash(Page):
     """Generate a human recognizable snapshot of the flash memory tied to a PIN"""
 
     def __init__(self, ctx, pin_hash):
@@ -123,21 +123,24 @@ class FlashSnapshot(Page):
         return " ".join(words[:2])
 
     def generate(self):
-        """Generates the flash snapshot"""
+        """Generates the flash hash snapshot"""
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Generating Flash Snapshot.."))
+        self.ctx.display.draw_hcentered_text(t("Generating Flash Hash.."))
         firmware_region_hash = self.hash_pin_with_flash()
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Flash Snapshot"))
+        self.ctx.display.draw_hcentered_text(t("Flash Hash"))
         y_offset = DEFAULT_PADDING + 2 * FONT_HEIGHT
         self.hash_to_fingerprint(firmware_region_hash, y_offset)
         anti_tamper_words = self.hash_to_words(firmware_region_hash)
         y_offset += self.image_block_size * 5
         if self.ctx.display.width() < self.ctx.display.height():
             y_offset += FONT_HEIGHT
-        y_offset += self.ctx.display.draw_hcentered_text(
-            anti_tamper_words, y_offset, color=theme.highlight_color
-        ) * FONT_HEIGHT
+        y_offset += (
+            self.ctx.display.draw_hcentered_text(
+                anti_tamper_words, y_offset, color=theme.highlight_color
+            )
+            * FONT_HEIGHT
+        )
         spiffs_region_hash = self.hash_pin_with_flash(spiffs_region=True)
         anti_tamper_words = self.hash_to_words(spiffs_region_hash)
         self.ctx.display.draw_hcentered_text(anti_tamper_words, y_offset)
