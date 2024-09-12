@@ -160,7 +160,8 @@ class SettingsPage(Page):
             if not pin_verification.capture(changing_pin=True):
                 return MENU_CONTINUE
 
-        if not self.prompt(t("Enter a 6+ digits PIN"), self.ctx.display.height() // 2):
+        self.ctx.display.clear()
+        if not self.prompt(t("Enter a 6+ characters PIN"), self.ctx.display.height() // 2):
             return MENU_CONTINUE
 
         pin = pin_confirm = ""
