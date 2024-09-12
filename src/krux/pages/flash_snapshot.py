@@ -21,8 +21,12 @@
 # THE SOFTWARE.
 
 from . import Page, MENU_CONTINUE, DEFAULT_PADDING
+from ..themes import theme
 from ..krux_settings import t
 from ..display import FONT_HEIGHT
+from ..wdt import wdt
+
+BLOCK_SIZE = 0x1000
 
 
 class FlashSnapshot(Page):
@@ -32,25 +36,33 @@ class FlashSnapshot(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.pin_hash = pin_hash
+        self.image_block_size = self.ctx.display.width() // 7
 
-    def hash_pin_with_flash(self):
+    def hash_pin_with_flash(self, spiffs_region=False):
         """Hashes the pin, unique ID and flash memory together"""
         import hashlib
         import flash
-        from ..firmware import FLASH_SIZE
+        from ..firmware import FLASH_SIZE, SPIFFS_ADDR
         from machine import unique_id
 
+        counter = SPIFFS_ADDR // BLOCK_SIZE if spiffs_region else 0
+        range_begin = SPIFFS_ADDR if spiffs_region else 0
+        range_end = FLASH_SIZE if spiffs_region else SPIFFS_ADDR
+        percentage_offset = (
+            DEFAULT_PADDING + 3 * FONT_HEIGHT + self.image_block_size * 5
+        )
         sha256 = hashlib.sha256()
         sha256.update(self.pin_hash)
         sha256.update(unique_id())
-        counter = 0
-        for address in range(0, FLASH_SIZE, 0x1000):
+        for address in range(range_begin, range_end, BLOCK_SIZE):
             counter += 1
-            sha256.update(flash.read(address, 0x1000))
+            sha256.update(flash.read(address, BLOCK_SIZE))
             if counter % 100 == 0:
                 # Update progress
-                print(counter // 41)
-                self.ctx.display.draw_centered_text("%d%%" % (counter // 41))
+                self.ctx.display.draw_hcentered_text(
+                    "%d%%" % (counter // 41), percentage_offset
+                )
+                wdt.feed()
         return sha256.digest()
 
     def hash_to_random_color(self, hash_bytes):
@@ -78,8 +90,8 @@ class FlashSnapshot(Page):
         """Generates a 5x5 pixelated fingerprint based on a 256-bit hash."""
 
         fg_color = self.hash_to_random_color(hash_bytes)
+        block_size = self.image_block_size
         # Create a 5x5 grid, but we'll only compute the first 3 columns
-        block_size = self.ctx.display.width() // 7
         for row in range(5):
             for col in range(3):  # Only compute the left half and middle column
                 byte_index = row * 3 + col
@@ -100,8 +112,6 @@ class FlashSnapshot(Page):
                     self.ctx.display.fill_rectangle(
                         x_mirror, y, block_size, block_size, color
                     )
-        # Returns the size of the fingerprint
-        return 5 * block_size
 
     def hash_to_words(self, hash_bytes):
         """Converts a hash to a list of words"""
@@ -114,13 +124,19 @@ class FlashSnapshot(Page):
         """Generates the flash snapshot"""
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Generating Flash Snapshot.."))
-        binary_flash_hash = self.hash_pin_with_flash()
+        firmware_region_hash = self.hash_pin_with_flash()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Flash Snapshot"))
         y_offset = DEFAULT_PADDING + 2 * FONT_HEIGHT
-        y_offset += self.hash_to_fingerprint(binary_flash_hash, y_offset)
+        self.hash_to_fingerprint(firmware_region_hash, y_offset)
+        anti_tamper_words = self.hash_to_words(firmware_region_hash)
+        y_offset += self.image_block_size * 5
+        self.ctx.display.draw_hcentered_text(
+            anti_tamper_words, y_offset, color=theme.highlight_color
+        )
         y_offset += FONT_HEIGHT
-        anti_tamper_words = self.hash_to_words(binary_flash_hash)
+        spiffs_region_hash = self.hash_pin_with_flash(spiffs_region=True)
+        anti_tamper_words = self.hash_to_words(spiffs_region_hash)
         self.ctx.display.draw_hcentered_text(anti_tamper_words, y_offset)
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

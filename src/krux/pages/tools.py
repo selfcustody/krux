@@ -62,19 +62,17 @@ class Tools(Page):
 
     def flash_snapshot(self):
         """Handler for the 'Flash Snapshot' menu item"""
-        import os
-        from ..krux_settings import PIN_PATH
 
-        try:
-            if (os.stat(PIN_PATH)[0] & 0x4000) == 0:
-                from .pin_verification import PinVerification
+        if self.ctx.pin_enabled:
+            from .pin_verification import PinVerification
 
-                pin_verification = PinVerification(self.ctx)
-                pin_hash = pin_verification.capture(return_hash=True)
-                if not pin_hash:
-                    return MENU_CONTINUE
-        except:
-            self.flash_error(t("PIN required to generate flash snapshot"))
+            pin_verification = PinVerification(self.ctx)
+            pin_hash = pin_verification.capture(return_hash=True)
+            if not pin_hash:
+                return MENU_CONTINUE
+        else:
+            self.flash_error(t("Set a PIN first"))
+            return MENU_CONTINUE
 
         from .flash_snapshot import FlashSnapshot
 

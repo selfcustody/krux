@@ -34,7 +34,9 @@ from .translations import translation_table
 from .key import SCRIPT_LONG_NAMES
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
+
 PIN_PATH = "/flash/pin"
+PIN_PBKDF2_ITERATIONS = 100000
 
 
 DEFAULT_TX_PIN = (

@@ -66,6 +66,7 @@ LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
+NUM_SPECIAL_3 = " !#$%&'()*"  # NUM_SPECIAL_1 without numbers
 DIGITS = "0123456789"
 
 BATTERY_WIDTH = 22

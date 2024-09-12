@@ -78,6 +78,7 @@ def pin_verification(ctx_pin):
     sys.modules.pop("krux.pages.pin_verification")
     del sys.modules["krux"].pages.pin_verification
     del PinVerification
+    ctx_pin.pin_enabled = True
     return True
 
 

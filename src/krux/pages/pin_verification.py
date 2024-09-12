@@ -20,8 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import Page, ESC_KEY, DIGITS
-from ..krux_settings import t, PIN_PATH
+from . import (
+    Page,
+    ESC_KEY,
+    DIGITS,
+    LETTERS,
+    UPPERCASE_LETTERS,
+    NUM_SPECIAL_2,
+    NUM_SPECIAL_3,
+)
+from ..krux_settings import t, PIN_PATH, PIN_PBKDF2_ITERATIONS
 
 
 class PinVerification(Page):
@@ -37,22 +45,41 @@ class PinVerification(Page):
         from machine import unique_id
 
         label = t("Current PIN") if changing_pin else t("PIN")
-        pin = self.capture_from_keypad(label, [DIGITS])
+        pin = self.capture_from_keypad(
+            label, [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3]
+        )
         if pin == ESC_KEY:
             return False
-        # Double hashes the PIN
+        # Hashes the PIN
         pin_bytes = pin.encode()
+        # Pin hash will be used in "Flash Snapshot"
         pin_hash = hashlib.sha256(pin_bytes).digest()
+
+        # Read the contents of PIN file
+        with open(PIN_PATH, "rb") as f:
+            file_secret = f.read()
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing.."))
+
+        # Tries with non-stretched secret (obsolete)
         sha256 = hashlib.sha256()
         sha256.update(pin_hash)
         sha256.update(unique_id())
-        secret_hash = sha256.digest()
-        # Read the contents of PIN file
-        with open(PIN_PATH, "rb") as f:
-            file_hash = f.read()
-        if secret_hash == file_hash:
+        non_stretched_secret = sha256.digest()
+        if non_stretched_secret == file_secret:
             if return_hash:
                 return pin_hash
             return True
+
+        # Generate PBKDF2 stretched secret
+        secret = hashlib.pbkdf2_hmac(
+            "sha256", pin_hash, unique_id(), PIN_PBKDF2_ITERATIONS
+        )
+        if secret == file_secret:
+            if return_hash:
+                return pin_hash
+            return True
+
         self.flash_error(t("Invalid PIN"))
         return False

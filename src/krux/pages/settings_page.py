@@ -48,6 +48,10 @@ from . import (
     Page,
     Menu,
     DIGITS,
+    LETTERS,
+    UPPERCASE_LETTERS,
+    NUM_SPECIAL_2,
+    NUM_SPECIAL_3,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -130,48 +134,67 @@ class SettingsPage(Page):
             self.ctx.power_manager.reboot()
         return MENU_CONTINUE
 
+    def disable_pin(self):
+        """Handler for the 'Disable PIN' menu item"""
+        from ..krux_settings import PIN_PATH
+        from .pin_verification import PinVerification
+
+        pin_verification = PinVerification(self.ctx)
+        if not pin_verification.capture(changing_pin=True):
+            return MENU_CONTINUE
+        os.remove(PIN_PATH)
+        self.ctx.pin_enabled = False
+        self.flash_text(t("PIN disabled"))
+        return MENU_CONTINUE
+
     def enter_modify_pin(self):
         """Handler for the 'PIN' menu item"""
         import hashlib
         from machine import unique_id
-        from ..krux_settings import PIN_PATH
+        from ..krux_settings import PIN_PATH, PIN_PBKDF2_ITERATIONS
+
+        if self.ctx.pin_enabled:
+            from .pin_verification import PinVerification
+
+            pin_verification = PinVerification(self.ctx)
+            if not pin_verification.capture(changing_pin=True):
+                return MENU_CONTINUE
 
         if not self.prompt(t("Enter a 6+ digits PIN"), self.ctx.display.height() // 2):
             return MENU_CONTINUE
 
-        try:
-            if (os.stat(PIN_PATH)[0] & 0x4000) == 0:
-                from .pin_verification import PinVerification
-
-                pin_verification = PinVerification(self.ctx)
-                if not pin_verification.capture(changing_pin=True):
-                    return MENU_CONTINUE
-        except:
-            pass
-
         pin = pin_confirm = ""
         while len(pin) < 6:
-            pin = self.capture_from_keypad("PIN", [DIGITS])
+            pin = self.capture_from_keypad(
+                "PIN",
+                [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
+            )
             if pin == ESC_KEY:
                 return MENU_CONTINUE
         while len(pin_confirm) < 6:
-            pin_confirm = self.capture_from_keypad(t("Confirm PIN"), [DIGITS])
+            pin_confirm = self.capture_from_keypad(
+                t("Confirm PIN"),
+                [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
+            )
             if pin_confirm == ESC_KEY:
                 return MENU_CONTINUE
         if pin != pin_confirm:
             self.flash_error(t("PINs do not match"))
             return MENU_CONTINUE
-        # Double hashes the PIN
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing.."))
+        # Hashes the PIN once
         pin_bytes = pin.encode()
         pin_hash = hashlib.sha256(pin_bytes).digest()
-        sha256 = hashlib.sha256()
-        sha256.update(pin_hash)
-        sha256.update(unique_id())
-        secret_hash = sha256.digest()
-        # Saves the double hashed PIN in a file
+        # Than uses hash to generate a stretched secret, with unique_id as salt
+        secret = hashlib.pbkdf2_hmac(
+            "sha256", pin_hash, unique_id(), PIN_PBKDF2_ITERATIONS
+        )
+        # Saves the stretched PIN in a file
         try:
             with open(PIN_PATH, "wb") as f:
-                f.write(secret_hash)
+                f.write(secret)
+            self.ctx.pin_enabled = True
             self.flash_text(t("PIN set successfully"))
         except OSError:
             self.flash_error(t("Error saving PIN"))
@@ -247,6 +270,8 @@ class SettingsPage(Page):
             # Case for security settings
             if settings_namespace.namespace == "settings.security":
                 items.append((t("Set PIN"), self.enter_modify_pin))
+                if self.ctx.pin_enabled:
+                    items.append((t("Disable PIN"), self.disable_pin))
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()
