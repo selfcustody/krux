@@ -71,8 +71,22 @@ def pin_verification(ctx_pin):
     from krux.pages.pin_verification import PinVerification
 
     pin_verification_page = PinVerification(ctx_pin)
-    if not pin_verification_page.capture():
+    pin_hash = pin_verification_page.capture(return_hash=True)
+    if not pin_hash:
         return False
+    
+    from krux.krux_settings import Settings
+
+    if Settings().security.boot_flash_hash:
+        from  krux.pages.flash_snapshot import FlashSnapshot
+
+        flash_snapshot = FlashSnapshot(ctx_pin, pin_hash)
+        flash_snapshot.generate()
+    
+        # Unimport FlashSnapshot the free memory
+        sys.modules.pop("krux.pages.flash_snapshot")
+        del sys.modules["krux"].pages.flash_snapshot
+        del FlashSnapshot
 
     # Unimport PinVerification the free memory
     sys.modules.pop("krux.pages.pin_verification")

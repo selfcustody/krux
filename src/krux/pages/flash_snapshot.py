@@ -51,6 +51,8 @@ class FlashSnapshot(Page):
         percentage_offset = (
             DEFAULT_PADDING + 3 * FONT_HEIGHT + self.image_block_size * 5
         )
+        if self.ctx.display.width() < self.ctx.display.height():
+            percentage_offset += FONT_HEIGHT
         sha256 = hashlib.sha256()
         sha256.update(self.pin_hash)
         sha256.update(unique_id())
@@ -131,10 +133,11 @@ class FlashSnapshot(Page):
         self.hash_to_fingerprint(firmware_region_hash, y_offset)
         anti_tamper_words = self.hash_to_words(firmware_region_hash)
         y_offset += self.image_block_size * 5
-        self.ctx.display.draw_hcentered_text(
+        if self.ctx.display.width() < self.ctx.display.height():
+            y_offset += FONT_HEIGHT
+        y_offset += self.ctx.display.draw_hcentered_text(
             anti_tamper_words, y_offset, color=theme.highlight_color
-        )
-        y_offset += FONT_HEIGHT
+        ) * FONT_HEIGHT
         spiffs_region_hash = self.hash_pin_with_flash(spiffs_region=True)
         anti_tamper_words = self.hash_to_words(spiffs_region_hash)
         self.ctx.display.draw_hcentered_text(anti_tamper_words, y_offset)
