@@ -1,5 +1,9 @@
 # PIN and Anti-Tamper Mechanism (Experimental)
 
+<span style="color: red;">Update!</span>
+There are some gaps and opportunities for improvement in the 'Flash Hash' anti-tamper solution. Therefore, it will not be included in release v24.09.0.
+
+
 ## Krux Security Model - Good Practices and Limitations
 
 It is crucial for users to verify the authenticity of the firmware being flashed onto the device, especially when doing so via USB.
