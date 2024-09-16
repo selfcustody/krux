@@ -30,11 +30,11 @@ from .settings import (
     MAIN_TXT,
     TEST_TXT,
 )
-from .translations import translation_table
 from .key import SCRIPT_LONG_NAMES
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
+DEFAULT_LOCALE = "en-US"
 
 DEFAULT_TX_PIN = (
     board.config["board_info"]["CONNEXT_A"]
@@ -54,20 +54,61 @@ PBKDF2_HMAC_CBC = 1
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 
 
-def translations(locale):
-    """Returns the translations map for the given locale"""
-    if locale in translation_table:
-        return translation_table[locale]
-    return None
-
-
 def t(slug):
     """Translates a slug according to the current locale"""
-    slug_id = binascii.crc32(slug.encode("utf-8"))
-    lookup = translations(Settings().i18n.locale)
-    if not lookup or slug_id not in lookup:
+    if not locale_control.translation:
         return slug
-    return lookup[slug_id]
+    slug_id = binascii.crc32(slug.encode("utf-8"))
+    if slug_id not in locale_control.translation:
+        return slug
+    return locale_control.translation[slug_id]
+
+
+class LocaleControl:
+    """Manages the current locale and available translations"""
+
+    def __init__(self):
+        self.translation = None
+        self.locales = []
+        self.update_locales()
+
+    def update_locales(self):
+        """Updates the list of available locales"""
+        from .translations import available_languages
+
+        self.locales = []
+        self.locales.append(DEFAULT_LOCALE)
+        self.locales.extend(available_languages)
+
+    def load_locale(self, locale):
+        """Loads translation based on the given locale"""
+
+        if locale == DEFAULT_LOCALE:
+            self.translation = None
+            return
+        module_path = "krux.translations.{}".format(locale.replace('-', '_'))
+        translation_module = __import__(module_path)
+        # Navigate to the nested module (translations.<locale>)
+        for part in module_path.split(".")[1:]:
+            translation_module = getattr(translation_module, part)
+
+        self.translation =  getattr(translation_module, "translation_table")
+
+
+locale_control = LocaleControl()
+
+
+class I18nSettings(SettingsNamespace):
+    """I18n-specific settings"""
+
+    namespace = "settings.i18n"
+    locale = CategorySetting("locale", DEFAULT_LOCALE, locale_control.locales)
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "locale": t("Locale"),
+        }[attr]
 
 
 class DefaultWallet(SettingsNamespace):
@@ -86,22 +127,6 @@ class DefaultWallet(SettingsNamespace):
             "network": t("Network"),
             "multisig": t("Multisig"),
             "script_type": t("Script Type"),
-        }[attr]
-
-
-class I18nSettings(SettingsNamespace):
-    """I18n-specific settings"""
-
-    namespace = "settings.i18n"
-    DEFAULT_LOCALE = "en-US"
-    locale = CategorySetting(
-        "locale", DEFAULT_LOCALE, list(translation_table.keys()) + [DEFAULT_LOCALE]
-    )
-
-    def label(self, attr):
-        """Returns a label for UI when given a setting name or namespace"""
-        return {
-            "locale": t("Locale"),
         }[attr]
 
 
@@ -420,3 +445,5 @@ class Settings(SettingsNamespace):
         }
 
         return main_menu[attr]
+    
+locale_control.load_locale(Settings().i18n.locale)

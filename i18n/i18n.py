@@ -22,12 +22,35 @@
 import binascii
 import sys
 import json
-from os import listdir, walk
-from os.path import isfile, exists, join, basename
+from os import listdir, walk, mkdir
+from os.path import isfile, isdir, exists, join, basename
 import re
 
 SRC_DIR = "../src"
 TRANSLATION_FILES_DIR = "translations"
+
+KRUX_LICENSE = """# The MIT License (MIT)
+
+# Copyright (c) 2021-2024 Krux contributors
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+"""
 
 
 def find_translation_slugs():
@@ -167,8 +190,13 @@ def remove_unnecessary():
 
 
 def bake_translations():
-    """Bakes all translations into a translations.py file inside the krux namespace"""
-    translation_table = {}
+    """Bakes individual translation tables into separate files inside the krux namespace within a 'translations' subfolder."""
+    translations_dir = join(SRC_DIR, "krux", "translations")
+
+    # Create the translations subfolder if it doesn't exist
+    if not isdir(translations_dir):
+        mkdir(translations_dir)
+
     translation_filenames = [
         f
         for f in listdir(TRANSLATION_FILES_DIR)
@@ -183,39 +211,33 @@ def bake_translations():
             lookup = {}
             for slug, translation in list(translations.items()):
                 lookup[binascii.crc32(slug.encode("utf-8"))] = translation
-            translation_table[basename(translation_filename).split(".")[0]] = lookup
 
-    with open(
-        join(SRC_DIR, "krux", "translations.py"), "w", encoding="utf8", newline="\n"
-    ) as translations:
-        translations.write(
-            """# The MIT License (MIT)
+            language_code = (
+                basename(translation_filename).split(".")[0].replace("-", "_")
+            )
 
-# Copyright (c) 2021-2024 Krux contributors
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.\n"""
+            # Write the individual translation table to a separate Python file in the 'translations' subfolder
+            with open(
+                join(translations_dir, f"{language_code}.py"),
+                "w",
+                encoding="utf8",
+                newline="\n",
+            ) as language_file:
+                language_file.write(KRUX_LICENSE)
+                language_file.write("# pylint: disable=C0301\n")
+                language_file.write(f"translation_table = ")
+                language_file.write(repr(lookup))
+                language_file.write("\n")
+                print("Baked: " + translations_dir + f"/{language_code}.py")
+    # Create a file with a list of all available languages
+    with open(join(translations_dir, "__init__.py"), "w", encoding="utf8") as init_file:
+        init_file.write(KRUX_LICENSE)
+        init_file.write("available_languages = [")
+        init_file.write(
+            ", ".join([f'"{basename(f).split(".")[0]}"' for f in translation_filenames])
         )
-        translations.write("# pylint: disable=C0301\n")
-        translations.write("translation_table = ")
-        translations.write(repr(translation_table))
-        translations.write("\n")
-        print("Baked " + SRC_DIR + "/krux/" + "translations.py")
+        init_file.write("]")
+        init_file.write("\n")
 
 
 def create_translation_file(locale):

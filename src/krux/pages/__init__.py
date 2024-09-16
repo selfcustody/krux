@@ -653,35 +653,38 @@ class Menu:
 
     # def draw_ram_indicator(self):
     #     """Draws the amount of free RAM in the status bar +recently-collected"""
+
     #     def strnum(_in):
-    #         large_units = ("","K","M")
+    #         large_units = ("", "K", "M")
 
     #         value = _in
     #         for i in range(len(large_units)):
     #             unit = large_units[i]
     #             if value < 2**10:
     #                 break
-    #             if i+1 < len(large_units):
+    #             if i + 1 < len(large_units):
     #                 value /= 2**10
 
     #         if value == int(value):
     #             fmt = "%d" + unit
     #         else:
-    #            if value < 1:
-    #                fmt = "%0.3f" + unit
-    #            elif value < 10:
-    #                fmt = "%.2f" + unit
-    #            elif value < 100:
-    #                fmt = "%.1f" + unit
-    #            else:
-    #                fmt = "%d" + unit
+    #             if value < 1:
+    #                 fmt = "%0.3f" + unit
+    #             elif value < 10:
+    #                 fmt = "%.2f" + unit
+    #             elif value < 100:
+    #                 fmt = "%.1f" + unit
+    #             else:
+    #                 fmt = "%d" + unit
 
     #         return fmt % value
 
     #     pre_collect = gc.mem_free()
     #     gc.collect()
     #     post_collect = gc.mem_free()
-    #     ram_text = "RAM: " + strnum(post_collect) + " +" + strnum(post_collect - pre_collect)
+    #     ram_text = (
+    #         "RAM: " + strnum(post_collect) + " +" + strnum(post_collect - pre_collect)
+    #     )
     #     self.ctx.display.draw_string(12, 0, ram_text, GREEN)
 
     def draw_battery_indicator(self):
