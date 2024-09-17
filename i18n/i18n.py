@@ -19,12 +19,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+
 import binascii
 import sys
 import json
 from os import listdir, walk, mkdir
 from os.path import isfile, isdir, exists, join, basename
 import re
+from translate import Translator
 
 SRC_DIR = "../src"
 TRANSLATION_FILES_DIR = "translations"
@@ -115,7 +117,6 @@ def print_missing():
         force_target = sys.argv[2]
     else:
         force_target = None
-    from translate import Translator
 
     slugs = find_translation_slugs()
     translation_filenames = [
@@ -190,7 +191,10 @@ def remove_unnecessary():
 
 
 def bake_translations():
-    """Bakes individual translation tables into separate files inside the krux namespace within a 'translations' subfolder."""
+    """
+    Bakes individual translation tables into separate files inside the krux namespace
+    within a 'translations' subfolder.
+    """
     translations_dir = join(SRC_DIR, "krux", "translations")
 
     # Create the translations subfolder if it doesn't exist
@@ -217,7 +221,8 @@ def bake_translations():
                     translations_array.append(translations[slug])
             language_code = basename(translation_filename).split(".")[0][:2]
 
-            # Write the individual translation table to a separate Python file in the 'translations' subfolder
+            # Write the individual translation array to a separate Python file
+            # in the 'translations' subfolder
             with open(
                 join(translations_dir, f"{language_code}.py"),
                 "w",
