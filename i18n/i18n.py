@@ -226,7 +226,7 @@ def bake_translations():
             ) as language_file:
                 language_file.write(KRUX_LICENSE)
                 language_file.write("# pylint: disable=C0301\n")
-                language_file.write(f"translation_array = ")
+                language_file.write("translation_array = ")
                 language_file.write(repr(translations_array))
                 language_file.write("\n")
                 print("Baked: " + translations_dir + f"/{language_code}.py")
