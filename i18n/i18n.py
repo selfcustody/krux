@@ -203,15 +203,18 @@ def bake_translations():
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
     translation_filenames.sort()
+    code_slugs = find_translation_slugs()
     for translation_filename in translation_filenames:
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
         ) as translation_file:
             translations = json.load(translation_file)
-            lookup = {}
-            for slug, translation in list(translations.items()):
-                lookup[binascii.crc32(slug.encode("utf-8"))] = translation
-
+            translations_array = []
+            for slug in code_slugs:
+                if slug not in translations:
+                    translations_array.append(slug)
+                else:
+                    translations_array.append(translations[slug])
             language_code = (
                 basename(translation_filename).split(".")[0].replace("-", "_")
             )
@@ -225,11 +228,15 @@ def bake_translations():
             ) as language_file:
                 language_file.write(KRUX_LICENSE)
                 language_file.write("# pylint: disable=C0301\n")
-                language_file.write(f"translation_table = ")
-                language_file.write(repr(lookup))
+                language_file.write(f"translation_array = ")
+                language_file.write(repr(translations_array))
                 language_file.write("\n")
                 print("Baked: " + translations_dir + f"/{language_code}.py")
-    # Create a file with a list of all available languages
+    # Create an reference array for index lookup
+    reference_array = []
+    for slug in code_slugs:
+        reference_array.append(binascii.crc32(slug.encode("utf-8")))
+    # Create a file with a list of all available languages and index lookup array
     with open(join(translations_dir, "__init__.py"), "w", encoding="utf8") as init_file:
         init_file.write(KRUX_LICENSE)
         init_file.write("available_languages = [")
@@ -237,6 +244,9 @@ def bake_translations():
             ", ".join([f'"{basename(f).split(".")[0]}"' for f in translation_filenames])
         )
         init_file.write("]")
+        init_file.write("\n")
+        init_file.write("ref_array = ")
+        init_file.write(repr(reference_array))
         init_file.write("\n")
 
 

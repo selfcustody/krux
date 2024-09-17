@@ -59,15 +59,15 @@ def t(slug):
     if not locale_control.translation:
         return slug
     slug_id = binascii.crc32(slug.encode("utf-8"))
-    if slug_id not in locale_control.translation:
-        return slug
-    return locale_control.translation[slug_id]
+    translation_index = locale_control.reference.index(slug_id)
+    return locale_control.translation[translation_index]
 
 
 class LocaleControl:
     """Manages the current locale and available translations"""
 
     def __init__(self):
+        self.reference = None
         self.translation = None
         self.locales = []
         self.update_locales()
@@ -84,15 +84,20 @@ class LocaleControl:
         """Loads translation based on the given locale"""
 
         if locale == DEFAULT_LOCALE:
+            self.reference = None
             self.translation = None
             return
-        module_path = "krux.translations.{}".format(locale.replace('-', '_'))
+        module_path = "krux.translations.{}".format(locale.replace("-", "_"))
         translation_module = __import__(module_path)
         # Navigate to the nested module (translations.<locale>)
         for part in module_path.split(".")[1:]:
             translation_module = getattr(translation_module, part)
 
-        self.translation =  getattr(translation_module, "translation_table")
+        self.translation = getattr(translation_module, "translation_array")
+        if self.reference is None:
+            from .translations import ref_array
+
+            self.reference = ref_array
 
 
 locale_control = LocaleControl()
@@ -445,5 +450,6 @@ class Settings(SettingsNamespace):
         }
 
         return main_menu[attr]
-    
+
+
 locale_control.load_locale(Settings().i18n.locale)
