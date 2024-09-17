@@ -26,7 +26,6 @@ import json
 from os import listdir, walk, mkdir
 from os.path import isfile, isdir, exists, join, basename
 import re
-from translate import Translator
 
 SRC_DIR = "../src"
 TRANSLATION_FILES_DIR = "translations"
@@ -117,6 +116,7 @@ def print_missing():
         force_target = sys.argv[2]
     else:
         force_target = None
+    from translate import Translator
 
     slugs = find_translation_slugs()
     translation_filenames = [
