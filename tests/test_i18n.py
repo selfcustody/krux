@@ -1,39 +1,35 @@
 import pytest
 
+# import binascii
 
-@pytest.fixture
-def tdata(mocker):
-    import binascii
+# TRANSLATION_SLUGS = [
+#     "Hello world",
+#     "Hello",
+#     "Untranslated slug",
+# ]
 
-    return [
-        {"en-US": {binascii.crc32("Hello world".encode("utf-8")): "Hello"}},
-        {"es-MX": {binascii.crc32("Hello world".encode("utf-8")): "Hola"}},
-    ]
+# INDEX_REFERENCE = [
+#     binascii.crc32(TRANSLATION_SLUGS[0].encode("utf-8")),
+#     binascii.crc32(TRANSLATION_SLUGS[1].encode("utf-8")),
+#     binascii.crc32(TRANSLATION_SLUGS[2].encode("utf-8")),
+# ]
 
-
-def test_translations(mocker, m5stickv, tdata):
-    import binascii
-    from krux.krux_settings import translations
-
-    cases = [
-        (tdata[0], {binascii.crc32("Hello world".encode("utf-8")): "Hello"}),
-        (tdata[1], None),
-    ]
-    for case in cases:
-        mocker.patch("krux.krux_settings.translation_table", case[0])
-        lookup = translations("en-US")
-
-        assert lookup == case[1]
+# PT_BR = [
+#     "Olá mundo",
+#     "Olá",
+#     "Untranslated slug",
+# ]
 
 
-def test_t(mocker, m5stickv, tdata):
-    from krux.krux_settings import t
+def test_translations(mocker, m5stickv):
+    from krux.krux_settings import t, locale_control
 
-    cases = [
-        (tdata[0], "Hello world", "Hello"),
-        (tdata[1], "Hello world", "Hello world"),
-    ]
-    for case in cases:
-        mocker.patch("krux.krux_settings.translation_table", case[0])
+    # Test default language
+    assert t("Load Mnemonic") == "Load Mnemonic"
 
-        assert t(case[1]) == case[2]
+    # Test pt_BR
+    locale_control.load_locale("pt_BR")
+    assert t("Load Mnemonic") == "Carregar Mnemônico"
+
+    # Test non existent slug
+    assert t("New Text") == "New Text"

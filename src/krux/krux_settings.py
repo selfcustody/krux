@@ -59,7 +59,10 @@ def t(slug):
     if not locale_control.translation:
         return slug
     slug_id = binascii.crc32(slug.encode("utf-8"))
-    translation_index = locale_control.reference.index(slug_id)
+    try:
+        translation_index = locale_control.reference.index(slug_id)
+    except:
+        return slug
     return locale_control.translation[translation_index]
 
 
@@ -87,7 +90,7 @@ class LocaleControl:
             self.reference = None
             self.translation = None
             return
-        module_path = "krux.translations.{}".format(locale.replace("-", "_"))
+        module_path = "krux.translations.{}".format(locale[:2])
         translation_module = __import__(module_path)
         # Navigate to the nested module (translations.<locale>)
         for part in module_path.split(".")[1:]:

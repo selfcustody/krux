@@ -215,9 +215,7 @@ def bake_translations():
                     translations_array.append(slug)
                 else:
                     translations_array.append(translations[slug])
-            language_code = (
-                basename(translation_filename).split(".")[0].replace("-", "_")
-            )
+            language_code = basename(translation_filename).split(".")[0][:2]
 
             # Write the individual translation table to a separate Python file in the 'translations' subfolder
             with open(
