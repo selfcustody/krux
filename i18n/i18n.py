@@ -208,6 +208,7 @@ def bake_translations():
     ]
     translation_filenames.sort()
     code_slugs = find_translation_slugs()
+    code_slugs = sorted(code_slugs)
     for translation_filename in translation_filenames:
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"

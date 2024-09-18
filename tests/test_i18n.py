@@ -1,25 +1,5 @@
 import pytest
 
-# import binascii
-
-# TRANSLATION_SLUGS = [
-#     "Hello world",
-#     "Hello",
-#     "Untranslated slug",
-# ]
-
-# INDEX_REFERENCE = [
-#     binascii.crc32(TRANSLATION_SLUGS[0].encode("utf-8")),
-#     binascii.crc32(TRANSLATION_SLUGS[1].encode("utf-8")),
-#     binascii.crc32(TRANSLATION_SLUGS[2].encode("utf-8")),
-# ]
-
-# PT_BR = [
-#     "Olá mundo",
-#     "Olá",
-#     "Untranslated slug",
-# ]
-
 
 def test_translations(mocker, m5stickv):
     from krux.krux_settings import t, locale_control
