@@ -45,6 +45,13 @@ def draw_splash():
 
 def check_for_updates():
     """Checks SD card, if a valid firmware is found asks if user wants to update the device"""
+
+    # Check if the SD card is inserted and contains a firmware before loading the firmware module
+    try:
+        os.stat("/sd/firmware.bin")
+    except OSError:
+        return
+
     from krux import firmware
 
     if firmware.upgrade():
