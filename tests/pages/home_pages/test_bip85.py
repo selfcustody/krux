@@ -33,13 +33,13 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             [
                 BUTTON_ENTER,  # 12 words
-                BUTTON_ENTER,  # Child index 0
+                BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
             ],
-            "wheat upgrade bind cover echo govern sorry seminar swallow evil gather horse",
-            "2ddff806",
+            "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
+            "a620a1bc",
             True,
         ),
         # 2 - 24w in, 12w out, load
@@ -47,13 +47,13 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
             tdata.SINGLESIG_24_WORD_KEY,
             [
                 BUTTON_ENTER,  # 12 words out
-                BUTTON_ENTER,  # Child index 0
+                BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
             ],
-            "fury deposit tackle carry minimum cool video choice armor frown age space",
-            "1b6c9237",
+            "mule patient cloth romance tongue taxi animal sweet develop settle elegant exercise",
+            "f1556c60",
             True,
         ),
         # 3 - 12w in, 24w out, load
@@ -62,13 +62,13 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
             [
                 BUTTON_PAGE,  # Move to 24 words
                 BUTTON_ENTER,  # Choose 24 words
-                BUTTON_ENTER,  # Child index 0
+                BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
             ],
-            "vendor autumn garlic peace excite blur powder room delay pink tattoo debate fabric spare donate employ effort accident remove drift page begin same modify",
-            "263b15ef",
+            "nice hundred tree change section dismiss wet birth sleep under cattle beef cross chunk rain elbow work tag tiger weird toy stand offer smart",
+            "cac16c1b",
             True,
         ),
         # 4 - 12w, don't load
@@ -76,14 +76,14 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             [
                 BUTTON_ENTER,  # 12 words
-                BUTTON_ENTER,  # Child index 0
+                BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE,  # Move to Cancel
                 BUTTON_ENTER,  # Cancel
             ],
-            "wheat upgrade bind cover echo govern sorry seminar swallow evil gather horse",
-            "2ddff806",
+            "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
+            "a620a1bc",
             False,
         ),
         # 12w, ESC
@@ -107,13 +107,13 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go" with no index assigned
                 BUTTON_ENTER,  # Go
                 # Loop back to initial state
-                BUTTON_ENTER,  # this time assign 0 for index
+                BUTTON_ENTER,  # this time assign 1 for index
                 BUTTON_PAGE_PREV,  # Move to "Go" with no index assigned
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
             ],
-            "wheat upgrade bind cover echo govern sorry seminar swallow evil gather horse",
-            "2ddff806",
+            "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
+            "a620a1bc",
             True,
         ),
         # Too big index
@@ -121,18 +121,18 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             [
                 BUTTON_ENTER,  # 12 words
-                BUTTON_PAGE,  # Move to 1
-                *([BUTTON_ENTER] * 12),  # Type 111111111111
+                BUTTON_PAGE,  # Move to 2
+                *([BUTTON_ENTER] * 12),  # Type 222222222222
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 # Invalid value message
-                BUTTON_ENTER,  # Assign index 0
+                BUTTON_ENTER,  # Assign index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
             ],
-            "wheat upgrade bind cover echo govern sorry seminar swallow evil gather horse",
-            "2ddff806",
+            "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
+            "a620a1bc",
             True,
         ),
     ]

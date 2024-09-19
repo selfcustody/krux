@@ -248,14 +248,14 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
-    INDEX_0_B85_FINGERPRINT = "02e8bff2"
+    INDEX_1_B85_FINGERPRINT = "af9bc2fe"
 
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 3),  # Go to BIP85
         BUTTON_ENTER,  # Enter BIP85
         BUTTON_ENTER,  # Agree
         BUTTON_ENTER,  # 12 words
-        BUTTON_ENTER,  # Index 0
+        BUTTON_ENTER,  # Index 1
         BUTTON_PAGE_PREV,  # Move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_ENTER,  # Load words
@@ -271,7 +271,7 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
     home.wallet()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert ctx.wallet.key.fingerprint_hex_str() == INDEX_0_B85_FINGERPRINT
+    assert ctx.wallet.key.fingerprint_hex_str() == INDEX_1_B85_FINGERPRINT
 
 
 def test_load_address_view(mocker, amigo, tdata):
