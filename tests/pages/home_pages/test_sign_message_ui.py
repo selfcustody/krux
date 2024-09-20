@@ -250,7 +250,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         QRCodeCapture,
         "qr_capture_loop",
         new=lambda self: (
-            "signmessage m/84h/1h/0h/0/3 ascii:a test message with a colon ':' character.",
+            "signmessage m/84h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
             FORMAT_NONE,
         ),
     )
@@ -275,7 +275,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         [mocker.call("3. bc1qgl..cn3", mocker.ANY)],
     )
     message_signer.display_qr_codes.assert_called_once_with(
-        "IHx1+DGW83eZZpV8rOT/9l/yUYa2ncmCr/Mnq7XBJmmyFCUWKceHZQqUZAk60XuwlBox3d3hAa4FU59AXOjbALo=",
+        "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         0,
         "Signed Message",
     )
