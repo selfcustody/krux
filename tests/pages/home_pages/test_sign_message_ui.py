@@ -241,7 +241,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         # Message content
         # Displayed address
         # Signature
-        ( # 0 - Sign P2WPKH Mainnet
+        (  # 0 - Sign P2WPKH Mainnet
             [
                 BUTTON_ENTER,  # Load from camera
                 BUTTON_ENTER,  # Confirm to sign message
@@ -256,7 +256,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             "3. bc1qgl..cn3",
             "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
-        ( # 1 - Sign P2WPKH Testnet
+        (  # 1 - Sign P2WPKH Testnet
             [
                 BUTTON_ENTER,  # Load from camera
                 BUTTON_ENTER,  # Confirm to sign message
@@ -271,7 +271,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             "3. tb1qyn..5km",
             "ILc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
         ),
-        ( # 2 - Sign P2TR Mainnet
+        (  # 2 - Sign P2TR Mainnet
             [
                 BUTTON_ENTER,  # Load from camera
                 BUTTON_ENTER,  # Confirm to sign message
@@ -286,7 +286,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             "3. bc1py0..ler",
             "H3Z5VioeLaC0rpdI2CflUu34IANgGxum0Rr9lmCziQRfUQv+vFND+nHvxHmJZA0uvLLI1/mTEEHD2bBfN6Y2d6w=",
         ),
-        ( # 3 - Sign Legacy Mainnet
+        (  # 3 - Sign Legacy Mainnet
             [
                 BUTTON_ENTER,  # Load from camera
                 BUTTON_ENTER,  # Confirm to sign message
@@ -301,7 +301,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             "3. 1MVGa1..rsJ",
             "IEpq8rUwSmDxO3GgwaZ75tw3DArtHtLi08kgQuRNXdteMI5KNEAWbpzsY8gRzGkspZN4YFiRu4RNCM+IsKkWys8=",
         ),
-        ( # 4 - Sign Nested Segwit Mainnet
+        (  # 4 - Sign Nested Segwit Mainnet
             [
                 BUTTON_ENTER,  # Load from camera
                 BUTTON_ENTER,  # Confirm to sign message
@@ -316,9 +316,29 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             "3. 38Cahk..EAN",
             "HyH8898c2S6eF8hTPGhRqLC6UQrJrhw/fdguBeFG0cCrOFkbG8TCVURXOgxXaEV93vrFlHyxNGEvL10IcsLtvvI=",
         ),
-        (  #  - Sign P2WPKH Mainnet - Save to SD card
+        (  # 5 - Sign P2WPKH Mainnet - Save to SD card
             [
                 BUTTON_ENTER,  # Confirm load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_PAGE,  # Sign to SD card
+                BUTTON_ENTER,  # Confirm sign to SD card
+                # BUTTON_PAGE_PREV,  # Move to Go
+                BUTTON_ENTER,  # Go
+            ],
+            "signmessage m/84h/0h/0h/0/3 ascii:A test message.",
+            None,
+            True,  # Sign to SD
+            "A test message.",
+            "3. bc1qgl..cn3",
+            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+        ),
+        (  # 6 - Sign P2WPKH Mainnet - Load from and save to SD card
+            [
+                BUTTON_PAGE,  # Load from SD card
+                BUTTON_ENTER,  # Confirm load from SD card
+                BUTTON_ENTER,  # Choose file "signmessage.txt"
+                BUTTON_ENTER,  # Confirm to sign message
                 BUTTON_ENTER,  # Confirm to sign message
                 BUTTON_ENTER,  # Check signature
                 BUTTON_PAGE,  # Sign to SD card
@@ -326,8 +346,8 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to Go
                 BUTTON_ENTER,  # Go
             ],
-            "signmessage m/84h/0h/0h/0/3 ascii:A test message.",
             None,
+            "A test message.\nm/84'/0'/0'/0/3\nP2WPKH",
             True,  # Sign to SD
             "A test message.",
             "3. bc1qgl..cn3",
@@ -354,15 +374,10 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 ),
             )
             qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
-        if case[3]:  # Save to SD card
-            mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
-            mocker.patch(
-                "builtins.open",
-                new=get_mock_open(
-                    {
-                        "/sd/message-signed.sig": case[2],
-                    }
-                ),
+        mocker.patch.object(message_signer, "has_sd_card", new=lambda: True)
+        if case[2]:  # Load from SD card
+            mocker.patch.object(
+                message_signer, "load_file", return_value=("signmessage.txt", case[2])
             )
 
         message_signer.sign_message()
