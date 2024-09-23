@@ -437,7 +437,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,
             None,
             [
-                BUTTON_ENTER,  # Load frm QR code
+                BUTTON_ENTER,  # Load from QR code
                 BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1

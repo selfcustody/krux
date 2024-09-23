@@ -89,7 +89,8 @@ disable=bad-inline-option,
         duplicate-code,
         ungrouped-imports,
         raise-missing-from,
-        anomalous-backslash-in-string
+        anomalous-backslash-in-string,
+        too-many-positional-arguments  # Todo: remove this and adapt for releases above 24.09.0
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

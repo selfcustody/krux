@@ -228,54 +228,177 @@ def test_sign_message(mocker, m5stickv, tdata):
 def test_sign_message_at_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.sign_message_ui import SignMessage
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
     from krux.themes import theme
     from krux.pages.qr_capture import QRCodeCapture
 
-    BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Load from camera
-        BUTTON_ENTER,  # Confirm to sign message
-        BUTTON_ENTER,  # Check signature
-        BUTTON_ENTER,  # Sign to QR code
-        BUTTON_ENTER,  # Check QR code
-    ]
-    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
-    mocker.patch.object(ctx.display, "width", new=lambda: 135)
-    message_signer = SignMessage(ctx)
-    mocker.spy(message_signer, "display_qr_codes")
-
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (
+    cases = [
+        # Button sequence
+        # QR raw message
+        # SD raw message
+        # Sign to SD
+        # Message content
+        # Displayed address
+        # Signature
+        (  # 0 - Sign P2WPKH Mainnet
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+            ],
             "signmessage m/84h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
-            FORMAT_NONE,
+            None,
+            False,
+            "a test message with a colon ':' character.",
+            "3. bc1qgl..cn3",
+            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
-    )
-    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
-    message_signer.sign_message()
+        (  # 1 - Sign P2WPKH Testnet
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+            ],
+            "signmessage m/84h/1h/0h/0/3 ascii:A test message.",
+            None,
+            False,
+            "A test message.",
+            "3. tb1qyn..5km",
+            "ILc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
+        ),
+        (  # 2 - Sign P2TR Mainnet
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+            ],
+            "signmessage m/86h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            None,
+            False,
+            "a test message with a colon ':' character.",
+            "3. bc1py0..ler",
+            "H3Z5VioeLaC0rpdI2CflUu34IANgGxum0Rr9lmCziQRfUQv+vFND+nHvxHmJZA0uvLLI1/mTEEHD2bBfN6Y2d6w=",
+        ),
+        (  # 3 - Sign Legacy Mainnet
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+            ],
+            "signmessage m/44h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            None,
+            False,
+            "a test message with a colon ':' character.",
+            "3. 1MVGa1..rsJ",
+            "IEpq8rUwSmDxO3GgwaZ75tw3DArtHtLi08kgQuRNXdteMI5KNEAWbpzsY8gRzGkspZN4YFiRu4RNCM+IsKkWys8=",
+        ),
+        (  # 4 - Sign Nested Segwit Mainnet
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+            ],
+            "signmessage m/49h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            None,
+            False,
+            "a test message with a colon ':' character.",
+            "3. 38Cahk..EAN",
+            "HyH8898c2S6eF8hTPGhRqLC6UQrJrhw/fdguBeFG0cCrOFkbG8TCVURXOgxXaEV93vrFlHyxNGEvL10IcsLtvvI=",
+        ),
+        (  # 5 - Sign P2WPKH Mainnet - Save to SD card
+            [
+                BUTTON_ENTER,  # Confirm load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_PAGE,  # Sign to SD card
+                BUTTON_ENTER,  # Confirm sign to SD card
+                # BUTTON_PAGE_PREV,  # Move to Go
+                BUTTON_ENTER,  # Go
+            ],
+            "signmessage m/84h/0h/0h/0/3 ascii:A test message.",
+            None,
+            True,  # Sign to SD
+            "A test message.",
+            "3. bc1qgl..cn3",
+            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+        ),
+        (  # 6 - Sign P2WPKH Mainnet - Load from and save to SD card
+            [
+                BUTTON_PAGE,  # Load from SD card
+                BUTTON_ENTER,  # Confirm load from SD card
+                BUTTON_ENTER,  # Choose file "signmessage.txt"
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_PAGE,  # Sign to SD card
+                BUTTON_ENTER,  # Confirm sign to SD card
+                BUTTON_PAGE_PREV,  # Move to Go
+                BUTTON_ENTER,  # Go
+            ],
+            None,
+            "A test message.\nm/84'/0'/0'/0/3\nP2WPKH",
+            True,  # Sign to SD
+            "A test message.",
+            "3. bc1qgl..cn3",
+            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+        ),
+    ]
+    case_count = 0
+    for case in cases:
+        print("Case: ", case_count)
+        # A mainnet wallet
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+        ctx = create_ctx(mocker, case[0], wallet)
+        mocker.patch.object(ctx.display, "width", new=lambda: 135)
+        message_signer = SignMessage(ctx)
 
-    qr_capturer.assert_called_once()
-    ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Message:", 10, theme.highlight_color)]
-    )
-    ctx.display.draw_hcentered_text.assert_has_calls(
-        [
-            mocker.call(
-                "a test message with a colon ':' character.", mocker.ANY, max_lines=10
+        if case[1]:
+            mocker.spy(message_signer, "display_qr_codes")
+            mocker.patch.object(
+                QRCodeCapture,
+                "qr_capture_loop",
+                new=lambda self: (
+                    case[1],
+                    FORMAT_NONE,
+                ),
             )
-        ]
-    )
-    ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Address:", mocker.ANY, theme.highlight_color)]
-    )
-    ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("3. bc1qgl..cn3", mocker.ANY)],
-    )
-    message_signer.display_qr_codes.assert_called_once_with(
-        "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
-        0,
-        "Signed Message",
-    )
+            qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
+        mocker.patch.object(message_signer, "has_sd_card", new=lambda: True)
+        if case[2]:  # Load from SD card
+            mocker.patch.object(
+                message_signer, "load_file", return_value=("signmessage.txt", case[2])
+            )
+
+        message_signer.sign_message()
+
+        qr_capturer.assert_called_once()
+        ctx.display.draw_hcentered_text.assert_has_calls(
+            [mocker.call("Message:", 10, theme.highlight_color)]
+        )
+        ctx.display.draw_hcentered_text.assert_has_calls(
+            [mocker.call(case[4], mocker.ANY, max_lines=10)]
+        )
+        ctx.display.draw_hcentered_text.assert_has_calls(
+            [mocker.call("Address:", mocker.ANY, theme.highlight_color)]
+        )
+        ctx.display.draw_hcentered_text.assert_has_calls(
+            [mocker.call(case[5], mocker.ANY)],
+        )
+        if not case[3]:
+            message_signer.display_qr_codes.assert_called_once_with(
+                case[6],
+                0,
+                "Signed Message",
+            )
+        case_count += 1
