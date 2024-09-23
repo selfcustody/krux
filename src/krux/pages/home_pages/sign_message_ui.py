@@ -26,7 +26,7 @@ import hashlib
 import binascii
 from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
 from ..utils import Utils
-from ...key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2SH, P2WPKH, P2TR
+from ...key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2WPKH, P2TR, P2SH_P2WPKH
 from ...themes import theme
 from ...display import (
     DEFAULT_PADDING,
@@ -120,7 +120,7 @@ class SignMessage(Utils):
         elif script_type == P2PKH:
             p2pkh_script = script.p2pkh(pubkey)
             addr = p2pkh_script.address(network=network)
-        elif script_type == P2SH - P2WPKH:
+        elif script_type == P2SH_P2WPKH:
             p2wpkh_script = script.p2wpkh(pubkey)
             p2sh_script = script.p2sh(p2wpkh_script)
             addr = p2sh_script.address(network=network)

@@ -241,7 +241,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         # Message content
         # Displayed address
         # Signature
-        (
+        ( # 0 - Sign P2WPKH Mainnet
             [
                 BUTTON_ENTER,  # Load from camera
                 BUTTON_ENTER,  # Confirm to sign message
@@ -256,7 +256,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             "3. bc1qgl..cn3",
             "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
-        (
+        ( # 1 - Sign P2WPKH Testnet
             [
                 BUTTON_ENTER,  # Load from camera
                 BUTTON_ENTER,  # Confirm to sign message
@@ -271,7 +271,52 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             "3. tb1qyn..5km",
             "ILc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
         ),
-        (  # Save to SD card
+        ( # 2 - Sign P2TR Mainnet
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+            ],
+            "signmessage m/86h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            None,
+            False,
+            "a test message with a colon ':' character.",
+            "3. bc1py0..ler",
+            "H3Z5VioeLaC0rpdI2CflUu34IANgGxum0Rr9lmCziQRfUQv+vFND+nHvxHmJZA0uvLLI1/mTEEHD2bBfN6Y2d6w=",
+        ),
+        ( # 3 - Sign Legacy Mainnet
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+            ],
+            "signmessage m/44h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            None,
+            False,
+            "a test message with a colon ':' character.",
+            "3. 1MVGa1..rsJ",
+            "IEpq8rUwSmDxO3GgwaZ75tw3DArtHtLi08kgQuRNXdteMI5KNEAWbpzsY8gRzGkspZN4YFiRu4RNCM+IsKkWys8=",
+        ),
+        ( # 4 - Sign Nested Segwit Mainnet
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+            ],
+            "signmessage m/49h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            None,
+            False,
+            "a test message with a colon ':' character.",
+            "3. 38Cahk..EAN",
+            "HyH8898c2S6eF8hTPGhRqLC6UQrJrhw/fdguBeFG0cCrOFkbG8TCVURXOgxXaEV93vrFlHyxNGEvL10IcsLtvvI=",
+        ),
+        (  #  - Sign P2WPKH Mainnet - Save to SD card
             [
                 BUTTON_ENTER,  # Confirm load from camera
                 BUTTON_ENTER,  # Confirm to sign message
