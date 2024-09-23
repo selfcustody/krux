@@ -20,12 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from embit import bip32, compact
+from embit import bip32, compact, script
+from embit.networks import NETWORKS
 import hashlib
 import binascii
 from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
 from ..utils import Utils
-from ...key import SINGLESIG_SCRIPT_PURPOSE
+from ...key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2SH, P2WPKH, P2TR
 from ...themes import theme
 from ...display import (
     DEFAULT_PADDING,
@@ -42,6 +43,12 @@ from ...sd_card import (
     SIGNED_FILE_SUFFIX,
     PUBKEY_FILE_EXTENSION,
 )
+from ...settings import TEST_TXT, MAIN_TXT
+
+
+SD_MESSAGE_HEADER = "-----BEGIN BITCOIN SIGNED MESSAGE-----"
+SD_SIGNATURE_HEADER = "-----BEGIN BITCOIN SIGNATURE-----"
+SD_SIGNATURE_FOOTER = "-----END BITCOIN SIGNATURE-----"
 
 
 class SignMessage(Utils):
@@ -72,23 +79,66 @@ class SignMessage(Utils):
         except:
             return False
 
-    def _sign_at_address(self, message, derivation_str):
-        """Signs a message at a derived Bitcoin address"""
-        derivation = bip32.parse_path(derivation_str)
-        wallet_path = "/".join(derivation_str.split("/")[:4])
+    def get_network_from_path(self, derivation_path):
+        """Gets the network from the derivation path"""
+        parts = derivation_path.split("/")
+        if len(parts) < 2:
+            return None
 
-        if wallet_path == self.ctx.wallet.key.derivation:
-            # Show derived address
-            address = self.ctx.wallet.descriptor.derive(
-                derivation[4], branch_index=0
-            ).address(network=self.ctx.wallet.key.network)
-            address_derivation = self.fit_to_line(
-                address, str(derivation[4]) + ". ", fixed_chars=3
-            )
+        if parts[2] in ["0'", "0h"]:
+            return NETWORKS[MAIN_TXT]
+        if parts[2] in ["1'", "1h"]:
+            return NETWORKS[TEST_TXT]
+        return None
+
+    def get_script_type_from_path(self, derivation_path):
+        """Gets the script type from the derivation path"""
+        parts = derivation_path.split("/")
+        if len(parts) < 2:
+            return None
+
+        script_from_deriv = int(parts[1].strip("'").strip("h"))
+        for script_name, script_number in SINGLESIG_SCRIPT_PURPOSE.items():
+            if script_number == script_from_deriv:
+                return script_name
+        return None
+
+    def get_bitcoin_address(self, derivation_path, script_type=""):
+        """Gets the Bitcoin address from the derivation path"""
+
+        network = self.get_network_from_path(derivation_path)
+        if not script_type:
+            script_type = self.get_script_type_from_path(derivation_path)
+        path = bip32.parse_path(derivation_path)
+        child_key = self.ctx.wallet.key.root.derive(path)
+        pubkey = child_key.to_public()
+
+        # Generate the Bitcoin address based on the script type
+        if script_type == P2WPKH:
+            p2wpkh_script = script.p2wpkh(pubkey)
+            addr = p2wpkh_script.address(network=network)
+        elif script_type == P2PKH:
+            p2pkh_script = script.p2pkh(pubkey)
+            addr = p2pkh_script.address(network=network)
+        elif script_type == P2SH - P2WPKH:
+            p2wpkh_script = script.p2wpkh(pubkey)
+            p2sh_script = script.p2sh(p2wpkh_script)
+            addr = p2sh_script.address(network=network)
+        elif script_type == P2TR:
+            taproot_script = script.p2tr(pubkey)
+            addr = taproot_script.address(network=network)
         else:
-            address_derivation = derivation_str.replace("h", "'")
+            raise ValueError("Unsupported script type: %s" % script_type)
 
-        self._display_message_sign_prompt(message, address_derivation)
+        return addr
+
+    def _sign_at_address(self, message, derivation_str, address=""):
+        """Signs a message at a derived Bitcoin address"""
+
+        derivation = bip32.parse_path(derivation_str)
+        self._display_message_sign_prompt(
+            message, self.fit_to_line(address, str(derivation[4]) + ". ", fixed_chars=3)
+        )
 
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return None
@@ -105,7 +155,7 @@ class SignMessage(Utils):
         self._display_signature(base_encode(sig, 64).strip().decode())
         return sig
 
-    def _display_message_sign_prompt(self, message, address_derivation):
+    def _display_message_sign_prompt(self, message, address):
         """Helper to display message and address for signing"""
         max_lines = TOTAL_LINES - (7 if MINIMAL_DISPLAY else 10)
         offset_y = DEFAULT_PADDING
@@ -129,7 +179,7 @@ class SignMessage(Utils):
             )
             * FONT_HEIGHT
         )
-        self.ctx.display.draw_hcentered_text(address_derivation, offset_y)
+        self.ctx.display.draw_hcentered_text(address, offset_y)
 
     def _display_signature(self, encoded_sig):
         """Helper to display the signature"""
@@ -139,6 +189,7 @@ class SignMessage(Utils):
 
     def _sign_at_address_from_qr(self, data):
         """Message signed at a derived Bitcoin address - Sparrow/Specter"""
+
         if not data.startswith(b"signmessage"):
             return None
 
@@ -151,20 +202,26 @@ class SignMessage(Utils):
         if len(message) < 2 or message[0] != b"ascii":
             return None
 
-        return self._sign_at_address(b" ".join(message[1:]), derivation)
+        address = self.get_bitcoin_address(derivation)
+        signature = self._sign_at_address(b" ".join(message[1:]), derivation, address)
+
+        return signature, message[1].decode(), address
 
     def _sign_at_address_from_sd(self, data):
         """Message signed at a derived Bitcoin address - SD card"""
         data = data.decode() if isinstance(data, bytes) else data
         lines = [line.strip() for line in data.splitlines() if line.strip()]
-        if len(lines) < 2 or lines[-1].lower() not in SINGLESIG_SCRIPT_PURPOSE:
+        script_type = lines[-1].lower()
+        if len(lines) < 2 or script_type not in SINGLESIG_SCRIPT_PURPOSE:
             return None
         derivation_path = lines[-2]
         if not self._is_valid_derivation_path(derivation_path):
             return None
+        address = self.get_bitcoin_address(derivation_path, script_type)
         message = "\n".join(lines[:-2])
+        signature = self._sign_at_address(message.encode(), derivation_path, address)
 
-        return self._sign_at_address(message.encode(), derivation_path)
+        return signature, message, address
 
     def sign_standard_message(self, data):
         """Signs a standard message"""
@@ -195,7 +252,12 @@ class SignMessage(Utils):
         return hashlib.sha256(data).digest()
 
     def _export_signature(
-        self, sig, qr_format=FORMAT_NONE, sign_at_address=False, message_filename=""
+        self,
+        sig,
+        qr_format=FORMAT_NONE,
+        message_filename="",
+        message="",
+        address="",
     ):
         """Exports the message signature to a QR code or SD card"""
         sign_menu = Menu(
@@ -217,19 +279,20 @@ class SignMessage(Utils):
         pubkey = binascii.hexlify(self.ctx.wallet.key.account.sec()).decode()
 
         if index == 0:
-            self._export_to_qr(sig, pubkey, qr_format, sign_at_address)
+            at_address = address != ""
+            self._export_to_qr(sig, pubkey, qr_format, at_address)
         elif self.has_sd_card():
-            self._export_to_sd(sig, pubkey, sign_at_address, message_filename)
+            self._export_to_sd(sig, pubkey, message_filename, message, address)
         return MENU_CONTINUE
 
-    def _export_to_qr(self, sig, pubkey, qr_format, sign_at_address):
+    def _export_to_qr(self, sig, pubkey, qr_format, at_address=False):
         """Exports the signature and public key to QR code"""
         encoded_sig = base_encode(sig, 64).strip().decode()
         title = t("Signed Message")
         self.display_qr_codes(encoded_sig, qr_format, title)
         self.print_standard_qr(encoded_sig, qr_format, title)
 
-        if not sign_at_address:
+        if not at_address:
             self._display_and_export_pubkey(pubkey, qr_format)
 
     def _display_and_export_pubkey(self, pubkey, qr_format):
@@ -242,15 +305,24 @@ class SignMessage(Utils):
         self.display_qr_codes(pubkey, qr_format, title)
         self.print_standard_qr(pubkey, qr_format, title)
 
-    def _export_to_sd(self, sig, pubkey, sign_at_address, message_filename):
+    def _export_to_sd(self, sig, pubkey, message_filename, message="", address=""):
         """Exports the signature and public key to SD card"""
         from ..file_operations import SaveFile
 
         save_page = SaveFile(self.ctx)
-        sig = base_encode(sig, 64).strip().decode()
-        extension = ".txt" if sign_at_address else SIGNATURE_FILE_EXTENSION
+        if address:
+            file_content = ""
+            file_content = SD_MESSAGE_HEADER + "\n"
+            file_content += message + "\n"
+            file_content += SD_SIGNATURE_HEADER + "\n"
+            file_content += address + "\n"
+            file_content += base_encode(sig, 64).strip().decode() + "\n"
+            file_content += SD_SIGNATURE_FOOTER
+        else:
+            file_content = sig
+        extension = ".txt" if address else SIGNATURE_FILE_EXTENSION
         save_page.save_file(
-            sig,
+            file_content,
             "message",
             message_filename,
             t("Signature") + ":",
@@ -259,7 +331,7 @@ class SignMessage(Utils):
             prompt=False,
         )
 
-        if not sign_at_address:
+        if not address:
             title = t("Hex Public Key")
             save_page.save_file(
                 pubkey, "pubkey", "", title + ":", PUBKEY_FILE_EXTENSION, "", False
@@ -274,17 +346,21 @@ class SignMessage(Utils):
             return MENU_CONTINUE
 
         if message_filename:
-            sig = self._sign_at_address_from_sd(data)
-            if sig:
-                self._export_signature(sig, FORMAT_NONE, True, message_filename)
+            signature_data = self._sign_at_address_from_sd(data)
+            if signature_data:
+                sig, message, address = signature_data
+                self._export_signature(
+                    sig, FORMAT_NONE, message_filename, message, address
+                )
                 return MENU_CONTINUE
 
         data = data.encode() if isinstance(data, str) else data
-        sig = self._sign_at_address_from_qr(data)
-        if sig:
-            self._export_signature(sig, qr_format, True, message_filename)
+        signature_data = self._sign_at_address_from_qr(data)
+        if signature_data:
+            sig, message, address = signature_data
+            self._export_signature(sig, qr_format, message_filename, message, address)
             return MENU_CONTINUE
         sig = self.sign_standard_message(data)
         if sig:
-            self._export_signature(sig, qr_format, False, message_filename)
+            self._export_signature(sig, qr_format, message_filename)
         return MENU_CONTINUE

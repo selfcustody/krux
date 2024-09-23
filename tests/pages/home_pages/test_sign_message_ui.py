@@ -268,7 +268,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             None,
             False,
             "A test message.",
-            "m/84'/1'/0'/0/3", # With path mismatch, show the full derivation path
+            "3. tb1qyn..5km",
             "ILc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
         ),
         (  # Save to SD card
@@ -319,7 +319,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                     }
                 ),
             )
-            
+
         message_signer.sign_message()
 
         qr_capturer.assert_called_once()
@@ -327,11 +327,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             [mocker.call("Message:", 10, theme.highlight_color)]
         )
         ctx.display.draw_hcentered_text.assert_has_calls(
-            [
-                mocker.call(
-                    case[4], mocker.ANY, max_lines=10
-                )
-            ]
+            [mocker.call(case[4], mocker.ANY, max_lines=10)]
         )
         ctx.display.draw_hcentered_text.assert_has_calls(
             [mocker.call("Address:", mocker.ANY, theme.highlight_color)]
