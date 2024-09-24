@@ -202,7 +202,11 @@ class MnemonicsView(Page):
         tiny_seed.export()
 
         # Allow to print on thermal printer only
-        if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
+        if (
+            Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT
+            and self.ctx.camera.mode is not None
+        ):
+            # TinySeed printing requires a camera frame buffer to draw in.
             if self.print_prompt(t("Print Tiny Seed?")):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE

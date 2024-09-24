@@ -17,11 +17,10 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
-    from krux.translations import translation_table
+    from krux.translations import available_languages
 
-    tlist = list(translation_table)
-    index_pt = tlist.index("pt-BR")
-    index_next = (index_pt + 1) % (len(tlist))
+    index_pt = available_languages.index("pt-BR")
+    index_next = (index_pt + 1) % (len(available_languages))
 
     cases = [
         (  # 0 - Change Network
@@ -83,7 +82,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
-            lambda: Settings().i18n.locale == tlist[index_next],
+            lambda: Settings().i18n.locale == available_languages[index_next],
         ),
         (  # 3  Printer numeric settings
             (
@@ -186,17 +185,25 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
     import krux
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_TOUCH
-    from krux.krux_settings import Settings, CategorySetting, NumberSetting
-    from krux.translations import translation_table
-    from krux.themes import WHITE, RED, GREEN, ORANGE
+    from krux.krux_settings import Settings, CategorySetting
+    from krux.translations import available_languages, ref_array
+    from krux.translations.pt import translation_array as br_array
+    from krux.themes import WHITE, GREEN, ORANGE
 
-    tlist = list(translation_table)
-    index_pt = tlist.index("pt-BR")
-    index_next = (index_pt + 1) % (len(tlist))
-    text_pt = translation_table[tlist[index_pt]][1177338798] + "\n" + tlist[index_pt]
-    text_next = (
-        translation_table[tlist[index_next]][1177338798] + "\n" + tlist[index_next]
-    )
+    index_pt = available_languages.index("pt-BR")
+    index_next = (index_pt + 1) % (len(available_languages))
+    slug_index = ref_array.index(1177338798)
+    text_pt = br_array[slug_index] + "\n" + available_languages[index_pt]
+
+    # Get translations for the next language
+    next_language = available_languages[index_next]
+    # Construct the path to the nested module
+    next_module_path = f"krux.translations.{next_language[:2]}"
+    # Import the top-level module (krux)
+    next_trans_module = __import__(next_module_path, fromlist=[""])
+    # Access the translation_array variable from the nested module
+    next_trans_array = getattr(next_trans_module, "translation_array")
+    text_next = next_trans_array[slug_index] + "\n" + available_languages[index_next]
 
     PREV_INDEX = 0
     GO_INDEX = 1
@@ -272,7 +279,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
                 mocker.call(text_pt, WHITE),
                 mocker.call(text_next, WHITE),
             ],
-            lambda: Settings().i18n.locale == tlist[index_next],
+            lambda: Settings().i18n.locale == available_languages[index_next],
             CategorySetting,
         ),
     ]

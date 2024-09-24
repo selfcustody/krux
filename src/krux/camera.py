@@ -31,21 +31,26 @@ OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
 GC2145_ID = 0x45  # Yahboom
 
+COLOR_MODE = 0
+GRAYSCALE_MODE = 1
+
 
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
     def __init__(self):
-        self.initialized = False
         self.cam_id = None
         self.antiglare_enabled = False
-        self.initialize_sensor()
+        self.mode = None
+        try:
+            self.initialize_sensor()
+            sensor.run(0)
+        except Exception as e:
+            print("Camera not found:", e)
 
     def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
-        self.initialized = False
         self.antiglare_enabled = False
-        self.cam_id = sensor.get_id()
         if self.cam_id in (OV7740_ID, GC2145_ID):
             sensor.reset(freq=18200000)
             if board.config["type"] == "cube":
@@ -54,9 +59,12 @@ class Camera:
                 sensor.set_vflip(1)
         else:
             sensor.reset()
+        self.cam_id = sensor.get_id()
+        self.mode = COLOR_MODE
         if grayscale and self.cam_id != GC2145_ID:
             # GC2145 does not support grayscale
             sensor.set_pixformat(sensor.GRAYSCALE)
+            self.mode = GRAYSCALE_MODE
         else:
             sensor.set_pixformat(sensor.RGB565)
         if self.cam_id == OV5642_ID:
@@ -201,8 +209,13 @@ class Camera:
 
     def initialize_run(self):
         """Initializes and runs sensor"""
-        self.initialize_sensor()
+        if self.mode is None:
+            raise ValueError("No camera found")
+        if self.mode != COLOR_MODE:
+            self.initialize_sensor()
         sensor.run(1)
+        if self.antiglare_enabled:
+            self.disable_antiglare()
 
     def stop_sensor(self):
         """Stops capturing from sensor"""

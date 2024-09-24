@@ -22,6 +22,7 @@
 import board
 import time
 from . import Page
+from ..display import FONT_HEIGHT
 from ..input import PRESSED
 from ..themes import theme
 from ..qr import QRPartParser, FORMAT_UR
@@ -58,6 +59,14 @@ class QRCodeCapture(Page):
         else:
             self.ctx.display.draw_centered_text(t("Anti-glare disabled"))
         time.sleep_ms(ANTI_GLARE_WAIT_TIME)
+        # Erase the message from the screen
+        self.ctx.display.fill_rectangle(
+            0,
+            (self.ctx.display.height() - FONT_HEIGHT) // 2,
+            self.ctx.display.width(),
+            FONT_HEIGHT,
+            theme.bg_color,
+        )
         self.ctx.display.to_landscape()
         self.ctx.input.reset_ios_state()
 

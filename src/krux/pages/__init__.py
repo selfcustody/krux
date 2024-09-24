@@ -24,6 +24,7 @@ import math
 import time
 import board
 import lcd
+import _thread
 from .keypads import Keypad
 from ..themes import theme, WHITE, GREEN, DARKGREY
 from ..input import (
@@ -643,50 +644,51 @@ class Menu:
                 STATUS_BAR_HEIGHT,
                 theme.info_bg_color,
             )
-            self.draw_battery_indicator()
             self.draw_network_indicator()
             self.draw_wallet_indicator()
+            if self.ctx.power_manager.has_battery():
+                _thread.start_new_thread(self.draw_battery_indicator, ())
 
     #     self.draw_ram_indicator()
 
     # def draw_ram_indicator(self):
     #     """Draws the amount of free RAM in the status bar +recently-collected"""
+
     #     def strnum(_in):
-    #         large_units = ("","K","M")
+    #         large_units = ("", "K", "M")
 
     #         value = _in
     #         for i in range(len(large_units)):
     #             unit = large_units[i]
     #             if value < 2**10:
     #                 break
-    #             if i+1 < len(large_units):
+    #             if i + 1 < len(large_units):
     #                 value /= 2**10
 
     #         if value == int(value):
     #             fmt = "%d" + unit
     #         else:
-    #            if value < 1:
-    #                fmt = "%0.3f" + unit
-    #            elif value < 10:
-    #                fmt = "%.2f" + unit
-    #            elif value < 100:
-    #                fmt = "%.1f" + unit
-    #            else:
-    #                fmt = "%d" + unit
+    #             if value < 1:
+    #                 fmt = "%0.3f" + unit
+    #             elif value < 10:
+    #                 fmt = "%.2f" + unit
+    #             elif value < 100:
+    #                 fmt = "%.1f" + unit
+    #             else:
+    #                 fmt = "%d" + unit
 
     #         return fmt % value
 
     #     pre_collect = gc.mem_free()
     #     gc.collect()
     #     post_collect = gc.mem_free()
-    #     ram_text = "RAM: " + strnum(post_collect) + " +" + strnum(post_collect - pre_collect)
+    #     ram_text = (
+    #         "RAM: " + strnum(post_collect) + " +" + strnum(post_collect - pre_collect)
+    #     )
     #     self.ctx.display.draw_string(12, 0, ram_text, GREEN)
 
     def draw_battery_indicator(self):
         """Draws a battery icon with depletion proportional to battery voltage"""
-        if not self.ctx.power_manager.has_battery():
-            return
-
         charge = self.ctx.power_manager.battery_charge_remaining()
         if self.ctx.power_manager.usb_connected():
             battery_color = theme.go_color

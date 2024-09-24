@@ -348,8 +348,10 @@ def detect_format(data):
     """Detects the QR format of the given data"""
     qr_format = FORMAT_NONE
     try:
-        if data.startswith("p") and data.index("of") <= 5:
-            qr_format = FORMAT_PMOFN
+        if data.startswith("p"):
+            header = data.split(" ")[0]
+            if "of" in header and header[1:].split("of")[0].isdigit():
+                qr_format = FORMAT_PMOFN
         elif data.lower().startswith("ur:"):
             qr_format = FORMAT_UR
         elif data.startswith("B$"):
