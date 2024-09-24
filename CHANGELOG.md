@@ -27,6 +27,9 @@ When generating new mnemonics through dice rolls or camera images, you can now m
 ### Support for Scanning Various Binary Grid Formats
 In addition to TinySeed, the camera can now scan and load mnemonics from equivalent formats, such as OneKey KeyTag, or even generic binary grids, like spreadsheets with colored, squared cells.
 
+### Message Signing Using SD cards
+Recently released in Sparrow, the SD card message signing workflow is now supported.
+
 ### Generate Double Mnemonics from Camera
 When generating a new mnemonic using the camera, users can now choose to create a "Double Mnemonic," in addition to the standard 12 and 24-word options. This feature generates a 24-word mnemonic that, when split in half, forms two valid 12-word mnemonics.
 
