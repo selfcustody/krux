@@ -74,7 +74,7 @@ class SignMessage(Utils):
         try:
             parts = derivation_path.split("/")
             return parts[0] == "m" and all(
-                p.endswith("'") or p.endswith("h") or p.isdigit() for p in parts[1:]
+                p[-1] in ("'hH") or p.isdigit() for p in parts[1:]
             )
         except:
             return False
@@ -85,9 +85,9 @@ class SignMessage(Utils):
         if len(parts) < 2:
             return None
 
-        if parts[2] in ["0'", "0h"]:
+        if parts[2] in ["0'", "0h", "0H"]:
             return NETWORKS[MAIN_TXT]
-        if parts[2] in ["1'", "1h"]:
+        if parts[2] in ["1'", "1h", "1H"]:
             return NETWORKS[TEST_TXT]
         return None
 
@@ -97,7 +97,7 @@ class SignMessage(Utils):
         if len(parts) < 2:
             return None
 
-        script_from_deriv = int(parts[1].strip("'").strip("h"))
+        script_from_deriv = int(parts[1].strip("'hH"))
         for script_name, script_number in SINGLESIG_SCRIPT_PURPOSE.items():
             if script_number == script_from_deriv:
                 return script_name
