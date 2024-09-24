@@ -32,7 +32,7 @@ def find_bin_files(root_dir, extension=".bin"):
             if filename.endswith(extension):
                 file_path = os.path.join(dirpath, filename)
                 sha256_hash = calculate_sha256(file_path)
-                device_name = dirpath.split("/")[-1].split("_")[-1]
+                device_name = dirpath.split("/")[-1].split("_", 1)[-1]
                 print(f"{device_name}: {sha256_hash}")
 
 
