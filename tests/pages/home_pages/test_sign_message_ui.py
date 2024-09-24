@@ -249,7 +249,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Sign to QR code
                 BUTTON_ENTER,  # Check QR code
             ],
-            "signmessage m/84h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            "signmessage m/84'/0h/0H/0/3 ascii:a test message with a colon ':' character.",
             None,
             False,
             "a test message with a colon ':' character.",
@@ -264,7 +264,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Sign to QR code
                 BUTTON_ENTER,  # Check QR code
             ],
-            "signmessage m/84h/1h/0h/0/3 ascii:A test message.",
+            "signmessage m/84'/1h/0H/0/3 ascii:A test message.",
             None,
             False,
             "A test message.",
@@ -279,7 +279,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Sign to QR code
                 BUTTON_ENTER,  # Check QR code
             ],
-            "signmessage m/86h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            "signmessage m/86'/0h/0H/0/3 ascii:a test message with a colon ':' character.",
             None,
             False,
             "a test message with a colon ':' character.",
@@ -294,7 +294,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Sign to QR code
                 BUTTON_ENTER,  # Check QR code
             ],
-            "signmessage m/44h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            "signmessage m/44'/0h/0H/0/3 ascii:a test message with a colon ':' character.",
             None,
             False,
             "a test message with a colon ':' character.",
@@ -309,7 +309,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Sign to QR code
                 BUTTON_ENTER,  # Check QR code
             ],
-            "signmessage m/49h/0h/0h/0/3 ascii:a test message with a colon ':' character.",
+            "signmessage m/49'/0h/0H/0/3 ascii:a test message with a colon ':' character.",
             None,
             False,
             "a test message with a colon ':' character.",
@@ -326,7 +326,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 # BUTTON_PAGE_PREV,  # Move to Go
                 BUTTON_ENTER,  # Go
             ],
-            "signmessage m/84h/0h/0h/0/3 ascii:A test message.",
+            "signmessage m/84'/0h/0H/0/3 ascii:A test message.",
             None,
             True,  # Sign to SD
             "A test message.",
@@ -347,7 +347,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Go
             ],
             None,
-            "A test message.\nm/84'/0'/0'/0/3\nP2WPKH",
+            "A test message.\nm/84'/0h/0H/0/3\nP2WPKH",
             True,  # Sign to SD
             "A test message.",
             "3. bc1qgl..cn3",
