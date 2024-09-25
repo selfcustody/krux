@@ -207,6 +207,15 @@ def parse_wallet(wallet_data, allow_assumption=None):
         except:
             pass
 
+        # Try to parse as a Crypto-Account type
+        try:
+            account = urtypes.crypto.Account.from_cbor(
+                wallet_data.cbor
+            ).output_descriptors[0]
+            return Descriptor.from_string(account.descriptor()), None
+        except:
+            pass
+
         # Treat the UR as a generic UR bytes object and extract the data for further processing
         wallet_data = urtypes.Bytes.from_cbor(wallet_data.cbor).data
 
@@ -446,3 +455,20 @@ def derivation_to_script_wrapper(derivation):
                 format_str = "tr({})"
 
     return format_str
+
+
+def is_double_mnemonic(mnemonic: str):
+    """Check if the mnemonic is a double mnemonic (12+12+24)"""
+
+    words = mnemonic.split(" ")
+    if len(words) > 12:
+        from krux.bip39 import mnemonic_is_valid
+
+        if (
+            mnemonic_is_valid(" ".join(words[:12]))
+            and mnemonic_is_valid(" ".join(words[12:]))
+            and mnemonic_is_valid(mnemonic)
+        ):
+            return True
+
+    return False

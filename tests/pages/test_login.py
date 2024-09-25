@@ -167,7 +167,7 @@ def test_new_12w_from_snapshot(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     # mocks a result of a hashed image
-    mock_capture_entropy = mocker.patch(
+    mocker.patch(
         "krux.pages.capture_entropy.CameraEntropy.capture", return_value=b"\x01" * 32
     )
 
@@ -196,13 +196,89 @@ def test_new_12w_from_snapshot(m5stickv, mocker):
     assert ctx.wallet.key.mnemonic == MNEMONIC
 
 
+def test_new_24w_from_snapshot(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    # mocks a result of a hashed image
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture", return_value=b"\x01" * 32
+    )
+
+    BTN_SEQUENCE = (
+        # 1 move to select 24 words, 1 press  to proceed
+        [BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # SHA256
+        [BUTTON_ENTER]
+        +
+        # Words 2x
+        [BUTTON_ENTER, BUTTON_ENTER]
+        +
+        # Load Wallet
+        [BUTTON_ENTER]
+    )
+    MNEMONIC = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic avoid letter advice comic"
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login.new_key_from_snapshot()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+
+
+def test_new_double_mnemonic_from_snapshot(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.wallet import is_double_mnemonic
+    from krux.display import DEFAULT_PADDING
+    from krux.themes import WHITE, BLACK
+
+    # mocks a result of a hashed image
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture", return_value=b"\x01" * 32
+    )
+
+    BTN_SEQUENCE = (
+        # 2 moves to select double mnemonic, 1 press  to proceed
+        [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # SHA256
+        [BUTTON_ENTER]
+        +
+        # Words 2x
+        [BUTTON_ENTER, BUTTON_ENTER]
+        +
+        # Load Wallet
+        [BUTTON_ENTER]
+    )
+    MNEMONIC = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust absurd amount doctor acoustic avoid letter advice cage absurd amount doll fancy"
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+    login.new_key_from_snapshot()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert is_double_mnemonic(MNEMONIC) == True
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("BIP39 Mnemonic*", 5)]
+    )
+
+
 ########## load words from qrcode tests
 
 
 def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
@@ -219,7 +295,7 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=(MNEMONIC, QR_FORMAT))
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (MNEMONIC, QR_FORMAT)
     )
     login.load_key_from_qr_code()
 
@@ -228,8 +304,9 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
 
 def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
@@ -247,9 +324,7 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=(ENCODED_MNEMONIC, QR_FORMAT)),
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (ENCODED_MNEMONIC, QR_FORMAT)
     )
     login.load_key_from_qr_code()
 
@@ -258,8 +333,9 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
 
 def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
@@ -275,9 +351,7 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=(BINARY_MNEMONIC, QR_FORMAT)),
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (BINARY_MNEMONIC, QR_FORMAT)
     )
     login.load_key_from_qr_code()
 
@@ -286,8 +360,9 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
 
 def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
@@ -305,7 +380,7 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=(MNEMONIC, QR_FORMAT))
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (MNEMONIC, QR_FORMAT)
     )
     login.load_key_from_qr_code()
 
@@ -314,8 +389,9 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
 
 def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
@@ -334,9 +410,7 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=(ENCODED_MNEMONIC, QR_FORMAT)),
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (ENCODED_MNEMONIC, QR_FORMAT)
     )
     login.load_key_from_qr_code()
 
@@ -345,8 +419,9 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
 
 def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
@@ -365,9 +440,7 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login,
-        "capture_qr_code",
-        mocker.MagicMock(return_value=(BINARY_MNEMONIC, QR_FORMAT)),
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (BINARY_MNEMONIC, QR_FORMAT)
     )
     login.load_key_from_qr_code()
 
@@ -376,8 +449,9 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
 
 def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_UR
+    from krux.pages.qr_capture import QRCodeCapture
     import binascii
     from ur.ur import UR
 
@@ -402,7 +476,7 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     login = Login(ctx)
     mocker.patch.object(
-        login, "capture_qr_code", mocker.MagicMock(return_value=(UR_DATA, QR_FORMAT))
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (UR_DATA, QR_FORMAT)
     )
     login.load_key_from_qr_code()
 
@@ -547,7 +621,7 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
                 BUTTON_ENTER,  # Load wallet
             ],
             "ability ability ability ability ability ability ability ability ability ability ability north",
-            [13, 14, 17, 27, 26, 17, 19, 0],
+            [13, 14, 17, 27, 26, 17, 19, 1],
         ),
     ]
 
@@ -1185,6 +1259,7 @@ def test_customization_while_loading_wallet(amigo, mocker):
 def test_about(mocker, m5stickv):
     import krux
     from krux.pages.login import Login
+    import board
     from krux.metadata import VERSION
     from krux.input import BUTTON_ENTER
 
@@ -1197,4 +1272,6 @@ def test_about(mocker, m5stickv):
     login.about()
 
     ctx.input.wait_for_button.assert_called_once()
-    ctx.display.draw_centered_text.assert_called_with("Krux\n\n\nVersion\n" + VERSION)
+    ctx.display.draw_centered_text.assert_called_with(
+        "Krux\n\nHardware\n" + board.config["type"] + "\n\nVersion\n" + VERSION
+    )

@@ -23,7 +23,7 @@
 
 import board
 import lcd
-from ..display import FONT_HEIGHT, FONT_WIDTH
+from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
 from ..themes import theme, GREEN, ORANGE
 from ..settings import (
     CategorySetting,
@@ -40,6 +40,7 @@ from ..krux_settings import (
     TouchSettings,
     ButtonsSettings,
     t,
+    locale_control,
 )
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..sd_card import SDHandler
@@ -74,36 +75,6 @@ class SettingsPage(Page):
 
     def settings(self):
         """Handler for the settings"""
-        location = Settings().persist.location
-        if location == SD_PATH:
-            if self.has_sd_card():
-                self.flash_text(
-                    t("Your changes will be kept on the SD card."),
-                    duration=PERSIST_MSG_TIME,
-                )
-            else:
-                self.flash_text(
-                    t("SD card not detected.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
-                    duration=PERSIST_MSG_TIME,
-                )
-        else:
-            try:
-                # Check for flash
-                os.listdir("/" + FLASH_PATH + "/.")
-                self.flash_text(
-                    t("Your changes will be kept on device flash storage."),
-                    duration=PERSIST_MSG_TIME,
-                )
-            except OSError:
-                self.flash_text(
-                    t("Device flash storage not detected.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
-                    duration=PERSIST_MSG_TIME,
-                )
-
         return self.namespace(Settings())()
 
     def _draw_settings_pad(self):
@@ -127,7 +98,7 @@ class SettingsPage(Page):
                     theme.frame_color,
                 )
                 offset_x = x
-                offset_x += (button_width - len(keys[i]) * FONT_WIDTH) // 2
+                offset_x += (button_width - lcd.string_width_px(keys[i])) // 2
                 self.ctx.display.draw_string(
                     offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
                 )
@@ -174,7 +145,7 @@ class SettingsPage(Page):
                 with SDHandler():
                     if store.save_settings():
                         self.flash_text(
-                            t("Changes persisted to SD card!"),
+                            t("Settings stored on SD card."),
                             duration=PERSIST_MSG_TIME,
                         )
             except OSError:
@@ -186,17 +157,9 @@ class SettingsPage(Page):
                 )
         else:
             self.ctx.display.clear()
-            try:
-                if store.save_settings():
-                    self.flash_text(
-                        t("Changes persisted to Flash!"),
-                        duration=PERSIST_MSG_TIME,
-                    )
-            except:
+            if store.save_settings():
                 self.flash_text(
-                    t("Unexpected error saving to Flash.")
-                    + "\n\n"
-                    + t("Changes will last until shutdown."),
+                    t("Settings stored internally on flash."),
                     duration=PERSIST_MSG_TIME,
                 )
 
@@ -230,14 +193,13 @@ class SettingsPage(Page):
             if len(items) == 1:
                 return items[0][1]()
 
+            back_status = lambda: MENU_EXIT  # pylint: disable=C3001
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
                 items.append((t("Factory Settings"), self.restore_settings))
-                items.append((t("Back"), self._settings_exit_check))
-            else:
-                items.append((t("Back"), lambda: MENU_EXIT))
+                back_status = self._settings_exit_check
 
-            submenu = Menu(self.ctx, items)
+            submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()
             if index == len(submenu.menu) - 1:
                 return MENU_CONTINUE
@@ -282,6 +244,12 @@ class SettingsPage(Page):
 
             encoder.debounce = Settings().hardware.buttons.debounce
 
+    def _amigo_lcd_reconfigure(self):
+        """reconfigure the display after re-initializing it"""
+        lcd.mirror(True)
+        lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
+        lcd.rotation(PORTRAIT)  # Portrait mode
+
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""
         categories = setting.categories
@@ -313,7 +281,7 @@ class SettingsPage(Page):
                 btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
-            new_category = None
+            new_category = current_category
             for i, category in enumerate(categories):
                 if current_category == category:
                     if btn in (BUTTON_PAGE, None):
@@ -322,10 +290,12 @@ class SettingsPage(Page):
                         new_category = categories[(i - 1) % len(categories)]
                     setting.__set__(settings_namespace, new_category)
                     break
+            if setting.attr == "locale":
+                locale_control.load_locale(new_category)
             if setting.attr == "theme":
                 theme.update()
             if setting.attr == "brightness":
-                if board.config["type"] == "cube":
+                if board.config["type"] in ["cube", "wonder_mv"]:
                     self.ctx.display.gpio_backlight_ctrl(new_category)
                 elif board.config["type"] == "m5stickv":
                     self.ctx.display.set_pmu_backlight(new_category)
@@ -337,10 +307,8 @@ class SettingsPage(Page):
                 lcd.init(
                     invert=new_category, lcd_type=Settings().hardware.display.lcd_type
                 )
-                # re-configuring the display after re-initializing it
-                lcd.mirror(True)
-                lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
-                lcd.rotation(1)  # Portrait mode
+                self._amigo_lcd_reconfigure()
+
             if setting.attr == "lcd_type" and new_category is not None:
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
@@ -354,10 +322,8 @@ class SettingsPage(Page):
                     invert=Settings().hardware.display.inverted_colors,
                     lcd_type=new_category,
                 )
-                # re-configuring the display after re-initializing it
-                lcd.mirror(True)
-                lcd.bgr_to_rgb(Settings().hardware.display.bgr_colors)
-                lcd.rotation(1)  # Portrait mode
+                self._amigo_lcd_reconfigure()
+
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
                     t('Press "PREVIOUS" (up arrow) button to keep this setting.')

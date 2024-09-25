@@ -22,6 +22,7 @@
 
 import math
 import time
+import lcd
 from ..krux_settings import t
 from ..themes import theme
 from ..input import (
@@ -34,7 +35,7 @@ from ..input import (
     FAST_BACKWARD,
     PRESSED,
 )
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
@@ -171,7 +172,7 @@ class Keypad:
                     custom_color = theme.toggle_color
                 if key is not None:
                     offset_x = x
-                    key_offset_x = (self.key_h_spacing - len(key) * FONT_WIDTH) // 2
+                    key_offset_x = (self.key_h_spacing - lcd.string_width_px(key)) // 2
                     key_offset_x += offset_x
                     if (
                         key_index < len(self.keys)

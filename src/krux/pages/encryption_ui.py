@@ -21,12 +21,12 @@
 # THE SOFTWARE.
 
 from ..display import BOTTOM_PROMPT_LINE
-from ..krux_settings import t, Settings, AES_BLOCK_SIZE
+from ..krux_settings import t, Settings
+from ..encryption import AES_BLOCK_SIZE
 from . import (
     Page,
     Menu,
     MENU_CONTINUE,
-    MENU_EXIT,
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
@@ -52,6 +52,7 @@ class EncryptionKey(Page):
                 (t("Type Key"), self.load_key),
                 (t("Scan Key QR Code"), self.load_qr_encryption_key),
             ],
+            back_label=None,
         )
         _, key = submenu.run_loop()
         if key in (ESC_KEY, MENU_CONTINUE):
@@ -60,7 +61,7 @@ class EncryptionKey(Page):
         if key:
             self.ctx.display.clear()
             continue_string = t("Key") + ": " + key + "\n\n"
-            continue_string += t("Continue?")
+            continue_string += t("Proceed?")
             if self.prompt(
                 continue_string,
                 self.ctx.display.height() // 2,
@@ -76,7 +77,11 @@ class EncryptionKey(Page):
 
     def load_qr_encryption_key(self):
         """Loads and returns a key from a QR code"""
-        data, _ = self.capture_qr_code()
+
+        from .qr_capture import QRCodeCapture
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, _ = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load key"))
             return None
@@ -107,7 +112,6 @@ class EncryptMnemonic(Page):
                 ),
             ),
             (t("Encrypted QR Code"), self.encrypted_qr_code),
-            (t("Back"), lambda: MENU_EXIT),
         ]
         submenu = Menu(self.ctx, encrypt_outputs_menu)
         _, _ = submenu.run_loop()
@@ -116,10 +120,12 @@ class EncryptMnemonic(Page):
     def _get_user_inputs(self):
         """Ask user for the key, mnemonic_id and i_vector"""
 
+        error_txt = t("Mnemonic was not encrypted")
+
         key_capture = EncryptionKey(self.ctx)
         key = key_capture.encryption_key()
         if key is None:
-            self.flash_text(t("Mnemonic was not encrypted"))
+            self.flash_text(error_txt)
             return None
 
         version = Settings().encryption.version
@@ -130,14 +136,14 @@ class EncryptMnemonic(Page):
                 t("Additional entropy from camera required for AES-CBC mode")
             )
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                self.flash_text(t("Mnemonic was not encrypted"))
+                self.flash_text(error_txt)
                 return None
             from .capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
             entropy = camera_entropy.capture(show_entropy_details=False)
             if entropy is None:
-                self.flash_text(t("Mnemonic was not encrypted"))
+                self.flash_text(error_txt)
                 return None
             i_vector = entropy[:AES_BLOCK_SIZE]
 
@@ -177,7 +183,7 @@ class EncryptMnemonic(Page):
             return
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
         words = self.ctx.wallet.key.mnemonic
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, i_vector):
             self.ctx.display.clear()
@@ -199,7 +205,7 @@ class EncryptMnemonic(Page):
         key, mnemonic_id, i_vector = user_inputs
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
 
         from ..encryption import EncryptedQRCode
 
@@ -253,7 +259,6 @@ class LoadEncryptedMnemonic(Page):
                     ),
                 )
             )
-        mnemonic_ids_menu.append((t("Back"), lambda: MENU_EXIT))
         submenu = Menu(self.ctx, mnemonic_ids_menu)
         index, status = submenu.run_loop()
         if index == len(submenu.menu) - 1:
@@ -270,7 +275,7 @@ class LoadEncryptedMnemonic(Page):
             self.flash_error(t("Key was not provided"))
             return MENU_CONTINUE
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
         mnemonic_storage = MnemonicStorage()
         try:
             words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()
@@ -292,17 +297,15 @@ class LoadEncryptedMnemonic(Page):
         self.ctx.display.clear()
         if self.prompt(t("Remove %s?") % mnemonic_id, self.ctx.display.height() // 2):
             mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
-            self.ctx.display.clear()
+            message = t("%s removed.") % mnemonic_id
+            message += "\n\n"
             if sd_card:
-                message = t("%s was removed from SD card") % mnemonic_id
-                message += "\n\n"
                 message += t(
                     "Fully erase your SD card in another device to ensure data is unrecoverable"
                 )
             else:
-                message = t("%s was removed from flash") % mnemonic_id
-                message += "\n\n"
                 message += t("To ensure data is unrecoverable use Wipe Device feature")
+            self.ctx.display.clear()
             self.ctx.display.draw_centered_text(message)
             self.ctx.input.wait_for_button()
         del mnemonic_storage

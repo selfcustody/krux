@@ -88,3 +88,22 @@ def test_toggle_from_on(mocker, m5stickv):
     light.toggle()
 
     light.turn_off.assert_called()
+
+
+def test_toggle_on_wonder_mv(mocker, wonder_mv):
+    mock_modules(mocker)
+    from krux.light import Light
+
+    light = Light()
+    mocker.spy(light, "turn_off")
+    mocker.spy(light, "turn_on")
+
+    # Toggle from on
+    mocker.patch.object(light, "is_on", new=lambda: True)
+    light.toggle()
+    light.turn_off.assert_called()
+
+    # Toggle again, now from off
+    mocker.patch.object(light, "is_on", new=lambda: False)
+    light.toggle()
+    light.turn_on.assert_called()

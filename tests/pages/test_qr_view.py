@@ -112,6 +112,39 @@ def test_loop_through_regions(amigo, mocker):
     assert ctx.display.draw_qr_code.call_count == 57
 
 
+def test_loop_through_brightness(amigo, mocker):
+    from krux.pages.qr_view import SeedQRView
+    from krux.themes import WHITE, DARKGREY
+    from krux.input import BUTTON_TOUCH
+    from krux.wallet import Wallet
+
+    TOUCH_SEQ = [
+        # Open touch menu
+        1,  # Toggle brightness to bright
+        # Open touch menu
+        1,  # Toggle brightness to dark
+        # Open touch menu
+        1,  # Toggle brightness to default
+        # Open touch menu
+        4,  # Exit
+    ]
+
+    BTN_SEQUENCE = [BUTTON_TOUCH] * 8
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQ)
+    data = TEST_DATA
+    seed_qr_view = SeedQRView(ctx, data=data, title=TEST_TITLE)
+    seed_qr_view.display_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.display.draw_qr_code.call_count == 4
+    assert ctx.display.draw_qr_code.call_args_list == [
+        mocker.call(0, TEST_CODE_BINARY_QR),  # Default
+        mocker.call(0, TEST_CODE_BINARY_QR, light_color=WHITE),  # Brighter
+        mocker.call(0, TEST_CODE_BINARY_QR, light_color=DARKGREY),  # Darker
+        mocker.call(0, TEST_CODE_BINARY_QR),  # Default
+    ]
+
+
 def test_add_frame(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
 

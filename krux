@@ -56,9 +56,12 @@ if [ "$1" == "build" ]; then
         echo "Missing device"
     else
         if [ "$device" == "maixpy_m5stickv" ]||[ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]||
-        [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]||[ "$device" == "maixpy_cube" ]; then
+        [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]||[ "$device" == "maixpy_cube" ]||[ "$device" == "maixpy_wonder_mv" ]; then
             declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
             sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
+            
+            # docs: latest_krux version
+            sed -i -- 's/  latest_krux: krux-v.*/  latest_krux: krux-v'$version'/g' mkdocs.yml
 
             mkdir -p build
             docker build . -t krux-builder --build-arg DEVICE=$device
@@ -84,7 +87,7 @@ elif [ "$1" == "flash" ]; then
         elif [ "$device" == "maixpy_amigo" ]||[ "$device" == "maixpy_bit" ]||[ "$device" == "maixpy_cube" ]; then
             # https://devicehunt.com/view/type/usb/vendor/0403/device/6010
             device_vendor_product_id="0403:6010"
-        elif [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]; then
+        elif [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_yahboom" ]||[ "$device" == "maixpy_wonder_mv" ]; then
             # https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
             device_vendor_product_id="1a86:7523"
         fi
@@ -98,7 +101,7 @@ elif [ "$1" == "flash" ]; then
             panic "Failed to find device via USB. Is it connected and powered on?"
         fi
 
-        if [ "$device" == "maixpy_dock" ]; then
+        if [ "$device" == "maixpy_dock" ]||[ "$device" == "maixpy_wonder_mv" ]; then
             BOARD="dan"
         else
             BOARD="goE"
@@ -238,7 +241,7 @@ elif [ "$1" == "build-release" ]; then
     cp -f ktool-win.exe ../$release_dir/ktool-win.exe
     cd ..
 
-    devices=("maixpy_m5stickv" "maixpy_amigo" "maixpy_bit" "maixpy_dock" "maixpy_yahboom" "maixpy_cube")
+    devices=("maixpy_m5stickv" "maixpy_amigo" "maixpy_bit" "maixpy_dock" "maixpy_yahboom" "maixpy_cube" "maixpy_wonder_mv")
     for device in ${devices[@]}; do
         ./krux build $device
         mkdir -p $release_dir/$device

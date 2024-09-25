@@ -1,7 +1,67 @@
 import pytest
 from unittest import mock
+from unittest.mock import MagicMock
 import pyqrcode
 import zlib
+
+
+class MockFile:
+    """Custom mock file class that supports read, write, seek, and other file methods"""
+
+    def __init__(self, data=b""):
+        self.data = data if isinstance(data, bytes) else data.encode()
+        self.position = 0
+        self.write_data = bytearray()
+        self.mode = "rb"
+        self.file = MagicMock()
+        self.file.read.side_effect = self.read
+        self.file.write.side_effect = self.write
+        self.file.seek.side_effect = self.seek
+
+    def set_mode(self, mode):
+        self.mode = mode
+        if "b" not in mode:
+            self.write_data = ""
+
+    def seek(self, pos):
+        self.position = pos
+
+    def read(self, size=None):
+        if size is None:
+            size = len(self.data) - self.position
+        result = self.data[self.position : self.position + size]
+        self.position += size
+        if "b" not in self.mode:
+            return result.decode()
+        return result
+
+    def write(self, content):
+        if "b" not in self.mode:
+            if isinstance(content, str):
+                self.write_data += content
+            else:
+                raise TypeError("write() argument must be str")
+        else:
+            if isinstance(content, bytearray) or isinstance(content, bytes):
+                self.write_data.extend(content)
+            else:
+                raise TypeError("A bytes-like object is required, not 'str'")
+        return len(content)
+
+    def __enter__(self):
+        self.position = 0
+        return self.file
+
+    def __exit__(self, *args):
+        pass
+
+
+def mock_open(mock_file):
+    def _open(file, mode="r", *args, **kwargs):
+        mock_file.set_mode(mode)
+        return mock_file
+
+    return _open
 
 
 class DeflateIO:
@@ -216,35 +276,36 @@ class MockStats:
 
 
 SNAP_SUCCESS = 0
-SNAP_HISTOGRAM_FAIL = 1
-SNAP_FIND_QRCODES_FAIL = 2
+SNAP_ANIMATED_QR = 1
+SNAP_FIND_ANIMATED_SKIPPING = 2
 SNAP_REPEAT_QRCODE = 3
 DONT_FIND_ANYTHING = 4
 
 IMAGE_TO_HASH = b"\x12" * 1024  # Dummy bytes
 
 
-def snapshot_generator(outcome=SNAP_SUCCESS):
+def snapshot_generator(outcome=SNAP_SUCCESS, animated_qr=[]):
     count = 0
+    qr_frames = animated_qr
 
     def snapshot():
         nonlocal count
         count += 1
         m = mock.MagicMock()
-        if outcome == SNAP_HISTOGRAM_FAIL and count == 2:
-            m.get_histogram.return_value = "failed"
-            m.find_qrcodes.return_value = [Mockqrcode(str(count))]
-        elif outcome == SNAP_FIND_QRCODES_FAIL and count == 2:
-            m.get_histogram.return_value = Mockhistogram()
-            m.find_qrcodes.return_value = []
-        elif outcome == SNAP_REPEAT_QRCODE and count == 2:
-            m.get_histogram.return_value = Mockhistogram()
-            m.find_qrcodes.return_value = [Mockqrcode(str(count - 1))]
+        if outcome == SNAP_ANIMATED_QR:
+            m.find_qrcodes.return_value = [Mockqrcode(qr_frames[count - 1])]
+        elif outcome == SNAP_FIND_ANIMATED_SKIPPING:
+            # Skips every other frame
+            if count % 2 == 0:
+                m.find_qrcodes.return_value = []
+            else:
+                m.find_qrcodes.return_value = [Mockqrcode(qr_frames[(count - 1) // 2])]
+        elif outcome == SNAP_REPEAT_QRCODE:
+            # Send every frame two times
+            m.find_qrcodes.return_value = [Mockqrcode(qr_frames[count // 2])]
         elif outcome == DONT_FIND_ANYTHING:
-            m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = []
         else:
-            m.get_histogram.return_value = Mockhistogram()
             m.find_qrcodes.return_value = [Mockqrcode(str(count))]
             m.to_bytes.return_value = IMAGE_TO_HASH
             m.find_blobs.return_value = [MockBlob()]
@@ -299,6 +360,7 @@ def board_m5stickv():
                 "display": {
                     "touch": False,
                     "font": [8, 14],
+                    "font_wide": [14, 14],
                 },
             },
         }
@@ -348,6 +410,7 @@ def board_amigo():
                 "display": {
                     "touch": True,
                     "font": [12, 24],
+                    "font_wide": [24, 24],
                 },
             },
         }
@@ -374,6 +437,7 @@ def board_dock():
                 "display": {
                     "touch": False,
                     "font": [8, 16],
+                    "font_wide": [16, 16],
                 },
             },
         }
@@ -407,7 +471,68 @@ def board_cube():
                 "display": {
                     "touch": False,
                     "font": [8, 14],
+                    "font_wide": [14, 14],
                 },
+            },
+        }
+    )
+
+
+def board_wonder_mv():
+    return mock.MagicMock(
+        config={
+            "type": "wonder_mv",
+            "lcd": {
+                "dcx": 8,
+                "ss": 6,
+                "rst": 21,
+                "clk": 7,
+                "height": 240,
+                "width": 320,
+                "invert": 1,
+                "dir": 96,
+                "lcd_type": 0,
+            },
+            "sensor": {
+                "pin_sda": 9,
+                "cmos_href": 17,
+                "cmos_pclk": 15,
+                "cmos_xclk": 14,
+                "cmos_pwdn": 13,
+                "cmos_vsync": 12,
+                "reg_width": 16,
+                "i2c_num": 2,
+                "pin_clk": 10,
+                "cmos_rst": 11,
+            },
+            "sdcard": {
+                "sclk": 29,
+                "mosi": 30,
+                "miso": 31,
+                "cs": 32,
+            },
+            "board_info": {
+                "BOOT_KEY": 16,
+                "CONNEXT_A": 28,
+                "CONNEXT_B": 27,
+                "I2C_SDA": 19,
+                "I2C_SCL": 18,
+                "SPI_SCLK": 29,
+                "SPI_MOSI": 30,
+                "SPI_MISO": 31,
+                "SPI_CS": 32,
+            },
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 26,
+                    "BUTTON_B": 47,
+                    "LED_W": 25,
+                    "TOUCH_IRQ": 41,
+                    "I2C_SDA": 19,
+                    "I2C_SCL": 18,
+                    "BACKLIGHT": 23,
+                },
+                "display": {"touch": True, "font": [8, 16], "font_wide": [16, 16]},
             },
         }
     )
@@ -457,9 +582,17 @@ def mock_context(mocker):
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
+            light=None,
         )
     elif board.config["type"] == "amigo":
         return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=mocker.MagicMock(),
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
             display=mocker.MagicMock(
                 font_width=12,
                 font_height=24,
@@ -492,4 +625,5 @@ def mock_context(mocker):
                 max_menu_lines=mocker.MagicMock(return_value=7),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
+            light=None,
         )

@@ -31,7 +31,7 @@ from hashlib import sha256
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
-from .settings import TEST_TXT
+from .settings import TEST_TXT, THIN_SPACE
 
 DER_SINGLE = "m/%dh/%dh/%dh"
 DER_MULTI = "m/%dh/%dh/%dh/2h"
@@ -65,6 +65,13 @@ P2WSH = "p2wsh"
 # address starts with bc1p (mainnet) or tb1p (testnet)
 P2TR = "p2tr"
 
+SCRIPT_LONG_NAMES = {
+    "Legacy - 44": P2PKH,
+    "Nested Segwit - 49": P2SH_P2WPKH,
+    "Native Segwit - 84": P2WPKH,
+    "Taproot - 86": P2TR,
+}
+
 SINGLESIG_SCRIPT_PURPOSE = {
     P2PKH: 44,
     P2SH_P2WPKH: 49,
@@ -73,6 +80,9 @@ SINGLESIG_SCRIPT_PURPOSE = {
 }
 
 MULTISIG_SCRIPT_PURPOSE = 48
+
+FINGERPRINT_SYMBOL = "⊚"
+DERIVATION_PATH_SYMBOL = "↳"
 
 
 class Key:
@@ -129,15 +139,11 @@ class Key:
 
     def fingerprint_hex_str(self, pretty=False):
         """Returns the master key fingerprint in hex format"""
-        formatted_txt = "⊚ %s" if pretty else "%s"
-        return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
+        return Key.format_fingerprint(self.fingerprint, pretty)
 
     def derivation_str(self, pretty=False):
-        """Returns the derivation path for the Hierarchical Deterministic Wallet to
-        be displayed as string
-        """
-        formatted_txt = "↳ %s" if pretty else "%s"
-        return (formatted_txt % self.derivation).replace("h", HARDENED_STR_REPLACE)
+        """Returns the derivation path for the HD Wallet as string"""
+        return Key.format_derivation(self.derivation, pretty)
 
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
@@ -185,13 +191,13 @@ class Key:
     @staticmethod
     def format_derivation(derivation, pretty=False):
         """Helper method to display the derivation path formatted"""
-        formatted_txt = "↳ %s" if pretty else "%s"
+        formatted_txt = DERIVATION_PATH_SYMBOL + THIN_SPACE + "%s" if pretty else "%s"
         return (formatted_txt % derivation).replace("h", HARDENED_STR_REPLACE)
 
     @staticmethod
     def format_fingerprint(fingerprint, pretty=False):
         """Helper method to display the fingerprint formatted"""
-        formatted_txt = "⊚ %s" if pretty else "%s"
+        formatted_txt = FINGERPRINT_SYMBOL + THIN_SPACE + "%s" if pretty else "%s"
         return formatted_txt % hexlify(fingerprint).decode("utf-8")
 
     @staticmethod

@@ -29,7 +29,6 @@ from . import (
     Page,
     Menu,
     MENU_CONTINUE,
-    MENU_EXIT,
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
@@ -55,7 +54,6 @@ class Tools(Page):
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("Wipe Device"), self.wipe_device),
-                    (t("Back"), lambda: MENU_EXIT),
                 ],
             ),
         )
@@ -99,7 +97,7 @@ class Tools(Page):
                         select_file_handler=file_manager.show_file_details
                     )
         except OSError:
-            self.flash_error(t("SD card not detected"))
+            self.flash_error(t("SD card not detected."))
 
         return MENU_CONTINUE
 

@@ -31,6 +31,9 @@ import hextokff
 FONT14 = "ter-u14n"
 FONT16 = "ter-u16n"
 FONT24 = "ter-u24b"
+KR_CN_14 = "FusionPixel-14"
+KR_CN_16 = "unifont-16"
+KR_CN_24 = "NotoSansCJK-24"
 
 
 def open_bdf_save_kff(filename, width, height):
@@ -41,6 +44,12 @@ def open_bdf_save_kff(filename, width, height):
         filename_kff = "bit_dock_yahboom"
     elif filename == FONT24:
         filename_kff = "amigo"
+    elif filename == KR_CN_14:
+        filename_kff = "m5stickv_kr_cn"
+    elif filename == KR_CN_16:
+        filename_kff = "bit_dock_yahboom_kr_cn"
+    elif filename == KR_CN_24:
+        filename_kff = "amigo_kr_cn"
 
     # Create hexfile based on bdf
     font_hex = "\n".join(bdftohex.bdftohex(filename + ".bdf")) + "\n"
@@ -63,7 +72,10 @@ def open_bdf_save_kff(filename, width, height):
     # overrides/components/micropython/port/src/omv/img/font.c
     # in order to replace the contents of the unicode[] variable
     #  in the font.c
-    font_kff = hextokff.hextokff(filename + ".hex", width, height)
+    wide_glyphs = None
+    if filename in (KR_CN_14, KR_CN_16, KR_CN_24):
+        wide_glyphs = ["ko-KR", "zh-CN"]
+    font_kff = hextokff.hextokff(filename + ".hex", width, height, wide_glyphs)
     with open(filename_kff + ".kff", "w", encoding="utf-8", newline="\n") as save_file:
         save_file.write(font_kff)
 
@@ -82,6 +94,14 @@ def save_new_fontc(font_name, overwrite=False):
         device_name = "dock"
     elif font_name == FONT24:
         device_name = filename_kff = "amigo"
+    elif font_name == KR_CN_14:
+        filename_kff = "m5stickv_kr_cn"
+    elif font_name == KR_CN_16:
+        filename_kff = "bit_dock_yahboom_kr_cn"
+        device_name = "dock"
+    elif font_name == KR_CN_24:
+        device_name = "amigo"
+        filename_kff = "amigo_kr_cn"
 
     maixpy_path_start = "../MaixPy/projects/maixpy_"
     maixpy_path_end = (
@@ -91,13 +111,18 @@ def save_new_fontc(font_name, overwrite=False):
     with open(filename_kff + ".kff", "r", encoding="utf-8") as read_file:
         content_kff = read_file.read()
 
-    content_kff = "static uint8_t unicode[] = {\n" + content_kff + "\n};"
+    if font_name in (KR_CN_14, KR_CN_16, KR_CN_24):
+        re_escape_str = "static uint8_t unicode_wide[] = {\n"
+        content_kff = re_escape_str + content_kff + "\n};"
+    else:
+        re_escape_str = "static uint8_t unicode[] = {\n"
+        content_kff = re_escape_str + content_kff + "\n};"
 
     filename = maixpy_path_start + device_name + maixpy_path_end
     with open(filename, "r", encoding="utf-8") as font_file:
         lines = font_file.read()
         unicode_str = re.sub(
-            re.escape("static uint8_t unicode[] = {\n")
+            re.escape(re_escape_str)
             + r"((0[xX][\da-fA-F]{2},)\n?)*0[xX][\da-fA-F]{2}\n};",
             content_kff,
             lines,
@@ -108,12 +133,18 @@ def save_new_fontc(font_name, overwrite=False):
             save_file.write(unicode_str)
 
         # Also replace for bit and yahboom
-        if font_name == FONT16:
+        if font_name in (FONT16, KR_CN_16):
             filename = maixpy_path_start + "bit" + maixpy_path_end
             with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
                 save_file.write(unicode_str)
 
             filename = maixpy_path_start + "yahboom" + maixpy_path_end
+            with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
+                save_file.write(unicode_str)
+
+        # Also replace for Cube
+        if font_name in (FONT14, KR_CN_14):
+            filename = maixpy_path_start + "cube" + maixpy_path_end
             with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
                 save_file.write(unicode_str)
     else:
@@ -127,16 +158,21 @@ def save_new_fontc(font_name, overwrite=False):
 
 
 if __name__ == "__main__":
-    REPLACE = False
-    if len(sys.argv) > 1:
-        REPLACE = True
+
+    replace = len(sys.argv) > 1 and sys.argv[1] == "True"
 
     # generate kff files
     open_bdf_save_kff(FONT14, 8, 14)
     open_bdf_save_kff(FONT16, 8, 16)
     open_bdf_save_kff(FONT24, 12, 24)
+    open_bdf_save_kff(KR_CN_14, 14, 14)
+    open_bdf_save_kff(KR_CN_16, 16, 16)
+    open_bdf_save_kff(KR_CN_24, 24, 24)
 
     # generate new font.c files (delete kff files)
-    save_new_fontc(FONT14, REPLACE)
-    save_new_fontc(FONT16, REPLACE)
-    save_new_fontc(FONT24, REPLACE)
+    save_new_fontc(FONT14, replace)
+    save_new_fontc(FONT16, replace)
+    save_new_fontc(FONT24, replace)
+    save_new_fontc(KR_CN_14, replace)
+    save_new_fontc(KR_CN_16, replace)
+    save_new_fontc(KR_CN_24, replace)

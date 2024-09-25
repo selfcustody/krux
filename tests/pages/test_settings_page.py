@@ -17,11 +17,10 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.krux_settings import Settings, CategorySetting, NumberSetting
-    from krux.translations import translation_table
+    from krux.translations import available_languages
 
-    tlist = list(translation_table)
-    index_pt = tlist.index("pt-BR")
-    index_next = (index_pt + 1) % (len(tlist))
+    index_pt = available_languages.index("pt-BR")
+    index_next = (index_pt + 1) % (len(available_languages))
 
     cases = [
         (  # 0 - Change Network
@@ -36,7 +35,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE_PREV,  # Go back to the second option - testnet
                 BUTTON_ENTER,
                 # Leave Default Wallet
-                BUTTON_PAGE,
+                *([BUTTON_PAGE] * 2),
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE_PREV,
@@ -83,7 +82,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 BUTTON_PAGE,
                 BUTTON_ENTER,
             ),
-            lambda: Settings().i18n.locale == tlist[index_next],
+            lambda: Settings().i18n.locale == available_languages[index_next],
         ),
         (  # 3  Printer numeric settings
             (
@@ -186,17 +185,25 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
     import krux
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_TOUCH
-    from krux.krux_settings import Settings, CategorySetting, NumberSetting
-    from krux.translations import translation_table
-    from krux.themes import WHITE, RED, GREEN, ORANGE
+    from krux.krux_settings import Settings, CategorySetting
+    from krux.translations import available_languages, ref_array
+    from krux.translations.pt import translation_array as br_array
+    from krux.themes import WHITE, GREEN, ORANGE
 
-    tlist = list(translation_table)
-    index_pt = tlist.index("pt-BR")
-    index_next = (index_pt + 1) % (len(tlist))
-    text_pt = translation_table[tlist[index_pt]][1177338798] + "\n" + tlist[index_pt]
-    text_next = (
-        translation_table[tlist[index_next]][1177338798] + "\n" + tlist[index_next]
-    )
+    index_pt = available_languages.index("pt-BR")
+    index_next = (index_pt + 1) % (len(available_languages))
+    slug_index = ref_array.index(1177338798)
+    text_pt = br_array[slug_index] + "\n" + available_languages[index_pt]
+
+    # Get translations for the next language
+    next_language = available_languages[index_next]
+    # Construct the path to the nested module
+    next_module_path = f"krux.translations.{next_language[:2]}"
+    # Import the top-level module (krux)
+    next_trans_module = __import__(next_module_path, fromlist=[""])
+    # Access the translation_array variable from the nested module
+    next_trans_array = getattr(next_trans_module, "translation_array")
+    text_next = next_trans_array[slug_index] + "\n" + available_languages[index_next]
 
     PREV_INDEX = 0
     GO_INDEX = 1
@@ -219,7 +226,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
                 NEXT_INDEX,
                 GO_INDEX,
                 # Back from wallet
-                2,
+                3,
                 # Leave Settings
                 LEAVE_INDEX,
             ),
@@ -272,7 +279,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
                 mocker.call(text_pt, WHITE),
                 mocker.call(text_next, WHITE),
             ],
-            lambda: Settings().i18n.locale == tlist[index_next],
+            lambda: Settings().i18n.locale == available_languages[index_next],
             CategorySetting,
         ),
     ]
@@ -309,6 +316,7 @@ def test_change_display_type_on_amigo(amigo, mocker):
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 2),  # Move to "Hardware"
         BUTTON_ENTER,  # Enter "Hardware"
+        BUTTON_PAGE,  # Change to "Display"
         BUTTON_ENTER,  # Enter "Display"
         BUTTON_ENTER,  # Enter "BGR colors"
         BUTTON_PAGE,  # Change "BGR Type"
@@ -329,7 +337,7 @@ def test_change_display_type_on_amigo(amigo, mocker):
         BUTTON_ENTER,  # Confirm "Type"
         BUTTON_PAGE,  # Move to "Back"
         BUTTON_ENTER,  # Confirm "Back" from display
-        BUTTON_PAGE_PREV,  # Move to "Back"
+        *([BUTTON_PAGE_PREV] * 2),  # Move to "Back"
         BUTTON_ENTER,  # Confirm "Back" from hardware
         *([BUTTON_PAGE_PREV] * 3),  # Move to "Back"
         BUTTON_ENTER,  # Confirm "Back" from settings
@@ -418,8 +426,7 @@ def test_save_settings_on_sd(amigo, mocker, mocker_sd_card_ok):
     settings_page.settings()
     settings_page.flash_text.assert_has_calls(
         [
-            mocker.call("Your changes will be kept on the SD card.", duration=2500),
-            mocker.call("Changes persisted to SD card!", duration=2500),
+            mocker.call("Settings stored on SD card.", duration=2500),
         ]
     )
 
@@ -436,26 +443,30 @@ def test_leave_settings_without_changes(amigo, mocker):
     BTN_SEQUENCES = [
         [
             # Change something then give up
-            BUTTON_ENTER,  # Change "Bitcoin"
+            BUTTON_ENTER,  # Change "Default Wallet"
+            BUTTON_PAGE,  # Move to "Network"
+            BUTTON_ENTER,  # Enter "Network"
             BUTTON_PAGE,  # Change to testnet
-            BUTTON_ENTER,  # Confirm testnet
-            BUTTON_ENTER,  # Change "Bitcoin" again
+            BUTTON_ENTER,  # Confirm "testnet"
+            BUTTON_ENTER,  # Change "Network" again
             BUTTON_PAGE,  # Change back to mainnet
             BUTTON_ENTER,  # Confirm mainnet
-            BUTTON_PAGE_PREV,  # Move to "Back"
+            *([BUTTON_PAGE] * 2),  # Move to "Back"
             BUTTON_ENTER,  # Confirm "Back"
+            BUTTON_PAGE_PREV,  # Move to "Back"
+            BUTTON_ENTER,  # Leave settings
         ],
         [
             # Change persist then give up
-            [BUTTON_PAGE] * 3,  # Move to "Persist"
-            BUTTON_ENTER,  # Change "Persist"
+            *([BUTTON_PAGE] * 4),  # Move to "Persist"
+            BUTTON_ENTER,  # Enter "Persist"
             BUTTON_PAGE,  # Change to SD
             BUTTON_ENTER,  # Confirm SD
             BUTTON_ENTER,  # Change "Persist" again
             BUTTON_PAGE,  # Change back to flash
             BUTTON_ENTER,  # Confirm flash
-            BUTTON_PAGE_PREV,  # Move to "Back"
-            BUTTON_ENTER,  # Confirm "Back"
+            *([BUTTON_PAGE] * 4),  # Move to "Back"
+            BUTTON_ENTER,  # Leave settings
         ],
         [
             # Don't change anything
@@ -469,16 +480,10 @@ def test_leave_settings_without_changes(amigo, mocker):
         settings_page = SettingsPage(ctx)
         settings_page.flash_text = mocker.MagicMock()
         settings_page.settings()
-        settings_page.flash_text.assert_has_calls(
-            [
-                mocker.call(
-                    "Your changes will be kept on device flash storage.", duration=2500
-                ),
-            ]
-        )
         persisted_to_flash_call = mocker.call(
-            "Changes persisted to Flash!", duration=2500
+            "Settings stored internally on flash.", duration=2500
         )
+        assert ctx.input.wait_for_button.call_count == len(btn_sequence)
         assert persisted_to_flash_call not in settings_page.flash_text.call_args_list
 
 
@@ -488,12 +493,12 @@ def test_leave_settings_with_changes(amigo, mocker, mocker_sd_card_ok):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Go to "Wallet"
+        BUTTON_ENTER,  # Go to "Default Wallet"
         BUTTON_PAGE,  # Go to "Network"
         BUTTON_ENTER,  # Enter "Network"
         BUTTON_PAGE,  # Change to testnet
         BUTTON_ENTER,  # Confirm "testnet"
-        BUTTON_PAGE,  # Move to back
+        *([BUTTON_PAGE] * 2),  # Move to back
         BUTTON_ENTER,  # Leave "Wallet"
         BUTTON_PAGE_PREV,  # Move to "Back"
         BUTTON_ENTER,  # Confirm "Back"
@@ -504,12 +509,10 @@ def test_leave_settings_with_changes(amigo, mocker, mocker_sd_card_ok):
 
     # Leave settings without changes
     settings_page.settings()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     settings_page.flash_text.assert_has_calls(
         [
-            mocker.call(
-                "Your changes will be kept on device flash storage.", duration=2500
-            ),
-            mocker.call("Changes persisted to Flash!", duration=2500),
+            mocker.call("Settings stored internally on flash.", duration=2500),
         ]
     )
 

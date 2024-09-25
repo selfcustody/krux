@@ -23,6 +23,7 @@
 import gc
 from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
+from ...settings import THIN_SPACE
 from ...qr import FORMAT_NONE
 from .. import (
     Page,
@@ -50,7 +51,6 @@ class Addresses(Page):
                 (t("Scan Address"), self.pre_scan_address),
                 (t("Receive Addresses"), self.list_address_type),
                 (t("Change Addresses"), lambda: self.list_address_type(1)),
-                (t("Back"), lambda: None),
             ],
         )
         submenu.run_loop()
@@ -84,7 +84,7 @@ class Addresses(Page):
                 address_index, limit=max_addresses, branch_index=addr_type
             )
             for addr in addresses:
-                pos_str = str(address_index) + ". "  # . + thin space
+                pos_str = str(address_index) + "." + THIN_SPACE
                 qr_title = pos_str + addr
                 items.append(
                     (
@@ -102,7 +102,6 @@ class Addresses(Page):
                     lambda: MENU_EXIT,
                 )
             )
-            items.append((t("Back"), lambda: MENU_EXIT))
 
             submenu = Menu(self.ctx, items)
             stay_on_this_addr_menu = True
@@ -137,7 +136,6 @@ class Addresses(Page):
             [
                 (t("Receive"), self.scan_address),
                 (t("Change"), lambda: self.scan_address(1)),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()
@@ -145,7 +143,10 @@ class Addresses(Page):
 
     def scan_address(self, addr_type=0):
         """Handler for the 'receive' or 'change' menu item"""
-        data, qr_format = self.capture_qr_code()
+        from ..qr_capture import QRCodeCapture
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, qr_format = qr_capture.qr_capture_loop()
         if data is None or qr_format != FORMAT_NONE:
             self.flash_error(t("Failed to load address"))
             return MENU_CONTINUE
@@ -169,21 +170,10 @@ class Addresses(Page):
             ):
                 return MENU_CONTINUE
 
-            checking_match_txt = t("Checking receive address from %d to %d for match..")
-            checked_no_match_txt = t("Checked %d receive addresses with no matches.")
-            is_valid_txt = "%s\n\n" + t("is a valid receive address!")
-            not_found_txt = "%s\n\n" + t(
-                "was NOT FOUND in the first %d receive addresses"
-            )
-            if addr_type == 1:
-                checking_match_txt = t(
-                    "Checking change address from %d to %d for match.."
-                )
-                checked_no_match_txt = t("Checked %d change addresses with no matches.")
-                is_valid_txt = "%s\n\n" + t("is a valid change address!")
-                not_found_txt = "%s\n\n" + t(
-                    "was NOT FOUND in the first %d change addresses"
-                )
+            checking_match_txt = t("Verifying..") + " " + t("%d to %d")
+            checked_no_match_txt = t("Checked %d addresses with no matches.")
+            is_valid_txt = "%s\n\n" + t("is a valid address!")
+            not_found_txt = "%s\n\n" + t("was NOT FOUND in the first %d addresses")
 
             found = False
             num_checked = 0

@@ -27,7 +27,6 @@ from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
-    MENU_EXIT,
 )
 
 
@@ -42,7 +41,6 @@ class MnemonicsView(Page):
                 (t("QR Code"), self.qr_code_backup),
                 (t("Encrypted"), self.encrypt_mnemonic_menu),
                 (t("Other Formats"), self.other_backup_formats),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()
@@ -57,7 +55,6 @@ class MnemonicsView(Page):
                 ("Compact SeedQR", lambda: self.display_seed_qr(True)),
                 ("SeedQR", self.display_seed_qr),
                 (t("Encrypted QR Code"), self.encrypt_qr_code),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()
@@ -77,7 +74,6 @@ class MnemonicsView(Page):
                 (t("Numbers"), self.display_mnemonic_numbers),
                 ("Stackbit 1248", self.stackbit),
                 ("Tiny Seed", self.tiny_seed),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()
@@ -97,9 +93,9 @@ class MnemonicsView(Page):
         encrypt_qr_code = EncryptMnemonic(self.ctx)
         return encrypt_qr_code.encrypted_qr_code()
 
-    def show_mnemonic(self, mnemonic, suffix=""):
+    def show_mnemonic(self, mnemonic, suffix="", display_mnemonic=None):
         """Displays only the mnemonic words or indexes"""
-        self.display_mnemonic(mnemonic, suffix)
+        self.display_mnemonic(mnemonic, suffix, display_mnemonic)
         self.ctx.input.wait_for_button()
 
         # Avoid printing text on a cnc
@@ -125,31 +121,33 @@ class MnemonicsView(Page):
                 (
                     t("Decimal"),
                     lambda: self.show_mnemonic(
+                        self.ctx.wallet.key.mnemonic,
+                        Utils.BASE_DEC_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_DEC
                         ),
-                        Utils.BASE_DEC_SUFFIX,
                     ),
                 ),
                 (
                     t("Hexadecimal"),
                     lambda: self.show_mnemonic(
+                        self.ctx.wallet.key.mnemonic,
+                        Utils.BASE_HEX_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_HEX
                         ),
-                        Utils.BASE_HEX_SUFFIX,
                     ),
                 ),
                 (
                     t("Octal"),
                     lambda: self.show_mnemonic(
+                        self.ctx.wallet.key.mnemonic,
+                        Utils.BASE_OCT_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_OCT
                         ),
-                        Utils.BASE_OCT_SUFFIX,
                     ),
                 ),
-                (t("Back"), lambda: MENU_EXIT),
             ],
         )
         submenu.run_loop()
@@ -204,7 +202,11 @@ class MnemonicsView(Page):
         tiny_seed.export()
 
         # Allow to print on thermal printer only
-        if Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
+        if (
+            Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT
+            and self.ctx.camera.mode is not None
+        ):
+            # TinySeed printing requires a camera frame buffer to draw in.
             if self.print_prompt(t("Print Tiny Seed?")):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE

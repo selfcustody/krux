@@ -121,9 +121,9 @@ def test_enter_stackbit_touch(amigo, mocker):
     from krux.pages.stack_1248 import Stackbit, STACKBIT_GO_INDEX
     from krux.input import BUTTON_TOUCH
 
-    YES = 0
+    YES = 1
     BTN_SEQUENCE = [BUTTON_TOUCH] * 3 * 12 + [BUTTON_TOUCH]
-    TOUCH_SEQUENCE = [0, STACKBIT_GO_INDEX + 1, YES] * 12 + [0]
+    TOUCH_SEQUENCE = [0, STACKBIT_GO_INDEX + 1, YES] * 12 + [YES]
     TEST_12_WORDS = "language language language language language language language language language language language language"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQUENCE)

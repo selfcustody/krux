@@ -5,12 +5,13 @@ on:
     branches:
       - main
       - develop
+      - 'release-**'
 
 jobs:
   build:
     strategy:
       matrix:
-        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock, maixpy_yahboom, maixpy_cube]
+        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock, maixpy_yahboom, maixpy_cube, maixpy_wonder_mv]
     runs-on: ubuntu-latest
     services:
       registry:
@@ -183,6 +184,30 @@ jobs:
         with:
           path: ${{ steps.extract-cube.outputs.destination }}
           name: build-cube
+
+      - name: Build for WonderMV
+        if: matrix.device == 'maixpy_wonder_mv'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: DEVICE=maixpy_wonder_mv
+          push: true
+          tags: localhost:5000/selfcustody/krux-builder-wonder-mv:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Extract firmware for WonderMV
+        id: extract-wonder-mv
+        if: matrix.device == 'maixpy_wonder_mv'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: localhost:5000/selfcustody/krux-builder-wonder-mv:latest
+          path: /src/firmware/Kboot/build/.
+      - name: Upload firmware for WonderMV
+        if: matrix.device == 'maixpy_wonder_mv'
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ steps.extract-wonder-mv.outputs.destination }}
+          name: build-wonder-mv
           
       - name: Move cache
         run: |

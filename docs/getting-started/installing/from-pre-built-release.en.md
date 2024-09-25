@@ -6,13 +6,13 @@ Head over to the [releases](https://github.com/selfcustody/krux/releases) page a
 ### Verify the files
 Before installing the release, it's a good idea to check that:
 
-1. The *SHA256 hash* of `krux-vX.Y.Z.zip` matches the hash in `krux-vX.Y.Z.zip.sha256.txt`
-2. The *signature file* `krux-vX.Y.Z.zip.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
+1. The *SHA256 hash* of `{{latest_krux}}.zip` matches the hash in `{{latest_krux}}.zip.sha256.txt`
+2. The *signature file* `{{latest_krux}}.zip.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
 
 You can either do this manually or with the `krux` shell script, which contains helper commands for this:
 ```bash
-./krux sha256 krux-vX.Y.Z.zip
-./krux verify krux-vX.Y.Z.zip selfcustody.pem
+./krux sha256 {{latest_krux}}.zip
+./krux verify {{latest_krux}}.zip selfcustody.pem
 ```
 
 On Mac you may need to install `coreutils` to be able to use `sha256sum`
@@ -25,7 +25,7 @@ Fun fact: Each Krux release is signed with Krux!
 ### Flash the firmware onto the device
 Extract the latest version of Krux you downloaded and enter the folder:
 ```bash
-unzip krux-vX.Y.Z.zip && cd krux-vX.Y.Z
+unzip {{latest_krux}}.zip && cd {{latest_krux}}
 ```
 
 Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube`, `dock` or `yahboom` (to yahboom you may need to manually specify the port, for example `/dev/ttyUSB0` on Linux or `COM6` on Windows):

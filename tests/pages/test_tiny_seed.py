@@ -7,8 +7,6 @@ def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
-    PRINT_LINES_24W = 312
-
     case = [
         Wallet(tdata.SINGLESIG_24_WORD_KEY),
         MockPrinter(),
@@ -134,7 +132,7 @@ def test_enter_tiny_seed_24w_m5stickv(m5stickv, mocker):
 
 
 def test_enter_tiny_seed_24w_amigo(amigo, mocker):
-    from krux.pages.tiny_seed import TinySeed
+    from krux.pages.tiny_seed import TinySeed, TS_GO_POSITION, TS_ESC_START_POSITION
     from krux.input import BUTTON_TOUCH
 
     TOUCH_SEQUENCE = (
@@ -145,19 +143,17 @@ def test_enter_tiny_seed_24w_amigo(amigo, mocker):
         # On line 2 and toggle bit "512"
         + [14]
         # "Go" and proceed to next page
-        + [165]
+        + [TS_GO_POSITION]
         # Toggle line 1 bit "256"
         + [3]
         # Toggle to last editable bit
         + [135]
-        # Press on invalid location
-        + [146]
         # Press ESC
-        + [158]
+        + [TS_ESC_START_POSITION]
         # Give up from ESC
-        + [1]  # Press "No"
+        + [0]  # Press "No"
         # "Go" and proceed
-        + [165]
+        + [TS_GO_POSITION]
     )
     BTN_SEQUENCE = [BUTTON_TOUCH] * len(TOUCH_SEQUENCE)
 
@@ -257,14 +253,8 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tiny_seed = TinyScanner(ctx)
-    # mocker.patch.object(
-    #     tiny_seed, "_detect_tiny_seed", new=lambda image: TINYSEED_RECTANGLE
-    # )
-    ctx.camera.snapshot = snapshot_generator()
+    mocker.patch.object(ctx.camera, "snapshot", new=snapshot_generator())
     ctx.camera.cam_id = OV7740_ID
-    # mocker.patch.object(
-    #     tiny_seed, "_detect_and_draw_punches", new=lambda image, corners: TEST_12_WORDS_NUMBERS
-    # )
     tiny_seed._gradient_corners = mocker.MagicMock(return_value=(50, 50, 50, 50))
     mocker.patch.object(tiny_seed, "_check_buttons", new=lambda w24, page: None)
     words = tiny_seed.scanner()
@@ -273,7 +263,7 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     assert " ".join(words) == TEST_12_WORDS
 
 
-def test_scan_tiny_seed_24w(all_devices, mocker):
+def test_scan_tiny_seed_24w(multiple_devices, mocker):
     # This will be used when scanning 24 TinySeed
     # First scanned page will be loaded to be edited, then proceed to scan second page
     # Seed will be returned as its word index
@@ -329,3 +319,30 @@ def test_scan_tiny_seed_24w(all_devices, mocker):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert " ".join(words) == TEST_24_WORDS
+
+
+def test_tinyscanner_initializes_tinyseed_with_label(multiple_devices, mocker):
+    import pytest
+    from krux.pages.tiny_seed import TinyScanner
+
+    test_cases = [
+        # TinyScanner grid_type param, expected exception, expected TinySeed label
+        (None, None, "Tiny Seed"),
+        ("Tiny Seed", None, "Tiny Seed"),
+        ("OneKey KeyTag", None, "OneKey KeyTag"),
+        ("Binary Grid", None, "Binary Grid"),
+        ("Unsupported Format", KeyError, None),
+    ]
+
+    for i, (grid_type, expected_exception, expected_label) in enumerate(test_cases):
+        print(i, (grid_type, expected_exception, expected_label))
+        ctx = create_ctx(mocker, [])
+        if not expected_exception:
+            if grid_type:
+                tiny_scanner = TinyScanner(ctx, grid_type=grid_type)
+            else:
+                tiny_scanner = TinyScanner(ctx)
+            assert tiny_scanner.tiny_seed.label == expected_label
+        else:
+            with pytest.raises(expected_exception):
+                tiny_scanner = TinyScanner(ctx, grid_type=grid_type)

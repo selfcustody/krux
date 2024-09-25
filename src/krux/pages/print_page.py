@@ -42,7 +42,7 @@ class PrintPage(Page):
             self.ctx.display.draw_centered_text(t("Exporting to SD card.."))
         else:
             self.ctx.display.draw_centered_text(
-                t("Printing") + "\n%d / %d" % (i + 1, count)
+                t("Printing..") + "\n%d / %d" % (i + 1, count)
             )
 
         self.printer.print_qr_code(qr_code)
@@ -71,7 +71,7 @@ class PrintPage(Page):
         """Prints Mnemonics words as text"""
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Printing") + " ...", self.ctx.display.height() // 2
+            t("Printing.."), self.ctx.display.height() // 2
         )
         self.printer.print_string("BIP39" + " " + suffix + "\n\n")
         words = mnemonic.split(" ")

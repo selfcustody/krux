@@ -15,6 +15,122 @@ def test_init(mocker, m5stickv):
         sn.label("test")
 
 
+def test_stored_i18n_settings(mocker, m5stickv):
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"i18n": {"locale": "pt-BR"}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import I18nSettings
+
+    i18n = I18nSettings()
+
+    assert i18n.locale == "pt-BR"
+
+
+def test_wrong_stored_i18n_settings(mocker, m5stickv):
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"i18n": {"locale": "aa-AA"}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import I18nSettings
+
+    i18n = I18nSettings()
+
+    assert i18n.locale == "en-US"
+
+
+def test_stored_adafruit_printer_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = (
+        """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 35}}}}}"""
+    )
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import AdafruitPrinterSettings
+
+    ada = AdafruitPrinterSettings()
+    assert ada.line_delay == 35
+
+
+def test_wrong_stored_adafruit_printer_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = (
+        """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 511}}}}}"""
+    )
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import AdafruitPrinterSettings
+
+    ada = AdafruitPrinterSettings()
+    assert ada.line_delay == 20
+
+
+def test_float_stored_adafruit_printer_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = (
+        """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 21.2}}}}}"""
+    )
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import AdafruitPrinterSettings
+
+    ada = AdafruitPrinterSettings()
+    assert ada.line_delay == 20
+
+
+def test_string_stored_adafruit_printer_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 1,abc}}}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import AdafruitPrinterSettings
+
+    ada = AdafruitPrinterSettings()
+    assert ada.line_delay == 20
+
+
+def test_stored_cnc_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"printer": {"cnc": {"border_padding": 127}}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import CNCSettings
+
+    cnc = CNCSettings()
+    assert cnc.border_padding == 127
+
+
+def test_wrong_stored_cnc_settings(mocker, m5stickv):
+    print("")
+
+    # mock store singleton creation before import
+    stored_settings = """{"settings": {"printer": {"thermal": {"adafruit": {"line_delay": 1.abc}}}}}"""
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    # import will create store singleton with mocked values
+    from krux.krux_settings import CNCSettings
+
+    cnc = CNCSettings()
+    assert cnc.border_padding == 0.0625
+
+
 def test_store_init(mocker, m5stickv):
     from krux.settings import Store, SETTINGS_FILENAME, SD_PATH
 
@@ -204,24 +320,32 @@ def test_all_labels(mocker, m5stickv):
         ThemeSettings,
         TouchSettings,
         ButtonsSettings,
-        AmgDisplaySettings,
+        DisplayAmgSettings,
+        DisplaySettings,
+        HardwareSettings,
+        SecuritySettings,
+        Settings,
     )
 
-    bitcoin = DefaultWallet()
+    wallet = DefaultWallet()
     i18n = I18nSettings()
-    encryption = EncryptionSettings()
-    printer = PrinterSettings()
     thermal = ThermalSettings()
     adafruit = AdafruitPrinterSettings()
     cnc = CNCSettings()
     gbrl = GRBLSettings()
-    persist = PersistSettings()
-    appearance = ThemeSettings()
-    touch = TouchSettings()
+    printer = PrinterSettings()
     buttons = ButtonsSettings()
-    amigo_display = AmgDisplaySettings()
+    touch = TouchSettings()
+    amigo_display = DisplayAmgSettings()
+    display = DisplaySettings()
+    hardware = HardwareSettings()
+    persist = PersistSettings()
+    encryption = EncryptionSettings()
+    appearance = ThemeSettings()
+    security = SecuritySettings()
+    settings = Settings()
 
-    assert bitcoin.label("network")
+    assert wallet.label("network")
     assert i18n.label("locale")
     assert encryption.label("version")
     assert printer.label("thermal")
@@ -235,3 +359,7 @@ def test_all_labels(mocker, m5stickv):
     assert touch.label("threshold")
     assert buttons.label("debounce")
     assert amigo_display.label("flipped_x")
+    assert display.label("brightness")
+    assert hardware.label("printer")
+    assert security.label("auto_shutdown")
+    assert settings.label("persist")

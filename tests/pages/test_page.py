@@ -1,11 +1,10 @@
 import pytest
-from ..shared_mocks import (
-    mock_context,
-    snapshot_generator,
-    MockQRPartParser,
-    TimeMocker,
-    SNAP_SUCCESS,
-    DONT_FIND_ANYTHING,
+from ..shared_mocks import mock_context
+from . import create_ctx
+
+TEST_QR_DATA = "test"
+TEST_QR_DATA_IMAGE = bytearray(
+    b"\x7f\xd3?H\nvU\xdd\xae\xa4\xdbut\x83\x80\xe0_\xf5\x070\x00O%7\x97\xd2\xd6\xd1\xe7\xc6\x1ae\xe5\xb2\x00J\xd5\x1f\xd9\t\xd23]N\xbckdu\xb5\x94\xa0\xaf\xf9\xb7\t\x00"
 )
 
 
@@ -55,67 +54,6 @@ def test_flash_text(mocker, m5stickv, mock_page_cls):
     ctx.display.flash_text.assert_called_with("Error", RED, FLASH_MSG_TIME)
 
 
-def test_capture_qr_code(mocker, m5stickv, mock_page_cls):
-    mocker.patch(
-        "krux.camera.sensor.snapshot", new=snapshot_generator(outcome=SNAP_SUCCESS)
-    )
-    mocker.patch("krux.camera.QRPartParser", new=MockQRPartParser)
-    from krux.camera import Camera
-
-    ctx = mock_context(mocker)
-    ctx.camera = Camera()
-
-    mocker.patch("time.ticks_ms", new=lambda: 0)
-
-    page = mock_page_cls(ctx)
-    ctx.input.flush_events()
-
-    qr_code, qr_format = page.capture_qr_code()
-    assert qr_code == "12345678910"
-    assert qr_format == MockQRPartParser.FORMAT
-
-    ctx.display.to_landscape.assert_has_calls([mocker.call() for _ in range(10)])
-    ctx.display.to_portrait.assert_has_calls([mocker.call() for _ in range(10)])
-    ctx.display.draw_centered_text.assert_has_calls([mocker.call("Loading Camera..")])
-
-
-def test_camera_antiglare_7740(mocker, m5stickv, mock_page_cls):
-    from krux.camera import Camera, OV7740_ID, OV2640_ID, GC2145_ID
-
-    time_mocker = TimeMocker(1001)
-
-    mocker.patch(
-        "krux.camera.sensor.snapshot",
-        new=snapshot_generator(outcome=DONT_FIND_ANYTHING),
-    )
-    cameras = [OV7740_ID, OV2640_ID, GC2145_ID]
-    for cam_id in cameras:
-        mocker.patch("krux.camera.sensor.get_id", lambda: cam_id)
-        mocker.patch("krux.camera.QRPartParser", new=MockQRPartParser)
-
-        ctx = mock_context(mocker)
-        ENTER_SEQ = [False, True, False, True, False]
-        PAGE_PREV_SEQ = [False, False, False, True]
-        mocker.patch("time.ticks_ms", time_mocker.tick)
-        ctx.input.enter_event = mocker.MagicMock(side_effect=ENTER_SEQ)
-        ctx.input.page_event = mocker.MagicMock(side_effect=ENTER_SEQ)
-        ctx.input.page_prev_event = mocker.MagicMock(side_effect=PAGE_PREV_SEQ)
-        ctx.camera = Camera()
-        ctx.camera.cam_id = OV7740_ID
-        mocker.spy(ctx.camera, "disable_antiglare")
-        mocker.spy(ctx.camera, "enable_antiglare")
-        mocker.spy(ctx.light, "turn_on")
-        mocker.spy(ctx.light, "turn_off")
-        page = mock_page_cls(ctx)
-
-        qr_code, _ = page.capture_qr_code()
-        assert qr_code == None
-        ctx.camera.disable_antiglare.assert_called_once()
-        ctx.camera.enable_antiglare.assert_called_once()
-        ctx.light.turn_on.call_count == 2
-        ctx.light.turn_off.call_count == 2
-
-
 def test_prompt_m5stickv(mocker, m5stickv, mock_page_cls):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -147,12 +85,73 @@ def test_prompt_amigo(mocker, amigo, mock_page_cls):
     assert page.prompt("test prompt") == False
 
     ctx.input.buttons_active = False
-    # Index 0 = YES pressed
-    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[0]))
+    # Index 1 = YES pressed
+    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[1]))
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
     assert page.prompt("test prompt") == True
 
-    # Index 1 = No pressed
-    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[1]))
+    # Index 0 = No pressed
+    ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[0]))
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
     assert page.prompt("test prompt") == False
+
+
+def test_display_qr_code(mocker, m5stickv, mock_page_cls):
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_NONE
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    page = mock_page_cls(ctx)
+
+    # Test QR code display
+    page.display_qr_codes(TEST_QR_DATA, FORMAT_NONE)
+
+    assert ctx.input.wait_for_button.call_count == 1
+    assert ctx.display.draw_qr_code.call_count == 1
+    assert ctx.display.draw_qr_code.call_args == mocker.call(0, TEST_QR_DATA_IMAGE)
+
+
+def test_display_qr_code_light_theme(mocker, m5stickv, mock_page_cls):
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_NONE
+    from krux.themes import theme, WHITE
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    page = mock_page_cls(ctx)
+
+    # Mock light theme background color
+    theme.bg_color = WHITE
+    # Test QR code display
+    page.display_qr_codes(TEST_QR_DATA, FORMAT_NONE)
+
+    assert ctx.input.wait_for_button.call_count == 1
+    assert ctx.display.draw_qr_code.call_count == 1
+    assert ctx.display.draw_qr_code.call_args == mocker.call(
+        0, TEST_QR_DATA_IMAGE, light_color=WHITE
+    )
+
+
+def test_display_qr_code_loop_through_brightness(mocker, m5stickv, mock_page_cls):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+    from krux.themes import WHITE, DARKGREY
+
+    BTN_SEQUENCE = [
+        *([BUTTON_PAGE] * 3),  # Loop through brightness
+        BUTTON_ENTER,  # Exit
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = mock_page_cls(ctx)
+
+    # Test QR code display
+    page.display_qr_codes(TEST_QR_DATA, FORMAT_NONE)
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.display.draw_qr_code.call_count == len(BTN_SEQUENCE)
+    assert ctx.display.draw_qr_code.call_args_list == [
+        mocker.call(0, TEST_QR_DATA_IMAGE),  # Default
+        mocker.call(0, TEST_QR_DATA_IMAGE, light_color=WHITE),  # Brighter
+        mocker.call(0, TEST_QR_DATA_IMAGE, light_color=DARKGREY),  # Darker
+        mocker.call(0, TEST_QR_DATA_IMAGE),  # Default
+    ]

@@ -31,6 +31,7 @@ from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
+from ...key import FINGERPRINT_SYMBOL
 
 
 class WalletDescriptor(Page):
@@ -84,7 +85,10 @@ class WalletDescriptor(Page):
         persisted = False
         load_method = self.load_method()
         if load_method == LOAD_FROM_CAMERA:
-            wallet_data, qr_format = self.capture_qr_code()
+            from ..qr_capture import QRCodeCapture
+
+            qr_capture = QRCodeCapture(self.ctx)
+            wallet_data, qr_format = qr_capture.qr_capture_loop()
         elif load_method == LOAD_FROM_SD:
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE
@@ -153,7 +157,10 @@ class WalletDescriptor(Page):
         for i, key in enumerate(wallet.descriptor.keys):
             label = str(i + 1) + ". " if wallet.is_multisig() else ""
             fingerprints.append(
-                label + "⊚ " + binascii.hexlify(key.fingerprint).decode()
+                label
+                + FINGERPRINT_SYMBOL
+                + " "
+                + binascii.hexlify(key.fingerprint).decode()
             )
         about.extend(fingerprints)
         if not wallet.is_multisig():

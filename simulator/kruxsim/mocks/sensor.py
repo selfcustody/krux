@@ -104,6 +104,7 @@ def snapshot():
     time.sleep(THREAD_DROP_PERIOD)
     
     m = mock.MagicMock()
+    m.find_qrcodes.return_value = None
     if sequence_executor:
         if sequence_executor.camera_image is not None:
             frame = sequence_executor.camera_image

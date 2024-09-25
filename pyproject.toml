@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "24.07.0"
+version = "24.09.0"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
@@ -38,6 +38,7 @@ mkdocs = "^1.6.0"
 mkdocs-material = "^9.5.28"
 mkdocs-static-i18n = "^1.2.3"
 pymdown-extensions = "^10.8.1"
+mkdocs-macros-plugin = "^1.0.5"
 
 # Simulator dependencies. Optional extras
 numpy = { version = "^1.25.2", optional = true }
@@ -48,6 +49,7 @@ pyzbar = { version = "^0.1.9", optional = true }
 
 # Flash dependencies. Optional extras
 pyserial = { version = "^3.5", optional = true }
+qrcode = "^7.4.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
@@ -58,6 +60,7 @@ pytest-mock = "^3.14.0"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.17.0"
 poethepoet = "^0.24.4"
+dill = "^0.3.8"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
@@ -82,12 +85,14 @@ lint = ["lint-src", "lint-scripts"]
 pylint.ref = "lint"
 
 # test tasks
-test = "pytest --cache-clear --cov src/krux --cov-report html ./tests"
+test-clean = """python -c 'import shutil; shutil.rmtree("htmlcov")'"""
+test-cov = "pytest --cache-clear --cov src/krux --cov-report html ./tests --cov-context=test --cov-report term-missing"
 test-verbose = "pytest --cache-clear --cov src/krux --cov-report html --show-capture all --capture tee-sys -r A ./tests"
 test-simple = "pytest --cache-clear ./tests"
 # aliases
-tests.ref = "test"
-pytest.ref = "test"
+tests = ["test-clean", "test-cov"]
+test.ref = "tests"
+pytest.ref = "tests"
 
 # pre commit task (do formatting, linting and tests)
 pre-commit = ["format", "lint", "i18n validate", "test-simple"]

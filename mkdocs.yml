@@ -51,6 +51,13 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
+  latest_krux: krux-v24.09.0
+  latest_installer: v0.0.2-alpha
+  latest_installer_rpm: krux-installer-0.0.2_alpha-1.x86_64.rpm
+  latest_installer_deb: krux-installer_0.0.2-alpha_amd64.deb
+  latest_installer_win: krux-installer_v0.0.2-alpha.Setup.exe 
+  latest_installer_mac_arm: krux-installer_0.0.2-alpha_arm64.dmg
+  latest_installer_mac_intel: krux-installer_0.0.2-alpha_x86_64.dmg 
   social:
     - icon: fontawesome/solid/bullhorn
       link: https://bitcointalk.org/index.php?topic=5489022.0
@@ -74,7 +81,15 @@ nav:
     - Getting Started: getting-started/index.en.md
     - Installing:
       - Installing: getting-started/installing/index.en.md
-      - From GUI application: getting-started/installing/from-gui.en.md
+      - From GUI application:
+        - From GUI application: getting-started/installing/from-gui/index.en.md
+        - Windows: getting-started/installing/from-gui/windows.en.md
+        - MacOS Intel: getting-started/installing/from-gui/macos-intel.en.md
+        - MacOS ARM64: getting-started/installing/from-gui/macos-arm64.en.md
+        - Debian-like: getting-started/installing/from-gui/debian-like.en.md
+        - Fedora-like: getting-started/installing/from-gui/fedora-like.en.md
+        - Other linux distro: getting-started/installing/from-gui/other-linux-distro.en.md
+        - Usage: getting-started/installing/from-gui/usage.en.md
       - From pre-built official release: getting-started/installing/from-pre-built-release.en.md
       - From pre-built test release: getting-started/installing/from-test-release.en.md
       - From source: getting-started/installing/from-source.en.md
@@ -91,6 +106,7 @@ nav:
       - Tools: getting-started/features/tools.en.md
       - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
       - Empirical Entropy Measurement: getting-started/features/entropy.en.md
+      - Tiny Seed and other metal plates: getting-started/features/tinyseed.en.md
     - Settings: getting-started/settings.en.md
     - Navigation Overview: getting-started/navigation.en.md
   - Devices and Parts List: parts.en.md
@@ -101,6 +117,7 @@ nav:
 
 plugins:
  - search
+ - macros
  - i18n:
     docs_structure: suffix
     languages:

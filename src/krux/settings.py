@@ -38,6 +38,8 @@ FLASH_PATH = "flash"
 MAIN_TXT = "main"
 TEST_TXT = "test"
 
+THIN_SPACE = " "
+
 
 class SettingsNamespace:
     """Represents a settings namespace containing settings and child namespaces"""
@@ -93,6 +95,15 @@ class CategorySetting(Setting):
         super().__init__(attr, default_value)
         self.categories = categories
 
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+
+        stored_val = store.get(obj.namespace, self.attr, self.default_value)
+        if stored_val not in self.categories:
+            return self.default_value
+        return stored_val
+
 
 class NumberSetting(Setting):
     """Setting that can be a number within a defined range"""
@@ -101,6 +112,19 @@ class NumberSetting(Setting):
         super().__init__(attr, default_value)
         self.numtype = numtype
         self.value_range = value_range
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+
+        stored_val = store.get(obj.namespace, self.attr, self.default_value)
+        if (
+            (self.numtype is int and isinstance(stored_val, self.numtype))
+            or (self.numtype is float and isinstance(stored_val, (self.numtype, int)))
+        ) and self.value_range[0] <= stored_val <= self.value_range[1]:
+            return stored_val
+
+        return self.default_value
 
 
 class Store:

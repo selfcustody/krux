@@ -6,6 +6,7 @@ from .shared_mocks import (
     board_dock,
     board_cube,
     board_m5stickv,
+    board_wonder_mv,
     encode_to_string,
     encode,
     statvfs,
@@ -92,6 +93,14 @@ def cube(monkeypatch, mp_modules):
     reset_krux_modules()
 
 
+@pytest.fixture
+def wonder_mv(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_wonder_mv())
+    reset_krux_modules()
+
+
 @pytest.fixture(params=["amigo", "m5stickv", "dock", "cube"])
-def all_devices(request):
+def multiple_devices(request):
     return request.getfixturevalue(request.param)

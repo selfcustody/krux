@@ -62,7 +62,6 @@ class PassphraseEditor(Page):
                 [
                     (t("Type BIP39 Passphrase"), self._load_passphrase),
                     (t("Scan BIP39 Passphrase"), self._load_qr_passphrase),
-                    (t("Back"), lambda: MENU_EXIT),
                 ],
                 disable_statusbar=True,
             )
@@ -83,7 +82,10 @@ class PassphraseEditor(Page):
         )
 
     def _load_qr_passphrase(self):
-        data, _ = self.capture_qr_code()
+        from .qr_capture import QRCodeCapture
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, _ = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load passphrase"))
             return MENU_CONTINUE
@@ -134,7 +136,6 @@ class WalletSettings(Page):
                     ("Single/Multisig", lambda: None),
                     (t("Script Type"), (lambda: None) if not multisig else None),
                     (t("Account"), lambda: None),
-                    (t("Back"), lambda: MENU_EXIT),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
@@ -167,6 +168,7 @@ class WalletSettings(Page):
                 ("Testnet", lambda: None),
             ],
             disable_statusbar=True,
+            back_label=None,
         )
         index, _ = submenu.run_loop()
         return NETWORKS[TEST_TXT] if index == 1 else NETWORKS[MAIN_TXT]
@@ -180,6 +182,7 @@ class WalletSettings(Page):
                 (t("Multisig"), lambda: MENU_EXIT),
             ],
             disable_statusbar=True,
+            back_label=None,
         )
         index, _ = submenu.run_loop()
         return index == 1
@@ -195,6 +198,7 @@ class WalletSettings(Page):
                 ("Taproot - 86 (Experimental)", lambda: P2TR),
             ],
             disable_statusbar=True,
+            back_label=None,
         )
         _, script_type = submenu.run_loop()
         return script_type

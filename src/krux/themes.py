@@ -105,7 +105,7 @@ THEMES = {
     ThemeSettings.GREEN_THEME_NAME: {
         "background": BLACK,
         "info_background": LIGHTBLACK,
-        "foreground": LIGHT_GREEN,
+        "foreground": GREEN,
         "frame": DARKGREEN,
         "disabled": DARKGREY,
         "go": GREEN,
@@ -113,7 +113,7 @@ THEMES = {
         "del": YELLOW,
         "toggle": CYAN,
         "error": RED,
-        "highlight": GREEN,
+        "highlight": CYAN,
     },
 }
 
@@ -127,10 +127,6 @@ class Theme:
     def update(self):
         """Updates theme colors"""
         current_theme = Settings().appearance.theme
-        if current_theme not in (list(ThemeSettings.THEME_NAMES.values())):
-            # In case old version theme in use was deleted
-            current_theme = ThemeSettings.DARK_THEME_NAME
-            Settings().appearance.theme = current_theme
         self.bg_color = THEMES[current_theme]["background"]
         self.info_bg_color = THEMES[current_theme]["info_background"]
         if board.config["type"] == "amigo":

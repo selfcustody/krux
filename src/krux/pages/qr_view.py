@@ -23,10 +23,11 @@
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
-from ..themes import theme, WHITE, BLACK
+from ..themes import theme, WHITE, BLACK, DARKGREY
 from ..krux_settings import t
+from ..settings import THIN_SPACE
 from ..qr import get_size
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, SMALLEST_WIDTH
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -53,7 +54,7 @@ class SeedQRView(Page):
         self.ctx = ctx
         self.binary = binary
         if data:
-            self.code = qrcode.encode(data)
+            self.code = qrcode.encode(data)  # pylint: disable=E1101
             self.title = title
         else:
             if self.binary:
@@ -66,18 +67,21 @@ class SeedQRView(Page):
         self.region_size = 7 if self.qr_size == 21 else 5
         self.columns = (self.qr_size + self.region_size - 1) // self.region_size
         self.lr_index = 0
-        self.bright = theme.bg_color == WHITE
+        if theme.bg_color == WHITE:
+            self.qr_foreground = WHITE
+        else:
+            self.qr_foreground = None
 
     def _seed_qr(self):
         words = self.ctx.wallet.key.mnemonic.split(" ")
         numbers = ""
         for word in words:
             numbers += str("%04d" % WORDLIST.index(word))
-        return qrcode.encode(numbers)
+        return qrcode.encode(numbers)  # pylint: disable=E1101
 
     def _binary_seed_qr(self):
         binary_seed = self._to_compact_seed_qr(self.ctx.wallet.key.mnemonic)
-        return qrcode.encode(binary_seed)
+        return qrcode.encode(binary_seed)  # pylint: disable=E1101
 
     def _to_compact_seed_qr(self, mnemonic):
         mnemonic = mnemonic.split(" ")
@@ -144,8 +148,8 @@ class SeedQRView(Page):
     def draw_grided_qr(self, mode):
         """Draws grided QR"""
         self.ctx.display.clear()
-        if self.ctx.display.width() > SMALLEST_WIDTH:
-            grid_size = self.ctx.display.width() // SMALLEST_WIDTH
+        if self.ctx.display.width() > NARROW_SCREEN_WITH:
+            grid_size = self.ctx.display.width() // NARROW_SCREEN_WITH
         else:
             grid_size = 1
         grid_offset = self.ctx.display.width() % (self.qr_size + 2)
@@ -153,8 +157,10 @@ class SeedQRView(Page):
         grid_pad = self.ctx.display.width() // (self.qr_size + 2)
         grid_offset += grid_pad
         if mode == STANDARD_MODE:
-            if self.bright:
-                self.ctx.display.draw_qr_code(0, self.code, light_color=WHITE)
+            if self.qr_foreground:
+                self.ctx.display.draw_qr_code(
+                    0, self.code, light_color=self.qr_foreground
+                )
             else:
                 self.ctx.display.draw_qr_code(0, self.code)
         elif mode == LINE_MODE:
@@ -373,7 +379,7 @@ class SeedQRView(Page):
             return
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Saving ..."))
+        self.ctx.display.draw_centered_text(t("Processing.."))
 
         bmp_img.save("/sd/" + file_name)
         self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
@@ -381,9 +387,8 @@ class SeedQRView(Page):
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""
 
-        suggested_file_name = self.title.replace(" ", "_")
-        # Replaces thin spaces too
-        suggested_file_name = suggested_file_name.replace(" ", "_")
+        # Replaces spaces and thin spaces
+        suggested_file_name = self.title.replace(" ", "_").replace(THIN_SPACE, "_")
         if len(suggested_file_name) > 10:  # Crop file name
             suggested_file_name = suggested_file_name[:10]
 
@@ -414,8 +419,7 @@ class SeedQRView(Page):
                     ),
                 )
             )
-        qr_menu.append((t("Back"), lambda: None))
-        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT)
+        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT, back_label=None)
         submenu.run_loop()
         return MENU_CONTINUE
         # return MENU_EXIT  # Use this to exit QR Viewer after saving
@@ -425,7 +429,7 @@ class SeedQRView(Page):
         from .utils import Utils
 
         utils = Utils(self.ctx)
-        title = self.title.replace(" ", " ")  # Replaces thin spaces
+        title = self.title.replace(THIN_SPACE, " ")  # Replaces thin spaces
         utils.print_standard_qr(self.code, title=title, is_qr=True)
         # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
@@ -444,7 +448,12 @@ class SeedQRView(Page):
             while button not in (SWIPE_DOWN, SWIPE_UP):
 
                 def toggle_brightness():
-                    self.bright = not self.bright
+                    if self.qr_foreground == WHITE:
+                        self.qr_foreground = DARKGREY
+                    elif not self.qr_foreground:
+                        self.qr_foreground = WHITE
+                    elif self.qr_foreground == DARKGREY:
+                        self.qr_foreground = None
 
                 self.draw_grided_qr(mode)
                 if self.ctx.display.height() > self.ctx.display.width():
@@ -487,9 +496,8 @@ class SeedQRView(Page):
                     ),
                 ),
                 (t("Print to QR"), printer_func),
-                (t("Back to Menu"), lambda: MENU_EXIT),
             ]
-            submenu = Menu(self.ctx, qr_menu)
+            submenu = Menu(self.ctx, qr_menu, back_label=t("Back to Menu"))
             _, status = submenu.run_loop()
             if status == MENU_EXIT:
                 return MENU_CONTINUE

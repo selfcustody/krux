@@ -1,28 +1,24 @@
 ---
-
 name: 🐞 Bug report
-about: Create a report to help us improve
-title: "[Bug] the title of bug report"
+about: Create a new report
+title: "[Bug] the summary of your report"
 labels: bug
 assignees: ''
 
 ---
 
-#### Summary
+#### Describe the bug
+<!-- Please try to be specific in providing all the steps to reproduce the error. -->
 
-<!-- Describe some general things about the bug -->
-
-**Device**
+**Device(s) affected**
 - [ ] Amigo
 - [ ] M5stickV
+- [ ] Cube
 - [ ] Dock
 - [ ] Bit
 - [ ] Yahboom
+- [ ] WonderMV
 
-**Version**
-- [ ] Official release (selfcustody/krux): <!-- Specify version, like v23.09.1 -->
-- [ ] Beta release (odudex/krux_binaries):  <!-- Specify version, like v24.01.0-beta14 -->
-
-#### Describe the bug
-
-<!-- Give some details about it -->
+**Version affected**
+- [ ] Official release (selfcustody/krux): vXX.YY.Z <!-- Specify the version! -->
+- [ ] Beta release (odudex/krux_binaries): vXX.YY.Z-betaWW <!-- Specify the version! -->

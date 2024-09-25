@@ -1,39 +1,30 @@
 import pytest
 
 
-@pytest.fixture
-def tdata(mocker):
+def test_translations(mocker, m5stickv):
+    from krux.krux_settings import t, locale_control
+    from krux.translations import available_languages, ref_array
     import binascii
 
-    return [
-        {"en-US": {binascii.crc32("Hello world".encode("utf-8")): "Hello"}},
-        {"es-MX": {binascii.crc32("Hello world".encode("utf-8")): "Hola"}},
-    ]
+    # Test default language
+    assert t("Load Mnemonic") == "Load Mnemonic"
 
+    # Test pt_BR
+    locale_control.load_locale("pt_BR")
+    assert t("Load Mnemonic") == "Carregar Mnemônico"
 
-def test_translations(mocker, m5stickv, tdata):
-    import binascii
-    from krux.krux_settings import translations
+    # Test non existent slug
+    assert t("New Text") == "New Text"
 
-    cases = [
-        (tdata[0], {binascii.crc32("Hello world".encode("utf-8")): "Hello"}),
-        (tdata[1], None),
-    ]
-    for case in cases:
-        mocker.patch("krux.krux_settings.translation_table", case[0])
-        lookup = translations("en-US")
-
-        assert lookup == case[1]
-
-
-def test_t(mocker, m5stickv, tdata):
-    from krux.krux_settings import t
-
-    cases = [
-        (tdata[0], "Hello world", "Hello"),
-        (tdata[1], "Hello world", "Hello world"),
-    ]
-    for case in cases:
-        mocker.patch("krux.krux_settings.translation_table", case[0])
-
-        assert t(case[1]) == case[2]
+    # Cross-check available languages reference files
+    crc32_index = binascii.crc32("Load Mnemonic".encode("utf-8"))
+    reference_index = ref_array.index(crc32_index)
+    for lang in available_languages:
+        # Construct the path to the nested module
+        lang_module_path = f"krux.translations.{lang[:2]}"
+        # Import the top-level module (krux)
+        lang_trans_module = __import__(lang_module_path, fromlist=[""])
+        # Access the translation_array variable from the nested module
+        lang_trans_array = getattr(lang_trans_module, "translation_array")
+        locale_control.load_locale(lang)
+        assert t("Load Mnemonic") == lang_trans_array[reference_index]

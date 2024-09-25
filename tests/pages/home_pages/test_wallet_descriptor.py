@@ -7,6 +7,7 @@ def test_wallet(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
 
     cases = [
         # 0 Don't load
@@ -145,14 +146,14 @@ def test_wallet(mocker, m5stickv, tdata):
         wallet_descriptor = WalletDescriptor(ctx)
         mocker.patch.object(wallet_descriptor, "has_sd_card", return_value=True)
         mocker.patch.object(
-            wallet_descriptor, "capture_qr_code", new=lambda: (case[2], FORMAT_PMOFN)
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (case[2], FORMAT_PMOFN)
         )
+        qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
         mocker.patch.object(
             wallet_descriptor,
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(wallet_descriptor, "capture_qr_code")
         mocker.spy(wallet_descriptor, "display_wallet")
 
         # Mock SD card descriptor loading
@@ -167,7 +168,7 @@ def test_wallet(mocker, m5stickv, tdata):
         else:
             # If accepted the message and choose to load from camera
             if case[4][:2] == [BUTTON_ENTER, BUTTON_ENTER]:
-                wallet_descriptor.capture_qr_code.assert_called_once()
+                qr_capturer.assert_called_once()
                 if case[2] is not None and case[2] != "{}":
                     wallet_descriptor.display_wallet.assert_called_once()
             # If accepted the message and choose to load from SD
