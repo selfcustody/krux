@@ -39,6 +39,7 @@ DEVICES = [
     "maixpy_dock",
     "maixpy_yahboom",
     "maixpy_cube",
+    "maixpy_wonder_mv",
 ]
 
 

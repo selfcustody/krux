@@ -1,4 +1,4 @@
-# Changelog 24.09.0 - September 16, 2024
+# Changelog 24.09.0 - September 25, 2024
 
 ### New Device Support: WonderMV
 Manufactured by HiWonder, the WonderMV is similar to Yahboom K210 Module, with a few differences, including a metal enclosure, USB-C port, and screen backlight control.
