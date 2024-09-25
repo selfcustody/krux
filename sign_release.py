@@ -156,7 +156,7 @@ with open(compressed_folder, "rb") as f:
     print("Hash of", compressed_folder, ":")
     print(hash_string + "\n")
     std_hash_string = hash_string + "  " + compressed_folder
-    with open(compressed_folder + ".sha256", "w") as f:
+    with open(compressed_folder + ".sha256.txt", "w") as f:
         f.write(std_hash_string)
 
 # Sign the compressed release
