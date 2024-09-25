@@ -42,8 +42,8 @@ Krux now accepts urtype.Account type QR code descriptors.
 ### Enhanced File Exploring
 File explorer now better differentiate files from folders.
 
-### Camera Adjustments for Yahboom and WondeMV
-Sensitivity and exposure adjustments were made to the GC2145 sensor, enhancing the scanning success rate for Yahboom and WondeMV devices.
+### Camera Adjustments for Yahboom and WonderMV
+Sensitivity and exposure adjustments were made to the GC2145 sensor, enhancing the scanning success rate for Yahboom and WonderMV devices.
 
 ### About Shows Board Type
 Ensure you flashed the correct firmware for your device consulting the "About" menu item.
