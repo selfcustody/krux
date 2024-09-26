@@ -51,15 +51,12 @@ class Camera:
     def initialize_sensor(self, grayscale=False):
         """Initializes the camera"""
         self.antiglare_enabled = False
-        if self.cam_id in (OV7740_ID, GC2145_ID):
-            sensor.reset(freq=18200000)
-            if board.config["type"] == "cube":
-                # Rotate camera 180 degrees on Cube
-                sensor.set_hmirror(1)
-                sensor.set_vflip(1)
-        else:
-            sensor.reset()
+        sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
+        if board.config["type"] == "cube":
+            # Rotate camera 180 degrees on Cube
+            sensor.set_hmirror(1)
+            sensor.set_vflip(1)
         self.mode = COLOR_MODE
         if grayscale and self.cam_id != GC2145_ID:
             # GC2145 does not support grayscale
