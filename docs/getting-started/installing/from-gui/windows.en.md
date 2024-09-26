@@ -11,7 +11,34 @@ verify-the-integrity-explain.en.txt
 ----8<----
 
 ```pwsh
-(Get-FileHash '.\{{latest_installer_win}}').Hash -eq (Get-Content '.\{{latest_installer_win}}')
+(Get-FileHash '.\{{latest_installer_win}}').Hash.ToLower() -eq (Get-Content '.\{{latest_installer_win}}.sha256.txt').split(" ")[0]
+```
+
+The result in prompt should be `True`.
+
+Alternatively, you can check more closely in two steps:
+
+* Compute the binary sha256sum hash:
+
+```pwsh
+# Option 1: Compute in default way
+Get-FileHash '.\{{latest_installer_win}}'
+
+# Option 2: Compute and filter the necessary information
+(Get-FileHash '.\{{latest_installer_win}}').Hash
+
+# Option 3: Compute, filter and process the Hash for lowercase letters
+(Get-FileHash '.\{{latest_installer_win}}').Hash.ToLower()
+```
+
+* Compare with provided hash:
+
+```pwsh
+# Option 1: Get content 
+Get-Content '.\{{latest_installer_win}}.sha256.txt'
+
+# Option 2: Get content and filter the necessary information
+(Get-Content '.\{{latest_installer_win}}.sha256.txt').split(" ")[0]
 ```
 
 ## Verify the authenticity
