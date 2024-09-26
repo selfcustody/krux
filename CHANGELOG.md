@@ -1,4 +1,4 @@
-# Changelog 24.09.0 - September 16, 2024
+# Changelog 24.09.0 - September 25, 2024
 
 ### New Device Support: WonderMV
 Manufactured by HiWonder, the WonderMV is similar to Yahboom K210 Module, with a few differences, including a metal enclosure, USB-C port, and screen backlight control.
@@ -42,8 +42,8 @@ Krux now accepts urtype.Account type QR code descriptors.
 ### Enhanced File Exploring
 File explorer now better differentiate files from folders.
 
-### Camera Adjustments for Yahboom and WondeMV
-Sensitivity and exposure adjustments were made to the GC2145 sensor, enhancing the scanning success rate for Yahboom and WondeMV devices.
+### Camera Adjustments for Yahboom and WonderMV
+Sensitivity and exposure adjustments were made to the GC2145 sensor, enhancing the scanning success rate for Yahboom and WonderMV devices.
 
 ### About Shows Board Type
 Ensure you flashed the correct firmware for your device consulting the "About" menu item.

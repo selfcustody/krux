@@ -145,3 +145,7 @@ For now, a workaround you can do is to take a picture or video of the QR code wi
 ### Why Does Krux Say the Entropy of My Fifty Dice Rolls Does Not Contain 128 Bits of Entropy?
 
 Please check how [entropy measurement](getting-started/features/entropy.md) works.
+
+### Why isn't Krux detecting my microSD card or presenting an error?
+Starting from version 23.09.0, Krux supports SD card hot plugging. If you are using older versions, it may only detect the SD card at boot, so make sure Krux is turned off when inserting the microSD into it. To test the card compatibility use Krux [Tools>Check SD Card](getting-started/features/tools.md/#check-sd-card).
+Make sure the SD card is using MBR/DOS partition table and FAT32 format.

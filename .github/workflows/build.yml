@@ -190,7 +190,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          build-args: DEVICE=maixpy_cube
+          build-args: DEVICE=maixpy_wonder_mv
           push: true
           tags: localhost:5000/selfcustody/krux-builder-wonder-mv:latest
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -206,7 +206,7 @@ jobs:
         if: matrix.device == 'maixpy_wonder_mv'
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ steps.extract-cube.outputs.destination }}
+          path: ${{ steps.extract-wonder-mv.outputs.destination }}
           name: build-wonder-mv
           
       - name: Move cache

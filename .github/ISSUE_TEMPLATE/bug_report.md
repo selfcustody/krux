@@ -17,6 +17,7 @@ assignees: ''
 - [ ] Dock
 - [ ] Bit
 - [ ] Yahboom
+- [ ] WonderMV
 
 **Version affected**
 - [ ] Official release (selfcustody/krux): vXX.YY.Z <!-- Specify the version! -->
