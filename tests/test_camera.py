@@ -10,7 +10,8 @@ def test_init(mocker, m5stickv):
     assert isinstance(c, Camera)
 
 
-def test_initialize_sensors(mocker, m5stickv):
+def test_initialize_sensors(mocker, multiple_devices):
+    import board
     import krux
     from krux.camera import Camera, OV7740_ID, OV2640_ID, GC0328_ID, GC2145_ID
 
@@ -29,6 +30,17 @@ def test_initialize_sensors(mocker, m5stickv):
         c.initialize_sensor()
         if config_method:
             getattr(c, config_method).assert_called()
+
+        if board.config["type"] == "cube" or c.cam_id == OV2640_ID:
+            krux.camera.sensor.set_vflip.assert_called_with(1)
+        else:
+            krux.camera.sensor.set_vflip.assert_not_called()
+        krux.camera.sensor.set_vflip.reset_mock()
+
+        if board.config["type"] == "cube":
+            krux.camera.sensor.set_hmirror.assert_called_with(1)
+        else:
+            krux.camera.sensor.set_hmirror.assert_not_called()
 
     krux.camera.sensor.reset.assert_called()
     krux.camera.sensor.set_pixformat.assert_called()
