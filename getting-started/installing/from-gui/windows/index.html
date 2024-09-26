@@ -1448,13 +1448,13 @@
 
 <h1 id="download-assets"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 12V6.75l6-1.32v6.48L3 12m17-9v8.75l-10 .15V5.21L20 3M3 13l6 .09v6.81l-6-1.15V13m17 .25V22l-10-1.91V13.1l10 .15Z"/></svg></span> Download assets<a class="headerlink" href="#download-assets" title="Permanent link">&para;</a></h1>
 <ul>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20-alpha-2/krux-installer_v0.0.20-alpha-2.Setup.exe"><code>krux-installer_v0.0.20-alpha-2.Setup.exe</code></a></li>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20-alpha-2/krux-installer_v0.0.20-alpha-2.Setup.exe.sha256.txt"><code>krux-installer_v0.0.20-alpha-2.Setup.exe.sha256.txt</code></a></li>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20-alpha-2/krux-installer_v0.0.20-alpha-2.Setup.exe.sig"><code>krux-installer_v0.0.20-alpha-2.Setup.exe.sig</code></a></li>
+<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20-alpha-3/krux-installer_v0.0.20-alpha-3.Setup.exe"><code>krux-installer_v0.0.20-alpha-3.Setup.exe</code></a></li>
+<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20-alpha-3/krux-installer_v0.0.20-alpha-3.Setup.exe.sha256.txt"><code>krux-installer_v0.0.20-alpha-3.Setup.exe.sha256.txt</code></a></li>
+<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20-alpha-3/krux-installer_v0.0.20-alpha-3.Setup.exe.sig"><code>krux-installer_v0.0.20-alpha-3.Setup.exe.sig</code></a></li>
 </ul>
 <h2 id="verify-the-integrity">Verify the integrity<a class="headerlink" href="#verify-the-integrity" title="Permanent link">&para;</a></h2>
 <p>Open your terminal and type the command below:</p>
-<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span><span class="p">.</span><span class="n">ToLower</span><span class="p">()</span> <span class="o">-eq</span> <span class="p">(</span><span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe.sha256.txt&#39;</span><span class="p">).</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-3.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span><span class="p">.</span><span class="n">ToLower</span><span class="p">()</span> <span class="o">-eq</span> <span class="p">(</span><span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-3.Setup.exe.sha256.txt&#39;</span><span class="p">).</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
 </code></pre></div>
 <p>The result in prompt should be <code>True</code>.</p>
 <p>Alternatively, you can check more closely in two steps:</p>
@@ -1462,22 +1462,22 @@
 <li>Compute the binary sha256sum hash:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c"># Option 1: Compute in default way</span>
-<span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span>
+<span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-3.Setup.exe&#39;</span>
 
 <span class="c"># Option 2: Compute and filter the necessary information</span>
-<span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span>
+<span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-3.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span>
 
 <span class="c"># Option 3: Compute, filter and process the Hash for lowercase letters</span>
-<span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span><span class="p">.</span><span class="n">ToLower</span><span class="p">()</span>
+<span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-3.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span><span class="p">.</span><span class="n">ToLower</span><span class="p">()</span>
 </code></pre></div>
 <ul>
 <li>Compare with provided hash:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c"># Option 1: Get content </span>
-<span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe.sha256.txt&#39;</span>
+<span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-3.Setup.exe.sha256.txt&#39;</span>
 
 <span class="c"># Option 2: Get content and filter the necessary information</span>
-<span class="p">(</span><span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe.sha256.txt&#39;</span><span class="p">).</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
+<span class="p">(</span><span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-3.Setup.exe.sha256.txt&#39;</span><span class="p">).</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
 </code></pre></div>
 <h2 id="verify-the-authenticity">Verify the authenticity<a class="headerlink" href="#verify-the-authenticity" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1488,14 +1488,14 @@
 <div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--keyserver<span class="w"> </span>hkps://keys.openpgp.org<span class="w"> </span>--recv-keys<span class="w"> </span>B4281DDDFBBD207BFA4113138974C90299326322
 </code></pre></div>
 <p>Then, to verify yourself, run this command on your terminal:</p>
-<div class="highlight"><pre><span></span><code><span class="n">gpg</span> <span class="p">-</span><span class="n">-verify</span> <span class="p">./</span><span class="n">krux-installer_v0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">20-alpha</span><span class="p">-</span><span class="n">2</span><span class="p">.</span><span class="n">Setup</span><span class="p">.</span><span class="n">exe</span><span class="p">.</span><span class="n">sig</span>
+<div class="highlight"><pre><span></span><code><span class="n">gpg</span> <span class="p">-</span><span class="n">-verify</span> <span class="p">./</span><span class="n">krux-installer_v0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">20-alpha</span><span class="p">-</span><span class="n">3</span><span class="p">.</span><span class="n">Setup</span><span class="p">.</span><span class="n">exe</span><span class="p">.</span><span class="n">sig</span>
 </code></pre></div>
 <blockquote>
 <p>⚠️  TIP: If the verification was successful,
 you may get a message similar to: <code>Good signature from "qlrddev &lt;qlrddev@gmail.com&gt;"</code></p>
 </blockquote>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
-<p>Execute the <code>krux-installer_v0.0.20-alpha-2.Setup.exe</code>. You'll be faced with a blue window saying
+<p>Execute the <code>krux-installer_v0.0.20-alpha-3.Setup.exe</code>. You'll be faced with a blue window saying
 "Windows protected your PC". This occurs because we don't have a
 <a href="https://signmycode.com/resources/how-to-sign-an-exe-or-windows-application">code signing certificate</a>:</p>
 <p><img width="450" src="/krux/img/krux-installer/windows_warn0.jpg" alt="Windows protected your computer" /></p>
