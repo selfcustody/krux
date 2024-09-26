@@ -1454,7 +1454,30 @@
 </ul>
 <h2 id="verify-the-integrity">Verify the integrity<a class="headerlink" href="#verify-the-integrity" title="Permanent link">&para;</a></h2>
 <p>Open your terminal and type the command below:</p>
-<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span> <span class="o">-eq</span> <span class="p">(</span><span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span><span class="p">.</span><span class="n">ToLower</span><span class="p">()</span> <span class="o">-eq</span> <span class="p">(</span><span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe.sha256.txt&#39;</span><span class="p">).</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
+</code></pre></div>
+<p>The result in prompt should be <code>True</code>.</p>
+<p>Alternatively, you can check more closely in two steps:</p>
+<ul>
+<li>Compute the binary sha256sum hash:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c"># Option 1: Compute in default way</span>
+<span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span>
+
+<span class="c"># Option 2: Compute and filter the necessary information</span>
+<span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span>
+
+<span class="c"># Option 3: Compute, filter and process the Hash for lowercase letters</span>
+<span class="p">(</span><span class="nb">Get-FileHash</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe&#39;</span><span class="p">).</span><span class="n">Hash</span><span class="p">.</span><span class="n">ToLower</span><span class="p">()</span>
+</code></pre></div>
+<ul>
+<li>Compare with provided hash:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c"># Option 1: Get content </span>
+<span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe.sha256.txt&#39;</span>
+
+<span class="c"># Option 2: Get content and filter the necessary information</span>
+<span class="p">(</span><span class="nb">Get-Content</span> <span class="s1">&#39;.\krux-installer_v0.0.20-alpha-2.Setup.exe.sha256.txt&#39;</span><span class="p">).</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
 </code></pre></div>
 <h2 id="verify-the-authenticity">Verify the authenticity<a class="headerlink" href="#verify-the-authenticity" title="Permanent link">&para;</a></h2>
 <ul>
