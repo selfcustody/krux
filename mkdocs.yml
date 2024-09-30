@@ -51,13 +51,13 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
-  latest_krux: krux-v24.09.beta15
-  latest_installer: v0.0.2-alpha
-  latest_installer_rpm: krux-installer-0.0.2_alpha-1.x86_64.rpm
-  latest_installer_deb: krux-installer_0.0.2-alpha_amd64.deb
-  latest_installer_win: krux-installer_v0.0.2-alpha.Setup.exe 
-  latest_installer_mac_arm: krux-installer_0.0.2-alpha_arm64.dmg
-  latest_installer_mac_intel: krux-installer_0.0.2-alpha_x86_64.dmg 
+  latest_krux: krux-v24.09.1
+  latest_installer: v0.0.20-alpha-3
+  latest_installer_rpm: krux-installer-0.0.20_alpha_3-1.x86_64.rpm
+  latest_installer_deb: krux-installer_0.0.20-alpha-3_amd64.deb
+  latest_installer_win: krux-installer_v0.0.20-alpha-3.Setup.exe
+  latest_installer_mac_arm: krux-installer_0.0.20-alpha-3_arm64.dmg
+  latest_installer_mac_intel: krux-installer_0.0.20-alpha-3_x86_64.dmg
   social:
     - icon: fontawesome/solid/bullhorn
       link: https://bitcointalk.org/index.php?topic=5489022.0

@@ -12,4 +12,4 @@
 	url = ../../selfcustody/Kboot
 [submodule "firmware/MaixPy"]
 	path = firmware/MaixPy
-	url = ../MaixPy
+	url = ../../selfcustody/MaixPy
