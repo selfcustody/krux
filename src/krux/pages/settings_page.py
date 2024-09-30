@@ -202,6 +202,11 @@ class SettingsPage(Page):
             self.flash_text(t("PIN set successfully"))
         except OSError:
             self.flash_error(t("Error saving PIN"))
+
+        from .fill_flash import FillFlash
+
+        flash_filler = FillFlash(self.ctx)
+        flash_filler.fill_flash_with_camera_entropy()
         return MENU_CONTINUE
 
     def _settings_exit_check(self):
