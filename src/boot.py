@@ -85,14 +85,14 @@ def pin_verification(ctx_pin):
     from krux.krux_settings import Settings
 
     if Settings().security.boot_flash_hash:
-        from krux.pages.flash_hash import FlashHash
+        from krux.pages.flash_tools import FlashHash
 
         flash_hash = FlashHash(ctx_pin, pin_hash)
         flash_hash.generate()
 
         # Unimport FlashHash the free memory
-        sys.modules.pop("krux.pages.flash_hash")
-        del sys.modules["krux"].pages.flash_hash
+        sys.modules.pop("krux.pages.flash_tools")
+        del sys.modules["krux"].pages.flash_tools
         del FlashHash
 
     # Unimport PinVerification the free memory

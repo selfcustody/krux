@@ -1,22 +1,25 @@
 # PIN and Anti-Tamper Mechanism (Experimental)
 
-<span style="color: red;">Update!</span>
-There are some gaps and opportunities for improvement in the 'Flash Hash' anti-tamper solution. Therefore, it will not be included in release v24.09.0.
-
 
 ## Krux Security Model - Good Practices and Limitations
 
-It is crucial for users to verify the authenticity of the firmware being flashed onto the device, especially when doing so via USB.
+To ensure the security of your Krux device, it's essential to verify the authenticity of the firmware before installation, especially when flashing via USB.
 
-Users can verify the firmware's signature by following the documentation and using OpenSSL command-line tool. Alternatively, when using Krux-Installer, users should verify Krux-Installer’s signature using GPG. This method is more user-friendly, as verification can be done through graphical user interfaces (GUIs) like Sparrow. Krux-Installer performs the firmware signature verification, informs the users of the results, and guides them through performing the verification manually, providing details about the firmware location and the necessary commands.
+### Firmware Verification Methods
 
-Learning about verification methods and tools is highly recommended. Building the firmware from source and verifying its reproducibility are also excellent steps towards maintaining control and ensuring the security of your device.
+- **Using OpenSSL Command-Line Tool:** Follow the Krux documentation to verify the firmware's signature manually. This method provides a high level of assurance but requires familiarity with command-line operations.
 
-After the initial flash, it is advisable to perform subsequent updates through the SD card. SD card updates not only keep the device air-gapped but also ensure that the previous firmware verifies the signature of subsequent updates before installation.
+- **Using Krux-Installer:** For a more user-friendly experience, verify the Krux-Installer's signature using GPG. Graphical interfaces like Sparrow Wallet can facilitate this process. Krux-Installer automatically verifies the firmware signature, informs you of the results, and guides you through manual verification if desired.
 
-Keeping the device air-gapped is a highly recommended practice, as the USB port presents a significant attack surface.
+### Recommendations
 
-The PIN and "Flash Hash" anti-tamper features, described below, will only be effective under the assumption that the flashed firmware is legitimate and uncompromised.
+- **Learn Verification Tools:** Familiarize yourself with verification methods and tools to maintain control over your device's security.
+
+- **Build from Source:** Consider building the firmware from source code and verifying its reproducibility for maximum assurance.
+
+- **Use SD Card for Updates:** After the initial flash, perform subsequent updates via the SD card. This keeps your device air-gapped and allows the existing firmware to verify new updates before installation.
+
+Note: The effectiveness of the PIN and "Flash Hash" anti-tamper features relies on running legitimate, uncompromised firmware
 
 ## PIN
 A PIN, composed of numbers, letters and special characters, with a minimum length of six characters, can be stored and required to boot the main application on Krux devices.
@@ -25,81 +28,75 @@ Before being stored in the device’s flash, the PIN is hashed together with the
 
 The PIN requirement is disabled if the user wipes the device or flashes an older firmware version.
 
+### Enhancing Anti-Tamper
+After setting the PIN, you are prompted to fill empty flash memory blocks with random entropy from the camera. This process strengthens the anti-tamper feature by preventing attackers from exploiting unused memory space.
+
 ## Flash Hash - Anti-tamper Tool
 ### Introduction
-Once a PIN is defined, users can generate a 'flash hash' to verify whether the flash content has been altered.
 
-The flash hash translates the flash content, combined with the user's PIN and the microcontroller's unique ID (UID), into an easy-to-recognize image and four anti-tamper words. The image’s shape, color, and the words are deterministically derived from the combination of the PIN, UID, and flash content.
+The "Flash Hash" tool enables you to verify if the flash memory content has been altered.
 
-The flash hash evaluates the entire flash memory, divided into two regions: the firmware region and the user's region.
+### How It Works
 
-- The firmware region hash generates an image and two anti-tamper words.
-- The user’s region hash generates another two words.
+The tool generates a unique image and four anti-tamper words based on a hash of your PIN, the device's UID, and the flash content. The flash memory is divided into two regions:
+
+- **Firmware Region:** Generates the image and the first two words.
+
+- **User Region:** Generates the last two words.
 
 <div style="text-align: center;">
     <img src="../../img/flash_hash_temp.bmp" alt="Flash Hash Temp" width="200"/>
 </div>
-In the example image, the blue symbol and the words "tail monkey" are derived from the firmware region, while "wrestle over" comes from the user’s region of memory.
 
-A single bit change in either region will produce different results:
+*Example: The blue symbol and the words "tail monkey" are derived from the firmware region, while "wrestle over" comes from the user region.*
 
-- A change in the firmware region (which includes the bootloader) will result in a different image and the first two words.
-- A change in the user’s region, such as new settings or storing an encrypted mnemonic, will change the last two words.
-- A PIN change will alter the image and all four words.
+Any change in the flash content results in a different image or words:
 
-To ensure the flash hash is resistant to tampering, the PIN and K210 chip’s UID are hashed along with the flash contents.
+- **Firmware Changes:** Alterations in the firmware region, including the bootloader, change the image and the first two words.
+
+- **User Data Changes:** Modifications in the user region, such as new settings or stored mnemonics, change the last two words.
+
+- **PIN Changes:** Updating the PIN alters the image and all four words.
+
+### Filling Empty Flash Blocks
+
+Krux performs a memory sweep while simultaneously capturing a live feed from the camera. Whenever an empty block is found in the flash memory, Krux estimates the image's entropy by evaluating its color variance. Krux waits until minimum threshold is met, then uses the data from the image to fill these empty spaces with rich, random entropy.
+
+### Ensuring Tamper Resistance
+
+The Flash Hash function securely hashes the combination of the PIN, UID, and flash content:
 
 `hash(PIN -> UID -> Flash content)` -> Image + Words
 
-### Possible Attack Scenarios
-If an attacker replaces the firmware and the user enters the correct PIN, here’s how the tampered firmware might attempt to bypass verification:
+## Potential Attack Scenarios and Their Mitigation
+### Challenge for an Attacker
 
-#### The Challenge for the Attacker
-Let’s break down how the tampered firmware might attempt to generate the correct hash:
+An attacker attempting to replace the firmware faces significant hurdles:
 
-1. Tampered Firmware Has Knowledge of the Original Hash:
+- **Lack of Original Flash Data:** Without the exact original flash content, the attacker cannot reproduce the correct hash.
 
-- The attacker may know the hash of the original firmware `hash(flash data)`, but not the original firmware content itself.
-- They cannot reverse-engineer the hash to recover the original firmware, as cryptographic hash functions like SHA-256 are one-way functions.
+- **Sequential Hash Dependency:** The hash function processes data sequentially (PIN, UID, flash content), preventing the attacker from injecting or rearranging data to produce the same hash.
 
-2. Attacker Receives the User’s PIN:
+- **One-Way Hash Functions:** Cryptographic hash functions like SHA-256 are one-way, making it infeasible to reverse-engineer or manipulate the hash without the original inputs.
 
-- After the user enters the PIN, the tampered firmware now knows the correct PIN and UID.
-- However, the tampered firmware still needs to compute `hash(PIN + UID + original flash data)` to match what the original firmware would have produced.
+### Why Tampered Firmware Cannot Bypass Verification
 
-3. Hash Function with Sequential Data Blocks:
+- **Cannot Reconstruct the Hash:** Without the original flash data, the attacker cannot generate the correct hash, even if they know the UID and PIN after the user enters it.
 
-- The hash depends on the PIN (first), UID (second), and the flash data (subsequently in sequential blocks).
-- Since the tampered firmware lacks the original flash data, it cannot generate the correct sequential hash `hash(PIN + UID + original flash data)`.
+- **Hash Sensitivity:** Any alteration in the flash content changes the hash output, which will be evident through a different image or anti-tamper words.
 
-#### Why the Tampered Firmware Can't Mock the Hash:
-- Impossibility of Reconstructing the Original Hash: Even though the tampered firmware knows hash(original flash data) and the user’s PIN, it cannot generate the correct hash `hash(PIN + UID + original flash data)` for the following reasons:
+- **Entropy Filling:** Filling empty flash blocks with camera-generated entropy leaves no space for malicious code and any changes to these blocks will alter the hash.
 
-- Hashing is Sensitive to Input Order: The hash function processes the PIN and then the flash data sequentially. The tampered firmware can’t simply "insert" the original flash data hash into this process. To generate the correct overall hash, the tampered firmware would need access to the actual original flash content itself, not just its hash.
+### Possible Attack Strategies and Failures
 
-- Hash Function Properties: Cryptographic hash functions, like SHA-256, are collision-resistant and deterministic. The tampered firmware can’t produce the same hash unless it provides the exact same sequence of data blocks that were used to create the original hash. The hash function works on the entire content (PIN + UID + flash data), not just their final hashes.
+- **Precomputing Hashes:** The attacker cannot precompute the correct hash without the PIN, UID, and exact flash content.
 
-- Time of PIN Entry: If the PIN is entered after the device has already booted the tampered firmware, the attacker would have no chance to modify the hash input to simulate the original flash data hash without full knowledge of the firmware’s content.
+- **Storing Hashes:** Storing hash(flash content) is ineffective because the overall hash depends on the sequential combination of PIN, UID, and flash data.
 
-#### Possible Tampered Firmware Strategies (and Why They Fail):
-1. Precompute and Store `hash(PIN + UID + flash data)`:
+- **Inserting Malicious Code:** Attempting to insert code into empty spaces fails because the entropy filling process and hash verification will detect any changes.
 
-- If the tampered firmware precomputes `hash(PIN + UID + flash data)` using the original firmware and stores it somewhere, it could potentially return the correct hash after receiving the PIN.
-- This strategy only works if the attacker had access to the PIN, the device (to extract UID) and the original firmware at the time of tampering, which contradicts the purpose of using an unknown PIN.
+## Conclusion
 
-2. Use of Stored `hash(flash data)`:
+The Flash Hash tool significantly enhances security by making it infeasible for attackers to tamper with the firmware without detection. By combining PIN hashing, filling empty memory with random entropy, and verifying flash integrity through unique images and words, Krux significantly enhances the detection of any tampering attempts.
 
-- The attacker might try to store `hash(flash data)` from the original firmware and somehow combine it with the PIN to mock the final hash.
-- But, the process of hashing PIN + UID + firmware as a block sequence ensures that merely combining the final hashes won’t produce a valid result.
-
-#### Conclusion:
-The tampered firmware cannot mock the correct result of `hash(PIN + UID + flash data)` unless it has access to the PIN, the device, and the exact original flash content. Simply knowing `hash(flash data)` or even precomputing certain hashes in advance wouldn’t help, because the hash function operates sequentially on the combined data (PIN + UID + flash data).
-
-In conclusion, this approach provides improved security because:
-
-- The PIN remains secret and is only input by the user.
-- The 'flash hash' hash depends on the PIN, UID and the entire flash content, making it infeasible for attackers to tamper with the firmware and pass verification without having previous access to the PIN and the device, to extract UID and exact flash content.
-
-Although this feature makes it much harder for an attacker to tamper the device with a malicious firmware without being noticed, an attack is still possible:
-When the attacker manages to get the PIN. So the PIN strength and users protocol is crucial for this defense strategy.
-Users can enforce their PIN by making them long and using letters and special characters. Privacy while unlocking the devices is also crucial.
+Note: The strength of this defense strategy depends on maintaining a strong, confidential PIN and following secure practices when unlocking the device.

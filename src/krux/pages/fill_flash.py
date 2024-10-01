@@ -20,13 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import board
 import flash
 import sensor
 from . import Page, MENU_CONTINUE
 from .capture_entropy import CameraEntropy, POOR_VARIANCE_TH
 from ..themes import theme
 from ..krux_settings import t
-from ..display import BOTTOM_LINE
+from ..display import BOTTOM_LINE, MINIMAL_PADDING
 from ..wdt import wdt
 from ..firmware import FLASH_SIZE
 
@@ -59,9 +60,12 @@ class FillFlash(Page):
         offset_x = self.ctx.display.width()
         offset_x -= TOTAL_BLOCKS // blocks_per_line
         offset_x //= 2
-        offset_y = BOTTOM_LINE
+        if board.config["type"] == "amigo":
+            offset_y = BOTTOM_LINE
+        else:
+            offset_y = BOTTOM_LINE - 12
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Filling Flash"))
+        self.ctx.display.draw_hcentered_text(t("Filling Flash"), MINIMAL_PADDING)
         self.ctx.camera.initialize_run()
         entropy_measurement = CameraEntropy(self.ctx)
         chunk_index = MAX_CHUNK_INDEX
@@ -75,13 +79,14 @@ class FillFlash(Page):
                 while True:
                     self.ctx.display.to_landscape()
                     img = sensor.snapshot()
-                    self.ctx.display.render_image(img)
                     entropy_measurement.entropy_measurement_update(
                         img, all_at_once=True
                     )
                     if entropy_measurement.stdev_index > POOR_VARIANCE_TH:
                         img_bytes = img.to_bytes()
+                        self.ctx.display.render_image(img, compact=True)
                         break
+                    self.ctx.display.render_image(img, compact=True)
                 self.ctx.display.to_portrait()
 
             if flash.read(address, BLOCK_SIZE) == empty_buf:
@@ -97,7 +102,7 @@ class FillFlash(Page):
                 self.ctx.display.draw_vline(
                     offset_x,
                     offset_y,
-                    10,
+                    8,
                     color,
                 )
                 color = theme.fg_color

@@ -20,13 +20,146 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import Page, MENU_CONTINUE, DEFAULT_PADDING
-from ..themes import theme
+from . import Page, Menu, MENU_CONTINUE, DEFAULT_PADDING
+from ..themes import theme, BLUE, GREEN, LIGHT_PINK, PURPLE, YELLOW, WHITE, DARKGREY
 from ..krux_settings import t
 from ..display import FONT_HEIGHT
 from ..wdt import wdt
+from ..firmware import (
+    FLASH_SIZE,
+    SPIFFS_ADDR,
+    FIRMWARE_SLOT_1,
+    FIRMWARE_SLOT_2,
+    MAX_FIRMWARE_SIZE,
+    ERASE_BLOCK_SIZE,
+)
 
 BLOCK_SIZE = 0x1000
+FLASH_ROWS = 64
+
+CONFIR_AREA = 0x4000
+UNALOCATED_AREA_1 = 0x6000
+UNALOCATED_AREA_2 = FIRMWARE_SLOT_1 + MAX_FIRMWARE_SIZE
+UNALOCATED_AREA_3 = FIRMWARE_SLOT_2 + MAX_FIRMWARE_SIZE
+
+
+class FlashToolsMenu(Page):
+    """Menu for flash tools"""
+
+    def flash_tools_menu(self):
+        """Load the flash tools menu"""
+        flash_menu = Menu(
+            self.ctx,
+            [
+                (t("Flash Map"), self.flash_map),
+                (t("Flash Hash"), self.flash_hash),
+                (t("Wipe Device"), self.wipe_device),
+            ],
+        )
+        flash_menu.run_loop()
+        return MENU_CONTINUE
+
+    def flash_map(self):
+        """Load the flash map page"""
+        import flash
+
+        image_block_size = self.ctx.display.width() // FLASH_ROWS
+        empty_buf = b"\xff" * BLOCK_SIZE
+        column = 0
+        row = 0
+        offset_x = self.ctx.display.width()
+        offset_x -= image_block_size * FLASH_ROWS
+        offset_x //= 2
+        offset_y = DEFAULT_PADDING + 2 * FONT_HEIGHT
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text(t("Flash Map"))
+
+        # Draw a map of the flash memory
+        for address in range(0, FLASH_SIZE, BLOCK_SIZE):
+            wdt.feed()
+            if address >= SPIFFS_ADDR:
+                color = YELLOW
+            elif address >= UNALOCATED_AREA_3:
+                color = WHITE
+            elif address >= FIRMWARE_SLOT_2:
+                color = PURPLE
+            elif address >= UNALOCATED_AREA_2:
+                color = WHITE
+            elif address >= FIRMWARE_SLOT_1:
+                color = LIGHT_PINK
+            elif address >= UNALOCATED_AREA_1:
+                color = WHITE
+            elif address >= CONFIR_AREA:
+                color = GREEN
+            else:
+                color = BLUE
+            if flash.read(address, BLOCK_SIZE) == empty_buf:
+                color = DARKGREY
+            self.ctx.display.fill_rectangle(
+                offset_x + column * image_block_size,
+                offset_y + row * image_block_size,
+                image_block_size,
+                image_block_size,
+                color,
+            )
+            column += 1
+            if column == FLASH_ROWS:
+                column = 0
+                row += 1
+        self.ctx.input.wait_for_button()
+
+        return MENU_CONTINUE
+
+    def flash_hash(self):
+        """Load the flash hash page"""
+
+        if self.ctx.pin_enabled:
+            from .pin_verification import PinVerification
+
+            pin_verification = PinVerification(self.ctx)
+            pin_hash = pin_verification.capture(return_hash=True)
+            if not pin_hash:
+                return MENU_CONTINUE
+        else:
+            self.flash_error(t("Set a PIN first"))
+            return MENU_CONTINUE
+
+        flash_hash = FlashHash(self.ctx, pin_hash)
+        flash_hash.generate()
+
+        return MENU_CONTINUE
+
+    def erase_spiffs(self):
+        """Erase all SPIFFS, removing all saved configs and mnemonics"""
+
+        import flash
+
+        empty_buf = b"\xff" * ERASE_BLOCK_SIZE
+        for address in range(SPIFFS_ADDR, FLASH_SIZE, ERASE_BLOCK_SIZE):
+            wdt.feed()
+            if flash.read(address, ERASE_BLOCK_SIZE) == empty_buf:
+                continue
+            flash.erase(address, ERASE_BLOCK_SIZE)
+
+    def wipe_device(self):
+        """Fully formats SPIFFS memory"""
+        self.ctx.display.clear()
+        if self.prompt(
+            t(
+                "Permanently remove all stored encrypted mnemonics and settings from flash?"
+            ),
+            self.ctx.display.height() // 2,
+        ):
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Wiping Device..")
+                + "\n\n"
+                + t("Do not power off, it may take a while to complete.")
+            )
+            self.erase_spiffs()
+            # Reboot so default settings take place and SPIFFS is formatted.
+            self.ctx.power_manager.reboot()
+        return MENU_CONTINUE
 
 
 class FlashHash(Page):
@@ -42,7 +175,6 @@ class FlashHash(Page):
         """Hashes the pin, unique ID and flash memory together"""
         import hashlib
         import flash
-        from ..firmware import FLASH_SIZE, SPIFFS_ADDR
         from machine import unique_id
 
         counter = SPIFFS_ADDR // BLOCK_SIZE if spiffs_region else 0

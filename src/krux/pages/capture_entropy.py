@@ -156,13 +156,13 @@ class CameraEntropy(Page):
             wdt.feed()
 
             img = sensor.snapshot()
-            self.ctx.display.render_image(img)
 
             command = self._callback()
             if command != NOT_PRESSED:
                 break
 
             self.entropy_measurement_update(img)
+            self.ctx.display.render_image(img)
 
         self.ctx.display.to_portrait()
         gc.collect()
