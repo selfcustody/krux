@@ -30,6 +30,7 @@ from ..krux_settings import t
 from ..display import BOTTOM_LINE, MINIMAL_PADDING
 from ..wdt import wdt
 from ..firmware import FLASH_SIZE
+from ..camera import ENTROPY_MODE
 
 FLASH_ROWS = 64
 BLOCK_SIZE = 0x1000
@@ -66,7 +67,7 @@ class FillFlash(Page):
             offset_y = BOTTOM_LINE - 12
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Filling Flash"), MINIMAL_PADDING)
-        self.ctx.camera.initialize_run()
+        self.ctx.camera.initialize_run(mode=ENTROPY_MODE)
         entropy_measurement = CameraEntropy(self.ctx)
         chunk_index = MAX_CHUNK_INDEX
         color = theme.fg_color

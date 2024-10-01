@@ -141,11 +141,12 @@ class CameraEntropy(Page):
         import sensor
         import shannon
         from ..wdt import wdt
+        from ..camera import ENTROPY_MODE
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))
         self.ctx.display.to_landscape()
-        self.ctx.camera.initialize_run()
+        self.ctx.camera.initialize_run(mode=ENTROPY_MODE)
         self.ctx.display.clear()
 
         command = 0

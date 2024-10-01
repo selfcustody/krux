@@ -31,8 +31,9 @@ OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
 GC2145_ID = 0x45  # Yahboom
 
-COLOR_MODE = 0
+QR_SCAN_MODE = 0
 GRAYSCALE_MODE = 1
+ENTROPY_MODE = 2
 
 
 class Camera:
@@ -48,7 +49,7 @@ class Camera:
         except Exception as e:
             print("Camera not found:", e)
 
-    def initialize_sensor(self, grayscale=False):
+    def initialize_sensor(self, mode=QR_SCAN_MODE):
         """Initializes the camera"""
         self.antiglare_enabled = False
         sensor.reset(freq=18200000)
@@ -57,8 +58,8 @@ class Camera:
             # Rotate camera 180 degrees on Cube
             sensor.set_hmirror(1)
             sensor.set_vflip(1)
-        self.mode = COLOR_MODE
-        if grayscale and self.cam_id != GC2145_ID:
+        self.mode = QR_SCAN_MODE
+        if mode==GRAYSCALE_MODE and self.cam_id != GC2145_ID:
             # GC2145 does not support grayscale
             sensor.set_pixformat(sensor.GRAYSCALE)
             self.mode = GRAYSCALE_MODE
@@ -73,12 +74,15 @@ class Camera:
             sensor.set_framesize(sensor.CIF)
         else:
             sensor.set_framesize(sensor.QVGA)
-        if self.cam_id == OV7740_ID:
-            self.config_ov_7740()
-        if self.cam_id == OV2640_ID:
-            self.config_ov_2640()
-        if self.cam_id == GC2145_ID:
-            self.config_gc_2145()
+        if mode == ENTROPY_MODE:
+            self.mode = ENTROPY_MODE
+        else:
+            if self.cam_id == OV7740_ID:
+                self.config_ov_7740()
+            if self.cam_id == OV2640_ID:
+                self.config_ov_2640()
+            if self.cam_id == GC2145_ID:
+                self.config_gc_2145()
         sensor.skip_frames()
 
     def config_ov_7740(self):
@@ -204,12 +208,12 @@ class Camera:
             img.rotation_corr(z_rotation=180)
         return img
 
-    def initialize_run(self):
+    def initialize_run(self, mode=QR_SCAN_MODE):
         """Initializes and runs sensor"""
         if self.mode is None:
             raise ValueError("No camera found")
-        if self.mode != COLOR_MODE:
-            self.initialize_sensor()
+        if self.mode != mode:
+            self.initialize_sensor(mode=mode)
         sensor.run(1)
         if self.antiglare_enabled:
             self.disable_antiglare()
