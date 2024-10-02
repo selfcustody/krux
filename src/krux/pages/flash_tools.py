@@ -37,10 +37,10 @@ from ..firmware import (
 BLOCK_SIZE = 0x1000
 FLASH_ROWS = 64
 
-CONFIR_AREA = 0x4000
-UNALOCATED_AREA_1 = 0x6000
-UNALOCATED_AREA_2 = FIRMWARE_SLOT_1 + MAX_FIRMWARE_SIZE
-UNALOCATED_AREA_3 = FIRMWARE_SLOT_2 + MAX_FIRMWARE_SIZE
+CONFIG_AREA = 0x4000
+UNALLOCATED_AREA_1 = 0x6000
+UNALLOCATED_AREA_2 = FIRMWARE_SLOT_1 + MAX_FIRMWARE_SIZE
+UNALLOCATED_AREA_3 = FIRMWARE_SLOT_2 + MAX_FIRMWARE_SIZE
 
 
 class FlashToolsMenu(Page):
@@ -63,13 +63,27 @@ class FlashToolsMenu(Page):
         """Load the flash map page"""
         import flash
 
+        def region_color(address):
+            if address >= SPIFFS_ADDR:
+                return YELLOW
+            if address >= UNALLOCATED_AREA_3:
+                return WHITE
+            if address >= FIRMWARE_SLOT_2:
+                return PURPLE
+            if address >= UNALLOCATED_AREA_2:
+                return WHITE
+            if address >= FIRMWARE_SLOT_1:
+                return LIGHT_PINK
+            if address >= UNALLOCATED_AREA_1:
+                return WHITE
+            if address >= CONFIG_AREA:
+                return GREEN
+            return BLUE
+
         image_block_size = self.ctx.display.width() // FLASH_ROWS
         empty_buf = b"\xff" * BLOCK_SIZE
-        column = 0
-        row = 0
-        offset_x = self.ctx.display.width()
-        offset_x -= image_block_size * FLASH_ROWS
-        offset_x //= 2
+        column, row = 0, 0
+        offset_x = (self.ctx.display.width() - (image_block_size * FLASH_ROWS)) // 2
         offset_y = DEFAULT_PADDING + 2 * FONT_HEIGHT
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Flash Map"))
@@ -77,30 +91,14 @@ class FlashToolsMenu(Page):
         # Draw a map of the flash memory
         for address in range(0, FLASH_SIZE, BLOCK_SIZE):
             wdt.feed()
-            if address >= SPIFFS_ADDR:
-                color = YELLOW
-            elif address >= UNALOCATED_AREA_3:
-                color = WHITE
-            elif address >= FIRMWARE_SLOT_2:
-                color = PURPLE
-            elif address >= UNALOCATED_AREA_2:
-                color = WHITE
-            elif address >= FIRMWARE_SLOT_1:
-                color = LIGHT_PINK
-            elif address >= UNALOCATED_AREA_1:
-                color = WHITE
-            elif address >= CONFIR_AREA:
-                color = GREEN
-            else:
-                color = BLUE
+            color = region_color(address)
             if flash.read(address, BLOCK_SIZE) == empty_buf:
                 color = DARKGREY
+            # Draw the block
+            x_pos = offset_x + column * image_block_size
+            y_pos = offset_y + row * image_block_size
             self.ctx.display.fill_rectangle(
-                offset_x + column * image_block_size,
-                offset_y + row * image_block_size,
-                image_block_size,
-                image_block_size,
-                color,
+                x_pos, y_pos, image_block_size, image_block_size, color
             )
             column += 1
             if column == FLASH_ROWS:
@@ -172,7 +170,7 @@ class FlashHash(Page):
         self.image_block_size = self.ctx.display.width() // 7
 
     def hash_pin_with_flash(self, spiffs_region=False):
-        """Hashes the pin, unique ID and flash memory together"""
+        """Hashes the PIN, unique ID, and flash memory together."""
         import hashlib
         import flash
         from machine import unique_id
@@ -190,7 +188,8 @@ class FlashHash(Page):
         sha256.update(unique_id())
         for address in range(range_begin, range_end, BLOCK_SIZE):
             counter += 1
-            sha256.update(flash.read(address, BLOCK_SIZE))
+            data = flash.read(address, BLOCK_SIZE)
+            sha256.update(data)
             if counter % 100 == 0:
                 # Update progress
                 self.ctx.display.draw_hcentered_text(
@@ -225,22 +224,23 @@ class FlashHash(Page):
 
         fg_color = self.hash_to_random_color(hash_bytes)
         block_size = self.image_block_size
-        # Create a 5x5 grid, but we'll only compute the first 3 columns
+
+        # Create a 5x5 grid, only compute first 3 columns and mirror them
         for row in range(5):
-            for col in range(3):  # Only compute the left half and middle column
+            for col in range(3):  # Left half and center
                 byte_index = row * 3 + col
                 bit_value = hash_bytes[byte_index] % 2  # 0 or 1
 
                 # Set the color based on the bit value
-                color = fg_color if bit_value == 0 else 0
+                color = fg_color if bit_value == 0 else 0  # 0 is background color
 
-                # Calculate the position and draw the rectangle
+                # Calculate positions
                 x = (col + 1) * block_size
                 y = y_offset + row * block_size
                 self.ctx.display.fill_rectangle(x, y, block_size, block_size, color)
 
+                # Mirror the column for symmetry
                 if col < 2:
-                    # Draw the mirrored columns (0 and 1)
                     mirrored_col = 5 - col
                     x_mirror = mirrored_col * block_size
                     self.ctx.display.fill_rectangle(
@@ -248,22 +248,22 @@ class FlashHash(Page):
                     )
 
     def hash_to_words(self, hash_bytes):
-        """Converts a hash to a list of words"""
+        """Converts a hash to a list of mnemonic words."""
         from embit.bip39 import mnemonic_from_bytes
 
         words = mnemonic_from_bytes(hash_bytes).split()
         return " ".join(words[:2])
 
     def generate(self):
-        """Generates the flash hash snapshot"""
+        """Generates the flash hash snapshot."""
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Generating Flash Hash.."))
-        firmware_region_hash = self.hash_pin_with_flash()
+        self.ctx.display.draw_hcentered_text(t("Processing.."))
+        firmware_hash = self.hash_pin_with_flash()
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Flash Hash"))
+        self.ctx.display.draw_hcentered_text("Flash Hash")
         y_offset = DEFAULT_PADDING + 2 * FONT_HEIGHT
-        self.hash_to_fingerprint(firmware_region_hash, y_offset)
-        anti_tamper_words = self.hash_to_words(firmware_region_hash)
+        self.hash_to_fingerprint(firmware_hash, y_offset)
+        anti_tamper_words = self.hash_to_words(firmware_hash)
         y_offset += self.image_block_size * 5
         if self.ctx.display.width() < self.ctx.display.height():
             y_offset += FONT_HEIGHT
@@ -273,8 +273,8 @@ class FlashHash(Page):
             )
             * FONT_HEIGHT
         )
-        spiffs_region_hash = self.hash_pin_with_flash(spiffs_region=True)
-        anti_tamper_words = self.hash_to_words(spiffs_region_hash)
+        spiffs_hash = self.hash_pin_with_flash(spiffs_region=True)
+        anti_tamper_words = self.hash_to_words(spiffs_hash)
         self.ctx.display.draw_hcentered_text(anti_tamper_words, y_offset)
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE
