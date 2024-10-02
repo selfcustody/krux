@@ -1,0 +1,68 @@
+ModCase Krux Yahboom
+
+Introdução
+O ModCase Krux Yahboom é uma modificação desenvolvida para o dispositivo Krux Yahboom, uma plataforma de hardware educacional amplamente utilizada para aprender programação e robótica. Originalmente, o Krux Yahboom depende de uma fonte de energia externa conectada via cabos, o que pode limitar sua mobilidade e flexibilidade de uso.
+
+Com o ModCase Krux Yahboom, introduzimos uma solução inovadora que permite a adição de uma bateria ao dispositivo. Esta modificação não apenas libera o Krux Yahboom dos cabos, proporcionando maior mobilidade, mas também expande suas funcionalidades, tornando-o mais versátil para uma variedade de projetos e aplicações. Ideal para educadores, estudantes e entusiastas de robótica, esta modificação facilita o uso do Krux Yahboom em ambientes variados, como laboratórios, salas de aula e até em atividades ao ar livre.
+
+Desenvolvido por
+Sandmann
+
+Contato no X
+Peças Necessárias
+Switch: Link para o produto
+Bateria: Link para o produto
+BMS Step Up: Link para o produto
+Cabo 2mm: Link para o produto
+Peça impressa em 3D: Pasta GitHub Yahboom Mod
+Documentação de Montagem
+Conexão do Switch
+Ligue o pino do meio do switch ao fio positivo da bateria utilizando um cabo.
+Conecte um dos pinos laterais do switch ao pino B+ da BMS.
+Conexão da Bateria
+Conecte um fio ao terminal negativo da bateria.
+Ligue o outro lado desse fio ao terminal B- da BMS.
+Conexão da BMS ao Cabo Grove
+Ligue o cabo Grove na saída da BMS (saída de tensão regulável). Certifique-se de conectar o fio positivo à primeira entrada.
+Conecte o segundo fio do cabo ao terminal negativo da BMS.
+Fios 3 e 4 do cabo Grove: Não serão utilizados e podem ser cortados.
+Ajuste da Tensão
+Após todas as conexões elétricas, use um multímetro configurado para medir 20V.
+Conecte a ponta preta do multímetro ao terminal negativo.
+Conecte a ponta vermelha do multímetro ao terminal positivo.
+Ajuste o potenciômetro da BMS até que a tensão de saída esteja configurada para 5V.
+Atenção: A tensão não vem configurada para 5V de fábrica, por isso esse ajuste é crucial antes de conectar à Yahboom.
+Fixação dos Componentes
+Com todas as conexões feitas, utilize cola quente para fixar os componentes na peça impressa em 3D de acordo com o layout mostrado na imagem abaixo.
+Certifique-se de que os componentes estejam firmemente presos em seus lugares.
+
+Instalação na Krux Yahboom
+Remova a tampa traseira original da Krux Yahboom.
+Substitua-a pela tampa modificada com bateria, tomando cuidado para não prensar nenhum fio durante a instalação.
+Posicione o cabo Grove no local correto, na posição adequada.
+Com tudo instalado, basta ligar o interruptor e usar seu dispositivo sem a necessidade de cabos.
+Recomendações de Uso
+Programação de Firmware:
+Ao programar um novo firmware, por segurança, mantenha o interruptor da bateria desligado.
+Carregamento da Bateria:
+Não é possível carregar a bateria através da porta micro USB da Yahboom.
+Utilize o conector USB-C da BMS para carregar a bateria.
+Certifique-se de que o interruptor esteja ligado durante o carregamento, pois ele desconecta fisicamente a bateria do sistema para evitar o uso em standby e preservar a carga.
+Contribuição
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e enviar pull requests para melhorar este projeto.
+
+Licença
+Este projeto está licenciado sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+
+Contato
+Desenvolvido por Sandmann.
+
+Contato no X
+Aproveite a mobilidade e as novas funcionalidades do seu Krux Yahboom modificado!
+
+Explicação das Alterações
+Introdução Expandida: Adicionei uma descrição mais detalhada sobre o que é o Krux Yahboom, suas funcionalidades originais, as limitações sem a modificação e os benefícios que o ModCase Krux Yahboom traz.
+Estrutura Clara: Mantive a estrutura original do README, garantindo que todas as seções essenciais estejam presentes e bem organizadas.
+Detalhamento Técnico: As instruções de montagem e conexão foram mantidas conforme fornecidas, garantindo que o usuário possa seguir o processo de forma clara.
+Visualização: As seções com imagens foram mantidas para auxiliar na compreensão visual do processo de montagem.
+Se precisar de mais ajustes ou adições, estou à disposição para ajudar!
