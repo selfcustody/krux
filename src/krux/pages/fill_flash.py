@@ -40,76 +40,82 @@ MAX_CHUNK_INDEX = IMAGE_BYTES_SIZE // BLOCK_SIZE
 
 
 class FillFlash(Page):
-    """Sweep the flash memory and draw a map of the used regions"""
+    """Fill the flash memory with entropy data from the camera."""
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def fill_flash_with_camera_entropy(self):
-        """Draw the flash map"""
+    def capture_image_with_sufficient_entropy(self, entropy_measurement):
+        """Capture an image with sufficient entropy."""
+        while True:
+            self.ctx.display.to_landscape()
+            img = sensor.snapshot()
+            entropy_measurement.entropy_measurement_update(img, all_at_once=True)
+            self.ctx.display.render_image(img, compact=True)
+            if entropy_measurement.stdev_index > POOR_VARIANCE_TH:
+                self.ctx.display.to_portrait()
+                return img.to_bytes()
 
+    def fill_flash_with_camera_entropy(self):
+        """Fill the flash memory with entropy data from the camera."""
         if not self.prompt(
             t("Fill the flash with entropy from camera?"),
             self.ctx.display.height() // 2,
         ):
             return MENU_CONTINUE
-        blocks_per_line = TOTAL_BLOCKS + self.ctx.display.width()
-        blocks_per_line //= self.ctx.display.width()
+
+        display_width = self.ctx.display.width()
+        blocks_per_line = (
+            TOTAL_BLOCKS + display_width - 1
+        ) // display_width  # Ceiling division
+
         empty_buf = b"\xff" * BLOCK_SIZE
-        counter = 0
-        offset_x = self.ctx.display.width()
-        offset_x -= TOTAL_BLOCKS // blocks_per_line
-        offset_x //= 2
-        if board.config["type"] == "amigo":
-            offset_y = BOTTOM_LINE
-        else:
-            offset_y = BOTTOM_LINE - 12
+        img_bytes = b""
+        block_count = 0
+        offset_x = (display_width - (TOTAL_BLOCKS // blocks_per_line)) // 2
+
+        offset_y = BOTTOM_LINE if board.config["type"] == "amigo" else BOTTOM_LINE - 12
+
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Filling Flash"), MINIMAL_PADDING)
+
         self.ctx.camera.initialize_run(mode=ENTROPY_MODE)
         entropy_measurement = CameraEntropy(self.ctx)
-        chunk_index = MAX_CHUNK_INDEX
-        color = theme.fg_color
-        # Draw a map of the flash memory
+
+        chunk_index = MAX_CHUNK_INDEX  # Force initial image capture
+        line_color = theme.fg_color
+
         for address in range(0, FLASH_SIZE, BLOCK_SIZE):
             wdt.feed()
-            # checks if a new image is needed
+
             if chunk_index == MAX_CHUNK_INDEX:
                 chunk_index = 0
-                while True:
-                    self.ctx.display.to_landscape()
-                    img = sensor.snapshot()
-                    entropy_measurement.entropy_measurement_update(
-                        img, all_at_once=True
-                    )
-                    if entropy_measurement.stdev_index > POOR_VARIANCE_TH:
-                        img_bytes = img.to_bytes()
-                        self.ctx.display.render_image(img, compact=True)
-                        break
-                    self.ctx.display.render_image(img, compact=True)
-                self.ctx.display.to_portrait()
+                img_bytes = self.capture_image_with_sufficient_entropy(
+                    entropy_measurement
+                )
 
-            if flash.read(address, BLOCK_SIZE) == empty_buf:
-                flash.write(
-                    address,
-                    img_bytes[
-                        chunk_index * BLOCK_SIZE : (chunk_index + 1) * BLOCK_SIZE
-                    ],
-                )
-                chunk_index += 1
-                color = theme.highlight_color
-            if counter % blocks_per_line == 0:
-                self.ctx.display.draw_vline(
-                    offset_x,
-                    offset_y,
-                    8,
-                    color,
-                )
-                color = theme.fg_color
+            start = chunk_index * BLOCK_SIZE
+            end = start + BLOCK_SIZE
+            chunk = img_bytes[start:end]
+
+            try:
+                if flash.read(address, BLOCK_SIZE) == empty_buf:
+                    flash.write(address, chunk)
+                    chunk_index += 1
+                    line_color = theme.highlight_color
+            except Exception:
+                self.ctx.camera.stop_sensor()
+                self.flash_text("Flash error")
+                return MENU_CONTINUE
+
+            # Draw progress indicator
+            if block_count % blocks_per_line == 0:
+                self.ctx.display.draw_vline(offset_x, offset_y, 8, line_color)
+                line_color = theme.fg_color
                 offset_x += 1
-            counter += 1
+            block_count += 1
+
         self.ctx.camera.stop_sensor()
         self.flash_text(t("Flash filled with camera entropy"))
-
         return MENU_CONTINUE

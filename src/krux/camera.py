@@ -59,7 +59,7 @@ class Camera:
             sensor.set_hmirror(1)
             sensor.set_vflip(1)
         self.mode = QR_SCAN_MODE
-        if mode==GRAYSCALE_MODE and self.cam_id != GC2145_ID:
+        if mode == GRAYSCALE_MODE and self.cam_id != GC2145_ID:
             # GC2145 does not support grayscale
             sensor.set_pixformat(sensor.GRAYSCALE)
             self.mode = GRAYSCALE_MODE
