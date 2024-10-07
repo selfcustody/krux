@@ -20,27 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import lcd
 from . import Page, Menu, MENU_CONTINUE, DEFAULT_PADDING
-from ..themes import theme, BLUE, GREEN, LIGHT_PINK, PURPLE, YELLOW, WHITE, DARKGREY
+from ..themes import theme
 from ..krux_settings import t
-from ..display import FONT_HEIGHT
+from ..display import FONT_HEIGHT, FONT_WIDTH, NARROW_SCREEN_WITH
 from ..wdt import wdt
 from ..firmware import (
     FLASH_SIZE,
     SPIFFS_ADDR,
-    FIRMWARE_SLOT_1,
-    FIRMWARE_SLOT_2,
-    MAX_FIRMWARE_SIZE,
     ERASE_BLOCK_SIZE,
 )
 
 BLOCK_SIZE = 0x1000
 FLASH_ROWS = 64
-
-CONFIG_AREA = 0x4000
-UNALLOCATED_AREA_1 = 0x6000
-UNALLOCATED_AREA_2 = FIRMWARE_SLOT_1 + MAX_FIRMWARE_SIZE
-UNALLOCATED_AREA_3 = FIRMWARE_SLOT_2 + MAX_FIRMWARE_SIZE
 
 
 class FlashToolsMenu(Page):
@@ -63,24 +56,9 @@ class FlashToolsMenu(Page):
         """Load the flash map page"""
         import flash
 
-        def region_color(address):
-            if address >= SPIFFS_ADDR:
-                return YELLOW
-            if address >= UNALLOCATED_AREA_3:
-                return WHITE
-            if address >= FIRMWARE_SLOT_2:
-                return PURPLE
-            if address >= UNALLOCATED_AREA_2:
-                return WHITE
-            if address >= FIRMWARE_SLOT_1:
-                return LIGHT_PINK
-            if address >= UNALLOCATED_AREA_1:
-                return WHITE
-            if address >= CONFIG_AREA:
-                return GREEN
-            return BLUE
-
         image_block_size = self.ctx.display.width() // FLASH_ROWS
+        if self.ctx.display.width() >= self.ctx.display.height():
+            image_block_size -= 1
         empty_buf = b"\xff" * BLOCK_SIZE
         column, row = 0, 0
         offset_x = (self.ctx.display.width() - (image_block_size * FLASH_ROWS)) // 2
@@ -88,12 +66,58 @@ class FlashToolsMenu(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Flash Map"))
 
+        # Draw the legend
+        l_y_text_offset = offset_y + image_block_size * FLASH_ROWS + FONT_HEIGHT
+        l_y_block_offset = l_y_text_offset + (FONT_HEIGHT - FONT_WIDTH) // 2
+        l_x_offset = DEFAULT_PADDING
+        self.ctx.display.fill_rectangle(
+            l_x_offset, l_y_block_offset, FONT_WIDTH, FONT_WIDTH, theme.fg_color
+        )
+        l_x_offset += (3 * FONT_WIDTH) // 2
+        self.ctx.display.draw_string(
+            l_x_offset,
+            l_y_text_offset,
+            "Firmware",
+            theme.fg_color,
+        )
+        if self.ctx.display.width() <= NARROW_SCREEN_WITH:
+            l_y_text_offset += FONT_HEIGHT
+            l_y_block_offset += FONT_HEIGHT
+            l_x_offset = DEFAULT_PADDING
+        else:
+            l_x_offset = self.ctx.display.width() - DEFAULT_PADDING
+            l_x_offset -= (3 * FONT_WIDTH) // 2
+            l_x_offset -= lcd.string_width_px(t("User's Data"))
+        self.ctx.display.fill_rectangle(
+            l_x_offset, l_y_block_offset, FONT_WIDTH, FONT_WIDTH, theme.highlight_color
+        )
+        l_x_offset += (3 * FONT_WIDTH) // 2
+        self.ctx.display.draw_string(
+            l_x_offset,
+            l_y_text_offset,
+            t("User's Data"),
+            theme.fg_color,
+        )
+        l_y_text_offset += FONT_HEIGHT
+        l_y_block_offset += FONT_HEIGHT
+        l_x_offset = DEFAULT_PADDING
+        self.ctx.display.fill_rectangle(
+            l_x_offset, l_y_block_offset, FONT_WIDTH, FONT_WIDTH, theme.disabled_color
+        )
+        l_x_offset += (3 * FONT_WIDTH) // 2
+        self.ctx.display.draw_string(
+            l_x_offset,
+            l_y_text_offset,
+            t("Empty"),
+            theme.fg_color,
+        )
+
         # Draw a map of the flash memory
         for address in range(0, FLASH_SIZE, BLOCK_SIZE):
             wdt.feed()
-            color = region_color(address)
+            color = theme.fg_color if address < SPIFFS_ADDR else theme.highlight_color
             if flash.read(address, BLOCK_SIZE) == empty_buf:
-                color = DARKGREY
+                color = theme.disabled_color
             # Draw the block
             x_pos = offset_x + column * image_block_size
             y_pos = offset_y + row * image_block_size
