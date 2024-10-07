@@ -337,9 +337,9 @@ class Display:
         """Draws a vertical line to the screen"""
         self.draw_line(x, y, x, y + height, color)
 
-    def draw_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
+    def fill_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
         """
-        Draws a circle to the screen.
+        Fills a circle to the screen.
         quadrant=0 will draw all 4 quadrants.
         1 is top right, 2 is top left, 3 is bottom left, 4 is bottom right.
         """

@@ -64,7 +64,7 @@ PROCEED = (BUTTON_ENTER, BUTTON_TOUCH)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
+NUM_SPECIAL_1 = "1234567890 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
 NUM_SPECIAL_3 = " !#$%&'()*"  # NUM_SPECIAL_1 without numbers
 DIGITS = "1234567890"
@@ -161,6 +161,7 @@ class Page:
             pad.compute_possible_keys(buffer)
             pad.get_valid_index()
             pad.draw_keys()
+            pad.draw_keyset_index()
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 btn = pad.touch_to_physical()

@@ -35,7 +35,7 @@ from ..input import (
     FAST_BACKWARD,
     PRESSED,
 )
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
@@ -216,6 +216,26 @@ class Keypad:
                                 self.key_v_spacing - 1,
                             )
                 key_index += 1
+
+    def draw_keyset_index(self):
+        """Indicates the current keyset index with a small circle"""
+        if len(self.keysets) == 1:
+            return
+        bar_height = FONT_HEIGHT // 6
+        bar_length = FONT_WIDTH
+        bar_padding = FONT_WIDTH // 3
+        x_offset = (
+            self.ctx.display.width() - (bar_length + bar_padding) * len(self.keysets)
+        ) // 2
+        for i in range(len(self.keysets)):
+            color = theme.fg_color if i == self.keyset_index else theme.frame_color
+            self.ctx.display.fill_rectangle(
+                x_offset + (bar_length + bar_padding) * i,
+                self.y_keypad_map[0] - bar_height - bar_padding,
+                bar_length,
+                bar_height,
+                color,
+            )
 
     def get_valid_index(self):
         """Moves current index to a valid position"""
