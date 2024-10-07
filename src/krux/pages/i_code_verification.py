@@ -29,34 +29,34 @@ from . import (
     NUM_SPECIAL_2,
     NUM_SPECIAL_3,
 )
-from ..krux_settings import t, PIN_PATH, PIN_PBKDF2_ITERATIONS
+from ..krux_settings import t, I_CODE_PATH, I_CODE_PBKDF2_ITERATIONS
 
 
-class PinVerification(Page):
-    """Pin Verification Page"""
+class ICVerification(Page):
+    """Integrity Code Verification Page"""
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def capture(self, changing_pin=False, return_hash=False):
-        """Capture PIN from user"""
+    def capture(self, changing_i_code=False, return_hash=False):
+        """Capture Tamper Check Code from user"""
         import hashlib
         from machine import unique_id
 
-        label = t("Current PIN") if changing_pin else t("PIN")
-        pin = self.capture_from_keypad(
+        label = t("Current Integrity Code") if changing_i_code else t("Integrity Code")
+        integrity_code = self.capture_from_keypad(
             label, [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3]
         )
-        if pin == ESC_KEY:
+        if integrity_code == ESC_KEY:
             return False
-        # Hashes the PIN
-        pin_bytes = pin.encode()
-        # Pin hash will be used in "Flash Hash"
+        # Hashes the integrity code
+        pin_bytes = integrity_code.encode()
+        # Integrity Code hash will be used in "Flash Hash"
         pin_hash = hashlib.sha256(pin_bytes).digest()
 
-        # Read the contents of PIN file
-        with open(PIN_PATH, "rb") as f:
+        # Read the contents of integrity code file
+        with open(I_CODE_PATH, "rb") as f:
             file_secret = f.read()
 
         self.ctx.display.clear()
@@ -74,12 +74,12 @@ class PinVerification(Page):
 
         # Generate PBKDF2 stretched secret
         secret = hashlib.pbkdf2_hmac(
-            "sha256", pin_hash, unique_id(), PIN_PBKDF2_ITERATIONS
+            "sha256", pin_hash, unique_id(), I_CODE_PBKDF2_ITERATIONS
         )
         if secret == file_secret:
             if return_hash:
                 return pin_hash
             return True
 
-        self.flash_error(t("Invalid PIN"))
+        self.flash_error(t("Invalid Integrity Code"))
         return False

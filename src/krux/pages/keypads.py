@@ -231,7 +231,7 @@ class Keypad:
             color = theme.fg_color if i == self.keyset_index else theme.frame_color
             self.ctx.display.fill_rectangle(
                 x_offset + (bar_length + bar_padding) * i,
-                self.keypad_offset() - bar_height - bar_padding,
+                self.y_keypad_map[-1] + 2,
                 bar_length,
                 bar_height,
                 color,

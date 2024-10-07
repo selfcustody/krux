@@ -63,43 +63,45 @@ def check_for_updates():
     del firmware
 
 
-def pin_verification(ctx_pin):
+def i_code_verification(ctx_pin):
     """Loads and run the Pin Verification page"""
-    PIN_PATH = "/flash/pin"
+    I_CODE_PATH = "/flash/pin"
 
     # Checks if there is a pin set
     try:
-        if not (os.stat(PIN_PATH)[0] & 0x4000) == 0:
+        if not (os.stat(I_CODE_PATH)[0] & 0x4000) == 0:
             raise OSError
     except OSError:
         print("No pin set")
         return True
 
-    from krux.pages.pin_verification import PinVerification
+    from krux.krux_settings import Settings
 
-    pin_verification_page = PinVerification(ctx_pin)
+    if not Settings().security.boot_flash_hash:
+        return True
+
+    from krux.pages.i_code_verification import ICVerification
+
+    pin_verification_page = ICVerification(ctx_pin)
     pin_hash = pin_verification_page.capture(return_hash=True)
     if not pin_hash:
         return False
 
-    from krux.krux_settings import Settings
+    from krux.pages.flash_tools import FlashHash
 
-    if Settings().security.boot_flash_hash:
-        from krux.pages.flash_tools import FlashHash
+    flash_hash = FlashHash(ctx_pin, pin_hash)
+    flash_hash.generate()
 
-        flash_hash = FlashHash(ctx_pin, pin_hash)
-        flash_hash.generate()
+    # Unimport FlashHash the free memory
+    sys.modules.pop("krux.pages.flash_tools")
+    del sys.modules["krux"].pages.flash_tools
+    del FlashHash
 
-        # Unimport FlashHash the free memory
-        sys.modules.pop("krux.pages.flash_tools")
-        del sys.modules["krux"].pages.flash_tools
-        del FlashHash
-
-    # Unimport PinVerification the free memory
-    sys.modules.pop("krux.pages.pin_verification")
-    del sys.modules["krux"].pages.pin_verification
-    del PinVerification
-    ctx_pin.pin_enabled = True
+    # Unimport ICVerification the free memory
+    sys.modules.pop("krux.pages.i_code_verification")
+    del sys.modules["krux"].pages.i_code_verification
+    del ICVerification
+    ctx_pin.i_code_enabled = True
     return True
 
 
@@ -154,7 +156,7 @@ postimport_ticks = time.ticks_ms()
 if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
     time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
-if not pin_verification(ctx):
+if not i_code_verification(ctx):
     power_manager.shutdown()
 login(ctx)
 gc.collect()

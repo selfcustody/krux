@@ -135,73 +135,73 @@ class SettingsPage(Page):
             self.ctx.power_manager.reboot()
         return MENU_CONTINUE
 
-    def disable_pin(self):
-        """Handler for the 'Disable PIN' menu item"""
-        from ..krux_settings import PIN_PATH
-        from .pin_verification import PinVerification
+    # def disable_integrity_code(self):
+    #     """Handler for the 'Disable Integrity Code' menu item"""
+    #     from ..krux_settings import I_CODE_PATH
+    #     from .i_code_verification import ICVerification
 
-        pin_verification = PinVerification(self.ctx)
-        if not pin_verification.capture(changing_pin=True):
-            return MENU_CONTINUE
-        os.remove(PIN_PATH)
-        self.ctx.pin_enabled = False
-        self.flash_text(t("PIN disabled"))
-        return MENU_CONTINUE
+    #     i_code_verification = ICVerification(self.ctx)
+    #     if not i_code_verification.capture(changing_i_code=True):
+    #         return MENU_CONTINUE
+    #     os.remove(I_CODE_PATH)
+    #     self.ctx.i_code_enabled = False
+    #     self.flash_text(t("Integrity Code disabled"))
+    #     return MENU_CONTINUE
 
-    def enter_modify_pin(self):
-        """Handler for the 'PIN' menu item"""
+    def enter_modify_i_code(self):
+        """Handler for the 'Integrity Code' menu item"""
         import hashlib
         from machine import unique_id
-        from ..krux_settings import PIN_PATH, PIN_PBKDF2_ITERATIONS
+        from ..krux_settings import I_CODE_PATH, I_CODE_PBKDF2_ITERATIONS
 
-        if self.ctx.pin_enabled:
-            from .pin_verification import PinVerification
+        if self.ctx.i_code_enabled:
+            from .i_code_verification import ICVerification
 
-            pin_verification = PinVerification(self.ctx)
-            if not pin_verification.capture(changing_pin=True):
+            i_code_verification = ICVerification(self.ctx)
+            if not i_code_verification.capture(changing_i_code=True):
                 return MENU_CONTINUE
 
         self.ctx.display.clear()
         if not self.prompt(
-            t("Enter a 6+ characters PIN"), self.ctx.display.height() // 2
+            t("Enter a 6+ characters Integrity Code"), self.ctx.display.height() // 2
         ):
             return MENU_CONTINUE
 
-        pin = pin_confirm = ""
-        while len(pin) < 6:
-            pin = self.capture_from_keypad(
-                "PIN",
+        integrity_code = i_code_confirm = ""
+        while len(integrity_code) < 6:
+            integrity_code = self.capture_from_keypad(
+                "Integrity Code",
                 [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
             )
-            if pin == ESC_KEY:
+            if integrity_code == ESC_KEY:
                 return MENU_CONTINUE
-        while len(pin_confirm) < 6:
-            pin_confirm = self.capture_from_keypad(
-                t("Confirm PIN"),
+        while len(i_code_confirm) < 6:
+            i_code_confirm = self.capture_from_keypad(
+                t("Confirm Integrity Code"),
                 [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
             )
-            if pin_confirm == ESC_KEY:
+            if i_code_confirm == ESC_KEY:
                 return MENU_CONTINUE
-        if pin != pin_confirm:
-            self.flash_error(t("PINs do not match"))
+        if integrity_code != i_code_confirm:
+            self.flash_error(t("Integrity codes do not match"))
             return MENU_CONTINUE
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing.."))
-        # Hashes the PIN once
-        pin_bytes = pin.encode()
-        pin_hash = hashlib.sha256(pin_bytes).digest()
+        # Hashes the Integrity Code once
+        i_code_bytes = integrity_code.encode()
+        i_code_hash = hashlib.sha256(i_code_bytes).digest()
         # Than uses hash to generate a stretched secret, with unique_id as salt
         secret = hashlib.pbkdf2_hmac(
-            "sha256", pin_hash, unique_id(), PIN_PBKDF2_ITERATIONS
+            "sha256", i_code_hash, unique_id(), I_CODE_PBKDF2_ITERATIONS
         )
-        # Saves the stretched PIN in a file
+        # Saves the stretched Integrity Code in a file
         try:
-            with open(PIN_PATH, "wb") as f:
+            with open(I_CODE_PATH, "wb") as f:
                 f.write(secret)
-            self.ctx.pin_enabled = True
-            self.flash_text(t("PIN set successfully"))
+            self.ctx.i_code_enabled = True
+            self.flash_text(t("Integrity code set successfully"))
         except OSError:
-            self.flash_error(t("Error saving PIN"))
+            self.flash_error(t("Error saving integrity code"))
 
         from .fill_flash import FillFlash
 
@@ -278,9 +278,11 @@ class SettingsPage(Page):
 
             # Case for security settings
             if settings_namespace.namespace == "settings.security":
-                items.append((t("Set PIN"), self.enter_modify_pin))
-                if self.ctx.pin_enabled:
-                    items.append((t("Disable PIN"), self.disable_pin))
+                items.append((t("Set Integrity Code"), self.enter_modify_i_code))
+                # if self.ctx.i_code_enabled:
+                #     items.append(
+                #         (t("Disable Integrity Code"), self.disable_integrity_code)
+                #     )
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()

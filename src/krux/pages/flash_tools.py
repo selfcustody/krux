@@ -135,15 +135,15 @@ class FlashTools(Page):
     def flash_hash(self):
         """Load the flash hash page"""
 
-        if self.ctx.pin_enabled:
-            from .pin_verification import PinVerification
+        if self.ctx.i_code_enabled:
+            from .i_code_verification import ICVerification
 
-            pin_verification = PinVerification(self.ctx)
-            pin_hash = pin_verification.capture(return_hash=True)
+            i_code_verification = ICVerification(self.ctx)
+            pin_hash = i_code_verification.capture(return_hash=True)
             if not pin_hash:
                 return MENU_CONTINUE
         else:
-            self.flash_error(t("Set a PIN first"))
+            self.flash_error(t("Set a tamper check code first"))
             return MENU_CONTINUE
 
         flash_hash = FlashHash(self.ctx, pin_hash)
@@ -185,7 +185,7 @@ class FlashTools(Page):
 
 
 class FlashHash(Page):
-    """Generate a human recognizable snapshot of the flash memory tied to a PIN"""
+    """Generate a human recognizable snapshot of the flash memory tied to a tamper check code"""
 
     def __init__(self, ctx, pin_hash):
         super().__init__(ctx, None)
@@ -194,7 +194,7 @@ class FlashHash(Page):
         self.image_block_size = self.ctx.display.width() // 7
 
     def hash_pin_with_flash(self, spiffs_region=False):
-        """Hashes the PIN, unique ID, and flash memory together."""
+        """Hashes the tamper check code, unique ID, and flash memory together."""
         import hashlib
         import flash
         from machine import unique_id
