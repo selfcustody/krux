@@ -62,9 +62,9 @@ class Tools(Page):
     def flash_tools(self):
         """Handler for the 'Flash Tools' menu item"""
 
-        from .flash_tools import FlashToolsMenu
+        from .flash_tools import FlashTools
 
-        flash_tools = FlashToolsMenu(self.ctx)
+        flash_tools = FlashTools(self.ctx)
         flash_tools.flash_tools_menu()
         return MENU_CONTINUE
 

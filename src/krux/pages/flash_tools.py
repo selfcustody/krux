@@ -36,7 +36,7 @@ BLOCK_SIZE = 0x1000
 FLASH_ROWS = 64
 
 
-class FlashToolsMenu(Page):
+class FlashTools(Page):
     """Menu for flash tools"""
 
     def flash_tools_menu(self):

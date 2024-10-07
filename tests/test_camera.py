@@ -82,36 +82,36 @@ def test_initialize_run_no_sensor(mocker, m5stickv):
 
 
 def test_initialize_run(mocker, m5stickv):
-    from krux.camera import Camera, COLOR_MODE
+    from krux.camera import Camera, QR_SCAN_MODE
 
     c = Camera()
     c.initialize_sensor()
     c.initialize_run()
-    assert c.mode == COLOR_MODE
+    assert c.mode == QR_SCAN_MODE
     assert c.cam_id is not None
     assert c.antiglare_enabled == False
 
 
 def test_initialize_run_from_grayscale(mocker, m5stickv):
-    from krux.camera import Camera, COLOR_MODE, GRAYSCALE_MODE
+    from krux.camera import Camera, QR_SCAN_MODE, GRAYSCALE_MODE
 
     c = Camera()
     c.initialize_sensor()
     c.mode = GRAYSCALE_MODE
     c.initialize_run()
-    assert c.mode == COLOR_MODE
+    assert c.mode == QR_SCAN_MODE
     assert c.cam_id is not None
     assert c.antiglare_enabled == False
 
 
 def test_initialize_run_with_anti_glair_enabled(mocker, m5stickv):
-    from krux.camera import Camera, COLOR_MODE, GRAYSCALE_MODE
+    from krux.camera import Camera, QR_SCAN_MODE
 
     c = Camera()
     c.initialize_sensor()
     c.antiglare_enabled = True
     c.initialize_run()
-    assert c.mode == COLOR_MODE
+    assert c.mode == QR_SCAN_MODE
     assert c.cam_id is not None
     assert c.antiglare_enabled == False
 

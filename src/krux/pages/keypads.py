@@ -231,7 +231,7 @@ class Keypad:
             color = theme.fg_color if i == self.keyset_index else theme.frame_color
             self.ctx.display.fill_rectangle(
                 x_offset + (bar_length + bar_padding) * i,
-                self.y_keypad_map[0] - bar_height - bar_padding,
+                self.keypad_offset() - bar_height - bar_padding,
                 bar_length,
                 bar_height,
                 color,
@@ -282,18 +282,18 @@ class Keypad:
             while self.ctx.input.page_value() == PRESSED:
                 self._next_key()
                 self.get_valid_index()
-                self._clean_dispaly_keypad_area()
+                self._clean_keypad_area()
                 self.draw_keys()
                 time.sleep_ms(100)
         elif btn == FAST_BACKWARD:
             while self.ctx.input.page_prev_value() == PRESSED:
                 self._previous_key()
                 self.get_valid_index()
-                self._clean_dispaly_keypad_area()
+                self._clean_keypad_area()
                 self.draw_keys()
                 time.sleep_ms(100)
 
-    def _clean_dispaly_keypad_area(self):
+    def _clean_keypad_area(self):
         self.ctx.display.fill_rectangle(
             0,
             self.keypad_offset(),

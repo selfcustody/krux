@@ -391,21 +391,21 @@ def test_draw_line_on_inverted_display(mocker, amigo):
     )
 
 
-def test_draw_circle(mocker, m5stickv):
+def test_fill_circle(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
     d = Display()
 
-    d.draw_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+    d.fill_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
 
     krux.display.lcd.draw_circle.assert_called_with(
         100, 100, 50, 0, krux.display.lcd.WHITE
     )
 
 
-def test_draw_circle_on_inverted_display(mocker, amigo):
+def test_fill_circle_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -413,7 +413,7 @@ def test_draw_circle_on_inverted_display(mocker, amigo):
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 480)
 
-    d.draw_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+    d.fill_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
 
     krux.display.lcd.draw_circle.assert_called_with(
         480 - 100, 100, 50, 0, krux.display.lcd.WHITE

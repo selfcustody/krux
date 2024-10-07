@@ -132,14 +132,14 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
 
 def test_wipe_device(amigo, mocker):
     """Test that the device is wiped when the user confirms the wipe."""
-    from krux.pages.tools import Tools
+    from krux.pages.flash_tools import FlashTools
     from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm wipe
 
-    mocker.spy(Tools, "erase_spiffs")
+    mocker.spy(FlashTools, "erase_spiffs")
     ctx = create_ctx(mocker, BTN_SEQUENCE)
-    test_tools = Tools(ctx)
+    test_tools = FlashTools(ctx)
     test_tools.wipe_device()
 
     assert test_tools.erase_spiffs.call_count == 1
