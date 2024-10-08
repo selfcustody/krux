@@ -46,7 +46,7 @@ class FlashTools(Page):
             [
                 (t("Flash Map"), self.flash_map),
                 (t("Flash Hash"), self.flash_hash),
-                (t("Wipe Device"), self.wipe_device),
+                (t("Erase User's Data"), self.erase_users_data),
             ],
         )
         flash_menu.run_loop()
@@ -163,7 +163,7 @@ class FlashTools(Page):
                 continue
             flash.erase(address, ERASE_BLOCK_SIZE)
 
-    def wipe_device(self):
+    def erase_users_data(self):
         """Fully formats SPIFFS memory"""
         self.ctx.display.clear()
         if self.prompt(
@@ -174,7 +174,7 @@ class FlashTools(Page):
         ):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Wiping Device..")
+                t("Erasing user's data..")
                 + "\n\n"
                 + t("Do not power off, it may take a while to complete.")
             )
