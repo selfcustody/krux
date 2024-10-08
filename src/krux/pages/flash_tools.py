@@ -135,11 +135,11 @@ class FlashTools(Page):
     def flash_hash(self):
         """Load the flash hash page"""
 
-        if self.ctx.i_code_enabled:
-            from .i_code_verification import ICVerification
+        if self.ctx.tc_code_enabled:
+            from .tc_code_verification import TCCodeVerification
 
-            i_code_verification = ICVerification(self.ctx)
-            pin_hash = i_code_verification.capture(return_hash=True)
+            tc_code_verification = TCCodeVerification(self.ctx)
+            pin_hash = tc_code_verification.capture(return_hash=True)
             if not pin_hash:
                 return MENU_CONTINUE
         else:

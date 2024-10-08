@@ -29,22 +29,26 @@ from . import (
     NUM_SPECIAL_2,
     NUM_SPECIAL_3,
 )
-from ..krux_settings import t, I_CODE_PATH, I_CODE_PBKDF2_ITERATIONS
+from ..krux_settings import t, TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
 
 
-class ICVerification(Page):
-    """Integrity Code Verification Page"""
+class TCCodeVerification(Page):
+    """Tamper Check Code Verification Page"""
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def capture(self, changing_i_code=False, return_hash=False):
+    def capture(self, changing_tc_code=False, return_hash=False):
         """Capture Tamper Check Code from user"""
         import hashlib
         from machine import unique_id
 
-        label = t("Current Integrity Code") if changing_i_code else t("Integrity Code")
+        label = (
+            t("Current Tamper Check Code")
+            if changing_tc_code
+            else t("Tamper Check Code")
+        )
         integrity_code = self.capture_from_keypad(
             label, [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3]
         )
@@ -52,17 +56,18 @@ class ICVerification(Page):
             return False
         # Hashes the integrity code
         pin_bytes = integrity_code.encode()
-        # Integrity Code hash will be used in "Flash Hash"
+        # Tamper Check Code hash will be used in "Flash Hash"
         pin_hash = hashlib.sha256(pin_bytes).digest()
 
         # Read the contents of integrity code file
-        with open(I_CODE_PATH, "rb") as f:
+        with open(TC_CODE_PATH, "rb") as f:
             file_secret = f.read()
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing.."))
 
         # Tries with non-stretched secret (obsolete)
+        # TODO: Remove obsolete before first release
         sha256 = hashlib.sha256()
         sha256.update(pin_hash)
         sha256.update(unique_id())
@@ -74,12 +79,12 @@ class ICVerification(Page):
 
         # Generate PBKDF2 stretched secret
         secret = hashlib.pbkdf2_hmac(
-            "sha256", pin_hash, unique_id(), I_CODE_PBKDF2_ITERATIONS
+            "sha256", pin_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
         )
         if secret == file_secret:
             if return_hash:
                 return pin_hash
             return True
 
-        self.flash_error(t("Invalid Integrity Code"))
+        self.flash_error(t("Invalid Tamper Check Code"))
         return False

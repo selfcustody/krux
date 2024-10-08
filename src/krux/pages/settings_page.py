@@ -135,73 +135,57 @@ class SettingsPage(Page):
             self.ctx.power_manager.reboot()
         return MENU_CONTINUE
 
-    # def disable_integrity_code(self):
-    #     """Handler for the 'Disable Integrity Code' menu item"""
-    #     from ..krux_settings import I_CODE_PATH
-    #     from .i_code_verification import ICVerification
-
-    #     i_code_verification = ICVerification(self.ctx)
-    #     if not i_code_verification.capture(changing_i_code=True):
-    #         return MENU_CONTINUE
-    #     os.remove(I_CODE_PATH)
-    #     self.ctx.i_code_enabled = False
-    #     self.flash_text(t("Integrity Code disabled"))
-    #     return MENU_CONTINUE
-
-    def enter_modify_i_code(self):
-        """Handler for the 'Integrity Code' menu item"""
+    def enter_modify_tc_code(self):
+        """Handler for the 'Tamper Check Code' menu item"""
         import hashlib
         from machine import unique_id
-        from ..krux_settings import I_CODE_PATH, I_CODE_PBKDF2_ITERATIONS
+        from ..krux_settings import TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
 
-        if self.ctx.i_code_enabled:
-            from .i_code_verification import ICVerification
+        if self.ctx.tc_code_enabled:
+            from .tc_code_verification import TCCodeVerification
 
-            i_code_verification = ICVerification(self.ctx)
-            if not i_code_verification.capture(changing_i_code=True):
+            tc_code_verification = TCCodeVerification(self.ctx)
+            if not tc_code_verification.capture(changing_tc_code=True):
                 return MENU_CONTINUE
 
         self.ctx.display.clear()
         if not self.prompt(
-            t("Enter a 6+ characters Integrity Code"), self.ctx.display.height() // 2
+            t("Enter a 6+ characters Tamper Check Code"), self.ctx.display.height() // 2
         ):
             return MENU_CONTINUE
 
-        integrity_code = i_code_confirm = ""
-        while len(integrity_code) < 6:
-            integrity_code = self.capture_from_keypad(
-                "Integrity Code",
+        tamper_check_code = tc_code_confirm = ""
+        while len(tamper_check_code) < 6:
+            tamper_check_code = self.capture_from_keypad(
+                t("Tamper Check Code"),
                 [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
             )
-            if integrity_code == ESC_KEY:
+            if tamper_check_code == ESC_KEY:
                 return MENU_CONTINUE
-        while len(i_code_confirm) < 6:
-            i_code_confirm = self.capture_from_keypad(
-                t("Confirm Integrity Code"),
+        while len(tc_code_confirm) < 6:
+            tc_code_confirm = self.capture_from_keypad(
+                t("Confirm Tamper Check Code"),
                 [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
             )
-            if i_code_confirm == ESC_KEY:
+            if tc_code_confirm == ESC_KEY:
                 return MENU_CONTINUE
-        if integrity_code != i_code_confirm:
-            self.flash_error(t("Integrity codes do not match"))
+        if tamper_check_code != tc_code_confirm:
+            self.flash_error(t("Tamper check codes do not match"))
             return MENU_CONTINUE
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing.."))
-        # Hashes the Integrity Code once
-        i_code_bytes = integrity_code.encode()
-        i_code_hash = hashlib.sha256(i_code_bytes).digest()
+        # Hashes the Tamper Check Code once
+        tc_code_bytes = tamper_check_code.encode()
+        tc_code_hash = hashlib.sha256(tc_code_bytes).digest()
         # Than uses hash to generate a stretched secret, with unique_id as salt
         secret = hashlib.pbkdf2_hmac(
-            "sha256", i_code_hash, unique_id(), I_CODE_PBKDF2_ITERATIONS
+            "sha256", tc_code_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
         )
-        # Saves the stretched Integrity Code in a file
-        try:
-            with open(I_CODE_PATH, "wb") as f:
-                f.write(secret)
-            self.ctx.i_code_enabled = True
-            self.flash_text(t("Integrity code set successfully"))
-        except OSError:
-            self.flash_error(t("Error saving integrity code"))
+        # Saves the stretched Tamper Check Code in a file
+        with open(TC_CODE_PATH, "wb") as f:
+            f.write(secret)
+        self.ctx.tc_code_enabled = True
+        self.flash_text(t("Tamper check code set successfully"))
 
         from .fill_flash import FillFlash
 
@@ -278,11 +262,7 @@ class SettingsPage(Page):
 
             # Case for security settings
             if settings_namespace.namespace == "settings.security":
-                items.append((t("Set Integrity Code"), self.enter_modify_i_code))
-                # if self.ctx.i_code_enabled:
-                #     items.append(
-                #         (t("Disable Integrity Code"), self.disable_integrity_code)
-                #     )
+                items.append((t("Tamper Check Code"), self.enter_modify_tc_code))
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()
