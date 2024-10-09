@@ -36,7 +36,7 @@ ASIA16 = "unifont-16"
 ASIA24 = "NotoSansCJK-24"
 
 
-def open_bdf_save_kff(filename, width, height):
+def open_bdf_save_kff(filename, width, height, replace):
     """Open a bdf font filename and save the corresponding kff file based on the filename"""
 
     filename_kff = "m5stickv"
@@ -80,7 +80,8 @@ def open_bdf_save_kff(filename, width, height):
         save_file.write(font_kff)
 
     # Deletes the temporary hexfile
-    os.remove(filename + ".hex")
+    if replace:
+        os.remove(filename + ".hex")
 
 
 def save_new_fontc(font_name, overwrite=False):
@@ -154,7 +155,8 @@ def save_new_fontc(font_name, overwrite=False):
             save_file.write(unicode_str)
 
     # Deletes the temporary kff file
-    os.remove(filename_kff + ".kff")
+    if replace:
+        os.remove(filename_kff + ".kff")
 
 
 if __name__ == "__main__":
@@ -162,12 +164,12 @@ if __name__ == "__main__":
     replace = len(sys.argv) > 1 and sys.argv[1] == "True"
 
     # generate kff files
-    open_bdf_save_kff(FONT14, 8, 14)
-    open_bdf_save_kff(FONT16, 8, 16)
-    open_bdf_save_kff(FONT24, 12, 24)
-    open_bdf_save_kff(ASIA14, 14, 14)
-    open_bdf_save_kff(ASIA16, 16, 16)
-    open_bdf_save_kff(ASIA24, 24, 24)
+    open_bdf_save_kff(FONT14, 8, 14, replace)
+    open_bdf_save_kff(FONT16, 8, 16, replace)
+    open_bdf_save_kff(FONT24, 12, 24, replace)
+    open_bdf_save_kff(ASIA14, 14, 14, replace)
+    open_bdf_save_kff(ASIA16, 16, 16, replace)
+    open_bdf_save_kff(ASIA24, 24, 24, replace)
 
     # generate new font.c files (delete kff files)
     save_new_fontc(FONT14, replace)
