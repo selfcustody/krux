@@ -66,9 +66,9 @@ Krux performs a memory sweep while simultaneously capturing a live feed from the
 
 The Flash Hash function securely hashes the combination of the *TC-Code*, UID, and flash content:
 
-`hash(*TC-Code*,UID,Flash content)` -> Image + Words
+`hash(TC-Code,UID,Flash content)` -> Image + Words
 
-Hash properties ensure that without knowing the TC-Code, UID, and flash content, an attacker cannot reproduce the Flash Hash results.
+Hash properties ensure that without knowing the *TC-Code*, UID, and flash content, an attacker cannot reproduce the Flash Hash results.
 
 ## Executing *Flash Hash*
 
@@ -95,7 +95,7 @@ An attacker faces major challenges in replacing the firmware:
 
 - **Cannot Reconstruct the Hash:** Without the original flash data, the attacker cannot generate the correct hash, even if they know the UID and *TC-Code* after the user enters it.
 
-- **Hash Sensitivity:** Any alteration in the flash content changes the hash output, which will be evident through a different image or anti-tamper words.
+- **Hash Sensitivity:** Any alteration in the flash content changes the hash output, which will be evident through a different image or tamper detection words.
 
 - **Entropy Filling:** Filling empty flash blocks with camera-generated entropy leaves no space for malicious code and any changes to these blocks will alter the hash.
 
@@ -106,6 +106,8 @@ An attacker faces major challenges in replacing the firmware:
 - **Storing Hashes:** Storing `hash(flash content)` is ineffective because the overall hash depends on the sequential combination of *TC-Code*, UID, and flash data.
 
 - **Inserting Malicious Code:** Attempting to insert code into empty spaces fails because the entropy filling process and hash verification will detect any changes.
+
+- **Using an SD Card to Store a Copy of Original Flash Content:** An attacker could extract an exact copy of the flash contents to an SD card and subsequently install malicious firmware. This firmware could capture the chip's UID and the user's TC-Code, then hash the content of the SD card instead of the flash memory. Although this would make the verification process slower, it introduces a potential security risk. To mitigate this vulnerability, it is advisable to avoid performing verifications while an SD card is inserted. 
 
 ## Conclusion
 
