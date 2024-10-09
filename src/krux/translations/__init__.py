@@ -23,6 +23,7 @@ available_languages = [
     "de-DE",
     "es-MX",
     "fr-FR",
+    "ja-JP",
     "ko-KR",
     "nl-NL",
     "pt-BR",
