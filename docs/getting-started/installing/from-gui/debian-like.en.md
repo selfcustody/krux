@@ -43,7 +43,7 @@ sudo dpkg -i {{latest_installer_deb}}
 - Update the installed package:
 
 ```bash
-sudo apt-get install -f {{latest_installer_deb}}
+sudo apt-get install -f
 ```
 
 It will warn you that your system user was added to `dialout` group and maybe you need to reboot
