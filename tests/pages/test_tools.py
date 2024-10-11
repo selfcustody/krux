@@ -140,7 +140,7 @@ def test_wipe_device(amigo, mocker):
     mocker.spy(FlashTools, "erase_spiffs")
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     test_tools = FlashTools(ctx)
-    test_tools.wipe_device()
+    test_tools.erase_users_data()
 
     assert test_tools.erase_spiffs.call_count == 1
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

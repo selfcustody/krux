@@ -228,6 +228,8 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
     # This will be used when scanning 24 TinySeed
     # First scanned page will be loaded to be edited, then proceed to scan second page
     # Seed will be returned as its word index
+    # TinySeed will be mocked with MockStats
+    # Punched values will be returned values under 0x80
     import time
     from krux.pages.tiny_seed import TinyScanner
     from krux.input import BUTTON_ENTER
@@ -235,20 +237,6 @@ def test_scan_tiny_seed_12w(m5stickv, mocker):
 
     BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Intro  # Check OK
     TIME_STAMPS = (0, 1, 100)
-    TEST_12_WORDS_NUMBERS = [
-        335,
-        1884,
-        1665,
-        1811,
-        1198,
-        1397,
-        1292,
-        1559,
-        48,
-        1069,
-        794,
-        1678,
-    ]
     TEST_12_WORDS = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     mocker.patch.object(time, "ticks_ms", mocker.MagicMock(side_effect=TIME_STAMPS))
     ctx = create_ctx(mocker, BTN_SEQUENCE)

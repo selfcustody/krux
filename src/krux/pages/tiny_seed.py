@@ -902,7 +902,6 @@ class TinyScanner(Page):
                         page_seed_numbers[word_index], bit
                     )
                 index += 1
-        # print(page_seed_numbers)
         return page_seed_numbers
 
     def _run_camera(self):

@@ -73,7 +73,6 @@ class Camera:
 
     def initialize_sensor(self, mode=QR_SCAN_MODE):
         """Initializes the camera"""
-        self.antiglare_enabled = False
         sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
         if board.config["type"] == "cube":

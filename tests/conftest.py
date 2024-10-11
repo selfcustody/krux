@@ -38,7 +38,9 @@ def mp_modules(mocker, monkeypatch):
     monkeypatch.setitem(sys.modules, "flash", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "machine", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "sensor", mocker.MagicMock())
-    monkeypatch.setitem(sys.modules, "lcd", mocker.MagicMock())
+    lcd_mock = mocker.MagicMock()
+    lcd_mock.string_width_px.side_effect = lambda s: len(s) * 8  # Assume 8px per char
+    monkeypatch.setitem(sys.modules, "lcd", lcd_mock)
     monkeypatch.setitem(sys.modules, "Maix", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "fpioa_manager", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "pmu", mocker.MagicMock())
