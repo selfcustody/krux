@@ -592,6 +592,7 @@ class TinyScanner(Page):
             label = grid_type
         self.tiny_seed = TinySeed(self.ctx, label=label)
         self.g_corners = (0x80, 0x80, 0x80, 0x80)
+        self.blob_otsu = 0x80
 
     def _map_punches_region(self, rect_size, page=0):
         # Think in portrait mode, with Tiny Seed tilted 90 degrees
@@ -768,8 +769,8 @@ class TinyScanner(Page):
         filtered = (
             gradient_bg_ul + gradient_bg_ur + gradient_bg_ll + gradient_bg_lr
         )  # weight 4/6 - 67% average
-        filtered += 2 * gradient  # weight 2/6 = 33% raw gradient
-        filtered //= 6
+        filtered += 6 * gradient  # weight 6/10 = 60% raw gradient
+        filtered //= 10
         return filtered
 
         # return gradient #pure gradient
@@ -777,70 +778,60 @@ class TinyScanner(Page):
     def _detect_tiny_seed(self, img):
         """Detects Tiny Seed as a bright blob against a dark surface"""
 
-        # Load Settings for the grid type we are using
+        # Load settings for the grid type we are using
         aspect_low = self.grid_settings["aspect_low"]
         aspect_high = self.grid_settings["aspect_high"]
 
         def _choose_rect(rects):
+            # Choose the best rectangle based on aspect ratio
+            best_rect = None
+            best_aspect_diff = float("inf")
+            medium_aspect = (aspect_low + aspect_high) / 2
             for rect in rects:
                 aspect = rect[2] / rect[3]
                 if (
-                    rect[0]
-                    and rect[1]
+                    rect[0] >= 0
+                    and rect[1] >= 0
                     and (rect[0] + rect[2]) < img.width()
                     and (rect[1] + rect[3]) < img.height()
                     and aspect_low < aspect < aspect_high
                 ):
-                    return rect
-            return None
+                    aspect_diff = abs(aspect - medium_aspect)
+                    if aspect_diff < best_aspect_diff:
+                        best_aspect_diff = aspect_diff
+                        best_rect = rect
+            return best_rect
 
-        stats = img.get_statistics()
-        # # Debug stats
-        # img.draw_string(10,10,"Mean:"+str(stats.mean()))
-        # img.draw_string(10,30,"Median:"+str(stats.median()))
-        # img.draw_string(10,50,"UQ:"+str(stats.uq()))
-        # img.draw_string(10,70,"LQ:"+str(stats.lq()))
+        try:
+            self.blob_otsu = img.get_histogram().get_threshold().value()
+        except:
+            pass
+        blob_threshold = [(self.blob_otsu, 255)]
+        blobs = img.find_blobs(
+            blob_threshold,
+            x_stride=30,
+            y_stride=30,
+            area_threshold=5000,
+        )
 
-        # Luminosity
-        luminosity = stats.median() * 2
-        attempts = 3
-        while attempts:
-            blob_threshold = [
-                (luminosity, 255),
-            ]
-            blobs = img.find_blobs(
-                blob_threshold,
-                x_stride=50,
-                y_stride=50,
-                area_threshold=10000,
-            )
-            # Debug blobs
-            # for blob in blobs:
-            #     img.draw_rectangle(blob.rect(), color=(255,125*attempts,0), thickness=3)
-            rects = []
-            for blob in blobs:
-                rects.append(blob.rect())
-            rect = _choose_rect(rects)
-            if rect:
-                break
-            attempts -= 1
-            # Reduce luminosity threshold to try again
-            luminosity *= 7
-            luminosity //= 10
-        # # Debug attempts
-        # img.draw_string(10,10,"Attempts:"+str(attempts))
+        # Debug: Optionally draw the blobs to see them during development
+        # for blob in blobs:
+        #     img.draw_rectangle(blob.rect(), color=(255, 125 * attempts, 0), thickness=3)
+
+        # Choose the best rectangle that matches the aspect ratio
+        rect = _choose_rect([blob.rect() for blob in blobs])
+
+        # If a rectangle was found, draw it
         if rect:
-            # Outline Tiny Seed
             outline = (
                 rect[0] - 1,
                 rect[1] - 1,
                 rect[2] + 1,
                 rect[3] + 1,
             )
-            if self.capturing:
-                img.draw_rectangle(outline, lcd.WHITE, thickness=4)
-            else:
-                img.draw_rectangle(outline, lcd.WHITE, thickness=2)
+            thickness = 4 if self.capturing else 2
+            img.draw_rectangle(outline, lcd.WHITE, thickness=thickness)
+
         return rect
 
     def _draw_grid(self, img):
@@ -1005,7 +996,6 @@ class TinyScanner(Page):
         self.ctx.display.draw_centered_text(message)
         precamera_ticks = time.ticks_ms()
         self.ctx.camera.initialize_run(mode=BINARY_GRID_MODE)
-        self.ctx.display.clear()
         self.ctx.display.to_landscape()
         postcamera_ticks = time.ticks_ms()
         # check how much time camera took to retain message on the screen
@@ -1017,6 +1007,7 @@ class TinyScanner(Page):
         # # Debug FPS 1/4
         # clock = time.clock()
         # fps = 0
+        self.ctx.display.clear()
         while True:
             # # Debug FPS 2/4
             # clock.tick()
