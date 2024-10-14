@@ -45,7 +45,7 @@ class FlashTools(Page):
             self.ctx,
             [
                 (t("Flash Map"), self.flash_map),
-                (t("Flash Hash"), self.flash_hash),
+                (t("TC Flash Hash"), self.flash_hash),
                 (t("Erase User's Data"), self.erase_users_data),
             ],
         )
@@ -279,7 +279,7 @@ class FlashHash(Page):
         return " ".join(words[:2])
 
     def generate(self):
-        """Generates the flash hash snapshot."""
+        """Generates the Tamper Check Flash Hash snapshot."""
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Processing.."))
         firmware_hash = self.hash_pin_with_flash()

@@ -56,7 +56,7 @@ class TCCodeVerification(Page):
             return False
         # Hashes the integrity code
         pin_bytes = integrity_code.encode()
-        # Tamper Check Code hash will be used in "Flash Hash"
+        # Tamper Check Code hash will be used in "TC Flash Hash"
         pin_hash = hashlib.sha256(pin_bytes).digest()
 
         # Read the contents of integrity code file

@@ -428,7 +428,7 @@ class SecuritySettings(SettingsNamespace):
         return {
             "auto_shutdown": t("Shutdown Time"),
             "hide_mnemonic": t("Hide Mnemonics"),
-            "boot_flash_hash": t("Hash Flash at Boot"),
+            "boot_flash_hash": t("TC Flash Hash at Boot"),
         }[attr]
 
 
