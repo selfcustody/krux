@@ -887,14 +887,14 @@ class Menu:
             offset_y += delta_y
 
 
-def choose_len_mnemonic(ctx, double_mnemonic=False):
+def choose_len_mnemonic(ctx, extra_option=""):
     """Reusable '12 or 24 words?" menu choice"""
     items = [
         (t("12 words"), lambda: 12),
         (t("24 words"), lambda: 24),
     ]
-    if double_mnemonic:
-        items += [(t("Double mnemonic"), lambda: 48)]
+    if extra_option:
+        items += [(extra_option, lambda: 48)]
     submenu = Menu(
         ctx,
         items,

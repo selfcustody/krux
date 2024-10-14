@@ -149,7 +149,7 @@ class Home(Page):
     def bip85(self):
         """Handler for the 'BIP85' menu item"""
         if not self.prompt(
-            t("Generate a BIP85 child mnemonic?"), self.ctx.display.height() // 2
+            t("Generate a BIP85 child?"), self.ctx.display.height() // 2
         ):
             return MENU_CONTINUE
 

@@ -160,7 +160,8 @@ class Login(Page):
 
     def new_key_from_snapshot(self):
         """Use camera's entropy to create a new mnemonic"""
-        len_mnemonic = choose_len_mnemonic(self.ctx, True)
+        extra_option = t("Double mnemonic")
+        len_mnemonic = choose_len_mnemonic(self.ctx, extra_option)
         if not len_mnemonic:
             return MENU_CONTINUE
 

@@ -51,7 +51,7 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
-  latest_krux: krux-v24.10.beta4
+  latest_krux: krux-v24.10.beta5
   latest_installer: v0.0.20-alpha-3
   latest_installer_rpm: krux-installer-0.0.20_alpha_3-1.x86_64.rpm
   latest_installer_deb: krux-installer_0.0.20-alpha-3_amd64.deb

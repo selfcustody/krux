@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 from embit import bip85
 from embit.bip32 import HARDENED_INDEX
+from ...baseconv import base_encode
 from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
 from ...krux_settings import Settings
@@ -28,9 +29,13 @@ from .. import (
     Page,
     DIGITS,
     ESC_KEY,
-    MENU_CONTINUE,
     choose_len_mnemonic,
 )
+
+BIP_PWD_APP_INDEX = 707764
+DEFAULT_PWD_LEN = "21"
+PWD_MIN_LEN = 20
+PWD_MAX_LEN = 86
 
 
 class Bip85(Page):
@@ -38,14 +43,15 @@ class Bip85(Page):
 
     def export(self):
         """Exports BIP85 child mnemonics"""
-        num_words = choose_len_mnemonic(self.ctx)
+        extra_option = t("Password")
+        num_words = choose_len_mnemonic(self.ctx, extra_option)
         if not num_words:
-            return MENU_CONTINUE
+            return
 
         while True:
             child = self.capture_from_keypad(t("Child Index"), [DIGITS])
             if child == ESC_KEY:
-                return None
+                return
             try:
                 child_index = int(child)
             except:  # Empty input
@@ -58,31 +64,65 @@ class Bip85(Page):
                 )
                 continue
             break
-        bip85_words = bip85.derive_mnemonic(
-            self.ctx.wallet.key.root,
-            num_words,
-            child_index,
-        )
-        self.ctx.display.clear()
-
-        from ...key import Key
-
-        key = Key(
-            bip85_words,
-            self.ctx.wallet.key.multisig,
-            self.ctx.wallet.key.network,
-            script_type=self.ctx.wallet.key.script_type,
-        )
-        if not Settings().security.hide_mnemonic:
-            self.display_mnemonic(
-                bip85_words,
-                suffix=t("Words"),
-                fingerprint=key.fingerprint_hex_str(True),
+        if num_words in [12, 24]:
+            bip85_words = bip85.derive_mnemonic(
+                self.ctx.wallet.key.root,
+                num_words,
+                child_index,
             )
-        else:
-            self.ctx.display.draw_centered_text(key.fingerprint_hex_str(True))
-        if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
-            from ...wallet import Wallet
+            self.ctx.display.clear()
 
-            self.ctx.wallet = Wallet(key)
-        return None
+            from ...key import Key
+
+            key = Key(
+                bip85_words,
+                self.ctx.wallet.key.multisig,
+                self.ctx.wallet.key.network,
+                script_type=self.ctx.wallet.key.script_type,
+            )
+            if not Settings().security.hide_mnemonic:
+                self.display_mnemonic(
+                    bip85_words,
+                    suffix=t("Words"),
+                    fingerprint=key.fingerprint_hex_str(True),
+                )
+            else:
+                self.ctx.display.draw_centered_text(key.fingerprint_hex_str(True))
+            if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
+                from ...wallet import Wallet
+
+                self.ctx.wallet = Wallet(key)
+            return
+        # Derive a password
+        while True:
+
+            pwd_len_txt = self.capture_from_keypad(
+                t("Password Length"), [DIGITS], starting_buffer=DEFAULT_PWD_LEN
+            )
+            if pwd_len_txt == ESC_KEY:
+                return
+            try:
+                pwd_len = int(pwd_len_txt)
+            except:  # Empty input
+                continue
+
+            # Check if the password length is within the range
+            if pwd_len < PWD_MIN_LEN or pwd_len > PWD_MAX_LEN:
+                self.flash_error(
+                    t("Value %s out of range: [%s, %s]")
+                    % (pwd_len, PWD_MIN_LEN, PWD_MAX_LEN)
+                )
+                continue
+            break
+
+        entropy = bip85.derive_entropy(
+            self.ctx.wallet.key.root,
+            BIP_PWD_APP_INDEX,
+            [pwd_len, child_index],
+        )
+        password = base_encode(entropy, 64).decode().strip()
+        password = password[:pwd_len]
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(password)
+        self.ctx.input.wait_for_button()
+        return
