@@ -562,7 +562,7 @@ class Menu:
             selected_item_index = start_from_index
         while True:
             gc.collect()
-            if self.menu_offset > FONT_HEIGHT:
+            if self.menu_offset > STATUS_BAR_HEIGHT:
                 # Clear only the menu area
                 self.ctx.display.fill_rectangle(
                     0,

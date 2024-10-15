@@ -148,9 +148,7 @@ class Home(Page):
 
     def bip85(self):
         """Handler for the 'BIP85' menu item"""
-        if not self.prompt(
-            t("Generate a BIP85 child?"), self.ctx.display.height() // 2
-        ):
+        if not self.prompt(t("Derive BIP85 entropy?"), self.ctx.display.height() // 2):
             return MENU_CONTINUE
 
         from .bip85 import Bip85
@@ -212,11 +210,11 @@ class Home(Page):
 
         # If load_method == LOAD_FROM_SD
         from ..utils import Utils
-        from ...sd_card import PSBT_FILE_EXTENSION, B64_PSBT_FILE_EXTENSION
+        from ...sd_card import PSBT_FILE_EXTENSION, B64_FILE_EXTENSION
 
         utils = Utils(self.ctx)
         psbt_filename, _ = utils.load_file(
-            [PSBT_FILE_EXTENSION, B64_PSBT_FILE_EXTENSION],
+            [PSBT_FILE_EXTENSION, B64_FILE_EXTENSION],
             prompt=False,
             only_get_filename=True,
         )
@@ -241,17 +239,17 @@ class Home(Page):
         """Formats the PSBT filename"""
         from ...sd_card import (
             PSBT_FILE_EXTENSION,
-            B64_PSBT_FILE_EXTENSION,
+            B64_FILE_EXTENSION,
             SIGNED_FILE_SUFFIX,
         )
         from ..file_operations import SaveFile
 
-        if psbt_filename.endswith(B64_PSBT_FILE_EXTENSION):
+        if psbt_filename.endswith(B64_FILE_EXTENSION):
             # Remove chained extensions
-            psbt_filename = psbt_filename[: -len(B64_PSBT_FILE_EXTENSION)]
+            psbt_filename = psbt_filename[: -len(B64_FILE_EXTENSION)]
             if psbt_filename.endswith(PSBT_FILE_EXTENSION):
                 psbt_filename = psbt_filename[: -len(PSBT_FILE_EXTENSION)]
-            extension = PSBT_FILE_EXTENSION + B64_PSBT_FILE_EXTENSION
+            extension = PSBT_FILE_EXTENSION + B64_FILE_EXTENSION
         else:
             extension = PSBT_FILE_EXTENSION
 
