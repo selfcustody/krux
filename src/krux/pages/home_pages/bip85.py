@@ -155,8 +155,8 @@ class Bip85(Page):
         password = base_encode(entropy, 64).decode().strip()
         password = password[:pwd_len]
         info = password
-        info += t("\n\nIndex: %s") % child_index
-        info += t("\nLength: %s") % pwd_len
+        info += "\n\n" + t("Index: %s") % child_index
+        info += "\n" + t("Length: %s") % pwd_len
         while True:
             menu_items = [
                 (
