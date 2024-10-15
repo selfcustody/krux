@@ -4,7 +4,7 @@ from .test_tools import mock_file_operations, SEEDS_JSON
 
 def test_load_file(m5stickv, mocker, mock_file_operations):
     from krux.pages.utils import Utils
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Pick first file
@@ -14,7 +14,7 @@ def test_load_file(m5stickv, mocker, mock_file_operations):
     for only_get_filename in ONLY_GET_FILENAME_OPTIONS:
         mocker.patch(
             "krux.sd_card.SDHandler.dir_exists",
-            mocker.MagicMock(side_effect=[True, False]),
+            mocker.MagicMock(side_effect=[True, False, False]),
         )
         ctx = create_ctx(mocker, BTN_SEQUENCE)
         utils = Utils(ctx)
@@ -32,7 +32,6 @@ def test_load_file(m5stickv, mocker, mock_file_operations):
 
 def test_load_file_with_no_sd(m5stickv, mocker):
     from krux.pages.utils import Utils
-    from krux.input import BUTTON_PAGE
 
     mocker.patch(
         "krux.sd_card.SDHandler.dir_exists",
