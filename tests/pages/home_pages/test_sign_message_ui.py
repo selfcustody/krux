@@ -212,7 +212,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             and case[3][0] == BUTTON_ENTER
             and case[3][1] == BUTTON_ENTER
         )
-        if case[0] and signed_qr_message and case[6] is None:
+        if case[0] is not None and signed_qr_message and case[6] is None:
             home.display_qr_codes.assert_has_calls(
                 [
                     mocker.call(case[4], case[1], "Signed Message"),
@@ -353,6 +353,26 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             "3. bc1qgl..cn3",
             "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
+        (  # 7 - Sign empty - Load from and save to SD card
+            [
+                BUTTON_PAGE,  # Load from SD card
+                BUTTON_ENTER,  # Confirm load from SD card
+                BUTTON_ENTER,  # Choose file "signmessage.txt"
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_PAGE,  # Sign to SD card
+                BUTTON_ENTER,  # Confirm sign to SD card
+                BUTTON_PAGE_PREV,  # Move to Go
+                BUTTON_ENTER,  # Go
+            ],
+            None,
+            "",
+            True,  # Sign to SD
+            "A test message.",
+            "3. bc1qgl..cn3",
+            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+        ),
     ]
     case_count = 0
     for case in cases:
@@ -375,7 +395,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             )
             qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
         mocker.patch.object(message_signer, "has_sd_card", new=lambda: True)
-        if case[2]:  # Load from SD card
+        if case[2] is not None:  # Load from SD card
             mocker.patch.object(
                 message_signer, "load_file", return_value=("signmessage.txt", case[2])
             )
@@ -383,18 +403,20 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         message_signer.sign_message()
 
         qr_capturer.assert_called_once()
-        ctx.display.draw_hcentered_text.assert_has_calls(
-            [mocker.call("Message:", 10, theme.highlight_color)]
-        )
-        ctx.display.draw_hcentered_text.assert_has_calls(
-            [mocker.call(case[4], mocker.ANY, max_lines=10)]
-        )
-        ctx.display.draw_hcentered_text.assert_has_calls(
-            [mocker.call("Address:", mocker.ANY, theme.highlight_color)]
-        )
-        ctx.display.draw_hcentered_text.assert_has_calls(
-            [mocker.call(case[5], mocker.ANY)],
-        )
+
+        if case[2] != "":
+            ctx.display.draw_hcentered_text.assert_has_calls(
+                [mocker.call("Message:", 10, theme.highlight_color)]
+            )
+            ctx.display.draw_hcentered_text.assert_has_calls(
+                [mocker.call(case[4], mocker.ANY, max_lines=10)]
+            )
+            ctx.display.draw_hcentered_text.assert_has_calls(
+                [mocker.call("Address:", mocker.ANY, theme.highlight_color)]
+            )
+            ctx.display.draw_hcentered_text.assert_has_calls(
+                [mocker.call(case[5], mocker.ANY)],
+            )
         if not case[3]:
             message_signer.display_qr_codes.assert_called_once_with(
                 case[6],
