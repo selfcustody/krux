@@ -112,8 +112,14 @@ class FileManager(Page):
                         menu_items.append(
                             (
                                 display_filename,
-                                lambda file=filename: select_file_handler(
-                                    path + "/" + file
+                                (
+                                    (lambda: MENU_EXIT)
+                                    if is_directory
+                                    else (
+                                        lambda file=filename: select_file_handler(
+                                            path + "/" + file
+                                        )
+                                    )
                                 ),
                             )
                         )
@@ -143,8 +149,6 @@ class FileManager(Page):
 
     def show_file_details(self, file):
         """Handler to print file info when selecting a file in the file explorer"""
-        if SDHandler.dir_exists(file):
-            return MENU_EXIT
 
         self.display_file(file)
         self.ctx.input.wait_for_button()
@@ -152,11 +156,8 @@ class FileManager(Page):
 
     def load_file(self, file):
         """Handler to ask if will load selected file in the file explorer"""
-        if SDHandler.dir_exists(file):
-            return MENU_EXIT
 
         self.display_file(file)
-
         if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
             return MENU_EXIT
         return MENU_CONTINUE
