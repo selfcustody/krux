@@ -32,6 +32,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
+                BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
@@ -46,6 +47,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
         (
             tdata.SINGLESIG_24_WORD_KEY,
             [
+                BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words out
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
@@ -60,6 +62,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
+                BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_PAGE,  # Move to 24 words
                 BUTTON_ENTER,  # Choose 24 words
                 BUTTON_ENTER,  # Child index 1
@@ -75,6 +78,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
+                BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
@@ -90,6 +94,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
+                BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
                 BUTTON_ENTER,  # Press "Esc"
@@ -103,6 +108,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
+                BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
                 BUTTON_PAGE_PREV,  # Move to "Go" with no index assigned
                 BUTTON_ENTER,  # Go
@@ -120,6 +126,7 @@ def test_bip85_wallet_creation(mocker, amigo, tdata):
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
+                BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
                 BUTTON_PAGE,  # Move to 2
                 *([BUTTON_ENTER] * 12),  # Type 222222222222
