@@ -42,7 +42,7 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
 
     # to view this directory, selected file isn't a directory
     mocker.patch(
-        "krux.sd_card.SDHandler.dir_exists", mocker.MagicMock(side_effect=[True, False])
+        "krux.sd_card.SDHandler.dir_exists", mocker.MagicMock(side_effect=[True])
     )
     # first 2 entries are files, next 2 are directories
     mocker.patch(
@@ -101,9 +101,9 @@ def test_file_load(m5stickv, mocker, mock_file_operations):
     # to view this directory, selected file isn't a directory
     mocker.patch(
         "krux.sd_card.SDHandler.dir_exists",
-        mocker.MagicMock(side_effect=[True, False, False]),
+        mocker.MagicMock(side_effect=[True, False]),
     )
-    # first 2 entries are files, next 2 are directories
+    # first 3 entries are files, next 2 are directories
     mocker.patch(
         "krux.sd_card.SDHandler.file_exists",
         mocker.MagicMock(side_effect=[True, True, True, False, False]),
@@ -165,12 +165,13 @@ def test_file_load_cancel(m5stickv, mocker, mock_file_operations):
     # to view this directory, selected file isn't a directory
     mocker.patch(
         "krux.sd_card.SDHandler.dir_exists",
-        mocker.MagicMock(side_effect=[True, False, False, False]),
+        mocker.MagicMock(side_effect=[True, False]),
     )
-    # first 2 entries are files, next 2 are directories
+    # first 3 entries are files, next 2 are directories
+    _listing_returns = [True, True, True, False, False]
     mocker.patch(
         "krux.sd_card.SDHandler.file_exists",
-        mocker.MagicMock(side_effect=[True, True, True, False, False]),
+        mocker.MagicMock(side_effect=_listing_returns),
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     file_manager = FileManager(ctx)
