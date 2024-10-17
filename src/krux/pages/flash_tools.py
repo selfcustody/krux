@@ -300,5 +300,6 @@ class FlashHash(Page):
         spiffs_hash = self.hash_pin_with_flash(spiffs_region=True)
         anti_tamper_words = self.hash_to_words(spiffs_hash)
         self.ctx.display.draw_hcentered_text(anti_tamper_words, y_offset)
+        self.ctx.input.reset_ios_state()
         self.ctx.input.wait_for_button()
         return MENU_CONTINUE

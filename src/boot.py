@@ -75,6 +75,7 @@ def tc_code_verification(ctx_pin):
         print("No pin set")
         return True
 
+    ctx_pin.tc_code_enabled = True
     from krux.krux_settings import Settings
 
     if not Settings().security.boot_flash_hash:
@@ -101,7 +102,6 @@ def tc_code_verification(ctx_pin):
     sys.modules.pop("krux.pages.tc_code_verification")
     del sys.modules["krux"].pages.tc_code_verification
     del TCCodeVerification
-    ctx_pin.tc_code_enabled = True
     return True
 
 
