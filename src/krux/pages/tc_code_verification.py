@@ -49,15 +49,15 @@ class TCCodeVerification(Page):
             if changing_tc_code
             else t("Tamper Check Code")
         )
-        integrity_code = self.capture_from_keypad(
+        tc_code = self.capture_from_keypad(
             label, [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3]
         )
-        if integrity_code == ESC_KEY:
+        if tc_code == ESC_KEY:
             return False
         # Hashes the integrity code
-        pin_bytes = integrity_code.encode()
+        tc_code_bytes = tc_code.encode()
         # Tamper Check Code hash will be used in "TC Flash Hash"
-        pin_hash = hashlib.sha256(pin_bytes).digest()
+        tc_code_hash = hashlib.sha256(tc_code_bytes).digest()
 
         # Read the contents of integrity code file
         with open(TC_CODE_PATH, "rb") as f:
@@ -69,21 +69,21 @@ class TCCodeVerification(Page):
         # Tries with non-stretched secret (obsolete)
         # TODO: Remove obsolete before first release
         sha256 = hashlib.sha256()
-        sha256.update(pin_hash)
+        sha256.update(tc_code_hash)
         sha256.update(unique_id())
         non_stretched_secret = sha256.digest()
         if non_stretched_secret == file_secret:
             if return_hash:
-                return pin_hash
+                return tc_code_hash
             return True
 
         # Generate PBKDF2 stretched secret
         secret = hashlib.pbkdf2_hmac(
-            "sha256", pin_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
+            "sha256", tc_code_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
         )
         if secret == file_secret:
             if return_hash:
-                return pin_hash
+                return tc_code_hash
             return True
 
         self.flash_error(t("Invalid Tamper Check Code"))

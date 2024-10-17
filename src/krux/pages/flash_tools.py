@@ -45,7 +45,7 @@ class FlashTools(Page):
             self.ctx,
             [
                 (t("Flash Map"), self.flash_map),
-                (t("TC Flash Hash"), self.flash_hash),
+                (t("TC Flash Hash"), self.tc_flash_hash),
                 (t("Erase User's Data"), self.erase_users_data),
             ],
         )
@@ -132,7 +132,7 @@ class FlashTools(Page):
 
         return MENU_CONTINUE
 
-    def flash_hash(self):
+    def tc_flash_hash(self):
         """Load the flash hash page"""
 
         if self.ctx.tc_code_enabled:
