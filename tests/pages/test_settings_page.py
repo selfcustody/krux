@@ -102,7 +102,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 # Remove digit (become 38)
                 *([BUTTON_PAGE_PREV] * 3),
                 BUTTON_ENTER,
-                # Add 9
+                # Add 0 (become 380)
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,
                 # Go
@@ -121,7 +121,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 *([BUTTON_PAGE_PREV] * 3),
                 BUTTON_ENTER,
             ),
-            lambda: Settings().hardware.printer.thermal.adafruit.paper_width == 389,
+            lambda: Settings().hardware.printer.thermal.adafruit.paper_width == 380,
         ),
         (  # 4 Change theme
             (
