@@ -14,7 +14,11 @@ def test_load_file(m5stickv, mocker, mock_file_operations):
     for only_get_filename in ONLY_GET_FILENAME_OPTIONS:
         mocker.patch(
             "krux.sd_card.SDHandler.dir_exists",
-            mocker.MagicMock(side_effect=[True, False, False]),
+            mocker.MagicMock(side_effect=[True, False]),
+        )
+        mocker.patch(
+            "krux.sd_card.SDHandler.file_exists",
+            mocker.MagicMock(side_effect=[True, True]),
         )
         ctx = create_ctx(mocker, BTN_SEQUENCE)
         utils = Utils(ctx)
