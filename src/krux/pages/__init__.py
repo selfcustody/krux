@@ -64,8 +64,10 @@ PROCEED = (BUTTON_ENTER, BUTTON_TOUCH)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-NUM_SPECIAL_1 = "0123456789 !#$%&'()*"
+NUM_SPECIAL_1 = "1234567890 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
+NUM_SPECIAL_3 = " !#$%&'()*"  # NUM_SPECIAL_1 without numbers
+DIGITS = "1234567890"
 
 BATTERY_WIDTH = 22
 BATTERY_HEIGHT = 7
@@ -146,12 +148,16 @@ class Page:
         """
         buffer = starting_buffer
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
+        big_tittle = len(self.ctx.display.to_lines(title)) > 1
         while True:
             self.ctx.display.clear()
-            offset_y = DEFAULT_PADDING
-            if (len(buffer) + 1) * FONT_WIDTH < self.ctx.display.width():
+            offset_y = MINIMAL_PADDING if big_tittle else DEFAULT_PADDING
+            if lcd.string_width_px(buffer) < self.ctx.display.width():
                 self.ctx.display.draw_hcentered_text(title, offset_y)
-                offset_y += FONT_HEIGHT * 3 // 2
+                if big_tittle:
+                    offset_y += 2 * FONT_HEIGHT
+                else:
+                    offset_y += FONT_HEIGHT * 3 // 2
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
 
             if progress_bar_fn:
@@ -159,6 +165,7 @@ class Page:
             pad.compute_possible_keys(buffer)
             pad.get_valid_index()
             pad.draw_keys()
+            pad.draw_keyset_index()
             btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 btn = pad.touch_to_physical()
@@ -555,7 +562,7 @@ class Menu:
             selected_item_index = start_from_index
         while True:
             gc.collect()
-            if self.menu_offset > FONT_HEIGHT:
+            if self.menu_offset > STATUS_BAR_HEIGHT:
                 # Clear only the menu area
                 self.ctx.display.fill_rectangle(
                     0,
@@ -880,14 +887,14 @@ class Menu:
             offset_y += delta_y
 
 
-def choose_len_mnemonic(ctx, double_mnemonic=False):
+def choose_len_mnemonic(ctx, extra_option=""):
     """Reusable '12 or 24 words?" menu choice"""
     items = [
         (t("12 words"), lambda: 12),
         (t("24 words"), lambda: 24),
     ]
-    if double_mnemonic:
-        items += [(t("Double mnemonic"), lambda: 48)]
+    if extra_option:
+        items += [(extra_option, lambda: 48)]
     submenu = Menu(
         ctx,
         items,

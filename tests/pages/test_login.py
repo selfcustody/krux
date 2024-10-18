@@ -713,8 +713,8 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 # 1 press change to number "2" and 1 press to select
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
-                # 10 press to place on btn Go
-                [BUTTON_PAGE] * 10
+                # 11 press to place on btn Go
+                [BUTTON_PAGE] * 11
                 + [
                     BUTTON_ENTER,
                     BUTTON_ENTER,
@@ -729,11 +729,11 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 0
-                [BUTTON_PAGE] * 11
+                [BUTTON_PAGE] * 8
                 + [BUTTON_ENTER]
                 +
                 # 3
-                [BUTTON_PAGE] * 3
+                [BUTTON_PAGE] * 6
                 + [BUTTON_ENTER]
                 # Confirm twelve word=1203 (north)
                 + [BUTTON_ENTER]
@@ -753,7 +753,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 10 press to place on btn Go
-                [BUTTON_PAGE] * 10
+                [BUTTON_PAGE] * 11
                 + [
                     BUTTON_ENTER,
                     BUTTON_ENTER,
@@ -769,7 +769,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 + [BUTTON_ENTER]
                 +
                 # Go
-                [BUTTON_PAGE] * 6
+                [BUTTON_PAGE] * 7
                 + [BUTTON_ENTER]
                 # Confirm
                 + [BUTTON_ENTER]

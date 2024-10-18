@@ -27,6 +27,7 @@ from ..krux_settings import t
 from . import (
     Page,
     Menu,
+    DIGITS,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -35,7 +36,6 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from .settings_page import DIGITS
 from ..key import SINGLESIG_SCRIPT_PURPOSE, MULTISIG_SCRIPT_PURPOSE
 from ..settings import (
     MAIN_TXT,

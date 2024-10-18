@@ -364,6 +364,15 @@ def fill_rectangle(x, y, w, h, color, radius=0):
     radius = min(radius, min(w, h) // 2)
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 
+def draw_circle(x, y, radious, quadrant, color):
+    def run():
+        if quadrant == 0:
+            pg.draw.circle(screen, color, (x, y), radious)
+
+    color = rgb565torgb888(color)
+    if _is_x_flipped():
+        x = width() - x - 1
+    pg.event.post(pg.event.Event(events.LCD_DRAW_CIRCLE_EVENT, {"f": run}))
 
 def draw_line(x_0, y_0, x_1, y_1, color):
 
@@ -422,6 +431,7 @@ if "lcd" not in sys.modules:
         draw_qr_code=draw_qr_code,
         draw_qr_code_binary=draw_qr_code_binary,
         fill_rectangle=fill_rectangle,
+        draw_circle=draw_circle,
         draw_line=draw_line,
         draw_outline=draw_outline,
         BLACK=COLOR_BLACK,
