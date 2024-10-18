@@ -17,7 +17,7 @@ def test_erase_users_data(amigo, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_flash_map(amigo, mocker):
+def test_flash_map(multiple_devices, mocker):
     """Test that the flash map is displayed."""
     from krux.pages.flash_tools import FlashTools
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
