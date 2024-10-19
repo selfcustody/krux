@@ -181,3 +181,18 @@ def test_load_descriptor_adresses(m5stickv, mocker):
     tool = Tools(ctx)
     tool.descriptor_addresses()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_load_flash_tools(m5stickv, mocker):
+    from krux.pages.tools import Tools
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    tool = Tools(ctx)
+    tool.flash_tools()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
