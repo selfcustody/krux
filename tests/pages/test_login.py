@@ -345,17 +345,30 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
-    MNEMONIC = "forum undo fragile fade shy sign arrest garment culture tube off merit"
-    BINARY_MNEMONIC = b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE"
+    C_SEED_QRs = [
+        (
+            b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE",
+            "forum undo fragile fade shy sign arrest garment culture tube off merit",
+        ),
+        (
+            b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE".decode("latin1"),
+            "forum undo fragile fade shy sign arrest garment culture tube off merit",
+        ),
+        (
+            b"[\xbd\x9dq\xa8\xec \x90\x83\x1a\xff5\x9dBeE".decode("latin1"),
+            "forum undo fragile fade search embark arrest garment culture tube off melt",
+        ),
+    ]
 
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    login = Login(ctx)
-    mocker.patch.object(
-        QRCodeCapture, "qr_capture_loop", new=lambda self: (BINARY_MNEMONIC, QR_FORMAT)
-    )
-    login.load_key_from_qr_code()
+    for c_seed_qr in C_SEED_QRs:
+        ctx = create_ctx(mocker, BTN_SEQUENCE)
+        login = Login(ctx)
+        mocker.patch.object(
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (c_seed_qr[0], QR_FORMAT)
+        )
+        login.load_key_from_qr_code()
 
-    assert ctx.wallet.key.mnemonic == MNEMONIC
+        assert ctx.wallet.key.mnemonic == c_seed_qr[1]
 
 
 def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
