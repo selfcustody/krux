@@ -21,13 +21,10 @@
 # THE SOFTWARE.
 # pylint: disable=C0103
 
-import uos
-
-uos.chdir("/flash")
-
 import sys
 import time
 import gc
+import os
 
 sys.path.append("")
 sys.path.append(".")
@@ -51,7 +48,7 @@ def check_for_updates():
 
     # Check if the SD card is inserted and contains a firmware before loading the firmware module
     try:
-        uos.stat("/sd/firmware.bin")
+        os.stat("/sd/firmware.bin")
     except OSError:
         return
 
@@ -72,7 +69,7 @@ def tc_code_verification(ctx_pin):
 
     # Checks if there is a pin set
     try:
-        if not (uos.stat(TC_CODE_PATH)[0] & 0x4000) == 0:
+        if not (os.stat(TC_CODE_PATH)[0] & 0x4000) == 0:
             raise OSError
     except OSError:
         print("No pin set")
