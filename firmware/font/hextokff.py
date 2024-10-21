@@ -36,10 +36,14 @@ DEFAULT_CODEPOINTS = [
 ]
 TRANSLATIONS_DIR = "../../i18n/translations"
 
+JAPANESE_CODEPOINT_MIN = 0x3000  # defined as WIDEFONT_CODEPOINT_MIN in MaixPy
+JAPANESE_CODEPOINT_MAX = 0x30FF
 CHINESE_CODEPOINT_MIN = 0x4E00
 CHINESE_CODEPOINT_MAX = 0x9FFF
 KOREAN_CODEPOINT_MIN = 0xAC00
 KOREAN_CODEPOINT_MAX = 0xD7A3
+FULLHALFWIDTH_CODEPOINT_MIN = 0xFF00
+FULLHALFWIDTH_CODEPOINT_MAX = 0xFFEF  # defined as WIDEFONT_CODEPOINT_MAX in MaixPy
 
 
 def hextokff(filename=None, width=None, height=None, wide_glyphs=None):
@@ -71,12 +75,16 @@ def hextokff(filename=None, width=None, height=None, wide_glyphs=None):
 
             for translation in translations.values():
                 for char in translation:
-                    # If is Chinese or Korean codepoint
+                    # If Japanese, Chinese, or Korean codepoint
                     if (
-                        CHINESE_CODEPOINT_MIN <= ord(char) <= CHINESE_CODEPOINT_MAX
+                        JAPANESE_CODEPOINT_MIN <= ord(char) <= JAPANESE_CODEPOINT_MAX
+                        or CHINESE_CODEPOINT_MIN <= ord(char) <= CHINESE_CODEPOINT_MAX
                         or KOREAN_CODEPOINT_MIN <= ord(char) <= KOREAN_CODEPOINT_MAX
+                        or FULLHALFWIDTH_CODEPOINT_MIN
+                        <= ord(char)
+                        <= FULLHALFWIDTH_CODEPOINT_MAX
                     ):
-                        # only include if wide_glyphs is ko-KR
+                        # only include if wide_glyphs required by this locale
                         if wide_glyphs and current_translation in wide_glyphs:
                             used_codepoints.add(ord(char))
                     elif wide_glyphs is None:
