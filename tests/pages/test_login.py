@@ -1275,3 +1275,39 @@ def test_about(mocker, m5stickv):
     ctx.display.draw_centered_text.assert_called_with(
         "Krux\n\nHardware\n" + board.config["type"] + "\n\nVersion\n" + VERSION
     )
+
+
+def test_auto_complete_qr_words(m5stickv, mocker):
+    from krux.pages.login import Login
+
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+
+    # Test case where all words are valid
+    words = ["abandon"] * 12
+    result = login.auto_complete_qr_words(words)
+    assert result == words
+
+    # Test case where some words need to be autocompleted
+    words = ["abandon", "abil", "abl"] + ["abandon"] * 9
+    expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
+    result = login.auto_complete_qr_words(words)
+    assert result == expected_result
+
+    # Test case where a word cannot be autocompleted
+    words = ["aband", "abil", "xyz"] + ["abandon"] * 9
+    result = login.auto_complete_qr_words(words)
+    assert result == []
+
+    # Test case where all words need to be autocompleted
+    words = ["aband", "abil", "abl"] + ["abandon"] * 9
+    expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
+    result = login.auto_complete_qr_words(words)
+    assert result == expected_result
+
+    # Test case with mixed case words
+    words = ["AbAnD", "aBiL", "AbL"] + ["abandon"] * 9
+    expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
+    result = login.auto_complete_qr_words(words)
+    assert result == expected_result
+
