@@ -132,13 +132,17 @@ def save_new_fontc(font_name, overwrite=False):
         with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
             save_file.write(unicode_str)
 
-        # Also replace for bit and yahboom
+        # Also replace for bit, yahboom, and wonder_mv
         if font_name in (FONT16, WIDE16):
             filename = maixpy_path_start + "bit" + maixpy_path_end
             with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
                 save_file.write(unicode_str)
 
             filename = maixpy_path_start + "yahboom" + maixpy_path_end
+            with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
+                save_file.write(unicode_str)
+
+            filename = maixpy_path_start + "wonder_mv" + maixpy_path_end
             with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
                 save_file.write(unicode_str)
 
