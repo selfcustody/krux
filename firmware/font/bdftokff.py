@@ -39,15 +39,15 @@ WIDE24 = "NotoSansCJK-24"
 def open_bdf_save_kff(filename, width, height):
     """Open a bdf font filename and save the corresponding kff file based on the filename"""
 
-    filename_kff = "m5stickv"
+    filename_kff = "m5stickv_cube"
     if filename == FONT16:
-        filename_kff = "bit_dock_yahboom"
+        filename_kff = "bit_dock_yahboom_wondermv"
     elif filename == FONT24:
         filename_kff = "amigo"
     elif filename == WIDE14:
-        filename_kff = "m5stickv_wide"
+        filename_kff = "m5stickv_cube_wide"
     elif filename == WIDE16:
-        filename_kff = "bit_dock_yahboom_wide"
+        filename_kff = "bit_dock_yahboom_wondermv_wide"
     elif filename == WIDE24:
         filename_kff = "amigo_wide"
 
@@ -88,16 +88,17 @@ def save_new_fontc(font_name, overwrite=False):
     on each project, based on the font_name passed otherwise save
     a new font.c file"""
 
-    device_name = filename_kff = "m5stickv"
+    filename_kff = "m5stickv_cube"
+    device_name = "m5stickv"
     if font_name == FONT16:
-        filename_kff = "bit_dock_yahboom"
+        filename_kff = "bit_dock_yahboom_wondermv"
         device_name = "dock"
     elif font_name == FONT24:
         device_name = filename_kff = "amigo"
     elif font_name == WIDE14:
-        filename_kff = "m5stickv_wide"
+        filename_kff = "m5stickv_cube_wide"
     elif font_name == WIDE16:
-        filename_kff = "bit_dock_yahboom_wide"
+        filename_kff = "bit_dock_yahboom_wondermv_wide"
         device_name = "dock"
     elif font_name == WIDE24:
         device_name = "amigo"
