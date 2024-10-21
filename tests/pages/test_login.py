@@ -1310,4 +1310,3 @@ def test_auto_complete_qr_words(m5stickv, mocker):
     expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
     result = login.auto_complete_qr_words(words)
     assert result == expected_result
-
