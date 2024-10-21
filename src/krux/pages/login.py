@@ -393,6 +393,8 @@ class Login(Page):
                 words = data_str.split() if " " in data_str else []
                 if len(words) in (12, 24):
                     words = self.auto_complete_qr_words(words)
+                else:
+                    words = []
             except:
                 pass
 
