@@ -206,7 +206,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave
             ],
-            "O/IkMwPt/B6R5QC/hOILV\n\nIndex: 1\nLength: 21",
+            "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
         ),
         # 1 - 24w input, check the password and leave
         (
@@ -223,7 +223,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave
             ],
-            "RmM+TPrN8L/7gpvfeqczo\n\nIndex: 1\nLength: 21",
+            "SC7Ib2KFm8/Fo6T8Okw+m\n\nIndex: 1\nLength: 21",
         ),
         # 2 - invalid password length, retry
         (
@@ -243,7 +243,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave
             ],
-            "O/IkMwPt/B6R5QC/hOILV\n\nIndex: 1\nLength: 21",
+            "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
         ),
         # 3 - ESC at password length input
         (
@@ -278,8 +278,8 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave
             ],
-            "O/IkMwPt/B6R5QC/hOILV\n\nIndex: 1\nLength: 21",
-            "O/IkMwPt/B6R5QC/hOILV",
+            "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
+            "n6JwU7iRyf2vhYeaToS3K",
         ),
         # 5 - Test save to SD card
         (
@@ -303,7 +303,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave
             ],
-            "O/IkMwPt/B6R5QC/hOILV\n\nIndex: 1\nLength: 21",
+            "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
             None,
             True,
         ),

@@ -150,7 +150,7 @@ class Bip85(Page):
         entropy = bip85.derive_entropy(
             self.ctx.wallet.key.root,
             BIP_PWD_APP_INDEX,
-            [child_index],
+            [pwd_len, child_index],
         )
         password = base_encode(entropy, 64).decode().strip()
         password = password[:pwd_len]
