@@ -181,6 +181,9 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
     from krux.pages.home_pages.bip85 import Bip85
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.settings import TEST_TXT
+    from embit import bip32
+    from embit.networks import NETWORKS
 
     cases = [
         # case
@@ -307,6 +310,24 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
             None,
             True,
         ),
+        # 6 - Test xprv example from BIP85 spec
+        (
+            "xprv9s21ZrQH143K2LBWUUQRFXhucrQqBpKdRRxNVq2zBqsx8HVqFk2uYo8kmbaLLHRdqtQpUm98uKfu3vca1LqdGhUtyoFnCNkfmXRyPXLjbKb",
+            [
+                BUTTON_PAGE,  # Move to "Base64 Password"
+                BUTTON_ENTER,  # Confirm
+                *([BUTTON_PAGE_PREV] * 4),  # Type 21 characters
+                BUTTON_ENTER,  # Index 0
+                *([BUTTON_PAGE] * 3),  # Move to "Go"
+                BUTTON_ENTER,  # Go
+                # Keep length = 21
+                BUTTON_PAGE_PREV,  # Move to "Go"
+                BUTTON_ENTER,  # Go
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave
+            ],
+            "dKLoepugzdVJvdL56ogNV\n\nIndex: 0\nLength: 21",
+        ),
     ]
     mock_save_file = mocker.patch(
         "krux.pages.file_operations.SaveFile.save_file",
@@ -314,7 +335,13 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
     case_num = 0
     for case in cases:
         print(case_num)
-        wallet = Wallet(case[0])
+        if isinstance(case[0], str):
+            # Create a dummy wallet
+            wallet = Wallet(cases[0][0])
+            # Replace root with the xprv
+            wallet.key.root = bip32.HDKey.from_string(case[0])
+        else:
+            wallet = Wallet(case[0])
         ctx = create_ctx(mocker, case[1], wallet)
         mocker.spy(ctx.display, "draw_hcentered_text")
         bip85_ui = Bip85(ctx)
