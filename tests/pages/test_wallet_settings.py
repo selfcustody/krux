@@ -214,8 +214,8 @@ def test_change_account(m5stickv, mocker, tdata):
     BTN_SEQUENCE_1 = [
         *([BUTTON_PAGE] * 3),  # Go to "Account"
         BUTTON_ENTER,  # Enter "Account"
-        BUTTON_PAGE,  # Move to number 1
-        BUTTON_ENTER,  # Confirm number 1
+        BUTTON_PAGE,  # Move to number 2
+        BUTTON_ENTER,  # Confirm number 2
         *([BUTTON_PAGE_PREV] * 2),  # Move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_PAGE_PREV,  # Go to Back
@@ -239,7 +239,7 @@ def test_change_account(m5stickv, mocker, tdata):
         )
     )
 
-    assert ctx.wallet.key.account_index == 1
+    assert ctx.wallet.key.account_index == 2
 
     # Change back to account 0
     BTN_SEQUENCE_2 = [
@@ -247,9 +247,9 @@ def test_change_account(m5stickv, mocker, tdata):
         BUTTON_ENTER,  # Enter "Account"
         *([BUTTON_PAGE_PREV] * 3),  # Move to del number
         BUTTON_ENTER,  # Confirm del number
-        *([BUTTON_PAGE] * 3),  # Move to "0"
+        BUTTON_PAGE_PREV,  # Move to "0"
         BUTTON_ENTER,  # Enter 0
-        BUTTON_PAGE_PREV,  # Move to "Go"
+        *([BUTTON_PAGE] * 3),  # Move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_PAGE_PREV,  # Move to Back
         BUTTON_ENTER,  # Leave
@@ -316,8 +316,8 @@ def test_account_out_of_range(m5stickv, mocker, tdata):
     BTN_SEQUENCE_1 = [
         *([BUTTON_PAGE] * 3),  # Go to "Account"
         BUTTON_ENTER,  # Enter "Account"
-        BUTTON_PAGE,  # Move to number 1
-        *([BUTTON_ENTER] * 11),  # Press number 1 11 times
+        BUTTON_PAGE,  # Move to number 2
+        *([BUTTON_ENTER] * 11),  # Press number 2 11 times
         *([BUTTON_PAGE_PREV] * 2),  # Move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_PAGE_PREV,  # Go to Back
@@ -343,6 +343,6 @@ def test_account_out_of_range(m5stickv, mocker, tdata):
     )
 
     wallet_settings.flash_error.assert_called_with(
-        "Value 11111111111 out of range: [0, 2147483647]"
+        "Value 22222222222 out of range: [0, 2147483647]"
     )
     assert ctx.wallet.key.account_index == 0

@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 from . import Page
-from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..sd_card import SDHandler
 from embit.wordlists.bip39 import WORDLIST
@@ -61,15 +60,16 @@ class Utils(Page):
                     from .file_manager import FileManager
 
                     file_manager = FileManager(self.ctx)
-                    filename = file_manager.select_file(file_extension=file_ext)
+                    filename = file_manager.select_file(
+                        select_file_handler=file_manager.load_file,
+                        file_extension=file_ext,
+                    )
 
                     if filename:
-                        filename = file_manager.display_file(filename)
-
-                        if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
-                            if only_get_filename:
-                                return filename, None
-                            return filename, sd.read_binary(filename)
+                        filename = filename[4:]  # remove "/sd/" prefix
+                        if only_get_filename:
+                            return filename, None
+                        return filename, sd.read_binary(filename)
         return "", None
 
     @staticmethod

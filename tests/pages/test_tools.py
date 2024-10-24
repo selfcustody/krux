@@ -130,22 +130,6 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_wipe_device(amigo, mocker):
-    """Test that the device is wiped when the user confirms the wipe."""
-    from krux.pages.tools import Tools
-    from krux.input import BUTTON_ENTER
-
-    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm wipe
-
-    mocker.spy(Tools, "erase_spiffs")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    test_tools = Tools(ctx)
-    test_tools.wipe_device()
-
-    assert test_tools.erase_spiffs.call_count == 1
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-
-
 def test_printer_test_tool(amigo, mocker):
     """Test that the print tool is called with the correct text"""
     from krux.pages.tools import Tools
@@ -196,4 +180,19 @@ def test_load_descriptor_adresses(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tool = Tools(ctx)
     tool.descriptor_addresses()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_load_flash_tools(m5stickv, mocker):
+    from krux.pages.tools import Tools
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    tool = Tools(ctx)
+    tool.flash_tools()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

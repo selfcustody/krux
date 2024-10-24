@@ -26,6 +26,7 @@ from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
 from ..sd_card import SDHandler
 from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
+from ..display import BOTTOM_PROMPT_LINE
 
 LIST_FILE_DIGITS = 9  # len on large devices per menu item
 LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
@@ -111,8 +112,14 @@ class FileManager(Page):
                         menu_items.append(
                             (
                                 display_filename,
-                                lambda file=filename: select_file_handler(
-                                    path + "/" + file
+                                (
+                                    (lambda: MENU_EXIT)
+                                    if is_directory
+                                    else (
+                                        lambda file=filename: select_file_handler(
+                                            path + "/" + file
+                                        )
+                                    )
                                 ),
                             )
                         )
@@ -142,11 +149,17 @@ class FileManager(Page):
 
     def show_file_details(self, file):
         """Handler to print file info when selecting a file in the file explorer"""
-        if SDHandler.dir_exists(file):
-            return MENU_EXIT
 
         self.display_file(file)
         self.ctx.input.wait_for_button()
+        return MENU_CONTINUE
+
+    def load_file(self, file):
+        """Handler to ask if will load selected file in the file explorer"""
+
+        self.display_file(file)
+        if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
+            return MENU_EXIT
         return MENU_CONTINUE
 
     def display_file(self, file):

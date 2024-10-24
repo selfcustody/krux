@@ -247,23 +247,23 @@ class MockStats:
 
     def __init__(self) -> None:
         self.counter = 0
-        self.word_counter = 0
+        self.word_counter = 1
 
     def median(self):
-        if self.word_counter == 0:
-            self.word_counter += 1
-            return 50
+        PUNCHED = 0x50
+        NON_PUNCHED = 0xA0
+
         self.counter += 1
         if self.word_counter == 12 and self.counter == 10:
-            return 20
+            return PUNCHED
         if self.counter == 12:
             self.counter = 0
             self.word_counter += 1
             if self.word_counter > 12:
                 self.word_counter = 0
-                return 60
-            return 20
-        return 60
+                return NON_PUNCHED
+            return PUNCHED
+        return NON_PUNCHED
 
     def l_stdev(self):
         return 0

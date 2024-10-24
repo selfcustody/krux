@@ -19,6 +19,21 @@ Help others get to know Krux.
 
 *"I'm an engineer, not a marketer. If you like Krux, help spread the word!"* - Jeff
 
+## Krux Ethos
+
+The purpose of this ethos is not to virtue signal, but to introduce newcomers to Krux's philosophy and provide a guiding reference for decision-making and the long-term mission for dedicated Krux users.
+
+### Mission
+
+To implement ideas that make self-custody more powerful, accessible, and user-friendly.
+### Don't Trust, Verify
+
+Do not trust developers’ intentions or competence. Krux is a DIY, use-at-your-own-risk project. We are committed to continuously improving security, but will not make claims or create marketing narratives about it. It is up to the users verify their hardware, the [firmware](../getting-started/installing/from-pre-built-release/#Verify-the-files) and [Krux-Installer](../getting-started/installing/from-gui/debian-like/#Verify-the-integrity)
 ### Donations
 
-Krux won't ask for, receive, manage or distribute donations. You can donate directly to a Krux contributor of your choice.
+Krux will not solicit, receive, manage, or distribute donations. Therefore, Krux has no budget for publicity, audits, or similar activities. Contributors to Krux will fund their own work—whether by promoting their efforts, applying for grants, or seeking direct individual donations.
+### Krux is Public Domain
+
+Krux users should feel completely free from any obligation to donate or support developers. Use Krux without guilt or expectation.
+
+The same applies to any company profiting from Krux-based products or services, such as educational content, custom hardware, or accessories. The "don't trust" principle clearly extends here as well—it is the users’ responsibility to determine if these products align with the Krux ethos and their personal values.

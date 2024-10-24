@@ -345,17 +345,30 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         [BUTTON_ENTER]
     )
     QR_FORMAT = FORMAT_NONE
-    MNEMONIC = "forum undo fragile fade shy sign arrest garment culture tube off merit"
-    BINARY_MNEMONIC = b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE"
+    C_SEED_QRs = [
+        (
+            b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE",
+            "forum undo fragile fade shy sign arrest garment culture tube off merit",
+        ),
+        (
+            b"[\xbd\x9dq\xa8\xecy\x90\x83\x1a\xff5\x9dBeE".decode("latin1"),
+            "forum undo fragile fade shy sign arrest garment culture tube off merit",
+        ),
+        (
+            b"[\xbd\x9dq\xa8\xec \x90\x83\x1a\xff5\x9dBeE".decode("latin1"),
+            "forum undo fragile fade search embark arrest garment culture tube off melt",
+        ),
+    ]
 
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    login = Login(ctx)
-    mocker.patch.object(
-        QRCodeCapture, "qr_capture_loop", new=lambda self: (BINARY_MNEMONIC, QR_FORMAT)
-    )
-    login.load_key_from_qr_code()
+    for c_seed_qr in C_SEED_QRs:
+        ctx = create_ctx(mocker, BTN_SEQUENCE)
+        login = Login(ctx)
+        mocker.patch.object(
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (c_seed_qr[0], QR_FORMAT)
+        )
+        login.load_key_from_qr_code()
 
-    assert ctx.wallet.key.mnemonic == MNEMONIC
+        assert ctx.wallet.key.mnemonic == c_seed_qr[1]
 
 
 def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
@@ -713,8 +726,8 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 # 1 press change to number "2" and 1 press to select
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
-                # 10 press to place on btn Go
-                [BUTTON_PAGE] * 10
+                # 11 press to place on btn Go
+                [BUTTON_PAGE] * 11
                 + [
                     BUTTON_ENTER,
                     BUTTON_ENTER,
@@ -729,11 +742,11 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 0
-                [BUTTON_PAGE] * 11
+                [BUTTON_PAGE] * 8
                 + [BUTTON_ENTER]
                 +
                 # 3
-                [BUTTON_PAGE] * 3
+                [BUTTON_PAGE] * 6
                 + [BUTTON_ENTER]
                 # Confirm twelve word=1203 (north)
                 + [BUTTON_ENTER]
@@ -753,7 +766,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 [BUTTON_PAGE, BUTTON_ENTER]
                 +
                 # 10 press to place on btn Go
-                [BUTTON_PAGE] * 10
+                [BUTTON_PAGE] * 11
                 + [
                     BUTTON_ENTER,
                     BUTTON_ENTER,
@@ -769,7 +782,7 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
                 + [BUTTON_ENTER]
                 +
                 # Go
-                [BUTTON_PAGE] * 6
+                [BUTTON_PAGE] * 7
                 + [BUTTON_ENTER]
                 # Confirm
                 + [BUTTON_ENTER]
@@ -1275,3 +1288,38 @@ def test_about(mocker, m5stickv):
     ctx.display.draw_centered_text.assert_called_with(
         "Krux\n\nHardware\n" + board.config["type"] + "\n\nVersion\n" + VERSION
     )
+
+
+def test_auto_complete_qr_words(m5stickv, mocker):
+    from krux.pages.login import Login
+
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+
+    # Test case where all words are valid
+    words = ["abandon"] * 12
+    result = login.auto_complete_qr_words(words)
+    assert result == words
+
+    # Test case where some words need to be autocompleted
+    words = ["abandon", "abil", "abl"] + ["abandon"] * 9
+    expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
+    result = login.auto_complete_qr_words(words)
+    assert result == expected_result
+
+    # Test case where a word cannot be autocompleted
+    words = ["aband", "abil", "xyz"] + ["abandon"] * 9
+    result = login.auto_complete_qr_words(words)
+    assert result == []
+
+    # Test case where all words need to be autocompleted
+    words = ["aband", "abil", "abl"] + ["abandon"] * 9
+    expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
+    result = login.auto_complete_qr_words(words)
+    assert result == expected_result
+
+    # Test case with mixed case words
+    words = ["AbAnD", "aBiL", "AbL"] + ["abandon"] * 9
+    expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
+    result = login.auto_complete_qr_words(words)
+    assert result == expected_result

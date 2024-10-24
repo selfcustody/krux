@@ -102,7 +102,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 # Remove digit (become 38)
                 *([BUTTON_PAGE_PREV] * 3),
                 BUTTON_ENTER,
-                # Add 9
+                # Add 0 (become 380)
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,
                 # Go
@@ -121,7 +121,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 *([BUTTON_PAGE_PREV] * 3),
                 BUTTON_ENTER,
             ),
-            lambda: Settings().hardware.printer.thermal.adafruit.paper_width == 389,
+            lambda: Settings().hardware.printer.thermal.adafruit.paper_width == 380,
         ),
         (  # 4 Change theme
             (
@@ -407,6 +407,87 @@ def test_restore_settings(amigo, mocker, mocker_sd_card_ok):
             settings_page.restore_settings()
     mock_delete_sd.assert_called_once_with(SETTINGS_FILENAME)
     mock_remove.assert_called_once_with("/" + FLASH_PATH + "/" + SETTINGS_FILENAME)
+
+
+def test_set_first_tc_code(amigo, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER
+    from ..shared_mocks import MockFile, mock_open
+
+    TC_CODE_EXTENDED_HASH = b"z\xc0\x99\xac\x01\x1f\xef\x91\xb6\xd5\xbd\xa8\xdc\xfc\x14\xcco-A\x9d\xba\xde\xaf\xe3\xe1{@0t\xb2\x85{"
+    mocker.patch(
+        "krux.pages.fill_flash.FillFlash.fill_flash_with_camera_entropy",
+        new=mocker.MagicMock(),
+    )
+    mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
+    mock_file = MockFile()
+    mocker.patch("builtins.open", mock_open(mock_file))
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    ctx.tc_code_enabled = False
+    settings_page = SettingsPage(ctx)
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value="123456")
+    settings_page.enter_modify_tc_code()
+    assert ctx.tc_code_enabled == True
+    assert mock_file.write_data == TC_CODE_EXTENDED_HASH
+
+
+def test_set_first_tc_code_not_match(amigo, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER
+    from ..shared_mocks import MockFile, mock_open
+
+    CODES = ["123456", "654321"]
+
+    mock_file = MockFile()
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    ctx.tc_code_enabled = False
+    settings_page = SettingsPage(ctx)
+    settings_page.capture_from_keypad = mocker.MagicMock(side_effect=CODES)
+    settings_page.enter_modify_tc_code()
+    assert ctx.tc_code_enabled == False
+    assert mock_file.write_data == b""
+
+
+def test_set_new_tc_code(amigo, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER
+    from ..shared_mocks import MockFile, mock_open
+
+    TC_CODE_EXTENDED_HASH = b"z\xc0\x99\xac\x01\x1f\xef\x91\xb6\xd5\xbd\xa8\xdc\xfc\x14\xcco-A\x9d\xba\xde\xaf\xe3\xe1{@0t\xb2\x85{"
+    mocker.patch(
+        "krux.pages.fill_flash.FillFlash.fill_flash_with_camera_entropy",
+        new=mocker.MagicMock(),
+    )
+    mocker.patch(
+        "krux.pages.tc_code_verification.TCCodeVerification.capture", return_value=True
+    )
+    mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
+    mock_file = MockFile()
+    mocker.patch("builtins.open", mock_open(mock_file))
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    ctx.tc_code_enabled = True
+    settings_page = SettingsPage(ctx)
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value="123456")
+    settings_page.enter_modify_tc_code()
+    assert ctx.tc_code_enabled == True
+    assert mock_file.write_data == TC_CODE_EXTENDED_HASH
+
+
+def test_wrong_code_set_new_tc_code(amigo, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER
+    from ..shared_mocks import MockFile, mock_open
+
+    # TC Code check returns false
+    mocker.patch(
+        "krux.pages.tc_code_verification.TCCodeVerification.capture", return_value=False
+    )
+    mock_file = MockFile()
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    ctx.tc_code_enabled = True
+    settings_page = SettingsPage(ctx)
+    settings_page.enter_modify_tc_code()
+    assert mock_file.write_data == b""
 
 
 def test_save_settings_on_sd(amigo, mocker, mocker_sd_card_ok):

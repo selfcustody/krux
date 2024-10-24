@@ -211,6 +211,8 @@ class SignMessage(Utils):
         """Message signed at a derived Bitcoin address - SD card"""
         data = data.decode() if isinstance(data, bytes) else data
         lines = [line.strip() for line in data.splitlines() if line.strip()]
+        if len(lines) == 0:
+            return None
         script_type = lines[-1].lower()
         if len(lines) < 2 or script_type not in SINGLESIG_SCRIPT_PURPOSE:
             return None
