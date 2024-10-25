@@ -28,6 +28,7 @@ PC = "maixpy_pc"
 DOCK = "maixpy_dock"
 YAHBOOM = "maixpy_yahboom"
 CUBE = "maixpy_cube"
+WONDER_MV = "maixpy_wonder_mv"
 
 WINDOW_SIZES = {
     M5STICKV: (320, 640),
@@ -36,6 +37,7 @@ WINDOW_SIZES = {
     DOCK: (440, 820),
     YAHBOOM: (450, 600),
     CUBE: (484, 612),
+    WONDER_MV: (410, 590),
 }
 
 
@@ -63,7 +65,7 @@ fonts = {}
 def load_font(device):
     device = with_prefix(device)
     if device not in fonts:
-        if device == M5STICKV or device == CUBE:
+        if device in (M5STICKV, CUBE):
             fonts[device] = [
                 pg.freetype.Font(
                    os.path.join("..", "firmware", "font", "ter-u14n.bdf"),
@@ -72,7 +74,7 @@ def load_font(device):
                    os.path.join("..", "firmware", "font", "FusionPixel-14.bdf"),
                 ),
             ]
-        elif device == DOCK or device == YAHBOOM:
+        elif device in (DOCK, YAHBOOM, WONDER_MV):
             fonts[device] = [
                 pg.freetype.Font(
                     os.path.join("..", "firmware", "font", "ter-u16n.bdf")
@@ -134,5 +136,13 @@ def screenshot_rect(device):
         rect.center = (
             screen.get_rect().center[0] + 1,
             screen.get_rect().center[1] - 13,
+        )
+    elif device == WONDER_MV:
+        # Todo: Adjust the rect for the Wonder MV device
+        rect.width -= 134
+        rect.height -= 155
+        rect.center = (
+            screen.get_rect().center[0],
+            screen.get_rect().center[1] + 29,
         )
     return rect
