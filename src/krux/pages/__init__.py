@@ -346,12 +346,13 @@ class Page:
         if MINIMAL_DISPLAY:
             return self.ctx.input.wait_for_button() == BUTTON_ENTER
         offset_y += (len(self.ctx.display.to_lines(text)) + 1) * FONT_HEIGHT
-        self.x_keypad_map.append(DEFAULT_PADDING)
+        self.x_keypad_map.append(0)
         self.x_keypad_map.append(self.ctx.display.width() // 2)
-        self.x_keypad_map.append(self.ctx.display.width() - DEFAULT_PADDING)
+        self.x_keypad_map.append(self.ctx.display.width())
         y_key_map = offset_y - (3 * FONT_HEIGHT // 2)
         self.y_keypad_map.append(y_key_map)
         y_key_map += 4 * FONT_HEIGHT
+        y_key_map = min(y_key_map, self.ctx.display.height())
         self.y_keypad_map.append(y_key_map)
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
@@ -389,14 +390,12 @@ class Page:
                         theme.no_esc_color,
                     )
             elif self.ctx.input.touch is not None:
-                for region in self.x_keypad_map:
-                    self.ctx.display.draw_line(
-                        region,
-                        self.y_keypad_map[0] + FONT_HEIGHT,
-                        region,
-                        self.y_keypad_map[0] + 3 * FONT_HEIGHT,
-                        theme.frame_color,
-                    )
+                self.ctx.display.draw_vline(
+                    self.ctx.display.width() // 2,
+                    self.y_keypad_map[0] + FONT_HEIGHT,
+                    2 * FONT_HEIGHT,
+                    theme.frame_color,
+                )
             btn = self.ctx.input.wait_for_button()
             if btn in (BUTTON_PAGE, BUTTON_PAGE_PREV):
                 answer = not answer
