@@ -153,6 +153,7 @@ M5STICKV_SIZE = (125, 247)
 DOCK_SIZE = (151, 258)
 YAHBOOM_SIZE = (156,220)
 CUBE_SIZE = (200,212)
+WONDER_MV_SIZE = (156, 220)
 
 # Handle screenshots scale and alpha bg
 # When exporting the mask from GIMP uncheck "Save info about transparent pixels color"
@@ -179,6 +180,11 @@ elif (args.device == devices.CUBE):
     device_screenshot_size = CUBE_SIZE
     mask_img = pg.image.load(
         os.path.join("assets", "maixpy_cube_mask.png")
+        ).convert_alpha()
+elif (args.device == devices.WONDER_MV):
+    device_screenshot_size = WONDER_MV_SIZE
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_wonder_mv_mask.png")
         ).convert_alpha()
     
 # Handle screenshots filename suffix when scaled
