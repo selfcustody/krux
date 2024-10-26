@@ -26,7 +26,7 @@ TinySeed background of blank templates to be manually filled.
 </a>
 
 <a href="./tiny_seed_template_24w.png">
-  <img src="./tiny_seed_template_24w.png" alt="TinySeed Scan Background" style="width: 22.5%; float: left; margin-left: 10px;">
+  <img src="./tiny_seed_template_24w.png" alt="TinySeed Scan Background" style="width: 22%; float: left; margin-left: 10px;">
 </a>
 
 
