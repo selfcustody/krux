@@ -108,6 +108,7 @@ nav:
       - Empirical Entropy Measurement: getting-started/features/entropy.en.md
       - Tiny Seed and other metal plates: getting-started/features/tinyseed.en.md
     - Settings: getting-started/settings.en.md
+    - Templates: getting-started/templates/templates.en.md
     - Navigation Overview: getting-started/navigation.en.md
   - Devices and Parts List: parts.en.md
   - FAQ: faq.en.md
