@@ -122,7 +122,7 @@ Once you choose the device and version, it enables the "flash device" button. It
         
         * The flash itself via USB;
 
-        * Air-gapped update via microSD;
+        * Air-gapped update via SD card;
         
 
 * For beta releases:
@@ -174,7 +174,7 @@ Now you will be able to select if you do a flash process or need to do an airgap
 
 <img width="640" src="/krux/img/krux-installer/unzip.png" alt="KruxInstaller unzip" />
 
-Click on [Flash with](#flash) to install via USB or [Air-gapped update with](#air-gapped-update-with) to perform upgrades via a microSD card.
+Click on [Flash with](#flash) to install via USB or [Air-gapped update with](#air-gapped-update-with) to perform upgrades via a SD card.
 
 #### Flash with
 
@@ -195,7 +195,7 @@ flash-krux-logo.en.txt
 
 #### Air-gapped update with
 
-Once you've installed the initial firmware on your device via USB, you can perform upgrades via microSD card to keep the device airgapped.
+Once you've installed the initial firmware on your device via USB, you can perform upgrades via SD card to keep the device airgapped.
 
 <img width="640" src="/krux/img/krux-installer/unzip.png" alt="KruxInstaller unzip" />
 > ⚠️ Click on "Air-gapped update with"
@@ -204,18 +204,17 @@ Once the `firmware.bin` and `firmware.bin.sig` are extracted, you'll see a warni
 
 <img width="640" src="/krux/img/krux-installer/warn_airgap.png" alt="KruxInstaller warn airgap" />
 
-Insert the microSD and click "Proceed" to installer detect the microSD card. 
+Insert the SD card and click 'Proceed' to allow the installer to detect it.
 
 <img width="640" src="/krux/img/krux-installer/list_drivers.png" alt="KruxInstaller warn airgap" />
-> ⚠️ If you one microSD, the screen will be turned on a big button. If you have more removable drives, both microSD and drives will be listed
+> ⚠️ If a single SD card is inserted, the screen will display a large button. If multiple removable drives are detected, both SD cards and other drives will be listed.
 
-Click on desired removable drive to copy both `firmware.bin` and `firmware.bin.sig`. The first is the krux firmware itself and the second
-is a file that assert both firmware's integrity and authenticity. 
+Select the desired removable drive to copy both `firmware.bin` and `firmware.bin.sig.` The first is the Krux firmware, and the second is a signature file that verifies the firmware’s integrity and authenticity. 
 
 Now you can compare the firmware's hash computed by installer with  the firmware's hash computed by the device. 
 
 <img width="640" src="/krux/img/krux-installer/airgap_done.png" alt="KruxInstaller warn airgap" />
-> ⚠️ Once files are copied, remove the microSD from computer, connect to device and compare the hashes
+> ⚠️ Once files are copied, remove the SD card from computer, connect to device and compare the hashes
 
 ### Wipe device
 
