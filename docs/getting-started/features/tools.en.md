@@ -31,6 +31,46 @@ Enter text to create, print or transcribe a QR code that can later be used as an
 
 Verify if an address or list of addresses belong to a wallet without needing to load private keys. Simply load a trusted wallet descriptor from a QR code or SD card.
 
+<div style="clear: both"></div>
+
+### Flash Tools
+Tools to inspect the content of device's flash memory and clear user's area
+
+<img src="../../../img/maixpy_m5stickv/flash-tools-125.png" align="right">
+<img src="../../../img/maixpy_amigo/flash-tools-150.png" align="right">
+
+<div style="clear: both"></div>
+
+#### Flash Map
+Flash map indicates which memory blocks (4086 Bytes each) are empty. Memory is separated in two regions: Firmware and User's Data. White or colored blocks contain data, while grey blocks are empty.
+
+This is an interesting tool to visualize the effects of filling the memory with ramdom entropy, what is done during the setup of a new `TC Code`, used with `TC Flash Hash` tool, described below.
+
+<img src="../../../img/maixpy_m5stickv/flash-map-125.png" align="right">
+<img src="../../../img/maixpy_amigo/flash-map-150.png" align="right">
+
+<div style="clear: both"></div>
+
+#### TC Flash Hash
+*Tamper Check Flash Hash* is a tamper detection mechanism that enables you to verify if the flash memory content has been altered. To use it first, need to create a `TC Code` on `Settings -> Security -> Tamper Check Code`.
+*TC Flash Hash* will hash this code, K210 chip's unique ID and the content of the whole flash memory together and produce an image.
+The tool generates a unique image and four tamper detection words based on a hash of your *TC Code*, the device's UID, and the flash content. The flash memory is divided into two regions:
+
+- **Firmware Region:** Generates the image and the first two words.
+
+- **User's Region:** Generates the last two words.
+
+Learn more about *Tamper Check Flash Hash* on [Tamper Detection](tamper-detection.md)
+
+#### Erase User's Data
+<img src="../../../img/maixpy_m5stickv/erase-data-125.png" align="right">
+<img src="../../../img/maixpy_amigo/erase-data-150.png" align="right">
+
+This option permanently removes all stored encrypted mnemonics, settings and `TC Code` from the device's internal flash memory. It ensures that the data is irrecoverable, making it an adequate measure to take if any important mnemonics were stored with a weak encryption key.
+
+<div style="clear: both"></div>
+
+
 ### Remove Mnemonic
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-150.png" align="right">
@@ -40,13 +80,3 @@ This option allows you to remove any stored encrypted mnemonic from the device's
 When mnemonics are removed from the device's flash memory, Krux will no longer be able to access them. However, as with most operating systems, the data may still be recoverable using specialized tools. If you stored any important keys with a weak encryption key, it is recommended to use the "Wipe Device" feature below to ensure that the data is irrecoverable.
 
 When mnemonics are removed from an SD card, Krux will overwrite the region where the encrypted mnemonic was stored with empty data. This makes it more secure to delete mnemonics from SD cards using Krux rather than a PC or another device. However, Krux does not have a "Wipe" feature for SD cards; you can find this feature in third-party applications.
-
-<div style="clear: both"></div>
-
-### Wipe Device
-<img src="../../../img/maixpy_m5stickv/wipe-device-125.png" align="right">
-<img src="../../../img/maixpy_amigo/wipe-device-150.png" align="right">
-
-This option permanently removes all stored encrypted mnemonics and settings from the device's internal flash memory. It ensures that the data is irrecoverable, making it an adequate measure to take if any important mnemonics were stored with a weak encryption key.
-
-<div style="clear: both"></div>
