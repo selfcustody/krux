@@ -935,9 +935,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#flash" class="md-nav__link">
+  <a href="#flash-with" class="md-nav__link">
     <span class="md-ellipsis">
-      Flash
+      Flash with
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#air-gapped-update-with" class="md-nav__link">
+    <span class="md-ellipsis">
+      Air-gapped update with
     </span>
   </a>
   
@@ -1789,7 +1798,15 @@ on which the firmware will be written.</p>
 <p>Unzip the correct firmware;</p>
 </li>
 <li>
-<p>The flash itself;</p>
+<p>Flash:</p>
+<ul>
+<li>
+<p>The flash itself via USB;</p>
+</li>
+<li>
+<p>Air-gapped update via microSD;</p>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -1831,7 +1848,6 @@ to download again or continue without downloading:</p>
 <ul>
 <li>A <code>kfpkg</code> file containing the specific firmware for choosen device;</li>
 </ul>
-<p><img width="640" src="/krux/img/krux-installer/download_beta.png" alt="KruxInstaller downloading kboot.kfpkg" /></p>
 <h4 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h4>
 <ul>
 <li>
@@ -1844,9 +1860,10 @@ the <code>zip.sig</code> and <code>selfcustody.pem</code>.</p>
 </ul>
 <p><img width="640" src="/krux/img/krux-installer/verification.png" alt="KruxInstaller verification process" /></p>
 <h4 id="unzip">Unzip<a class="headerlink" href="#unzip" title="Permanent link">&para;</a></h4>
-<p>Now you will be able to select if you do a flash process or need to do an airgap process (soon):</p>
+<p>Now you will be able to select if you do a flash process or need to do an airgap process:</p>
 <p><img width="640" src="/krux/img/krux-installer/unzip.png" alt="KruxInstaller unzip" /></p>
-<h4 id="flash">Flash<a class="headerlink" href="#flash" title="Permanent link">&para;</a></h4>
+<p>Click on <a href="#flash">Flash with</a> to install via USB or <a href="#air-gapped-update-with">Air-gapped update with</a> to perform upgrades via a microSD card.</p>
+<h4 id="flash-with">Flash with<a class="headerlink" href="#flash-with" title="Permanent link">&para;</a></h4>
 <p>When flash starts, it will warn you to <strong>not disconnect the device until the process is complete</strong>.
 You'll be able to see the flash progress:</p>
 <p><img width="640" src="/krux/img/krux-installer/flash.png" alt="KruxInstaller unzip" /></p>
@@ -1863,6 +1880,26 @@ When the flashing process completes, you should see the Krux logo:</p>
 <img src="/krux/img/maixpy_m5stickv/logo-125.png"></p>
 <p>If it doesn't, try turning your device off and on by holding down the power button for six seconds.</p>
 <p>Congrats, you're now running Krux!</p>
+<h4 id="air-gapped-update-with">Air-gapped update with<a class="headerlink" href="#air-gapped-update-with" title="Permanent link">&para;</a></h4>
+<p>Once you've installed the initial firmware on your device via USB, you can perform upgrades via microSD card to keep the device airgapped.</p>
+<p><img width="640" src="/krux/img/krux-installer/unzip.png" alt="KruxInstaller unzip" /></p>
+<blockquote>
+<p>⚠️ Click on "Air-gapped update with"</p>
+</blockquote>
+<p>Once the <code>firmware.bin</code> and <code>firmware.bin.sig</code> are extracted, you'll see a warning message.</p>
+<p><img width="640" src="/krux/img/krux-installer/warn_airgap.png" alt="KruxInstaller warn airgap" /></p>
+<p>Insert the microSD and click "Proceed" to installer detect the microSD card. </p>
+<p><img width="640" src="/krux/img/krux-installer/list_drivers.png" alt="KruxInstaller warn airgap" /></p>
+<blockquote>
+<p>⚠️ If you one microSD, the screen will be turned on a big button. If you have more removable drives, both microSD and drives will be listed</p>
+</blockquote>
+<p>Click on desired removable drive to copy both <code>firmware.bin</code> and <code>firmware.bin.sig</code>. The first is the krux firmware itself and the second
+is a file that assert both firmware's integrity and authenticity. </p>
+<p>Now you can compare the firmware's hash computed by installer with  the firmware's hash computed by the device. </p>
+<p><img width="640" src="/krux/img/krux-installer/airgap_done.png" alt="KruxInstaller warn airgap" /></p>
+<blockquote>
+<p>⚠️ Once files are copied, remove the microSD from computer, connect to device and compare the hashes</p>
+</blockquote>
 <h3 id="wipe-device">Wipe device<a class="headerlink" href="#wipe-device" title="Permanent link">&para;</a></h3>
 <p>This is two step process:</p>
 <ul>
