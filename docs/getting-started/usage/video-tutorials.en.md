@@ -64,3 +64,14 @@ Como utilizar a carteira Krux no celular - por João Trein
 Faça sua hardware wallet em casa com a KRUX! - por Caiovski
 
 [![Krux no celular](https://img.youtube.com/vi/1V6Lp0m8esc/0.jpg)](https://www.youtube.com/watch?v=1V6Lp0m8esc)
+
+### Korean
+
+Krux 월렛 설치 및 검증 방법
+
+[![Krux 월렛 설치 및 검증 방법](https://img.youtube.com/vi/7H1bI0A2y0w/0.jpg)](https://www.youtube.com/watch?v=7H1bI0A2y0w)
+
+
+안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑
+
+[![안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑](https://img.youtube.com/vi/1_JSJ1uzPzQ/0.jpg)](https://www.youtube.com/watch?v=1_JSJ1uzPzQ)
