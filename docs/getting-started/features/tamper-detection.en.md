@@ -45,7 +45,7 @@ The tool generates a unique image and four tamper detection words based on a has
 - **User's Region:** Generates the last two words.
 
 <div style="text-align: center;">
-    <img src="../../../img/flash_hash.bmp" alt="TC Flash Hash" width="200"/>
+    <img src="../../img/flash_hash.bmp" alt="TC Flash Hash" width="200"/>
 </div>
 
 *Example: The blue symbol and words 'tail monkey' represent the firmware region, while 'wrestle over' reflects the user region.*
