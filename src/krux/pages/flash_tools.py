@@ -284,7 +284,7 @@ class FlashHash(Page):
         self.ctx.display.draw_hcentered_text(t("Processing.."))
         firmware_hash = self.hash_pin_with_flash()
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text("Flash Hash")
+        self.ctx.display.draw_hcentered_text("TC Flash Hash")
         y_offset = DEFAULT_PADDING + 2 * FONT_HEIGHT
         self.hash_to_fingerprint(firmware_hash, y_offset)
         anti_tamper_words = self.hash_to_words(firmware_hash)
