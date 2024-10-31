@@ -391,21 +391,21 @@ def test_draw_line_on_inverted_display(mocker, amigo):
     )
 
 
-def test_draw_circle(mocker, m5stickv):
+def test_fill_circle(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
 
     d = Display()
 
-    d.draw_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+    d.fill_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
 
     krux.display.lcd.draw_circle.assert_called_with(
         100, 100, 50, 0, krux.display.lcd.WHITE
     )
 
 
-def test_draw_circle_on_inverted_display(mocker, amigo):
+def test_fill_circle_on_inverted_display(mocker, amigo):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -413,7 +413,7 @@ def test_draw_circle_on_inverted_display(mocker, amigo):
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 480)
 
-    d.draw_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+    d.fill_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
 
     krux.display.lcd.draw_circle.assert_called_with(
         480 - 100, 100, 50, 0, krux.display.lcd.WHITE
@@ -604,3 +604,50 @@ def test_flash_text(mocker, m5stickv):
     d.clear.assert_called()
     d.draw_centered_text.assert_called_with("test", WHITE)
     time.sleep_ms.assert_called_with(FLASH_MSG_TIME)
+
+
+def test_render_image(mocker, multiple_devices):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+    import board
+
+    d = Display()
+    img = mocker.MagicMock()
+
+    # Test non-compact rendering
+    d.render_image(img, compact=False)
+    if board.config["type"] == "m5stickv":
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(0, 0), roi=(68, 52, 185, 135)
+        )
+    elif board.config["type"] == "amigo":
+        krux.display.lcd.display.assert_called_once_with(img, oft=(40, 40))
+    elif board.config["type"] == "dock":
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(0, 0), roi=(8, 0, 304, 240)
+        )
+    elif board.config["type"] == "cube":
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(0, 0), roi=(48, 0, 224, 240)
+        )
+
+    # Reset mock for next test
+    krux.display.lcd.display.reset_mock()
+
+    # Test compact rendering
+    d.render_image(img, compact=True)
+    if board.config["type"] == "m5stickv":
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(24, 0), roi=(68, 52, 185, 135)
+        )
+    elif board.config["type"] == "amigo":
+        krux.display.lcd.display.assert_called_once_with(img, oft=(40, 40))
+    elif board.config["type"] == "dock":
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(26, 0), roi=(28, 0, 264, 240)
+        )
+    elif board.config["type"] == "cube":
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(24, 0), roi=(67, 0, 186, 240)
+        )

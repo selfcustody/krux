@@ -51,7 +51,7 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
-  latest_krux: krux-v24.09.1
+  latest_krux: krux-v24.10.beta10
   latest_installer: v0.0.20-beta
   latest_installer_rpm: krux-installer-0.0.20_beta-1.x86_64.rpm
   latest_installer_deb: krux-installer_0.0.20-beta_amd64.deb
@@ -107,7 +107,9 @@ nav:
       - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
       - Empirical Entropy Measurement: getting-started/features/entropy.en.md
       - Tiny Seed and other metal plates: getting-started/features/tinyseed.en.md
+      - Tamper Detection: getting-started/features/tamper-detection.en.md
     - Settings: getting-started/settings.en.md
+    - Templates: getting-started/templates/templates.en.md
     - Navigation Overview: getting-started/navigation.en.md
   - Devices and Parts List: parts.en.md
   - FAQ: faq.en.md

@@ -35,7 +35,7 @@ from ..input import (
     FAST_BACKWARD,
     PRESSED,
 )
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
@@ -217,6 +217,26 @@ class Keypad:
                             )
                 key_index += 1
 
+    def draw_keyset_index(self):
+        """Indicates the current keyset index with a small circle"""
+        if len(self.keysets) == 1:
+            return
+        bar_height = FONT_HEIGHT // 6
+        bar_length = FONT_WIDTH
+        bar_padding = FONT_WIDTH // 3
+        x_offset = (
+            self.ctx.display.width() - (bar_length + bar_padding) * len(self.keysets)
+        ) // 2
+        for i in range(len(self.keysets)):
+            color = theme.fg_color if i == self.keyset_index else theme.frame_color
+            self.ctx.display.fill_rectangle(
+                x_offset + (bar_length + bar_padding) * i,
+                self.y_keypad_map[-1] + 2,
+                bar_length,
+                bar_height,
+                color,
+            )
+
     def get_valid_index(self):
         """Moves current index to a valid position"""
         while (
@@ -262,18 +282,18 @@ class Keypad:
             while self.ctx.input.page_value() == PRESSED:
                 self._next_key()
                 self.get_valid_index()
-                self._clean_dispaly_keypad_area()
+                self._clean_keypad_area()
                 self.draw_keys()
                 time.sleep_ms(100)
         elif btn == FAST_BACKWARD:
             while self.ctx.input.page_prev_value() == PRESSED:
                 self._previous_key()
                 self.get_valid_index()
-                self._clean_dispaly_keypad_area()
+                self._clean_keypad_area()
                 self.draw_keys()
                 time.sleep_ms(100)
 
-    def _clean_dispaly_keypad_area(self):
+    def _clean_keypad_area(self):
         self.ctx.display.fill_rectangle(
             0,
             self.keypad_offset(),

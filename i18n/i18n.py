@@ -110,8 +110,11 @@ def validate_translation_files():
         sys.exit(1)
 
 
-def print_missing():
-    """Uses translate 3.6.1 to automatically print missing translations"""
+def print_missing(save_to_file=False):
+    """
+    Uses translate 3.6.1 to automatically print missing translations
+    and optionally save them to files
+    """
     if len(sys.argv) > 2:
         force_target = sys.argv[2]
     else:
@@ -124,6 +127,11 @@ def print_missing():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
+
+    filled_dir = join(TRANSLATION_FILES_DIR, "filled")
+    if save_to_file and not exists(filled_dir):
+        mkdir(filled_dir)
+
     for translation_filename in translation_filenames:
         target = translation_filename[:5]
         if force_target:
@@ -132,6 +140,7 @@ def print_missing():
         translator = Translator(to_lang=target)
         print("Translating %s...\n" % translation_filename)
         complete = True
+        new_translations = {}
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
         ) as translation_file:
@@ -139,10 +148,9 @@ def print_missing():
             for slug in slugs:
                 if slug not in translations or translations[slug] == "":
                     try:
-                        translated = '"%s",' % translator.translate(slug).replace(
-                            " \ n", "\\n"
-                        )
-                        print('"%s":' % slug, translated)
+                        translated = translator.translate(slug).replace(" \ n", "\\n")
+                        print('"%s":' % slug, '"%s",' % translated)
+                        new_translations[slug] = translated
                     except Exception as e:
                         print("Error:", e)
                         print("Failed to translate:", slug)
@@ -152,6 +160,17 @@ def print_missing():
             print("Nothing to add")
         else:
             print("\n -- Please review and copy items above -- ")
+            if save_to_file:
+                with open(
+                    join(filled_dir, translation_filename),
+                    "w",
+                    encoding="utf8",
+                    newline="\n",
+                ) as filled_file:
+                    json.dump(
+                        new_translations, filled_file, ensure_ascii=False, indent=4
+                    )
+                print(f"Saved translations to {join(filled_dir, translation_filename)}")
         print("\n\n")
 
 
@@ -326,6 +345,8 @@ if __name__ == "__main__":
                 validate_translation_files()
             elif arg == "fill":
                 print_missing()
+            elif arg == "fill_to_files":
+                print_missing(save_to_file=True)
             elif arg == "clean":
                 remove_unnecessary()
             elif arg == "prettify":

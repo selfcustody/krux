@@ -31,6 +31,7 @@ from ..krux_settings import t
 from . import (
     Page,
     Menu,
+    DIGITS,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -38,7 +39,6 @@ from . import (
     choose_len_mnemonic,
 )
 
-DIGITS = "0123456789"
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
 
@@ -160,7 +160,8 @@ class Login(Page):
 
     def new_key_from_snapshot(self):
         """Use camera's entropy to create a new mnemonic"""
-        len_mnemonic = choose_len_mnemonic(self.ctx, True)
+        extra_option = t("Double mnemonic")
+        len_mnemonic = choose_len_mnemonic(self.ctx, extra_option)
         if not len_mnemonic:
             return MENU_CONTINUE
 
@@ -354,6 +355,23 @@ class Login(Page):
             return MENU_CONTINUE  # prompt NO
         return None
 
+    def auto_complete_qr_words(self, words):
+        """Ensure all words are in the wordlist, autocomplete if possible"""
+        for i, word in enumerate(words):
+            if word not in WORDLIST:
+                word_lower = word.lower()
+                # Try to autocomplete the word
+                auto_complete = False
+                for list_word in WORDLIST:
+                    if list_word.startswith(word_lower):
+                        words[i] = list_word
+                        auto_complete = True
+                        break
+                if not auto_complete:
+                    # Mark as invalid and clear the words list to indicate failure
+                    return []
+        return words
+
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
         from .qr_capture import QRCodeCapture
@@ -372,8 +390,11 @@ class Login(Page):
         else:
             try:
                 data_str = data.decode() if not isinstance(data, str) else data
-                if " " in data_str and len(data_str.split()) in (12, 24):
-                    words = data_str.split()
+                words = data_str.split() if " " in data_str else []
+                if len(words) in (12, 24):
+                    words = self.auto_complete_qr_words(words)
+                else:
+                    words = []
             except:
                 pass
 

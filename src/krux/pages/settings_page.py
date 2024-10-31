@@ -48,14 +48,17 @@ from ..encryption import QR_CODE_ITER_MULTIPLE
 from . import (
     Page,
     Menu,
+    DIGITS,
+    LETTERS,
+    UPPERCASE_LETTERS,
+    NUM_SPECIAL_2,
+    NUM_SPECIAL_3,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
     DEFAULT_PADDING,
 )
 import os
-
-DIGITS = "0123456789"
 
 PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
@@ -132,6 +135,65 @@ class SettingsPage(Page):
             self.ctx.power_manager.reboot()
         return MENU_CONTINUE
 
+    def enter_modify_tc_code(self):
+        """Handler for the 'Tamper Check Code' menu item"""
+        import hashlib
+        from machine import unique_id
+        from ..krux_settings import TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
+
+        if self.ctx.tc_code_enabled:
+            from .tc_code_verification import TCCodeVerification
+
+            tc_code_verification = TCCodeVerification(self.ctx)
+            if not tc_code_verification.capture(changing_tc_code=True):
+                return MENU_CONTINUE
+
+        self.ctx.display.clear()
+        if not self.prompt(
+            t("Enter a 6+ characters Tamper Check Code") + "\n" + t("(Experimental)"),
+            self.ctx.display.height() // 2,
+        ):
+            return MENU_CONTINUE
+
+        tamper_check_code = tc_code_confirm = ""
+        while len(tamper_check_code) < 6:
+            tamper_check_code = self.capture_from_keypad(
+                t("Tamper Check Code"),
+                [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
+            )
+            if tamper_check_code == ESC_KEY:
+                return MENU_CONTINUE
+        while len(tc_code_confirm) < 6:
+            tc_code_confirm = self.capture_from_keypad(
+                t("Confirm Tamper Check Code"),
+                [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
+            )
+            if tc_code_confirm == ESC_KEY:
+                return MENU_CONTINUE
+        if tamper_check_code != tc_code_confirm:
+            self.flash_error(t("Tamper check codes do not match"))
+            return MENU_CONTINUE
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing.."))
+        # Hashes the Tamper Check Code once
+        tc_code_bytes = tamper_check_code.encode()
+        tc_code_hash = hashlib.sha256(tc_code_bytes).digest()
+        # Than uses hash to generate a stretched secret, with unique_id as salt
+        secret = hashlib.pbkdf2_hmac(
+            "sha256", tc_code_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
+        )
+        # Saves the stretched Tamper Check Code in a file
+        with open(TC_CODE_PATH, "wb") as f:
+            f.write(secret)
+        self.ctx.tc_code_enabled = True
+        self.flash_text(t("Tamper check code set successfully"))
+
+        from .fill_flash import FillFlash
+
+        flash_filler = FillFlash(self.ctx)
+        flash_filler.fill_flash_with_camera_entropy()
+        return MENU_CONTINUE
+
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
 
@@ -198,6 +260,10 @@ class SettingsPage(Page):
             if settings_namespace.namespace == Settings.namespace:
                 items.append((t("Factory Settings"), self.restore_settings))
                 back_status = self._settings_exit_check
+
+            # Case for security settings
+            if settings_namespace.namespace == "settings.security":
+                items.append((t("Tamper Check Code"), self.enter_modify_tc_code))
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()

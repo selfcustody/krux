@@ -124,7 +124,7 @@ All QR codes will contain [key origin information in key expressions](https://gi
 Always prefer to import extended public keys directly from Krux when setting up a coordinator instead of copying it (or parts of it) from other sources.
 
 ### Wallet
-Here you can load view and save wallet descriptors, add or change passphrases, customize wallet's attributes, generate and load a BIP85 child mnemonic.
+Here you can load view and save wallet descriptors, add or change passphrases, customize wallet's attributes, derive BIP85 mnemonics and passwords.
 
 #### Wallet Descriptor
 A Bitcoin Wallet Output Script Descriptor defines a set of addresses in a wallet. It includes the following information:
@@ -172,16 +172,24 @@ Here you are presented to the exact same customization options you have while lo
 <div style="clear: both"></div>
 
 #### BIP85
-Bitcoin BIP85, also known as the Deterministic Entropy From BIP32 Keychains, allows for the generation of deterministic entropy using a BIP32 master key. This entropy can then be used to create various cryptographic keys and mnemonics (e.g., BIP39 seed phrases). BIP85 ensures that all derived keys and mnemonics are deterministic and reproducible, meaning they can be recreated from the same master key. This feature is useful for securely managing multiple child keys from a single master key without the need to store each one separately.
+Bitcoin BIP85, also known as Deterministic Entropy From BIP32 Keychains, allows for the generation of deterministic entropy using a BIP32 master key. This entropy can then be used to create various cryptographic keys and mnemonics (e.g., BIP39 seed phrases). BIP85 ensures that all derived keys and mnemonics are deterministic and reproducible, meaning they can be recreated from the same master key. This feature is useful for securely managing multiple child keys from a single master key without the need to store each one separately.
+
+**BIP39 Mnemonic**
 
 <img src="../../../img/maixpy_amigo/bip85-child-index-150.png" >
 <img src="../../../img/maixpy_amigo/bip85-load-child-150.png" >
 <img src="../../../img/maixpy_m5stickv/bip85-child-index-125.png" >
 <img src="../../../img/maixpy_m5stickv/bip85-load-child-125.png" >
 
-Choose between a 12 or 24 words child then type the desired index to export a child mnemonic. After being presented to the new mnemonic, you can choose to load and use it right away.
+Choose between 12 or 24 words, then type the desired index to export a child mnemonic. After being presented with the new mnemonic, you can choose to load and use it right away.
 
-Please note passphrases will be removed when loading a BIP85 child.
+Please note that any passphrase from the parent mnemonic will be removed when loading a BIP85 child mnemonic.
+
+**Base64 Password**
+
+To create a Base64 password, which can be used in a variety of logins, from email to social media accounts, choose an index and then a length of at least 20 characters.
+
+The resulting password will be displayed on the screen and can also be exported to an SD Card or as a QR code.
 
 ### Address
 <img src="../../../img/maixpy_m5stickv/address-menu-125.png" align="right">

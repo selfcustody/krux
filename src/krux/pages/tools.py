@@ -21,10 +21,6 @@
 # THE SOFTWARE.
 
 import uos
-from ..sd_card import SDHandler
-from ..display import BOTTOM_PROMPT_LINE
-from ..krux_settings import t
-from ..qr import FORMAT_NONE
 from . import (
     Page,
     Menu,
@@ -37,6 +33,10 @@ from . import (
 )
 from .file_manager import SD_ROOT_PATH
 from ..format import generate_thousands_separator
+from ..sd_card import SDHandler
+from ..display import BOTTOM_PROMPT_LINE
+from ..krux_settings import t
+from ..qr import FORMAT_NONE
 
 
 class Tools(Page):
@@ -52,12 +52,21 @@ class Tools(Page):
                     (t("Print Test QR"), self.print_test),
                     (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
+                    (t("Flash Tools"), self.flash_tools),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
-                    (t("Wipe Device"), self.wipe_device),
                 ],
             ),
         )
         self.ctx = ctx
+
+    def flash_tools(self):
+        """Handler for the 'Flash Tools' menu item"""
+
+        from .flash_tools import FlashTools
+
+        flash_tools = FlashTools(self.ctx)
+        flash_tools.flash_tools_menu()
+        return MENU_CONTINUE
 
     def sd_check(self):
         """Handler for the 'SD Check' menu item"""
@@ -111,40 +120,6 @@ class Tools(Page):
             if ret == MENU_CONTINUE:
                 del encrypted_mnemonics
                 return ret
-
-    def erase_spiffs(self):
-        """Erase all SPIFFS, removing all saved configs and mnemonics"""
-
-        import flash
-        from ..firmware import FLASH_SIZE, SPIFFS_ADDR, ERASE_BLOCK_SIZE
-        from ..wdt import wdt
-
-        empty_buf = b"\xff" * ERASE_BLOCK_SIZE
-        for address in range(SPIFFS_ADDR, FLASH_SIZE, ERASE_BLOCK_SIZE):
-            wdt.feed()
-            if flash.read(address, ERASE_BLOCK_SIZE) == empty_buf:
-                continue
-            flash.erase(address, ERASE_BLOCK_SIZE)
-
-    def wipe_device(self):
-        """Fully formats SPIFFS memory"""
-        self.ctx.display.clear()
-        if self.prompt(
-            t(
-                "Permanently remove all stored encrypted mnemonics and settings from flash?"
-            ),
-            self.ctx.display.height() // 2,
-        ):
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Wiping Device..")
-                + "\n\n"
-                + t("Do not power off, it may take a while to complete.")
-            )
-            self.erase_spiffs()
-            # Reboot so default settings take place and SPIFFS is formatted.
-            self.ctx.power_manager.reboot()
-        return MENU_CONTINUE
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
