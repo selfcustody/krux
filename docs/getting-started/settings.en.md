@@ -140,6 +140,8 @@ Create or modify a Tamper Check Code. This code will be required every time [Tam
 
 After creating the code, you will be prompted to fill the empty memory spaces with random entropy from the camera. This step is important to make *TC Flash Hash* more resilient to data manipulation by eliminating empty memory spaces that could be exploited in a sophisticated tamper attempt.
 
+The filling process requires good entropy images. If, for any reason, such as starting the process in a dark room, you fail to capture good entropy images, you can restart the filling process by resetting your *TC Code*.
+
 The *TC Code* will be deleted if the device is wiped or user data is erased, which will consequently disable *TC Flash Hash*.
 
 ### Appearance

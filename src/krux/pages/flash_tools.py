@@ -128,6 +128,7 @@ class FlashTools(Page):
             if column == FLASH_ROWS:
                 column = 0
                 row += 1
+        self.ctx.input.reset_ios_state()
         self.ctx.input.wait_for_button()
 
         return MENU_CONTINUE

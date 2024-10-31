@@ -51,9 +51,9 @@ class FillFlash(Page):
     def capture_image_with_sufficient_entropy(self, entropy_measurement):
         """Capture an image with sufficient entropy."""
         start_time = time.time()  # Record the start time
-
+        self.ctx.display.to_landscape()
         while time.time() - start_time < MAX_CAPTURE_PERIOD:
-            self.ctx.display.to_landscape()
+            wdt.feed()
             img = sensor.snapshot()
             entropy_measurement.entropy_measurement_update(img, all_at_once=True)
             self.ctx.display.render_image(img, compact=True)
