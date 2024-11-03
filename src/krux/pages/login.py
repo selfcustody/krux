@@ -254,8 +254,10 @@ class Login(Page):
 
         from .mnemonic_editor import MnemonicEditor
 
-        mnemonic_editor = MnemonicEditor(self.ctx, mnemonic, new)
-        mnemonic = mnemonic_editor.edit()
+        # If the mnemonic is not hidden, show the mnemonic editor
+        if not Settings().security.hide_mnemonic:
+            mnemonic_editor = MnemonicEditor(self.ctx, mnemonic, new)
+            mnemonic = mnemonic_editor.edit()
         if mnemonic is None:
             return MENU_CONTINUE
         self.ctx.display.clear()
