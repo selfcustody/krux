@@ -232,6 +232,7 @@ translation_array = [
     "Traitement..",
     "Code QR",
     "RX Fiche",
+    "Redémarrer",
     "Recevoir",
     "Adresses de Réception",
     "Région\u2009:",

@@ -232,6 +232,7 @@ translation_array = [
     "Processando..",
     "Código QR",
     "Pino RX",
+    "Reiniciar",
     "Recebimento",
     "Endereços de Recebimento",
     "Região:",

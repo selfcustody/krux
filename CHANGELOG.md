@@ -32,6 +32,9 @@ Computer simulator for WonderMV device has been added.
 ### Krux Ethos
 Guidelines have been created to assist with decision-making regarding the Krux project's interactions with contributors, users, and businesses that may create products or services related to Krux.
 
+### Minor Bugfixes and Refactors
+Several code improvements for better reliability and efficiency.
+
 # Changelog 24.09.1 - September 26, 2024
 
 ### Fix Camera Orientation on Cube

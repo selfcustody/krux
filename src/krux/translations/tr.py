@@ -232,6 +232,7 @@ translation_array = [
     "İşleniyor..",
     "QR Kodu",
     "RX Pini",
+    "Yeniden Başlat",
     "Al",
     "Adresleri Al",
     "Bölge:",

@@ -232,6 +232,7 @@ translation_array = [
     "Wird bearbeitet..",
     "QR-Code",
     "RX Pin",
+    "Neustart",
     "Empfangen",
     "Empfangsadresse",
     "Region:",

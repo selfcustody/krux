@@ -232,6 +232,7 @@ translation_array = [
     "Đang xử lý..",
     "Mã QR",
     "RX Pin",
+    "Khởi động lại",
     "Nhận được",
     "Các địa chỉ nhận",
     "Vùng:",

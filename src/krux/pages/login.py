@@ -50,6 +50,9 @@ class Login(Page):
     SETTINGS_MENU_INDEX = 2
 
     def __init__(self, ctx):
+        shtn_reboot_label = (
+            t("Shutdown") if ctx.power_manager.has_battery() else t("Reboot")
+        )
         super().__init__(
             ctx,
             Menu(
@@ -60,7 +63,7 @@ class Login(Page):
                     (t("Settings"), self.settings),
                     (t("Tools"), self.tools),
                     (t("About"), self.about),
-                    (t("Shutdown"), self.shutdown),
+                    (shtn_reboot_label, self.shutdown),
                 ],
                 back_label=None,
             ),

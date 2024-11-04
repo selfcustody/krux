@@ -232,6 +232,7 @@ translation_array = [
     "Verwerken..",
     "QR code",
     "RX pin",
+    "Opnieuw opstarten",
     "Ontvangen",
     "Ontvangstadres",
     "Regio:",
