@@ -66,17 +66,6 @@ class TCCodeVerification(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing.."))
 
-        # Tries with non-stretched secret (obsolete)
-        # TODO: Remove obsolete before first release
-        sha256 = hashlib.sha256()
-        sha256.update(tc_code_hash)
-        sha256.update(unique_id())
-        non_stretched_secret = sha256.digest()
-        if non_stretched_secret == file_secret:
-            if return_hash:
-                return tc_code_hash
-            return True
-
         # Generate PBKDF2 stretched secret
         secret = hashlib.pbkdf2_hmac(
             "sha256", tc_code_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS

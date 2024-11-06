@@ -65,7 +65,7 @@ def check_for_updates():
 
 def tc_code_verification(ctx_pin):
     """Loads and run the Pin Verification page"""
-    TC_CODE_PATH = "/flash/pin"
+    from krux.krux_settings import Settings, TC_CODE_PATH
 
     # Checks if there is a pin set
     try:
@@ -76,7 +76,6 @@ def tc_code_verification(ctx_pin):
         return True
 
     ctx_pin.tc_code_enabled = True
-    from krux.krux_settings import Settings
 
     if not Settings().security.boot_flash_hash:
         return True
