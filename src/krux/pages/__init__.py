@@ -148,13 +148,13 @@ class Page:
         """
         buffer = starting_buffer
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
-        big_tittle = len(self.ctx.display.to_lines(title)) > 1
+        big_title = len(self.ctx.display.to_lines(title)) > 1
         while True:
             self.ctx.display.clear()
-            offset_y = MINIMAL_PADDING if big_tittle else DEFAULT_PADDING
+            offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
             if lcd.string_width_px(buffer) < self.ctx.display.width():
                 self.ctx.display.draw_hcentered_text(title, offset_y)
-                if big_tittle:
+                if big_title:
                     offset_y += 2 * FONT_HEIGHT
                 else:
                     offset_y += FONT_HEIGHT * 3 // 2
