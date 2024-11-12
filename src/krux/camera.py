@@ -31,37 +31,58 @@ OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
 GC2145_ID = 0x45  # Yahboom
 
-COLOR_MODE = 0
-GRAYSCALE_MODE = 1
+QR_SCAN_MODE = 0
+ANTI_GLARE_MODE = 1
+ENTROPY_MODE = 2
+BINARY_GRID_MODE = 3
 
 
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
 
+    # Luminosity thresholds for each camera and mode
+    lum_th = {
+        OV2640_ID: {
+            QR_SCAN_MODE: (0x60, 0x70),
+            ANTI_GLARE_MODE: (0x20, 0x28),
+            ENTROPY_MODE: (0x68, 0x78),
+            BINARY_GRID_MODE: (0x44, 0x48),
+        },
+        OV7740_ID: {
+            QR_SCAN_MODE: (0x60, 0x70),
+            ANTI_GLARE_MODE: (0x20, 0x28),
+            ENTROPY_MODE: (0x68, 0x78),
+            BINARY_GRID_MODE: (0x44, 0x48),
+        },
+        GC2145_ID: {
+            QR_SCAN_MODE: (0x30, 0x55),
+            ANTI_GLARE_MODE: (0x25, 0x40),
+            ENTROPY_MODE: (0x20, 0xF2),
+            BINARY_GRID_MODE: (0x30, 0x50),
+        },
+    }
+
     def __init__(self):
         self.cam_id = None
-        self.antiglare_enabled = False
         self.mode = None
         try:
-            self.initialize_sensor()
+            self.initialize_sensor(mode=QR_SCAN_MODE)
             sensor.run(0)
         except Exception as e:
             print("Camera not found:", e)
 
-    def initialize_sensor(self, grayscale=False):
+    def initialize_sensor(self, mode=QR_SCAN_MODE):
         """Initializes the camera"""
-        self.antiglare_enabled = False
         sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
         if board.config["type"] == "cube":
             # Rotate camera 180 degrees on Cube
             sensor.set_hmirror(1)
             sensor.set_vflip(1)
-        self.mode = COLOR_MODE
-        if grayscale and self.cam_id != GC2145_ID:
-            # GC2145 does not support grayscale
+        self.mode = mode
+        if mode == BINARY_GRID_MODE and self.cam_id != GC2145_ID:
+            # Binary grid mode uses grayscale except for GC2145
             sensor.set_pixformat(sensor.GRAYSCALE)
-            self.mode = GRAYSCALE_MODE
         else:
             sensor.set_pixformat(sensor.RGB565)
         if self.cam_id == OV5642_ID:
@@ -73,21 +94,17 @@ class Camera:
             sensor.set_framesize(sensor.CIF)
         else:
             sensor.set_framesize(sensor.QVGA)
-        if self.cam_id == OV7740_ID:
-            self.config_ov_7740()
-        if self.cam_id == OV2640_ID:
-            self.config_ov_2640()
-        if self.cam_id == GC2145_ID:
-            self.config_gc_2145()
-        sensor.skip_frames()
+        if mode != ENTROPY_MODE:
+            if self.cam_id == OV7740_ID:
+                self.config_ov_7740()
+            if self.cam_id == OV2640_ID:
+                self.config_ov_2640()
+            if self.cam_id == GC2145_ID:
+                self.config_gc_2145()
+            self.luminosity_threshold()
 
     def config_ov_7740(self):
         """Specialized config for OV7740 sensor"""
-        # Allowed luminance thresholds:
-        # luminance high threshold, default=0x78
-        sensor.__write_reg(0x24, 0x70)
-        # luminance low threshold, default=0x68
-        sensor.__write_reg(0x25, 0x60)
 
         # Average-based sensing window definition
         # Ingnore periphery and measure luminance only on central area
@@ -108,12 +125,6 @@ class Camera:
         sensor.__write_reg(0xC2, 0x8C)
         # Set register bank 1
         sensor.__write_reg(0xFF, 0x01)
-        sensor.__write_reg(0x03, 0xCF)
-        # Allowed luminance thresholds:
-        # luminance high threshold, default=0x78
-        sensor.__write_reg(0x24, 0x70)
-        # luminance low threshold, default=0x68
-        sensor.__write_reg(0x25, 0x60)
 
         # Average-based sensing window definition
         # Ingnore periphery and measure luminance only on central area
@@ -132,68 +143,53 @@ class Camera:
         sensor.__write_reg(0xFE, 0x01)
         # Center weight mode = 7, default=0x01 (center mode = 0)
         sensor.__write_reg(0x0C, 0x71)
-        self.disable_antiglare()
 
     def has_antiglare(self):
         """Returns whether the camera has anti-glare functionality"""
         return self.cam_id in (OV7740_ID, OV2640_ID, GC2145_ID)
 
-    def enable_antiglare(self):
-        """Enables anti-glare mode"""
+    def luminosity_threshold(self):
+        """Set luminosity thresholds for cameras"""
+
+        (low, high) = self.lum_th.get(self.cam_id, {}).get(self.mode, (0, 0))
+        if low < 0x10 or high > 0xF0:
+            return
+
         if self.cam_id == OV2640_ID:
             # Set register bank 1
             sensor.__write_reg(0xFF, 0x01)
-            # luminance high level, default=0x78
-            sensor.__write_reg(0x24, 0x28)
-            # luminance low level, default=0x68
-            sensor.__write_reg(0x25, 0x20)
-        elif self.cam_id == OV7740_ID:
-            # luminance high level, default=0x78
-            sensor.__write_reg(0x24, 0x38)
-            # luminance low level, default=0x68
-            sensor.__write_reg(0x25, 0x20)
-            # Disable frame integrtation (night mode)
-            sensor.__write_reg(0x15, 0x00)
-        elif self.cam_id == GC2145_ID:
-            # Set register bank 1
-            sensor.__write_reg(0xFE, 0x01)
-            # Expected luminance level, default=0x50
-            sensor.__write_reg(0x13, 0x25)
-            # luminance high level, default=0xF2
-            sensor.__write_reg(0x0E, 0x40)
-            # luminance low level, default=0x20
-            sensor.__write_reg(0x0F, 0x15)
-        sensor.skip_frames()
-        self.antiglare_enabled = True
-
-    def disable_antiglare(self):
-        """Disables anti-glare mode"""
         if self.cam_id in (OV7740_ID, OV2640_ID):
-            if self.cam_id == OV2640_ID:
-                # Set register bank 1
-                sensor.__write_reg(0xFF, 0x01)
             # luminance high level, default=0x78
-            sensor.__write_reg(0x24, 0x70)
+            sensor.__write_reg(0x24, high)
             # luminance low level, default=0x68
-            sensor.__write_reg(0x25, 0x60)
+            sensor.__write_reg(0x25, low)
+            vpt_low = (low - 0x10) >> 4
+            vpt_high = (high + 0x10) >> 4
+            vpt = (vpt_high << 4) | vpt_low
+            # VPT - fast convergence zone, default=0xD4
+            sensor.__write_reg(0x26, vpt)
+            if self.mode in (QR_SCAN_MODE, ANTI_GLARE_MODE):
+                # Disable frame integration (bad for animated QR codes)
+                sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
         elif self.cam_id == GC2145_ID:
             # Set register bank 1
             sensor.__write_reg(0xFE, 0x01)
-            # Expected luminance level, default=0x50
-            sensor.__write_reg(0x13, 0x35)
             # luminance high level, default=0xF2
-            sensor.__write_reg(0x0E, 0x55)
+            sensor.__write_reg(0x0E, high)
             # luminance low level, default=0x20
-            sensor.__write_reg(0x0F, 0x30)
+            sensor.__write_reg(0x0F, low)
+            # Expected luminance level, default=0x50
+            sensor.__write_reg(0x13, (low + high) // 2)
         sensor.skip_frames()
-        self.antiglare_enabled = False
 
     def toggle_antiglare(self):
         """Toggles anti-glare mode and returns the new state"""
-        if self.antiglare_enabled:
-            self.disable_antiglare()
+        if self.mode == ANTI_GLARE_MODE:
+            self.mode = QR_SCAN_MODE
+            self.luminosity_threshold()
             return False
-        self.enable_antiglare()
+        self.mode = ANTI_GLARE_MODE
+        self.luminosity_threshold()
         return True
 
     def snapshot(self):
@@ -204,15 +200,13 @@ class Camera:
             img.rotation_corr(z_rotation=180)
         return img
 
-    def initialize_run(self):
+    def initialize_run(self, mode=QR_SCAN_MODE):
         """Initializes and runs sensor"""
         if self.mode is None:
             raise ValueError("No camera found")
-        if self.mode != COLOR_MODE:
-            self.initialize_sensor()
+        if self.mode != mode:
+            self.initialize_sensor(mode=mode)
         sensor.run(1)
-        if self.antiglare_enabled:
-            self.disable_antiglare()
 
     def stop_sensor(self):
         """Stops capturing from sensor"""

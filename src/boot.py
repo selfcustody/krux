@@ -63,6 +63,47 @@ def check_for_updates():
     del firmware
 
 
+def tc_code_verification(ctx_pin):
+    """Loads and run the Pin Verification page"""
+    from krux.krux_settings import Settings, TC_CODE_PATH
+
+    # Checks if there is a pin set
+    try:
+        if not (os.stat(TC_CODE_PATH)[0] & 0x4000) == 0:
+            raise OSError
+    except OSError:
+        print("No pin set")
+        return True
+
+    ctx_pin.tc_code_enabled = True
+
+    if not Settings().security.boot_flash_hash:
+        return True
+
+    from krux.pages.tc_code_verification import TCCodeVerification
+
+    pin_verification_page = TCCodeVerification(ctx_pin)
+    pin_hash = pin_verification_page.capture(return_hash=True)
+    if not pin_hash:
+        return False
+
+    from krux.pages.flash_tools import FlashHash
+
+    flash_hash = FlashHash(ctx_pin, pin_hash)
+    flash_hash.generate()
+
+    # Unimport FlashHash the free memory
+    sys.modules.pop("krux.pages.flash_tools")
+    del sys.modules["krux"].pages.flash_tools
+    del FlashHash
+
+    # Unimport TCCodeVerification the free memory
+    sys.modules.pop("krux.pages.tc_code_verification")
+    del sys.modules["krux"].pages.tc_code_verification
+    del TCCodeVerification
+    return True
+
+
 def login(ctx_login):
     """Loads and run the Login page"""
     from krux.pages.login import Login
@@ -114,6 +155,8 @@ postimport_ticks = time.ticks_ms()
 if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
     time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
+if not tc_code_verification(ctx):
+    power_manager.shutdown()
 login(ctx)
 gc.collect()
 home(ctx)

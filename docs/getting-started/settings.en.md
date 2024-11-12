@@ -127,8 +127,22 @@ Set the time it takes for Krux to automatically shut down. This feature not only
 
 Please note that devices without batteries and power management will not shut down but will reboot instead, which is sufficient to unload private keys.
 
+#### TC Flash Hash at Boot
+Chose if you would like to run [Tamper Check Flash Hash](features/tamper-detection.en.md) every time the device is powered on.
+
+Activating *TC Flash Hash* at boot helps prevent unauthorized use by requiring the *TC Code*. But is important to note, unlike a PIN, the TC Code does not provide access control over USB. This means that the device's memory remains accessible for reading and writing via USB, allowing it to be flashed with firmware that does not require the *TC Code*, which could then allow unauthorized use through its human interface.
+
 #### Hide Mnemonics
 When "Hide Mnemonics" mode is set to "True", your device will not display private key data or backup tools when a key is loaded. It will only show public key information and allow signing operations.
+
+#### Tamper Check Code
+Create or modify a Tamper Check Code. This code will be required every time [Tamper Check Flash Hash](features/tamper-detection.en.md) is executed.
+
+After creating the code, you will be prompted to fill the empty memory spaces with random entropy from the camera. This step is important to make *TC Flash Hash* more resilient to data manipulation by eliminating empty memory spaces that could be exploited in a sophisticated tamper attempt.
+
+The filling process requires good entropy images. If, for any reason, such as starting the process in a dark room, you fail to capture good entropy images, you can restart the filling process by resetting your *TC Code*.
+
+The *TC Code* will be deleted if the device is wiped or user data is erased, which will consequently disable *TC Flash Hash*.
 
 ### Appearance
 <img src="../../img/maixpy_m5stickv/settings-options-appearance-125.png" align="right">

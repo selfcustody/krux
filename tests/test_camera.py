@@ -82,63 +82,54 @@ def test_initialize_run_no_sensor(mocker, m5stickv):
 
 
 def test_initialize_run(mocker, m5stickv):
-    from krux.camera import Camera, COLOR_MODE
+    from krux.camera import Camera, QR_SCAN_MODE
 
     c = Camera()
-    c.initialize_sensor()
     c.initialize_run()
-    assert c.mode == COLOR_MODE
+    assert c.mode == QR_SCAN_MODE
     assert c.cam_id is not None
-    assert c.antiglare_enabled == False
 
 
-def test_initialize_run_from_grayscale(mocker, m5stickv):
-    from krux.camera import Camera, COLOR_MODE, GRAYSCALE_MODE
+def test_initialize_run_from_binary_grid_mode(mocker, m5stickv):  # GrayScale mode
+    from krux.camera import Camera, BINARY_GRID_MODE
 
     c = Camera()
-    c.initialize_sensor()
-    c.mode = GRAYSCALE_MODE
-    c.initialize_run()
-    assert c.mode == COLOR_MODE
+    c.initialize_run(mode=BINARY_GRID_MODE)
+    assert c.mode == BINARY_GRID_MODE
     assert c.cam_id is not None
-    assert c.antiglare_enabled == False
 
 
 def test_initialize_run_with_anti_glair_enabled(mocker, m5stickv):
-    from krux.camera import Camera, COLOR_MODE, GRAYSCALE_MODE
+    from krux.camera import Camera, ANTI_GLARE_MODE
 
     c = Camera()
-    c.initialize_sensor()
-    c.antiglare_enabled = True
-    c.initialize_run()
-    assert c.mode == COLOR_MODE
+    c.initialize_sensor(mode=ANTI_GLARE_MODE)
+    assert c.mode == ANTI_GLARE_MODE
     assert c.cam_id is not None
-    assert c.antiglare_enabled == False
 
 
 def test_toggle_antiglare(mocker, m5stickv):
     import krux
-    from krux.camera import Camera, OV7740_ID, OV2640_ID, GC0328_ID, GC2145_ID
+    from krux.camera import (
+        Camera,
+        OV7740_ID,
+        OV2640_ID,
+        GC0328_ID,
+        GC2145_ID,
+        QR_SCAN_MODE,
+        ANTI_GLARE_MODE,
+    )
 
     SENSORS_LIST = [OV7740_ID, OV2640_ID, GC0328_ID, GC2145_ID]
 
     for sensor_id in SENSORS_LIST:
         mocker.patch("krux.camera.sensor.get_id", lambda: sensor_id)
         c = Camera()
-        mocker.spy(c, "enable_antiglare")
-        mocker.spy(c, "disable_antiglare")
         mocker.spy(c, "has_antiglare")
         c.initialize_sensor()
         if c.has_antiglare():
-            assert c.antiglare_enabled == False
-            c.enable_antiglare.assert_not_called()
+            assert c.mode == QR_SCAN_MODE
             c.toggle_antiglare()
-            c.enable_antiglare.assert_called()
-            assert c.antiglare_enabled == True
+            assert c.mode == ANTI_GLARE_MODE
             c.toggle_antiglare()
-            c.enable_antiglare.assert_called()
-            c.disable_antiglare.assert_called()
-            assert c.antiglare_enabled == False
-        else:
-            c.enable_antiglare.assert_not_called()
-            c.disable_antiglare.assert_not_called()
+            assert c.mode == QR_SCAN_MODE

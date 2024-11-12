@@ -40,6 +40,7 @@ class Context:
         self.power_manager = None
         self.printer = None
         self.wallet = None
+        self.tc_code_enabled = False
 
     def clear(self):
         """Clears all sensitive data from the context, resetting it"""

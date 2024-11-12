@@ -37,6 +37,7 @@ CANCEL_PRESSED = 2
 INSUFFICIENT_ENTROPY = 0
 POOR_ENTROPY = 1
 GOOD_ENTROPY = 2
+UNKNOWN_ENTROPY = 3
 
 
 class CameraEntropy(Page):
@@ -50,7 +51,7 @@ class CameraEntropy(Page):
         self.image_stats = None
         self.image_stats_vector = [0] * 3
         self.measurement_machine_state = 0
-        self.previous_measurement = POOR_ENTROPY
+        self.previous_measurement = UNKNOWN_ENTROPY
         self.stdev_index = 0
         self.y_label_offset = BOTTOM_LINE
         if board.config["type"] == "amigo":
@@ -78,7 +79,7 @@ class CameraEntropy(Page):
         rms = math.sqrt(mean_square)
         return int(rms)
 
-    def entropy_measurement_update(self, img, all_at_once=False):
+    def entropy_measurement_update(self, img, all_at_once=False, show_measurement=True):
         """
         Entropy measurement state machine calculates and prints entropy estimation every 4 frames
         """
@@ -99,7 +100,7 @@ class CameraEntropy(Page):
                 entropy_level = GOOD_ENTROPY
             elif self.stdev_index > INSUFFICIENT_VARIANCE_TH:
                 entropy_level = POOR_ENTROPY
-            if self.previous_measurement != entropy_level and not all_at_once:
+            if self.previous_measurement != entropy_level and show_measurement:
                 self.ctx.display.to_portrait()
                 self.previous_measurement = entropy_level
                 self.ctx.display.fill_rectangle(
@@ -141,11 +142,12 @@ class CameraEntropy(Page):
         import sensor
         import shannon
         from ..wdt import wdt
+        from ..camera import ENTROPY_MODE
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))
         self.ctx.display.to_landscape()
-        self.ctx.camera.initialize_run()
+        self.ctx.camera.initialize_run(mode=ENTROPY_MODE)
         self.ctx.display.clear()
 
         command = 0
@@ -156,13 +158,13 @@ class CameraEntropy(Page):
             wdt.feed()
 
             img = sensor.snapshot()
-            self.ctx.display.render_image(img)
 
             command = self._callback()
             if command != NOT_PRESSED:
                 break
 
             self.entropy_measurement_update(img)
+            self.ctx.display.render_image(img)
 
         self.ctx.display.to_portrait()
         gc.collect()
@@ -175,7 +177,7 @@ class CameraEntropy(Page):
 
         self.ctx.display.draw_centered_text(t("Processing.."))
 
-        self.entropy_measurement_update(img, all_at_once=True)
+        self.entropy_measurement_update(img, all_at_once=True, show_measurement=False)
 
         img_bytes = img.to_bytes()
         img_pixels = img.width() * img.height()

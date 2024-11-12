@@ -68,7 +68,7 @@ poetry run poe simulator --sequence sequences/tools-check-sd.txt  --sd --device 
 poetry run poe simulator --sequence sequences/tools-create-QR.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/tools-mnemonic.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/tools-print-test-qr.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/tools-wipe-device.txt  --sd --device $device
+poetry run poe simulator --sequence sequences/tools-flash.txt  --sd --device $device
 
 # Settings
 poetry run poe simulator --sequence sequences/all-settings.txt  --device $device

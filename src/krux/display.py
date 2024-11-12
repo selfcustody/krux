@@ -246,9 +246,11 @@ class Display:
         columns = (
             self.usable_width() if self.width() > NARROW_SCREEN_WITH else self.width()
         )
-        if Settings().i18n.locale in ["ko-KR", "zh-CN"] and lcd.string_has_wide_glyph(
-            text
-        ):
+        if Settings().i18n.locale in [
+            "ko-KR",
+            "zh-CN",
+            "ja-JP",
+        ] and lcd.string_has_wide_glyph(text):
             columns //= FONT_WIDTH_WIDE
         else:
             columns //= FONT_WIDTH
@@ -337,9 +339,9 @@ class Display:
         """Draws a vertical line to the screen"""
         self.draw_line(x, y, x, y + height, color)
 
-    def draw_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
+    def fill_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
         """
-        Draws a circle to the screen.
+        Fills a circle to the screen.
         quadrant=0 will draw all 4 quadrants.
         1 is top right, 2 is top left, 3 is bottom left, 4 is bottom right.
         """
@@ -435,20 +437,31 @@ class Display:
         """Maximum menu items the display can fit"""
         return (self.height() - line_offset) // (2 * FONT_HEIGHT)
 
-    def render_image(self, img):
+    def render_image(self, img, compact=False):
         """Renders the image based on the board type."""
         board_type = board.config["type"]
 
-        if board_type == "m5stickv":
-            img.lens_corr(strength=1.0, zoom=0.56)
-            lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
-        elif board_type == "amigo":
-            x_offset = 40 if self.flipped_x_coordinates else 120
-            lcd.display(img, oft=(x_offset, 40))
-        elif board_type == "cube":
-            lcd.display(img, oft=(0, 0), roi=(0, 0, 224, 240))
+        if not compact:
+            if board_type == "m5stickv":
+                img.lens_corr(strength=1.0, zoom=0.56)
+                lcd.display(img, oft=(0, 0), roi=(68, 52, 185, 135))
+            elif board_type == "amigo":
+                x_offset = 40 if self.flipped_x_coordinates else 120
+                lcd.display(img, oft=(x_offset, 40))
+            elif board_type == "cube":
+                lcd.display(img, oft=(0, 0), roi=(48, 0, 224, 240))
+            else:
+                lcd.display(img, oft=(0, 0), roi=(8, 0, 304, 240))
         else:
-            lcd.display(img, oft=(0, 0), roi=(0, 0, 304, 240))
+            if board_type == "m5stickv":
+                lcd.display(img, oft=(24, 0), roi=(68, 52, 185, 135))
+            elif board_type == "amigo":
+                x_offset = 40 if self.flipped_x_coordinates else 120
+                lcd.display(img, oft=(x_offset, 40))
+            elif board_type == "cube":
+                lcd.display(img, oft=(24, 0), roi=(67, 0, 186, 240))
+            else:
+                lcd.display(img, oft=(26, 0), roi=(28, 0, 264, 240))
 
 
 display = Display()

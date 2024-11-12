@@ -40,7 +40,7 @@ from ..display import (
     NARROW_SCREEN_WITH,
     SMALLEST_HEIGHT,
 )
-from ..camera import OV7740_ID, OV2640_ID, OV5642_ID
+from ..camera import BINARY_GRID_MODE
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
 # Tiny Seed last bit index positions according to checksums
@@ -591,6 +591,8 @@ class TinyScanner(Page):
         else:
             label = grid_type
         self.tiny_seed = TinySeed(self.ctx, label=label)
+        self.g_corners = (0x80, 0x80, 0x80, 0x80)
+        self.blob_otsu = 0x80
 
     def _map_punches_region(self, rect_size, page=0):
         # Think in portrait mode, with Tiny Seed tilted 90 degrees
@@ -725,14 +727,22 @@ class TinyScanner(Page):
         # img.draw_string(10,55,str(gradient_bg_ll))
         # img.draw_string(70,55,str(gradient_bg_lr))
 
-        return (
-            img.get_statistics(roi=region_ul).median(),
-            img.get_statistics(roi=region_ur).median(),
-            img.get_statistics(roi=region_ll).median(),
-            img.get_statistics(roi=region_lr).median(),
-        )
+        # Compute Otsu threshold for each corner
+        try:
+            gradient_bg_ul = img.get_histogram(roi=region_ul).get_threshold().value()
+            gradient_bg_ur = img.get_histogram(roi=region_ur).get_threshold().value()
+            gradient_bg_ll = img.get_histogram(roi=region_ll).get_threshold().value()
+            gradient_bg_lr = img.get_histogram(roi=region_lr).get_threshold().value()
+            self.g_corners = (
+                gradient_bg_ul,
+                gradient_bg_ur,
+                gradient_bg_ll,
+                gradient_bg_lr,
+            )
+        except:
+            pass
 
-    def _gradient_value(self, index, gradient_corners):
+    def _gradient_value(self, index):
         """Calculates a reference threshold according to a linear
         interpolation gradient of luminosity from 4 corners of Tiny Seed"""
         (
@@ -740,7 +750,7 @@ class TinyScanner(Page):
             gradient_bg_ur,
             gradient_bg_ll,
             gradient_bg_lr,
-        ) = gradient_corners
+        ) = self.g_corners
 
         y_position = index % 12
         x_position = index // 12
@@ -759,8 +769,8 @@ class TinyScanner(Page):
         filtered = (
             gradient_bg_ul + gradient_bg_ur + gradient_bg_ll + gradient_bg_lr
         )  # weight 4/6 - 67% average
-        filtered += 2 * gradient  # weight 2/6 = 33% raw gradient
-        filtered //= 6
+        filtered += 6 * gradient  # weight 6/10 = 60% raw gradient
+        filtered //= 10
         return filtered
 
         # return gradient #pure gradient
@@ -768,74 +778,60 @@ class TinyScanner(Page):
     def _detect_tiny_seed(self, img):
         """Detects Tiny Seed as a bright blob against a dark surface"""
 
-        # Load Settings for the grid type we are using
+        # Load settings for the grid type we are using
         aspect_low = self.grid_settings["aspect_low"]
         aspect_high = self.grid_settings["aspect_high"]
 
         def _choose_rect(rects):
+            # Choose the best rectangle based on aspect ratio
+            best_rect = None
+            best_aspect_diff = float("inf")
+            medium_aspect = (aspect_low + aspect_high) / 2
             for rect in rects:
                 aspect = rect[2] / rect[3]
                 if (
-                    rect[0]
-                    and rect[1]
+                    rect[0] >= 0
+                    and rect[1] >= 0
                     and (rect[0] + rect[2]) < img.width()
                     and (rect[1] + rect[3]) < img.height()
                     and aspect_low < aspect < aspect_high
                 ):
-                    return rect
-            return None
+                    aspect_diff = abs(aspect - medium_aspect)
+                    if aspect_diff < best_aspect_diff:
+                        best_aspect_diff = aspect_diff
+                        best_rect = rect
+            return best_rect
 
-        # Big lenses cameras seems to distort aspect ratio
-        if self.ctx.camera.cam_id not in (OV2640_ID, OV5642_ID):
-            aspect_low += 0.1
+        try:
+            self.blob_otsu = img.get_histogram().get_threshold().value()
+        except:
+            pass
+        blob_threshold = [(self.blob_otsu, 255)]
+        blobs = img.find_blobs(
+            blob_threshold,
+            x_stride=30,
+            y_stride=30,
+            area_threshold=5000,
+        )
 
-        stats = img.get_statistics()
-        # # Debug stats
-        # img.draw_string(10,10,"Mean:"+str(stats.mean()))
-        # img.draw_string(10,30,"Median:"+str(stats.median()))
-        # img.draw_string(10,50,"UQ:"+str(stats.uq()))
-        # img.draw_string(10,70,"LQ:"+str(stats.lq()))
+        # Debug: Optionally draw the blobs to see them during development
+        # for blob in blobs:
+        #     img.draw_rectangle(blob.rect(), color=(255, 125 * attempts, 0), thickness=3)
 
-        # Luminosity
-        luminosity = stats.median() * 2
-        attempts = 3
-        while attempts:
-            blob_threshold = [
-                (luminosity, 255),
-            ]
-            blobs = img.find_blobs(
-                blob_threshold,
-                x_stride=50,
-                y_stride=50,
-                area_threshold=10000,
-            )
-            # Debug blobs
-            # for blob in blobs:
-            #     img.draw_rectangle(blob.rect(), color=(255,125*attempts,0), thickness=3)
-            rects = []
-            for blob in blobs:
-                rects.append(blob.rect())
-            rect = _choose_rect(rects)
-            if rect:
-                break
-            attempts -= 1
-            # Reduce luminosity threshold to try again
-            luminosity *= 7
-            luminosity //= 10
-        # # Debug attempts
-        # img.draw_string(10,10,"Attempts:"+str(attempts))
+        # Choose the best rectangle that matches the aspect ratio
+        rect = _choose_rect([blob.rect() for blob in blobs])
+
+        # If a rectangle was found, draw it
         if rect:
-            # Outline Tiny Seed
             outline = (
                 rect[0] - 1,
                 rect[1] - 1,
                 rect[2] + 1,
                 rect[3] + 1,
             )
-            if self.capturing:
-                img.draw_rectangle(outline, lcd.WHITE, thickness=4)
-            else:
-                img.draw_rectangle(outline, lcd.WHITE, thickness=2)
+            thickness = 4 if self.capturing else 2
+            img.draw_rectangle(outline, lcd.WHITE, thickness=thickness)
+
         return rect
 
     def _draw_grid(self, img):
@@ -856,7 +852,7 @@ class TinyScanner(Page):
                     lcd.WHITE,
                 )
 
-    def _detect_and_draw_punches(self, img, gradient_corners):
+    def _detect_and_draw_punches(self, img):
         """Applies gradient threshold to detect punched(black painted) bits"""
         page_seed_numbers = [0] * 12
         index = 0
@@ -890,9 +886,7 @@ class TinyScanner(Page):
                 #     img.draw_string(70,25,"143:"+str(gradient_ref))
 
                 # Defines a threshold to evaluate if the dot is considered punched
-                punch_threshold = (
-                    self._gradient_value(index, gradient_corners) * 4
-                ) // 5  # ~-20%
+                punch_threshold = self._gradient_value(index)
                 # Sensor image will be downscaled on small displays
                 punch_thickness = (
                     1 if self.ctx.display.height() > SMALLEST_HEIGHT else 2
@@ -908,36 +902,13 @@ class TinyScanner(Page):
                         page_seed_numbers[word_index], bit
                     )
                 index += 1
-        # print(page_seed_numbers)
         return page_seed_numbers
 
-    def _set_camera_sensitivity(self):
-        if self.ctx.camera.cam_id == OV7740_ID:
-            # reduce sensitivity to avoid saturated reflactions
-            # luminance high level, default=0x78
-            sensor.__write_reg(0x24, 0x48)  # pylint: disable=W0212
-            # luminance low level, default=0x68
-            sensor.__write_reg(0x25, 0x44)  # pylint: disable=W0212
-            # Disable frame integrtation (night mode)
-            sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
-
     def _run_camera(self):
-        """Turns camera on, returns True if image fills full screen"""
+        """Turns camera on and rotates screen to landscape"""
         sensor.run(1)
         self.ctx.display.clear()
-        if self.ctx.display.width() < 320:
-            full_screen = True
-        else:
-            full_screen = False
-            self.ctx.display.outline(
-                39,
-                1,
-                241,
-                321,
-            )
         self.ctx.display.to_landscape()
-
-        return full_screen
 
     def _exit_camera(self):
         sensor.run(0)
@@ -1023,9 +994,8 @@ class TinyScanner(Page):
             message = t("TOUCH or ENTER to capture")
         self.ctx.display.draw_centered_text(message)
         precamera_ticks = time.ticks_ms()
-        self.ctx.camera.initialize_sensor(grayscale=True)
-        self._set_camera_sensitivity()
-        full_screen = self._run_camera()
+        self.ctx.camera.initialize_run(mode=BINARY_GRID_MODE)
+        self.ctx.display.to_landscape()
         postcamera_ticks = time.ticks_ms()
         # check how much time camera took to retain message on the screen
         if precamera_ticks + FLASH_MSG_TIME > postcamera_ticks:
@@ -1036,6 +1006,7 @@ class TinyScanner(Page):
         # # Debug FPS 1/4
         # clock = time.clock()
         # fps = 0
+        self.ctx.display.clear()
         while True:
             # # Debug FPS 2/4
             # clock.tick()
@@ -1044,24 +1015,21 @@ class TinyScanner(Page):
             img = self.ctx.camera.snapshot()
             rect = self._detect_tiny_seed(img)
             if rect:
-                gradient_corners = self._gradient_corners(rect, img)
-                # print(gradient_corners)
+                self._gradient_corners(rect, img)
+                # print(self.g_corners)
                 # map_regions
                 self._map_punches_region(rect, page)
-                page_seed_numbers = self._detect_and_draw_punches(img, gradient_corners)
+                page_seed_numbers = self._detect_and_draw_punches(img)
                 self._draw_grid(img)
             if board.config["type"] == "m5stickv":
                 img.lens_corr(strength=1.0, zoom=0.56)
             # # Debug FPS 3/4
             # img.draw_string(10,100,str(fps))
-            if full_screen:
-                lcd.display(img)
-            else:
+            if board.config["type"] == "amigo":
                 # Centralize image on top Amigo's screen
-                # Offset x = 480 - 320 - 2 = 158 if not flipped
-                oft_x = 2 if self.ctx.display.flipped_x_coordinates else 158
-                lcd.display(img, oft=(oft_x, 40))
-
+                lcd.display(img, oft=(80, 40))
+            else:
+                lcd.display(img)
             if page_seed_numbers:
                 if w24:
                     if page == 0:  # Scanning first 12 words (page 0)

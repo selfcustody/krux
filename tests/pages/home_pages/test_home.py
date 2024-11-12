@@ -248,14 +248,15 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
-    INDEX_0_B85_FINGERPRINT = "02e8bff2"
+    INDEX_1_B85_FINGERPRINT = "af9bc2fe"
 
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 3),  # Go to BIP85
         BUTTON_ENTER,  # Enter BIP85
         BUTTON_ENTER,  # Agree
+        BUTTON_ENTER,  # BIP39 Mnemonics
         BUTTON_ENTER,  # 12 words
-        BUTTON_ENTER,  # Index 0
+        BUTTON_ENTER,  # Index 1
         BUTTON_PAGE_PREV,  # Move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_ENTER,  # Load words
@@ -271,7 +272,7 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
     home.wallet()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert ctx.wallet.key.fingerprint_hex_str() == INDEX_0_B85_FINGERPRINT
+    assert ctx.wallet.key.fingerprint_hex_str() == INDEX_1_B85_FINGERPRINT
 
 
 def test_load_address_view(mocker, amigo, tdata):
@@ -332,7 +333,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.pages.qr_capture import QRCodeCapture
     from krux.sd_card import (
         PSBT_FILE_EXTENSION,
-        B64_PSBT_FILE_EXTENSION,
+        B64_FILE_EXTENSION,
         SIGNED_FILE_SUFFIX,
     )
     from ...shared_mocks import MockFile, mock_open
@@ -628,14 +629,11 @@ def test_sign_psbt(mocker, m5stickv, tdata):
     PSBT_FILE_NAME_NO_EXT = "test"
     PSBT_FILE_NAME = PSBT_FILE_NAME_NO_EXT + PSBT_FILE_EXTENSION
     B64_PSBT_FILE_NAME = (
-        PSBT_FILE_NAME_NO_EXT + PSBT_FILE_EXTENSION + B64_PSBT_FILE_EXTENSION
+        PSBT_FILE_NAME_NO_EXT + PSBT_FILE_EXTENSION + B64_FILE_EXTENSION
     )
     SIGNED_PSBT_FILE_NAME = PSBT_FILE_NAME_NO_EXT + "-signed" + PSBT_FILE_EXTENSION
     B64_SIGNED_PSBT_FILE_NAME = (
-        PSBT_FILE_NAME_NO_EXT
-        + "-signed"
-        + PSBT_FILE_EXTENSION
-        + B64_PSBT_FILE_EXTENSION
+        PSBT_FILE_NAME_NO_EXT + "-signed" + PSBT_FILE_EXTENSION + B64_FILE_EXTENSION
     )
 
     num = 0
@@ -700,7 +698,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
 
         if case[8] is not None:  # if signed from/to SD card
             mock_utils.return_value.load_file.assert_called_once_with(
-                [PSBT_FILE_EXTENSION, B64_PSBT_FILE_EXTENSION],
+                [PSBT_FILE_EXTENSION, B64_FILE_EXTENSION],
                 prompt=False,
                 only_get_filename=True,
             )
@@ -709,7 +707,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                     PSBT_FILE_NAME_NO_EXT,
                     "QRCode",
                     SIGNED_FILE_SUFFIX,
-                    PSBT_FILE_EXTENSION + B64_PSBT_FILE_EXTENSION,
+                    PSBT_FILE_EXTENSION + B64_FILE_EXTENSION,
                 )
             else:
                 mock_set_filename.assert_called_once_with(
@@ -738,7 +736,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.sd_card import (
         PSBT_FILE_EXTENSION,
-        B64_PSBT_FILE_EXTENSION,
+        B64_FILE_EXTENSION,
         SIGNED_FILE_SUFFIX,
     )
     from krux.settings import THIN_SPACE
@@ -822,7 +820,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
 
     # signed from/to SD card
     mock_utils.return_value.load_file.assert_called_once_with(
-        [PSBT_FILE_EXTENSION, B64_PSBT_FILE_EXTENSION],
+        [PSBT_FILE_EXTENSION, B64_FILE_EXTENSION],
         prompt=False,
         only_get_filename=True,
     )
@@ -929,7 +927,7 @@ def test_sign_p2tr_zeroes_fingerprint(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.sd_card import (
         PSBT_FILE_EXTENSION,
-        B64_PSBT_FILE_EXTENSION,
+        B64_FILE_EXTENSION,
         SIGNED_FILE_SUFFIX,
     )
 
@@ -979,7 +977,7 @@ def test_sign_p2tr_zeroes_fingerprint(mocker, m5stickv, tdata):
 
     # signed from/to SD card
     mock_utils.return_value.load_file.assert_called_once_with(
-        [PSBT_FILE_EXTENSION, B64_PSBT_FILE_EXTENSION],
+        [PSBT_FILE_EXTENSION, B64_FILE_EXTENSION],
         prompt=False,
         only_get_filename=True,
     )

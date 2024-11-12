@@ -1,3 +1,46 @@
+# Changelog 24.11.0 - November 2024
+
+### Tamper Check Flash Hash and Tamper Check Code (Experimental)
+The *Tamper Check Flash Hash* (TC Flash Hash) feature verifies the integrity of the device's flash memory by generating a unique tamper indicator that relies on hash properties. After setting up a *Tamper Check Code* (TC Code), this check can be performed at every boot or manually via `Tools -> Flash Tools`. The TC Code is a key component, required to execute the verification and detect unauthorized changes to the device's memory. Users can also fill unused memory blocks with camera-generated entropy to further mitigate tampering attempts.
+
+### Flash Map
+*Flash Map* is an auxiliary tool that allows users to visualize the regions of the device's memory that are empty. This helps users verify the results of actions such as:
+
+- Wiping the device's memory
+- Erasing the user's area
+- Saving settings and encrypted mnemonics
+- Filling empty blocks with camera-generated entropy
+
+### Japanese Translation
+Japanese translation has been added.
+
+### BIP85: Allow Export Base64 Passwords
+In  addition to BIP39 Mnemonics, users can now derive Base64 passwords from their keys. These passwords, which can be used in standard logins, can be noted down, saved to an SD card, or exported as a QR code.
+
+### Vulnerability Fix: Block Import of Python Modules from SD Card
+A feature of MicroPython, commonly used for general-purpose development, is the ability to run Python code directly from an SD card. However, with the recent implementation of tamper detection tools, this behavior is now considered a vulnerability. It was discovered that MicroPython would prioritize importing `.pyc` (Python frozen modules) from an SD card before checking the internal flash, which could be exploited to run unintended code from the SD card. To address this, a block has been implemented in MicroPython to prevent running any code from the SD card, enhancing the overall security of the device.
+
+### Add Compatibility to Partial Text Mnemonic QR Codes
+Partial Text Mnemonic QR Codes, like Coldcard's backups, where mnemonics words are cropped and contain only the first 3 or 4 letters, are now auto-completed and loaded.
+
+### Multi-keypad Position Indicator
+An indicator has been added to the bottom of keypads to help users identify the keypad index while swiping between them.
+
+### WonderMV Simulator
+Computer simulator for WonderMV device has been added.
+
+### Krux Ethos
+Guidelines have been created to assist with decision-making regarding the Krux project's interactions with contributors, users, and businesses that may create products or services related to Krux.
+
+### Minor Bugfixes and Refactors
+Several code improvements for better reliability and efficiency.
+
+# Changelog 24.09.1 - September 26, 2024
+
+### Fix Camera Orientation on Cube
+Fix for the camera, that was being started upside-down on Maix Cube devices 
+
+
 # Changelog 24.09.0 - September 25, 2024
 
 ### New Device Support: WonderMV

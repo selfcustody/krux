@@ -88,24 +88,66 @@ class Touch:
             return False
         return True
 
+    # def highlight_region(self, x_index, y_index):
+    #     """Outlines the region of the current index"""
+    #     import lcd
+    #     from .themes import theme
+
+    #     # Draw outline delimiting the region
+    #     if y_index >= 0 and x_index >= 0:
+    #         y_start = self.y_regions[y_index] if y_index < len(self.y_regions) else 0
+    #         y_start += 1
+    #         y_end = (
+    #             self.y_regions[y_index + 1]
+    #             if y_index + 1 < len(self.y_regions)
+    #             else self.height
+    #         )
+    #         y_end -= 1
+    #         x_start = self.x_regions[x_index] if x_index < len(self.x_regions) else 0
+    #         x_start += 1
+    #         x_end = (
+    #             self.x_regions[x_index + 1]
+    #             if x_index + 1 < len(self.x_regions)
+    #             else self.height
+    #         )
+    #         x_end -= 1
+
+    #         lcd.draw_outline(
+    #             x_start,
+    #             y_start,
+    #             x_end - x_start,
+    #             y_end - y_start,
+    #             theme.fg_color,
+    #         )
+
     def _extract_index(self, data):
-        """Gets an index from touched points, x and y delimiters"""
-        index = 0
-        if self.y_regions:
-            for region in self.y_regions:
-                if data[1] > region:
-                    index += 1
-            index -= 1
-            if self.x_regions:  # if 2D array
-                index *= len(self.x_regions) - 1
-                x_index = 0
-                for x_region in self.x_regions:
-                    if data[0] > x_region:
-                        x_index += 1
-                x_index -= 1
-                index += x_index
-            return index
-        return 0
+        """
+        Gets an index from touched points, x and y delimiters.
+        The index is calculated based on the position of the touch within the defined regions.
+        """
+        y_index = 0
+        x_index = 0
+
+        # Calculate y index
+        for region in self.y_regions:
+            if data[1] > region:
+                y_index += 1
+        y_index -= 1 if y_index > 0 else 0
+
+        # Calculate x index if x regions are defined (2D array)
+        if self.x_regions:
+            for x_region in self.x_regions:
+                if data[0] > x_region:
+                    x_index += 1
+            x_index -= 1  # Adjust index to be zero-based
+            # Combine y and x indices to get the final index
+            index = y_index * (len(self.x_regions) - 1) + x_index
+        else:
+            index = y_index
+
+        # self.highlight_region(x_index, y_index)
+
+        return index
 
     def _store_points(self, data):
         """Store pressed points and calculare an average pressed point"""
