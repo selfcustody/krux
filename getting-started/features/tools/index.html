@@ -404,6 +404,8 @@
       
         
       
+        
+      
     
     
       
@@ -1012,6 +1014,8 @@
       
         
       
+        
+      
     
     
       
@@ -1196,18 +1200,51 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#remove-mnemonic" class="md-nav__link">
+  <a href="#flash-tools" class="md-nav__link">
     <span class="md-ellipsis">
-      Remove Mnemonic
+      Flash Tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Flash Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flash-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flash Map
     </span>
   </a>
   
 </li>
+        
+          <li class="md-nav__item">
+  <a href="#tc-flash-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      TC Flash Hash
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erase-users-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erase User's Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#wipe-device" class="md-nav__link">
+  <a href="#remove-mnemonic" class="md-nav__link">
     <span class="md-ellipsis">
-      Wipe Device
+      Remove Mnemonic
     </span>
   </a>
   
@@ -1285,6 +1322,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tamper-detection/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tamper Detection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1305,6 +1363,27 @@
   
   <span class="md-ellipsis">
     Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../templates/templates/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Templates
   </span>
   
 
@@ -1485,19 +1564,46 @@
 
 <h3 id="descriptor-addresses">Descriptor Addresses<a class="headerlink" href="#descriptor-addresses" title="Permanent link">&para;</a></h3>
 <p>Verify if an address or list of addresses belong to a wallet without needing to load private keys. Simply load a trusted wallet descriptor from a QR code or SD card.</p>
+<div style="clear: both"></div>
+
+<h3 id="flash-tools">Flash Tools<a class="headerlink" href="#flash-tools" title="Permanent link">&para;</a></h3>
+<p>Tools to inspect the content of device's flash memory and clear user's area</p>
+<p><img src="../../../img/maixpy_m5stickv/flash-tools-125.png" align="right">
+<img src="../../../img/maixpy_amigo/flash-tools-150.png" align="right"></p>
+<div style="clear: both"></div>
+
+<h4 id="flash-map">Flash Map<a class="headerlink" href="#flash-map" title="Permanent link">&para;</a></h4>
+<p>Flash map indicates which memory blocks (4086 Bytes each) are empty. Memory is separated in two regions: Firmware and User's Data. White or colored blocks contain data, while grey blocks are empty.</p>
+<p>This is an interesting tool to visualize the effects of filling the memory with ramdom entropy, what is done during the setup of a new <code>TC Code</code>, used with <code>TC Flash Hash</code> tool, described below.</p>
+<p><img src="../../../img/maixpy_m5stickv/flash-map-125.png" align="right">
+<img src="../../../img/maixpy_amigo/flash-map-150.png" align="right"></p>
+<div style="clear: both"></div>
+
+<h4 id="tc-flash-hash">TC Flash Hash<a class="headerlink" href="#tc-flash-hash" title="Permanent link">&para;</a></h4>
+<p><em>Tamper Check Flash Hash</em> is a tamper detection mechanism that enables you to verify if the flash memory content has been altered. To use it first, need to create a <code>TC Code</code> on <code>Settings -&gt; Security -&gt; Tamper Check Code</code>.
+<em>TC Flash Hash</em> will hash this code, K210 chip's unique ID and the content of the whole flash memory together and produce an image.
+The tool generates a unique image and four tamper detection words based on a hash of your <em>TC Code</em>, the device's UID, and the flash content. The flash memory is divided into two regions:</p>
+<ul>
+<li>
+<p><strong>Firmware Region:</strong> Generates the image and the first two words.</p>
+</li>
+<li>
+<p><strong>User's Region:</strong> Generates the last two words.</p>
+</li>
+</ul>
+<p>Learn more about <em>Tamper Check Flash Hash</em> on <a href="../tamper-detection/">Tamper Detection</a></p>
+<h4 id="erase-users-data">Erase User's Data<a class="headerlink" href="#erase-users-data" title="Permanent link">&para;</a></h4>
+<p><img src="../../../img/maixpy_m5stickv/erase-data-125.png" align="right">
+<img src="../../../img/maixpy_amigo/erase-data-150.png" align="right"></p>
+<p>This option permanently removes all stored encrypted mnemonics, settings and <code>TC Code</code> from the device's internal flash memory. It ensures that the data is irrecoverable, making it an adequate measure to take if any important mnemonics were stored with a weak encryption key.</p>
+<div style="clear: both"></div>
+
 <h3 id="remove-mnemonic">Remove Mnemonic<a class="headerlink" href="#remove-mnemonic" title="Permanent link">&para;</a></h3>
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-150.png" align="right"></p>
 <p>This option allows you to remove any stored encrypted mnemonic from the device's internal memory or an SD card. For more information, see <a href="../encrypted-mnemonics/">Krux Encrypted Mnemonics</a>.</p>
 <p>When mnemonics are removed from the device's flash memory, Krux will no longer be able to access them. However, as with most operating systems, the data may still be recoverable using specialized tools. If you stored any important keys with a weak encryption key, it is recommended to use the "Wipe Device" feature below to ensure that the data is irrecoverable.</p>
 <p>When mnemonics are removed from an SD card, Krux will overwrite the region where the encrypted mnemonic was stored with empty data. This makes it more secure to delete mnemonics from SD cards using Krux rather than a PC or another device. However, Krux does not have a "Wipe" feature for SD cards; you can find this feature in third-party applications.</p>
-<div style="clear: both"></div>
-
-<h3 id="wipe-device">Wipe Device<a class="headerlink" href="#wipe-device" title="Permanent link">&para;</a></h3>
-<p><img src="../../../img/maixpy_m5stickv/wipe-device-125.png" align="right">
-<img src="../../../img/maixpy_amigo/wipe-device-150.png" align="right"></p>
-<p>This option permanently removes all stored encrypted mnemonics and settings from the device's internal flash memory. It ensures that the data is irrecoverable, making it an adequate measure to take if any important mnemonics were stored with a weak encryption key.</p>
-<div style="clear: both"></div>
 
 
 

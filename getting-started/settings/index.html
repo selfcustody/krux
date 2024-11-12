@@ -13,10 +13,10 @@
         <link rel="canonical" href="https://selfcustody.github.io/krux/getting-started/settings/">
       
       
-        <link rel="prev" href="../features/tinyseed/">
+        <link rel="prev" href="../features/tamper-detection/">
       
       
-        <link rel="next" href="../navigation/">
+        <link rel="next" href="../templates/templates/">
       
       
       <link rel="icon" href="../../img/favicon.png">
@@ -392,6 +392,8 @@
       
         
           
+        
+      
         
       
         
@@ -1010,6 +1012,8 @@
       
         
       
+        
+      
     
     
       
@@ -1186,6 +1190,27 @@
   
   <span class="md-ellipsis">
     Tiny Seed and other metal plates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/tamper-detection/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tamper Detection
   </span>
   
 
@@ -1463,9 +1488,27 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#tc-flash-hash-at-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      TC Flash Hash at Boot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#hide-mnemonics" class="md-nav__link">
     <span class="md-ellipsis">
       Hide Mnemonics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tamper-check-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tamper Check Code
     </span>
   </a>
   
@@ -1522,6 +1565,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../templates/templates/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Templates
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1764,8 +1828,16 @@
 <h4 id="shutdown-time">Shutdown Time<a class="headerlink" href="#shutdown-time" title="Permanent link">&para;</a></h4>
 <p>Set the time it takes for Krux to automatically shut down. This feature not only conserves your device's battery, if it has one, but also serves as an important security measure. If you forget your device with private keys loaded, it will shut down automatically after the set time.</p>
 <p>Please note that devices without batteries and power management will not shut down but will reboot instead, which is sufficient to unload private keys.</p>
+<h4 id="tc-flash-hash-at-boot">TC Flash Hash at Boot<a class="headerlink" href="#tc-flash-hash-at-boot" title="Permanent link">&para;</a></h4>
+<p>Chose if you would like to run <a href="../features/tamper-detection/">Tamper Check Flash Hash</a> every time the device is powered on.</p>
+<p>Activating <em>TC Flash Hash</em> at boot helps prevent unauthorized use by requiring the <em>TC Code</em>. But is important to note, unlike a PIN, the TC Code does not provide access control over USB. This means that the device's memory remains accessible for reading and writing via USB, allowing it to be flashed with firmware that does not require the <em>TC Code</em>, which could then allow unauthorized use through its human interface.</p>
 <h4 id="hide-mnemonics">Hide Mnemonics<a class="headerlink" href="#hide-mnemonics" title="Permanent link">&para;</a></h4>
 <p>When "Hide Mnemonics" mode is set to "True", your device will not display private key data or backup tools when a key is loaded. It will only show public key information and allow signing operations.</p>
+<h4 id="tamper-check-code">Tamper Check Code<a class="headerlink" href="#tamper-check-code" title="Permanent link">&para;</a></h4>
+<p>Create or modify a Tamper Check Code. This code will be required every time <a href="../features/tamper-detection/">Tamper Check Flash Hash</a> is executed.</p>
+<p>After creating the code, you will be prompted to fill the empty memory spaces with random entropy from the camera. This step is important to make <em>TC Flash Hash</em> more resilient to data manipulation by eliminating empty memory spaces that could be exploited in a sophisticated tamper attempt.</p>
+<p>The filling process requires good entropy images. If, for any reason, such as starting the process in a dark room, you fail to capture good entropy images, you can restart the filling process by resetting your <em>TC Code</em>.</p>
+<p>The <em>TC Code</em> will be deleted if the device is wiped or user data is erased, which will consequently disable <em>TC Flash Hash</em>.</p>
 <h3 id="appearance">Appearance<a class="headerlink" href="#appearance" title="Permanent link">&para;</a></h3>
 <p><img src="../../img/maixpy_m5stickv/settings-options-appearance-125.png" align="right">
 <img src="../../img/maixpy_amigo/settings-options-appearance-150.png" align="right"></p>
@@ -1830,7 +1902,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../features/tinyseed/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Tiny Seed and other metal plates">
+          <a href="../features/tamper-detection/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Tamper Detection">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -1840,20 +1912,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Tiny Seed and other metal plates
+                Tamper Detection
               </div>
             </div>
           </a>
         
         
           
-          <a href="../navigation/" class="md-footer__link md-footer__link--next" aria-label="Next: Navigation Overview">
+          <a href="../templates/templates/" class="md-footer__link md-footer__link--next" aria-label="Next: Templates">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Navigation Overview
+                Templates
               </div>
             </div>
             <div class="md-footer__button md-icon">

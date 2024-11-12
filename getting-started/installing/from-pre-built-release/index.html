@@ -404,6 +404,8 @@
       
         
       
+        
+      
     
     
       
@@ -1148,6 +1150,8 @@
       
         
       
+        
+      
     
     
       
@@ -1333,6 +1337,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/tamper-detection/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tamper Detection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1353,6 +1378,27 @@
   
   <span class="md-ellipsis">
     Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../templates/templates/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Templates
   </span>
   
 
@@ -1516,12 +1562,12 @@
 <h3 id="verify-the-files">Verify the files<a class="headerlink" href="#verify-the-files" title="Permanent link">&para;</a></h3>
 <p>Before installing the release, it's a good idea to check that:</p>
 <ol>
-<li>The <em>SHA256 hash</em> of <code>krux-v24.09.1.zip</code> matches the hash in <code>krux-v24.09.1.zip.sha256.txt</code></li>
-<li>The <em>signature file</em> <code>krux-v24.09.1.zip.sig</code> can be verified with the <a href="https://github.com/selfcustody/krux/blob/main/selfcustody.pem"><code>selfcustody.pem</code> public key</a> found in the root of the krux repository.</li>
+<li>The <em>SHA256 hash</em> of <code>krux-v24.11.0.zip</code> matches the hash in <code>krux-v24.11.0.zip.sha256.txt</code></li>
+<li>The <em>signature file</em> <code>krux-v24.11.0.zip.sig</code> can be verified with the <a href="https://github.com/selfcustody/krux/blob/main/selfcustody.pem"><code>selfcustody.pem</code> public key</a> found in the root of the krux repository.</li>
 </ol>
 <p>You can either do this manually or with the <code>krux</code> shell script, which contains helper commands for this:
-<div class="highlight"><pre><span></span><code>./krux<span class="w"> </span>sha256<span class="w"> </span>krux-v24.09.1.zip
-./krux<span class="w"> </span>verify<span class="w"> </span>krux-v24.09.1.zip<span class="w"> </span>selfcustody.pem
+<div class="highlight"><pre><span></span><code>./krux<span class="w"> </span>sha256<span class="w"> </span>krux-v24.11.0.zip
+./krux<span class="w"> </span>verify<span class="w"> </span>krux-v24.11.0.zip<span class="w"> </span>selfcustody.pem
 </code></pre></div></p>
 <p>On Mac you may need to install <code>coreutils</code> to be able to use <code>sha256sum</code>
 <div class="highlight"><pre><span></span><code>brew install coreutils
@@ -1529,7 +1575,7 @@
 <p>Fun fact: Each Krux release is signed with Krux!</p>
 <h3 id="flash-the-firmware-onto-the-device">Flash the firmware onto the device<a class="headerlink" href="#flash-the-firmware-onto-the-device" title="Permanent link">&para;</a></h3>
 <p>Extract the latest version of Krux you downloaded and enter the folder:
-<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>krux-v24.09.1.zip<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>krux-v24.09.1
+<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>krux-v24.11.0.zip<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>krux-v24.11.0
 </code></pre></div></p>
 <p>Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing <code>DEVICE</code> with either <code>m5stickv</code>, <code>amigo</code>, <code>bit</code>, <code>cube</code>, <code>dock</code> or <code>yahboom</code> (to yahboom you may need to manually specify the port, for example <code>/dev/ttyUSB0</code> on Linux or <code>COM6</code> on Windows):
 <div class="highlight"><pre><span></span><code>./ktool<span class="w"> </span>-B<span class="w"> </span>goE<span class="w"> </span>-b<span class="w"> </span><span class="m">1500000</span><span class="w"> </span>maixpy_DEVICE/kboot.kfpkg
