@@ -64,12 +64,13 @@ class AESCipher:
         data_bytes = raw.encode("latin-1") if isinstance(raw, str) else raw
         if i_vector:
             encryptor = ucryptolib.aes(self.key, mode, i_vector)
-            data_bytes = i_vector + data_bytes
         else:
             encryptor = ucryptolib.aes(self.key, mode)
         encrypted = encryptor.encrypt(
             data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
         )
+        if i_vector:
+            encrypted = i_vector + encrypted
         return base_encode(encrypted, 64)
 
     def decrypt(self, encrypted, mode, i_vector=None):
