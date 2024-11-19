@@ -1,3 +1,8 @@
+# Changelog 24.11.1 - November 2024
+
+### Security Fix
+This release addresses a vulnerability affecting AES-CBC encrypted mnemonics stored on flash storage, SD cards, and QR codes. Due to an implementation error, the Initialization Vector (IV) in our CBC encryption, which used camera-generated entropy, was not being correctly utilized, which meant it did not provide the intended additional entropy.
+
 # Changelog 24.11.0 - November 2024
 
 ### Tamper Check Flash Hash and Tamper Check Code (Experimental)
