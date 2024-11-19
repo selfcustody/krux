@@ -13,10 +13,10 @@ ECB_WORDS = "brass creek fuel snack era success impulse dirt caution purity lott
 CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
 
 ECB_ENCRYPTED_WORDS = "1NV55l0ny9vkFV6s4MnDvDlpiWUJo35sv5hs6ZKp4T0zVrOxXft8E/RLX9unZJJwii2/crVgr+XE/lAgWhL7YoKYtimDmbpdOFK9U84+3bE="
-CBC_ENCRYPTED_WORDS = "pJy/goOD11Nulfzd07PPKCOuPWsy2/tONwHrpY/AihVDcGxmIgzasyhs3fY90E0khrCqqgCvzjukMCdxif2OljKDxZQPGoVNeJKqE4nu5fq5023WhO1yKtAcPt3mML6Q"
+CBC_ENCRYPTED_WORDS = "T1Khk2w+MnEgnp1kBZ7XjpLaWFYlK9sShaYMyO7BPmjUacEhco2X1LFWDC8YRP+Z2GG4hYEoCMoHyOAoBPXh8P3Z1D5F34pWtBlgEOpGAwFBc+VeDWFRhDLWLjl6pXia"
 
 ECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
-CBC_ENCRYPTED_QR = b"\x07test ID\x01\x00\x00\n\xf3<k\xc1Qn\x95`hrs],^R\x9b\xfa\xec\xfe4\x9e\xf1\xaaT\x8f\xdan<,\xa7\x87Pm\xd8\x80\xd7\x15@\x95\xeb\xc1\xdb\xcd\xb2\xfc\xf7 \x8e"
+CBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
 
 ECB_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 100000"
@@ -34,12 +34,12 @@ SEEDS_JSON = """{
     "cbcID": {
         "version": 1,
         "key_iterations": 100000,
-        "data": "GpNxj9kzdiTuIf1UYC6R0FHoUokBhiNLkxWgSOHBhmBHb0Ew8wk1M+VlsR4v/koCfSGOTkgjFshC36+n7mx0W0PI6NizAoPClO8DUVamd5hS6irS+Lfff0//VJWK1BcdvOJjzYw8TBiVaL1swAEEySjn5GsqF1RaJXzAMMgu03Kq32iDIDy7h/jHJTiIPCoVQAle/C9vXq2HQeVx43c0LhGXTZmIhhkHPMgDzFTsMGM="
+        "data": "T1Khk2w+MnEgnp1kBZ7Xjp+66c9sy20J39ffK11XvVAaDSyQybsM6txAwKy/U1iU4KKYRu3ywDDN9q9sWAi1R+y7x4aHwQd0C0rRcW0iDxvWtFyWMKilA0AsDQwvBSgkhf5PQnQ1rfjnKVF75rTrG5vUNF01FRwa9PoM5cq30Yki/hFnWj/4niaeXqgQvIwjSzBNbXgaRLjfoaUyHiu8+zBX25rkpI0PW243fgDEfqI="
     }
 }"""
 
 ECB_ONLY_JSON = """{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}"""
-CBC_ONLY_JSON = """{"cbcID": {"version": 1, "key_iterations": 100000, "data": "GpNxj9kzdiTuIf1UYC6R0FHoUokBhiNLkxWgSOHBhmBHb0Ew8wk1M+VlsR4v/koCfSGOTkgjFshC36+n7mx0W0PI6NizAoPClO8DUVamd5hS6irS+Lfff0//VJWK1BcdvOJjzYw8TBiVaL1swAEEySjn5GsqF1RaJXzAMMgu03Kq32iDIDy7h/jHJTiIPCoVQAle/C9vXq2HQeVx43c0LhGXTZmIhhkHPMgDzFTsMGM="}}"""
+CBC_ONLY_JSON = """{"cbcID": {"version": 1, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7Xjp+66c9sy20J39ffK11XvVAaDSyQybsM6txAwKy/U1iU4KKYRu3ywDDN9q9sWAi1R+y7x4aHwQd0C0rRcW0iDxvWtFyWMKilA0AsDQwvBSgkhf5PQnQ1rfjnKVF75rTrG5vUNF01FRwa9PoM5cq30Yki/hFnWj/4niaeXqgQvIwjSzBNbXgaRLjfoaUyHiu8+zBX25rkpI0PW243fgDEfqI="}}"""
 I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
 
 
@@ -70,9 +70,38 @@ def test_cbc_encryption(m5stickv):
     from Crypto.Random import get_random_bytes
 
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
-    iv = get_random_bytes(AES.block_size)
+    iv = I_VECTOR
     encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, iv).decode("utf-8")
     assert encrypted == CBC_ENCRYPTED_WORDS
+    data = base64.b64decode(encrypted)
+    encrypted_mnemonic = data[AES.block_size :]
+    i_vector = data[: AES.block_size]
+    decrypted = encryptor.decrypt(encrypted_mnemonic, AES.MODE_CBC, i_vector)
+    assert decrypted == TEST_WORDS
+
+
+def test_cbc_iv_use(m5stickv):
+    from krux.encryption import AESCipher
+    from Crypto.Random import get_random_bytes
+
+    SECOND_IV = b"\x8e\xc8b\x8f\xe2\xa8`\xaa\x06d\xe8\xe7\xaa.0\x03"
+    CBC_ENCRYPTED_WORDS_SECOND_IV = "jshij+KoYKoGZOjnqi4wA8BON70ndcVal949EOpP9Hi15hBsz3XvnpQDTC3c/6Nt8GnU4gp7OUcXvy6WuhoHrGtLOZAttnNmMQFZK6aAYy95T5MnZIsNbnJ15xewAZqb"
+
+    encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
+    iv = I_VECTOR
+    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, iv).decode("utf-8")
+    assert encrypted == CBC_ENCRYPTED_WORDS
+    data = base64.b64decode(encrypted)
+    encrypted_mnemonic = data[AES.block_size :]
+    i_vector = data[: AES.block_size]
+    decrypted = encryptor.decrypt(encrypted_mnemonic, AES.MODE_CBC, i_vector)
+    assert decrypted == TEST_WORDS
+    # Encrypt again with same data except for the IV
+    iv = SECOND_IV
+    print(iv)
+    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, iv).decode("utf-8")
+    print(encrypted)
+    assert encrypted == CBC_ENCRYPTED_WORDS_SECOND_IV
     data = base64.b64decode(encrypted)
     encrypted_mnemonic = data[AES.block_size :]
     i_vector = data[: AES.block_size]
