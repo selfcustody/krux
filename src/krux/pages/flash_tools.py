@@ -71,7 +71,7 @@ class FlashTools(Page):
         l_y_block_offset = l_y_text_offset + (FONT_HEIGHT - FONT_WIDTH) // 2
         l_x_offset = DEFAULT_PADDING
         self.ctx.display.fill_rectangle(
-            l_x_offset, l_y_block_offset, FONT_WIDTH, FONT_WIDTH, theme.fg_color
+            l_x_offset, l_y_block_offset, FONT_WIDTH, FONT_WIDTH, theme.highlight_color
         )
         l_x_offset += (3 * FONT_WIDTH) // 2
         self.ctx.display.draw_string(
@@ -89,7 +89,7 @@ class FlashTools(Page):
             l_x_offset -= (3 * FONT_WIDTH) // 2
             l_x_offset -= lcd.string_width_px(t("User's Data"))
         self.ctx.display.fill_rectangle(
-            l_x_offset, l_y_block_offset, FONT_WIDTH, FONT_WIDTH, theme.highlight_color
+            l_x_offset, l_y_block_offset, FONT_WIDTH, FONT_WIDTH, theme.fg_color
         )
         l_x_offset += (3 * FONT_WIDTH) // 2
         self.ctx.display.draw_string(
@@ -115,7 +115,7 @@ class FlashTools(Page):
         # Draw a map of the flash memory
         for address in range(0, FLASH_SIZE, BLOCK_SIZE):
             wdt.feed()
-            color = theme.fg_color if address < SPIFFS_ADDR else theme.highlight_color
+            color = theme.highlight_color if address < SPIFFS_ADDR else theme.fg_color
             if flash.read(address, BLOCK_SIZE) == empty_buf:
                 color = theme.disabled_color
             # Draw the block
@@ -125,7 +125,7 @@ class FlashTools(Page):
                 x_pos, y_pos, image_block_size, image_block_size, color
             )
             column += 1
-            if column == FLASH_ROWS:
+            if column >= FLASH_ROWS:
                 column = 0
                 row += 1
         self.ctx.input.reset_ios_state()
