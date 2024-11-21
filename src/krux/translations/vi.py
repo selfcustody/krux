@@ -314,7 +314,7 @@ translation_array = [
     "Sử dụng bề mặt nền đen.",
     "Sử dụng sự ngẫu nhiên của máy ảnh để tạo ra một Mnemonic mới",
     "Đã sử dụng:",
-    "Dữ liệu của người dùng",
+    "Người dùng",
     "Giá trị %s ngoài phạm vi: [ %s, %s]",
     "Giá trị phải là bội của %s",
     "Đang xác minh..",

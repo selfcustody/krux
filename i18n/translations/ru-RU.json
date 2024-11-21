@@ -292,7 +292,7 @@
     "Use a black background surface.": "Использовать черную фоновую поверхность.",
     "Use camera's entropy to create a new mnemonic": "Использовать энтропию камеры, чтобы создать новую мнемонику",
     "Used:": "Использовано:",
-    "User's Data": "Данные пользователя",
+    "User's Data": "Пользователь",
     "Value %s out of range: [%s, %s]": "Значение %s вне диапозона: [%s, %s]",
     "Value must be multiple of %s": "Значение должно быть кратным %s",
     "Verifying..": "Проверка..",

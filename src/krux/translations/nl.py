@@ -314,7 +314,7 @@ translation_array = [
     "Gebruik een donker achergrond.",
     "Gebruik de camera als entropie voor het aanmaken van een nieuwe geheugensteun",
     "Gebruikt:",
-    "Gegevens van de gebruiker",
+    "Gebruiker",
     "Waarde %s is buiten bereik: [%s, %s]",
     "Waarde moet meerdere van %s zijn",
     "Bezig met verifiëren..",

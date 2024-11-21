@@ -292,7 +292,7 @@
     "Use a black background surface.": "Sử dụng bề mặt nền đen.",
     "Use camera's entropy to create a new mnemonic": "Sử dụng sự ngẫu nhiên của máy ảnh để tạo ra một Mnemonic mới",
     "Used:": "Đã sử dụng:",
-    "User's Data": "Dữ liệu của người dùng",
+    "User's Data": "Người dùng",
     "Value %s out of range: [%s, %s]": "Giá trị %s ngoài phạm vi: [ %s, %s]",
     "Value must be multiple of %s": "Giá trị phải là bội của %s",
     "Verifying..": "Đang xác minh..",

@@ -314,7 +314,7 @@ translation_array = [
     "Siyah bir arka plan yüzeyi kullanın.",
     "Yeni bir mnemonic oluşturmak için kameranın entropisini kullanın",
     "Kullanılan:",
-    "Kullanıcı Verileri",
+    "Kullanıcı",
     "%s değeri aralık dışında: [%s, %s]",
     "Değer %s'nin katı olmalıdır",
     "Doğrulanıyor..",

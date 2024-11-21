@@ -314,7 +314,7 @@ translation_array = [
     "Utilisez une surface de fond noire.",
     "Utilisez l'entropie de la caméra pour créer un nouveau mnémonique",
     "Utilisé\u2009:",
-    "Données de l'utilisateur",
+    "Utilisateur",
     "Valeur %s hors de portée: [%s, %s]",
     "La valeur doit être un multiple de %s",
     "Vérification..",

@@ -292,7 +292,7 @@
     "Use a black background surface.": "Siyah bir arka plan yüzeyi kullanın.",
     "Use camera's entropy to create a new mnemonic": "Yeni bir mnemonic oluşturmak için kameranın entropisini kullanın",
     "Used:": "Kullanılan:",
-    "User's Data": "Kullanıcı Verileri",
+    "User's Data": "Kullanıcı",
     "Value %s out of range: [%s, %s]": "%s değeri aralık dışında: [%s, %s]",
     "Value must be multiple of %s": "Değer %s'nin katı olmalıdır",
     "Verifying..": "Doğrulanıyor..",

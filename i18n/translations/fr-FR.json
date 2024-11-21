@@ -292,7 +292,7 @@
     "Use a black background surface.": "Utilisez une surface de fond noire.",
     "Use camera's entropy to create a new mnemonic": "Utilisez l'entropie de la caméra pour créer un nouveau mnémonique",
     "Used:": "Utilisé :",
-    "User's Data": "Données de l'utilisateur",
+    "User's Data": "Utilisateur",
     "Value %s out of range: [%s, %s]": "Valeur %s hors de portée: [%s, %s]",
     "Value must be multiple of %s": "La valeur doit être un multiple de %s",
     "Verifying..": "Vérification..",
