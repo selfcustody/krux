@@ -55,6 +55,7 @@ class FlashTools(Page):
     def flash_map(self):
         """Load the flash map page"""
         import flash
+        import image
 
         image_block_size = self.ctx.display.width() // FLASH_ROWS
         if self.ctx.display.width() >= self.ctx.display.height():
@@ -113,19 +114,25 @@ class FlashTools(Page):
         )
 
         # Draw a map of the flash memory
+        mem_bar = image.Image(size=(FLASH_ROWS * image_block_size, image_block_size))
         for address in range(0, FLASH_SIZE, BLOCK_SIZE):
             wdt.feed()
             color = theme.highlight_color if address < SPIFFS_ADDR else theme.fg_color
             if flash.read(address, BLOCK_SIZE) == empty_buf:
                 color = theme.disabled_color
             # Draw the block
-            x_pos = offset_x + column * image_block_size
-            y_pos = offset_y + row * image_block_size
-            self.ctx.display.fill_rectangle(
-                x_pos, y_pos, image_block_size, image_block_size, color
+            mem_bar.draw_rectangle(
+                column * image_block_size,
+                0,
+                image_block_size,
+                image_block_size,
+                color,
+                fill=True,
             )
             column += 1
             if column >= FLASH_ROWS:
+                y_pos = offset_y + row * image_block_size
+                lcd.display(mem_bar, oft=(offset_x, y_pos))
                 column = 0
                 row += 1
         self.ctx.input.reset_ios_state()
