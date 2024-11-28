@@ -739,7 +739,8 @@ class Login(Page):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            "Krux\n\n"
+            "Krux\n"
+            + "selfcustody.github.io/krux\n\n"
             + t("Hardware")
             + "\n%s\n\n" % board.config["type"]
             + t("Version")
