@@ -11,8 +11,17 @@ Before installing the release, it's a good idea to check that:
 
 You can either do this manually or with the `krux` shell script, which contains helper commands for this:
 ```bash
+### Using krux script ###
+# Hash checksum
 ./krux sha256 {{latest_krux}}.zip
+# Signature
 ./krux verify {{latest_krux}}.zip selfcustody.pem
+
+### Manually ###
+# Hash checksum
+sha256sum {{latest_krux}}.zip.sha256.txt -c
+#Signature
+openssl sha256 <{{latest_krux}}.zip -binary | openssl pkeyutl -verify -pubin -inkey selfcustody.pem -sigfile {{latest_krux}}.zip.sig
 ```
 
 On Mac you may need to install `coreutils` to be able to use `sha256sum`
