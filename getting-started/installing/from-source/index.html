@@ -1593,16 +1593,20 @@ fatal: clone of ... failed
 Failed to clone ...
 </code></pre></div></p>
 <h4 id="reproducibility">Reproducibility<a class="headerlink" href="#reproducibility" title="Permanent link">&para;</a></h4>
-<p>If you build from the <code>main</code> branch of the source code, you should be able to reproduce the build process used to generate the last release binaries and obtain exact copies of the <code>firmware.bin</code> and <code>kboot.kfpkg</code> files, with matching hash checksums.</p>
-<p>To extract and verify the firmware.bin contained in kboot.kfpkg, you can use the following command:</p>
+<p>If you build from the <code>main</code> branch of the source code, you should be able to reproduce the build process used to generate the latest release binaries and obtain exactly the same copies of the <code>firmware.bin</code> and <code>kboot.kfpkg</code> files, with matching hash checksums (to check for an older version, use the <code>tag</code> instead).</p>
+<p>To check, use the compiled files for the target device. Each command should output the same hash for the two provided files:
+<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>build/firmware.bin<span class="w"> </span>krux-v24.11.1/maixpy_DEVICE/firmware.bin
+sha256sum<span class="w"> </span>build/kboot.kfpkg<span class="w"> </span>krux-v24.11.1/maixpy_DEVICE/kboot.kfpkg
+</code></pre></div></p>
+<p>If you want to extract and verify the <code>firmware.bin</code>file contained in <code>kboot.kfpkg</code>, use the following:</p>
 <div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>kboot.kfpkg<span class="w"> </span>-d<span class="w"> </span>./kboot/
 </code></pre></div>
 <h3 id="flash-the-firmware-onto-the-device">Flash the firmware onto the device<a class="headerlink" href="#flash-the-firmware-onto-the-device" title="Permanent link">&para;</a></h3>
 <p>Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing <code>DEVICE</code> with either <code>m5stickv</code>, <code>amigo</code>, <code>bit</code>, <code>cube</code>, <code>dock</code> or <code>yahboom</code>:
-<div class="highlight"><pre><span></span><code><span class="c1"># build firmware for DEVICE</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># flash firmware to DEVICE</span>
 ./krux<span class="w"> </span>flash<span class="w"> </span>maixpy_DEVICE
 </code></pre></div>
-If the flashing fails try one of the following common solutions listed on FAQ</p>
+If flashing fails try reading <a href="../../../troubleshooting/">Troubleshooting</a></p>
 <p>When the flashing process completes, you should see the Krux logo:</p>
 <p><img src="/krux/img/maixpy_amigo/logo-150.png">
 <img src="/krux/img/maixpy_m5stickv/logo-125.png"></p>

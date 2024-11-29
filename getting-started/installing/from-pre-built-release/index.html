@@ -1566,8 +1566,17 @@
 <li>The <em>signature file</em> <code>krux-v24.11.1.zip.sig</code> can be verified with the <a href="https://github.com/selfcustody/krux/blob/main/selfcustody.pem"><code>selfcustody.pem</code> public key</a> found in the root of the krux repository.</li>
 </ol>
 <p>You can either do this manually or with the <code>krux</code> shell script, which contains helper commands for this:
-<div class="highlight"><pre><span></span><code>./krux<span class="w"> </span>sha256<span class="w"> </span>krux-v24.11.1.zip
+<div class="highlight"><pre><span></span><code><span class="c1">### Using krux script ###</span>
+<span class="c1"># Hash checksum</span>
+./krux<span class="w"> </span>sha256<span class="w"> </span>krux-v24.11.1.zip
+<span class="c1"># Signature</span>
 ./krux<span class="w"> </span>verify<span class="w"> </span>krux-v24.11.1.zip<span class="w"> </span>selfcustody.pem
+
+<span class="c1">### Manually ###</span>
+<span class="c1"># Hash checksum</span>
+sha256sum<span class="w"> </span>krux-v24.11.1.zip.sha256.txt<span class="w"> </span>-c
+<span class="c1">#Signature</span>
+openssl<span class="w"> </span>sha256<span class="w"> </span>&lt;krux-v24.11.1.zip<span class="w"> </span>-binary<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>pkeyutl<span class="w"> </span>-verify<span class="w"> </span>-pubin<span class="w"> </span>-inkey<span class="w"> </span>selfcustody.pem<span class="w"> </span>-sigfile<span class="w"> </span>krux-v24.11.1.zip.sig
 </code></pre></div></p>
 <p>On Mac you may need to install <code>coreutils</code> to be able to use <code>sha256sum</code>
 <div class="highlight"><pre><span></span><code>brew install coreutils
