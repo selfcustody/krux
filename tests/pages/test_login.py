@@ -1286,7 +1286,10 @@ def test_about(mocker, m5stickv):
 
     ctx.input.wait_for_button.assert_called_once()
     ctx.display.draw_centered_text.assert_called_with(
-        "Krux\n\nHardware\n" + board.config["type"] + "\n\nVersion\n" + VERSION
+        "Krux\nselfcustody.github.io/krux\n\nHardware\n"
+        + board.config["type"]
+        + "\n\nVersion\n"
+        + VERSION
     )
 
 
