@@ -250,6 +250,7 @@ class Input:
             or self.touch_value() == PRESSED
         ):
             time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
+            self.reset_ios_state()
             self.wdt_feed_inc_entropy()
 
     def _detect_press_type(self, btn):
