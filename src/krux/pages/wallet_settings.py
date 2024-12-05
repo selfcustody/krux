@@ -197,7 +197,7 @@ class WalletSettings(Page):
             [
                 ("Single-sig", lambda: MENU_EXIT),
                 ("Multisig", lambda: MENU_EXIT),
-                ("Miniscript", lambda: MENU_EXIT),
+                ("Miniscript (Experimental)", lambda: MENU_EXIT),
             ],
             disable_statusbar=True,
         )
