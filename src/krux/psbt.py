@@ -304,7 +304,7 @@ class PSBTSigner:
                 if address_from_my_wallet:
                     address_is_change = (
                         len(list(out.bip32_derivations.values())) > 0
-                        and list(out.bip32_derivations.values())[0].derivation[3] == 1
+                        and list(out.bip32_derivations.values())[0].derivation[-2] == 1
                     )
         if address_is_change:
             return CHANGE
