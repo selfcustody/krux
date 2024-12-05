@@ -29,6 +29,8 @@ from .settings import (
     FLASH_PATH,
     MAIN_TXT,
     TEST_TXT,
+    NAME_SINGLE_SIG,
+    POLICY_TYPE_NAMES,
 )
 from .key import SCRIPT_LONG_NAMES
 
@@ -127,7 +129,7 @@ class DefaultWallet(SettingsNamespace):
 
     namespace = "settings.wallet"
     network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
-    multisig = CategorySetting("multisig", False, [False, True])
+    policy_type = CategorySetting("policy_type", NAME_SINGLE_SIG, POLICY_TYPE_NAMES)
     script_type = CategorySetting(
         "script_type", "Native Segwit - 84", list(SCRIPT_LONG_NAMES.keys())
     )
@@ -136,7 +138,7 @@ class DefaultWallet(SettingsNamespace):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "network": t("Network"),
-            "multisig": t("Multisig"),
+            "policy_type": t("Policy Type"),
             "script_type": t("Script Type"),
         }[attr]
 

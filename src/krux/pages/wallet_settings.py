@@ -36,7 +36,14 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from ..key import SINGLESIG_SCRIPT_PURPOSE, MULTISIG_SCRIPT_PURPOSE
+from ..key import (
+    SINGLESIG_SCRIPT_PURPOSE,
+    MULTISIG_SCRIPT_PURPOSE,
+    MINISCRIPT_PURPOSE,
+    TYPE_SINGLESIG,
+    TYPE_MULTISIG,
+    TYPE_MINISCRIPT,
+)
 from ..settings import (
     MAIN_TXT,
     TEST_TXT,
@@ -106,23 +113,22 @@ class WalletSettings(Page):
         """Customize wallet derivation properties"""
 
         network = key.network
-        multisig = key.multisig
+        policy_type = key.policy_type
         script_type = key.script_type
         account = key.account_index
         while True:
             derivation_path = "m/"
-            derivation_path += "'/".join(
-                [
-                    (
-                        str(MULTISIG_SCRIPT_PURPOSE)
-                        if multisig
-                        else str(SINGLESIG_SCRIPT_PURPOSE[script_type])
-                    ),
-                    "0" if network == NETWORKS[MAIN_TXT] else "1",
-                    str(account) + "'",
-                ]
-            )
-            if multisig:
+            if policy_type == TYPE_SINGLESIG:
+                derivation_path += str(SINGLESIG_SCRIPT_PURPOSE[script_type])
+            elif policy_type == TYPE_MULTISIG:
+                derivation_path += str(MULTISIG_SCRIPT_PURPOSE)
+            elif policy_type == TYPE_MINISCRIPT:
+                # For now, miniscript is the same as multisig
+                derivation_path += str(MINISCRIPT_PURPOSE)
+            derivation_path += "'/"
+            derivation_path += "0'" if network == NETWORKS[MAIN_TXT] else "1'"
+            derivation_path += "/" + str(account) + "'"
+            if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
                 derivation_path += "/2'"
 
             derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
@@ -133,8 +139,11 @@ class WalletSettings(Page):
                 self.ctx,
                 [
                     (t("Network"), lambda: None),
-                    ("Single/Multisig", lambda: None),
-                    (t("Script Type"), (lambda: None) if not multisig else None),
+                    (t("Policy Type"), lambda: None),
+                    (
+                        t("Script Type"),
+                        (lambda: None) if policy_type == TYPE_SINGLESIG else None,
+                    ),
                     (t("Account"), lambda: None),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
@@ -143,21 +152,28 @@ class WalletSettings(Page):
             if index == len(submenu.menu) - 1:
                 break
             if index == 0:
-                network = self._coin_type()
+                new_network = self._coin_type()
+                if new_network is not None:
+                    network = new_network
             elif index == 1:
-                multisig = self._multisig()
-                if not multisig and script_type == P2WSH:
-                    # If is not multisig, and script is p2wsh, force to pick a new type
-                    script_type = self._script_type()
+                new_policy_type = self._policy_type()
+                if new_policy_type is not None:
+                    policy_type = new_policy_type
+                    if policy_type == TYPE_SINGLESIG and script_type == P2WSH:
+                        # If is single-sig, and script is p2wsh, force to pick a new type
+                        script_type = self._script_type()
+                        script_type = P2WPKH if script_type is None else script_type
             elif index == 2:
-                script_type = self._script_type()
+                new_script_type = self._script_type()
+                if new_script_type is not None:
+                    script_type = new_script_type
             elif index == 3:
                 account_temp = self._account(account)
                 if account_temp is not None:
                     account = account_temp
-        if multisig:
+        if policy_type != TYPE_SINGLESIG:
             script_type = P2WSH
-        return network, multisig, script_type, account
+        return network, policy_type, script_type, account
 
     def _coin_type(self):
         """Network selection menu"""
@@ -168,24 +184,27 @@ class WalletSettings(Page):
                 ("Testnet", lambda: None),
             ],
             disable_statusbar=True,
-            back_label=None,
         )
         index, _ = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return None
         return NETWORKS[TEST_TXT] if index == 1 else NETWORKS[MAIN_TXT]
 
-    def _multisig(self):
-        """Multisig selection menu"""
+    def _policy_type(self):
+        """Policy type selection menu"""
         submenu = Menu(
             self.ctx,
             [
-                (t("Single-sig"), lambda: MENU_EXIT),
-                (t("Multisig"), lambda: MENU_EXIT),
+                ("Single-sig", lambda: MENU_EXIT),
+                ("Multisig", lambda: MENU_EXIT),
+                ("Miniscript", lambda: MENU_EXIT),
             ],
             disable_statusbar=True,
-            back_label=None,
         )
         index, _ = submenu.run_loop()
-        return index == 1
+        if index == len(submenu.menu) - 1:
+            return None
+        return index  # Index is equal to the policy types IDs
 
     def _script_type(self):
         """Script type selection menu"""
@@ -198,9 +217,10 @@ class WalletSettings(Page):
                 ("Taproot - 86 (Experimental)", lambda: P2TR),
             ],
             disable_statusbar=True,
-            back_label=None,
         )
-        _, script_type = submenu.run_loop()
+        index, script_type = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return None
         return script_type
 
     def _account(self, initial_account=None):

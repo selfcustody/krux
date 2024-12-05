@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 import gc
 from embit.psbt import PSBT
+from embit.bip32 import HARDENED_INDEX
 from ur.ur import UR
 import urtypes
 from urtypes.crypto import CRYPTO_PSBT
@@ -146,7 +147,12 @@ class PSBTSigner:
     def validate(self):
         """Validates the PSBT"""
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
-        xpubs = self.xpubs()
+        xpubs = []
+        try:
+            xpubs = self.xpubs()
+        except:
+            # Expected to fail to get xpubs from Miniscript PSBT
+            pass
         for inp in self.psbt.inputs:
             # get policy of the input
             try:
@@ -162,10 +168,14 @@ class PSBTSigner:
                 if self.policy != inp_policy:
                     raise ValueError("mixed inputs in the tx")
 
-        if is_multisig(self.policy) and not self.wallet.is_multisig():
-            raise ValueError("multisig tx")
-        if not is_multisig(self.policy) and self.wallet.is_multisig():
-            raise ValueError("not multisig tx")
+        if self.wallet.is_miniscript():
+            if not is_miniscript(self.policy):
+                raise ValueError("Not a miniscript PSBT")
+        elif self.wallet.is_multisig():
+            if not is_multisig(self.policy):
+                raise ValueError("Not a multisig PSBT")
+        elif is_multisig(self.policy) or is_miniscript(self.policy):
+            raise ValueError("Not a single-sig PSBT")
 
         # If a wallet descriptor has been loaded, verify that the wallet
         # policy matches the PSBT policy
@@ -214,6 +224,29 @@ class PSBTSigner:
             return Key.format_derivation(", ".join(mismatched_paths))
         return ""
 
+    def is_our_miniscript_output(self, psbt_output):
+        """Check if the output is from our wallet"""
+
+        # TODO: Is comparing fingerprints and paths a trustable method?
+        derivations = psbt_output.bip32_derivations
+        if not derivations:
+            return False
+        for _, derivation in derivations.items():
+            # Check if the fingerprint matches
+            if derivation.fingerprint == self.wallet.key.fingerprint:
+                # Verify the derivation path
+                expected_path_str = self.wallet.key.derivation.split("/")[1:]
+                expected_path_nodes = []
+                for p in expected_path_str:
+                    if "h" in p:
+                        expected_path_nodes.append(int(p[:-1]) + HARDENED_INDEX)
+                    else:
+                        expected_path_nodes.append(int(p))
+
+                if derivation.derivation[:4] == expected_path_nodes:
+                    return True
+        return False
+
     def _classify_output(self, out_policy, i, out):
         """Classify the output based on its properties and policy"""
         from embit import script
@@ -231,9 +264,13 @@ class PSBTSigner:
 
             # empty script by default
             sc = script.Script(b"")
-            # multisig, we know witness script
             if self.policy["type"] == P2WSH:
-                sc = script.p2wsh(out.witness_script)
+                try:
+                    # if multisig, we know witness script
+                    sc = script.p2wsh(out.witness_script)
+                except:
+                    # Expected to fail with Miniscript PSBT
+                    pass
             elif self.policy["type"] == P2SH_P2WSH:
                 sc = script.p2sh(script.p2wsh(out.witness_script))
             # single-sig
@@ -257,9 +294,13 @@ class PSBTSigner:
                     _, der = list(out.taproot_bip32_derivations.values())[0]
                     address_is_change = der.derivation[3] == 1
             else:
-                address_from_my_wallet = (
-                    sc.data == self.psbt.tx.vout[i].script_pubkey.data
-                )
+                if sc.data:
+                    address_from_my_wallet = (
+                        sc.data == self.psbt.tx.vout[i].script_pubkey.data
+                    )
+                else:
+                    # If the script is empty, we compare fingerprints and paths
+                    address_from_my_wallet = self.is_our_miniscript_output(out)
                 if address_from_my_wallet:
                     address_is_change = (
                         len(list(out.bip32_derivations.values())) > 0
@@ -300,7 +341,12 @@ class PSBTSigner:
 
         output_policy_count = Counter()
 
-        xpubs = self.xpubs()
+        xpubs = []
+        try:
+            xpubs = self.xpubs()
+        except:
+            # Expected to fail to get xpubs from Miniscript PSBT
+            pass
         for i, out in enumerate(self.psbt.outputs):
             out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs)
             output_policy_count[out_policy["type"]] += 1
@@ -358,14 +404,17 @@ class PSBTSigner:
                 )
                 + "\n\n"
             )
-
         fee = inp_amount - spend_amount - self_amount - change_amount
-        satvb = fee / SatsVB.get_vbytes(
-            self.policy,
-            output_policy_count,
-            len(self.psbt.inputs),
-            len(self.psbt.outputs),
-        )
+        if not self.wallet.is_miniscript():
+            # TODO: Tadeu - Add miniscript support to SatsVB
+            satvb = fee / SatsVB.get_vbytes(
+                self.policy,
+                output_policy_count,
+                len(self.psbt.inputs),
+                len(self.psbt.outputs),
+            )
+        else:
+            satvb = 0
 
         # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
         fee_percent = max(
@@ -380,9 +429,9 @@ class PSBTSigner:
             + " ("
             + replace_decimal_separator("%.1f" % fee_percent)
             + "%)"
-            + (" ~%.1f" % satvb)
-            + " sat/vB"
         )
+        if satvb > 0:
+            resume_fee_str += (" ~%.1f" % satvb) + " sat/vB"
 
         messages = []
         # first screen - resume
@@ -552,6 +601,17 @@ def is_multisig(policy):
     )
 
 
+def is_miniscript(policy):
+    """Returns a boolean indicating if the policy is a miniscript"""
+    # m and n will not be present in miniscript policies
+    return (
+        "type" in policy
+        and P2WSH in policy["type"]
+        and "m" not in policy
+        and "n" not in policy
+    )
+
+
 # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L41
 def get_cosigners(pubkeys, derivations, xpubs):
     """Returns xpubs used to derive pubkeys using global xpub field from psbt"""
@@ -576,7 +636,28 @@ def get_cosigners(pubkeys, derivations, xpubs):
     return sorted(cosigners)
 
 
-# From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L64
+def get_cosigners_miniscript(derivations, xpubs):
+    """Returns xpubs used to derive pubkeys listed in derivations."""
+    cosigners = []
+    for pubkey, der in derivations.items():
+        for xpub in xpubs:
+            origin_der = xpubs[xpub]
+            # Check that the fingerprint matches
+            if origin_der.fingerprint == der.fingerprint:
+                # Check that the derivation path matches except for the last two indices
+                if origin_der.derivation == der.derivation[:-2]:
+                    # Verify that the xpub derives the pubkey
+                    if xpub.derive(der.derivation[-2:]).key == pubkey:
+                        # Append the xpub as a base58 string
+                        cosigners.append(xpub.to_base58())
+                        break
+    # Ensure all pubkeys have a matching xpub
+    if len(cosigners) != len(derivations):
+        raise ValueError("Not all pubkeys in derivations have corresponding xpubs")
+    return sorted(cosigners)
+
+
+# Modified from: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L64
 def get_policy(scope, scriptpubkey, xpubs):
     """Parse scope and get policy"""
     from embit.finalizer import parse_multisig
@@ -594,10 +675,21 @@ def get_policy(scope, scriptpubkey, xpubs):
         ):
             script_type = P2SH_P2WPKH
     policy = {"type": script_type}
-    # expected multisig
-    if P2WSH in script_type and scope.witness_script is not None:
-        m, pubkeys = parse_multisig(scope.witness_script)
-        # check pubkeys are derived from cosigners
-        cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
-        policy.update({"m": m, "n": len(cosigners), "cosigners": cosigners})
+    if P2WSH in script_type:
+        try:
+            # Try to parse as multisig
+            if scope.witness_script is None:
+                raise ValueError("Missing witness script")
+            m, pubkeys = parse_multisig(scope.witness_script)
+            # check pubkeys are derived from cosigners
+            cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
+            policy.update({"m": m, "n": len(cosigners), "cosigners": cosigners})
+        except:
+            try:
+                # Try to parse as miniscript
+                # Will succeed to verify cosigners only if the descriptor is loaded
+                cosigners = get_cosigners_miniscript(scope.bip32_derivations, xpubs)
+                policy.update({"cosigners": cosigners})
+            except:
+                pass
     return policy

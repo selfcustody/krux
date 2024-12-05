@@ -41,7 +41,9 @@ class Addresses(Page):
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
         # only show address for single-sig or multisig with wallet output descriptor loaded
-        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
+        if not self.ctx.wallet.is_loaded() and (
+            self.ctx.wallet.is_multisig() or self.ctx.wallet.is_miniscript()
+        ):
             self.flash_error(t("Please load a wallet output descriptor"))
             return MENU_CONTINUE
 

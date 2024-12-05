@@ -31,12 +31,26 @@ except ImportError:
 
 import os
 
+# Settings storage
 SETTINGS_FILENAME = "settings.json"
 SD_PATH = "sd"
 FLASH_PATH = "flash"
 
+# Network settings
 MAIN_TXT = "main"
 TEST_TXT = "test"
+
+# Policy types
+NAME_SINGLE_SIG = "Single-sig"
+NAME_MULTISIG = "Multi-sig"
+NAME_MINISCRIPT = "Miniscript"
+
+# Policy types names
+POLICY_TYPE_NAMES = [
+    NAME_SINGLE_SIG,
+    NAME_MULTISIG,
+    NAME_MINISCRIPT,
+]
 
 THIN_SPACE = " "
 

@@ -31,10 +31,17 @@ from hashlib import sha256
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
-from .settings import TEST_TXT, THIN_SPACE
+from .settings import (
+    TEST_TXT,
+    THIN_SPACE,
+    NAME_SINGLE_SIG,
+    NAME_MULTISIG,
+    NAME_MINISCRIPT,
+)
 
 DER_SINGLE = "m/%dh/%dh/%dh"
 DER_MULTI = "m/%dh/%dh/%dh/2h"
+DER_MINISCRIPT = "m/%dh/%dh/%dh/2h"
 HARDENED_STR_REPLACE = "'"
 
 # Pay To Public Key Hash - 44' Legacy single-sig
@@ -79,7 +86,18 @@ SINGLESIG_SCRIPT_PURPOSE = {
     P2TR: 86,
 }
 
+TYPE_SINGLESIG = 0
+TYPE_MULTISIG = 1
+TYPE_MINISCRIPT = 2
+
+POLICY_TYPE_IDS = {
+    NAME_SINGLE_SIG: TYPE_SINGLESIG,
+    NAME_MULTISIG: TYPE_MULTISIG,
+    NAME_MINISCRIPT: TYPE_MINISCRIPT,
+}
+
 MULTISIG_SCRIPT_PURPOSE = 48
+MINISCRIPT_PURPOSE = 48
 
 FINGERPRINT_SYMBOL = "⊚"
 DERIVATION_PATH_SYMBOL = "↳"
@@ -91,24 +109,24 @@ class Key:
     def __init__(
         self,
         mnemonic,
-        multisig,
+        policy_type,
         network=NETWORKS[TEST_TXT],
         passphrase="",
         account_index=0,
         script_type=P2WPKH,
     ):
         self.mnemonic = mnemonic
-        self.multisig = multisig
+        self.policy_type = policy_type
         self.network = network
         self.passphrase = passphrase
         self.account_index = account_index
-        self.script_type = script_type if not multisig else P2WSH
+        self.script_type = script_type if policy_type == TYPE_SINGLESIG else P2WSH
         self.root = bip32.HDKey.from_seed(
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
         self.derivation = self.get_default_derivation(
-            self.multisig, self.network, self.account_index, self.script_type
+            self.policy_type, self.network, self.account_index, self.script_type
         )
         self.account = self.root.derive(self.derivation).to_public()
 
@@ -178,15 +196,19 @@ class Key:
         return random.choice(Key.get_final_word_candidates(words))
 
     @staticmethod
-    def get_default_derivation(multisig, network, account=0, script_type=P2WPKH):
+    def get_default_derivation(policy_type, network, account=0, script_type=P2WPKH):
         """Return the Krux default derivation path for single-sig or multisig"""
-        der_format = DER_MULTI if multisig else DER_SINGLE
-        purpose = (
-            MULTISIG_SCRIPT_PURPOSE
-            if multisig
-            else SINGLESIG_SCRIPT_PURPOSE[script_type]
-        )
-        return der_format % (purpose, network["bip32"], account)
+        if policy_type == TYPE_SINGLESIG:
+            return DER_SINGLE % (
+                SINGLESIG_SCRIPT_PURPOSE[script_type],
+                network["bip32"],
+                account,
+            )
+        if policy_type == TYPE_MULTISIG:
+            return DER_MULTI % (MULTISIG_SCRIPT_PURPOSE, network["bip32"], account)
+        if policy_type == TYPE_MINISCRIPT:
+            return DER_MINISCRIPT % (MINISCRIPT_PURPOSE, network["bip32"], account)
+        raise ValueError("Invalid policy type")
 
     @staticmethod
     def format_derivation(derivation, pretty=False):

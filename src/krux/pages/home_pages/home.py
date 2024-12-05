@@ -21,10 +21,6 @@
 # THE SOFTWARE.
 
 import gc
-from ...display import BOTTOM_PROMPT_LINE
-from ...qr import FORMAT_NONE, FORMAT_PMOFN
-from ...krux_settings import t, Settings
-from ...format import replace_decimal_separator
 from .. import (
     Page,
     Menu,
@@ -33,6 +29,12 @@ from .. import (
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
 )
+from ...display import BOTTOM_PROMPT_LINE
+from ...qr import FORMAT_NONE, FORMAT_PMOFN
+from ...krux_settings import t, Settings
+from ...format import replace_decimal_separator
+from ...key import TYPE_SINGLESIG
+
 
 MAX_POLICY_COSIGNERS_DISPLAYED = 5
 
@@ -107,7 +109,7 @@ class Home(Page):
         self.ctx.wallet = Wallet(
             Key(
                 self.ctx.wallet.key.mnemonic,
-                self.ctx.wallet.key.multisig,
+                self.ctx.wallet.key.policy_type,
                 self.ctx.wallet.key.network,
                 passphrase,
                 self.ctx.wallet.key.account_index,
@@ -268,8 +270,11 @@ class Home(Page):
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
 
-        # Warns in case multisig wallet descriptor is not loaded
-        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
+        # Warns in case multisig or miniscript wallet descriptor is not loaded
+        if (
+            not self.ctx.wallet.is_loaded()
+            and self.ctx.wallet.key.policy_type != TYPE_SINGLESIG
+        ):
             self.ctx.display.draw_centered_text(
                 t("Warning:")
                 + "\n"
@@ -318,15 +323,20 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
 
-        # Show the policy for multisig
-        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.is_multisig():
+        # Show the policy for multisig and miniscript PSBTs in case the wallet descriptor is not loaded
+        if (
+            not self.ctx.wallet.is_loaded()
+            and not self.ctx.wallet.key.policy_type == TYPE_SINGLESIG
+        ):
             from ...key import Key
+            from ...psbt import is_multisig
 
             policy_str = "PSBT policy:\n"
             policy_str += signer.policy["type"] + "\n"
-            policy_str += (
-                str(signer.policy["m"]) + " of " + str(signer.policy["n"]) + "\n"
-            )
+            if is_multisig(signer.policy):
+                policy_str += (
+                    str(signer.policy["m"]) + " of " + str(signer.policy["n"]) + "\n"
+                )
             fingerprints = []
             for inp in signer.psbt.inputs:
                 # Do we need to loop through all the inputs or just one?

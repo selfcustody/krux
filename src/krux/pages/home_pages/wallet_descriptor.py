@@ -31,7 +31,7 @@ from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
-from ...key import FINGERPRINT_SYMBOL
+from ...key import FINGERPRINT_SYMBOL, TYPE_SINGLESIG
 
 
 class WalletDescriptor(Page):
@@ -81,6 +81,7 @@ class WalletDescriptor(Page):
         return MENU_CONTINUE
 
     def _load_wallet(self):
+        """Load a wallet output descriptor from the camera or SD card"""
 
         persisted = False
         load_method = self.load_method()
@@ -163,10 +164,8 @@ class WalletDescriptor(Page):
                 + binascii.hexlify(key.fingerprint).decode()
             )
         about.extend(fingerprints)
-        if not wallet.is_multisig():
+        if not wallet.is_multisig() and not wallet.is_miniscript():
             about.append(self.fit_to_line(str(wallet.descriptor.keys[0].key)))
-
-        if not wallet.is_multisig():
             if is_loading:
                 self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
             else:

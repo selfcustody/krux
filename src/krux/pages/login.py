@@ -26,7 +26,15 @@ from embit.wordlists.bip39 import WORDLIST
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import Settings
 from ..qr import FORMAT_UR
-from ..key import Key, P2WSH, SCRIPT_LONG_NAMES
+from ..key import (
+    Key,
+    P2WSH,
+    SCRIPT_LONG_NAMES,
+    TYPE_SINGLESIG,
+    TYPE_MULTISIG,
+    TYPE_MINISCRIPT,
+    POLICY_TYPE_IDS,
+)
 from ..krux_settings import t
 from . import (
     Page,
@@ -264,23 +272,36 @@ class Login(Page):
         self.ctx.display.clear()
 
         passphrase = ""
-        multisig = Settings().wallet.multisig
+        if not hasattr(Settings().wallet, "policy_type") and hasattr(
+            Settings().wallet, "multisig"
+        ):
+            # Retro compatibility with old settings - Multisig (false or true)
+            if Settings().wallet.multisig:
+                Settings().wallet.policy_type = TYPE_MULTISIG
+        else:
+            # New settings - Policy type (single-sig, multisig, miniscript)
+            policy_type = POLICY_TYPE_IDS.get(
+                Settings().wallet.policy_type, TYPE_SINGLESIG
+            )
         network = NETWORKS[Settings().wallet.network]
         account = 0
-        if multisig:
-            script_type = P2WSH
-        else:
+        if policy_type == TYPE_SINGLESIG:
             script_type = SCRIPT_LONG_NAMES.get(Settings().wallet.script_type)
+        else:
+            script_type = P2WSH
         from ..wallet import Wallet
 
         while True:
-            key = Key(mnemonic, multisig, network, passphrase, account, script_type)
+            key = Key(mnemonic, policy_type, network, passphrase, account, script_type)
 
             wallet_info = key.fingerprint_hex_str(True) + "\n"
             wallet_info += network["name"] + "\n"
-            wallet_info += (
-                t("Single-sig") + "\n" if not multisig else t("Multisig") + "\n"
-            )
+            if policy_type == TYPE_SINGLESIG:
+                wallet_info += "Single-sig" + "\n"
+            elif policy_type == TYPE_MULTISIG:
+                wallet_info += "Multisig" + "\n"
+            elif policy_type == TYPE_MINISCRIPT:
+                wallet_info += "Miniscript" + "\n"
             wallet_info += (
                 self.fit_to_line(key.derivation_str(True), crop_middle=False) + "\n"
             )
@@ -319,7 +340,7 @@ class Login(Page):
                 from .wallet_settings import WalletSettings
 
                 wallet_settings = WalletSettings(self.ctx)
-                network, multisig, script_type, account = (
+                network, policy_type, script_type, account = (
                     wallet_settings.customize_wallet(key)
                 )
 

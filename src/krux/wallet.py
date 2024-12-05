@@ -33,6 +33,9 @@ from .key import (
     P2TR,
     SINGLESIG_SCRIPT_PURPOSE,
     MULTISIG_SCRIPT_PURPOSE,
+    TYPE_SINGLESIG,
+    TYPE_MULTISIG,
+    TYPE_MINISCRIPT,
 )
 
 
@@ -52,7 +55,7 @@ class Wallet:
         self.policy = None
         self.persisted = False
         self._network = None
-        if self.key and not self.key.multisig:
+        if self.key and self.key.policy_type == TYPE_SINGLESIG:
             if self.key.script_type == P2PKH:
                 self.descriptor = Descriptor.from_string(
                     "pkh(%s/<0;1>/*)" % self.key.key_expression()
@@ -93,10 +96,20 @@ class Wallet:
     def is_multisig(self):
         """Returns a boolean indicating whether or not the wallet is multisig"""
         if self.key:
-            return self.key.multisig
+            return self.key.policy_type == TYPE_MULTISIG
         if self.descriptor:
             return self.descriptor.is_basic_multisig
-        return None
+        return False
+
+    def is_miniscript(self):
+        """Returns a boolean indicating whether or not the wallet is miniscript"""
+        if self.key:
+            return self.key.policy_type == TYPE_MINISCRIPT
+        if self.descriptor:
+            if self.descriptor.is_basic_multisig:
+                return False
+            return self.descriptor.miniscript is not None
+        return False
 
     def is_loaded(self):
         """Returns a boolean indicating whether or not this wallet has been loaded"""
@@ -113,7 +126,14 @@ class Wallet:
                 if self.key.xpub() not in [
                     key.key.to_base58() for key in descriptor.keys
                 ]:
-                    raise ValueError("xpub not a cosigner")
+                    raise ValueError("xpub not a multisig cosigner")
+            elif self.is_miniscript():
+                if descriptor.miniscript is None or descriptor.is_basic_multisig:
+                    raise ValueError("not miniscript")
+                if self.key.xpub() not in [
+                    key.key.to_base58() for key in descriptor.keys
+                ]:
+                    raise ValueError("xpub not a miniscript cosigner")
             else:
                 if not descriptor.key:
                     if len(descriptor.keys) > 1:
@@ -130,7 +150,7 @@ class Wallet:
             if not self.label:
                 self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
-        else:
+        elif self.descriptor.is_basic_multisig:
             m = int(str(self.descriptor.miniscript.args[0]))
             n = len(self.descriptor.keys)
             cosigners = [key.key.to_base58() for key in self.descriptor.keys]
@@ -142,6 +162,15 @@ class Wallet:
                 "type": self.descriptor.scriptpubkey_type(),
                 "m": m,
                 "n": n,
+                "cosigners": cosigners,
+            }
+        elif self.descriptor.miniscript is not None:
+            if not self.label:
+                self.label = t("Miniscript")
+            cosigners = [key.key.to_base58() for key in self.descriptor.keys]
+            cosigners = sorted(cosigners)
+            self.policy = {
+                "type": self.descriptor.scriptpubkey_type(),
                 "cosigners": cosigners,
             }
 
