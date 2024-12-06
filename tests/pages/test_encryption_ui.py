@@ -92,15 +92,22 @@ def test_load_key_from_qr_code(m5stickv, mocker):
 
     print("case 2: load_key_from_qr_code")
     # Repeat with too much characters >ENCRYPTION_KEY_MAX_LEN
-    BTN_SEQUENCE = [BUTTON_PAGE] + [  # move to QR code key
-        BUTTON_ENTER
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # move to QR code key
+        BUTTON_ENTER,  # read too long text
+        BUTTON_ENTER,  # click to pass error
+        BUTTON_ENTER,  # enter to read normal text
+        BUTTON_PAGE,  # Cancel
     ]  # choose QR code key
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     key_generator = EncryptionKey(ctx)
     too_long_text = "l" * (ENCRYPTION_KEY_MAX_LEN + 1)
-    mocker.patch.object(
-        QRCodeCapture, "qr_capture_loop", new=lambda self: (too_long_text, None)
-    )
+    values_list = ["short text", too_long_text]
+
+    def qr_return(self):
+        return values_list.pop(), None
+
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=qr_return)
     key = key_generator.encryption_key()
     assert key == None
 

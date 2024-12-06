@@ -193,15 +193,17 @@ def upgrade():
 
     inp = Input()
 
-    display.clear()
-    display.draw_centered_text(t("New firmware detected.") + "\n\n" + t("Verifying.."))
+    def status_text(text):
+        display.clear()
+        display.draw_centered_text(text)
+
+    status_text(t("New firmware detected.") + "\n\n" + t("Verifying.."))
 
     new_size = fsize(firmware_path)
     firmware_hash = sha256(firmware_path)
     firmware_with_header_hash = sha256(firmware_path, new_size)
 
-    display.clear()
-    display.draw_centered_text(
+    status_text(
         t("New firmware detected.")
         + "\n\n"
         + "SHA256:\n"
@@ -215,14 +217,14 @@ def upgrade():
         return False
 
     if new_size > MAX_FIRMWARE_SIZE:
-        display.flash_text(t("Firmware exceeds max size: %d") % MAX_FIRMWARE_SIZE)
+        display.flash_text("Firmware exceeds max size: %d" % MAX_FIRMWARE_SIZE)
         return False
 
     pubkey = None
     try:
         pubkey = ec.PublicKey.from_string(SIGNER_PUBKEY)
     except:
-        display.flash_text(t("Invalid public key"))
+        display.flash_text("Invalid public key")
         return False
 
     sig = None
@@ -248,53 +250,52 @@ def upgrade():
         boot_config_sector = flash.read(BACKUP_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
         address, _, entry_index = find_active_firmware(boot_config_sector)
         if address is None:
-            display.flash_text(t("Invalid bootloader"))
+            display.flash_text("Invalid bootloader")
             return False
 
     # Write new firmware to the opposite slot
     new_address = FIRMWARE_SLOT_2 if address == FIRMWARE_SLOT_1 else FIRMWARE_SLOT_1
 
-    def status_text(text):
-        display.clear()
-        display.draw_centered_text(text)
+    try:
+        write_data(
+            lambda pct: status_text(
+                t("Processing..") + "1/3" + "\n\n%d%%" % int(pct * 100)
+            ),
+            new_address,
+            open(firmware_path, "rb", buffering=0),
+            new_size,
+            65536,
+            True,
+            firmware_with_header_hash,
+        )
 
-    write_data(
-        lambda pct: status_text(
-            t("Processing..") + "1/3" + "\n\n%d%%" % int(pct * 100)
-        ),
-        new_address,
-        open(firmware_path, "rb", buffering=0),
-        new_size,
-        65536,
-        True,
-        firmware_with_header_hash,
-    )
+        write_data(
+            lambda pct: status_text(
+                t("Processing..") + "2/3" + "\n\n%d%%" % int(pct * 100)
+            ),
+            BACKUP_BOOT_CONFIG_SECTOR_ADDRESS,
+            io.BytesIO(boot_config_sector),
+            len(boot_config_sector),
+            4096,
+        )
 
-    write_data(
-        lambda pct: status_text(
-            t("Processing..") + "2/3" + "\n\n%d%%" % int(pct * 100)
-        ),
-        BACKUP_BOOT_CONFIG_SECTOR_ADDRESS,
-        io.BytesIO(boot_config_sector),
-        len(boot_config_sector),
-        4096,
-    )
+        new_boot_config_sector = update_boot_config_sector(
+            boot_config_sector, entry_index, new_address, new_size
+        )
+        write_data(
+            lambda pct: status_text(
+                t("Processing..") + "3/3" + "\n\n%d%%" % int(pct * 100)
+            ),
+            MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
+            io.BytesIO(new_boot_config_sector),
+            len(new_boot_config_sector),
+            4096,
+        )
+    except:
+        display.flash_text("Error read/write data")
+        return False
 
-    new_boot_config_sector = update_boot_config_sector(
-        boot_config_sector, entry_index, new_address, new_size
-    )
-    write_data(
-        lambda pct: status_text(
-            t("Processing..") + "3/3" + "\n\n%d%%" % int(pct * 100)
-        ),
-        MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
-        io.BytesIO(new_boot_config_sector),
-        len(new_boot_config_sector),
-        4096,
-    )
-
-    display.clear()
-    display.draw_centered_text(
+    status_text(
         t("Upgrade complete.") + "\n" + t("Remove firmware files from SD Card?")
     )
     inp.buttons_active = True

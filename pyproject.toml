@@ -119,6 +119,7 @@ simulator-wonder-mv = "python simulator/simulator.py --device maixpy_wonder_mv"
 # aliases
 simulator.ref = "simulator-amigo"
 simulator-m5.ref = "simulator-m5stickv"
+simulator-mv.ref = "simulator-wonder-mv"
 
 # git tasks
 git-update = "git submodule update --init --recursive"
