@@ -42,7 +42,7 @@ TEST_TXT = "test"
 
 # Policy types
 NAME_SINGLE_SIG = "Single-sig"
-NAME_MULTISIG = "Multi-sig"
+NAME_MULTISIG = "Multisig"
 NAME_MINISCRIPT = "Miniscript"
 
 # Policy types names
