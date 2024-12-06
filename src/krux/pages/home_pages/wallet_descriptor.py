@@ -107,7 +107,7 @@ class WalletDescriptor(Page):
 
         if wallet_data is None:
             # Camera or SD card loading failed!
-            self.flash_error(t("Failed to load output descriptor"))
+            self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
         from ...wallet import Wallet, AssumptionWarning

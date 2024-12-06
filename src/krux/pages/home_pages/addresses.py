@@ -148,7 +148,7 @@ class Addresses(Page):
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
         if data is None or qr_format != FORMAT_NONE:
-            self.flash_error(t("Failed to load address"))
+            self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
         addr = None
