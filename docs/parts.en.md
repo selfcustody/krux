@@ -3,7 +3,7 @@
 
 ### Comparative Table
 
-| Device | M5StickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module | Maix Cube | WonderMV
+| Device | M5StickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module | Maix Cube | WonderMV |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 32-42 | US$ 45-61 | US$ 34-49 | US$ 58-86 |
 | Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 | 2" / 240*320 |
@@ -95,6 +95,19 @@ Below is a list of some distributors where you can find this device:
 
 <div style="clear: both"></div>
 
+### WonderMV
+<img src="../img/maixpy_wonder_mv/logo-152.png" align="right" width="116">
+
+It comes with a compatible 32G card, an USB card reader, and two Molex 51004 4-pin male-to-male cable (to connect to a [thermal printer](#optional-ttl-serial-thermal-printer)). Below is a list of some distributors where you can find this device:
+
+- [AliExpress](https://www.aliexpress.com/w/wholesale-k210-wondermv.html)
+- [Amazon](https://www.amazon.com/s?k=k210+WonderMV)
+- [Hiwonder Store](https://www.hiwonder.com/products/wondermv)
+- [Ruten](https://www.ruten.com.tw/item/show?22351444721094)
+- [飆機器人](https://shop.playrobot.com/products/veo0116)
+
+<div style="clear: both"></div>
+
 ### Maix Dock and Maix Bit
 <img src="../img/maixpy_dock/logo-151.png" align="right" width="144">
 
@@ -135,4 +148,4 @@ Krux has the capability to print all QR codes it generates, including those for 
 Many TTL serial thermal printers may be compatible, but currently, the [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) has the best support (except this printer only supports ASCII or Chinese characters, non-ASCII characters will be printed as Chinese). The [Adafruit printer starter pack](https://www.adafruit.com/product/600) can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in the [Krux settings](./getting-started/settings.md/#thermal), set the Tx pin and baud rate value to either 19200 or 9600 (depends on the printer), as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will need to connect the device's Tx to the printer's Rx and device's ground to the printer's ground, do not connect any other pins because a wrong connection may damage your device. The printer requires a dedicated power supply, typically with an output of 5 to 9V (or 12V) and capable of supplying at least 2A. For more information, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
 
 #### (Optional) Conversion Cable for Thermal Printer
-To connect the printer to M5StickV, Amigo or Cube, you will need a [grove conversion cable](https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs) with a 4-pin male Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). Check your device and printer model connection first, Yahboom comes with PH2.0 4Pin female connector; Dock and Bit doesn't have a connector. For a more reliable connection, it is recommended to cut and solder the wires of your custom cables instead of using jumpers.
+To connect the printer to M5StickV, Amigo or Cube, you will need a [grove conversion cable](https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs) with a 4-pin male Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). Check your device and printer model connection first, Yahboom comes with PH2.0 4Pin female connector; Dock and Bit doesn't have a connector; WonderMV comes with [Molex 51004 4-pin connector](https://www.digikey.ca/en/products/detail/molex/0530150410/1785079) (used with smart servo). For a more reliable connection, it is recommended to cut and solder the wires of your custom cables instead of using jumpers. Here we have a description of some [inter-integrated circuit (I2C) connector standards](https://www.cable-tester.com/i2c-pin-out/).

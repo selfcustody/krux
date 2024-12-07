@@ -124,3 +124,21 @@ See the correct port at Device Manager > Ports (COM & LPT), in the example below
 ```pwsh
 .\ktool-win.exe -B goE -b 1500000 -p COM6 maixpy_yahboom\kboot.kfpkg
 ```
+
+#### Hiwonder WonderMV Vision Recognition Module
+To Flash WonderMV you need to pass the `-B dan` parameter.
+
+##### Linux
+```bash
+./ktool-linux -B dan -b 1500000 maixpy_wonder_mv/kboot.kfpkg
+```
+
+##### Mac
+```bash
+./ktool-mac -B dan -b 1500000 maixpy_wonder_mv/kboot.kfpkg
+```
+
+##### Windows
+```pwsh
+.\ktool-win.exe -B dan -b 1500000 maixpy_wonder_mv\kboot.kfpkg
+```
