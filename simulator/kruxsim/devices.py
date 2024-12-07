@@ -138,7 +138,6 @@ def screenshot_rect(device):
             screen.get_rect().center[1] - 13,
         )
     elif device == WONDER_MV:
-        # Todo: Adjust the rect for the Wonder MV device
         rect.width -= 88
         rect.height -= 129
         rect.center = (
