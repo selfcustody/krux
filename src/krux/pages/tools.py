@@ -43,12 +43,15 @@ class Tools(Page):
     """Krux generic tools"""
 
     def __init__(self, ctx):
+        self.ctx = ctx
+
         super().__init__(
             ctx,
             Menu(
                 ctx,
                 [
                     (t("Check SD Card"), self.sd_check),
+                    (t("Load Krux app"), self.load_krux_app),
                     (t("Print Test QR"), self.print_test),
                     (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
@@ -57,7 +60,14 @@ class Tools(Page):
                 ],
             ),
         )
-        self.ctx = ctx
+
+    def load_krux_app(self):
+        """Handler for the 'Load Krux app' menu item"""
+
+        from krux.pages.kapps import Kapps
+
+        kapps = Kapps(self.ctx)
+        return kapps.load_kapp()
 
     def flash_tools(self):
         """Handler for the 'Flash Tools' menu item"""
