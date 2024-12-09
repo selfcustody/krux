@@ -151,9 +151,9 @@ device_image = devices.load_image(args.device)
 AMIGO_SIZE = (150, 252)
 M5STICKV_SIZE = (125, 247)
 DOCK_SIZE = (151, 258)
-YAHBOOM_SIZE = (156,220)
-CUBE_SIZE = (200,212)
-WONDER_MV_SIZE = (156, 220)
+YAHBOOM_SIZE = (156, 220)
+CUBE_SIZE = (200, 212)
+WONDER_MV_SIZE = (152, 220)
 
 # Handle screenshots scale and alpha bg
 # When exporting the mask from GIMP uncheck "Save info about transparent pixels color"
