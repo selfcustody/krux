@@ -50,21 +50,27 @@ Failed to clone ...
 ```
 
 #### Reproducibility
-If you build from the `main` branch of the source code, you should be able to reproduce the build process used to generate the last release binaries and obtain exact copies of the `firmware.bin` and `kboot.kfpkg` files, with matching hash checksums.
+If you build from the `main` branch of the source code, you should be able to reproduce the build process used to generate the latest release binaries and obtain exactly the same copies of the `firmware.bin` and `kboot.kfpkg` files, with matching hash checksums (to check for an older version, use the `tag` instead).
 
-To extract and verify the firmware.bin contained in kboot.kfpkg, you can use the following command:
+To check, use the compiled files for the target device. Each command should output the same hash for the two provided files:
+```bash
+sha256sum build/firmware.bin {{latest_krux}}/maixpy_DEVICE/firmware.bin
+sha256sum build/kboot.kfpkg {{latest_krux}}/maixpy_DEVICE/kboot.kfpkg
+```
+
+If you want to extract and verify the `firmware.bin`file contained in `kboot.kfpkg`, use the following:
 
 ```bash
 unzip kboot.kfpkg -d ./kboot/
 ```
 
 ### Flash the firmware onto the device
-Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube`, `dock` or `yahboom`:
+Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube`, `dock`, `yahboom` or `wonder_mv`:
 ```bash
-# build firmware for DEVICE
+# flash firmware to DEVICE
 ./krux flash maixpy_DEVICE
 ```
-If the flashing fails try one of the following common solutions listed on FAQ
+If flashing fails try reading [Troubleshooting](../../troubleshooting.md)
 
 ----8<----
 flash-krux-logo.en.txt

@@ -11,8 +11,17 @@ Before installing the release, it's a good idea to check that:
 
 You can either do this manually or with the `krux` shell script, which contains helper commands for this:
 ```bash
+### Using krux script ###
+# Hash checksum
 ./krux sha256 {{latest_krux}}.zip
+# Signature
 ./krux verify {{latest_krux}}.zip selfcustody.pem
+
+### Manually ###
+# Hash checksum
+sha256sum {{latest_krux}}.zip.sha256.txt -c
+#Signature
+openssl sha256 <{{latest_krux}}.zip -binary | openssl pkeyutl -verify -pubin -inkey selfcustody.pem -sigfile {{latest_krux}}.zip.sig
 ```
 
 On Mac you may need to install `coreutils` to be able to use `sha256sum`
@@ -28,7 +37,7 @@ Extract the latest version of Krux you downloaded and enter the folder:
 unzip {{latest_krux}}.zip && cd {{latest_krux}}
 ```
 
-Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube`, `dock` or `yahboom` (to yahboom you may need to manually specify the port, for example `/dev/ttyUSB0` on Linux or `COM6` on Windows):
+Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube`, `dock`, `yahboom` or `wonder_mv` (to yahboom you may need to manually specify the port, for example `/dev/ttyUSB0` on Linux or `COM6` on Windows):
 ```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```

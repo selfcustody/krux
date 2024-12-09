@@ -17,7 +17,7 @@ To secure your Krux device, always verify firmware authenticity before installat
 
 - **Learn Verification Tools:** Familiarize yourself with verification methods and tools to maintain control over your device's security.
 
-- **Build from Source:** Consider building the firmware from source code and verifying its reproducibility for maximum assurance.
+- **Build from Source:** Consider building the firmware from source code and verifying its [reproducibility](../installing/from-source.md#reproducibility) for maximum assurance.
 
 - **Use SD Card for Updates:** After the initial flash through USB, perform subsequent updates via the SD card. This keeps your device air-gapped and allows the existing firmware to verify new updates before installation.
 
