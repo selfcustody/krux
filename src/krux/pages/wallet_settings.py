@@ -22,7 +22,7 @@
 
 from embit.networks import NETWORKS
 from embit.bip32 import HARDENED_INDEX
-from ..display import FONT_HEIGHT, DEFAULT_PADDING
+from ..display import FONT_HEIGHT, DEFAULT_PADDING, BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from . import (
     Page,
@@ -69,17 +69,21 @@ class PassphraseEditor(Page):
             if passphrase in (ESC_KEY, MENU_EXIT):
                 return None
             self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(t("Passphrase") + ": " + passphrase)
             if self.prompt(
-                t("Passphrase") + ": " + passphrase,
-                self.ctx.display.height() // 2,
+                t("Proceed?"),
+                BOTTOM_PROMPT_LINE,
             ):
                 return passphrase
 
     def _load_passphrase(self):
         """Loads and returns a passphrase from keypad"""
-        return self.capture_from_keypad(
+        data = self.capture_from_keypad(
             t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
         )
+        if len(str(data)) > PASSPHRASE_MAX_LEN:
+            raise ValueError("Maximum length exceeded (%s)" % PASSPHRASE_MAX_LEN)
+        return data
 
     def _load_qr_passphrase(self):
         from .qr_capture import QRCodeCapture
@@ -87,11 +91,10 @@ class PassphraseEditor(Page):
         qr_capture = QRCodeCapture(self.ctx)
         data, _ = qr_capture.qr_capture_loop()
         if data is None:
-            self.flash_error(t("Failed to load passphrase"))
+            self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
         if len(data) > PASSPHRASE_MAX_LEN:
-            self.flash_error(t("Maximum length exceeded (%s)") % PASSPHRASE_MAX_LEN)
-            return MENU_CONTINUE
+            raise ValueError("Maximum length exceeded (%s)" % PASSPHRASE_MAX_LEN)
         return data
 
 
@@ -125,6 +128,7 @@ class WalletSettings(Page):
             if multisig:
                 derivation_path += "/2'"
 
+            self.ctx.display.clear()
             derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
             info_len = self.ctx.display.draw_hcentered_text(
                 derivation_path, info_box=True

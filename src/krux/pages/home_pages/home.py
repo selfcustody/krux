@@ -285,7 +285,7 @@ class Home(Page):
 
         if data is None and psbt_filename == "":
             # Both the camera and the file on SD card failed!
-            self.flash_error(t("Failed to load PSBT"))
+            self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
         # PSBT read OK! Will try to sign

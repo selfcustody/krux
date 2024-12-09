@@ -1,5 +1,6 @@
 from . import create_ctx
 from .home_pages.test_home import tdata
+import pytest
 
 
 def test_type_passphrase(m5stickv, mocker):
@@ -11,7 +12,7 @@ def test_type_passphrase(m5stickv, mocker):
     mocker.patch.object(
         passphrase_editor,
         "capture_from_keypad",
-        mocker.MagicMock(return_value=TEST_VALUE),
+        return_value=TEST_VALUE,
     )
     test_passphrase = passphrase_editor._load_passphrase()
 
@@ -52,7 +53,11 @@ def test_qr_passphrase(m5stickv, mocker):
 
 
 def test_qr_passphrase_too_long(m5stickv, mocker):
-    from krux.pages.wallet_settings import PassphraseEditor, MENU_CONTINUE
+    from krux.pages.wallet_settings import (
+        PassphraseEditor,
+        MENU_CONTINUE,
+        PASSPHRASE_MAX_LEN,
+    )
     from krux.pages.qr_capture import QRCodeCapture
 
     TEST_VALUE = "Test value" * 25
@@ -61,10 +66,14 @@ def test_qr_passphrase_too_long(m5stickv, mocker):
     passphrase_editor = PassphraseEditor(ctx)
     mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (QR_DATA))
     qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
-    test_passphrase = passphrase_editor._load_qr_passphrase()
 
-    assert test_passphrase == MENU_CONTINUE
-    qr_capturer.assert_called_once()
+    error_message = "Maximum length exceeded (%s)" % PASSPHRASE_MAX_LEN
+    with pytest.raises(ValueError) as error:
+        test_passphrase = passphrase_editor._load_qr_passphrase()
+
+        assert error_message in str(error.value)
+        assert test_passphrase == MENU_CONTINUE
+        qr_capturer.assert_called_once()
 
 
 def test_qr_passphrase_fail(m5stickv, mocker):
