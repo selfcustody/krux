@@ -384,7 +384,7 @@ class Login(Page):
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
         if data is None:
-            self.flash_error(t("Failed to load mnemonic"))
+            self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
         words = []
@@ -708,7 +708,7 @@ class Login(Page):
         words = tiny_scanner.scanner(len_mnemonic == 24)
         del tiny_scanner
         if words is None:
-            self.flash_error(t("Failed to load mnemonic"))
+            self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
