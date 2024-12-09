@@ -42,7 +42,7 @@ The *TC Flash Hash* tool enables you to verify if the device's internal flash me
     <img src="../../../img/flash_hash.bmp" alt="TC Flash Hash" width="200"/>
 </div>
 
-*Example: The blue symbol and words 'tail monkey' represents the firmware region, while 'wrestle over' user's region.*
+*Example: The blue symbol and words 'tail monkey' represent the firmware region, while 'wrestle over' user's region.*
 
 Any change in the flash content results in a different image and words:
 
@@ -64,14 +64,14 @@ The *TC Flash Hash* function securely hashes the combination of the *TC Code*, d
 
 After setting a *TC Code* user can use the *TC Flash Hash* feature, available in `Tools -> Flash Tools -> TC Flash Hash`.
 
-By navigating to `Settings -> Security -> TC Flash Hash at Boot`, users can set Krux to always require *TC Flash Hash* verification after device is turned on. If a wrong *TC Code* is typed at boot, the device will turn off. Nothing else will happen if the wrong *TC Code* is entered multiple times. As *TC Code* verification data is stored in the user's region of memory, the requirement to type at boot is disabled if the user [erases user's data](../features/tools.md/#erase-users-data) or [wipe device](../installing/from-gui/usage.md/#wipe-device). Flashing an older firmware version will also disable this feature.
+By navigating to `Settings -> Security -> TC Flash Hash at Boot`, users can set Krux to always require *TC Flash Hash* verification after device is turned on. If a wrong *TC Code* is typed at boot, the device will turn off. Nothing else will happen if the wrong *TC Code* is entered multiple times. As *TC Code* verification data is stored in the user's region of memory, the requirement to type at boot is disabled if the user [erases user's data](../features/tools.md/#erase-users-data) or [wipe device](../installing/from-gui/usage.md/#wipe-device). Flashing an older firmware version, prior to *TC Flash Hash* support, will also disable this feature.
 
 ## Potential Attack Scenarios and Their Mitigation
 ### Challenge for an Attacker
 
 An attacker faces major challenges in replacing the firmware:
 
-- **Lack of Original Flash Data:** Without the exact original flash content, the attacker cannot reproduce the correct hash.
+- **Lack of Original Flash Data:** Without the exact original flash content, attackers cannot reproduce the correct hash.
 
 - **Sequential Hash Dependency:** The hash function processes data sequentially (*TC Code*, device's UID, and flash memory contents), preventing the attacker from injecting or rearranging data to produce the same hash.
 
@@ -79,9 +79,9 @@ An attacker faces major challenges in replacing the firmware:
 
 ### Why Tampered Firmware Cannot Bypass Verification
 
-- **Cannot Reconstruct the Hash:** Without the original flash data, the attacker cannot generate the correct hash, even if it knows the device's UID and the *TC Code* (after the user enters it).
+- **Cannot Reconstruct the Hash:** Without the original flash data, the attacker cannot generate the correct hash, even if they know the device's UID and the *TC Code* (after the user enters it).
 
-- **Hash Sensitivity:** Any alteration in the flash content changes the hash output, which will be evident through a different image or the set of two words.
+- **Hash Sensitivity:** Any alteration in the flash content changes the hash output, which will be evident through a different image and words.
 
 - **Entropy Filling:** Filling empty flash blocks with camera-generated entropy leaves no space for malicious code and any changes to these blocks will alter the hash.
 
@@ -97,6 +97,6 @@ An attacker faces major challenges in replacing the firmware:
 
 ## Conclusion
 
-The *TC Flash Hash* tool significantly enhances security by making it impossible for attackers to tamper with firmware without being detected. By combining *TC Code* hashing, filling empty memory with random entropy, and verification of the the unique image and set of words, Krux allows the detection of any tamper attempts.
+The *TC Flash Hash* tool significantly enhances security by making it infeasible for attackers to tamper with firmware without being detected. By combining *TC Code* hashing, filling empty memory with random entropy, and verification of the the unique image and set of words, Krux allows the detection of any tamper attempts.
 
 Note: The strength of this defense strategy depends on maintaining a strong, confidential *TC Code* and remove the SD card before unlocking the device.
