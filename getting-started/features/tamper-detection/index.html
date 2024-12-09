@@ -1279,6 +1279,24 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#setting-up-tamper-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setting Up Tamper Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-krux-tamper-detection-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How Krux Tamper Detection Works
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1630,8 +1648,14 @@
 </li>
 </ul>
 <p>Note: The effectiveness of <em>TC Flash Hash</em> tamper detection feature relies on running legitimate, uncompromised firmware and safely protecting your <em>TC Code</em>.</p>
+<h3 id="setting-up-tamper-detection">Setting Up Tamper Detection<a class="headerlink" href="#setting-up-tamper-detection" title="Permanent link">&para;</a></h3>
+<p>To help ensure the integrity of your device’s firmware, you can set up tamper detection tools, called <em>Tamper Check (TC) Flash Hash</em> and a <em>Tamper Check (TC) Code</em>. The <em>TC Code</em> must be at least six characters long, and for best security, should include a mix of letters, numbers, and special characters. You can create or change your <em>TC Code</em> by going to <code>Settings -&gt; Security -&gt; Tamper Check Code</code>.</p>
+<p>Ensure that your <em>TC Code</em> remains confidential and challenging to guess, as its security directly influences the effectiveness of your tamper detection.</p>
+<p>Once configured, your <em>TC Code</em> will be required to run <em>TC Flash Hash</em>. You can run TC Flash Hash at any time by navigating to <code>Tools -&gt; Flash Tools -&gt; TC Flash Hash</code>. Alternatively, enable automatic checks on every boot by selecting <code>Settings -&gt; Security -&gt; TC Flash Hash at Boot</code>.</p>
+<p>When you enable the <em>TC Flash Hash at Boot</em> feature, the device will require you to enter your TC Code at each startup, ensuring routine integrity checks. This also prevents device usage unless the correct code is entered.</p>
+<p><em>TC Flash Hash</em> produces a unique visual and verbal signature (an image and two sets of words) that helps you instantly recognize unauthorized changes. See below for details on how it works and what to expect from its output.</p>
+<h3 id="how-krux-tamper-detection-works">How Krux Tamper Detection Works<a class="headerlink" href="#how-krux-tamper-detection-works" title="Permanent link">&para;</a></h3>
 <h2 id="tamper-check-code-tc-code">Tamper Check Code (TC Code)<a class="headerlink" href="#tamper-check-code-tc-code" title="Permanent link">&para;</a></h2>
-<p>A <em>TC Code</em>, composed of numbers, letters and special characters, with a minimum length of six characters, can be stored and required to execute <em>TC Flash Hash</em> tamper verification before Krux boots at the main application, or optionally as a feature available in <code>Tools -&gt; Flash Tools</code>.</p>
 <p>Before being stored in the device’s flash, the <em>TC Code</em> is hashed together with the K210 chip’s unique ID and stretched using PBKDF2. This ensures the <em>TC Code</em> is not retrievable via a flash dump and can only be brute-forced outside the device if the attacker also has access to the device’s unique ID (UID). By allowing letters, special characters, and running 100k iterations of PBKDF2, brute-forcing the <em>TC Code</em> from dumped data becomes more time-consuming and resource-intensive.</p>
 <h3 id="enhancing-tamper-detection">Enhancing Tamper Detection<a class="headerlink" href="#enhancing-tamper-detection" title="Permanent link">&para;</a></h3>
 <p>After setting the <em>TC Code</em>, you are prompted to fill empty flash memory blocks with random entropy from the camera. This process ensures that attackers cannot exploit unused memory space.</p>
@@ -1686,7 +1710,7 @@
 <h3 id="why-tampered-firmware-cannot-bypass-verification">Why Tampered Firmware Cannot Bypass Verification<a class="headerlink" href="#why-tampered-firmware-cannot-bypass-verification" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
-<p><strong>Cannot Reconstruct the Hash:</strong> Without the original flash data, the attacker cannot generate the correct hash, even if they know the device's UID and the <em>TC Code</em> (after the user enters it).</p>
+<p><strong>Cannot Reconstruct the Hash:</strong> Without the original flash data, attackers cannot generate the correct hash, even if they know the device's UID and the <em>TC Code</em> (after the user enters it).</p>
 </li>
 <li>
 <p><strong>Hash Sensitivity:</strong> Any alteration in the flash content changes the hash output, which will be evident through a different image and words.</p>
@@ -1712,7 +1736,7 @@
 </ul>
 <h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
 <p>The <em>TC Flash Hash</em> tool significantly enhances security by making it infeasible for attackers to tamper with firmware without being detected. By combining <em>TC Code</em> hashing, filling empty memory with random entropy, and verification of the the unique image and set of words, Krux allows the detection of any tamper attempts.</p>
-<p>Note: The strength of this defense strategy depends on maintaining a strong, confidential <em>TC Code</em> and remove the SD card before unlocking the device.</p>
+<p>Note: The strength of this defense strategy depends on maintaining a strong, confidential <em>TC Code</em>, removing the SD card before running <em>TC Flash Hash</em> and following usual security and privacy practices.</p>
 
 
 
