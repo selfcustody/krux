@@ -1115,6 +1115,48 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#hiwonder-wondermv-vision-recognition-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hiwonder WonderMV Vision Recognition Module
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hiwonder WonderMV Vision Recognition Module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linux_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linux
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mac_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mac
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Windows
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1836,6 +1878,17 @@
 <p>See the correct port at Device Manager &gt; Ports (COM &amp; LPT), in the example below we use <code>COM6</code>:
 <div class="highlight"><pre><span></span><code><span class="p">.\</span><span class="n">ktool-win</span><span class="p">.</span><span class="n">exe</span> <span class="n">-B</span> <span class="n">goE</span> <span class="n">-b</span> <span class="n">1500000</span> <span class="n">-p</span> <span class="n">COM6</span> <span class="n">maixpy_yahboom</span><span class="p">\</span><span class="n">kboot</span><span class="p">.</span><span class="n">kfpkg</span>
 </code></pre></div></p>
+<h4 id="hiwonder-wondermv-vision-recognition-module">Hiwonder WonderMV Vision Recognition Module<a class="headerlink" href="#hiwonder-wondermv-vision-recognition-module" title="Permanent link">&para;</a></h4>
+<p>To Flash WonderMV you need to pass the <code>-B dan</code> parameter.</p>
+<h5 id="linux_6">Linux<a class="headerlink" href="#linux_6" title="Permanent link">&para;</a></h5>
+<div class="highlight"><pre><span></span><code>./ktool-linux<span class="w"> </span>-B<span class="w"> </span>dan<span class="w"> </span>-b<span class="w"> </span><span class="m">1500000</span><span class="w"> </span>maixpy_wonder_mv/kboot.kfpkg
+</code></pre></div>
+<h5 id="mac_6">Mac<a class="headerlink" href="#mac_6" title="Permanent link">&para;</a></h5>
+<div class="highlight"><pre><span></span><code>./ktool-mac<span class="w"> </span>-B<span class="w"> </span>dan<span class="w"> </span>-b<span class="w"> </span><span class="m">1500000</span><span class="w"> </span>maixpy_wonder_mv/kboot.kfpkg
+</code></pre></div>
+<h5 id="windows_6">Windows<a class="headerlink" href="#windows_6" title="Permanent link">&para;</a></h5>
+<div class="highlight"><pre><span></span><code><span class="p">.\</span><span class="n">ktool-win</span><span class="p">.</span><span class="n">exe</span> <span class="n">-B</span> <span class="n">dan</span> <span class="n">-b</span> <span class="n">1500000</span> <span class="n">maixpy_wonder_mv</span><span class="p">\</span><span class="n">kboot</span><span class="p">.</span><span class="n">kfpkg</span>
+</code></pre></div>
 
 
 

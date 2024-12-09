@@ -1390,6 +1390,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#wondermv" class="md-nav__link">
+    <span class="md-ellipsis">
+      WonderMV
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#maix-dock-and-maix-bit" class="md-nav__link">
     <span class="md-ellipsis">
       Maix Dock and Maix Bit
@@ -1744,6 +1753,18 @@ Some stores ship the Maix Dock with soldered pin connectors that do not fit into
 </ul>
 <div style="clear: both"></div>
 
+<h3 id="wondermv">WonderMV<a class="headerlink" href="#wondermv" title="Permanent link">&para;</a></h3>
+<p><img src="../img/maixpy_wonder_mv/logo-152.png" align="right" width="116"></p>
+<p>It comes with a compatible 32G card, an USB card reader, and two Molex 51004 4-pin male-to-male cable (to connect to a <a href="#optional-ttl-serial-thermal-printer">thermal printer</a>). Below is a list of some distributors where you can find this device:</p>
+<ul>
+<li><a href="https://www.aliexpress.com/w/wholesale-k210-wondermv.html">AliExpress</a></li>
+<li><a href="https://www.amazon.com/s?k=k210+WonderMV">Amazon</a></li>
+<li><a href="https://www.hiwonder.com/products/wondermv">Hiwonder Store</a></li>
+<li><a href="https://www.ruten.com.tw/item/show?22351444721094">Ruten</a></li>
+<li><a href="https://shop.playrobot.com/products/veo0116">飆機器人</a></li>
+</ul>
+<div style="clear: both"></div>
+
 <h3 id="maix-dock-and-maix-bit">Maix Dock and Maix Bit<a class="headerlink" href="#maix-dock-and-maix-bit" title="Permanent link">&para;</a></h3>
 <p><img src="../img/maixpy_dock/logo-151.png" align="right" width="144"></p>
 <p>For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.</p>
@@ -1773,7 +1794,7 @@ Yahboom will come with a compatible 32G card. The size of the SD card isn't impo
 <p>Krux has the capability to print all QR codes it generates, including those for mnemonics, xpubs, wallet backups, and signed PSBTs, using a locally-connected thermal printer via its serial port.</p>
 <p>Many TTL serial thermal printers may be compatible, but currently, the <a href="https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html">Goojprt QR203</a> has the best support (except this printer only supports ASCII or Chinese characters, non-ASCII characters will be printed as Chinese). The <a href="https://www.adafruit.com/product/600">Adafruit printer starter pack</a> can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in the <a href="../getting-started/settings/#thermal">Krux settings</a>, set the Tx pin and baud rate value to either 19200 or 9600 (depends on the printer), as explained in this <a href="https://learn.adafruit.com/mini-thermal-receipt-printer/first-test">Adafruit printer tutorial</a>. You will need to connect the device's Tx to the printer's Rx and device's ground to the printer's ground, do not connect any other pins because a wrong connection may damage your device. The printer requires a dedicated power supply, typically with an output of 5 to 9V (or 12V) and capable of supplying at least 2A. For more information, <a href="https://github.com/selfcustody/krux/discussions/312">see this discussion</a>.</p>
 <h4 id="optional-conversion-cable-for-thermal-printer">(Optional) Conversion Cable for Thermal Printer<a class="headerlink" href="#optional-conversion-cable-for-thermal-printer" title="Permanent link">&para;</a></h4>
-<p>To connect the printer to M5StickV, Amigo or Cube, you will need a <a href="https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs">grove conversion cable</a> with a 4-pin male Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). Check your device and printer model connection first, Yahboom comes with PH2.0 4Pin female connector; Dock and Bit doesn't have a connector. For a more reliable connection, it is recommended to cut and solder the wires of your custom cables instead of using jumpers.</p>
+<p>To connect the printer to M5StickV, Amigo or Cube, you will need a <a href="https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs">grove conversion cable</a> with a 4-pin male Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). Check your device and printer model connection first, Yahboom comes with PH2.0 4Pin female connector; Dock and Bit doesn't have a connector; WonderMV comes with <a href="https://www.digikey.ca/en/products/detail/molex/0530150410/1785079">Molex 51004 4-pin connector</a> (used with smart servo). For a more reliable connection, it is recommended to cut and solder the wires of your custom cables instead of using jumpers. Here we have a description of some <a href="https://www.cable-tester.com/i2c-pin-out/">inter-integrated circuit (I2C) connector standards</a>.</p>
 
 
 
