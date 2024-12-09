@@ -227,7 +227,8 @@ def upgrade():
 
     sig = None
     try:
-        sig = open(firmware_path + ".sig", "rb").read()
+        with open(firmware_path + ".sig", "rb") as sig_file:
+            sig = sig_file.read()
     except:
         display.flash_text(t("Missing signature file"))
         return False
@@ -258,17 +259,19 @@ def upgrade():
         display.clear()
         display.draw_centered_text(text)
 
+    firmware_file = open(firmware_path, "rb", buffering=0)
     write_data(
         lambda pct: status_text(
             t("Processing..") + "1/3" + "\n\n%d%%" % int(pct * 100)
         ),
         new_address,
-        open(firmware_path, "rb", buffering=0),
+        firmware_file,
         new_size,
         65536,
         True,
         firmware_with_header_hash,
     )
+    firmware_file.close()
 
     write_data(
         lambda pct: status_text(
