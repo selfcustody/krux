@@ -22,9 +22,20 @@ To secure your Krux device, always verify firmware authenticity before installat
 
 Note: The effectiveness of *TC Flash Hash* tamper detection feature relies on running legitimate, uncompromised firmware and safely protecting your *TC Code*.
 
-## Tamper Check Code (TC Code)
-A *TC Code*, composed of numbers, letters and special characters, with a minimum length of six characters, can be stored and required to execute *TC Flash Hash* tamper verification before Krux boots at the main application, or optionally as a feature available in `Tools -> Flash Tools`.
+### Setting Up Tamper Detection
+To help ensure the integrity of your device’s firmware, you can set up tamper detection tools, called *Tamper Check (TC) Flash Hash* and a *Tamper Check (TC) Code*. The *TC Code* must be at least six characters long, and for best security, should include a mix of letters, numbers, and special characters. You can create or change your *TC Code* by going to `Settings -> Security -> Tamper Check Code`.
 
+Ensure that your *TC Code* remains confidential and challenging to guess, as its security directly influences the effectiveness of your tamper detection.
+
+Once configured, your *TC Code* will be required to run *TC Flash Hash*. You can run TC Flash Hash at any time by navigating to `Tools -> Flash Tools -> TC Flash Hash`. Alternatively, enable automatic checks on every boot by selecting `Settings -> Security -> TC Flash Hash at Boot`.
+
+When you enable the *TC Flash Hash at Boot* feature, the device will require you to enter your TC Code at each startup, ensuring routine integrity checks. This also prevents device usage unless the correct code is entered.
+
+*TC Flash Hash* produces a unique visual and verbal signature (an image and two sets of words) that helps you instantly recognize unauthorized changes. See below for details on how it works and what to expect from its output.
+
+### How Krux Tamper Detection Works
+
+## Tamper Check Code (TC Code)
 Before being stored in the device’s flash, the *TC Code* is hashed together with the K210 chip’s unique ID and stretched using PBKDF2. This ensures the *TC Code* is not retrievable via a flash dump and can only be brute-forced outside the device if the attacker also has access to the device’s unique ID (UID). By allowing letters, special characters, and running 100k iterations of PBKDF2, brute-forcing the *TC Code* from dumped data becomes more time-consuming and resource-intensive.
 
 ### Enhancing Tamper Detection
@@ -79,7 +90,7 @@ An attacker faces major challenges in replacing the firmware:
 
 ### Why Tampered Firmware Cannot Bypass Verification
 
-- **Cannot Reconstruct the Hash:** Without the original flash data, the attacker cannot generate the correct hash, even if they know the device's UID and the *TC Code* (after the user enters it).
+- **Cannot Reconstruct the Hash:** Without the original flash data, attackers cannot generate the correct hash, even if they know the device's UID and the *TC Code* (after the user enters it).
 
 - **Hash Sensitivity:** Any alteration in the flash content changes the hash output, which will be evident through a different image and words.
 
@@ -99,4 +110,4 @@ An attacker faces major challenges in replacing the firmware:
 
 The *TC Flash Hash* tool significantly enhances security by making it infeasible for attackers to tamper with firmware without being detected. By combining *TC Code* hashing, filling empty memory with random entropy, and verification of the the unique image and set of words, Krux allows the detection of any tamper attempts.
 
-Note: The strength of this defense strategy depends on maintaining a strong, confidential *TC Code* and remove the SD card before unlocking the device.
+Note: The strength of this defense strategy depends on maintaining a strong, confidential *TC Code*, removing the SD card before running *TC Flash Hash* and following usual security and privacy practices.
