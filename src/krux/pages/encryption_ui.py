@@ -238,7 +238,7 @@ class LoadEncryptedMnemonic(Page):
         sd_mnemonics = mnemonic_storage.list_mnemonics(sd_card=True)
         del mnemonic_storage
 
-        for mnemonic_id in mnemonics:
+        for mnemonic_id in sorted(mnemonics):
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(flash)",
@@ -249,7 +249,7 @@ class LoadEncryptedMnemonic(Page):
                     ),
                 )
             )
-        for mnemonic_id in sd_mnemonics:
+        for mnemonic_id in sorted(sd_mnemonics):
             mnemonic_ids_menu.append(
                 (
                     mnemonic_id + "(SD card)",
