@@ -597,7 +597,7 @@ def is_multisig(policy):
         and P2WSH in policy["type"]
         and "m" in policy
         and "n" in policy
-        and "cosigners" in policy
+        # and "cosigners" in policy
     )
 
 
@@ -681,9 +681,10 @@ def get_policy(scope, scriptpubkey, xpubs):
             if scope.witness_script is None:
                 raise ValueError("Missing witness script")
             m, pubkeys = parse_multisig(scope.witness_script)
+            policy.update({"m": m, "n": len(pubkeys)})
             # check pubkeys are derived from cosigners
             cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
-            policy.update({"m": m, "n": len(cosigners), "cosigners": cosigners})
+            policy.update({"cosigners": cosigners})
         except:
             try:
                 # Try to parse as miniscript
