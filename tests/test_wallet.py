@@ -37,10 +37,12 @@ def tdata(mocker):
     KRUX_NESTEDSW1_DESCRIPTOR = "sh(wpkh([55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV))"
     KRUX_NESTEDSW1_XPUB = "[55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV"
     KRUX_NESTEDSW1_YPUB = "[55f8fc5d/49h/0h/1h]ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
+    KRUX_NESTEDSW1_YPUB_DESCRIPTOR = "sh(wpkh(" + KRUX_NESTEDSW1_YPUB + "))"
 
     KRUX_NATIVESW1_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/1h]xpub6DPMTPxGMqdu43FvwYdC6eHCPJWckCkx1rLJ1HEG7259GyWQD5P17WB2oowP9SpQdC8ogrmXfwfoazvf6Te8svtxWh4UTwTqyRdG5G54FxW)"
     KRUX_NATIVESW1_XPUB = "[55f8fc5d/84h/0h/1h]xpub6DPMTPxGMqdu43FvwYdC6eHCPJWckCkx1rLJ1HEG7259GyWQD5P17WB2oowP9SpQdC8ogrmXfwfoazvf6Te8svtxWh4UTwTqyRdG5G54FxW"
     KRUX_NATIVESW1_ZPUB = "[55f8fc5d/84h/0h/1h]zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
+    KRUX_NATIVESW1_ZPUB_DESCRIPTOR = "wpkh(" + KRUX_NATIVESW1_ZPUB + ")"
 
     KRUX_TAPROOT1_DESCRIPTOR = "tr([55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q)"
     KRUX_TAPROOT1_XPUB = "[55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q"
@@ -51,13 +53,13 @@ def tdata(mocker):
     SPECTER_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))"
     SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
 
-    BLUEWALLET_SINGLESIG_DESCRIPTOR = "wpkh(xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
+    BLUEWALLET_SINGLESIG_DESCRIPTOR = "wpkh(zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw)"
     BLUEWALLET_SINGLESIG_WALLET_DATA = "zpub6s3t4jJ6fCirgxL4WAasdamVyus8i4Dks4at95tw8tezYJvCtKBeZ1CHH33P7BUdY1iFBPQbB1XnnNxCmi9BoZ4BhBmYYCf9Sfxs6jY8Ycw"
 
     BLUEWALLET_LEGACY_DESCRIPTOR = "pkh(xpub6C1dUaopHgps26SpkdwL28cS5WFH7Xyaut4HLKZq8Jgiisp5VZK8o1HJLoDRiQyAbdMpBJSpgc8eToiJay4XAnSSvxDVvMuMTnBoTAR26Gb)"
     BLUEWALLET_LEGACY_WALLET_DATA = "xpub6C1dUaopHgps26SpkdwL28cS5WFH7Xyaut4HLKZq8Jgiisp5VZK8o1HJLoDRiQyAbdMpBJSpgc8eToiJay4XAnSSvxDVvMuMTnBoTAR26Gb"
 
-    BLUEWALLET_NESTEDSW_DESCRIPTOR = "sh(wpkh(xpub6Ca1JGnSFNZ7g8zXNjwY1Li1GKEJPQnbq8Lcev7qoXj33PzMkwWnRKjwqSPo1ArJ2KY3GYAcYhJvcZTwvb99yWuQ5eH4rPEd5mvazBhKiTn))"
+    BLUEWALLET_NESTEDSW_DESCRIPTOR = "sh(wpkh(ypub6XQGbwTMQ46bXSBeD6jADRoWSHNkL2n6kErqSK1jBY6v6Vob1bgM3PQ5reMP15WDRxer21mB1MfUVr5WeHZAmkazwyyVSJ47MVzENnCyRcP))"
     BLUEWALLET_NESTEDSW_WALLET_DATA = "ypub6XQGbwTMQ46bXSBeD6jADRoWSHNkL2n6kErqSK1jBY6v6Vob1bgM3PQ5reMP15WDRxer21mB1MfUVr5WeHZAmkazwyyVSJ47MVzENnCyRcP"
 
     BLUEWALLET_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
@@ -173,9 +175,11 @@ def tdata(mocker):
             "KRUX_NESTEDSW1_DESCRIPTOR",
             "KRUX_NESTEDSW1_XPUB",
             "KRUX_NESTEDSW1_YPUB",
+            "KRUX_NESTEDSW1_YPUB_DESCRIPTOR",
             "KRUX_NATIVESW1_DESCRIPTOR",
             "KRUX_NATIVESW1_XPUB",
             "KRUX_NATIVESW1_ZPUB",
+            "KRUX_NATIVESW1_ZPUB_DESCRIPTOR",
             "KRUX_TAPROOT1_DESCRIPTOR",
             "KRUX_TAPROOT1_XPUB",
             "SPECTER_SINGLESIG_DESCRIPTOR",
@@ -221,9 +225,11 @@ def tdata(mocker):
         KRUX_NESTEDSW1_DESCRIPTOR,
         KRUX_NESTEDSW1_XPUB,
         KRUX_NESTEDSW1_YPUB,
+        KRUX_NESTEDSW1_YPUB_DESCRIPTOR,
         KRUX_NATIVESW1_DESCRIPTOR,
         KRUX_NATIVESW1_XPUB,
         KRUX_NATIVESW1_ZPUB,
+        KRUX_NATIVESW1_ZPUB_DESCRIPTOR,
         KRUX_TAPROOT1_DESCRIPTOR,
         KRUX_TAPROOT1_XPUB,
         SPECTER_SINGLESIG_DESCRIPTOR,
@@ -615,7 +621,7 @@ def test_parse_wallet(mocker, m5stickv, tdata):
         ),
         (
             tdata.KRUX_NESTEDSW1_YPUB,
-            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+            tdata.KRUX_NESTEDSW1_YPUB_DESCRIPTOR,
             None,
         ),
         (
@@ -625,7 +631,7 @@ def test_parse_wallet(mocker, m5stickv, tdata):
         ),
         (
             tdata.KRUX_NATIVESW1_ZPUB,
-            tdata.KRUX_NATIVESW1_DESCRIPTOR,
+            tdata.KRUX_NATIVESW1_ZPUB_DESCRIPTOR,
             None,
         ),
         (

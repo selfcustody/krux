@@ -119,26 +119,28 @@ class Wallet:
         """Loads the wallet from the given data"""
         descriptor, label = parse_wallet(wallet_data, allow_assumption)
 
+        # convert descriptor keys to 'xpub' on same network -- for comparison only
+        descriptor_xpubs = []
+        for key in descriptor.keys:
+            network, _ = version_to_network_versiontype(key.key.version)
+            descriptor_xpubs.append(key.key.to_base58(version=NETWORKS[network]['xpub']))
+
         if self.key:
             if self.is_multisig():
                 if not descriptor.is_basic_multisig:
                     raise ValueError("not multisig")
-                if self.key.xpub() not in [
-                    key.key.to_base58() for key in descriptor.keys
-                ]:
+                if self.key.xpub() not in descriptor_xpubs:
                     raise ValueError("xpub not a multisig cosigner")
             elif self.is_miniscript():
                 if descriptor.miniscript is None or descriptor.is_basic_multisig:
                     raise ValueError("not miniscript")
-                if self.key.xpub() not in [
-                    key.key.to_base58() for key in descriptor.keys
-                ]:
+                if self.key.xpub() not in descriptor_xpubs:
                     raise ValueError("xpub not a miniscript cosigner")
             else:
                 if not descriptor.key:
                     if len(descriptor.keys) > 1:
                         raise ValueError("not single-sig")
-                if self.key.xpub() != descriptor.key.key.to_base58():
+                if self.key.xpub() != descriptor_xpubs[0]:
                     raise ValueError("xpub does not match")
 
         self.wallet_data = wallet_data
@@ -246,11 +248,9 @@ def parse_key_value_file(wallet_data):
             kv = key_vals[i]
             kv_prefix = kv[:4].lower()
             if kv_prefix[1:] == "pub" and kv_prefix[0] in ["x", "z", "t", "v"]:
-                xpub = Key.from_string(kv)
-                network, _ = version_to_network_versiontype(xpub.key.version)
-                xpub_as_xpub = xpub.key.to_base58(version=NETWORKS[network]["xpub"])
+                xpub = Key.from_string(kv).key.to_base58()
                 fingerprint = key_vals[i - 1]
-                keys.append((xpub_as_xpub, fingerprint))
+                keys.append((xpub, fingerprint))
 
         if len(keys) != n:
             raise ValueError("expected %d keys, found %d" % (n, len(keys)))
@@ -347,7 +347,7 @@ def parse_wallet(wallet_data, allow_assumption=None):
         if pubkey.is_extended:
             network, versiontype = version_to_network_versiontype(pubkey.key.version)
 
-            xpub = pubkey.key.to_base58(version=NETWORKS[network]["xpub"])
+            xpub = pubkey.key.to_base58()
 
             fmt = None
             if pubkey.origin is None:
