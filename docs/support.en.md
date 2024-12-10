@@ -28,7 +28,7 @@ The purpose of this ethos is not to virtue signal, but to introduce newcomers to
 To implement ideas that make self-custody more powerful, accessible, and user-friendly.
 ### Don't Trust, Verify
 
-Do not trust developers’ intentions or competence. Krux is a DIY, use-at-your-own-risk project. We are committed to continuously improving security, but will not make claims or create marketing narratives about it. It is up to the users verify their hardware, the [firmware](../getting-started/installing/from-pre-built-release/#Verify-the-files) and [Krux-Installer](../getting-started/installing/from-gui/debian-like/#Verify-the-integrity)
+Do not trust developers’ intentions or competence. Krux is a DIY, use-at-your-own-risk project. We are committed to continuously improving security, but will not make claims or create marketing narratives about it. It is up to the users verify their hardware, the [firmware](getting-started/installing/from-pre-built-release.md/#verify-the-files) and [Krux-Installer](getting-started/installing/from-gui/debian-like.md/#verify-the-integrity)
 ### Donations
 
 Krux will not solicit, receive, manage, or distribute donations. Therefore, Krux has no budget for publicity, audits, or similar activities. Contributors to Krux will fund their own work—whether by promoting their efforts, applying for grants, or seeking direct individual donations.

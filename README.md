@@ -13,6 +13,7 @@
 <img src="https://selfcustody.github.io/krux/img/maixpy_dock/logo-151.png" width="144">
 <img src="https://selfcustody.github.io/krux/img/maixpy_yahboom/logo-156.png" width="116">
 <img src="https://selfcustody.github.io/krux/img/maixpy_cube/logo-200.png" width="120">
+<img src="https://selfcustody.github.io/krux/img/maixpy_wonder_mv/logo-152.png" width="116">
 </p>
 
 Krux is an open-source firmware facilitating the creation of Bitcoin signing devices from readily available components, such as Kendryte K210 devices. It transforms these devices into airgapped tools capable of handling transactions for both single and multisignature wallets, supporting offline signing via QR code or SD card, thus empowering users to securely self-custody their Bitcoin.
@@ -148,6 +149,9 @@ poetry run poe simulator-yahboom
 
 # Run simulator on the device cube, then use keyboard (arrow keys UP or DOWN and ENTER)
 poetry run poe simulator-cube
+
+# Run simulator with the touch device wonderMV, then use mouse to navigate
+poetry run poe simulator-wonder-mv
 ```
 
 Note: With emulated SD card it is possible to store settings, encrypted mnemonics, also drop and sign PSBTs. After some time running, the simulator may become slow. If that happens, just close and open again!
