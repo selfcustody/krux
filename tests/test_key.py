@@ -88,14 +88,14 @@ def mock_modules(mocker):
 def test_init(mocker, m5stickv, tdata):
     mock_modules(mocker)
     from embit.networks import NETWORKS
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG, TYPE_MULTISIG
 
     cases = [
         (
             [tdata.TEST_12_WORD_MNEMONIC, False],
             {
                 "mnemonic": tdata.TEST_12_WORD_MNEMONIC,
-                "multisig": False,
+                "policy_type": TYPE_SINGLESIG,
                 "network": NETWORKS["test"],
                 "root key": "tprv8ZgxMBicQKsPfJtsjGcMm6f7ibxmy2LbqbePeCJnhE3tFNKfuWmNHUyMnAfgwQXDSAhfTLGvN4f8zjEFochGbnHiZcrGXnyHDKQaTRK5trx",
                 "derivation": "m/84h/1h/0h",
@@ -106,7 +106,7 @@ def test_init(mocker, m5stickv, tdata):
             [tdata.TEST_12_WORD_MNEMONIC, True],
             {
                 "mnemonic": tdata.TEST_12_WORD_MNEMONIC,
-                "multisig": True,
+                "policy_type": TYPE_MULTISIG,
                 "network": NETWORKS["test"],
                 "root key": "tprv8ZgxMBicQKsPfJtsjGcMm6f7ibxmy2LbqbePeCJnhE3tFNKfuWmNHUyMnAfgwQXDSAhfTLGvN4f8zjEFochGbnHiZcrGXnyHDKQaTRK5trx",
                 "derivation": "m/48h/1h/0h/2h",
@@ -117,7 +117,7 @@ def test_init(mocker, m5stickv, tdata):
             [tdata.TEST_12_WORD_MNEMONIC, False, NETWORKS["main"]],
             {
                 "mnemonic": tdata.TEST_12_WORD_MNEMONIC,
-                "multisig": False,
+                "policy_type": TYPE_SINGLESIG,
                 "network": NETWORKS["main"],
                 "root key": "xprv9s21ZrQH143K4VfM4hkrbT38QUYZjWJbW3jGmmtLDFZQTmaav9RcmjburzW2w38u4jAtTEfACi5LXsgWgQMKnj282ydxsSFEJDfA1o1TySf",
                 "derivation": "m/84h/0h/0h",
@@ -128,7 +128,7 @@ def test_init(mocker, m5stickv, tdata):
             [tdata.TEST_12_WORD_MNEMONIC, True, NETWORKS["main"]],
             {
                 "mnemonic": tdata.TEST_12_WORD_MNEMONIC,
-                "multisig": True,
+                "policy_type": TYPE_MULTISIG,
                 "network": NETWORKS["main"],
                 "root key": "xprv9s21ZrQH143K4VfM4hkrbT38QUYZjWJbW3jGmmtLDFZQTmaav9RcmjburzW2w38u4jAtTEfACi5LXsgWgQMKnj282ydxsSFEJDfA1o1TySf",
                 "derivation": "m/48h/0h/0h/2h",
@@ -139,7 +139,7 @@ def test_init(mocker, m5stickv, tdata):
             [tdata.TEST_24_WORD_MNEMONIC, False],
             {
                 "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
-                "multisig": False,
+                "policy_type": TYPE_SINGLESIG,
                 "network": NETWORKS["test"],
                 "root key": "tprv8ZgxMBicQKsPe5ghS4VTSeC3XwXJqVcJo4pzkFpuqZzFxhjuMsF13r8avzU8nwnwng6PCZ5EcJuPuqWwvJVCMRj3G9ZZyJ884RcrjAQ52BG",
                 "derivation": "m/84h/1h/0h",
@@ -150,7 +150,7 @@ def test_init(mocker, m5stickv, tdata):
             [tdata.TEST_24_WORD_MNEMONIC, True],
             {
                 "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
-                "multisig": True,
+                "policy_type": TYPE_MULTISIG,
                 "network": NETWORKS["test"],
                 "root key": "tprv8ZgxMBicQKsPe5ghS4VTSeC3XwXJqVcJo4pzkFpuqZzFxhjuMsF13r8avzU8nwnwng6PCZ5EcJuPuqWwvJVCMRj3G9ZZyJ884RcrjAQ52BG",
                 "derivation": "m/48h/1h/0h/2h",
@@ -161,7 +161,7 @@ def test_init(mocker, m5stickv, tdata):
             [tdata.TEST_24_WORD_MNEMONIC, False, NETWORKS["main"]],
             {
                 "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
-                "multisig": False,
+                "policy_type": TYPE_SINGLESIG,
                 "network": NETWORKS["main"],
                 "root key": "xprv9s21ZrQH143K3GTAmVdxGza4Dp76byaJTWussqQTMbVnB6zpNVuFY6m91pJUnaQdREZcCTTUSxKbSyyCo69FYNTSjWMGJwQ59KsSHUeNNQd",
                 "derivation": "m/84h/0h/0h",
@@ -172,7 +172,7 @@ def test_init(mocker, m5stickv, tdata):
             [tdata.TEST_24_WORD_MNEMONIC, True, NETWORKS["main"]],
             {
                 "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
-                "multisig": True,
+                "policy_type": TYPE_MULTISIG,
                 "network": NETWORKS["main"],
                 "root key": "xprv9s21ZrQH143K3GTAmVdxGza4Dp76byaJTWussqQTMbVnB6zpNVuFY6m91pJUnaQdREZcCTTUSxKbSyyCo69FYNTSjWMGJwQ59KsSHUeNNQd",
                 "derivation": "m/48h/0h/0h/2h",
@@ -186,7 +186,7 @@ def test_init(mocker, m5stickv, tdata):
 
         assert isinstance(key, Key)
         assert key.mnemonic == case[1]["mnemonic"]
-        assert key.multisig == case[1]["multisig"]
+        assert key.policy_type == case[1]["policy_type"]
         assert key.network == case[1]["network"]
         assert key.root.to_base58() == case[1]["root key"]
         assert key.derivation == case[1]["derivation"]

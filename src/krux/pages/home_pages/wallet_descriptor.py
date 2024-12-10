@@ -31,7 +31,7 @@ from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
-from ...key import FINGERPRINT_SYMBOL, TYPE_SINGLESIG
+from ...key import FINGERPRINT_SYMBOL
 
 
 class WalletDescriptor(Page):

@@ -323,7 +323,8 @@ class Home(Page):
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
 
-        # Show the policy for multisig and miniscript PSBTs in case the wallet descriptor is not loaded
+        # Show the policy for multisig and miniscript PSBTs
+        # in case the wallet descriptor is not loaded
         if (
             not self.ctx.wallet.is_loaded()
             and not self.ctx.wallet.key.policy_type == TYPE_SINGLESIG

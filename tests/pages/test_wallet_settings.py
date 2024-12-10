@@ -110,13 +110,13 @@ def test_change_multisig_changes(m5stickv, mocker, tdata):
     ctx = create_ctx(mocker, BTN_SEQUENCE_1, Wallet(tdata.SINGLESIG_12_WORD_KEY))
     mnemonic = ctx.wallet.key.mnemonic
     wallet_settings = WalletSettings(ctx)
-    network, multisig, script_type, account = wallet_settings.customize_wallet(
+    network, policy_type, script_type, account = wallet_settings.customize_wallet(
         ctx.wallet.key
     )
     ctx.wallet = Wallet(
         Key(
             mnemonic,
-            multisig,
+            policy_type,
             network,
             "",  # passphrase
             account,
@@ -138,13 +138,13 @@ def test_change_multisig_changes(m5stickv, mocker, tdata):
     ]
     ctx = create_ctx(mocker, BTN_SEQUENCE_2, ctx.wallet)
     wallet_settings = WalletSettings(ctx)
-    network, multisig, script_type, account = wallet_settings.customize_wallet(
+    network, policy_type, script_type, account = wallet_settings.customize_wallet(
         ctx.wallet.key
     )
     ctx.wallet = Wallet(
         Key(
             mnemonic,
-            multisig,
+            policy_type,
             network,
             "",  # passphrase
             account,
@@ -163,7 +163,7 @@ def test_change_script_type(m5stickv, mocker, tdata):
     BTN_SEQUENCE_1 = [
         *([BUTTON_PAGE] * 2),  # Go to "Script Type"
         BUTTON_ENTER,  # Enter "Script Type"
-        BUTTON_PAGE_PREV,  # Move to Taproot
+        *([BUTTON_PAGE] * 3),  # Move to Taproot
         BUTTON_ENTER,  # Confirm Taproot
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
@@ -172,13 +172,13 @@ def test_change_script_type(m5stickv, mocker, tdata):
     ctx = create_ctx(mocker, BTN_SEQUENCE_1, Wallet(tdata.SINGLESIG_12_WORD_KEY))
     mnemonic = ctx.wallet.key.mnemonic
     wallet_settings = WalletSettings(ctx)
-    network, multisig, script_type, account = wallet_settings.customize_wallet(
+    network, policy_type, script_type, account = wallet_settings.customize_wallet(
         ctx.wallet.key
     )
     ctx.wallet = Wallet(
         Key(
             mnemonic,
-            multisig,
+            policy_type,
             network,
             "",  # passphrase
             account,
@@ -198,13 +198,13 @@ def test_change_script_type(m5stickv, mocker, tdata):
     ]
     ctx = create_ctx(mocker, BTN_SEQUENCE_2, ctx.wallet)
     wallet_settings = WalletSettings(ctx)
-    network, multisig, script_type, account = wallet_settings.customize_wallet(
+    network, policy_type, script_type, account = wallet_settings.customize_wallet(
         ctx.wallet.key
     )
     ctx.wallet = Wallet(
         Key(
             mnemonic,
-            multisig,
+            policy_type,
             network,
             "",  # passphrase
             account,
@@ -234,13 +234,13 @@ def test_change_account(m5stickv, mocker, tdata):
     ctx = create_ctx(mocker, BTN_SEQUENCE_1, Wallet(tdata.SINGLESIG_12_WORD_KEY))
     mnemonic = ctx.wallet.key.mnemonic
     wallet_settings = WalletSettings(ctx)
-    network, multisig, script_type, account = wallet_settings.customize_wallet(
+    network, policy_type, script_type, account = wallet_settings.customize_wallet(
         ctx.wallet.key
     )
     ctx.wallet = Wallet(
         Key(
             mnemonic,
-            multisig,
+            policy_type,
             network,
             "",  # passphrase
             account,
@@ -265,13 +265,13 @@ def test_change_account(m5stickv, mocker, tdata):
     ]
     ctx = create_ctx(mocker, BTN_SEQUENCE_2, ctx.wallet)
     wallet_settings = WalletSettings(ctx)
-    network, multisig, script_type, account = wallet_settings.customize_wallet(
+    network, policy_type, script_type, account = wallet_settings.customize_wallet(
         ctx.wallet.key
     )
     ctx.wallet = Wallet(
         Key(
             mnemonic,
-            multisig,
+            policy_type,
             network,
             "",  # passphrase
             account,
@@ -300,13 +300,13 @@ def test_change_account_esc(m5stickv, mocker, tdata):
     ctx = create_ctx(mocker, BTN_SEQUENCE_1, Wallet(tdata.SINGLESIG_12_WORD_KEY))
     mnemonic = ctx.wallet.key.mnemonic
     wallet_settings = WalletSettings(ctx)
-    network, multisig, script_type, account = wallet_settings.customize_wallet(
+    network, policy_type, script_type, account = wallet_settings.customize_wallet(
         ctx.wallet.key
     )
     ctx.wallet = Wallet(
         Key(
             mnemonic,
-            multisig,
+            policy_type,
             network,
             "",  # passphrase
             account,
@@ -337,13 +337,13 @@ def test_account_out_of_range(m5stickv, mocker, tdata):
     mnemonic = ctx.wallet.key.mnemonic
     wallet_settings = WalletSettings(ctx)
     wallet_settings.flash_error = mocker.MagicMock()
-    network, multisig, script_type, account = wallet_settings.customize_wallet(
+    network, policy_type, script_type, account = wallet_settings.customize_wallet(
         ctx.wallet.key
     )
     ctx.wallet = Wallet(
         Key(
             mnemonic,
-            multisig,
+            policy_type,
             network,
             "",  # passphrase
             account,

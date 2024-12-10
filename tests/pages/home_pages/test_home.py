@@ -6,7 +6,7 @@ from .. import create_ctx
 @pytest.fixture
 def tdata(mocker):
     from collections import namedtuple
-    from krux.key import Key, P2PKH, P2SH_P2WPKH, P2TR
+    from krux.key import Key, P2PKH, P2SH_P2WPKH, P2TR, TYPE_SINGLESIG, TYPE_MULTISIG
     from embit.networks import NETWORKS
 
     TEST_12_WORD_MNEMONIC = (
@@ -16,32 +16,32 @@ def tdata(mocker):
     SIGNING_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     ACTION_MNEMONIC = "action action action action action action action action action action action action"
 
-    SINGLESIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, False, NETWORKS["main"])
-    SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, False, NETWORKS["main"])
-    MULTISIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, True, NETWORKS["main"])
-    SINGLESIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, False, NETWORKS["main"])
-    MULTISIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, True, NETWORKS["main"])
-    SINGLESIG_ACTION_KEY = Key(ACTION_MNEMONIC, False, NETWORKS["main"])
+    SINGLESIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
+    SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
+    MULTISIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, TYPE_MULTISIG, NETWORKS["main"])
+    SINGLESIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
+    MULTISIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, TYPE_MULTISIG, NETWORKS["main"])
+    SINGLESIG_ACTION_KEY = Key(ACTION_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
     SINGLESIG_ACTION_KEY_TEST = Key(
-        ACTION_MNEMONIC, False, NETWORKS["test"], script_type=P2TR
+        ACTION_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2TR
     )
     LEGACY1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
-        False,
+        TYPE_SINGLESIG,
         NETWORKS["main"],
         account_index=1,
         script_type=P2PKH,
     )
     NESTEDSW1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
-        False,
+        TYPE_SINGLESIG,
         NETWORKS["main"],
         account_index=1,
         script_type=P2SH_P2WPKH,
     )
     NATIVESW1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
-        False,
+        TYPE_SINGLESIG,
         NETWORKS["main"],
         account_index=1,
     )

@@ -612,7 +612,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
             [
                 "Inputs (2): ₿ 0.20 000 000\n\nSpend (1): ₿ 0.18 993 880\n\nSelf-transfer or Change (1): ₿ 0.01 000 000\n\nFee: ₿ 0.00 006 120 (0.1%) ~20.1 sat/vB",
                 "1. Spend: \n\ntb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n\n\n₿ 0.18 993 880",
-                "1. Self-transfer: \n\ntb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t\n\n₿ 0.01 000 000",
+                "1. Change: \n\ntb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t\n\n₿ 0.01 000 000",
             ],
         ),
         (
@@ -620,7 +620,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
             [
                 "Inputs (1): ₿ 1.00 000 000\n\nSpend (1): ₿ 0.10 000 000\n\nSelf-transfer or Change (1): ₿ 0.89 995 740\n\nFee: ₿ 0.00 004 260 (0.1%) ~20.0 sat/vB",
                 "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10 000 000",
-                "1. Self-transfer: \n\n2N3vYfcg14Axr4NN33ADUorE2kEGEchFJpC\n\n₿ 0.89 995 740",
+                "1. Change: \n\n2N3vYfcg14Axr4NN33ADUorE2kEGEchFJpC\n\n₿ 0.89 995 740",
             ],
         ),
     ]
@@ -629,6 +629,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
         outputs, _ = signer.outputs()
         assert outputs == case[1]
+        # TODO: Re-create wallets and check if addresses are change indeed outside these tests
 
 
 def test_xpubs_fails_with_no_xpubs(mocker, m5stickv, tdata):

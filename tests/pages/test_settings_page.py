@@ -28,14 +28,13 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
                 # Default Wallet
                 BUTTON_ENTER,
                 # Go to Network
-                BUTTON_PAGE,
                 BUTTON_ENTER,
                 # Change network
                 *([BUTTON_PAGE] * 2),  # Cycle through 2 options
                 BUTTON_PAGE_PREV,  # Go back to the second option - testnet
                 BUTTON_ENTER,
                 # Leave Default Wallet
-                *([BUTTON_PAGE] * 2),
+                *([BUTTON_PAGE] * 3),
                 BUTTON_ENTER,
                 # Leave Settings
                 BUTTON_PAGE_PREV,
@@ -150,7 +149,7 @@ def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
         assert case[1]()
 
 
-@pytest.fixture(params=["m5stickv", "cube"])
+@pytest.fixture(params=["m5stickv", "cube"])  # TODO:Add WonderMV to the list
 def bkl_control_devices(request):
     return request.getfixturevalue(request.param)
 
@@ -221,7 +220,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
                 # Enter Wallet
                 0,
                 # Go to Network
-                1,
+                0,
                 # Change network
                 NEXT_INDEX,
                 GO_INDEX,
