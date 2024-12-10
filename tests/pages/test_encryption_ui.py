@@ -229,7 +229,7 @@ def test_load_encrypted_from_flash(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.pages.encryption_ui import LoadEncryptedMnemonic
 
-    BTN_SEQUENCE = [BUTTON_ENTER]  # First mnemonic
+    BTN_SEQUENCE = [BUTTON_PAGE, BUTTON_ENTER]  # Second mnemonic
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
         mocker.MagicMock(return_value=TEST_KEY),
@@ -245,7 +245,7 @@ def test_load_encrypted_from_sd(m5stickv, mocker, mock_file_operations):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.pages.encryption_ui import LoadEncryptedMnemonic
 
-    BTN_SEQUENCE = [BUTTON_ENTER]  # First mnemonic
+    BTN_SEQUENCE = [BUTTON_PAGE, BUTTON_ENTER]  # Second mnemonic
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
         mocker.MagicMock(return_value=TEST_KEY),
