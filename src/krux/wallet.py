@@ -297,10 +297,14 @@ def parse_wallet(wallet_data, allow_assumption=None):
 
             keys = []
             for i in range(len(key_vals)):
-                xpub = key_vals[i]
-                if xpub.lower().startswith("xpub") or xpub.lower().startswith("tpub"):
+                kv = key_vals[i]
+                kv_prefix = kv[:4].lower()
+                if kv_prefix[1:] == "pub" and kv_prefix[0] in ["x", "z", "t", "v"]:
+                    xpub = Key.from_string(kv)
+                    network, versiontype = version_to_network_versiontype(xpub.key.version)
+                    xpub_as_xpub = xpub.key.to_base58(version=NETWORKS[network]["xpub"])
                     fingerprint = key_vals[i - 1]
-                    keys.append((xpub, fingerprint))
+                    keys.append((xpub_as_xpub, fingerprint))
 
             if len(keys) != n:
                 raise ValueError("expected %d keys, found %d" % (n, len(keys)))
@@ -323,6 +327,7 @@ def parse_wallet(wallet_data, allow_assumption=None):
             )
             return descriptor, label
     except:
+        raise
         raise ValueError("invalid wallet format")
 
     # Try to parse directly as a descriptor
