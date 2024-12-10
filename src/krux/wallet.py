@@ -123,7 +123,9 @@ class Wallet:
         descriptor_xpubs = []
         for key in descriptor.keys:
             network, _ = version_to_network_versiontype(key.key.version)
-            descriptor_xpubs.append(key.key.to_base58(version=NETWORKS[network]['xpub']))
+            descriptor_xpubs.append(
+                key.key.to_base58(version=NETWORKS[network]["xpub"])
+            )
 
         if self.key:
             if self.is_multisig():
