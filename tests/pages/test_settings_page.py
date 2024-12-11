@@ -420,10 +420,16 @@ def test_set_first_tc_code(amigo, mocker):
         new=mocker.MagicMock(),
     )
     mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
+    mocker.patch("krux.pages.flash_tools.FlashHash", new=mocker.MagicMock())
     mock_file = MockFile()
     mocker.patch("builtins.open", mock_open(mock_file))
     ctx = create_ctx(
-        mocker, [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]  # Skip checking TC Flash Hash
+        mocker,
+        [
+            BUTTON_ENTER,
+            BUTTON_PAGE,
+            BUTTON_ENTER,
+        ],  # Skip TC Flash Hash at boot
     )
     ctx.tc_code_enabled = False
     settings_page = SettingsPage(ctx)
@@ -463,11 +469,17 @@ def test_set_new_tc_code(amigo, mocker):
     mocker.patch(
         "krux.pages.tc_code_verification.TCCodeVerification.capture", return_value=True
     )
+    mocker.patch("krux.pages.flash_tools.FlashHash", new=mocker.MagicMock())
     mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
     mock_file = MockFile()
     mocker.patch("builtins.open", mock_open(mock_file))
     ctx = create_ctx(
-        mocker, [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]  # Skip checking TC Flash Hash
+        mocker,
+        [
+            BUTTON_ENTER,
+            BUTTON_PAGE,
+            BUTTON_ENTER,
+        ],  # Skip TC Flash Hash at boot
     )
     ctx.tc_code_enabled = True
     settings_page = SettingsPage(ctx)
