@@ -161,7 +161,11 @@ class WalletDescriptor(Page):
                 label
                 + FINGERPRINT_SYMBOL
                 + " "
-                + binascii.hexlify(key.fingerprint).decode()
+                + (
+                    binascii.hexlify(key.origin.fingerprint).decode()
+                    if key.origin
+                    else t("unknown")
+                )
             )
         about.extend(fingerprints)
         if not wallet.is_multisig() and not wallet.is_miniscript():

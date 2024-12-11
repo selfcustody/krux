@@ -327,5 +327,6 @@ translation_array = [
     "Mots",
     "Oui",
     "Adresse non valide\u2009!",
+    "inconnu",
     "INTROUVABLE dans les %d premières adresses",
 ]

@@ -327,5 +327,6 @@ translation_array = [
     "Wörter",
     "Ja",
     "ist eine gültige Adresse!",
+    "unbekannt",
     "wurde in den ersten %d Adressen nicht gefunden",
 ]

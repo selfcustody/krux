@@ -327,5 +327,6 @@ translation_array = [
     "Từ ngữ",
     "Đúng",
     "là một địa chỉ hợp lệ!",
+    "không rõ",
     "kHÔNG TÌM THẤY trong %d địa chỉ đầu tiên",
 ]
