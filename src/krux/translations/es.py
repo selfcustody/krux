@@ -88,6 +88,7 @@ translation_array = [
     "Doble mnemónico",
     "Operador",
     "Vacío",
+    "¿Permitir?",
     "Cifrado",
     "Código QR Cifrado",
     "Mnemónico cifrado no se almacenó",

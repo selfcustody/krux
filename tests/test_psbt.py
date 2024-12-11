@@ -629,7 +629,6 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
         outputs, _ = signer.outputs()
         assert outputs == case[1]
-        # TODO: Re-create wallets and check if addresses are change indeed outside these tests
 
 
 def test_xpubs_fails_with_no_xpubs(mocker, m5stickv, tdata):

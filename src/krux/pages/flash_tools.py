@@ -147,14 +147,14 @@ class FlashTools(Page):
             from .tc_code_verification import TCCodeVerification
 
             tc_code_verification = TCCodeVerification(self.ctx)
-            pin_hash = tc_code_verification.capture(return_hash=True)
-            if not pin_hash:
+            tc_code_hash = tc_code_verification.capture(return_hash=True)
+            if not tc_code_hash:
                 return MENU_CONTINUE
         else:
             self.flash_error(t("Set a tamper check code first"))
             return MENU_CONTINUE
 
-        flash_hash = FlashHash(self.ctx, pin_hash)
+        flash_hash = FlashHash(self.ctx, tc_code_hash)
         flash_hash.generate()
 
         return MENU_CONTINUE
@@ -195,10 +195,10 @@ class FlashTools(Page):
 class FlashHash(Page):
     """Generate a human recognizable snapshot of the flash memory tied to a tamper check code"""
 
-    def __init__(self, ctx, pin_hash):
+    def __init__(self, ctx, tc_code_hash):
         super().__init__(ctx, None)
         self.ctx = ctx
-        self.pin_hash = pin_hash
+        self.tc_code_hash = tc_code_hash
         self.image_block_size = self.ctx.display.width() // 7
 
     def hash_pin_with_flash(self, spiffs_region=False):
@@ -216,7 +216,7 @@ class FlashHash(Page):
         if self.ctx.display.width() < self.ctx.display.height():
             percentage_offset += FONT_HEIGHT
         sha256 = hashlib.sha256()
-        sha256.update(self.pin_hash)
+        sha256.update(self.tc_code_hash)
         sha256.update(unique_id())
         for address in range(range_begin, range_end, BLOCK_SIZE):
             counter += 1

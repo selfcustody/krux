@@ -88,6 +88,7 @@ translation_array = [
     "Dubbel geheugensteuntje",
     "Driver",
     "Leeg",
+    "Inschakelen?",
     "Versleuteld",
     "Versleutelde QR code",
     "Versleutelde geheugensteun was niet opgeslagen",

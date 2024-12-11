@@ -54,12 +54,12 @@ class TCCodeVerification(Page):
         )
         if tc_code == ESC_KEY:
             return False
-        # Hashes the integrity code
+        # Hashes the tamper check code
         tc_code_bytes = tc_code.encode()
         # Tamper Check Code hash will be used in "TC Flash Hash"
         tc_code_hash = hashlib.sha256(tc_code_bytes).digest()
 
-        # Read the contents of integrity code file
+        # Read the contents of tamper check code file
         with open(TC_CODE_PATH, "rb") as f:
             file_secret = f.read()
 

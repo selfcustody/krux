@@ -627,3 +627,24 @@ def mock_context(mocker):
             ),
             light=None,
         )
+    elif board.config["type"] == "wonder_mv":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=mocker.MagicMock(),
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=16,
+                total_lines=20,  # 320 / 16
+                width=mocker.MagicMock(return_value=240),
+                height=mocker.MagicMock(return_value=320),
+                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
+            ),
+        )

@@ -66,6 +66,7 @@
     "Double mnemonic": "ダブルニーモニック",
     "Driver": "ドライバー",
     "Empty": "空",
+    "Enable?": "有効化:",
     "Encrypted": "暗号化されました",
     "Encrypted QR Code": "暗号化されたQRコード",
     "Encrypted mnemonic was not stored": "暗号化されたニーモニックが保存されませんでした",

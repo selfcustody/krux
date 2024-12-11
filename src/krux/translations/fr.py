@@ -88,6 +88,7 @@ translation_array = [
     "Double mnémonique",
     "Pilote",
     "Vide",
+    "Activer ?",
     "Chiffré",
     "Code QR chiffré",
     "Le mnémonique chiffré n'a pas été stocké",

@@ -88,6 +88,7 @@ translation_array = [
     "Doppelte Gedächtnisstütze",
     "Driver",
     "Leer",
+    "Aktivieren?",
     "Verschlüsselt",
     "Verschlüsselter QR-Code",
     "Verschlüsselte Mnemonic wurde nicht gespeichert",

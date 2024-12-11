@@ -88,6 +88,7 @@ translation_array = [
     "Çifte anımsatıcı",
     "Sürücü",
     "Boş",
+    "Etkinleştir?",
     "Şifrelenmiş",
     "Şifrelenmiş QR Kodu",
     "Şifrelenmiş mnemonic depolanmadı",

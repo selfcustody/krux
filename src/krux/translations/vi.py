@@ -88,6 +88,7 @@ translation_array = [
     "Từ gợi nhớ kép",
     "Driver",
     "Trống",
+    "Kích hoạt?",
     "Đã mã hóa",
     "Mã QR được mã hóa",
     "Mnemonic được mã hóa không được lưu trữ",

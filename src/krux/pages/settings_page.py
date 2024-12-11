@@ -23,7 +23,7 @@
 
 import board
 import lcd
-from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
+from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT, BOTTOM_PROMPT_LINE
 from ..themes import theme, GREEN, ORANGE
 from ..settings import (
     CategorySetting,
@@ -192,6 +192,26 @@ class SettingsPage(Page):
 
         flash_filler = FillFlash(self.ctx)
         flash_filler.fill_flash_with_camera_entropy()
+
+        from .flash_tools import FlashHash
+
+        # Asks if the user wants to set TC Flash Hash at boot
+        self.ctx.display.clear()
+        if not Settings().security.boot_flash_hash and self.prompt(
+            t("TC Flash Hash at Boot") + "\n\n" + t("Enable?"),
+            self.ctx.display.height() // 2,
+        ):
+            Settings().security.boot_flash_hash = True
+            store.save_settings()
+
+        # Shows TC Flash Hash
+
+        tc_code_bytes = tamper_check_code.encode()
+        # Tamper Check Code hash will be used in "TC Flash Hash"
+        tc_code_hash = hashlib.sha256(tc_code_bytes).digest()
+        flash_hash = FlashHash(self.ctx, tc_code_hash)
+        flash_hash.generate()
+
         return MENU_CONTINUE
 
     def _settings_exit_check(self):

@@ -88,6 +88,7 @@ translation_array = [
     "Duplo mnemônico",
     "Driver",
     "Vazio",
+    "Ativar?",
     "Criptografado",
     "Código QR Criptografado",
     "Mnemonic criptografado não foi armazenado",
