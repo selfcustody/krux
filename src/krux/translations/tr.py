@@ -327,5 +327,6 @@ translation_array = [
     "Kelimeler",
     "Evet",
     "geçerli bir adres!",
+    "bilinmiyor",
     "ilk %d adreste BULUNAMADI",
 ]

@@ -327,5 +327,6 @@ translation_array = [
     "Woorden",
     "Yes",
     "is geen geldig adres",
+    "onbekend",
     "werd NIET GEVONDEN in de eerste %d adressen",
 ]
