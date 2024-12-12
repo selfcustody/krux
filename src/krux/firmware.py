@@ -215,6 +215,7 @@ def upgrade():
     inp.buttons_active = True
     if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
         display.clear()
+        inp.wait_for_release()  # Wait for button release loading inputs on context
         return False
 
     if new_size > MAX_FIRMWARE_SIZE:
