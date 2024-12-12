@@ -156,7 +156,7 @@ class DiceEntropy(Page):
             offset_x += bar_pad
         offset_y += FONT_HEIGHT
         self.ctx.display.draw_hcentered_text(
-            t("Shannon's Entropy:") + " " + str(shannon_entropy) + " " + "bits",
+            t("Shannon's entropy:") + " " + str(shannon_entropy) + " " + "bits",
             offset_y,
         )
 
@@ -278,7 +278,7 @@ class DiceEntropy(Page):
                         if self.calculate_entropy() < (
                             self.min_entropy - ENTROPY_TOLERANCE
                         ):
-                            warning_txt += t("Poor entropy detected!")
+                            warning_txt += t("Poor entropy!")
                         if self.pattern_detection():
                             if warning_txt:
                                 warning_txt += "\n"
