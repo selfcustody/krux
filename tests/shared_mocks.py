@@ -10,6 +10,7 @@ class MockFile:
 
     def __init__(self, data=b""):
         self.data = data if isinstance(data, bytes) else data.encode()
+        self.previous_data = []
         self.position = 0
         self.write_data = bytearray()
         self.mode = "rb"
@@ -20,8 +21,12 @@ class MockFile:
 
     def set_mode(self, mode):
         self.mode = mode
+        if self.write_data:
+            self.previous_data.append(self.write_data)
         if "b" not in mode:
             self.write_data = ""
+        else:
+            self.write_data = bytearray()
 
     def seek(self, pos):
         self.position = pos

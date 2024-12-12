@@ -427,16 +427,18 @@ def test_set_first_tc_code(amigo, mocker):
         mocker,
         [
             BUTTON_ENTER,
-            BUTTON_PAGE,
             BUTTON_ENTER,
-        ],  # Skip TC Flash Hash at boot
+        ],  # Confirm TC Flash Hash at boot
     )
     ctx.tc_code_enabled = False
     settings_page = SettingsPage(ctx)
     settings_page.capture_from_keypad = mocker.MagicMock(return_value="123456")
     settings_page.enter_modify_tc_code()
     assert ctx.tc_code_enabled == True
-    assert mock_file.write_data == TC_CODE_EXTENDED_HASH
+    assert mock_file.previous_data[-1] == TC_CODE_EXTENDED_HASH
+    assert (
+        mock_file.write_data == '{"settings": {"security": {"boot_flash_hash": true}}}'
+    )
 
 
 def test_set_first_tc_code_not_match(amigo, mocker):
@@ -477,16 +479,18 @@ def test_set_new_tc_code(amigo, mocker):
         mocker,
         [
             BUTTON_ENTER,
-            BUTTON_PAGE,
             BUTTON_ENTER,
-        ],  # Skip TC Flash Hash at boot
+        ],  # Confirm TC Flash Hash at boot
     )
     ctx.tc_code_enabled = True
     settings_page = SettingsPage(ctx)
     settings_page.capture_from_keypad = mocker.MagicMock(return_value="123456")
     settings_page.enter_modify_tc_code()
     assert ctx.tc_code_enabled == True
-    assert mock_file.write_data == TC_CODE_EXTENDED_HASH
+    assert mock_file.previous_data[-1] == TC_CODE_EXTENDED_HASH
+    assert (
+        mock_file.write_data == '{"settings": {"security": {"boot_flash_hash": true}}}'
+    )
 
 
 def test_wrong_code_set_new_tc_code(amigo, mocker):
