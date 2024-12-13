@@ -17,16 +17,16 @@ TinySeed background of blank templates to be manually filled.
 
 <div style="clear: both"></div>
 
-<a href="./tiny_seed_scan_background.png">
-  <img src="./tiny_seed_scan_background.png" alt="TinySeed Scan Background" style="width: 15%; float: left; margin-left: 10px;">
+<a href="../tiny_seed_scan_background.png">
+  <img src="../tiny_seed_scan_background.png" alt="TinySeed Scan Background" style="width: 15%; float: left; margin-left: 10px;">
 </a>
 
-<a href="./tiny_seed_template.png">
-  <img src="./tiny_seed_template.png" alt="TinySeed Scan Background" style="width: 15%; float: left; margin-left: 10px;">
+<a href="../tiny_seed_template.png">
+  <img src="../tiny_seed_template.png" alt="TinySeed Scan Background" style="width: 15%; float: left; margin-left: 10px;">
 </a>
 
-<a href="./tiny_seed_template_24w.png">
-  <img src="./tiny_seed_template_24w.png" alt="TinySeed Scan Background" style="width: 22%; float: left; margin-left: 10px;">
+<a href="../tiny_seed_template_24w.png">
+  <img src="../tiny_seed_template_24w.png" alt="TinySeed Scan Background" style="width: 22%; float: left; margin-left: 10px;">
 </a>
 
 
@@ -38,12 +38,12 @@ Binary Grid labeled and and "stealth" clean templates
 
 <div style="clear: both"></div>
 
-<a href="./Krux_Binary_Grid_double_rev1.png">
-  <img src="./Krux_Binary_Grid_double_rev1.png" alt="TinySeed Scan Background" style="width: 30%; float: left; margin-left: 10px;">
+<a href="../Krux_Binary_Grid_double_rev1.png">
+  <img src="../Krux_Binary_Grid_double_rev1.png" alt="TinySeed Scan Background" style="width: 30%; float: left; margin-left: 10px;">
 </a>
 
-<a href="./Krux_Binary_Grid_double_clean_rev1.png">
-  <img src="./Krux_Binary_Grid_double_clean_rev1.png" alt="TinySeed Scan Background" style="width: 30%; float: left; margin-left: 10px;">
+<a href="../Krux_Binary_Grid_double_clean_rev1.png">
+  <img src="../Krux_Binary_Grid_double_clean_rev1.png" alt="TinySeed Scan Background" style="width: 30%; float: left; margin-left: 10px;">
 </a>
 
 <div style="clear: both"></div>
