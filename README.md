@@ -31,7 +31,7 @@ Detailed instructions for installing and running Krux can now be found in our [o
 The instructions below are intended for programmers or developers who want to contribute to the project.
 
 ## Download our firmware releases
-[<img src="docs/img/badge_github.png" height="70">](https://github.com/selfcustody/krux/releases)
+[<img src="docs/img/badge_github.png" width="186">](https://github.com/selfcustody/krux/releases)
 
 # Development
 ## Fetch the code

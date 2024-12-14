@@ -1,7 +1,6 @@
-## Krux Compatible Devices
-<img src="../img/krux-devices.jpg">
+<img src="../img/krux-devices.jpg" width="600">
 
-### Comparative Table
+### Compatible Devices (comparative table)
 
 | Device | M5StickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module | Maix Cube | WonderMV |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
