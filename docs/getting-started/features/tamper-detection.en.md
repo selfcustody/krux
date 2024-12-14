@@ -39,7 +39,7 @@ The *TC Flash Hash* tool enables you to verify if the device's internal flash me
 - **User's Region:** The area used to stored encrypted mnemonics, settings and TC Code. It generates the last set of two words.
 
 <div style="text-align: center;">
-    <img src="../../../img/flash_hash.bmp" alt="TC Flash Hash" width="200"/>
+    <img src="../../../img/flash_hash.png" alt="TC Flash Hash" width="200"/>
 </div>
 
 *Example: The blue symbol and words 'tail monkey' represent the firmware region, while 'wrestle over' user's region.*
