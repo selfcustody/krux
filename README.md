@@ -25,7 +25,10 @@ Krux is an open-source firmware facilitating the creation of Bitcoin signing dev
 ---
 
 # Getting Started
-Detailed instructions for installing and running Krux can now be found in our [official documentation](https://selfcustody.github.io/krux/)
+Detailed instructions for installing and running Krux can now be found in our [official documentation](https://selfcustody.github.io/krux/).
+
+## Download our firmware releases
+[<img src="docs/img/badge_github.png" height="70">](/releases)
 
 The instructions below are intended for programmers or developers who want to contribute to the project.
 
