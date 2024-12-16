@@ -60,6 +60,12 @@ class Camera:
             ENTROPY_MODE: (0x20, 0xF2),
             BINARY_GRID_MODE: (0x30, 0x50),
         },
+        GC0328_ID: {
+            QR_SCAN_MODE: 0x70,
+            ANTI_GLARE_MODE: 0x40,
+            ENTROPY_MODE: 0x80,
+            BINARY_GRID_MODE: 0x70,
+        },
     }
 
     def __init__(self):
@@ -146,10 +152,18 @@ class Camera:
 
     def has_antiglare(self):
         """Returns whether the camera has anti-glare functionality"""
-        return self.cam_id in (OV7740_ID, OV2640_ID, GC2145_ID)
+        return self.cam_id in (OV7740_ID, OV2640_ID, GC2145_ID, GC0328_ID)
 
     def luminosity_threshold(self):
         """Set luminosity thresholds for cameras"""
+
+        if self.cam_id == GC0328_ID:
+            target = self.lum_th.get(self.cam_id, {}).get(self.mode, 0x80)
+            # Set register bank 1
+            sensor.__write_reg(0xFE, 0x01)
+            # Expected luminance level, default=0x50
+            sensor.__write_reg(0x13, target)
+            return
 
         (low, high) = self.lum_th.get(self.cam_id, {}).get(self.mode, (0, 0))
         if low < 0x10 or high > 0xF0:
