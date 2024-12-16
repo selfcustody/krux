@@ -8,12 +8,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/selfcustody/krux/blob/main/LICENSE.md)
 
 <p align="center">
-<img src="https://selfcustody.github.io/krux/img/maixpy_amigo/logo-150.png">
-<img src="https://selfcustody.github.io/krux/img/maixpy_m5stickv/logo-125.png" width="75">
-<img src="https://selfcustody.github.io/krux/img/maixpy_dock/logo-151.png" width="144">
-<img src="https://selfcustody.github.io/krux/img/maixpy_yahboom/logo-156.png" width="116">
-<img src="https://selfcustody.github.io/krux/img/maixpy_cube/logo-200.png" width="120">
-<img src="https://selfcustody.github.io/krux/img/maixpy_wonder_mv/logo-152.png" width="116">
+<img src="docs/img/maixpy_amigo/logo-150.en.png" alt="maixpy amigo device">
+<img src="docs/img/maixpy_m5stickv/logo-125.en.png" alt="m5stickv device" width="75">
+<img src="docs/img/maixpy_dock/logo-151.en.png" alt="maixpy dock device" width="144">
+<img src="docs/img/maixpy_yahboom/logo-156.en.png" alt="yahboom device" width="116">
+<img src="docs/img/maixpy_cube/logo-200.en.png" alt="maixpy cube device" width="120">
+<img src="docs/img/maixpy_wonder_mv/logo-152.en.png" alt="wonder mv device" width="116">
 </p>
 
 Krux is an open-source firmware facilitating the creation of Bitcoin signing devices from readily available components, such as Kendryte K210 devices. It transforms these devices into airgapped tools capable of handling transactions for both single and multisignature wallets, supporting offline signing via QR code or SD card, thus empowering users to securely self-custody their Bitcoin.
@@ -25,9 +25,13 @@ Krux is an open-source firmware facilitating the creation of Bitcoin signing dev
 ---
 
 # Getting Started
-Detailed instructions for installing and running Krux can now be found in our [official documentation](https://selfcustody.github.io/krux/)
+Detailed instructions for installing and running Krux can now be found in our [official documentation](https://selfcustody.github.io/krux/).
+
 
 The instructions below are intended for programmers or developers who want to contribute to the project.
+
+## Download our firmware releases
+[<img src="docs/img/badge_github.png" alt="github releases page" width="186">](https://github.com/selfcustody/krux/releases)
 
 # Development
 ## Fetch the code

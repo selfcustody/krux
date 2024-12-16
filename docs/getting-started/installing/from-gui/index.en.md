@@ -1,10 +1,9 @@
 You can install Krux (both official or beta releases) onto your K210-based device using our
-official desktop application, [KruxInstaller](https://github.com/selfcustody/krux-installer),
-available for:
+official desktop application, **KruxInstaller**:
 
-> ⚠️  WARNING: Krux-Installer latest version is in it's alpha version. Maybe you can experience
-> bugs or don't like something. If it is the case, please submit a
-[issue](https://github.com/selfcustody/krux-installer/issues).
+[<img src="../../../img/badge_github.png" width="186">](https://github.com/selfcustody/krux-installer/releases)
+
+Install instructions:
 
 - [:material-microsoft-windows: Windows](./windows.en.md)
 - [:material-apple: MacOS Intel](./macos-intel.en.md)
@@ -13,3 +12,5 @@ available for:
 - [:material-fedora: Fedora and like](./fedora-like.en.md)
 - [:material-linux: Other linux distros](./other-linux-distro.en.md)
 
+> ⚠️  WARNING: Krux-Installer is currently in alpha. If you find any bug, please submit a
+[issue here](https://github.com/selfcustody/krux-installer/issues).
