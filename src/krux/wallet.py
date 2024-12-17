@@ -110,7 +110,7 @@ class Wallet:
                 return False
             return (
                 self.descriptor.miniscript is not None
-                or self.descriptor.taptree is not None
+                or self.descriptor.taptree  #  taptree is "" when not present
             )
         return False
 
