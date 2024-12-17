@@ -47,6 +47,9 @@ from ..key import (
 from ..settings import (
     MAIN_TXT,
     TEST_TXT,
+    NAME_SINGLE_SIG,
+    NAME_MULTISIG,
+    NAME_MINISCRIPT,
 )
 from ..key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
@@ -120,6 +123,14 @@ class WalletSettings(Page):
         script_type = key.script_type
         account = key.account_index
         while True:
+            wallet_info = network["name"] + "\n"
+            if policy_type == TYPE_SINGLESIG:
+                wallet_info += NAME_SINGLE_SIG + "\n"
+            elif policy_type == TYPE_MULTISIG:
+                wallet_info += NAME_MULTISIG + "\n"
+            elif policy_type == TYPE_MINISCRIPT:
+                wallet_info += NAME_MINISCRIPT + "\n"
+            wallet_info += str(script_type).upper() + "\n"
             derivation_path = "m/"
             if policy_type == TYPE_SINGLESIG:
                 derivation_path += str(SINGLESIG_SCRIPT_PURPOSE[script_type])
@@ -133,12 +144,11 @@ class WalletSettings(Page):
             derivation_path += "/" + str(account) + "'"
             if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
                 derivation_path += "/2'"
+            wallet_info += derivation_path
 
             self.ctx.display.clear()
             derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
-            info_len = self.ctx.display.draw_hcentered_text(
-                derivation_path, info_box=True
-            )
+            info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
             submenu = Menu(
                 self.ctx,
                 [
@@ -146,7 +156,7 @@ class WalletSettings(Page):
                     (t("Policy Type"), lambda: None),
                     (
                         t("Script Type"),
-                        (lambda: None) if policy_type == TYPE_SINGLESIG else None,
+                        (lambda: None) if policy_type != TYPE_MULTISIG else None,
                     ),
                     (t("Account"), lambda: None),
                 ],
@@ -167,16 +177,30 @@ class WalletSettings(Page):
                         # If is single-sig, and script is p2wsh, force to pick a new type
                         script_type = self._script_type()
                         script_type = P2WPKH if script_type is None else script_type
+
+                    elif policy_type == TYPE_MULTISIG:
+                        # If is multisig, force to p2wsh
+                        script_type = P2WSH
+
+                    elif policy_type == TYPE_MINISCRIPT and script_type not in (
+                        P2WSH,
+                        P2TR,
+                    ):
+                        # If is miniscript, pick P2WSH or P2TR
+                        script_type = self._miniscript_type()
+                        script_type = P2WSH if script_type is None else script_type
+
             elif index == 2:
-                new_script_type = self._script_type()
+                if policy_type == TYPE_MINISCRIPT:
+                    new_script_type = self._miniscript_type()
+                else:
+                    new_script_type = self._script_type()
                 if new_script_type is not None:
                     script_type = new_script_type
             elif index == 3:
                 account_temp = self._account(account)
                 if account_temp is not None:
                     account = account_temp
-        if policy_type != TYPE_SINGLESIG:
-            script_type = P2WSH
         return network, policy_type, script_type, account
 
     def _coin_type(self):
@@ -199,9 +223,9 @@ class WalletSettings(Page):
         submenu = Menu(
             self.ctx,
             [
-                ("Single-sig", lambda: MENU_EXIT),
-                ("Multisig", lambda: MENU_EXIT),
-                ("Miniscript (Experimental)", lambda: MENU_EXIT),
+                (NAME_SINGLE_SIG, lambda: MENU_EXIT),
+                (NAME_MULTISIG, lambda: MENU_EXIT),
+                (NAME_MINISCRIPT + " (Experimental)", lambda: MENU_EXIT),
             ],
             disable_statusbar=True,
         )
@@ -219,6 +243,21 @@ class WalletSettings(Page):
                 ("Nested Segwit - 49", lambda: P2SH_P2WPKH),
                 ("Native Segwit - 84", lambda: P2WPKH),
                 ("Taproot - 86 (Experimental)", lambda: P2TR),
+            ],
+            disable_statusbar=True,
+        )
+        index, script_type = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return None
+        return script_type
+
+    def _miniscript_type(self):
+        """Script type selection menu for Taproot"""
+        submenu = Menu(
+            self.ctx,
+            [
+                ("Native Segwit - P2WSH", lambda: P2WSH),
+                ("Taproot - TR", lambda: P2TR),
             ],
             disable_statusbar=True,
         )

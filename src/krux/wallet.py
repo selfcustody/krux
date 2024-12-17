@@ -108,7 +108,10 @@ class Wallet:
         if self.descriptor:
             if self.descriptor.is_basic_multisig:
                 return False
-            return self.descriptor.miniscript is not None
+            return (
+                self.descriptor.miniscript is not None
+                or self.descriptor.taptree is not None
+            )
         return False
 
     def is_loaded(self):
@@ -134,8 +137,16 @@ class Wallet:
                 if self.key.xpub() not in descriptor_xpubs:
                     raise ValueError("xpub not a multisig cosigner")
             elif self.is_miniscript():
-                if descriptor.miniscript is None or descriptor.is_basic_multisig:
-                    raise ValueError("not miniscript")
+                if self.key.script_type == P2WSH:
+                    if descriptor.miniscript is None or descriptor.is_basic_multisig:
+                        raise ValueError("not P2WSH miniscript")
+                elif self.key.script_type == P2TR:
+                    if descriptor.taptree is None:
+                        raise ValueError("not P2TR miniscript")
+                else:
+                    raise ValueError(
+                        "wrong miniscript script type"
+                    )  # Temporary - debug
                 if self.key.xpub() not in descriptor_xpubs:
                     raise ValueError("xpub not a miniscript cosigner")
             else:
@@ -149,8 +160,7 @@ class Wallet:
         self.wallet_qr_format = qr_format
         self.descriptor = to_unambiguous_descriptor(descriptor)
         self.label = label
-
-        if self.descriptor.key:
+        if self.descriptor.key and not self.descriptor.taptree:
             if not self.label:
                 self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
@@ -168,9 +178,13 @@ class Wallet:
                 "n": n,
                 "cosigners": cosigners,
             }
-        elif self.descriptor.miniscript is not None:
+        elif (
+            self.descriptor.miniscript is not None
+            or self.descriptor.taptree is not None
+        ):
+            taproot_txt = "TR " if self.descriptor.taptree is not None else ""
             if not self.label:
-                self.label = t("Miniscript")
+                self.label = taproot_txt + t("Miniscript")
             cosigners = [key.key.to_base58() for key in self.descriptor.keys]
             cosigners = sorted(cosigners)
             self.policy = {
