@@ -252,7 +252,7 @@ class WalletSettings(Page):
         return script_type
 
     def _miniscript_type(self):
-        """Script type selection menu for Taproot"""
+        """Script type selection menu for miniscript policy type"""
         submenu = Menu(
             self.ctx,
             [
