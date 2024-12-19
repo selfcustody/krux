@@ -257,7 +257,7 @@ class WalletSettings(Page):
             self.ctx,
             [
                 ("Native Segwit - P2WSH", lambda: P2WSH),
-                ("Taproot - TR", lambda: P2TR),
+                ("Taproot - P2TR", lambda: P2TR),
             ],
             disable_statusbar=True,
         )

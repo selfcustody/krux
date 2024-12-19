@@ -118,6 +118,30 @@ class Wallet:
         """Returns a boolean indicating whether or not this wallet has been loaded"""
         return self.wallet_data is not None
 
+    def _validate_descriptor(self, descriptor, descriptor_xpubs):
+        """Validates the descriptor against the current key and policy type"""
+
+        if self.is_multisig():
+            if not descriptor.is_basic_multisig:
+                raise ValueError("not multisig")
+            if self.key.xpub() not in descriptor_xpubs:
+                raise ValueError("xpub not a multisig cosigner")
+        elif self.is_miniscript():
+            if self.key.script_type == P2WSH:
+                if descriptor.miniscript is None or descriptor.is_basic_multisig:
+                    raise ValueError("not P2WSH miniscript")
+            elif self.key.script_type == P2TR:
+                if descriptor.taptree is None:
+                    raise ValueError("not P2TR miniscript")
+            if self.key.xpub() not in descriptor_xpubs:
+                raise ValueError("xpub not a miniscript cosigner")
+        else:
+            if not descriptor.key:
+                if len(descriptor.keys) > 1:
+                    raise ValueError("not single-sig")
+            if self.key.xpub() != descriptor_xpubs[0]:
+                raise ValueError("xpub does not match")
+
     def load(self, wallet_data, qr_format, allow_assumption=None):
         """Loads the wallet from the given data"""
         descriptor, label = parse_wallet(wallet_data, allow_assumption)
@@ -131,26 +155,10 @@ class Wallet:
             )
 
         if self.key:
-            if self.is_multisig():
-                if not descriptor.is_basic_multisig:
-                    raise ValueError("not multisig")
-                if self.key.xpub() not in descriptor_xpubs:
-                    raise ValueError("xpub not a multisig cosigner")
-            elif self.is_miniscript():
-                if self.key.script_type == P2WSH:
-                    if descriptor.miniscript is None or descriptor.is_basic_multisig:
-                        raise ValueError("not P2WSH miniscript")
-                elif self.key.script_type == P2TR:
-                    if descriptor.taptree is None:
-                        raise ValueError("not P2TR miniscript")
-                if self.key.xpub() not in descriptor_xpubs:
-                    raise ValueError("xpub not a miniscript cosigner")
-            else:
-                if not descriptor.key:
-                    if len(descriptor.keys) > 1:
-                        raise ValueError("not single-sig")
-                if self.key.xpub() != descriptor_xpubs[0]:
-                    raise ValueError("xpub does not match")
+            try:
+                self._validate_descriptor(descriptor, descriptor_xpubs)
+            except ValueError as e:
+                raise ValueError("Invalid Descriptor: %s" % e)
 
         self.wallet_data = wallet_data
         self.wallet_qr_format = qr_format
