@@ -576,9 +576,9 @@ class PSBTSigner:
             raise ValueError("missing xpubs")
 
         descriptor_keys = (
-            [self.wallet.descriptor.key]
-            if self.wallet.descriptor.key
-            else self.wallet.descriptor.keys
+            self.wallet.descriptor.keys
+            if self.wallet.descriptor.keys
+            else [self.wallet.descriptor.key]
         )
         xpubs = {}
         for descriptor_key in descriptor_keys:
@@ -606,7 +606,8 @@ def is_miniscript(policy):
     # m and n will not be present in miniscript policies
     return (
         "type" in policy
-        and P2WSH in policy["type"]
+        and policy["type"] in (P2WSH, P2TR)
+        and "miniscript" in policy
         and "m" not in policy
         and "n" not in policy
     )
@@ -637,7 +638,7 @@ def get_cosigners(pubkeys, derivations, xpubs):
 
 
 def get_cosigners_miniscript(derivations, xpubs):
-    """Returns xpubs used to derive pubkeys listed in derivations."""
+    """Compares the derivations with the xpubs to check and get the cosigners"""
     cosigners = []
     for pubkey, der in derivations.items():
         for xpub in xpubs:
@@ -653,7 +654,42 @@ def get_cosigners_miniscript(derivations, xpubs):
                         break
     # Ensure all pubkeys have a matching xpub
     if len(cosigners) != len(derivations):
-        raise ValueError("Not all pubkeys in derivations have corresponding xpubs")
+        raise ValueError("cannot get all cosigners")
+    return sorted(cosigners)
+
+
+def get_cosigners_taproot_miniscript(taproot_derivations, xpubs):
+    """
+    Compares the taproot derivations with the xpubs to check get the cosigners
+    """
+
+    cosigners = []
+    loop_count = 0
+    for xonly_pubkey, der_info in taproot_derivations.items():
+        loop_count += 1
+        _, der = der_info  # tap_leaf_hashes are not used
+        fp = der.fingerprint
+        full_path = der.derivation
+
+        for xpub in xpubs:
+            origin_der = xpubs[xpub]
+            # Check that the fingerprint matches
+            if origin_der.fingerprint == fp:
+                # Check that the origin derivation is a prefix of the full derivation path
+                if full_path[: len(origin_der.derivation)] == origin_der.derivation:
+                    # Derive the remainder of the path
+                    remainder = full_path[len(origin_der.derivation) :]
+                    # Verify that the xpub derives to the given xonly_pubkey
+                    derived_key = xpub.derive(remainder).key
+                    if derived_key.xonly() == xonly_pubkey.xonly():
+                        # Append the xpub as a base58 string
+                        cosigners.append(xpub.to_base58())
+                        break
+
+    # Ensure all pubkeys have a matching xpub
+    if len(cosigners) != len(taproot_derivations):
+        raise ValueError("cannot get all cosigners")
+
     return sorted(cosigners)
 
 
@@ -690,7 +726,18 @@ def get_policy(scope, scriptpubkey, xpubs):
                 # Try to parse as miniscript
                 # Will succeed to verify cosigners only if the descriptor is loaded
                 cosigners = get_cosigners_miniscript(scope.bip32_derivations, xpubs)
-                policy.update({"cosigners": cosigners})
+                policy.update({"cosigners": cosigners, "miniscript": P2WSH})
             except:
                 pass
+    elif script_type == P2TR:
+        try:
+            # Try to parse as taproot miniscript
+            # Will succeed to verify cosigners only if the descriptor is loaded
+            cosigners = get_cosigners_taproot_miniscript(
+                scope.taproot_bip32_derivations, xpubs
+            )
+            policy.update({"cosigners": cosigners, "miniscript": P2TR})
+        except Exception as e:
+            print("Error getting taproot PSBT cosigners: ", e)
+
     return policy
