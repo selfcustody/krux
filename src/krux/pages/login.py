@@ -23,19 +23,6 @@
 import sys
 from embit.networks import NETWORKS
 from embit.wordlists.bip39 import WORDLIST
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
-from ..krux_settings import Settings
-from ..qr import FORMAT_UR
-from ..key import (
-    Key,
-    P2WSH,
-    SCRIPT_LONG_NAMES,
-    TYPE_SINGLESIG,
-    TYPE_MULTISIG,
-    TYPE_MINISCRIPT,
-    POLICY_TYPE_IDS,
-)
-from ..krux_settings import t
 from . import (
     Page,
     Menu,
@@ -46,6 +33,22 @@ from . import (
     LETTERS,
     choose_len_mnemonic,
 )
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
+from ..krux_settings import Settings
+from ..qr import FORMAT_UR
+from ..key import (
+    Key,
+    P2WSH,
+    P2TR,
+    SCRIPT_LONG_NAMES,
+    TYPE_SINGLESIG,
+    TYPE_MULTISIG,
+    TYPE_MINISCRIPT,
+    POLICY_TYPE_IDS,
+)
+from ..krux_settings import t
+from ..settings import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
+
 
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
@@ -289,6 +292,8 @@ class Login(Page):
         account = 0
         if policy_type == TYPE_SINGLESIG:
             script_type = SCRIPT_LONG_NAMES.get(Settings().wallet.script_type)
+        elif policy_type == TYPE_MINISCRIPT and Settings().wallet.script_type == P2TR:
+            script_type = P2TR
         else:
             script_type = P2WSH
         from ..wallet import Wallet
@@ -299,11 +304,13 @@ class Login(Page):
             wallet_info = key.fingerprint_hex_str(True) + "\n"
             wallet_info += network["name"] + "\n"
             if policy_type == TYPE_SINGLESIG:
-                wallet_info += "Single-sig" + "\n"
+                wallet_info += NAME_SINGLE_SIG + "\n"
             elif policy_type == TYPE_MULTISIG:
-                wallet_info += "Multisig" + "\n"
+                wallet_info += NAME_MULTISIG + "\n"
             elif policy_type == TYPE_MINISCRIPT:
-                wallet_info += "Miniscript" + "\n"
+                if script_type == P2TR:
+                    wallet_info += "TR "
+                wallet_info += NAME_MINISCRIPT + "\n"
             wallet_info += (
                 self.fit_to_line(key.derivation_str(True), crop_middle=False) + "\n"
             )
