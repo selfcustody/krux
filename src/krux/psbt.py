@@ -736,10 +736,9 @@ def get_policy(scope, scriptpubkey, xpubs):
             cosigners = get_cosigners_taproot_miniscript(
                 scope.taproot_bip32_derivations, xpubs
             )
-            policy.update({"cosigners": cosigners})
             if len(cosigners) > 1:
                 # Assume it is single-sig TR if there is only one cosigner
-                policy.update({"miniscript": P2TR})
+                policy.update({"cosigners": cosigners, "miniscript": P2TR})
         except Exception as e:
             print("Error getting taproot PSBT cosigners: ", e)
 
