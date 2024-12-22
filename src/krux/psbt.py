@@ -504,34 +504,51 @@ class PSBTSigner:
                     filled += 1
         return filled
 
-    def sign(self):
-        """Signs the PSBT removing all irrelevant data"""
+    def sign(self, trim=True):
+        """Signs the PSBT and preserves necessary fields for the final transaction"""
         self.add_signatures()
+
+        if not trim:
+            return
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
-            # Copy the final_scriptwitness if it's present (Taproot case)
+            # Copy the final_scriptwitness if present (for Taproot or other SegWit inputs)
             if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
-            # Copy partial signatures for multisig or other script types
+            # Copy any partial signatures (for multisig or other script types)
             if inp.partial_sigs:
                 trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
-            # Include the PSBT_IN_WITNESS_UTXO field if it exists
-            if hasattr(inp, "witness_utxo"):
+            # Preserve witness UTXO if present
+            if inp.witness_utxo:
                 trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
 
-            # Include the PSBT_IN_NON_WITNESS_UTXO field if it exists (Legacy)
-            if hasattr(inp, "non_witness_utxo"):
+            # Preserve non-witness UTXO if present (for legacy inputs)
+            if inp.non_witness_utxo:
                 trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
 
-            # Check for P2SH (Nested SegWit) and copy redeem_script if present
-            if hasattr(inp, "redeem_script"):
+            # Preserve redeem_script for P2SH or nested SegWit
+            if inp.redeem_script:
                 trimmed_psbt.inputs[i].redeem_script = inp.redeem_script
 
-            # Check for P2WSH (SegWit multisig) and copy witness_script if present
-            if hasattr(inp, "witness_script"):
+            # Preserve witness_script for P2WSH multisig
+            if inp.witness_script:
                 trimmed_psbt.inputs[i].witness_script = inp.witness_script
+
+        #     # # --- Taproot-specific fields ---
+
+        #     # # Taproot BIP32 derivation paths (PSBT_IN_TAP_BIP32_DERIVATION)
+        #     # if inp.taproot_bip32_derivations is not None:
+        #     #     trimmed_psbt.inputs[i].taproot_bip32_derivations = inp.taproot_bip32_derivations
+
+        #     # # Internal key (PSBT_IN_TAP_INTERNAL_KEY)
+        #     # if inp.taproot_internal_key is not None:
+        #     #     trimmed_psbt.inputs[i].taproot_internal_key = inp.taproot_internal_key
+
+        #     # # Taproot leaf scripts (PSBT_IN_TAP_LEAF_SCRIPT)
+        #     # if inp.taproot_scripts is not None:
+        #     #     trimmed_psbt.inputs[i].taproot_scripts = inp.taproot_scripts
 
         self.psbt = trimmed_psbt
 
@@ -724,21 +741,27 @@ def get_policy(scope, scriptpubkey, xpubs):
         except:
             try:
                 # Try to parse as miniscript
+                policy.update({"miniscript": P2WSH})
                 # Will succeed to verify cosigners only if the descriptor is loaded
                 cosigners = get_cosigners_miniscript(scope.bip32_derivations, xpubs)
-                policy.update({"cosigners": cosigners, "miniscript": P2WSH})
+                policy.update({"cosigners": cosigners})
             except:
                 pass
     elif script_type == P2TR:
         try:
             # Try to parse as taproot miniscript
+            if len(scope.taproot_bip32_derivations) > 1:
+                # Assume is miniscript if there are multiple cosigners
+                policy.update({"miniscript": P2TR})
+
             # Will succeed to verify cosigners only if the descriptor is loaded
             cosigners = get_cosigners_taproot_miniscript(
                 scope.taproot_bip32_derivations, xpubs
             )
+            # Only add cosigners if is miniscript (multiple cosigners),
+            # otherwise it probably is single-sig taproot
             if len(cosigners) > 1:
-                # Assume it is single-sig TR if there is only one cosigner
-                policy.update({"cosigners": cosigners, "miniscript": P2TR})
+                policy.update({"cosigners": cosigners})
         except Exception as e:
             print("Error getting taproot PSBT cosigners: ", e)
 

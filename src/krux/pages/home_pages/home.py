@@ -400,11 +400,10 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Signing.."))
 
-        signer.sign()
-
         title = t("Signed PSBT")
         if index == 0:
             # Sign to QR code
+            signer.sign()
             signed_psbt, qr_format = signer.psbt_qr()
 
             # memory management
@@ -420,6 +419,7 @@ class Home(Page):
             return MENU_CONTINUE
 
         # index == 1: Sign to SD card
+        signer.sign(trim=False)
         psbt_filename = self._format_psbt_file_extension(psbt_filename)
         gc.collect()
 
