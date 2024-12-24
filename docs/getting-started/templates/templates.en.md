@@ -2,14 +2,94 @@
 Here we offer a few templates to transcribe QR codes, TinySeed or Binary Grid backups.
 
 ### QR Code Templates
-Print the templates in standard, wax or slide paper, make sure the scale is set to 1:1 in printer setup.
 You can manually copy compact SeedQR codes or place a proper sized template over the device screen.
 Protect the template backside with a transparent tape so you won't bleed ink through the paper to your device's screen.
 Then, using a marker, paint the QR code.
 
-[Transcribe Templates - pdf](Krux_transcribe_templates.pdf)
+#### V1 - 21x21
 
-[Transcribe Templates - svg](Krux_transcribe_templates.svg)
+<a href="../QR/png/qr_v1_dots_regions.png">
+  <img src="../QR/png/qr_v1_dots_regions.png" alt="Dots" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v1_lines_regions.png">
+  <img src="../QR/png/qr_v1_lines_regions.png" alt="Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v1_dots_lines_regions.png">
+  <img src="../QR/png/qr_v1_dots_lines_regions.png" alt="Dots Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<div style="clear: both"></div>
+SVG: [Dots](../QR/svg/qr_v1_dots_regions.svg), [Lines](../QR/svg/qr_v1_lines_regions.svg), [Dots and Lines](../QR/svg/qr_v1_dots_lines_regions.svg)
+
+#### V2 - 25x25
+
+<a href="../QR/png/qr_v2_dots_regions.png">
+  <img src="../QR/png/qr_v2_dots_regions.png" alt="Dots" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v2_lines_regions.png">
+  <img src="../QR/png/qr_v2_lines_regions.png" alt="Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v2_dots_lines_regions.png">
+  <img src="../QR/png/qr_v2_dots_lines_regions.png" alt="Dots Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<div style="clear: both"></div>
+SVG: [Dots](../QR/svg/qr_v2_dots_regions.svg), [Lines](../QR/svg/qr_v2_lines_regions.svg), [Dots and Lines](../QR/svg/qr_v2_dots_lines_regions.svg)
+
+#### V3 - 29x29
+
+<a href="../QR/png/qr_v3_dots_regions.png">
+  <img src="../QR/png/qr_v3_dots_regions.png" alt="Dots" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v3_lines_regions.png">
+  <img src="../QR/png/qr_v3_lines_regions.png" alt="Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v3_dots_lines_regions.png">
+  <img src="../QR/png/qr_v3_dots_lines_regions.png" alt="Dots Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<div style="clear: both"></div>
+SVG: [Dots](../QR/svg/qr_v3_dots_regions.svg), [Lines](../QR/svg/qr_v3_lines_regions.svg), [Dots and Lines](../QR/svg/qr_v3_dots_lines_regions.svg)
+
+#### V4 - 33x33
+
+<a href="../QR/png/qr_v4_dots_regions.png">
+  <img src="../QR/png/qr_v4_dots_regions.png" alt="Dots" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v4_lines_regions.png">
+  <img src="../QR/png/qr_v4_lines_regions.png" alt="Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v4_dots_lines_regions.png">
+  <img src="../QR/png/qr_v4_dots_lines_regions.png" alt="Dots Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<div style="clear: both"></div>
+SVG: [Dots](../QR/svg/qr_v4_dots_regions.svg), [Lines](../QR/svg/qr_v4_lines_regions.svg), [Dots and Lines](../QR/svg/qr_v4_dots_lines_regions.svg)
+
+#### V5 - 37x37
+
+<a href="../QR/png/qr_v5_dots_regions.png">
+  <img src="../QR/png/qr_v5_dots_regions.png" alt="Dots" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v5_lines_regions.png">
+  <img src="../QR/png/qr_v5_lines_regions.png" alt="Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<a href="../QR/png/qr_v5_dots_lines_regions.png">
+  <img src="../QR/png/qr_v5_dots_lines_regions.png" alt="Dots Lines" style="width: 20%; float: left; margin-left: 10px;">
+</a>
+
+<div style="clear: both"></div>
+SVG: [Dots](../QR/svg/qr_v5_dots_regions.svg), [Lines](../QR/svg/qr_v5_lines_regions.svg), [Dots and Lines](../QR/svg/qr_v5_dots_lines_regions.svg)
 
 ### TinySeed Templates
 
