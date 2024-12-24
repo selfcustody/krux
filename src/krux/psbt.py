@@ -504,34 +504,51 @@ class PSBTSigner:
                     filled += 1
         return filled
 
-    def sign(self):
-        """Signs the PSBT removing all irrelevant data"""
+    def sign(self, trim=True):
+        """Signs the PSBT and preserves necessary fields for the final transaction"""
         self.add_signatures()
+
+        if not trim:
+            return
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
-            # Copy the final_scriptwitness if it's present (Taproot case)
+            # Copy the final_scriptwitness if present (for Taproot or other SegWit inputs)
             if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
-            # Copy partial signatures for multisig or other script types
+            # Copy any partial signatures (for multisig or other script types)
             if inp.partial_sigs:
                 trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
-            # Include the PSBT_IN_WITNESS_UTXO field if it exists
-            if hasattr(inp, "witness_utxo"):
+            # Preserve witness UTXO if present
+            if inp.witness_utxo:
                 trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
 
-            # Include the PSBT_IN_NON_WITNESS_UTXO field if it exists (Legacy)
-            if hasattr(inp, "non_witness_utxo"):
+            # Preserve non-witness UTXO if present (for legacy inputs)
+            if inp.non_witness_utxo:
                 trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
 
-            # Check for P2SH (Nested SegWit) and copy redeem_script if present
-            if hasattr(inp, "redeem_script"):
+            # Preserve redeem_script for P2SH or nested SegWit
+            if inp.redeem_script:
                 trimmed_psbt.inputs[i].redeem_script = inp.redeem_script
 
-            # Check for P2WSH (SegWit multisig) and copy witness_script if present
-            if hasattr(inp, "witness_script"):
+            # Preserve witness_script for P2WSH multisig
+            if inp.witness_script:
                 trimmed_psbt.inputs[i].witness_script = inp.witness_script
+
+        #     # # --- Taproot-specific fields ---
+
+        #     # # Taproot BIP32 derivation paths (PSBT_IN_TAP_BIP32_DERIVATION)
+        #     # if inp.taproot_bip32_derivations is not None:
+        #     #     trimmed_psbt.inputs[i].taproot_bip32_derivations = inp.taproot_bip32_derivations
+
+        #     # # Internal key (PSBT_IN_TAP_INTERNAL_KEY)
+        #     # if inp.taproot_internal_key is not None:
+        #     #     trimmed_psbt.inputs[i].taproot_internal_key = inp.taproot_internal_key
+
+        #     # # Taproot leaf scripts (PSBT_IN_TAP_LEAF_SCRIPT)
+        #     # if inp.taproot_scripts is not None:
+        #     #     trimmed_psbt.inputs[i].taproot_scripts = inp.taproot_scripts
 
         self.psbt = trimmed_psbt
 
@@ -576,9 +593,9 @@ class PSBTSigner:
             raise ValueError("missing xpubs")
 
         descriptor_keys = (
-            [self.wallet.descriptor.key]
-            if self.wallet.descriptor.key
-            else self.wallet.descriptor.keys
+            self.wallet.descriptor.keys
+            if self.wallet.descriptor.keys
+            else [self.wallet.descriptor.key]
         )
         xpubs = {}
         for descriptor_key in descriptor_keys:
@@ -606,7 +623,8 @@ def is_miniscript(policy):
     # m and n will not be present in miniscript policies
     return (
         "type" in policy
-        and P2WSH in policy["type"]
+        and policy["type"] in (P2WSH, P2TR)
+        and "miniscript" in policy
         and "m" not in policy
         and "n" not in policy
     )
@@ -637,7 +655,7 @@ def get_cosigners(pubkeys, derivations, xpubs):
 
 
 def get_cosigners_miniscript(derivations, xpubs):
-    """Returns xpubs used to derive pubkeys listed in derivations."""
+    """Compares the derivations with the xpubs to check and get the cosigners"""
     cosigners = []
     for pubkey, der in derivations.items():
         for xpub in xpubs:
@@ -653,7 +671,42 @@ def get_cosigners_miniscript(derivations, xpubs):
                         break
     # Ensure all pubkeys have a matching xpub
     if len(cosigners) != len(derivations):
-        raise ValueError("Not all pubkeys in derivations have corresponding xpubs")
+        raise ValueError("cannot get all cosigners")
+    return sorted(cosigners)
+
+
+def get_cosigners_taproot_miniscript(taproot_derivations, xpubs):
+    """
+    Compares the taproot derivations with the xpubs to check get the cosigners
+    """
+
+    cosigners = []
+    loop_count = 0
+    for xonly_pubkey, der_info in taproot_derivations.items():
+        loop_count += 1
+        _, der = der_info  # tap_leaf_hashes are not used
+        fp = der.fingerprint
+        full_path = der.derivation
+
+        for xpub in xpubs:
+            origin_der = xpubs[xpub]
+            # Check that the fingerprint matches
+            if origin_der.fingerprint == fp:
+                # Check that the origin derivation is a prefix of the full derivation path
+                if full_path[: len(origin_der.derivation)] == origin_der.derivation:
+                    # Derive the remainder of the path
+                    remainder = full_path[len(origin_der.derivation) :]
+                    # Verify that the xpub derives to the given xonly_pubkey
+                    derived_key = xpub.derive(remainder).key
+                    if derived_key.xonly() == xonly_pubkey.xonly():
+                        # Append the xpub as a base58 string
+                        cosigners.append(xpub.to_base58())
+                        break
+
+    # Ensure all pubkeys have a matching xpub
+    if len(cosigners) != len(taproot_derivations):
+        raise ValueError("cannot get all cosigners")
+
     return sorted(cosigners)
 
 
@@ -688,9 +741,28 @@ def get_policy(scope, scriptpubkey, xpubs):
         except:
             try:
                 # Try to parse as miniscript
+                policy.update({"miniscript": P2WSH})
                 # Will succeed to verify cosigners only if the descriptor is loaded
                 cosigners = get_cosigners_miniscript(scope.bip32_derivations, xpubs)
                 policy.update({"cosigners": cosigners})
             except:
                 pass
+    elif script_type == P2TR:
+        try:
+            # Try to parse as taproot miniscript
+            if len(scope.taproot_bip32_derivations) > 1:
+                # Assume is miniscript if there are multiple cosigners
+                policy.update({"miniscript": P2TR})
+
+            # Will succeed to verify cosigners only if the descriptor is loaded
+            cosigners = get_cosigners_taproot_miniscript(
+                scope.taproot_bip32_derivations, xpubs
+            )
+            # Only add cosigners if is miniscript (multiple cosigners),
+            # otherwise it probably is single-sig taproot
+            if len(cosigners) > 1:
+                policy.update({"cosigners": cosigners})
+        except Exception as e:
+            print("Error getting taproot PSBT cosigners: ", e)
+
     return policy
