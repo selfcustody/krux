@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
-from embit.psbt import PSBT
+from embit.psbt import PSBT, CompressMode
 from embit.bip32 import HARDENED_INDEX
 from ur.ur import UR
 import urtypes
@@ -39,6 +39,8 @@ SPEND = 2
 
 # We always uses thin spaces after the ₿ in this file
 BTC_SYMBOL = "₿"
+
+MAX_POLICY_COSIGNERS_DISPLAYED = 5
 
 
 class Counter(dict):
@@ -68,7 +70,7 @@ class PSBTSigner:
             file_path = "/%s/%s" % (SD_PATH, psbt_filename)
             try:
                 with open(file_path, "rb") as file:
-                    self.psbt = PSBT.read_from(file, compress=1)
+                    self.psbt = PSBT.read_from(file)
                 self.validate()
             except:
                 try:
@@ -81,11 +83,12 @@ class PSBTSigner:
                             psbt_data = file.read()
                         self.psbt = PSBT.parse(base_decode(psbt_data, 64))
                     else:
-                        # Legacy will fail to get policy from compressed PSBT
-                        # so we load it uncompressed
+                        # Try to load the PSBT in compressed mode
                         with open(file_path, "rb") as file:
                             file.seek(0)  # Reset the file pointer to the beginning
-                            self.psbt = PSBT.read_from(file)
+                            self.psbt = PSBT.read_from(
+                                file, compress=CompressMode.CLEAR_ALL
+                            )
                 except Exception as e:
                     raise ValueError("Error loading PSBT file: %s" % e)
             self.base_encoding = 64  # In case it is exported as QR code
@@ -513,10 +516,11 @@ class PSBTSigner:
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
-            # Copy the final_scriptwitness if present (for Taproot or other SegWit inputs)
+            # Copy the final_scriptwitness if present
             if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
-            # Copy any partial signatures (for multisig or other script types)
+
+            # Copy any partial signatures
             if inp.partial_sigs:
                 trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
@@ -535,20 +539,6 @@ class PSBTSigner:
             # Preserve witness_script for P2WSH multisig
             if inp.witness_script:
                 trimmed_psbt.inputs[i].witness_script = inp.witness_script
-
-        #     # # --- Taproot-specific fields ---
-
-        #     # # Taproot BIP32 derivation paths (PSBT_IN_TAP_BIP32_DERIVATION)
-        #     # if inp.taproot_bip32_derivations is not None:
-        #     #     trimmed_psbt.inputs[i].taproot_bip32_derivations = inp.taproot_bip32_derivations
-
-        #     # # Internal key (PSBT_IN_TAP_INTERNAL_KEY)
-        #     # if inp.taproot_internal_key is not None:
-        #     #     trimmed_psbt.inputs[i].taproot_internal_key = inp.taproot_internal_key
-
-        #     # # Taproot leaf scripts (PSBT_IN_TAP_LEAF_SCRIPT)
-        #     # if inp.taproot_scripts is not None:
-        #     #     trimmed_psbt.inputs[i].taproot_scripts = inp.taproot_scripts
 
         self.psbt = trimmed_psbt
 
@@ -605,6 +595,41 @@ class PSBTSigner:
                     descriptor_key.origin.fingerprint, descriptor_key.origin.derivation
                 )
         return xpubs
+
+    def psbt_policy_string(self):
+        """Returns the policy string containing script type and cosigners' fingerprints"""
+
+        policy_str = "PSBT policy:\n"
+        policy_str += self.policy["type"] + "\n"
+        if is_multisig(self.policy):
+            policy_str += str(self.policy["m"]) + " of " + str(self.policy["n"]) + "\n"
+        fingerprints = []
+        for inp in self.psbt.inputs:
+            # Do we need to loop through all the inputs or just one?
+            if self.policy["type"] == P2WSH:
+                for pub in inp.bip32_derivations:
+                    fingerprint_srt = Key.format_fingerprint(
+                        inp.bip32_derivations[pub].fingerprint, True
+                    )
+                    if fingerprint_srt not in fingerprints:
+                        if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
+                            fingerprints[-1] = "..."
+                            break
+                        fingerprints.append(fingerprint_srt)
+            elif self.policy["type"] == P2TR:
+                for pub in inp.taproot_bip32_derivations:
+                    _, derivation_path = inp.taproot_bip32_derivations[pub]
+                    fingerprint_srt = Key.format_fingerprint(
+                        derivation_path.fingerprint, True
+                    )
+                    if fingerprint_srt not in fingerprints:
+                        if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
+                            fingerprints[-1] = "..."
+                            break
+                        fingerprints.append(fingerprint_srt)
+
+        policy_str += "\n".join(fingerprints)
+        return policy_str
 
 
 def is_multisig(policy):

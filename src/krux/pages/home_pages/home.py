@@ -33,10 +33,7 @@ from ...display import BOTTOM_PROMPT_LINE
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t, Settings
 from ...format import replace_decimal_separator
-from ...key import TYPE_SINGLESIG, P2WSH, P2TR
-
-
-MAX_POLICY_COSIGNERS_DISPLAYED = 5
+from ...key import TYPE_SINGLESIG
 
 
 class Home(Page):
@@ -329,41 +326,7 @@ class Home(Page):
             not self.ctx.wallet.is_loaded()
             and not self.ctx.wallet.key.policy_type == TYPE_SINGLESIG
         ):
-            from ...key import Key
-            from ...psbt import is_multisig
-
-            policy_str = "PSBT policy:\n"
-            policy_str += signer.policy["type"] + "\n"
-            if is_multisig(signer.policy):
-                policy_str += (
-                    str(signer.policy["m"]) + " of " + str(signer.policy["n"]) + "\n"
-                )
-            fingerprints = []
-            for inp in signer.psbt.inputs:
-                # Do we need to loop through all the inputs or just one?
-                if signer.policy["type"] == P2WSH:
-                    for pub in inp.bip32_derivations:
-                        fingerprint_srt = Key.format_fingerprint(
-                            inp.bip32_derivations[pub].fingerprint, True
-                        )
-                        if fingerprint_srt not in fingerprints:
-                            if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                                fingerprints[-1] = "..."
-                                break
-                            fingerprints.append(fingerprint_srt)
-                elif signer.policy["type"] == P2TR:
-                    for pub in inp.taproot_bip32_derivations:
-                        _, derivation_path = inp.taproot_bip32_derivations[pub]
-                        fingerprint_srt = Key.format_fingerprint(
-                            derivation_path.fingerprint, True
-                        )
-                        if fingerprint_srt not in fingerprints:
-                            if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                                fingerprints[-1] = "..."
-                                break
-                            fingerprints.append(fingerprint_srt)
-
-            policy_str += "\n".join(fingerprints)
+            policy_str = signer.psbt_policy_string()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(policy_str)
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
