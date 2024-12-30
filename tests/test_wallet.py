@@ -8,7 +8,15 @@ def tdata(mocker):
     from collections import namedtuple
     from ur.ur import UR
     from embit.networks import NETWORKS
-    from krux.key import Key, P2PKH, P2SH_P2WPKH, P2TR
+    from krux.key import (
+        Key,
+        P2PKH,
+        P2SH_P2WPKH,
+        P2TR,
+        TYPE_SINGLESIG,
+        TYPE_MULTISIG,
+        TYPE_MINISCRIPT,
+    )
 
     TEST_MNEMONIC1 = (
         "olympic term tissue route sense program under choose bean emerge velvet absurd"
@@ -17,14 +25,16 @@ def tdata(mocker):
     TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
     SINGLESIG_KEY = Key(
-        TEST_MNEMONIC1, False, NETWORKS["main"]
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"]
     )  # default account=0, script=P2WPKH
-    LEGACY1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2PKH)
-    NESTEDSW1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2SH_P2WPKH)
-    TAPROOT1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2TR)
-    MULTISIG_KEY1 = Key(TEST_MNEMONIC1, True, NETWORKS["main"])
-    MULTISIG_KEY2 = Key(TEST_MNEMONIC2, True, NETWORKS["main"])
-    MULTISIG_KEY3 = Key(TEST_MNEMONIC3, True, NETWORKS["main"])
+    LEGACY1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2PKH)
+    NESTEDSW1_KEY = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2SH_P2WPKH
+    )
+    TAPROOT1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2TR)
+    MULTISIG_KEY1 = Key(TEST_MNEMONIC1, TYPE_MULTISIG, NETWORKS["main"])
+    MULTISIG_KEY2 = Key(TEST_MNEMONIC2, TYPE_MULTISIG, NETWORKS["main"])
+    MULTISIG_KEY3 = Key(TEST_MNEMONIC3, TYPE_MULTISIG, NETWORKS["main"])
 
     # SINGLESIG_KEY [55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA
     # MULTISIG_KEY1 [55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy

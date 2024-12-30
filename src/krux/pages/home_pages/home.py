@@ -131,7 +131,7 @@ class Home(Page):
         from ...wallet import Wallet
 
         wallet_settings = WalletSettings(self.ctx)
-        network, multisig, script_type, account = wallet_settings.customize_wallet(
+        network, policy_type, script_type, account = wallet_settings.customize_wallet(
             self.ctx.wallet.key
         )
         mnemonic = self.ctx.wallet.key.mnemonic
@@ -139,7 +139,7 @@ class Home(Page):
         self.ctx.wallet = Wallet(
             Key(
                 mnemonic,
-                multisig,
+                policy_type,
                 network,
                 passphrase,
                 account,
