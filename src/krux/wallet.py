@@ -131,7 +131,7 @@ class Wallet:
                 if descriptor.miniscript is None or descriptor.is_basic_multisig:
                     raise ValueError("not P2WSH miniscript")
             elif self.key.script_type == P2TR:
-                if descriptor.taptree is None:
+                if not descriptor.taptree:
                     raise ValueError("not P2TR miniscript")
             if self.key.xpub() not in descriptor_xpubs:
                 raise ValueError("xpub not a miniscript cosigner")
@@ -182,11 +182,8 @@ class Wallet:
                 "n": n,
                 "cosigners": cosigners,
             }
-        elif (
-            self.descriptor.miniscript is not None
-            or self.descriptor.taptree is not None
-        ):
-            if self.descriptor.taptree is not None:
+        elif self.descriptor.miniscript is not None or self.descriptor.taptree:
+            if self.descriptor.taptree:
                 taproot_txt = "TR "
                 miniscript_type = P2TR
             else:
