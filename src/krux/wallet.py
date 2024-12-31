@@ -215,6 +215,10 @@ class Wallet:
     def obtain_addresses(self, i=0, limit=None, branch_index=0):
         """Returns an iterator deriving addresses (default branch_index is receive)
         for the wallet up to the provided limit"""
+
+        if self.descriptor is None:
+            raise ValueError("No descriptor to derive addresses from")
+
         starting_index = i
 
         while limit is None or i < starting_index + limit:
