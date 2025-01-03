@@ -120,7 +120,11 @@ class Key:
         self.network = network
         self.passphrase = passphrase
         self.account_index = account_index
-        self.script_type = script_type if policy_type == TYPE_SINGLESIG else P2WSH
+        if policy_type == TYPE_MULTISIG and script_type != P2WSH:
+            script_type = P2WSH
+        if policy_type == TYPE_MINISCRIPT and script_type not in (P2WSH, P2TR):
+            script_type = P2WSH
+        self.script_type = script_type
         self.root = bip32.HDKey.from_seed(
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
