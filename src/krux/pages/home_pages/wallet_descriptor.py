@@ -26,12 +26,12 @@ from .. import (
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
 )
-from ...display import DEFAULT_PADDING, BOTTOM_PROMPT_LINE
+from ...display import DEFAULT_PADDING, BOTTOM_PROMPT_LINE, FONT_HEIGHT
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
-from ...key import FINGERPRINT_SYMBOL
+from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, TYPE_SINGLESIG
 
 
 class WalletDescriptor(Page):
@@ -151,43 +151,69 @@ class WalletDescriptor(Page):
         which will contain the same data as was originally loaded, in
         the same QR format
         """
-        import binascii
 
-        about = [wallet.label]
-        fingerprints = []
+        offset_y = DEFAULT_PADDING
+        self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+        offset_y += (3 * FONT_HEIGHT) // 2
         for i, key in enumerate(wallet.descriptor.keys):
-            label = str(i + 1) + ". " if wallet.is_multisig() else ""
-            fingerprints.append(
-                label
-                + FINGERPRINT_SYMBOL
-                + " "
-                + (
-                    binascii.hexlify(key.origin.fingerprint).decode()
-                    if key.origin
-                    else t("unknown")
-                )
+            label_color = theme.fg_color
+            if wallet.is_multisig() or wallet.is_miniscript():
+                label = chr(65 + i) + ": "
+            else:
+                label = ""
+            key_fingerprint = FINGERPRINT_SYMBOL + " "
+            if key.origin:
+                key_origin_str = str(key.origin)
+                key_fingerprint += key_origin_str[:8]
+            else:
+                key_fingerprint += t("unknown")
+            if (
+                self.ctx.wallet.key
+                and key.fingerprint == self.ctx.wallet.key.fingerprint
+            ):
+                label_color = theme.highlight_color
+            self.ctx.display.draw_string(
+                DEFAULT_PADDING,
+                offset_y,
+                label + key_fingerprint,
+                label_color,
             )
-        about.extend(fingerprints)
+            offset_y += FONT_HEIGHT
+            if key.origin:
+                key_derivation_str = " " * 3
+                key_derivation_str += DERIVATION_PATH_SYMBOL
+                key_derivation_str += " "
+                key_derivation_str += key_origin_str[8:]
+                self.ctx.display.draw_string(
+                    DEFAULT_PADDING,
+                    offset_y,
+                    key_derivation_str,
+                    label_color,
+                )
+            offset_y += (FONT_HEIGHT * 3) // 2
+
         if not wallet.is_multisig() and not wallet.is_miniscript():
-            about.append(self.fit_to_line(str(wallet.descriptor.keys[0].key)))
+            about = self.fit_to_line(str(wallet.descriptor.keys[0].key))
             if is_loading:
-                self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+                self.ctx.display.draw_hcentered_text(about, offset_y)
             else:
                 wallet_data, qr_format = wallet.wallet_qr()
                 self.display_qr_codes(wallet_data, qr_format, title=about)
         else:
-            # Display fingerprints
-            self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+
+            # Wait user acknowledge fingerprints
             self.ctx.input.wait_for_button()
 
             # Display XPUBs
-            about = [wallet.label]
-            xpubs = []
-            for i, xpub in enumerate(wallet.policy["cosigners"]):
-                xpubs.append(self.fit_to_line(xpub, str(i + 1) + ". "))
-            about.extend(xpubs)
             self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
+            offset_y = DEFAULT_PADDING
+            self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+            for i, xpub in enumerate(wallet.policy["cosigners"]):
+                offset_y += FONT_HEIGHT
+                self.ctx.display.draw_hcentered_text(
+                    self.fit_to_line(xpub, chr(65 + i) + ". "), offset_y
+                )
+
             if is_loading:
                 # Skip the QR code if we're loading the wallet
                 return
