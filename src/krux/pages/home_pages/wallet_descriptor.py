@@ -31,7 +31,7 @@ from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
-from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, TYPE_SINGLESIG
+from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL
 
 
 class WalletDescriptor(Page):
@@ -106,6 +106,8 @@ class WalletDescriptor(Page):
         else:  # Cancel
             return MENU_CONTINUE
 
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing.."))
         if wallet_data is None:
             # Camera or SD card loading failed!
             self.flash_error(t("Failed to load"))
@@ -155,6 +157,7 @@ class WalletDescriptor(Page):
         offset_y = DEFAULT_PADDING
         self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
         offset_y += (3 * FONT_HEIGHT) // 2
+        our_key_index = None
         for i, key in enumerate(wallet.descriptor.keys):
             label_color = theme.fg_color
             if wallet.is_multisig() or wallet.is_miniscript():
@@ -172,6 +175,7 @@ class WalletDescriptor(Page):
                 and key.fingerprint == self.ctx.wallet.key.fingerprint
             ):
                 label_color = theme.highlight_color
+                our_key_index = i
             self.ctx.display.draw_string(
                 DEFAULT_PADDING,
                 offset_y,
@@ -192,6 +196,14 @@ class WalletDescriptor(Page):
                 )
             offset_y += (FONT_HEIGHT * 3) // 2
 
+            # Checks if there's room for another key
+            if offset_y + (FONT_HEIGHT * 3) > self.ctx.display.height():
+                self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
+                offset_y = DEFAULT_PADDING
+                self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+                offset_y += (3 * FONT_HEIGHT) // 2
+
         if not wallet.is_multisig() and not wallet.is_miniscript():
             about = self.fit_to_line(str(wallet.descriptor.keys[0].key))
             if is_loading:
@@ -208,11 +220,24 @@ class WalletDescriptor(Page):
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
             self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
-            for i, xpub in enumerate(wallet.policy["cosigners"]):
+            for i, key in enumerate(wallet.descriptor.keys):
                 offset_y += FONT_HEIGHT
+                # Checks is xpub belongs to the current wallet
+                if i == our_key_index:
+                    label_color = theme.highlight_color
+                else:
+                    label_color = theme.fg_color
                 self.ctx.display.draw_hcentered_text(
-                    self.fit_to_line(xpub, chr(65 + i) + ". "), offset_y
+                    self.fit_to_line(key.key.to_base58(), chr(65 + i) + ". "),
+                    offset_y,
+                    label_color,
                 )
+                # Checks if there's room for another xpub
+                if offset_y + FONT_HEIGHT > self.ctx.display.height():
+                    self.ctx.input.wait_for_button()
+                    self.ctx.display.clear()
+                    offset_y = DEFAULT_PADDING
+                    self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
 
             if is_loading:
                 # Skip the QR code if we're loading the wallet
