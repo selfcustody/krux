@@ -856,7 +856,6 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
 
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
-        BUTTON_ENTER,  # Path mismatch ACK
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1
         BUTTON_ENTER,  # output 2
@@ -898,7 +897,6 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
 
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
-        BUTTON_ENTER,  # Path mismatch ACK
         BUTTON_ENTER,  # Confirm fingerprint missing
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1

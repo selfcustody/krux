@@ -199,7 +199,7 @@ class PSBTSigner:
         return get_policy(tx_input, scriptpubkey, xpubs)
 
     def path_mismatch(self):
-        """Verifies if the PSBT path matches wallet's derivation path"""
+        """Verifies if the PSBT key path matches loaded keys's derivation path"""
         mismatched_paths = []
         der_path_nodes = len(self.wallet.key.derivation.split("/")) - 1
         for _input in self.psbt.inputs:
@@ -208,10 +208,16 @@ class PSBTSigner:
             else:
                 derivations = _input.bip32_derivations
             for pubkey in derivations:
+                # Checks if fingerprint belongs to loaded key
                 if self.policy["type"] == P2TR:
-                    derivation_path = derivations[pubkey][
-                        1
-                    ].derivation  # ignore taproot leaf
+                    fingerprint = derivations[pubkey][1].fingerprint
+                else:
+                    fingerprint = derivations[pubkey].fingerprint
+                if fingerprint != self.wallet.key.fingerprint:
+                    # Not our key, won't check derivation path mismatch
+                    continue
+                if self.policy["type"] == P2TR:
+                    derivation_path = derivations[pubkey][1].derivation
                 else:
                     derivation_path = derivations[pubkey].derivation
                 textual_path = "m"
