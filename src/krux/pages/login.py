@@ -45,6 +45,7 @@ from ..key import (
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
     POLICY_TYPE_IDS,
+    DERIVATION_PATH_SYMBOL,
 )
 from ..krux_settings import t
 from ..settings import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
@@ -296,11 +297,21 @@ class Login(Page):
             script_type = P2TR
         else:
             script_type = P2WSH
+        derivation_path = ""
         from ..wallet import Wallet
 
         while True:
-            key = Key(mnemonic, policy_type, network, passphrase, account, script_type)
-
+            key = Key(
+                mnemonic,
+                policy_type,
+                network,
+                passphrase,
+                account,
+                script_type,
+                derivation_path,
+            )
+            if not derivation_path:
+                derivation_path = key.derivation
             wallet_info = key.fingerprint_hex_str(True) + "\n"
             wallet_info += network["name"] + "\n"
             if policy_type == TYPE_SINGLESIG:
@@ -311,9 +322,7 @@ class Login(Page):
                 if script_type == P2TR:
                     wallet_info += "TR "
                 wallet_info += NAME_MINISCRIPT + "\n"
-            wallet_info += (
-                self.fit_to_line(key.derivation_str(True), crop_middle=False) + "\n"
-            )
+            wallet_info += key.derivation_str(True) + "\n"
             wallet_info += (
                 t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
             )
@@ -349,7 +358,7 @@ class Login(Page):
                 from .wallet_settings import WalletSettings
 
                 wallet_settings = WalletSettings(self.ctx)
-                network, policy_type, script_type, account = (
+                network, policy_type, script_type, account, derivation_path = (
                     wallet_settings.customize_wallet(key)
                 )
 

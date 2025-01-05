@@ -42,7 +42,6 @@ from .settings import (
 DER_SINGLE = "m/%dh/%dh/%dh"
 DER_MULTI = "m/%dh/%dh/%dh/2h"
 DER_MINISCRIPT = "m/%dh/%dh/%dh/2h"
-HARDENED_STR_REPLACE = "'"
 
 # Pay To Public Key Hash - 44' Legacy single-sig
 # address starts with 1 (mainnet) or m (testnet)
@@ -114,6 +113,7 @@ class Key:
         passphrase="",
         account_index=0,
         script_type=P2WPKH,
+        custom_derivation="",
     ):
         self.mnemonic = mnemonic
         self.policy_type = policy_type
@@ -129,9 +129,14 @@ class Key:
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
-        self.derivation = self.get_default_derivation(
-            self.policy_type, self.network, self.account_index, self.script_type
-        )
+        if not custom_derivation:
+            self.derivation = self.get_default_derivation(
+                self.policy_type, self.network, self.account_index, self.script_type
+            )
+            self.custom_derivation = False
+        else:
+            self.derivation = custom_derivation
+            self.custom_derivation = True
         self.account = self.root.derive(self.derivation).to_public()
 
     def xpub(self, version=None):
@@ -218,7 +223,7 @@ class Key:
     def format_derivation(derivation, pretty=False):
         """Helper method to display the derivation path formatted"""
         formatted_txt = DERIVATION_PATH_SYMBOL + THIN_SPACE + "%s" if pretty else "%s"
-        return (formatted_txt % derivation).replace("h", HARDENED_STR_REPLACE)
+        return formatted_txt % derivation
 
     @staticmethod
     def format_fingerprint(fingerprint, pretty=False):

@@ -43,6 +43,7 @@ from ..key import (
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
+    DERIVATION_PATH_SYMBOL,
 )
 from ..settings import (
     MAIN_TXT,
@@ -54,6 +55,9 @@ from ..settings import (
 from ..key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
 PASSPHRASE_MAX_LEN = 200
+DERIVATION_KEYPAD = "123456789/0h"
+
+MINISCRIPT_DEFAULT_DERIVATION = "m/48h/0h/0h/2h"
 
 
 class PassphraseEditor(Page):
@@ -122,6 +126,7 @@ class WalletSettings(Page):
         policy_type = key.policy_type
         script_type = key.script_type
         account = key.account_index
+        custom_derivation = key.derivation if key.custom_derivation else None
         while True:
             wallet_info = network["name"] + "\n"
             if policy_type == TYPE_SINGLESIG:
@@ -131,20 +136,24 @@ class WalletSettings(Page):
             elif policy_type == TYPE_MINISCRIPT:
                 wallet_info += NAME_MINISCRIPT + "\n"
             wallet_info += str(script_type).upper() + "\n"
-            derivation_path = "m/"
-            if policy_type == TYPE_SINGLESIG:
-                derivation_path += str(SINGLESIG_SCRIPT_PURPOSE[script_type])
-            elif policy_type == TYPE_MULTISIG:
-                derivation_path += str(MULTISIG_SCRIPT_PURPOSE)
-            elif policy_type == TYPE_MINISCRIPT:
-                # For now, miniscript is the same as multisig
-                derivation_path += str(MINISCRIPT_PURPOSE)
-            derivation_path += "'/"
-            derivation_path += "0'" if network == NETWORKS[MAIN_TXT] else "1'"
-            derivation_path += "/" + str(account) + "'"
-            if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
-                derivation_path += "/2'"
-            wallet_info += derivation_path
+            if policy_type != TYPE_MINISCRIPT or not custom_derivation:
+                derivation_path = "m/"
+                if policy_type == TYPE_SINGLESIG:
+                    derivation_path += str(SINGLESIG_SCRIPT_PURPOSE[script_type])
+                elif policy_type == TYPE_MULTISIG:
+                    derivation_path += str(MULTISIG_SCRIPT_PURPOSE)
+                elif policy_type == TYPE_MINISCRIPT:
+                    # For now, miniscript is the same as multisig
+                    derivation_path += str(MINISCRIPT_PURPOSE)
+                derivation_path += "h/"
+                derivation_path += "0h" if network == NETWORKS[MAIN_TXT] else "1h"
+                derivation_path += "/" + str(account) + "h"
+                if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
+                    derivation_path += "/2h"
+                custom_derivation = ""
+            else:
+                derivation_path = custom_derivation
+            wallet_info += DERIVATION_PATH_SYMBOL + " " + derivation_path
 
             self.ctx.display.clear()
             derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
@@ -158,7 +167,14 @@ class WalletSettings(Page):
                         t("Script Type"),
                         (lambda: None) if policy_type != TYPE_MULTISIG else None,
                     ),
-                    (t("Account"), lambda: None),
+                    (
+                        (
+                            t("Account")
+                            if policy_type != TYPE_MINISCRIPT
+                            else t("Derivation Path")
+                        ),
+                        lambda: None,
+                    ),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
@@ -198,10 +214,15 @@ class WalletSettings(Page):
                 if new_script_type is not None:
                     script_type = new_script_type
             elif index == 3:
-                account_temp = self._account(account)
-                if account_temp is not None:
-                    account = account_temp
-        return network, policy_type, script_type, account
+                if policy_type != TYPE_MINISCRIPT:
+                    new_account = self._account(account)
+                    if new_account is not None:
+                        account = new_account
+                else:
+                    new_derivation_path = self._derivation_path(derivation_path)
+                    if new_derivation_path is not None:
+                        custom_derivation = new_derivation_path
+        return network, policy_type, script_type, account, derivation_path
 
     def _coin_type(self):
         """Network selection menu"""
@@ -287,3 +308,32 @@ class WalletSettings(Page):
             )
             return None
         return account
+
+    def _derivation_path(self, derivation):
+        """Derivation path input"""
+        while True:
+            derivation = self.capture_from_keypad(
+                t("Derivation Path"),
+                [DERIVATION_KEYPAD],
+                starting_buffer=(str(derivation) if derivation is not None else ""),
+                delete_key_fn=lambda x: x[:-1] if len(x) > 2 else x,
+            )
+            if derivation == ESC_KEY:
+                return None
+            nodes = derivation.split("/")[1:]
+            not_hardened_txt = ""
+            for i, node in enumerate(nodes):
+                if node[-1] != "h":
+                    not_hardened_txt += "Node {}: {}\n".format(i, node)
+            if not_hardened_txt:
+                self.ctx.display.clear()
+                if not self.prompt(
+                    t("Some nodes are not hardened:")
+                    + "\n"
+                    + not_hardened_txt
+                    + t("Proceed?"),
+                    self.ctx.display.height() // 2,
+                ):
+                    # Allow user to edit the derivation path
+                    continue
+            return derivation
