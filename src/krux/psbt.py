@@ -546,6 +546,10 @@ class PSBTSigner:
             if inp.witness_script:
                 trimmed_psbt.inputs[i].witness_script = inp.witness_script
 
+            # Preserve taproot_key_sig for Taproot inputs
+            if inp.taproot_key_sig:
+                trimmed_psbt.inputs[i].taproot_key_sig = inp.taproot_key_sig
+
         self.psbt = trimmed_psbt
 
     def psbt_qr(self):
