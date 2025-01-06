@@ -55,9 +55,9 @@ from ..settings import (
 from ..key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
 PASSPHRASE_MAX_LEN = 200
-DERIVATION_KEYPAD = "123456789/0h"
+DERIVATION_KEYPAD = "123456789/0'"
 
-MINISCRIPT_DEFAULT_DERIVATION = "m/48h/0h/0h/2h"
+MINISCRIPT_DEFAULT_DERIVATION = "m/48'/0'/0'/2'"
 
 
 class PassphraseEditor(Page):
@@ -145,11 +145,11 @@ class WalletSettings(Page):
                 elif policy_type == TYPE_MINISCRIPT:
                     # For now, miniscript is the same as multisig
                     derivation_path += str(MINISCRIPT_PURPOSE)
-                derivation_path += "h/"
-                derivation_path += "0h" if network == NETWORKS[MAIN_TXT] else "1h"
-                derivation_path += "/" + str(account) + "h"
+                derivation_path += "'/"
+                derivation_path += "0'" if network == NETWORKS[MAIN_TXT] else "1'"
+                derivation_path += "/" + str(account) + "'"
                 if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
-                    derivation_path += "/2h"
+                    derivation_path += "/2'"
                 custom_derivation = ""
             else:
                 derivation_path = custom_derivation
@@ -323,7 +323,7 @@ class WalletSettings(Page):
             nodes = derivation.split("/")[1:]
             not_hardened_txt = ""
             for i, node in enumerate(nodes):
-                if node[-1] != "h":
+                if node[-1] != "'":
                     not_hardened_txt += "Node {}: {}\n".format(i, node)
             if not_hardened_txt:
                 self.ctx.display.clear()

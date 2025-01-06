@@ -42,6 +42,7 @@ from .settings import (
 DER_SINGLE = "m/%dh/%dh/%dh"
 DER_MULTI = "m/%dh/%dh/%dh/2h"
 DER_MINISCRIPT = "m/%dh/%dh/%dh/2h"
+HARDENED_STR_REPLACE = "'"
 
 # Pay To Public Key Hash - 44' Legacy single-sig
 # address starts with 1 (mainnet) or m (testnet)
@@ -223,7 +224,7 @@ class Key:
     def format_derivation(derivation, pretty=False):
         """Helper method to display the derivation path formatted"""
         formatted_txt = DERIVATION_PATH_SYMBOL + THIN_SPACE + "%s" if pretty else "%s"
-        return formatted_txt % derivation
+        return (formatted_txt % derivation).replace("'", HARDENED_STR_REPLACE)
 
     @staticmethod
     def format_fingerprint(fingerprint, pretty=False):

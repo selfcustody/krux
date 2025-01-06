@@ -45,7 +45,6 @@ from ..key import (
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
     POLICY_TYPE_IDS,
-    DERIVATION_PATH_SYMBOL,
 )
 from ..krux_settings import t
 from ..settings import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT

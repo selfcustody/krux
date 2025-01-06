@@ -26,7 +26,7 @@ from .. import (
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
 )
-from ...display import DEFAULT_PADDING, BOTTOM_PROMPT_LINE, FONT_HEIGHT
+from ...display import DEFAULT_PADDING, BOTTOM_PROMPT_LINE, FONT_HEIGHT, FONT_WIDTH
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
@@ -140,42 +140,52 @@ class WalletDescriptor(Page):
 
         if wallet.is_loaded():
             self.ctx.display.clear()
-            self.display_wallet(wallet, is_loading=True)
+            self.display_loading_wallet(wallet)
             if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                 self.ctx.wallet = wallet
                 self.flash_text(t("Wallet output descriptor loaded!"))
 
         return MENU_CONTINUE
 
-    def display_wallet(self, wallet, is_loading=False):
-        """Displays a wallet, including its label and abbreviated xpubs.
-        If include_qr is True, a QR code of the wallet will be shown
-        which will contain the same data as was originally loaded, in
-        the same QR format
-        """
+    def display_wallet(self, wallet):
+        """Try to show the wallet output descriptor as a QRCode"""
+        try:
+            wallet_data, qr_format = wallet.wallet_qr()
+            self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
+        except Exception as e:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Error:") + "\n%s" % repr(e), theme.error_color
+            )
+            self.ctx.input.wait_for_button()
+
+    def display_loading_wallet(self, wallet):
+        """Displays wallet descriptor attrbutes while loading"""
 
         offset_y = DEFAULT_PADDING
         self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
         offset_y += (3 * FONT_HEIGHT) // 2
-        our_key_index = None
+        our_key_indexes_chars = []
         for i, key in enumerate(wallet.descriptor.keys):
             label_color = theme.fg_color
             if wallet.is_multisig() or wallet.is_miniscript():
                 label = chr(65 + i) + ": "
             else:
-                label = ""
+                label = " " * 3
             key_fingerprint = FINGERPRINT_SYMBOL + " "
             if key.origin:
                 key_origin_str = str(key.origin)
                 key_fingerprint += key_origin_str[:8]
             else:
                 key_fingerprint += t("unknown")
+            #  Check if the key is the one loaded in the wallet
             if (
                 self.ctx.wallet.key
+                and len(wallet.descriptor.keys) > 1
                 and key.fingerprint == self.ctx.wallet.key.fingerprint
             ):
                 label_color = theme.highlight_color
-                our_key_index = i
+                our_key_indexes_chars.append(chr(65 + i))
             self.ctx.display.draw_string(
                 DEFAULT_PADDING,
                 offset_y,
@@ -184,72 +194,60 @@ class WalletDescriptor(Page):
             )
             offset_y += FONT_HEIGHT
             if key.origin:
-                key_derivation_str = " " * 3
-                key_derivation_str += DERIVATION_PATH_SYMBOL
-                key_derivation_str += " "
-                key_derivation_str += key_origin_str[8:]
+                key_derivation_str = DERIVATION_PATH_SYMBOL
+                key_derivation_str += " m"
+                key_derivation_str += key_origin_str[8:].replace("h", "'")
                 self.ctx.display.draw_string(
-                    DEFAULT_PADDING,
+                    DEFAULT_PADDING + 3 * FONT_WIDTH,
                     offset_y,
                     key_derivation_str,
                     label_color,
                 )
+            offset_y += FONT_HEIGHT
+            self.ctx.display.draw_hcentered_text(
+                self.fit_to_line(key.key.to_base58(), " " * 3),
+                offset_y,
+                label_color,
+            )
             offset_y += (FONT_HEIGHT * 3) // 2
 
-            # Checks if there's room for another key
-            if offset_y + (FONT_HEIGHT * 3) > self.ctx.display.height():
+            # Checks if there's another key and room for it
+            if (
+                i + 1 < len(wallet.descriptor.keys)
+                and offset_y + (FONT_HEIGHT * 4) > self.ctx.display.height()
+            ):
+                # If there's no room for another key, create a new page
                 self.ctx.input.wait_for_button()
                 self.ctx.display.clear()
                 offset_y = DEFAULT_PADDING
                 self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
                 offset_y += (3 * FONT_HEIGHT) // 2
 
-        if not wallet.is_multisig() and not wallet.is_miniscript():
-            about = self.fit_to_line(str(wallet.descriptor.keys[0].key))
-            if is_loading:
-                self.ctx.display.draw_hcentered_text(about, offset_y)
-            else:
-                wallet_data, qr_format = wallet.wallet_qr()
-                self.display_qr_codes(wallet_data, qr_format, title=about)
-        else:
-
-            # Wait user acknowledge fingerprints
-            self.ctx.input.wait_for_button()
-
-            # Display XPUBs
-            self.ctx.display.clear()
-            offset_y = DEFAULT_PADDING
-            self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
-            for i, key in enumerate(wallet.descriptor.keys):
-                offset_y += FONT_HEIGHT
-                # Checks is xpub belongs to the current wallet
-                if i == our_key_index:
-                    label_color = theme.highlight_color
-                else:
-                    label_color = theme.fg_color
-                self.ctx.display.draw_hcentered_text(
-                    self.fit_to_line(key.key.to_base58(), chr(65 + i) + ". "),
-                    offset_y,
-                    label_color,
-                )
-                # Checks if there's room for another xpub
-                if offset_y + FONT_HEIGHT > self.ctx.display.height():
-                    self.ctx.input.wait_for_button()
-                    self.ctx.display.clear()
-                    offset_y = DEFAULT_PADDING
-                    self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
-
-            if is_loading:
-                # Skip the QR code if we're loading the wallet
-                return
-            self.ctx.input.wait_for_button()
-            # Try to show the wallet output descriptor as a QRCode
-            try:
-                wallet_data, qr_format = wallet.wallet_qr()
-                self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
-            except Exception as e:
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    t("Error:") + "\n%s" % repr(e), theme.error_color
-                )
+        # Display miniscrip policies
+        if wallet.is_miniscript():
+            # TODO: Replace to_lines with a better wrapper
+            miniscript_policy = self.ctx.display.to_lines(wallet.descriptor.full_policy)
+            lines_left = (self.ctx.display.height() - offset_y) // FONT_HEIGHT
+            if len(miniscript_policy) > lines_left:
+                # If there's no room for the policy, create a new page
                 self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
+                offset_y = DEFAULT_PADDING
+                self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+                offset_y += (3 * FONT_HEIGHT) // 2
+
+            for line in miniscript_policy:
+                self.ctx.display.draw_string(
+                    DEFAULT_PADDING,
+                    offset_y,
+                    line,
+                )
+                for i, char in enumerate(line):
+                    if char in our_key_indexes_chars:
+                        self.ctx.display.draw_string(
+                            DEFAULT_PADDING + i * FONT_WIDTH,
+                            offset_y,
+                            char,
+                            theme.highlight_color,
+                        )
+                offset_y += FONT_HEIGHT
