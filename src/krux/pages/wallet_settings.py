@@ -44,6 +44,7 @@ from ..key import (
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
     DERIVATION_PATH_SYMBOL,
+    POLICY_TYPE_IDS,
 )
 from ..settings import (
     MAIN_TXT,
@@ -129,27 +130,15 @@ class WalletSettings(Page):
         custom_derivation = key.derivation if key.custom_derivation else None
         while True:
             wallet_info = network["name"] + "\n"
-            if policy_type == TYPE_SINGLESIG:
-                wallet_info += NAME_SINGLE_SIG + "\n"
-            elif policy_type == TYPE_MULTISIG:
-                wallet_info += NAME_MULTISIG + "\n"
-            elif policy_type == TYPE_MINISCRIPT:
-                wallet_info += NAME_MINISCRIPT + "\n"
+            policy_type_str = next(
+                (k for k, v in POLICY_TYPE_IDS.items() if v == policy_type), ""
+            )
+            wallet_info += policy_type_str + "\n"
             wallet_info += str(script_type).upper() + "\n"
             if policy_type != TYPE_MINISCRIPT or not custom_derivation:
-                derivation_path = "m/"
-                if policy_type == TYPE_SINGLESIG:
-                    derivation_path += str(SINGLESIG_SCRIPT_PURPOSE[script_type])
-                elif policy_type == TYPE_MULTISIG:
-                    derivation_path += str(MULTISIG_SCRIPT_PURPOSE)
-                elif policy_type == TYPE_MINISCRIPT:
-                    # For now, miniscript is the same as multisig
-                    derivation_path += str(MINISCRIPT_PURPOSE)
-                derivation_path += "'/"
-                derivation_path += "0'" if network == NETWORKS[MAIN_TXT] else "1'"
-                derivation_path += "/" + str(account) + "'"
-                if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
-                    derivation_path += "/2'"
+                derivation_path = self._derivation_path_str(
+                    policy_type, script_type, network, account
+                )
                 custom_derivation = ""
             else:
                 derivation_path = custom_derivation
@@ -308,6 +297,22 @@ class WalletSettings(Page):
             )
             return None
         return account
+
+    def _derivation_path_str(self, policy_type, script_type, network, account):
+        derivation_path = "m/"
+        if policy_type == TYPE_SINGLESIG:
+            derivation_path += str(SINGLESIG_SCRIPT_PURPOSE[script_type])
+        elif policy_type == TYPE_MULTISIG:
+            derivation_path += str(MULTISIG_SCRIPT_PURPOSE)
+        elif policy_type == TYPE_MINISCRIPT:
+            # For now, miniscript is the same as multisig
+            derivation_path += str(MINISCRIPT_PURPOSE)
+        derivation_path += "'/"
+        derivation_path += "0'" if network == NETWORKS[MAIN_TXT] else "1'"
+        derivation_path += "/" + str(account) + "'"
+        if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
+            derivation_path += "/2'"
+        return derivation_path
 
     def _derivation_path(self, derivation):
         """Derivation path input"""

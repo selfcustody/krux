@@ -224,7 +224,7 @@ class Key:
     def format_derivation(derivation, pretty=False):
         """Helper method to display the derivation path formatted"""
         formatted_txt = DERIVATION_PATH_SYMBOL + THIN_SPACE + "%s" if pretty else "%s"
-        return (formatted_txt % derivation).replace("'", HARDENED_STR_REPLACE)
+        return (formatted_txt % derivation).replace("h", HARDENED_STR_REPLACE)
 
     @staticmethod
     def format_fingerprint(fingerprint, pretty=False):
