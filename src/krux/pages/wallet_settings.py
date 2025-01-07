@@ -321,6 +321,28 @@ class WalletSettings(Page):
             if derivation == ESC_KEY:
                 return None
             nodes = derivation.split("/")[1:]
+
+            # Check node numbers are valid
+            valid_nodes = True
+            for node in nodes:
+                if not node:
+                    valid_nodes = False
+                    break
+                try:
+                    if node[-1] == "'":
+                        node = node[:-1]
+                    if not 0 <= int(node) < HARDENED_INDEX:
+                        raise ValueError
+                except ValueError:
+                    valid_nodes = False
+                    break
+            if not valid_nodes:
+                self.flash_error(
+                    t("Invalid derivation path"),
+                )
+                continue
+
+            # Check if all nodes are hardened
             not_hardened_txt = ""
             for i, node in enumerate(nodes):
                 if node[-1] != "'":
