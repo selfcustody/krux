@@ -130,9 +130,12 @@ class WalletSettings(Page):
         custom_derivation = key.derivation if key.custom_derivation else None
         while True:
             wallet_info = network["name"] + "\n"
-            policy_type_str = next(
-                (k for k, v in POLICY_TYPE_IDS.items() if v == policy_type), ""
-            )
+            # Find the policy type string from the POLICY_TYPE_IDS dictionary
+            policy_type_str = ""
+            for k, v in POLICY_TYPE_IDS.items():
+                if v == policy_type:
+                    policy_type_str = k
+                    break
             wallet_info += policy_type_str + "\n"
             wallet_info += str(script_type).upper() + "\n"
             if policy_type != TYPE_MINISCRIPT or not custom_derivation:
