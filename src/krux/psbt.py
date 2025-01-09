@@ -354,13 +354,16 @@ class PSBTSigner:
         output_policy_count = Counter()
 
         xpubs = []
+        origin_less_xpub = None
         try:
             xpubs, origin_less_xpub = self.xpubs()
         except:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
         for i, out in enumerate(self.psbt.outputs):
-            out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs, origin_less_xpub)
+            out_policy = get_policy(
+                out, self.psbt.tx.vout[i].script_pubkey, xpubs, origin_less_xpub
+            )
             output_policy_count[out_policy["type"]] += 1
             output_type = self._classify_output(out_policy, i, out)
 
@@ -590,7 +593,7 @@ class PSBTSigner:
         from embit.psbt import DerivationPath
 
         if self.psbt.xpubs:
-            return self.psbt.xpubs
+            return self.psbt.xpubs, None
 
         if not self.wallet.descriptor:
             raise ValueError("missing xpubs")
