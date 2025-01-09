@@ -31,7 +31,7 @@ from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
-from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL
+from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, TYPE_MINISCRIPT, P2TR
 
 
 class WalletDescriptor(Page):
@@ -166,6 +166,7 @@ class WalletDescriptor(Page):
         self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
         offset_y += (3 * FONT_HEIGHT) // 2
         our_key_indexes_chars = []
+        unused_key_index = None
         for i, key in enumerate(wallet.descriptor.keys):
             label_color = theme.fg_color
             if wallet.is_multisig() or wallet.is_miniscript():
@@ -177,7 +178,16 @@ class WalletDescriptor(Page):
                 key_origin_str = str(key.origin)
                 key_fingerprint += key_origin_str[:8]
             else:
-                key_fingerprint += t("unknown")
+                if (
+                    i == 0
+                    and wallet.key.policy_type == TYPE_MINISCRIPT
+                    and wallet.key.script_type == P2TR
+                ):
+                    key_fingerprint = t("TR internal key")
+                    label_color = theme.disabled_color
+                    unused_key_index = chr(65 + i)
+                else:
+                    key_fingerprint += t("unknown")
             #  Check if the key is the one loaded in the wallet
             if (
                 self.ctx.wallet.key
@@ -201,6 +211,17 @@ class WalletDescriptor(Page):
                     DEFAULT_PADDING + 3 * FONT_WIDTH,
                     offset_y,
                     key_derivation_str,
+                    label_color,
+                )
+            elif (
+                i == 0
+                and wallet.key.policy_type == TYPE_MINISCRIPT
+                and wallet.key.script_type == P2TR
+            ):
+                self.ctx.display.draw_string(
+                    DEFAULT_PADDING + 3 * FONT_WIDTH,
+                    offset_y,
+                    t("unused"),
                     label_color,
                 )
             offset_y += FONT_HEIGHT
@@ -243,7 +264,14 @@ class WalletDescriptor(Page):
                     line,
                 )
                 for i, char in enumerate(line):
-                    if char in our_key_indexes_chars:
+                    if char == unused_key_index:
+                        self.ctx.display.draw_string(
+                            DEFAULT_PADDING + i * FONT_WIDTH,
+                            offset_y,
+                            char,
+                            theme.disabled_color,
+                        )
+                    elif char in our_key_indexes_chars:
                         self.ctx.display.draw_string(
                             DEFAULT_PADDING + i * FONT_WIDTH,
                             offset_y,

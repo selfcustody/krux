@@ -151,15 +151,18 @@ class PSBTSigner:
         """Validates the PSBT"""
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
         xpubs = []
+        origin_less_xpub = None
         try:
-            xpubs = self.xpubs()
+            xpubs, origin_less_xpub = self.xpubs()
         except:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
         for inp in self.psbt.inputs:
             # get policy of the input
             try:
-                inp_policy = self.get_policy_from_psbt_input(inp, xpubs)
+                inp_policy = self.get_policy_from_psbt_input(
+                    inp, xpubs, origin_less_xpub
+                )
             except:
                 raise ValueError("Unable to get policy")
             # if policy is None - assign current
@@ -186,7 +189,7 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
-    def get_policy_from_psbt_input(self, tx_input, xpubs):
+    def get_policy_from_psbt_input(self, tx_input, xpubs, origin_less_xpub=None):
         """Extracts the scriptPubKey from an input's UTXO and determines the policy."""
         if tx_input.witness_utxo:
             scriptpubkey = tx_input.witness_utxo.script_pubkey
@@ -196,7 +199,7 @@ class PSBTSigner:
         else:
             raise ValueError("No UTXO information available in the input.")
 
-        return get_policy(tx_input, scriptpubkey, xpubs)
+        return get_policy(tx_input, scriptpubkey, xpubs, origin_less_xpub)
 
     def path_mismatch(self):
         """Verifies if the PSBT key path matches loaded keys's derivation path"""
@@ -226,7 +229,7 @@ class PSBTSigner:
                         textual_path += "/{}'".format(index - 2**31)
                     else:
                         textual_path += "/{}".format(index)
-                if textual_path != self.wallet.key.derivation:
+                if textual_path != self.wallet.key.derivation.replace("h", "'"):
                     if textual_path not in mismatched_paths:
                         mismatched_paths.append(textual_path)
         if mismatched_paths:
@@ -352,12 +355,12 @@ class PSBTSigner:
 
         xpubs = []
         try:
-            xpubs = self.xpubs()
+            xpubs, origin_less_xpub = self.xpubs()
         except:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
         for i, out in enumerate(self.psbt.outputs):
-            out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs)
+            out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs, origin_less_xpub)
             output_policy_count[out_policy["type"]] += 1
             output_type = self._classify_output(out_policy, i, out)
 
@@ -598,13 +601,19 @@ class PSBTSigner:
             else [self.wallet.descriptor.key]
         )
         xpubs = {}
+        origin_less_xpub = None
         for descriptor_key in descriptor_keys:
             if descriptor_key.origin:
                 # Pure xpub descriptors (Blue Wallet) don't have origin data
                 xpubs[descriptor_key.key] = DerivationPath(
                     descriptor_key.origin.fingerprint, descriptor_key.origin.derivation
                 )
-        return xpubs
+            elif len(descriptor_keys) > 1:
+                # Allow one descriptor key without origin data for taproot
+                # Pure taptree descriptors won't have origin data for internal key
+                origin_less_xpub = descriptor_key.key
+
+        return xpubs, origin_less_xpub
 
     def psbt_policy_string(self):
         """Returns the policy string containing script type and cosigners' fingerprints"""
@@ -710,15 +719,13 @@ def get_cosigners_miniscript(derivations, xpubs):
     return sorted(cosigners)
 
 
-def get_cosigners_taproot_miniscript(taproot_derivations, xpubs):
+def get_cosigners_taproot_miniscript(taproot_derivations, xpubs, origin_less_xpub=None):
     """
     Compares the taproot derivations with the xpubs to check get the cosigners
     """
 
     cosigners = []
-    loop_count = 0
     for xonly_pubkey, der_info in taproot_derivations.items():
-        loop_count += 1
         _, der = der_info  # tap_leaf_hashes are not used
         fp = der.fingerprint
         full_path = der.derivation
@@ -738,6 +745,11 @@ def get_cosigners_taproot_miniscript(taproot_derivations, xpubs):
                         cosigners.append(xpub.to_base58())
                         break
 
+    if origin_less_xpub:
+        # Pocicies which don't cover internal key spending (e.g. taptree only)
+        # can have an origin-less xpub for internal key derivation
+        cosigners.append(origin_less_xpub.to_base58())
+
     # Ensure all pubkeys have a matching xpub
     if len(cosigners) != len(taproot_derivations):
         raise ValueError("cannot get all cosigners")
@@ -746,7 +758,7 @@ def get_cosigners_taproot_miniscript(taproot_derivations, xpubs):
 
 
 # Modified from: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L64
-def get_policy(scope, scriptpubkey, xpubs):
+def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
     """Parse scope and get policy"""
     from embit.finalizer import parse_multisig
 
@@ -791,7 +803,7 @@ def get_policy(scope, scriptpubkey, xpubs):
 
             # Will succeed to verify cosigners only if the descriptor is loaded
             cosigners = get_cosigners_taproot_miniscript(
-                scope.taproot_bip32_derivations, xpubs
+                scope.taproot_bip32_derivations, xpubs, origin_less_xpub
             )
             # Only add cosigners if is miniscript (multiple cosigners),
             # otherwise it probably is single-sig taproot
