@@ -31,7 +31,7 @@ from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
-from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, TYPE_MINISCRIPT, P2TR
+from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
 
 
 class WalletDescriptor(Page):
@@ -180,8 +180,8 @@ class WalletDescriptor(Page):
             else:
                 if (
                     i == 0
-                    and wallet.key.policy_type == TYPE_MINISCRIPT
-                    and wallet.key.script_type == P2TR
+                    and wallet.is_miniscript()
+                    and wallet.policy.get("type") == P2TR
                 ):
                     key_fingerprint = t("TR internal key")
                     label_color = theme.disabled_color
@@ -214,9 +214,7 @@ class WalletDescriptor(Page):
                     label_color,
                 )
             elif (
-                i == 0
-                and wallet.key.policy_type == TYPE_MINISCRIPT
-                and wallet.key.script_type == P2TR
+                i == 0 and wallet.is_miniscript() and wallet.policy.get("type") == P2TR
             ):
                 self.ctx.display.draw_string(
                     DEFAULT_PADDING + 3 * FONT_WIDTH,
