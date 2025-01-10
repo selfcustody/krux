@@ -38,6 +38,11 @@ from .key import (
     TYPE_MINISCRIPT,
 )
 
+# Liana's NUMS (Nothing-Up-My-Sleeve)
+# for Taproot descriptors to make them unspendable from internal key
+# https://delvingbitcoin.org/t/unspendable-keys-in-descriptors/304/21
+LIANA_TR_NUMS = "0250929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
+
 
 class AssumptionWarning(Exception):
     """An exception for assumptions that require user acceptance"""
@@ -184,6 +189,16 @@ class Wallet:
             }
         elif self.descriptor.miniscript is not None or self.descriptor.taptree:
             if self.descriptor.taptree:
+                if not descriptor.keys[0].origin:
+                    import binascii
+
+                    # In case internal key is disabled, check if NUMS is known
+                    if (
+                        binascii.hexlify(descriptor.keys[0].sec()).decode()
+                        != LIANA_TR_NUMS
+                    ):
+                        raise ValueError("Unregistered NUMS")
+
                 taproot_txt = "TR "
                 miniscript_type = P2TR
             else:
