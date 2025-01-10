@@ -287,6 +287,7 @@ translation_array = [
     "TC Flash Hash",
     "启动时的 TC Flash Hash",
     "点击或按下 ENTER 截图",
+    "TR内部密钥",
     "TX 引脚",
     "防篡改检查码",
     "防篡改检查码设置成功",

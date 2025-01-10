@@ -287,6 +287,7 @@ translation_array = [
     "TC Flash Hash",
     "TC Flash Hash au démarrage",
     "TOUCHEZ ou ENTRER pour capturer",
+    "Clé interne TR",
     "TX Fiche",
     "Code de non compromis",
     "Code de non compromis défini avec succès",

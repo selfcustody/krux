@@ -287,6 +287,7 @@ translation_array = [
     "TC Flash Hash",
     "Hash Flash TC khi khởi động",
     "Chạm màn hình hoặc nhấn nút ENTER để chụp",
+    "Khóa nội bộ TR",
     "TX Pin",
     "Mã kiểm tra giả mạo",
     "Đã đặt mã kiểm tra giả mạo thành công",

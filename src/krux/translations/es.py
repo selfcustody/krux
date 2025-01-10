@@ -287,6 +287,7 @@ translation_array = [
     "TC Hash Flash",
     "TC Flash Hash al arranque",
     "TOCA o ENTER para capturar",
+    "Clave interna TR",
     "TX Pin",
     "Código de verificación",
     "Código de verificación establecido con éxito",

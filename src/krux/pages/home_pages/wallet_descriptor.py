@@ -219,7 +219,7 @@ class WalletDescriptor(Page):
                 self.ctx.display.draw_string(
                     DEFAULT_PADDING + 3 * FONT_WIDTH,
                     offset_y,
-                    t("unused"),
+                    "NUMS",
                     label_color,
                 )
             offset_y += FONT_HEIGHT

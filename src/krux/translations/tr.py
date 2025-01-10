@@ -287,6 +287,7 @@ translation_array = [
     "TC Flash Hash",
     "Önyüklemede TC Flash Hash",
     "Yakalamak için DOKUN veya GİR",
+    "TR iç anahtar",
     "TX Pini",
     "Kurcalama Kontrol Kodu",
     "Kurcalama kontrol kodu başarıyla ayarlandı",

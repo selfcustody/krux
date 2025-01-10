@@ -287,6 +287,7 @@ translation_array = [
     "TC Flash Hash",
     "Hash Flash bij het opstarten",
     "TIK of ENTER voor opname",
+    "TR interne sleutel",
     "TX pin",
     "Sabotagecontrolecode",
     "Sabotagecontrolecode succesvol ingesteld",

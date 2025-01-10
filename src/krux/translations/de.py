@@ -287,6 +287,7 @@ translation_array = [
     "TC Flash-Hash",
     "TC Flash-Hash beim Start",
     "TOUCH oder ENTER zum Erfassen",
+    "TR interner Schlüssel",
     "TX Pin",
     "Tamper Check Code",
     "Tamper Check Code erfolgreich gesetzt",
