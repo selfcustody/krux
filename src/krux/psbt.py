@@ -556,6 +556,10 @@ class PSBTSigner:
             if inp.taproot_key_sig:
                 trimmed_psbt.inputs[i].taproot_key_sig = inp.taproot_key_sig
 
+            # Preserve taproot script path sigs
+            if inp.taproot_sigs:
+                trimmed_psbt.inputs[i].taproot_sigs = inp.taproot_sigs
+
         self.psbt = trimmed_psbt
 
     def psbt_qr(self):
