@@ -250,7 +250,7 @@ class PSBTSigner:
                 expected_path_str = self.wallet.key.derivation.split("/")[1:]
                 expected_path_nodes = []
                 for p in expected_path_str:
-                    if "h" in p:
+                    if "'" in p:
                         expected_path_nodes.append(int(p[:-1]) + HARDENED_INDEX)
                     else:
                         expected_path_nodes.append(int(p))
