@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 import gc
 from embit.psbt import PSBT, CompressMode
-from embit.bip32 import HARDENED_INDEX
 from ur.ur import UR
 import urtypes
 from urtypes.crypto import CRYPTO_PSBT
@@ -29,7 +28,7 @@ from .baseconv import base_decode
 from .krux_settings import t
 from .settings import THIN_SPACE
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
-from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
+from .key import Key, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 from .sats_vb import SatsVB
 
 # PSBT Output Types:
@@ -236,32 +235,15 @@ class PSBTSigner:
             return Key.format_derivation(", ".join(mismatched_paths))
         return ""
 
-    def is_our_miniscript_output(self, psbt_output):
-        """Check if the output is from our wallet"""
+    def address_belongs_to_descriptor(self, psbt_output):
+        """Check if the output is from our wallet descriptor"""
 
-        # TODO: Is comparing fingerprints and paths a trustable method?
-        derivations = psbt_output.bip32_derivations
-        if not derivations:
-            return False
-        for _, derivation in derivations.items():
-            # Check if the fingerprint matches
-            if derivation.fingerprint == self.wallet.key.fingerprint:
-                # Verify the derivation path
-                expected_path_str = self.wallet.key.derivation.split("/")[1:]
-                expected_path_nodes = []
-                for p in expected_path_str:
-                    if "'" in p:
-                        expected_path_nodes.append(int(p[:-1]) + HARDENED_INDEX)
-                    else:
-                        expected_path_nodes.append(int(p))
-
-                if derivation.derivation[:4] == expected_path_nodes:
-                    return True
+        if self.wallet.descriptor:
+            return self.wallet.descriptor.owns(psbt_output)
         return False
 
-    def _classify_output(self, out_policy, i, out):
+    def _classify_output(self, out_policy, out):
         """Classify the output based on its properties and policy"""
-        from embit import script
 
         address_from_my_wallet = False
         address_is_change = False
@@ -274,45 +256,14 @@ class PSBTSigner:
             # so we only need to check that scriptpubkey is generated from
             # witness script
 
-            # empty script by default
-            sc = script.Script(b"")
-            if self.policy["type"] == P2WSH:
-                try:
-                    # if multisig, we know witness script
-                    sc = script.p2wsh(out.witness_script)
-                except:
-                    # Expected to fail with Miniscript PSBT
-                    pass
-            elif self.policy["type"] == P2SH_P2WSH:
-                sc = script.p2sh(script.p2wsh(out.witness_script))
-            # single-sig
-            elif "pkh" in self.policy["type"]:
-                if len(list(out.bip32_derivations.values())) > 0:
-                    der = list(out.bip32_derivations.values())[0].derivation
-                    my_hd_prvkey = self.wallet.key.root.derive(der)
-                    if self.policy["type"] == P2WPKH:
-                        sc = script.p2wpkh(my_hd_prvkey)
-                    elif self.policy["type"] == P2SH_P2WPKH:
-                        sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
-                    elif self.policy["type"] == P2PKH:
-                        sc = script.p2pkh(my_hd_prvkey)
+            address_from_my_wallet = self.address_belongs_to_descriptor(out)
 
             if self.policy["type"] == P2TR:
-                address_from_my_wallet = (
-                    len(list(out.taproot_bip32_derivations.values())) > 0
-                )
                 if address_from_my_wallet:
                     # _ = leafs
                     _, der = list(out.taproot_bip32_derivations.values())[0]
-                    address_is_change = der.derivation[3] == 1
+                    address_is_change = der.derivation[-2] == 1
             else:
-                if sc.data:
-                    address_from_my_wallet = (
-                        sc.data == self.psbt.tx.vout[i].script_pubkey.data
-                    )
-                else:
-                    # If the script is empty, we compare fingerprints and paths
-                    address_from_my_wallet = self.is_our_miniscript_output(out)
                 if address_from_my_wallet:
                     address_is_change = (
                         len(list(out.bip32_derivations.values())) > 0
@@ -365,7 +316,7 @@ class PSBTSigner:
                 out, self.psbt.tx.vout[i].script_pubkey, xpubs, origin_less_xpub
             )
             output_policy_count[out_policy["type"]] += 1
-            output_type = self._classify_output(out_policy, i, out)
+            output_type = self._classify_output(out_policy, out)
 
             if output_type == CHANGE:
                 change_list.append(
