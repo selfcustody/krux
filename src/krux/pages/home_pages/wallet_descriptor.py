@@ -246,7 +246,7 @@ class WalletDescriptor(Page):
         if wallet.is_miniscript():
             # TODO: Replace to_lines with a better wrapper
             miniscript_policy = self.ctx.display.to_lines(wallet.descriptor.full_policy)
-            lines_left = (self.ctx.display.height() - offset_y) // FONT_HEIGHT
+            lines_left = (BOTTOM_PROMPT_LINE - offset_y) // FONT_HEIGHT
             if len(miniscript_policy) > lines_left:
                 # If there's no room for the policy, create a new page
                 self.ctx.input.wait_for_button()
