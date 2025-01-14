@@ -222,6 +222,7 @@ translation_array = [
     "¿Proceder de todas maneras?",
     "¿Continuar?",
     "Procesando..",
+    "No se puede gastar",
     "Código QR",
     "RX Pin",
     "Reiniciar",

@@ -222,6 +222,7 @@ translation_array = [
     "Yine de devam edilsin mi?",
     "Devam edilsin mi?",
     "İşleniyor..",
+    "Kanıtlanabilir harcanamaz",
     "QR Kodu",
     "RX Pini",
     "Yeniden Başlat",

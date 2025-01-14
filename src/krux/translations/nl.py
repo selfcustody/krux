@@ -222,6 +222,7 @@ translation_array = [
     "Toch doorgaan?",
     "Doorgaan?",
     "Verwerken..",
+    "Bewijsbaar niet besteedbaar",
     "QR code",
     "RX pin",
     "Opnieuw opstarten",

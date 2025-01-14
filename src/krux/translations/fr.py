@@ -222,6 +222,7 @@ translation_array = [
     "Procéder quand même\u2009?",
     "Procéder\u2009?",
     "Traitement..",
+    "Provably unspendable",
     "Code QR",
     "RX Fiche",
     "Redémarrer",

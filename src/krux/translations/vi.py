@@ -222,6 +222,7 @@ translation_array = [
     "Vẫn tiếp tục?",
     "Thực hiện?",
     "Đang xử lý..",
+    "Chắc chắn không thể chi tiêu",
     "Mã QR",
     "RX Pin",
     "Khởi động lại",

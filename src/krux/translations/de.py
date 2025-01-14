@@ -222,6 +222,7 @@ translation_array = [
     "Trotzdem fortfahren?",
     "Weiter?",
     "Wird bearbeitet..",
+    "Nachweislich nicht ausgebbar",
     "QR-Code",
     "RX Pin",
     "Neustart",
