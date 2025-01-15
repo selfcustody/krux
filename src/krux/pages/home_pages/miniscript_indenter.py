@@ -136,7 +136,7 @@ class MiniScriptIndenter:
         # If any child is a leaf, flatten them all
         # It's likely it will group multi and thresh children together
         any_child_is_leaf = any(not c.children for c in node.children)
-        if any_child_is_leaf:
+        if any_child_is_leaf and node.level > 0:
             # Flatten children on one line
             indent = " " * node.level
             line = "{0}{1}(".format(indent, node.text)
