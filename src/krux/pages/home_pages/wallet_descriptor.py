@@ -244,8 +244,12 @@ class WalletDescriptor(Page):
 
         # Display miniscrip policies
         if wallet.is_miniscript():
-            # TODO: Replace to_lines with a better wrapper
-            miniscript_policy = self.ctx.display.to_lines(wallet.descriptor.full_policy)
+            from .miniscript_indenter import MiniScriptIndenter
+
+            miniscript_policy = MiniScriptIndenter().indent(
+                wallet.descriptor.full_policy
+            )
+            # miniscript_policy = self.ctx.display.to_lines(wallet.descriptor.full_policy)
             lines_left = (BOTTOM_PROMPT_LINE - offset_y) // FONT_HEIGHT
             if len(miniscript_policy) > lines_left:
                 # If there's no room for the policy, create a new page
@@ -277,3 +281,13 @@ class WalletDescriptor(Page):
                             theme.highlight_color,
                         )
                 offset_y += FONT_HEIGHT
+                if offset_y > BOTTOM_PROMPT_LINE:
+                    # If there's no room for another line, create a new page
+                    self.ctx.display.draw_hcentered_text("...", offset_y)
+                    self.ctx.input.wait_for_button()
+                    self.ctx.display.clear()
+                    offset_y = DEFAULT_PADDING
+                    self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+                    offset_y += FONT_HEIGHT
+                    self.ctx.display.draw_hcentered_text("...", offset_y)
+                    offset_y += FONT_HEIGHT
