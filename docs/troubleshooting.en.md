@@ -30,6 +30,10 @@ Your device should charge and turn on when connected to a USB-A port, even if it
 
 **USB-C:**
 
+#### WonderMV
+- WonderMV devices will not be detected or powered on when connected directly to USB-C output ports on computers or chargers. Please use a USB hub or a USB‑C–to–USB‑A adapter for proper detection and powering.
+
+#### Maix Amigo, Cube
 - If the device is turned off and connected to a USB-C port, it should turn on and start charging. You can turn it off again, and it will continue to charge.
 
 - If the device is already turned on and connected to a USB-C port, it may not charge or be recognized by the computer. In this case, turn off the device to initiate recognition and charging. Once turned off and reconnected, the device should restart, be recognized by the computer, and charging should be triggered by USB-C hosts.

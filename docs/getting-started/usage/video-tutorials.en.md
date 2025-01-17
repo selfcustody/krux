@@ -67,11 +67,15 @@ Faça sua hardware wallet em casa com a KRUX! - por Caiovski
 
 ### Korean
 
-Krux 월렛 설치 및 검증 방법
+#### 비트코인 지갑 만들기(셀프커스터디 AtoZ)
+[![비트코인 지갑 만들기(셀프커스터디 AtoZ)](https://img.youtube.com/vi/NTsZCHbQXgc/0.jpg)](https://www.youtube.com/playlist?list=PLetYvN5q3ZS9m1sf7_MJ1It-t8O87xEeB)
+
+
+#### Krux 월렛 설치 및 검증 방법
 
 [![Krux 월렛 설치 및 검증 방법](https://img.youtube.com/vi/7H1bI0A2y0w/0.jpg)](https://www.youtube.com/watch?v=7H1bI0A2y0w)
 
 
-안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑
+#### 안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑
 
 [![안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑](https://img.youtube.com/vi/1_JSJ1uzPzQ/0.jpg)](https://www.youtube.com/watch?v=1_JSJ1uzPzQ)
