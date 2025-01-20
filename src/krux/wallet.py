@@ -456,7 +456,7 @@ def parse_address(address_data):
         try:
             sc = address_to_scriptpubkey(addr.lower())
             if isinstance(sc, Script):
-                addr = addr.lower()
+                return addr.lower()
         except:
             pass
 
