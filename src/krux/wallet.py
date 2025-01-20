@@ -444,17 +444,29 @@ def parse_address(address_data):
     from embit.script import Script, address_to_scriptpubkey
 
     addr = address_data
+    sc = None
     if address_data.lower().startswith("bitcoin:"):
         addr_end = address_data.find("?")
         if addr_end == -1:
             addr_end = len(address_data)
         addr = address_data[8:addr_end]
 
-    try:
-        sc = address_to_scriptpubkey(addr)
-        if not isinstance(sc, Script):
+    if addr == addr.upper():
+        # bip173 suggests bech32 in uppercase for compact QR-Code
+        try:
+            sc = address_to_scriptpubkey(addr.lower())
+            if isinstance(sc, Script):
+                addr = addr.lower()
+        except:
+            pass
+
+    if not isinstance(sc, Script):
+        try:
+            sc = address_to_scriptpubkey(addr)
+        except:
             raise ValueError("invalid address")
-    except:
+
+    if not isinstance(sc, Script):
         raise ValueError("invalid address")
 
     return addr

@@ -993,6 +993,18 @@ def test_parse_address(mocker, m5stickv, tdata):
             "bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn",
         ),
         (
+            "BC1QX2ZUDAY8D6J4UFH4DF6E9TTD06LNFMN2CUZ0VN",
+            "bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn",
+        ),
+        (
+            "bitcoin:BC1QX2ZUDAY8D6J4UFH4DF6E9TTD06LNFMN2CUZ0VN?message=test",
+            "bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn",
+        ),
+        (
+            "BITCOIN:BC1QX2ZUDAY8D6J4UFH4DF6E9TTD06LNFMN2CUZ0VN?message=test",
+            "bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn",
+        ),
+        (
             "bitcoin:32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg?message=test",
             "32iCX1pY1iztdgM5qzurGLPMu5xhNfAUtg",
         ),
