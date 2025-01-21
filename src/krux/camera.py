@@ -35,6 +35,14 @@ QR_SCAN_MODE = 0
 ANTI_GLARE_MODE = 1
 ENTROPY_MODE = 2
 BINARY_GRID_MODE = 3
+ZOOMED_MODE = 4
+
+OV2640Z_OFFSET_X = 160
+OV2640Z_OFFSET_Y = 120
+OV2640Z_MAX_X = 400 // 4
+OV2640Z_MAX_Y = 360 // 4
+OV2640Z_WIDTH = OV2640Z_MAX_X - OV2640Z_OFFSET_X // 4
+OV2640Z_HEIGHT = OV2640Z_MAX_Y - OV2640Z_OFFSET_Y // 4
 
 
 class Camera:
@@ -47,24 +55,28 @@ class Camera:
             ANTI_GLARE_MODE: (0x20, 0x28),
             ENTROPY_MODE: (0x68, 0x78),
             BINARY_GRID_MODE: (0x44, 0x48),
+            ZOOMED_MODE: (0x35, 0x50),
         },
         OV7740_ID: {
             QR_SCAN_MODE: (0x60, 0x70),
             ANTI_GLARE_MODE: (0x20, 0x28),
             ENTROPY_MODE: (0x68, 0x78),
             BINARY_GRID_MODE: (0x44, 0x48),
+            ZOOMED_MODE: (0x35, 0x50),
         },
         GC2145_ID: {
             QR_SCAN_MODE: (0x30, 0x55),
             ANTI_GLARE_MODE: (0x25, 0x40),
             ENTROPY_MODE: (0x20, 0xF2),
             BINARY_GRID_MODE: (0x30, 0x50),
+            ZOOMED_MODE: (0x27, 0x45),
         },
         GC0328_ID: {
             QR_SCAN_MODE: 0x70,
             ANTI_GLARE_MODE: 0x40,
             ENTROPY_MODE: 0x80,
             BINARY_GRID_MODE: 0x70,
+            ZOOMED_MODE: 0x55,
         },
     }
 
@@ -196,15 +208,122 @@ class Camera:
             sensor.__write_reg(0x13, (low + high) // 2)
         sensor.skip_frames()
 
-    def toggle_antiglare(self):
+    def _gc2145_crop(self):
+        sensor.run(0)
+        sensor.set_framesize(sensor.VGA)
+        sensor.set_windowing((0, 0, 240, 240))
+        # Set register bank 0
+        sensor.__write_reg(0xFE, 0x00)
+        # Crop enable
+        sensor.__write_reg(0x90, 0x01)
+        # Crop window
+        # Registers: X[10:8]=0x93, X[7:0]=0x94, Y[10:8]=0x91, Y[7:0]=0x92
+        # X_HEIGHT[10:8]=0x95, X_HEIGHT[7:0]=0x96, Y_WIDTH[10:8]=0x97, Y_WIDTH[7:0]=0x98
+        sensor.__write_reg(0x93, 0x01)
+        sensor.__write_reg(0x94, 0x00)
+        sensor.__write_reg(0x91, 0x00)
+        sensor.__write_reg(0x92, 0xC0)
+        # 240x240
+        sensor.__write_reg(0x95, 0x00)
+        sensor.__write_reg(0x96, 0xF0)
+        sensor.__write_reg(0x97, 0x00)
+        sensor.__write_reg(0x98, 0xF0)
+
+        sensor.run(1)
+
+    def _gc0328_crop(self):
+        sensor.run(0)
+        sensor.set_framesize(sensor.VGA)
+        sensor.set_windowing((0, 0, 240, 240))
+        # Setting registers to crop GC0328 are the same as GC2145 but starting from 0x50
+        # Set register bank 0
+        sensor.__write_reg(0xFE, 0x00)
+        # Crop enable
+        sensor.__write_reg(0x50, 0x01)
+        # Crop window
+        # Registers: X[10:8]=0x53, X[7:0]=0x54, Y[10:8]=0x51, Y[7:0]=0x52
+        # X_HEIGHT[10:8]=0x55, X_HEIGHT[7:0]=0x56, Y_WIDTH[10:8]=0x57, Y_WIDTH[7:0]=0x58
+        sensor.__write_reg(0x53, 0x00)
+        sensor.__write_reg(0x54, 0xD0)
+        sensor.__write_reg(0x51, 0x00)
+        sensor.__write_reg(0x52, 0x90)
+        # 240x240
+        sensor.__write_reg(0x55, 0x00)
+        sensor.__write_reg(0x56, 0xF0)
+        sensor.__write_reg(0x57, 0x00)
+        sensor.__write_reg(0x58, 0xF0)
+
+        sensor.run(1)
+
+    def _ov2640_crop(self):
+        sensor.run(0)
+        sensor.set_framesize(sensor.VGA)
+        sensor.set_windowing((0, 0, 240, 240))
+
+        # Prepare register list
+        win_regs = [
+            [0xFF, 0x00],
+            [0x51, OV2640Z_MAX_X & 0xFF],
+            [0x52, OV2640Z_MAX_Y & 0xFF],
+            [0x53, OV2640Z_OFFSET_X & 0xFF],
+            [0x54, OV2640Z_OFFSET_Y & 0xFF],
+            [
+                0x55,
+                ((OV2640Z_MAX_Y >> 1) & 0x80)  # bit 7 from (OV2640Z_MAX_Y >> 1)
+                | (
+                    (OV2640Z_OFFSET_Y >> 4) & 0x70
+                )  # bits 6:4 from (OV2640Z_OFFSET_Y >> 4)
+                | ((OV2640Z_MAX_X >> 5) & 0x08)  # bit 3 from (OV2640Z_MAX_X >> 5)
+                | (
+                    (OV2640Z_OFFSET_X >> 8) & 0x07
+                ),  # bits 2:0 from (OV2640Z_OFFSET_X >> 8)
+            ],
+            [0x57, (OV2640Z_MAX_X >> 2) & 0x80],  # bit 7 from (OV2640Z_MAX_X >> 2)
+            [0x5A, OV2640Z_WIDTH & 0xFF],
+            [0x5B, OV2640Z_HEIGHT & 0xFF],
+            [
+                0x5C,
+                ((OV2640Z_HEIGHT >> 6) & 0x04)  # bit 2 from (h >> 6)
+                | ((OV2640Z_WIDTH >> 8) & 0x03),  # bits 1:0 from (w >> 8)
+            ],
+        ]
+
+        # Write each register to the sensor
+        for reg, val in win_regs:
+            sensor.__write_reg(reg, val)
+
+        sensor.run(1)
+
+    def toggle_camera_mode(self):
         """Toggles anti-glare mode and returns the new state"""
         if self.mode == ANTI_GLARE_MODE:
+            # Enter zoomed mode
+            if self.cam_id == GC2145_ID:
+                self._gc2145_crop()
+            elif self.cam_id == GC0328_ID:
+                self._gc0328_crop()
+            elif self.cam_id == OV7740_ID:
+                sensor.__write_reg(0xD5, 0x00)
+            elif self.cam_id == OV2640_ID:
+                self._ov2640_crop()
+            self.mode = ZOOMED_MODE
+        elif self.mode == ZOOMED_MODE:
+            # Turn off zoomed mode
+            if self.cam_id in (GC0328_ID, GC2145_ID, OV2640_ID):
+                sensor.run(0)
+                sensor.set_framesize(sensor.QVGA)
+                sensor.set_windowing((0, 0, 320, 240))
+                sensor.run(1)
+            elif self.cam_id == OV7740_ID:
+                sensor.__write_reg(0xD5, 0x30)
+            sensor.skip_frames()
+            # Go back to standard mode
             self.mode = QR_SCAN_MODE
-            self.luminosity_threshold()
-            return False
-        self.mode = ANTI_GLARE_MODE
+        else:
+            self.mode = ANTI_GLARE_MODE
+        print("Camera mode:", self.mode)
         self.luminosity_threshold()
-        return True
+        return self.mode
 
     def snapshot(self):
         """Helper to take a customized snapshot from sensor"""
