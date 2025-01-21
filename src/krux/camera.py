@@ -321,7 +321,6 @@ class Camera:
             self.mode = QR_SCAN_MODE
         else:
             self.mode = ANTI_GLARE_MODE
-        print("Camera mode:", self.mode)
         self.luminosity_threshold()
         return self.mode
 
