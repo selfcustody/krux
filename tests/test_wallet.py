@@ -168,11 +168,14 @@ def tdata(mocker):
 
     UNRELATED_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB)"
     UNRELATED_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
+    UNRELATED_MINISCRIPT_DESCRIPTOR = "wsh(or_d(multi(2,[1f280825/48'/1'/0'/2']tpubDEx7EkaqE8rG5NsCrijASmBjWiNv6teugndQCs4YN6JDS4hpJ3QtSC4ifPAcE7LQXtjRgB96trmEucoLbsiYYMuvLthymAhssZQpEPPb1pU/<0;1>/*,[e1efb2e7/48'/1'/0'/2']tpubDFhm1JYGdsR6Uv7SvXVd6JfjVkYimPDizEwwXRR9EhESpMhx3qL9nVjpfbtPRLzicWhYkMF4mn4AuZ4zYDjNMvuWSqugFBEJnYsMJurmbLM/<0;1>/*),and_v(v:thresh(2,pkh([1f280825/48'/1'/0'/2']tpubDEx7EkaqE8rG5NsCrijASmBjWiNv6teugndQCs4YN6JDS4hpJ3QtSC4ifPAcE7LQXtjRgB96trmEucoLbsiYYMuvLthymAhssZQpEPPb1pU/<2;3>/*),a:pkh([e1efb2e7/48'/1'/0'/2']tpubDFhm1JYGdsR6Uv7SvXVd6JfjVkYimPDizEwwXRR9EhESpMhx3qL9nVjpfbtPRLzicWhYkMF4mn4AuZ4zYDjNMvuWSqugFBEJnYsMJurmbLM/<2;3>/*),a:pkh([b32caab5/48'/1'/0'/2']tpubDEwY4xag4eQabW74PwS8BZb3aYy9mBzBffzBKqS74NjxzaDHodGGqfFLumwQGM5JYExNjs1mG3u8MaeEr94HNmxTaBPHERkoJXEcZ12aPdF/<0;1>/*)),older(144))))#tfk3syfj"
+    UNRELATED_TAP_MINISCRIPT_DESCRIPTOR = "tr(tpubD6NzVbkrYhZ4Y18xhod7E8V6Sy3YF36bge8HJb4ww1QgTrdkNvCEzcvUmFGQkTJA32gqr3j94iE8vsUzYpv8Pn29JezD9YiYnxgUREhN3QR/<0;1>/*,{and_v(v:multi_a(2,[1f280825/48'/1'/0'/2']tpubDEx7EkaqE8rG5NsCrijASmBjWiNv6teugndQCs4YN6JDS4hpJ3QtSC4ifPAcE7LQXtjRgB96trmEucoLbsiYYMuvLthymAhssZQpEPPb1pU/<2;3>/*,[e1efb2e7/48'/1'/0'/2']tpubDFhm1JYGdsR6Uv7SvXVd6JfjVkYimPDizEwwXRR9EhESpMhx3qL9nVjpfbtPRLzicWhYkMF4mn4AuZ4zYDjNMvuWSqugFBEJnYsMJurmbLM/<2;3>/*,[b32caab5/48'/1'/0'/2']tpubDEwY4xag4eQabW74PwS8BZb3aYy9mBzBffzBKqS74NjxzaDHodGGqfFLumwQGM5JYExNjs1mG3u8MaeEr94HNmxTaBPHERkoJXEcZ12aPdF/<0;1>/*),older(144)),multi_a(2,[1f280825/48'/1'/0'/2']tpubDEx7EkaqE8rG5NsCrijASmBjWiNv6teugndQCs4YN6JDS4hpJ3QtSC4ifPAcE7LQXtjRgB96trmEucoLbsiYYMuvLthymAhssZQpEPPb1pU/<0;1>/*,[e1efb2e7/48'/1'/0'/2']tpubDFhm1JYGdsR6Uv7SvXVd6JfjVkYimPDizEwwXRR9EhESpMhx3qL9nVjpfbtPRLzicWhYkMF4mn4AuZ4zYDjNMvuWSqugFBEJnYsMJurmbLM/<0;1>/*)})#u5clzmqy"
 
     UNSORTED_MULTISIG_DESCRIPTOR = "wsh(multi(2,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*))"
 
     LIANA_MINISCRIPT_DESCRIPTOR = "wsh(or_d(pk([55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*),and_v(v:pkh([3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),older(6))))#x09nw3rv"
     LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR = "tr([55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,and_v(v:pk([3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),older(6)))#qjluv5ue"
+    LIANA_TAP_EXPANDING_MINISCRIPT_DESCRIPTOR = "tr(xpub661MyMwAqRbcFHMDceyRcHhEfeDBXneBmbTnqujM6EumzeNcd8wrs3SHGzkETt7dDwqSCmDJx2rz6uKEddXRcYUWuAu6rkaj4L2QuVxqNUS/<0;1>/*,{and_v(v:multi_a(2,[55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<2;3>/*,[3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<2;3>/*,[d3a80c8b/48'/0'/0'/2']xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),older(65535)),multi_a(2,[55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*)})#uyj29ygt"
 
     return namedtuple(
         "TestData",
@@ -226,9 +229,12 @@ def tdata(mocker):
             "AMBIGUOUS_MULTISIG_DESCRIPTOR",
             "UNRELATED_SINGLESIG_DESCRIPTOR",
             "UNRELATED_MULTISIG_DESCRIPTOR",
+            "UNRELATED_MINISCRIPT_DESCRIPTOR",
+            "UNRELATED_TAP_MINISCRIPT_DESCRIPTOR",
             "UNSORTED_MULTISIG_DESCRIPTOR",
             "LIANA_MINISCRIPT_DESCRIPTOR",
             "LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR",
+            "LIANA_TAP_EXPANDING_MINISCRIPT_DESCRIPTOR",
         ],
     )(
         TEST_MNEMONIC1,
@@ -280,9 +286,12 @@ def tdata(mocker):
         AMBIGUOUS_MULTISIG_DESCRIPTOR,
         UNRELATED_SINGLESIG_DESCRIPTOR,
         UNRELATED_MULTISIG_DESCRIPTOR,
+        UNRELATED_MINISCRIPT_DESCRIPTOR,
+        UNRELATED_TAP_MINISCRIPT_DESCRIPTOR,
         UNSORTED_MULTISIG_DESCRIPTOR,
         LIANA_MINISCRIPT_DESCRIPTOR,
         LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR,
+        LIANA_TAP_EXPANDING_MINISCRIPT_DESCRIPTOR,
     )
 
 
@@ -466,13 +475,36 @@ def test_is_miniscript(mocker, m5stickv, tdata):
 def test_is_loaded(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
+    # Single-sig key
     wallet = Wallet(tdata.SINGLESIG_KEY)
     assert not wallet.is_loaded()
 
+    # Single-sig key with loaded descriptor
+    wallet.wallet_data = tdata.SPECTER_SINGLESIG_WALLET_DATA
+    assert wallet.is_loaded()
+
+    # Multisig key
     wallet = Wallet(tdata.MULTISIG_KEY1)
     assert not wallet.is_loaded()
 
+    # Multisig key with loaded descriptor
     wallet.wallet_data = tdata.UR_OUTPUT_MULTISIG_WALLET_DATA
+    assert wallet.is_loaded()
+
+    # Miniscript key
+    wallet = Wallet(tdata.MINISCRIPT_KEY)
+    assert not wallet.is_loaded()
+
+    # Miniscript key with loaded descriptor
+    wallet.wallet_data = tdata.LIANA_MINISCRIPT_DESCRIPTOR
+    assert wallet.is_loaded()
+
+    # Tap miniscript key
+    wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
+    assert not wallet.is_loaded()
+
+    # Tap miniscript key with loaded descriptor
+    wallet.wallet_data = tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR
     assert wallet.is_loaded()
 
     wallet = Wallet(None)
@@ -676,23 +708,6 @@ def test_load_multisig(mocker, m5stickv, tdata):
                 ],
             },
         ),
-        # TODO: Fix AssertionError (see previous "TODO: Switch to 2-of-3 from keys defined above")
-        # (
-        #    tdata.UR_OUTPUT_MULTISIG_WALLET_DATA,
-        #    FORMAT_UR,
-        #    tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR,
-        #    '2 of 3',
-        #    {
-        #        'type': 'p2wsh',
-        #        'm': 2,
-        #        'n': 3,
-        #        'cosigners': [
-        #            tdata.MULTISIG_KEY1.xpub(),
-        #            tdata.MULTISIG_KEY2.xpub(),
-        #            tdata.MULTISIG_KEY3.xpub()
-        #        ],
-        #    },
-        # ),
         (
             tdata.UR_BYTES_MULTISIG_WALLET_DATA,
             FORMAT_UR,
@@ -783,6 +798,18 @@ def test_load_singlesig_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
             wallet.load(case[0], case[1])
 
 
+def test_load_singlesig_fails_with_miniscript_descriptor(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.SINGLESIG_KEY)
+
+    with pytest.raises(ValueError):
+        wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    with pytest.raises(ValueError):
+        wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+
+
 def test_load_multisig_fails_with_singlesig_descriptor(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN
@@ -796,6 +823,83 @@ def test_load_multisig_fails_with_singlesig_descriptor(mocker, m5stickv, tdata):
     for case in cases:
         with pytest.raises(ValueError):
             wallet.load(case[0], case[1])
+
+
+def test_load_multisig_fails_with_miniscript_descriptor(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.MULTISIG_KEY1)
+
+    with pytest.raises(ValueError):
+        wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    with pytest.raises(ValueError):
+        wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+
+
+def test_load_miniscript_fails_with_singlesig_descriptor(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN
+
+    wallets = [
+        Wallet(tdata.MINISCRIPT_KEY),
+        Wallet(tdata.TAP_MINISCRIPT_KEY),
+    ]
+
+    cases = [
+        (tdata.SPECTER_SINGLESIG_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE),
+    ]
+    for wallet in wallets:
+        for case in cases:
+            with pytest.raises(ValueError):
+                wallet.load(case[0], case[1])
+
+
+def test_load_miniscript_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallets = [
+        Wallet(tdata.MINISCRIPT_KEY),
+        Wallet(tdata.TAP_MINISCRIPT_KEY),
+    ]
+
+    cases = [
+        (tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.BLUEWALLET_MULTISIG_WALLET_DATA, FORMAT_NONE),
+        (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR),
+        (tdata.UR_BYTES_MULTISIG_WALLET_DATA, FORMAT_UR),
+    ]
+
+    for wallet in wallets:
+        for case in cases:
+            with pytest.raises(ValueError):
+                wallet.load(case[0], case[1])
+
+
+def test_load_wsh_miniscript_fails_with_tr_miniscript_descriptor(
+    mocker, m5stickv, tdata
+):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.MINISCRIPT_KEY)
+
+    with pytest.raises(ValueError):
+        wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+
+
+def test_load_tr_miniscript_fails_with_wsh_miniscript_descriptor(
+    mocker, m5stickv, tdata
+):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
+
+    with pytest.raises(ValueError):
+        wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
 
 
 def test_load_singlesig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
@@ -816,6 +920,26 @@ def test_load_multisig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata)
 
     with pytest.raises(ValueError):
         wallet.load(tdata.UNRELATED_MULTISIG_DESCRIPTOR, FORMAT_NONE)
+
+
+def test_load_miniscript_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.MINISCRIPT_KEY)
+
+    with pytest.raises(ValueError):
+        wallet.load(tdata.UNRELATED_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+
+
+def test_load_tr_miniscript_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
+
+    with pytest.raises(ValueError):
+        wallet.load(tdata.UNRELATED_TAP_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
 
 
 def test_parse_wallet(mocker, m5stickv, tdata):
@@ -912,6 +1036,16 @@ def test_parse_wallet(mocker, m5stickv, tdata):
             tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
             None,
         ),
+        (
+            tdata.LIANA_MINISCRIPT_DESCRIPTOR,
+            tdata.LIANA_MINISCRIPT_DESCRIPTOR,
+            None,
+        ),
+        (
+            tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR,
+            tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR,
+            None,
+        ),
     ]
 
     case_n = 1
@@ -922,8 +1056,21 @@ def test_parse_wallet(mocker, m5stickv, tdata):
             descriptor, label = parse_wallet(case[0])
         except AssumptionWarning as e:
             descriptor, label = parse_wallet(case[0], allow_assumption=e.args[1])
-        assert descriptor.to_string() == case[1]
+        assert descriptor.to_string() == case[1].split("#")[0].replace("'", "h")
         assert label == case[2]
+
+
+def test_provably_unspendable(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
+    wallet.load(tdata.LIANA_TAP_EXPANDING_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert not wallet.is_loaded()
+
+
+# TODO: test_provably_unspendable_wrong_nums
+# TODO: test_provably_unspendable_non_deterministic_chain_code
 
 
 def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
