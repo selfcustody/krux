@@ -995,6 +995,7 @@ class TinyScanner(Page):
         self.ctx.display.draw_centered_text(message)
         precamera_ticks = time.ticks_ms()
         self.ctx.camera.initialize_run(mode=BINARY_GRID_MODE)
+        self.ctx.camera.zoom_mode()
         self.ctx.display.to_landscape()
         postcamera_ticks = time.ticks_ms()
         # check how much time camera took to retain message on the screen

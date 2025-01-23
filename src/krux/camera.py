@@ -294,18 +294,22 @@ class Camera:
 
         sensor.run(1)
 
+    def zoom_mode(self):
+        """Zooms in the camera to the center of the image"""
+        if self.cam_id == GC2145_ID:
+            self._gc2145_crop()
+        elif self.cam_id == GC0328_ID:
+            self._gc0328_crop()
+        elif self.cam_id == OV7740_ID:
+            sensor.__write_reg(0xD5, 0x00)
+        elif self.cam_id == OV2640_ID:
+            self._ov2640_crop()
+
     def toggle_camera_mode(self):
         """Toggles anti-glare mode and returns the new state"""
         if self.mode == ANTI_GLARE_MODE:
             # Enter zoomed mode
-            if self.cam_id == GC2145_ID:
-                self._gc2145_crop()
-            elif self.cam_id == GC0328_ID:
-                self._gc0328_crop()
-            elif self.cam_id == OV7740_ID:
-                sensor.__write_reg(0xD5, 0x00)
-            elif self.cam_id == OV2640_ID:
-                self._ov2640_crop()
+            self.zoom_mode()
             self.mode = ZOOMED_MODE
         elif self.mode == ZOOMED_MODE:
             # Turn off zoomed mode
