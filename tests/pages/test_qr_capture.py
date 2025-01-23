@@ -123,12 +123,8 @@ def test_camera_antiglare(mocker, m5stickv):
         ctx.display.draw_centered_text.assert_has_calls(
             [mocker.call("Anti-glare mode")]
         )
-        ctx.display.draw_centered_text.assert_has_calls(
-            [mocker.call("Zoomed mode")]
-        )
-        ctx.display.draw_centered_text.assert_has_calls(
-            [mocker.call("Standard mode")]
-        )
+        ctx.display.draw_centered_text.assert_has_calls([mocker.call("Zoomed mode")])
+        ctx.display.draw_centered_text.assert_has_calls([mocker.call("Standard mode")])
 
 
 def test_light_control(mocker, multiple_devices):
