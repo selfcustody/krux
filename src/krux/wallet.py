@@ -219,6 +219,7 @@ class Wallet:
                         descriptor.keys[0].key.to_base58()
                         != provably_unspendable.to_base58()
                     ):
+                        self.wallet_data = None
                         raise ValueError("Internal key not provably unspendable")
 
                 taproot_txt = "TR "
