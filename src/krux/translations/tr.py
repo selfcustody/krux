@@ -122,6 +122,7 @@ translation_array = [
     "Flash Haritası",
     "Flash Araçları",
     "Flash kamera entropisi ile dolduruldu",
+    "Ters Çevrilmiş Yönlendirme",
     "X Koordinatları Tersine Çevrildi",
     "Flute Çapı",
     "Boş:",

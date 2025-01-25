@@ -122,6 +122,7 @@ translation_array = [
     "Mapa Flash",
     "Flash Tools",
     "Flash lleno de entropía de cámara",
+    "Orientación Invertida",
     "Coordenadas X Invertidas",
     "Diámetro de la Flauta",
     "Libre:",

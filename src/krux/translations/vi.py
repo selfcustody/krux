@@ -122,6 +122,7 @@ translation_array = [
     "Bản đồ Flash",
     "Công cụ Flash",
     "Đèn flash chứa đầy entropy của máy ảnh",
+    "Hướng lật",
     "Tọa độ X bị lật",
     "Đường kính mũi cắt CNC",
     "Khả dụng:",

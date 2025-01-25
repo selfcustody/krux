@@ -122,6 +122,7 @@ translation_array = [
     "Flash地图",
     "Flash工具",
     "Flash已用摄像头熵填充",
+    "翻转方向",
     "翻转 X 坐标",
     "刀具直径",
     "空闲：",

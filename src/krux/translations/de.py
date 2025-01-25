@@ -122,6 +122,7 @@ translation_array = [
     "Flash-Karte",
     "Flash-Tools",
     "Flash gefüllt mit Kameraentropie",
+    "Umgekehrte Ausrichtung",
     "Umgedrehte X-Koordinaten",
     "Flötendurchmesser",
     "Frei:",

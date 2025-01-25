@@ -122,6 +122,7 @@ translation_array = [
     "Flash Map",
     "Flash Tools",
     "Flash gevuld met camera-entropie",
+    "Omgekeerde oriëntering",
     "Geflipte X-coördinaten",
     "Fluit diameter",
     "Vrij:",
