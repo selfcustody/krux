@@ -768,6 +768,6 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             if len(cosigners) > 1:
                 policy.update({"cosigners": cosigners})
         except Exception as e:
-            print("Error getting taproot PSBT cosigners: ", e)
+            print(e)
 
     return policy
