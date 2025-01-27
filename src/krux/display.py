@@ -227,7 +227,12 @@ class Display:
     def to_landscape(self):
         """Changes the rotation of the display to landscape"""
         if self.portrait:
-            lcd.rotation(LANDSCAPE)
+            lcd.rotation(
+                (LANDSCAPE + 2) % 4
+                if hasattr(Settings().hardware, "display")
+                and getattr(Settings().hardware.display, "flipped_orientation", False)
+                else LANDSCAPE
+            )
             self.portrait = False
 
     def to_portrait(self):

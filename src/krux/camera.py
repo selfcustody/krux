@@ -24,6 +24,7 @@
 import gc
 import sensor
 import board
+from .krux_settings import Settings
 
 OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
 OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
@@ -44,41 +45,34 @@ OV2640Z_MAX_Y = 360 // 4
 OV2640Z_WIDTH = OV2640Z_MAX_X - OV2640Z_OFFSET_X // 4
 OV2640Z_HEIGHT = OV2640Z_MAX_Y - OV2640Z_OFFSET_Y // 4
 
+# Luminosity threshold values for each camera and mode
+LUM_TH = {
+    # flat dictionary using composite keys (camera_id, mode)
+    (OV2640_ID, QR_SCAN_MODE): (0x60, 0x70),
+    (OV2640_ID, ANTI_GLARE_MODE): (0x20, 0x28),
+    (OV2640_ID, ENTROPY_MODE): (0x68, 0x78),
+    (OV2640_ID, BINARY_GRID_MODE): (0x44, 0x48),
+    (OV2640_ID, ZOOMED_MODE): (0x35, 0x50),
+    (OV7740_ID, QR_SCAN_MODE): (0x60, 0x70),
+    (OV7740_ID, ANTI_GLARE_MODE): (0x20, 0x28),
+    (OV7740_ID, ENTROPY_MODE): (0x68, 0x78),
+    (OV7740_ID, BINARY_GRID_MODE): (0x44, 0x48),
+    (OV7740_ID, ZOOMED_MODE): (0x35, 0x50),
+    (GC2145_ID, QR_SCAN_MODE): (0x30, 0x55),
+    (GC2145_ID, ANTI_GLARE_MODE): (0x25, 0x40),
+    (GC2145_ID, ENTROPY_MODE): (0x20, 0xF2),
+    (GC2145_ID, BINARY_GRID_MODE): (0x30, 0x50),
+    (GC2145_ID, ZOOMED_MODE): (0x27, 0x45),
+    (GC0328_ID, QR_SCAN_MODE): 0x70,
+    (GC0328_ID, ANTI_GLARE_MODE): 0x40,
+    (GC0328_ID, ENTROPY_MODE): 0x80,
+    (GC0328_ID, BINARY_GRID_MODE): 0x70,
+    (GC0328_ID, ZOOMED_MODE): 0x55,
+}
+
 
 class Camera:
     """Camera is a singleton interface for interacting with the device's camera"""
-
-    # Luminosity thresholds for each camera and mode
-    lum_th = {
-        OV2640_ID: {
-            QR_SCAN_MODE: (0x60, 0x70),
-            ANTI_GLARE_MODE: (0x20, 0x28),
-            ENTROPY_MODE: (0x68, 0x78),
-            BINARY_GRID_MODE: (0x44, 0x48),
-            ZOOMED_MODE: (0x35, 0x50),
-        },
-        OV7740_ID: {
-            QR_SCAN_MODE: (0x60, 0x70),
-            ANTI_GLARE_MODE: (0x20, 0x28),
-            ENTROPY_MODE: (0x68, 0x78),
-            BINARY_GRID_MODE: (0x44, 0x48),
-            ZOOMED_MODE: (0x35, 0x50),
-        },
-        GC2145_ID: {
-            QR_SCAN_MODE: (0x30, 0x55),
-            ANTI_GLARE_MODE: (0x25, 0x40),
-            ENTROPY_MODE: (0x20, 0xF2),
-            BINARY_GRID_MODE: (0x30, 0x50),
-            ZOOMED_MODE: (0x27, 0x45),
-        },
-        GC0328_ID: {
-            QR_SCAN_MODE: 0x70,
-            ANTI_GLARE_MODE: 0x40,
-            ENTROPY_MODE: 0x80,
-            BINARY_GRID_MODE: 0x70,
-            ZOOMED_MODE: 0x55,
-        },
-    }
 
     def __init__(self):
         self.cam_id = None
@@ -93,7 +87,11 @@ class Camera:
         """Initializes the camera"""
         sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
-        if board.config["type"] == "cube":
+        if board.config["type"] == "cube" or (
+            board.config["type"] in ["yahboom", "wonder_mv"]
+            and hasattr(Settings().hardware, "display")
+            and getattr(Settings().hardware.display, "flipped_orientation", False)
+        ):
             # Rotate camera 180 degrees on Cube
             sensor.set_hmirror(1)
             sensor.set_vflip(1)
@@ -167,46 +165,64 @@ class Camera:
         return self.cam_id in (OV7740_ID, OV2640_ID, GC2145_ID, GC0328_ID)
 
     def luminosity_threshold(self):
-        """Set luminosity thresholds for cameras"""
+        """Configures the luminosity thresholds for the camera"""
+        config_map = {
+            GC0328_ID: self._config_gc0328_lum,
+            OV2640_ID: self._config_ovxx40_lum,
+            OV7740_ID: self._config_ovxx40_lum,  # Same as OV2640
+            GC2145_ID: self._config_gc2145_lum,
+        }
 
-        if self.cam_id == GC0328_ID:
-            target = self.lum_th.get(self.cam_id, {}).get(self.mode, 0x80)
-            # Set register bank 1
-            sensor.__write_reg(0xFE, 0x01)
-            # Expected luminance level, default=0x50
-            sensor.__write_reg(0x13, target)
-            return
+        config_func = config_map.get(self.cam_id)
+        if config_func:
+            config_func()
+        sensor.skip_frames()
 
-        (low, high) = self.lum_th.get(self.cam_id, {}).get(self.mode, (0, 0))
+    def _config_gc0328_lum(self):
+        key = (self.cam_id, self.mode)
+        target = LUM_TH.get(key, 0x80)  # Default value if key not found
+        # Set register bank 1
+        sensor.__write_reg(0xFE, 0x01)
+        # Expected luminance level, default=0x50
+        sensor.__write_reg(0x13, target)
+
+    def _config_ovxx40_lum(self):
+        key = (self.cam_id, self.mode)
+        thresholds = LUM_TH.get(key, (0, 0))  # Default to (0, 0) if key not found
+        low, high = thresholds
+
         if low < 0x10 or high > 0xF0:
             return
 
-        if self.cam_id == OV2640_ID:
-            # Set register bank 1
-            sensor.__write_reg(0xFF, 0x01)
-        if self.cam_id in (OV7740_ID, OV2640_ID):
-            # luminance high level, default=0x78
-            sensor.__write_reg(0x24, high)
-            # luminance low level, default=0x68
-            sensor.__write_reg(0x25, low)
-            vpt_low = (low - 0x10) >> 4
-            vpt_high = (high + 0x10) >> 4
-            vpt = (vpt_high << 4) | vpt_low
-            # VPT - fast convergence zone, default=0xD4
-            sensor.__write_reg(0x26, vpt)
-            if self.mode in (QR_SCAN_MODE, ANTI_GLARE_MODE):
-                # Disable frame integration (bad for animated QR codes)
-                sensor.__write_reg(0x15, 0x00)  # pylint: disable=W0212
-        elif self.cam_id == GC2145_ID:
-            # Set register bank 1
-            sensor.__write_reg(0xFE, 0x01)
-            # luminance high level, default=0xF2
-            sensor.__write_reg(0x0E, high)
-            # luminance low level, default=0x20
-            sensor.__write_reg(0x0F, low)
-            # Expected luminance level, default=0x50
-            sensor.__write_reg(0x13, (low + high) // 2)
-        sensor.skip_frames()
+        # luminance high level, default=0x78
+        sensor.__write_reg(0x24, high)
+        # luminance low level, default=0x68
+        sensor.__write_reg(0x25, low)
+        vpt_low = (low - 0x10) >> 4
+        vpt_high = (high + 0x10) >> 4
+        vpt = (vpt_high << 4) | vpt_low
+        # VPT - fast convergence zone, default=0xD4
+        sensor.__write_reg(0x26, vpt)
+        if self.mode in (QR_SCAN_MODE, ANTI_GLARE_MODE):
+            # Disable frame integration (bad for animated QR codes)
+            sensor.__write_reg(0x15, 0x00)
+
+    def _config_gc2145_lum(self):
+        key = (self.cam_id, self.mode)
+        thresholds = LUM_TH.get(key, (0, 0))  # Default to (0, 0) if key not found
+        low, high = thresholds
+
+        if low < 0x10 or high > 0xF0:
+            return
+
+        # Set register bank 1
+        sensor.__write_reg(0xFE, 0x01)
+        # luminance high level, default=0xF2
+        sensor.__write_reg(0x0E, high)
+        # luminance low level, default=0x20
+        sensor.__write_reg(0x0F, low)
+        # Expected luminance level, default=0x50
+        sensor.__write_reg(0x13, (low + high) // 2)
 
     def _gc2145_crop(self):
         sensor.run(0)
@@ -261,13 +277,13 @@ class Camera:
         sensor.set_windowing((0, 0, 240, 240))
 
         # Prepare register list
-        win_regs = [
-            [0xFF, 0x00],
-            [0x51, OV2640Z_MAX_X & 0xFF],
-            [0x52, OV2640Z_MAX_Y & 0xFF],
-            [0x53, OV2640Z_OFFSET_X & 0xFF],
-            [0x54, OV2640Z_OFFSET_Y & 0xFF],
-            [
+        win_regs = (
+            (0xFF, 0x00),
+            (0x51, OV2640Z_MAX_X & 0xFF),
+            (0x52, OV2640Z_MAX_Y & 0xFF),
+            (0x53, OV2640Z_OFFSET_X & 0xFF),
+            (0x54, OV2640Z_OFFSET_Y & 0xFF),
+            (
                 0x55,
                 ((OV2640Z_MAX_Y >> 1) & 0x80)  # bit 7 from (OV2640Z_MAX_Y >> 1)
                 | (
@@ -277,16 +293,16 @@ class Camera:
                 | (
                     (OV2640Z_OFFSET_X >> 8) & 0x07
                 ),  # bits 2:0 from (OV2640Z_OFFSET_X >> 8)
-            ],
-            [0x57, (OV2640Z_MAX_X >> 2) & 0x80],  # bit 7 from (OV2640Z_MAX_X >> 2)
-            [0x5A, OV2640Z_WIDTH & 0xFF],
-            [0x5B, OV2640Z_HEIGHT & 0xFF],
-            [
+            ),
+            (0x57, (OV2640Z_MAX_X >> 2) & 0x80),  # bit 7 from (OV2640Z_MAX_X >> 2)
+            (0x5A, OV2640Z_WIDTH & 0xFF),
+            (0x5B, OV2640Z_HEIGHT & 0xFF),
+            (
                 0x5C,
                 ((OV2640Z_HEIGHT >> 6) & 0x04)  # bit 2 from (h >> 6)
                 | ((OV2640Z_WIDTH >> 8) & 0x03),  # bits 1:0 from (w >> 8)
-            ],
-        ]
+            ),
+        )
 
         # Write each register to the sensor
         for reg, val in win_regs:
