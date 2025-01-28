@@ -4,6 +4,7 @@ from .shared_mocks import MockFile, mock_open
 WSH_MULTISIG = "wsh(sortedmulti(2,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*,[8cb36b38/48h/1h/0h/2h]tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*))#jpxgnm0a"
 WSH_MINISCRIPT = "wsh(or_d(pk([73c5da0a/48'/1'/0'/2']tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*),and_v(v:pkh([02e8bff2/48'/1'/0'/2']tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(65535))))#466dtswe"
 TR_MINISCRIPT = "tr([73c5da0a/48'/1'/0'/2']tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,and_v(v:pk([02e8bff2/48'/1'/0'/2']tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(6)))#rfuhsd9c"
+TR_EXP_MULTI_MINISCRIPT = "tr(tpubD6NzVbkrYhZ4YYQjuKXFp85eRGCk4oA94MXbbHJW6zNAibMfkwZh7JQNVHEhpcQYaRCUs3b5PhvKPKESGoAJptiLvF8Rm1jhoFsryyFuR1P/<0;1>/*,{and_v(v:multi_a(2,[73c5da0a/48'/1'/0'/2']tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<2;3>/*,[02e8bff2/48'/1'/0'/2']tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<2;3>/*,[8cb36b38/48'/1'/0'/2']tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*),older(6)),multi_a(2,[73c5da0a/48'/1'/0'/2']tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,[02e8bff2/48'/1'/0'/2']tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*)})#6ga85u82"
 
 
 @pytest.fixture
@@ -14,6 +15,7 @@ def tdata(mocker):
     from krux.bbqr import encode_bbqr
 
     TEST_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    TEST_MNEMONIC_BIP85_I0 = "prosper short ramp prepare exchange stove life snack client enough purpose fold"
 
     # Legacy Singlesig
     P2PKH_PSBT = b'psbt\xff\x01\x00\xa4\x02\x00\x00\x00\x03\xae\xe25\xaf(\x9a\xc9\xee\xc23\xca"\x15\xbf?\xf4\xc1\xcaxAP\xd6\x0f[\x94kA\x87\x8b\x15\x04,\x00\x00\x00\x00\x00\xfd\xff\xff\xffT\xc9\x91i\xc4ZIg Z!\xd6)\xbf+z\x161\xc4uoS \xf0\x9d\x96\xcf#\xdc\xdbc\xa0\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x04\x1eVt\x8d\x80H\x1f\x89k\x07T(\xca\xaf\x91\x1e"\x1a2\xef\xa5_\\s\xf9\x8b\xc2J\xa0\xc8\x11\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x01\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hlZ\x0f+\x00O\x01\x045\x87\xcf\x03\x06\xb07\xf6\x80\x00\x00\x00k"\xc5\x12;\xa1\n\xde\xafK\xfc\xbbE\xd1\xa0-\x82\x8f%\xbf\x86F\x95z\x98\xd0b\x87\xc4\xe2\xb8P\x02\x8bB\xcdGv7l\x82y\x1bIAU\x15\x1fV\xc2\xd7\xb4q\xe0\xc7\xa5&\xa7\xce`\xdd\x87.8g\x10s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x01\x00~\x02\x00\x00\x00\x02\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x02\x00\x00\x00\x00\xfd\xff\xff\xff\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x01@\x07\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xacZ\x0f+\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00U\x02\x00\x00\x00\x01\x873 i\xd7\x11\xa7\xcd*`\xd5\x84\x1c8\n,U\xe8\xa2\n\xdd\xdaV\xa2\x9c\x00\x84e\xef\xf6[\xa2\x01\x00\x00\x00\x00\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xac\x00\x00\x00\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00U\x02\x00\x00\x00\x01\x05j\xc0\xa7"\x1f\xe5\x82x\xc9\xa7h\xd0\x1a!\xe6\xb6GJ\x01\x9a\xf6\xe7?\x08\xc8R\xe6\x86|\xad\xa5\x00\x00\x00\x00\x00\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xac\x00\x00\x00\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
@@ -149,6 +151,7 @@ def tdata(mocker):
     # TR Miniscript - tr([73c5da0a/48'/1'/0'/2']tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,and_v(v:pk([02e8bff2/48'/1'/0'/2']tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(6)))#rfuhsd9c
     # tb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu
     # tb1ph0aq68587rflxewpvs05axhn0lv4jes9zggzsc5jde05auag2mcqx6prnr
+    # Liana simple inheritance, internal key signed
 
     MINIS_TR_PSBT = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01]p\x9b\x12\xc2\xd4\x8d\xb3\x84\x1b\xdb\xff\x1c\xfd\x0f\x8e\xeb\xe8\xb8\xf5("\xf4\xc6\xbdc\xa9-\xf2L\x85\xff\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03@B\x0f\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07 \xa1\x07\x00\x00\x00\x00\x00"Q @\x9b\x0e\x0b\x19s\xa6\xb0\xefX\x89\x869\xd3\xfbn\x1f\x86L0i\x07\x01y\x0c\xc0(\xb7\xd8\x03"\x87\xdd\x88\x07\x00\x00\x00\x00\x00"Q [\xf5T\x10]\x86\x9b0\x00\xa1-(\x1fr\\\x81\xc5\xef\xc4\xc8\x8fBm\xd5T\xe7\x94\xde\x04\x91rR\x00\x00\x00\x00\x00\x01\x01+\xefs\x1e\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3"\x15\xc0\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04% q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04\xadV\xb2\xc0!\x16q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04=\x01\xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00!\x16\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00\x01\x17 \xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x01\x18 \xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x00\x00\x01\x05 \n[Y\xc1!\xee\xb8/DNTh\'*\xcdb\xffM\x1dA\xfc4\xbcQ\xe6l)Q/\xb8\xa2\xeb\x01\x06\'\x00\xc0$ 4!\x8d\x9e\x94\x17\x93)Xk\xd7\xfa\x9d\x88\xf5\x1cl\x15y\x93u\xc5\xf9Y\\\xea\x10\xbfl#\xd4\x83\xadV\xb2!\x07\n[Y\xc1!\xee\xb8/DNTh\'*\xcdb\xffM\x1dA\xfc4\xbcQ\xe6l)Q/\xb8\xa2\xeb\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x05\x00\x00\x00!\x074!\x8d\x9e\x94\x17\x93)Xk\xd7\xfa\x9d\x88\xf5\x1cl\x15y\x93u\xc5\xf9Y\\\xea\x10\xbfl#\xd4\x83=\x01\xf8s\xc9\xec\x12zCG\xb2\x13\xc4l\x893M\x98\xe4\xc8\xd3\x9d\xc9\xda\x11\xf8\xd1\x10\xfe2\x90\xd6d\xfd\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x05\x00\x00\x00\x00\x01\x05 \xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d\x01\x06\'\x00\xc0$ |n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP\xadV\xb2!\x07|n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP=\x01\xbf|\xea~\xde\xcc\xf2r\x0e\xd1\xbd\xcd\x00\xf6\xc4\xec\xc0\x057\xe5U\xff\x19\xb8\xce\xdc\t\xc7\xe6\xb7:T\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00!\x07\xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00\x00'
     MINIS_TR_PSBT_B43 = "C.ZHL9FPQGNRBX4AMRTEV*BIH.4L3ZH**OGKXMO2GFGP56LMHQJ-C+EVKTIKZQUT0SM+JBF9S/PTF$Y-1YCH+*ZD$6:$L5H5X5N*/5I-1CD7K0CN:ATQ0QSZRJI64B-6M/3GVU0D0TSGORS9JP:+:IOJERDBGFH-G/$C*HA7EIG81125R41B*11/*96/YZ8GE1*830+J19NCJIDAJ5D1JRAX2+Z-$-GPZ49RUSYH.IJ1E$Z2C$5XPIDKTMC:A7X/Q8EBPM.HG9*LAUZDHIM+GAJ/W-J5D/:NY8:A++I6YWHD97292:85NTU1B7/X0P.3L9OU:TF0AQPV6IC3IWR4D6Z163.S/C05PAABYKWF$.WFJTGI7/KD/0D52H3OYSIH5369MW8G+:NWBXW+*6N1QZZ*-6SNG3JJIF8K/$D4W1BT15VCTHHT$TA8J:.X.V/ZN1A9WJD1QRX1E.OX73Y1BMI5U6*6TUVK-DK64L563I/*F439WUVLDQU-IUQAAJHH+*$OUD73FY7DYJTBL*9BS/12F/B5TEPDI1QQFLPP*Q6/RH2UK1U.TINN7XS:$Q2ZNGPRUZLGW/9ZI+$8AHVGTH86ZUYE9GA$0IQ-1*Y$11/J$DTO78H$VU4L4*SB59O1YDP4MZA5U*JZ7QB7:V4C321JC/1D309MEKMWT5--2N1OLQG63/BAF$8TOGVILJ8Q5JYIS0M652TE:QA6LN$FRVPQE*BXCPFP50SNO6*OHTG.R+G7KAGO:.JXA/U7MSM6DU5MQ3IVW$UJHI4RI2Z/.OZIIGUX3+MZT.ZJH/5Q.27YVSU0V3I1$9CV-.+*9.FGHDJWJTMNPZA4VK0TIVDVNL+/.A-/UQVPALKZ93+C5VY839JHJK5CPK*J:W7F:Q6T*1UYDW65WZG:$9P3ONB7SRMHXQ1LIB40TH+7/PFU:FY1CV7ZHG6-.3SJ:6Y5HHVGT1JZ/5-XAYLF1$2LO6$SGG1WQ677LWIP1:ML/BQX1HR1$V*+X//TEGE-SFTJ3/RYHH*$$W+66WLAGH6PCQB-56/DS:B7DCIXDV34S.ZI*FC*+KRV5D8V2KL2Z$K*-X/2M1CW+WQG0PXPHSZ66Y7:1KIW19+R2.68$.65*F/89.:EXFYXW54TK*9$77Y-OIBH7H+++TEEW9AEN+SYFPM.BOVRB+KZ$UC:$BNBNH8*TJDLSQ:IJFRZ:BHW969+Y0468-PXBJ6$V/2ZZ9J+/1PPW03QCO4I89GZ1BQY9QD2AMD85//O+-MQK66Q-EDFYRYQ20L$JO3M.*JYZ$TM2F202TZICVC7FQC-:HQRI7L2-5MC5W8S2P+CRPC4.:7DT5/Z7FWUN$7JPDGTRBD3BBV59KL.9EWJ9RF:AM/EWI4FT8O7CR7L82N+7FV9CXQ-Z7UL$W$QDWAOBP+7G1X+K4GTSN6C6Y+Q48HDN9ZAH-A/VHYW43-9S/CC$W.T.15/HP-4883MZGFEYXORA6R17E+XU*UUJH"
@@ -156,20 +159,57 @@ def tdata(mocker):
     MINIS_TR_PSBT_B64 = "cHNidP8BALQCAAAAAV1wmxLC1I2zhBvb/xz9D47r6Lj1KCL0xr1jqS3yTIX/AAAAAAD9////A0BCDwAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcgoQcAAAAAACJRIECbDgsZc6aw71iJhjnT+24fhkwwaQcBeQzAKLfYAyKH3YgHAAAAAAAiUSBb9VQQXYabMAChLSgfclyBxe/EyI9CbdVU55TeBJFyUgAAAAAAAQEr73MeAAAAAAAiUSCKMs95fYJ22tHaq0FOis38SPVg352JZymPeaMp80ThwyIVwLGhNdUqlR4BAOLGTMrY2ZJYTQNRudp7fU7i8crRJqgEJSBxH7ZhlZP7yYLfGJ/WUNIbYrz3I9PdvXk35AmuapvqBK1WssAhFnEftmGVk/vJgt8Yn9ZQ0htivPcj0929eTfkCa5qm+oEPQH3BXv7e9eze4jSTr+PgvfiuCLkXs7bSOlAeCPQqaBnWALov/IwAACAAQAAgAAAAIACAACAAAAAAAMAAAAhFrGhNdUqlR4BAOLGTMrY2ZJYTQNRudp7fU7i8crRJqgEHQBzxdoKMAAAgAEAAIAAAACAAgAAgAAAAAADAAAAARcgsaE11SqVHgEA4sZMytjZklhNA1G52nt9TuLxytEmqAQBGCD3BXv7e9eze4jSTr+PgvfiuCLkXs7bSOlAeCPQqaBnWAAAAQUgCltZwSHuuC9ETlRoJyrNYv9NHUH8NLxR5mwpUS+4ousBBicAwCQgNCGNnpQXkylYa9f6nYj1HGwVeZN1xflZXOoQv2wj1IOtVrIhBwpbWcEh7rgvRE5UaCcqzWL/TR1B/DS8UeZsKVEvuKLrHQBzxdoKMAAAgAEAAIAAAACAAgAAgAAAAAAFAAAAIQc0IY2elBeTKVhr1/qdiPUcbBV5k3XF+Vlc6hC/bCPUgz0B+HPJ7BJ6Q0eyE8RsiTNNmOTI053J2hH40RD+MpDWZP0C6L/yMAAAgAEAAIAAAACAAgAAgAAAAAAFAAAAAAEFIPZsMKB9vP1h58W2+s9ObCf5R7r6y7P8DqKB4BZ+bpSNAQYnAMAkIHxuOjHDK8ueogVkcyIpbFujaTY/E2747lrLIcj51R5QrVayIQd8bjoxwyvLnqIFZHMiKWxbo2k2PxNu+O5ayyHI+dUeUD0Bv3zqft7M8nIO0b3NAPbE7MAFN+VV/xm4ztwJx+a3OlQC6L/yMAAAgAEAAIAAAACAAgAAgAEAAAABAAAAIQf2bDCgfbz9YefFtvrPTmwn+Ue6+suz/A6igeAWfm6UjR0Ac8XaCjAAAIABAACAAAAAgAIAAIABAAAAAQAAAAA="
     MINIS_TR_PSBT_UR_PSBT = UR("crypto-psbt", PSBT(MINIS_TR_PSBT).to_cbor())
 
-    SIGNED_MINIS_TR_PSBT = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01]p\x9b\x12\xc2\xd4\x8d\xb3\x84\x1b\xdb\xff\x1c\xfd\x0f\x8e\xeb\xe8\xb8\xf5("\xf4\xc6\xbdc\xa9-\xf2L\x85\xff\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03@B\x0f\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07 \xa1\x07\x00\x00\x00\x00\x00"Q @\x9b\x0e\x0b\x19s\xa6\xb0\xefX\x89\x869\xd3\xfbn\x1f\x86L0i\x07\x01y\x0c\xc0(\xb7\xd8\x03"\x87\xdd\x88\x07\x00\x00\x00\x00\x00"Q [\xf5T\x10]\x86\x9b0\x00\xa1-(\x1fr\\\x81\xc5\xef\xc4\xc8\x8fBm\xd5T\xe7\x94\xde\x04\x91rR\x00\x00\x00\x00\x00\x01\x01+\xefs\x1e\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3\x01\x08B\x01@Q3\x98\xe4[\xd0}HM\x86\x00H\xb4\xa0\x16\xb19<i\xeb\xa1\xa8?\xc4i\x8c\xba~\x8djb\'\xb8MM\x80\x97\xa4\xf44\xf0\xb1\xbb\xd4\xf7\x17i\x07Pc:z\xbc\xfar\xad\x0er\xddb\xe4\xd0zJ\x01\x13@Q3\x98\xe4[\xd0}HM\x86\x00H\xb4\xa0\x16\xb19<i\xeb\xa1\xa8?\xc4i\x8c\xba~\x8djb\'\xb8MM\x80\x97\xa4\xf44\xf0\xb1\xbb\xd4\xf7\x17i\x07Pc:z\xbc\xfar\xad\x0er\xddb\xe4\xd0zJ\x00\x00\x00\x00'
-    SIGNED_MINIS_TR_PSBT_B43 = "BIOW5$16$7C7.QKRAZJCSEHQTU-XW0ZQ$+PPO66J:2K.7.LT5/ZR$Y/Z-X88.Z-UT5WQXF/12K2C0Y07B6JRFZHLOV2FD66J4AZ8IW9YJTGQKYN2DB2VMXT5XNP5Y$-7KPZ95MAWEG9CB/Q06VRY9THI8$YUQ6GB32*SDD27UVULMH/O+0PP-0IWW+R-AC$BBF88W/3RM-5G/AB$U2OD$XZ57TRQ9OHKKK:S$/YCPY4+2*A$.N6$Y55UXT4SSU+1R03V4AU87$6PH5ND034-0EXA*SX9W*OJ9$9/$ULQ6J4D$0HQ0MF1IHK41FYFY*C2OVD30PHBA8UH6D/H4BRZ6DUZB3-HFF374XQ5$3G533HZKGUO/.RQI6L6NVXMZ+8E476-L6WC:A5828*UZ91QZYM0NEM6KOV85N:OBP$1MQ./SI5-VL:Z1/5**43/6EUX2PWYSB7-QT$OLFDWS+X3T30XPHCSNJZ994PBJF-0LZ1*-0SV087T.HS$NIZN+895VDQZ*NGBW12X6N0DHJDM.1EK85/AI*6UIE9SSJ7+/"
-    SIGNED_MINIS_TR_PSBT_B58 = "inScThssu4fzeEVSrUbUGPftqsZ3YRxvu8gyPzNaU8zbBHvCEhm9uzqzeZq7dQ3nYaGqq51sMxMV1goB2pk8UTRLfytypdRU1dYXnwPVfeNWExpr621st3NoTfaBwrJMMJyiHUpUTwL183nrsxGaFG9aVjt6KeGjFTX71FjkazQ5pBqdkBkwMf7MpsNxM6RbD1YSNxnF3jMCPwZnHcqTayznwfKetnfJjDh4DhLXfU5cJmgM6kS7sYkJSHbnFpz81hnQpXvvgQYv1RNjwnfbSnA2U9UzHXSSVXyco4iVL5Q9iUEzAMQ4iLPZinVGWgArBpey2eyfpHXWsyrhvnfejnuhbxcXUj1vKd7xrbUNYGXBbXgnVMBxZfHNNfcTnxHmJDk49aDKaensLRZxT8mj9yh2WyPJM6y61PG5VoZ4no453kmXVtfRq6VU2swPw6k4bPGG4Q2F3tc8iHfqhXKMTsa2UirqC592ZueMPbcAQ76TvQnRNR2UvrQVZvyBso4j"
-    SIGNED_MINIS_TR_PSBT_B64 = "cHNidP8BALQCAAAAAV1wmxLC1I2zhBvb/xz9D47r6Lj1KCL0xr1jqS3yTIX/AAAAAAD9////A0BCDwAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcgoQcAAAAAACJRIECbDgsZc6aw71iJhjnT+24fhkwwaQcBeQzAKLfYAyKH3YgHAAAAAAAiUSBb9VQQXYabMAChLSgfclyBxe/EyI9CbdVU55TeBJFyUgAAAAAAAQEr73MeAAAAAAAiUSCKMs95fYJ22tHaq0FOis38SPVg352JZymPeaMp80ThwwEIQgFAUTOY5FvQfUhNhgBItKAWsTk8aeuhqD/EaYy6fo1qYie4TU2Al6T0NPCxu9T3F2kHUGM6erz6cq0Oct1i5NB6SgETQFEzmORb0H1ITYYASLSgFrE5PGnroag/xGmMun6NamInuE1NgJek9DTwsbvU9xdpB1BjOnq8+nKtDnLdYuTQekoAAAAA"
-    SIGNED_MINIS_TR_PSBT_UR_PSBT = UR(
-        "crypto-psbt", PSBT(SIGNED_MINIS_TR_PSBT).to_cbor()
+    IN_KEY_SIGNED_MINIS_TR_PSBT = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01]p\x9b\x12\xc2\xd4\x8d\xb3\x84\x1b\xdb\xff\x1c\xfd\x0f\x8e\xeb\xe8\xb8\xf5("\xf4\xc6\xbdc\xa9-\xf2L\x85\xff\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03@B\x0f\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07 \xa1\x07\x00\x00\x00\x00\x00"Q @\x9b\x0e\x0b\x19s\xa6\xb0\xefX\x89\x869\xd3\xfbn\x1f\x86L0i\x07\x01y\x0c\xc0(\xb7\xd8\x03"\x87\xdd\x88\x07\x00\x00\x00\x00\x00"Q [\xf5T\x10]\x86\x9b0\x00\xa1-(\x1fr\\\x81\xc5\xef\xc4\xc8\x8fBm\xd5T\xe7\x94\xde\x04\x91rR\x00\x00\x00\x00\x00\x01\x01+\xefs\x1e\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3\x01\x08B\x01@Q3\x98\xe4[\xd0}HM\x86\x00H\xb4\xa0\x16\xb19<i\xeb\xa1\xa8?\xc4i\x8c\xba~\x8djb\'\xb8MM\x80\x97\xa4\xf44\xf0\xb1\xbb\xd4\xf7\x17i\x07Pc:z\xbc\xfar\xad\x0er\xddb\xe4\xd0zJ\x01\x13@Q3\x98\xe4[\xd0}HM\x86\x00H\xb4\xa0\x16\xb19<i\xeb\xa1\xa8?\xc4i\x8c\xba~\x8djb\'\xb8MM\x80\x97\xa4\xf44\xf0\xb1\xbb\xd4\xf7\x17i\x07Pc:z\xbc\xfar\xad\x0er\xddb\xe4\xd0zJ\x00\x00\x00\x00'
+    IN_KEY_SIGNED_MINIS_TR_PSBT_B43 = "BIOW5$16$7C7.QKRAZJCSEHQTU-XW0ZQ$+PPO66J:2K.7.LT5/ZR$Y/Z-X88.Z-UT5WQXF/12K2C0Y07B6JRFZHLOV2FD66J4AZ8IW9YJTGQKYN2DB2VMXT5XNP5Y$-7KPZ95MAWEG9CB/Q06VRY9THI8$YUQ6GB32*SDD27UVULMH/O+0PP-0IWW+R-AC$BBF88W/3RM-5G/AB$U2OD$XZ57TRQ9OHKKK:S$/YCPY4+2*A$.N6$Y55UXT4SSU+1R03V4AU87$6PH5ND034-0EXA*SX9W*OJ9$9/$ULQ6J4D$0HQ0MF1IHK41FYFY*C2OVD30PHBA8UH6D/H4BRZ6DUZB3-HFF374XQ5$3G533HZKGUO/.RQI6L6NVXMZ+8E476-L6WC:A5828*UZ91QZYM0NEM6KOV85N:OBP$1MQ./SI5-VL:Z1/5**43/6EUX2PWYSB7-QT$OLFDWS+X3T30XPHCSNJZ994PBJF-0LZ1*-0SV087T.HS$NIZN+895VDQZ*NGBW12X6N0DHJDM.1EK85/AI*6UIE9SSJ7+/"
+    IN_KEY_SIGNED_MINIS_TR_PSBT_B58 = "inScThssu4fzeEVSrUbUGPftqsZ3YRxvu8gyPzNaU8zbBHvCEhm9uzqzeZq7dQ3nYaGqq51sMxMV1goB2pk8UTRLfytypdRU1dYXnwPVfeNWExpr621st3NoTfaBwrJMMJyiHUpUTwL183nrsxGaFG9aVjt6KeGjFTX71FjkazQ5pBqdkBkwMf7MpsNxM6RbD1YSNxnF3jMCPwZnHcqTayznwfKetnfJjDh4DhLXfU5cJmgM6kS7sYkJSHbnFpz81hnQpXvvgQYv1RNjwnfbSnA2U9UzHXSSVXyco4iVL5Q9iUEzAMQ4iLPZinVGWgArBpey2eyfpHXWsyrhvnfejnuhbxcXUj1vKd7xrbUNYGXBbXgnVMBxZfHNNfcTnxHmJDk49aDKaensLRZxT8mj9yh2WyPJM6y61PG5VoZ4no453kmXVtfRq6VU2swPw6k4bPGG4Q2F3tc8iHfqhXKMTsa2UirqC592ZueMPbcAQ76TvQnRNR2UvrQVZvyBso4j"
+    IN_KEY_SIGNED_MINIS_TR_PSBT_B64 = "cHNidP8BALQCAAAAAV1wmxLC1I2zhBvb/xz9D47r6Lj1KCL0xr1jqS3yTIX/AAAAAAD9////A0BCDwAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcgoQcAAAAAACJRIECbDgsZc6aw71iJhjnT+24fhkwwaQcBeQzAKLfYAyKH3YgHAAAAAAAiUSBb9VQQXYabMAChLSgfclyBxe/EyI9CbdVU55TeBJFyUgAAAAAAAQEr73MeAAAAAAAiUSCKMs95fYJ22tHaq0FOis38SPVg352JZymPeaMp80ThwwEIQgFAUTOY5FvQfUhNhgBItKAWsTk8aeuhqD/EaYy6fo1qYie4TU2Al6T0NPCxu9T3F2kHUGM6erz6cq0Oct1i5NB6SgETQFEzmORb0H1ITYYASLSgFrE5PGnroag/xGmMun6NamInuE1NgJek9DTwsbvU9xdpB1BjOnq8+nKtDnLdYuTQekoAAAAA"
+    IN_KEY_SIGNED_MINIS_TR_PSBT_UR_PSBT = UR(
+        "crypto-psbt", PSBT(IN_KEY_SIGNED_MINIS_TR_PSBT).to_cbor()
     )
-    SIGNED_MINIS_TR_PSBT_SD = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01]p\x9b\x12\xc2\xd4\x8d\xb3\x84\x1b\xdb\xff\x1c\xfd\x0f\x8e\xeb\xe8\xb8\xf5("\xf4\xc6\xbdc\xa9-\xf2L\x85\xff\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03@B\x0f\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07 \xa1\x07\x00\x00\x00\x00\x00"Q @\x9b\x0e\x0b\x19s\xa6\xb0\xefX\x89\x869\xd3\xfbn\x1f\x86L0i\x07\x01y\x0c\xc0(\xb7\xd8\x03"\x87\xdd\x88\x07\x00\x00\x00\x00\x00"Q [\xf5T\x10]\x86\x9b0\x00\xa1-(\x1fr\\\x81\xc5\xef\xc4\xc8\x8fBm\xd5T\xe7\x94\xde\x04\x91rR\x00\x00\x00\x00\x00\x01\x01+\xefs\x1e\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3\x01\x08B\x01@Q3\x98\xe4[\xd0}HM\x86\x00H\xb4\xa0\x16\xb19<i\xeb\xa1\xa8?\xc4i\x8c\xba~\x8djb\'\xb8MM\x80\x97\xa4\xf44\xf0\xb1\xbb\xd4\xf7\x17i\x07Pc:z\xbc\xfar\xad\x0er\xddb\xe4\xd0zJ\x01\x13@Q3\x98\xe4[\xd0}HM\x86\x00H\xb4\xa0\x16\xb19<i\xeb\xa1\xa8?\xc4i\x8c\xba~\x8djb\'\xb8MM\x80\x97\xa4\xf44\xf0\xb1\xbb\xd4\xf7\x17i\x07Pc:z\xbc\xfar\xad\x0er\xddb\xe4\xd0zJ"\x15\xc0\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04% q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04\xadV\xb2\xc0!\x16q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04=\x01\xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00!\x16\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00\x01\x17 \xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x01\x18 \xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x00\x00\x01\x05 \n[Y\xc1!\xee\xb8/DNTh\'*\xcdb\xffM\x1dA\xfc4\xbcQ\xe6l)Q/\xb8\xa2\xeb!\x07\n[Y\xc1!\xee\xb8/DNTh\'*\xcdb\xffM\x1dA\xfc4\xbcQ\xe6l)Q/\xb8\xa2\xeb\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x05\x00\x00\x00!\x074!\x8d\x9e\x94\x17\x93)Xk\xd7\xfa\x9d\x88\xf5\x1cl\x15y\x93u\xc5\xf9Y\\\xea\x10\xbfl#\xd4\x83=\x01\xf8s\xc9\xec\x12zCG\xb2\x13\xc4l\x893M\x98\xe4\xc8\xd3\x9d\xc9\xda\x11\xf8\xd1\x10\xfe2\x90\xd6d\xfd\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x05\x00\x00\x00\x01\x06\'\x00\xc0$ 4!\x8d\x9e\x94\x17\x93)Xk\xd7\xfa\x9d\x88\xf5\x1cl\x15y\x93u\xc5\xf9Y\\\xea\x10\xbfl#\xd4\x83\xadV\xb2\x00\x01\x05 \xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d!\x07|n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP=\x01\xbf|\xea~\xde\xcc\xf2r\x0e\xd1\xbd\xcd\x00\xf6\xc4\xec\xc0\x057\xe5U\xff\x19\xb8\xce\xdc\t\xc7\xe6\xb7:T\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00!\x07\xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00\x01\x06\'\x00\xc0$ |n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP\xadV\xb2\x00'
-    SIGNED_MINIS_TR_PSBT_B64_SD = "cHNidP8BALQCAAAAAV1wmxLC1I2zhBvb/xz9D47r6Lj1KCL0xr1jqS3yTIX/AAAAAAD9////A0BCDwAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcgoQcAAAAAACJRIECbDgsZc6aw71iJhjnT+24fhkwwaQcBeQzAKLfYAyKH3YgHAAAAAAAiUSBb9VQQXYabMAChLSgfclyBxe/EyI9CbdVU55TeBJFyUgAAAAAAAQEr73MeAAAAAAAiUSCKMs95fYJ22tHaq0FOis38SPVg352JZymPeaMp80ThwwEIQgFAUTOY5FvQfUhNhgBItKAWsTk8aeuhqD/EaYy6fo1qYie4TU2Al6T0NPCxu9T3F2kHUGM6erz6cq0Oct1i5NB6SgETQFEzmORb0H1ITYYASLSgFrE5PGnroag/xGmMun6NamInuE1NgJek9DTwsbvU9xdpB1BjOnq8+nKtDnLdYuTQekoiFcCxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBCUgcR+2YZWT+8mC3xif1lDSG2K89yPT3b15N+QJrmqb6gStVrLAIRZxH7ZhlZP7yYLfGJ/WUNIbYrz3I9PdvXk35AmuapvqBD0B9wV7+3vXs3uI0k6/j4L34rgi5F7O20jpQHgj0KmgZ1gC6L/yMAAAgAEAAIAAAACAAgAAgAAAAAADAAAAIRaxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBB0Ac8XaCjAAAIABAACAAAAAgAIAAIAAAAAAAwAAAAEXILGhNdUqlR4BAOLGTMrY2ZJYTQNRudp7fU7i8crRJqgEARgg9wV7+3vXs3uI0k6/j4L34rgi5F7O20jpQHgj0KmgZ1gAAAEFIApbWcEh7rgvRE5UaCcqzWL/TR1B/DS8UeZsKVEvuKLrIQcKW1nBIe64L0ROVGgnKs1i/00dQfw0vFHmbClRL7ii6x0Ac8XaCjAAAIABAACAAAAAgAIAAIAAAAAABQAAACEHNCGNnpQXkylYa9f6nYj1HGwVeZN1xflZXOoQv2wj1IM9AfhzyewSekNHshPEbIkzTZjkyNOdydoR+NEQ/jKQ1mT9Aui/8jAAAIABAACAAAAAgAIAAIAAAAAABQAAAAEGJwDAJCA0IY2elBeTKVhr1/qdiPUcbBV5k3XF+Vlc6hC/bCPUg61WsgABBSD2bDCgfbz9YefFtvrPTmwn+Ue6+suz/A6igeAWfm6UjSEHfG46McMry56iBWRzIilsW6NpNj8TbvjuWsshyPnVHlA9Ab986n7ezPJyDtG9zQD2xOzABTflVf8ZuM7cCcfmtzpUAui/8jAAAIABAACAAAAAgAIAAIABAAAAAQAAACEH9mwwoH28/WHnxbb6z05sJ/lHuvrLs/wOooHgFn5ulI0dAHPF2gowAACAAQAAgAAAAIACAACAAQAAAAEAAAABBicAwCQgfG46McMry56iBWRzIilsW6NpNj8TbvjuWsshyPnVHlCtVrIA"
+    IN_KEY_SIGNED_MINIS_TR_PSBT_SD = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01]p\x9b\x12\xc2\xd4\x8d\xb3\x84\x1b\xdb\xff\x1c\xfd\x0f\x8e\xeb\xe8\xb8\xf5("\xf4\xc6\xbdc\xa9-\xf2L\x85\xff\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03@B\x0f\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07 \xa1\x07\x00\x00\x00\x00\x00"Q @\x9b\x0e\x0b\x19s\xa6\xb0\xefX\x89\x869\xd3\xfbn\x1f\x86L0i\x07\x01y\x0c\xc0(\xb7\xd8\x03"\x87\xdd\x88\x07\x00\x00\x00\x00\x00"Q [\xf5T\x10]\x86\x9b0\x00\xa1-(\x1fr\\\x81\xc5\xef\xc4\xc8\x8fBm\xd5T\xe7\x94\xde\x04\x91rR\x00\x00\x00\x00\x00\x01\x01+\xefs\x1e\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3\x01\x08B\x01@Q3\x98\xe4[\xd0}HM\x86\x00H\xb4\xa0\x16\xb19<i\xeb\xa1\xa8?\xc4i\x8c\xba~\x8djb\'\xb8MM\x80\x97\xa4\xf44\xf0\xb1\xbb\xd4\xf7\x17i\x07Pc:z\xbc\xfar\xad\x0er\xddb\xe4\xd0zJ\x01\x13@Q3\x98\xe4[\xd0}HM\x86\x00H\xb4\xa0\x16\xb19<i\xeb\xa1\xa8?\xc4i\x8c\xba~\x8djb\'\xb8MM\x80\x97\xa4\xf44\xf0\xb1\xbb\xd4\xf7\x17i\x07Pc:z\xbc\xfar\xad\x0er\xddb\xe4\xd0zJ"\x15\xc0\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04% q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04\xadV\xb2\xc0!\x16q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04=\x01\xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00!\x16\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00\x01\x17 \xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x01\x18 \xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x00\x00\x01\x05 \n[Y\xc1!\xee\xb8/DNTh\'*\xcdb\xffM\x1dA\xfc4\xbcQ\xe6l)Q/\xb8\xa2\xeb!\x07\n[Y\xc1!\xee\xb8/DNTh\'*\xcdb\xffM\x1dA\xfc4\xbcQ\xe6l)Q/\xb8\xa2\xeb\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x05\x00\x00\x00!\x074!\x8d\x9e\x94\x17\x93)Xk\xd7\xfa\x9d\x88\xf5\x1cl\x15y\x93u\xc5\xf9Y\\\xea\x10\xbfl#\xd4\x83=\x01\xf8s\xc9\xec\x12zCG\xb2\x13\xc4l\x893M\x98\xe4\xc8\xd3\x9d\xc9\xda\x11\xf8\xd1\x10\xfe2\x90\xd6d\xfd\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x05\x00\x00\x00\x01\x06\'\x00\xc0$ 4!\x8d\x9e\x94\x17\x93)Xk\xd7\xfa\x9d\x88\xf5\x1cl\x15y\x93u\xc5\xf9Y\\\xea\x10\xbfl#\xd4\x83\xadV\xb2\x00\x01\x05 \xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d!\x07|n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP=\x01\xbf|\xea~\xde\xcc\xf2r\x0e\xd1\xbd\xcd\x00\xf6\xc4\xec\xc0\x057\xe5U\xff\x19\xb8\xce\xdc\t\xc7\xe6\xb7:T\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00!\x07\xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00\x01\x06\'\x00\xc0$ |n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP\xadV\xb2\x00'
+    IN_KEY_SIGNED_MINIS_TR_PSBT_B64_SD = "cHNidP8BALQCAAAAAV1wmxLC1I2zhBvb/xz9D47r6Lj1KCL0xr1jqS3yTIX/AAAAAAD9////A0BCDwAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcgoQcAAAAAACJRIECbDgsZc6aw71iJhjnT+24fhkwwaQcBeQzAKLfYAyKH3YgHAAAAAAAiUSBb9VQQXYabMAChLSgfclyBxe/EyI9CbdVU55TeBJFyUgAAAAAAAQEr73MeAAAAAAAiUSCKMs95fYJ22tHaq0FOis38SPVg352JZymPeaMp80ThwwEIQgFAUTOY5FvQfUhNhgBItKAWsTk8aeuhqD/EaYy6fo1qYie4TU2Al6T0NPCxu9T3F2kHUGM6erz6cq0Oct1i5NB6SgETQFEzmORb0H1ITYYASLSgFrE5PGnroag/xGmMun6NamInuE1NgJek9DTwsbvU9xdpB1BjOnq8+nKtDnLdYuTQekoiFcCxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBCUgcR+2YZWT+8mC3xif1lDSG2K89yPT3b15N+QJrmqb6gStVrLAIRZxH7ZhlZP7yYLfGJ/WUNIbYrz3I9PdvXk35AmuapvqBD0B9wV7+3vXs3uI0k6/j4L34rgi5F7O20jpQHgj0KmgZ1gC6L/yMAAAgAEAAIAAAACAAgAAgAAAAAADAAAAIRaxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBB0Ac8XaCjAAAIABAACAAAAAgAIAAIAAAAAAAwAAAAEXILGhNdUqlR4BAOLGTMrY2ZJYTQNRudp7fU7i8crRJqgEARgg9wV7+3vXs3uI0k6/j4L34rgi5F7O20jpQHgj0KmgZ1gAAAEFIApbWcEh7rgvRE5UaCcqzWL/TR1B/DS8UeZsKVEvuKLrIQcKW1nBIe64L0ROVGgnKs1i/00dQfw0vFHmbClRL7ii6x0Ac8XaCjAAAIABAACAAAAAgAIAAIAAAAAABQAAACEHNCGNnpQXkylYa9f6nYj1HGwVeZN1xflZXOoQv2wj1IM9AfhzyewSekNHshPEbIkzTZjkyNOdydoR+NEQ/jKQ1mT9Aui/8jAAAIABAACAAAAAgAIAAIAAAAAABQAAAAEGJwDAJCA0IY2elBeTKVhr1/qdiPUcbBV5k3XF+Vlc6hC/bCPUg61WsgABBSD2bDCgfbz9YefFtvrPTmwn+Ue6+suz/A6igeAWfm6UjSEHfG46McMry56iBWRzIilsW6NpNj8TbvjuWsshyPnVHlA9Ab986n7ezPJyDtG9zQD2xOzABTflVf8ZuM7cCcfmtzpUAui/8jAAAIABAACAAAAAgAIAAIABAAAAAQAAACEH9mwwoH28/WHnxbb6z05sJ/lHuvrLs/wOooHgFn5ulI0dAHPF2gowAACAAQAAgAAAAIACAACAAQAAAAEAAAABBicAwCQgfG46McMry56iBWRzIilsW6NpNj8TbvjuWsshyPnVHlCtVrIA"
+
+    # Liana simple inheritance recovery PSBT - Tap tree signed
+    RECOV_M_TR_PSBT = b'psbt\xff\x01\x00^\x02\x00\x00\x00\x01]p\x9b\x12\xc2\xd4\x8d\xb3\x84\x1b\xdb\xff\x1c\xfd\x0f\x8e\xeb\xe8\xb8\xf5("\xf4\xc6\xbdc\xa9-\xf2L\x85\xff\x00\x00\x00\x00\x00\x06\x00\x00\x00\x01\xe5n\x1e\x00\x00\x00\x00\x00"Q S+\x82\x18\xb4|S\xa2\xf3\x15\xb1RH\xd0\xc3\x1d\xde)\xb3\xe2\xd6M\r\xeaP\xdb\xce\xae\x13g\xf5\xfb\x00\x00\x00\x00\x00\x01\x01+\xefs\x1e\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3"\x15\xc0\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04% q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04\xadV\xb2\xc0!\x16q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04=\x01\xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00!\x16\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00\x01\x17 \xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x01\x18 \xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x00\x00'
+    RECOV_M_TR_PSBT_B43 = "1O4HGFPIQ-$.KIIHSB$QWW5D51IGXH7O11TXGA+HQ.4L/ZXG7AMSYR*2UJCUJ2EOWI:VBL3LJFRFH198+.T9Y/001EXT+QA5$V85R14-K2HWNK+9TQG60F26:N*P8S/*+7JRZKR3GB*A56VIB7:1:IN5J.RJR8NESUDO+:7P.T.CW.GP7XFI0A4KU$9ZD/2J0A-A+XFZJ30QS$-O*OON-5IH$0ES-$ZHV4Y4V5/HWLKSVV*-Q*/7/8+-KDL-CGL4H*UKBS:/X20QG/RQTSUKR759P+H90NZRXQDV3YZ$E6:F.MO3.GJECC6437MSC.G90SN*A52NA9*UI*QPD0K0G*SVHR4K*GX.HB2GL.:R2I--XC8LOZZSU/*I3IQ2EIWZ6R+F2VD8J5$5NIOMQ-$4RRCH1JS.F7IHZH0Q1S/L4CS*N.KIYYRWP.-*PELTJ$V7IA$5WSY/F66IF6H0/A+PS7.I5RXF1P7NPL2E+NOOPKCS:B.ICMCT0YHUHIGW6A3JBRJLKY*-P8LRE0EYK0C8NOM5QZSTEDGBXQG1J.PF/KO83HF16+KCN$B.DAC2N1DSBKTJQONKUDPJK-:K$6G.-6Z/6W*$DRYZUBG0RO4BH.XE.5RID1ZNY0:AVY:W80LPPC6N9*J1IR9:NHT349YXADJ7G8ZD+2"
+    RECOV_M_TR_PSBT_B58 = "TQg8LbQjsiNzFXb3gyFabELir3GQCcKKJH25NkxR44rBxUhuuZu7XZ5rBDB256orGyzqnbxcytCZ92mAKSgwxMk1owyRefcpqrqRi8Ff1LcVeexCaWvpuRmNFXgFa3GcBNBu9f4jAg9KXQhMFfP4wikCm2V7FBRocjG8dDqbJ7oUqjZJ92ZNUeyjQv7f5jZMW8ievzN1UppVj8oSLh2cX4HdpxXjZD8SZU3g9EfNCCKoDHMEjWwjTr44Pd3qpAA99H7ZnzH683cLoABrvR8GCkDjxYuqX1SzRoCDyVWVWHnnRuDcas8LWQ6pmKSuWJBQoWxUKicBcxcySXcqQxNw9mjEDgtBSwj3PWKumwpvGfxzqjU7HnVG5MJQcWeG1FnqVAGJyujsu6uKxLNRZ8sysrCKiG6RBD4VazSc1mVqbzYjnCN5hsupjWuyC7NRuK5qxPQGhr4qGyFfeSYEKAGGU2t6eQhVLQh9WynPsp7x2fPnGRhYj6u4eoei5FPGhy7CppN7B1KWtoK7Q9YWzAM4vSSTeGL1JudmT6PhsbyG2qntbeWP5jb2Xa1rMZg8ii5eAPePe3rabBcEkDU5Mvc29PfKSNCeyz2ZQEmARwxH45vP"
+    RECOV_M_TR_PSBT_B64 = "cHNidP8BAF4CAAAAAV1wmxLC1I2zhBvb/xz9D47r6Lj1KCL0xr1jqS3yTIX/AAAAAAAGAAAAAeVuHgAAAAAAIlEgUyuCGLR8U6LzFbFSSNDDHd4ps+LWTQ3qUNvOrhNn9fsAAAAAAAEBK+9zHgAAAAAAIlEgijLPeX2CdtrR2qtBTorN/Ej1YN+diWcpj3mjKfNE4cMiFcCxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBCUgcR+2YZWT+8mC3xif1lDSG2K89yPT3b15N+QJrmqb6gStVrLAIRZxH7ZhlZP7yYLfGJ/WUNIbYrz3I9PdvXk35AmuapvqBD0B9wV7+3vXs3uI0k6/j4L34rgi5F7O20jpQHgj0KmgZ1gC6L/yMAAAgAEAAIAAAACAAgAAgAAAAAADAAAAIRaxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBB0Ac8XaCjAAAIABAACAAAAAgAIAAIAAAAAAAwAAAAEXILGhNdUqlR4BAOLGTMrY2ZJYTQNRudp7fU7i8crRJqgEARgg9wV7+3vXs3uI0k6/j4L34rgi5F7O20jpQHgj0KmgZ1gAAA=="
+    RECOV_M_TR_PSBT_UR_PSBT = UR("crypto-psbt", PSBT(RECOV_M_TR_PSBT).to_cbor())
+
+    TAP_TREE_SIGNED_RECOV_PSBT = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01]p\x9b\x12\xc2\xd4\x8d\xb3\x84\x1b\xdb\xff\x1c\xfd\x0f\x8e\xeb\xe8\xb8\xf5("\xf4\xc6\xbdc\xa9-\xf2L\x85\xff\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03@B\x0f\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07 \xa1\x07\x00\x00\x00\x00\x00"Q @\x9b\x0e\x0b\x19s\xa6\xb0\xefX\x89\x869\xd3\xfbn\x1f\x86L0i\x07\x01y\x0c\xc0(\xb7\xd8\x03"\x87\xdd\x88\x07\x00\x00\x00\x00\x00"Q [\xf5T\x10]\x86\x9b0\x00\xa1-(\x1fr\\\x81\xc5\xef\xc4\xc8\x8fBm\xd5T\xe7\x94\xde\x04\x91rR\x00\x00\x00\x00\x00\x01\x01+\xefs\x1e\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3A\x14q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04\xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX@\xe0\xf3\n\xf0\x1b;\xf6\xde\x1d@X\xc0o\xe1s`\xea\xe2\x0bJ(\xbc4\xc1H\xa9%\xd7`q\xddC\x8b\xd3\xcd\xeb\x1d\xcc"w\x93\xcbj\x02[hW\xf0\xcd\xbc3>\xd3S\xf0a\xce\xfd\x92\x14\\\x9e\x1a\x17\x00\x00\x00\x00'
+    TAP_TREE_SIGNED_RECOV_PSBT_B43 = "2ZMQXUW070H/C$O912IUP38PY-B:Y$-RMWPWCEVH4INJ0O18-TBJ48CZOD$TWI4I/NE8VN6KM12$5ZSVRTAG309P5CUJ2C2//V/10X86GODPB2R6A.-1F03RUUBF1+7YE8I/JYD4EB9C+U2E*ECO6IS/FAIE8CSCDLXC3$O$N*WQ9M1R*V*AKQ0$1T9RPNVBEVDGRPOJH8W.+6WV5M8.F3BOON/VSH39A5Z17$:50YW8.QS+AO7ZR.:RO*PD-DZPBFCDLJY*9QV/+BT1W9PT7JQ0XX81B::I9YOOIUKCJ$V*39Q$GYUKV887917VA-S7U1*4RHVHP64V$L6+Y0Y-S-8MTY99L*VA*$C*IA1YRVZ.A85M07KQF:CUR1RYODG6IXQHI*J/LWU$I46Y*6OIR*B40O-0+7U6.B:..O*YZZHA-*UAKA3J.DJBUP9ZYOV34+9K4-5R074W7NP$ZSXH*YL1B0YFUBQSLB:LE*K7UM.$L-8L759$8R/A8NZQLYMHBAAK/Y8MDL.17RIOJE4$:QD+N4HTN3BOL+"
+    TAP_TREE_SIGNED_RECOV_PSBT_B58 = "2SudmehyNb1LkDuASe1chZCVpPJRP43zF2Ub1pehVv1WnSr4xckuEfFbCXCeSVuL2r43s6voxZbf4k8JeqvVwsVseK557UvqnpJ45Nts2vs274zxo1Pw1kEpZcKsMpsnaxp1rscFNrorxYGBQFBa3phYf39obkfjBcdTFuH724TJp95dPy3m66uegpNzCbWd3UnGbdXmALngVxMtZf26T4jEJrthxXZCDgQMM3ucGuYoVU1qdsGVCKvYo9NawBmRHsQGxxbEAdVkjDShJMMcpH9TpyVo8QUq28MNAMQYiBGFTTNGtm1iuQ118Tu37YAzCMtsEFL18hWNGjVGLPzednoie9iwxUrmm1fvHuxoZnjeop6h5aEJkksqZZESo8AYJXwVnv2NGvUn3KDMrRpEwWNp5m3Uj61UEeLWxav5kbf86x1rKukjpqA2GJBf3GqDvXHDf8EVoGTcNW7aAc3Edccd5dA4sy2QwfX2Ht1RHsfgVSWVRgfjZNUJGo"
+    TAP_TREE_SIGNED_RECOV_PSBT_B64 = "cHNidP8BALQCAAAAAV1wmxLC1I2zhBvb/xz9D47r6Lj1KCL0xr1jqS3yTIX/AAAAAAD9////A0BCDwAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcgoQcAAAAAACJRIECbDgsZc6aw71iJhjnT+24fhkwwaQcBeQzAKLfYAyKH3YgHAAAAAAAiUSBb9VQQXYabMAChLSgfclyBxe/EyI9CbdVU55TeBJFyUgAAAAAAAQEr73MeAAAAAAAiUSCKMs95fYJ22tHaq0FOis38SPVg352JZymPeaMp80Thw0EUcR+2YZWT+8mC3xif1lDSG2K89yPT3b15N+QJrmqb6gT3BXv7e9eze4jSTr+PgvfiuCLkXs7bSOlAeCPQqaBnWEDg8wrwGzv23h1AWMBv4XNg6uILSii8NMFIqSXXYHHdQ4vTzesdzCJ3k8tqAltoV/DNvDM+01PwYc79khRcnhoXAAAAAA=="
+    TAP_TREE_SIGNED_RECOV_PSBT_UR_PSBT = UR(
+        "crypto-psbt", PSBT(TAP_TREE_SIGNED_RECOV_PSBT).to_cbor()
+    )
+    TAP_TREE_SIGNED_RECOV_PSBT_SD = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01]p\x9b\x12\xc2\xd4\x8d\xb3\x84\x1b\xdb\xff\x1c\xfd\x0f\x8e\xeb\xe8\xb8\xf5("\xf4\xc6\xbdc\xa9-\xf2L\x85\xff\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03@B\x0f\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07 \xa1\x07\x00\x00\x00\x00\x00"Q @\x9b\x0e\x0b\x19s\xa6\xb0\xefX\x89\x869\xd3\xfbn\x1f\x86L0i\x07\x01y\x0c\xc0(\xb7\xd8\x03"\x87\xdd\x88\x07\x00\x00\x00\x00\x00"Q [\xf5T\x10]\x86\x9b0\x00\xa1-(\x1fr\\\x81\xc5\xef\xc4\xc8\x8fBm\xd5T\xe7\x94\xde\x04\x91rR\x00\x00\x00\x00\x00\x01\x01+\xefs\x1e\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3A\x14q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04\xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX@\xe0\xf3\n\xf0\x1b;\xf6\xde\x1d@X\xc0o\xe1s`\xea\xe2\x0bJ(\xbc4\xc1H\xa9%\xd7`q\xddC\x8b\xd3\xcd\xeb\x1d\xcc"w\x93\xcbj\x02[hW\xf0\xcd\xbc3>\xd3S\xf0a\xce\xfd\x92\x14\\\x9e\x1a\x17"\x15\xc0\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04% q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04\xadV\xb2\xc0!\x16q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04=\x01\xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00!\x16\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00\x01\x17 \xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\x01\x18 \xf7\x05{\xfb{\xd7\xb3{\x88\xd2N\xbf\x8f\x82\xf7\xe2\xb8"\xe4^\xce\xdbH\xe9@x#\xd0\xa9\xa0gX\x00\x00\x01\x05 \n[Y\xc1!\xee\xb8/DNTh\'*\xcdb\xffM\x1dA\xfc4\xbcQ\xe6l)Q/\xb8\xa2\xeb!\x07\n[Y\xc1!\xee\xb8/DNTh\'*\xcdb\xffM\x1dA\xfc4\xbcQ\xe6l)Q/\xb8\xa2\xeb\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x05\x00\x00\x00!\x074!\x8d\x9e\x94\x17\x93)Xk\xd7\xfa\x9d\x88\xf5\x1cl\x15y\x93u\xc5\xf9Y\\\xea\x10\xbfl#\xd4\x83=\x01\xf8s\xc9\xec\x12zCG\xb2\x13\xc4l\x893M\x98\xe4\xc8\xd3\x9d\xc9\xda\x11\xf8\xd1\x10\xfe2\x90\xd6d\xfd\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x05\x00\x00\x00\x01\x06\'\x00\xc0$ 4!\x8d\x9e\x94\x17\x93)Xk\xd7\xfa\x9d\x88\xf5\x1cl\x15y\x93u\xc5\xf9Y\\\xea\x10\xbfl#\xd4\x83\xadV\xb2\x00\x01\x05 \xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d!\x07|n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP=\x01\xbf|\xea~\xde\xcc\xf2r\x0e\xd1\xbd\xcd\x00\xf6\xc4\xec\xc0\x057\xe5U\xff\x19\xb8\xce\xdc\t\xc7\xe6\xb7:T\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00!\x07\xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d\x1d\x00s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00\x01\x06\'\x00\xc0$ |n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP\xadV\xb2\x00'
+    TAP_TREE_SIGNED_RECOV_PSBT_B64_SD = "cHNidP8BALQCAAAAAV1wmxLC1I2zhBvb/xz9D47r6Lj1KCL0xr1jqS3yTIX/AAAAAAD9////A0BCDwAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcgoQcAAAAAACJRIECbDgsZc6aw71iJhjnT+24fhkwwaQcBeQzAKLfYAyKH3YgHAAAAAAAiUSBb9VQQXYabMAChLSgfclyBxe/EyI9CbdVU55TeBJFyUgAAAAAAAQEr73MeAAAAAAAiUSCKMs95fYJ22tHaq0FOis38SPVg352JZymPeaMp80Thw0EUcR+2YZWT+8mC3xif1lDSG2K89yPT3b15N+QJrmqb6gT3BXv7e9eze4jSTr+PgvfiuCLkXs7bSOlAeCPQqaBnWEDg8wrwGzv23h1AWMBv4XNg6uILSii8NMFIqSXXYHHdQ4vTzesdzCJ3k8tqAltoV/DNvDM+01PwYc79khRcnhoXIhXAsaE11SqVHgEA4sZMytjZklhNA1G52nt9TuLxytEmqAQlIHEftmGVk/vJgt8Yn9ZQ0htivPcj0929eTfkCa5qm+oErVaywCEWcR+2YZWT+8mC3xif1lDSG2K89yPT3b15N+QJrmqb6gQ9AfcFe/t717N7iNJOv4+C9+K4IuRezttI6UB4I9CpoGdYAui/8jAAAIABAACAAAAAgAIAAIAAAAAAAwAAACEWsaE11SqVHgEA4sZMytjZklhNA1G52nt9TuLxytEmqAQdAHPF2gowAACAAQAAgAAAAIACAACAAAAAAAMAAAABFyCxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBAEYIPcFe/t717N7iNJOv4+C9+K4IuRezttI6UB4I9CpoGdYAAABBSAKW1nBIe64L0ROVGgnKs1i/00dQfw0vFHmbClRL7ii6yEHCltZwSHuuC9ETlRoJyrNYv9NHUH8NLxR5mwpUS+4ousdAHPF2gowAACAAQAAgAAAAIACAACAAAAAAAUAAAAhBzQhjZ6UF5MpWGvX+p2I9RxsFXmTdcX5WVzqEL9sI9SDPQH4c8nsEnpDR7ITxGyJM02Y5MjTncnaEfjREP4ykNZk/QLov/IwAACAAQAAgAAAAIACAACAAAAAAAUAAAABBicAwCQgNCGNnpQXkylYa9f6nYj1HGwVeZN1xflZXOoQv2wj1IOtVrIAAQUg9mwwoH28/WHnxbb6z05sJ/lHuvrLs/wOooHgFn5ulI0hB3xuOjHDK8ueogVkcyIpbFujaTY/E2747lrLIcj51R5QPQG/fOp+3szycg7Rvc0A9sTswAU35VX/GbjO3AnH5rc6VALov/IwAACAAQAAgAAAAIACAACAAQAAAAEAAAAhB/ZsMKB9vP1h58W2+s9ObCf5R7r6y7P8DqKB4BZ+bpSNHQBzxdoKMAAAgAEAAIAAAACAAgAAgAEAAAABAAAAAQYnAMAkIHxuOjHDK8ueogVkcyIpbFujaTY/E2747lrLIcj51R5QrVayAA=="
+
+    # TR expanding multisig - tr(tpubD6NzVbkrYhZ4YYQjuKXFp85eRGCk4oA94MXbbHJW6zNAibMfkwZh7JQNVHEhpcQYaRCUs3b5PhvKPKESGoAJptiLvF8Rm1jhoFsryyFuR1P/<0;1>/*,{and_v(v:multi_a(2,[73c5da0a/48'/1'/0'/2']tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<2;3>/*,[02e8bff2/48'/1'/0'/2']tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<2;3>/*,[8cb36b38/48'/1'/0'/2']tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*),older(6)),multi_a(2,[73c5da0a/48'/1'/0'/2']tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,[02e8bff2/48'/1'/0'/2']tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*)})#6ga85u82
+    # tb1p2v4cyx9503f69uc4k9fy35xrrh0znvlz6exsm6jsm082uym87hasr4urrx
+
+    EXP_TR_MINIS_PSBT = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01\x7f\xca\x84\x9d\xd9\x85\xd8s\xa9Lz\xbd\x95\x05b\x1f<\xb1\xf3\x01:\x05j\xcda;\xc1\x8d\x88G\\\xf1\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03 \xa1\x07\x00\x00\x00\x00\x00"Q \x87\\?;;\x80\x10\xc0\xfe\x06\xe3\xdc\xcbj\xed\x00\xc4\x9a\r\x91?\x8d\xc3\x1a\xb1\xda%;\ne\x8a\x82@B\x0f\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3\xda\x81\x07\x00\x00\x00\x00\x00"Q \x12Z\xa5\xd2\xc5\x8bR\xc8~\xbd\x8d\xbb\x1dK\r,\xea\x10\xf2\x16G\x98\x90g<\x88\xa4\x0cP\'\xff:\x00\x00\x00\x00\x00\x01\x01+\xe5n\x1e\x00\x00\x00\x00\x00"Q S+\x82\x18\xb4|S\xa2\xf3\x15\xb1RH\xd0\xc3\x1d\xde)\xb3\xe2\xd6M\r\xeaP\xdb\xce\xae\x13g\xf5\xfbB\x15\xc1\x12\x97\x80=D@o\x05S\xab\xcbu\x93h\xb7\xb05\r\xa3\xa6!\x04[G\x8dtVX\x87\xaan\x99W\xbbd\x83\x10\xd8\xec\xd4H\x13\xda\x12\xc0!jXcWp\x08o\\/^j?\x182\x85U\xc4\xa9k R\xb1/\x9c\xc6\xcd5\x8b\x97\xfa\xa0\xf1\xd0\x92F\xe3&\xe1\x1d\x07o`\x0e\xa7pns\xb7<n\x12e\xac w\xb7\xdf\x08\xb0a\xca\xeb\xa5\xc0\xc4YE\x16q\x88 \x00\xdaG\x12\x9aWN6C\r\xa4\xfb\xa7\xe4A\xba \x12q\x1a\x15(m\xd0<\'G\xfb\x13\xb5h\x9aq$\xbcE11\xfc\x13D\xce\xc7\xfa\xc4\x82\xe9\x1b\xdd\xbaR\x9dV\xb2\xc0B\x15\xc1\x12\x97\x80=D@o\x05S\xab\xcbu\x93h\xb7\xb05\r\xa3\xa6!\x04[G\x8dtVX\x87\xaan\x99\xcbN\x85\xff6c|k\x1a\xe4\xf9K\xd6S\xe7km58\xa6&=\x9b\xc4\x83\xe1\x98\xf8\xf6\x8d\xfdzG h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87\xac ,\xc4Rd\x176!k\xcaX\x9c\x0c\xc1\x018\xddWsSu3\x98\xb3\x12\x9c\x15\x1a\xf4\x7f\xf96\x92\xbaR\x9c\xc0!\x16\x12q\x1a\x15(m\xd0<\'G\xfb\x13\xb5h\x9aq$\xbcE11\xfc\x13D\xce\xc7\xfa\xc4\x82\xe9\x1b\xdd=\x01\xcbN\x85\xff6c|k\x1a\xe4\xf9K\xd6S\xe7km58\xa6&=\x9b\xc4\x83\xe1\x98\xf8\xf6\x8d\xfdz\x8c\xb3k80\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x01\x00\x00\x00!\x16\x12\x97\x80=D@o\x05S\xab\xcbu\x93h\xb7\xb05\r\xa3\xa6!\x04[G\x8dtVX\x87\xaan\x99\r\x00|F\x1e]\x00\x00\x00\x00\x01\x00\x00\x00!\x16,\xc4Rd\x176!k\xcaX\x9c\x0c\xc1\x018\xddWsSu3\x98\xb3\x12\x9c\x15\x1a\xf4\x7f\xf96\x92=\x01W\xbbd\x83\x10\xd8\xec\xd4H\x13\xda\x12\xc0!jXcWp\x08o\\/^j?\x182\x85U\xc4\xa9\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x01\x00\x00\x00!\x16R\xb1/\x9c\xc6\xcd5\x8b\x97\xfa\xa0\xf1\xd0\x92F\xe3&\xe1\x1d\x07o`\x0e\xa7pns\xb7<n\x12e=\x01\xcbN\x85\xff6c|k\x1a\xe4\xf9K\xd6S\xe7km58\xa6&=\x9b\xc4\x83\xe1\x98\xf8\xf6\x8d\xfdzs\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x02\x00\x00\x00\x01\x00\x00\x00!\x16h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87=\x01W\xbbd\x83\x10\xd8\xec\xd4H\x13\xda\x12\xc0!jXcWp\x08o\\/^j?\x182\x85U\xc4\xa9s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x01\x00\x00\x00!\x16w\xb7\xdf\x08\xb0a\xca\xeb\xa5\xc0\xc4YE\x16q\x88 \x00\xdaG\x12\x9aWN6C\r\xa4\xfb\xa7\xe4A=\x01\xcbN\x85\xff6c|k\x1a\xe4\xf9K\xd6S\xe7km58\xa6&=\x9b\xc4\x83\xe1\x98\xf8\xf6\x8d\xfdz\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x02\x00\x00\x00\x01\x00\x00\x00\x01\x17 \x12\x97\x80=D@o\x05S\xab\xcbu\x93h\xb7\xb05\r\xa3\xa6!\x04[G\x8dtVX\x87\xaan\x99\x01\x18 \x97J\x82\x1dSk\x03O\xd0\xce\xdf~\xfbw0\x83\xccb\xfcY\x06_L\x9b\xd3|\xd3\xb7\xcd\\\x9b3\x00\x01\x05 \xb2\x8d\xb420\x90=\xed\x82\xf8\xdf\xe3\xa3\xd5\xae\xe3\xbe\xad\x88\xe3o\xa9\xb0\xe6x\x90\xf3W\xbeo\xee#\x01\x06\xb6\x01\xc0F \xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04\xac q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04\xbaR\x9c\x01\xc0j \x8d\x14\xa0!lo\xaf\x02(\xba\xba\x88\x96\xfd-k\x8a\xea\x06\x80\xcf\xe7\x16\xe5\xd0L\x9e1Q\x82\xefl\xac \x93L3\xca\x11c(=\xc5\xed\x8aRl\xfez\xd3\x9e\xea\xce)\x0c\x8c\xe2\xffy\x03`[\xea\x7f?.\xba \xb7O\xab\x0f\xe3{\x8b\xac\x8a7$\x9cH\xf6x\xd9f\xbe\x8a\x97\xc6~\x17\x91\x97j\x0f\x00\x0f"\xd52\xbaR\x9dV\xb2!\x07q\x1f\xb6a\x95\x93\xfb\xc9\x82\xdf\x18\x9f\xd6P\xd2\x1bb\xbc\xf7#\xd3\xdd\xbdy7\xe4\t\xaej\x9b\xea\x04=\x01Br\xf1\xe7\xf2\xd3\\|\xaf\x01\xc6\x11\x820\xde\x0e]BaL|&\x8b`\x993\x8b\\\x82S\x0e\xb8\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00!\x07\x8d\x14\xa0!lo\xaf\x02(\xba\xba\x88\x96\xfd-k\x8a\xea\x06\x80\xcf\xe7\x16\xe5\xd0L\x9e1Q\x82\xefl=\x01[m\x83v\xc1v\xdcT\xa5/,-\xa4\x0ci=\xf4\xd9\xd18\xe0O\x96\x829\x87\x9b\x9c\x96Dt\xaas\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x02\x00\x00\x00\x03\x00\x00\x00!\x07\x93L3\xca\x11c(=\xc5\xed\x8aRl\xfez\xd3\x9e\xea\xce)\x0c\x8c\xe2\xffy\x03`[\xea\x7f?.=\x01[m\x83v\xc1v\xdcT\xa5/,-\xa4\x0ci=\xf4\xd9\xd18\xe0O\x96\x829\x87\x9b\x9c\x96Dt\xaa\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x02\x00\x00\x00\x03\x00\x00\x00!\x07\xb1\xa15\xd5*\x95\x1e\x01\x00\xe2\xc6L\xca\xd8\xd9\x92XM\x03Q\xb9\xda{}N\xe2\xf1\xca\xd1&\xa8\x04=\x01Br\xf1\xe7\xf2\xd3\\|\xaf\x01\xc6\x11\x820\xde\x0e]BaL|&\x8b`\x993\x8b\\\x82S\x0e\xb8s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00!\x07\xb2\x8d\xb420\x90=\xed\x82\xf8\xdf\xe3\xa3\xd5\xae\xe3\xbe\xad\x88\xe3o\xa9\xb0\xe6x\x90\xf3W\xbeo\xee#\r\x00|F\x1e]\x00\x00\x00\x00\x03\x00\x00\x00!\x07\xb7O\xab\x0f\xe3{\x8b\xac\x8a7$\x9cH\xf6x\xd9f\xbe\x8a\x97\xc6~\x17\x91\x97j\x0f\x00\x0f"\xd52=\x01[m\x83v\xc1v\xdcT\xa5/,-\xa4\x0ci=\xf4\xd9\xd18\xe0O\x96\x829\x87\x9b\x9c\x96Dt\xaa\x8c\xb3k80\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x01\x05 \x05/\x9b\x92\xfe\x84)\xe3L\x1c\x11\x07\x7f`!\x8c.\n\xaa\x84\xe3\xf2\xec|\xe26\x0e\xb4\x9b\xe550\x01\x06\xb6\x01\xc0F \xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d\xac |n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP\xbaR\x9c\x01\xc0j \xe6r\x85\xe7\\\x8a\xe5tB\x90\xef\xdf-C\x14\x8a\x8a\xd3{\xda[!\xf3\x89\xf1X;\xa6\xe6(\x96\xee\xac i\x94\x0c\x81\xcd\xb2\x17\xab\x86A\xc8\xbb!\x9fL\xad\xc9\r\xf1J\xa5\xc1l11\xac\xb7\x9f|\x11\xb4\xf6\xba \x9b\x105\xbc\xba\x1b\x96o\xff6\xa2\xc1\xb1R7\xbc\x99Q\xb9\x91Zr\xbd\xf4%/\xae_\x9a\x08\xb5\xff\xbaR\x9dV\xb2!\x07\x05/\x9b\x92\xfe\x84)\xe3L\x1c\x11\x07\x7f`!\x8c.\n\xaa\x84\xe3\xf2\xec|\xe26\x0e\xb4\x9b\xe550\r\x00|F\x1e]\x01\x00\x00\x00\x01\x00\x00\x00!\x07i\x94\x0c\x81\xcd\xb2\x17\xab\x86A\xc8\xbb!\x9fL\xad\xc9\r\xf1J\xa5\xc1l11\xac\xb7\x9f|\x11\xb4\xf6=\x01\xd6\xa0\xf1\xa1\x89\xe3\x84\t\xbe\xcaV\xd7\x97g/e\xb3\x7f\x99{\x8b)\x9axZ\xeb\x06\x9e\x13\xdft\xe2\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x03\x00\x00\x00\x01\x00\x00\x00!\x07|n:1\xc3+\xcb\x9e\xa2\x05ds")l[\xa3i6?\x13n\xf8\xeeZ\xcb!\xc8\xf9\xd5\x1eP=\x01\x08\xbeb^\x87gy\x83fF\xa6T\xed\x08\xca|C\x11\x9b\x03EP\x98\x14\xa0O\xde\x066\x7f\xfb\x08\x02\xe8\xbf\xf20\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00!\x07\x9b\x105\xbc\xba\x1b\x96o\xff6\xa2\xc1\xb1R7\xbc\x99Q\xb9\x91Zr\xbd\xf4%/\xae_\x9a\x08\xb5\xff=\x01\xd6\xa0\xf1\xa1\x89\xe3\x84\t\xbe\xcaV\xd7\x97g/e\xb3\x7f\x99{\x8b)\x9axZ\xeb\x06\x9e\x13\xdft\xe2\x8c\xb3k80\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00!\x07\xe6r\x85\xe7\\\x8a\xe5tB\x90\xef\xdf-C\x14\x8a\x8a\xd3{\xda[!\xf3\x89\xf1X;\xa6\xe6(\x96\xee=\x01\xd6\xa0\xf1\xa1\x89\xe3\x84\t\xbe\xcaV\xd7\x97g/e\xb3\x7f\x99{\x8b)\x9axZ\xeb\x06\x9e\x13\xdft\xe2s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x03\x00\x00\x00\x01\x00\x00\x00!\x07\xf6l0\xa0}\xbc\xfda\xe7\xc5\xb6\xfa\xcfNl\'\xf9G\xba\xfa\xcb\xb3\xfc\x0e\xa2\x81\xe0\x16~n\x94\x8d=\x01\x08\xbeb^\x87gy\x83fF\xa6T\xed\x08\xca|C\x11\x9b\x03EP\x98\x14\xa0O\xde\x066\x7f\xfb\x08s\xc5\xda\n0\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x02\x00\x00\x80\x01\x00\x00\x00\x01\x00\x00\x00\x00'
+    EXP_TR_MINIS_PSBT_B43 = "2+0M:*ILDQYN:FA2VEHKQ63OAENOFWPYRKA*/JXTUAIUQ/F8V2P2U/15CPXZPC6MRDM.5RR+:VRHCBI025RT8KUSR9$/1EQ8D5D86BQ+.QA9+$Y*FQI-AJW4HB2Y57BDE$X.-9R:/1B-BW-3S.UOYDMI/WOLJJ+VTCQECQ3+C91G5K7OSR96Q8.-Z+ZA66E96RJ5YT2*5:RB9-TBJ9F4ENHEK77//P*86FSM26G1S74HJ2$9UBSY+RAB9VP/3VSK1M3MUZCLBPRQSH7A4S3LC42ZEU7X93UKAWD$QDXK:T41-NVGQ0-5/U48574QI.ZFB5CO.7UJH+..EXQXU/OM--F4G*+$JCNBVC+Y4:--YJWJ9Y1Y3-0OL*FSCWB$ZVRKF-0M/Z4XXLJLJ6AILVQF$9YJ/1W$OF.T.AVK6+USK:0B60TLHJ:*1R*:*QPF48KP*RTXJQG84I*7NB7D8NF:X0MA9W9Z$C45G2D:8TREV59ZLC3G5FP8ZG-F-EFFEXGHBRAI+GLHU6Q+L50ZW.PR0GI/6/E72/81W::WJ+:Q9C89GCPM6AG7L0MWTN4L/EQJ:QP8UJ.TNQ4-.$1:X48$H-$E.MJ1DUT+T.CGEX1USNNC.TI+W+-L3U78GO:T:9R:/6YJ-B4TI2Y$.R2HA313-7GRAZ+YER6D4ZH5UX.FNCKJ2-N--M-4G0RF953GKW-MW3MVG0SOUIQC:DLLSNL588NFE4HKRMGJJ/NU4PFUOY+*ZB-4+P4PU*HLL*15K05LTH41+W6N547WSD:$FU9PAI68WUOVRQ7DRS09+YK$:KSV+*JX:P.45NIP/AM:ZLA1N/.K0$:N-MP+I.N89WCW*8-F7:KQQ*DNDSTQC$*H6CVCE.4*G+729:W9M-F1CTDP28R6DWH.JKNJGTYZVUWOKR684S4WHTTH*I1:G4TSB$DSVSM/T*ZAM3T9Q*NKWGKZL7UA3.SQ6A2IIZRADHA*SMASAWHEVU:RO9DB7NA65LOY5.$VU2.YI7WG0RKAFSUS.CTKM/.9EJ:0SSP1VNQX5$97HM1D6P*I4N$B$S$BB4HDU4C:MD89N6EPYRPPS4:GYR9TN9E96UJRW*EU4H$D6DC*.0J9P+H.+BRYGM$0SZI0-6W/X6UKPG8H-/QC$74-4K:C1JXTO.7QTOY24KE*E:-Q1.P3XSM$FAAM*Y6B6LTAS1VQJMI8YKI6.DE1338V$F$S/.IPP75$$VFW+MG1A:FXLMVD.Q73Z5MULV$QGJ5JY/0050-::MULH.+A.2LEMW92W8/*X+UN.5TBEPW9.-01G6T4U:L4:H6U30*WR4ZMBM6VJ6Q7OVWV1JK4U$R11IFLG:6PUHKNYEIXV+60UTL4NTGN$8GRUV2D5R+K/9OBO3IORN44L-7JJ-O7HNN*IE-IGAR*WUCKU5SCU9*0+*JP$4V/J9O.I6E4VX9WMMP+0-R6SFAJ+NJ2RDKDH4N:DQB8:.FYN3IK9/:WPH1TS-NVAHAUTWJXK6X7*5Y5C2V4N.199-4QSQT/B7ZYX16YF9PAV4DWKJT*1UGZUPNTJK/OC-01WFY35IY/BC02OTZ8QP.4L2KWQSTN+PIDQ*SYDH-1C9UQ-.G8YPM1O/8I92DOB/951U44D4QK4BXZBW/I+H4+PBUOJCC280BGUN5VI525F$0S:4G6M7CNB8ZNZDJ7:IKRH5+XZW*.2ZE6..PWJW178/3GL925KDR40T+6-XPJD9CEF1GQ6FXM:+Y.0:/WM:WGTRR.IEBA$QF963K445ME8NFRZ8//QWCU7S93R68*T*88UMYSTZSAS0FT89XRV-4N+Q0:XT2-0HU5+QG0S3DZ:2M9:1D2.V-16:G$BMDID6K.DXQ4CQZ4QACIIP.L$KLG9VLIK-HHV4N0PXP1XG07DAHSW07RXUQURG*/IS3$RB+X.W0-LRV3M90KE/E/K1CH$$JRGPEW*$50+X.93JN:S5RWT4NMO17ZSX25MGS71*2S*0HFFPM8SW4.CXNJAQW/UX-.8CA6HOI2:HGBT5V/H3R238:X97NBZJSWF/-8$FDRKRMVZFOQVQE5QYCV:151S-NY3$7Q:GTRDAB3Z$5M-R1$38GLLW8P$S47LRZB5RVQQVUY.$P2PLWZA8FBIM2WRPM*D34XCFC05$HX6EHM4F5QUP*$HOWGAY9IK-GC31.A23*NTPN1XR5Y$B*RP40P+X6ANI8KRQ-TY7$Z46/I.LRC55ZNV8J:QCN.B1M7B8/7:YNO410WAFGJ*8GD-0+XB:680J812L0:81$NPKW/.T37QMOAD$7G9GKWL2TMG6DOKZA-MK8+8SPZ$VOQTKG/7SZXLJK1L8$9SZ84RAI8K18G4BT.FDS$XA-G/Y584/39ETKU4LF5I7X0*X:/LLU.*:URSF:A18F/-3:4/QYS1V/K:8V+*F3QP*2Q7JI/+NHFZTDB/9W0NBJXUC8I3+X177NBS2.WDD1DQLWLC/Y:OITJ:F4-ZE0WXOWSQCJ/CZ$RU$SMIKL*.4X6D-9PSRR34NSOU.7LSXAQNEN5AYMFR*J*I.5$O3X.8.JVPZS$+Q73DBMD4Y5EIT3LAHJWRLWU+4$SJ88AAA.JNUPW.WIBI7JRL9C./MO*V:CAWRZ4/OH8X653SP*6ED:ZR25NGP-WQ6PM:/HKP0Z:1G+$-9.1:O$P9E2.4K.PN*Y//3U$5ORFNV29T6IV-CI/NP9/LHGSI+NQXSIO78UXEZT3XSX/0G7Z54/XE$V-1S5D*4KP/$IQ.E23.*XR/8$HK5-6Z+J3DYJTXG3IOSVWP$K1JQH-P2MZYS/GTEI03QTIP2RWM6I1EV3-W7NM*ZKN38KGG/CGNH/-CYGR$KVNLT9J$CB1$6ETSX$-HN4QQVV2TH.YW5S4/CBUR3Y-T0EBP::$D44YA$I**ZMM3/E*OXV:MX40067BGFKC*WUEV3Z7Q:CA*OYR2MKRY8OO.7.VQGEFWBIIQ2L7NTDBN+9BA3$7XPB:KYZV/GSLM:7LYI6C0V4AGCD*YKXXW*6C/DK0PB+-N1998D7JTP4J28ZGG*M/VV1F$FPCZ.3BN61OKD17+NU7ZYF$-03:EIGPJ*7U0-YH/5FJ.D/MRMFL+//JDKDOY.6SU$1IPF1CHDMA3FV.9B-VFC0$QMQDLRW05-VBTSP6PJSVOMUVZIS5N9$J*37$NC97ZLJ$C0B$SJ93$IGWDR6-/-ACZHS5WA97AW$3-H:DWA$MIZ190-7*G/LF9$J*CBRW51BXL4NBATDC55P++ZZYRG-K0WAAM5+9*LN9JV+CE2H313TA6F.XC6.:X-K++B.TZ3J+WV8O/R-CK1:L:9C38J0YL5LZ.GG797RO3XLZ$DEVLW69URIG*ML7-3NQHQXABICL9OXWT2$9+OK8Q+GTVC4Y*ELJK29EH1QEWVCC$UGZWFO8W9X7JOEH4W21WKJPL1U:93ZM+T0YHU8$O9B*LOOD$D:JVSV.OFPQ:YYXTSCO/GOY.XSM44RH8+Y.3HII7J7OH6FVM:WMPH0Q+1Z:44+DN.FF$2CZ*HSE15DIRCH3$H*JHPT6R:LH7$B:MBJG418TNRL7D/C6-Q1UTGZJMI-.-E:DX6439.RXYL+QSMCE3EQ849Q-:G4:O/D9LQ7Y-7PSZ7+MKI-4JBF:P7KV$U*JLRO4VXEAJYW/H75PKER$H2B7O:I-IW9-GM.MXJAZ$YXXO0L9FWCI8QOE0$9M4:M5GO6O5QQ/7:RA+HBDJCUCYNRUOE9*-ATGTTVNV4YLNU6M0EWECTAVJZ6YPJNYWOWE5F+KCHHNUC+93I+DM*2XHL-LPJFC6VO97MB$EQ3EAC:3+8C.HV48LLM0R8XXFF78PYOGF-V7JMP:W+6$OE7Q9B13GEL7PRZ4L/Y8T4GXKY:7FL2I2RMG5A+"
+    EXP_TR_MINIS_PSBT_B58 = "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"
+    EXP_TR_MINIS_PSBT_B64 = "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"
+    EXP_TR_MINIS_PSBT_UR_PSBT = UR("crypto-psbt", PSBT(EXP_TR_MINIS_PSBT).to_cbor())
+
+    SIGNED_EXP_TR_MINIS_PSBT = b'psbt\xff\x01\x00\xb4\x02\x00\x00\x00\x01\x7f\xca\x84\x9d\xd9\x85\xd8s\xa9Lz\xbd\x95\x05b\x1f<\xb1\xf3\x01:\x05j\xcda;\xc1\x8d\x88G\\\xf1\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03 \xa1\x07\x00\x00\x00\x00\x00"Q \x87\\?;;\x80\x10\xc0\xfe\x06\xe3\xdc\xcbj\xed\x00\xc4\x9a\r\x91?\x8d\xc3\x1a\xb1\xda%;\ne\x8a\x82@B\x0f\x00\x00\x00\x00\x00"Q \x8a2\xcfy}\x82v\xda\xd1\xda\xabAN\x8a\xcd\xfcH\xf5`\xdf\x9d\x89g)\x8fy\xa3)\xf3D\xe1\xc3\xda\x81\x07\x00\x00\x00\x00\x00"Q \x12Z\xa5\xd2\xc5\x8bR\xc8~\xbd\x8d\xbb\x1dK\r,\xea\x10\xf2\x16G\x98\x90g<\x88\xa4\x0cP\'\xff:\x00\x00\x00\x00\x00\x01\x01+\xe5n\x1e\x00\x00\x00\x00\x00"Q S+\x82\x18\xb4|S\xa2\xf3\x15\xb1RH\xd0\xc3\x1d\xde)\xb3\xe2\xd6M\r\xeaP\xdb\xce\xae\x13g\xf5\xfbA\x14h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87W\xbbd\x83\x10\xd8\xec\xd4H\x13\xda\x12\xc0!jXcWp\x08o\\/^j?\x182\x85U\xc4\xa9@\xf9:GjU\xfb$9\xa8>\xc8\xf3\xde@f\x8b\x87\x96I\x17\xe7\xaa\xc8y\xeb\x97\xf9GSX:\xf5+\x11eJ\x9bx\x18x\xaa\x1ax\xb8\x1d\xe9R\x0e\xe2jK\x8e\xadr\xcd\xc5VV\x1f\t\x11\xad\xcf\x93A\x14R\xb1/\x9c\xc6\xcd5\x8b\x97\xfa\xa0\xf1\xd0\x92F\xe3&\xe1\x1d\x07o`\x0e\xa7pns\xb7<n\x12e\xcbN\x85\xff6c|k\x1a\xe4\xf9K\xd6S\xe7km58\xa6&=\x9b\xc4\x83\xe1\x98\xf8\xf6\x8d\xfdz@\x04<\xc8F"\x889\xc5\x99\xa5G\xff;\x8f\xdd\x18MVG;\xcf\x1f\xd1]\x1634\xa4\xb8D\x1a\x08\x92\n1N\xea\xdd\xcd\x86\x96\x96\x80\x02^W\x7f#\xc6s\xb4Lp\xb2\x02\x8fMx\xc5\x14vy\xf7\x86\x00\x00\x00\x00'
+    SIGNED_EXP_TR_MINIS_PSBT_B43 = "4TT$EW2BC750K0.EQ*OESR*TGYF.-DD/LNKXNKCH-6XECST3IQQE+:F6.Y/0JLF7F+GJN5RT*NFF:IV5+NZPT63T2:7-N/5Z67XO/QU*-Y5A/*5HX89U7DJWQ0I-6YIYT15-50EHV:4HD0T5J+M:FBO80S+V8R.NKPC86Y:EM/J8WSHFX$S$IQD.Q0/GQHLNY$R8$MRS6V*Y5VE6TMNMZU4$$AL/0P1*0VIWH:F5SI/UIRS46O64DL:VURGAY39L/FWKSPR9FWE6I43KBC27/1GSJN+FXOX*:Q3O-6BYTXWK5Z93Y3979VKYOP8VE/EQ6XUV14$J06O.NMPACBX/N.2-V+ODBC0BRC/:GAC*A:146:/4XWY94K.GY-RI$-6*UVV8GEA/M*7$TY$+15E8B4LQ3$1O0JPCC7YG.PMR$63RXYNOO/J3KXYAC:.YYF9FYURTB8OJIC**DC41URJ.VH12UB-6:HTSE.1-ANI6ZE2/E.AAX61MM494QM*95OOGE5CANW*GA6HO5AG1$0T6PWYW*ER5.LB-FS7RGN656BK4DZP*O2C305DXV4AR-JN:RM+*/-*L:ZU0XFBF1V4CCAT6V7NIJ1/D8S:Z74$*ZXJ2ACRGY-:BJ73*9.-7WGG/J2XX1XVC8OM8CQ3N3J.EEN+6R.BV1MQAOYA$HN1V-WP$J0C/IGLNUOXNQD+71W4N1X2C58H5V7V.U$RDWWI2E823-R7HL1E6B1N"
+    SIGNED_EXP_TR_MINIS_PSBT_B58 = "yBmUhxPER5LACMorWNH5G7qrTgLkwgd6sudwBgzFT78eurc9c2xwb7bhjyY7codASWJZsTU7tAAo51pgQMghHf64iBgA4V18jHKvEUSV9c47uTVoug7uZsx6DxcSSCnduUrh9L5oxoScPMkBR2dUjkEJYL9tJfZdtfztPy8m2MP587kj375NhNu3vHPb5mNrDaLtLC2rh5DZ6cASa4Vt1taRtpGLquwJE9NPQ7V6eEYvhpagxZvCvErNQZaSnhQQ3hgbHQgwQegmHehkXpVLTV3NqLh3uEWUosqNNhZesCRP9BTwp41dGETHi2Ksz8YRmjnzYai1mVfLh4i7RahVTXmPVEfQkcHJLi9FseXBdy9wYcpyn4KvmDLdH5rGvxc3R3HaFCP4vA9qT98EqaHmaee6ufwyEbm4SBYz2Cymj6thv1iAxDS2VPiqaQe43AEP4qXq6iQGHNfXgw39BkxRzTpZxoQE5monTxCLGbWRy6LEeGHgPttLKC2HBJpBFitTSVrWRHQSdztQyygTK2y3r6247nfrYnZDQMnvz55e2J4fnmt7u8aMUMoB2zZvWL4VyRQ43pgVhBsDKg1jhNJ5WbgSa26PuUYdAjcPkQwsE1zsWdRjPwXpiGx1jwNgx9TJQxWLPg7FpNnEvm5pgVxGcgop47g1RtLjLNN7J3BPA4CF"
+    SIGNED_EXP_TR_MINIS_PSBT_B64 = "cHNidP8BALQCAAAAAX/KhJ3ZhdhzqUx6vZUFYh88sfMBOgVqzWE7wY2IR1zxAAAAAAD9////AyChBwAAAAAAIlEgh1w/OzuAEMD+BuPcy2rtAMSaDZE/jcMasdolOwplioJAQg8AAAAAACJRIIoyz3l9gnba0dqrQU6KzfxI9WDfnYlnKY95oynzROHD2oEHAAAAAAAiUSASWqXSxYtSyH69jbsdSw0s6hDyFkeYkGc8iKQMUCf/OgAAAAAAAQEr5W4eAAAAAAAiUSBTK4IYtHxTovMVsVJI0MMd3imz4tZNDepQ286uE2f1+0EUaJVy4osP7anWmBwCN9nl3tv+wW3nFD9oCgLtXRWfdYdXu2SDENjs1EgT2hLAIWpYY1dwCG9cL15qPxgyhVXEqUD5OkdqVfskOag+yPPeQGaLh5ZJF+eqyHnrl/lHU1g69SsRZUqbeBh4qhp4uB3pUg7iakuOrXLNxVZWHwkRrc+TQRRSsS+cxs01i5f6oPHQkkbjJuEdB29gDqdwbnO3PG4SZctOhf82Y3xrGuT5S9ZT52ttNTimJj2bxIPhmPj2jf16QAQ8yEYiiDnFmaVH/zuP3RhNVkc7zx/RXRYzNKS4RBoIkgoxTurdzYaWloACXld/I8ZztExwsgKPTXjFFHZ594YAAAAA"
+    SIGNED_EXP_TR_MINIS_PSBT_UR_PSBT = UR(
+        "crypto-psbt", PSBT(SIGNED_EXP_TR_MINIS_PSBT).to_cbor()
+    )
+    SIGNED_EXP_TR_MINIS_PSBT_SD = b"b"
+    SIGNED_EXP_TR_MINIS_PSBT_B64_SD = "YQ=="
 
     return namedtuple(
         "TestData",
         [
             "TEST_MNEMONIC",
+            "TEST_MNEMONIC_BIP85_I0",
             "P2PKH_PSBT",
             "P2PKH_PSBT_B43",
             "P2PKH_PSBT_B58",
@@ -270,16 +310,41 @@ def tdata(mocker):
             "MINIS_TR_PSBT_B58",
             "MINIS_TR_PSBT_B64",
             "MINIS_TR_PSBT_UR_PSBT",
-            "SIGNED_MINIS_TR_PSBT",
-            "SIGNED_MINIS_TR_PSBT_B43",
-            "SIGNED_MINIS_TR_PSBT_B58",
-            "SIGNED_MINIS_TR_PSBT_B64",
-            "SIGNED_MINIS_TR_PSBT_UR_PSBT",
-            "SIGNED_MINIS_TR_PSBT_SD",
-            "SIGNED_MINIS_TR_PSBT_B64_SD",
+            "IN_KEY_SIGNED_MINIS_TR_PSBT",
+            "IN_KEY_SIGNED_MINIS_TR_PSBT_B43",
+            "IN_KEY_SIGNED_MINIS_TR_PSBT_B58",
+            "IN_KEY_SIGNED_MINIS_TR_PSBT_B64",
+            "IN_KEY_SIGNED_MINIS_TR_PSBT_UR_PSBT",
+            "IN_KEY_SIGNED_MINIS_TR_PSBT_SD",
+            "IN_KEY_SIGNED_MINIS_TR_PSBT_B64_SD",
+            "RECOV_M_TR_PSBT",
+            "RECOV_M_TR_PSBT_B43",
+            "RECOV_M_TR_PSBT_B58",
+            "RECOV_M_TR_PSBT_B64",
+            "RECOV_M_TR_PSBT_UR_PSBT",
+            "TAP_TREE_SIGNED_RECOV_PSBT",
+            "TAP_TREE_SIGNED_RECOV_PSBT_B43",
+            "TAP_TREE_SIGNED_RECOV_PSBT_B58",
+            "TAP_TREE_SIGNED_RECOV_PSBT_B64",
+            "TAP_TREE_SIGNED_RECOV_PSBT_UR_PSBT",
+            "TAP_TREE_SIGNED_RECOV_PSBT_SD",
+            "TAP_TREE_SIGNED_RECOV_PSBT_B64_SD",
+            "EXP_TR_MINIS_PSBT",
+            "EXP_TR_MINIS_PSBT_B43",
+            "EXP_TR_MINIS_PSBT_B58",
+            "EXP_TR_MINIS_PSBT_B64",
+            "EXP_TR_MINIS_PSBT_UR_PSBT",
+            "SIGNED_EXP_TR_MINIS_PSBT",
+            "SIGNED_EXP_TR_MINIS_PSBT_B43",
+            "SIGNED_EXP_TR_MINIS_PSBT_B58",
+            "SIGNED_EXP_TR_MINIS_PSBT_B64",
+            "SIGNED_EXP_TR_MINIS_PSBT_UR_PSBT",
+            "SIGNED_EXP_TR_MINIS_PSBT_SD",
+            "SIGNED_EXP_TR_MINIS_PSBT_B64_SD",
         ],
     )(
         TEST_MNEMONIC,
+        TEST_MNEMONIC_BIP85_I0,
         P2PKH_PSBT,
         P2PKH_PSBT_B43,
         P2PKH_PSBT_B58,
@@ -380,13 +445,37 @@ def tdata(mocker):
         MINIS_TR_PSBT_B58,
         MINIS_TR_PSBT_B64,
         MINIS_TR_PSBT_UR_PSBT,
-        SIGNED_MINIS_TR_PSBT,
-        SIGNED_MINIS_TR_PSBT_B43,
-        SIGNED_MINIS_TR_PSBT_B58,
-        SIGNED_MINIS_TR_PSBT_B64,
-        SIGNED_MINIS_TR_PSBT_UR_PSBT,
-        SIGNED_MINIS_TR_PSBT_SD,
-        SIGNED_MINIS_TR_PSBT_B64_SD,
+        IN_KEY_SIGNED_MINIS_TR_PSBT,
+        IN_KEY_SIGNED_MINIS_TR_PSBT_B43,
+        IN_KEY_SIGNED_MINIS_TR_PSBT_B58,
+        IN_KEY_SIGNED_MINIS_TR_PSBT_B64,
+        IN_KEY_SIGNED_MINIS_TR_PSBT_UR_PSBT,
+        IN_KEY_SIGNED_MINIS_TR_PSBT_SD,
+        IN_KEY_SIGNED_MINIS_TR_PSBT_B64_SD,
+        RECOV_M_TR_PSBT,
+        RECOV_M_TR_PSBT_B43,
+        RECOV_M_TR_PSBT_B58,
+        RECOV_M_TR_PSBT_B64,
+        RECOV_M_TR_PSBT_UR_PSBT,
+        TAP_TREE_SIGNED_RECOV_PSBT,
+        TAP_TREE_SIGNED_RECOV_PSBT_B43,
+        TAP_TREE_SIGNED_RECOV_PSBT_B58,
+        TAP_TREE_SIGNED_RECOV_PSBT_B64,
+        TAP_TREE_SIGNED_RECOV_PSBT_UR_PSBT,
+        TAP_TREE_SIGNED_RECOV_PSBT_SD,
+        TAP_TREE_SIGNED_RECOV_PSBT_B64_SD,
+        EXP_TR_MINIS_PSBT,
+        EXP_TR_MINIS_PSBT_B43,
+        EXP_TR_MINIS_PSBT_B58,
+        EXP_TR_MINIS_PSBT_B64,
+        EXP_TR_MINIS_PSBT_UR_PSBT,
+        SIGNED_EXP_TR_MINIS_PSBT,
+        SIGNED_EXP_TR_MINIS_PSBT_B43,
+        SIGNED_EXP_TR_MINIS_PSBT_B58,
+        SIGNED_EXP_TR_MINIS_PSBT_B64,
+        SIGNED_EXP_TR_MINIS_PSBT_UR_PSBT,
+        SIGNED_EXP_TR_MINIS_PSBT_SD,
+        SIGNED_EXP_TR_MINIS_PSBT_B64_SD,
     )
 
 
@@ -868,7 +957,7 @@ def test_sign_miniscript_from_sdcard(mocker, m5stickv, tdata):
         assert mock_file.write_data == case[2]
 
 
-def test_sign_tr_miniscript(mocker, m5stickv, tdata):
+def test_sign_tr_miniscript_internal_key(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
     from krux.key import Key, TYPE_MINISCRIPT, P2TR
@@ -879,11 +968,15 @@ def test_sign_tr_miniscript(mocker, m5stickv, tdata):
         Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
     )
     cases = [
-        (tdata.MINIS_TR_PSBT, FORMAT_NONE, tdata.SIGNED_MINIS_TR_PSBT),
-        (tdata.MINIS_TR_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_MINIS_TR_PSBT_B43),
-        (tdata.MINIS_TR_PSBT_B58, FORMAT_PMOFN, tdata.SIGNED_MINIS_TR_PSBT_B58),
-        (tdata.MINIS_TR_PSBT_B64, FORMAT_PMOFN, tdata.SIGNED_MINIS_TR_PSBT_B64),
-        (tdata.MINIS_TR_PSBT_UR_PSBT, FORMAT_UR, tdata.SIGNED_MINIS_TR_PSBT_UR_PSBT),
+        (tdata.MINIS_TR_PSBT, FORMAT_NONE, tdata.IN_KEY_SIGNED_MINIS_TR_PSBT),
+        (tdata.MINIS_TR_PSBT_B43, FORMAT_PMOFN, tdata.IN_KEY_SIGNED_MINIS_TR_PSBT_B43),
+        (tdata.MINIS_TR_PSBT_B58, FORMAT_PMOFN, tdata.IN_KEY_SIGNED_MINIS_TR_PSBT_B58),
+        (tdata.MINIS_TR_PSBT_B64, FORMAT_PMOFN, tdata.IN_KEY_SIGNED_MINIS_TR_PSBT_B64),
+        (
+            tdata.MINIS_TR_PSBT_UR_PSBT,
+            FORMAT_UR,
+            tdata.IN_KEY_SIGNED_MINIS_TR_PSBT_UR_PSBT,
+        ),
     ]
 
     for case in cases:
@@ -899,7 +992,7 @@ def test_sign_tr_miniscript(mocker, m5stickv, tdata):
         assert signer.psbt_qr() == (case[2], case[1])
 
 
-def test_sign_tr_miniscript_from_sdcard(mocker, m5stickv, tdata):
+def test_sign_tr_miniscript_internal_key_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
     from krux.key import Key, TYPE_MINISCRIPT, P2TR
@@ -910,8 +1003,12 @@ def test_sign_tr_miniscript_from_sdcard(mocker, m5stickv, tdata):
         Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
     )
     cases = [
-        (tdata.MINIS_TR_PSBT, FORMAT_NONE, tdata.SIGNED_MINIS_TR_PSBT_SD),
-        (tdata.MINIS_TR_PSBT_B64, FORMAT_NONE, tdata.SIGNED_MINIS_TR_PSBT_B64_SD),
+        (tdata.MINIS_TR_PSBT, FORMAT_NONE, tdata.IN_KEY_SIGNED_MINIS_TR_PSBT_SD),
+        (
+            tdata.MINIS_TR_PSBT_B64,
+            FORMAT_NONE,
+            tdata.IN_KEY_SIGNED_MINIS_TR_PSBT_B64_SD,
+        ),
     ]
 
     for i, case in enumerate(cases):
@@ -928,6 +1025,119 @@ def test_sign_tr_miniscript_from_sdcard(mocker, m5stickv, tdata):
             with open("/sd/" + "dummy-signed.psbt", "wb") as f:
                 signer.psbt.write_to(f)
         assert mock_file.write_data == case[2]
+
+
+def test_sign_tr_miniscript_tap_tree(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(
+        Key(
+            tdata.TEST_MNEMONIC_BIP85_I0,
+            TYPE_MINISCRIPT,
+            NETWORKS["test"],
+            script_type=P2TR,
+        )
+    )
+    cases = [
+        (tdata.MINIS_TR_PSBT, FORMAT_NONE, tdata.TAP_TREE_SIGNED_RECOV_PSBT),
+        (tdata.MINIS_TR_PSBT_B43, FORMAT_PMOFN, tdata.TAP_TREE_SIGNED_RECOV_PSBT_B43),
+        (tdata.MINIS_TR_PSBT_B58, FORMAT_PMOFN, tdata.TAP_TREE_SIGNED_RECOV_PSBT_B58),
+        (tdata.MINIS_TR_PSBT_B64, FORMAT_PMOFN, tdata.TAP_TREE_SIGNED_RECOV_PSBT_B64),
+        (
+            tdata.MINIS_TR_PSBT_UR_PSBT,
+            FORMAT_UR,
+            tdata.TAP_TREE_SIGNED_RECOV_PSBT_UR_PSBT,
+        ),
+    ]
+
+    for case in cases:
+        signer = PSBTSigner(wallet, case[0], case[1])
+        signer.sign()
+        assert signer.psbt_qr() == (case[2], case[1])
+
+    # Repeat signatures with descriptor loaded and more checks
+    wallet.load(TR_MINISCRIPT, FORMAT_NONE)
+    for case in cases:
+        signer = PSBTSigner(wallet, case[0], case[1])
+        signer.sign()
+        assert signer.psbt_qr() == (case[2], case[1])
+
+
+def test_sign_tr_miniscript_tap_tree_from_sdcard(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(
+        Key(
+            tdata.TEST_MNEMONIC_BIP85_I0,
+            TYPE_MINISCRIPT,
+            NETWORKS["test"],
+            script_type=P2TR,
+        )
+    )
+    cases = [
+        (tdata.MINIS_TR_PSBT, FORMAT_NONE, tdata.TAP_TREE_SIGNED_RECOV_PSBT_SD),
+        (tdata.MINIS_TR_PSBT_B64, FORMAT_NONE, tdata.TAP_TREE_SIGNED_RECOV_PSBT_B64_SD),
+    ]
+
+    for i, case in enumerate(cases):
+        mock_file = MockFile(case[0])
+        mocker.patch("builtins.open", mock_open(mock_file))
+        signer = PSBTSigner(wallet, None, case[1], "dummy.psbt")
+        signer.sign(trim=False)
+        if i == 1:
+            assert signer.is_b64_file
+            signed_psbt, _ = signer.psbt_qr()
+            with open("/sd/" + "dummy-signed.psbt", "w") as f:
+                f.write(signed_psbt)
+        else:
+            with open("/sd/" + "dummy-signed.psbt", "wb") as f:
+                signer.psbt.write_to(f)
+        assert mock_file.write_data == case[2]
+
+
+# TODO: Investigate! On tests, different signatures are being eventually produced.
+# On device, signatures seems to be constant, matching those defined above in tdata
+def test_sign_tr_expanding_multisig(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
+    )
+    cases = [
+        (tdata.EXP_TR_MINIS_PSBT, FORMAT_NONE, tdata.SIGNED_EXP_TR_MINIS_PSBT),
+        (tdata.EXP_TR_MINIS_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_EXP_TR_MINIS_PSBT_B43),
+        (tdata.EXP_TR_MINIS_PSBT_B58, FORMAT_PMOFN, tdata.SIGNED_EXP_TR_MINIS_PSBT_B58),
+        (tdata.EXP_TR_MINIS_PSBT_B64, FORMAT_PMOFN, tdata.SIGNED_EXP_TR_MINIS_PSBT_B64),
+        (
+            tdata.EXP_TR_MINIS_PSBT_UR_PSBT,
+            FORMAT_UR,
+            tdata.SIGNED_EXP_TR_MINIS_PSBT_UR_PSBT,
+        ),
+    ]
+
+    for case in cases:
+        signer = PSBTSigner(wallet, case[0], case[1])
+        signer.sign()
+        assert signer.psbt_qr() == (case[2], case[1])
+
+    # Repeat signatures with descriptor loaded and more checks
+    wallet.load(TR_EXP_MULTI_MINISCRIPT, FORMAT_NONE)
+    for case in cases:
+        signer = PSBTSigner(wallet, case[0], case[1])
+        signer.sign()
+        assert signer.psbt_qr() == (case[2], case[1])
 
 
 def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
@@ -1202,6 +1412,56 @@ def test_outputs_tr_miniscript(mocker, m5stickv, tdata):
             ],
         ),
     ]
+    for case in cases:
+        wallet = case[2]
+        signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
+        outputs, _ = signer.outputs()
+        assert outputs == case[1]
+        wallet.load(case[3], FORMAT_NONE)
+        signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
+        outputs, _ = signer.outputs()
+        assert outputs == case[4]
+
+
+def test_outputs_tr_miniscript_provably_unspendable(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        # 0 - PSBT
+        # 1 - Expected outputs without descriptor
+        # 2 - Wallet
+        # 3 - Descriptor
+        # 4 - Expected outputs with descriptor
+        (
+            tdata.EXP_TR_MINIS_PSBT,
+            [
+                "Inputs (1): ₿\u20090.01 994 469\n\nSpend (3): ₿\u20090.01 991 994\n\nFee: ₿\u20090.00 002 475 (0.2%)",
+                "1. Spend: \n\ntb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c\n\n₿\u20090.00 500 000",
+                "2. Spend: \n\ntb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu\n\n₿\u20090.01 000 000",
+                "3. Spend: \n\ntb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct\n\n₿\u20090.00 491 994",
+            ],
+            Wallet(
+                Key(
+                    tdata.TEST_MNEMONIC,
+                    TYPE_MINISCRIPT,
+                    NETWORKS["test"],
+                    script_type=P2TR,
+                )
+            ),
+            TR_EXP_MULTI_MINISCRIPT,
+            [
+                "Inputs (1): ₿\u20090.01 994 469\n\nSpend (1): ₿\u20090.01 000 000\n\nSelf-transfer or Change (2): ₿\u20090.00 991 994\n\nFee: ₿\u20090.00 002 475 (0.2%)",
+                "1. Spend: \n\ntb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu\n\n₿\u20090.01 000 000",
+                "1. Self-transfer: \n\ntb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c\n\n₿\u20090.00 500 000",
+                "1. Change: \n\ntb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct\n\n₿\u20090.00 491 994",
+            ],
+        ),
+    ]
+
     for case in cases:
         wallet = case[2]
         signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
