@@ -816,7 +816,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/48'/0'/0'/2'\nPSBT: m/48'/1'/0'/2'"
+                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h"
             ),
             mocker.call(
                 "PSBT policy:\np2wsh\n2 of 3\n⊚"
@@ -1045,7 +1045,7 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84'/0'/0'\nPSBT: m/84'/1'/0'"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
             ),
             mocker.call("Processing.."),
             mocker.call("Warning: High fees!\n799.7% of the amount."),
@@ -1095,7 +1095,7 @@ def test_sign_self(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84'/0'/0'\nPSBT: m/84'/1'/0'"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
             ),
             mocker.call("Processing.."),
             mocker.call("Warning: High fees!\n799.7% of the amount."),
@@ -1146,7 +1146,7 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84'/0'/0'\nPSBT: m/84'/1'/0'"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
             ),
             mocker.call("Processing.."),
             mocker.call("Warning: High fees!\n235.9% of the amount."),

@@ -56,9 +56,9 @@ from ..settings import (
 from ..key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
 
 PASSPHRASE_MAX_LEN = 200
-DERIVATION_KEYPAD = "123456789/0'"
+DERIVATION_KEYPAD = "123456789/0h"
 
-MINISCRIPT_DEFAULT_DERIVATION = "m/48'/0'/0'/2'"
+MINISCRIPT_DEFAULT_DERIVATION = "m/48h/0h/0h/2h"
 
 
 class PassphraseEditor(Page):
@@ -310,11 +310,11 @@ class WalletSettings(Page):
         elif policy_type == TYPE_MINISCRIPT:
             # For now, miniscript is the same as multisig
             derivation_path += str(MINISCRIPT_PURPOSE)
-        derivation_path += "'/"
-        derivation_path += "0'" if network == NETWORKS[MAIN_TXT] else "1'"
-        derivation_path += "/" + str(account) + "'"
+        derivation_path += "h/"
+        derivation_path += "0h" if network == NETWORKS[MAIN_TXT] else "1h"
+        derivation_path += "/" + str(account) + "h"
         if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
-            derivation_path += "/2'"
+            derivation_path += "/2h"
         return derivation_path
 
     def _derivation_path(self, derivation):
@@ -337,7 +337,7 @@ class WalletSettings(Page):
                     valid_nodes = False
                     break
                 try:
-                    if node[-1] == "'":
+                    if node[-1] == "h":
                         node = node[:-1]
                     if not 0 <= int(node) < HARDENED_INDEX:
                         raise ValueError
@@ -353,7 +353,7 @@ class WalletSettings(Page):
             # Check if all nodes are hardened
             not_hardened_txt = ""
             for i, node in enumerate(nodes):
-                if node[-1] != "'":
+                if node[-1] != "h":
                     not_hardened_txt += "Node {}: {}\n".format(i, node)
             if not_hardened_txt:
                 self.ctx.display.clear()

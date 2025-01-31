@@ -225,10 +225,10 @@ class PSBTSigner:
                 textual_path = "m"
                 for index in derivation_path[:der_path_nodes]:
                     if index >= 2**31:
-                        textual_path += "/{}'".format(index - 2**31)
+                        textual_path += "/{}h".format(index - 2**31)
                     else:
                         textual_path += "/{}".format(index)
-                if textual_path != self.wallet.key.derivation.replace("h", "'"):
+                if textual_path != self.wallet.key.derivation:
                     if textual_path not in mismatched_paths:
                         mismatched_paths.append(textual_path)
         if mismatched_paths:

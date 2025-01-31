@@ -206,7 +206,7 @@ class WalletDescriptor(Page):
             if key.origin:
                 key_derivation_str = DERIVATION_PATH_SYMBOL
                 key_derivation_str += " m"
-                key_derivation_str += key_origin_str[8:].replace("h", "'")
+                key_derivation_str += key_origin_str[8:]
                 self.ctx.display.draw_string(
                     DEFAULT_PADDING + 3 * FONT_WIDTH,
                     offset_y,
