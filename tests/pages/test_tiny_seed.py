@@ -330,7 +330,7 @@ def test_tinyscanner_initializes_tinyseed_with_label(multiple_devices, mocker):
                 tiny_scanner = TinyScanner(ctx, grid_type=grid_type)
             else:
                 tiny_scanner = TinyScanner(ctx)
-            assert tiny_scanner.tiny_seed.label == expected_label
+            assert tiny_scanner.label == expected_label
         else:
             with pytest.raises(expected_exception):
                 tiny_scanner = TinyScanner(ctx, grid_type=grid_type)
