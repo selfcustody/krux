@@ -715,6 +715,62 @@ def test_init_fails_on_invalid_psbt_from_sdcard(mocker, m5stickv, tdata):
         PSBTSigner(wallet, None, FORMAT_NONE, "dummy.psbt")
 
 
+def test_init_singlesig_fails_not_singlesig(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        tdata.P2WSH_PSBT,
+        tdata.MINIS_P2WSH_PSBT,
+        tdata.MINIS_TR_PSBT,
+    ]
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    for case in cases:
+        with pytest.raises(ValueError, match="Invalid PSBT: Not a single-sig PSBT"):
+            PSBTSigner(wallet, case, FORMAT_NONE)
+
+
+def test_init_singlesig_fails_not_multisig(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MULTISIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        tdata.P2PKH_PSBT,
+        tdata.MINIS_P2WSH_PSBT,
+        tdata.MINIS_TR_PSBT,
+    ]
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
+    for case in cases:
+        with pytest.raises(ValueError, match="Invalid PSBT: Not a multisig PSBT"):
+            PSBTSigner(wallet, case, FORMAT_NONE)
+
+
+def test_init_singlesig_fails_not_miniscript(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        tdata.P2PKH_PSBT,
+        tdata.P2WSH_PSBT,
+    ]
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"]))
+    for case in cases:
+        with pytest.raises(ValueError, match="Invalid PSBT: Not a miniscript PSBT"):
+            PSBTSigner(wallet, case, FORMAT_NONE)
+
+
 def test_sign_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner

@@ -176,6 +176,7 @@ class PSBTSigner:
         if self.wallet.is_miniscript():
             if not is_miniscript(self.policy):
                 raise ValueError("Not a miniscript PSBT")
+                # Should we check/raise non matching WSH/TR?
         elif self.wallet.is_multisig():
             if not is_multisig(self.policy):
                 raise ValueError("Not a multisig PSBT")

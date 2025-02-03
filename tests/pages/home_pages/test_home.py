@@ -1,6 +1,7 @@
 import pytest
 from ...shared_mocks import MockPrinter
 from .. import create_ctx
+from ...test_psbt import tdata as psbt_tdata
 
 
 @pytest.fixture
@@ -824,6 +825,120 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
                 + "26bb83c4\n⊚"
                 + THIN_SPACE
                 + "0208cb77\n⊚"
+                + THIN_SPACE
+                + "73c5da0a"
+            ),
+        ]
+    )
+
+    # signed from/to SD card
+    mock_utils.return_value.load_file.assert_called_once_with(
+        [PSBT_FILE_EXTENSION, B64_FILE_EXTENSION],
+        prompt=False,
+        only_get_filename=True,
+    )
+    mock_set_filename.assert_called_once_with(
+        PSBT_FILE_NAME,
+        "QRCode",
+        SIGNED_FILE_SUFFIX,
+        PSBT_FILE_EXTENSION,
+    )
+
+    # no qrcode
+    home.display_qr_codes.assert_not_called()
+
+
+def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.key import Key, NETWORKS, TYPE_MINISCRIPT, P2TR
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.sd_card import (
+        PSBT_FILE_EXTENSION,
+        B64_FILE_EXTENSION,
+        SIGNED_FILE_SUFFIX,
+    )
+    from krux.settings import THIN_SPACE
+
+    PSBT_FILE_NAME = "test.psbt"
+    SIGNED_PSBT_FILE_NAME = "test-signed.psbt"
+
+    wallet = Wallet(
+        # Use mainnet key with testnet psbt to trigger a path mismatch warning
+        Key(
+            psbt_tdata.TEST_MNEMONIC,
+            TYPE_MINISCRIPT,
+            NETWORKS["main"],
+            script_type=P2TR,
+        )
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # Wallet not loaded, proceed?
+        BUTTON_PAGE,  # Move to "Load from SD card"
+        BUTTON_ENTER,  # Load from SD card
+        BUTTON_ENTER,  # Path mismatch ACK
+        BUTTON_ENTER,  # PSBT Policy ACK
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_PAGE,  # Move to "Sign to QR SD card"
+        BUTTON_ENTER,  # Sign to SD card
+    ]
+
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    home = Home(ctx)
+
+    mocker.spy(home, "display_qr_codes")
+    mocker.spy(ctx.display, "draw_centered_text")
+
+    # SD available
+    mocker.patch.object(home, "has_sd_card", new=lambda: True)
+    mock_utils = mocker.patch("krux.pages.utils.Utils")
+    mock_utils.return_value.load_file.return_value = (PSBT_FILE_NAME, None)
+    # Mock for reading from input file
+    mock_open_read = mocker.mock_open(read_data=psbt_tdata.RECOV_M_TR_PSBT)
+    # Mock for writing to output file
+    mock_open_write = mocker.mock_open()
+    # Ensure the write method returns the number of bytes written
+    mock_open_write.return_value.write.side_effect = lambda x: len(x)
+    mocker.patch(
+        "builtins.open",
+        side_effect=[mock_open_read.return_value, mock_open_write.return_value],
+    )
+    mock_set_filename = mocker.patch(
+        "krux.pages.file_operations.SaveFile.set_filename",
+        return_value=SIGNED_PSBT_FILE_NAME,
+    )
+
+    # Wallet output descriptor not loaded
+    assert ctx.wallet.is_loaded() == wallet.is_loaded() == False
+
+    # Wallet is multisig
+    assert ctx.wallet.is_miniscript() == wallet.is_miniscript() == True
+
+    home.sign_psbt()
+
+    # all inputs were used/consumed
+    print(ctx.input.wait_for_button.call_count, len(btn_seq))
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+    # Wallet output descriptor not loaded had to show a warning
+    ctx.display.draw_centered_text.assert_any_call(
+        "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+    )
+
+    # These two calls must have occured in sequence
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h"
+            ),
+            mocker.call(
+                "PSBT policy:\np2tr"
+                + "\n⊚"
+                + THIN_SPACE
+                + "02e8bff2"
+                + "\n⊚"
                 + THIN_SPACE
                 + "73c5da0a"
             ),
