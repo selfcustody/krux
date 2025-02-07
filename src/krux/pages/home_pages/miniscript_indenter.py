@@ -45,11 +45,16 @@ class MiniScriptIndenter:
         """
         Indent a MiniScript expression, breaking lines as needed to fit within max_line_width.
         """
+        multiple_tap_scripts = "{" in expression
         tree = self._parse_expression(expression)
         indented_lines = self._node_to_indented_string(tree, max_line_width)
         final_lines = []
         for line in indented_lines:
             final_lines.extend(self._break_lines(line, max_line_width))
+        if multiple_tap_scripts:
+            # replace penultimate ")" of the last line by "}"
+            line = final_lines[-1]
+            final_lines[-1] = line[:-2] + "}" + line[-1]
         return final_lines
 
     def _split_top_level_args(self, s, delimiter=","):

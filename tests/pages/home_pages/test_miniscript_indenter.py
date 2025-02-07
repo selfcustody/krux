@@ -218,12 +218,13 @@ andor(
 """,
         ),
         (
-            "tr(A, and_v(v:pk(B,older(65535)))",
+            "tr(A,and_v(v:pk(B),older(65535)))",
             """
 tr(
  A,
  and_v(
-  v:pk(B,older(6553))))
+  v:pk(B),
+  older(65535)))
 """,
         ),
         (
@@ -234,7 +235,7 @@ tr(
  {and_v(
   v:multi_a(2,B,C,D),
   older(6)),
- multi_a(2,F,G)))
+ multi_a(2,F,G)})
 """,
         ),
     ]
@@ -244,6 +245,7 @@ tr(
         indented = MiniScriptIndenter().indent(case[0], max_line_width=25)
         indented = "\n".join(indented)
         assert indented == case[1].strip()
+        assert indented.replace("\n", "").replace(" ", "") == case[0]
 
         # Case for Yahboom/WonderMV
         indented = MiniScriptIndenter().indent(case[0], max_line_width=27)
@@ -254,3 +256,4 @@ tr(
         else:
             # Results are the same as for Amigo
             assert indented == case[1].strip()
+        assert indented.replace("\n", "").replace(" ", "") == case[0]
