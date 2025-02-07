@@ -734,7 +734,7 @@ def test_init_singlesig_fails_not_singlesig(mocker, m5stickv, tdata):
             PSBTSigner(wallet, case, FORMAT_NONE)
 
 
-def test_init_singlesig_fails_not_multisig(mocker, m5stickv, tdata):
+def test_init_multisig_fails_not_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
     from krux.key import Key, TYPE_MULTISIG
@@ -753,7 +753,7 @@ def test_init_singlesig_fails_not_multisig(mocker, m5stickv, tdata):
             PSBTSigner(wallet, case, FORMAT_NONE)
 
 
-def test_init_singlesig_fails_not_miniscript(mocker, m5stickv, tdata):
+def test_init_wsh_miniscript_fails_not_wsh_miniscript(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
     from krux.key import Key, TYPE_MINISCRIPT
@@ -763,11 +763,51 @@ def test_init_singlesig_fails_not_miniscript(mocker, m5stickv, tdata):
     cases = [
         tdata.P2PKH_PSBT,
         tdata.P2WSH_PSBT,
+        tdata.MINIS_TR_PSBT,
     ]
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"]))
-    for case in cases:
-        with pytest.raises(ValueError, match="Invalid PSBT: Not a miniscript PSBT"):
+    wallet.load(WSH_MINISCRIPT, FORMAT_NONE)
+    for i, case in enumerate(cases):
+        error = (
+            "Invalid PSBT: Not a miniscript PSBT"
+            if i < 2
+            # Case 2: Taproot miniscript PSBT vs wsh wallet discrepancy
+            # A tr miniscript PSBT vs wsh miniscript wallet discrepancy
+            # will only get caught if a descriptor is loaded
+            else "Invalid PSBT: policy mismatch"
+        )
+        with pytest.raises(ValueError, match=error):
+            PSBTSigner(wallet, case, FORMAT_NONE)
+
+
+def test_init_tr_miniscript_fails_not_tr_miniscript(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        tdata.P2PKH_PSBT,
+        tdata.P2WSH_PSBT,
+        tdata.MINIS_P2WSH_PSBT,
+    ]
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
+    )
+    wallet.load(TR_MINISCRIPT, FORMAT_NONE)
+    for i, case in enumerate(cases):
+        error = (
+            "Invalid PSBT: Not a miniscript PSBT"
+            if i < 2
+            # Case 2: wsh miniscript PSBT vs tr wallet discrepancy
+            # A wsh miniscript PSBT vs tr miniscript wallet discrepancy
+            # will only get caught if a descriptor is loaded
+            else "Invalid PSBT: policy mismatch"
+        )
+        with pytest.raises(ValueError, match=error):
             PSBTSigner(wallet, case, FORMAT_NONE)
 
 
