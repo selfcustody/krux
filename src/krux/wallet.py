@@ -38,14 +38,6 @@ from .key import (
     TYPE_MINISCRIPT,
 )
 
-# Liana uses a example NUMS (Nothing-Up-My-Sleeve) key from BIP341 to create unspendable keys
-# https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#constructing-and-spending-taproot-outputs
-# https://delvingbitcoin.org/t/unspendable-keys-in-descriptors/304/21
-# H = lift_x(0x50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0)
-BIP_341_NUMS_EXAMPLE = (
-    "0250929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
-)
-
 
 class AssumptionWarning(Exception):
     """An exception for assumptions that require user acceptance"""
@@ -194,7 +186,7 @@ class Wallet:
             if self.descriptor.taptree:
                 if not descriptor.keys[0].origin:
                     import hashlib
-                    from embit.ec import PublicKey
+                    from embit.ec import NUMS_PUBKEY
                     from embit.bip32 import HDKey
 
                     # In case internal key is disabled, check if NUMS is known
@@ -205,13 +197,10 @@ class Wallet:
                         hasher.update(key.sec())
                     det_chain_code = hasher.digest()
 
-                    # Use BIP341 NUMS as public key
-                    public_key = PublicKey.from_string(BIP_341_NUMS_EXAMPLE)
-
                     # Create provably unspendable deterministic key
                     version = self.descriptor.keys[0].key.version
                     provably_unspendable = HDKey(
-                        public_key, det_chain_code, version=version
+                        NUMS_PUBKEY, det_chain_code, version=version
                     )
 
                     # Compare expected provably unspendable key with first descriptor key
