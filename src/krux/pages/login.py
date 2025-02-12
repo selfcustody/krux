@@ -55,6 +55,8 @@ DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
 
 DOUBLE_MNEMONICS_MAX_TRIES = 200
+MASK256 = (1 << 256) - 1
+MASK128 = (1 << 128) - 1
 
 
 class Login(Page):
@@ -230,29 +232,25 @@ class Login(Page):
                     # Increment 1 to full 24 words entropy until
                     # both last 12 words and all 24 have valid checksum
                     tries = 0
+                    entropy_int = int.from_bytes(entropy_bytes, "big")
                     while True:
                         # calculate the checksum for the new 24 words
-                        checksum24 = entropy_checksum(entropy_bytes, 8)
-                        second_12_entropy = entropy_bytes[16:32]
-                        # shift second 12 words entropy by 4 bits that were replaced
-                        # by the checksum of first 12 words
-                        shifted_entropy = (
-                            int.from_bytes(second_12_entropy, "big") << 4
-                        ) & ((1 << 128) - 1)
-                        # append first 4 of the 8 bits checksum of the full 24 words
-                        shifted_entropy |= checksum24 >> 4
-                        shifted_entropy = shifted_entropy.to_bytes(16, "big")
-                        # calculate the 4 bits checksum for the second 12 words
-                        checksum_l_12 = entropy_checksum(shifted_entropy, 4)
+                        ck_sum_24 = entropy_checksum(entropy_bytes, 8)
+
+                        # Extract the lower 128 bits from the integer.
+                        snd_12_int = entropy_int & MASK128
+                        # Shift and combine with first 4 bits of the 24 wwords checksum
+                        shifted_entr = ((snd_12_int << 4) & MASK128) | (ck_sum_24 >> 4)
+                        shifted_entropy_bytes = shifted_entr.to_bytes(16, "big")
+                        checksum_l_12 = entropy_checksum(shifted_entropy_bytes, 4)
                         # check if checksum_l_12 is equal to the last 4 bits of the
                         # checksum of the full 24 words
-                        if checksum_l_12 == checksum24 & 0x0F:
+                        if checksum_l_12 == (ck_sum_24 & 0x0F):
                             break
-                        # increment 1 to the 24 words entropy
-                        entropy_bytes = (int.from_bytes(entropy_bytes, "big") + 1) & (
-                            (1 << 256) - 1
-                        )
-                        entropy_bytes = entropy_bytes.to_bytes(32, "big")
+
+                        # Increment the integer value and mask to 256 bits.
+                        entropy_int = (entropy_int + 1) & MASK256
+                        entropy_bytes = entropy_int.to_bytes(32, "big")
                         tries += 1
                         if tries > DOUBLE_MNEMONICS_MAX_TRIES:
                             raise ValueError("Failed to find a valid double mnemonic")
