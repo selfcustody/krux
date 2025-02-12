@@ -31,6 +31,7 @@ from . import (
     MENU_EXIT,
     ESC_KEY,
     LETTERS,
+    EXTRA_MNEMONIC_LENGTH_FLAG,
     choose_len_mnemonic,
 )
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
@@ -52,6 +53,8 @@ from ..settings import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
 
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
+
+DOUBLE_MNEMONICS_MAX_TRIES = 200
 
 
 class Login(Page):
@@ -192,6 +195,7 @@ class Login(Page):
             if entropy_bytes is not None:
                 import binascii
                 from embit.bip39 import mnemonic_from_bytes
+                from ..bip39 import entropy_checksum
 
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
@@ -200,47 +204,62 @@ class Login(Page):
                 )
                 self.ctx.input.wait_for_button()
 
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Processing.."))
+                # Checks if user wants to create a double mnemonic
+                if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
+
+                    # import time  # Debug
+                    # pre_t = time.ticks_ms()  # Debug
+
+                    # split the mnemonic into two parts
+                    first_12_entropy = entropy_bytes[:16]
+                    second_12_entropy = entropy_bytes[16:32]
+
+                    # calculate the checksum for the first 12 words
+                    checksum1 = entropy_checksum(first_12_entropy, 4)
+                    # print first 12 words
+
+                    # replace checksum1 as first 4 bits of second 12 words
+                    snd_12_array = bytearray(second_12_entropy)
+                    snd_12_array[0] = (snd_12_array[0] & 0x0F) | (
+                        (checksum1 & 0x0F) << 4
+                    )
+                    second_12_entropy = bytes(snd_12_array)
+                    # reassemble the 256 bits entropy that has first 12 words with valid checksum
+                    entropy_bytes = first_12_entropy + second_12_entropy
+
+                    # Increment 1 to full 24 words entropy until
+                    # both last 12 words and all 24 have valid checksum
+                    tries = 0
+                    while True:
+                        # calculate the checksum for the new 24 words
+                        checksum24 = entropy_checksum(entropy_bytes, 8)
+                        second_12_entropy = entropy_bytes[16:32]
+                        # shift second 12 words entropy by 4 bits that were replaced
+                        # by the checksum of first 12 words
+                        shifted_entropy = (
+                            int.from_bytes(second_12_entropy, "big") << 4
+                        ) & ((1 << 128) - 1)
+                        # append first 4 of the 8 bits checksum of the full 24 words
+                        shifted_entropy |= checksum24 >> 4
+                        shifted_entropy = shifted_entropy.to_bytes(16, "big")
+                        # calculate the 4 bits checksum for the second 12 words
+                        checksum_l_12 = entropy_checksum(shifted_entropy, 4)
+                        # check if checksum_l_12 is equal to the last 4 bits of the
+                        # checksum of the full 24 words
+                        if checksum_l_12 == checksum24 & 0x0F:
+                            break
+                        # increment 1 to the 24 words entropy
+                        entropy_bytes = (int.from_bytes(entropy_bytes, "big") + 1) & (
+                            (1 << 256) - 1
+                        )
+                        entropy_bytes = entropy_bytes.to_bytes(32, "big")
+                        tries += 1
+                        if tries > DOUBLE_MNEMONICS_MAX_TRIES:
+                            raise ValueError("Failed to find a valid double mnemonic")
+                    # print("Tries: {} / {} ms".format(tries, time.ticks_ms() - pre_t))  # Debug
 
                 num_bytes = 16 if len_mnemonic == 12 else 32
                 entropy_mnemonic = mnemonic_from_bytes(entropy_bytes[:num_bytes])
-
-                # Double mnemonic check
-                if len_mnemonic == 48:
-                    from ..wallet import is_double_mnemonic
-
-                    if not is_double_mnemonic(entropy_mnemonic):
-                        from ..wdt import wdt
-                        import time
-                        from krux.bip39 import mnemonic_is_valid
-
-                        pre_t = time.ticks_ms()
-                        tries = 0
-
-                        # create two 12w mnemonic with the provided entropy
-                        first_12 = mnemonic_from_bytes(entropy_bytes[:16])
-                        second_entropy_mnemonic_int = int.from_bytes(
-                            entropy_bytes[16:32], "big"
-                        )
-                        double_mnemonic = False
-                        while not double_mnemonic:
-                            wdt.feed()
-                            tries += 1
-                            # increment the second mnemonic entropy
-                            second_entropy_mnemonic_int += 1
-                            second_12 = mnemonic_from_bytes(
-                                second_entropy_mnemonic_int.to_bytes(16, "big")
-                            )
-                            entropy_mnemonic = first_12 + " " + second_12
-                            double_mnemonic = mnemonic_is_valid(entropy_mnemonic)
-
-                        print(
-                            "Tries: %d" % tries,
-                            "/ %d" % (time.ticks_ms() - pre_t),
-                            "ms",
-                        )
-
                 return self._load_key_from_words(entropy_mnemonic.split(), new=True)
         return MENU_CONTINUE
 

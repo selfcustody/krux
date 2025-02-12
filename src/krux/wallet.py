@@ -569,12 +569,12 @@ def is_double_mnemonic(mnemonic: str):
 
     words = mnemonic.split(" ")
     if len(words) > 12:
-        from krux.bip39 import mnemonic_is_valid
+        from krux.bip39 import k_mnemonic_is_valid
 
         if (
-            mnemonic_is_valid(" ".join(words[:12]))
-            and mnemonic_is_valid(" ".join(words[12:]))
-            and mnemonic_is_valid(mnemonic)
+            k_mnemonic_is_valid(" ".join(words[:12]))
+            and k_mnemonic_is_valid(" ".join(words[12:]))
+            and k_mnemonic_is_valid(mnemonic)
         ):
             return True
 

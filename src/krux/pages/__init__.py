@@ -74,6 +74,8 @@ BATTERY_HEIGHT = 7
 LOAD_FROM_CAMERA = 0
 LOAD_FROM_SD = 1
 
+EXTRA_MNEMONIC_LENGTH_FLAG = 48
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -403,10 +405,10 @@ class Page:
         if len(text) + len(prefix) <= usable_chars:
             return prefix + text
         if not crop_middle:
-            return prefix + text[: usable_chars - 2] + ".."
+            return "{}{}..".format(prefix, text[: usable_chars - 2])
         usable_chars -= len(prefix) + fixed_chars + 2
         half = usable_chars // 2
-        return prefix + text[: half + fixed_chars] + ".." + text[-half:]
+        return "{}{}..{}".format(prefix, text[: half + fixed_chars], text[-half:])
 
     def has_printer(self):
         """Checks if the device has a printer setup"""
@@ -835,7 +837,7 @@ def choose_len_mnemonic(ctx, extra_option=""):
         (t("24 words"), lambda: 24),
     ]
     if extra_option:
-        items.append((extra_option, lambda: 48))
+        items.append((extra_option, lambda: EXTRA_MNEMONIC_LENGTH_FLAG))
     submenu = Menu(ctx, items, back_status=lambda: None)
     _, num_words = submenu.run_loop()
     ctx.display.clear()

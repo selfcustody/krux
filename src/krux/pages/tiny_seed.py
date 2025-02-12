@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import hashlib
 import board
 import lcd
 import image
@@ -42,6 +41,7 @@ from ..display import (
 )
 from ..camera import BINARY_GRID_MODE
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+from ..bip39 import entropy_checksum
 
 # Tiny Seed last bit index positions according to checksums
 TS_LAST_BIT_NO_CS = 143
@@ -858,24 +858,20 @@ def check_sum_bg(tiny_seed_numbers):
     """Dinamically calculates checksum of binary grid"""
     total_bits = len(tiny_seed_numbers) * 11
     # Calculate the number of checksum bits.
-    checksum_length_bits = total_bits // 33
+    checksum_length = total_bits // 33
 
-    # Accumulate the bits from the TinySeed words.
+    # Accumulate the bits from the Binary Grid words.
     acc = 0
     for n in tiny_seed_numbers:
-        # Subtract 1 because TinySeed values are 1-indexed.
-        acc = (acc << 11) | (n - 1 if n > 1 else 0)
+        if not n:
+            raise ValueError("Invalid Binary Grid number")
+        # Subtract 1 because Binary Grid values are 1-indexed.
+        acc = (acc << 11) | (n - 1)
 
     # The bitstream is: [entropy bits][checksum bits]
     # Remove the checksum bits by right-shifting.
-    entropy_int = acc >> checksum_length_bits
-    entropy_bits = total_bits - checksum_length_bits
-    # Convert entropy_int to a byte array.
-    entropy_bytes = (entropy_bits + 7) // 8  # Number of full bytes required.
-    data = entropy_int.to_bytes(entropy_bytes, "big")
+    entropy_int = acc >> checksum_length
+    entropy_bytes_count = 16 if checksum_length == 4 else 32
+    data = entropy_int.to_bytes(entropy_bytes_count, "big")
 
-    # Compute the checksum from the SHA256 hash of the entropy.
-    hash_digest = hashlib.sha256(data).digest()
-    hash_int = int.from_bytes(hash_digest, "big")
-    computed_checksum = hash_int >> (256 - checksum_length_bits)
-    return computed_checksum
+    return entropy_checksum(data, checksum_length)
