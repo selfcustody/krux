@@ -27,10 +27,10 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 
 1. Load a mnemonic and wallet in Krux.
 
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-150.png">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-150.png">
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-125.png">
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-125.png">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" style="width: 13%;">
 
 2. On your coordinator, when presented with possible signer devices to add, choose Krux if available, otherwise choose "other" or even another QR code compatible signer. As Krux is compatible with many QR code formats, most of available alternatives should work.
 
@@ -79,8 +79,8 @@ For single-sig or multisig (after loading a descriptor):
 
 - List "Receive Addresses" and "Change Addresses" or use "Scan Address" to verify if addresses from your coordinator are matched by Krux.
 
-<img src="../../../img/maixpy_m5stickv/list-address-receive-125.png">
-<img src="../../../img/maixpy_amigo/list-address-receive-150.png">
+<img src="../../../img/maixpy_m5stickv/list-address-receive-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_amigo/list-address-receive-300.png" style="width: 16%;">
 
 ## Step 5: Funding your Wallet
 
@@ -112,5 +112,5 @@ Save the transaction as a file on an SD card. On Krux, go to "Sign" -> "PSBT" ->
 
 Some coordinators, like Sparrow, allow you to sign messages linked to your wallet's addresses. Signing and verifying a message signature attests to the ownership of an address and serves as an additional test for your setup.
 
-<img src="../../../img/maixpy_m5stickv/sign-message-at-address-prompt-125.png">
-<img src="../../../img/maixpy_amigo/sign-message-at-address-prompt-150.png">
+<img src="../../../img/maixpy_m5stickv/sign-message-at-address-prompt-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_amigo/sign-message-at-address-prompt-300.png" style="width: 16%;">
