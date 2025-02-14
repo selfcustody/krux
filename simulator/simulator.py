@@ -148,8 +148,8 @@ pg.display.set_caption("Krux Simulator")
 device_image = devices.load_image(args.device)
 
 # Scale screenshots for docs
-AMIGO_SIZE = (150, 252)
-M5STICKV_SIZE = (125, 247)
+AMIGO_SIZE = (300, 504)
+M5STICKV_SIZE = (250, 494)
 DOCK_SIZE = (151, 258)
 YAHBOOM_SIZE = (156, 220)
 CUBE_SIZE = (200, 212)

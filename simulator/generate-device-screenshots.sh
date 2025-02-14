@@ -56,6 +56,7 @@ poetry run poe simulator --sequence sequences/extended-public-key-wpkh.txt  --de
 poetry run poe simulator --sequence sequences/extended-public-key-wsh.txt  --device $device
 poetry run poe simulator --sequence sequences/wallet-descriptor-wsh.txt  --device $device
 poetry run poe simulator --sequence sequences/wallet-descriptor-wpkh.txt  --device $device
+poetry run poe simulator --sequence sequences/wallet-descriptor-exp-tr-minis.txt  --device $device
 poetry run poe simulator --sequence sequences/bip85.txt  --device $device
 poetry run poe simulator --sequence sequences/scan-address.txt --device $device
 poetry run poe simulator --sequence sequences/list-address.txt --device $device
@@ -78,7 +79,3 @@ poetry run poe simulator --sequence sequences/all-settings.txt  --device $device
 # Other
 poetry run poe simulator --sequence sequences/qr-transcript.txt  --device $device
 poetry run poe simulator --sequence sequences/print-qr.txt --sd --printer --device $device
-
-
-
-

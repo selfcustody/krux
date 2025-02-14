@@ -1,5 +1,24 @@
 After entering your mnemonic, and loading a wallet, you will find yourself on Krux's main menu. Below is a breakdown of the entries available:
 
+- [Backup Mnemonic](#backup-mnemonic)
+- [Extended Public Key](#extended-public-key)
+- Wallet
+    - [Wallet Descriptor](#wallet-descriptor)
+    - [Passphrase](#passphrase)
+    - [Customize](#customize)
+    - [BIP85](#bip85)
+- Address
+    - [Scan Address](#scan-address)
+    - [Receive Addresses](#receive-addresses)
+    - [Change Addresses](#change-addresses)
+- Sign
+    - [PSBT](#psbt)
+    - Message
+        - [Standard Messages and Files](#standard-messages-and-files)
+        - [Messages at Address](#messages-at-address)
+
+### Main Menu
+
 <img src="../../../img/maixpy_amigo/home-options-150.png">
 <img src="../../../img/maixpy_m5stickv/home-options-125.png">
 
@@ -112,12 +131,12 @@ This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) 
 
 A menu will be presented with options to display your master extended public key (xpub) as text and as a QR code. Depending on the script type or whether a single-sig or multisig wallet was loaded, the options shown will be xpub, ypub, zpub, or Zpub. When displayed as text, the extended public key can be stored on an SD card if available. If you choose to export a QR code, you can not only scan it but also save it as an image on an SD card or print it if a thermal printer is attached.
 
-<img src="../../../img/maixpy_amigo/extended-public-key-menu-150.png" >
-<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-text-150.png" >
-<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-150.png" >
-<img src="../../../img/maixpy_m5stickv/extended-public-key-menu-125.png" >
-<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-125.png" >
-<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-125.png" >
+<img src="../../../img/maixpy_amigo/extended-public-key-menu-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-text-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_m5stickv/extended-public-key-menu-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-250.png" style="width: 13%;">
 
 All QR codes will contain [key origin information in key expressions](https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#Key_Expressions). If your coordinator cannot parse this information, it will not be capable of importing the wallet's fingerprint. As a result, Krux will not perform important verifications when signing transactions created by it unless you manually add the fingerprint so that it can be used to create Krux-compatible PSBTs.
 
@@ -138,10 +157,19 @@ For multisig wallets, it is essential to load a descriptor to check addresses an
 
 When you select the "Wallet Descriptor" option for the first time, you will be prompted to load a wallet descriptor via QR code or SD card. After loading, a preview of the wallet attributes will be displayed for confirmation.
 
-<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-fingerprints-150.png" >
-<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-xpubs-150.png" >
-<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-fingerprints-125.png" >
-<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png" >
+<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-250.png" style="width: 13%;">
+
+
+You can verify each key’s fingerprint, derivation path, and abbreviated XPUB with the currently loaded key distinctly highlighted with a different color.
+
+<img src="../../../img/maixpy_amigo/wallet-descriptor-tr-minis-1-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_amigo/wallet-descriptor-tr-minis-2-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-1-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-2-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-3-250.png" style="width: 13%;">
+
+**Miniscript Descriptors** will present an indented view for the miniscript after keys are shown. For Taproot, Krux checks whether an internal key is used, and if that key is "provably unspendable" – meaning funds can only be moved via Tap tree scripts – internal key is displayed in a distinct disabled color.
 
 If you access the "Wallet Descriptor" option again after loading your wallet, you will see the wallet's name, fingerprints, and the abbreviated XPUBs of all cosigners, along with a QR code containing the exact data that was initially loaded. If an SD card is inserted, you can save the descriptor to it for later use without the assistance of a coordinator. Additionally, if you have a thermal printer attached, you can print this QR code.
 
@@ -176,10 +204,10 @@ Bitcoin BIP85, also known as Deterministic Entropy From BIP32 Keychains, allows 
 
 **BIP39 Mnemonic**
 
-<img src="../../../img/maixpy_amigo/bip85-child-index-150.png" >
-<img src="../../../img/maixpy_amigo/bip85-load-child-150.png" >
-<img src="../../../img/maixpy_m5stickv/bip85-child-index-125.png" >
-<img src="../../../img/maixpy_m5stickv/bip85-load-child-125.png" >
+<img src="../../../img/maixpy_amigo/bip85-child-index-150.png">
+<img src="../../../img/maixpy_amigo/bip85-load-child-150.png">
+<img src="../../../img/maixpy_m5stickv/bip85-child-index-125.png">
+<img src="../../../img/maixpy_m5stickv/bip85-load-child-125.png">
 
 Choose between 12 or 24 words, then type the desired index to export a child mnemonic. After being presented with the new mnemonic, you can choose to load and use it right away.
 

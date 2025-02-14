@@ -36,15 +36,15 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 
 3. When prompted by your coordinator to import signer's public key, access the "Extended Public Key" on Krux.
 
-<img src="../../../img/maixpy_amigo/extended-public-key-selected-150.png">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-selected-125.png">
+<img src="../../../img/maixpy_amigo/extended-public-key-selected-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_m5stickv/extended-public-key-selected-250.png" style="width: 13%;">
 
 4. Export an XPUB (or YPUB, ZPUB, etc., based on the script type) as a QR code.
 
-<img src="../../../img/maixpy_amigo/extended-public-key-xpub-qr-menu-selected-150.png">
-<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-150.png">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-xpub-qr-menu-selected-125.png">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-125.png">
+<img src="../../../img/maixpy_amigo/extended-public-key-xpub-qr-menu-selected-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_m5stickv/extended-public-key-xpub-qr-menu-selected-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-250.png" style="width: 13%;">
 
 5. Scan this QR code with your coordinator.
 
@@ -60,13 +60,10 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 2. Export the descriptor as a QR code or file.
 3. On Krux, go to "Wallet" -> "Wallet Descriptor" to scan the descriptor QR code or load it via SD card.
 
-<img src="../../../img/maixpy_amigo/wallet-load-prompt-150.png">
-<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-fingerprints-150.png">
-<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-xpubs-150.png">
-
-<img src="../../../img/maixpy_m5stickv/wallet-load-prompt-125.png">
-<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-fingerprints-125.png">
-<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-xpubs-125.png">
+<img src="../../../img/maixpy_amigo/wallet-load-prompt-300.png" style="width: 21%;">
+<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-300.png" style="width: 21%;">
+<img src="../../../img/maixpy_m5stickv/wallet-load-prompt-250.png" style="width: 17%;">
+<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-250.png" style="width: 17%;">
 
 4. If you access "Wallet" -> "Wallet Descriptor" again, you will be able to:
     - Check the wallet cosigners.

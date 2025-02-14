@@ -126,23 +126,24 @@ The BIP-32 master wallet's fingerprint, if you have it noted down, will help you
 * ` Mainnet `:
 Check if you are loading a `Testnet` or `Mainnet` wallet.
 
-#### Single / Multisig
-* ` Single-sig `:
-Check if you are loading a `Single-sig` or `Multisig` wallet.
+#### Policy Type
+Check the wallet's policy type: `Single-sig`, `Multisig`, `Miniscript`, or `TR Miniscript` (Taproot).
 
 #### Derivation Path
-* ` m/84'/0'/0' `:
+* ` m/84h/0h/0h `:
 The derivation path is a sequence of numbers, or "nodes", that define the script type, network, and account index of your wallet.
-    * **Script Type** `84'`: The first number defines the script type. The default is `84'`, corresponding to a Native Segwit wallet. Other values include:
-        * `44'` for Legacy
-        * `49'` for Nested Segwit
-        * `86'` for Taproot
-        * `48'` for Multisig
-    * **Network** `0'`: The second number defines the network:
-        * `0'` for Mainnet
-        * `1'` for Testnet
-    * **Account Index** `0'`: The third number is the account index, with `0'` being the default.
-    * **Additional**: For multisig wallets, a fourth node with the value `2'` is added to the derivation path.
+    * **Script Type** `84h`: The first number defines the script type. The default is `84h`, corresponding to a Native Segwit wallet. Other values include:
+        * `44h` for Legacy
+        * `49h` for Nested Segwit
+        * `86h` for Taproot
+        * `48h` for Multisig
+    * **Network** `0h`: The second number defines the network:
+        * `0h` for Mainnet
+        * `1h` for Testnet
+    * **Account Index** `0h`: The third number is the account index, with `0h` being the default.
+    * **Additional**: For multisig wallets, a fourth node with the value `2h` is added to the derivation path.
+
+    Default Miniscript derivation path is the same as for multisig: ` m/48'/0h/0h/2h `, but they can be fully customized
 
 #### Passphrase
 * ` No Passphrase `:
@@ -150,7 +151,7 @@ Informs if the wallet has a loaded passphrase.
 
 ### Customize
 You can change any of the attributes before and after loading a wallet.
-It is also possible to change default settings for `Network` and `Single/Multisig` on [settings](../settings.md).
+It is also possible to change default settings for `Network`, `Policy Type` and `Script Type` on [Settings -> Default Wallet](../settings.md).
 
 #### Passphrase
 <img src="../../../img/maixpy_m5stickv/passphrase-load-options-125.png" align="right">
@@ -164,7 +165,7 @@ You can type or scan a BIP-39 passphrase. When typing, swipe left :material-gest
 <img src="../../../img/maixpy_m5stickv/wallet-customization-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/wallet-customization-options-150.png" align="right">
 
-Press `Customize` to open a menu where you can change the `Network`, `Single/Multisig`, `Script Type` and `Account`.
+Press `Customize` to open a menu where you can change the `Network`, `Policy Type`, `Script Type`, and `Account`. If `Policy Type` is Miniscript, instead of setting just an account, you can customize the entire derivation path.
 
 <div style="clear: both"></div>
 
