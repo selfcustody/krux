@@ -3,13 +3,12 @@ After creating a mnemonic, making a safe backup, and testing to recover your mne
 Krux can work with multiple coordinator wallets. Popular options include:
 
 - [Sparrow Wallet](https://www.sparrowwallet.com/) (desktop)
-
+- [Liana](https://wizardsardine.com/liana/) (desktop)*
 - [Specter Desktop](https://specter.solutions/) (desktop)
-
 - [Nunchuk](https://nunchuk.io/) (mobile)
-
 - [BlueWallet](https://bluewallet.io/) (mobile)
 
+**Note: For Liana, the exchange of extended public keys, wallet output descriptors, and PSBTs is performed via copy and paste. On Krux, use SD cards and a standard text editor, or use QR codes via an intermediary application such as [SeedQReader](https://github.com/pythcoiner/SeedQReader).*
 
 ## Step 1: Install the Coordinator Wallet
 
@@ -19,11 +18,11 @@ Download and install the appropriate version of your chosen coordinator wallet f
 
 Depending on the coordinator, the steps to add Krux as a signer may vary slightly:
 
-**Specter and Nunchuk Single-sig:** Add Krux as signer device, then create a wallet that uses it.
+**Specter and Nunchuk Single-sig:** Add Krux key, then create a wallet that uses it.
 
-**Specter and Nunchuk Multisig:** Add Krux as signer device, add other devices, then create a wallet that uses them.
+**Specter and Nunchuk Multisig:** Add Krux key, add other keys, then create a wallet that uses them.
 
-**Sparrow and BlueWallet**: Create a wallet (or vault in Blue Wallet) first, then add signer device(s).
+**Sparrow, Liana and BlueWallet**: Create a wallet (or vault in Blue Wallet) and add keys during setup.
 
 1. Load a mnemonic and wallet in Krux.
 
@@ -50,10 +49,18 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 
 6. Ensure the coordinator’s wallet attributes (policy type, script type, fingerprint, and derivation) match those in Krux.
 
+Alternatively, you can export the extended public keys as files to an SD card. Instead of displaying them as QR codes, select the "XPUB - Text" option, then choose "Save to SD card".
+
+<img src="../../../img/maixpy_amigo/extended-public-key-menu-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-text-300.png" style="width: 16%;">
+<img src="../../../img/maixpy_m5stickv/extended-public-key-menu-250.png" style="width: 13%;">
+<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-250.png" style="width: 13%;">
+
 ## Step 3: Load and Backup Wallet Descriptor (Multisig Only)
 
 1. In your coordinator, export the wallet descriptor containing information about the wallet and all cosigners:
     - Sparrow: "Descriptor"
+    - Liana: "Wallet Descriptor"
     - Specter: "Export Wallet"
     - Nunchuk: "Export Wallet Configuration"
     - BlueWallet: "Export Coordination Setup"
