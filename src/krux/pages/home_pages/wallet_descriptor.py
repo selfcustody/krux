@@ -35,7 +35,7 @@ from ...display import (
     MINIMAL_PADDING,
 )
 from ...krux_settings import t
-from ...qr import FORMAT_NONE
+from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
 from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
@@ -157,8 +157,11 @@ class WalletDescriptor(Page):
     def display_wallet(self, wallet):
         """Try to show the wallet output descriptor as a QRCode"""
         try:
-            wallet_data, qr_format = wallet.wallet_qr()
-            self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
+            w_data, qr_format = wallet.wallet_qr()
+            if qr_format == FORMAT_NONE:
+                qr_format = FORMAT_PMOFN
+                w_data = w_data.decode() if not isinstance(w_data, str) else w_data
+            self.display_qr_codes(w_data, qr_format, title=wallet.label)
         except Exception as e:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
