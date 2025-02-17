@@ -76,7 +76,7 @@ Alternatively, you can export the extended public keys as files to an SD card. I
     - Check the wallet cosigners.
     - Save the descriptor on an SD card (useful if you initially loaded it from QR codes).
 
-    It is crucial to have a backup of this descriptor to recover your wallet in case one of the cosigners is lost.
+    Having a backup of descriptors is essential for recovering your wallet.
 
 ## Step 4: Verify Addresses
 

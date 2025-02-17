@@ -17,16 +17,14 @@ At the start screen, after selecting New Mnemonic, you will be taken to a second
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-entropy-estimation-250.png" align="right" style="width: 13%;">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-entropy-estimation-300.png" align="right" style="width: 16%;">
 
-During image capture, entropy quality estimation is displayed to assist you in obtaining a high-quality image source for your key. After a snapshot is taken, Shannon's entropy and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation. It's important to note that these values serve as indicators or estimations of entropy quality, but they are not absolute entropy values in a cryptographic context.
+During image capture, entropy quality estimation is displayed to assist you in obtaining a quality image source for your key. After a snapshot is taken, Shannon's entropy and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation. It's important to note that these values serve as indicators or estimations of entropy quality, but they are not absolute entropy values in a cryptographic context.
 
 <div style="clear: both"></div>
 
 #### Double mnemonic
 It is the combination of two 12-word mnemonics that also forms a valid 24-word BIP-39 mnemonic. This is achieved by using the first 16 bytes (128 bits) of the image's entropy to generate the first 12-word, then using the next 16 bytes to generate the second 12-word and checking if these two 12-word together forms a valid 24-word, if not, we iterate over the second 12-word incrementing its entropy bytes until the two 12-word forms a valid 24-word.
 
-Some might say that the name double mnemonic is incorrect because we end up with two 12-word plus a 24-word mnemonic (12 + 12 + 24), so it's a triple mnemonic! But we only use entropy for the two 12-word ones, hence the name double mnemonic. Also, this name has already been used in this [double mnemonic generator](https://stepansnigirev.github.io/seed-tools/double_mnemonic.html) since July 2023.
-
-Some may wonder what is the use of this, it may be useful to some [plausible deniability](https://en.bitcoin.it/wiki/Privacy) or even a way to improve your [OPSEC](https://en.wikipedia.org/wiki/Operations_security).
+Double Mnemonic was first defined by Stepan Snigirev in his [Double Mnemonic Generator](https://stepansnigirev.github.io/seed-tools/double_mnemonic.html). It can be used for plausible deniability, or, as Stepan stated, to have fun and confuse everyone.
 
 ## Words
 Print the BIP39 word list in 3D or on paper, then cut out the words and place them in a bucket. Manually draw 11 or 23 words from the bucket.

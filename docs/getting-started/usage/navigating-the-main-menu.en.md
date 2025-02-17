@@ -64,6 +64,10 @@ Words are converted to their BIP-39 numeric indexes, those numbers are then conc
 
 This option converts the encrypted mnemonic into a QR code. Enter an encryption key and, optionally, a custom ID. When you scan this QR code through "Load Mnemonic" -> "Via Camera" -> "QR Code," you will be prompted to enter the decryption key to load the mnemonic stored in it. Like any QR code, it can be printed if a thermal printer driver is set up.
 
+- **Transcribing QR Codes**
+
+Please refer to [Transcribing QR Codes](../../features/QR-transcript-tools) for details on transcription modes and helper tools.
+
 #### Encrypted
 <img src="../../../img/maixpy_m5stickv/home-encrypt-options-250.png" align="right" style="width: 13%;">
 <img src="../../../img/maixpy_amigo/home-encrypt-options-300.png" align="right" style="width: 16%;">
@@ -142,24 +146,26 @@ All QR codes will contain [key origin information in key expressions](https://gi
 
 Always prefer to import extended public keys directly from Krux when setting up a coordinator instead of copying it (or parts of it) from other sources.
 
+Some coordinators are phasing out support for variants like ypub and zpub in favor of xpubs that include key origin data, a clearer, more standardized approach. We therefore recommend using xpub exclusively.
+
 ### Wallet
-Here you can load view and save wallet descriptors, add or change passphrases, customize wallet's attributes, derive BIP85 mnemonics and passwords.
+Here you can load, view and save wallet descriptors, add or change passphrases, customize wallet's attributes, derive BIP85 mnemonics and passwords.
 
 #### Wallet Descriptor
-A Bitcoin Wallet Output Script Descriptor defines a set of addresses in a wallet. It includes the following information:
-- Script Type: Specifies the type of script (e.g., P2PKH, P2SH, P2WPKH).
-- Origin Info: Defines the master fingerprint and derivation path used to derive keys.
-- Extended Public Keys: usually represented as an xpub, but could be ypub, zpub, etc.
 
-Output descriptors standardize how wallets generate addresses, ensuring compatibility and security. They help wallets and other software understand how to derive and verify the addresses used in transactions.
+A Bitcoin Wallet Output Script Descriptor defines addresses from a wallet. It encodes essential details such as:
+- Script: Specifies the type of script (e.g., P2PKH, P2SH, P2WPKH, P2TR). For miniscript, it outlines advanced spending policies and conditions.
+- Origin Info: For each key, it includes the corresponding master fingerprint and derivation path that was used to derive it.
+- Extended Public Keys: Contains one or more extended public keys (e.g., xpub, ypub, zpub), each associated with its own origin information.
 
-For multisig wallets, it is essential to load a descriptor to check addresses and perform full PSBT verification. For single-sig wallets, loading a descriptor is optional and serves as a redundancy check of the coordinator's wallet attributes.
+Output descriptors standardize wallet address generation, ensuring accurate wallet restoration from backups and compatibility across different apps.
+
+For multisig and miniscript wallets, loading a descriptor is essential to verify addresses and perform full PSBT verification. For single-sig wallets, loading a descriptor remains optional and serves as a redundancy check of the coordinator's wallet attributes.
 
 When you select the "Wallet Descriptor" option for the first time, you will be prompted to load a wallet descriptor via QR code or SD card. After loading, a preview of the wallet attributes will be displayed for confirmation.
 
 <img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-300.png" style="width: 16%;">
 <img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-250.png" style="width: 13%;">
-
 
 You can verify each key’s fingerprint, derivation path, and abbreviated XPUB with the currently loaded key distinctly highlighted with a different color.
 
@@ -169,9 +175,9 @@ You can verify each key’s fingerprint, derivation path, and abbreviated XPUB w
 <img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-2-250.png" style="width: 13%;">
 <img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-3-250.png" style="width: 13%;">
 
-**Miniscript Descriptors** will present an indented view for the miniscript after keys are shown. For Taproot, Krux checks whether an internal key is used, and if that key is "provably unspendable" – meaning funds can only be moved via Tap tree scripts – internal key is displayed in a distinct disabled color.
+**Miniscript Descriptors** present an indented view of the miniscript after the keys. When Taproot is used, Krux checks if the internal key is "provably unspendable", meaning funds can only be moved via Tap tree scripts, in which case the internal key is displayed in a distinct, disabled color.
 
-If you access the "Wallet Descriptor" option again after loading your wallet, you will see the wallet's name, fingerprints, and the abbreviated XPUBs of all cosigners, along with a QR code containing the exact data that was initially loaded. If an SD card is inserted, you can save the descriptor to it for later use without the assistance of a coordinator. Additionally, if you have a thermal printer attached, you can print this QR code.
+Re-access the "Wallet Descriptor" option after loading your wallet to view its name and a QR code containing the originally loaded data. If an SD card is inserted, you can save the descriptor for future use without a coordinator's assistance. Additionally, if a thermal printer is attached, you can print the QR code.
 
 Krux also allows you to verify a descriptor's receive and change addresses without the need to load private keys. Simply turn on your Krux, access "Tools" -> "Descriptor Addresses," and load a trusted descriptor from a QR code or SD card.
 
