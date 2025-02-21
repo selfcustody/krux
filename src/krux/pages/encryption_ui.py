@@ -23,6 +23,7 @@
 from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
 from ..encryption import AES_BLOCK_SIZE
+from ..themes import theme
 from . import (
     Page,
     Menu,
@@ -177,7 +178,7 @@ class EncryptMnemonic(Page):
 
         mnemonic_storage = MnemonicStorage()
         if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
-            self.flash_text(
+            self.flash_error(
                 t("ID already exists") + "\n" + t("Encrypted mnemonic was not stored")
             )
             del mnemonic_storage
@@ -193,7 +194,9 @@ class EncryptMnemonic(Page):
             )
         else:
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Failed to store mnemonic"))
+            self.ctx.display.draw_centered_text(
+                t("Failed to store mnemonic"), theme.error_color
+            )
         self.ctx.input.wait_for_button()
         del mnemonic_storage
 
