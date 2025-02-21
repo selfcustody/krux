@@ -51,8 +51,8 @@ from . import (
     DIGITS,
     LETTERS,
     UPPERCASE_LETTERS,
+    NUM_SPECIAL_1,
     NUM_SPECIAL_2,
-    NUM_SPECIAL_3,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -159,14 +159,14 @@ class SettingsPage(Page):
         while len(tamper_check_code) < 6:
             tamper_check_code = self.capture_from_keypad(
                 t("Tamper Check Code"),
-                [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
+                [NUM_SPECIAL_1, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2],
             )
             if tamper_check_code == ESC_KEY:
                 return MENU_CONTINUE
         while len(tc_code_confirm) < 6:
             tc_code_confirm = self.capture_from_keypad(
                 t("Confirm Tamper Check Code"),
-                [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3],
+                [NUM_SPECIAL_1, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2],
             )
             if tc_code_confirm == ESC_KEY:
                 return MENU_CONTINUE
