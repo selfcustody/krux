@@ -47,6 +47,8 @@ class Keypad:
         self.ctx = ctx
         self.keysets = keysets
         self.keyset_index = 0
+        self.max_keys_count = max([len(keyset) for keyset in keysets])
+        self.max_keys_count += FIXED_KEYS + (1 if len(keysets) > 1 else 0)
         self.key_h_spacing, self.key_v_spacing = self.map_keys_array(
             self.width, self.height
         )
@@ -90,12 +92,12 @@ class Keypad:
     @property
     def width(self):
         """Returns the needed width for the current keyset"""
-        return math.floor(math.sqrt(self.total_keys))
+        return math.floor(math.sqrt(self.max_keys_count))
 
     @property
     def height(self):
         """Returns the needed height for the current keyset"""
-        return math.ceil((self.total_keys) / self.width)
+        return math.ceil((self.max_keys_count) / self.width)
 
     @property
     def max_index(self):
