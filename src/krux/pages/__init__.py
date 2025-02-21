@@ -66,7 +66,6 @@ LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "1234567890 !#$%&'()*"
 NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
-NUM_SPECIAL_3 = " !#$%&'()*"  # NUM_SPECIAL_1 without numbers
 DIGITS = "1234567890"
 
 BATTERY_WIDTH = 22
