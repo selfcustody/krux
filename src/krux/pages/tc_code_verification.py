@@ -23,11 +23,10 @@
 from . import (
     Page,
     ESC_KEY,
-    DIGITS,
     LETTERS,
     UPPERCASE_LETTERS,
+    NUM_SPECIAL_1,
     NUM_SPECIAL_2,
-    NUM_SPECIAL_3,
 )
 from ..krux_settings import t, TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
 
@@ -50,7 +49,7 @@ class TCCodeVerification(Page):
             else t("Tamper Check Code")
         )
         tc_code = self.capture_from_keypad(
-            label, [DIGITS, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2, NUM_SPECIAL_3]
+            label, [NUM_SPECIAL_1, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2]
         )
         if tc_code == ESC_KEY:
             return False
