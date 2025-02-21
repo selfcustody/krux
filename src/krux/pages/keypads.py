@@ -69,13 +69,13 @@ class Keypad:
     def more_index(self):
         """Returns the index of the "More" key"""
         if len(self.keysets) > 1:
-            return self.del_index - 1
+            return self.go_index + 1
         return None
 
     @property
     def del_index(self):
         """Returns the index of the "Del" key"""
-        return len(self.keys) + self.empty_keys + (1 if len(self.keysets) > 1 else 0)
+        return len(self.keys) + self.empty_keys
 
     @property
     def esc_index(self):
