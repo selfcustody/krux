@@ -37,21 +37,52 @@ from ..input import (
 )
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 
-FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
+FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.
+
+KEYPAD_OFFSET = DEFAULT_PADDING + FONT_HEIGHT * 3
+
+
+class KeypadLayout:
+    """Groups layout-related attributes for Keypad."""
+
+    def __init__(self, ctx, max_keys_count):
+        self.width = math.floor(math.sqrt(max_keys_count))
+        self.height = math.ceil(max_keys_count / self.width)
+        self.max_index = self.width * self.height
+
+        key_h_spacing = ctx.display.width() - DEFAULT_PADDING
+        key_h_spacing //= self.width
+        key_v_spacing = (
+            ctx.display.height() - DEFAULT_PADDING - (DEFAULT_PADDING + FONT_HEIGHT * 3)
+        )
+        key_v_spacing //= self.height
+        self.key_h_spacing, self.key_v_spacing = key_h_spacing, key_v_spacing
+
+        self.y_keypad_map = [
+            y * key_v_spacing + (DEFAULT_PADDING + FONT_HEIGHT * 3)
+            for y in range(self.height + 1)
+        ]
+        self.x_keypad_map = [
+            x * key_h_spacing + MINIMAL_PADDING for x in range(self.width + 1)
+        ]
+        if ctx.input.touch is not None:
+            ctx.input.touch.y_regions = self.y_keypad_map
+            ctx.input.touch.x_regions = self.x_keypad_map
 
 
 class Keypad:
-    """Controls keypad creation and management"""
+    """Controls keypad creation and management."""
 
     def __init__(self, ctx, keysets, possible_keys_fn=None):
         self.ctx = ctx
         self.keysets = keysets
         self.keyset_index = 0
-        self.max_keys_count = max([len(keyset) for keyset in keysets])
-        self.max_keys_count += FIXED_KEYS + (1 if len(keysets) > 1 else 0)
-        self.key_h_spacing, self.key_v_spacing = self.map_keys_array(
-            self.width, self.height
+        max_keys_count = (
+            max(len(keyset) for keyset in keysets)
+            + FIXED_KEYS
+            + (1 if len(keysets) > 1 else 0)
         )
+        self.layout = KeypadLayout(ctx, max_keys_count)
         self.cur_key_index = 0
         self.moving_forward = True
         self.possible_keys_fn = possible_keys_fn
@@ -90,60 +121,15 @@ class Keypad:
         return self.esc_index + 1
 
     @property
-    def width(self):
-        """Returns the needed width for the current keyset"""
-        return math.floor(math.sqrt(self.max_keys_count))
-
-    @property
-    def height(self):
-        """Returns the needed height for the current keyset"""
-        return math.ceil((self.max_keys_count) / self.width)
-
-    @property
-    def max_index(self):
-        """Returns last possible key index"""
-        return self.width * self.height
-
-    @property
     def empty_keys(self):
         """Returns dummy keys space needed to always position fixed keys at bottom right"""
-        return self.max_index - self.total_keys
+        return self.layout.max_index - self.total_keys
 
     def reset(self):
         """Reset parameters when switching a multi-keypad"""
-        self.key_h_spacing, self.key_v_spacing = self.map_keys_array(
-            self.width, self.height
-        )
         self.cur_key_index = 0
         self.possible_keys = self.keys
         self.moving_forward = True
-
-    def map_keys_array(self, width, height):
-        """Maps an array of regions for keys to be placed in
-        Returns horizontal and vertical spacing of keys
-        """
-        self.y_keypad_map = []
-        self.x_keypad_map = []
-        key_h_spacing = self.ctx.display.width() - DEFAULT_PADDING
-        key_h_spacing //= width
-        key_v_spacing = (
-            self.ctx.display.height() - DEFAULT_PADDING - self.keypad_offset()
-        )
-        key_v_spacing //= height
-        for y in range(height + 1):
-            region = y * key_v_spacing + self.keypad_offset()
-            self.y_keypad_map.append(region)
-        for x in range(width + 1):
-            region = x * key_h_spacing + MINIMAL_PADDING
-            self.x_keypad_map.append(region)
-        if self.ctx.input.touch is not None:
-            self.ctx.input.touch.y_regions = self.y_keypad_map
-            self.ctx.input.touch.x_regions = self.x_keypad_map
-        return key_h_spacing, key_v_spacing
-
-    def keypad_offset(self):
-        """Returns keypad start position"""
-        return DEFAULT_PADDING + FONT_HEIGHT * 3
 
     def compute_possible_keys(self, buffer):
         """Computes the possible keys for the current keypad"""
@@ -153,9 +139,9 @@ class Keypad:
     def draw_keys(self):
         """Draws keypad on the screen"""
         key_index = 0
-        for y in self.y_keypad_map[:-1]:
-            offset_y = y + (self.key_v_spacing - FONT_HEIGHT) // 2
-            for x in self.x_keypad_map[:-1]:
+        for y in self.layout.y_keypad_map[:-1]:
+            offset_y = y + (self.layout.key_v_spacing - FONT_HEIGHT) // 2
+            for x in self.layout.x_keypad_map[:-1]:
                 key = None
                 custom_color = None
                 if key_index < len(self.keys):
@@ -172,10 +158,12 @@ class Keypad:
                 elif key_index == self.more_index and len(self.keysets) > 1:
                     key = "ABC"
                     custom_color = theme.toggle_color
+
                 if key is not None:
                     offset_x = x
-                    key_offset_x = (self.key_h_spacing - lcd.string_width_px(key)) // 2
-                    key_offset_x += offset_x
+                    key_offset_x = (
+                        self.layout.key_h_spacing - lcd.string_width_px(key)
+                    ) // 2 + offset_x
                     if (
                         key_index < len(self.keys)
                         and self.keys[key_index] not in self.possible_keys
@@ -189,8 +177,8 @@ class Keypad:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,
-                                self.key_h_spacing - 2,
-                                self.key_v_spacing - 2,
+                                self.layout.key_h_spacing - 2,
+                                self.layout.key_v_spacing - 2,
                                 theme.frame_color,
                             )
                         if custom_color:
@@ -207,15 +195,15 @@ class Keypad:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,
-                                self.key_h_spacing - 2,
-                                self.key_v_spacing - 2,
+                                self.layout.key_h_spacing - 2,
+                                self.layout.key_v_spacing - 2,
                             )
                         else:
                             self.ctx.display.outline(
                                 offset_x - 2,
                                 y,
-                                self.key_h_spacing + 1,
-                                self.key_v_spacing - 1,
+                                self.layout.key_h_spacing + 1,
+                                self.layout.key_v_spacing - 1,
                             )
                 key_index += 1
 
@@ -233,7 +221,7 @@ class Keypad:
             color = theme.fg_color if i == self.keyset_index else theme.frame_color
             self.ctx.display.fill_rectangle(
                 x_offset + (bar_length + bar_padding) * i,
-                self.y_keypad_map[-1] + 2,
+                self.layout.y_keypad_map[-1] + 2,
                 bar_length,
                 bar_height,
                 color,
@@ -246,7 +234,7 @@ class Keypad:
             and self.keys[self.cur_key_index] not in self.possible_keys
         ):
             if self.moving_forward:
-                self.cur_key_index = (self.cur_key_index + 1) % self.max_index
+                self.cur_key_index = (self.cur_key_index + 1) % self.layout.max_index
                 # Jump over empty keys
                 if 0 <= (self.cur_key_index - len(self.keys)) < self.empty_keys:
                     self.cur_key_index += self.empty_keys
@@ -254,7 +242,7 @@ class Keypad:
                 if self.cur_key_index:
                     self.cur_key_index -= 1
                 else:
-                    self.cur_key_index = self.max_index - 1
+                    self.cur_key_index = self.layout.max_index - 1
         return self.cur_key_index
 
     def touch_to_physical(self):
@@ -264,7 +252,7 @@ class Keypad:
         if self.cur_key_index < len(self.keys):
             if self.keys[self.cur_key_index] in self.possible_keys:
                 actual_button = BUTTON_ENTER
-        elif self.cur_key_index < self.max_index:
+        elif self.cur_key_index < self.layout.max_index:
             actual_button = BUTTON_ENTER
         else:
             self.cur_key_index = 0
@@ -298,16 +286,16 @@ class Keypad:
     def _clean_keypad_area(self):
         self.ctx.display.fill_rectangle(
             0,
-            self.keypad_offset(),
+            KEYPAD_OFFSET,
             self.ctx.display.width(),
-            self.ctx.display.height() - self.keypad_offset(),
+            self.ctx.display.height() - KEYPAD_OFFSET,
             theme.bg_color,
         )
 
     def _next_key(self):
         """Increments cursor when page button is pressed"""
         self.moving_forward = True
-        self.cur_key_index = (self.cur_key_index + 1) % self.max_index
+        self.cur_key_index = (self.cur_key_index + 1) % self.layout.max_index
         if self.cur_key_index == len(self.keys):
             self.cur_key_index += self.empty_keys
 
@@ -317,7 +305,7 @@ class Keypad:
         if self.cur_key_index == len(self.keys) + self.empty_keys:
             self.cur_key_index = len(self.keys) - 1
         else:
-            self.cur_key_index = (self.cur_key_index - 1) % self.max_index
+            self.cur_key_index = (self.cur_key_index - 1) % self.layout.max_index
 
     def next_keyset(self):
         """Change keys for the next keyset"""

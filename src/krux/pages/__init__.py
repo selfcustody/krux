@@ -183,8 +183,6 @@ class Page:
                             return ESC_KEY
                     else:
                         return ESC_KEY
-                    # remap keypad touch array
-                    pad.map_keys_array(pad.width, pad.height)
                 elif pad.cur_key_index == pad.go_index:
                     break
                 elif pad.cur_key_index == pad.more_index:
