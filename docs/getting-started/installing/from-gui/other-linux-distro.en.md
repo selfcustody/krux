@@ -56,3 +56,9 @@ bsdtar -xvf data.tar.zst
 ```
 
 The binary will be located at `./usr/local/bin/krux-installer`. 
+
+## After install
+
+----8<----
+after-install-installer.en.txt
+----8<----

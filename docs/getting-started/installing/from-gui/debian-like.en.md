@@ -30,7 +30,7 @@ verify-the-signature-tip.en.txt
     
 ## Install
 
-**krux-installer** isn't available on Debian or Ubuntu repositories.
+**Krux-Installer** isn't available on Debian or Ubuntu repositories.
 Therefore, only the `apt-get install` command will not work. 
 To install, it'll be necessary two steps:
 
@@ -52,5 +52,5 @@ to activate the `sudoless` flash procedure.
 ## After install
 
 ----8<----
-after-install-installer.en.md
+after-install-installer.en.txt
 ----8<----

@@ -89,7 +89,7 @@ If you accidentally pressed `PREVIOUS` (UP) and saved the wrong setting, you wil
 
 `./ktool-linux -B goE -b 1500000 -E`
 
-(Soon Krux-Installer will have a full wipe button too)
+(Soon **Krux-Installer** will have a full wipe button too)
 
 Then flash the firmware again.
 
