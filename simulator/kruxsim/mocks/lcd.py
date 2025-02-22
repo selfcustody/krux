@@ -34,6 +34,8 @@ COLOR_WHITE = (255, 255, 255)
 WIDTH = BOARD_CONFIG["lcd"]["width"]
 HEIGHT = BOARD_CONFIG["lcd"]["height"]
 
+JAPANESE_CODEPOINT_MIN = 0x3000
+JAPANESE_CODEPOINT_MAX = 0x30FF
 CHINESE_CODEPOINT_MIN = 0x4E00
 CHINESE_CODEPOINT_MAX = 0x9FFF
 KOREAN_CODEPOINT_MIN = 0xAC00
@@ -153,7 +155,8 @@ def string_width_px(string):
 
     for c in string:
         if (
-            CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+            JAPANESE_CODEPOINT_MIN <= ord(c) <= JAPANESE_CODEPOINT_MAX
+            or CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
             or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
         ):
             string_width += wide_width
@@ -165,7 +168,8 @@ def string_width_px(string):
 def string_has_wide_glyph(string):
     for c in string:
         if (
-            CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+            JAPANESE_CODEPOINT_MIN <= ord(c) <= JAPANESE_CODEPOINT_MAX
+            or CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
             or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
         ):
             return True
@@ -173,13 +177,15 @@ def string_has_wide_glyph(string):
 
 def is_wide(c):
     return (
-            CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+            JAPANESE_CODEPOINT_MIN <= ord(c) <= JAPANESE_CODEPOINT_MAX
+            or CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
             or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
     )
 
 def char_width(c):
     if (
-        CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+        JAPANESE_CODEPOINT_MIN <= ord(c) <= JAPANESE_CODEPOINT_MAX
+        or CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
         or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
     ):
         return BOARD_CONFIG["krux"]["display"]["font_wide"][0]
