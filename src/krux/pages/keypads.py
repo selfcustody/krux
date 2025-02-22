@@ -156,7 +156,7 @@ class Keypad:
                     key = t("Go")
                     custom_color = theme.go_color
                 elif key_index == self.more_index and len(self.keysets) > 1:
-                    key = "ABC"
+                    key = self.keysets[self._move_keyset_index()][:3]
                     custom_color = theme.toggle_color
 
                 if key is not None:
@@ -310,11 +310,16 @@ class Keypad:
     def next_keyset(self):
         """Change keys for the next keyset"""
         if len(self.keysets) > 1:
-            self.keyset_index = (self.keyset_index + 1) % len(self.keysets)
+            self.keyset_index = self._move_keyset_index()
             self.reset()
 
     def previous_keyset(self):
         """Change keys for the previous keyset"""
         if len(self.keysets) > 1:
-            self.keyset_index = (self.keyset_index - 1) % len(self.keysets)
+            self.keyset_index = self._move_keyset_index(False)
             self.reset()
+
+    def _move_keyset_index(self, forward=True):
+        """Calc the index of keyset forward or backwards"""
+        i = 1 if forward else -1
+        return (self.keyset_index + i) % len(self.keysets)

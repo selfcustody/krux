@@ -63,8 +63,8 @@ PROCEED = (BUTTON_ENTER, BUTTON_TOUCH)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-NUM_SPECIAL_1 = "1234567890 !#$%&'()*"
-NUM_SPECIAL_2 = '+,-./:;<=>?@[\\]^_"{|}~'
+NUM_SPECIAL_1 = "1234567890 !#$%()&*'"
+NUM_SPECIAL_2 = '<>.,"[]:;/{}^~|-+=_\\?@'
 DIGITS = "1234567890"
 
 BATTERY_WIDTH = 22
