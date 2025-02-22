@@ -30,7 +30,7 @@ verify-the-signature-tip.en.txt
 
 ## Install
 
-**krux-installer** isn't available on Fedora or RedHat repositories. You'll need to add it manually:
+**Krux-Installer** isn't available on Fedora or RedHat repositories. You'll need to add it manually:
 
 ### Fedora
 
@@ -50,5 +50,5 @@ to activate the `sudoless` flash procedure.
 ## After install
 
 ----8<----
-after-install-installer.en.md
+after-install-installer.en.txt
 ----8<----

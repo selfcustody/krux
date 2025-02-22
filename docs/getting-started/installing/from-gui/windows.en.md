@@ -76,5 +76,5 @@ Follow the installer's instructions to complete the installation. At the end, cl
 ## After install
 
 ----8<----
-after-install-installer.en.md
+after-install-installer.en.txt
 ----8<----

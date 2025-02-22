@@ -1,0 +1,1 @@
+Once done, you will use **Krux-Installer** GUI to perform the [firmware installation](/krux/getting-started/installing/from-gui/usage). 
