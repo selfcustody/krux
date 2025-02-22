@@ -162,8 +162,8 @@ class Page:
             pad.draw_keys()
             pad.draw_keyset_index()
             btn = self.ctx.input.wait_for_button()
-            show_swipe_hint = False # unless overridden by a particular key,
-                                    # don't show the swipe hint after a key press
+            show_swipe_hint = False  # unless overridden by a particular key,
+            # don't show the swipe hint after a key press
             if btn == BUTTON_TOUCH:
                 btn = pad.touch_to_physical()
             if btn == BUTTON_ENTER:
