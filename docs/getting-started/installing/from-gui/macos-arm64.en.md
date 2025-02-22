@@ -37,5 +37,5 @@ install-installer-macos.en.txt
 ## After install
 
 ----8<----
-after-install-installer.en.md
+after-install-installer.en.txt
 ----8<----

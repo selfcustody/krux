@@ -11,7 +11,7 @@ To secure your Krux device, always verify firmware authenticity before installat
 
 - **Using OpenSSL Command-Line Tool:** Follow [from pre-built official release](../installing/from-pre-built-release.md/#verify-the-files) instructions to verify the firmware's signature manually. This method provides a high level of assurance but requires familiarity with command-line operations.
 
-- **Using Krux-Installer:** Our [Krux-Installer GUI](../installing/from-gui/index.md) can facilitate this process by downloading our firmware from Github and verifying its signature. It also guides you through manual verification if desired. Just don't forget to verify the integrity of the Krux-Installer as well.
+- **Using Krux-Installer:** Our [Krux-Installer GUI](../installing/from-gui/index.md) can facilitate this process by downloading our firmware from Github and verifying its signature. It also guides you through manual verification if desired. Just don't forget to verify the integrity of the **Krux-Installer** as well.
 
 
 ### Recommendations
