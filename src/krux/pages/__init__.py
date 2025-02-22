@@ -145,7 +145,7 @@ class Page:
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
         big_title = len(self.ctx.display.to_lines(title)) > 1
         swipe_has_not_been_used = True
-        swipe_hint = "« swipe »"
+        swipe_hint = "« " + t("swipe") + " »"
         show_swipe_hint = False
         while True:
             self.ctx.display.clear()
