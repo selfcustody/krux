@@ -1,5 +1,5 @@
 Open the `dmg` file and a new volume will be presented;
-drag'n'drop the **krux-installer** to the **Applications** folder:
+drag'n'drop the **Krux-Installer** to the **Applications** folder:
 
 <img width="450" src="/krux/img/krux-installer/dmg_volume.png" alt="krux-installer's DMG volume" />
 
