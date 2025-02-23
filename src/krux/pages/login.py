@@ -632,9 +632,10 @@ class Login(Page):
             return None
 
         def to_word(user_input):
-            word_num = int(user_input, 8)
-            if 0 < word_num <= 2048:
-                return WORDLIST[word_num - 1]
+            if user_input:
+                word_num = int(user_input, 8)
+                if 0 < word_num <= 2048:
+                    return WORDLIST[word_num - 1]
             return ""
 
         def possible_letters(prefix):
@@ -665,9 +666,10 @@ class Login(Page):
             return None
 
         def to_word(user_input):
-            word_num = int(user_input, 16)
-            if 0 < word_num <= 2048:
-                return WORDLIST[word_num - 1]
+            if user_input:
+                word_num = int(user_input, 16)
+                if 0 < word_num <= 2048:
+                    return WORDLIST[word_num - 1]
             return ""
 
         def possible_letters(prefix):
@@ -695,9 +697,10 @@ class Login(Page):
             return None
 
         def to_word(user_input):
-            word_num = int(user_input)
-            if 0 < word_num <= 2048:
-                return WORDLIST[word_num - 1]
+            if user_input:
+                word_num = int(user_input)
+                if 0 < word_num <= 2048:
+                    return WORDLIST[word_num - 1]
             return ""
 
         def possible_letters(prefix):
