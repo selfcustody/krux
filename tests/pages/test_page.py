@@ -155,3 +155,11 @@ def test_display_qr_code_loop_through_brightness(mocker, m5stickv, mock_page_cls
         mocker.call(0, TEST_QR_DATA_IMAGE, light_color=DARKGREY),  # Darker
         mocker.call(0, TEST_QR_DATA_IMAGE),  # Default
     ]
+
+
+def test_keypad_swipe_hint_executes_without_error(mocker, amigo, mock_page_cls):
+    from krux.input import BUTTON_TOUCH, SWIPE_RIGHT
+
+    ctx = create_ctx(mocker, [BUTTON_TOUCH, BUTTON_TOUCH], None, None, touch_seq=[0, 3])
+    page = mock_page_cls(ctx)
+    captured = page.capture_from_keypad("", ["", ""])
