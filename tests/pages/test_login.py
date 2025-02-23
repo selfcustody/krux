@@ -733,8 +733,8 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
     cases = [
         (
             [BUTTON_ENTER]  # 1 press confirm msg
-            + [BUTTON_PAGE_PREV] # place on btn Go
-            + [BUTTON_ENTER] # press Go without any value should not present any error
+            + [BUTTON_PAGE_PREV]  # place on btn Go
+            + [BUTTON_ENTER]  # press Go without any value should not present any error
             + (
                 # 1 press change to number "2" and 1 press to select
                 [BUTTON_PAGE, BUTTON_ENTER]
@@ -828,8 +828,8 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # 1 press confirm msg
-        + [BUTTON_PAGE_PREV] # place on btn Go
-        + [BUTTON_ENTER] # press Go without any value should not present any error
+        + [BUTTON_PAGE_PREV]  # place on btn Go
+        + [BUTTON_ENTER]  # press Go without any value should not present any error
         + (
             # 4 press change to number "F"
             [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV]
@@ -934,8 +934,8 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # 1 press confirm msg
-        + [BUTTON_PAGE_PREV] # place on btn Go
-        + [BUTTON_ENTER] # press Go without any value should not present any error
+        + [BUTTON_PAGE_PREV]  # place on btn Go
+        + [BUTTON_ENTER]  # press Go without any value should not present any error
         + (
             # 4 press change to number "7"
             [BUTTON_PAGE_PREV] * 4
