@@ -333,6 +333,7 @@ translation_array = [
     "Sí",
     "Modo ampliado",
     "es una dirección válida!",
+    "deslizar",
     "desconocido",
     "NO FUE ENCONTRADO en las primeras %d direcciones",
 ]
