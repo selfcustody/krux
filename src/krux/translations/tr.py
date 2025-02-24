@@ -333,6 +333,7 @@ translation_array = [
     "Evet",
     "Zoom Mod",
     "geçerli bir adres!",
+    "kaydırın",
     "bilinmiyor",
     "ilk %d adreste BULUNAMADI",
 ]

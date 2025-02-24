@@ -333,6 +333,7 @@ translation_array = [
     "Yes",
     "Ingezoomde modus",
     "is geen geldig adres",
+    "veeg",
     "onbekend",
     "werd NIET GEVONDEN in de eerste %d adressen",
 ]

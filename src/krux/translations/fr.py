@@ -333,6 +333,7 @@ translation_array = [
     "Oui",
     "Mode zoomé",
     "Adresse non valide\u2009!",
+    "glisser",
     "inconnu",
     "INTROUVABLE dans les %d premières adresses",
 ]
