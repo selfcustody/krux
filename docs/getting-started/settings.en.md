@@ -1,15 +1,15 @@
 In the Krux home menu, there is a `Settings` entry. Some submenu entries have too many options to fit on one screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens if your device has a touchscreen. Below is a breakdown of the options you can change:
 
-<img src="../../img/maixpy_amigo/settings-options-300.png" style="width: 16%;">
-<img src="../../img/maixpy_m5stickv/settings-options-250.png" style="width: 13%;">
+<img src="../../img/maixpy_amigo/settings-options-300.png" class="amigo">
+<img src="../../img/maixpy_m5stickv/settings-options-250.png" class="m5stickv">
 
 ### Default Wallet
 
 Set the default attributes for wallet loading.
 
 #### Network
-<img src="../../img/maixpy_m5stickv/network-options-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/network-options-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/network-options-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/network-options-300.png" align="right" class="amigo">
 
 This option allows you to switch between `mainnet` (the default) and `testnet`. `Testnet` can be used to try out different wallet coordinators or for development. 
 
@@ -28,16 +28,16 @@ As with Policy Type, pre-select the most commonly used script type so that you d
 These settings do not restrict changes to these attributes during or after loading a wallet, they only set the default values.
 
 ### Encryption
-<img src="../../img/maixpy_m5stickv/encryption-options-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/encryption-options-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/encryption-options-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/encryption-options-300.png" align="right" class="amigo">
 
 Modify the encryption method and parameters to fit your needs. This will be used when storing encrypted mnemonics or creating encrypted QR codes. For more info see [Krux Encrypted Mnemonics](./features/encrypted-mnemonics.md).
 
 <div style="clear: both"></div>
 
 #### PBKDF2 Iter. (Iterations)
-<img src="../../img/maixpy_m5stickv/encryption-options-pbkdf2-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/encryption-options-pbkdf2-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/encryption-options-pbkdf2-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/encryption-options-pbkdf2-300.png" align="right" class="amigo">
 
 When you enter the encryption key, it is not directly used to encrypt your data. In order to protect against brute force attacks, the key is derived multiple times using hashing functions. PBKDF2 (Password-Based Key Derivation Function) iterations stands for the amount of derivations that will be performed over your key prior to encrypt/decrypt your mnemonic.
 
@@ -48,8 +48,8 @@ Values must be multiple of 10,000. This was done to save data space on QR codes.
 <div style="clear: both"></div>
 
 #### Encryption Mode
-<img src="../../img/maixpy_m5stickv/encryption-options-mode-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/encryption-options-mode-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/encryption-options-mode-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/encryption-options-mode-300.png" align="right" class="amigo">
 
 Choose between well known and widely used AES (Advanced Encryption Standard) modes:
 
@@ -64,8 +64,8 @@ Encryption will take longer because a snapshot will be needed to generate the IV
 <div style="clear: both"></div>
 
 ### Hardware
-<img src="../../img/maixpy_m5stickv/settings-options-hardware-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/settings-options-hardware-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/settings-options-hardware-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/settings-options-hardware-300.png" align="right" class="amigo">
 
 Customize the parameters available for your device and change printer settings.
 
@@ -77,7 +77,7 @@ If your device has a rotary encoder, you can change the debounce threshold in mi
 The caveat is low values can cause issues, such as double step and unexpected movements, especially with lower quality encoders. If this is the case increase the value to make navigation more stable.
 
 #### Display
-<img src="../../img/maixpy_amigo/settings-options-hardware-display-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_amigo/settings-options-hardware-display-300.png" align="right" class="amigo">
 
 Available display settings vary based on your device’s hardware.
 
@@ -86,8 +86,8 @@ Some Maix Amigo screens are different, here you can customize the `BGR Colors`, 
 <div style="clear: both"></div>
 
 ### Printer
-<img src="../../img/maixpy_m5stickv/printer-options-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/printer-options-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/printer-options-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/printer-options-300.png" align="right" class="amigo">
 
 You can set up a TTL serial thermal printer or tell Krux to store a GRBL CNC instructions file on a SD card to machine QR codes.
 
@@ -105,23 +105,23 @@ Here you choose between Thermal, CNC or none (default). Leave this setting to "n
 <div style="clear: both"></div>
 
 #### Touchscreen (Maix Amigo, Yahboom and WonderMV only)
-<img src="../../img/maixpy_amigo/touchscreen-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_amigo/touchscreen-300.png" align="right" class="amigo">
 
 If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false or ghost touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
 
 <div style="clear: both"></div>
 
 ### Language - Locale
-<img src="../../img/maixpy_m5stickv/locale-options-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/locale-options-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/locale-options-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/locale-options-300.png" align="right" class="amigo">
 
 Here you can change Krux to your desired language.
 
 <div style="clear: both"></div>
 
 ### Persist
-<img src="../../img/maixpy_m5stickv/persist-options-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/persist-options-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/persist-options-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/persist-options-300.png" align="right" class="amigo">
 
 Choose between flash (device's internal memory) or SD card for the place where your settings will be stored.
 
@@ -153,16 +153,16 @@ The filling process requires good entropy images. If, for any reason, such as st
 The *TC Code* will be deleted if the device is wiped or user data is erased, which will consequently disable *TC Flash Hash*.
 
 ### Appearance
-<img src="../../img/maixpy_m5stickv/settings-options-appearance-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/settings-options-appearance-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/settings-options-appearance-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/settings-options-appearance-300.png" align="right" class="amigo">
 
 Configure screensaver time and change Krux to your desired theme.
 
 <div style="clear: both"></div>
 
 #### Screensaver time
-<img src="../../img/maixpy_m5stickv/settings-options-appearance-screensaver-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/settings-options-appearance-screensaver-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/settings-options-appearance-screensaver-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/settings-options-appearance-screensaver-300.png" align="right" class="amigo">
 
 Set how long to wait idle before the screensaver appears. Enter 0 to disable the screensaver.
 
@@ -171,21 +171,21 @@ Set how long to wait idle before the screensaver appears. Enter 0 to disable the
 #### Theme
 Choose your color theme according to your preference. Some themes may be more suitable for some devices, coordinator cameras and environments. As an example, it may be easier to scan QR codes from Krux devices using light theme in brighter environments.
 
-<img src="../../img/maixpy_amigo/theme-1-300.png" style="width: 16%;">
-<img src="../../img/maixpy_amigo/theme-2-300.png" style="width: 16%;">
-<img src="../../img/maixpy_amigo/theme-3-300.png" style="width: 16%;">
-<img src="../../img/maixpy_amigo/theme-4-300.png" style="width: 16%;">
-<img src="../../img/maixpy_amigo/theme-5-300.png" style="width: 16%;">
+<img src="../../img/maixpy_amigo/theme-1-300.png" class="amigo">
+<img src="../../img/maixpy_amigo/theme-2-300.png" class="amigo">
+<img src="../../img/maixpy_amigo/theme-3-300.png" class="amigo">
+<img src="../../img/maixpy_amigo/theme-4-300.png" class="amigo">
+<img src="../../img/maixpy_amigo/theme-5-300.png" class="amigo">
 
-<img src="../../img/maixpy_m5stickv/theme-1-250.png" style="width: 13%;">
-<img src="../../img/maixpy_m5stickv/theme-2-250.png" style="width: 13%;">
-<img src="../../img/maixpy_m5stickv/theme-3-250.png" style="width: 13%;">
-<img src="../../img/maixpy_m5stickv/theme-4-250.png" style="width: 13%;">
-<img src="../../img/maixpy_m5stickv/theme-5-250.png" style="width: 13%;">
+<img src="../../img/maixpy_m5stickv/theme-1-250.png" class="m5stickv">
+<img src="../../img/maixpy_m5stickv/theme-2-250.png" class="m5stickv">
+<img src="../../img/maixpy_m5stickv/theme-3-250.png" class="m5stickv">
+<img src="../../img/maixpy_m5stickv/theme-4-250.png" class="m5stickv">
+<img src="../../img/maixpy_m5stickv/theme-5-250.png" class="m5stickv">
 
 ### Factory Settings
-<img src="../../img/maixpy_m5stickv/settings-options-factory-settings-250.png" align="right" style="width: 13%;">
-<img src="../../img/maixpy_amigo/settings-options-factory-settings-300.png" align="right" style="width: 16%;">
+<img src="../../img/maixpy_m5stickv/settings-options-factory-settings-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/settings-options-factory-settings-300.png" align="right" class="amigo">
 
 Restore device to factory settings and reboot.
 
