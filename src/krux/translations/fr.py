@@ -211,6 +211,7 @@ translation_array = [
     "Taux de plongée",
     "Type de politique",
     "Entropie faible\u2009!",
+    "Appuyez sur PAGE pour changer de mode",
     "Impression Test QR",
     "Imprimer Tiny Seed\u2009?",
     "Imprimer Code QR",

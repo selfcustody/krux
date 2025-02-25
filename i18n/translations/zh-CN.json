@@ -189,6 +189,7 @@
     "Plunge Rate": "下刀速度",
     "Policy Type": "政策类型",
     "Poor entropy!": "熵值低!",
+    "Press PAGE to toggle mode": "按 PAGE 切换模式",
     "Print Test QR": "打印测试二维码",
     "Print Tiny Seed?": "打印 Tiny Seed？",
     "Print to QR": "打印到二维码",
@@ -263,7 +264,6 @@
     "Stats for Nerds": "极客统计数据",
     "Store on Flash": "存储到 Flash",
     "Store on SD Card": "存储到 SD 卡",
-    "swipe": "滑动",
     "Swipe to change mode": "滑动切换模式",
     "TC Flash Hash": "TC Flash Hash",
     "TC Flash Hash at Boot": "启动时的 TC Flash Hash",
@@ -312,6 +312,7 @@
     "Yes": "是",
     "Zoomed mode": "放大模式",
     "is a valid address!": " 非有效地址",
+    "swipe": "滑动",
     "unknown": "未知",
     "was NOT FOUND in the first %d addresses": "在前 %d 个地址中未找到"
 }

@@ -211,6 +211,7 @@ translation_array = [
     "Tỷ lệ sụt giảm",
     "Loại Chính sách",
     "Entropy kém!",
+    "Nhấn PAGE để chuyển chế độ",
     "In kiểm tra QR",
     "In Tiny Seed?",
     "In ra QR",

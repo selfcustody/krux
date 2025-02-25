@@ -189,6 +189,7 @@
     "Plunge Rate": "Dalış Hızı",
     "Policy Type": "Politika türü",
     "Poor entropy!": "Düşük entropi!",
+    "Press PAGE to toggle mode": "Modu değiştirmek için PAGE tuşuna basın",
     "Print Test QR": "Test QR'ını Yazdır",
     "Print Tiny Seed?": "Tiny Seed Yazdırılsın mı?",
     "Print to QR": "QR'a Yazdır",
@@ -263,7 +264,6 @@
     "Stats for Nerds": "İnekler İçin İstatistikler",
     "Store on Flash": "Flash'ta Sakla",
     "Store on SD Card": "SD Kartta Sakla",
-    "swipe": "kaydırın",
     "Swipe to change mode": "Modu değiştirmek için kaydırın",
     "TC Flash Hash": "TC Flash Hash",
     "TC Flash Hash at Boot": "Önyüklemede TC Flash Hash",
@@ -312,6 +312,7 @@
     "Yes": "Evet",
     "Zoomed mode": "Zoom Mod",
     "is a valid address!": "geçerli bir adres!",
+    "swipe": "kaydırın",
     "unknown": "bilinmiyor",
     "was NOT FOUND in the first %d addresses": "ilk %d adreste BULUNAMADI"
 }
