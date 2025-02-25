@@ -66,8 +66,7 @@ class KeypadLayout:
             x * key_h_spacing + MINIMAL_PADDING for x in range(self.width + 1)
         ]
         if ctx.input.touch is not None:
-            ctx.input.touch.y_regions = self.y_keypad_map
-            ctx.input.touch.x_regions = self.x_keypad_map
+            ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
 
 
 class Keypad:
@@ -96,19 +95,27 @@ class Keypad:
     @property
     def total_keys(self):
         """Returns the total number of keys in the current keyset, including fixed"""
-        return len(self.keys) + FIXED_KEYS + (1 if len(self.keysets) > 1 else 0)
+        return len(self.keys) + FIXED_KEYS + self.count_more_key()
 
     @property
     def more_index(self):
         """Returns the index of the "More" key"""
-        if len(self.keysets) > 1:
+        if self.has_more_key():
             return self.del_index - 1
         return None
 
     @property
     def del_index(self):
         """Returns the index of the "Del" key"""
-        return len(self.keys) + self.empty_keys + (1 if len(self.keysets) > 1 else 0)
+        return len(self.keys) + self.empty_keys + self.count_more_key()
+
+    def has_more_key(self):
+        """If keypad has "ABC" key"""
+        return len(self.keysets) > 1
+
+    def count_more_key(self):
+        """Count 1 if has the more key"""
+        return 1 if self.has_more_key() else 0
 
     @property
     def esc_index(self):
@@ -155,7 +162,7 @@ class Keypad:
                 elif key_index == self.go_index:
                     key = t("Go")
                     custom_color = theme.go_color
-                elif key_index == self.more_index and len(self.keysets) > 1:
+                elif self.has_more_key() and key_index == self.more_index:
                     key = self.keysets[self._move_keyset_index()][:3]
                     custom_color = theme.toggle_color
 
@@ -209,7 +216,7 @@ class Keypad:
 
     def draw_keyset_index(self):
         """Indicates the current keyset index with a small circle"""
-        if len(self.keysets) == 1:
+        if not self.has_more_key():
             return
         bar_height = FONT_HEIGHT // 6
         bar_length = FONT_WIDTH
@@ -309,13 +316,13 @@ class Keypad:
 
     def next_keyset(self):
         """Change keys for the next keyset"""
-        if len(self.keysets) > 1:
+        if self.has_more_key():
             self.keyset_index = self._move_keyset_index()
             self.reset()
 
     def previous_keyset(self):
         """Change keys for the previous keyset"""
-        if len(self.keysets) > 1:
+        if self.has_more_key():
             self.keyset_index = self._move_keyset_index(False)
             self.reset()
 

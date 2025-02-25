@@ -176,6 +176,10 @@ class Page:
                     if esc_prompt:
                         if self.esc_prompt() == ESC_KEY:
                             return ESC_KEY
+                        if self.ctx.input.touch is not None:
+                            self.ctx.input.touch.set_regions(
+                                pad.layout.x_keypad_map, pad.layout.y_keypad_map
+                            )
                     else:
                         return ESC_KEY
                 elif pad.cur_key_index == pad.go_index:
@@ -343,9 +347,7 @@ class Page:
         y_key_map += 4 * FONT_HEIGHT
         self.y_keypad_map.append(min(y_key_map, self.ctx.display.height()))
         if self.ctx.input.touch is not None:
-            self.ctx.input.touch.clear_regions()
-            self.ctx.input.touch.x_regions = self.x_keypad_map
-            self.ctx.input.touch.y_regions = self.y_keypad_map
+            self.ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
         btn = None
         answer = True
         while btn != BUTTON_ENTER:

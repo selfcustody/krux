@@ -206,6 +206,27 @@ def get_frame_titles_resulting_from_input(
     return frame_titles
 
 
+def test_keypad_esc_no_exit(mocker, amigo):
+    from krux.pages import Page, LETTERS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    btn_seq = (
+        [BUTTON_PAGE_PREV] * 2  # go to ESC
+        + [BUTTON_ENTER]  # press ESC to exit
+        + [BUTTON_PAGE_PREV, BUTTON_ENTER]  # No
+        + [BUTTON_ENTER]  # press ESC to exit
+        + [BUTTON_ENTER]  # Yes
+    )
+
+    ctx = create_ctx(mocker, btn_seq)
+    assert ctx.input.touch is not None
+
+    page = Page(ctx)
+    page.capture_from_keypad("test", [LETTERS])
+
+    assert ctx.input.touch.set_regions.call_count == 4
+
+
 def test_keypad_swipe_hint_is_shown_after_more_keypress_and_cleared_after_other_keypress(
     mocker, amigo, mock_page_cls
 ):
