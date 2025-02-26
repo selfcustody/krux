@@ -24,6 +24,7 @@ import math
 from unittest import mock
 import pygame as pg
 import cv2
+from numpy import zeros_like
 from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
 from krux.krux_settings import Settings
@@ -82,6 +83,17 @@ def register(addr, val):
     pass
 
 
+def zoom_out(img, factor=0.6):
+    h, w = img.shape[:2]
+    new_width = int(w * factor)
+    new_height = int(h * factor)
+    resized = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_AREA)
+    canvas = zeros_like(img)
+    y, x = (h - new_height) // 2, (w - new_width) // 2
+    canvas[y : y + resized.shape[0], x : x + resized.shape[1]] = resized
+    return canvas
+
+
 def display(img, oft=(0, 0), roi=None):
 
     image_width = 240
@@ -98,14 +110,22 @@ def display(img, oft=(0, 0), roi=None):
             if frame.shape[1] / frame.shape[0] > image_width / image_height:
                 frame = frame[
                     :,
-                    int((frame.shape[1] - frame.shape[0] * image_width / image_height) / 2) : int(
-                        (frame.shape[1] + frame.shape[0] * image_width / image_height) / 2
+                    int(
+                        (frame.shape[1] - frame.shape[0] * image_width / image_height)
+                        / 2
+                    ) : int(
+                        (frame.shape[1] + frame.shape[0] * image_width / image_height)
+                        / 2
                     ),
                 ]
             else:
                 frame = frame[
-                    int((frame.shape[0] - frame.shape[1] * image_height / image_width) / 2) : int(
-                        (frame.shape[0] + frame.shape[1] * image_height / image_width) / 2
+                    int(
+                        (frame.shape[0] - frame.shape[1] * image_height / image_width)
+                        / 2
+                    ) : int(
+                        (frame.shape[0] + frame.shape[1] * image_height / image_width)
+                        / 2
                     ),
                     :,
                 ]
@@ -114,8 +134,12 @@ def display(img, oft=(0, 0), roi=None):
                 (image_width, image_height),
                 interpolation=cv2.INTER_AREA,
             )
+            # If roi width < 240, zoom out keeping canvas size
+            # Case for M5StickV
+            if roi and roi[2] < 240:
+                frame = zoom_out(frame, 0.6)
             frame = frame.swapaxes(0, 1)
-        except Exception as e: 
+        except Exception as e:
             print(f"Error: {e}")
             return
 
@@ -123,7 +147,7 @@ def display(img, oft=(0, 0), roi=None):
         if roi:
             x, y, w, h = roi
             frame = frame[y : y + h, x : x + w]
-        
+
         # Create a surface for the frame
         frame_surface = pg.surfarray.make_surface(frame)
 
@@ -167,6 +191,7 @@ def _is_x_flipped():
         flipped_x = Settings().hardware.display.flipped_x_coordinates
     return flipped_x
 
+
 def string_width_px(string):
     standard_width = BOARD_CONFIG["krux"]["display"]["font"][0]
     wide_width = BOARD_CONFIG["krux"]["display"]["font_wide"][0]
@@ -184,6 +209,7 @@ def string_width_px(string):
 
     return string_width
 
+
 def string_has_wide_glyph(string):
     for c in string:
         if (
@@ -194,12 +220,14 @@ def string_has_wide_glyph(string):
             return True
     return False
 
+
 def is_wide(c):
     return (
-            JAPANESE_CODEPOINT_MIN <= ord(c) <= JAPANESE_CODEPOINT_MAX
-            or CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
-            or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
+        JAPANESE_CODEPOINT_MIN <= ord(c) <= JAPANESE_CODEPOINT_MAX
+        or CHINESE_CODEPOINT_MIN <= ord(c) <= CHINESE_CODEPOINT_MAX
+        or KOREAN_CODEPOINT_MIN <= ord(c) <= KOREAN_CODEPOINT_MAX
     )
+
 
 def char_width(c):
     if (
@@ -211,6 +239,7 @@ def char_width(c):
     else:
         return BOARD_CONFIG["krux"]["display"]["font"][0]
 
+
 def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
 
     def run():
@@ -218,7 +247,9 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
 
         x_position = x
         if not string_has_wide_glyph(s):
-            text, _ = devices.load_font(BOARD_CONFIG["type"])[0].render(s, color, bgcolor)
+            text, _ = devices.load_font(BOARD_CONFIG["type"])[0].render(
+                s, color, bgcolor
+            )
             if landscape:
                 text = pg.transform.rotate(text, 90)
                 screen.blit(
@@ -229,7 +260,11 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                     ),
                 )
             else:
-                x_val = x_position if BOARD_CONFIG["type"] != "amigo" else width() - text.get_width() - x_position
+                x_val = (
+                    x_position
+                    if BOARD_CONFIG["type"] != "amigo"
+                    else width() - text.get_width() - x_position
+                )
                 screen.blit(
                     text,
                     (
@@ -239,11 +274,17 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                 )
         else:
             # draw wide text char by char
-            total_with =  string_width_px(s)
+            total_with = string_width_px(s)
             for c in s:
-                x_val = x_position if BOARD_CONFIG["type"] != "amigo" else width() - x_position - total_with
+                x_val = (
+                    x_position
+                    if BOARD_CONFIG["type"] != "amigo"
+                    else width() - x_position - total_with
+                )
                 if is_wide(c):
-                    text, _ = devices.load_font(BOARD_CONFIG["type"])[1].render(c, color, bgcolor)
+                    text, _ = devices.load_font(BOARD_CONFIG["type"])[1].render(
+                        c, color, bgcolor
+                    )
                     if landscape:
                         text = pg.transform.rotate(text, 90)
                         screen.blit(
@@ -262,7 +303,9 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                             ),
                         )
                 else:
-                    text, _ = devices.load_font(BOARD_CONFIG["type"])[0].render(c, color, bgcolor)
+                    text, _ = devices.load_font(BOARD_CONFIG["type"])[0].render(
+                        c, color, bgcolor
+                    )
                     if landscape:
                         text = pg.transform.rotate(text, 90)
                         screen.blit(
@@ -280,7 +323,9 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
                                 y,
                             ),
                         )
-                x_position += char_width(c) if BOARD_CONFIG["type"] != "amigo" else -char_width(c)
+                x_position += (
+                    char_width(c) if BOARD_CONFIG["type"] != "amigo" else -char_width(c)
+                )
 
     color = rgb565torgb888(color)
     bgcolor = rgb565torgb888(bgcolor)
@@ -316,7 +361,7 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color, backgro
 def draw_qr_code_binary(
     offset_y, code_bin, max_width, dark_color, light_color, background
 ):
-    
+
     def run():
         starting_size = int(math.sqrt(len(code_bin) * 8))
         block_size_divisor = starting_size + 2
@@ -389,6 +434,7 @@ def fill_rectangle(x, y, w, h, color, radius=0):
     radius = min(radius, min(w, h) // 2)
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
 
+
 def draw_circle(x, y, radious, quadrant, color):
     def run():
         if quadrant == 0:
@@ -398,6 +444,7 @@ def draw_circle(x, y, radious, quadrant, color):
     if _is_x_flipped():
         x = width() - x - 1
     pg.event.post(pg.event.Event(events.LCD_DRAW_CIRCLE_EVENT, {"f": run}))
+
 
 def draw_line(x_0, y_0, x_1, y_1, color):
 
@@ -425,11 +472,7 @@ def draw_outline(x, y, w, h, color):
             screen,
             color,
             (
-                (
-                    width() - w - x - 1
-                    if _is_x_flipped()
-                    else x
-                ),
+                (width() - w - x - 1 if _is_x_flipped() else x),
                 y,
                 w + 1,
                 h + 1,
