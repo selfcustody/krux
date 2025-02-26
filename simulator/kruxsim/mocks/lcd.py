@@ -94,6 +94,21 @@ def display(img, oft=(0, 0), roi=None):
     def run():
         try:
             frame = img.get_frame()
+            # Fix aspect ration by cutting the image
+            if frame.shape[1] / frame.shape[0] > image_width / image_height:
+                frame = frame[
+                    :,
+                    int((frame.shape[1] - frame.shape[0] * image_width / image_height) / 2) : int(
+                        (frame.shape[1] + frame.shape[0] * image_width / image_height) / 2
+                    ),
+                ]
+            else:
+                frame = frame[
+                    int((frame.shape[0] - frame.shape[1] * image_height / image_width) / 2) : int(
+                        (frame.shape[0] + frame.shape[1] * image_height / image_width) / 2
+                    ),
+                    :,
+                ]
             frame = cv2.resize(
                 frame,
                 (image_width, image_height),
