@@ -189,6 +189,7 @@
     "Plunge Rate": "Tỷ lệ sụt giảm",
     "Policy Type": "Loại Chính sách",
     "Poor entropy!": "Entropy kém!",
+    "Press PAGE to toggle mode": "Nhấn PAGE để chuyển chế độ",
     "Print Test QR": "In kiểm tra QR",
     "Print Tiny Seed?": "In Tiny Seed?",
     "Print to QR": "In ra QR",
@@ -263,7 +264,6 @@
     "Stats for Nerds": "Số liệu thống kê cho Mọt sách",
     "Store on Flash": "Lưu trữ trên flash",
     "Store on SD Card": "Lưu trữ trên thẻ SD",
-    "swipe": "vuốt",
     "Swipe to change mode": "Vuốt để thay đổi chế độ",
     "TC Flash Hash": "TC Flash Hash",
     "TC Flash Hash at Boot": "Hash Flash TC khi khởi động",
@@ -312,6 +312,7 @@
     "Yes": "Đúng",
     "Zoomed mode": "Chế độ thu phóng",
     "is a valid address!": "là một địa chỉ hợp lệ!",
+    "swipe": "vuốt",
     "unknown": "không rõ",
     "was NOT FOUND in the first %d addresses": "kHÔNG TÌM THẤY trong %d địa chỉ đầu tiên"
 }

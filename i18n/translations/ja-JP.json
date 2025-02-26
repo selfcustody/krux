@@ -189,6 +189,7 @@
     "Plunge Rate": "沈下率",
     "Policy Type": "証券の種類",
     "Poor entropy!": "低品質なエントロピー!",
+    "Press PAGE to toggle mode": "PAGEを押してモードを切り替えます",
     "Print Test QR": "テストQRを印刷",
     "Print Tiny Seed?": "小さなシードを印刷しますか?",
     "Print to QR": "QRを印刷",
@@ -263,7 +264,6 @@
     "Stats for Nerds": "オタクのための統計",
     "Store on Flash": "フラッシュに保存する",
     "Store on SD Card": "SDカードに保存する",
-    "swipe": "スワイプ",
     "Swipe to change mode": "スワイプしてモードを変更する",
     "TC Flash Hash": "TCフラッシュハッシュ",
     "TC Flash Hash at Boot": "起動時のTCフラッシュハッシュ",
@@ -312,6 +312,7 @@
     "Yes": "はい",
     "Zoomed mode": "ズームモード",
     "is a valid address!": "有効なアドレスです！",
+    "swipe": "スワイプ",
     "unknown": "不明",
     "was NOT FOUND in the first %d addresses": "最初の%dアドレスに見つかりませんでした"
 }
