@@ -1,4 +1,4 @@
-Once you have either a 12 or 24-word BIP-39 mnemonic, choose `Load Mnemonic` on Krux's start menu (aka login menu), and you will be presented with several input methods:
+Once you have either a 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), choose `Load Mnemonic` on Krux's start menu (aka login menu), and you will be presented with several input methods:
 
 <img src="../../../img/maixpy_amigo/load-mnemonic-options-300.png" class="amigo">
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-options-250.png" class="m5stickv">
@@ -21,7 +21,7 @@ camera-scan-tips.en.txt
 It's unpleasant having to manually enter 12 or 24 words every time you want to use Krux. To remedy this you can instead use the device's camera to read a QR code containing the words. Krux will decode QR codes of four types:
 
 - **Plain text QR**: The mnemonic words encoded as text, with words separated by spaces.
-- [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP-39 numbers concatenated, encoded as text.
+- [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP39 numbers concatenated, encoded as text.
 - [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
 - [Encrypted Mnemonic](../features/encrypted-mnemonics.md): A specification created by Krux that encrypts the mnemonic words bits and adds some information about the encryption used.
 
@@ -45,7 +45,7 @@ Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) 
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-text-word-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-text-word-300.png" align="right" class="amigo">
 
-Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
+Enter each word of your BIP39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
 
 <div style="clear: both"></div>
 
@@ -54,10 +54,10 @@ Enter each word of your BIP-39 mnemonic one at a time. Krux will disable impossi
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-300.png" align="right" class="amigo">
 
 ##### Decimal
-Enter each word of your BIP-39 mnemonic as a number (1-2048) one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
+Enter each word of your BIP39 mnemonic as a number (1-2048) one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
 
 ##### Hexadecimal and Octal
-You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal format, with values ranging from 0x1 to 0x800, or in octal format, with values ranging from 01 to 04000. This is useful with some metal plate backups that uses those formats.
+You can also enter your BIP39 mnemonic word's numbers (1-2048) in hexadecimal format, with values ranging from 0x1 to 0x800, or in octal format, with values ranging from 01 to 04000. This is useful with some metal plate backups that uses those formats.
 
 <div style="clear: both"></div>
 
@@ -65,7 +65,7 @@ You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal f
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-300.png" align="right" class="amigo">
 
-Enter the BIP-39 mnemonic word's numbers (1-2048) in binary format, toggling necessary bits to recreate each of the word's respective number. The last word will have checksum bits dynamically toggled while you fill the bits.
+Enter the BIP39 mnemonic word's numbers (1-2048) in binary format, toggling necessary bits to recreate each of the word's respective number. The last word will have checksum bits dynamically toggled while you fill the bits.
 
 **Tip**: You can use this screen to generate a mnemonic by flipping a coin:
 
@@ -78,7 +78,7 @@ Enter the BIP-39 mnemonic word's numbers (1-2048) in binary format, toggling nec
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-filled-300.png" align="right" class="amigo">
 
-Enter the BIP-39 mnemonic word's numbers (1-2048) using the Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of the numbers marked (punched) 1, 2, 4, or 8. For example, to enter the word "oyster", number 1268, you must punch (1)(2)(2,4)(8).
+Enter the BIP39 mnemonic word's numbers (1-2048) using the Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of the numbers marked (punched) 1, 2, 4, or 8. For example, to enter the word "oyster", number 1268, you must punch (1)(2)(2,4)(8).
 
 <div style="clear: both"></div>
 
@@ -124,7 +124,7 @@ You will be presented with a screen containing wallet attributes, if they are as
 
 #### Fingerprint 
 * :material-fingerprint: ` 73c5da0a `:
-The BIP-32 master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet. Just to reinforce, the fingerprint is the best checksum you can have, it's good to note it down.
+The [BIP32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet. Just to reinforce, the fingerprint is the best checksum you can have, it's good to note it down.
 
 #### Network 
 * ` Mainnet `:
@@ -151,7 +151,7 @@ The derivation path is a sequence of numbers, or "nodes", that define the script
 
 #### Passphrase
 * ` No Passphrase `:
-Informs if the wallet has a passphrase. Adding a passphrase is like adding an extra word to your mnemonic, it will change the wallet's fingerprint.
+Informs if the wallet has a passphrase. Adding a passphrase gives you a whole other wallet and changes the fingerprint.
 
 ### Customize
 You can change any of the attributes before and after loading a wallet.
@@ -161,7 +161,7 @@ It is also possible to change default settings for `Network`, `Policy Type` and 
 <img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
 
-You can type or scan a BIP-39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. You can also hold the button `PAGE` or `PAGE_PREV` when navigating among letters while typing text to fast forward or backward. For scanning, you can also create a QR code from your offline passphrase using the [create QR code tool](../features/tools.md/#create-qr-code).
+You can type or scan a BIP39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. You can also hold the button `PAGE` or `PAGE_PREV` when navigating among letters while typing text to fast forward or backward. For scanning, you can also create a QR code from your offline passphrase using the [create QR code tool](../features/tools.md/#create-qr-code).
 
 <div style="clear: both"></div>
 

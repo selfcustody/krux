@@ -1,4 +1,4 @@
-Krux supports creating 12 and 24-word BIP-39 mnemonic seed phrases. Since generating true entropy is challenging, especially with an embedded device, we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
+Krux supports creating 12 and 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrases. Since generating true entropy is challenging, especially with an embedded device, we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
 
 At the start screen, after selecting New Mnemonic, you will be taken to a second menu where you can choose to create a mnemonic via the camera, words, rolls of a D6 (standard six-sided die), or a D20 (20-sided die).
 
@@ -22,12 +22,12 @@ During image capture, entropy quality estimation is displayed to assist you in o
 <div style="clear: both"></div>
 
 #### Double mnemonic
-It is the combination of two 12-word mnemonics that also forms a valid 24-word BIP-39 mnemonic. This is achieved by using the first 16 bytes (128 bits) of the image's entropy to generate the first 12-word, then using the next 16 bytes to generate the second 12-word and checking if these two 12-word together forms a valid 24-word, if not, we iterate over the second 12-word incrementing its entropy bytes until the two 12-word forms a valid 24-word.
+It is the combination of two 12-word mnemonics that also forms a valid 24-word BIP39 mnemonic. This is achieved by using the first 16 bytes (128 bits) of the image's entropy to generate the first 12-word, then using the next 16 bytes to generate the second 12-word and checking if these two 12-word together forms a valid 24-word, if not, we iterate over the second 12-word incrementing its entropy bytes until the two 12-word forms a valid 24-word.
 
 Double Mnemonic was first defined by Stepan Snigirev in his [Double Mnemonic Generator](https://stepansnigirev.github.io/seed-tools/double_mnemonic.html). It can be used for plausible deniability, or, as Stepan stated, to have fun and confuse everyone.
 
 ## Words
-Print the BIP39 word list in 3D or on paper, then cut out the words and place them in a bucket. Manually draw 11 or 23 words from the bucket.
+Print the [BIP39 word list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) in 3D or on paper, then cut out the words and place them in a bucket. Manually draw 11 or 23 words from the bucket.
 For the final word, Krux will assist you in picking a valid 12th or 24th word by adjusting its smart keypad to only allow typing words with a valid checksum. Alternatively, you can leave it empty, and Krux will select a final, valid checksum word for you.
 
 ## Dice Rolls
@@ -85,7 +85,7 @@ In case a camera snapshot is used as a source, the image bytes, which contain pi
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-250.png" class="m5stickv">
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-250.png" class="m5stickv">
 
-Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/binascii.html#binascii.unhexlify) on it to encode it as bytes, and deterministically converts it into a mnemonic according to the [BIP-39 Reference Implementation](https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207).
+Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/binascii.html#binascii.unhexlify) on it to encode it as bytes, and deterministically converts it into a mnemonic according to the [BIP39 Reference Implementation](https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207).
 
 Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).
 

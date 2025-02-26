@@ -56,7 +56,7 @@ A QR code is created from a binary representation of mnemonic words. Format crea
 <img src="../../../img/maixpy_m5stickv/backup-seed-qr-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-seed-qr-300.png" align="right" class="amigo">
 
-Words are converted to their BIP-39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner, more info [here](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md).
+Words are converted to their BIP39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner, more info [here](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md).
 
 <div style="clear: both"></div>
 
@@ -100,7 +100,7 @@ It's another path for the same functionality present on QR Code backups, describ
 <img src="../../../img/maixpy_m5stickv/backup-mnemonic-words-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-mnemonic-words-300.png" align="right" class="amigo">
 
-Display the BIP-39 mnemonic words as text so you can write them down.
+Display the BIP39 mnemonic words as text so you can write them down.
 
 <div style="clear: both"></div>
 
@@ -109,7 +109,7 @@ Display the BIP-39 mnemonic words as text so you can write them down.
 <img src="../../../img/maixpy_m5stickv/backup-mnemonic-numbers-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-mnemonic-numbers-300.png" align="right" class="amigo">
 
-Display the BIP-39 mnemonic word numbers (1-2048) in decimal, hex, or octal format.
+Display the BIP39 mnemonic word numbers (1-2048) in decimal, hex, or octal format.
 
 <div style="clear: both"></div>
 
@@ -118,7 +118,7 @@ Display the BIP-39 mnemonic word numbers (1-2048) in decimal, hex, or octal form
 <img src="../../../img/maixpy_m5stickv/backup-stackbit-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-stackbit-300.png" align="right" class="amigo">
 
-This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
+This metal backup format represents the BIP39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
 
 <div style="clear: both"></div>
 
@@ -127,7 +127,7 @@ This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048).
 <img src="../../../img/maixpy_m5stickv/backup-tiny-seed-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-tiny-seed-300.png" align="right" class="amigo">
 
-This metal backup format represents the BIP-39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format if a thermal printer driver is set.
+This metal backup format represents the BIP39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format if a thermal printer driver is set.
 
 <div style="clear: both"></div>
 
