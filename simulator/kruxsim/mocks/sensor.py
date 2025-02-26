@@ -128,12 +128,13 @@ def snapshot():
         lab_frame = cvtColor(rgb_frame, COLOR_BGR2LAB)
         img = Image.fromarray(rgb_frame)
 
-        m.get_frame.return_value = rgb_frame
+        m.get_frame.return_value = frame
         m.find_qrcodes.return_value = find_qrcodes(img)
         m.to_bytes.return_value = frame.tobytes()
         m.get_statistics.return_value = MockStatistics(lab_frame)
         m.width.return_value = frame.shape[1]
         m.height.return_value = frame.shape[0]
+        m.lens_corr.return_value = m
     return m
 
 

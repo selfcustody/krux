@@ -83,14 +83,12 @@ def register(addr, val):
 
 
 def display(img, oft=(0, 0), roi=None):
-    if roi:
-        image_width = roi[3]
-        image_height = roi[2]
-    else:
-        image_width = 240
-        image_height = 320
 
-        # Swap and adjust oft axis
+    image_width = 240
+    image_height = 320
+
+    # Swap and adjust oft axis
+    if portrait:
         oft = (oft[1], oft[0])
 
     def run():
@@ -102,9 +100,15 @@ def display(img, oft=(0, 0), roi=None):
                 interpolation=cv2.INTER_AREA,
             )
             frame = frame.swapaxes(0, 1)
-        except:
+        except Exception as e: 
+            print(f"Error: {e}")
             return
 
+        # Cut image according to region of interest
+        if roi:
+            x, y, w, h = roi
+            frame = frame[y : y + h, x : x + w]
+        
         # Create a surface for the frame
         frame_surface = pg.surfarray.make_surface(frame)
 
