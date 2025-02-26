@@ -89,7 +89,7 @@ Some Maix Amigo screens are different, here you can customize the `BGR Colors`, 
 <img src="../../img/maixpy_m5stickv/printer-options-250.png" align="right" class="m5stickv">
 <img src="../../img/maixpy_amigo/printer-options-300.png" align="right" class="amigo">
 
-You can set up a TTL serial thermal printer or tell Krux to store a GRBL CNC instructions file on a SD card to machine QR codes.
+You can set up a TTL serial thermal printer or tell Krux to store a GRBL CNC instructions file on an SD card to machine QR codes.
 
 #### CNC
 Define several machining parameters according to the desired size, material you'll use, and your CNC characteristics and capabilities.
