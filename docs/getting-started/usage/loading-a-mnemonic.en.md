@@ -134,7 +134,7 @@ Check if you are loading a `Testnet` or `Mainnet` wallet.
 Check the wallet's policy type: `Single-sig`, `Multisig`, `Miniscript`, or `TR Miniscript` (Taproot).
 
 #### Derivation Path
-* ` m/84h/0h/0h `:
+* :material-arrow-right-bottom: ` m/84h/0h/0h `:
 The derivation path is a sequence of numbers, or "nodes", that define the script type, network, and account index of your wallet.
     * **Script Type** `84h`: The first number defines the script type. The default is `84h`, corresponding to a Native Segwit wallet. Other values include:
         * `44h` for Legacy
