@@ -28,7 +28,7 @@ locale=$2
 # Create screenshots directory
 rm -rf screenshots && mkdir -p screenshots
 
-# Create a sd folder and a fresh settings.json file
+# Create an sd folder and a fresh settings.json file
 mkdir -p sd && rm -f sd/settings.json
 echo "{\"settings\": {\"i18n\": {\"locale\": \"$locale\"}}}" > sd/settings.json
 
