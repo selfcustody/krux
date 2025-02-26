@@ -67,7 +67,7 @@ You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal f
 
 Enter the BIP-39 mnemonic word's numbers (1-2048) in binary format, toggling necessary bits to recreate each of the word's respective number. The last word will have checksum bits dynamically toggled while you fill the bits.
 
-Tip: You can use this screen to generate a mnemonic by flipping a coin:
+**Tip**: You can use this screen to generate a mnemonic by flipping a coin:
 
 - Flip a coin, if it is heads, mark the first space (value 1) of the word, if it is tails do nothing. Repeat this step for each space up to 1024 (only up to 1024, never change 2048).
 - The last word has the checksum, you will do as you did with the other words, the only difference is that you cannot set some spaces, they are calculated automatically. For 12 words you will flip the coin only 7 times, for spaces 16, 32, 64, 128, 256, 512 and 1024. For 24 words you will flip the coin only 3 times, for spaces 256, 512 and 1024.
@@ -95,8 +95,7 @@ You can retrieve mnemonics previously stored on device's internal flash or exter
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" align="right" class="amigo">
 
-
-Once you have entered your mnemonic, you will be presented with the full list of words to confirm. 
+Once you have entered your mnemonic, you will be presented with the full list of words to confirm. A 12 word has only 4 checksum bits, so it has a 1 in 16 chance (6,25%) of still being valid even if you mistype a word. A 24 word phrase has 8 checksum bits, so it only has 1 in 256 chance (~0,4%) of still being valid if you mistype a word. So if you can, choose 24 words.
 
 <div style="clear: both"></div>
 
@@ -125,7 +124,7 @@ You will be presented with a screen containing wallet attributes, if they are as
 
 #### Fingerprint 
 * :material-fingerprint: ` 73c5da0a `:
-The BIP-32 master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet.
+The BIP-32 master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet. Just to reinforce, the fingerprint is the best checksum you can have, it's good to note it down.
 
 #### Network 
 * ` Mainnet `:
@@ -152,7 +151,7 @@ The derivation path is a sequence of numbers, or "nodes", that define the script
 
 #### Passphrase
 * ` No Passphrase `:
-Informs if the wallet has a loaded passphrase.
+Informs if the wallet has a passphrase. Adding a passphrase is like adding an extra word to your mnemonic, it will change the wallet's fingerprint.
 
 ### Customize
 You can change any of the attributes before and after loading a wallet.
