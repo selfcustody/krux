@@ -67,6 +67,11 @@ You can also enter your BIP-39 mnemonic word's numbers (1-2048) in hexadecimal f
 
 Enter the BIP-39 mnemonic word's numbers (1-2048) in binary format, toggling necessary bits to recreate each of the word's respective number. The last word will have checksum bits dynamically toggled while you fill the bits.
 
+Tip: You can use this screen to generate a mnemonic by flipping a coin:
+
+- Flip a coin, if it is heads, mark the first space (value 1) of the word, if it is tails do nothing. Repeat this step for each space up to 1024 (only up to 1024, never change 2048).
+- The last word has the checksum, you will do as you did with the other words, the only difference is that you cannot set some spaces, they are calculated automatically. For 12 words you will flip the coin only 7 times, for spaces 16, 32, 64, 128, 256, 512 and 1024. For 24 words you will flip the coin only 3 times, for spaces 256, 512 and 1024.
+
 <div style="clear: both"></div>
 
 #### Stackbit 1248
