@@ -209,7 +209,7 @@ translation_array = [
     "QR em Texto",
     "Carregue um descritor da carteira",
     "Taxa de Mergulho",
-    "Tipo de Apólice",
+    "Tipo de Política",
     "Entropia fraca!",
     "Imprimir QR de teste",
     "Imprimir Tiny Seed?",
