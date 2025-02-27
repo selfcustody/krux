@@ -90,7 +90,7 @@ You can retrieve mnemonics previously stored on device's internal flash or exter
 
 <div style="clear: both"></div>
 
-## Wallet Loading
+## Wallet Loading Confirmations
 ### Confirm Mnemonic Words
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" align="right" class="amigo">
@@ -105,12 +105,11 @@ If you see an asterisk (`*`) in the header, it means this is a [double mnemonic]
 
 <div style="clear: both"></div>
 
-### Edit Mnemonic - Optional
-
+### (Optional) Edit Mnemonic
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-edited-wrong-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-edited-wrong-300.png" align="right" class="amigo">
 
-If you make a mistake while loading a mnemonic, you can easily edit it. Simply touch or navigate to the word you want to change and replace it. Edited words will be highlighted in a different color. If the final word contains an invalid checksum, it will appear in red. If your checksum word is red, please review your mnemonic carefully, as there may be an error.
+If you make a mistake while loading a mnemonic, you can easily edit it. Simply touch or navigate to the word you want to change and replace it. Edited words will be highlighted. If the final word contains an invalid checksum, it will appear in red. If your checksum word is red, please review your mnemonic carefully, as there may be an error.
 
 <div style="clear: both"></div>
 
