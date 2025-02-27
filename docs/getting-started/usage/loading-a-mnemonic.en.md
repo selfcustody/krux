@@ -118,7 +118,7 @@ If you make a mistake while loading a mnemonic, you can easily edit it. Simply t
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" align="right" class="amigo">
 
-You will be presented with a screen containing wallet attributes, if they are as expected just press `Load Wallet` and you'll be ready to use your loaded key.
+A screen with an information box at the top shows the wallet's attributes. If they are as expected, press `Load Wallet` and you'll be ready to go.
 
 <div style="clear: both"></div>
 
@@ -153,9 +153,8 @@ The derivation path is a sequence of numbers, or "nodes", that define the script
 * ` No Passphrase `:
 Informs if the wallet has a passphrase. Adding a passphrase gives you a whole other wallet and changes the fingerprint.
 
-### Customize
-You can change any of the attributes before and after loading a wallet.
-It is also possible to change default settings for `Network`, `Policy Type` and `Script Type` on [Settings -> Default Wallet](../settings.md).
+### Customize Wallet
+Here you can change any of the wallet's attributes, it is also possible to change them later, after loading. Default wallet attributes can be set on [settings](../settings.md) to load it faster next time, they are: `Network`, `Policy Type` and `Script Type`.
 
 #### Passphrase
 <img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
@@ -169,7 +168,7 @@ You can type or scan a BIP39 passphrase. When typing, swipe left :material-gestu
 <img src="../../../img/maixpy_m5stickv/wallet-customization-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/wallet-customization-options-300.png" align="right" class="amigo">
 
-Press `Customize` to open a menu where you can change the `Network`, `Policy Type`, `Script Type`, and `Account`. If `Policy Type` is Miniscript, instead of setting just an account, you can customize the entire derivation path.
+Use this screen to change the `Network`, `Policy Type`, `Script Type`, and `Account` of the wallet. If `Policy Type` is Miniscript, you will be able to enter a custom derivation path.
 
 <div style="clear: both"></div>
 
