@@ -151,7 +151,7 @@ The derivation path is a sequence of numbers, or "nodes", that define the script
 
 #### Passphrase
 * ` No Passphrase `:
-Informs if the wallet has a passphrase. Adding a passphrase gives you a whole other wallet and changes the fingerprint.
+Informs if the wallet has a passphrase. Adding or changing the passphrase results in a completely different wallet and fingerprint.
 
 ### Customize Wallet
 Here you can change any of the wallet's attributes, it is also possible to change them later, after loading. Default wallet attributes can be set on [settings](../settings.md) to load it faster next time, they are: `Network`, `Policy Type` and `Script Type`.
