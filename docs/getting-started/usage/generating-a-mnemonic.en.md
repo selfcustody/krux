@@ -1,6 +1,6 @@
-Krux supports creating 12 and 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrases. Since generating true entropy is challenging, especially with an embedded device, we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
+Krux supports creating 12 and 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrases using random bits, also known as [entropy](https://en.wikipedia.org/wiki/Entropy_(computing)). Generating true entropy is challenging, especially for an embedded device, so we recommend outsourcing entropy generation using dice rolls. However, it is also possible to randomly pick words (e.g., SeedPicker) or use the camera as a source of entropy to quickly create a mnemonic.
 
-At the start screen, after selecting New Mnemonic, you will be taken to a second menu where you can choose to create a mnemonic via the camera, words, rolls of a D6 (standard six-sided die), or a D20 (20-sided die).
+At the start screen, select **New Mnemonic**, and choose between camera, words, rolls of a D6 (standard six-sided die), or a D20 (20-sided die).
 
 <img src="../../../img/maixpy_amigo/new-mnemonic-options-300.png" class="amigo">
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-options-250.png" class="m5stickv">
@@ -17,7 +17,9 @@ At the start screen, after selecting New Mnemonic, you will be taken to a second
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-entropy-estimation-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-entropy-estimation-300.png" align="right" class="amigo">
 
-During image capture, entropy quality estimation is displayed to assist you in obtaining a quality image source for your key. After a snapshot is taken, Shannon's entropy and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation. It's important to note that these values serve as indicators or estimations of entropy quality, but they are not absolute entropy values in a cryptographic context.
+During image capture, entropy quality estimation is displayed to assist you in obtaining a quality image source for your key. After the snapshot is taken, [Shannon's entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation.
+
+Note: These values ​​serve only as indicators or estimations of the quality of entropy, but are not absolute values ​​of entropy in a cryptographic context.
 
 <div style="clear: both"></div>
 
@@ -32,7 +34,7 @@ For the final word, Krux will assist you in picking a valid 12th or 24th word by
 
 ## Dice Rolls
 ### Via D6
-Choose between 12 or 24 words. The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore a minimum of a 50 rolls will be required for 128 bits of entropy, enough to generate a 12-word mnemonic. For 24-word, or an entropy of 256 bits, a minimum of 99 rolls will be required.
+Choose between 12 or 24 words. The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore a minimum of 50 rolls is required for 128 bits of entropy, enough to generate a 12-word mnemonic. For 24 words, a minimum of 99 rolls is required for 256 bits of entropy.
 
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-d6-roll-1-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-d6-last-n-rolls-300.png" class="amigo">
@@ -40,7 +42,7 @@ Choose between 12 or 24 words. The entropy in a single roll of a D6 is 2.585 bit
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-last-n-rolls-250.png" class="m5stickv">
 
 ### Via D20
-Since a D20 has more possible outcomes, the entropy is increased per roll to 4.322 bits ( log<sub>2</sub>(20) ). This means that only 30 rolls are necessary to create a 12-word mnemonic and 60 rolls for a 24-word mnemonic.
+The entropy in a single roll of a D20 is 4.322 bits ( log<sub>2</sub>(20) ); therefore a minimum of 30 rolls is required to generate a 12-word mnemonic and 60 rolls to generate a 24-word mnemonic.
 
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-d20-roll-1-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-d20-last-n-rolls-300.png" class="amigo">
@@ -51,7 +53,8 @@ Since a D20 has more possible outcomes, the entropy is increased per roll to 4.3
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-d6-roll-string-300.png" align="right" class="amigo">
 
-When you input your dice rolls, you'll see two progress bars filling up. The top progress bar shows how many rolls you've entered compared to the minimum number needed. The bottom progress bar shows the real-time calculated Shannon's entropy compared to the required minimum (128 bits for 12 words and 256 bits for 24 words). When the Shannon's entropy estimation reaches the recommended level, the progress bar will be full, and its frame will change color. If you've met the minimum number of rolls but the entropy estimation is still below the recommended level, a warning will appear, suggesting you add more rolls to increase entropy.
+As you enter your dice rolls, you'll see two progress bars fill up. The top progress bar shows how many rolls you've entered compared to the minimum required. The bottom progress bar shows the real-time calculated [Shannon's entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) compared to the minimum required (128 bits for 12 words and 256 bits for 24 words). When the Shannon's entropy estimation reaches the recommended level, the progress bar will be full, and its frame will change color. If you've reached the minimum number of rolls but the entropy estimation is still below the recommended level, a warning will appear suggesting that you add more rolls to increase the entropy.
+
 Note: Similar to image entropy quality estimation, dice rolls Shannon's entropy serves as an indicator and should not be considered an absolute measure of cryptographic entropy.
 
 Learn more about [Krux Entropy Quality Estimation](../features/entropy.md).
@@ -67,13 +70,17 @@ A low Shannon's entropy value could suggest that your dice are biased or that th
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-nerd-stats-250.png" class="m5stickv">
 
 
-## Editing a New Mnemonic - Optional
-After entering dice rolls, random words, or captured entropy through the camera, you can manually add custom entropy by editing some of the words. Edited words will be highlighted, and the final word will automatically update to ensure a valid checksum. However, proceed with caution, modifying words can negatively impact the natural entropy previously captured.
+## (Optional) Edit Mnemonic
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-edited-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/new-mnemonic-edited-300.png" align="right" class="amigo">
 
-<img src="../../../img/maixpy_amigo/new-mnemonic-edited-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-edited-250.png" class="m5stickv">
+After sufficient entropy is given, you can manually add custom entropy by editing some of the words. Simply touch or navigate to the word you want to change and replace it. Edited words will be highlighted, and the final word will automatically update to ensure a valid checksum. However, proceed with caution, modifying words can negatively impact the natural entropy previously captured.
 
-## How Entropy Capture Works
+On the next screen, you will be loading a wallet. You can read more about this in [Loading a Mnemonic -> Confirm Wallet Attributes](./loading-a-mnemonic.md/#confirm-wallet-attributes).
+
+<div style="clear: both"></div>
+
+## How Entropy Works in Krux
 For dice rolls, Krux keeps track of every roll you enter and displays the cumulative string of outcomes after each roll. 
 
 When you have entered your final roll, Krux will hash this string using [SHA256](https://en.bitcoin.it/wiki/SHA-256) and output the resulting hash to the screen so that you can verify it for yourself.
