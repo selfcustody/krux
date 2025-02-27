@@ -1,4 +1,4 @@
-Once you have either a 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), choose `Load Mnemonic` on Krux's start menu (aka login menu), and you will be presented with several input methods:
+Once you have either a 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), choose `Load Mnemonic` on Krux's start menu (aka login menu), and choose an input method:
 
 <img src="../../../img/maixpy_amigo/load-mnemonic-options-300.png" class="amigo">
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-options-250.png" class="m5stickv">
@@ -86,7 +86,7 @@ Enter the BIP39 mnemonic word's numbers (1-2048) using the Stackbit 1248 metal p
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-300.png" align="right" class="amigo">
 
-You can retrieve mnemonics previously stored on device's internal flash or external (SD card). All stored mnemonics are encrypted, to load them you'll have to enter the same key you used to encrypt them.
+You can also retrieve [encrypted mnemonics previously stored](./navigating-the-main-menu.md/#encrypted) on device's internal flash or external (SD card). To load them you'll have to enter the same key you used to encrypt them.
 
 <div style="clear: both"></div>
 
@@ -117,22 +117,24 @@ If you make a mistake while loading a mnemonic, you can easily edit it. Simply t
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" align="right" class="amigo">
 
-A screen with an information box at the top shows the wallet's attributes. If they are as expected, press `Load Wallet` and you'll be ready to go.
+After confirming your mnemonic, a screen with an **information box at the top** with the wallet's attributes is shown. If they are as expected, just press `Load Wallet`. If you need to change something you may customize the wallet by setting a `Passphrase` or using the `Customize` button.
 
 <div style="clear: both"></div>
 
-#### Fingerprint 
+#### The Attributes:
+
+##### Fingerprint 
 * :material-fingerprint: ` 73c5da0a `:
 The [BIP32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet. Just to reinforce, the fingerprint is the best checksum you can have, it's good to note it down.
 
-#### Network 
+##### Network 
 * ` Mainnet `:
 Check if you are loading a `Testnet` or `Mainnet` wallet.
 
-#### Policy Type
-Check the wallet's policy type: `Single-sig`, `Multisig`, `Miniscript`, or `TR Miniscript` (Taproot).
+##### Policy Type
+* Check the wallet's policy type: `Single-sig`, `Multisig`, `Miniscript`, or `TR Miniscript` (Taproot).
 
-#### Derivation Path
+##### Derivation Path
 * :material-arrow-right-bottom: ` m/84h/0h/0h `:
 The derivation path is a sequence of numbers, or "nodes", that define the script type, network, and account index of your wallet.
     * **Script Type** `84h`: The first number defines the script type. The default is `84h`, corresponding to a Native Segwit wallet. Other values include:
@@ -148,12 +150,12 @@ The derivation path is a sequence of numbers, or "nodes", that define the script
 
     Default Miniscript derivation path is the same as for multisig: ` m/48'/0h/0h/2h `, but they can be fully customized
 
-#### Passphrase
+##### Passphrase
 * ` No Passphrase `:
 Informs if the wallet has a passphrase. Adding or changing the passphrase results in a completely different wallet and fingerprint.
 
 ### Customize Wallet
-Here you can change any of the wallet's attributes, it is also possible to change them later, after loading. Default wallet attributes can be set on [settings](../settings.md) to load it faster next time, they are: `Network`, `Policy Type` and `Script Type`.
+It is possible to change any of the **wallet's attributes** (it will be possible to change them later too, after loading). To load it faster next time, some default wallet attributes can be set in [settings](../settings.md), they are: `Network`, `Policy Type` and `Script Type`.
 
 #### Passphrase
 <img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
@@ -167,8 +169,8 @@ You can type or scan a BIP39 passphrase. When typing, swipe left :material-gestu
 <img src="../../../img/maixpy_m5stickv/wallet-customization-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/wallet-customization-options-300.png" align="right" class="amigo">
 
-Use this screen to change the `Network`, `Policy Type`, `Script Type`, and `Account` of the wallet. If `Policy Type` is Miniscript, you will be able to enter a custom derivation path.
+This button opens a screen to change the `Network`, `Policy Type`, `Script Type`, and `Account` of the wallet. If `Policy Type` is Miniscript, you will be able to enter a custom derivation path.
 
 <div style="clear: both"></div>
 
-Now, onto the main menu...
+When everything looks good, press `Load Wallet`and you will go to the main menu...
