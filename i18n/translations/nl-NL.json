@@ -189,6 +189,7 @@
     "Plunge Rate": "Duik tarief",
     "Policy Type": "Type beleid",
     "Poor entropy!": "Slechte entropie!",
+    "Press PAGE to toggle mode": "Druk op PAGINA om de modus te wisselen",
     "Print Test QR": "Test QR afdrukken",
     "Print Tiny Seed?": "Tiny Seed afdrukken?",
     "Print to QR": "Afdrukken naar QR",
@@ -263,7 +264,6 @@
     "Stats for Nerds": "Statistieken voor nerds",
     "Store on Flash": "Opslaan op apparaat",
     "Store on SD Card": "Opslaan op SD kaart",
-    "swipe": "veeg", 
     "Swipe to change mode": "Verander modus",
     "TC Flash Hash": "TC Flash Hash",
     "TC Flash Hash at Boot": "Hash Flash bij het opstarten",
@@ -312,6 +312,7 @@
     "Yes": "Yes",
     "Zoomed mode": "Ingezoomde modus",
     "is a valid address!": "is geen geldig adres",
+    "swipe": "veeg",
     "unknown": "onbekend",
     "was NOT FOUND in the first %d addresses": "werd NIET GEVONDEN in de eerste %d adressen"
 }

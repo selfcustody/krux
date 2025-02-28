@@ -211,6 +211,7 @@ translation_array = [
     "Tauchrate",
     "Richtlinientyp:",
     "Schlechte Entropie!",
+    "Drücken Sie PAGE, um den Modus umzuschalten",
     "Drucke Test-QR",
     "Tiny Seed drucken?",
     "Als QR-Code drucken",

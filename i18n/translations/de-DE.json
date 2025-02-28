@@ -189,6 +189,7 @@
     "Plunge Rate": "Tauchrate",
     "Policy Type": "Richtlinientyp:",
     "Poor entropy!": "Schlechte Entropie!",
+    "Press PAGE to toggle mode": "PAGE für Moduswechsel",
     "Print Test QR": "Drucke Test-QR",
     "Print Tiny Seed?": "Tiny Seed drucken?",
     "Print to QR": "Als QR-Code drucken",
@@ -264,7 +265,6 @@
     "Store on Flash": "Auf Flash speichern",
     "Store on SD Card": "Auf der SD-Karte speichern",
     "Swipe to change mode": "Wischen um den Modus zu ändern",
-    "swipe" : "wischen",
     "TC Flash Hash": "TC Flash-Hash",
     "TC Flash Hash at Boot": "TC Flash-Hash beim Start",
     "TOUCH or ENTER to capture": "TOUCH oder ENTER zum Erfassen",
@@ -312,6 +312,7 @@
     "Yes": "Ja",
     "Zoomed mode": "Zoommodus",
     "is a valid address!": "ist eine gültige Adresse!",
+    "swipe": "wischen",
     "unknown": "unbekannt",
     "was NOT FOUND in the first %d addresses": "wurde in den ersten %d Adressen nicht gefunden"
 }

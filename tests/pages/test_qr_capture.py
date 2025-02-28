@@ -32,6 +32,8 @@ def test_capture_qr_code(mocker, multiple_devices, tdata):
             tdata.TEST_DATA_BYTES,
         ],
     ]
+    time_mocker = TimeMocker(1000)
+    mocker.patch("time.ticks_ms", time_mocker.tick)
     for case in cases:
         ctx = create_ctx(mocker, None)
         # Mocking the snapshot method to return an animated QR code
@@ -205,6 +207,8 @@ def test_capture_qr_code_loop_skipping(mocker, m5stickv, tdata):
             animated_qr=tdata.TEST_PARTS_FORMAT_PMOFN,
         ),
     )
+    time_mocker = TimeMocker(1000)
+    mocker.patch("time.ticks_ms", time_mocker.tick)
     # Use wdt as loop iteration counter
     spy_wdt = mocker.spy(wdt, "feed")
     qr_capturer = QRCodeCapture(ctx)
@@ -238,6 +242,8 @@ def test_capture_qr_code_loop_duplicated_frames(mocker, m5stickv, tdata):
             animated_qr=tdata.TEST_PARTS_FORMAT_PMOFN,
         ),
     )
+    time_mocker = TimeMocker(1000)
+    mocker.patch("time.ticks_ms", time_mocker.tick)
     # Use wdt as loop iteration counter
     spy_wdt = mocker.spy(wdt, "feed")
     qr_capturer = QRCodeCapture(ctx)

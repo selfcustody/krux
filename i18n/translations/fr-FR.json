@@ -189,6 +189,7 @@
     "Plunge Rate": "Taux de plongée",
     "Policy Type": "Type de politique",
     "Poor entropy!": "Entropie faible !",
+    "Press PAGE to toggle mode": "Appuyez sur PAGE pour changer de mode",
     "Print Test QR": "Impression Test QR",
     "Print Tiny Seed?": "Imprimer Tiny Seed ?",
     "Print to QR": "Imprimer Code QR",
@@ -263,7 +264,6 @@
     "Stats for Nerds": "Statistiques pour les geeks",
     "Store on Flash": "Stocker sur flash",
     "Store on SD Card": "Stocker sur la carte SD",
-    "swipe": "glisser",
     "Swipe to change mode": "Faites glisser pour changer de mode",
     "TC Flash Hash": "TC Flash Hash",
     "TC Flash Hash at Boot": "TC Flash Hash au démarrage",
@@ -312,6 +312,7 @@
     "Yes": "Oui",
     "Zoomed mode": "Mode zoomé",
     "is a valid address!": "Adresse non valide !",
+    "swipe": "glisser",
     "unknown": "inconnu",
     "was NOT FOUND in the first %d addresses": "INTROUVABLE dans les %d premières adresses"
 }
