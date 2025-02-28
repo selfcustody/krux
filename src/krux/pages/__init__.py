@@ -286,9 +286,12 @@ class Page:
             btn = self.ctx.input.wait_for_button(num_parts == 1)
 
             if btn in TOGGLE_BRIGHTNESS:
-                qr_foreground = {WHITE: DARKGREY, DARKGREY: None, None: WHITE}.get(
-                    qr_foreground, WHITE
-                )
+                if qr_foreground == WHITE:
+                    qr_foreground = DARKGREY
+                elif qr_foreground is None:
+                    qr_foreground = WHITE
+                else:
+                    qr_foreground = None
                 extra_debounce_flag = True
             elif btn in PROCEED:
                 if self.ctx.input.touch is not None:
