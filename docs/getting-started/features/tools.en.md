@@ -54,7 +54,7 @@ This is an interesting tool to visualize the effects of filling the memory with 
 <div style="clear: both"></div>
 
 #### TC Flash Hash
-*Tamper Check (TC) Flash Hash* is a tamper detection mechanism that enables you to verify if the flash memory content has been altered. To use it first, need to create a *Tamper Check (TC) Code* on `Settings -> Security -> Tamper Check Code`.
+*Tamper Check (TC) Flash Hash* is a tamper detection mechanism that enables you to verify if the flash memory content has been altered. To use it first, need to create a *Tamper Check (TC) Code* on **Settings -> Security -> Tamper Check Code**.
 *TC Flash Hash* will hash *TC Code*, K210 chip's unique ID and the content of the whole internal flash creating a tamper indicator that is unique to each device, represented by a memorable image and two sets of two words.
 
 More information on [Tamper Detection page](tamper-detection.md).
