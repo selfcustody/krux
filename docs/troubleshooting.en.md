@@ -45,7 +45,8 @@ If the device behaves this way when connected to the computer, Windows is known 
 
 ## **After Installing**
 
-### Maix Amigo touchscreen doesn't work with v24.03.0 but worked okay with v23.09.1?
+### Maix Amigo touchscreen doesn't work with v24.03.0 and later, but worked okay with v23.09.1?
+
 <img src="../img/amigo-inside-switch-up.jpg" align="right">
 
 We added a hardware IRQ (interrupt request) to the firmware, so when you open your Maix Amigo, you will see a switch in the middle of the device board, it must be in the upper position for the touchscreen to work with v24.03.0 and later.
@@ -54,57 +55,54 @@ We added a hardware IRQ (interrupt request) to the firmware, so when you open yo
 
 
 ### Troubleshooting LCD Settings on Maix Amigo
-**Buttons in the Wrong Order**
+
+#### Buttons in the Wrong Order
 
 If the buttons on keypad input screens appear to be in the wrong order, this might be due to inverted X coordinates. To correct this:
 
-1. Go to Settings > Hardware > Display.
+1. Go to **Settings -> Hardware -> Display**.
 2. Change the value of `Flipped X Coordinates`.
 
-**Incorrect Colors**
+#### Incorrect Colors
 
-If the colors displayed on the interface or camera preview are incorrect, you can try the following options:
+If the colors displayed on the interface themes or camera feed are incorrect, you can try the following options:
 
-**Inverted Colors**
+- **Inverted Colors**:  If, for example, the background color is white when it should be black, go to **Settings -> Hardware -> Display** and toggle `Inverted Colors`.
 
-If, for example, the background color is white when it should be black, go to *Settings > Hardware > Display and toggle*  `Inverted Colors` .
+- **BGR Colors**: If, for example, you are using the Orange theme, and instead of orange the colors appear bluish, **Settings -> Hardware -> Display** and toggle `BGR Colors` in the display settings.
 
-**BGR Colors**
+- **LCD Type**: WARNING! Only try changing this setting if you failed to fix colors with previous ones.
+    - If adjusting `Inverted Colors` or `BGR Colors` doesn't fix the incorrect color issue, try changing the `LCD Type`:
 
-If, for example, you are using the Orange theme, and instead of orange the colors appear bluish, toggle `BGR Colors` in the display settings.
+        - (1) After changing `LCD Type`, you will be warned that the device will reboot automatically if this change does't resolve the issue.
+        - (2) After that, if you see a message prompting you to press the `PREVIOUS` (UP) button, it means that the new setting worked, if you see a black screen only, it means it failed.
+        - (3) If it works but the colors are still wrong, try again with different combinations of `Inverted Colors` and `BGR Colors`. This time, you'll likely find a combination that correctly displays the colors of your interface themes and camera feed.
 
-**LCD Type**
+        If, after the step (1), the screen turns black and you don't see anything, don't panic, don't press any button, just wait 5 seconds. After 5 seconds the device will automatically reboot with the previous `LCD Type` setting meaning you should not change this setting and maybe try again with `Inverted Colors` and `BGR Colors` only.
 
-*WARNING!*  Only try changing this setting if you failed to fix colors with previous ones.
+        If you pressed `PREVIOUS` (UP) and Krux saved the wrong `LCD Type` setting, you will have to remove all stored settings to see the screen working again. If settings were on SD, remove it from the device and edit or delete the settings manually. If settings were on device's internal memory you will have to wipe it's entire flash memory. You can use the [Krux-Installer -> Wipe device feature](./getting-started/installing/from-gui/usage.md/#wipe-device) or type a command on terminal with the device connected. On Linux for example, go to the folder where you downloaded the Krux firmware and use *Ktool* to fully wipe your device (on other OS use `ktool-win.exe` or `ktool-mac`):
 
-If adjusting `BGR Colors` and `Inverted Colors` doesn't fix the color issue, try changing the `LCD Type`:
+        ```bash
+        ./ktool-linux -B goE -b 1500000 -E
+        ```
 
-1. After changing this setting, you will be warned that the device will reboot automatically if this change does not resolve the issue (if it fails, the screen will turn black, and you'll not see anything).
-2. After proceeding with the warning, if you see a message prompting you to press the `PREVIOUS` (UP) button, it means that the new setting worked. Follow the instructions and press UP.
-3. If you notice menu options but the colors are still wrong, try again with different combinations of `Inverted Colors` and `BGR Colors`. This time, it is likely you will find a combination that correctly displays the colors of themes and the camera feed.
+        Then flash the firmware again using Krux-Installer or by typing on the terminal:
 
-If, after the warning in step 1, the screen turns black and you don't see anything, don't panic or press any buttons. Just wait 5 seconds, and the device will automatically reboot with the previous display settings. This means you should keep the default `LCD Type` setting and maybe try again with `Inverted Colors` and `BGR Colors`.
-
-If you accidentally pressed `PREVIOUS` (UP) and saved the wrong setting, you will have to perform a wipe to remove all stored settings to be able to see the screen working again. On Linux, go to the folder where you downloaded the Krux firmware and use Ktool to fully wipe your device:
-
-`./ktool-linux -B goE -b 1500000 -E`
-
-(Soon **Krux-Installer** will have a full wipe button too)
-
-Then flash the firmware again.
-
-`./ktool-linux -B goE -b 1500000 maixpy_amigo/kboot.kfpkg`
+        ```bash
+        ./ktool-linux -B goE -b 1500000 maixpy_amigo/kboot.kfpkg
+        ```
 
 ### Device didn't reboot, and screen is blank
 
-If the device didn't reboot after successfully flashing the firmware, and the screen is blank after turning it off and on, check if the downloaded file matches the device (this can also occur due to data corruption). Try downloading binaries again. 
+If the device didn't reboot after successfully flashing the firmware, and the screen is blank after turning it off and on, check if the downloaded file matches the device or try downloading binaries again as this can also occur due to data corruption. 
 
-You can also install [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) to help with debugging, Tools > Open Terminal > New Terminal > Connect to serial port > Select a COM port available (if it doesn't work, try another COM port). It will show the terminal and some messages, a message about an empty device or with corrupted firmware appears like: "interesting, something's wrong, boot failed with exit code 233, go to find your vendor."
+You can also install [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) to help with debugging. On its menu go to **Tools -> Open Terminal -> New Terminal -> Connect to serial port -> Select a COM port available** (if it doesn't work, try another COM port). It will show the terminal and some messages, a message about an empty device or with corrupted firmware appears like: "interesting, something's wrong, boot failed with exit code 233, go to find your vendor."
 
 ## **Usage**
 
 ### Why isn't Krux scanning the QR code?
-The level of detail that you see is what Krux sees. If the QR code shown on the device's screen is blurry, the camera lens of the device may be out of focus. It can be adjusted by rotating it clockwise or counter-clockwise to achieve a clearer result. The lenses usually comes with a drop of glue that makes id harder to adjust for the first time. You can use your fingertip, tweezers or small precision pliers to help, being careful to don't damage the fragile lenses.
+
+What you see on the screen is what Krux sees, if the QR code is blurry the camera lens of the device may be out of focus. It can be adjusted by rotating it clockwise or counter-clockwise to achieve a clearer result. The lenses usually comes with a drop of glue that makes id harder to adjust for the first time. You can use your fingertip, tweezers or small precision pliers to help, being careful to don't damage the fragile lenses.
 
 If you have adjusted the lens already, the device may be too far away or too close to the code to read it. Start by holding the device as close to the QR code as possible and pulling away slowly until all or most of the QR code is viewable within the screen. If the code on the screen looks crisp, Krux should read it quickly and give you immediate feedback.
 
@@ -141,15 +139,14 @@ Additionally, Krux recognizes animated QR codes that use either the plaintext `p
 
 ### Computer not reading QR code that Krux displays?
 
-You can toggle brightness of QR codes from public keys and PSBTs by pressing `PAGE` button.
-In the future, more work will be done to support displaying lower density QR codes. If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays.
+You can toggle brightness of PSBTs QR codes by pressing `PAGE` or `PREVIOUS` button. If you are using an M5StickV, the small screen makes it difficult for laptop webcams to capture enough detail to parse the QR codes it displays. For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam.
 
-For now, a workaround you can do is to take a picture or video of the QR code with a better-quality camera (such as your phone), then enlarge and display the photo or video to your webcam. Alternatively, it may be simpler to use a mobile wallet such as BlueWallet with the M5StickV since phone cameras don't seem to have issues reading the small QR codes. You can also save the PSBT on a microSD card for Krux to sign and then save the signed transaction to the microSD card to transfer the file to the computer or phone.
+Alternatively, it may be simpler to use a mobile wallet (BlueWallet or Nunchuk) with the M5StickV since phone cameras don't seem to have issues reading the small QR codes. You can also save the PSBT on a microSD card for Krux to sign and then save the signed PSBT to transfer the file to the computer or phone. Other QR codes displayed by Krux can also be exported as an image to the SD card.
 
 ### Why Does Krux Say the Entropy of My Fifty Dice Rolls Does Not Contain 128 Bits of Entropy?
 
 Please check how [entropy measurement](getting-started/features/entropy.md) works.
 
 ### Why isn't Krux detecting my microSD card or presenting an error?
-Starting from version 23.09.0, Krux supports SD card hot plugging. If you are using older versions, it may only detect the SD card at boot, so make sure Krux is turned off when inserting the microSD into it. To test the card compatibility use Krux [Tools>Check SD Card](getting-started/features/tools.md/#check-sd-card).
-Make sure the SD card is using MBR/DOS partition table and FAT32 format.
+Starting from version 23.09.0, Krux supports SD card hot plugging. If you are using older versions, it may only detect the SD card at boot, so make sure Krux is turned off when inserting the microSD into it. To test the card compatibility use Krux [Tools -> Check SD Card](getting-started/features/tools.md/#check-sd-card).
+Make sure the SD card is using MBR/DOS partition table and FAT32 format, [in this video](https://www.youtube.com/watch?v=dlOiAJOPoME) Crypto Guide explains how to do this in Windows.
