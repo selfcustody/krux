@@ -19,7 +19,7 @@ At the start screen, select **New Mnemonic**, and choose between camera, words, 
 
 During image capture, entropy quality estimation is displayed to assist you in obtaining a quality image source for your key. After the snapshot is taken, [Shannon's entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation.
 
-Note: These values ​​serve only as indicators or estimations of the quality of entropy, but are not absolute values ​​of entropy in a cryptographic context.
+**Note**: These values ​​serve only as indicators or estimations of the quality of entropy, but are not absolute values ​​of entropy in a cryptographic context.
 
 <div style="clear: both"></div>
 
@@ -55,7 +55,7 @@ The entropy in a single roll of a D20 is 4.322 bits ( log<sub>2</sub>(20) ); the
 
 As you enter your dice rolls, you'll see two progress bars fill up. The top progress bar shows how many rolls you've entered compared to the minimum required. The bottom progress bar shows the real-time calculated [Shannon's entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) compared to the minimum required (128 bits for 12 words and 256 bits for 24 words). When the Shannon's entropy estimation reaches the recommended level, the progress bar will be full, and its frame will change color. If you've reached the minimum number of rolls but the entropy estimation is still below the recommended level, a warning will appear suggesting that you add more rolls to increase the entropy.
 
-Note: Similar to image entropy quality estimation, dice rolls Shannon's entropy serves as an indicator and should not be considered an absolute measure of cryptographic entropy.
+**Note**: Similar to image entropy quality estimation, dice rolls Shannon's entropy serves as an indicator and should not be considered an absolute measure of cryptographic entropy.
 
 Learn more about [Krux Entropy Quality Estimation](../features/entropy.md).
 
@@ -94,7 +94,7 @@ In case a camera snapshot is used as a source, the image bytes, which contain pi
 
 Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/binascii.html#binascii.unhexlify) on it to encode it as bytes, and deterministically converts it into a mnemonic according to the [BIP39 Reference Implementation](https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207).
 
-Note: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).
+**Note**: For 12-word mnemonics, only the first half of the SHA256 hash is used (128 bits), while 24-word mnemonics use the full hash (256 bits).
 
 ### How to Verify
 Don't trust, verify. We encourage you not to trust any claim you cannot verify yourself. Therefore, there are wallets that use compatible algorithms to calculate the entropy derived from dice rolls. You can use the [SeedSigner](https://seedsigner.com/) or [Coldcard](https://coldcard.com/) hardware wallets, or even the [Bitcoiner Guide website](https://bitcoiner.guide/seed/), they share the same logic that Krux uses and will give the same mnemonic for the dice roll method.

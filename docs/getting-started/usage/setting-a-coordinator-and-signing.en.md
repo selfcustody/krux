@@ -8,7 +8,7 @@ Krux can work with multiple coordinator wallets. Popular options include:
 - [Nunchuk](https://nunchuk.io/) (mobile)
 - [BlueWallet](https://bluewallet.io/) (mobile)
 
-**Note: For Liana, the exchange of extended public keys, wallet output descriptors, and PSBTs is performed via copy and paste. On Krux, use SD cards and a standard text editor, or use QR codes via an intermediary application such as [SeedQReader](https://github.com/pythcoiner/SeedQReader).*
+***Note**: For Liana, the exchange of extended public keys, wallet output descriptors, and PSBTs is performed via copy and paste. On Krux, use SD cards and a standard text editor, or use QR codes via an intermediary application such as [SeedQReader](https://github.com/pythcoiner/SeedQReader).
 
 ## Step 1: Install the Coordinator Wallet
 

@@ -28,7 +28,7 @@ On Mac you may need to install `coreutils` to be able to use `sha256sum`
 brew install coreutils
 ```
 
-Fun fact: Each Krux release is signed with Krux!
+Fun fact: Each new Krux release is signed with Krux!
 
 ### Flash the firmware onto the device
 Extract the latest version of Krux you downloaded and enter the folder:
@@ -68,7 +68,7 @@ See the correct port using `ls /dev/ttyUSB*`, in the example below we use `/dev/
 ```
 
 ##### Windows
-See the correct port at Device Manager > Ports (COM & LPT), in the example below we use `COM6`:
+See the correct port at **Device Manager -> Ports (COM & LPT)**, in the example below we use `COM6`:
 ```pwsh
 .\ktool-win.exe -B goE -b 1500000 maixpy_amigo\kboot.kfpkg -p COM6
 ```

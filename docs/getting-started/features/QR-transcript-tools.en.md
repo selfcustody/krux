@@ -12,7 +12,7 @@ This mode is optimized for scanning, the raw QR code will be displayed
 <img src="../../../img/maixpy_m5stickv/lines-qr-code-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/lines-qr-code-300.png" align="right" class="amigo">
 
-If you are good at transcribing things like handwritten text, with this mode one QR code line will be highlighted at a time. Press `Enter` to highlight the next line.
+If you are good at transcribing things like handwritten text, with this mode one QR code line will be highlighted at a time. Press `ENTER` to highlight the next line.
 
 <div style="clear: both"></div>
 
@@ -20,7 +20,7 @@ If you are good at transcribing things like handwritten text, with this mode one
 <img src="../../../img/maixpy_m5stickv/zoomed-qr-code-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/zoomed-qr-code-300.png" align="right" class="amigo">
 
-QR codes will be split into regions, of 5x5 or 7x7 "blocks". One QR code region will be shown at a time. Press `Enter` to display the next region.
+QR codes will be split into regions, of 5x5 or 7x7 "blocks". One QR code region will be shown at a time. Press `ENTER` to display the next region.
 
 <div style="clear: both"></div>
 
@@ -28,7 +28,7 @@ QR codes will be split into regions, of 5x5 or 7x7 "blocks". One QR code region 
 <img src="../../../img/maixpy_m5stickv/regions-qr-code-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/regions-qr-code-300.png" align="right" class="amigo">
 
-QR codes will be split into regions, of 5x5 or 7x7 "blocks". One QR code region will be highlighted at a time. Press `Enter` to highlight the next region.
+QR codes will be split into regions, of 5x5 or 7x7 "blocks". One QR code region will be highlighted at a time. Press `ENTER` to highlight the next region.
 
 <div style="clear: both"></div>
 

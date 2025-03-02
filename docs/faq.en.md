@@ -5,7 +5,7 @@ Krux was initially developed as a signer, operating exclusively in amnesic mode,
 
 Krux does not include hardware secure elements. The security of stored data relies on encryption.
 
-Note: Due to the inherent fragility of electronic components, never use your Krux device or SD card encrypted storage as your sole backup method. Always maintain a physical backup for added security.
+**Note**: Due to the inherent fragility of electronic components, never use your Krux device or SD card encrypted storage as your sole backup method. Always maintain a physical backup for added security.
 
 ## What is Beta version?
 The Beta version includes the latest and most experimental features, which we occasionally share on our social media. These can be found exclusively in the [test (beta) repository](https://github.com/odudex/krux_binaries/). Use and flash the beta firmware if you are curious about new features or want to participate in the development process by hunting bugs, providing feedback, and sharing ideas in our Telegram groups or other social media platforms.

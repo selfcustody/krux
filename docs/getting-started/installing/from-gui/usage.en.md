@@ -218,11 +218,7 @@ Now you can compare the firmware's hash computed by installer with  the firmware
 
 ### Wipe device
 
-This is two step process:
-
-* Warning
-
-* Wipe
+This is a two step process, **Warning msg** and **Wipe process**.
 
 #### Warning
 
@@ -239,8 +235,6 @@ When it's done, you can scroll down you will see a `check` icon.
 
 <img width="640" src="/krux/img/krux-installer/wipe.png" alt="Wipe Warning" />
 > ⚠️  TIP: Do not unplug or poweroff your device or computer. Wait until the process finishes.
-
-## Tips after install
 
 ----8<----
 tips-after-install.en.txt

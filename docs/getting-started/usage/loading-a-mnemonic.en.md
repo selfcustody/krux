@@ -86,7 +86,7 @@ Enter the BIP39 mnemonic word's numbers (1-2048) using the Stackbit 1248 metal p
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-300.png" align="right" class="amigo">
 
-You can also retrieve [encrypted mnemonics previously stored](./navigating-the-main-menu.md/#encrypted) on device's internal flash or external (SD card). To load them you'll have to enter the same key you used to encrypt them.
+You can also retrieve [encrypted mnemonics previously stored](./navigating-the-main-menu.md/#encrypted) on device's internal memory or external (SD card). To load them you'll have to enter the same key you used to encrypt them.
 
 <div style="clear: both"></div>
 
@@ -161,7 +161,7 @@ It is possible to change any of the **wallet's attributes** (it will be possible
 <img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
 
-You can type or scan a BIP39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. You can also hold the button `PAGE` or `PAGE_PREV` when navigating among letters while typing text to fast forward or backward. For scanning, you can also create a QR code from your offline passphrase using the [create QR code tool](../features/tools.md/#create-qr-code).
+You can type or scan a BIP39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. You can also hold the button `PAGE` or `PREVIOUS` when navigating among letters while typing text to fast forward or backward. For scanning, you can also create a QR code from your offline passphrase using the [create QR code tool](../features/tools.md/#create-qr-code).
 
 <div style="clear: both"></div>
 
