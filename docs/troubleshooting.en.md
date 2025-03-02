@@ -104,7 +104,7 @@ You can also install [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide
 
 ### Why isn't Krux scanning the QR code?
 
-What you see on the screen is what Krux sees, if the QR code is blurry the camera lens of the device may be out of focus. It can be adjusted by rotating it clockwise or counter-clockwise to achieve a clearer result. The lenses usually comes with a drop of glue that makes id harder to adjust for the first time. You can use your fingertip, tweezers or small precision pliers to help, being careful to don't damage the fragile lenses.
+What you see on the screen is what Krux sees through its camera. If the QR code is blurry the camera lens of the device may be out of focus. It can be adjusted by gently rotating the lens clockwise or counter-clockwise to achieve a more clear result. From the factory, the lens may have been adjusted and 'set' with a drop of glue, making it difficult to adjust initially. You can use your fingertip, tweezers or small precision pliers to gently rotate the plastic lens ring. After the first adjustment, focusing the lens will be easier.
 
 If you have adjusted the lens already, the device may be too far away or too close to the code to read it. Start by holding the device as close to the QR code as possible and pulling away slowly until all or most of the QR code is viewable within the screen. If the code on the screen looks crisp, Krux should read it quickly and give you immediate feedback.
 
