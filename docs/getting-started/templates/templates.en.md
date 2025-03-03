@@ -1,4 +1,4 @@
-Here we offer a few templates to transcribe QR codes, TinySeed or Binary Grid backups.
+Here we offer a few templates to [transcribe QR codes](../features/QR-transcript-tools.md), TinySeed or Binary Grid backups.
 
 ## QR Code Templates
 You can manually copy compact SeedQR codes or place a proper sized template over the device screen.

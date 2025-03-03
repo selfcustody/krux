@@ -23,7 +23,7 @@ Quickly print a test QR code to check and optimize your printer setup.
 <img src="../../../img/maixpy_m5stickv/create-qr-code-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/create-qr-code-300.png" align="right" class="amigo">
 
-Enter text to create, print or transcribe a QR code that can later be used as an encryption key or passphrase. Swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes if your device has a touchscreen.
+Enter text to create, print or [transcribe a QR](./QR-transcript-tools.md) code that can later be used as an encryption key or passphrase. Swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes if your device has a touchscreen.
 
 <div style="clear: both"></div>
 

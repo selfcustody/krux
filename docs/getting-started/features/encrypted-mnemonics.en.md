@@ -6,11 +6,11 @@ We use standard AES encryption modes ECB and CBC:
 
 ### AES-ECB
 
-ECB (Electronic Codebook) is a simpler method where encryption data blocks are encrypted individually. This mode is faster and simpler to encrypt, resulting in QR codes with lower density and easier to transcribe. It is generally considered less secure than CBC because it does not provide data chaining, meaning identical plaintext blocks will produce identical ciphertext blocks, making it vulnerable to pattern analysis. However, in Krux's implementation, only one or two binary data blocks are encrypted, so there will be no patterns, and the lack of chaining is not as relevant as it would be for larger files, plain text, or media.
+ECB (Electronic Codebook) is a simpler method where encryption data blocks are encrypted individually. This mode is faster and simpler to encrypt, resulting in QR codes with lower density and easier to [transcribe](./QR-transcript-tools.md). It is generally considered less secure than CBC because it does not provide data chaining, meaning identical plaintext blocks will produce identical ciphertext blocks, making it vulnerable to pattern analysis. However, in Krux's implementation, only one or two binary data blocks are encrypted, so there will be no patterns, and the lack of chaining is not as relevant as it would be for larger files, plain text, or media.
 
 ### AES-CBC
 
-CBC (Cipher-block Chaining) is considered more secure. In the first data block, an initialization vector (IV) is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, characterizing chaining. The tradeoff is that the encryption process will take longer because a snapshot will be needed to generate the IV. This IV will be stored together with encrypted data, making encrypted QR codes denser and harder to transcribe.
+CBC (Cipher-block Chaining) is considered more secure. In the first data block, an initialization vector (IV) is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, characterizing chaining. The tradeoff is that the encryption process will take longer because a snapshot will be needed to generate the IV. This IV will be stored together with encrypted data, making encrypted QR codes denser and harder to [transcribe](./QR-transcript-tools.md).
 
 #### CBC Encryption IV
 

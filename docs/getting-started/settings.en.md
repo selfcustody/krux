@@ -58,12 +58,12 @@ When you enter the encryption key, it is not directly used to encrypt your data.
 Choose between well known and widely used AES (Advanced Encryption Standard) modes:
 
 ##### AES-ECB
-ECB (Electronic Codebook) is a simpler method where data blocks are encrypted individually. Compared to CBC, it will be faster and simpler to encrypt, QR codes will have a lower density and will be easier to transcribe.
+ECB (Electronic Codebook) is a simpler method where data blocks are encrypted individually. Compared to CBC, it will be faster and simpler to encrypt, QR codes will have a lower density and will be easier to [transcribe](./features/QR-transcript-tools.md).
 
 ##### AES-CBC
 CBC (Cipher-block Chaining) is considered more secure than ECB.  The first data block, an initialization vector (IV), is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, ensuring chaining.
 
-Encryption will take longer because a snapshot will be needed to generate the IV. This IV will be stored together with the encrypted data, making encrypted QR codes denser and harder to transcribe.
+Encryption will take longer because a snapshot will be needed to generate the IV. This IV will be stored together with the encrypted data, making encrypted QR codes denser and harder to [transcribe](./features/QR-transcript-tools.md).
 
 <div style="clear: both"></div>
 

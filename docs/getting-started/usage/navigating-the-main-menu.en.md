@@ -47,7 +47,7 @@ This option converts the encrypted mnemonic into a QR code. Enter an encryption 
 
 **Transcribing QR Codes**
 
-Please refer to [Transcribing QR Codes](../../features/QR-transcript-tools) for details on transcription modes and helper tools.
+Please refer to [Transcribing QR Codes](../features/QR-transcript-tools.md) for details on transcription modes and helper tools.
 
 #### Encrypted
 <img src="../../../img/maixpy_m5stickv/home-encrypt-options-250.png" align="right" class="m5stickv">
