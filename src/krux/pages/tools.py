@@ -154,7 +154,7 @@ class Tools(Page):
         """Handler for the 'Descriptor Addresses' menu item"""
         from .home_pages.wallet_descriptor import WalletDescriptor
         from .home_pages.addresses import Addresses
-        from krux.wallet import Wallet
+        from ..wallet import Wallet
 
         self.ctx.wallet = Wallet(None)
         menu_result = WalletDescriptor(self.ctx).wallet()

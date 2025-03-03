@@ -36,7 +36,11 @@ from ...display import (
 )
 from ...krux_settings import t
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
-from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
+from ...sd_card import (
+    DESCRIPTOR_FILE_EXTENSION,
+    JSON_FILE_EXTENSION,
+    PUBKEY_FILE_EXTENSION,
+)
 from ...themes import theme
 from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
 
@@ -105,7 +109,12 @@ class WalletDescriptor(Page):
 
                 utils = Utils(self.ctx)
                 _, wallet_data = utils.load_file(
-                    (DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION), prompt=False
+                    (
+                        DESCRIPTOR_FILE_EXTENSION,
+                        JSON_FILE_EXTENSION,
+                        PUBKEY_FILE_EXTENSION,
+                    ),
+                    prompt=False,
                 )
                 persisted = True
             except OSError:
@@ -171,6 +180,7 @@ class WalletDescriptor(Page):
 
     def display_loading_wallet(self, wallet):
         """Displays wallet descriptor attributes while loading"""
+        from ...settings import THIN_SPACE
 
         def draw_header():
             nonlocal offset_y
@@ -191,7 +201,7 @@ class WalletDescriptor(Page):
                 if (wallet.is_multisig() or wallet.is_miniscript())
                 else (" " * 3 if not MINIMAL_DISPLAY else "")
             )
-            key_fingerprint = FINGERPRINT_SYMBOL + " "
+            key_fingerprint = FINGERPRINT_SYMBOL + THIN_SPACE
             if key.origin:
                 key_origin_str = str(key.origin)
                 key_fingerprint += key_origin_str[:8]

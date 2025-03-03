@@ -292,6 +292,10 @@ class Page:
         header = "BIP39 {}{}".format(suffix, fingerprint)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
+        if fingerprint:
+            self.ctx.display.draw_hcentered_text(
+                fingerprint, color=theme.highlight_color
+            )
         lines = self.ctx.display.to_lines(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (
             len(lines) * FONT_HEIGHT + FONT_HEIGHT
@@ -305,6 +309,10 @@ class Page:
                 self.ctx.input.wait_for_button()
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(header)
+                if fingerprint:
+                    self.ctx.display.draw_hcentered_text(
+                        fingerprint, color=theme.highlight_color
+                    )
                 for i, word in enumerate(word_list[12:]):
                     self.ctx.display.draw_string(
                         DEFAULT_PADDING, starting_y_offset + (i * FONT_HEIGHT), word

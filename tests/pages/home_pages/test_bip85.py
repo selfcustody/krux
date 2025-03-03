@@ -7,6 +7,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
     from krux.pages.home_pages.bip85 import Bip85
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.themes import theme
 
     cases = [
         # case
@@ -174,7 +175,9 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
     bip85_ui = Bip85(ctx)
     mocker.spy(bip85_ui, "display_mnemonic")
     bip85_ui.export()
-    ctx.display.draw_centered_text.assert_called_with("⊚" + THIN_SPACE + "%s" % case[3])
+    ctx.display.draw_centered_text.assert_called_with(
+        "⊚" + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
+    )
 
 
 def test_bip85_base64_password_derivation(mocker, amigo, tdata):
