@@ -39,3 +39,11 @@ QR codes will be split into regions, of 5x5 or 7x7 "blocks". One QR code region 
 Grids will be added to a standard QR code. In a dark room, if you place a sheet of paper over the device's screen, you'll notice QR code will be visible and it will be possible to copy it directly from above (tracing). Be careful not to damage your screen with pen and markers, use an insulating plastic tape or film to protect the device when using this method.
 
 <div style="clear: both"></div>
+
+### QR Viewer
+<img src="../../../img/maixpy_m5stickv/qr-viewer-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/qr-viewer-300.png" align="right" class="amigo">
+
+Almost every QR code in Krux will also bring up this menu with these extra options: `Toggle Brightness`, `Save QR Image to SD Card` and `Print as QR`. If `Save QR Image to SD Card` shows as disabled it means that the SD card was not detected. To enable `Print as QR` you need to configure your printer driver in [settings](../settings.md#thermal).
+
+<div style="clear: both"></div>
