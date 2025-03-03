@@ -76,5 +76,5 @@ poetry run poe simulator --sequence sequences/tools-flash.txt  --sd --device $de
 poetry run poe simulator --sequence sequences/all-settings.txt  --device $device
 
 # Other
-poetry run poe simulator --sequence sequences/qr-transcript.txt  --device $device
+poetry run poe simulator --sequence sequences/qr-transcript.txt --sd --printer --device $device
 poetry run poe simulator --sequence sequences/print-qr.txt --sd --printer --device $device

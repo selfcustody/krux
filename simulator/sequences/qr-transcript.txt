@@ -35,3 +35,7 @@ screenshot regions-qr-code.png
 press BUTTON_B
 
 screenshot grided-qr-code.png
+
+press BUTTON_A
+
+screenshot qr-viewer.png
