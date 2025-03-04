@@ -234,6 +234,7 @@ class LoadEncryptedMnemonic(Page):
     def load_from_storage(self, remove_opt=False):
         """Lists all encrypted mnemonics stored is flash and SD card"""
         from ..encryption import MnemonicStorage
+        from ..settings import THIN_SPACE
 
         mnemonic_ids_menu = []
         mnemonic_storage = MnemonicStorage()
@@ -244,7 +245,7 @@ class LoadEncryptedMnemonic(Page):
         for mnemonic_id in sorted(mnemonics):
             mnemonic_ids_menu.append(
                 (
-                    mnemonic_id + "(flash)",
+                    mnemonic_id + " (flash)",
                     lambda m_id=mnemonic_id: (
                         self._remove_encrypted_mnemonic(m_id)
                         if remove_opt
@@ -255,7 +256,7 @@ class LoadEncryptedMnemonic(Page):
         for mnemonic_id in sorted(sd_mnemonics):
             mnemonic_ids_menu.append(
                 (
-                    mnemonic_id + "(SD card)",
+                    mnemonic_id + " (SD" + THIN_SPACE + "card)",
                     lambda m_id=mnemonic_id: (
                         self._remove_encrypted_mnemonic(m_id, sd_card=True)
                         if remove_opt

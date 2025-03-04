@@ -194,6 +194,7 @@ translation_array = [
     "Zahlen",
     "Oktal",
     "Andere Formate",
+    "PAGE zum Umschalten der Bildschirmhelligkeit",
     "PBKDF2-Iter.",
     "Male gestanzte Punkte schwarz an, damit sie erkannt werden können.",
     "Papierbreite",

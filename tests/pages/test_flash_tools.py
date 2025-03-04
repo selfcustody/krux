@@ -103,12 +103,12 @@ def test_tc_flash_hash(multiple_devices, mocker):
         (
             b'V\xfb\xc9\xe1\x98\xc5?\xd3+\xbe"\xb8\xb8\xbe\x0b5I@R\x1a\xc5\x08\xe1\xf6\x04\x8aD8\x04;\xcf\x93',
             b"\x01" * 32,
-            b"\x0F" * 4096,
+            b"\x0f" * 4096,
             mocker.call("below cave", fw_words_pos, color=LIGHTBLUE),
             mocker.call("arrive flock", u_data_words_pos),
         ),
         (
-            b"\x0A" * 32,
+            b"\x0a" * 32,
             b"\x02" * 32,
             b"\x11" * 4096,
             mocker.call("keen net", fw_words_pos, color=LIGHTBLUE),
