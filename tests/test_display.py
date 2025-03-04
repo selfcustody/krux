@@ -482,7 +482,8 @@ def test_draw_string_on_inverted_display(mocker, amigo):
 
 def test_draw_hcentered_text(mocker, m5stickv):
     import krux
-    from krux.display import Display
+    from krux.display import Display, DEFAULT_PADDING
+    from krux.themes import theme
 
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
@@ -497,6 +498,20 @@ def test_draw_hcentered_text(mocker, m5stickv):
 
     d.draw_string.assert_called_with(
         23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+    d.draw_hcentered_text("prefix: highlighted", highlight_prefix=":")
+
+    d.draw_string.assert_has_calls(
+        [
+            mocker.call(
+                39,
+                DEFAULT_PADDING,
+                "prefix:",
+                color=theme.highlight_color,
+            ),
+            mocker.call(23, 24, "highlighted", theme.fg_color, theme.bg_color),
+        ]
     )
 
 
