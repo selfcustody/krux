@@ -188,13 +188,12 @@ class FileManager(Page):
                 + generate_thousands_separator(int(size_KB))
                 + render_decimal_separator()
                 + size_KB_fraction
-                + " KB"
-                + "\n\n",
+                + " KB",
                 offset_y,
                 highlight_prefix=":",
             )
-            * FONT_HEIGHT
-        )
+            + 1
+        ) * FONT_HEIGHT
         offset_y += (
             self.ctx.display.draw_hcentered_text(
                 t("Created:"), offset_y, color=theme.highlight_color
