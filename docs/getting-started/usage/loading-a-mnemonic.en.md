@@ -69,7 +69,7 @@ Enter the BIP39 mnemonic word's numbers (1-2048) in binary format, toggling nece
 
 **Tip**: You can use this screen to generate a mnemonic by flipping a coin:
 
-- Flip a coin, if it is heads, mark the first space (value 1) of the word, if it is tails do nothing. Repeat this step for each space up to 1024 (only up to 1024, never change 2048).
+- Flip a coin, if it is heads, mark the first space (value 1) of the word, if it is tails do nothing. Repeat this step for each space up to 1024 (in case you flip 11 tails in a row, just leave the 2048 marked).
 - The last word has the checksum, you will do as you did with the other words, the only difference is that you cannot set some spaces, they are calculated automatically. For 12 words you will flip the coin only 7 times, for spaces 16, 32, 64, 128, 256, 512 and 1024. For 24 words you will flip the coin only 3 times, for spaces 256, 512 and 1024.
 
 <div style="clear: both"></div>
