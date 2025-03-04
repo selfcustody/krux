@@ -8,11 +8,14 @@
 - Detects unspendable internal keys in Taproot.
 - Contains several UI and settings modifications.
 
-### More Intuitive Tamper Check
-The Tamper Check Flash Hash now appears immediately after the Tamper Check code is created, clarifying its purpose and expected output.
+### Easter Eggs Reveal
+Hints were added to unveil hidden features, such as swiping sideways to change the keypad keyset, switching camera modes, and adjusting QR code brightness.
 
 ### More Camera Modes
 A zoomed camera mode is available for all cameras, and an anti-glare mode has been added to the GC0328 camera.
+
+### More Intuitive Tamper Check
+The Tamper Check Flash Hash now appears immediately after the Tamper Check code is created, clarifying its purpose and expected output.
 
 ### Display Customization Options
 Display orientation on Yahboom and WonderMV devices can now be flipped.
