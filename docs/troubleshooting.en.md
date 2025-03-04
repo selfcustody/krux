@@ -151,4 +151,5 @@ Please check how [entropy measurement](getting-started/features/entropy.md) work
 
 ### Why isn't Krux detecting my microSD card or presenting an error?
 Starting from version 23.09.0, Krux supports SD card hot plugging. If you are using older versions, it may only detect the SD card at boot, so make sure Krux is turned off when inserting the microSD into it. To test the card compatibility use Krux [Tools -> Check SD Card](getting-started/features/tools.md/#check-sd-card).
-Make sure the SD card is using MBR/DOS partition table and FAT32 format, [in this video](https://www.youtube.com/watch?v=dlOiAJOPoME) Crypto Guide explains how to do this in Windows.
+
+**Note**: Make sure the SD card is using MBR/DOS partition table and FAT32 format, [in this video](https://www.youtube.com/watch?v=dlOiAJOPoME) Crypto Guide explains how to do this in Windows. If it is still not detected, try deleting all large files in it.
