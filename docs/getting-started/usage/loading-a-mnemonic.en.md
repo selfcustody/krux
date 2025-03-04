@@ -69,7 +69,7 @@ Enter the BIP39 mnemonic word's numbers (1-2048) in binary format, toggling nece
 
 **Tip**: You can use this screen to generate a mnemonic by flipping a coin:
 
-- Flip a coin, if it is heads, mark the first space (value 1) of the word, if it is tails do nothing. Repeat this step for each space up to 1024 (in case you flip 11 tails in a row, just leave the 2048 marked).
+- Flip a coin, if it is heads, mark the first space (value 1) of the word, if it is tails do nothing. Repeat this step for each space up to 1024 (if you flip 11 tails in a row, just leave the 2048 square marked).
 - The last word has the checksum, you will do as you did with the other words, the only difference is that you cannot set some spaces, they are calculated automatically. For 12 words you will flip the coin only 7 times, for spaces 16, 32, 64, 128, 256, 512 and 1024. For 24 words you will flip the coin only 3 times, for spaces 256, 512 and 1024.
 
 <div style="clear: both"></div>
@@ -90,7 +90,7 @@ You can also retrieve [encrypted mnemonics previously stored](./navigating-the-m
 
 <div style="clear: both"></div>
 
-## Wallet Loading Confirmations
+## Confirm Wallet Setup
 ### Confirm Mnemonic Words
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" align="right" class="amigo">
@@ -125,7 +125,7 @@ After confirming your mnemonic, a screen with an **information box at the top** 
 
 ##### Fingerprint 
 * :material-fingerprint: ` 73c5da0a `:
-The [BIP32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet. Just to reinforce, the fingerprint is the best checksum you can have, it's good to note it down.
+The [BIP32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet. The fingerprint is the best checksum you can have, it's good to note it down.
 
 ##### Network 
 * ` Mainnet `:
