@@ -96,7 +96,8 @@ class Tools(Page):
                     + t("Free:")
                     + " "
                     + generate_thousands_separator(sd_free_MB)
-                    + " MB"
+                    + " MB",
+                    highlight_prefix=":",
                 )
                 if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
                     from .file_manager import FileManager
