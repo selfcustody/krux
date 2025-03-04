@@ -125,7 +125,7 @@ After confirming your mnemonic, a screen with an **information box at the top** 
 
 ##### Fingerprint 
 * :material-fingerprint: ` 73c5da0a `:
-The [BIP32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) master wallet's fingerprint, if you have it noted down, will help you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet. The fingerprint is the best checksum you can have, it's good to note it down.
+The [BIP32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) master wallet's fingerprint helps you make sure you entered the correct mnemonic and passphrase (optional) and will load the expected wallet. The fingerprint is the best checksum you can have, it's good to note it down.
 
 ##### Network 
 * ` Mainnet `:
