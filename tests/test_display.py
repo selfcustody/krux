@@ -500,6 +500,10 @@ def test_draw_hcentered_text(mocker, m5stickv):
         23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
     )
 
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.spy(d, "draw_string")
+
     d.draw_hcentered_text("prefix: highlighted", highlight_prefix=":")
 
     d.draw_string.assert_has_calls(
@@ -511,6 +515,78 @@ def test_draw_hcentered_text(mocker, m5stickv):
                 color=theme.highlight_color,
             ),
             mocker.call(23, 24, "highlighted", theme.fg_color, theme.bg_color),
+        ]
+    )
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text(
+        "This is a very big prefix that don't fit one line: highlighted2",
+        highlight_prefix=":",
+    )
+
+    d.draw_string.assert_has_calls(
+        [
+            mocker.call(
+                47,
+                52,
+                "line:",
+                color=theme.highlight_color,
+            ),
+            mocker.call(
+                15,
+                38,
+                "don't fit one",
+                color=theme.highlight_color,
+            ),
+            mocker.call(
+                7,
+                24,
+                "big prefix that",
+                color=theme.highlight_color,
+            ),
+            mocker.call(
+                11,
+                DEFAULT_PADDING,
+                "This is a very",
+                color=theme.highlight_color,
+            ),
+            mocker.call(19, 66, "highlighted2", theme.fg_color, theme.bg_color),
+        ]
+    )
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text(
+        "This is\n\n a very\nbig prefix that don't fit one line: highlighted2",
+        highlight_prefix=":",
+    )
+
+    d.draw_string.assert_has_calls(
+        [
+            mocker.call(
+                47,
+                80,
+                "line:",
+                color=theme.highlight_color,
+            ),
+            mocker.call(
+                15,
+                66,
+                "don't fit one",
+                color=theme.highlight_color,
+            ),
+            mocker.call(
+                7,
+                52,
+                "big prefix that",
+                color=theme.highlight_color,
+            ),
+            mocker.call(19, 94, "highlighted2", theme.fg_color, theme.bg_color),
         ]
     )
 

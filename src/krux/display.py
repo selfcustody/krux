@@ -417,6 +417,32 @@ class Display:
                             color=theme.highlight_color,
                         )
 
+                        # check if lines before highlight_prefix also needs to be highlighted
+                        i -= 1
+                        while i > -1:
+                            line = lines[i]
+                            prefix_index = line.find(highlight_prefix)
+                            # content may need highlight
+                            if (
+                                line
+                                and prefix_index == -1
+                                and isinstance(text, str)
+                                and text[text.find(line) + len(line)] != "\n"
+                            ):
+                                offset_x = max(
+                                    0,
+                                    (self.width() - lcd.string_width_px(line)) // 2,
+                                )
+                                self.draw_string(
+                                    offset_x,
+                                    offset_y + (i * (FONT_HEIGHT)),
+                                    line,
+                                    color=theme.highlight_color,
+                                )
+                            else:
+                                break
+                            i -= 1
+
         return len(lines)  # return number of lines drawn
 
     def draw_centered_text(
