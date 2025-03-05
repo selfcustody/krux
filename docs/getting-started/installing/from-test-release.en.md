@@ -120,7 +120,7 @@ See the correct port using the command line: `ls /dev/cu.usbserial*`, in the exa
 ```
 
 ##### Windows
-See the correct port at Device Manager > Ports (COM & LPT), in the example below we use `COM6`:
+See the correct port at **Device Manager -> Ports (COM & LPT)**, in the example below we use `COM6`:
 ```pwsh
 .\ktool-win.exe -B goE -b 1500000 -p COM6 maixpy_yahboom\kboot.kfpkg
 ```

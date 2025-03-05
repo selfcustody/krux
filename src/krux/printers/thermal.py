@@ -156,7 +156,7 @@ class AdafruitPrinter(Printer):
         """Set image format to be printed"""
         # width in bytes, height in pixels
         # scale_mode=1-> unchanged scale. scale_mode=3-> 2x scale
-        command = b"\x1D\x76\x30"
+        command = b"\x1d\x76\x30"
         command += bytes([scale_mode])
         command += bytes([width])
         command += b"\x00"

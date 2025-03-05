@@ -6,7 +6,7 @@ This will download the source code of Krux as well as the code of all its depend
 git clone --recurse-submodules https://github.com/selfcustody/krux
 ```
 
-Note: When you wish to pull updates (to all submodules, their submodules, ...) to this repo, use:
+**Note**: When you wish to pull updates (to all submodules, their submodules, ...) to this repo, use:
 ```bash
 git pull origin main && git submodule update --init --recursive
 ```
@@ -39,7 +39,7 @@ To build and flash the firmware:
 
 The first time, the build can take around an hour or so to complete. Subsequent builds should take only a few minutes. If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
-Note: if you encounter any of these errors while building, it is a problem connecting to github, try again (if the error persists, try changing the DNS/VPN or correcting the hostname resolution of github.com to an IP that is working for you):
+**Note**: if you encounter any of these errors while building, it is a problem connecting to github, try again (if the error persists, try changing the DNS/VPN or correcting the hostname resolution of github.com to an IP that is working for you):
 ```
 error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err8)
 fatal: the remote end hung up unexpectedly
@@ -91,7 +91,7 @@ First, calculate the SHA256 hash of the new firmware by running:
 
 Copy this hex string and turn it into a QR code using whichever QR code generator you'd like.
 
-In Krux, enter the mnemonic of your private key that will be used for signing, and go to *Sign > Message*. Scan the QR code you generated, and you will be asked if you wish to sign the hash. Proceed, and you will be presented with a base64-encoded string containing the signature, as text and as a QR code.
+In Krux, enter the mnemonic of your private key that will be used for signing, and go to **Sign -> Message**. Scan the QR code you generated, and you will be asked if you wish to sign the hash. Proceed, and you will be presented with a base64-encoded string containing the signature, as text and as a QR code.
 
 Take this string and create a signature file by running:
 ```bash

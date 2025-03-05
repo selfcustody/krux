@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-""" This script removes docstrings from the source code. This is useful for
-    reducing the size of the firmware image. """
+"""This script removes docstrings from the source code. This is useful for
+reducing the size of the firmware image."""
 
 import ast
 import sys
