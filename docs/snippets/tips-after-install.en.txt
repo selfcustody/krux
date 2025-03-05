@@ -1,3 +1,4 @@
+## Tips
 ### Multilingual support
 Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.
 

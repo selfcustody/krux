@@ -20,14 +20,14 @@ To secure your Krux device, always verify firmware authenticity before installat
 
 - **Use SD Card for Updates:** After the initial flash through USB, perform subsequent [updates via the SD card](../features/sd-card-update.md). This keeps your device air-gapped and allows the existing firmware to verify the new one before installation.
 
-Note: The effectiveness of *TC Flash Hash* tamper detection feature relies on running legitimate, uncompromised firmware and safely protecting your *TC Code*.
+**Note**: The effectiveness of *TC Flash Hash* tamper detection feature relies on running legitimate, uncompromised firmware and safely protecting your *TC Code*.
 
 ### Setting Up Tamper Detection
-To help ensure the integrity of your device’s firmware, you can set up tamper detection tools, called *Tamper Check (TC) Flash Hash* and a *Tamper Check (TC) Code*. The *TC Code* must be at least six characters long, and for best security, should include a mix of letters, numbers, and special characters. You can create or change your *TC Code* by going to `Settings -> Security -> Tamper Check Code`.
+To help ensure the integrity of your device’s firmware, you can set up tamper detection tools, called *Tamper Check (TC) Flash Hash* and a *Tamper Check (TC) Code*. The *TC Code* must be at least six characters long, and for best security, should include a mix of letters, numbers, and special characters. You can create or change your *TC Code* by going to **Settings -> Security -> Tamper Check Code**.
 
 Ensure that your *TC Code* remains confidential and challenging to guess, as its security directly influences the effectiveness of your tamper detection.
 
-Once configured, your *TC Code* will be required to run *TC Flash Hash*. You can run TC Flash Hash at any time by navigating to `Tools -> Flash Tools -> TC Flash Hash`. Alternatively, enable automatic checks on every boot by selecting `Settings -> Security -> TC Flash Hash at Boot`.
+Once configured, your *TC Code* will be required to run *TC Flash Hash*. You can run TC Flash Hash at any time by navigating to **Tools -> Flash Tools -> TC Flash Hash**. Alternatively, enable automatic checks on every boot by selecting **Settings -> Security -> TC Flash Hash at Boot**.
 
 When you enable the *TC Flash Hash at Boot* feature, the device will require you to enter your TC Code at each startup, ensuring routine integrity checks. This also prevents device usage unless the correct code is entered.
 
@@ -53,7 +53,7 @@ The *TC Flash Hash* tool enables you to verify if the device's internal flash me
     <img src="../../../img/flash_hash.png" alt="TC Flash Hash" width="200"/>
 </div>
 
-*Example: The blue symbol and words 'tail monkey' represent the firmware region, while 'wrestle over' user's region.*
+*Example: On the image, the blue symbol and words 'tail monkey' represent the firmware region, while 'wrestle over' user's region.*
 
 Any change in the flash content results in a different image and words:
 
@@ -73,9 +73,9 @@ The *TC Flash Hash* function securely hashes the combination of the *TC Code*, d
 
 ## Executing *TC Flash Hash*
 
-After setting a *TC Code* user can use the *TC Flash Hash* feature, available in `Tools -> Flash Tools -> TC Flash Hash`.
+After setting a *TC Code* user can use the *TC Flash Hash* feature, available in **Tools -> Flash Tools -> TC Flash Hash**.
 
-By navigating to `Settings -> Security -> TC Flash Hash at Boot`, users can set Krux to always require *TC Flash Hash* verification after device is turned on. If a wrong *TC Code* is typed at boot, the device will turn off. Nothing else will happen if the wrong *TC Code* is entered multiple times. As *TC Code* verification data is stored in the user's region of memory, the requirement to type at boot is disabled if the user [erases user's data](../features/tools.md/#erase-users-data) or [wipe device](../installing/from-gui/usage.md/#wipe-device). Flashing an older firmware version, prior to *TC Flash Hash* support, will also disable this feature.
+By navigating to **Settings -> Security -> TC Flash Hash at Boot**, users can set Krux to always require *TC Flash Hash* verification after device is turned on. If a wrong *TC Code* is typed at boot, the device will turn off. Nothing else will happen if the wrong *TC Code* is entered multiple times. As *TC Code* verification data is stored in the user's region of memory, the requirement to type at boot is disabled if the user [erases user's data](../features/tools.md/#erase-users-data) or [wipe device](../installing/from-gui/usage.md/#wipe-device). Flashing an older firmware version, prior to *TC Flash Hash* support, will also disable this feature.
 
 ## Potential Attack Scenarios and Their Mitigation
 ### Challenge for an Attacker
@@ -110,4 +110,4 @@ An attacker faces major challenges in replacing the firmware:
 
 The *TC Flash Hash* tool significantly enhances security by making it infeasible for attackers to tamper with firmware without being detected. By combining *TC Code* hashing, filling empty memory with random entropy, and verification of the the unique image and set of words, Krux allows the detection of any tamper attempts.
 
-Note: The strength of this defense strategy depends on maintaining a strong, confidential *TC Code*, removing the SD card before running *TC Flash Hash* and following usual security and privacy practices.
+**Note**: The strength of this defense strategy depends on maintaining a strong, confidential *TC Code*, removing the SD card before running *TC Flash Hash* and following usual security and privacy practices.

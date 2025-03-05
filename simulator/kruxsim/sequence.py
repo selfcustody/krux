@@ -44,7 +44,7 @@ class SequenceExecutor:
         self.touch_checks = 0
         self.camera_image = None
         commands = load_commands(self.filepath)
-        if commands[0][0] == "wait" and BOARD_CONFIG["krux"]["display"]["touch"]:
+        if BOARD_CONFIG["krux"]["display"]["touch"] and commands[0][0] == "wait" and commands[1][0] != "screenshot":
             commands = commands[0:1] + [("press", ["BUTTON_A"])] + commands[1:]
         commands.append(("wait", ["1"]))
         self.commands = deque(commands)
