@@ -414,7 +414,8 @@ class Display:
                             offset_x,
                             offset_y + (i * (FONT_HEIGHT)),
                             line[: prefix_index + len(highlight_prefix)],
-                            color=theme.highlight_color,
+                            theme.highlight_color,
+                            bg_color,
                         )
 
                         # check if lines before highlight_prefix also needs to be highlighted
@@ -437,7 +438,8 @@ class Display:
                                     offset_x,
                                     offset_y + (i * (FONT_HEIGHT)),
                                     line,
-                                    color=theme.highlight_color,
+                                    theme.highlight_color,
+                                    bg_color,
                                 )
                             else:
                                 break
