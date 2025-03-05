@@ -80,6 +80,7 @@ class Bip85(Page):
         self.ctx.display.clear()
 
         from ...key import Key
+        from ...themes import theme
 
         key = Key(
             bip85_words,
@@ -94,7 +95,9 @@ class Bip85(Page):
                 fingerprint=key.fingerprint_hex_str(True),
             )
         else:
-            self.ctx.display.draw_centered_text(key.fingerprint_hex_str(True))
+            self.ctx.display.draw_centered_text(
+                key.fingerprint_hex_str(True), color=theme.highlight_color
+            )
         if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
             from ...wallet import Wallet
 

@@ -361,7 +361,7 @@ class Home(Page):
 
         for message in outputs:
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(message)
+            self.ctx.display.draw_centered_text(message, highlight_prefix=":")
             self.ctx.input.wait_for_button()
 
         # memory management

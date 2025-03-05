@@ -99,7 +99,12 @@ def test_sd_check(m5stickv, mocker, mock_file_operations):
     tool = Tools(ctx)
     tool.sd_check()
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("SD card\n\nSize: 16 MB\n\nUsed: 12 MB\n\nFree: 4 MB")]
+        [
+            mocker.call(
+                "SD card\n\nSize: 16 MB\n\nUsed: 12 MB\n\nFree: 4 MB",
+                highlight_prefix=":",
+            )
+        ]
     )
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
