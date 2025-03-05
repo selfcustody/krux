@@ -497,7 +497,7 @@ class SeedQRView(Page):
                         else None
                     ),
                 ),
-                (t("Print to QR"), printer_func),
+                (t("Print as QR"), printer_func),
             ]
             submenu = Menu(self.ctx, qr_menu, back_label=t("Back to Menu"))
             _, status = submenu.run_loop()
