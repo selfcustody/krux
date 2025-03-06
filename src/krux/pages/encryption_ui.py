@@ -75,7 +75,7 @@ class EncryptionKey(Page):
         if key_len >= 40:
             score += 1
 
-        set_len = len(set([x for x in key_string]))
+        set_len = len(set(key_string))
         if set_len < 6:
             score -= 1
         if set_len < 3:
