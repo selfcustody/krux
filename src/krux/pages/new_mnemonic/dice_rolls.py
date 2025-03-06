@@ -134,7 +134,9 @@ class DiceEntropy(Page):
         It's intended for users interested in the quality and distribution of their entropy source.
         """
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Rolls distribution:"), FONT_HEIGHT)
+        self.ctx.display.draw_hcentered_text(
+            t("Rolls distribution:"), FONT_HEIGHT, theme.highlight_color
+        )
         shannon_entropy = self.calculate_entropy()
         max_count = max(self.roll_counts) or 1  # Prevent division by zero
 
@@ -304,10 +306,13 @@ class DiceEntropy(Page):
                 "".join(self.rolls) if self.num_sides < 10 else "-".join(self.rolls)
             )
             self.ctx.display.clear()
-            rolls_str = t("Rolls:") + "\n\n%s" % entropy
+            rolls_str = "\n\n%s" % entropy
             max_lines = TOTAL_LINES - 6  # room for menu
             menu_offset = self.ctx.display.draw_hcentered_text(
                 rolls_str, info_box=True, max_lines=max_lines
+            )
+            self.ctx.display.draw_hcentered_text(
+                t("Rolls:"), color=theme.highlight_color, info_box=True
             )
             menu_offset *= FONT_HEIGHT
             menu_offset += DEFAULT_PADDING
@@ -333,7 +338,7 @@ class DiceEntropy(Page):
             ).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("SHA256 of rolls:") + "\n\n%s" % entropy_hash
+                t("SHA256 of rolls:") + "\n\n%s" % entropy_hash, highlight_prefix=":"
             )
             self.ctx.input.wait_for_button()
             num_bytes = 32 if len_mnemonic == 24 else 16

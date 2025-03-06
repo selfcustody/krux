@@ -382,7 +382,9 @@ class SeedQRView(Page):
         self.ctx.display.draw_centered_text(t("Processing.."))
 
         bmp_img.save("/sd/" + file_name)
-        self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)
+        self.flash_text(
+            t("Saved to SD card:") + "\n%s" % file_name, highlight_prefix=":"
+        )
 
     def save_qr_image_menu(self):
         """Options to save QR codes as images on SD card"""

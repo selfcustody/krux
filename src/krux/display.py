@@ -458,10 +458,12 @@ class Display:
             text, offset_y, color, bg_color, highlight_prefix=highlight_prefix
         )
 
-    def flash_text(self, text, color=theme.fg_color, duration=FLASH_MSG_TIME):
+    def flash_text(
+        self, text, color=theme.fg_color, duration=FLASH_MSG_TIME, highlight_prefix=""
+    ):
         """Flashes text centered on the display for duration ms"""
         self.clear()
-        self.draw_centered_text(text, color)
+        self.draw_centered_text(text, color, highlight_prefix=highlight_prefix)
         time.sleep_ms(duration)
         self.clear()
 

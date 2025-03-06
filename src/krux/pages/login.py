@@ -202,7 +202,8 @@ class Login(Page):
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash
+                    t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash,
+                    highlight_prefix=":",
                 )
                 self.ctx.input.wait_for_button()
 
@@ -578,6 +579,7 @@ class Login(Page):
                 if self.prompt(
                     str(len(words) + 1) + ".\n\n" + word_num + word + "\n\n",
                     self.ctx.display.height() // 2,
+                    highlight_prefix=":",
                 ):
                     words.append(word)
 

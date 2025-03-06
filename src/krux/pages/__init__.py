@@ -117,9 +117,13 @@ class Page:
         index, _ = load_menu.run_loop()
         return index
 
-    def flash_text(self, text, color=theme.fg_color, duration=FLASH_MSG_TIME):
+    def flash_text(
+        self, text, color=theme.fg_color, duration=FLASH_MSG_TIME, highlight_prefix=""
+    ):
         """Flashes text centered on the display for duration ms"""
-        self.ctx.display.flash_text(text, color, duration)
+        self.ctx.display.flash_text(
+            text, color, duration, highlight_prefix=highlight_prefix
+        )
         # Discard button presses that occurred during the message
         self.ctx.input.reset_ios_state()
 
@@ -360,12 +364,16 @@ class Page:
         prompt_text = (text + "\n\n%s\n\n") % Settings().hardware.printer.driver
         return self.prompt(prompt_text, self.ctx.display.height() // 2)
 
-    def prompt(self, text, offset_y=0):
+    def prompt(self, text, offset_y=0, highlight_prefix=""):
         """Prompts user to answer Yes or No"""
         lines = self.ctx.display.to_lines(text)
         offset_y -= (len(lines) - 1) * FONT_HEIGHT
         self.ctx.display.draw_hcentered_text(
-            text, offset_y, theme.fg_color, theme.bg_color
+            text,
+            offset_y,
+            theme.fg_color,
+            theme.bg_color,
+            highlight_prefix=highlight_prefix,
         )
         self.y_keypad_map = []
         self.x_keypad_map = []
