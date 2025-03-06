@@ -50,8 +50,6 @@ class EncryptionKey(Page):
 
         if len(key_string) < 8:
             return t("Weak")
-        if len(key_string) > 40:
-            return t("Strong")
 
         # Helper function to check if character is alphanumeric
         def is_alnum(c):
@@ -67,10 +65,21 @@ class EncryptionKey(Page):
         score = sum([has_upper, has_lower, has_digit, has_special])
 
         # Add length score to score
-        if len(key_string) >= 12:
+        key_len = len(key_string)
+        if key_len >= 12:
             score += 1
-        if len(key_string) >= 16:
+        if key_len >= 16:
             score += 1
+        if key_len >= 20:
+            score += 1
+        if key_len >= 40:
+            score += 1
+
+        set_len = len(set([x for x in key_string]))
+        if set_len < 6:
+            score -= 1
+        if set_len < 3:
+            score -= 1
 
         # Determine key strength
         if score >= 4:
