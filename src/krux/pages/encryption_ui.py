@@ -61,7 +61,9 @@ class EncryptionKey(Page):
 
         if key:
             self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(t("Key:") + key, highlight_prefix=":")
+            self.ctx.display.draw_hcentered_text(
+                t("Key") + ": " + key, highlight_prefix=":"
+            )
             if self.prompt(
                 t("Proceed?"),
                 BOTTOM_PROMPT_LINE,
@@ -72,7 +74,7 @@ class EncryptionKey(Page):
     def load_key(self):
         """Loads and returns a key from keypad"""
         data = self.capture_from_keypad(
-            t("Key:"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            t("Key"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
         )
         if len(str(data)) > ENCRYPTION_KEY_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % ENCRYPTION_KEY_MAX_LEN)
@@ -151,10 +153,8 @@ class EncryptMnemonic(Page):
 
         mnemonic_id = None
         self.ctx.display.clear()
-        if self.prompt(
-            t(
-                "Give this mnemonic a custom ID? Otherwise current fingerprint will be used"
-            ),
+        if not self.prompt(
+            t("Use fingerprint as ID?"),
             self.ctx.display.height() // 2,
         ):
             mnemonic_id = self.capture_from_keypad(
@@ -190,7 +190,7 @@ class EncryptMnemonic(Page):
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, i_vector):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Encrypted mnemonic was stored with ID:") + " " + mnemonic_id,
+                t("Encrypted mnemonic stored with ID:") + " " + mnemonic_id,
                 highlight_prefix=":",
             )
         else:

@@ -78,6 +78,8 @@ LOAD_FROM_SD = 1
 
 EXTRA_MNEMONIC_LENGTH_FLAG = 48
 
+SWIPE_SYMBOL = "»"
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -150,7 +152,7 @@ class Page:
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
         big_title = len(self.ctx.display.to_lines(title)) > 1
         swipe_has_not_been_used = True
-        swipe_hint = "« " + t("swipe") + " »"
+        swipe_hint = SWIPE_SYMBOL + " " + t("swipe") + " " + SWIPE_SYMBOL
         show_swipe_hint = False
         while True:
             self.ctx.display.clear()

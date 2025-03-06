@@ -158,8 +158,8 @@ class Bip85(Page):
         password = base_encode(entropy, 64).decode().strip()
         password = password[:pwd_len]
         info = password
-        info += "\n\n" + t("Index: %s") % child_index
-        info += "\n" + t("Length: %s") % pwd_len
+        info += "\n\n" + t("Index") + ": %s" % child_index
+        info += "\n" + t("Length:") + "%s" % pwd_len
         while True:
             menu_items = [
                 (
@@ -176,7 +176,9 @@ class Bip85(Page):
                 ),
             ]
             self.ctx.display.clear()
-            info_len = self.ctx.display.draw_hcentered_text(info, info_box=True)
+            info_len = self.ctx.display.draw_hcentered_text(
+                info, info_box=True, highlight_prefix=":"
+            )
             info_len *= FONT_HEIGHT
             info_len += DEFAULT_PADDING
             submenu = Menu(
