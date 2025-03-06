@@ -8,6 +8,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.themes import theme
+    from krux.key import FINGERPRINT_SYMBOL
 
     cases = [
         # case
@@ -158,7 +159,9 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
 
         if case[2]:
             bip85_ui.display_mnemonic.assert_called_with(
-                case[2], suffix="Words", fingerprint="⊚" + THIN_SPACE + "%s" % case[3]
+                case[2],
+                suffix="Words",
+                fingerprint=FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % case[3],
             )
         else:
             bip85_ui.display_mnemonic.assert_not_called()
@@ -176,7 +179,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
     mocker.spy(bip85_ui, "display_mnemonic")
     bip85_ui.export()
     ctx.display.draw_centered_text.assert_called_with(
-        "⊚" + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
+        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
     )
 
 
@@ -187,6 +190,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.themes import theme
+    from krux.key import FINGERPRINT_SYMBOL
 
     cases = [
         # case
@@ -337,7 +341,9 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
 
         if case[2]:
             bip85_ui.display_mnemonic.assert_called_with(
-                case[2], suffix="Words", fingerprint="⊚" + THIN_SPACE + "%s" % case[3]
+                case[2],
+                suffix="Words",
+                fingerprint=FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % case[3],
             )
         else:
             bip85_ui.display_mnemonic.assert_not_called()
@@ -356,7 +362,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
     mocker.spy(bip85_ui, "display_mnemonic")
     bip85_ui.export()
     ctx.display.draw_centered_text.assert_called_with(
-        "⊚" + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
+        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
     )
 
 
