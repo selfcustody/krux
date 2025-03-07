@@ -8,12 +8,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/selfcustody/krux/blob/main/LICENSE.md)
 
 <p align="center">
-<img src="docs/img/maixpy_yahboom/logo-312.png" alt="yahboom" style="width: 11%;">
-<img src="docs/img/maixpy_amigo/logo-300.png"  alt="maixpy amigo" style="width: 16%;">
-<img src="docs/img/maixpy_dock/logo-302.png" alt="maixpy dock" style="width: 15%;">
-<img src="docs/img/maixpy_wonder_mv/logo-304.png" alt="wonder mv" style="width: 11%;">
-<img src="docs/img/maixpy_m5stickv/logo-250.png" alt="m5stickv" style="width: 6%;">
-<img src="docs/img/maixpy_cube/logo-400.png" alt="maixpy cube" style="width: 10%;">
+<img src="docs/img/maixpy_yahboom/logo-312.en.png" alt="yahboom" style="width: 11%;">
+<img src="docs/img/maixpy_amigo/logo-300.en.png"  alt="maixpy amigo" style="width: 16%;">
+<img src="docs/img/maixpy_dock/logo-302.en.png" alt="maixpy dock" style="width: 15%;">
+<img src="docs/img/maixpy_wonder_mv/logo-304.en.png" alt="wonder mv" style="width: 11%;">
+<img src="docs/img/maixpy_m5stickv/logo-250.en.png" alt="m5stickv" style="width: 6%;">
+<img src="docs/img/maixpy_cube/logo-400.en.png" alt="maixpy cube" style="width: 10%;">
 </p>
 
 Krux is an open-source firmware facilitating the creation of Bitcoin signing devices from readily available components, such as Kendryte K210 devices. It transforms these devices into airgapped tools capable of handling transactions for both single and multisignature wallets, supporting offline signing via QR code or SD card, thus empowering users to securely self-custody their Bitcoin.
