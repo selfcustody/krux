@@ -159,7 +159,7 @@ class Bip85(Page):
         password = password[:pwd_len]
         info = password
         info += "\n\n" + t("Index") + ": %s" % child_index
-        info += "\n" + t("Length:") + "%s" % pwd_len
+        info += "\n" + t("Length:") + " %s" % pwd_len
         while True:
             menu_items = [
                 (
