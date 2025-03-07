@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ..display import BOTTOM_PROMPT_LINE
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
 from ..encryption import AES_BLOCK_SIZE
 from ..themes import theme
@@ -45,7 +45,50 @@ class EncryptionKey(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def encryption_key(self):
+    def key_strength(self, key_string):
+        """Check the strength of a key."""
+
+        if len(key_string) < 8:
+            return t("Weak")
+
+        # Helper function to check if character is alphanumeric
+        def is_alnum(c):
+            return ("a" <= c <= "z") or ("A" <= c <= "Z") or ("0" <= c <= "9")
+
+        # Check for presence of character types
+        has_upper = any(c.isupper() for c in key_string)
+        has_lower = any(c.islower() for c in key_string)
+        has_digit = any(c.isdigit() for c in key_string)
+        has_special = any(not is_alnum(c) for c in key_string)
+
+        # Count how many character types are present
+        score = sum([has_upper, has_lower, has_digit, has_special])
+
+        # Add length score to score
+        key_len = len(key_string)
+        if key_len >= 12:
+            score += 1
+        if key_len >= 16:
+            score += 1
+        if key_len >= 20:
+            score += 1
+        if key_len >= 40:
+            score += 1
+
+        set_len = len(set(key_string))
+        if set_len < 6:
+            score -= 1
+        if set_len < 3:
+            score -= 1
+
+        # Determine key strength
+        if score >= 4:
+            return t("Strong")
+        if score >= 3:
+            return t("Medium")
+        return t("Weak")
+
+    def encryption_key(self, creating=False):
         """Loads and returns an ecnryption key from keypad or QR code"""
         submenu = Menu(
             self.ctx,
@@ -61,7 +104,18 @@ class EncryptionKey(Page):
 
         if key:
             self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(t("Key") + ": " + key)
+            offset_y = DEFAULT_PADDING
+            self.ctx.display.draw_hcentered_text(
+                "{}: {}".format(t("Key"), key), offset_y
+            )
+            if creating:
+                strength = self.key_strength(key)
+                offset_y += 2 * FONT_HEIGHT
+                color = theme.error_color if strength == t("Weak") else theme.fg_color
+                self.ctx.display.draw_hcentered_text(
+                    "{}: {}".format(t("Strength"), strength), offset_y, color
+                )
+
             if self.prompt(
                 t("Proceed?"),
                 BOTTOM_PROMPT_LINE,
@@ -125,7 +179,7 @@ class EncryptMnemonic(Page):
         error_txt = t("Mnemonic was not encrypted")
 
         key_capture = EncryptionKey(self.ctx)
-        key = key_capture.encryption_key()
+        key = key_capture.encryption_key(creating=True)
         if key is None:
             self.flash_error(t("Key was not provided"))
             return None
