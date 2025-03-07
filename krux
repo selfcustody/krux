@@ -265,6 +265,37 @@ elif [ "$1" == "build-release" ]; then
 elif [ "$1" == "clean" ]; then
     rm -rf build
     docker system prune
+    old_year=$2
+    new_year=$3
+    # Define the old and new copyright text
+    OLD_TEXT="# Copyright (c) 2021-$old_year Krux contributors"
+    NEW_TEXT="# Copyright (c) 2021-$new_year Krux contributors"
+
+    # Find Python files inside src/ (including subdirectories) that contain the old copyright text
+    FILES=$(grep -rl --include="*.py" "$OLD_TEXT" src)
+
+    # If no files are found, exit
+    if [ -z "$FILES" ]; then
+        echo "No Python files in 'src/' need updating."
+        exit 0
+    fi
+
+    # Display files that will be modified
+    echo "The following Python files in 'src/' and its subdirectories will be updated:"
+    echo "$FILES"
+    echo ""
+
+    # Prompt user for confirmation
+    read -p "Update copyright in these files? (y/n): " CONFIRM
+
+    # If user agrees, perform the replacement
+    if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+        echo "Updating files..."
+        echo "$FILES" | xargs sed -i'' -e "s|$OLD_TEXT|$NEW_TEXT|g"
+        echo "Copyright year updated successfully."
+    else
+        echo "Update canceled."
+    fi
 else
     echo "Missing argument"
 fi

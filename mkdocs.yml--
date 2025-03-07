@@ -1,0 +1,129 @@
+markdown_extensions:
+  - attr_list
+  - meta
+  - admonition
+  - pymdownx.arithmatex
+  - pymdownx.mark
+  - toc:
+      permalink: true
+  - pymdownx.mark
+  - pymdownx.snippets:
+      base_path: ["docs/snippets"]
+  - pymdownx.superfences:
+      preserve_tabs: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML
+
+extra_css:
+  - css/custom.css
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.css
+
+theme:
+  name: material
+  logo: img/favicon.png
+  favicon: img/favicon.png
+  palette:
+    primary: white
+    accent: light blue
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - navigation.expand
+    - navigation.footer
+    - toc.integrate
+
+site_name: Krux - Open-source signing device firmware for Bitcoin
+site_description: Krux is open-source firmware that enables anyone to build their own Bitcoin signing device via off-the-shelf parts.
+site_url: https://selfcustody.github.io/krux/
+repo_url: https://github.com/selfcustody/krux
+edit_uri: edit/main/docs
+docs_dir: docs
+site_dir: public
+extra:
+  latest_krux: krux-v25.01.beta7
+  latest_installer: v0.0.20-beta
+  latest_installer_rpm: krux-installer-0.0.20_beta-1.x86_64.rpm
+  latest_installer_deb: krux-installer_0.0.20-beta_amd64.deb
+  latest_installer_win: krux-installer_v0.0.20-beta.Setup.exe
+  latest_installer_mac_arm: krux-installer_0.0.20-beta_arm64.dmg
+  latest_installer_mac_intel: krux-installer_0.0.20-beta_x86_64.dmg
+  social:
+    - icon: fontawesome/solid/bullhorn
+      link: https://bitcointalk.org/index.php?topic=5489022.0
+      name: Send a message to the Bitcoin Forum
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/SC_Krux
+      name: Join our community-led Telegram
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/selfcustodykrux
+      name: Follow us on X (Twitter)
+    - icon: fontawesome/brands/github
+      link: https://github.com/selfcustody/krux
+      name: Our code on Github
+  generator: true
+copyright: 
+  Powered by <a href="https://embit.rocks/">embit</a>, the Bitcoin library for Python 3 and Micropython
+
+nav:
+  - Home: index.en.md
+  - Getting Started:
+    - Getting Started: getting-started/index.en.md
+    - Installing:
+      - Installing: getting-started/installing/index.en.md
+      - From GUI application:
+        - From GUI application: getting-started/installing/from-gui/index.en.md
+        - Windows: getting-started/installing/from-gui/windows.en.md
+        - MacOS Intel: getting-started/installing/from-gui/macos-intel.en.md
+        - MacOS ARM64: getting-started/installing/from-gui/macos-arm64.en.md
+        - Debian-like: getting-started/installing/from-gui/debian-like.en.md
+        - Fedora-like: getting-started/installing/from-gui/fedora-like.en.md
+        - Other linux distro: getting-started/installing/from-gui/other-linux-distro.en.md
+        - Usage: getting-started/installing/from-gui/usage.en.md
+      - From pre-built official release: getting-started/installing/from-pre-built-release.en.md
+      - From pre-built test release: getting-started/installing/from-test-release.en.md
+      - From source: getting-started/installing/from-source.en.md
+    - Basic Usage:
+      - Generating a Mnemonic: getting-started/usage/generating-a-mnemonic.en.md
+      - Loading a Mnemonic: getting-started/usage/loading-a-mnemonic.en.md
+      - Navigating the Main Menu: getting-started/usage/navigating-the-main-menu.en.md
+      - Setting a Coordinator and Signing: getting-started/usage/setting-a-coordinator-and-signing.en.md
+      - Video Tutorials: getting-started/usage/video-tutorials.en.md
+    - Features:
+      - Encrypted Mnemonics: getting-started/features/encrypted-mnemonics.en.md
+      - Printing: getting-started/features/printing.en.md
+      - SD Card Updates: getting-started/features/sd-card-update.en.md
+      - Tools: getting-started/features/tools.en.md
+      - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
+      - Empirical Entropy Measurement: getting-started/features/entropy.en.md
+      - Tiny Seed and other metal plates: getting-started/features/tinyseed.en.md
+      - Tamper Detection: getting-started/features/tamper-detection.en.md
+    - Settings: getting-started/settings.en.md
+    - Templates: getting-started/templates/templates.en.md
+    - Navigation Overview: getting-started/navigation.en.md
+  - Devices and Parts List: parts.en.md
+  - FAQ: faq.en.md
+  - Troubleshooting: troubleshooting.en.md
+  - Uncommon Questions: uncommon-questions.en.md
+  - Support the Project: support.en.md
+
+plugins:
+ - search
+ - macros
+ - i18n:
+    docs_structure: suffix
+    languages:
+      - locale: en
+        default: true
+        name: English
+        build: true
