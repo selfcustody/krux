@@ -1,8 +1,8 @@
-# Changelog 25.02.0 - February 2025
+# Changelog 25.03.0 - March 2025
 
 ### Taproot and WSH Miniscript support
 
-- Provides an indented visualization of Miniscript for easier inspection.
+- Provides an indented visualization of Miniscript descriptor for easier inspection.
 - Includes policy and cosigner verification.
 - Supports custom derivations.
 - Detects unspendable internal keys in Taproot.
