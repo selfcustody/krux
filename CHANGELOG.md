@@ -11,6 +11,9 @@
 ### Easter Eggs Reveal
 Hints were added to unveil hidden features, such as swiping sideways to change the keypad keyset, switching camera modes, and adjusting QR code brightness.
 
+### Rearranged Keypad Keysets 
+Keypad keysets were organized to group similar keys and help with visibility. Also the *"ABC"* key now changes to *"123"*, *"<>."* and *"abc"* according to the next keyset.
+
 ### More Camera Modes
 A zoomed camera mode is available for all cameras, and an anti-glare mode has been added to the GC0328 camera.
 
