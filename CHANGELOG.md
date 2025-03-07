@@ -24,7 +24,7 @@ Display orientation on Yahboom and WonderMV devices can now be flipped.
 When signing via SD cards, all fields in a PSBT—including signatures from other keys—are preserved. This facilitates workflows across multiple devices and locations by allowing a single PSBT file to be sequentially signed by different devices.
 
 ### Other Bug Fixes and Optimizations
-- Stored mnemonics are now sorted alphabetically.
+- New encrypted mnemonics show key-strength score during confirmation. If stored, will be sorted alphabetically.
 - Flash Map drawing errors have been corrected.
 - Address scanning for Blue Wallet has been fixed following its export format change.
 - The use of “h” to indicate hardened derivation path nodes has been standardized.
