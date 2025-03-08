@@ -113,7 +113,7 @@ class Key:
         passphrase="",
         account_index=0,
         script_type=P2WPKH,
-        custom_derivation="",
+        derivation="",
     ):
         self.mnemonic = mnemonic
         self.policy_type = policy_type
@@ -129,14 +129,12 @@ class Key:
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
-        if not custom_derivation:
+        if not derivation:
             self.derivation = self.get_default_derivation(
                 self.policy_type, self.network, self.account_index, self.script_type
             )
-            self.custom_derivation = False
         else:
-            self.derivation = custom_derivation
-            self.custom_derivation = True
+            self.derivation = derivation
         self.account = self.root.derive(self.derivation).to_public()
 
     def xpub(self, version=None):

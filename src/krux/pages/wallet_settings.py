@@ -127,7 +127,7 @@ class WalletSettings(Page):
         policy_type = key.policy_type
         script_type = key.script_type
         account = key.account_index
-        custom_derivation = key.derivation if key.custom_derivation else None
+        derivation_path = key.derivation
         while True:
             wallet_info = network["name"] + "\n"
             # Find the policy type string from the POLICY_TYPE_IDS dictionary
@@ -138,13 +138,10 @@ class WalletSettings(Page):
                     break
             wallet_info += policy_type_str + "\n"
             wallet_info += str(script_type).upper() + "\n"
-            if policy_type != TYPE_MINISCRIPT or not custom_derivation:
+            if not derivation_path:
                 derivation_path = self._derivation_path_str(
                     policy_type, script_type, network, account
                 )
-                custom_derivation = ""
-            else:
-                derivation_path = custom_derivation
             wallet_info += DERIVATION_PATH_SYMBOL + " " + derivation_path
 
             self.ctx.display.clear()
@@ -177,6 +174,7 @@ class WalletSettings(Page):
                 new_network = self._coin_type()
                 if new_network is not None:
                     network = new_network
+                    derivation_path = ""
             elif index == 1:
                 new_policy_type = self._policy_type()
                 if new_policy_type is not None:
@@ -197,6 +195,7 @@ class WalletSettings(Page):
                         # If is miniscript, pick P2WSH or P2TR
                         script_type = self._miniscript_type()
                         script_type = P2WSH if script_type is None else script_type
+                    derivation_path = ""
 
             elif index == 2:
                 if policy_type == TYPE_MINISCRIPT:
@@ -205,15 +204,17 @@ class WalletSettings(Page):
                     new_script_type = self._script_type()
                 if new_script_type is not None:
                     script_type = new_script_type
+                    derivation_path = ""
             elif index == 3:
                 if policy_type != TYPE_MINISCRIPT:
                     new_account = self._account(account)
                     if new_account is not None:
                         account = new_account
+                        derivation_path = ""
                 else:
                     new_derivation_path = self._derivation_path(derivation_path)
                     if new_derivation_path is not None:
-                        custom_derivation = new_derivation_path
+                        derivation_path = new_derivation_path
         return network, policy_type, script_type, account, derivation_path
 
     def _coin_type(self):
