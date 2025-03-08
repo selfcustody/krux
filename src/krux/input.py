@@ -25,6 +25,7 @@ from .wdt import wdt
 from .auto_shutdown import auto_shutdown
 from .buttons import PRESSED, RELEASED
 from .krux_settings import Settings
+from .kboard import kboard
 
 BUTTON_ENTER = 0
 BUTTON_PAGE = 1
@@ -39,7 +40,7 @@ FAST_BACKWARD = 9
 ACTIVATING_BUTTONS = 8  # Won't trigger actions, just indicates buttons can used
 
 # Release must be confirmed X times
-BUTTON_RELEASE_FILTER = 10 if board.config["type"] in ["cube", "dock"] else 1
+BUTTON_RELEASE_FILTER = 10 if kboard.need_release_filter else 1
 
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
@@ -65,7 +66,7 @@ class Input:
 
         self.page = None
         self.page_prev = None
-        if "ENCODER" in board.config["krux"]["pins"]:
+        if kboard.has_encoder:
             from .rotary import EncoderPage, EncoderPagePrev
 
             self.page = EncoderPage()
@@ -156,13 +157,13 @@ class Input:
         event_val = False
         if self.page is not None:
             event_val = self.page.event()
-        if board.config["type"] == "yahboom":
+        if kboard.is_yahboom:
             event_val = event_val or self.page_prev_event(check_yahboom=True)
         return event_val
 
     def page_prev_event(self, check_yahboom=False):
         """Intermediary method to pull button PAGE_PREV event"""
-        if board.config["type"] != "yahboom" or check_yahboom:
+        if not kboard.is_yahboom or check_yahboom:
             if self.page_prev is not None:
                 return self.page_prev.event()
         return False
@@ -257,7 +258,7 @@ class Input:
 
         def _handle_button_press(btn):
             press_start_time = time.ticks_ms()
-            if board.config["type"] == "cube":
+            if kboard.is_cube:
                 time.sleep_ms(200)  # Stabilization time for cube
             release_filter = _get_release_filter(btn)
             while release_filter:
@@ -277,10 +278,7 @@ class Input:
 
         def _get_release_filter(btn):
             """Returns the appropriate release filter for the button"""
-            if (
-                btn in [BUTTON_PAGE, BUTTON_PAGE_PREV]
-                and "ENCODER" in board.config["krux"]["pins"]
-            ):
+            if btn in [BUTTON_PAGE, BUTTON_PAGE_PREV] and kboard.has_encoder:
                 return 0
             return BUTTON_RELEASE_FILTER
 

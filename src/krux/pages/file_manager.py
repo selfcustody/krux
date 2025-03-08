@@ -20,13 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import gc
 from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
 from ..sd_card import SDHandler
 from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
 from ..display import BOTTOM_PROMPT_LINE
+from ..kboard import kboard
 
 LIST_FILE_DIGITS = 9  # len on large devices per menu item
 LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
@@ -49,7 +49,7 @@ class FileManager(Page):
 
         custom_start_digits = LIST_FILE_DIGITS
         custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
-        if board.config["type"] == "m5stickv":
+        if kboard.is_m5stickv:
             custom_start_digits = LIST_FILE_DIGITS_SMALL
             custom_end_digts = LIST_FILE_DIGITS_SMALL + 4  # 3 more because of file type
 

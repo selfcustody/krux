@@ -40,7 +40,6 @@ from ..input import (
 from ..display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
-    MINIMAL_DISPLAY,
     FLASH_MSG_TIME,
     FONT_HEIGHT,
     FONT_WIDTH,
@@ -51,6 +50,7 @@ from ..display import (
 from ..qr import to_qr_codes
 from ..krux_settings import t, Settings
 from ..sd_card import SDHandler
+from ..kboard import kboard
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -326,7 +326,7 @@ class Page:
                 DEFAULT_PADDING, starting_y_offset + (i * FONT_HEIGHT), word
             )
         if len(word_list) > 12:
-            if board.config["type"] == "m5stickv":
+            if kboard.is_m5stickv:
                 self.ctx.input.wait_for_button()
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(header)
@@ -361,7 +361,7 @@ class Page:
         )
         self.y_keypad_map = []
         self.x_keypad_map = []
-        if MINIMAL_DISPLAY:
+        if kboard.has_minimal_display:
             return self.ctx.input.wait_for_button() == BUTTON_ENTER
         offset_y += (len(lines) + 1) * FONT_HEIGHT
         self.x_keypad_map.extend(

@@ -22,13 +22,14 @@
 import board
 import time
 from . import Page
-from ..display import FONT_HEIGHT, MINIMAL_PADDING
+from ..display import FONT_HEIGHT, MINIMAL_PADDING, BOTTOM_PROMPT_LINE
 from ..input import PRESSED
 from ..themes import theme
 from ..qr import QRPartParser, FORMAT_UR
 from ..wdt import wdt
 from ..krux_settings import t
 from ..camera import QR_SCAN_MODE, ANTI_GLARE_MODE, ZOOMED_MODE
+from ..kboard import kboard
 
 ANTI_GLARE_WAIT_TIME = 500
 MESSAGE_DISPLAY_PERIOD = 5000
@@ -131,8 +132,9 @@ class QRCodeCapture(Page):
         # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
         start_time = time.ticks_ms()
+        padding = BOTTOM_PROMPT_LINE if kboard.is_amigo else MINIMAL_PADDING
         title_lines = self.ctx.display.draw_hcentered_text(
-            t("Press PAGE to toggle mode"), MINIMAL_PADDING
+            t("Press PAGE to toggle mode"), padding
         )
         self.ctx.display.to_landscape()
         while True:
