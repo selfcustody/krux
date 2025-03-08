@@ -23,7 +23,7 @@
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
 from . import Page, ESC_KEY, LETTERS, proceed_menu
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH, MINIMAL_DISPLAY
 from ..krux_settings import t
 from ..themes import theme
 from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -153,6 +153,8 @@ class MnemonicEditor(Page):
         self.header_offset = MINIMAL_PADDING * 2 + (
             len(self.ctx.display.to_lines(header)) * FONT_HEIGHT
         )
+        if MINIMAL_DISPLAY:
+            self.header_offset -= MINIMAL_PADDING
 
     def _map_words(self, button_index=0, page=0):
         """Map words to the screen"""
