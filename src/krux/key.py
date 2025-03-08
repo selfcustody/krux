@@ -125,9 +125,7 @@ class Key:
         if policy_type == TYPE_MINISCRIPT and script_type not in (P2WSH, P2TR):
             script_type = P2WSH
         self.script_type = script_type
-        self.root = bip32.HDKey.from_seed(
-            bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
-        )
+        self.root = Key.extract_root(mnemonic, passphrase, network)
         self.fingerprint = self.root.child(0).fingerprint
         if not custom_derivation:
             self.derivation = self.get_default_derivation(
@@ -142,6 +140,27 @@ class Key:
     def xpub(self, version=None):
         """Returns the xpub representation of the extended master public key"""
         return self.account.to_base58(version)
+
+    @classmethod
+    def extract_fingerprint(
+        cls, mnemonic, passphrase="", network=NETWORKS[TEST_TXT], pretty=True
+    ):
+        """Calculate and return the fingerprint based on mnemonic"""
+        try:
+            return Key.format_fingerprint(
+                Key.extract_root(mnemonic, passphrase, network).child(0).fingerprint,
+                pretty,
+            )
+        except:
+            pass
+        return ""
+
+    @classmethod
+    def extract_root(cls, mnemonic, passphrase, network):
+        """Calculate and return the BIP32 root key based on mnemonic"""
+        return bip32.HDKey.from_seed(
+            bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
+        )
 
     def get_xpub(self, path):
         """Returns the xpub for the provided path"""

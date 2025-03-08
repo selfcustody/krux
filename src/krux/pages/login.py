@@ -279,7 +279,7 @@ class Login(Page):
                 DIGITS_OCT: Utils.BASE_OCT_SUFFIX,
             }
             numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
-            self.display_mnemonic(numbers_str, suffix_dict[charset])
+            self.display_mnemonic(numbers_str, suffix_dict[charset], fingerprint=Key.extract_fingerprint(mnemonic))
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
             self.ctx.display.clear()

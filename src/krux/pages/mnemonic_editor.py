@@ -27,6 +27,7 @@ from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCRE
 from ..krux_settings import t
 from ..themes import theme
 from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+from ..key import Key
 
 GO_INDEX = 25
 ESC_INDEX = 24
@@ -134,10 +135,21 @@ class MnemonicEditor(Page):
         from ..wallet import is_double_mnemonic
 
         header = "BIP39" + " " + t("Mnemonic")
-        if is_double_mnemonic(" ".join(self.current_mnemonic)):
+        mnemonic = " ".join(self.current_mnemonic)
+        fingerprint=""
+        if is_double_mnemonic(mnemonic):
             header += "*"
+        if self.valid_checksum:
+            fingerprint = Key.extract_fingerprint(mnemonic)
+            if fingerprint:
+                fingerprint = "\n" + fingerprint
+                header += fingerprint
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header, MINIMAL_PADDING)
+        if fingerprint:
+            self.ctx.display.draw_hcentered_text(
+                fingerprint, MINIMAL_PADDING, theme.highlight_color
+            )
         self.header_offset = MINIMAL_PADDING * 2 + (
             len(self.ctx.display.to_lines(header)) * FONT_HEIGHT
         )
