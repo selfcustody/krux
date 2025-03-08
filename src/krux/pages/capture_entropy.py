@@ -20,12 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import math
 from . import Page
 from ..display import FONT_HEIGHT, BOTTOM_LINE, BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..themes import theme
+from ..kboard import kboard
 
 POOR_VARIANCE_TH = 10  # RMS value of L, A, B channels considered poor
 INSUFFICIENT_VARIANCE_TH = 5  # RMS value of L, A, B channels considered insufficient
@@ -54,7 +54,7 @@ class CameraEntropy(Page):
         self.previous_measurement = UNKNOWN_ENTROPY
         self.stdev_index = 0
         self.y_label_offset = BOTTOM_LINE
-        if board.config["type"] == "amigo":
+        if kboard.is_amigo:
             self.y_label_offset = BOTTOM_PROMPT_LINE
 
     def _callback(self):

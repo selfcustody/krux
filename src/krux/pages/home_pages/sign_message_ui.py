@@ -30,7 +30,6 @@ from ...key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2WPKH, P2TR, P2SH_P2WPKH
 from ...themes import theme
 from ...display import (
     DEFAULT_PADDING,
-    MINIMAL_DISPLAY,
     FONT_HEIGHT,
     TOTAL_LINES,
     BOTTOM_PROMPT_LINE,
@@ -44,6 +43,7 @@ from ...sd_card import (
     PUBKEY_FILE_EXTENSION,
 )
 from ...settings import TEST_TXT, MAIN_TXT
+from ...kboard import kboard
 
 
 SD_MESSAGE_HEADER = "-----BEGIN BITCOIN SIGNED MESSAGE-----"
@@ -157,7 +157,7 @@ class SignMessage(Utils):
 
     def _display_message_sign_prompt(self, message, address):
         """Helper to display message and address for signing"""
-        max_lines = TOTAL_LINES - (7 if MINIMAL_DISPLAY else 10)
+        max_lines = TOTAL_LINES - (7 if kboard.has_minimal_display else 10)
         offset_y = DEFAULT_PADDING
         self.ctx.display.clear()
 
