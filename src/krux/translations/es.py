@@ -213,7 +213,7 @@ translation_array = [
     "Tasa de Caída",
     "Tipo de póliza",
     "Baja entropía!",
-    "Presione PAGE para cambiar el modo",
+    "PAGE para cambiar el modo",
     "Prueba de Impresión QR",
     "¿Imprimir Tiny Seed?",
     "Imprimir como Código QR",
