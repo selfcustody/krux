@@ -180,12 +180,21 @@ def print_missing(save_to_file=False, merge_after=False):
                         newline="\n",
                     ) as file:
                         json.dump(
-                            translations, file, ensure_ascii=False, indent=4, sort_keys=True
+                            translations,
+                            file,
+                            ensure_ascii=False,
+                            indent=4,
+                            sort_keys=True,
                         )
-                    print(f"Saved translations to {join(TRANSLATION_FILES_DIR, translation_filename)}")
+                    print(
+                        f"Saved translations to {join(TRANSLATION_FILES_DIR, translation_filename)}"
+                    )
                     import os
+
                     os.remove(join(filled_dir, translation_filename))
-                    print(f"Removed translation {join(filled_dir, translation_filename)}")
+                    print(
+                        f"Removed translation {join(filled_dir, translation_filename)}"
+                    )
         print("\n\n")
 
 
@@ -360,9 +369,27 @@ if __name__ == "__main__":
                 validate_translation_files()
             elif arg == "fill":
                 print_missing()
-            elif [True for text in ("fill_to_files", "fill-to-files", "fill_files", "fill-files") if arg in text]:
+            elif [
+                True
+                for text in (
+                    "fill_to_files",
+                    "fill-to-files",
+                    "fill_files",
+                    "fill-files",
+                )
+                if arg in text
+            ]:
                 print_missing(save_to_file=True)
-            elif [True for text in ("fill_and_merge", "fill-and-merge", "fill_merge", "fill-merge") if arg in text]:
+            elif [
+                True
+                for text in (
+                    "fill_and_merge",
+                    "fill-and-merge",
+                    "fill_merge",
+                    "fill-merge",
+                )
+                if arg in text
+            ]:
                 print_missing(save_to_file=True, merge_after=True)
             elif arg == "clean":
                 remove_unnecessary()
