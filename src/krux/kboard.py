@@ -35,7 +35,7 @@ class KBoard:
         self.is_m5stickv = board.config["type"] == "m5stickv"
         self.has_touchscreen = self.is_yahboom or self.is_wonder_mv or self.is_amigo
         self.has_minimal_display = self.is_m5stickv or self.is_cube
-        self.has_brightness_control = (
+        self.can_control_brightness = (
             self.is_cube or self.is_m5stickv or self.is_wonder_mv
         )
         self.can_flip_orientation = self.is_yahboom or self.is_wonder_mv

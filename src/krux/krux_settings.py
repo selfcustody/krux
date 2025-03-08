@@ -307,7 +307,7 @@ class DisplaySettings(SettingsNamespace):
     """Custom display settings for Maix Cube"""
 
     namespace = "settings.display"
-    if kboard.has_brightness_control:
+    if kboard.can_control_brightness:
         default_brightness = "1" if kboard.is_m5stickv else "3"
         brightness = CategorySetting(
             "brightness", default_brightness, ["1", "2", "3", "4", "5"]
@@ -320,7 +320,7 @@ class DisplaySettings(SettingsNamespace):
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         options = {}
-        if kboard.has_brightness_control:
+        if kboard.can_control_brightness:
             options["brightness"] = t("Brightness")
         if kboard.can_flip_orientation:
             options["flipped_orientation"] = t("Flipped Orientation")
@@ -340,7 +340,7 @@ class HardwareSettings(SettingsNamespace):
             self.touch = TouchSettings()
         if kboard.is_amigo:
             self.display = DisplayAmgSettings()
-        elif kboard.can_flip_orientation or kboard.has_brightness_control:
+        elif kboard.can_flip_orientation or kboard.can_control_brightness:
             self.display = DisplaySettings()
 
     def label(self, attr):
@@ -354,7 +354,7 @@ class HardwareSettings(SettingsNamespace):
             hardware_menu["touchscreen"] = t("Touchscreen")
         if kboard.is_amigo:
             hardware_menu["display_amg"] = t("Display")
-        elif kboard.can_flip_orientation or kboard.has_brightness_control:
+        elif kboard.can_flip_orientation or kboard.can_control_brightness:
             hardware_menu["display"] = t("Display")
 
         return hardware_menu[attr]
