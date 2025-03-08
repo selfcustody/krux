@@ -205,7 +205,7 @@ class CameraEntropy(Page):
             self.ctx.input.wait_for_button()
             return None
         if show_entropy_details:
-            self.ctx.display.draw_centered_text(entropy_msg)
+            self.ctx.display.draw_centered_text(entropy_msg, highlight_prefix=":")
             self.ctx.input.wait_for_button()
         hasher = hashlib.sha256()
         image_len = len(img_bytes)

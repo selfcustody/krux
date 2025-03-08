@@ -78,6 +78,8 @@ LOAD_FROM_SD = 1
 
 EXTRA_MNEMONIC_LENGTH_FLAG = 48
 
+SWIPE_SYMBOL = "»"
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -117,9 +119,13 @@ class Page:
         index, _ = load_menu.run_loop()
         return index
 
-    def flash_text(self, text, color=theme.fg_color, duration=FLASH_MSG_TIME):
+    def flash_text(
+        self, text, color=theme.fg_color, duration=FLASH_MSG_TIME, highlight_prefix=""
+    ):
         """Flashes text centered on the display for duration ms"""
-        self.ctx.display.flash_text(text, color, duration)
+        self.ctx.display.flash_text(
+            text, color, duration, highlight_prefix=highlight_prefix
+        )
         # Discard button presses that occurred during the message
         self.ctx.input.reset_ios_state()
 
@@ -146,7 +152,7 @@ class Page:
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
         big_title = len(self.ctx.display.to_lines(title)) > 1
         swipe_has_not_been_used = True
-        swipe_hint = "« " + t("swipe") + " »"
+        swipe_hint = SWIPE_SYMBOL + " " + t("swipe") + " " + SWIPE_SYMBOL
         show_swipe_hint = False
         while True:
             self.ctx.display.clear()
@@ -317,6 +323,10 @@ class Page:
         header = "BIP39 {}{}".format(suffix, fingerprint)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
+        if fingerprint:
+            self.ctx.display.draw_hcentered_text(
+                fingerprint, color=theme.highlight_color
+            )
         lines = self.ctx.display.to_lines(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (
             len(lines) * FONT_HEIGHT + FONT_HEIGHT
@@ -330,6 +340,10 @@ class Page:
                 self.ctx.input.wait_for_button()
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(header)
+                if fingerprint:
+                    self.ctx.display.draw_hcentered_text(
+                        fingerprint, color=theme.highlight_color
+                    )
                 for i, word in enumerate(word_list[12:]):
                     self.ctx.display.draw_string(
                         DEFAULT_PADDING, starting_y_offset + (i * FONT_HEIGHT), word
@@ -352,12 +366,16 @@ class Page:
         prompt_text = (text + "\n\n%s\n\n") % Settings().hardware.printer.driver
         return self.prompt(prompt_text, self.ctx.display.height() // 2)
 
-    def prompt(self, text, offset_y=0):
+    def prompt(self, text, offset_y=0, highlight_prefix=""):
         """Prompts user to answer Yes or No"""
         lines = self.ctx.display.to_lines(text)
         offset_y -= (len(lines) - 1) * FONT_HEIGHT
         self.ctx.display.draw_hcentered_text(
-            text, offset_y, theme.fg_color, theme.bg_color
+            text,
+            offset_y,
+            theme.fg_color,
+            theme.bg_color,
+            highlight_prefix=highlight_prefix,
         )
         self.y_keypad_map = []
         self.x_keypad_map = []
