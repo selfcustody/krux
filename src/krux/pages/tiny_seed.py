@@ -26,7 +26,7 @@ import image
 import sensor
 import time
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, FLASH_MSG_TIME, proceed_menu
+from . import Page, FLASH_MSG_TIME
 from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
@@ -367,7 +367,7 @@ class TinySeed(Page):
                 if index >= TS_GO_POSITION
                 else (0 if index >= TS_ESC_START_POSITION else None)
             )
-            proceed_menu(self.ctx, menu_offset, menu_index, t("Go"), t("Esc"))
+            self.draw_proceed_menu(t("Go"), t("Esc"), menu_offset, menu_index)
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
             btn = self.ctx.input.wait_for_button()
