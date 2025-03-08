@@ -173,11 +173,12 @@ class WalletSettings(Page):
             if index == 0:
                 new_network = self._coin_type()
                 if new_network is not None:
-                    network = new_network
                     derivation_path = ""
+                    network = new_network
             elif index == 1:
                 new_policy_type = self._policy_type()
                 if new_policy_type is not None:
+                    derivation_path = ""
                     policy_type = new_policy_type
                     if policy_type == TYPE_SINGLESIG and script_type == P2WSH:
                         # If is single-sig, and script is p2wsh, force to pick a new type
@@ -195,7 +196,6 @@ class WalletSettings(Page):
                         # If is miniscript, pick P2WSH or P2TR
                         script_type = self._miniscript_type()
                         script_type = P2WSH if script_type is None else script_type
-                    derivation_path = ""
 
             elif index == 2:
                 if policy_type == TYPE_MINISCRIPT:
@@ -203,14 +203,14 @@ class WalletSettings(Page):
                 else:
                     new_script_type = self._script_type()
                 if new_script_type is not None:
-                    script_type = new_script_type
                     derivation_path = ""
+                    script_type = new_script_type
             elif index == 3:
                 if policy_type != TYPE_MINISCRIPT:
                     new_account = self._account(account)
                     if new_account is not None:
-                        account = new_account
                         derivation_path = ""
+                        account = new_account
                 else:
                     new_derivation_path = self._derivation_path(derivation_path)
                     if new_derivation_path is not None:
