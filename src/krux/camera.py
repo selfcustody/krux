@@ -23,8 +23,8 @@
 
 import gc
 import sensor
-import board
 from .krux_settings import Settings
+from .kboard import kboard
 
 OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
 OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
@@ -87,8 +87,8 @@ class Camera:
         """Initializes the camera"""
         sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
-        if board.config["type"] == "cube" or (
-            board.config["type"] in ["yahboom", "wonder_mv"]
+        if kboard.is_cube or (
+            kboard.can_flip_orientation
             and hasattr(Settings().hardware, "display")
             and getattr(Settings().hardware.display, "flipped_orientation", False)
         ):
@@ -105,7 +105,7 @@ class Camera:
             sensor.set_hmirror(1)
         if self.cam_id == OV2640_ID:
             sensor.set_vflip(1)
-        if board.config["type"] == "bit":
+        if kboard.is_bit:
             # CIF mode will use central pixels and discard darker periphery
             sensor.set_framesize(sensor.CIF)
         else:
@@ -347,7 +347,7 @@ class Camera:
     def snapshot(self):
         """Helper to take a customized snapshot from sensor"""
         img = sensor.snapshot()
-        if board.config["type"] == "bit":
+        if kboard.is_bit:
             img.lens_corr(strength=1.1)
             img.rotation_corr(z_rotation=180)
         return img

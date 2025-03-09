@@ -21,8 +21,8 @@
 # THE SOFTWARE.
 import machine
 import sys
-import board
 from .i2c import i2c_bus
+from .kboard import kboard
 
 # https://github.com/m5stack/M5StickC/blob/0527606d9e56c956ab17b278c25e3d07d7664f5e/src/AXP192.cpp#L20
 MAX_BATTERY_MV = 4200
@@ -40,7 +40,7 @@ class PowerManager:
 
             self.pmu = PMUController(i2c_bus)
             self.pmu.enable_adcs(True)
-            if board.config["type"] == "m5stickv":
+            if kboard.is_m5stickv:
                 self.pmu.enable_pek_button_monitor()
         except Exception as e:
             print(e)
@@ -57,9 +57,9 @@ class PowerManager:
     def battery_charge_remaining(self):
         """Returns the state of charge of the device's battery"""
         mv = int(self.pmu.get_battery_voltage())
-        if board.config["type"] == "amigo":
+        if kboard.is_amigo:
             charge = max(0, (mv - 3394.102415024943) / 416.73204356)
-        elif board.config["type"] in ("m5stickv", "cube"):
+        elif kboard.is_m5stickv or kboard.is_cube:
             charge = max(0, (mv - 3131.427782118631) / 790.56172897)
         else:
             charge = max(0, ((mv - MIN_BATTERY_MV) / (MAX_BATTERY_MV - MIN_BATTERY_MV)))
