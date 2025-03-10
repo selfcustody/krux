@@ -772,7 +772,7 @@ class TinyScanner(Page):
                 t("Scanning words 1-12 again") + "\n\n" + t("TOUCH or ENTER to capture")
             )
             self._run_camera()
-        elif self._valid_numbers(page_seed_numbers):
+        else:
             self.previous_seed_numbers = page_seed_numbers
         return None
 
@@ -817,7 +817,7 @@ class TinyScanner(Page):
                 lcd.display(img, oft=(80, 40))
             else:
                 lcd.display(img)
-            if page_seed_numbers:
+            if page_seed_numbers and self._valid_numbers(page_seed_numbers):
                 if w24:
                     if page == 0:
                         first_page = self._process_24w_pg0_scan(page_seed_numbers)
