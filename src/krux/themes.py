@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 from .krux_settings import Settings, ThemeSettings
-import board
+from .kboard import kboard
 
 DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
 
@@ -129,7 +129,7 @@ class Theme:
         current_theme = Settings().appearance.theme
         self.bg_color = THEMES[current_theme]["background"]
         self.info_bg_color = THEMES[current_theme]["info_background"]
-        if board.config["type"] == "amigo":
+        if kboard.is_amigo:
             # Amigo has darker grays, so we will use a lighter one
             self.info_bg_color = THEMES[current_theme]["disabled"]
         self.fg_color = THEMES[current_theme]["foreground"]

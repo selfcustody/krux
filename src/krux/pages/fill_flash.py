@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import flash
 import sensor
+import time
 from . import Page, MENU_CONTINUE
 from .capture_entropy import CameraEntropy, POOR_VARIANCE_TH
 from ..themes import theme
@@ -31,7 +31,7 @@ from ..display import BOTTOM_LINE, MINIMAL_PADDING
 from ..wdt import wdt
 from ..firmware import FLASH_SIZE
 from ..camera import ENTROPY_MODE
-import time
+from ..kboard import kboard
 
 FLASH_ROWS = 64
 BLOCK_SIZE = 0x1000
@@ -80,7 +80,7 @@ class FillFlash(Page):
         block_count = 0
         offset_x = (display_width - (TOTAL_BLOCKS // blocks_per_line)) // 2
 
-        offset_y = BOTTOM_LINE if board.config["type"] == "amigo" else BOTTOM_LINE - 12
+        offset_y = BOTTOM_LINE if kboard.is_amigo else BOTTOM_LINE - 12
 
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Filling Flash"), MINIMAL_PADDING)
