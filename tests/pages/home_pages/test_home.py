@@ -753,6 +753,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
         SIGNED_FILE_SUFFIX,
     )
     from krux.settings import THIN_SPACE
+    from krux.key import FINGERPRINT_SYMBOL
 
     PSBT_FILE_NAME = "test.psbt"
     SIGNED_PSBT_FILE_NAME = "test-signed.psbt"
@@ -820,11 +821,14 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
                 "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h"
             ),
             mocker.call(
-                "PSBT policy:\np2wsh\n2 of 3\n⊚"
+                "PSBT policy:\np2wsh\n2 of 3\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
-                + "26bb83c4\n⊚"
+                + "26bb83c4\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
-                + "0208cb77\n⊚"
+                + "0208cb77\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "73c5da0a"
             ),
@@ -851,7 +855,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
 def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.key import Key, NETWORKS, TYPE_MINISCRIPT, P2TR
+    from krux.key import Key, NETWORKS, TYPE_MINISCRIPT, P2TR, FINGERPRINT_SYMBOL
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.sd_card import (
         PSBT_FILE_EXTENSION,
@@ -935,10 +939,12 @@ def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
             ),
             mocker.call(
                 "PSBT policy:\np2tr"
-                + "\n⊚"
+                + "\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "02e8bff2"
-                + "\n⊚"
+                + "\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "73c5da0a"
             ),

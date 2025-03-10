@@ -202,7 +202,8 @@ class Login(Page):
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
-                    t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash
+                    t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash,
+                    highlight_prefix=":",
                 )
                 self.ctx.input.wait_for_button()
 
@@ -278,7 +279,7 @@ class Login(Page):
                 DIGITS_OCT: Utils.BASE_OCT_SUFFIX,
             }
             numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
-            self.display_mnemonic(numbers_str, suffix_dict[charset])
+            self.display_mnemonic(numbers_str, suffix_dict[charset], fingerprint=Key.extract_fingerprint(mnemonic))
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return MENU_CONTINUE
             self.ctx.display.clear()
@@ -314,6 +315,7 @@ class Login(Page):
             script_type = P2WSH
         derivation_path = ""
         from ..wallet import Wallet
+        from ..themes import theme
 
         while True:
             key = Key(
@@ -327,7 +329,7 @@ class Login(Page):
             )
             if not derivation_path:
                 derivation_path = key.derivation
-            wallet_info = key.fingerprint_hex_str(True) + "\n"
+            wallet_info = "\n"
             wallet_info += network["name"] + "\n"
             if policy_type == TYPE_SINGLESIG:
                 wallet_info += NAME_SINGLE_SIG + "\n"
@@ -354,6 +356,12 @@ class Login(Page):
                     * FONT_HEIGHT
                     + DEFAULT_PADDING
                 ),
+            )
+            # draw fingerprint with highlight color
+            self.ctx.display.draw_hcentered_text(
+                key.fingerprint_hex_str(True),
+                color=theme.highlight_color,
+                info_box=True,
             )
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
@@ -571,6 +579,7 @@ class Login(Page):
                 if self.prompt(
                     str(len(words) + 1) + ".\n\n" + word_num + word + "\n\n",
                     self.ctx.display.height() // 2,
+                    highlight_prefix=":",
                 ):
                     words.append(word)
 
