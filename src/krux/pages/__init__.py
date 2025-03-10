@@ -476,6 +476,48 @@ class Page:
         _, status = self.menu.run_loop(start_from_index)
         return status != MENU_SHUTDOWN
 
+    def draw_proceed_menu(
+        self, go_txt, esc_txt, y_offset=0, menu_index=None, go_enabled=True
+    ):
+        """Reusable 'Esc' and 'Go' menu choice"""
+        go_x_offset = (
+            self.ctx.display.width() // 2 - lcd.string_width_px(go_txt)
+        ) // 2 + self.ctx.display.width() // 2
+        esc_x_offset = (
+            self.ctx.display.width() // 2 - lcd.string_width_px(esc_txt)
+        ) // 2
+        go_esc_y_offset = (
+            self.ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
+        ) // 2 + y_offset
+        if menu_index == 0 and self.ctx.input.buttons_active:
+            self.ctx.display.outline(
+                DEFAULT_PADDING,
+                go_esc_y_offset - FONT_HEIGHT // 2,
+                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+                FONT_HEIGHT + FONT_HEIGHT,
+                theme.error_color,
+            )
+        self.ctx.display.draw_string(
+            esc_x_offset, go_esc_y_offset, esc_txt, theme.error_color
+        )
+        if menu_index == 1 and self.ctx.input.buttons_active:
+            self.ctx.display.outline(
+                self.ctx.display.width() // 2 + DEFAULT_PADDING,
+                go_esc_y_offset - FONT_HEIGHT // 2,
+                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+                FONT_HEIGHT + FONT_HEIGHT,
+                theme.go_color,
+            )
+        go_color = theme.go_color if go_enabled else theme.disabled_color
+        self.ctx.display.draw_string(go_x_offset, go_esc_y_offset, go_txt, go_color)
+        if not self.ctx.input.buttons_active:
+            self.ctx.display.draw_vline(
+                self.ctx.display.width() // 2,
+                go_esc_y_offset,
+                FONT_HEIGHT,
+                theme.frame_color,
+            )
+
 
 class ListView:
     """Acts as a fixed-size, sliding window over an underlying list"""
@@ -879,42 +921,3 @@ def choose_len_mnemonic(ctx, extra_option=""):
     _, num_words = submenu.run_loop()
     ctx.display.clear()
     return num_words
-
-
-def proceed_menu(
-    ctx, y_offset=0, menu_index=None, proceed_txt="Go", esc_txt="Esc", go_enabled=True
-):
-    """Reusable 'Esc' and 'Go' menu choice"""
-    go_x_offset = (
-        ctx.display.width() // 2 - lcd.string_width_px(proceed_txt)
-    ) // 2 + ctx.display.width() // 2
-    esc_x_offset = (ctx.display.width() // 2 - lcd.string_width_px(esc_txt)) // 2
-    go_esc_y_offset = (
-        ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
-    ) // 2 + y_offset
-    if menu_index == 0 and ctx.input.buttons_active:
-        ctx.display.outline(
-            DEFAULT_PADDING,
-            go_esc_y_offset - FONT_HEIGHT // 2,
-            ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
-            FONT_HEIGHT + FONT_HEIGHT,
-            theme.error_color,
-        )
-    ctx.display.draw_string(esc_x_offset, go_esc_y_offset, esc_txt, theme.error_color)
-    if menu_index == 1 and ctx.input.buttons_active:
-        ctx.display.outline(
-            ctx.display.width() // 2 + DEFAULT_PADDING,
-            go_esc_y_offset - FONT_HEIGHT // 2,
-            ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
-            FONT_HEIGHT + FONT_HEIGHT,
-            theme.go_color,
-        )
-    go_color = theme.go_color if go_enabled else theme.disabled_color
-    ctx.display.draw_string(go_x_offset, go_esc_y_offset, proceed_txt, go_color)
-    if not ctx.input.buttons_active:
-        ctx.display.draw_vline(
-            ctx.display.width() // 2,
-            go_esc_y_offset,
-            FONT_HEIGHT,
-            theme.frame_color,
-        )

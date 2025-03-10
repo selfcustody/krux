@@ -22,7 +22,7 @@
 
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, ESC_KEY, LETTERS, proceed_menu
+from . import Page, ESC_KEY, LETTERS
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH
 from ..krux_settings import t
 from ..themes import theme
@@ -239,8 +239,8 @@ class MnemonicEditor(Page):
         menu_index = None
         if self.ctx.input.buttons_active and button_index >= ESC_INDEX:
             menu_index = button_index - ESC_INDEX
-        proceed_menu(
-            self.ctx, y_region, menu_index, go_txt, esc_txt, self.valid_checksum
+        self.draw_proceed_menu(
+            go_txt, esc_txt, y_region, menu_index, self.valid_checksum
         )
 
     def edit_word(self, index):
