@@ -216,7 +216,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             home.display_qr_codes.assert_has_calls(
                 [
                     mocker.call(case[4], case[1], "Signed Message"),
-                    mocker.call(case[5], case[1], "Hex Public Key"),
+                    mocker.call(case[5], case[1], "Hex Public Key:"),
                 ]
             )
         else:

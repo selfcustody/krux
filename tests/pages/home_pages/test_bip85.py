@@ -541,7 +541,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[1])
         if case[2]:
             ctx.display.draw_hcentered_text.assert_has_calls(
-                [mocker.call(case[2], info_box=True)]
+                [mocker.call(case[2], info_box=True, highlight_prefix=':')]
             )
         if len(case) > 3 and case[3]:
             bip85_ui._base64_password_qr.assert_has_calls(

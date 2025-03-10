@@ -701,7 +701,7 @@ def test_flash_text(mocker, m5stickv):
     d.flash_text("test", WHITE)
 
     d.clear.assert_called()
-    d.draw_centered_text.assert_called_with("test", WHITE)
+    d.draw_centered_text.assert_called_with("test", WHITE, highlight_prefix="")
     time.sleep_ms.assert_called_with(FLASH_MSG_TIME)
 
 
