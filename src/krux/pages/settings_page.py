@@ -366,6 +366,7 @@ class SettingsPage(Page):
                 btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
+
             new_category = current_category
             for i, category in enumerate(categories):
                 if current_category == category:
@@ -375,30 +376,42 @@ class SettingsPage(Page):
                         new_category = categories[(i - 1) % len(categories)]
                     setting.__set__(settings_namespace, new_category)
                     break
-            if setting.attr == "locale":
-                locale_control.load_locale(new_category)
-            if setting.attr == "theme":
-                theme.update()
-            # Update screen in case orientation has changed
-            if setting.attr == "flipped_orientation":
-                self.ctx.display.to_landscape()
-                self.ctx.display.to_portrait()
-            if setting.attr == "brightness":
-                if board.config["type"] in ["cube", "wonder_mv"]:
-                    self.ctx.display.gpio_backlight_ctrl(new_category)
-                elif board.config["type"] == "m5stickv":
-                    self.ctx.display.set_pmu_backlight(new_category)
-            if setting.attr == "flipped_x" and new_category is not None:
+
+            self._category_change_special_cases(setting, new_category)
+
+        return self._category_change_exit_check(
+            settings_namespace, setting, starting_category
+        )
+
+    def _category_change_special_cases(self, setting, new_category):
+        if setting.attr == "locale":
+            locale_control.load_locale(new_category)
+        elif setting.attr == "theme":
+            theme.update()
+        # Update screen in case orientation has changed
+        elif setting.attr == "flipped_orientation":
+            self.ctx.display.to_landscape()
+            self.ctx.display.to_portrait()
+        elif setting.attr == "brightness":
+            if board.config["type"] in ["cube", "wonder_mv"]:
+                self.ctx.display.gpio_backlight_ctrl(new_category)
+            elif board.config["type"] == "m5stickv":
+                self.ctx.display.set_pmu_backlight(new_category)
+        elif setting.attr == "flipped_x":
+            if new_category is not None:
                 self.ctx.display.flipped_x_coordinates = new_category
-            if setting.attr == "bgr_colors" and new_category is not None:
+        elif setting.attr == "bgr_colors":
+            if new_category is not None:
                 lcd.bgr_to_rgb(new_category)
-            if setting.attr == "inverted_colors" and new_category is not None:
+        elif setting.attr == "inverted_colors":
+            if new_category is not None:
                 lcd.init(
-                    invert=new_category, lcd_type=Settings().hardware.display.lcd_type
+                    invert=new_category,
+                    lcd_type=Settings().hardware.display.lcd_type,
                 )
                 self._amigo_lcd_reconfigure()
-
-            if setting.attr == "lcd_type" and new_category is not None:
+        elif setting.attr == "lcd_type":
+            if new_category is not None:
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
                     t(
@@ -423,13 +436,14 @@ class SettingsPage(Page):
                 if btn != BUTTON_PAGE_PREV:
                     self.ctx.power_manager.reboot()
 
-        # When changing locale, exit Login to force recreate with new locale
-        if (
-            setting.attr == "locale"
-            and setting.__get__(settings_namespace) != starting_category
-        ):
-            return MENU_EXIT
-        if setting.attr == "theme":
+    def _category_change_exit_check(
+        self, settings_namespace, setting, starting_category
+    ):
+        if setting.attr in ("locale", "hide_mnemonic"):
+            # If locale or hide changed, needs to recreate Login
+            if setting.__get__(settings_namespace) != starting_category:
+                return MENU_EXIT
+        elif setting.attr == "theme":
             self.ctx.display.clear()
             if self.prompt(
                 t("Change theme and reboot?"), self.ctx.display.height() // 2
