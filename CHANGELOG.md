@@ -1,3 +1,8 @@
+# Changelog 25.XX.X - XXX 2025
+
+### New Mnemonic menu disabled by Hide Mnemonic
+When enabled, the hide mnemonic setting also disables the New Mnemonic menu
+
 # Changelog 25.03.0 - March 2025
 
 ### Taproot and WSH Miniscript support
