@@ -171,7 +171,7 @@ Activating *TC Flash Hash* at boot helps prevent unauthorized use by requiring t
 <img src="../../img/maixpy_m5stickv/settings-hide-mnemonic-250.png" align="right" class="m5stickv">
 <img src="../../img/maixpy_amigo/settings-hide-mnemonic-300.png" align="right" class="amigo">
 
-When `True`, Krux will hide the [New Mnemonic](./usage/generating-a-mnemonic.md) menu and hide the words when [Loading a Mnemonic](./usage/loading-a-mnemonic.md). It will also hide the words when using [BIP85 to create a BIP39 Mnemonic](./usage/navigating-the-main-menu.md#bip85) and disable the [Backup Mnemonic](./usage/navigating-the-main-menu.md#backup-mnemonic) menu.
+When `True`, Krux will disable the [New Mnemonic](./usage/generating-a-mnemonic.md) menu and hide the words when [Loading a Mnemonic](./usage/loading-a-mnemonic.md). It will also hide the words when using [BIP85 to create a BIP39 Mnemonic](./usage/navigating-the-main-menu.md#bip85) and disable the [Backup Mnemonic](./usage/navigating-the-main-menu.md#backup-mnemonic) menu.
 
 <div style="clear: both"></div>
 
