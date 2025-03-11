@@ -108,18 +108,18 @@ def login(ctx_login):
     """Loads and run the Login page"""
     from krux.pages.login import Login
 
-    login_start_from = None
+    start_from = None
     while True:
-        if not Login(ctx_login).run(login_start_from):
+        if not Login(ctx_login).run(start_from):
+            # Exited for shutdown
             break
 
         if ctx_login.wallet is not None:
-            # Have a loaded wallet
+            # Exited for Home menu
             break
-        # Login closed due to change of locale at Settings
-        login_start_from = (
-            Login.SETTINGS_MENU_INDEX
-        )  # will start Login again from Settings index
+
+        # Exited for change in Settings
+        start_from = Login.SETTINGS_MENU_INDEX
 
     # Unimport Login the free memory
     sys.modules.pop("krux.pages.login")
