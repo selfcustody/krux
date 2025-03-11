@@ -213,7 +213,7 @@ translation_array = [
     "Taxa de Mergulho",
     "Tipo de Política",
     "Entropia fraca!",
-    "Pressione PAGE para alternar o modo",
+    "PAGE para alternar o modo",
     "Imprimir QR de teste",
     "Imprimir Tiny Seed?",
     "Imprimir QR",
