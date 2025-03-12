@@ -66,6 +66,8 @@ DISPLAY_TEST_TIME = 5000  # 5 seconds
 CATEGORY_SETTING_COLOR_DICT = {
     MAIN_TXT: ORANGE,
     TEST_TXT: GREEN,
+    True: theme.go_color,
+    False: theme.no_esc_color,
 }
 
 
