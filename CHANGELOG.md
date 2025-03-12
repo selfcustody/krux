@@ -1,7 +1,17 @@
 # Changelog 25.XX.X - XXX 2025
 
-### New Mnemonic menu disabled by Hide Mnemonic
-When enabled, the hide mnemonic setting also disables the New Mnemonic menu
+### New Mnemonic Menu Disabled by Hide Mnemonic
+When enabled, the hide mnemonic setting also disables the New Mnemonic menu.
+
+### Highlight Fingerprint and Prefixes
+Wallet fingerprint and prefix texts are shown highlighted on all screens.
+
+### Other Bug Fixes and Optimizations
+- Added fingerprint to mnemonic preview and editor.
+- Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
+- Optimized the way we check device's board values.
+- Other small text changes for clarity and translation simplification.
+
 
 # Changelog 25.03.0 - March 2025
 
