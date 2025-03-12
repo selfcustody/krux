@@ -149,7 +149,7 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
         [BUTTON_PAGE]  # Move to store on SD card
         + [BUTTON_ENTER]  # Confirm SD card
         + [BUTTON_ENTER]  # Confirm add CBC cam entropy
-        + [BUTTON_ENTER]  # add custom ID - move to no
+        + [BUTTON_ENTER]  # YES, use fingerprint as ID
         + [BUTTON_ENTER]  # Confirm encryption ID
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -187,7 +187,9 @@ def test_encrypt_save_error_exist(m5stickv, mocker, mock_file_operations):
     from krux.key import Key
     from embit.networks import NETWORKS
 
-    BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_ENTER]  # Confirm flash store  # Cancel
+    BTN_SEQUENCE = [BUTTON_ENTER] + [
+        BUTTON_ENTER
+    ]  # Confirm flash store  # Confirm fingerprint as ID
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
     storage_ui = EncryptMnemonic(ctx)
@@ -221,7 +223,7 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # Confirm flash store
-        + [BUTTON_ENTER]  # add custom ID - move to no
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         + [BUTTON_ENTER]  # Confirm encryption ID
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -256,7 +258,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
         [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
         + [BUTTON_ENTER]  # Confirm Encrypted QR
         # Key is mocked here, no press needed
-        + [BUTTON_ENTER]  # add custom ID - No
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -293,7 +295,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
         + [BUTTON_ENTER]  # Confirm Encrypted QR
         + [BUTTON_ENTER]  # Confirm to add CBC cam entropy
         # Key is mocked here, no press needed
-        + [BUTTON_ENTER]  # add custom ID - No
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
