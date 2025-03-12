@@ -72,7 +72,9 @@ def test_load_key_from_keypad_when_creating(m5stickv, mocker):
     key = key_generator.encryption_key(creating=True)
     assert key == "b"
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    call_message = mocker.call("Strength: Weak", 38, RED)  # 38 = y_offset
+    call_message = mocker.call(
+        "Strength: Weak", 38, RED, highlight_prefix=":"
+    )  # 38 = y_offset
 
     ctx.display.draw_hcentered_text.assert_has_calls([call_message])
 
