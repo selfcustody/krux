@@ -69,6 +69,7 @@ sitemap.xml.gz
 memzip-files.c
 memzip-files.zip
 .coverage
+.coverage.*
 privkey.pem
 pubkey.pem
 simulator/krux-screenshots
