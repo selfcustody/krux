@@ -6,6 +6,9 @@ When enabled, the hide mnemonic setting also disables the New Mnemonic menu.
 ### Highlight Fingerprint and Other Texts
 The wallet fingerprint, keypad title, settings categories and prefix texts are now shown highlighted on all screens.
 
+### More Colors on Settings Categories
+When the value of the settings category is boolean (True/False), it will be displayed in color.
+
 ### Other Bug Fixes and Optimizations
 - Added fingerprint to mnemonic preview and editor.
 - Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
