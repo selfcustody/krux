@@ -159,7 +159,7 @@ class Page:
             offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
             if lcd.string_width_px(buffer) < self.ctx.display.width():
                 text_to_show = title if not show_swipe_hint else swipe_hint
-                self.ctx.display.draw_hcentered_text(text_to_show, offset_y)
+                self.ctx.display.draw_hcentered_text(text_to_show, offset_y, color=theme.highlight_color)
                 offset_y += 2 * FONT_HEIGHT if big_title else (FONT_HEIGHT * 3 // 2)
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
             if progress_bar_fn:
