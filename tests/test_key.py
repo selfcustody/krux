@@ -342,3 +342,16 @@ def test_get_final_word_candidates_fails_when_wrong_word_count(mocker, m5stickv,
 
     with pytest.raises(ValueError):
         Key.get_final_word_candidates(tdata.TEST_12_WORD_MNEMONIC.split()[:-2])
+
+
+def test_classmethod_extract_fingerprint(mocker, m5stickv, tdata):
+    from krux.key import Key
+
+    # extract_fingerprint also calls Key.extract_root - we don't need to create its tests
+    fingerprint = Key.extract_fingerprint(tdata.TEST_12_WORD_MNEMONIC, pretty=False)
+
+    assert fingerprint == "55f8fc5d"
+
+    fingerprint = Key.extract_fingerprint("this is not a mnemonic", pretty=False)
+
+    assert fingerprint == ""
