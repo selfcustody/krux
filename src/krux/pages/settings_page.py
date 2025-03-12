@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
-import board
 import lcd
 from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
 from ..themes import theme, GREEN, ORANGE
@@ -59,6 +58,7 @@ from . import (
     DEFAULT_PADDING,
 )
 import os
+from ..kboard import kboard
 
 PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
@@ -324,7 +324,7 @@ class SettingsPage(Page):
 
         # Update buttons debounce time
         self.ctx.input.debounce_value = Settings().hardware.buttons.debounce
-        if "ENCODER" in board.config["krux"]["pins"]:
+        if kboard.has_encoder:
             from ..rotary import encoder
 
             encoder.debounce = Settings().hardware.buttons.debounce
@@ -393,9 +393,9 @@ class SettingsPage(Page):
             self.ctx.display.to_landscape()
             self.ctx.display.to_portrait()
         elif setting.attr == "brightness":
-            if board.config["type"] in ["cube", "wonder_mv"]:
+            if kboard.is_cube or kboard.is_wonder_mv:
                 self.ctx.display.gpio_backlight_ctrl(new_category)
-            elif board.config["type"] == "m5stickv":
+            elif kboard.is_m5stickv:
                 self.ctx.display.set_pmu_backlight(new_category)
         elif setting.attr == "flipped_x":
             if new_category is not None:

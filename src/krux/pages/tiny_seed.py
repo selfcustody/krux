@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import lcd
 import image
 import sensor
@@ -33,7 +32,6 @@ from ..krux_settings import t
 from ..display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
-    MINIMAL_DISPLAY,
     FONT_HEIGHT,
     FONT_WIDTH,
     NARROW_SCREEN_WITH,
@@ -42,6 +40,7 @@ from ..display import (
 from ..camera import BINARY_GRID_MODE
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..bip39 import entropy_checksum
+from ..kboard import kboard
 
 # Tiny Seed last bit index positions according to checksums
 TS_LAST_BIT_NO_CS = 143
@@ -91,7 +90,7 @@ class TinySeed(Page):
         """Draws labels for import and export Tinyseed UI"""
         self.ctx.display.draw_hcentered_text(self.label)
         # For non‑minimal displays, show extra bit numbers (rotate to landscape temporarily)
-        if not MINIMAL_DISPLAY:
+        if not kboard.has_minimal_display:
             self.ctx.display.to_landscape()
             bit_number = 2048
             bit_offset = MINIMAL_PADDING + 2 * FONT_HEIGHT
@@ -464,14 +463,12 @@ class TinyScanner(Page):
         self.label = t("Binary Grid") if grid_type == "Binary Grid" else grid_type
         self.g_corners = (0x80, 0x80, 0x80, 0x80)
         self.blob_otsu = 0x80
-        # Cache board type to avoid repeated lookups.
-        self.board_type = board.config.get("type", "")
 
     def _map_punches_region(self, rect_size, page=0):
         """Calculate x and y coordinates for punched grid regions."""
         self.x_regions = []
         self.y_regions = []
-        if self.board_type == "amigo":
+        if kboard.is_amigo:
             offset_key_x = "x_offset_factor_amigo_p{}".format(page)
             offset_key_y = "y_offset_factor_amigo_p{}".format(page)
         else:
@@ -497,7 +494,7 @@ class TinyScanner(Page):
 
     def _gradient_corners(self, rect, img):
         """Compute histogram thresholds from four corners of the Tiny Seed region."""
-        if self.board_type != "amigo":
+        if not kboard.is_amigo:
             region_ul = (
                 rect[0] + rect[2] // 8,
                 rect[1] + rect[3] // 30,
@@ -660,7 +657,7 @@ class TinyScanner(Page):
         # Prepare mapping (reverse one axis based on board type)
         y_map = self.y_regions[:-1][:]
         x_map = self.x_regions[:-1][:]
-        if self.board_type == "amigo":
+        if kboard.is_amigo:
             x_map.reverse()
         else:
             y_map.reverse()
@@ -811,9 +808,9 @@ class TinyScanner(Page):
                 self._map_punches_region(rect, page)
                 page_seed_numbers = self._detect_and_draw_punches(img)
                 self._draw_grid(img)
-            if self.board_type == "m5stickv":
+            if kboard.is_m5stickv:
                 img.lens_corr(strength=1.0, zoom=0.56)
-            if self.board_type == "amigo":
+            if kboard.is_amigo:
                 lcd.display(img, oft=(80, 40))
             else:
                 lcd.display(img)

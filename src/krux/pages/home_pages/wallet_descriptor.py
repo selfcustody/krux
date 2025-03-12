@@ -31,7 +31,6 @@ from ...display import (
     BOTTOM_PROMPT_LINE,
     FONT_HEIGHT,
     FONT_WIDTH,
-    MINIMAL_DISPLAY,
     MINIMAL_PADDING,
 )
 from ...krux_settings import t
@@ -39,6 +38,7 @@ from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
 from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
+from ...kboard import kboard
 
 
 class WalletDescriptor(Page):
@@ -185,11 +185,13 @@ class WalletDescriptor(Page):
         unused_key_index = None
         for i, key in enumerate(wallet.descriptor.keys):
             label_color = theme.fg_color
-            padding = DEFAULT_PADDING if not MINIMAL_DISPLAY else MINIMAL_PADDING
+            padding = (
+                DEFAULT_PADDING if not kboard.has_minimal_display else MINIMAL_PADDING
+            )
             key_label = (
                 "{}: ".format(chr(65 + i))
                 if (wallet.is_multisig() or wallet.is_miniscript())
-                else (" " * 3 if not MINIMAL_DISPLAY else "")
+                else (" " * 3 if not kboard.has_minimal_display else "")
             )
             key_fingerprint = FINGERPRINT_SYMBOL + " "
             if key.origin:
@@ -219,7 +221,9 @@ class WalletDescriptor(Page):
                 self.ctx.display.draw_string(padding, offset_y, line, label_color)
                 offset_y += FONT_HEIGHT
 
-            sub_padding = padding + (0 if MINIMAL_DISPLAY else 3 * FONT_WIDTH)
+            sub_padding = padding + (
+                0 if kboard.has_minimal_display else 3 * FONT_WIDTH
+            )
 
             if key.origin:
                 key_derivation_str = "{} m{}".format(
@@ -239,7 +243,7 @@ class WalletDescriptor(Page):
                     offset_y += FONT_HEIGHT
 
             xpub_text = self.fit_to_line(
-                ("" if MINIMAL_DISPLAY else " " * 3) + key.key.to_base58()
+                ("" if kboard.has_minimal_display else " " * 3) + key.key.to_base58()
             )
             self.ctx.display.draw_string(padding, offset_y, xpub_text, label_color)
             offset_y += (FONT_HEIGHT * 3) // 2
