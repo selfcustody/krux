@@ -133,6 +133,7 @@ class Page:
         """Flashes text centered on the display for duration ms"""
         self.flash_text(text, theme.error_color)
 
+    # pylint: disable=too-many-arguments
     def capture_from_keypad(
         self,
         title,
@@ -144,26 +145,18 @@ class Page:
         go_on_change=False,
         starting_buffer="",
         esc_prompt=True,
+        buffer_title="",
     ):
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
         """
         buffer = starting_buffer
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
-        big_title = len(self.ctx.display.to_lines(title)) > 1
         swipe_has_not_been_used = True
-        swipe_hint = SWIPE_SYMBOL + " " + t("swipe") + " " + SWIPE_SYMBOL
         show_swipe_hint = False
         while True:
             self.ctx.display.clear()
-            offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
-            if lcd.string_width_px(buffer) < self.ctx.display.width():
-                text_to_show = title if not show_swipe_hint else swipe_hint
-                self.ctx.display.draw_hcentered_text(
-                    text_to_show, offset_y, color=theme.highlight_color
-                )
-                offset_y += 2 * FONT_HEIGHT if big_title else (FONT_HEIGHT * 3 // 2)
-            self.ctx.display.draw_hcentered_text(buffer, offset_y)
+            self._print_keypad_header(title, show_swipe_hint, buffer, buffer_title)
             if progress_bar_fn:
                 progress_bar_fn()
             pad.compute_possible_keys(buffer)
@@ -218,6 +211,21 @@ class Page:
         if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
         return buffer
+
+    def _print_keypad_header(self, title, show_swipe_hint, buffer, buffer_title):
+        big_title = len(self.ctx.display.to_lines(title)) > 1
+        swipe_hint = SWIPE_SYMBOL + " " + t("swipe") + " " + SWIPE_SYMBOL
+        offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
+        if buffer_title:
+            self.ctx.display.draw_hcentered_text(buffer_title, offset_y)
+        if lcd.string_width_px(buffer) < self.ctx.display.width():
+            text_to_show = title if not show_swipe_hint else swipe_hint
+            self.ctx.display.draw_hcentered_text(
+                text_to_show, offset_y, color=theme.highlight_color
+            )
+            offset_y += 2 * FONT_HEIGHT if big_title else (FONT_HEIGHT * 3 // 2)
+        if not buffer_title:
+            self.ctx.display.draw_hcentered_text(buffer, offset_y)
 
     def display_qr_codes(self, data, qr_format, title=""):
         """Displays a QR code or an animated series of QR codes to the user, encoding them

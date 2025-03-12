@@ -3,8 +3,8 @@
 ### New Mnemonic Menu Disabled by Hide Mnemonic
 When enabled, the hide mnemonic setting also disables the New Mnemonic menu.
 
-### Highlight Fingerprint and Prefixes
-Wallet fingerprint and prefix texts are shown highlighted on all screens.
+### Highlight Fingerprint and Other Texts
+The wallet fingerprint, keypad title, settings categories and prefix texts are now shown highlighted on all screens.
 
 ### Other Bug Fixes and Optimizations
 - Added fingerprint to mnemonic preview and editor.

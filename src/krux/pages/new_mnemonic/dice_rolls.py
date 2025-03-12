@@ -253,22 +253,22 @@ class DiceEntropy(Page):
             while True:
                 roll = ""
                 while True:
-                    dice_title = t("Rolls:") + " %d\n" % len(self.rolls)
+                    dice_title = t("Rolls:") + " %d" % len(self.rolls)
                     entropy = (
                         "".join(self.rolls)
                         if self.num_sides < 10
                         else "-".join(self.rolls)
                     )
-                    if len(entropy) <= 10:
-                        dice_title += entropy
-                    else:
-                        dice_title += "..." + entropy[-10:]
+                    buffer_title = entropy
+                    if len(entropy) > 10:
+                        buffer_title = "..." + entropy[-10:]
                     roll = self.capture_from_keypad(
                         dice_title,
                         [self.roll_states],
                         delete_key_fn=delete_roll,
                         progress_bar_fn=self.draw_progress_bar,
                         go_on_change=True,
+                        buffer_title="\n" + buffer_title,
                     )
                     if roll == ESC_KEY:
                         return None
