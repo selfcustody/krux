@@ -356,9 +356,15 @@ class SettingsPage(Page):
                     t("Right"),
                 )
             self.ctx.display.draw_centered_text(
-                settings_namespace.label(setting.attr) + "\n" + str(current_category),
+                "\n" + str(current_category),
                 color,
                 theme.bg_color,
+            )
+            # Print title highlighted
+            self.ctx.display.draw_centered_text(
+                settings_namespace.label(setting.attr) + "\n\n",
+                theme.highlight_color,
+                theme.bg_color
             )
             self._draw_settings_pad()
             btn = self.ctx.input.wait_for_button()
