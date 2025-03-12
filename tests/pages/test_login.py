@@ -235,6 +235,7 @@ def test_new_double_mnemonic_from_snapshot(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.wallet import is_double_mnemonic
     from embit.bip39 import mnemonic_from_bytes
+    from krux.display import THIN_SPACE
 
     ORIGINAL_ENTROPY = b"\x01" * 32
 
@@ -269,7 +270,7 @@ def test_new_double_mnemonic_from_snapshot(m5stickv, mocker):
     assert ctx.wallet.key.mnemonic == MNEMONIC
     assert is_double_mnemonic(MNEMONIC) == True
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("BIP39 Mnemonic*\n⊚\u20095d4342d2", 5)]
+        [mocker.call("BIP39 Mnemonic*\n⊚" + THIN_SPACE + "5d4342d2", 5)]
     )
     original_mnemonic_words = mnemonic_from_bytes(ORIGINAL_ENTROPY).split(" ")
     converted_mnemonic_words = ctx.wallet.key.mnemonic.split(" ")
