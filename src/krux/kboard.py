@@ -19,39 +19,30 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import gc
-from .display import display
-from .input import Input
-from .camera import Camera
-from .light import Light
-from .kboard import kboard
+# pylint: disable=R0902
+import board
 
 
-class Context:
-    """Context is a singleton containing all 'global' state that lives throughout the
-    duration of the program, including references to all device interfaces.
-    """
+class KBoard:
+    """A simple class to organize and cache board related information"""
 
     def __init__(self):
-        self.display = display
-        self.input = Input()
-        self.camera = Camera()
-        self.light = Light() if kboard.has_light else None
-        self.power_manager = None
-        self.printer = None
-        self.wallet = None
-        self.tc_code_enabled = False
-
-    def clear(self):
-        """Clears all sensitive data from the context, resetting it"""
-        self.wallet = None
-        if self.printer is not None:
-            self.printer.clear()
-        gc.collect()
-
-    def is_logged_in(self):
-        """Returns True if user is logged-in with private key material"""
-        return bool(self.wallet is not None and self.wallet.key)
+        self.is_amigo = board.config["type"] == "amigo"
+        self.is_bit = board.config["type"] == "bit"
+        self.is_cube = board.config["type"] == "cube"
+        self.is_yahboom = board.config["type"] == "yahboom"
+        self.is_wonder_mv = board.config["type"] == "wonder_mv"
+        self.is_m5stickv = board.config["type"] == "m5stickv"
+        self.has_touchscreen = self.is_yahboom or self.is_wonder_mv or self.is_amigo
+        self.has_minimal_display = self.is_m5stickv or self.is_cube
+        self.can_control_brightness = (
+            self.is_cube or self.is_m5stickv or self.is_wonder_mv
+        )
+        self.can_flip_orientation = self.is_yahboom or self.is_wonder_mv
+        self.has_light = "LED_W" in board.config["krux"]["pins"]
+        self.has_backlight = "BACKLIGHT" in board.config["krux"]["pins"]
+        self.has_encoder = "ENCODER" in board.config["krux"]["pins"]
+        self.need_release_filter = self.has_encoder or self.is_cube
 
 
-ctx = Context()  # Singleton instance
+kboard = KBoard()

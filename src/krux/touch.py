@@ -153,7 +153,6 @@ class Touch:
             index = y_index
 
         # self.highlight_region(x_index, y_index)
-
         return index
 
     def set_regions(self, x_list=None, y_list=None):

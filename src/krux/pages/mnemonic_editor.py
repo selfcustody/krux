@@ -22,8 +22,8 @@
 
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, ESC_KEY, LETTERS, proceed_menu
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH, MINIMAL_DISPLAY
+from . import Page, ESC_KEY, LETTERS
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH
 from ..krux_settings import t
 from ..themes import theme
 from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -174,12 +174,12 @@ class MnemonicEditor(Page):
         word_v_padding = self.ctx.display.height() * 3 // 4
         word_v_padding //= 12
 
-        if self.ctx.input.touch is not None and not self.ctx.input.buttons_active:
+        if self.ctx.input.touch is not None:
             self.ctx.input.touch.clear_regions()
             self.ctx.input.touch.x_regions.append(0)
             self.ctx.input.touch.x_regions.append(self.ctx.display.width() // 2)
             self.ctx.input.touch.x_regions.append(self.ctx.display.width())
-            if self.mnemonic_length == 24:
+            if not self.ctx.input.buttons_active and self.mnemonic_length == 24:
                 self.ctx.display.draw_vline(
                     self.ctx.display.width() // 2,
                     self.header_offset,
@@ -188,12 +188,13 @@ class MnemonicEditor(Page):
                 )
             y_region = self.header_offset
             for _ in range(13):
-                self.ctx.display.draw_hline(
-                    MINIMAL_PADDING,
-                    y_region,
-                    self.ctx.display.width() - 2 * MINIMAL_PADDING,
-                    theme.frame_color,
-                )
+                if not self.ctx.input.buttons_active:
+                    self.ctx.display.draw_hline(
+                        MINIMAL_PADDING,
+                        y_region,
+                        self.ctx.display.width() - 2 * MINIMAL_PADDING,
+                        theme.frame_color,
+                    )
                 self.ctx.input.touch.y_regions.append(y_region)
                 y_region += word_v_padding
             self.ctx.input.touch.y_regions.append(self.ctx.display.height())
@@ -252,8 +253,8 @@ class MnemonicEditor(Page):
         menu_index = None
         if self.ctx.input.buttons_active and button_index >= ESC_INDEX:
             menu_index = button_index - ESC_INDEX
-        proceed_menu(
-            self.ctx, y_region, menu_index, go_txt, esc_txt, self.valid_checksum
+        self.draw_proceed_menu(
+            go_txt, esc_txt, y_region, menu_index, self.valid_checksum
         )
 
     def edit_word(self, index):

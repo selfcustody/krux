@@ -211,7 +211,7 @@ translation_array = [
     "Dalış Hızı",
     "Politika türü",
     "Düşük entropi!",
-    "Modu değiştirmek için PAGE tuşuna basın",
+    "PAGE modunu değiştir",
     "Test QR'ını Yazdır",
     "Tiny Seed Yazdırılsın mı?",
     "QR'a Yazdır",

@@ -201,7 +201,42 @@ def test_change_brightness(bkl_control_devices, mocker):
         else len(BTN_SEQUENCE_WONDER_MV)
     )
     assert ctx.input.wait_for_button.call_count == len_sequence
+    assert ctx.display.to_landscape.call_count == 0
+    assert ctx.display.to_portrait.call_count == 0
     assert Settings().hardware.display.brightness == str(previous_brightness + 1)
+
+
+def test_change_flipped_orientation(wonder_mv, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.krux_settings import Settings
+
+    BTN_SEQUENCE = [
+        *([BUTTON_PAGE] * 2),  # Move to "Hardware"
+        BUTTON_ENTER,  # Confirm
+        BUTTON_PAGE,  # Move to "Display"
+        BUTTON_ENTER,  # Confirm
+        BUTTON_PAGE,  # Move to "Flipped Orientation"
+        BUTTON_ENTER,  # Confirm
+        BUTTON_PAGE,  # Change val
+        BUTTON_ENTER,  # Confirm
+        BUTTON_PAGE,  # Move to "Back"
+        BUTTON_ENTER,  # Confirm exit Display
+        *([BUTTON_PAGE_PREV] * 2),  # Move to "Back"
+        BUTTON_ENTER,  # Confirm exit Hardware
+        *([BUTTON_PAGE_PREV] * 3),  # Move to "Back"
+        BUTTON_ENTER,  # Confirm exit Settings
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    settings_page = SettingsPage(ctx)
+    previous_val = Settings().hardware.display.flipped_orientation
+    settings_page.settings()
+
+    assert Settings().hardware.display.brightness != previous_val
+    assert ctx.display.to_landscape.call_count > 0
+    assert ctx.display.to_portrait.call_count > 0
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
@@ -371,6 +406,42 @@ def test_change_display_type_on_amigo(amigo, mocker):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     # assert Settings().hardware.display.bgr_type == "RGB"
+
+
+def test_change_display_lcd_on_amigo(amigo, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+
+    BTN_SEQUENCE = [
+        *([BUTTON_PAGE] * 2),  # Move to "Hardware"
+        BUTTON_ENTER,  # Enter "Hardware"
+        BUTTON_PAGE,  # Change to "Display"
+        BUTTON_ENTER,  # Enter "Display"
+        *([BUTTON_PAGE] * 3),  # Go to "LCD Type"
+        BUTTON_ENTER,  # Enter LCD
+        BUTTON_PAGE,  # Change val
+        BUTTON_ENTER,  # Confirm "Warning" msg
+        BUTTON_ENTER,  # Confirm cancel and reboot - will throw error
+        BUTTON_ENTER,  # Confirm error msg - errors are displayed on screen
+        # We need to exit menu because it will not reboot as is not the device error is caught
+        BUTTON_PAGE,  # Move to "Back"
+        BUTTON_ENTER,  # Confirm "Back" from display
+        *([BUTTON_PAGE_PREV] * 2),  # Move to "Back"
+        BUTTON_ENTER,  # Confirm "Back" from hardware
+        *([BUTTON_PAGE_PREV] * 3),  # Move to "Back"
+        BUTTON_ENTER,  # Confirm "Back" from settings
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    settings_page = SettingsPage(ctx)
+    settings_page.ctx.power_manager.reboot = mocker.MagicMock(
+        side_effect=ValueError("Reboot")
+    )
+    settings_page.settings()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.power_manager.reboot.assert_called()
 
 
 def test_encryption_pbkdf2_setting(m5stickv, mocker):

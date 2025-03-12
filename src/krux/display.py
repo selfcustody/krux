@@ -25,19 +25,17 @@ import time
 from .themes import theme
 from .krux_settings import Settings
 from .settings import THIN_SPACE
+from .kboard import kboard
 
 DEFAULT_PADDING = 10
 MINIMAL_PADDING = 5
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 FONT_WIDTH_WIDE, FONT_HEIGHT_WIDE = board.config["krux"]["display"]["font_wide"]
-PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
-QR_DARK_COLOR, QR_LIGHT_COLOR = (
-    [16904, 61307] if board.config["type"] == "m5stickv" else [0, 6342]
-)
+PORTRAIT, LANDSCAPE = [2, 3] if kboard.is_cube else [1, 2]
+QR_DARK_COLOR, QR_LIGHT_COLOR = [16904, 61307] if kboard.is_m5stickv else [0, 6342]
 TOTAL_LINES = board.config["lcd"]["width"] // FONT_HEIGHT
 BOTTOM_LINE = (TOTAL_LINES - 1) * FONT_HEIGHT
-MINIMAL_DISPLAY = board.config["type"] in ("m5stickv", "cube")
-if MINIMAL_DISPLAY:
+if kboard.has_minimal_display:
     BOTTOM_PROMPT_LINE = BOTTOM_LINE - DEFAULT_PADDING
 else:
     # room left for no/yes buttons
@@ -45,7 +43,7 @@ else:
 
 # Status bar dimensions
 STATUS_BAR_HEIGHT = (
-    FONT_HEIGHT + 1 if MINIMAL_DISPLAY else FONT_HEIGHT + MINIMAL_PADDING
+    FONT_HEIGHT + 1 if kboard.has_minimal_display else FONT_HEIGHT + MINIMAL_PADDING
 )
 
 FLASH_MSG_TIME = 2000
@@ -74,14 +72,14 @@ class Display:
 
     def __init__(self):
         self.portrait = False
-        if board.config["type"] == "amigo":
+        if kboard.is_amigo:
             self.flipped_x_coordinates = (
                 Settings().hardware.display.flipped_x_coordinates
             )
         else:
             self.flipped_x_coordinates = False
         self.blk_ctrl = None
-        if "BACKLIGHT" in board.config["krux"]["pins"]:
+        if kboard.has_backlight:
             self.gpio_backlight_ctrl(Settings().hardware.display.brightness)
 
     def initialize_lcd(self):
@@ -139,7 +137,7 @@ class Display:
                 ],
             )
             self.set_pmu_backlight(Settings().hardware.display.brightness)
-        elif board.config["type"] in ["yahboom", "wonder_mv"]:
+        elif kboard.is_yahboom or kboard.is_wonder_mv:
             lcd.init(
                 invert=True,
                 rst=board.config["lcd"]["rst"],
@@ -147,12 +145,12 @@ class Display:
                 ss=board.config["lcd"]["ss"],
                 clk=board.config["lcd"]["clk"],
             )
-        elif board.config["type"] == "cube":
+        elif kboard.is_cube:
             lcd.init(
                 invert=True,
                 offset_h0=80,
             )
-        elif board.config["type"] == "amigo":
+        elif kboard.is_amigo:
             lcd_type = Settings().hardware.display.lcd_type
             invert = Settings().hardware.display.inverted_colors
             bgr_to_rgb = Settings().hardware.display.bgr_colors
@@ -180,7 +178,7 @@ class Display:
                 enable=True,
             )
         # Calculate duty cycle
-        if board.config["type"] == "cube":
+        if kboard.is_cube:
             # Ranges from 80% to 0% duty cycle
             # 100 is 0% duty cycle (off, not used here)
             pwm_value = 5 - int(brightness)
@@ -192,7 +190,7 @@ class Display:
 
     def qr_offset(self):
         """Retuns y offset to subtitle QR codes"""
-        if board.config["type"] == "cube":
+        if kboard.is_cube:
             return BOTTOM_LINE
         return self.width() + MINIMAL_PADDING
 
@@ -494,31 +492,30 @@ class Display:
 
     def render_image(self, img, title_lines=0, double_subtitle=False):
         """Renders the image based on the board type."""
-        board_type = board.config["type"]
 
         # Initialize offset and region components
         offset_x, offset_y = 0, 0
         region_x, region_y, region_w, region_h = 8, 0, 304, 240
 
-        if board_type == "amigo":
+        if kboard.is_amigo:
             offset_x = 40 if self.flipped_x_coordinates else 120
             offset_y = 40
             region_x, region_y, region_w, region_h = 0, 0, 320, 240
-        elif board_type == "m5stickv":
+        elif kboard.is_m5stickv:
             # Apply lens correction and update img reference
             img = img.lens_corr(strength=1.0, zoom=0.56)
             region_x, region_y, region_w, region_h = 68, 52, 185, 135
-        elif board_type == "cube":
+        elif kboard.is_cube:
             region_x, region_y, region_w, region_h = 48, 0, 224, 240
 
         # Adjust for title if needed for boards with height < 320px
-        if title_lines and board_type != "amigo":
+        if title_lines and not kboard.is_amigo:
             message_height = DEFAULT_PADDING + FONT_HEIGHT * title_lines
             offset_x += message_height
             region_x += message_height
             region_w -= message_height
             # Adjust bottom padding for double subtitle
-            if double_subtitle and board_type != "m5stickv":
+            if double_subtitle and not kboard.is_m5stickv:
                 # Extra cut on Cube to fit progress bar
                 # and entropy measurement on flash filling
                 region_w -= FONT_HEIGHT

@@ -75,7 +75,14 @@ class Login(Page):
                 ctx,
                 [
                     (t("Load Mnemonic"), self.load_key),
-                    (t("New Mnemonic"), self.new_key),
+                    (
+                        t("New Mnemonic"),
+                        (
+                            self.new_key
+                            if not Settings().security.hide_mnemonic
+                            else None
+                        ),
+                    ),
                     (t("Settings"), self.settings),
                     (t("Tools"), self.tools),
                     (t("About"), self.about),

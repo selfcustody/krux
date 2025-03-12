@@ -34,8 +34,8 @@ from ...display import (
     FONT_HEIGHT,
     TOTAL_LINES,
     BOTTOM_PROMPT_LINE,
-    MINIMAL_DISPLAY,
 )
+from ...kboard import kboard
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
@@ -165,7 +165,7 @@ class DiceEntropy(Page):
             offset_x += bar_pad
 
         # Draw Shannon's entropy below the graph
-        suffix = " bits" if not MINIMAL_DISPLAY else "b"
+        suffix = " bits" if not kboard.has_minimal_display else "b"
         self.ctx.display.draw_hcentered_text(
             t("Shannon's entropy:") + " " + str(shannon_entropy) + suffix,
             offset_y + FONT_HEIGHT,

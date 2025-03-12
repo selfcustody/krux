@@ -211,7 +211,7 @@ translation_array = [
     "Duik tarief",
     "Type beleid",
     "Slechte entropie!",
-    "Druk op PAGINA om de modus te wisselen",
+    "PAGINA om de modus te wisselen",
     "Test QR afdrukken",
     "Tiny Seed afdrukken?",
     "Afdrukken naar QR",
