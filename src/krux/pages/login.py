@@ -273,27 +273,8 @@ class Login(Page):
         mnemonic = " ".join(words)
 
         if charset != LETTERS:
-            from .utils import Utils
-
-            charset_type = {
-                DIGITS: Utils.BASE_DEC,
-                DIGITS_HEX: Utils.BASE_HEX,
-                DIGITS_OCT: Utils.BASE_OCT,
-            }
-            suffix_dict = {
-                DIGITS: Utils.BASE_DEC_SUFFIX,
-                DIGITS_HEX: Utils.BASE_HEX_SUFFIX,
-                DIGITS_OCT: Utils.BASE_OCT_SUFFIX,
-            }
-            numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
-            self.display_mnemonic(
-                numbers_str,
-                suffix_dict[charset],
-                fingerprint=Key.extract_fingerprint(mnemonic),
-            )
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+            if self._confirm_key_from_digits(mnemonic, charset) is not None:
                 return MENU_CONTINUE
-            self.ctx.display.clear()
 
         # If the mnemonic is not hidden, show the mnemonic editor
         if not Settings().security.hide_mnemonic:
@@ -401,6 +382,31 @@ class Login(Page):
 
         self.ctx.wallet = Wallet(key)
         return MENU_EXIT
+
+    def _confirm_key_from_digits(self, mnemonic, charset):
+        from .utils import Utils
+
+        charset_type = {
+            DIGITS: Utils.BASE_DEC,
+            DIGITS_HEX: Utils.BASE_HEX,
+            DIGITS_OCT: Utils.BASE_OCT,
+        }
+        suffix_dict = {
+            DIGITS: Utils.BASE_DEC_SUFFIX,
+            DIGITS_HEX: Utils.BASE_HEX_SUFFIX,
+            DIGITS_OCT: Utils.BASE_OCT_SUFFIX,
+        }
+        numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
+        self.display_mnemonic(
+            numbers_str,
+            suffix_dict[charset],
+            fingerprint=Key.extract_fingerprint(mnemonic),
+        )
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+            return MENU_CONTINUE
+        self.ctx.display.clear()
+
+        return None
 
     def _encrypted_qr_code(self, data):
         from ..encryption import EncryptedQRCode
