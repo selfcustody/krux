@@ -89,7 +89,7 @@ The caveat is low values can cause issues, such as double click and unexpected m
 <img src="../../img/maixpy_m5stickv/settings-options-hardware-display-250.png" align="right" class="m5stickv">
 <img src="../../img/maixpy_amigo/settings-options-hardware-display-300.png" align="right" class="amigo">
 
-Available display settings vary based on your device’s hardware. Amigo has several options detailed below, Yahboom and WonderMV have an option for inverted orientation, others will have brightness control and Dock does not have this submenu.
+Available display settings vary based on your device. Amigo has several options detailed below, Yahboom and WonderMV have an option for flipped orientation, others will have brightness control and Dock does not have this submenu.
 
 Few Maix Amigo screens are different, here you can customize the `BGR Colors`, `Flipped X Coordinates`, `Inverted Colors` and `LCD Type`. For more info see [Troubleshooting](../troubleshooting.md/#troubleshooting-lcd-settings-on-maix-amigo)
 
