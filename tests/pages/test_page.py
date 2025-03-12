@@ -46,12 +46,16 @@ def test_flash_text(mocker, m5stickv, mock_page_cls):
 
     page.flash_text("Hello world", duration=1000)
 
-    ctx.display.flash_text.assert_called_with("Hello world", WHITE, 1000, highlight_prefix="")
+    ctx.display.flash_text.assert_called_with(
+        "Hello world", WHITE, 1000, highlight_prefix=""
+    )
 
     page.flash_error("Error")
 
     assert ctx.display.flash_text.call_count == 2
-    ctx.display.flash_text.assert_called_with("Error", RED, FLASH_MSG_TIME, highlight_prefix="")
+    ctx.display.flash_text.assert_called_with(
+        "Error", RED, FLASH_MSG_TIME, highlight_prefix=""
+    )
 
 
 def test_prompt_m5stickv(mocker, m5stickv, mock_page_cls):

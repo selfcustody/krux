@@ -810,19 +810,21 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
     # Multisig with wallet output descriptor not loaded had to show a warning
-    ctx.display.draw_centered_text.assert_has_calls([
-        mocker.call(                                           
-            "Warning: Wallet output descriptor not found.\n\nSome checks cannot be performed.",
-            highlight_prefix=":"
-        )
-    ])
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Wallet output descriptor not found.\n\nSome checks cannot be performed.",
+                highlight_prefix=":",
+            )
+        ]
+    )
 
     # These two calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
                 "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h",
-                highlight_prefix=":"
+                highlight_prefix=":",
             ),
             mocker.call(
                 "PSBT policy:\np2wsh\n2 of 3\n"
@@ -932,19 +934,21 @@ def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
 
     # Wallet output descriptor not loaded had to show a warning
     print(ctx.display.draw_centered_text.mock_calls)
-    ctx.display.draw_centered_text.assert_has_calls([
-        mocker.call(
-            "Warning: Wallet output descriptor not found.\n\nSome checks cannot be performed.",
-            highlight_prefix=':'
-        )
-    ])
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Wallet output descriptor not found.\n\nSome checks cannot be performed.",
+                highlight_prefix=":",
+            )
+        ]
+    )
 
     # These two calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
                 "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h",
-                highlight_prefix=":"
+                highlight_prefix=":",
             ),
             mocker.call(
                 "PSBT policy:\np2tr"
@@ -1176,12 +1180,11 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
         [
             mocker.call(
                 "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
-                highlight_prefix=":"
+                highlight_prefix=":",
             ),
             mocker.call("Processing.."),
             mocker.call(
-                "Warning: High fees!\n799.7% of the amount.",
-                highlight_prefix=":"
+                "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
             ),
         ]
     )
@@ -1230,10 +1233,12 @@ def test_sign_self(mocker, m5stickv, tdata):
         [
             mocker.call(
                 "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
-                highlight_prefix=":"
+                highlight_prefix=":",
             ),
             mocker.call("Processing.."),
-            mocker.call("Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"),
+            mocker.call(
+                "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
+            ),
         ]
     )
 
@@ -1282,9 +1287,11 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
         [
             mocker.call(
                 "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
-                highlight_prefix=':'
+                highlight_prefix=":",
             ),
             mocker.call("Processing.."),
-            mocker.call("Warning: High fees!\n235.9% of the amount.", highlight_prefix=':'),
+            mocker.call(
+                "Warning: High fees!\n235.9% of the amount.", highlight_prefix=":"
+            ),
         ]
     )

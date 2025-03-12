@@ -143,7 +143,12 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
     storage_ui.encrypt_menu()
 
     ctx.display.draw_centered_text.assert_has_calls(
-        [mocker.call("Encrypted mnemonic stored with ID: " + ENCRYPTED_QR_TITLE_CBC, highlight_prefix=':')],
+        [
+            mocker.call(
+                "Encrypted mnemonic stored with ID: " + ENCRYPTED_QR_TITLE_CBC,
+                highlight_prefix=":",
+            )
+        ],
         any_order=True,
     )
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

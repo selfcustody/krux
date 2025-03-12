@@ -196,7 +196,7 @@ def test_poor_variance(amigo, mocker):
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
         ENTROPY_MESSAGE_STR % (shannon_value, total_shannon, variance),
-        highlight_prefix=":"
+        highlight_prefix=":",
     )
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
@@ -254,7 +254,7 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
         ENTROPY_MESSAGE_STR % (shannon_value, total_shannon, variance),
-        highlight_prefix=":"
+        highlight_prefix=":",
     )
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
