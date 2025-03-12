@@ -113,7 +113,10 @@ class EncryptionKey(Page):
                 offset_y += 2 * FONT_HEIGHT
                 color = theme.error_color if strength == t("Weak") else theme.fg_color
                 self.ctx.display.draw_hcentered_text(
-                    "{}: {}".format(t("Strength"), strength), offset_y, color, highlight_prefix=":"
+                    "{}: {}".format(t("Strength"), strength),
+                    offset_y,
+                    color,
+                    highlight_prefix=":",
                 )
 
             if self.prompt(
