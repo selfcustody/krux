@@ -234,10 +234,10 @@ def test_keypad_esc_no_exit(mocker, amigo):
 def test_keypad_swipe_hint_is_shown_after_more_keypress_and_cleared_after_other_keypress(
     mocker, amigo, mock_page_cls
 ):
-    from krux.pages import SWIPE_SYMBOL
+    from krux.pages import SWIPE_L_CHAR, SWIPE_R_CHAR
 
     initial_txt = "title"
-    swipe_txt = SWIPE_SYMBOL + " swipe " + SWIPE_SYMBOL
+    swipe_txt = SWIPE_L_CHAR + " swipe " + SWIPE_R_CHAR
     frame_titles = get_frame_titles_resulting_from_input(
         mocker,
         mock_page_cls,
@@ -255,10 +255,10 @@ def test_keypad_swipe_hint_is_shown_after_more_keypress_and_cleared_after_other_
 def test_keypad_swipe_hint_is_not_shown_once_user_has_swiped(
     mocker, amigo, mock_page_cls
 ):
-    from krux.pages import SWIPE_SYMBOL
+    from krux.pages import SWIPE_L_CHAR, SWIPE_R_CHAR
 
     initial_txt = "title"
-    swipe_txt = SWIPE_SYMBOL + " swipe " + SWIPE_SYMBOL
+    swipe_txt = SWIPE_L_CHAR + " swipe " + SWIPE_R_CHAR
     frame_titles = get_frame_titles_resulting_from_input(
         mocker,
         mock_page_cls,
@@ -276,10 +276,10 @@ def test_keypad_swipe_hint_is_not_shown_once_user_has_swiped(
 def test_keypad_swipe_hint_is_not_shown_on_nontouch_device(
     mocker, amigo, mock_page_cls
 ):
-    from krux.pages import SWIPE_SYMBOL
+    from krux.pages import SWIPE_L_CHAR, SWIPE_R_CHAR
 
     initial_txt = "title"
-    swipe_txt = SWIPE_SYMBOL + " swipe " + SWIPE_SYMBOL
+    swipe_txt = SWIPE_L_CHAR + " swipe " + SWIPE_R_CHAR
 
     # first check we get a hint if we have a touchscreen
     frame_titles = get_frame_titles_resulting_from_input(

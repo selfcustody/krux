@@ -78,7 +78,8 @@ LOAD_FROM_SD = 1
 
 EXTRA_MNEMONIC_LENGTH_FLAG = 48
 
-SWIPE_SYMBOL = "»"
+SWIPE_R_CHAR = "»"
+SWIPE_L_CHAR = "«"
 
 
 class Page:
@@ -214,7 +215,7 @@ class Page:
 
     def _print_keypad_header(self, title, show_swipe_hint, buffer, buffer_title):
         big_title = len(self.ctx.display.to_lines(title)) > 1
-        swipe_hint = SWIPE_SYMBOL + " " + t("swipe") + " " + SWIPE_SYMBOL
+        swipe_hint = SWIPE_L_CHAR + " " + t("swipe") + " " + SWIPE_R_CHAR
         offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
         if buffer_title:
             self.ctx.display.draw_hcentered_text(buffer_title, offset_y)
