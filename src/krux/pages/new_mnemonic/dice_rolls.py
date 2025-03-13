@@ -296,7 +296,9 @@ class DiceEntropy(Page):
                             warning_txt += t("Pattern detected!")
                         if warning_txt:
                             self.ctx.display.clear()
-                            self.ctx.display.draw_centered_text(warning_txt)
+                            self.ctx.display.draw_centered_text(
+                                warning_txt, theme.error_color
+                            )
                             if self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
                                 break
                         else:
@@ -312,7 +314,7 @@ class DiceEntropy(Page):
                 rolls_str, info_box=True, max_lines=max_lines
             )
             self.ctx.display.draw_hcentered_text(
-                t("Rolls:"), color=theme.highlight_color, info_box=True
+                t("Rolls:"), color=theme.highlight_color, bg_color=theme.info_bg_color
             )
             menu_offset *= FONT_HEIGHT
             menu_offset += DEFAULT_PADDING

@@ -87,7 +87,9 @@ class PassphraseEditor(Page):
             from ..themes import theme
 
             self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text("\n" + passphrase)
+            self.ctx.display.draw_hcentered_text(
+                passphrase, offset_y=DEFAULT_PADDING + FONT_HEIGHT
+            )
             self.ctx.display.draw_hcentered_text(
                 t("Passphrase") + ":", color=theme.highlight_color
             )

@@ -88,7 +88,7 @@ class PubkeyView(Page):
                 self.ctx.wallet.key.fingerprint_hex_str(pretty=True),
                 offset_y=FONT_HEIGHT,
                 color=theme.highlight_color,
-                info_box=True,
+                bg_color=theme.info_bg_color,
             )
             pub_key_menu.run_loop()
 

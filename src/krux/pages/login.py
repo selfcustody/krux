@@ -353,7 +353,7 @@ class Login(Page):
             self.ctx.display.draw_hcentered_text(
                 key.fingerprint_hex_str(True),
                 color=theme.highlight_color,
-                info_box=True,
+                bg_color=theme.info_bg_color,
             )
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
