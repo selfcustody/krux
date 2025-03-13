@@ -357,14 +357,14 @@ class SettingsPage(Page):
                     DEFAULT_PADDING,
                     t("Right"),
                 )
-            self.ctx.display.draw_centered_text(
-                "\n" + str(current_category),
+            lines = self.ctx.display.draw_centered_text(
+                "\n\n" + str(current_category),
                 color,
                 theme.bg_color,
             )
             # Print title highlighted
             self.ctx.display.draw_centered_text(
-                settings_namespace.label(setting.attr) + "\n\n",
+                settings_namespace.label(setting.attr) + "\n" + (lines) * "\n",
                 theme.highlight_color,
                 theme.bg_color,
             )
