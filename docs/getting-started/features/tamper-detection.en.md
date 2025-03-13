@@ -65,7 +65,9 @@ Any change in the flash content results in a different image and words:
 
 ### Filling Empty Flash Memory Blocks
 
-Use this to enhance tamper detection. Krux performs a memory sweep while capturing a live feed from the camera. Whenever an empty block is found in the flash memory, it uses the data from the image to fill these empty spaces with rich, random entropy. It estimates the image's entropy by evaluating its color variance waiting until a minimum threshold is met. 
+Use this to enhance tamper detection. Krux performs a memory sweep while capturing a live feed from the camera. Whenever an empty block is found in the flash memory, it uses the data from the image to fill these empty spaces when the entropy is good enough. It estimates the image's entropy by evaluating its color variance waiting until a minimum threshold is met.
+
+A progress bar is shown below, when the highlighted color appears, it means that this flash memory space is not empty and Krux will move on to the next one to fill any empty spaces. When you run it a second time, nothing will change because all the memory will be filled. You will see the progress bar move quickly, showing only the highlighted color, and a still image will be displayed on the camera during the process.
 
 ### Ensuring Tamper Detection
 
