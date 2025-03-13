@@ -200,7 +200,7 @@ translation_array = [
     "Phần",
     "Kích thước một phần",
     "Cụm mật khẩu",
-    "Độ dài mật khẩu tối thiểu:",
+    "Độ dài mật khẩu tối thiểu",
     "Đường dẫn không khớp",
     "Đã phát hiện mẫu!",
     "Xóa vĩnh viễn mọi Mnemonics và cài đặt được mã hóa lưu trữ trong flash?",
