@@ -6,7 +6,7 @@ include set_to_multisig.txt
 x2 press BUTTON_B
 x2 press BUTTON_A
 
-screenshot wallet-load-prompt.png
+#screenshot wallet-load-prompt.png
 
 #Load from QR code
 x2 press BUTTON_A

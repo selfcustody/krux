@@ -8,4 +8,4 @@ press BUTTON_A
 x5 press BUTTON_B
 press BUTTON_A
 
-screenshot delete-mnemonic.png
+#screenshot delete-mnemonic.png

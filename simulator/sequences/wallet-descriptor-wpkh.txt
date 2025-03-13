@@ -11,7 +11,7 @@ x2 press BUTTON_A
 qrcode specter-desktop-singlesig-wallet.png
 wait 0.1
 
-screenshot wallet-wpkh-load-prompt.png
+#screenshot wallet-wpkh-load-prompt.png
 
 press BUTTON_A
 
