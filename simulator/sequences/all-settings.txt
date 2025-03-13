@@ -96,8 +96,17 @@ press BUTTON_A
 
 screenshot printer-options.png
 
+# Move to driver
+x2 press BUTTON_B
+press BUTTON_A
+
+screenshot settings-printer-driver.png
+
+# set driver
+press BUTTON_A
+
 # Return to hardware
-press BUTTON_C
+press BUTTON_B
 press BUTTON_A
 
 # Move to touchscreen
@@ -138,8 +147,26 @@ press BUTTON_A
 
 screenshot security-options.png
 
+# move to TC Flash at boot
+press BUTTON_B
+press BUTTON_A
+
+screenshot settings-tc-boot.png
+
+# set val
+press BUTTON_A
+
+# move to hide mnemonic
+press BUTTON_B
+press BUTTON_A
+
+screenshot settings-hide-mnemonic.png
+
+# set val
+press BUTTON_A
+
 # Navigate to Tamper Check Code
-x3 press BUTTON_B
+press BUTTON_B
 press BUTTON_A
 
 screenshot tamper_check_settings.png
