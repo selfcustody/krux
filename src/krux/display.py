@@ -248,6 +248,8 @@ class Display:
         """Takes a string of text and converts it to lines to display on
         the screen
         """
+        if isinstance(text, list):
+            return text
         lines = []
         start = 0
         line_count = 0
@@ -365,9 +367,6 @@ class Display:
             x = max(0, x)
         lcd.draw_string(x, y, text, color, bg_color)
 
-    def _get_text_lines(self, text, max_lines=None):
-        return text if isinstance(text, list) else self.to_lines(text, max_lines)
-
     def draw_hcentered_text(
         self,
         text,
@@ -379,7 +378,7 @@ class Display:
         highlight_prefix="",
     ) -> int:
         """Draws text horizontally-centered on the display, at the given offset_y"""
-        lines = self._get_text_lines(text, max_lines)
+        lines = self.to_lines(text, max_lines)
         if info_box:
             bg_color = theme.info_bg_color
             padding = (
@@ -450,7 +449,7 @@ class Display:
         self, text, color=theme.fg_color, bg_color=theme.bg_color, highlight_prefix=""
     ):
         """Draws text horizontally and vertically centered on the display"""
-        lines = self._get_text_lines(text)
+        lines = self.to_lines(text)
         lines_height = len(lines) * FONT_HEIGHT
         offset_y = max(0, (self.height() - lines_height) // 2)
         return self.draw_hcentered_text(
