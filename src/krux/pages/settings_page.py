@@ -364,7 +364,7 @@ class SettingsPage(Page):
             )
             # Print title highlighted
             self.ctx.display.draw_centered_text(
-                settings_namespace.label(setting.attr) + "\n" + (lines) * "\n",
+                settings_namespace.label(setting.attr) + (lines + 1) * "\n",
                 theme.highlight_color,
                 theme.bg_color,
             )

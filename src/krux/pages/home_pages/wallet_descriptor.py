@@ -38,7 +38,6 @@ from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...sd_card import (
     DESCRIPTOR_FILE_EXTENSION,
     JSON_FILE_EXTENSION,
-    PUBKEY_FILE_EXTENSION,
 )
 from ...themes import theme
 from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
@@ -112,7 +111,6 @@ class WalletDescriptor(Page):
                     (
                         DESCRIPTOR_FILE_EXTENSION,
                         JSON_FILE_EXTENSION,
-                        PUBKEY_FILE_EXTENSION,
                     ),
                     prompt=False,
                 )
