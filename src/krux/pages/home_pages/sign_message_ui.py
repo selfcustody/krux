@@ -236,7 +236,7 @@ class SignMessage(Utils):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
             "SHA256:\n\n%s" % binascii.hexlify(message_hash).decode(),
-            highlight_prefix="SHA256:",
+            highlight_prefix=":",
         )
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return ""
