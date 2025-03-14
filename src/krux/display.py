@@ -445,13 +445,19 @@ class Display:
 
         return len(lines)  # return number of lines drawn
 
+    def get_center_offset_y(self, lines_qtd):
+        """Return the ammount of offset_y to be at center"""
+        return max(0, (self.height() - lines_qtd * FONT_HEIGHT) // 2)
+
     def draw_centered_text(
         self, text, color=theme.fg_color, bg_color=theme.bg_color, highlight_prefix=""
     ):
         """Draws text horizontally and vertically centered on the display"""
         lines = self.to_lines(text)
-        lines_height = len(lines) * FONT_HEIGHT
-        offset_y = max(0, (self.height() - lines_height) // 2)
+        offset_y = self.get_center_offset_y(len(lines))
+
+        if highlight_prefix == "":
+            text = lines
         return self.draw_hcentered_text(
             text, offset_y, color, bg_color, highlight_prefix=highlight_prefix
         )

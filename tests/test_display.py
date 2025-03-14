@@ -665,7 +665,7 @@ def test_draw_centered_text(mocker, m5stickv):
     d.draw_centered_text("Hello world", krux.display.lcd.WHITE, 0)
 
     d.draw_hcentered_text.assert_called_with(
-        "Hello world", 113, krux.display.lcd.WHITE, 0, highlight_prefix=""
+        ["Hello world"], 113, krux.display.lcd.WHITE, 0, highlight_prefix=""
     )
 
 
