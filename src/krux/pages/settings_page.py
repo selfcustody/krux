@@ -66,6 +66,8 @@ DISPLAY_TEST_TIME = 5000  # 5 seconds
 CATEGORY_SETTING_COLOR_DICT = {
     MAIN_TXT: ORANGE,
     TEST_TXT: GREEN,
+    True: theme.go_color,
+    False: theme.no_esc_color,
 }
 
 
@@ -355,8 +357,20 @@ class SettingsPage(Page):
                     DEFAULT_PADDING,
                     t("Right"),
                 )
-            self.ctx.display.draw_centered_text(
-                settings_namespace.label(setting.attr) + "\n" + str(current_category),
+            title = self.ctx.display.to_lines(settings_namespace.label(setting.attr))
+            title_lines = len(title) + 1
+            offset_y = self.ctx.display.get_center_offset_y(title_lines + 2)
+            # Print title highlighted
+            self.ctx.display.draw_hcentered_text(
+                title,
+                offset_y,
+                theme.highlight_color,
+                theme.bg_color,
+            )
+            # Print value
+            self.ctx.display.draw_hcentered_text(
+                str(current_category),
+                offset_y + title_lines * FONT_HEIGHT,
                 color,
                 theme.bg_color,
             )

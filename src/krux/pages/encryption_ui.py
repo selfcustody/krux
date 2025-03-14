@@ -106,14 +106,17 @@ class EncryptionKey(Page):
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
             self.ctx.display.draw_hcentered_text(
-                "{}: {}".format(t("Key"), key), offset_y
+                "{}: {}".format(t("Key"), key), offset_y, highlight_prefix=":"
             )
             if creating:
                 strength = self.key_strength(key)
                 offset_y += 2 * FONT_HEIGHT
                 color = theme.error_color if strength == t("Weak") else theme.fg_color
                 self.ctx.display.draw_hcentered_text(
-                    "{}: {}".format(t("Strength"), strength), offset_y, color
+                    "{}: {}".format(t("Strength"), strength),
+                    offset_y,
+                    color,
+                    highlight_prefix=":",
                 )
 
             if self.prompt(
@@ -205,10 +208,8 @@ class EncryptMnemonic(Page):
 
         mnemonic_id = None
         self.ctx.display.clear()
-        if self.prompt(
-            t(
-                "Give this mnemonic a custom ID? Otherwise current fingerprint will be used"
-            ),
+        if not self.prompt(
+            t("Use fingerprint as ID?"),
             self.ctx.display.height() // 2,
         ):
             mnemonic_id = self.capture_from_keypad(
@@ -244,7 +245,8 @@ class EncryptMnemonic(Page):
         if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, i_vector):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Encrypted mnemonic was stored with ID:") + " " + mnemonic_id
+                t("Encrypted mnemonic stored with ID:") + " " + mnemonic_id,
+                highlight_prefix=":",
             )
         else:
             self.ctx.display.clear()

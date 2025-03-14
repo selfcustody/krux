@@ -175,6 +175,10 @@ screenshot tamper_check_settings.png
 press BUTTON_B
 press_amigo_only BUTTON_A
 
+# Return to settings
+press BUTTON_B
+press BUTTON_A
+
 # Navigate to Appearance
 press BUTTON_B
 press BUTTON_A

@@ -753,6 +753,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
         SIGNED_FILE_SUFFIX,
     )
     from krux.settings import THIN_SPACE
+    from krux.key import FINGERPRINT_SYMBOL
 
     PSBT_FILE_NAME = "test.psbt"
     SIGNED_PSBT_FILE_NAME = "test-signed.psbt"
@@ -809,22 +810,31 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
     # Multisig with wallet output descriptor not loaded had to show a warning
-    ctx.display.draw_centered_text.assert_any_call(
-        "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Wallet output descriptor not found.\n\nSome checks cannot be performed.",
+                highlight_prefix=":",
+            )
+        ]
     )
 
     # These two calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h"
+                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h",
+                highlight_prefix=":",
             ),
             mocker.call(
-                "PSBT policy:\np2wsh\n2 of 3\n⊚"
+                "PSBT policy:\np2wsh\n2 of 3\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
-                + "26bb83c4\n⊚"
+                + "26bb83c4\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
-                + "0208cb77\n⊚"
+                + "0208cb77\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "73c5da0a"
             ),
@@ -851,7 +861,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
 def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.key import Key, NETWORKS, TYPE_MINISCRIPT, P2TR
+    from krux.key import Key, NETWORKS, TYPE_MINISCRIPT, P2TR, FINGERPRINT_SYMBOL
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.sd_card import (
         PSBT_FILE_EXTENSION,
@@ -923,22 +933,31 @@ def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
     # Wallet output descriptor not loaded had to show a warning
-    ctx.display.draw_centered_text.assert_any_call(
-        "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+    print(ctx.display.draw_centered_text.mock_calls)
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Wallet output descriptor not found.\n\nSome checks cannot be performed.",
+                highlight_prefix=":",
+            )
+        ]
     )
 
     # These two calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h"
+                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h",
+                highlight_prefix=":",
             ),
             mocker.call(
                 "PSBT policy:\np2tr"
-                + "\n⊚"
+                + "\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "02e8bff2"
-                + "\n⊚"
+                + "\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "73c5da0a"
             ),
@@ -1160,10 +1179,13 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
+                highlight_prefix=":",
             ),
             mocker.call("Processing.."),
-            mocker.call("Warning: High fees!\n799.7% of the amount."),
+            mocker.call(
+                "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
+            ),
         ]
     )
 
@@ -1210,10 +1232,13 @@ def test_sign_self(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
+                highlight_prefix=":",
             ),
             mocker.call("Processing.."),
-            mocker.call("Warning: High fees!\n799.7% of the amount."),
+            mocker.call(
+                "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
+            ),
         ]
     )
 
@@ -1261,9 +1286,12 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
+                highlight_prefix=":",
             ),
             mocker.call("Processing.."),
-            mocker.call("Warning: High fees!\n235.9% of the amount."),
+            mocker.call(
+                "Warning: High fees!\n235.9% of the amount.", highlight_prefix=":"
+            ),
         ]
     )

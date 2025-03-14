@@ -96,7 +96,8 @@ class Tools(Page):
                     + t("Free:")
                     + " "
                     + generate_thousands_separator(sd_free_MB)
-                    + " MB"
+                    + " MB",
+                    highlight_prefix=":",
                 )
                 if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
                     from .file_manager import FileManager
@@ -154,7 +155,7 @@ class Tools(Page):
         """Handler for the 'Descriptor Addresses' menu item"""
         from .home_pages.wallet_descriptor import WalletDescriptor
         from .home_pages.addresses import Addresses
-        from krux.wallet import Wallet
+        from ..wallet import Wallet
 
         self.ctx.wallet = Wallet(None)
         menu_result = WalletDescriptor(self.ctx).wallet()

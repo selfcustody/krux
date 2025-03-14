@@ -80,6 +80,7 @@ class Bip85(Page):
         self.ctx.display.clear()
 
         from ...key import Key
+        from ...themes import theme
 
         key = Key(
             bip85_words,
@@ -94,7 +95,9 @@ class Bip85(Page):
                 fingerprint=key.fingerprint_hex_str(True),
             )
         else:
-            self.ctx.display.draw_centered_text(key.fingerprint_hex_str(True))
+            self.ctx.display.draw_centered_text(
+                key.fingerprint_hex_str(True), color=theme.highlight_color
+            )
         if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
             from ...wallet import Wallet
 
@@ -155,8 +158,8 @@ class Bip85(Page):
         password = base_encode(entropy, 64).decode().strip()
         password = password[:pwd_len]
         info = password
-        info += "\n\n" + t("Index: %s") % child_index
-        info += "\n" + t("Length: %s") % pwd_len
+        info += "\n\n" + t("Index") + ": %s" % child_index
+        info += "\n" + t("Length:") + " %s" % pwd_len
         while True:
             menu_items = [
                 (
@@ -173,7 +176,9 @@ class Bip85(Page):
                 ),
             ]
             self.ctx.display.clear()
-            info_len = self.ctx.display.draw_hcentered_text(info, info_box=True)
+            info_len = self.ctx.display.draw_hcentered_text(
+                info, info_box=True, highlight_prefix=":"
+            )
             info_len *= FONT_HEIGHT
             info_len += DEFAULT_PADDING
             submenu = Menu(

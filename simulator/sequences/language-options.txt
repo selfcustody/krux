@@ -15,7 +15,7 @@ press BUTTON_A
 x2 press BUTTON_B
 press BUTTON_A
 
-screenshot locale-options.png
+#screenshot locale-options.png
 
 # screenshot language-options-1.png
 

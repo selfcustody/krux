@@ -184,7 +184,9 @@ class SignMessage(Utils):
     def _display_signature(self, encoded_sig):
         """Helper to display the signature"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Signature") + ":\n\n%s" % encoded_sig)
+        self.ctx.display.draw_centered_text(
+            t("Signature:") + "\n\n%s" % encoded_sig, highlight_prefix=":"
+        )
         self.ctx.input.wait_for_button()
 
     def _sign_at_address_from_qr(self, data):
@@ -233,7 +235,8 @@ class SignMessage(Utils):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            "SHA256:\n%s" % binascii.hexlify(message_hash).decode()
+            "SHA256:\n\n%s" % binascii.hexlify(message_hash).decode(),
+            highlight_prefix=":",
         )
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return ""
@@ -299,9 +302,11 @@ class SignMessage(Utils):
 
     def _display_and_export_pubkey(self, pubkey, qr_format):
         """Displays and exports the public key as QR code"""
-        title = t("Hex Public Key")
+        title = t("Hex Public Key:")
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(title + ":\n\n%s" % pubkey)
+        self.ctx.display.draw_centered_text(
+            title + "\n\n%s" % pubkey, highlight_prefix=":"
+        )
         self.ctx.input.wait_for_button()
 
         self.display_qr_codes(pubkey, qr_format, title)
@@ -327,16 +332,22 @@ class SignMessage(Utils):
             file_content,
             "message",
             message_filename,
-            t("Signature") + ":",
+            t("Signature:"),
             extension,
             SIGNED_FILE_SUFFIX,
             prompt=False,
         )
 
         if not address:
-            title = t("Hex Public Key")
+            title = t("Hex Public Key:")
             save_page.save_file(
-                pubkey, "pubkey", "", title + ":", PUBKEY_FILE_EXTENSION, "", False
+                pubkey,
+                "pubkey",
+                "",
+                title + "\n\n%s" % pubkey + "\n",
+                PUBKEY_FILE_EXTENSION,
+                "",
+                False,
             )
 
     def sign_message(self):

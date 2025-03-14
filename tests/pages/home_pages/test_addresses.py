@@ -375,6 +375,7 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_PMOFN
+    from krux.settings import THIN_SPACE
 
     cases = [
         # Single-sig, loaded, No print prompt, show address nº1
@@ -409,7 +410,9 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
 
         addresses_ui.list_address_type()
 
-        addresses_ui.show_address.assert_called_with(case[3], title="0. " + case[3])
+        addresses_ui.show_address.assert_called_with(
+            case[3], title="0." + THIN_SPACE + case[3]
+        )
         assert ctx.input.wait_for_button.call_count == len(case[5])
 
 
@@ -418,6 +421,7 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_PMOFN
+    from krux.settings import THIN_SPACE
 
     cases = [
         # Single-sig, loaded, No print prompt, show address nº1
@@ -451,5 +455,7 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
 
         addresses_ui.list_address_type(1)  # Change addresses
 
-        addresses_ui.show_address.assert_called_with(case[3], title="0. " + case[3])
+        addresses_ui.show_address.assert_called_with(
+            case[3], title="0." + THIN_SPACE + case[3]
+        )
         assert ctx.input.wait_for_button.call_count == len(case[5])

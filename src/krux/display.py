@@ -248,6 +248,8 @@ class Display:
         """Takes a string of text and converts it to lines to display on
         the screen
         """
+        if isinstance(text, list):
+            return text
         lines = []
         start = 0
         line_count = 0
@@ -373,11 +375,10 @@ class Display:
         bg_color=theme.bg_color,
         info_box=False,
         max_lines=None,
+        highlight_prefix="",
     ) -> int:
         """Draws text horizontally-centered on the display, at the given offset_y"""
-        lines = (
-            text if isinstance(text, list) else self.to_lines(text, max_lines=max_lines)
-        )
+        lines = self.to_lines(text, max_lines)
         if info_box:
             bg_color = theme.info_bg_color
             padding = (
@@ -404,19 +405,69 @@ class Display:
                     color,
                     bg_color,
                 )
+                if highlight_prefix:
+                    prefix_index = line.find(highlight_prefix)
+                    if prefix_index > -1:
+                        self.draw_string(
+                            offset_x,
+                            offset_y + (i * (FONT_HEIGHT)),
+                            line[: prefix_index + len(highlight_prefix)],
+                            theme.highlight_color,
+                            bg_color,
+                        )
+
+                        # check if lines before highlight_prefix also needs to be highlighted
+                        i -= 1
+                        while i > -1:
+                            line = lines[i]
+                            prefix_index = line.find(highlight_prefix)
+                            # content may need highlight
+                            if (
+                                line
+                                and prefix_index == -1
+                                and isinstance(text, str)
+                                and text[text.find(line) + len(line)] != "\n"
+                            ):
+                                offset_x = max(
+                                    0,
+                                    (self.width() - lcd.string_width_px(line)) // 2,
+                                )
+                                self.draw_string(
+                                    offset_x,
+                                    offset_y + (i * (FONT_HEIGHT)),
+                                    line,
+                                    theme.highlight_color,
+                                    bg_color,
+                                )
+                            else:
+                                break
+                            i -= 1
+
         return len(lines)  # return number of lines drawn
 
-    def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
-        """Draws text horizontally and vertically centered on the display"""
-        lines = text if isinstance(text, list) else self.to_lines(text)
-        lines_height = len(lines) * FONT_HEIGHT
-        offset_y = max(0, (self.height() - lines_height) // 2)
-        self.draw_hcentered_text(text, offset_y, color, bg_color)
+    def get_center_offset_y(self, lines_qtd):
+        """Return the ammount of offset_y to be at center"""
+        return max(0, (self.height() - lines_qtd * FONT_HEIGHT) // 2)
 
-    def flash_text(self, text, color=theme.fg_color, duration=FLASH_MSG_TIME):
+    def draw_centered_text(
+        self, text, color=theme.fg_color, bg_color=theme.bg_color, highlight_prefix=""
+    ):
+        """Draws text horizontally and vertically centered on the display"""
+        lines = self.to_lines(text)
+        offset_y = self.get_center_offset_y(len(lines))
+
+        if highlight_prefix == "":
+            text = lines
+        return self.draw_hcentered_text(
+            text, offset_y, color, bg_color, highlight_prefix=highlight_prefix
+        )
+
+    def flash_text(
+        self, text, color=theme.fg_color, duration=FLASH_MSG_TIME, highlight_prefix=""
+    ):
         """Flashes text centered on the display for duration ms"""
         self.clear()
-        self.draw_centered_text(text, color)
+        self.draw_centered_text(text, color, highlight_prefix=highlight_prefix)
         time.sleep_ms(duration)
         self.clear()
 

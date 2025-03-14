@@ -72,7 +72,9 @@ def test_load_key_from_keypad_when_creating(m5stickv, mocker):
     key = key_generator.encryption_key(creating=True)
     assert key == "b"
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    call_message = mocker.call("Strength: Weak", 38, RED)  # 38 = y_offset
+    call_message = mocker.call(
+        "Strength: Weak", 38, RED, highlight_prefix=":"
+    )  # 38 = y_offset
 
     ctx.display.draw_hcentered_text.assert_has_calls([call_message])
 
@@ -147,11 +149,12 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
         [BUTTON_PAGE]  # Move to store on SD card
         + [BUTTON_ENTER]  # Confirm SD card
         + [BUTTON_ENTER]  # Confirm add CBC cam entropy
-        + [BUTTON_PAGE]  # add custom ID - move to no
+        + [BUTTON_ENTER]  # YES, use fingerprint as ID
         + [BUTTON_ENTER]  # Confirm encryption ID
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(CBC_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
+
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
@@ -167,7 +170,8 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Encrypted mnemonic was stored with ID: " + ENCRYPTED_QR_TITLE_CBC
+                "Encrypted mnemonic stored with ID: " + ENCRYPTED_QR_TITLE_CBC,
+                highlight_prefix=":",
             )
         ],
         any_order=True,
@@ -183,7 +187,9 @@ def test_encrypt_save_error_exist(m5stickv, mocker, mock_file_operations):
     from krux.key import Key
     from embit.networks import NETWORKS
 
-    BTN_SEQUENCE = [BUTTON_ENTER] + [BUTTON_PAGE]  # Confirm flash store  # Cancel
+    BTN_SEQUENCE = [BUTTON_ENTER] + [
+        BUTTON_ENTER
+    ]  # Confirm flash store  # Confirm fingerprint as ID
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
     storage_ui = EncryptMnemonic(ctx)
@@ -217,7 +223,7 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # Confirm flash store
-        + [BUTTON_PAGE]  # add custom ID - move to no
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         + [BUTTON_ENTER]  # Confirm encryption ID
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -252,7 +258,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
         [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
         + [BUTTON_ENTER]  # Confirm Encrypted QR
         # Key is mocked here, no press needed
-        + [BUTTON_PAGE]  # add custom ID - No
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -289,7 +295,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
         + [BUTTON_ENTER]  # Confirm Encrypted QR
         + [BUTTON_ENTER]  # Confirm to add CBC cam entropy
         # Key is mocked here, no press needed
-        + [BUTTON_PAGE]  # add custom ID - No
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)

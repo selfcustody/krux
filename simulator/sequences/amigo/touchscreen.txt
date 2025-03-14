@@ -15,4 +15,4 @@ press BUTTON_A
 x7 press BUTTON_B
 press BUTTON_A
 
-screenshot touchscreen.png
+#screenshot touchscreen.png

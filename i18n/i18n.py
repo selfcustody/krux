@@ -110,7 +110,7 @@ def validate_translation_files():
         sys.exit(1)
 
 
-def print_missing(save_to_file=False):
+def print_missing(save_to_file=False, merge_after=False):
     """
     Uses translate 3.6.1 to automatically print missing translations
     and optionally save them to files
@@ -171,6 +171,30 @@ def print_missing(save_to_file=False):
                         new_translations, filled_file, ensure_ascii=False, indent=4
                     )
                 print(f"Saved translations to {join(filled_dir, translation_filename)}")
+                if merge_after:
+                    translations.update(new_translations)
+                    with open(
+                        join(TRANSLATION_FILES_DIR, translation_filename),
+                        "w",
+                        encoding="utf8",
+                        newline="\n",
+                    ) as file:
+                        json.dump(
+                            translations,
+                            file,
+                            ensure_ascii=False,
+                            indent=4,
+                            sort_keys=True,
+                        )
+                    print(
+                        f"Saved translations to {join(TRANSLATION_FILES_DIR, translation_filename)}"
+                    )
+                    import os
+
+                    os.remove(join(filled_dir, translation_filename))
+                    print(
+                        f"Removed translation {join(filled_dir, translation_filename)}"
+                    )
         print("\n\n")
 
 
@@ -345,8 +369,28 @@ if __name__ == "__main__":
                 validate_translation_files()
             elif arg == "fill":
                 print_missing()
-            elif arg == "fill_to_files":
+            elif [
+                True
+                for text in (
+                    "fill_to_files",
+                    "fill-to-files",
+                    "fill_files",
+                    "fill-files",
+                )
+                if arg in text
+            ]:
                 print_missing(save_to_file=True)
+            elif [
+                True
+                for text in (
+                    "fill_and_merge",
+                    "fill-and-merge",
+                    "fill_merge",
+                    "fill-merge",
+                )
+                if arg in text
+            ]:
+                print_missing(save_to_file=True, merge_after=True)
             elif arg == "clean":
                 remove_unnecessary()
             elif arg == "prettify":

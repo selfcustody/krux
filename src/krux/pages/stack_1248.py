@@ -231,7 +231,7 @@ class Stackbit(Page):
                 self.x_offset + 17 * FONT_WIDTH,
                 y_offset,
                 digits_str,
-                theme.disabled_color,
+                theme.highlight_color,
             )
             self.ctx.display.draw_string(
                 self.x_offset + 17 * FONT_WIDTH,
@@ -355,7 +355,9 @@ class Stackbit(Page):
             preview_string += ": " + word
             color = theme.fg_color
         y_offset = self.y_offset + 3 * self.y_pad
-        self.ctx.display.draw_hcentered_text(preview_string, y_offset, color=color)
+        self.ctx.display.draw_hcentered_text(
+            preview_string, y_offset, color=color, highlight_prefix=":"
+        )
 
     def _map_keys_array(self):
         """Maps an array of regions for keys to be placed in"""
@@ -437,7 +439,11 @@ class Stackbit(Page):
                         digits = [0, 0, 0, 0]
                         index = 0
                         self.ctx.display.clear()
-                        if self.prompt(prompt_str, self.ctx.display.height() // 2):
+                        if self.prompt(
+                            prompt_str,
+                            self.ctx.display.height() // 2,
+                            highlight_prefix=":",
+                        ):
                             words.append(word)
                         else:
                             self.ctx.display.clear()

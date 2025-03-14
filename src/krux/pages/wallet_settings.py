@@ -83,8 +83,16 @@ class PassphraseEditor(Page):
             _, passphrase = submenu.run_loop()
             if passphrase in (ESC_KEY, MENU_EXIT):
                 return None
+
+            from ..themes import theme
+
             self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(t("Passphrase") + ": " + passphrase)
+            self.ctx.display.draw_hcentered_text(
+                passphrase, offset_y=DEFAULT_PADDING + FONT_HEIGHT
+            )
+            self.ctx.display.draw_hcentered_text(
+                t("Passphrase") + ":", color=theme.highlight_color
+            )
             if self.prompt(
                 t("Proceed?"),
                 BOTTOM_PROMPT_LINE,
@@ -360,10 +368,12 @@ class WalletSettings(Page):
                 self.ctx.display.clear()
                 if not self.prompt(
                     t("Some nodes are not hardened:")
-                    + "\n"
+                    + "\n\n"
                     + not_hardened_txt
+                    + "\n"
                     + t("Proceed?"),
                     self.ctx.display.height() // 2,
+                    highlight_prefix=":",
                 ):
                     # Allow user to edit the derivation path
                     continue

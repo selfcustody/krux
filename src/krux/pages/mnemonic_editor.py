@@ -27,6 +27,8 @@ from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCRE
 from ..krux_settings import t
 from ..themes import theme
 from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+from ..key import Key
+from ..kboard import kboard
 
 GO_INDEX = 25
 ESC_INDEX = 24
@@ -134,13 +136,26 @@ class MnemonicEditor(Page):
         from ..wallet import is_double_mnemonic
 
         header = "BIP39" + " " + t("Mnemonic")
-        if is_double_mnemonic(" ".join(self.current_mnemonic)):
+        mnemonic = " ".join(self.current_mnemonic)
+        fingerprint = ""
+        if is_double_mnemonic(mnemonic):
             header += "*"
+        if self.valid_checksum:
+            fingerprint = Key.extract_fingerprint(mnemonic)
+            if fingerprint:
+                fingerprint = "\n" + fingerprint
+                header += fingerprint
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header, MINIMAL_PADDING)
+        if fingerprint:
+            self.ctx.display.draw_hcentered_text(
+                fingerprint, MINIMAL_PADDING, theme.highlight_color
+            )
         self.header_offset = MINIMAL_PADDING * 2 + (
             len(self.ctx.display.to_lines(header)) * FONT_HEIGHT
         )
+        if kboard.has_minimal_display:
+            self.header_offset -= MINIMAL_PADDING
 
     def _map_words(self, button_index=0, page=0):
         """Map words to the screen"""
@@ -251,8 +266,6 @@ class MnemonicEditor(Page):
             self.compute_search_ranges()
             # if new and last word, lead input to a valid mnemonic
             if self.new_mnemonic and index == self.mnemonic_length - 1:
-                from ..key import Key
-
                 final_words = Key.get_final_word_candidates(self.current_mnemonic[:-1])
                 word = self.capture_from_keypad(
                     t("Word %d") % (index + 1),

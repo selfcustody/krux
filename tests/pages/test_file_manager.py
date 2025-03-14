@@ -23,6 +23,8 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
     from krux.pages.file_manager import FileManager
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     import time
+    from krux.display import DEFAULT_PADDING
+    from krux.themes import theme
 
     BTN_SEQUENCE = (
         [BUTTON_PAGE]  # move to second entry, last directory
@@ -58,8 +60,22 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "file2_has_a_long_name\n\nSize: 1.1 KB\n\nCreated: 1970-01-01 00:00\n\nModified: 1970-01-01 00:00"
-            )
+                "file2_has_a_long_name\n\nSize: 1.1 KB",
+                DEFAULT_PADDING,
+                highlight_prefix=":",
+            ),
+            mocker.call(
+                "Created:",
+                38,
+                color=theme.highlight_color,
+            ),
+            mocker.call("1970-01-01 00:00\n\n", 52),
+            mocker.call(
+                "Modified:",
+                66,
+                color=theme.highlight_color,
+            ),
+            mocker.call("1970-01-01 00:00", 80),
         ]
     )
 
@@ -69,6 +85,8 @@ def test_file_load(m5stickv, mocker, mock_file_operations):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.sd_card import DESCRIPTOR_FILE_EXTENSION
     import time
+    from krux.display import DEFAULT_PADDING
+    from krux.themes import theme
 
     BTN_SEQUENCE = (
         [BUTTON_PAGE]  # move to second entry, last directory
@@ -120,8 +138,22 @@ def test_file_load(m5stickv, mocker, mock_file_operations):
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "file2_has_a_long_name.txt\n\nSize: 1.1 KB\n\nCreated: 1970-01-01 00:00\n\nModified: 1970-01-01 00:00"
-            )
+                "file2_has_a_long_name.txt\n\nSize: 1.1 KB",
+                DEFAULT_PADDING,
+                highlight_prefix=":",
+            ),
+            mocker.call(
+                "Created:",
+                38,
+                color=theme.highlight_color,
+            ),
+            mocker.call("1970-01-01 00:00\n\n", 52),
+            mocker.call(
+                "Modified:",
+                66,
+                color=theme.highlight_color,
+            ),
+            mocker.call("1970-01-01 00:00", 80),
         ]
     )
 
@@ -131,6 +163,8 @@ def test_file_load_cancel(m5stickv, mocker, mock_file_operations):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.sd_card import DESCRIPTOR_FILE_EXTENSION
     import time
+    from krux.display import DEFAULT_PADDING
+    from krux.themes import theme
 
     BTN_SEQUENCE = (
         [BUTTON_PAGE]  # move to second entry, last directory
@@ -185,8 +219,22 @@ def test_file_load_cancel(m5stickv, mocker, mock_file_operations):
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "file2_has_a_long_name.txt\n\nSize: 1.1 KB\n\nCreated: 1970-01-01 00:00\n\nModified: 1970-01-01 00:00"
-            )
+                "file2_has_a_long_name.txt\n\nSize: 1.1 KB",
+                DEFAULT_PADDING,
+                highlight_prefix=":",
+            ),
+            mocker.call(
+                "Created:",
+                38,
+                color=theme.highlight_color,
+            ),
+            mocker.call("1970-01-01 00:00\n\n", 52),
+            mocker.call(
+                "Modified:",
+                66,
+                color=theme.highlight_color,
+            ),
+            mocker.call("1970-01-01 00:00", 80),
         ]
     )
 

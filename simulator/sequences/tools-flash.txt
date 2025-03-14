@@ -17,7 +17,7 @@ press BUTTON_A
 # remember to uncomment lines on flash_tools.py
 wait 5
 
-screenshot flash-map.png
+#screenshot flash-map.png
 
 # Back
 press BUTTON_A
