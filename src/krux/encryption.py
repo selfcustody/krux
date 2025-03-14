@@ -29,7 +29,7 @@ import ucryptolib
 from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
 from .krux_settings import Settings, PBKDF2_HMAC_ECB, PBKDF2_HMAC_CBC
-from embit.wordlists.bip39 import WORDLIST
+from embit import bip39
 
 
 MNEMONICS_FILE = "seeds.json"
@@ -60,7 +60,7 @@ class AESCipher:
         )
 
     def encrypt(self, raw, mode=ucryptolib.MODE_ECB, i_vector=None):
-        """Encrypt using AES-ECB or AES-CBC and return the value encoded as base64"""
+        """Encrypt using AES-ECB or AES-CBC and return the value as bytes"""
         data_bytes = raw.encode("latin-1") if isinstance(raw, str) else raw
         if i_vector:
             encryptor = ucryptolib.aes(self.key, mode, i_vector)
@@ -71,23 +71,15 @@ class AESCipher:
         )
         if i_vector:
             encrypted = i_vector + encrypted
-        return base_encode(encrypted, 64)
+        return encrypted
 
-    def decrypt(self, encrypted, mode, i_vector=None):
-        """Decrypt bytes and return the value decoded as string"""
-        if i_vector:
-            decryptor = ucryptolib.aes(self.key, mode, i_vector)
-        else:
-            decryptor = ucryptolib.aes(self.key, mode)
-        load = decryptor.decrypt(encrypted).decode("utf-8")
-        return load.replace("\x00", "")
-
-    def decrypt_bytes(self, encrypted, mode, i_vector=None):
+    def decrypt(self, encrypted, mode):
         """Decrypt and return value as bytes"""
-        if i_vector:
-            decryptor = ucryptolib.aes(self.key, mode, i_vector)
-        else:
+        if mode == ucryptolib.MODE_ECB:
             decryptor = ucryptolib.aes(self.key, mode)
+        else:
+            decryptor = ucryptolib.aes(self.key, mode, encrypted[:AES_BLOCK_SIZE])
+            encrypted = encrypted[AES_BLOCK_SIZE:]
         return decryptor.decrypt(encrypted)
 
 
@@ -131,21 +123,17 @@ class MnemonicStorage:
             return None
         data = base_decode(encrypted_data, 64)
         mode = VERSION_MODE[version]
-        if mode == ucryptolib.MODE_ECB:
-            encrypted_mnemonic = data
-            i_vector = None
-        else:
-            encrypted_mnemonic = data[AES_BLOCK_SIZE:]
-            i_vector = data[:AES_BLOCK_SIZE]
         decryptor = AESCipher(key, mnemonic_id, iterations)
-        words = decryptor.decrypt(encrypted_mnemonic, mode, i_vector)
+        decrypted = decryptor.decrypt(data, mode)
+        words = decrypted.decode().replace("\x00", "")
         return words
 
     def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, i_vector=None):
         """Saves the encrypted mnemonic on a file, returns True if successful"""
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
         mode = VERSION_MODE[Settings().encryption.version]
-        encrypted = encryptor.encrypt(mnemonic, mode, i_vector).decode("utf-8")
+        encrypted = encryptor.encrypt(mnemonic, mode, i_vector)
+        encrypted = base_encode(encrypted, 64).decode()
         mnemonics = {}
         if sd_card:
             # load current MNEMONICS_FILE
@@ -225,85 +213,102 @@ class EncryptedQRCode:
         self.encrypted_data = None
 
     def create(self, key, mnemonic_id, mnemonic, i_vector=None):
-        """Joins necessary data and creates encrypted mnemonic QR codes"""
-        name_lenght = len(mnemonic_id.encode())
+        """encrypted mnemonic QR codes"""
+        iterations = (
+            Settings().encryption.pbkdf2_iterations // QR_CODE_ITER_MULTIPLE
+        ) * QR_CODE_ITER_MULTIPLE
         version = VERSION_NUMBER[Settings().encryption.version]
-        ten_k_iterations = Settings().encryption.pbkdf2_iterations
-
-        # Divide iterations by a Multiple(10,000) to save space
-        ten_k_iterations //= QR_CODE_ITER_MULTIPLE
-
-        # Add public data bytes
-        qr_code_data = name_lenght.to_bytes(1, "big")
-        qr_code_data += mnemonic_id.encode()
-        qr_code_data += version.to_bytes(1, "big")
-        qr_code_data += ten_k_iterations.to_bytes(3, "big")
-
-        # Restore the iterations value assuring is a multiple of 10,000
-        ten_k_iterations *= QR_CODE_ITER_MULTIPLE
-
-        # Encrypted data
-        encryptor = AESCipher(key, mnemonic_id, ten_k_iterations)
-        mode = VERSION_MODE[Settings().encryption.version]
-        words = mnemonic.split(" ")
-        checksum_bits = 8 if len(words) == 24 else 4
-        indexes = [WORDLIST.index(word) for word in words]
-        bitstring = "".join(["{:0>11}".format(bin(index)[2:]) for index in indexes])[
-            :-checksum_bits
-        ]
-        bytes_to_encrypt = int(bitstring, 2).to_bytes((len(bitstring) + 7) // 8, "big")
+        mode = VERSION_MODE[version]
+        encryptor = AESCipher(key, mnemonic_id, iterations)
+        bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
         bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
-        base64_encrypted = encryptor.encrypt(bytes_to_encrypt, mode, i_vector)
-        bytes_encrypted = base_decode(base64_encrypted, 64)
-
-        # Add encrypted data bytes
-        qr_code_data += bytes_encrypted
-
-        return qr_code_data
+        bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, mode, i_vector)
+        return kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
 
     def public_data(self, data):
         """Parse and returns encrypted mnemonic QR codes public data"""
-        mnemonic_info = "Encrypted QR Code:\n"
         try:
-            id_lenght = int.from_bytes(data[:1], "big")
-            self.mnemonic_id = data[1 : id_lenght + 1].decode("utf-8")
-            mnemonic_info += "ID: " + self.mnemonic_id + "\n"
-            self.version = int.from_bytes(data[id_lenght + 1 : id_lenght + 2], "big")
+            (self.mnemonic_id, self.version, self.iterations, self.encrypted_data) = (
+                kef_decode(data)
+            )
             version_name = [k for k, v in VERSION_NUMBER.items() if v == self.version][
                 0
             ]
-            mnemonic_info += "Version: " + version_name + "\n"
-            self.iterations = int.from_bytes(data[id_lenght + 2 : id_lenght + 5], "big")
-            self.iterations *= 10000
-            mnemonic_info += "Key iter.: " + str(self.iterations)
         except:
             return None
-        extra_bytes = id_lenght + 5  # 1(id lenght byte) + 1(version) + 3(iterations)
-        if self.version == 1:
-            extra_bytes += 16  # Initial Vector size
-        extra_bytes += 16  # Encrypted QR checksum is always 16 bytes
-        len_mnemonic_bytes = len(data) - extra_bytes
-        if len_mnemonic_bytes not in (16, 32):
-            return None
-        self.encrypted_data = data[id_lenght + 5 :]
-        return mnemonic_info
+
+        return "\n".join(
+            [
+                "Encrypted QR Code:",
+                "ID: " + self.mnemonic_id,
+                "Version: " + version_name,
+                "Key iter.: " + str(self.iterations),
+            ]
+        )
 
     def decrypt(self, key):
         """Decrypts encrypted mnemonic QR codes"""
         mode = VERSION_MODE[self.version]
-        if mode == ucryptolib.MODE_ECB:
-            encrypted_mnemonic_data = self.encrypted_data
-            i_vector = None
-        else:
-            encrypted_mnemonic_data = self.encrypted_data[AES_BLOCK_SIZE:]
-            i_vector = self.encrypted_data[:AES_BLOCK_SIZE]
         decryptor = AESCipher(key, self.mnemonic_id, self.iterations)
-        decrypted_data = decryptor.decrypt_bytes(
-            encrypted_mnemonic_data, mode, i_vector
-        )
+        decrypted_data = decryptor.decrypt(self.encrypted_data, mode)
         mnemonic_data = decrypted_data[:-AES_BLOCK_SIZE]
         checksum = decrypted_data[-AES_BLOCK_SIZE:]
         # Data validation:
         if hashlib.sha256(mnemonic_data).digest()[:16] != checksum:
             return None
         return mnemonic_data
+
+
+def kef_encode(id_, version, iterations, ciphertext):
+    """
+    encodes inputs into krux_encryption_format, returns bytes
+    """
+    try:
+        assert 0 <= len(id_.encode()) <= 255
+    except:
+        raise ValueError("Invalid ID")
+    try:
+        assert 0 <= version <= 255 and version in VERSION_MODE
+    except:
+        raise ValueError("Invalid version")
+    try:
+        iterations = iterations / 10000
+        assert iterations == int(iterations) and 1 <= iterations <= 2**24
+    except:
+        raise ValueError("Invalid iterations")
+    if not isinstance(ciphertext, bytes):
+        raise ValueError("Ciphertext is not bytes")
+    if len(ciphertext) % 16 != 0:
+        raise ValueError("Ciphertext is not aligned")
+    if len(ciphertext) // 16 < 2:
+        raise ValueError("Ciphertext is too short")
+
+    return b"".join(
+        [
+            len(id_).to_bytes(1, "big"),
+            id_.encode(),
+            version.to_bytes(1, "big"),
+            int(iterations).to_bytes(3, "big"),
+            ciphertext,
+        ]
+    )
+
+
+def kef_decode(kef_bytes):
+    """
+    decodes krux_encryption_format bytes, returns tuple of parsed values
+    """
+    len_id = kef_bytes[0]
+    try:
+        id_ = kef_bytes[1 : 1 + len_id].decode()
+    except:
+        raise ValueError("Invalid ID encoding")
+    version = kef_bytes[1 + len_id]
+    iterations = 10000 * int.from_bytes(kef_bytes[2 + len_id : 5 + len_id], "big")
+    payload = kef_bytes[len_id + 5 :]
+    ciphertext = payload
+    if len(ciphertext) % 16 != 0:
+        raise ValueError("Ciphertext is not aligned")
+    if len(ciphertext) // 16 < 2:
+        raise ValueError("Ciphertext is too short")
+    return (id_, version, iterations, ciphertext)
