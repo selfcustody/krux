@@ -105,12 +105,12 @@ class EncryptionKey(Page):
         if key:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
-            self.ctx.display.draw_hcentered_text(
+            key_lines = self.ctx.display.draw_hcentered_text(
                 "{}: {}".format(t("Key"), key), offset_y, highlight_prefix=":"
             )
             if creating:
                 strength = self.key_strength(key)
-                offset_y += 2 * FONT_HEIGHT
+                offset_y += (key_lines + 1) * FONT_HEIGHT
                 color = theme.error_color if strength == t("Weak") else theme.fg_color
                 self.ctx.display.draw_hcentered_text(
                     "{}: {}".format(t("Strength"), strength),
