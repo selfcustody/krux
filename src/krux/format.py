@@ -64,3 +64,8 @@ def replace_decimal_separator(text):
 def generate_thousands_separator(number_without_decimal):
     """Generate thousands separator in number_without_decimal"""
     return "{:,}".format(number_without_decimal).replace(",", THOUSANDS_SEPARATOR)
+
+
+def format_address(address, length=4):
+    """Format addresses by adding spaces after each length"""
+    return " ".join(address[i : i + length] for i in range(0, len(address), length))
