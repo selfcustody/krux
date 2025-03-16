@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 from . import Page
-from ..krux_settings import t, Settings
+from ..krux_settings import t, Settings, CNC_FILE_DRIVER
 from ..qr import to_qr_codes, FORMAT_NONE
 from ..printers import create_printer
 
@@ -38,7 +38,7 @@ class PrintPage(Page):
 
     def _send_qr_to_printer(self, qr_code, i=0, count=1):
         self.ctx.display.clear()
-        if Settings().hardware.printer.driver == "cnc/file":
+        if Settings().hardware.printer.driver == CNC_FILE_DRIVER:
             self.ctx.display.draw_centered_text(t("Exporting to SD card.."))
         else:
             self.ctx.display.draw_centered_text(
