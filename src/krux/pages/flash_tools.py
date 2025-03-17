@@ -224,9 +224,10 @@ class FlashHash(Page):
         )
         if self.ctx.display.width() < self.ctx.display.height():
             percentage_offset += FONT_HEIGHT
+        uid = unique_id()
         sha256 = uhashlib_hw.sha256()
         sha256.update(self.tc_code_hash)
-        sha256.update(unique_id())
+        sha256.update(uid)
         for address in range(range_begin, range_end, BLOCK_SIZE):
             counter += 1
             data = flash.read(address, BLOCK_SIZE)
