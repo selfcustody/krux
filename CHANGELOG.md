@@ -13,6 +13,7 @@ When the value of the settings category is boolean (True/False), it will be disp
 - Added fingerprint to mnemonic preview and editor.
 - Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
 - Optimized the way we check device's board values.
+- Added QR Code to About screen.
 - Other small text changes for clarity and translation simplification.
 
 
