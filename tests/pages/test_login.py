@@ -1299,7 +1299,7 @@ def test_about(mocker, m5stickv):
     from krux.metadata import VERSION
     from krux.input import BUTTON_ENTER
 
-    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER]
+    BTN_SEQUENCE = [BUTTON_ENTER]
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
 
@@ -1307,12 +1307,20 @@ def test_about(mocker, m5stickv):
 
     login.about()
 
+    title = "selfcustody.github.io/krux"
+    msg = (
+        title
+        + "\n"
+        + ("Hardware")
+        + ": %s\n" % board.config["type"]
+        + ("Version")
+        + ": %s" % VERSION
+    )
     ctx.input.wait_for_button.assert_called_once()
-    ctx.display.draw_centered_text.assert_called_with(
-        "Krux\nselfcustody.github.io/krux\n\nHardware\n"
-        + board.config["type"]
-        + "\n\nVersion\n"
-        + VERSION
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [
+            mocker.call(msg, 250, highlight_prefix=":"),
+        ]
     )
 
 
