@@ -74,6 +74,23 @@ def test_ecb_encryption(m5stickv):
     assert decrypted.decode().replace("\x00", "") == TEST_WORDS
 
 
+def test_ecb_encryption_fails_duplicated_blocks(m5stickv):
+    from krux.encryption import AESCipher
+
+    # test controls
+    key, id_, iterations = "a key", "a label", 100000
+    plaintext = b"a 16-byte block." * 2
+    ciphertext = b"I\x1fD!\x80\x88:\x9e\xc7\xbd\x8a<\x9d\x8f\xea(I\x1fD!\x80\x88:\x9e\xc7\xbd\x8a<\x9d\x8f\xea("
+
+    cryptor = AESCipher(key, id_, iterations)
+    err = "Duplicate blocks in ECB mode"
+    with pytest.raises(ValueError, match=err):
+        cryptor.encrypt(plaintext, AES.MODE_ECB)
+
+    # but can still decrypt if previously encrypted
+    assert cryptor.decrypt(ciphertext, AES.MODE_ECB) == plaintext
+
+
 def test_cbc_encryption(m5stickv):
     from krux.encryption import AESCipher
     from Crypto.Random import get_random_bytes

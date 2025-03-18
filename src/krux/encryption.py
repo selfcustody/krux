@@ -61,14 +61,19 @@ class AESCipher:
 
     def encrypt(self, raw, mode=ucryptolib.MODE_ECB, i_vector=None):
         """Encrypt using AES-ECB or AES-CBC and return the value as bytes"""
-        data_bytes = raw.encode("latin-1") if isinstance(raw, str) else raw
+        plain = raw.encode("latin-1") if isinstance(raw, str) else raw
+        plain += b"\x00" * ((16 - (len(plain) % 16)) % 16)
+        if mode == ucryptolib.MODE_ECB:
+            unique_blocks = len(
+                set((plain[x : x + 16] for x in range(0, len(plain), 16)))
+            )
+            if unique_blocks != len(plain) // 16:
+                raise ValueError("Duplicate blocks in ECB mode")
         if i_vector:
             encryptor = ucryptolib.aes(self.key, mode, i_vector)
         else:
             encryptor = ucryptolib.aes(self.key, mode)
-        encrypted = encryptor.encrypt(
-            data_bytes + b"\x00" * ((16 - (len(data_bytes) % 16)) % 16)
-        )
+        encrypted = encryptor.encrypt(plain)
         if i_vector:
             encrypted = i_vector + encrypted
         return encrypted
