@@ -194,9 +194,9 @@ def upgrade():
 
     inp = Input()
 
-    def status_text(text):
+    def status_text(text, highlight_prefix=""):
         display.clear()
-        display.draw_centered_text(text)
+        display.draw_centered_text(text, highlight_prefix=highlight_prefix)
 
     status_text(t("New firmware detected.") + "\n\n" + t("Verifying.."))
 
@@ -207,10 +207,11 @@ def upgrade():
     status_text(
         t("New firmware detected.")
         + "\n\n"
-        + "SHA256:\n"
+        + "SHA256:\n\n"
         + binascii.hexlify(firmware_hash).decode()
-        + "\n\n\n\n"
-        + t("Install?")
+        + "\n\n\n"
+        + t("Install?"),
+        ":",
     )
     inp.buttons_active = True
     if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
@@ -302,7 +303,7 @@ def upgrade():
         return False
 
     status_text(
-        t("Upgrade complete.") + "\n" + t("Remove firmware files from SD Card?")
+        t("Upgrade complete.") + "\n\n\n" + t("Remove firmware files from SD Card?")
     )
     inp.buttons_active = True
     if not inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):

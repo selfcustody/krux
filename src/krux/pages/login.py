@@ -819,15 +819,16 @@ class Login(Page):
 
         import board
         from ..metadata import VERSION
+        from ..qr import FORMAT_NONE
 
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(
-            "Krux\n"
-            + "selfcustody.github.io/krux\n\n"
+        title = "selfcustody.github.io/krux"
+        msg = (
+            title
+            + "\n"
             + t("Hardware")
-            + "\n%s\n\n" % board.config["type"]
+            + ": %s\n" % board.config["type"]
             + t("Version")
-            + "\n%s" % VERSION
+            + ": %s" % VERSION
         )
-        self.ctx.input.wait_for_button()
+        self.display_qr_codes(title, FORMAT_NONE, msg, highlight_prefix=":")
         return MENU_CONTINUE

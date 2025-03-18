@@ -10,9 +10,11 @@ The wallet fingerprint, keypad title, settings categories and prefix texts are n
 When the value of the settings category is boolean (True/False), it will be displayed in color.
 
 ### Other Bug Fixes and Optimizations
+- Fix printing words instead of numbers when using "Backup Mnemonic > Other formats > Numbers".
 - Added fingerprint to mnemonic preview and editor.
 - Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
 - Optimized the way we check device's board values.
+- Added QR Code to About screen.
 - Other small text changes for clarity and translation simplification.
 
 

@@ -15,7 +15,6 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
     ctx.is_logged_in.return_value = False
 
     ctx.wallet = wallet
-    ctx.printer = printer
     if printer is not None:
         mocker.patch("krux.printers.create_printer", new=mocker.MagicMock())
         Settings().hardware.printer.driver = THERMAL_ADAFRUIT_TXT

@@ -228,7 +228,7 @@ class Page:
         if not buffer_title:
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
 
-    def display_qr_codes(self, data, qr_format, title=""):
+    def display_qr_codes(self, data, qr_format, title="", highlight_prefix=""):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
@@ -253,7 +253,9 @@ class Page:
             tit_len = 1
         else:
             # Draws permanent title
-            tit_len = self.ctx.display.draw_hcentered_text(title, qr_offset_val)
+            tit_len = self.ctx.display.draw_hcentered_text(
+                title, qr_offset_val, highlight_prefix=highlight_prefix
+            )
         cursor_y = qr_offset_val + tit_len * FONT_HEIGHT
         if cursor_y < BOTTOM_LINE and is_portrait:
             cursor_y += BOTTOM_LINE

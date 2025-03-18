@@ -108,6 +108,7 @@ class MnemonicsView(Page):
                 from ..print_page import PrintPage
 
                 print_page = PrintPage(self.ctx)
+                mnemonic = display_mnemonic or mnemonic
                 print_page.print_mnemonic_text(mnemonic, suffix)
         return MENU_CONTINUE
 
