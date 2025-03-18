@@ -58,6 +58,7 @@ PBKDF2_HMAC_ECB = 0
 PBKDF2_HMAC_CBC = 1
 
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
+CNC_FILE_DRIVER = "cnc/file"
 
 
 def t(slug):
@@ -240,7 +241,7 @@ class PrinterSettings(SettingsNamespace):
     PRINTERS = {
         "none": ("none", None),
         THERMAL_ADAFRUIT_TXT: ("thermal", "AdafruitPrinter"),
-        "cnc/file": ("cnc", "FilePrinter"),
+        CNC_FILE_DRIVER: ("cnc", "FilePrinter"),
     }
     namespace = "settings.printer"
     driver = CategorySetting("driver", "none", list(PRINTERS.keys()))
