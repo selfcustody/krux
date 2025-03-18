@@ -267,15 +267,22 @@ def kef_encode(id_, version, iterations, ciphertext):
         assert 0 <= len(id_.encode()) <= 255
     except:
         raise ValueError("Invalid ID")
+
     try:
         assert 0 <= version <= 255 and version in VERSION_MODE
     except:
         raise ValueError("Invalid version")
+
     try:
-        iterations = iterations / 10000
-        assert iterations == int(iterations) and 1 <= iterations <= 2**24
+        assert isinstance(iterations, int)
+        if iterations % 10000 == 0:
+            iterations = iterations // 10000
+            assert 1 <= iterations <= 10000 * 10000
+        else:
+            assert 10000 < iterations < 2**24
     except:
         raise ValueError("Invalid iterations")
+
     if not isinstance(ciphertext, bytes):
         raise ValueError("Ciphertext is not bytes")
     if len(ciphertext) % 16 != 0:
@@ -304,7 +311,11 @@ def kef_decode(kef_bytes):
     except:
         raise ValueError("Invalid ID encoding")
     version = kef_bytes[1 + len_id]
-    iterations = 10000 * int.from_bytes(kef_bytes[2 + len_id : 5 + len_id], "big")
+    kef_iterations = int.from_bytes(kef_bytes[2 + len_id : 5 + len_id], "big")
+    if kef_iterations <= 10000:
+        iterations = kef_iterations * 10000
+    else:
+        iterations = kef_iterations
     payload = kef_bytes[len_id + 5 :]
     ciphertext = payload
     if len(ciphertext) % 16 != 0:

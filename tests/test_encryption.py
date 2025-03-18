@@ -316,7 +316,7 @@ def test_kef_encode_exceptions(m5stickv):
         "ID can be empty or as long as 255 utf-8 characters, but not longer\nA purely peer-to-peer version of electronic cash would allow online\npayments to be sent directly from one party to another without going through a\nfinancial institution. Digital signatures",
     )
     valid_versions = (0, 1)
-    valid_iterations = (1 * ten_k, 10 * ten_k, 50 * ten_k, 2**24 * ten_k)
+    valid_iterations = (ten_k, 50 * ten_k, ten_k + 1, 2**24 - 1, ten_k * ten_k)
     valid_ciphertexts = (ECB_ENCRYPTED_QR[-32:], CBC_ENCRYPTED_QR[-48:])
 
     # test individual exceptions against other valid params
@@ -333,18 +333,22 @@ def test_kef_encode_exceptions(m5stickv):
 
                     # Version must be 0-255, and supported
                     err = "Invalid version"
-                    for invalid in (None, -1, 256, 2, 3):
+                    for invalid in (None, -1, 0.5, "0", 256, 2, 3):
                         with pytest.raises(ValueError, match=err):
                             kef_encode(id_, invalid, iterations, ciphertext)
 
-                    # Iterations are a multiple of 10k, no greater than 2**24 * 10k
+                    # Iterations: used for key stretching
                     err = "Invalid iterations"
                     for invalid in (
                         None,
-                        ten_k - 1,
-                        ten_k + 1,
                         -ten_k,
-                        2**24 * ten_k + ten_k,
+                        "10000",
+                        ten_k + 0.5,
+                        0,
+                        1,
+                        ten_k - 1,
+                        2**24,
+                        ten_k * ten_k + 1,
                     ):
                         with pytest.raises(ValueError, match=err):
                             kef_encode(id_, version, invalid, ciphertext)
@@ -367,6 +371,33 @@ def test_kef_encode_exceptions(m5stickv):
                     invalid = ciphertext[:16]
                     with pytest.raises(ValueError, match=err):
                         kef_encode(id_, version, iterations, invalid)
+
+
+def test_kef_interpretation_of_iterations(m5stickv):
+    from krux.encryption import kef_encode, kef_decode
+
+    # int to 3-byte big-endian
+    def i2b(an_int):
+        return an_int.to_bytes(3, "big")
+
+    ten_k = 10000
+
+    # mock values so that iterations will be at bytes[6:9]
+    id_ = "test"
+    version = 0
+    ciphertext = b"\x00" * 32
+
+    # if (iterations % 10000 == 0) they are serialized divided by 10000
+    for iterations in (ten_k, ten_k * 10, ten_k * 50, ten_k * ten_k):
+        encoded = kef_encode(id_, version, iterations, ciphertext)
+        assert encoded[6:9] == i2b(iterations // 10000)
+        assert kef_decode(encoded)[2] == iterations
+
+    # if (iterations % 10000 != 0) they are serialized as the same value
+    for iterations in (ten_k + 1, ten_k * 10 + 1, ten_k * 50 + 1, 2**24 - 1):
+        encoded = kef_encode(id_, version, iterations, ciphertext)
+        assert encoded[6:9] == i2b(iterations)
+        assert kef_decode(encoded)[2] == iterations
 
 
 def test_kef_decode_exceptions(m5stickv):
