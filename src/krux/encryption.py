@@ -52,15 +52,16 @@ QR_CODE_ITER_MULTIPLE = 10000
 
 
 class AESCipher:
-    """Helper for AES encrypt/decrypt"""
+    """More than just a helper for AES encrypt/decrypt. Enforces krux encryption versions"""
 
     def __init__(self, key, salt, iterations):
         self.key = hashlib.pbkdf2_hmac(
             "sha256", key.encode(), salt.encode(), iterations
         )
 
-    def encrypt(self, raw, mode=ucryptolib.MODE_ECB, i_vector=None):
-        """Encrypt using AES-ECB or AES-CBC and return the value as bytes"""
+    def encrypt(self, raw, version, i_vector=None):
+        """AES encrypt according to krux rules defined by version, returns bytes"""
+        mode = VERSION_MODE[version]
         plain = raw.encode("latin-1") if isinstance(raw, str) else raw
         plain = pad(plain)
         if mode == ucryptolib.MODE_ECB:
@@ -69,6 +70,13 @@ class AESCipher:
             )
             if unique_blocks != len(plain) // 16:
                 raise ValueError("Duplicate blocks in ECB mode")
+            if i_vector:
+                raise ValueError("IV is not valid in ECB mode")
+        elif mode == ucryptolib.MODE_CBC:
+            if not (isinstance(i_vector, bytes) and len(i_vector) == 16):
+                raise ValueError("IV must be 16 bytes in CBC mode")
+        else:
+            raise ValueError("Invalid mode")
         if i_vector:
             encryptor = ucryptolib.aes(self.key, mode, i_vector)
         else:
@@ -78,13 +86,18 @@ class AESCipher:
             encrypted = i_vector + encrypted
         return encrypted
 
-    def decrypt(self, encrypted, mode):
-        """Decrypt and return value as bytes"""
+    def decrypt(self, encrypted, version):
+        """AES Decrypt according to krux rules defined by version, returns bytes"""
+        mode = VERSION_MODE[version]
         if mode == ucryptolib.MODE_ECB:
             decryptor = ucryptolib.aes(self.key, mode)
-        else:
+        elif mode == ucryptolib.MODE_CBC:
+            if len(encrypted) < AES_BLOCK_SIZE * 2:
+                raise ValueError("Missing IV")
             decryptor = ucryptolib.aes(self.key, mode, encrypted[:AES_BLOCK_SIZE])
             encrypted = encrypted[AES_BLOCK_SIZE:]
+        else:
+            raise ValueError("Invalid mode")
         return decryptor.decrypt(encrypted)
 
 
@@ -141,9 +154,8 @@ class MnemonicStorage:
         except:
             return None
         data = base_decode(encrypted_data, 64)
-        mode = VERSION_MODE[version]
         decryptor = AESCipher(key, mnemonic_id, iterations)
-        decrypted = decryptor.decrypt(data, mode)
+        decrypted = decryptor.decrypt(data, version)
         # Data validation
         mnemonic_data = decrypted[:-AES_BLOCK_SIZE]
         checksum = decrypted[-AES_BLOCK_SIZE:]
@@ -158,10 +170,10 @@ class MnemonicStorage:
     def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, i_vector=None):
         """Saves the encrypted mnemonic on a file, returns True if successful"""
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
-        mode = VERSION_MODE[Settings().encryption.version]
+        version = VERSION_NUMBER[Settings().encryption.version]
         plain = bip39.mnemonic_to_bytes(mnemonic)
         plain += hashlib.sha256(plain).digest()[:16]
-        encrypted = encryptor.encrypt(plain, mode, i_vector)
+        encrypted = encryptor.encrypt(plain, version, i_vector)
         encrypted = base_encode(encrypted, 64).decode()
         mnemonics = {}
         if sd_card:
@@ -178,9 +190,7 @@ class MnemonicStorage:
             try:
                 with SDHandler() as sd:
                     mnemonics[mnemonic_id] = {}
-                    mnemonics[mnemonic_id]["version"] = VERSION_NUMBER[
-                        Settings().encryption.version
-                    ]
+                    mnemonics[mnemonic_id]["version"] = version
                     mnemonics[mnemonic_id][
                         "key_iterations"
                     ] = Settings().encryption.pbkdf2_iterations
@@ -203,9 +213,7 @@ class MnemonicStorage:
                 # save the new MNEMONICS_FILE
                 with open(FLASH_PATH + MNEMONICS_FILE, "w") as f:
                     mnemonics[mnemonic_id] = {}
-                    mnemonics[mnemonic_id]["version"] = VERSION_NUMBER[
-                        Settings().encryption.version
-                    ]
+                    mnemonics[mnemonic_id]["version"] = version
                     mnemonics[mnemonic_id][
                         "key_iterations"
                     ] = Settings().encryption.pbkdf2_iterations
@@ -247,11 +255,10 @@ class EncryptedQRCode:
             Settings().encryption.pbkdf2_iterations // QR_CODE_ITER_MULTIPLE
         ) * QR_CODE_ITER_MULTIPLE
         version = VERSION_NUMBER[Settings().encryption.version]
-        mode = VERSION_MODE[version]
         encryptor = AESCipher(key, mnemonic_id, iterations)
         bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
         bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
-        bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, mode, i_vector)
+        bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, version, i_vector)
         return kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
 
     def public_data(self, data):
@@ -277,9 +284,8 @@ class EncryptedQRCode:
 
     def decrypt(self, key):
         """Decrypts encrypted mnemonic QR codes"""
-        mode = VERSION_MODE[self.version]
         decryptor = AESCipher(key, self.mnemonic_id, self.iterations)
-        decrypted_data = decryptor.decrypt(self.encrypted_data, mode)
+        decrypted_data = decryptor.decrypt(self.encrypted_data, self.version)
         mnemonic_data = decrypted_data[:-AES_BLOCK_SIZE]
         checksum = decrypted_data[-AES_BLOCK_SIZE:]
         # Data validation:

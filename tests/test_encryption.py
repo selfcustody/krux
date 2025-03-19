@@ -93,27 +93,124 @@ def mock_deprecated_seeds_json(mocker):
 # -------------------------
 
 
+def test_AESCipher_initialization(m5stickv):
+    from krux.encryption import AESCipher
+
+    # .__init__() expects str (key, salt) and pos-int iterations
+    valid_params = ("key", "salt", 1)
+    AESCipher(*valid_params)  # this works
+
+    invalid_keys = (None, 1, b"key")
+    invalid_salts = (None, 1, b"salt")
+    invalid_iterations = (None, -1, 0, 1.5)
+    for invalid in invalid_keys:
+        with pytest.raises(Exception):
+            AESCipher(invalid, valid_params[1], valid_params[2])
+    for invalid in invalid_salts:
+        with pytest.raises(Exception):
+            AESCipher(valid_params[0], invalid, valid_params[2])
+    for invalid in invalid_iterations:
+        with pytest.raises(Exception):
+            AESCipher(valid_params[0], valid_params[1], invalid)
+
+
+def test_AESCipher_calling_method_encrypt(m5stickv):
+    from krux.encryption import AESCipher, VERSION_MODE
+    from ucryptolib import MODE_ECB, MODE_CBC, MODE_GCM
+
+    encryptor = AESCipher("key", "salt", 1)
+
+    # .encrypt() expects bytes raw, AES mode, sometimes bytes i_vector
+    valid_params = (
+        ("\x00", 0),
+        ("\x00", 1, b"\x00" * 16),
+        (b"\x00", 0),
+        (b"\x00", 1, b"\x00" * 16),
+    )
+    invalid_raws = (True, None, 1)
+    invalid_versions = (None, -1, 3)
+    invalid_ivs = ("\x00" * 16, b"\x00" * 15, 1)
+    for valids in valid_params:
+        # valid params works
+        encrypted = encryptor.encrypt(*valids)
+
+        # test valid params against invalid ones
+        for invalid in invalid_raws:
+            with pytest.raises(TypeError):
+                encryptor.encrypt(invalid, *valids[1:])
+        for invalid in invalid_versions:
+            # err = "Invalid mode"
+            with pytest.raises((ValueError, KeyError)):  # , match=err):
+                if len(valids) == 3:
+                    encryptor.encrypt(valids[0], invalid, valids[2])
+                else:
+                    encryptor.encrypt(valids[0], invalid)
+        if valids[1] == 0:
+            err = "IV is not valid in ECB mode"
+            for invalid in invalid_ivs:
+                with pytest.raises(ValueError, match=err):
+                    encryptor.encrypt(valids[0], valids[1], invalid)
+        elif valids[1] == 1:
+            err = "IV must be 16 bytes in CBC mode"
+            for invalid in invalid_ivs:
+                with pytest.raises(ValueError, match=err):
+                    encryptor.encrypt(valids[0], valids[1], invalid)
+
+
+def test_AESCipher_calling_method_decrypt(m5stickv):
+    from krux.encryption import AESCipher, VERSION_MODE
+    from ucryptolib import MODE_ECB, MODE_CBC, MODE_GCM
+
+    decryptor = AESCipher("key", "salt", 1)
+
+    valid_params = (
+        (b"\x00" * 16, 0),
+        (b"\x00" * 32, 1),
+    )
+    invalid_encrypteds = (True, None, 1, b"\x00")
+    invalid_versions = (None, -1, 3)
+    for valids in valid_params:
+        # valid params works
+        encrypted = decryptor.decrypt(*valids)
+
+        # test valid params against invalid ones
+        for invalid in invalid_encrypteds:
+            with pytest.raises((ValueError, TypeError)):
+                decryptor.decrypt(invalid, valids[1])
+        for invalid in invalid_versions:
+            # err = "Invalid mode"
+            with pytest.raises((ValueError, KeyError)):  # , match=err):
+                decryptor.decrypt(valids[0], invalid)
+
+    err = "Missing IV"
+    with pytest.raises(ValueError, match=err):
+        decryptor.decrypt(b"\x00" * 16, 1)
+
+
 def test_ecb_encryption(m5stickv):
     from krux.encryption import AESCipher
 
+    version = 0  # AES.MODE_ECB
+
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
-    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_ECB)
+    encrypted = encryptor.encrypt(TEST_WORDS, version)
     assert encrypted == ECB_ENCRYPTED_WORDS
 
     b64encrypted = base64.b64encode(encrypted)
     assert b64encrypted == B64_ECB_ENCRYPTED_WORDS
 
-    decrypted = encryptor.decrypt(encrypted, AES.MODE_ECB)
+    decrypted = encryptor.decrypt(encrypted, version)
     assert decrypted.decode().replace("\x00", "") == TEST_WORDS
 
-    encrypted = encryptor.encrypt(ECB_ENTROPY, AES.MODE_ECB)
-    assert encryptor.decrypt(encrypted, AES.MODE_ECB) == ECB_ENTROPY
+    encrypted = encryptor.encrypt(ECB_ENTROPY, version)
+    assert encryptor.decrypt(encrypted, version) == ECB_ENTROPY
 
 
 def test_ecb_encryption_fails_duplicated_blocks(m5stickv):
     from krux.encryption import AESCipher
 
     # test controls
+    version = 0  # AES.MODE_ECB
     key, id_, iterations = "a key", "a label", 100000
     plaintext = b"a 16-byte block." * 2
     ciphertext = b"I\x1fD!\x80\x88:\x9e\xc7\xbd\x8a<\x9d\x8f\xea(I\x1fD!\x80\x88:\x9e\xc7\xbd\x8a<\x9d\x8f\xea("
@@ -121,29 +218,31 @@ def test_ecb_encryption_fails_duplicated_blocks(m5stickv):
     encryptor = AESCipher(key, id_, iterations)
     err = "Duplicate blocks in ECB mode"
     with pytest.raises(ValueError, match=err):
-        encryptor.encrypt(plaintext, AES.MODE_ECB)
+        encryptor.encrypt(plaintext, version)
 
     # but can still decrypt if previously encrypted
-    assert encryptor.decrypt(ciphertext, AES.MODE_ECB) == plaintext
+    assert encryptor.decrypt(ciphertext, version) == plaintext
 
 
 def test_cbc_encryption(m5stickv):
     from krux.encryption import AESCipher
     from Crypto.Random import get_random_bytes
 
+    version = 1  # AES.MODE_CBC
+
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
     iv = I_VECTOR
-    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, iv)
+    encrypted = encryptor.encrypt(TEST_WORDS, version, iv)
     assert encrypted == CBC_ENCRYPTED_WORDS
 
     b64encrypted = base64.b64encode(encrypted)
     assert b64encrypted == B64_CBC_ENCRYPTED_WORDS
 
-    decrypted = encryptor.decrypt(encrypted, AES.MODE_CBC)
+    decrypted = encryptor.decrypt(encrypted, version)
     assert decrypted.decode().replace("\x00", "") == TEST_WORDS
 
-    encrypted = encryptor.encrypt(CBC_ENTROPY, AES.MODE_CBC, iv)
-    assert encryptor.decrypt(encrypted, AES.MODE_CBC) == CBC_ENTROPY
+    encrypted = encryptor.encrypt(CBC_ENTROPY, version, iv)
+    assert encryptor.decrypt(encrypted, version) == CBC_ENTROPY
 
 
 def test_cbc_iv_use(m5stickv):
@@ -154,26 +253,28 @@ def test_cbc_iv_use(m5stickv):
     CBC_ENCRYPTED_WORDS_SECOND_IV = b"\x8e\xc8b\x8f\xe2\xa8`\xaa\x06d\xe8\xe7\xaa.0\x03\xc0N7\xbd'u\xc5Z\x97\xde=\x10\xeaO\xf4x\xb5\xe6\x10l\xcfu\xef\x9e\x94\x03L-\xdc\xff\xa3m\xf0i\xd4\xe2\n{9G\x17\xbf.\x96\xba\x1a\x07\xackK9\x90-\xb6sf1\x01Y+\xa6\x80c/yO\x93'd\x8b\rnru\xe7\x17\xb0\x01\x9a\x9b"
     B64_CBC_ENCRYPTED_WORDS_SECOND_IV = b"jshij+KoYKoGZOjnqi4wA8BON70ndcVal949EOpP9Hi15hBsz3XvnpQDTC3c/6Nt8GnU4gp7OUcXvy6WuhoHrGtLOZAttnNmMQFZK6aAYy95T5MnZIsNbnJ15xewAZqb"
 
+    version = 1  # AES.MODE_CBC
+
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
     iv = I_VECTOR
-    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, iv)
+    encrypted = encryptor.encrypt(TEST_WORDS, version, iv)
     assert encrypted == CBC_ENCRYPTED_WORDS
 
     b64encrypted = base64.b64encode(encrypted)
     assert b64encrypted == B64_CBC_ENCRYPTED_WORDS
 
-    decrypted = encryptor.decrypt(encrypted, AES.MODE_CBC)
+    decrypted = encryptor.decrypt(encrypted, version)
     assert decrypted.decode().replace("\x00", "") == TEST_WORDS
 
     # Encrypt again with same data except for the IV
     iv = SECOND_IV
-    encrypted = encryptor.encrypt(TEST_WORDS, AES.MODE_CBC, iv)
+    encrypted = encryptor.encrypt(TEST_WORDS, version, iv)
     assert encrypted == CBC_ENCRYPTED_WORDS_SECOND_IV
 
     b64encrypted = base64.b64encode(encrypted)
     assert b64encrypted == B64_CBC_ENCRYPTED_WORDS_SECOND_IV
 
-    decrypted = encryptor.decrypt(encrypted, AES.MODE_CBC)
+    decrypted = encryptor.decrypt(encrypted, version)
     assert decrypted.decode().replace("\x00", "") == TEST_WORDS
 
 
