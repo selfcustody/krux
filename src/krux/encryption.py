@@ -62,7 +62,7 @@ class AESCipher:
     def encrypt(self, raw, mode=ucryptolib.MODE_ECB, i_vector=None):
         """Encrypt using AES-ECB or AES-CBC and return the value as bytes"""
         plain = raw.encode("latin-1") if isinstance(raw, str) else raw
-        plain += b"\x00" * ((16 - (len(plain) % 16)) % 16)
+        plain = pad(plain)
         if mode == ucryptolib.MODE_ECB:
             unique_blocks = len(
                 set((plain[x : x + 16] for x in range(0, len(plain), 16)))
@@ -86,6 +86,20 @@ class AESCipher:
             decryptor = ucryptolib.aes(self.key, mode, encrypted[:AES_BLOCK_SIZE])
             encrypted = encrypted[AES_BLOCK_SIZE:]
         return decryptor.decrypt(encrypted)
+
+
+def pad(some_bytes):
+    """Pads some_bytes to AES block size of 16 bytes, returns bytes"""
+    len_padding = (16 - len(some_bytes) % 16) % 16
+    return some_bytes + b"\x00" * len_padding
+
+
+def unpad(some_bytes):
+    """Strips padding from some_bytes, returns bytes"""
+    stripped = some_bytes.replace(b"\x00", b"")
+    if 0 < len(some_bytes) - len(stripped) < 16:
+        return stripped
+    return some_bytes
 
 
 class MnemonicStorage:
@@ -136,7 +150,7 @@ class MnemonicStorage:
         if hashlib.sha256(mnemonic_data).digest()[:16] == checksum:
             return bip39.mnemonic_from_bytes(mnemonic_data)
         try:  # Deprecated, but supported for decryption
-            words = decrypted.decode().replace("\x00", "")
+            words = unpad(decrypted).decode()
         except:
             words = None
         return words

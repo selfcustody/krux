@@ -520,3 +520,54 @@ def test_kef_decode_exceptions(m5stickv):
     encoded = CBC_ENCRYPTED_QR[:-32]  # 24w CBC is 48 bytes w/ iv+checksum
     with pytest.raises(ValueError, match=err):
         kef_decode(encoded)
+
+
+NULPAD_TEST_CASES = [
+    # (unpadded, padded)
+    (b"0", b"0" + b"\x00" * 15),
+    (b"0123456789abcde", b"0123456789abcde" + b"\x00"),
+    (b"0123456789abcdef", b"0123456789abcdef"),
+    (b"0123456789abcdef0", b"0123456789abcdef0" + b"\x00" * 15),
+    (b"0123456789abcdef0123456789abcde", b"0123456789abcdef0123456789abcde" + b"\x00"),
+    (b"0123456789abcdef0123456789abcdef", b"0123456789abcdef0123456789abcdef"),
+    (b"\x00" * 16, b"\x00" * 16),
+    (b"\x00" * 32, b"\x00" * 32),
+    (b"\x01" * 15 + b"\x00" * 17, b"\x01" * 15 + b"\x00" * 17),
+    (TEST_WORDS.encode(), TEST_WORDS.encode() + b"\x00" * 6),
+    (ECB_WORDS.encode(), ECB_WORDS.encode() + b"\x00" * 5),
+    (CBC_WORDS.encode(), CBC_WORDS.encode() + b"\x00" * 9),
+]
+BROKEN_NULPAD_TEST_CASES = [
+    # (unpadded, padded)
+    (b"\x01\x00", b"\x01\x00" + b"\x00" * 14),
+    (b"\x01\x00" * 15, b"\x01\x00" * 15 + b"\x00" * 2),
+]
+
+
+def test_padding(m5stickv):
+    from krux.encryption import pad, unpad
+
+    # pad() and unpad() expect bytestrings
+    unpadded = b"hello world"
+    padded = pad(unpadded)
+    with pytest.raises(TypeError):
+        pad(unpadded.decode())
+    with pytest.raises(TypeError):
+        unpad(padded.decode())
+
+    # versions 0,1 pad to complete last 16byte block w/ b"\x00" bytes
+    for unpadded, padded in NULPAD_TEST_CASES:
+        assert pad(unpadded) == padded
+        assert unpad(padded) == unpadded
+        len_padding = len(padded) - len(unpadded)
+        if len_padding:
+            assert pad(unpadded)[-len_padding:] == b"\x00" * len_padding
+
+    # versions 0,1 use non-faithful padding for bytestrings ending w/ b"\x00"
+    for unpadded, padded in BROKEN_NULPAD_TEST_CASES:
+        # pad() works just fine
+        assert pad(unpadded) == padded
+
+        # but unpad() will strip too many padding bytes
+        with pytest.raises(AssertionError):
+            assert unpad(padded) == unpadded
