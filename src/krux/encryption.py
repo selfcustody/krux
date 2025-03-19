@@ -130,14 +130,24 @@ class MnemonicStorage:
         mode = VERSION_MODE[version]
         decryptor = AESCipher(key, mnemonic_id, iterations)
         decrypted = decryptor.decrypt(data, mode)
-        words = decrypted.decode().replace("\x00", "")
+        # Data validation
+        mnemonic_data = decrypted[:-AES_BLOCK_SIZE]
+        checksum = decrypted[-AES_BLOCK_SIZE:]
+        if hashlib.sha256(mnemonic_data).digest()[:16] == checksum:
+            return bip39.mnemonic_from_bytes(mnemonic_data)
+        try:  # Deprecated, but supported for decryption
+            words = decrypted.decode().replace("\x00", "")
+        except:
+            words = None
         return words
 
     def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, i_vector=None):
         """Saves the encrypted mnemonic on a file, returns True if successful"""
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
         mode = VERSION_MODE[Settings().encryption.version]
-        encrypted = encryptor.encrypt(mnemonic, mode, i_vector)
+        plain = bip39.mnemonic_to_bytes(mnemonic)
+        plain += hashlib.sha256(plain).digest()[:16]
+        encrypted = encryptor.encrypt(plain, mode, i_vector)
         encrypted = base_encode(encrypted, 64).decode()
         mnemonics = {}
         if sd_card:
