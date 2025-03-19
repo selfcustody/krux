@@ -93,6 +93,45 @@ def mock_deprecated_seeds_json(mocker):
 # -------------------------
 
 
+def test_encryption_VERSIONS_definition(m5stickv):
+    """
+    krux encryption VERSIONS are defined in src/krux/encryption.py
+
+    VERSIONS is a dict with 1-byte-integer keys and dict values.
+    The values are paramaters that define rules for each version.
+    Once "released", these cannot be redefined w/o breaking compatibility
+    to decrypt existing ciphertext in-the-wild, but more versions can be
+    added in the future.
+    """
+    from krux.encryption import VERSIONS, VERSION_NUMBERS
+    from krux.krux_settings import EncryptionSettings
+
+    # the keys to VERSIONS are all integers between 0 and 255
+    for k in VERSIONS:
+        assert isinstance(k, int) and 0 <= k <= 255
+
+    # each version has important key-value pairs which define it
+    for v in VERSIONS.values():
+
+        # each version has a human readable 'name'
+        assert len(v["name"]) and isinstance(v["name"], str)
+
+        # each version has a 'mode' integer that krux supports
+        assert isinstance(v["mode"], int) and 1 <= v["mode"] <= 2
+
+    # VERSIONS['name'] must be unique else VERSION_NUMBERS will break
+    assert len(VERSIONS) == len(VERSION_NUMBERS)
+
+    # VERSION_NUMBERS is a reverse lookup (name->version) derived from VERSIONS
+    for k, v in VERSION_NUMBERS.items():
+        assert VERSIONS[v]["name"] == k
+
+    # similarly, src/krux/krux_settings.py also requires a compatible structure
+    assert len(VERSIONS) == len(EncryptionSettings().VERSION_NAMES)
+    for k, v in EncryptionSettings().VERSION_NAMES.items():
+        assert VERSIONS[k]["name"] == v
+
+
 def test_AESCipher_initialization(m5stickv):
     from krux.encryption import AESCipher
 
@@ -115,7 +154,7 @@ def test_AESCipher_initialization(m5stickv):
 
 
 def test_AESCipher_calling_method_encrypt(m5stickv):
-    from krux.encryption import AESCipher, VERSION_MODE
+    from krux.encryption import AESCipher
     from ucryptolib import MODE_ECB, MODE_CBC, MODE_GCM
 
     encryptor = AESCipher("key", "salt", 1)
@@ -158,7 +197,7 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
 
 
 def test_AESCipher_calling_method_decrypt(m5stickv):
-    from krux.encryption import AESCipher, VERSION_MODE
+    from krux.encryption import AESCipher
     from ucryptolib import MODE_ECB, MODE_CBC, MODE_GCM
 
     decryptor = AESCipher("key", "salt", 1)

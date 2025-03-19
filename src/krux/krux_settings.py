@@ -53,10 +53,6 @@ DEFAULT_RX_PIN = (
     else 34
 )
 
-# Encription Versions
-PBKDF2_HMAC_ECB = 0
-PBKDF2_HMAC_CBC = 1
-
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 CNC_FILE_DRIVER = "cnc/file"
 
@@ -377,14 +373,13 @@ class PersistSettings(SettingsNamespace):
 class EncryptionSettings(SettingsNamespace):
     """Encryption settings"""
 
-    AES_ECB_NAME = "AES-ECB"
-    AES_CBC_NAME = "AES-CBC"
+    # defined in krux.encryption.VERSIONS
     VERSION_NAMES = {
-        PBKDF2_HMAC_ECB: AES_ECB_NAME,
-        PBKDF2_HMAC_CBC: AES_CBC_NAME,
+        0: "AES-ECB",
+        1: "AES-CBC",
     }
     namespace = "settings.encryption"
-    version = CategorySetting("version", AES_ECB_NAME, list(VERSION_NAMES.values()))
+    version = CategorySetting("version", "AES-ECB", list(VERSION_NAMES.values()))
     pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [1, 500000])
 
     def label(self, attr):

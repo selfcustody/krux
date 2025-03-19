@@ -28,24 +28,19 @@ import hashlib
 import ucryptolib
 from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
-from .krux_settings import Settings, PBKDF2_HMAC_ECB, PBKDF2_HMAC_CBC
+from .krux_settings import Settings
 from embit import bip39
 
 
 MNEMONICS_FILE = "seeds.json"
 FLASH_PATH = "/flash/"
 
-VERSION_MODE = {
-    "AES-ECB": ucryptolib.MODE_ECB,
-    "AES-CBC": ucryptolib.MODE_CBC,
-    PBKDF2_HMAC_ECB: ucryptolib.MODE_ECB,
-    PBKDF2_HMAC_CBC: ucryptolib.MODE_CBC,
+# encryption versions are defined here
+VERSIONS = {
+    0: {"name": "AES-ECB", "mode": ucryptolib.MODE_ECB},
+    1: {"name": "AES-CBC", "mode": ucryptolib.MODE_CBC},
 }
-
-VERSION_NUMBER = {
-    "AES-ECB": PBKDF2_HMAC_ECB,
-    "AES-CBC": PBKDF2_HMAC_CBC,
-}
+VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
 
 AES_BLOCK_SIZE = 16
 QR_CODE_ITER_MULTIPLE = 10000
@@ -61,7 +56,7 @@ class AESCipher:
 
     def encrypt(self, raw, version, i_vector=None):
         """AES encrypt according to krux rules defined by version, returns bytes"""
-        mode = VERSION_MODE[version]
+        mode = VERSIONS[version]["mode"]
         plain = raw.encode("latin-1") if isinstance(raw, str) else raw
         plain = pad(plain)
         if mode == ucryptolib.MODE_ECB:
@@ -88,7 +83,7 @@ class AESCipher:
 
     def decrypt(self, encrypted, version):
         """AES Decrypt according to krux rules defined by version, returns bytes"""
-        mode = VERSION_MODE[version]
+        mode = VERSIONS[version]["mode"]
         if mode == ucryptolib.MODE_ECB:
             decryptor = ucryptolib.aes(self.key, mode)
         elif mode == ucryptolib.MODE_CBC:
@@ -170,7 +165,7 @@ class MnemonicStorage:
     def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, i_vector=None):
         """Saves the encrypted mnemonic on a file, returns True if successful"""
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
-        version = VERSION_NUMBER[Settings().encryption.version]
+        version = VERSION_NUMBERS[Settings().encryption.version]
         plain = bip39.mnemonic_to_bytes(mnemonic)
         plain += hashlib.sha256(plain).digest()[:16]
         encrypted = encryptor.encrypt(plain, version, i_vector)
@@ -245,7 +240,7 @@ class EncryptedQRCode:
 
     def __init__(self) -> None:
         self.mnemonic_id = None
-        self.version = VERSION_NUMBER[Settings().encryption.version]
+        self.version = VERSION_NUMBERS[Settings().encryption.version]
         self.iterations = Settings().encryption.pbkdf2_iterations
         self.encrypted_data = None
 
@@ -254,7 +249,7 @@ class EncryptedQRCode:
         iterations = (
             Settings().encryption.pbkdf2_iterations // QR_CODE_ITER_MULTIPLE
         ) * QR_CODE_ITER_MULTIPLE
-        version = VERSION_NUMBER[Settings().encryption.version]
+        version = VERSION_NUMBERS[Settings().encryption.version]
         encryptor = AESCipher(key, mnemonic_id, iterations)
         bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
         bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
@@ -267,9 +262,7 @@ class EncryptedQRCode:
             (self.mnemonic_id, self.version, self.iterations, self.encrypted_data) = (
                 kef_decode(data)
             )
-            version_name = [k for k, v in VERSION_NUMBER.items() if v == self.version][
-                0
-            ]
+            version_name = VERSIONS[self.version]["name"]
         except:
             return None
 
@@ -304,7 +297,7 @@ def kef_encode(id_, version, iterations, ciphertext):
         raise ValueError("Invalid ID")
 
     try:
-        assert 0 <= version <= 255 and version in VERSION_MODE
+        assert 0 <= version <= 255 and version in VERSIONS
     except:
         raise ValueError("Invalid version")
 
