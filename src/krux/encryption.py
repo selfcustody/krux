@@ -37,8 +37,8 @@ FLASH_PATH = "/flash/"
 
 # encryption versions are defined here
 VERSIONS = {
-    0: {"name": "AES-ECB", "mode": ucryptolib.MODE_ECB},
-    1: {"name": "AES-CBC", "mode": ucryptolib.MODE_CBC},
+    0: {"name": "AES-ECB", "mode": ucryptolib.MODE_ECB, "pkcs_pad": False},
+    1: {"name": "AES-CBC", "mode": ucryptolib.MODE_CBC, "pkcs_pad": False},
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
 
@@ -96,14 +96,21 @@ class AESCipher:
         return decryptor.decrypt(encrypted)
 
 
-def pad(some_bytes):
+def pad(some_bytes, pkcs_pad=False):
     """Pads some_bytes to AES block size of 16 bytes, returns bytes"""
     len_padding = (16 - len(some_bytes) % 16) % 16
+    if pkcs_pad:
+        if len_padding == 0:
+            len_padding = 16
+        return some_bytes + (len_padding).to_bytes(1, "big") * len_padding
     return some_bytes + b"\x00" * len_padding
 
 
-def unpad(some_bytes):
+def unpad(some_bytes, pkcs_pad=False):
     """Strips padding from some_bytes, returns bytes"""
+    if pkcs_pad:
+        len_padding = some_bytes[-1]
+        return some_bytes[:-len_padding]
     stripped = some_bytes.replace(b"\x00", b"")
     if 0 < len(some_bytes) - len(stripped) < 16:
         return stripped

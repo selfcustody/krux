@@ -119,6 +119,9 @@ def test_encryption_VERSIONS_definition(m5stickv):
         # each version has a 'mode' integer that krux supports
         assert isinstance(v["mode"], int) and 1 <= v["mode"] <= 2
 
+        # each version has a 'pkcs_pad' boolean for pkcs style padding
+        assert isinstance(v["pkcs_pad"], bool)
+
     # VERSIONS['name'] must be unique else VERSION_NUMBERS will break
     assert len(VERSIONS) == len(VERSION_NUMBERS)
 
@@ -682,14 +685,37 @@ BROKEN_NULPAD_TEST_CASES = [
     (b"\x01\x00", b"\x01\x00" + b"\x00" * 14),
     (b"\x01\x00" * 15, b"\x01\x00" * 15 + b"\x00" * 2),
 ]
+PKCSPAD_TEST_CASES = [
+    # (unpadded, padded)
+    (b"0", b"0" + b"\x0f" * 15),
+    (b"0123456789abcde", b"0123456789abcde" + b"\x01"),
+    (b"0123456789abcdef", b"0123456789abcdef" + b"\x10" * 16),
+    (b"0123456789abcdef0", b"0123456789abcdef0" + b"\x0f" * 15),
+    (
+        b"0123456789abcdef0123456789abcde",
+        b"0123456789abcdef0123456789abcde" + b"\x01",
+    ),
+    (
+        b"0123456789abcdef0123456789abcdef",
+        b"0123456789abcdef0123456789abcdef" + b"\x10" * 16,
+    ),
+    (b"\x00" * 16, b"\x00" * 16 + b"\x10" * 16),
+    (b"\x00" * 32, b"\x00" * 32 + b"\x10" * 16),
+    (b"\x01" * 15 + b"\x00" * 17, b"\x01" * 15 + b"\x00" * 17 + b"\x10" * 16),
+    (TEST_WORDS.encode(), TEST_WORDS.encode() + b"\x06" * 6),
+    (ECB_WORDS.encode(), ECB_WORDS.encode() + b"\x05" * 5),
+    (CBC_WORDS.encode(), CBC_WORDS.encode() + b"\x09" * 9),
+]
 
 
 def test_padding(m5stickv):
     from krux.encryption import pad, unpad
 
-    # pad() and unpad() expect bytestrings
+    # pad() and unpad() expect bytestrings, optionally pkcs_pad boolean
     unpadded = b"hello world"
     padded = pad(unpadded)
+    assert padded == pad(unpadded, pkcs_pad=False)  # default: pkcs_pad=False
+    assert unpadded == unpad(pad(unpadded, pkcs_pad=True), pkcs_pad=True)
     with pytest.raises(TypeError):
         pad(unpadded.decode())
     with pytest.raises(TypeError):
@@ -711,3 +737,13 @@ def test_padding(m5stickv):
         # but unpad() will strip too many padding bytes
         with pytest.raises(AssertionError):
             assert unpad(padded) == unpadded
+
+    # pkcs padding always adds at least 1 byte of padding
+    for unpadded, padded in PKCSPAD_TEST_CASES:
+        assert pad(unpadded, pkcs_pad=True) == padded
+        assert unpad(padded, pkcs_pad=True) == unpadded
+        len_padding = len(padded) - len(unpadded)
+        assert (
+            pad(unpadded, pkcs_pad=True)[-len_padding:]
+            == len_padding.to_bytes(1, "big") * len_padding
+        )
