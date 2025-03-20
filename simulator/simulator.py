@@ -112,6 +112,7 @@ from kruxsim.mocks import ft6x36
 from kruxsim.mocks import buttons
 from kruxsim.mocks import rotary
 from kruxsim.sequence import SequenceExecutor
+from kruxsim.mocks import uhashlib_hw
 
 sequence_executor = None
 if args.sequence:

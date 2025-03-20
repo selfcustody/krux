@@ -35,6 +35,7 @@ def new_remove(path, *args, **kwargs):
     path = path.lstrip("/") if path.startswith("/sd") else path
     return old_remove(path, *args, **kwargs)
 
+
 def new_stat(path, *args, **kwargs):
     path = path.lstrip("/") if path.startswith("/sd") else path
     return old_stat(path, *args, **kwargs)
