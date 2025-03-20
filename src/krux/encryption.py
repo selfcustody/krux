@@ -37,8 +37,20 @@ FLASH_PATH = "/flash/"
 
 # encryption versions are defined here
 VERSIONS = {
-    0: {"name": "AES-ECB", "mode": ucryptolib.MODE_ECB, "pkcs_pad": False},
-    1: {"name": "AES-CBC", "mode": ucryptolib.MODE_CBC, "pkcs_pad": False},
+    0: {"name": "AES-ECB", "mode": ucryptolib.MODE_ECB, "pkcs_pad": False, "cksum": 0},
+    1: {"name": "AES-CBC", "mode": ucryptolib.MODE_CBC, "pkcs_pad": False, "cksum": 0},
+    2: {
+        "name": "AES-ECB v2",
+        "mode": ucryptolib.MODE_ECB,
+        "pkcs_pad": True,
+        "cksum": 4,
+    },
+    3: {
+        "name": "AES-CBC v2",
+        "mode": ucryptolib.MODE_CBC,
+        "pkcs_pad": True,
+        "cksum": 4,
+    },
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
 
@@ -58,7 +70,9 @@ class AESCipher:
         """AES encrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
         plain = raw.encode("latin-1") if isinstance(raw, str) else raw
-        plain = pad(plain)
+        if VERSIONS[version]["cksum"]:
+            plain += hashlib.sha256(plain).digest()[: VERSIONS[version]["cksum"]]
+        plain = pad(plain, pkcs_pad=VERSIONS[version]["pkcs_pad"])
         if mode == ucryptolib.MODE_ECB:
             unique_blocks = len(
                 set((plain[x : x + 16] for x in range(0, len(plain), 16)))
@@ -93,7 +107,15 @@ class AESCipher:
             encrypted = encrypted[AES_BLOCK_SIZE:]
         else:
             raise ValueError("Invalid mode")
-        return decryptor.decrypt(encrypted)
+        decrypted = decryptor.decrypt(encrypted)
+        if VERSIONS[version]["cksum"]:
+            decrypted = unpad(decrypted, pkcs_pad=VERSIONS[version]["pkcs_pad"])
+            len_cksum = VERSIONS[version]["cksum"]
+            cksum = decrypted[-len_cksum:]
+            decrypted = decrypted[:-len_cksum]
+            if hashlib.sha256(decrypted).digest()[:len_cksum] != cksum:
+                return None
+        return decrypted
 
 
 def pad(some_bytes, pkcs_pad=False):
@@ -160,8 +182,8 @@ class MnemonicStorage:
         decrypted = decryptor.decrypt(data, version)
         # Data validation
         mnemonic_data = decrypted[:-AES_BLOCK_SIZE]
-        checksum = decrypted[-AES_BLOCK_SIZE:]
-        if hashlib.sha256(mnemonic_data).digest()[:16] == checksum:
+        cksum = decrypted[-AES_BLOCK_SIZE:]
+        if hashlib.sha256(mnemonic_data).digest()[:16] == cksum:
             return bip39.mnemonic_from_bytes(mnemonic_data)
         try:  # Deprecated, but supported for decryption
             words = unpad(decrypted).decode()
@@ -287,9 +309,9 @@ class EncryptedQRCode:
         decryptor = AESCipher(key, self.mnemonic_id, self.iterations)
         decrypted_data = decryptor.decrypt(self.encrypted_data, self.version)
         mnemonic_data = decrypted_data[:-AES_BLOCK_SIZE]
-        checksum = decrypted_data[-AES_BLOCK_SIZE:]
+        cksum = decrypted_data[-AES_BLOCK_SIZE:]
         # Data validation:
-        if hashlib.sha256(mnemonic_data).digest()[:16] != checksum:
+        if hashlib.sha256(mnemonic_data).digest()[:16] != cksum:
             return None
         return mnemonic_data
 
