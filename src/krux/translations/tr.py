@@ -36,7 +36,7 @@ translation_array = [
     "#0 numaralı hesap varsayılacaktır",
     "Hesap Endeksi",
     "Cüzdan parolası eklensin mi veya değiştirilsin mi?",
-    "AES-CBC modu için kameradan ek entropi gereklidir",
+    "Aşağıdakiler için kameradan ek entropi gereklidir",
     "Adres",
     "Kamerayı ve yedek plakay'ı düzgün bir şekilde hizalayın.",
     "Parlama Önleyici Mod",

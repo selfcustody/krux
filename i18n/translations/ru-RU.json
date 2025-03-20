@@ -14,7 +14,7 @@
     "Account #0 would be assumed": "Будет принят счет №0",
     "Account Index": "Индекс счета",
     "Add or change wallet passphrase?": "Добавить или изменить пароль кошелька?",
-    "Additional entropy from camera required for AES-CBC mode": "Для режима AES-CBC требуется дополнительная энтропия от камеры",
+    "Additional entropy from camera required for": "Дополнительная энтропия от камеры, необходимая для",
     "Address": "Адрес",
     "Align camera and backup plate properly.": "Правильно совместите камеру и резервную пластину.",
     "Anti-glare mode": "Антибликовый режим",

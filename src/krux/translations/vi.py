@@ -36,7 +36,7 @@ translation_array = [
     "Tài khoản #0 sẽ được giả định",
     "Chỉ mục tài khoản",
     "Thêm hoặc thay đổi cụm mật khẩu ví?",
-    "Cần thêm entropy từ camera cho chế độ AES-CBC",
+    "Entropy bổ sung từ máy ảnh cần thiết cho",
     "Địa chỉ",
     "Căn chỉnh camera và tấm dự phòng đúng cách.",
     "Chế độ chống lóa",

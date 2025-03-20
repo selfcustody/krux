@@ -119,6 +119,9 @@ def test_encryption_VERSIONS_definition(m5stickv):
         # each version has a 'mode' integer that krux supports
         assert isinstance(v["mode"], int) and 1 <= v["mode"] <= 2
 
+        # each version has an 'iv' boolean to require i_vector
+        assert isinstance(v["iv"], bool)
+
         # each version has a 'pkcs_pad' boolean for pkcs style padding
         assert isinstance(v["pkcs_pad"], bool)
 
@@ -184,19 +187,18 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
             with pytest.raises(TypeError):
                 encryptor.encrypt(invalid, *valids[1:])
         for invalid in invalid_versions:
-            # err = "Invalid mode"
-            with pytest.raises((ValueError, KeyError)):  # , match=err):
+            with pytest.raises((ValueError, KeyError)):
                 if len(valids) == 3:
                     encryptor.encrypt(valids[0], invalid, valids[2])
                 else:
                     encryptor.encrypt(valids[0], invalid)
         if valids[1] == 0:
-            err = "IV is not valid in ECB mode"
+            err = "IV is not required"
             for invalid in invalid_ivs:
                 with pytest.raises(ValueError, match=err):
                     encryptor.encrypt(valids[0], valids[1], invalid)
         elif valids[1] == 1:
-            err = "IV must be 16 bytes in CBC mode"
+            err = "IV must be 16 bytes"
             for invalid in invalid_ivs:
                 with pytest.raises(ValueError, match=err):
                     encryptor.encrypt(valids[0], valids[1], invalid)
@@ -223,8 +225,7 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
             with pytest.raises((ValueError, TypeError)):
                 decryptor.decrypt(invalid, valids[1])
         for invalid in invalid_versions:
-            # err = "Invalid mode"
-            with pytest.raises((ValueError, KeyError)):  # , match=err):
+            with pytest.raises((ValueError, KeyError)):
                 decryptor.decrypt(valids[0], invalid)
 
     err = "Missing IV"
@@ -254,6 +255,10 @@ def test_ecb_encryption(m5stickv):
     plain = b'"Running bitcoin" -Hal, January 11, 2009'
     encrypted = encryptor.encrypt(plain, version)
     assert encryptor.decrypt(encrypted, version) == plain
+
+    # wrong key fails to decrypt silently
+    wrong = AESCipher("wrong", "wrong", ITERATIONS)
+    assert wrong.decrypt(encrypted, version) == None
 
 
 def test_ecb_encryption_fails_duplicated_blocks(m5stickv):
@@ -294,10 +299,14 @@ def test_cbc_encryption(m5stickv):
     encrypted = encryptor.encrypt(CBC_ENTROPY, version, iv)
     assert encryptor.decrypt(encrypted, version) == CBC_ENTROPY
 
-    version = 3  # AES.MODE_ECB w/ pkcs_pad + cksum
-    plain = b'"Running bitcoin" -Hal, January 11, 2009'
+    version = 3  # AES.MODE_CCB w/ pkcs_pad + cksum
+    plain = b'"Running bitcoin" -Hal, January 10, 2009'
     encrypted = encryptor.encrypt(plain, version, iv)
     assert encryptor.decrypt(encrypted, version) == plain
+
+    # wrong key fails to decrypt silently
+    wrong = AESCipher("wrong", "wrong", ITERATIONS)
+    assert wrong.decrypt(encrypted, version) == None
 
 
 def test_cbc_iv_use(m5stickv):

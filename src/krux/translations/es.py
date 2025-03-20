@@ -36,7 +36,7 @@ translation_array = [
     "Se supondría que la cuenta #0",
     "Índice de la cuenta",
     "¿Añadir o cambiar passphrase de la cartera?",
-    "Se requiere entropía adicional de la cámara para el modo AES-CBC",
+    "Se requiere entropía adicional de la cámara para",
     "Dirección",
     "Alinea la cámara y la placa de respaldo correctamente.",
     "Modo antirreflejo",

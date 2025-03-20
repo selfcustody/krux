@@ -36,7 +36,7 @@ translation_array = [
     "Le compte n °0 serait supposé",
     "Index du compte",
     "Ajoutez ou modifiez la phrase secrète\u2009?",
-    "Entropie supplémentaire de la caméra requise pour le mode AES-CBC",
+    "Entropie supplémentaire de la caméra requise pour",
     "Adresse",
     "Alignez correctement la caméra et plaque de sauvegarde.",
     "Mode anti-reflets",

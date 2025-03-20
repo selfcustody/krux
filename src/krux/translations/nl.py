@@ -36,7 +36,7 @@ translation_array = [
     "Account #0 zou worden aangenomen",
     "Accountindex",
     "Wachtwoordzin voor portemonnee toevoegen of wijzigen?",
-    "Extra entropie van de camera vereist voor AES-CBC-modus",
+    "Extra entropie van camera vereist voor",
     "Adres",
     "Richt de camera en back-upplaat op de juiste manier.",
     "Anti-verblindingsmodus",

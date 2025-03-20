@@ -22,7 +22,7 @@
 
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
-from ..encryption import AES_BLOCK_SIZE
+from ..encryption import AES_BLOCK_SIZE, VERSIONS, VERSION_NUMBERS
 from ..themes import theme
 from . import (
     Page,
@@ -187,12 +187,12 @@ class EncryptMnemonic(Page):
             self.flash_error(t("Key was not provided"))
             return None
 
-        version = Settings().encryption.version
+        version = VERSIONS[VERSION_NUMBERS[Settings().encryption.version]]
         i_vector = None
-        if version == "AES-CBC":
+        if version["iv"]:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Additional entropy from camera required for AES-CBC mode")
+                t("Additional entropy from camera required for") + " " + version["name"]
             )
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 self.flash_error(error_txt)
