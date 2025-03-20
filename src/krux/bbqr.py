@@ -188,13 +188,6 @@ def base32_decode_stream(encoded_str):
             decoded_bytes.append((buffer >> bits_left) & 0xFF)
             buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
 
-    # Process any remaining bits if they form a valid byte
-    if 0 < bits_left < 8:
-        remaining_byte = (buffer << (8 - bits_left)) & 0xFF
-        if remaining_byte != 0:
-            # Dead code? remaining bits seem to always be padding (null)
-            decoded_bytes.append(remaining_byte)
-
     return bytes(decoded_bytes)
 
 
