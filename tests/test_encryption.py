@@ -530,6 +530,32 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
     assert words == TEST_WORDS
 
 
+def test_check_encrypted_qr_code_lengths(m5stickv):
+    from krux.encryption import EncryptedQRCode, VERSIONS
+    from krux.krux_settings import Settings
+
+    for version in VERSIONS:
+        version_name = VERSIONS[version]["name"]
+        Settings().encryption.version = version_name
+        encrypted_qr = EncryptedQRCode()
+        iv = None
+        if VERSIONS[version]["iv"]:
+            iv = I_VECTOR
+        encrypted_qr = EncryptedQRCode()
+        qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, iv)
+        if version_name == "AES-ECB":
+            assert len(qr_data) == 44
+        elif version_name == "AES-CBC":
+            assert len(qr_data) == 60
+        elif version_name == "AES-ECB v2":
+            assert len(qr_data) == 44
+        elif version_name == "AES-CBC v2":
+            assert len(qr_data) == 60
+        else:
+            print(f"Unknown version: {version_name}")
+            assert 0
+
+
 def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
     from krux.encryption import EncryptedQRCode
     from krux.krux_settings import Settings
