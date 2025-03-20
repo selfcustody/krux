@@ -322,6 +322,12 @@ def snapshot_generator(outcome=SNAP_SUCCESS, animated_qr=[]):
     return snapshot
 
 
+def pbkdf2_hmac_sha256_wrapper(secret, salt, iterations):
+    import hashlib
+
+    return hashlib.pbkdf2_hmac("sha256", secret, salt, iterations)
+
+
 def board_m5stickv():
     return mock.MagicMock(
         config={
