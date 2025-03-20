@@ -410,10 +410,18 @@ class Login(Page):
 
     def _encrypted_qr_code(self, data):
         from ..encryption import EncryptedQRCode
+        from ..baseconv import base_decode
 
         encrypted_qr = EncryptedQRCode()
         data_bytes = data.encode("latin-1") if isinstance(data, str) else data
-        public_data = encrypted_qr.public_data(data_bytes)
+        public_data = None
+        try:  # Try to decode base43 data
+            decoded_b43 = base_decode(data_bytes, 43)
+            public_data = encrypted_qr.public_data(decoded_b43)
+        except:
+            pass
+        if not public_data:  # Failed to decode and parse base43
+            public_data = encrypted_qr.public_data(data_bytes)
         if public_data:
             self.ctx.display.clear()
             if self.prompt(

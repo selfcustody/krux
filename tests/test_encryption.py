@@ -533,6 +533,7 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
 def test_check_encrypted_qr_code_lengths(m5stickv):
     from krux.encryption import EncryptedQRCode, VERSIONS
     from krux.krux_settings import Settings
+    from krux.baseconv import base_decode
 
     for version in VERSIONS:
         version_name = VERSIONS[version]["name"]
@@ -548,9 +549,11 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         elif version_name == "AES-CBC":
             assert len(qr_data) == 60
         elif version_name == "AES-ECB v2":
-            assert len(qr_data) == 44
+            assert len(qr_data) == 64  # base43 string
+            assert len(base_decode(qr_data.encode(), 43)) == 44
         elif version_name == "AES-CBC v2":
-            assert len(qr_data) == 60
+            assert len(qr_data) == 88  # base43 string
+            assert len(base_decode(qr_data.encode(), 43)) == 60
         else:
             print(f"Unknown version: {version_name}")
             assert 0
