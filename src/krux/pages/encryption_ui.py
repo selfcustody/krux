@@ -156,6 +156,7 @@ class EncryptMnemonic(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.version_number = VERSION_NUMBERS[Settings().encryption.version]
 
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
@@ -187,7 +188,7 @@ class EncryptMnemonic(Page):
             self.flash_error(t("Key was not provided"))
             return None
 
-        version = VERSIONS[VERSION_NUMBERS[Settings().encryption.version]]
+        version = VERSIONS[self.version_number]
         i_vector = None
         if version["iv"]:
             self.ctx.display.clear()
@@ -275,6 +276,12 @@ class EncryptMnemonic(Page):
         del encrypted_qr
 
         from .qr_view import SeedQRView
+
+        if self.version_number > 1:
+            from ..baseconv import base_encode
+
+            # Convert to base43
+            qr_data = base_encode(qr_data, 43).decode("ascii")
 
         seed_qr_view = SeedQRView(self.ctx, data=qr_data, title=mnemonic_id)
         seed_qr_view.display_qr(allow_export=True)

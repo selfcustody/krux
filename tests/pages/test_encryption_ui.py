@@ -155,6 +155,7 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(CBC_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
 
+    Settings().encryption.version = "AES-CBC"
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
@@ -164,7 +165,6 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
         "krux.pages.capture_entropy.CameraEntropy.capture",
         mocker.MagicMock(return_value=I_VECTOR),
     )
-    Settings().encryption.version = "AES-CBC"
     storage_ui.encrypt_menu()
 
     ctx.display.draw_centered_text.assert_has_calls(
@@ -301,6 +301,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(CBC_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
+    Settings().encryption.version = "AES-CBC"
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
@@ -312,7 +313,6 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
     )
 
     with patch("krux.pages.qr_view.SeedQRView", mocker.MagicMock()) as qr_view:
-        Settings().encryption.version = "AES-CBC"
         storage_ui.encrypt_menu()
     qr_view.assert_has_calls(
         [

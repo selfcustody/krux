@@ -325,8 +325,7 @@ class EncryptedQRCode:
         if VERSIONS[version]["cksum"] == 0:
             bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
         bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, version, i_vector)
-        payload = kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
-        return payload
+        return kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
 
     def public_data(self, data):
         """Parse and returns encrypted mnemonic QR codes public data"""
