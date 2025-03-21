@@ -65,6 +65,20 @@ VERSIONS = {
         "pkcs_pad": True,
         "cksum": 4,
     },
+    4: {
+        "name": "AES-ECB v3",
+        "mode": ucryptolib.MODE_ECB,
+        "iv": False,
+        "pkcs_pad": False,
+        "cksum": -2,
+    },
+    5: {
+        "name": "AES-CBC v3",
+        "mode": ucryptolib.MODE_CBC,
+        "iv": True,
+        "pkcs_pad": False,
+        "cksum": -2,
+    },
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
 
@@ -83,9 +97,15 @@ class AESCipher:
     def encrypt(self, raw, version, i_vector=None):
         """AES encrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
+        prefix = b""
         plain = raw.encode("latin-1") if isinstance(raw, str) else raw
         if VERSIONS[version]["cksum"]:
-            plain += hashlib.sha256(plain).digest()[: VERSIONS[version]["cksum"]]
+            cksum = hashlib.sha256(plain).digest()[: abs(VERSIONS[version]["cksum"])]
+            if VERSIONS[version]["cksum"] > 0:
+                plain += cksum
+            else:
+                prefix += cksum
+            del cksum
         plain = pad(plain, pkcs_pad=VERSIONS[version]["pkcs_pad"])
         if mode == ucryptolib.MODE_ECB:
             unique_blocks = len(
@@ -105,12 +125,16 @@ class AESCipher:
             encryptor = ucryptolib.aes(self.key, mode)
         encrypted = encryptor.encrypt(plain)
         if i_vector:
-            encrypted = i_vector + encrypted
-        return encrypted
+            prefix += i_vector
+        return prefix + encrypted
 
     def decrypt(self, encrypted, version):
         """AES Decrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
+        cksum = None
+        if VERSIONS[version]["cksum"] < 0:
+            cksum = encrypted[: -VERSIONS[version]["cksum"]]
+            encrypted = encrypted[-VERSIONS[version]["cksum"] :]
         if not VERSIONS[version]["iv"]:
             decryptor = ucryptolib.aes(self.key, mode)
         else:
@@ -121,10 +145,13 @@ class AESCipher:
         decrypted = decryptor.decrypt(encrypted)
         if VERSIONS[version]["cksum"]:
             decrypted = unpad(decrypted, pkcs_pad=VERSIONS[version]["pkcs_pad"])
-            len_cksum = VERSIONS[version]["cksum"]
-            cksum = decrypted[-len_cksum:]
-            decrypted = decrypted[:-len_cksum]
-            if hashlib.sha256(decrypted).digest()[:len_cksum] != cksum:
+            if VERSIONS[version]["cksum"] > 0:
+                cksum = decrypted[-VERSIONS[version]["cksum"] :]
+                decrypted = decrypted[: -VERSIONS[version]["cksum"]]
+            try:
+                shasum = hashlib.sha256(decrypted).digest()
+                assert shasum[: abs(VERSIONS[version]["cksum"])] == cksum
+            except:
                 return None
         return decrypted
 
@@ -299,10 +326,7 @@ class EncryptedQRCode:
             bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
         bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, version, i_vector)
         payload = kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
-        if version < 2:
-            return payload
-        # Encode in base43 format
-        return base_encode(payload, 43).decode("ascii")
+        return payload
 
     def public_data(self, data):
         """Parse and returns encrypted mnemonic QR codes public data"""
@@ -362,11 +386,15 @@ def kef_encode(id_, version, iterations, ciphertext):
     except:
         raise ValueError("Invalid iterations")
 
+    if VERSIONS[version]["cksum"] >= 0:
+        offset = 0
+    else:
+        offset = -VERSIONS[version]["cksum"]
     if not isinstance(ciphertext, bytes):
         raise ValueError("Ciphertext is not bytes")
-    if len(ciphertext) % 16 != 0:
+    if len(ciphertext[offset:]) % 16 != 0:
         raise ValueError("Ciphertext is not aligned")
-    if len(ciphertext) // 16 < 2:
+    if len(ciphertext[offset:]) // 16 < 1:
         raise ValueError("Ciphertext is too short")
 
     return b"".join(

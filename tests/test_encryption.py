@@ -126,7 +126,10 @@ def test_encryption_VERSIONS_definition(m5stickv):
         assert isinstance(v["pkcs_pad"], bool)
 
         # each version has a 'cksum' integer for bytes of sha256 checksum
-        assert isinstance(v["cksum"], int) and 0 <= v["cksum"] <= 32
+        # if positive, it's appended to plaintext before padding, encryption
+        # If negative, it is prepended to ciphertext (effectively public)
+        # before optional IV
+        assert isinstance(v["cksum"], int) and -32 <= v["cksum"] <= 32
 
     # VERSIONS['name'] must be unique else VERSION_NUMBERS will break
     assert len(VERSIONS) == len(VERSION_NUMBERS)
@@ -168,15 +171,23 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
 
     encryptor = AESCipher("key", "salt", 1)
 
-    # .encrypt() expects bytes raw, AES mode, sometimes bytes i_vector
+    # .encrypt() expects bytes raw, version, sometimes bytes i_vector
     valid_params = (
         ("\x00", 0),
         ("\x00", 1, b"\x00" * 16),
+        ("\x00", 2),
+        ("\x00", 3, b"\x00" * 16),
+        ("\x00", 4),
+        ("\x00", 5, b"\x00" * 16),
         (b"\x00", 0),
         (b"\x00", 1, b"\x00" * 16),
+        (b"\x00", 2),
+        (b"\x00", 3, b"\x00" * 16),
+        (b"\x00", 4),
+        (b"\x00", 5, b"\x00" * 16),
     )
     invalid_raws = (True, None, 1)
-    invalid_versions = (None, -1, 4)
+    invalid_versions = (None, -1, 6)
     invalid_ivs = ("\x00" * 16, b"\x00" * 15, 1)
     for valids in valid_params:
         # valid params works
@@ -213,9 +224,13 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
     valid_params = (
         (b"\x00" * 16, 0),
         (b"\x00" * 32, 1),
+        (b"\x00" * 16, 2),
+        (b"\x00" * 32, 3),
+        (b"\x00" * 18, 4),
+        (b"\x00" * 34, 5),
     )
-    invalid_encrypteds = (True, None, 1, b"\x00")
-    invalid_versions = (None, -1, 4)
+    invalid_encrypteds = (True, None, 1, "\x00")
+    invalid_versions = (None, -1, 6)
     for valids in valid_params:
         # valid params works
         encrypted = decryptor.decrypt(*valids)
@@ -231,6 +246,10 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
     err = "Missing IV"
     with pytest.raises(ValueError, match=err):
         decryptor.decrypt(b"\x00" * 16, 1)
+    with pytest.raises(ValueError, match=err):
+        decryptor.decrypt(b"\x00" * 16, 3)
+    with pytest.raises(ValueError, match=err):
+        decryptor.decrypt(b"\x00" * 18, 5)
 
 
 def test_ecb_encryption(m5stickv):
@@ -251,8 +270,17 @@ def test_ecb_encryption(m5stickv):
     encrypted = encryptor.encrypt(ECB_ENTROPY, version)
     assert encryptor.decrypt(encrypted, version) == ECB_ENTROPY
 
-    version = 2  # AES.MODE_ECB w/ pkcs_pad + cksum
-    plain = b'"Running bitcoin" -Hal, January 11, 2009'
+    version = 2  # AES.MODE_ECB w/ pkcs_pad +cksum
+    plain = b'"Running bitcoin" -Hal, January 10, 2009'
+    encrypted = encryptor.encrypt(plain, version)
+    assert encryptor.decrypt(encrypted, version) == plain
+
+    # wrong key fails to decrypt silently
+    wrong = AESCipher("wrong", "wrong", ITERATIONS)
+    assert wrong.decrypt(encrypted, version) == None
+
+    version = 4  # AES.MODE_ECB w/ pkcs_pad -cksum
+    plain = b'"Running bitcoin" -Hal, January 10, 2009'
     encrypted = encryptor.encrypt(plain, version)
     assert encryptor.decrypt(encrypted, version) == plain
 
@@ -299,7 +327,16 @@ def test_cbc_encryption(m5stickv):
     encrypted = encryptor.encrypt(CBC_ENTROPY, version, iv)
     assert encryptor.decrypt(encrypted, version) == CBC_ENTROPY
 
-    version = 3  # AES.MODE_CCB w/ pkcs_pad + cksum
+    version = 3  # AES.MODE_CBC w/ pkcs_pad +cksum
+    plain = b'"Running bitcoin" -Hal, January 10, 2009'
+    encrypted = encryptor.encrypt(plain, version, iv)
+    assert encryptor.decrypt(encrypted, version) == plain
+
+    # wrong key fails to decrypt silently
+    wrong = AESCipher("wrong", "wrong", ITERATIONS)
+    assert wrong.decrypt(encrypted, version) == None
+
+    version = 5  # AES.MODE_CBC w/ pkcs_pad -cksum
     plain = b'"Running bitcoin" -Hal, January 10, 2009'
     encrypted = encryptor.encrypt(plain, version, iv)
     assert encryptor.decrypt(encrypted, version) == plain
@@ -533,7 +570,7 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
 def test_check_encrypted_qr_code_lengths(m5stickv):
     from krux.encryption import EncryptedQRCode, VERSIONS
     from krux.krux_settings import Settings
-    from krux.baseconv import base_decode
+    from krux.baseconv import base_encode
 
     for version in VERSIONS:
         version_name = VERSIONS[version]["name"]
@@ -546,14 +583,22 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, iv)
         if version_name == "AES-ECB":
             assert len(qr_data) == 44
+            assert len(base_encode(qr_data, 43)) == 64
         elif version_name == "AES-CBC":
             assert len(qr_data) == 60
+            assert len(base_encode(qr_data, 43)) == 88
         elif version_name == "AES-ECB v2":
-            assert len(qr_data) == 64  # base43 string
-            assert len(base_decode(qr_data.encode(), 43)) == 44
+            assert len(qr_data) == 44
+            assert len(base_encode(qr_data, 43)) == 64
         elif version_name == "AES-CBC v2":
-            assert len(qr_data) == 88  # base43 string
-            assert len(base_decode(qr_data.encode(), 43)) == 60
+            assert len(qr_data) == 60
+            assert len(base_encode(qr_data, 43)) == 88
+        elif version_name == "AES-ECB v3":
+            assert len(qr_data) == 30
+            assert len(base_encode(qr_data, 43)) == 44
+        elif version_name == "AES-CBC v3":
+            assert len(qr_data) == 46
+            assert len(base_encode(qr_data, 43)) == 67
         else:
             print(f"Unknown version: {version_name}")
             assert 0
@@ -619,7 +664,7 @@ def test_kef_encode_exceptions(m5stickv):
 
                     # Version must be 0-255, and supported
                     err = "Invalid version"
-                    for invalid in (None, -1, 0.5, "0", 256, 4):
+                    for invalid in (None, -1, 0.5, "0", 256, 6):
                         with pytest.raises(ValueError, match=err):
                             kef_encode(id_, invalid, iterations, ciphertext)
 
@@ -654,7 +699,7 @@ def test_kef_encode_exceptions(m5stickv):
 
                     # ...and not too short
                     err = "Ciphertext is too short"
-                    invalid = ciphertext[:16]
+                    invalid = ciphertext[:0]
                     with pytest.raises(ValueError, match=err):
                         kef_encode(id_, version, iterations, invalid)
 

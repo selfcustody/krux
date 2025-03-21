@@ -379,6 +379,8 @@ class EncryptionSettings(SettingsNamespace):
         1: "AES-CBC",
         2: "AES-ECB v2",
         3: "AES-CBC v2",
+        4: "AES-ECB v3",
+        5: "AES-CBC v3",
     }
     namespace = "settings.encryption"
     version = CategorySetting("version", "AES-ECB", list(VERSION_NAMES.values()))
