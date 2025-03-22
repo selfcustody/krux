@@ -105,7 +105,8 @@ from Crypto.Cipher import AES
 
 if "ucryptolib" not in sys.modules:
     def new_with_mac_len(*args, **kwargs):
-        kwargs['mac_len'] = 4
+        if args[1] == 11:  # 1=ECB, 2=CBC, 11=GCM
+            kwargs['mac_len'] = 4
         return AES.new(*args, **kwargs)
 
     sys.modules["ucryptolib"] = mock.MagicMock(
