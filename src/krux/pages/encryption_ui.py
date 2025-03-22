@@ -189,7 +189,7 @@ class EncryptMnemonic(Page):
 
         version = VERSIONS[VERSION_NUMBERS[Settings().encryption.version]]
         i_vector = None
-        if version["iv"]:
+        if version.get("iv", 0):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Additional entropy from camera required for") + " " + version["name"]

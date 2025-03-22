@@ -40,43 +40,34 @@ VERSIONS = {
     0: {
         "name": "AES-ECB",
         "mode": ucryptolib.MODE_ECB,
-        "iv": False,
-        "pkcs_pad": False,
-        "cksum": 0,
     },
     1: {
         "name": "AES-CBC",
         "mode": ucryptolib.MODE_CBC,
-        "iv": True,
-        "pkcs_pad": False,
-        "cksum": 0,
+        "iv": 16,
     },
     2: {
         "name": "AES-ECB v2",
         "mode": ucryptolib.MODE_ECB,
-        "iv": False,
         "pkcs_pad": True,
         "cksum": -4,
     },
     3: {
         "name": "AES-CBC v2",
         "mode": ucryptolib.MODE_CBC,
-        "iv": True,
+        "iv": 16,
         "pkcs_pad": True,
         "cksum": -4,
     },
     4: {
         "name": "AES-ECB v3",
         "mode": ucryptolib.MODE_ECB,
-        "iv": False,
-        "pkcs_pad": False,
         "cksum": 3,
     },
     5: {
         "name": "AES-CBC v3",
         "mode": ucryptolib.MODE_CBC,
-        "iv": True,
-        "pkcs_pad": False,
+        "iv": 16,
         "cksum": 4,
     },
 }
@@ -97,24 +88,28 @@ class AESCipher:
     def encrypt(self, plain, version, i_vector=None):
         """AES encrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
+        v_cksum = VERSIONS[version].get("cksum", 0)
+        v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
+        v_iv = VERSIONS[version].get("iv", 0)
+
         prefix, suffix = b"", b""
         plain = plain.encode("latin-1") if isinstance(plain, str) else plain
-        if VERSIONS[version]["cksum"]:
-            cksum = hashlib.sha256(plain).digest()[: abs(VERSIONS[version]["cksum"])]
-            if VERSIONS[version]["cksum"] < 0:
+        if v_cksum:
+            cksum = hashlib.sha256(plain).digest()[: abs(v_cksum)]
+            if v_cksum < 0:
                 plain += cksum
             else:
                 suffix += cksum
             del cksum
-        plain = pad(plain, pkcs_pad=VERSIONS[version]["pkcs_pad"])
+        plain = pad(plain, pkcs_pad=v_pkcs_pad)
         if mode == ucryptolib.MODE_ECB:
             unique_blocks = len(
                 set((plain[x : x + 16] for x in range(0, len(plain), 16)))
             )
             if unique_blocks != len(plain) // 16:
                 raise ValueError("Duplicate blocks in ECB mode")
-        if VERSIONS[version]["iv"]:
-            if not (isinstance(i_vector, bytes) and len(i_vector) == 16):
+        if v_iv:
+            if not (isinstance(i_vector, bytes) and len(i_vector) == v_iv):
                 raise ValueError("Wrong IV length")
         else:
             if i_vector:
@@ -131,27 +126,28 @@ class AESCipher:
     def decrypt(self, payload, version):
         """AES Decrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
+        v_cksum = VERSIONS[version].get("cksum", 0)
+        v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
+        v_iv = VERSIONS[version].get("iv", 0)
+
         cksum = None
-        if VERSIONS[version]["cksum"] > 0:
-            cksum = payload[-VERSIONS[version]["cksum"] :]
-            payload = payload[: -VERSIONS[version]["cksum"]]
-        if not VERSIONS[version]["iv"]:
+        if v_cksum > 0:
+            cksum = payload[-v_cksum:]
+            payload = payload[:-v_cksum]
+        if not v_iv:
             decryptor = ucryptolib.aes(self.key, mode)
         else:
-            if len(payload) < AES_BLOCK_SIZE * 2:
+            if len(payload) < AES_BLOCK_SIZE + v_iv:
                 raise ValueError("Missing IV")
-            decryptor = ucryptolib.aes(self.key, mode, payload[:AES_BLOCK_SIZE])
-            payload = payload[AES_BLOCK_SIZE:]
+            decryptor = ucryptolib.aes(self.key, mode, payload[:v_iv])
+            payload = payload[v_iv:]
         decrypted = decryptor.decrypt(payload)
-        if VERSIONS[version]["cksum"]:
-            decrypted = unpad(decrypted, pkcs_pad=VERSIONS[version]["pkcs_pad"])
-            if VERSIONS[version]["cksum"] < 0:
-                cksum = decrypted[VERSIONS[version]["cksum"] :]
-                decrypted = decrypted[: VERSIONS[version]["cksum"]]
-            try:
-                shasum = hashlib.sha256(decrypted).digest()
-                assert shasum[: abs(VERSIONS[version]["cksum"])] == cksum
-            except:
+        if v_cksum:
+            decrypted = unpad(decrypted, pkcs_pad=v_pkcs_pad)
+            if v_cksum < 0:
+                cksum = decrypted[v_cksum:]
+                decrypted = decrypted[:v_cksum]
+            if hashlib.sha256(decrypted).digest()[: abs(v_cksum)] != cksum:
                 return None
         return decrypted
 
@@ -218,7 +214,7 @@ class MnemonicStorage:
         data = base_decode(encrypted_data, 64)
         decryptor = AESCipher(key, mnemonic_id, iterations)
         decrypted = decryptor.decrypt(data, version)
-        if VERSIONS[version]["cksum"]:
+        if VERSIONS[version].get("cksum", 0):
             return bip39.mnemonic_from_bytes(decrypted)
         # Data validation
         mnemonic_data = decrypted[:-AES_BLOCK_SIZE]
@@ -236,7 +232,7 @@ class MnemonicStorage:
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
         version = VERSION_NUMBERS[Settings().encryption.version]
         plain = bip39.mnemonic_to_bytes(mnemonic)
-        if VERSIONS[version]["cksum"] == 0:
+        if VERSIONS[version].get("cksum", 0) == 0:
             plain += hashlib.sha256(plain).digest()[:16]
         encrypted = encryptor.encrypt(plain, version, i_vector)
         encrypted = base_encode(encrypted, 64).decode()
@@ -322,7 +318,7 @@ class EncryptedQRCode:
         version = VERSION_NUMBERS[Settings().encryption.version]
         encryptor = AESCipher(key, mnemonic_id, iterations)
         bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
-        if VERSIONS[version]["cksum"] == 0:
+        if VERSIONS[version].get("cksum", 0) == 0:
             bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
         bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, version, i_vector)
         payload = kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
@@ -351,7 +347,7 @@ class EncryptedQRCode:
         """Decrypts encrypted mnemonic QR codes"""
         decryptor = AESCipher(key, self.mnemonic_id, self.iterations)
         decrypted_data = decryptor.decrypt(self.encrypted_data, self.version)
-        if VERSIONS[self.version]["cksum"]:
+        if VERSIONS[self.version].get("cksum", 0):
             mnemonic_data = decrypted_data
         else:
             # Data validation:
@@ -386,10 +382,11 @@ def kef_encode(id_, version, iterations, payload):
     except:
         raise ValueError("Invalid iterations")
 
-    if VERSIONS[version]["cksum"] <= 0:
-        extra = 0
+    extra = VERSIONS[version].get("iv", 0)
+    if VERSIONS[version].get("cksum", 0) <= 0:
+        extra += 0
     else:
-        extra = VERSIONS[version]["cksum"]
+        extra += VERSIONS[version]["cksum"]
     if not isinstance(payload, bytes):
         raise ValueError("Payload is not bytes")
     if (len(payload) - extra) % 16 != 0:

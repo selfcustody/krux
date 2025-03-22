@@ -120,16 +120,16 @@ def test_encryption_VERSIONS_definition(m5stickv):
         assert isinstance(v["mode"], int) and 1 <= v["mode"] <= 2
 
         # each version has an 'iv' int to require this size i_vector
-        assert isinstance(v["iv"], int)
+        assert isinstance(v.get("iv", 0), int)
 
         # each version has a 'pkcs_pad' boolean for pkcs style padding
-        assert isinstance(v["pkcs_pad"], bool)
+        assert isinstance(v.get("pkcs_pad", False), bool)
 
         # each version has a 'cksum' integer for bytes of sha256 checksum
         # if negative, it's appended to plaintext "before" encryption/padding
         # If positive, it is appended "after" encryption/padding and appended
         # to ciphertext (effectively public)
-        assert isinstance(v["cksum"], int) and -32 <= v["cksum"] <= 32
+        assert isinstance(v.get("cksum", 0), int) and -32 <= v.get("cksum", 0) <= 32
 
     # VERSIONS['name'] must be unique else VERSION_NUMBERS will break
     assert len(VERSIONS) == len(VERSION_NUMBERS)
@@ -577,8 +577,9 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         Settings().encryption.version = version_name
         encrypted_qr = EncryptedQRCode()
         iv = None
-        if VERSIONS[version]["iv"]:
-            iv = I_VECTOR
+        v_iv = VERSIONS[version].get("iv", 0)
+        if v_iv:
+            iv = I_VECTOR[:v_iv]
         encrypted_qr = EncryptedQRCode()
         qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, iv)
         if version_name == "AES-ECB":
