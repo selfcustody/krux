@@ -119,16 +119,16 @@ def test_encryption_VERSIONS_definition(m5stickv):
         # each version has a 'mode' integer that krux supports
         assert isinstance(v["mode"], int) and 1 <= v["mode"] <= 2
 
-        # each version has an 'iv' boolean to require i_vector
-        assert isinstance(v["iv"], bool)
+        # each version has an 'iv' int to require this size i_vector
+        assert isinstance(v["iv"], int)
 
         # each version has a 'pkcs_pad' boolean for pkcs style padding
         assert isinstance(v["pkcs_pad"], bool)
 
         # each version has a 'cksum' integer for bytes of sha256 checksum
-        # if positive, it's appended to plaintext before padding, encryption
-        # If negative, it is prepended to ciphertext (effectively public)
-        # before optional IV
+        # if negative, it's appended to plaintext "before" encryption/padding
+        # If positive, it is appended "after" encryption/padding and appended
+        # to ciphertext (effectively public)
         assert isinstance(v["cksum"], int) and -32 <= v["cksum"] <= 32
 
     # VERSIONS['name'] must be unique else VERSION_NUMBERS will break
@@ -209,7 +209,7 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
                 with pytest.raises(ValueError, match=err):
                     encryptor.encrypt(valids[0], valids[1], invalid)
         elif valids[1] == 1:
-            err = "IV must be 16 bytes"
+            err = "Wrong IV length"
             for invalid in invalid_ivs:
                 with pytest.raises(ValueError, match=err):
                     encryptor.encrypt(valids[0], valids[1], invalid)
@@ -226,8 +226,8 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
         (b"\x00" * 32, 1),
         (b"\x00" * 16, 2),
         (b"\x00" * 32, 3),
-        (b"\x00" * 18, 4),
-        (b"\x00" * 34, 5),
+        (b"\x00" * 19, 4),
+        (b"\x00" * 36, 5),
     )
     invalid_encrypteds = (True, None, 1, "\x00")
     invalid_versions = (None, -1, 6)
@@ -594,11 +594,11 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
             assert len(qr_data) == 60
             assert len(base_encode(qr_data, 43)) == 88
         elif version_name == "AES-ECB v3":
-            assert len(qr_data) == 30
-            assert len(base_encode(qr_data, 43)) == 44
+            assert len(qr_data) == 31
+            assert len(base_encode(qr_data, 43)) == 45
         elif version_name == "AES-CBC v3":
-            assert len(qr_data) == 46
-            assert len(base_encode(qr_data, 43)) == 67
+            assert len(qr_data) == 48
+            assert len(base_encode(qr_data, 43)) == 70
         else:
             print(f"Unknown version: {version_name}")
             assert 0
@@ -685,7 +685,7 @@ def test_kef_encode_exceptions(m5stickv):
                             kef_encode(id_, version, invalid, ciphertext)
 
                     # Ciphertext must be bytes
-                    err = "Ciphertext is not bytes"
+                    err = "Payload is not bytes"
                     invalid = (b"\x00" * 32).decode()
                     with pytest.raises(ValueError, match=err):
                         kef_encode(id_, version, iterations, invalid)

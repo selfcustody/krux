@@ -56,28 +56,28 @@ VERSIONS = {
         "mode": ucryptolib.MODE_ECB,
         "iv": False,
         "pkcs_pad": True,
-        "cksum": 4,
+        "cksum": -4,
     },
     3: {
         "name": "AES-CBC v2",
         "mode": ucryptolib.MODE_CBC,
         "iv": True,
         "pkcs_pad": True,
-        "cksum": 4,
+        "cksum": -4,
     },
     4: {
         "name": "AES-ECB v3",
         "mode": ucryptolib.MODE_ECB,
         "iv": False,
         "pkcs_pad": False,
-        "cksum": -2,
+        "cksum": 3,
     },
     5: {
         "name": "AES-CBC v3",
         "mode": ucryptolib.MODE_CBC,
         "iv": True,
         "pkcs_pad": False,
-        "cksum": -2,
+        "cksum": 4,
     },
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
@@ -94,17 +94,17 @@ class AESCipher:
             "sha256", key.encode(), salt.encode(), iterations
         )
 
-    def encrypt(self, raw, version, i_vector=None):
+    def encrypt(self, plain, version, i_vector=None):
         """AES encrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
-        prefix = b""
-        plain = raw.encode("latin-1") if isinstance(raw, str) else raw
+        prefix, suffix = b"", b""
+        plain = plain.encode("latin-1") if isinstance(plain, str) else plain
         if VERSIONS[version]["cksum"]:
             cksum = hashlib.sha256(plain).digest()[: abs(VERSIONS[version]["cksum"])]
-            if VERSIONS[version]["cksum"] > 0:
+            if VERSIONS[version]["cksum"] < 0:
                 plain += cksum
             else:
-                prefix += cksum
+                suffix += cksum
             del cksum
         plain = pad(plain, pkcs_pad=VERSIONS[version]["pkcs_pad"])
         if mode == ucryptolib.MODE_ECB:
@@ -115,7 +115,7 @@ class AESCipher:
                 raise ValueError("Duplicate blocks in ECB mode")
         if VERSIONS[version]["iv"]:
             if not (isinstance(i_vector, bytes) and len(i_vector) == 16):
-                raise ValueError("IV must be 16 bytes")
+                raise ValueError("Wrong IV length")
         else:
             if i_vector:
                 raise ValueError("IV is not required")
@@ -126,28 +126,28 @@ class AESCipher:
         encrypted = encryptor.encrypt(plain)
         if i_vector:
             prefix += i_vector
-        return prefix + encrypted
+        return prefix + encrypted + suffix
 
-    def decrypt(self, encrypted, version):
+    def decrypt(self, payload, version):
         """AES Decrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
         cksum = None
-        if VERSIONS[version]["cksum"] < 0:
-            cksum = encrypted[: -VERSIONS[version]["cksum"]]
-            encrypted = encrypted[-VERSIONS[version]["cksum"] :]
+        if VERSIONS[version]["cksum"] > 0:
+            cksum = payload[-VERSIONS[version]["cksum"] :]
+            payload = payload[: -VERSIONS[version]["cksum"]]
         if not VERSIONS[version]["iv"]:
             decryptor = ucryptolib.aes(self.key, mode)
         else:
-            if len(encrypted) < AES_BLOCK_SIZE * 2:
+            if len(payload) < AES_BLOCK_SIZE * 2:
                 raise ValueError("Missing IV")
-            decryptor = ucryptolib.aes(self.key, mode, encrypted[:AES_BLOCK_SIZE])
-            encrypted = encrypted[AES_BLOCK_SIZE:]
-        decrypted = decryptor.decrypt(encrypted)
+            decryptor = ucryptolib.aes(self.key, mode, payload[:AES_BLOCK_SIZE])
+            payload = payload[AES_BLOCK_SIZE:]
+        decrypted = decryptor.decrypt(payload)
         if VERSIONS[version]["cksum"]:
             decrypted = unpad(decrypted, pkcs_pad=VERSIONS[version]["pkcs_pad"])
-            if VERSIONS[version]["cksum"] > 0:
-                cksum = decrypted[-VERSIONS[version]["cksum"] :]
-                decrypted = decrypted[: -VERSIONS[version]["cksum"]]
+            if VERSIONS[version]["cksum"] < 0:
+                cksum = decrypted[VERSIONS[version]["cksum"] :]
+                decrypted = decrypted[: VERSIONS[version]["cksum"]]
             try:
                 shasum = hashlib.sha256(decrypted).digest()
                 assert shasum[: abs(VERSIONS[version]["cksum"])] == cksum
@@ -362,7 +362,7 @@ class EncryptedQRCode:
         return mnemonic_data
 
 
-def kef_encode(id_, version, iterations, ciphertext):
+def kef_encode(id_, version, iterations, payload):
     """
     encodes inputs into krux_encryption_format, returns bytes
     """
@@ -386,15 +386,15 @@ def kef_encode(id_, version, iterations, ciphertext):
     except:
         raise ValueError("Invalid iterations")
 
-    if VERSIONS[version]["cksum"] >= 0:
-        offset = 0
+    if VERSIONS[version]["cksum"] <= 0:
+        extra = 0
     else:
-        offset = -VERSIONS[version]["cksum"]
-    if not isinstance(ciphertext, bytes):
-        raise ValueError("Ciphertext is not bytes")
-    if len(ciphertext[offset:]) % 16 != 0:
+        extra = VERSIONS[version]["cksum"]
+    if not isinstance(payload, bytes):
+        raise ValueError("Payload is not bytes")
+    if (len(payload) - extra) % 16 != 0:
         raise ValueError("Ciphertext is not aligned")
-    if len(ciphertext[offset:]) // 16 < 1:
+    if (len(payload) - extra) // 16 < 1:
         raise ValueError("Ciphertext is too short")
 
     return b"".join(
@@ -403,7 +403,7 @@ def kef_encode(id_, version, iterations, ciphertext):
             id_.encode(),
             version.to_bytes(1, "big"),
             int(iterations).to_bytes(3, "big"),
-            ciphertext,
+            payload,
         ]
     )
 
@@ -424,9 +424,8 @@ def kef_decode(kef_bytes):
     else:
         iterations = kef_iterations
     payload = kef_bytes[len_id + 5 :]
-    ciphertext = payload
-    if len(ciphertext) % 16 != 0:
+    if len(payload) % 16 != 0:
         raise ValueError("Ciphertext is not aligned")
-    if len(ciphertext) // 16 < 2:
+    if len(payload) // 16 < 2:
         raise ValueError("Ciphertext is too short")
-    return (id_, version, iterations, ciphertext)
+    return (id_, version, iterations, payload)
