@@ -150,7 +150,7 @@ class AESCipher:
             decryptor = ucryptolib.aes(self.key, mode, payload[:v_iv])
             payload = payload[v_iv:]
         if v_mac > 0:
-            mac = payload[-mac:]  # mac = tag
+            mac = payload[-v_mac:]  # mac = tag
             payload = payload[:-v_mac]
         decrypted = decryptor.decrypt(payload)
         if v_mac > 0:
@@ -399,6 +399,7 @@ def kef_encode(id_, version, iterations, payload):
         raise ValueError("Invalid iterations")
 
     extra = VERSIONS[version].get("iv", 0)
+    extra += VERSIONS[version].get("mac", 0)
     if VERSIONS[version].get("cksum", 0) <= 0:
         extra += 0
     else:
