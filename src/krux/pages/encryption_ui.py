@@ -190,7 +190,8 @@ class EncryptMnemonic(Page):
 
         version = VERSIONS[self.version_number]
         i_vector = None
-        if version["iv"]:
+        iv_len = version.get("iv", 0)
+        if iv_len > 0:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Additional entropy from camera required for") + " " + version["name"]
@@ -205,7 +206,7 @@ class EncryptMnemonic(Page):
             if entropy is None:
                 self.flash_error(error_txt)
                 return None
-            i_vector = entropy[:AES_BLOCK_SIZE]
+            i_vector = entropy[:iv_len]
 
         mnemonic_id = None
         self.ctx.display.clear()
