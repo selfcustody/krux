@@ -838,5 +838,7 @@ class Login(Page):
             + t("Version")
             + ": %s" % VERSION
         )
+        # from ..encryption import test_aes_gcm
+        # test_aes_gcm()
         self.display_qr_codes(title, FORMAT_NONE, msg, highlight_prefix=":")
         return MENU_CONTINUE

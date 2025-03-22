@@ -70,6 +70,12 @@ VERSIONS = {
         "iv": 16,
         "cksum": 4,
     },
+    6: {
+        "name": "AES-GCM",
+        "mode": ucryptolib.MODE_GCM,
+        "iv": 12,  # 12 bytes of IV - nonce
+        "mac": 4,  # 4 bytes of MAC (validation tag)
+    },
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
 
@@ -88,13 +94,14 @@ class AESCipher:
     def encrypt(self, plain, version, i_vector=None):
         """AES encrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
-        v_cksum = VERSIONS[version].get("cksum", 0)
-        v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
         v_iv = VERSIONS[version].get("iv", 0)
-
+        v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
+        v_cksum = VERSIONS[version].get("cksum", 0)
+        v_mac = VERSIONS[version].get("mac", 0)
         prefix, suffix = b"", b""
+
         plain = plain.encode("latin-1") if isinstance(plain, str) else plain
-        if v_cksum:
+        if v_cksum != 0:
             cksum = hashlib.sha256(plain).digest()[: abs(v_cksum)]
             if v_cksum < 0:
                 plain += cksum
@@ -108,27 +115,28 @@ class AESCipher:
             )
             if unique_blocks != len(plain) // 16:
                 raise ValueError("Duplicate blocks in ECB mode")
-        if v_iv:
+        if v_iv > 0:
             if not (isinstance(i_vector, bytes) and len(i_vector) == v_iv):
                 raise ValueError("Wrong IV length")
-        else:
-            if i_vector:
-                raise ValueError("IV is not required")
+        elif i_vector:
+            raise ValueError("IV is not required")
         if i_vector:
             encryptor = ucryptolib.aes(self.key, mode, i_vector)
+            prefix += i_vector
         else:
             encryptor = ucryptolib.aes(self.key, mode)
         encrypted = encryptor.encrypt(plain)
-        if i_vector:
-            prefix += i_vector
+        if v_mac > 0:
+            suffix += encryptor.digest()[:v_mac]
         return prefix + encrypted + suffix
 
     def decrypt(self, payload, version):
         """AES Decrypt according to krux rules defined by version, returns bytes"""
         mode = VERSIONS[version]["mode"]
-        v_cksum = VERSIONS[version].get("cksum", 0)
-        v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
         v_iv = VERSIONS[version].get("iv", 0)
+        v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
+        v_cksum = VERSIONS[version].get("cksum", 0)
+        v_mac = VERSIONS[version].get("mac", 0)
 
         cksum = None
         if v_cksum > 0:
@@ -141,12 +149,21 @@ class AESCipher:
                 raise ValueError("Missing IV")
             decryptor = ucryptolib.aes(self.key, mode, payload[:v_iv])
             payload = payload[v_iv:]
+        if v_mac > 0:
+            mac = payload[-mac:]  # mac = tag
+            payload = payload[:-v_mac]
         decrypted = decryptor.decrypt(payload)
-        if v_cksum:
+        if v_mac > 0:
+            try:
+                decryptor.verify(mac)
+            except:
+                return None
+        if v_cksum != 0 or v_mac != 0:
             decrypted = unpad(decrypted, pkcs_pad=v_pkcs_pad)
-            if v_cksum < 0:
-                cksum = decrypted[v_cksum:]
-                decrypted = decrypted[:v_cksum]
+        if v_cksum < 0:
+            cksum = decrypted[v_cksum:]
+            decrypted = decrypted[:v_cksum]
+        if v_cksum != 0:
             if hashlib.sha256(decrypted).digest()[: abs(v_cksum)] != cksum:
                 return None
         return decrypted
@@ -321,8 +338,7 @@ class EncryptedQRCode:
         if VERSIONS[version].get("cksum", 0) == 0:
             bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
         bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, version, i_vector)
-        payload = kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
-        return payload
+        return kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
 
     def public_data(self, data):
         """Parse and returns encrypted mnemonic QR codes public data"""

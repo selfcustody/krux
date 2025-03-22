@@ -22,7 +22,7 @@
 
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
-from ..encryption import AES_BLOCK_SIZE, VERSIONS, VERSION_NUMBERS
+from ..encryption import VERSIONS, VERSION_NUMBERS
 from ..themes import theme
 from . import (
     Page,
@@ -156,6 +156,7 @@ class EncryptMnemonic(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
+        self.version_number = VERSION_NUMBERS[Settings().encryption.version]
 
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
@@ -187,9 +188,10 @@ class EncryptMnemonic(Page):
             self.flash_error(t("Key was not provided"))
             return None
 
-        version = VERSIONS[VERSION_NUMBERS[Settings().encryption.version]]
+        version = VERSIONS[self.version_number]
         i_vector = None
-        if version.get("iv", 0):
+        iv_len = version.get("iv", 0)
+        if iv_len > 0:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Additional entropy from camera required for") + " " + version["name"]
@@ -204,7 +206,7 @@ class EncryptMnemonic(Page):
             if entropy is None:
                 self.flash_error(error_txt)
                 return None
-            i_vector = entropy[:AES_BLOCK_SIZE]
+            i_vector = entropy[:iv_len]
 
         mnemonic_id = None
         self.ctx.display.clear()
@@ -275,6 +277,12 @@ class EncryptMnemonic(Page):
         del encrypted_qr
 
         from .qr_view import SeedQRView
+
+        if self.version_number > 1:
+            from ..baseconv import base_encode
+
+            # Convert to base43
+            qr_data = base_encode(qr_data, 43).decode("ascii")
 
         seed_qr_view = SeedQRView(self.ctx, data=qr_data, title=mnemonic_id)
         seed_qr_view.display_qr(allow_export=True)
