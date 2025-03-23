@@ -235,7 +235,7 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
         (b"\x00" * 36, 5),
     )
     invalid_encrypteds = (True, None, 1, "\x00")
-    invalid_versions = (None, -1, 6)
+    invalid_versions = (None, -1, 7)
     for valids in valid_params:
         # valid params works
         encrypted = decryptor.decrypt(*valids)
@@ -586,9 +586,6 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         if v_iv:
             iv = I_VECTOR[:v_iv]
         encrypted_qr = EncryptedQRCode()
-        # TODO: make GCM work
-        if version_name == "AES-GCM":
-            continue
         qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, iv)
         if version_name == "AES-ECB":
             assert len(qr_data) == 44
@@ -608,6 +605,9 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         elif version_name == "AES-CBC v3":
             assert len(qr_data) == 48
             assert len(base_encode(qr_data, 43)) == 70
+        elif version_name == "AES-GCM":
+            assert len(qr_data) == 60
+            assert len(base_encode(qr_data, 43)) == 88
         else:
             print(f"Unknown version: {version_name}")
             assert 0
