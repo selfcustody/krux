@@ -324,6 +324,112 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_encrypted_qr_code_mode_and_density(amigo, mocker):
+    import re, pyqrcode
+    from krux.wallet import Wallet
+    from krux.krux_settings import Settings
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.pages.encryption_ui import EncryptMnemonic
+    from krux.key import Key, TYPE_SINGLESIG
+    from embit.networks import NETWORKS
+
+    TEST_MNEMONICS = [
+        # 12w
+        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        # 24w
+        "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
+    ]
+
+    # Dictionary mapping encryption modes to (mode, size) tuples
+    QR_PROPS = {
+        "AES-ECB": ("binary", 29, 33),
+        "AES-ECB v2": ("alphanumeric", 29, 33),
+        "AES-ECB v3": ("alphanumeric", 25, 29),
+        "AES-CBC": ("binary", 33, 33),
+        "AES-CBC v2": ("alphanumeric", 33, 33),
+        "AES-CBC v3": ("alphanumeric", 29, 33),
+        "AES-GCM": ("alphanumeric", 33, 33),
+    }
+
+    BTN_SEQUENCE = (
+        [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
+        + [BUTTON_ENTER]  # Confirm Encrypted QR
+        # Key is mocked here, no press needed
+        + [BUTTON_ENTER]  # Confirm to add CBC or GCM cam entropy
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
+        # QR view is mocked here, no press needed
+    )
+    BTN_SEQUENCE_EBC = (
+        [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
+        + [BUTTON_ENTER]  # Confirm Encrypted QR
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
+        # QR view is mocked here, no press needed
+    )
+
+    def is_qr_alphanumeric(string):
+        return bool(re.match("^[A-Z0-9 $%*+\-./:]+$", string))
+
+    for mnemonic in TEST_MNEMONICS:
+        for encryption_mode in sorted(QR_PROPS.keys()):
+            btn_seq = (
+                BTN_SEQUENCE
+                if not encryption_mode.startswith("AES-ECB")
+                else BTN_SEQUENCE_EBC
+            )
+            ctx = create_ctx(mocker, btn_seq)
+            ctx.wallet = Wallet(Key(mnemonic, TYPE_SINGLESIG, NETWORKS["main"]))
+            ctx.printer = None
+            Settings().encryption.version = encryption_mode
+            storage_ui = EncryptMnemonic(ctx)
+            mocker.patch(
+                "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+                mocker.MagicMock(return_value=TEST_KEY),
+            )
+            mocker.patch(
+                "krux.pages.capture_entropy.CameraEntropy.capture",
+                mocker.MagicMock(return_value=I_VECTOR),
+            )
+
+            with patch("krux.pages.qr_view.SeedQRView", mocker.MagicMock()) as qr_view:
+                storage_ui.encrypt_menu()
+
+            assert qr_view.called, "SeedQRView was not called"
+            _, called_kwargs = qr_view.call_args
+            data = called_kwargs.get("data")
+            mode = "binary"
+            if isinstance(data, str):
+                if data.isnumeric():
+                    mode = "numeric"
+                elif is_qr_alphanumeric(data):
+                    mode = "alphanumeric"
+            try:
+                code_str = pyqrcode.create(data, error="L", mode=mode).text(
+                    quiet_zone=0
+                )
+            except:
+                # pre-decode if binary (SeedQR)
+                data = data.decode("latin-1")
+                code_str = pyqrcode.create(data, error="L", mode="binary").text(
+                    quiet_zone=0
+                )
+            size = 0
+            while code_str[size] != "\n":
+                size += 1
+
+            expected_mode, expected_size_12w, expected_size_24w = QR_PROPS[
+                encryption_mode
+            ]
+            len_mnemonic = len(mnemonic.split())
+            expected_size = (
+                expected_size_12w if len_mnemonic == 12 else expected_size_24w
+            )
+            assert mode == expected_mode, f"QR mode mismatch for {encryption_mode}"
+            assert (
+                size == expected_size
+            ), f"QR size mismatch for {encryption_mode}, {len_mnemonic}w"
+            assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
 def test_load_encrypted_from_flash(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.pages.encryption_ui import LoadEncryptedMnemonic
