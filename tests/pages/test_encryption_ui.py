@@ -348,7 +348,7 @@ def test_encrypted_qr_code_mode_and_density(amigo, mocker):
         "AES-CBC": ("binary", 33, 33),
         "AES-CBC v2": ("alphanumeric", 33, 33),
         "AES-CBC v3": ("alphanumeric", 29, 33),
-        "AES-GCM": ("alphanumeric", 33, 33),
+        "AES-GCM": ("alphanumeric", 29, 33),
     }
 
     BTN_SEQUENCE = (

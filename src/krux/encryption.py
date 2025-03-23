@@ -156,6 +156,7 @@ class AESCipher:
         if v_mac > 0:
             try:
                 decryptor.verify(mac)
+                return decrypted
             except:
                 return None
         if v_cksum != 0 or v_mac != 0:
@@ -231,7 +232,7 @@ class MnemonicStorage:
         data = base_decode(encrypted_data, 64)
         decryptor = AESCipher(key, mnemonic_id, iterations)
         decrypted = decryptor.decrypt(data, version)
-        if VERSIONS[version].get("cksum", 0):
+        if not in_cipher_checksum(version):
             return bip39.mnemonic_from_bytes(decrypted)
         # Data validation
         mnemonic_data = decrypted[:-AES_BLOCK_SIZE]
@@ -249,7 +250,7 @@ class MnemonicStorage:
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
         version = VERSION_NUMBERS[Settings().encryption.version]
         plain = bip39.mnemonic_to_bytes(mnemonic)
-        if VERSIONS[version].get("cksum", 0) == 0:
+        if in_cipher_checksum(version):
             plain += hashlib.sha256(plain).digest()[:16]
         encrypted = encryptor.encrypt(plain, version, i_vector)
         encrypted = base_encode(encrypted, 64).decode()
@@ -335,7 +336,7 @@ class EncryptedQRCode:
         version = VERSION_NUMBERS[Settings().encryption.version]
         encryptor = AESCipher(key, mnemonic_id, iterations)
         bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
-        if VERSIONS[version].get("cksum", 0) == 0:
+        if in_cipher_checksum(version):
             bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
         bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, version, i_vector)
         return kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
@@ -363,7 +364,7 @@ class EncryptedQRCode:
         """Decrypts encrypted mnemonic QR codes"""
         decryptor = AESCipher(key, self.mnemonic_id, self.iterations)
         decrypted_data = decryptor.decrypt(self.encrypted_data, self.version)
-        if VERSIONS[self.version].get("cksum", 0):
+        if not in_cipher_checksum(self.version):
             mnemonic_data = decrypted_data
         else:
             # Data validation:
@@ -372,6 +373,15 @@ class EncryptedQRCode:
             if hashlib.sha256(mnemonic_data).digest()[:16] != cksum:
                 return None
         return mnemonic_data
+
+
+def in_cipher_checksum(version):
+    """
+    Returns True if the ciphertext contains a block of checksum
+    """
+    return (
+        VERSIONS[version].get("cksum", 0) == 0 and VERSIONS[version].get("mac", 0) == 0
+    )
 
 
 def kef_encode(id_, version, iterations, payload):

@@ -606,8 +606,8 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
             assert len(qr_data) == 48
             assert len(base_encode(qr_data, 43)) == 70
         elif version_name == "AES-GCM":
-            assert len(qr_data) == 60
-            assert len(base_encode(qr_data, 43)) == 88
+            assert len(qr_data) == 44
+            assert len(base_encode(qr_data, 43)) == 64
         else:
             print(f"Unknown version: {version_name}")
             assert 0
