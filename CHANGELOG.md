@@ -1,5 +1,8 @@
 # Changelog 25.XX.X - XXX 2025
 
+### 2x Faster TC Flash Hash
+SHA256 and PBKDF2_hmac can now use hardware sha256 hashing, allowing TC Flash to be executed 2x faster.
+
 ### New Mnemonic Menu Disabled by Hide Mnemonic
 When enabled, the hide mnemonic setting also disables the New Mnemonic menu.
 
