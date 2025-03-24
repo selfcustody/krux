@@ -156,7 +156,6 @@ class AESCipher:
         if v_mac > 0:
             try:
                 decryptor.verify(mac)
-                return decrypted
             except:
                 return None
         if v_cksum != 0 or v_mac != 0:
