@@ -26,10 +26,6 @@ from unittest import mock
 
 
 def pbkdf2_hmac_sha256_wrapper(secret, salt, iterations):
-    print("pbkdf2_hmac_sha256_wrapper called")
-    print(f"Secret: {secret}")
-    print(f"Salt: {salt}")
-    print(f"Iterations: {iterations}")
     return hashlib.pbkdf2_hmac("sha256", secret, salt, iterations)
 
 
