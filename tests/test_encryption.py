@@ -122,7 +122,7 @@ def test_encryption_VERSIONS_definition(m5stickv):
                 1,
                 2,
                 11,
-            )  # ECB, CBC, GCM=11???
+            )  # ECB, CBC, GCM=11
 
         # each version has an 'iv' int to require this size i_vector
         assert isinstance(v.get("iv", 0), int)
@@ -130,11 +130,13 @@ def test_encryption_VERSIONS_definition(m5stickv):
         # each version has a 'pkcs_pad' boolean for pkcs style padding
         assert isinstance(v.get("pkcs_pad", False), bool)
 
-        # each version has a 'cksum' integer for bytes of sha256 checksum
+        # each version has a 'auth' integer for bytes of authentication data
         # if negative, it's appended to plaintext "before" encryption/padding
         # If positive, it is appended "after" encryption/padding and appended
-        # to ciphertext (effectively public)
-        assert isinstance(v.get("cksum", 0), int) and -32 <= v.get("cksum", 0) <= 32
+        # to ciphertext (effectively public),
+        # if 0, it means that .decrypt() callers must figure out how to validate
+        # successful decryption
+        assert isinstance(v.get("auth", 0), int) and -32 <= v.get("auth", 0) <= 32
 
     # VERSIONS['name'] must be unique else VERSION_NUMBERS will break
     assert len(VERSIONS) == len(VERSION_NUMBERS)
@@ -179,20 +181,28 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
     # .encrypt() expects bytes raw, version, sometimes bytes i_vector
     valid_params = (
         ("\x00", 0),
+        ("\x00", 0, b""),
         ("\x00", 1, b"\x00" * 16),
         ("\x00", 2),
+        ("\x00", 2, b""),
         ("\x00", 3, b"\x00" * 16),
         ("\x00", 4),
+        ("\x00", 4, b""),
         ("\x00", 5, b"\x00" * 16),
+        ("\x00", 6, b"\x00" * 12),
         (b"\x00", 0),
+        (b"\x00", 0, b""),
         (b"\x00", 1, b"\x00" * 16),
         (b"\x00", 2),
+        (b"\x00", 2, b""),
         (b"\x00", 3, b"\x00" * 16),
         (b"\x00", 4),
+        (b"\x00", 4, b""),
         (b"\x00", 5, b"\x00" * 16),
+        (b"\x00", 6, b"\x00" * 12),
     )
     invalid_raws = (True, None, 1)
-    invalid_versions = (None, -1, 6)
+    invalid_versions = (None, -1, 7)
     invalid_ivs = ("\x00" * 16, b"\x00" * 15, 1)
     for valids in valid_params:
         # valid params works
@@ -332,7 +342,7 @@ def test_cbc_encryption(m5stickv):
     encrypted = encryptor.encrypt(CBC_ENTROPY, version, iv)
     assert encryptor.decrypt(encrypted, version) == CBC_ENTROPY
 
-    version = 3  # AES.MODE_CBC w/ pkcs_pad +cksum
+    version = 3  # AES.MODE_CBC w/ pkcs_pad +auth
     plain = b'"Running bitcoin" -Hal, January 10, 2009'
     encrypted = encryptor.encrypt(plain, version, iv)
     assert encryptor.decrypt(encrypted, version) == plain
@@ -341,7 +351,7 @@ def test_cbc_encryption(m5stickv):
     wrong = AESCipher("wrong", "wrong", ITERATIONS)
     assert wrong.decrypt(encrypted, version) == None
 
-    version = 5  # AES.MODE_CBC w/ pkcs_pad -cksum
+    version = 5  # AES.MODE_CBC w/ pkcs_pad -auth
     plain = b'"Running bitcoin" -Hal, January 10, 2009'
     encrypted = encryptor.encrypt(plain, version, iv)
     assert encryptor.decrypt(encrypted, version) == plain
@@ -382,6 +392,79 @@ def test_cbc_iv_use(m5stickv):
 
     decrypted = encryptor.decrypt(encrypted, version)
     assert decrypted.decode().replace("\x00", "") == TEST_WORDS
+
+
+def test_gcm_encryption(m5stickv):
+    from krux.encryption import AESCipher
+
+    version = 6  # AES.MODE_GCM
+    iv = I_VECTOR[:12]
+
+    encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
+    encrypted = encryptor.encrypt(TEST_WORDS, version, iv)
+    assert encryptor.decrypt(encrypted, version) == TEST_WORDS.encode()
+
+    encrypted = encryptor.encrypt(ECB_ENTROPY, version, iv)
+    assert encryptor.decrypt(encrypted, version) == ECB_ENTROPY
+
+    plain = b'"Running bitcoin" -Hal, January 10, 2009'
+    encrypted = encryptor.encrypt(plain, version, iv)
+    assert encryptor.decrypt(encrypted, version) == plain
+
+    # wrong key fails to decrypt silently
+    wrong = AESCipher("wrong", "wrong", ITERATIONS)
+    assert wrong.decrypt(encrypted, version) == None
+
+
+def test_broken_decryption_cases(m5stickv):
+    """
+    an edge case of broken AESCipher.decrypt() exists for versions which use
+    authentication bytes but not pkcs_pad AND plaintext ends in 0x00 byte
+    """
+    # TODO: once VERSIONS settled, include test-cases here of encrypted-payloads so
+    # that these checks can still run -- then add checks in .encrypt() to fail when
+    # encrypting plaintext that cannot be decrypted.
+
+    from krux.encryption import AESCipher, VERSIONS
+
+    plaintexts = (
+        b"plaintext that isn't 16-byte aligned AND ends in \x00",
+        b"plaintext that isn't 16-byte aligned",
+        b"aligned plaintext that ends in \x00",
+        b"aligned plaintext doesnt end nul",
+    )
+    encryptor = AESCipher("key", "salt", 100000)
+    for version in VERSIONS:
+        iv = I_VECTOR[: VERSIONS[version].get("iv", 0)]
+        v_auth = VERSIONS[version].get("auth", 0)
+        v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
+        v_name = VERSIONS[version]["name"]
+
+        for plain in plaintexts:
+            encrypted = encryptor.encrypt(plain, version, iv)
+
+            if v_auth != 0:
+                # versions with authentication checking...
+                if v_pkcs_pad == False:
+                    # ...and without safe pkcs_pad
+                    if plain[-1] == 0x00:
+                        # ...and plaintext that ends in 0x00, ARE BROKEN
+                        # TODO: fail to encrypt these in the first place
+                        assert encryptor.decrypt(encrypted, version) != plain
+                    else:
+                        # ...but if plaintext doesn't end in 0x00, it works
+                        assert encryptor.decrypt(encrypted, version) == plain
+                else:
+                    # ... or if version uses safe pkcs_pad, it works
+                    assert encryptor.decrypt(encrypted, version) == plain
+            else:
+                # if no auth checking, then it doesn't matter,
+                # it's up to the caller to unpad and verify
+                if len(plain) % 16 == 0:
+                    assert encryptor.decrypt(encrypted, version) == plain
+                else:
+                    assert encryptor.decrypt(encrypted, version) != plain
+                    assert plain in encryptor.decrypt(encrypted, version)
 
 
 def test_list_mnemonic_storage(m5stickv, mock_file_operations):

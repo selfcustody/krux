@@ -50,31 +50,31 @@ VERSIONS = {
         "name": "AES-ECB v2",
         "mode": ucryptolib.MODE_ECB,
         "pkcs_pad": True,
-        "cksum": -4,
+        "auth": -4,
     },
     3: {
         "name": "AES-CBC v2",
         "mode": ucryptolib.MODE_CBC,
         "iv": 16,
         "pkcs_pad": True,
-        "cksum": -4,
+        "auth": -4,
     },
     4: {
         "name": "AES-ECB v3",
         "mode": ucryptolib.MODE_ECB,
-        "cksum": 3,
+        "auth": 3,
     },
     5: {
         "name": "AES-CBC v3",
         "mode": ucryptolib.MODE_CBC,
         "iv": 16,
-        "cksum": 4,
+        "auth": 4,
     },
     6: {
         "name": "AES-GCM",
         "mode": ucryptolib.MODE_GCM,
         "iv": 12,  # 12 bytes of IV - nonce
-        "mac": 4,  # 4 bytes of MAC (validation tag)
+        "auth": 4,  # 4 bytes validation tag
     },
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
@@ -91,57 +91,62 @@ class AESCipher:
             "sha256", key.encode(), salt.encode(), iterations
         )
 
-    def encrypt(self, plain, version, i_vector=None):
-        """AES encrypt according to krux rules defined by version, returns bytes"""
+    def encrypt(self, plain, version, iv=b""):
+        """AES encrypt according to krux rules defined by version, returns payload bytes"""
         mode = VERSIONS[version]["mode"]
         v_iv = VERSIONS[version].get("iv", 0)
         v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
-        v_cksum = VERSIONS[version].get("cksum", 0)
-        v_mac = VERSIONS[version].get("mac", 0)
-        prefix, suffix = b"", b""
-
+        v_auth = VERSIONS[version].get("auth", 0)
+        auth = b""
         plain = plain.encode("latin-1") if isinstance(plain, str) else plain
-        if v_cksum != 0:
-            cksum = hashlib.sha256(plain).digest()[: abs(v_cksum)]
-            if v_cksum < 0:
-                plain += cksum
-            else:
-                suffix += cksum
-            del cksum
+
+        # for modes that don't have authentication, krux uses sha256 checksum
+        if v_auth != 0 and mode in (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC):
+            auth = hashlib.sha256(plain).digest()[: abs(v_auth)]
+            if v_auth < 0:
+                plain += auth
+                auth = b""
+
+        # AES plaintext must be divisible into 16-byte blocks
         plain = pad(plain, pkcs_pad=v_pkcs_pad)
+
+        # fail to encrypt in modes where it is known unsafe
         if mode == ucryptolib.MODE_ECB:
             unique_blocks = len(
                 set((plain[x : x + 16] for x in range(0, len(plain), 16)))
             )
             if unique_blocks != len(plain) // 16:
                 raise ValueError("Duplicate blocks in ECB mode")
+
+        # setup the encryptor (checking for modes that need initialization-vector)
         if v_iv > 0:
-            if not (isinstance(i_vector, bytes) and len(i_vector) == v_iv):
+            if not (isinstance(iv, bytes) and len(iv) == v_iv):
                 raise ValueError("Wrong IV length")
-        elif i_vector:
+        elif iv:
             raise ValueError("IV is not required")
-        if i_vector:
-            encryptor = ucryptolib.aes(self.key, mode, i_vector)
-            prefix += i_vector
+        if iv:
+            encryptor = ucryptolib.aes(self.key, mode, iv)
         else:
             encryptor = ucryptolib.aes(self.key, mode)
+            iv = b""
+
+        # encrypt the plaintext
         encrypted = encryptor.encrypt(plain)
-        if v_mac > 0:
-            suffix += encryptor.digest()[:v_mac]
-        return prefix + encrypted + suffix
+
+        # for modes that do have inherent authentication, use it
+        if mode == ucryptolib.MODE_GCM:
+            auth = encryptor.digest()[:v_auth]
+
+        return iv + encrypted + auth
 
     def decrypt(self, payload, version):
-        """AES Decrypt according to krux rules defined by version, returns bytes"""
+        """AES Decrypt according to krux rules defined by version, returns plaintext bytes"""
         mode = VERSIONS[version]["mode"]
         v_iv = VERSIONS[version].get("iv", 0)
         v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
-        v_cksum = VERSIONS[version].get("cksum", 0)
-        v_mac = VERSIONS[version].get("mac", 0)
+        v_auth = VERSIONS[version].get("auth", 0)
 
-        cksum = None
-        if v_cksum > 0:
-            cksum = payload[-v_cksum:]
-            payload = payload[:-v_cksum]
+        # setup decryptor (pulling initialization-vector from payload if necessary)
         if not v_iv:
             decryptor = ucryptolib.aes(self.key, mode)
         else:
@@ -149,23 +154,36 @@ class AESCipher:
                 raise ValueError("Missing IV")
             decryptor = ucryptolib.aes(self.key, mode, payload[:v_iv])
             payload = payload[v_iv:]
-        if v_mac > 0:
-            mac = payload[-v_mac:]  # mac = tag
-            payload = payload[:-v_mac]
+
+        # remove authentication from payload if suffixed to ciphertext
+        auth = None
+        if v_auth > 0:
+            auth = payload[-v_auth:]
+            payload = payload[:-v_auth]
+
+        # decrypt the ciphertext
         decrypted = decryptor.decrypt(payload)
-        if v_mac > 0:
-            try:
-                decryptor.verify(mac)
-            except:
-                return None
-        if v_cksum != 0 or v_mac != 0:
+
+        # if authentication added (inherent or added by krux)
+        # then: unpad and validate via embeded authentication bytes
+        # else: let caller deal with unpad and auth
+        if v_auth != 0:
+            # need to unpad
             decrypted = unpad(decrypted, pkcs_pad=v_pkcs_pad)
-        if v_cksum < 0:
-            cksum = decrypted[v_cksum:]
-            decrypted = decrypted[:v_cksum]
-        if v_cksum != 0:
-            if hashlib.sha256(decrypted).digest()[: abs(v_cksum)] != cksum:
-                return None
+            if mode == ucryptolib.MODE_GCM:
+                # for modes that have authentication built-in
+                try:
+                    decryptor.verify(auth)
+                except:
+                    return None
+            else:
+                # for modes that don't, krux uses sha256 checksum
+                if v_auth < 0:
+                    auth = decrypted[v_auth:]
+                    decrypted = decrypted[:v_auth]
+                if hashlib.sha256(decrypted).digest()[: abs(v_auth)] != auth:
+                    return None
+
         return decrypted
 
 
@@ -378,9 +396,7 @@ def in_cipher_checksum(version):
     """
     Returns True if the ciphertext contains a block of checksum
     """
-    return (
-        VERSIONS[version].get("cksum", 0) == 0 and VERSIONS[version].get("mac", 0) == 0
-    )
+    return VERSIONS[version].get("auth", 0) == 0
 
 
 def kef_encode(id_, version, iterations, payload):
@@ -408,11 +424,10 @@ def kef_encode(id_, version, iterations, payload):
         raise ValueError("Invalid iterations")
 
     extra = VERSIONS[version].get("iv", 0)
-    extra += VERSIONS[version].get("mac", 0)
-    if VERSIONS[version].get("cksum", 0) <= 0:
+    if VERSIONS[version].get("auth", 0) <= 0:
         extra += 0
     else:
-        extra += VERSIONS[version]["cksum"]
+        extra += VERSIONS[version]["auth"]
     if not isinstance(payload, bytes):
         raise ValueError("Payload is not bytes")
     if (len(payload) - extra) % 16 != 0:
