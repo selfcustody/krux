@@ -26,16 +26,19 @@ from krux.krux_settings import Settings, THERMAL_ADAFRUIT_TXT, CNC_FILE_DRIVER
 from krux.printers import create_printer
 import krux
 
+UID = bytes([0x00] * 32)
+
 old_create_printer = create_printer
+
 
 def new_create_printer():
     printer = old_create_printer()
     old_print_qr_code = printer.print_qr_code
-    
+
     def new_print_qr_code(qr_code):
         print("QR Code sent to printer:", qr_code)
         return old_print_qr_code(qr_code)
-    
+
     printer.print_qr_code = new_print_qr_code
     return printer
 
@@ -55,6 +58,10 @@ def reset():
     pg.event.post(pg.event.Event(pg.QUIT))
 
 
+def unique_id():
+    return UID
+
+
 class UART:
     UART1 = 0
     UART2 = 1
@@ -66,18 +73,22 @@ class UART:
         pass
 
     def read(self, num_bytes):
-        if simulating_printer and Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT:
-                return chr(0b00000000)
+        if (
+            simulating_printer
+            and Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT
+        ):
+            return chr(0b00000000)
         return None
 
     def readline(self):
         if simulating_printer and Settings().hardware.printer.driver == CNC_FILE_DRIVER:
-                return "ok\n".encode()
+            return "ok\n".encode()
         return None
 
     def write(self, data):
         if type(data) == str:
             print("String sent to printer:", data)
+
 
 class SDCard:
     def remount():
@@ -86,5 +97,5 @@ class SDCard:
 
 if "machine" not in sys.modules:
     sys.modules["machine"] = mock.MagicMock(
-        reset=reset, UART=mock.MagicMock(wraps=UART), SDCard=SDCard
+        reset=reset, UART=mock.MagicMock(wraps=UART), SDCard=SDCard, unique_id=unique_id
     )

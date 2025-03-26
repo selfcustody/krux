@@ -212,7 +212,7 @@ class FlashHash(Page):
 
     def hash_pin_with_flash(self, spiffs_region=False):
         """Hashes the tamper check code, unique ID, and flash memory together."""
-        import hashlib
+        import uhashlib_hw
         import flash
         from machine import unique_id
 
@@ -224,14 +224,15 @@ class FlashHash(Page):
         )
         if self.ctx.display.width() < self.ctx.display.height():
             percentage_offset += FONT_HEIGHT
-        sha256 = hashlib.sha256()
+        uid = unique_id()
+        sha256 = uhashlib_hw.sha256()
         sha256.update(self.tc_code_hash)
-        sha256.update(unique_id())
+        sha256.update(uid)
         for address in range(range_begin, range_end, BLOCK_SIZE):
             counter += 1
             data = flash.read(address, BLOCK_SIZE)
             sha256.update(data)
-            if counter % 100 == 0:
+            if counter % 200 == 0:
                 # Update progress
                 self.ctx.display.draw_hcentered_text(
                     "%d%%" % (counter // 41), percentage_offset

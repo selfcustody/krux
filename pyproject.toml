@@ -27,7 +27,7 @@ description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9.1"
+python = "^3.12.3"
 translate = "^3.6.1"
 embit = { path = "./vendor/embit/", develop = true }
 ur = { path = "./vendor/foundation-ur-py/", develop = true }
