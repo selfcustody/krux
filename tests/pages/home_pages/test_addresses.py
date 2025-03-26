@@ -21,6 +21,7 @@ def test_scan_address(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
+    from krux.format import format_address
 
     cases = [
         # (
@@ -273,13 +274,13 @@ def test_scan_address(mocker, m5stickv, tdata):
             if can_search:
                 if case[6]:  # If search should be successful
                     ctx.display.draw_centered_text.assert_called_with(
-                        "0. \n\n%s\n\nis a valid address!" % case[3]
+                        "0. \n\n%s\n\nis a valid address!" % format_address(case[3])
                     )
                 else:
                     attempts = 50 * (len(case[5]) - 3)
                     ctx.display.draw_centered_text.assert_called_with(
                         "%s\n\nwas NOT FOUND in the first %s addresses"
-                        % (case[3], attempts)
+                        % (format_address(case[3]), attempts)
                     )
         else:
             addresses_ui.show_address.assert_not_called()
@@ -293,6 +294,7 @@ def test_scan_change_address(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
+    from krux.format import format_address
 
     cases = [
         # Single-sig, not loaded, owned address, search successful
@@ -344,13 +346,13 @@ def test_scan_change_address(mocker, m5stickv, tdata):
             if can_search:
                 if case[6]:  # If search should be successful
                     ctx.display.draw_centered_text.assert_called_with(
-                        "0. \n\n%s\n\nis a valid address!" % case[3]
+                        "0. \n\n%s\n\nis a valid address!" % format_address(case[3])
                     )
                 else:
                     attempts = 50 * (len(case[5]) - 3)
                     ctx.display.draw_centered_text.assert_called_with(
                         "%s\n\nwas NOT FOUND in the first %s receive addresses"
-                        % (case[3], attempts)
+                        % (format_address(case[3]), attempts)
                     )
         else:
             addresses_ui.show_address.assert_not_called()
@@ -376,6 +378,7 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_PMOFN
     from krux.settings import THIN_SPACE
+    from krux.format import format_address
 
     cases = [
         # Single-sig, loaded, No print prompt, show address nº1
@@ -411,7 +414,7 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
         addresses_ui.list_address_type()
 
         addresses_ui.show_address.assert_called_with(
-            case[3], title="0." + THIN_SPACE + case[3]
+            case[3], title="0." + THIN_SPACE + format_address(case[3])
         )
         assert ctx.input.wait_for_button.call_count == len(case[5])
 
@@ -422,6 +425,7 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_PMOFN
     from krux.settings import THIN_SPACE
+    from krux.format import format_address
 
     cases = [
         # Single-sig, loaded, No print prompt, show address nº1
@@ -456,6 +460,6 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
         addresses_ui.list_address_type(1)  # Change addresses
 
         addresses_ui.show_address.assert_called_with(
-            case[3], title="0." + THIN_SPACE + case[3]
+            case[3], title="0." + THIN_SPACE + format_address(case[3])
         )
         assert ctx.input.wait_for_button.call_count == len(case[5])

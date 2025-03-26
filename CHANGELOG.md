@@ -9,6 +9,9 @@ The wallet fingerprint, keypad title, settings categories and prefix texts are n
 ### More Colors on Settings Categories
 When the value of the settings category is boolean (True/False), it will be displayed in color.
 
+### More Readable Address 
+Addresses are displayed in groups of 4, separated by spaces, for better readability.
+
 ### Other Bug Fixes and Optimizations
 - Fix printing words instead of numbers when using "Backup Mnemonic > Other formats > Numbers".
 - Added fingerprint to mnemonic preview and editor.
