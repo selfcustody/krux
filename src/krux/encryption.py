@@ -47,34 +47,41 @@ VERSIONS = {
         "iv": 16,
     },
     2: {
-        "name": "AES-ECB v2",
+        "name": "AES-ECB v2p",
         "mode": ucryptolib.MODE_ECB,
         "pkcs_pad": True,
         "auth": -4,
     },
     3: {
-        "name": "AES-CBC v2",
+        "name": "AES-CBC v2p",
         "mode": ucryptolib.MODE_CBC,
         "iv": 16,
         "pkcs_pad": True,
         "auth": -4,
     },
     4: {
-        "name": "AES-ECB v3",
+        "name": "AES-ECB v2",
         "mode": ucryptolib.MODE_ECB,
         "auth": 3,
     },
     5: {
-        "name": "AES-CBC v3",
+        "name": "AES-CBC v2",
         "mode": ucryptolib.MODE_CBC,
         "iv": 16,
         "auth": 4,
     },
     6: {
-        "name": "AES-GCM",
+        "name": "AES-GCM v2",
         "mode": ucryptolib.MODE_GCM,
         "iv": 12,  # 12 bytes of IV - nonce
         "auth": 4,  # 4 bytes validation tag
+    },
+    7: {
+        "name": "AES-GCM v2p",
+        "mode": ucryptolib.MODE_GCM,
+        "iv": 12,
+        "auth": 4,
+        "pkcs_pad": True,
     },
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}

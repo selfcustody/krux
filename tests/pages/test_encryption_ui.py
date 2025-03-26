@@ -346,12 +346,13 @@ def test_encrypted_qr_code_mode_and_density(amigo, mocker):
     # Dictionary mapping encryption modes to (mode, size) tuples
     QR_PROPS = {
         "AES-ECB": ("binary", 29, 33),
-        "AES-ECB v2": ("alphanumeric", 29, 33),
-        "AES-ECB v3": ("alphanumeric", 25, 29),
+        "AES-ECB v2p": ("alphanumeric", 29, 33),
+        "AES-ECB v2": ("alphanumeric", 25, 29),
         "AES-CBC": ("binary", 33, 33),
-        "AES-CBC v2": ("alphanumeric", 33, 33),
-        "AES-CBC v3": ("alphanumeric", 29, 33),
-        "AES-GCM": ("alphanumeric", 29, 33),
+        "AES-CBC v2p": ("alphanumeric", 33, 33),
+        "AES-CBC v2": ("alphanumeric", 29, 33),
+        "AES-GCM v2": ("alphanumeric", 29, 33),
+        "AES-GCM v2p": ("alphanumeric", 33, 33),
     }
 
     BTN_SEQUENCE = (
