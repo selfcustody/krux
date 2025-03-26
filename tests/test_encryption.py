@@ -205,29 +205,33 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
     invalid_versions = (None, -1, 7)
     invalid_ivs = ("\x00" * 16, b"\x00" * 15, 1)
     for valids in valid_params:
+        # all calls for these unit tests use "fail_unsafe=False"
+        # in order to pass simple "calling" testcases above
+        kwargs = {"fail_unsafe": False}
+
         # valid params works
-        encrypted = encryptor.encrypt(*valids)
+        encrypted = encryptor.encrypt(*valids, **kwargs)
 
         # test valid params against invalid ones
         for invalid in invalid_raws:
             with pytest.raises(TypeError):
-                encryptor.encrypt(invalid, *valids[1:])
+                encryptor.encrypt(invalid, *valids[1:], **kwargs)
         for invalid in invalid_versions:
             with pytest.raises((ValueError, KeyError)):
                 if len(valids) == 3:
-                    encryptor.encrypt(valids[0], invalid, valids[2])
+                    encryptor.encrypt(valids[0], invalid, valids[2], **kwargs)
                 else:
-                    encryptor.encrypt(valids[0], invalid)
+                    encryptor.encrypt(valids[0], invalid, **kwargs)
         if valids[1] == 0:
             err = "IV is not required"
             for invalid in invalid_ivs:
                 with pytest.raises(ValueError, match=err):
-                    encryptor.encrypt(valids[0], valids[1], invalid)
+                    encryptor.encrypt(valids[0], valids[1], invalid, **kwargs)
         elif valids[1] == 1:
             err = "Wrong IV length"
             for invalid in invalid_ivs:
                 with pytest.raises(ValueError, match=err):
-                    encryptor.encrypt(valids[0], valids[1], invalid)
+                    encryptor.encrypt(valids[0], valids[1], invalid, **kwargs)
 
 
 def test_AESCipher_calling_method_decrypt(m5stickv):
@@ -311,9 +315,13 @@ def test_ecb_encryption_fails_duplicated_blocks(m5stickv):
     version = 0  # AES.MODE_ECB
     key, id_, iterations = "a key", "a label", 100000
     plaintext = b"a 16-byte block." * 2
-    ciphertext = b"I\x1fD!\x80\x88:\x9e\xc7\xbd\x8a<\x9d\x8f\xea(I\x1fD!\x80\x88:\x9e\xc7\xbd\x8a<\x9d\x8f\xea("
 
     encryptor = AESCipher(key, id_, iterations)
+
+    # duplicate blocks in ECB mode can be encrypted only w/ fail_unsafe=False
+    ciphertext = encryptor.encrypt(plaintext, version, fail_unsafe=False)
+
+    # by default, unsafe plaintext encryption fails
     err = "Duplicate blocks in ECB mode"
     with pytest.raises(ValueError, match=err):
         encryptor.encrypt(plaintext, version)
@@ -421,9 +429,6 @@ def test_broken_decryption_cases(m5stickv):
     an edge case of broken AESCipher.decrypt() exists for versions which use
     authentication bytes but not pkcs_pad AND plaintext ends in 0x00 byte
     """
-    # TODO: once VERSIONS settled, include test-cases here of encrypted-payloads so
-    # that these checks can still run -- then add checks in .encrypt() to fail when
-    # encrypting plaintext that cannot be decrypted.
 
     from krux.encryption import AESCipher, VERSIONS
 
@@ -441,7 +446,7 @@ def test_broken_decryption_cases(m5stickv):
         v_name = VERSIONS[version]["name"]
 
         for plain in plaintexts:
-            encrypted = encryptor.encrypt(plain, version, iv)
+            encrypted = encryptor.encrypt(plain, version, iv, fail_unsafe=False)
 
             if v_auth != 0:
                 # versions with authentication checking...
@@ -449,8 +454,12 @@ def test_broken_decryption_cases(m5stickv):
                     # ...and without safe pkcs_pad
                     if plain[-1] == 0x00:
                         # ...and plaintext that ends in 0x00, ARE BROKEN
-                        # TODO: fail to encrypt these in the first place
                         assert encryptor.decrypt(encrypted, version) != plain
+
+                        # therefore, by default, krux fails to encrypt
+                        err = "Cannot validate decryption for this plaintext"
+                        with pytest.raises(ValueError, match=err):
+                            encryptor.encrypt(plain, version, iv)
                     else:
                         # ...but if plaintext doesn't end in 0x00, it works
                         assert encryptor.decrypt(encrypted, version) == plain

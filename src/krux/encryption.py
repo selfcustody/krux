@@ -91,7 +91,7 @@ class AESCipher:
             "sha256", key.encode(), salt.encode(), iterations
         )
 
-    def encrypt(self, plain, version, iv=b""):
+    def encrypt(self, plain, version, iv=b"", fail_unsafe=True):
         """AES encrypt according to krux rules defined by version, returns payload bytes"""
         mode = VERSIONS[version]["mode"]
         v_iv = VERSIONS[version].get("iv", 0)
@@ -99,6 +99,10 @@ class AESCipher:
         v_auth = VERSIONS[version].get("auth", 0)
         auth = b""
         plain = plain.encode("latin-1") if isinstance(plain, str) else plain
+
+        # fail to encrypt where unfaithful padding breaks authenticated decryption
+        if fail_unsafe and v_auth and not v_pkcs_pad and plain[-1] == 0x00:
+            raise ValueError("Cannot validate decryption for this plaintext")
 
         # for modes that don't have authentication, krux uses sha256 checksum
         if v_auth != 0 and mode in (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC):
@@ -111,7 +115,7 @@ class AESCipher:
         plain = pad(plain, pkcs_pad=v_pkcs_pad)
 
         # fail to encrypt in modes where it is known unsafe
-        if mode == ucryptolib.MODE_ECB:
+        if fail_unsafe and mode == ucryptolib.MODE_ECB:
             unique_blocks = len(
                 set((plain[x : x + 16] for x in range(0, len(plain), 16)))
             )

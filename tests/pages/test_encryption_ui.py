@@ -335,7 +335,10 @@ def test_encrypted_qr_code_mode_and_density(amigo, mocker):
 
     TEST_MNEMONICS = [
         # 12w
-        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        "crush inherit small egg include title slogan mom remain blouse boost bonus",
+        # The following mnemonic bytes end with 0x00 requiring AESCipher.encrypt() be called
+        # w/ non-default "fail_unsafe=False" for some versions (w/ auth, w/o pkcs_pad).
+        # "olympic term tissue route sense program under choose bean emerge velvet absurd",
         # 24w
         "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major",
     ]
