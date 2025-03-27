@@ -105,7 +105,6 @@ class AESCipher:
         v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
         v_auth = VERSIONS[version].get("auth", 0)
         auth = b""
-        plain = plain.encode("latin-1") if isinstance(plain, str) else plain
 
         # fail to encrypt where unfaithful padding breaks authenticated decryption
         if fail_unsafe and v_auth and not v_pkcs_pad and plain[-1] == 0x00:

@@ -181,16 +181,6 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
 
     # .encrypt() expects bytes raw, version, sometimes bytes i_vector
     valid_params = (
-        ("\x00", 0),
-        ("\x00", 0, b""),
-        ("\x00", 1, b"\x00" * 16),
-        ("\x00", 2),
-        ("\x00", 2, b""),
-        ("\x00", 3, b"\x00" * 16),
-        ("\x00", 4),
-        ("\x00", 4, b""),
-        ("\x00", 5, b"\x00" * 16),
-        ("\x00", 6, b"\x00" * 12),
         (b"\x00", 0),
         (b"\x00", 0, b""),
         (b"\x00", 1, b"\x00" * 16),
@@ -203,7 +193,7 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
         (b"\x00", 6, b"\x00" * 12),
         (b"\x00", 7, b"\x00" * 12),
     )
-    invalid_raws = (True, None, 1)
+    invalid_raws = ("\x00", True, None, 1)
     invalid_versions = (None, -1, 8)
     invalid_ivs = ("\x00" * 16, b"\x00" * 15, 1)
     for valids in valid_params:
@@ -271,7 +261,6 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
         if values.get("iv", 0) == 0:
             continue
         len_payload = 16 + values.get("iv")
-        print(version, values, len_payload)
         with pytest.raises(ValueError, match=err):
             decryptor.decrypt(b"\x00" * (len_payload - 1), version)
 
@@ -282,7 +271,7 @@ def test_ecb_encryption(m5stickv):
     version = 0  # AES.MODE_ECB
 
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
-    encrypted = encryptor.encrypt(TEST_WORDS, version)
+    encrypted = encryptor.encrypt(TEST_WORDS.encode(), version)
     assert encrypted == ECB_ENCRYPTED_WORDS
 
     b64encrypted = base64.b64encode(encrypted)
@@ -354,7 +343,7 @@ def test_cbc_encryption(m5stickv):
 
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
     iv = I_VECTOR
-    encrypted = encryptor.encrypt(TEST_WORDS, version, iv)
+    encrypted = encryptor.encrypt(TEST_WORDS.encode(), version, iv)
     assert encrypted == CBC_ENCRYPTED_WORDS
 
     b64encrypted = base64.b64encode(encrypted)
@@ -408,7 +397,7 @@ def test_cbc_iv_use(m5stickv):
 
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
     iv = I_VECTOR
-    encrypted = encryptor.encrypt(TEST_WORDS, version, iv)
+    encrypted = encryptor.encrypt(TEST_WORDS.encode(), version, iv)
     assert encrypted == CBC_ENCRYPTED_WORDS
 
     b64encrypted = base64.b64encode(encrypted)
@@ -419,7 +408,7 @@ def test_cbc_iv_use(m5stickv):
 
     # Encrypt again with same data except for the IV
     iv = SECOND_IV
-    encrypted = encryptor.encrypt(TEST_WORDS, version, iv)
+    encrypted = encryptor.encrypt(TEST_WORDS.encode(), version, iv)
     assert encrypted == CBC_ENCRYPTED_WORDS_SECOND_IV
 
     b64encrypted = base64.b64encode(encrypted)
