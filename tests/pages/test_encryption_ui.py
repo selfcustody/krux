@@ -374,7 +374,7 @@ def test_encrypted_qr_code_mode_and_density(amigo, mocker):
     )
 
     def is_qr_alphanumeric(string):
-        return bool(re.match("^[A-Z0-9 $%*+\-./:]+$", string))
+        return bool(re.match("^[A-Z0-9 $%*+\\-./:]+$", string))
 
     for mnemonic in TEST_MNEMONICS:
         for encryption_mode in sorted(QR_PROPS.keys()):
