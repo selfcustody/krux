@@ -26,6 +26,7 @@ except ImportError:
     import json
 import hashlib
 import ucryptolib
+from .bbqr import deflate_compress, deflate_decompress
 from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
 from .krux_settings import Settings
@@ -47,41 +48,64 @@ VERSIONS = {
         "iv": 16,
     },
     2: {
-        "name": "AES-ECB v2p",
-        "mode": ucryptolib.MODE_ECB,
-        "pkcs_pad": True,
-        "auth": -4,
+        "name": "AES-GCM",
+        "mode": ucryptolib.MODE_GCM,
+        "iv": 12,
+        "auth": 4,
     },
     3: {
-        "name": "AES-CBC v2p",
-        "mode": ucryptolib.MODE_CBC,
-        "iv": 16,
-        "pkcs_pad": True,
-        "auth": -4,
-    },
-    4: {
         "name": "AES-ECB v2",
         "mode": ucryptolib.MODE_ECB,
         "auth": 3,
     },
-    5: {
+    4: {
         "name": "AES-CBC v2",
         "mode": ucryptolib.MODE_CBC,
         "iv": 16,
         "auth": 4,
     },
-    6: {
-        "name": "AES-GCM v2",
-        "mode": ucryptolib.MODE_GCM,
-        "iv": 12,  # 12 bytes of IV - nonce
-        "auth": 4,  # 4 bytes validation tag
-    },
-    7: {
-        "name": "AES-GCM v2p",
+    5: {
+        "name": "AES-GCM +p",
         "mode": ucryptolib.MODE_GCM,
         "iv": 12,
         "auth": 4,
         "pkcs_pad": True,
+    },
+    6: {
+        "name": "AES-ECB +p",
+        "mode": ucryptolib.MODE_ECB,
+        "pkcs_pad": True,
+        "auth": -4,
+    },
+    7: {
+        "name": "AES-CBC +p",
+        "mode": ucryptolib.MODE_CBC,
+        "iv": 16,
+        "pkcs_pad": True,
+        "auth": -4,
+    },
+    8: {
+        "name": "AES-GCM +c",
+        "mode": ucryptolib.MODE_GCM,
+        "iv": 12,
+        "pkcs_pad": True,
+        "auth": 4,
+        "compress": True,
+    },
+    9: {
+        "name": "AES-ECB +c",
+        "mode": ucryptolib.MODE_ECB,
+        "pkcs_pad": True,
+        "auth": -4,
+        "compress": True,
+    },
+    10: {
+        "name": "AES-CBC +c",
+        "mode": ucryptolib.MODE_CBC,
+        "iv": 16,
+        "pkcs_pad": True,
+        "auth": -4,
+        "compress": True,
     },
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
@@ -104,7 +128,15 @@ class AESCipher:
         v_iv = VERSIONS[version].get("iv", 0)
         v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
         v_auth = VERSIONS[version].get("auth", 0)
+        v_compress = VERSIONS[version].get("compress", False)
         auth = b""
+
+        if not isinstance(plain, bytes):
+            raise TypeError("Plaintext is not bytes")
+
+        # for versions that compress
+        if v_compress:
+            plain = deflate_compress(plain)
 
         # fail to encrypt where unfaithful padding breaks authenticated decryption
         if fail_unsafe and v_auth and not v_pkcs_pad and plain[-1] == 0x00:
@@ -155,6 +187,7 @@ class AESCipher:
         v_iv = VERSIONS[version].get("iv", 0)
         v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
         v_auth = VERSIONS[version].get("auth", 0)
+        v_compress = VERSIONS[version].get("compress", False)
 
         # setup decryptor (pulling initialization-vector from payload if necessary)
         if not v_iv:
@@ -193,6 +226,10 @@ class AESCipher:
                     decrypted = decrypted[:v_auth]
                 if hashlib.sha256(decrypted).digest()[: abs(v_auth)] != auth:
                     return None
+
+        # for versions that compress
+        if v_compress:
+            decrypted = deflate_decompress(decrypted)
 
         return decrypted
 
