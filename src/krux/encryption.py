@@ -45,12 +45,10 @@ VERSIONS = {
     1: {
         "name": "AES-CBC",
         "mode": ucryptolib.MODE_CBC,
-        "iv": 16,
     },
     2: {
         "name": "AES-GCM",
         "mode": ucryptolib.MODE_GCM,
-        "iv": 12,
         "auth": 4,
     },
     3: {
@@ -61,13 +59,11 @@ VERSIONS = {
     4: {
         "name": "AES-CBC v2",
         "mode": ucryptolib.MODE_CBC,
-        "iv": 16,
         "auth": 4,
     },
     5: {
         "name": "AES-GCM +p",
         "mode": ucryptolib.MODE_GCM,
-        "iv": 12,
         "auth": 4,
         "pkcs_pad": True,
     },
@@ -80,14 +76,12 @@ VERSIONS = {
     7: {
         "name": "AES-CBC +p",
         "mode": ucryptolib.MODE_CBC,
-        "iv": 16,
         "pkcs_pad": True,
         "auth": -4,
     },
     8: {
         "name": "AES-GCM +c",
         "mode": ucryptolib.MODE_GCM,
-        "iv": 12,
         "pkcs_pad": True,
         "auth": 4,
         "compress": True,
@@ -102,17 +96,19 @@ VERSIONS = {
     10: {
         "name": "AES-CBC +c",
         "mode": ucryptolib.MODE_CBC,
-        "iv": 16,
         "pkcs_pad": True,
         "auth": -4,
         "compress": True,
     },
 }
-VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
 MODE_NUMBERS = {
     "AES-ECB": ucryptolib.MODE_ECB,
     "AES-CBC": ucryptolib.MODE_CBC,
     "AES-GCM": ucryptolib.MODE_GCM,
+}
+MODE_IVS = {
+    ucryptolib.MODE_CBC: 16,
+    ucryptolib.MODE_GCM: 12,
 }
 
 AES_BLOCK_SIZE = 16
@@ -130,7 +126,7 @@ class AESCipher:
     def encrypt(self, plain, version, iv=b"", fail_unsafe=True):
         """AES encrypt according to krux rules defined by version, returns payload bytes"""
         mode = VERSIONS[version]["mode"]
-        v_iv = VERSIONS[version].get("iv", 0)
+        v_iv = MODE_IVS.get(mode, 0)
         v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
         v_auth = VERSIONS[version].get("auth", 0)
         v_compress = VERSIONS[version].get("compress", False)
@@ -189,7 +185,7 @@ class AESCipher:
     def decrypt(self, payload, version):
         """AES Decrypt according to krux rules defined by version, returns plaintext bytes"""
         mode = VERSIONS[version]["mode"]
-        v_iv = VERSIONS[version].get("iv", 0)
+        v_iv = MODE_IVS.get(mode, 0)
         v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
         v_auth = VERSIONS[version].get("auth", 0)
         v_compress = VERSIONS[version].get("compress", False)
@@ -553,7 +549,7 @@ def kef_encode(id_, version, iterations, payload):
     except:
         raise ValueError("Invalid iterations")
 
-    extra = VERSIONS[version].get("iv", 0)
+    extra = MODE_IVS.get(VERSIONS[version]["mode"], 0)
     if VERSIONS[version].get("auth", 0) > 0:
         extra += VERSIONS[version]["auth"]
     if not isinstance(payload, bytes):
@@ -590,7 +586,7 @@ def kef_decode(kef_bytes):
     else:
         iterations = kef_iterations
     payload = kef_bytes[len_id + 5 :]
-    extra = VERSIONS[version].get("iv", 0)
+    extra = MODE_IVS.get(VERSIONS[version]["mode"], 0)
     if VERSIONS[version].get("auth", 0) > 0:
         extra += VERSIONS[version]["auth"]
     if (len(payload) - extra) % 16 != 0:

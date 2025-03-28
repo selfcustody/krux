@@ -111,7 +111,7 @@ def test_encryption_VERSIONS_definition(m5stickv):
     to decrypt existing ciphertext in-the-wild, but more versions can be
     added in the future.
     """
-    from krux.encryption import VERSIONS, VERSION_NUMBERS, MODE_NUMBERS
+    from krux.encryption import VERSIONS, MODE_IVS, MODE_NUMBERS
     from krux.krux_settings import EncryptionSettings
 
     # the keys to VERSIONS are all integers between 0 and 255
@@ -131,8 +131,8 @@ def test_encryption_VERSIONS_definition(m5stickv):
             11,  # GCM
         )
 
-        # each version has an 'iv' int to require this size i_vector
-        assert isinstance(v.get("iv", 0), int)
+        # each version may have an "iv" value in MODE_IVS to require this size i_vector
+        assert isinstance(MODE_IVS.get(v["mode"], 0), int)
 
         # each version has a 'pkcs_pad' boolean for pkcs style padding
         assert isinstance(v.get("pkcs_pad", False), bool)
@@ -147,13 +147,6 @@ def test_encryption_VERSIONS_definition(m5stickv):
         # successful decryption.
         assert isinstance(v.get("auth", 0), int) and -32 <= v.get("auth", 0) <= 32
 
-    # VERSIONS['name'] must be unique else VERSION_NUMBERS will break
-    assert len(VERSIONS) == len(VERSION_NUMBERS)
-
-    # VERSION_NUMBERS is a reverse lookup (name->version) derived from VERSIONS
-    for k, v in VERSION_NUMBERS.items():
-        assert VERSIONS[v]["name"] == k
-
     # MODE_NUMBERS defines the AES modes of operation
     assert sorted(MODE_NUMBERS.keys()) == ["AES-CBC", "AES-ECB", "AES-GCM"]
     for k, v in VERSIONS.items():
@@ -161,13 +154,18 @@ def test_encryption_VERSIONS_definition(m5stickv):
         assert implied_mode in MODE_NUMBERS
         assert v["mode"] == MODE_NUMBERS[implied_mode]
 
-    # similarly, src/krux/krux_settings.py also requires a compatible structure
+    # EncrypionSettings.MODE_NAMES requires a compatible structure
     for name, mode_number in MODE_NUMBERS.items():
         assert EncryptionSettings().MODE_NAMES[mode_number] == name
 
+    # MODE_IVS defines initialization-vector length for modes that need it
+    for mode, ivlen in MODE_IVS.items():
+        assert isinstance(ivlen, int)
+        assert mode in MODE_NUMBERS.values()
+
 
 def test_suggest_versions(m5stickv):
-    from krux.encryption import suggest_versions, VERSIONS, MODE_NUMBERS
+    from krux.encryption import suggest_versions, VERSIONS, MODE_IVS, MODE_NUMBERS
 
     entropy16 = b"16 random bytes!"
     entropy32 = b"32 super random bytes of entropy"
@@ -248,7 +246,7 @@ def test_suggest_versions(m5stickv):
         version = suggesteds[0]
         if isinstance(plain, str):
             plain = plain.encode()
-        iv = b"\x00" * VERSIONS[version].get("iv", 0)
+        iv = b"\x00" * MODE_IVS.get(VERSIONS[version]["mode"], 0)
         encryptor = AESCipher("key", "salt", 100000)
         encryptor.encrypt(plain, suggesteds[0], iv)
         # end debugging
@@ -278,7 +276,7 @@ def test_AESCipher_initialization(m5stickv):
 
 
 def test_AESCipher_calling_method_encrypt(m5stickv):
-    from krux.encryption import AESCipher, VERSIONS
+    from krux.encryption import AESCipher, VERSIONS, MODE_IVS
     from ucryptolib import MODE_ECB, MODE_CBC, MODE_GCM
 
     encryptor = AESCipher("key", "salt", 1)
@@ -323,7 +321,7 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
                     encryptor.encrypt(valids[0], invalid, valids[2], **kwargs)
                 else:
                     encryptor.encrypt(valids[0], invalid, **kwargs)
-        v_iv = VERSIONS[valids[1]].get("iv", 0)
+        v_iv = MODE_IVS.get(VERSIONS[valids[1]]["mode"], 0)
         if v_iv == 0:
             err = "IV is not required"
             for invalid in invalid_ivs:
@@ -337,7 +335,7 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
 
 
 def test_AESCipher_calling_method_decrypt(m5stickv):
-    from krux.encryption import AESCipher, VERSIONS
+    from krux.encryption import AESCipher, VERSIONS, MODE_IVS
     from ucryptolib import MODE_ECB, MODE_CBC, MODE_GCM
 
     decryptor = AESCipher("key", "salt", 1)
@@ -371,9 +369,9 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
 
     err = "Missing IV"
     for version, values in VERSIONS.items():
-        if values.get("iv", 0) == 0:
+        if MODE_IVS.get(values["mode"], 0) == 0:
             continue
-        len_payload = 16 + values.get("iv")
+        len_payload = 16 + MODE_IVS[values["mode"]]
         with pytest.raises(ValueError, match=err):
             decryptor.decrypt(b"\x00" * (len_payload - 1), version)
 
@@ -595,7 +593,7 @@ def test_broken_decryption_cases(m5stickv):
     authentication bytes but not pkcs_pad AND plaintext ends in 0x00 byte
     """
 
-    from krux.encryption import AESCipher, VERSIONS
+    from krux.encryption import AESCipher, VERSIONS, MODE_IVS
 
     plaintexts = (
         b"plaintext that isn't 16-byte aligned AND ends in \x00",
@@ -611,7 +609,7 @@ def test_broken_decryption_cases(m5stickv):
     )
     encryptor = AESCipher("key", "salt", 100000)
     for version in VERSIONS:
-        iv = I_VECTOR[: VERSIONS[version].get("iv", 0)]
+        iv = I_VECTOR[: MODE_IVS.get(VERSIONS[version]["mode"], 0)]
         v_auth = VERSIONS[version].get("auth", 0)
         v_pkcs_pad = VERSIONS[version].get("pkcs_pad", False)
         v_name = VERSIONS[version]["name"]
@@ -842,7 +840,8 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         EncryptedQRCode,
         suggest_versions,
         VERSIONS,
-        VERSION_NUMBERS,
+        MODE_IVS,
+        MODE_NUMBERS,
     )
     from krux.krux_settings import Settings, EncryptionSettings
     from krux.baseconv import base_encode
@@ -851,7 +850,7 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
     qr_code_datum = {}
     for mode, mode_name in EncryptionSettings.MODE_NAMES.items():
         Settings().encryption.version = mode_name
-        iv = I_VECTOR[: VERSIONS[VERSION_NUMBERS[mode_name]].get("iv", 0)]
+        iv = I_VECTOR[: MODE_IVS.get(MODE_NUMBERS[mode_name], 0)]
         encrypted_qr = EncryptedQRCode()
         qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, iv)
         if mode_name == "AES-ECB":
@@ -876,9 +875,9 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
     TEST_ENTROPY = mnemonic_to_bytes(TEST_WORDS)
     ITERATIONS = Settings().encryption.pbkdf2_iterations
     encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
-    for version in VERSIONS:
-        implied_mode = VERSIONS[version]["name"][:7]
-        iv = I_VECTOR[: VERSIONS[version].get("iv", 0)]
+    for version, value in VERSIONS.items():
+        implied_mode = value["name"][:7]
+        iv = I_VECTOR[: MODE_IVS.get(value["mode"], 0)]
         payload = encryptor.encrypt(TEST_ENTROPY, version, iv)
         if version in (0, 1):
             payload += sha256(payload).digest()[:16]  # checksum
@@ -925,7 +924,7 @@ def test_kef_encoding_is_faithful(m5stickv):
 
 
 def test_kef_encode_exceptions(m5stickv):
-    from krux.encryption import kef_encode, VERSIONS, AESCipher
+    from krux.encryption import kef_encode, VERSIONS, MODE_IVS, AESCipher
 
     ten_k = 10000
     valid_ids = (
@@ -947,7 +946,7 @@ def test_kef_encode_exceptions(m5stickv):
         for version in valid_versions:
             for iterations in valid_iterations:
                 for plaintext in plaintexts:
-                    iv = b"\x00" * VERSIONS[version].get("iv", 0)
+                    iv = b"\x00" * MODE_IVS.get(VERSIONS[version]["mode"], 0)
                     ciphertext = encryptor.encrypt(
                         plaintext, version, iv, fail_unsafe=False
                     )
@@ -995,7 +994,7 @@ def test_kef_encode_exceptions(m5stickv):
 
                     # ...and not too short
                     err = "Ciphertext is too short"
-                    extra = VERSIONS[version].get("iv", 0)
+                    extra = MODE_IVS.get(VERSIONS[version]["mode"], 0)
                     if VERSIONS[version].get("auth", 0) > 0:
                         extra += VERSIONS[version]["auth"]
                     invalid = ciphertext[:extra]

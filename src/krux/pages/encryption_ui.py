@@ -22,7 +22,7 @@
 
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
-from ..encryption import VERSIONS, VERSION_NUMBERS
+from ..encryption import MODE_NUMBERS, MODE_IVS
 from ..themes import theme
 from . import (
     Page,
@@ -189,7 +189,7 @@ class EncryptMnemonic(Page):
             return None
 
         i_vector = None
-        iv_len = VERSIONS[VERSION_NUMBERS[self.mode_name]].get("iv", 0)
+        iv_len = MODE_IVS.get(MODE_NUMBERS[self.mode_name], 0)
         if iv_len > 0:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
