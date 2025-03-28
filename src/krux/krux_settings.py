@@ -374,21 +374,13 @@ class EncryptionSettings(SettingsNamespace):
     """Encryption settings"""
 
     # defined in krux.encryption.VERSIONS
-    VERSION_NAMES = {
-        0: "AES-ECB",
-        1: "AES-CBC",
-        2: "AES-GCM",
-        3: "AES-ECB v2",
-        4: "AES-CBC v2",
-        5: "AES-GCM +p",
-        6: "AES-ECB +p",
-        7: "AES-CBC +p",
-        8: "AES-GCM +c",
-        9: "AES-ECB +c",
-        10: "AES-CBC +c",
+    MODE_NAMES = {
+        1: "AES-ECB",
+        2: "AES-CBC",
+        11: "AES-GCM",
     }
     namespace = "settings.encryption"
-    version = CategorySetting("version", "AES-ECB", list(VERSION_NAMES.values()))
+    version = CategorySetting("version", "AES-ECB", list(MODE_NAMES.values()))
     pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [1, 500000])
 
     def label(self, attr):

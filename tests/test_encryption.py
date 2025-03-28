@@ -29,26 +29,34 @@ B64_ECB_ENCRYPTED_ENTROPY_CKSUM = (
 )
 B64_CBC_ENCRYPTED_ENTROPY_CKSUM = b"T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkTcp7WZ0lQqJH3j2Na7hmxg=="
 
-ECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
-CBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
+ECB_ENCRYPTED_QR = b"\x07test ID\x03\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xb35\xef"
+OLD_ECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
+CBC_ENCRYPTED_QR = b'\x07test ID\x04\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xb35\xef\x7f'
+OLD_CBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
 
 ECB_QR_PUBLIC_DATA = (
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB v2\nKey iter.: 100000"
+)
+OLD_ECB_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 100000"
 )
 CBC_QR_PUBLIC_DATA = (
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC v2\nKey iter.: 100000"
+)
+OLD_CBC_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC\nKey iter.: 100000"
 )
 
 SEEDS_JSON = """{
     "ecbID": {
-        "version": 0,
+        "version": 3,
         "key_iterations": 100000,
-        "data": "DGMJf5DsmyRNiO80fcSMV7zE4JjfTn/kaUAg8hX4knJH5vbEu7Bo/0yqZXaNHjd0"
+        "data": "DGMJf5DsmyRNiO80fcSMV7zE4JjfTn/kaUAg8hX4knK3oy0="
     },
     "cbcID": {
-        "version": 1,
+        "version": 4,
         "key_iterations": 100000,
-        "data": "T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkTcp7WZ0lQqJH3j2Na7hmxg=="
+        "data": "T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkA8Wg1Q=="
     }
 }"""
 
@@ -66,8 +74,8 @@ DEPRECATED_SEEDS_JSON = """{
 }"""
 
 
-ECB_ONLY_JSON = '{"ecbID": {"version": 0, "key_iterations": 100000, "data": "DGMJf5DsmyRNiO80fcSMV7zE4JjfTn/kaUAg8hX4knJH5vbEu7Bo/0yqZXaNHjd0"}}'
-CBC_ONLY_JSON = '{"cbcID": {"version": 1, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkTcp7WZ0lQqJH3j2Na7hmxg=="}}'
+ECB_ONLY_JSON = '{"ecbID": {"version": 3, "key_iterations": 100000, "data": "DGMJf5DsmyRNiO80fcSMV7zE4JjfTn/kaUAg8hX4knK3oy0="}}'
+CBC_ONLY_JSON = '{"cbcID": {"version": 4, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkA8Wg1Q=="}}'
 
 I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
 
@@ -103,7 +111,7 @@ def test_encryption_VERSIONS_definition(m5stickv):
     to decrypt existing ciphertext in-the-wild, but more versions can be
     added in the future.
     """
-    from krux.encryption import VERSIONS, VERSION_NUMBERS
+    from krux.encryption import VERSIONS, VERSION_NUMBERS, MODE_NUMBERS
     from krux.krux_settings import EncryptionSettings
 
     # the keys to VERSIONS are all integers between 0 and 255
@@ -146,10 +154,106 @@ def test_encryption_VERSIONS_definition(m5stickv):
     for k, v in VERSION_NUMBERS.items():
         assert VERSIONS[v]["name"] == k
 
+    # MODE_NUMBERS defines the AES modes of operation
+    assert sorted(MODE_NUMBERS.keys()) == ["AES-CBC", "AES-ECB", "AES-GCM"]
+    for k, v in VERSIONS.items():
+        implied_mode = v["name"][:7]
+        assert implied_mode in MODE_NUMBERS
+        assert v["mode"] == MODE_NUMBERS[implied_mode]
+
     # similarly, src/krux/krux_settings.py also requires a compatible structure
-    assert len(VERSIONS) == len(EncryptionSettings().VERSION_NAMES)
-    for k, v in EncryptionSettings().VERSION_NAMES.items():
-        assert VERSIONS[k]["name"] == v
+    for name, mode_number in MODE_NUMBERS.items():
+        assert EncryptionSettings().MODE_NAMES[mode_number] == name
+
+
+def test_suggest_versions(m5stickv):
+    from krux.encryption import suggest_versions, VERSIONS, MODE_NUMBERS
+
+    entropy16 = b"16 random bytes!"
+    entropy32 = b"32 super random bytes of entropy"
+    nul_byte_str = "a nul byte string \x00"
+    short_str = "Running bitcoin"
+    bad_passwd = "N0 body will ever gue55 th!s 1"
+    descriptor_single = "pkh([55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE)"
+    descriptor_1of2 = "wsh(multi(1,[55f8fc5d/44h/0h/1h]xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))"
+    descriptor_2of3 = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*))"
+    descriptor_mini_liana_em = "tr(xpub661MyMwAqRbcFHMDceyRcHhEfeDBXneBmbTnqujM6EumzeNcd8wrs3SHGzkETt7dDwqSCmDJx2rz6uKEddXRcYUWuAu6rkaj4L2QuVxqNUS/<0;1>/*,{and_v(v:multi_a(2,[55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<2;3>/*,[3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<2;3>/*,[d3a80c8b/48'/0'/0'/2']xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),older(65535)),multi_a(2,[55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*)})#uyj29ygt"
+    descriptor_remint005 = "wsh(andor(multi(2,[fbf14e49/45h/1h/0h/3h]tpubDEPmZmWcL9G3XEbhBy6A5UG7tR4hAT7zvhu4cVmCSbVPhjkfuYRgqFnUfG4Gm1NSaoo412nzyRe3UAtC73BHQbVDLz4nAkrhJDSxcYSpUnz/<0;1>/*,[525cb3d5/45h/1h/0h/3h]tpubDF4yVr6ohjK1hQgyHvtLpanC4JxkshsMVUDHfmDvpXcBzdD2peXKdhfLFVNWQekAYAN1vU81dUNfgokZb1foUQfDMtf6X8mb3vMs7cYHbcr/<0;1>/*,[5fc83bce/45h/1h/0h/3h]tpubDFMqbP9gd34rd5Db2hHVYsJA3LnBD2fZo6zWFzeAA2kUC27cndyN2axBs55K9qJSghbvZx1Nyrrvb2ixgLXRzyK7dLLnXHGAmHe7apv4XwU/<0;1>/*),or_i(and_v(v:pkh([5acaced1/49h/1h/0h]tpubDDXMHf1PVPUPYHKyR9b5pbsfcd4SDC5FHtx7msTwazX4gkZPCRjoTYB2mFR4HsiybdptPtKH7yyoogx9d2gvc92SaoCYANEdZYqRR6FJKGx/<0;1>/*),after(230436)),thresh(2,pk([5ecc195f/48h/1h/0h/2h]tpubDFfTpjFSFT9FFvWwXand2JfnRBSpekQQpzdoz5qm8fy6cUhjLdTBuNrqxdsFgyTJ6xr5oeUAqa28VHPMprbosXLhGEgJW4SPa31tuSmp9Ub/<0;1>/*),s:pk([a1088994/48h/1h/0h/2h]tpubDFE64qjVGZ8L31gXFNtRUUpbaZ5viPgkFpth8j3XfGNWgaM6Vsm3F4z1nNE1soY3cQc6YZtNqMqfrywkeAQMiiYnR8N1oyFP5YuuFYTQ2nx/<0;1>/*),s:pk([8faeabe8/48h/1h/0h/2h]tpubDEMz5Gib3V3i1xzY4yaKH2k2J4MBRjNYNSace1YHMr6MgaM1oLZ4qiF7mWQvGPm9gH5bgroqPMr44viw16XWYoig6rbCQrkzakJw6hsapFw/<0;1>/*),snl:after(230220))),and_v(v:thresh(2,pkh([2bd4a49f/84h/1h/1h]tpubDCtwDKhf7tMtt2NDNrWsN7tFQSEvoKt9qvSBMUPuZVnoR52FwSaQS37UT5skDddUyzhVEGJozGxu8CBJPPc8MXhXidD7azaubMHgNCPvq28/<0;1>/*),a:pkh([d38f3599/84h/1h/2h]tpubDDYgycbJd7DgJjKFd4W8Dp8RRNhDDYfLs93cjhBP6boyXiZxdUyZc8fuLMJyetQXq6i9xfYSJwEf1GYxmND6jXExLS9q9ibP2YXZxtqe7mK/<0;1>/*),a:pkh([001ceab0/84h/1h/3h]tpubDCuJUyHrMq4PY4fXEHyADTkFwgy498AnuhrhFzgT7tWuuwp9JAeopqMTre99nzEVnqJNsJk21VRLeLsGz4cA5hboULrupdHqiZdxKRLJV9R/<0;1>/*)),after(230775))))#5flg0r73"
+    testcases = (
+        # plaintext, preferred mode, suggested-version-name
+        # ECB
+        (entropy16, "AES-ECB", "AES-ECB v2"),
+        (entropy32, "AES-ECB", "AES-ECB v2"),
+        (entropy16 * 2, "AES-ECB", "AES-ECB +c"),
+        (entropy32 * 3, "AES-ECB", "AES-ECB +c"),
+        (entropy32 * 8, "AES-ECB", "AES-ECB +c"),
+        (nul_byte_str, "AES-ECB", "AES-ECB +p"),
+        (entropy32 * 2 + nul_byte_str.encode(), "AES-ECB", "AES-ECB +c"),
+        (short_str, "AES-ECB", "AES-ECB v2"),
+        (bad_passwd, "AES-ECB", "AES-ECB v2"),
+        (descriptor_single, "AES-ECB", "AES-ECB +p"),
+        (descriptor_1of2, "AES-ECB", "AES-ECB +c"),
+        (descriptor_2of3, "AES-ECB", "AES-ECB +c"),
+        (descriptor_mini_liana_em, "AES-ECB", "AES-ECB +c"),
+        (descriptor_remint005, "AES-ECB", "AES-ECB +c"),
+        # CBC
+        (entropy16, "AES-CBC", "AES-CBC v2"),
+        (entropy32, "AES-CBC", "AES-CBC v2"),
+        (entropy16 * 2, "AES-CBC", "AES-CBC v2"),
+        (entropy32 * 3, "AES-CBC", "AES-CBC +p"),
+        (entropy32 * 8, "AES-CBC", "AES-CBC +c"),
+        (nul_byte_str, "AES-CBC", "AES-CBC +p"),
+        (entropy32 * 2 + nul_byte_str.encode(), "AES-CBC", "AES-CBC +p"),
+        (short_str, "AES-CBC", "AES-CBC v2"),
+        (bad_passwd, "AES-CBC", "AES-CBC v2"),
+        (descriptor_single, "AES-CBC", "AES-CBC +p"),
+        (descriptor_1of2, "AES-CBC", "AES-CBC +c"),
+        (descriptor_2of3, "AES-CBC", "AES-CBC +c"),
+        (descriptor_mini_liana_em, "AES-CBC", "AES-CBC +c"),
+        (descriptor_remint005, "AES-CBC", "AES-CBC +c"),
+        # GCM
+        (entropy16, "AES-GCM", "AES-GCM"),
+        (entropy32, "AES-GCM", "AES-GCM"),
+        (entropy16 * 2, "AES-GCM", "AES-GCM"),
+        (entropy32 * 3, "AES-GCM", "AES-GCM +p"),
+        (entropy32 * 8, "AES-GCM", "AES-GCM +c"),
+        (nul_byte_str, "AES-GCM", "AES-GCM +p"),
+        (entropy32 * 2 + nul_byte_str.encode(), "AES-GCM", "AES-GCM +p"),
+        (short_str, "AES-GCM", "AES-GCM"),
+        (bad_passwd, "AES-GCM", "AES-GCM"),
+        (descriptor_single, "AES-GCM", "AES-GCM +p"),
+        (descriptor_1of2, "AES-GCM", "AES-GCM +c"),
+        (descriptor_2of3, "AES-GCM", "AES-GCM +c"),
+        (descriptor_mini_liana_em, "AES-GCM", "AES-GCM +c"),
+        (descriptor_remint005, "AES-GCM", "AES-GCM +c"),
+    )
+
+    # call it with plaintext (bytes or str) and mode_name
+    for mode_name in MODE_NUMBERS:
+        assert len(suggest_versions(b"arbitrary bytestring", mode_name)) > 0
+        assert len(suggest_versions("an arbitrary text str", mode_name)) > 0
+
+        with pytest.raises(TypeError, match="Plaintext is not bytes or str"):
+            suggest_versions(None, mode_name)
+        with pytest.raises(TypeError):
+            suggest_versions(b"some bytes")
+
+    for plain, mode_name, version_name in testcases:
+        suggesteds = suggest_versions(plain, mode_name)
+
+        # begin debugging
+        from krux.encryption import AESCipher
+
+        print(len(plain), mode_name, [VERSIONS[x]["name"] for x in suggesteds])
+        version = suggesteds[0]
+        if isinstance(plain, str):
+            plain = plain.encode()
+        iv = b"\x00" * VERSIONS[version].get("iv", 0)
+        encryptor = AESCipher("key", "salt", 100000)
+        encryptor.encrypt(plain, suggesteds[0], iv)
+        # end debugging
+
+        assert version_name in [VERSIONS[x]["name"] for x in suggesteds]
 
 
 def test_AESCipher_initialization(m5stickv):
@@ -692,6 +796,7 @@ def test_create_ecb_encrypted_qr_code(m5stickv):
     Settings().encryption.version = "AES-ECB"
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS)
+    # assert qr_data == OLD_ECB_ENCRYPTED_QR
     assert qr_data == ECB_ENCRYPTED_QR
 
 
@@ -702,7 +807,7 @@ def test_create_cbc_encrypted_qr_code(m5stickv):
     Settings().encryption.version = "AES-CBC"
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, I_VECTOR)
-    print(qr_data)
+    # assert qr_data == OLD_CBC_ENCRYPTED_QR
     assert qr_data == CBC_ENCRYPTED_QR
 
 
@@ -712,6 +817,7 @@ def test_decode_ecb_encrypted_qr_code(m5stickv):
 
     encrypted_qr = EncryptedQRCode()
     public_data = encrypted_qr.public_data(ECB_ENCRYPTED_QR)
+    # assert public_data == OLD_ECB_QR_PUBLIC_DATA
     assert public_data == ECB_QR_PUBLIC_DATA
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
@@ -724,64 +830,67 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
 
     encrypted_qr = EncryptedQRCode()
     public_data = encrypted_qr.public_data(CBC_ENCRYPTED_QR)
-    print(public_data)
     assert public_data == CBC_QR_PUBLIC_DATA
+    # assert public_data == OLD_CBC_QR_PUBLIC_DATA
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
     assert words == TEST_WORDS
 
 
 def test_check_encrypted_qr_code_lengths(m5stickv):
-    from krux.encryption import EncryptedQRCode, VERSIONS
-    from krux.krux_settings import Settings
+    from krux.encryption import (
+        EncryptedQRCode,
+        suggest_versions,
+        VERSIONS,
+        VERSION_NUMBERS,
+    )
+    from krux.krux_settings import Settings, EncryptionSettings
     from krux.baseconv import base_encode
 
-    for version in VERSIONS:
-        version_name = VERSIONS[version]["name"]
-        Settings().encryption.version = version_name
-        encrypted_qr = EncryptedQRCode()
-        iv = None
-        v_iv = VERSIONS[version].get("iv", 0)
-        if v_iv:
-            iv = I_VECTOR[:v_iv]
+    # make encrypted_mnemonics using encryption settings mode preference
+    qr_code_datum = {}
+    for mode, mode_name in EncryptionSettings.MODE_NAMES.items():
+        Settings().encryption.version = mode_name
+        iv = I_VECTOR[: VERSIONS[VERSION_NUMBERS[mode_name]].get("iv", 0)]
         encrypted_qr = EncryptedQRCode()
         qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, iv)
-        if version_name == "AES-ECB":
-            assert len(qr_data) == 44
-            assert len(base_encode(qr_data, 43)) == 64
-        elif version_name == "AES-CBC":
-            assert len(qr_data) == 60
-            assert len(base_encode(qr_data, 43)) == 88
-        elif version_name == "AES-GCM":
-            assert len(qr_data) == 44
-            assert len(base_encode(qr_data, 43)) == 64
-        elif version_name == "AES-ECB v2":
+        if mode_name == "AES-ECB":
             assert len(qr_data) == 31
             assert len(base_encode(qr_data, 43)) == 45
-        elif version_name == "AES-CBC v2":
+        elif mode_name == "AES-CBC":
             assert len(qr_data) == 48
             assert len(base_encode(qr_data, 43)) == 70
-        elif version_name == "AES-ECB +p":
+        elif mode_name == "AES-GCM":
             assert len(qr_data) == 44
             assert len(base_encode(qr_data, 43)) == 64
-        elif version_name == "AES-CBC +p":
-            assert len(qr_data) == 60
-            assert len(base_encode(qr_data, 43)) == 88
-        elif version_name == "AES-GCM +p":
-            assert len(qr_data) == 60
-            assert len(base_encode(qr_data, 43)) == 88
-        elif version_name == "AES-GCM +c":
-            assert len(qr_data) == 60
-            assert len(base_encode(qr_data, 43)) == 88
-        elif version_name == "AES-ECB +c":
-            assert len(qr_data) == 44
-            assert len(base_encode(qr_data, 43)) == 64
-        elif version_name == "AES-CBC +c":
-            assert len(qr_data) == 60
-            assert len(base_encode(qr_data, 43)) == 88
         else:
-            print(f"Unknown version: {version_name}")
+            print(f"Unknown mode: {mode_name}")
             assert 0
+        qr_code_datum[mode_name] = qr_data
+
+    # re-create similar cipher-payloads for all versions, assert their kef-encoding is not any smaller
+    from hashlib import sha256
+    from embit.bip39 import mnemonic_to_bytes
+    from krux.encryption import AESCipher, kef_encode
+
+    TEST_ENTROPY = mnemonic_to_bytes(TEST_WORDS)
+    ITERATIONS = Settings().encryption.pbkdf2_iterations
+    encryptor = AESCipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
+    for version in VERSIONS:
+        implied_mode = VERSIONS[version]["name"][:7]
+        iv = I_VECTOR[: VERSIONS[version].get("iv", 0)]
+        payload = encryptor.encrypt(TEST_ENTROPY, version, iv)
+        if version in (0, 1):
+            payload += sha256(payload).digest()[:16]  # checksum
+        kef_data = kef_encode(TEST_MNEMONIC_ID, version, ITERATIONS, payload)
+        qr_data = qr_code_datum[implied_mode]
+
+        # looping through all versions, we didn't do any better than suggested version above
+        assert len(qr_data) <= len(kef_data)
+
+        # where it's the same size, it's the same data
+        if len(qr_data) == len(kef_data):
+            assert qr_data == kef_data
 
 
 def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
@@ -794,13 +903,11 @@ def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
     Settings().encryption.pbkdf2_iterations = 99999
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS)
-    print(qr_data)
-    print(ECB_ENCRYPTED_QR)
 
     print("case Decode: customize_pbkdf2_iterations")
     public_data = encrypted_qr.public_data(qr_data)
     assert public_data == (
-        "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 90000"
+        "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB v2\nKey iter.: 90000"
     )
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
@@ -818,7 +925,7 @@ def test_kef_encoding_is_faithful(m5stickv):
 
 
 def test_kef_encode_exceptions(m5stickv):
-    from krux.encryption import kef_encode
+    from krux.encryption import kef_encode, VERSIONS, AESCipher
 
     ten_k = 10000
     valid_ids = (
@@ -826,15 +933,24 @@ def test_kef_encode_exceptions(m5stickv):
         "My Mnemonic",
         "ID can be empty or as long as 255 utf-8 characters, but not longer\nA purely peer-to-peer version of electronic cash would allow online\npayments to be sent directly from one party to another without going through a\nfinancial institution. Digital signatures",
     )
-    valid_versions = (0, 1)
+    valid_versions = range(11)
     valid_iterations = (ten_k, 50 * ten_k, ten_k + 1, 2**24 - 1, ten_k * ten_k)
-    valid_ciphertexts = (ECB_ENCRYPTED_QR[-32:], CBC_ENCRYPTED_QR[-48:])
+    plaintexts = (
+        b"\xde\xad\xbe\xef" * 4,
+        b"\xde\xad\xbe\xef" * 8,
+        b"hello world",
+    )
 
     # test individual exceptions against other valid params
+    encryptor = AESCipher("key", "salt", 100000)
     for id_ in valid_ids:
         for version in valid_versions:
             for iterations in valid_iterations:
-                for ciphertext in valid_ciphertexts:
+                for plaintext in plaintexts:
+                    iv = b"\x00" * VERSIONS[version].get("iv", 0)
+                    ciphertext = encryptor.encrypt(
+                        plaintext, version, iv, fail_unsafe=False
+                    )
 
                     # ID is limited to length < 256 utf-8
                     err = "Invalid ID"
@@ -873,13 +989,16 @@ def test_kef_encode_exceptions(m5stickv):
                     # ...and aligned
                     err = "Ciphertext is not aligned"
                     for extra in range(1, 16):
-                        invalid = ciphertext + (b"\x00" * extra)
+                        invalid = ciphertext + (b"\xff" * extra)
                         with pytest.raises(ValueError, match=err):
                             kef_encode(id_, version, iterations, invalid)
 
                     # ...and not too short
                     err = "Ciphertext is too short"
-                    invalid = ciphertext[:0]
+                    extra = VERSIONS[version].get("iv", 0)
+                    if VERSIONS[version].get("auth", 0) > 0:
+                        extra += VERSIONS[version]["auth"]
+                    invalid = ciphertext[:extra]
                     with pytest.raises(ValueError, match=err):
                         kef_encode(id_, version, iterations, invalid)
 

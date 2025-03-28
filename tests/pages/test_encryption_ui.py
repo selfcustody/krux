@@ -20,10 +20,16 @@ SEEDS_JSON = """{
     }
 }"""
 ENCRYPTED_QR_TITLE_CBC = "353175d8"
-ENCRYPTED_QR_DATA_CBC = b"\x08353175d8\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\xa5\x95(IzR\x81\xabI:\x1e\x8a\x1d\xe7|O\xac\x9c\xe8.\x8cc\xc0\x93\x0e\xe67vpO#i\x99\xd1.\x85\xf7\x00\xfez\xadN\x9d7\xaex\xa6\xd3"
+OLD_ENCRYPTED_QR_DATA_CBC = b"\x08353175d8\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\xa5\x95(IzR\x81\xabI:\x1e\x8a\x1d\xe7|O\xac\x9c\xe8.\x8cc\xc0\x93\x0e\xe67vpO#i\x99\xd1.\x85\xf7\x00\xfez\xadN\x9d7\xaex\xa6\xd3"
+ENCRYPTED_QR_DATA_CBC = b"\x08353175d8\x04\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\xa5\x95(IzR\x81\xabI:\x1e\x8a\x1d\xe7|O\xac\x9c\xe8.\x8cc\xc0\x93\x0e\xe67vpO#i\x03\xc5\xa0\xd5"
+ENCRYPTED_QR_DATA_CBC_b43 = "VBRRAN4/CZD0IRXE6+U4CKZLO3$W:B2G6I2S*0S+4G../PSX38:ZCB$BJ33OUL-:IKAP/1756MSY0/.ONPH66V.PT0K2A7*"
 
 ENCRYPTED_QR_TITLE_ECB = "06b79aa2"
-ENCRYPTED_QR_DATA_ECB = b"\x0806b79aa2\x00\x00\x00\n\xa4\xaaa\xb9h\x0c\xdc-i\x85\x83.9,\x91\xf1\x19E,\xc9\xf0'\xb1b7\x91mo\xa2-\xb6\x16\xac\x04-2F\x10\xda\xd1\xdb,\x85\x9fr\x1c\x8aH"
+OLD_ENCRYPTED_QR_DATA_ECB = b"\x0806b79aa2\x00\x00\x00\n\xa4\xaaa\xb9h\x0c\xdc-i\x85\x83.9,\x91\xf1\x19E,\xc9\xf0'\xb1b7\x91mo\xa2-\xb6\x16\xac\x04-2F\x10\xda\xd1\xdb,\x85\x9fr\x1c\x8aH"
+ENCRYPTED_QR_DATA_ECB = b"\x0806b79aa2\x03\x00\x00\n\xa4\xaaa\xb9h\x0c\xdc-i\x85\x83.9,\x91\xf1\x19E,\xc9\xf0'\xb1b7\x91mo\xa2-\xb6\x16\xb7\xa3-"
+ENCRYPTED_QR_DATA_ECB_b43 = (
+    "OQD.HJOZXT8AMC4ZRZS$I2+NPMFK5NAG9GXB2/X4RU3M-1ZRBPLS6HMIAZDDBXF$F8TQX*"
+)
 
 
 @pytest.fixture
@@ -275,7 +281,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
     qr_view.assert_has_calls(
         [
             mocker.call(
-                mocker.ANY, data=ENCRYPTED_QR_DATA_ECB, title=ENCRYPTED_QR_TITLE_ECB
+                mocker.ANY, data=ENCRYPTED_QR_DATA_ECB_b43, title=ENCRYPTED_QR_TITLE_ECB
             )
         ]
     )
@@ -317,7 +323,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
     qr_view.assert_has_calls(
         [
             mocker.call(
-                mocker.ANY, data=ENCRYPTED_QR_DATA_CBC, title=ENCRYPTED_QR_TITLE_CBC
+                mocker.ANY, data=ENCRYPTED_QR_DATA_CBC_b43, title=ENCRYPTED_QR_TITLE_CBC
             )
         ]
     )
@@ -345,17 +351,17 @@ def test_encrypted_qr_code_mode_and_density(amigo, mocker):
 
     # Dictionary mapping encryption modes to (mode, size) tuples
     QR_PROPS = {
-        "AES-ECB": ("binary", 29, 33),
-        "AES-ECB v2": ("alphanumeric", 25, 29),
-        "AES-ECB +p": ("alphanumeric", 29, 33),
-        "AES-ECB +c": ("alphanumeric", 29, 33),
-        "AES-CBC": ("binary", 33, 33),
-        "AES-CBC v2": ("alphanumeric", 29, 33),
-        "AES-CBC +p": ("alphanumeric", 33, 33),
-        "AES-CBC +c": ("alphanumeric", 33, 33),
+        "AES-ECB": ("alphanumeric", 25, 29),
+        # "AES-ECB v2": ("alphanumeric", 25, 29),
+        # "AES-ECB +p": ("alphanumeric", 29, 33),
+        # "AES-ECB +c": ("alphanumeric", 29, 33),
+        "AES-CBC": ("alphanumeric", 29, 33),
+        # "AES-CBC v2": ("alphanumeric", 29, 33),
+        # "AES-CBC +p": ("alphanumeric", 33, 33),
+        # "AES-CBC +c": ("alphanumeric", 33, 33),
         "AES-GCM": ("alphanumeric", 29, 33),
-        "AES-GCM +p": ("alphanumeric", 33, 33),
-        "AES-GCM +c": ("alphanumeric", 33, 33),
+        # "AES-GCM +p": ("alphanumeric", 33, 33),
+        # "AES-GCM +c": ("alphanumeric", 33, 33),
     }
 
     BTN_SEQUENCE = (
@@ -366,7 +372,7 @@ def test_encrypted_qr_code_mode_and_density(amigo, mocker):
         + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
-    BTN_SEQUENCE_EBC = (
+    BTN_SEQUENCE_ECB = (
         [BUTTON_PAGE] * 2  # Move to store on Encrypted QR
         + [BUTTON_ENTER]  # Confirm Encrypted QR
         + [BUTTON_ENTER]  # Yes, use fingerprint as ID
@@ -379,9 +385,7 @@ def test_encrypted_qr_code_mode_and_density(amigo, mocker):
     for mnemonic in TEST_MNEMONICS:
         for encryption_mode in sorted(QR_PROPS.keys()):
             btn_seq = (
-                BTN_SEQUENCE
-                if not encryption_mode.startswith("AES-ECB")
-                else BTN_SEQUENCE_EBC
+                BTN_SEQUENCE if not encryption_mode == "AES-ECB" else BTN_SEQUENCE_ECB
             )
             ctx = create_ctx(mocker, btn_seq)
             ctx.wallet = Wallet(Key(mnemonic, TYPE_SINGLESIG, NETWORKS["main"]))

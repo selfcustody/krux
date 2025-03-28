@@ -156,7 +156,7 @@ class EncryptMnemonic(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
-        self.version_number = VERSION_NUMBERS[Settings().encryption.version]
+        self.mode_name = Settings().encryption.version
 
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
@@ -188,13 +188,12 @@ class EncryptMnemonic(Page):
             self.flash_error(t("Key was not provided"))
             return None
 
-        version = VERSIONS[self.version_number]
         i_vector = None
-        iv_len = version.get("iv", 0)
+        iv_len = VERSIONS[VERSION_NUMBERS[self.mode_name]].get("iv", 0)
         if iv_len > 0:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Additional entropy from camera required for") + " " + version["name"]
+                t("Additional entropy from camera required for") + " " + self.mode_name
             )
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 self.flash_error(error_txt)
@@ -274,11 +273,12 @@ class EncryptMnemonic(Page):
         encrypted_qr = EncryptedQRCode()
         words = self.ctx.wallet.key.mnemonic
         qr_data = encrypted_qr.create(key, mnemonic_id, words, i_vector)
+        version_number = encrypted_qr.version
         del encrypted_qr
 
         from .qr_view import SeedQRView
 
-        if self.version_number > 1:
+        if version_number > 1:
             from ..baseconv import base_encode
 
             # Convert to base43

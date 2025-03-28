@@ -109,6 +109,11 @@ VERSIONS = {
     },
 }
 VERSION_NUMBERS = {v["name"]: k for k, v in VERSIONS.items()}
+MODE_NUMBERS = {
+    "AES-ECB": ucryptolib.MODE_ECB,
+    "AES-CBC": ucryptolib.MODE_CBC,
+    "AES-GCM": ucryptolib.MODE_GCM,
+}
 
 AES_BLOCK_SIZE = 16
 QR_CODE_ITER_MULTIPLE = 10000
@@ -255,6 +260,80 @@ def unpad(some_bytes, pkcs_pad=False):
     return some_bytes
 
 
+def suggest_versions(plaintext, mode_name):
+    """Suggests a krux encryption version based on plaintext and preferred mode"""
+
+    small_thresh = 32  # if len(plaintext) <= small_thresh: it is small
+    big_thresh = 160  # if len(plaintext) >= big_thresh: it is big
+
+    # gather metrics on plaintext
+    if not isinstance(plaintext, (bytes, str)):
+        raise TypeError("Plaintext is not bytes or str")
+    p_length = len(plaintext)
+    unique_blocks = len(set((plaintext[x : x + 16] for x in range(0, p_length, 16))))
+    p_duplicates = bool(unique_blocks < p_length / 16)
+    if isinstance(plaintext, bytes):
+        p_nul_suffix = bool(plaintext[-1] == 0x00)
+    else:
+        p_nul_suffix = bool(plaintext.encode()[-1] == 0x00)
+
+    candidates = []
+    for version, values in VERSIONS.items():
+        # strategy: eliminate bad choices of versions
+        # TODO: explore a strategy that cuts to the best one right away
+
+        # never use a version that is not the correct mode
+        if values["mode"] != MODE_NUMBERS[mode_name]:
+            continue
+        v_compress = values.get("compress", False)
+        v_auth = values.get("auth", 0)
+        v_pkcs_pad = values.get("pkcs_pad", False)
+
+        # never use non-compressed ECB when plaintext has duplicate blocks
+        if p_duplicates and mode_name == "AES-ECB" and not v_compress:
+            continue
+
+        # never use v1 versions since v2 is smaller
+        if mode_name in ("AES-ECB", "AES-CBC") and v_auth == 0:
+            continue
+
+        # based on plaintext size
+        if p_length <= small_thresh:
+            # except unsafe ECB text...
+            if mode_name == "AES-ECB" and p_duplicates:
+                pass
+            else:
+                # ...never use pkcs when it's small and can keep it small
+                if v_pkcs_pad and not p_nul_suffix:
+                    continue
+                # ...and never compress
+                if v_compress:
+                    continue
+        else:
+            # never use non-safe padding for not-small plaintext
+            if not v_pkcs_pad:
+                continue
+
+            # except unsafe ECB text...
+            if mode_name == "AES-ECB" and p_duplicates:
+                pass
+            elif p_length < big_thresh:
+                # ...never use compressed for not-big plaintext
+                if v_compress:
+                    continue
+            else:
+                # never use non-compressed for big plaintext
+                if not v_compress:
+                    continue
+
+        # never use a version without pkcs padding if plaintext ends 0x00
+        if p_nul_suffix and not v_pkcs_pad:
+            continue
+
+        candidates.append(version)
+    return candidates
+
+
 class MnemonicStorage:
     """Handler of stored encrypted seeds"""
 
@@ -296,6 +375,8 @@ class MnemonicStorage:
         data = base_decode(encrypted_data, 64)
         decryptor = AESCipher(key, mnemonic_id, iterations)
         decrypted = decryptor.decrypt(data, version)
+        if decrypted is None:
+            return None
         if not in_cipher_checksum(version):
             return bip39.mnemonic_from_bytes(decrypted)
         # Data validation
@@ -312,8 +393,9 @@ class MnemonicStorage:
     def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, i_vector=None):
         """Saves the encrypted mnemonic on a file, returns True if successful"""
         encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
-        version = VERSION_NUMBERS[Settings().encryption.version]
+        mode_name = Settings().encryption.version
         plain = bip39.mnemonic_to_bytes(mnemonic)
+        version = suggest_versions(plain, mode_name)[0]
         if in_cipher_checksum(version):
             plain += hashlib.sha256(plain).digest()[:16]
         encrypted = encryptor.encrypt(plain, version, i_vector)
@@ -388,7 +470,7 @@ class EncryptedQRCode:
 
     def __init__(self) -> None:
         self.mnemonic_id = None
-        self.version = VERSION_NUMBERS[Settings().encryption.version]
+        self.version = None
         self.iterations = Settings().encryption.pbkdf2_iterations
         self.encrypted_data = None
 
@@ -397,13 +479,14 @@ class EncryptedQRCode:
         iterations = (
             Settings().encryption.pbkdf2_iterations // QR_CODE_ITER_MULTIPLE
         ) * QR_CODE_ITER_MULTIPLE
-        version = VERSION_NUMBERS[Settings().encryption.version]
+        mode_name = Settings().encryption.version
         encryptor = AESCipher(key, mnemonic_id, iterations)
         bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
-        if in_cipher_checksum(version):
+        self.version = suggest_versions(bytes_to_encrypt, mode_name)[0]
+        if in_cipher_checksum(self.version):
             bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
-        bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, version, i_vector)
-        return kef_encode(mnemonic_id, version, iterations, bytes_encrypted)
+        bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, self.version, i_vector)
+        return kef_encode(mnemonic_id, self.version, iterations, bytes_encrypted)
 
     def public_data(self, data):
         """Parse and returns encrypted mnemonic QR codes public data"""
@@ -471,9 +554,7 @@ def kef_encode(id_, version, iterations, payload):
         raise ValueError("Invalid iterations")
 
     extra = VERSIONS[version].get("iv", 0)
-    if VERSIONS[version].get("auth", 0) <= 0:
-        extra += 0
-    else:
+    if VERSIONS[version].get("auth", 0) > 0:
         extra += VERSIONS[version]["auth"]
     if not isinstance(payload, bytes):
         raise ValueError("Payload is not bytes")
@@ -509,8 +590,11 @@ def kef_decode(kef_bytes):
     else:
         iterations = kef_iterations
     payload = kef_bytes[len_id + 5 :]
-    if len(payload) % 16 != 0:
+    extra = VERSIONS[version].get("iv", 0)
+    if VERSIONS[version].get("auth", 0) > 0:
+        extra += VERSIONS[version]["auth"]
+    if (len(payload) - extra) % 16 != 0:
         raise ValueError("Ciphertext is not aligned")
-    if len(payload) // 16 < 2:
+    if (len(payload) - extra) // 16 < 1:
         raise ValueError("Ciphertext is too short")
     return (id_, version, iterations, payload)
