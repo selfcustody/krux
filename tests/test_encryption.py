@@ -1185,3 +1185,117 @@ def test_padding(m5stickv):
             pad(unpadded, pkcs_pad=True)[-len_padding:]
             == len_padding.to_bytes(1, "big") * len_padding
         )
+
+
+def kef_self_document(version, label=None, iterations=None, limit=None):
+    """This is NOT a unit-test, it's a way for KEF encoding to document itself"""
+
+    from krux.encryption import VERSIONS, MODE_IVS, MODE_NUMBERS
+    from collections import OrderedDict
+
+    def join_text(a_dict, limit):
+        result = "\n".join(["{}: {}".format(k, v) for k, v in a_dict.items()])
+        if not limit or len(result) <= limit:
+            return result
+        result = "\n".join(
+            ["{}: {}".format(k, v.replace(" + ", " +")) for k, v in a_dict.items()]
+        )
+        if not limit or len(result) <= limit:
+            return result
+        result = "\n".join(
+            ["{}: {}".format(k, v.replace(" ", "")) for k, v in a_dict.items()]
+        )
+        if not limit or len(result) <= limit:
+            return result
+        return result.replace(" ", "")[:limit]
+
+    # rules are declared as VERSIONS values
+    v_name = VERSIONS[version]["name"]
+    v_mode = VERSIONS[version]["mode"]
+    mode_name = [k for k, v in MODE_NUMBERS.items() if v == v_mode][0]
+    v_iv = MODE_IVS.get(v_mode, 0)
+    v_auth = VERSIONS[version].get("auth", 0)
+    v_pkcs = VERSIONS[version].get("pkcs_pad", False)
+    v_compress = VERSIONS[version].get("compress", False)
+
+    label_key = "KEF bytes"
+    if label:
+        label_key = "[{}] KEF bytes".format(label)
+
+    itertext = " big; =(i > 10K && i % 10K) ? i : i * 10K"
+    if iterations:
+        itertext = "; ={}".format(iterations)
+
+    text = OrderedDict()
+    text[label_key] = "len_id + id + v + i + cpl"
+    text["len_id"] = "1b"
+    text["id"] = "<len_id>b"
+    text["v"] = "1b; ={}".format(version)
+    text["i"] = "3b{}".format(itertext)
+    text["cpl"] = None
+
+    cpl = "{}"
+    if v_iv:
+        cpl = "iv + {}".format(cpl)
+        iv_arg = ", iv"
+        text["iv"] = "{}b".format(v_iv)
+    else:
+        iv_arg = ""
+
+    if v_compress:
+        plain = "deflate(<P>, wbits=-10)"
+    else:
+        plain = "<P>"
+
+    if mode_name in ("AES-ECB", "AES-CBC"):
+        if v_auth > 0:
+            auth = "sha256({})[:{}]".format(plain, v_auth)
+            cpl += " + auth"
+            text["e"] = None
+            text["pad"] = None
+        elif v_auth < 0:
+            auth = "sha256({})[:{}]".format(plain, -v_auth)
+            plain += " + auth"
+        else:
+            auth = "sha256({})[:16]".format(plain)
+            plain += " + auth"
+    elif mode_name == "AES-GCM":
+        auth = "e.authtag[:{}]".format(v_auth)
+        cpl += " + auth"
+        text["e"] = None
+        text["pad"] = None
+
+    plain += " + pad"
+
+    text["cpl"] = cpl.format("e.encrypt({})".format(plain))
+    text["e"] = "AES(k, {}{})".format(mode_name[-3:], iv_arg)
+    text["auth"] = auth
+    text["pad"] = "pkcs" if v_pkcs else "nul"
+    text["k"] = "pbkdf2_hmac(sha256, <K>, id, i)"
+
+    return join_text(text, limit)
+
+
+def test_kef_self_document(m5stickv):
+    """Does not test krux code, tests the above kef_self_document function"""
+    from krux.encryption import VERSIONS
+
+    test_cases = {
+        0: "[AES-ECB] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =0\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:16]\npad: nul\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        1: "[AES-CBC] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =1\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:16]\npad: nul\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        2: "[AES-GCM] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =2\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 12b\ne: AES(k, GCM, iv)\npad: nul\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        3: "[AES-ECB v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =3\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + pad) + auth\ne: AES(k, ECB)\npad: nul\nauth: sha256(<P>)[:3]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        4: "[AES-CBC v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =4\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 16b\ne: AES(k, CBC, iv)\npad: nul\nauth: sha256(<P>)[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        5: "[AES-GCM +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =5\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 12b\ne: AES(k, GCM, iv)\npad: pkcs\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        6: "[AES-ECB +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =6\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:4]\npad: pkcs\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        7: "[AES-CBC +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =7\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:4]\npad: pkcs\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        8: "[AES-GCM +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =8\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10) + pad) + auth\niv: 12b\ne: AES(k, GCM, iv)\npad: pkcs\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        9: "[AES-ECB +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =9\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(deflate(<P>, wbits=-10) + auth + pad)\ne: AES(k, ECB)\nauth: sha256(deflate(<P>, wbits=-10))[:4]\npad: pkcs\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        10: "[AES-CBC +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =10\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10) + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(deflate(<P>, wbits=-10))[:4]\npad: pkcs\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+    }
+
+    for v, expected in test_cases.items():
+        label = VERSIONS[v]["name"]
+        doc = kef_self_document(v, label=label)
+        # print("\n"+doc)
+        assert doc == expected
