@@ -258,21 +258,32 @@ def test_AESCipher_initialization(m5stickv):
     from krux.encryption import AESCipher
 
     # .__init__() expects str (key, salt) and pos-int iterations
-    valid_params = ("key", "salt", 1)
-    AESCipher(*valid_params)  # this works
+    valid_params = (
+        ("key", "salt", 1),
+        (
+            int(255).to_bytes(1, "big").decode("latin-1"),
+            int(255).to_bytes(1, "big").decode("latin-1"),
+            1,
+        ),
+    )
 
     invalid_keys = (None, 1, b"key")
     invalid_salts = (None, 1, b"salt")
     invalid_iterations = (None, -1, 0, 1.5)
-    for invalid in invalid_keys:
-        with pytest.raises(Exception):
-            AESCipher(invalid, valid_params[1], valid_params[2])
-    for invalid in invalid_salts:
-        with pytest.raises(Exception):
-            AESCipher(valid_params[0], invalid, valid_params[2])
-    for invalid in invalid_iterations:
-        with pytest.raises(Exception):
-            AESCipher(valid_params[0], valid_params[1], invalid)
+    for valid_key, valid_salt, valid_iterations in valid_params:
+        # this works
+        AESCipher(valid_key, valid_salt, valid_iterations)
+
+        # these fail
+        for invalid in invalid_keys:
+            with pytest.raises(Exception):
+                AESCipher(invalid, valid_salt, valid_iterations)
+        for invalid in invalid_salts:
+            with pytest.raises(Exception):
+                AESCipher(valid_key, invalid, valid_iterations)
+        for invalid in invalid_iterations:
+            with pytest.raises(Exception):
+                AESCipher(valid_key, valid_salt, invalid)
 
 
 def test_AESCipher_calling_method_encrypt(m5stickv):
@@ -906,7 +917,7 @@ def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
     print("case Decode: customize_pbkdf2_iterations")
     public_data = encrypted_qr.public_data(qr_data)
     assert public_data == (
-        "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB v2\nKey iter.: 90000"
+        "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB v2\nKey iter.: 99999"
     )
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
@@ -931,6 +942,7 @@ def test_kef_encode_exceptions(m5stickv):
         "",
         "My Mnemonic",
         "ID can be empty or as long as 255 utf-8 characters, but not longer\nA purely peer-to-peer version of electronic cash would allow online\npayments to be sent directly from one party to another without going through a\nfinancial institution. Digital signatures",
+        b"".join([i.to_bytes(1, "big") for i in range(1, 256)]).decode("latin-1"),
     )
     valid_versions = range(11)
     valid_iterations = (ten_k, 50 * ten_k, ten_k + 1, 2**24 - 1, ten_k * ten_k)
@@ -1030,16 +1042,24 @@ def test_kef_interpretation_of_iterations(m5stickv):
 
 
 def test_kef_decode_exceptions(m5stickv):
-    from krux.encryption import kef_decode
+    from krux.encryption import kef_decode, VERSIONS
 
     test_cases = (ECB_ENCRYPTED_QR, CBC_ENCRYPTED_QR)
 
-    # ID must be utf-8 encoded
-    err = "Invalid ID encoding"
+    # an unknown version is not KEF Encryption Format
+    err = "Invalid format"
     for encoded in test_cases:
-        encoded = encoded[:1] + b"\xff" + encoded[2:]
-        with pytest.raises(ValueError, match=err):
-            kef_decode(encoded)
+        version_pos = encoded[0] + 1
+        for i in range(256):
+            if i in VERSIONS:
+                continue
+            encoded = (
+                encoded[:version_pos]
+                + i.to_bytes(1, "big")
+                + encoded[version_pos + 1 :]
+            )
+            with pytest.raises(ValueError, match=err):
+                kef_decode(encoded)
 
     # Ciphertext is aligned on 16-byte blocks
     err = "Ciphertext is not aligned"
@@ -1049,7 +1069,7 @@ def test_kef_decode_exceptions(m5stickv):
             with pytest.raises(ValueError, match=err):
                 kef_decode(encoded)
 
-    # Ciphertext is at least 2 blocks (payload and checksum)
+    # Ciphertext is at least 1 block (per AES)
     err = "Ciphertext is too short"
     encoded = ECB_ENCRYPTED_QR[:-16]  # 24w ECB is 32 bytes w/ checksum
     with pytest.raises(ValueError, match=err):
@@ -1057,6 +1077,30 @@ def test_kef_decode_exceptions(m5stickv):
     encoded = CBC_ENCRYPTED_QR[:-32]  # 24w CBC is 48 bytes w/ iv+checksum
     with pytest.raises(ValueError, match=err):
         kef_decode(encoded)
+
+
+def test_faithful_encrypted_kef_packaging(m5stickv):
+    from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_encode, kef_decode
+
+    iterations = (10000, 12345)
+    keys = ("", "key", "clé", int(255).to_bytes(1, "big").decode("latin-1"))
+    salts = ("", "salt", "salé", int(255).to_bytes(1, "big").decode("latin-1"))
+    plaintexts = (b"Hello World!", b"im sixteen bytes")
+
+    for version in VERSIONS:
+        for key in keys:
+            for salt in salts:
+                for iteration in iterations:
+                    for plain in plaintexts:
+                        iv = b"\x00" * MODE_IVS.get(VERSIONS[version]["mode"], 0)
+                        encryptor = AESCipher(key, salt, iteration)
+                        cipher_payload = encryptor.encrypt(plain, version, iv)
+                        kef_encoded = kef_encode(
+                            salt, version, iteration, cipher_payload
+                        )
+                        kef_decoded = kef_decode(kef_encoded)
+                        assert kef_decoded == (salt, version, iteration, cipher_payload)
+                        assert encryptor.decrypt(cipher_payload, version)
 
 
 NULPAD_TEST_CASES = [

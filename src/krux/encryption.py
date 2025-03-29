@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2024 Krux contributors
+# Copyright (c) 2021-2025 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -116,11 +116,12 @@ QR_CODE_ITER_MULTIPLE = 10000
 
 
 class AESCipher:
-    """More than just a helper for AES encrypt/decrypt. Enforces krux encryption versions"""
+    """More than just a helper for AES encrypt/decrypt. Enforces VERSIONS rules"""
 
     def __init__(self, key, salt, iterations):
+        # latin-1 encoding enables all byte values for key and salt (KEF's id_)
         self.key = hashlib.pbkdf2_hmac(
-            "sha256", key.encode(), salt.encode(), iterations
+            "sha256", key.encode("latin-1"), salt.encode("latin-1"), iterations
         )
 
     def encrypt(self, plain, version, iv=b"", fail_unsafe=True):
@@ -472,17 +473,14 @@ class EncryptedQRCode:
 
     def create(self, key, mnemonic_id, mnemonic, i_vector=None):
         """encrypted mnemonic QR codes"""
-        iterations = (
-            Settings().encryption.pbkdf2_iterations // QR_CODE_ITER_MULTIPLE
-        ) * QR_CODE_ITER_MULTIPLE
         mode_name = Settings().encryption.version
-        encryptor = AESCipher(key, mnemonic_id, iterations)
+        encryptor = AESCipher(key, mnemonic_id, self.iterations)
         bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
         self.version = suggest_versions(bytes_to_encrypt, mode_name)[0]
         if in_cipher_checksum(self.version):
             bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
         bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, self.version, i_vector)
-        return kef_encode(mnemonic_id, self.version, iterations, bytes_encrypted)
+        return kef_encode(mnemonic_id, self.version, self.iterations, bytes_encrypted)
 
     def public_data(self, data):
         """Parse and returns encrypted mnemonic QR codes public data"""
@@ -527,10 +525,14 @@ def in_cipher_checksum(version):
 
 def kef_encode(id_, version, iterations, payload):
     """
-    encodes inputs into krux_encryption_format, returns bytes
+    encodes inputs into KEF Encryption Format, returns bytes
     """
+
     try:
-        assert 0 <= len(id_.encode()) <= 255
+        # latin-1 encoding enables all byte values in id_ (salt for key-stretch)
+        id_ = id_.encode("latin-1")
+        assert 0 <= len(id_) <= 255
+        len_id = len(id_).to_bytes(1, "big")
     except:
         raise ValueError("Invalid ID")
 
@@ -546,6 +548,7 @@ def kef_encode(id_, version, iterations, payload):
             assert 1 <= iterations <= 10000 * 10000
         else:
             assert 10000 < iterations < 2**24
+        iterations = iterations.to_bytes(3, "big")
     except:
         raise ValueError("Invalid iterations")
 
@@ -559,27 +562,19 @@ def kef_encode(id_, version, iterations, payload):
     if (len(payload) - extra) // 16 < 1:
         raise ValueError("Ciphertext is too short")
 
-    return b"".join(
-        [
-            len(id_).to_bytes(1, "big"),
-            id_.encode(),
-            version.to_bytes(1, "big"),
-            int(iterations).to_bytes(3, "big"),
-            payload,
-        ]
-    )
+    version = version.to_bytes(1, "big")
+    return b"".join([len_id, id_, version, iterations, payload])
 
 
 def kef_decode(kef_bytes):
     """
-    decodes krux_encryption_format bytes, returns tuple of parsed values
+    decodes KEF Encryption Format bytes, returns tuple of parsed values
     """
     len_id = kef_bytes[0]
-    try:
-        id_ = kef_bytes[1 : 1 + len_id].decode()
-    except:
-        raise ValueError("Invalid ID encoding")
-    version = kef_bytes[1 + len_id]
+    version = kef_bytes[1 + len_id]  # out-of-order reading to validate version early
+    if version not in VERSIONS:
+        raise ValueError("Invalid format")
+    id_ = kef_bytes[1 : 1 + len_id].decode("latin-1")
     kef_iterations = int.from_bytes(kef_bytes[2 + len_id : 5 + len_id], "big")
     if kef_iterations <= 10000:
         iterations = kef_iterations * 10000
