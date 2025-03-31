@@ -1111,15 +1111,15 @@ NULPAD_TEST_CASES = [
     (b"0123456789abcdef0", b"0123456789abcdef0" + b"\x00" * 15),
     (b"0123456789abcdef0123456789abcde", b"0123456789abcdef0123456789abcde" + b"\x00"),
     (b"0123456789abcdef0123456789abcdef", b"0123456789abcdef0123456789abcdef"),
-    (b"\x00" * 16, b"\x00" * 16),
-    (b"\x00" * 32, b"\x00" * 32),
-    (b"\x01" * 15 + b"\x00" * 17, b"\x01" * 15 + b"\x00" * 17),
     (TEST_WORDS.encode(), TEST_WORDS.encode() + b"\x00" * 6),
     (ECB_WORDS.encode(), ECB_WORDS.encode() + b"\x00" * 5),
     (CBC_WORDS.encode(), CBC_WORDS.encode() + b"\x00" * 9),
 ]
 BROKEN_NULPAD_TEST_CASES = [
     # (unpadded, padded)
+    (b"\x00", b"\x00" * 16),
+    (b"\x00" * 17, b"\x00" * 32),
+    (b"\x01" * 15 + b"\x00" * 17, b"\x01" * 15 + b"\x00" * 17),
     (b"\x01\x00", b"\x01\x00" + b"\x00" * 14),
     (b"\x01\x00" * 15, b"\x01\x00" * 15 + b"\x00" * 2),
 ]
@@ -1317,14 +1317,14 @@ def test_kef_wrapped_kef_packaging(m5stickv):
     participants = []
     for v, version in VERSIONS.items():
         # some versions cannot participate
-        if not version.get("pkcs_pad", False):
+        if not version.get("auth", 0):
             continue
         participants.append(v)
         label = '"{}", K={}'.format(version["name"][4:], key)
         id_ = kef_self_document(v, label=label, iterations=iterations, limit=255)
         id2 = deflate_compress(id_.encode("latin-1")).decode(
             "latin-1"
-        )  # can compress it
+        )  # id_ can be any bytes via "latin-1", here compressed
         encryptor = AESCipher(key, id_, iterations)
         encryptor2 = AESCipher(key, id2, iterations)
         iv = I_VECTOR[: MODE_IVS.get(version["mode"], 0)]
@@ -1333,6 +1333,7 @@ def test_kef_wrapped_kef_packaging(m5stickv):
         plaintext = kef_encode(id_, v, iterations, cipher_payload)
         plaintext2 = kef_encode(id2, v, iterations, cipher_payload2)
         assert plaintext[:-1] != b"\x00"
+        assert plaintext2[:-1] != b"\x00"
         iterations += i_step
     print("\nI'm a KEF puzzle.", repr(plaintext))
     print("\nI'm a KEF puzzle w/ compressed id", repr(plaintext2))
@@ -1344,7 +1345,9 @@ def test_kef_wrapped_kef_packaging(m5stickv):
             kef_parsed2 = kef_decode(plaintext2)
             id_, v, iterations, cipher_payload = kef_parsed
             id2, v2, iterations2, cipher_payload2 = kef_parsed2
-            assert v == v2 and iterations == iterations2
+            assert v == v2
+            assert iterations == iterations2
+            assert id_ == deflate_decompress(id2.encode("latin-1")).decode("latin-1")
             # print("\n" + id_)
         except:
             break
@@ -1355,4 +1358,4 @@ def test_kef_wrapped_kef_packaging(m5stickv):
 
     assert plaintext == orig_plaintext
     assert plaintext2 == orig_plaintext
-    assert participants == [5, 6, 7, 8, 9, 10]  # TODO: explore if more can participate
+    assert participants == [2, 3, 4, 5, 6, 7, 8, 9, 10]

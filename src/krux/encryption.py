@@ -251,10 +251,7 @@ def unpad(some_bytes, pkcs_pad=False):
     if pkcs_pad:
         len_padding = some_bytes[-1]
         return some_bytes[:-len_padding]
-    stripped = some_bytes.replace(b"\x00", b"")
-    if 0 < len(some_bytes) - len(stripped) < 16:
-        return stripped
-    return some_bytes
+    return some_bytes.rstrip(b"\x00")
 
 
 def suggest_versions(plaintext, mode_name):
