@@ -41,10 +41,12 @@ VERSIONS = {
     0: {
         "name": "AES-ECB",
         "mode": ucryptolib.MODE_ECB,
+        "auth": -16,
     },
     1: {
         "name": "AES-CBC",
         "mode": ucryptolib.MODE_CBC,
+        "auth": -16,
     },
     2: {
         "name": "AES-GCM",
@@ -140,8 +142,8 @@ class AESCipher:
         if v_compress:
             plain = deflate_compress(plain)
 
-        # fail to encrypt where unfaithful padding breaks authenticated decryption
-        if fail_unsafe and v_auth and not v_pkcs_pad and plain[-1] == 0x00:
+        # fail: post-encryption appended "auth" with unfaithful-padding breaks decryption
+        if fail_unsafe and v_auth > 0 and not v_pkcs_pad and plain[-1] == 0x00:
             raise ValueError("Cannot validate decryption for this plaintext")
 
         # for modes that don't have authentication, krux uses sha256 checksum
@@ -288,7 +290,7 @@ def suggest_versions(plaintext, mode_name):
             continue
 
         # never use v1 versions since v2 is smaller
-        if mode_name in ("AES-ECB", "AES-CBC") and v_auth == 0:
+        if mode_name in ("AES-ECB", "AES-CBC") and v_auth == -16:
             continue
 
         # based on plaintext size
@@ -345,6 +347,35 @@ class MnemonicStorage:
         except:
             pass
 
+    def _deprecated_decrypt(self, key, salt, iterations, mode, payload):
+        """in-the-wild, some `seeds.json` may have encrypted mnemonic words"""
+
+        def stretch_key(key, salt, iterations):
+            return hashlib.pbkdf2_hmac(
+                "sha256", key.encode("latin-1"), salt.encode("latin-1"), iterations
+            )
+
+        if not (
+            isinstance(key, str)
+            and isinstance(salt, str)
+            and isinstance(iterations, int)
+            and isinstance(payload, bytes)
+        ):
+            return None
+
+        mode_name = [k for k, v in MODE_NUMBERS.items() if v == mode][0]
+        stretched_key = stretch_key(key, salt, iterations)
+        if mode_name == "AES-CBC":
+            decryptor = ucryptolib.aes(stretched_key, mode, payload[:16])
+            payload = payload[16:]
+        else:
+            decryptor = ucryptolib.aes(stretched_key, mode)
+        try:
+            plaintext = unpad(decryptor.decrypt(payload))
+            return plaintext.decode()
+        except:
+            return None
+
     def list_mnemonics(self, sd_card=False):
         """List all seeds stored on a file"""
         mnemonic_ids = []
@@ -357,43 +388,37 @@ class MnemonicStorage:
         """Decrypt a selected encrypted mnemonic from a file"""
         try:
             if sd_card:
-                encrypted_data = self.stored_sd.get(mnemonic_id)["data"]
-                iterations = self.stored_sd.get(mnemonic_id)["key_iterations"]
-                version = self.stored_sd.get(mnemonic_id)["version"]
+                stored_value = self.stored_sd.get(mnemonic_id)
             else:
-                encrypted_data = self.stored.get(mnemonic_id)["data"]
-                iterations = self.stored.get(mnemonic_id)["key_iterations"]
-                version = self.stored.get(mnemonic_id)["version"]
+                stored_value = self.stored.get(mnemonic_id)
         except:
             return None
-        data = base_decode(encrypted_data, 64)
-        decryptor = AESCipher(key, mnemonic_id, iterations)
-        decrypted = decryptor.decrypt(data, version)
-        if decrypted is None:
-            return None
-        if not in_cipher_checksum(version):
-            return bip39.mnemonic_from_bytes(decrypted)
-        # Data validation
-        mnemonic_data = decrypted[:-AES_BLOCK_SIZE]
-        cksum = decrypted[-AES_BLOCK_SIZE:]
-        if hashlib.sha256(mnemonic_data).digest()[:16] == cksum:
-            return bip39.mnemonic_from_bytes(mnemonic_data)
-        try:  # Deprecated, but supported for decryption
-            words = unpad(decrypted).decode()
-        except:
-            words = None
-        return words
+
+        if stored_value.get("b64_kef"):
+            kef_encoded = base_decode(stored_value["b64_kef"], 64)
+            id_, version, iterations, data = kef_decode(kef_encoded)
+            decryptor = AESCipher(key, id_, iterations)
+            decrypted = decryptor.decrypt(data, version)
+            if decrypted:
+                return bip39.mnemonic_from_bytes(decrypted)
+        else:
+            iterations = stored_value.get("key_iterations")
+            version = stored_value.get("version")
+            mode = MODE_NUMBERS[VERSIONS[version]["name"]]
+            data = base_decode(stored_value.get("data"), 64)
+            return self._deprecated_decrypt(key, mnemonic_id, iterations, mode, data)
+        return None
 
     def store_encrypted(self, key, mnemonic_id, mnemonic, sd_card=False, i_vector=None):
         """Saves the encrypted mnemonic on a file, returns True if successful"""
-        encryptor = AESCipher(key, mnemonic_id, Settings().encryption.pbkdf2_iterations)
+        iterations = Settings().encryption.pbkdf2_iterations
+        encryptor = AESCipher(key, mnemonic_id, iterations)
         mode_name = Settings().encryption.version
         plain = bip39.mnemonic_to_bytes(mnemonic)
         version = suggest_versions(plain, mode_name)[0]
-        if in_cipher_checksum(version):
-            plain += hashlib.sha256(plain).digest()[:16]
         encrypted = encryptor.encrypt(plain, version, i_vector)
-        encrypted = base_encode(encrypted, 64).decode()
+        kef_encoded = kef_encode(mnemonic_id, version, iterations, encrypted)
+        b64_kef = base_encode(kef_encoded, 64).decode()
         mnemonics = {}
         if sd_card:
             # load current MNEMONICS_FILE
@@ -408,12 +433,7 @@ class MnemonicStorage:
             # save the new MNEMONICS_FILE
             try:
                 with SDHandler() as sd:
-                    mnemonics[mnemonic_id] = {}
-                    mnemonics[mnemonic_id]["version"] = version
-                    mnemonics[mnemonic_id][
-                        "key_iterations"
-                    ] = Settings().encryption.pbkdf2_iterations
-                    mnemonics[mnemonic_id]["data"] = encrypted
+                    mnemonics[mnemonic_id] = {"b64_kef": b64_kef}
                     contents = json.dumps(mnemonics)
                     # pad contents to orig_len to avoid abandoned bytes on sdcard
                     if len(contents) < orig_len:
@@ -431,12 +451,7 @@ class MnemonicStorage:
             try:
                 # save the new MNEMONICS_FILE
                 with open(FLASH_PATH + MNEMONICS_FILE, "w") as f:
-                    mnemonics[mnemonic_id] = {}
-                    mnemonics[mnemonic_id]["version"] = version
-                    mnemonics[mnemonic_id][
-                        "key_iterations"
-                    ] = Settings().encryption.pbkdf2_iterations
-                    mnemonics[mnemonic_id]["data"] = encrypted
+                    mnemonics[mnemonic_id] = {"b64_kef": b64_kef}
                     f.write(json.dumps(mnemonics))
             except:
                 return False
@@ -474,8 +489,6 @@ class EncryptedQRCode:
         encryptor = AESCipher(key, mnemonic_id, self.iterations)
         bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
         self.version = suggest_versions(bytes_to_encrypt, mode_name)[0]
-        if in_cipher_checksum(self.version):
-            bytes_to_encrypt += hashlib.sha256(bytes_to_encrypt).digest()[:16]
         bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, self.version, i_vector)
         return kef_encode(mnemonic_id, self.version, self.iterations, bytes_encrypted)
 
@@ -502,22 +515,7 @@ class EncryptedQRCode:
         """Decrypts encrypted mnemonic QR codes"""
         decryptor = AESCipher(key, self.mnemonic_id, self.iterations)
         decrypted_data = decryptor.decrypt(self.encrypted_data, self.version)
-        if not in_cipher_checksum(self.version):
-            mnemonic_data = decrypted_data
-        else:
-            # Data validation:
-            mnemonic_data = decrypted_data[:-AES_BLOCK_SIZE]
-            cksum = decrypted_data[-AES_BLOCK_SIZE:]
-            if hashlib.sha256(mnemonic_data).digest()[:16] != cksum:
-                return None
-        return mnemonic_data
-
-
-def in_cipher_checksum(version):
-    """
-    Returns True if the ciphertext contains a block of checksum
-    """
-    return VERSIONS[version].get("auth", 0) == 0
+        return decrypted_data
 
 
 def kef_encode(id_, version, iterations, payload):

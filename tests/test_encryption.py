@@ -15,11 +15,15 @@ CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice
 ECB_ENTROPY = b"\x1b&ew\xe6\x84\xc5\xb0\x9c\x89\xf5$\xb5\xca\x10Aa\x90\xaae\t\x19\xdb\xd9\x9e\xc7C\x16a~%C"
 CBC_ENTROPY = b"@\x8c\xf9\xb8\xd8\xd9\xe2\xbdo\xb5\xd1\xa1?\xb0\x10O\xd4\xc8\xfd()\xa0\xc2\xaf\xb5\x1d\x06\xdc\xfb\x80\x1cn"
 
-ECB_ENCRYPTED_WORDS = b"\xd4\xd5y\xe6]'\xcb\xdb\xe4\x15^\xac\xe0\xc9\xc3\xbc9i\x89e\t\xa3~l\xbf\x98l\xe9\x92\xa9\xe1=3V\xb3\xb1]\xfb|\x13\xf4K_\xdb\xa7d\x92p\x8a-\xbfr\xb5`\xaf\xe5\xc4\xfeP Z\x12\xfbb\x82\x98\xb6)\x83\x99\xba]8R\xbdS\xce>\xdd\xb1"
-CBC_ENCRYPTED_WORDS = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x92\xdaXV%+\xdb\x12\x85\xa6\x0c\xc8\xee\xc1>h\xd4i\xc1!r\x8d\x97\xd4\xb1V\x0c/\x18D\xff\x99\xd8a\xb8\x85\x81(\x08\xca\x07\xc8\xe0(\x04\xf5\xe1\xf0\xfd\xd9\xd4>E\xdf\x8aV\xb4\x19`\x10\xeaF\x03\x01As\xe5^\raQ\x842\xd6.9z\xa5x\x9a"
+ECB_ENCRYPTED_WORDS = b"\xd4\xd5y\xe6]'\xcb\xdb\xe4\x15^\xac\xe0\xc9\xc3\xbc9i\x89e\t\xa3~l\xbf\x98l\xe9\x92\xa9\xe1=3V\xb3\xb1]\xfb|\x13\xf4K_\xdb\xa7d\x92p\x8a-\xbfr\xb5`\xaf\xe5\xc4\xfeP Z\x12\xfbbQ9G'\xael\x9d*F\xafn4\t\x7fE\xb2K\xc1\xbaB\xfa\xb7J6\xefu\x95\xa9\x9c\xe8\x14\x88"
+# OLDECB_ENCRYPTED_WORDS = b"\xd4\xd5y\xe6]'\xcb\xdb\xe4\x15^\xac\xe0\xc9\xc3\xbc9i\x89e\t\xa3~l\xbf\x98l\xe9\x92\xa9\xe1=3V\xb3\xb1]\xfb|\x13\xf4K_\xdb\xa7d\x92p\x8a-\xbfr\xb5`\xaf\xe5\xc4\xfeP Z\x12\xfbb\x82\x98\xb6)\x83\x99\xba]8R\xbdS\xce>\xdd\xb1"
+CBC_ENCRYPTED_WORDS = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x92\xdaXV%+\xdb\x12\x85\xa6\x0c\xc8\xee\xc1>h\xd4i\xc1!r\x8d\x97\xd4\xb1V\x0c/\x18D\xff\x99\xd8a\xb8\x85\x81(\x08\xca\x07\xc8\xe0(\x04\xf5\xe1\xf0\xfd\xd9\xd4>E\xdf\x8aV\xb4\x19`\x10\xeaF\x03\x01\x16\x9e\x07&+|\xcb\x15as\x92y\xa1>\xd0\xc8\xca\xb0YX\x08\xda>\xf0\xca6=\xc9cR\xb5j"
+# OLDCBC_ENCRYPTED_WORDS = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x92\xdaXV%+\xdb\x12\x85\xa6\x0c\xc8\xee\xc1>h\xd4i\xc1!r\x8d\x97\xd4\xb1V\x0c/\x18D\xff\x99\xd8a\xb8\x85\x81(\x08\xca\x07\xc8\xe0(\x04\xf5\xe1\xf0\xfd\xd9\xd4>E\xdf\x8aV\xb4\x19`\x10\xeaF\x03\x01As\xe5^\raQ\x842\xd6.9z\xa5x\x9a"
 
-B64_ECB_ENCRYPTED_WORDS = b"1NV55l0ny9vkFV6s4MnDvDlpiWUJo35sv5hs6ZKp4T0zVrOxXft8E/RLX9unZJJwii2/crVgr+XE/lAgWhL7YoKYtimDmbpdOFK9U84+3bE="
-B64_CBC_ENCRYPTED_WORDS = b"T1Khk2w+MnEgnp1kBZ7XjpLaWFYlK9sShaYMyO7BPmjUacEhco2X1LFWDC8YRP+Z2GG4hYEoCMoHyOAoBPXh8P3Z1D5F34pWtBlgEOpGAwFBc+VeDWFRhDLWLjl6pXia"
+B64_ECB_ENCRYPTED_WORDS = b"1NV55l0ny9vkFV6s4MnDvDlpiWUJo35sv5hs6ZKp4T0zVrOxXft8E/RLX9unZJJwii2/crVgr+XE/lAgWhL7YlE5RyeubJ0qRq9uNAl/RbJLwbpC+rdKNu91lamc6BSI"
+# OLDB64_ECB_ENCRYPTED_WORDS = b"1NV55l0ny9vkFV6s4MnDvDlpiWUJo35sv5hs6ZKp4T0zVrOxXft8E/RLX9unZJJwii2/crVgr+XE/lAgWhL7YoKYtimDmbpdOFK9U84+3bE="
+B64_CBC_ENCRYPTED_WORDS = b"T1Khk2w+MnEgnp1kBZ7XjpLaWFYlK9sShaYMyO7BPmjUacEhco2X1LFWDC8YRP+Z2GG4hYEoCMoHyOAoBPXh8P3Z1D5F34pWtBlgEOpGAwEWngcmK3zLFWFzknmhPtDIyrBZWAjaPvDKNj3JY1K1ag=="
+# OLDB64_CBC_ENCRYPTED_WORDS = b"T1Khk2w+MnEgnp1kBZ7XjpLaWFYlK9sShaYMyO7BPmjUacEhco2X1LFWDC8YRP+Z2GG4hYEoCMoHyOAoBPXh8P3Z1D5F34pWtBlgEOpGAwFBc+VeDWFRhDLWLjl6pXia"
 
 ECB_ENCRYPTED_ENTROPY_CKSUM = b"\x0cc\t\x7f\x90\xec\x9b$M\x88\xef4}\xc4\x8cW\xbc\xc4\xe0\x98\xdfN\x7f\xe4i@ \xf2\x15\xf8\x92rG\xe6\xf6\xc4\xbb\xb0h\xffL\xaaev\x8d\x1e7t"
 CBC_ENCRYPTED_ENTROPY_CKSUM = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x13\x90d\xaa\xd6\xb8\xb4\xaas\x01{kj\xb6\xba\xa4\x93\x110\x1f\x0f\xbbW)\xaai\xaa\x13X\n@dM\xca{Y\x9d%B\xa2G\xde=\x8dk\xb8f\xc6"
@@ -30,52 +34,41 @@ B64_ECB_ENCRYPTED_ENTROPY_CKSUM = (
 B64_CBC_ENCRYPTED_ENTROPY_CKSUM = b"T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkTcp7WZ0lQqJH3j2Na7hmxg=="
 
 ECB_ENCRYPTED_QR = b"\x07test ID\x03\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xb35\xef"
-OLD_ECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
+# OLDECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
 CBC_ENCRYPTED_QR = b'\x07test ID\x04\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xb35\xef\x7f'
-OLD_CBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
+# OLDCBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
 
 ECB_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB v2\nKey iter.: 100000"
 )
-OLD_ECB_QR_PUBLIC_DATA = (
-    "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 100000"
-)
+# OLDECB_QR_PUBLIC_DATA = ("Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 100000")
 CBC_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC v2\nKey iter.: 100000"
 )
-OLD_CBC_QR_PUBLIC_DATA = (
-    "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC\nKey iter.: 100000"
+# OLDCBC_QR_PUBLIC_DATA = ("Encrypted QR Code:\nID: test ID\nVersion: AES-CBC\nKey iter.: 100000")
+
+# Must maintain old in-the-wild versions of cipher-payloads in seeds.json to ensure recoverable
+# TODO: OLDecbID and OLDcbcID (versions 3,4) never released in-the-wild, can be removed eventually
+OLD_ECBWORDS_ONLY_JSON = '{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}'
+OLD_CBCWORDS_ONLY_JSON = '{"cbcID": {"version": 1, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7Xjp+66c9sy20J39ffK11XvVAaDSyQybsM6txAwKy/U1iU4KKYRu3ywDDN9q9sWAi1R+y7x4aHwQd0C0rRcW0iDxvWtFyWMKilA0AsDQwvBSgkhf5PQnQ1rfjnKVF75rTrG5vUNF01FRwa9PoM5cq30Yki/hFnWj/4niaeXqgQvIwjSzBNbXgaRLjfoaUyHiu8+zBX25rkpI0PW243fgDEfqI="}}'
+OLD_ECBENTROPY_ONLY_JSON = '{"OLDecbID": {"version": 3, "key_iterations": 100000, "data": "OQLhgAoK6dtoPhQ3L1m1qD/Sc290zywTlm/V2UaGL1S3oy0="}}'
+OLD_CBCENTROPY_ONLY_JSON = '{"OLDcbcID": {"version": 4, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7XjjDCk4eC610GUMpNB8QZi0YI9hywXxe+fzUEGCGFngYVA8Wg1Q=="}}'
+KEF_ECBENTROPY_ONLY_JSON = '{"KEFecbID": {"b64_kef": "CEtFRmVjYklEAwAACrjZPsHP9sA0UAKiWuotRXbnFma/HVnfaVAZV6Kw5Tu7t6Mt"}}'
+KEF_CBCENTROPY_ONLY_JSON = '{"KEFcbcID": {"b64_kef": "CEtFRmNiY0lEBAAACk9SoZNsPjJxIJ6dZAWe145shFPojYLA4hthWHv2Z2FSIyQ6fm5KU81NLiQ/mQDM4wPFoNU="}}'
+SEEDS_JSON = (
+    "{"
+    + ", ".join(
+        [
+            OLD_ECBWORDS_ONLY_JSON[1:-1],
+            OLD_CBCWORDS_ONLY_JSON[1:-1],
+            OLD_ECBENTROPY_ONLY_JSON[1:-1],
+            OLD_CBCENTROPY_ONLY_JSON[1:-1],
+            KEF_ECBENTROPY_ONLY_JSON[1:-1],
+            KEF_CBCENTROPY_ONLY_JSON[1:-1],
+        ]
+    )
+    + "}"
 )
-
-SEEDS_JSON = """{
-    "ecbID": {
-        "version": 3,
-        "key_iterations": 100000,
-        "data": "DGMJf5DsmyRNiO80fcSMV7zE4JjfTn/kaUAg8hX4knK3oy0="
-    },
-    "cbcID": {
-        "version": 4,
-        "key_iterations": 100000,
-        "data": "T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkA8Wg1Q=="
-    }
-}"""
-
-DEPRECATED_SEEDS_JSON = """{
-    "ecbID": {
-        "version": 0,
-        "key_iterations": 100000,
-        "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="
-    },
-    "cbcID": {
-        "version": 1,
-        "key_iterations": 100000,
-        "data": "T1Khk2w+MnEgnp1kBZ7Xjp+66c9sy20J39ffK11XvVAaDSyQybsM6txAwKy/U1iU4KKYRu3ywDDN9q9sWAi1R+y7x4aHwQd0C0rRcW0iDxvWtFyWMKilA0AsDQwvBSgkhf5PQnQ1rfjnKVF75rTrG5vUNF01FRwa9PoM5cq30Yki/hFnWj/4niaeXqgQvIwjSzBNbXgaRLjfoaUyHiu8+zBX25rkpI0PW243fgDEfqI="
-    }
-}"""
-
-
-ECB_ONLY_JSON = '{"ecbID": {"version": 3, "key_iterations": 100000, "data": "DGMJf5DsmyRNiO80fcSMV7zE4JjfTn/kaUAg8hX4knK3oy0="}}'
-CBC_ONLY_JSON = '{"cbcID": {"version": 4, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkA8Wg1Q=="}}'
 
 I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
 
@@ -87,15 +80,6 @@ def mock_file_operations(mocker):
         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
     )
     mocker.patch("builtins.open", mocker.mock_open(read_data=SEEDS_JSON))
-
-
-@pytest.fixture
-def mock_deprecated_seeds_json(mocker):
-    mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
-    )
-    mocker.patch("builtins.open", mocker.mock_open(read_data=DEPRECATED_SEEDS_JSON))
 
 
 # -------------------------
@@ -414,7 +398,7 @@ def test_ecb_encryption(m5stickv):
         b'"Running bitcoin" -Hal, January 10, 2009',
     )
     testversions = (
-        0,  # AES.MODE_ECB
+        0,  # AES.MODE_ECB -auth16
         3,  # AES.MODE_ECB +auth3
         6,  # AES.MODE_ECB +pkcs -auth4
         9,  # AES.MODE_ECB +pkcs -auth4 +compress
@@ -488,7 +472,7 @@ def test_cbc_encryption(m5stickv):
         b'"Running bitcoin" -Hal, January 10, 2009',
     )
     testversions = (
-        1,  # AES.MODE_CBC
+        1,  # AES.MODE_CBC -auth16
         4,  # AES.MODE_CBC +auth4
         7,  # AES.MODE_CBC +pkcs -auth4
         10,  # AES.MODE_CBC +pkcs -auth4 +compress
@@ -515,8 +499,10 @@ def test_cbc_iv_use(m5stickv):
     from Crypto.Random import get_random_bytes
 
     SECOND_IV = b"\x8e\xc8b\x8f\xe2\xa8`\xaa\x06d\xe8\xe7\xaa.0\x03"
-    CBC_ENCRYPTED_WORDS_SECOND_IV = b"\x8e\xc8b\x8f\xe2\xa8`\xaa\x06d\xe8\xe7\xaa.0\x03\xc0N7\xbd'u\xc5Z\x97\xde=\x10\xeaO\xf4x\xb5\xe6\x10l\xcfu\xef\x9e\x94\x03L-\xdc\xff\xa3m\xf0i\xd4\xe2\n{9G\x17\xbf.\x96\xba\x1a\x07\xackK9\x90-\xb6sf1\x01Y+\xa6\x80c/yO\x93'd\x8b\rnru\xe7\x17\xb0\x01\x9a\x9b"
-    B64_CBC_ENCRYPTED_WORDS_SECOND_IV = b"jshij+KoYKoGZOjnqi4wA8BON70ndcVal949EOpP9Hi15hBsz3XvnpQDTC3c/6Nt8GnU4gp7OUcXvy6WuhoHrGtLOZAttnNmMQFZK6aAYy95T5MnZIsNbnJ15xewAZqb"
+    CBC_ENCRYPTED_WORDS_SECOND_IV = b"\x8e\xc8b\x8f\xe2\xa8`\xaa\x06d\xe8\xe7\xaa.0\x03\xc0N7\xbd'u\xc5Z\x97\xde=\x10\xeaO\xf4x\xb5\xe6\x10l\xcfu\xef\x9e\x94\x03L-\xdc\xff\xa3m\xf0i\xd4\xe2\n{9G\x17\xbf.\x96\xba\x1a\x07\xackK9\x90-\xb6sf1\x01Y+\xa6\x80c/\x1f#[:\xb0,K\xa7M\x90\xa2\xe6d\x8aX\xe6~\x13\xc3\x8d\x82\x1f\xe0\xbf\x8d\r0\xfa\xc7\xde\x18'"
+    # OLDCBC_ENCRYPTED_WORDS_SECOND_IV = b"\x8e\xc8b\x8f\xe2\xa8`\xaa\x06d\xe8\xe7\xaa.0\x03\xc0N7\xbd'u\xc5Z\x97\xde=\x10\xeaO\xf4x\xb5\xe6\x10l\xcfu\xef\x9e\x94\x03L-\xdc\xff\xa3m\xf0i\xd4\xe2\n{9G\x17\xbf.\x96\xba\x1a\x07\xackK9\x90-\xb6sf1\x01Y+\xa6\x80c/yO\x93'd\x8b\rnru\xe7\x17\xb0\x01\x9a\x9b"
+    B64_CBC_ENCRYPTED_WORDS_SECOND_IV = b"jshij+KoYKoGZOjnqi4wA8BON70ndcVal949EOpP9Hi15hBsz3XvnpQDTC3c/6Nt8GnU4gp7OUcXvy6WuhoHrGtLOZAttnNmMQFZK6aAYy8fI1s6sCxLp02QouZkiljmfhPDjYIf4L+NDTD6x94YJw=="
+    # OLDB64_CBC_ENCRYPTED_WORDS_SECOND_IV = b"jshij+KoYKoGZOjnqi4wA8BON70ndcVal949EOpP9Hi15hBsz3XvnpQDTC3c/6Nt8GnU4gp7OUcXvy6WuhoHrGtLOZAttnNmMQFZK6aAYy95T5MnZIsNbnJ15xewAZqb"
 
     version = 1
 
@@ -628,8 +614,8 @@ def test_broken_decryption_cases(m5stickv):
         for plain in plaintexts:
             encrypted = encryptor.encrypt(plain, version, iv, fail_unsafe=False)
 
-            if v_auth != 0:
-                # versions with authentication checking...
+            if v_auth > 0:
+                # for versions that append auth bytes after padded encryption...
                 if v_pkcs_pad == False:
                     # ...and without safe pkcs_pad
                     if plain[-1] == 0x00:
@@ -646,9 +632,10 @@ def test_broken_decryption_cases(m5stickv):
                 else:
                     # ... or if version uses safe pkcs_pad, it works
                     assert encryptor.decrypt(encrypted, version) == plain
-            else:
+            elif v_auth == 0:
                 # if no auth checking, then it doesn't matter,
                 # it's up to the caller to unpad and verify
+                # all KEF versions have "auth": this test remains just in case
                 if len(plain) % 16 == 0:
                     assert encryptor.decrypt(encrypted, version) == plain
                 else:
@@ -664,23 +651,11 @@ def test_list_mnemonic_storage(m5stickv, mock_file_operations):
     sd_list = storage.list_mnemonics(sd_card=True)
     assert "ecbID" and "cbcID" in flash_list
     assert "ecbID" and "cbcID" in sd_list
+    assert "OLDecbID" and "OLDcbcID" in flash_list  # legacy seeds.json
+    assert "OLDecbID" and "OLDcbcID" in sd_list  # legacy seeds.json
 
 
 def test_load_decrypt_ecb(m5stickv, mock_file_operations):
-    from krux.encryption import MnemonicStorage
-
-    storage = MnemonicStorage()
-    words = storage.decrypt(TEST_KEY, "ecbID", sd_card=False)
-    words_sd = storage.decrypt(TEST_KEY, "ecbID", sd_card=True)
-    assert words == ECB_WORDS
-    assert words_sd == ECB_WORDS
-
-    # returns silently with wrong key
-    assert storage.decrypt("wrong", "ecbID", sd_card=False) == None
-    assert storage.decrypt("wrong", "ecbID", sd_card=True) == None
-
-
-def test_load_decrypt_ecb_deprecated(m5stickv, mock_deprecated_seeds_json):
     from krux.encryption import MnemonicStorage
 
     storage = MnemonicStorage()
@@ -708,20 +683,6 @@ def test_load_decrypt_cbc(m5stickv, mock_file_operations):
     assert storage.decrypt("wrong", "cbcID", sd_card=True) == None
 
 
-def test_load_decrypt_cbc_deprecated(m5stickv, mock_deprecated_seeds_json):
-    from krux.encryption import MnemonicStorage
-
-    storage = MnemonicStorage()
-    words = storage.decrypt(TEST_KEY, "cbcID", sd_card=False)
-    words_sd = storage.decrypt(TEST_KEY, "cbcID", sd_card=True)
-    assert words == CBC_WORDS
-    assert words_sd == CBC_WORDS
-
-    # returns silently with wrong key
-    assert storage.decrypt("wrong", "cbcID", sd_card=False) == None
-    assert storage.decrypt("wrong", "cbcID", sd_card=True) == None
-
-
 def test_encrypt_ecb_flash(m5stickv, mocker):
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
@@ -729,9 +690,11 @@ def test_encrypt_ecb_flash(m5stickv, mocker):
     with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")) as m:
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-ECB"
-        success = storage.store_encrypted(TEST_KEY, "ecbID", ECB_WORDS, sd_card=False)
+        success = storage.store_encrypted(
+            TEST_KEY, "KEFecbID", ECB_WORDS, sd_card=False
+        )
     assert success is True
-    m().write.assert_called_once_with(ECB_ONLY_JSON)
+    m().write.assert_called_once_with(KEF_ECBENTROPY_ONLY_JSON)
 
 
 def test_encrypt_cbc_flash(m5stickv, mocker):
@@ -742,10 +705,10 @@ def test_encrypt_cbc_flash(m5stickv, mocker):
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-CBC"
         success = storage.store_encrypted(
-            TEST_KEY, "cbcID", CBC_WORDS, sd_card=False, i_vector=I_VECTOR
+            TEST_KEY, "KEFcbcID", CBC_WORDS, sd_card=False, i_vector=I_VECTOR
         )
     assert success is True
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+    m().write.assert_called_once_with(KEF_CBCENTROPY_ONLY_JSON)
 
 
 def test_encrypt_ecb_sd(m5stickv, mocker, mock_file_operations):
@@ -755,9 +718,9 @@ def test_encrypt_ecb_sd(m5stickv, mocker, mock_file_operations):
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-ECB"
-        success = storage.store_encrypted(TEST_KEY, "ecbID", ECB_WORDS, sd_card=True)
+        success = storage.store_encrypted(TEST_KEY, "KEFecbID", ECB_WORDS, sd_card=True)
     assert success is True
-    m().write.assert_called_once_with(ECB_ONLY_JSON)
+    m().write.assert_called_once_with(KEF_ECBENTROPY_ONLY_JSON)
 
 
 def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
@@ -768,34 +731,35 @@ def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-CBC"
         success = storage.store_encrypted(
-            TEST_KEY, "cbcID", CBC_WORDS, sd_card=True, i_vector=I_VECTOR
+            TEST_KEY, "KEFcbcID", CBC_WORDS, sd_card=True, i_vector=I_VECTOR
         )
     assert success is True
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+    m().write.assert_called_once_with(KEF_CBCENTROPY_ONLY_JSON)
 
 
 def test_delete_from_flash(m5stickv, mocker):
     from krux.encryption import MnemonicStorage
 
-    # Loads a file with 2 mnemonics, one with ID="ecbID", other with ID="cbcID"
-    # Deletes "ecbID" and assures only "cbcID" is left
+    # Loads a seeds.json file with many entries
+    # Deletes "KEFecbID" and assures the rest remain
     with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         storage = MnemonicStorage()
-        storage.del_mnemonic("ecbID")
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+        storage.del_mnemonic("KEFecbID")
+    expected = SEEDS_JSON.replace(KEF_ECBENTROPY_ONLY_JSON[1:-1] + ", ", "")
+    m().write.assert_called_once_with(expected)
 
 
 def test_delete_from_sd(m5stickv, mocker, mock_file_operations):
     from krux.encryption import MnemonicStorage
 
-    # Loads a file with 2 mnemonics, one with ID="ecbID", other with ID="cbcID"
-    # Deletes "ecbID" and assures only "cbcID" is left
+    # Loads a seeds.json file with many entries
+    # Deletes "cbcID" and assures the rest remain + padding to over-write abandoned bytes
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         storage = MnemonicStorage()
-        storage.del_mnemonic("ecbID", sd_card=True)
-    # Calculate padding size
-    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
-    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
+        storage.del_mnemonic("cbcID", sd_card=True)
+    padding_size = len(OLD_CBCWORDS_ONLY_JSON)
+    expected = SEEDS_JSON.replace(OLD_CBCWORDS_ONLY_JSON[1:-1] + ", ", "")
+    m().write.assert_called_once_with(expected + " " * padding_size)
 
 
 def test_create_ecb_encrypted_qr_code(m5stickv):
@@ -805,7 +769,7 @@ def test_create_ecb_encrypted_qr_code(m5stickv):
     Settings().encryption.version = "AES-ECB"
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS)
-    # assert qr_data == OLD_ECB_ENCRYPTED_QR
+    # assert qr_data == OLDECB_ENCRYPTED_QR
     assert qr_data == ECB_ENCRYPTED_QR
 
 
@@ -816,7 +780,6 @@ def test_create_cbc_encrypted_qr_code(m5stickv):
     Settings().encryption.version = "AES-CBC"
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, I_VECTOR)
-    # assert qr_data == OLD_CBC_ENCRYPTED_QR
     assert qr_data == CBC_ENCRYPTED_QR
 
 
@@ -826,7 +789,6 @@ def test_decode_ecb_encrypted_qr_code(m5stickv):
 
     encrypted_qr = EncryptedQRCode()
     public_data = encrypted_qr.public_data(ECB_ENCRYPTED_QR)
-    # assert public_data == OLD_ECB_QR_PUBLIC_DATA
     assert public_data == ECB_QR_PUBLIC_DATA
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
@@ -840,7 +802,6 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
     encrypted_qr = EncryptedQRCode()
     public_data = encrypted_qr.public_data(CBC_ENCRYPTED_QR)
     assert public_data == CBC_QR_PUBLIC_DATA
-    # assert public_data == OLD_CBC_QR_PUBLIC_DATA
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
     assert words == TEST_WORDS
@@ -1256,9 +1217,6 @@ def kef_self_document(version, label=None, iterations=None, limit=None):
         elif v_auth < 0:
             auth = "sha256({})[:{}]".format(plain, -v_auth)
             plain += " + auth"
-        else:
-            auth = "sha256({})[:16]".format(plain)
-            plain += " + auth"
     elif mode_name == "AES-GCM":
         auth = "e.authtag[:{}]".format(v_auth)
         cpl += " + auth"
@@ -1314,12 +1272,7 @@ def test_kef_wrapped_kef_packaging(m5stickv):
     # encrypt plaintext for versions of KEF
     plaintext = orig_plaintext
     plaintext2 = orig_plaintext
-    participants = []
     for v, version in VERSIONS.items():
-        # some versions cannot participate
-        if not version.get("auth", 0):
-            continue
-        participants.append(v)
         label = '"{}", K={}'.format(version["name"][4:], key)
         id_ = kef_self_document(v, label=label, iterations=iterations, limit=255)
         id2 = deflate_compress(id_.encode("latin-1")).decode(
@@ -1358,4 +1311,3 @@ def test_kef_wrapped_kef_packaging(m5stickv):
 
     assert plaintext == orig_plaintext
     assert plaintext2 == orig_plaintext
-    assert participants == [2, 3, 4, 5, 6, 7, 8, 9, 10]
