@@ -150,6 +150,9 @@ class AESCipher:
         if v_auth != 0 and mode in (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC):
             auth = hashlib.sha256(plain).digest()[: abs(v_auth)]
             if v_auth < 0:
+                # fail: same case as above if auth bytes have NUL suffix
+                if fail_unsafe and not v_pkcs_pad and auth[-1] == 0x00:
+                    raise ValueError("Cannot validate decryption for this plaintext")
                 plain += auth
                 auth = b""
 
@@ -215,27 +218,61 @@ class AESCipher:
         # then: unpad and validate via embeded authentication bytes
         # else: let caller deal with unpad and auth
         if v_auth != 0:
-            # need to unpad
-            decrypted = unpad(decrypted, pkcs_pad=v_pkcs_pad)
-            if mode == ucryptolib.MODE_GCM:
-                # for modes that have authentication built-in
-                try:
-                    decryptor.verify(auth)
-                except:
-                    return None
-            else:
-                # for modes that don't, krux uses sha256 checksum
-                if v_auth < 0:
-                    auth = decrypted[v_auth:]
-                    decrypted = decrypted[:v_auth]
-                if hashlib.sha256(decrypted).digest()[: abs(v_auth)] != auth:
-                    return None
+            decrypted = self._authenticate(
+                decrypted, decryptor, auth, mode, v_auth, v_pkcs_pad
+            )
 
         # for versions that compress
-        if v_compress:
+        if decrypted and v_compress:
             decrypted = deflate_decompress(decrypted)
 
         return decrypted
+
+    def _authenticate(self, decrypted, decryptor, auth, mode, len_auth, pkcs_pad):
+        if not (
+            isinstance(decrypted, bytes),
+            isinstance(auth, bytes),
+            isinstance(mode, int),
+            isinstance(len_auth, int),
+            isinstance(pkcs_pad, int),
+        ):
+            raise ValueError("Invalid call of ._authenticate()")
+
+        # need to unpad
+        unpadded = unpad(decrypted, pkcs_pad=pkcs_pad)
+        if len_auth < 0:
+            # auth was added to plaintext
+            auth = unpadded[len_auth:]
+            unpadded = unpadded[:len_auth]
+
+        # versions that have built-in authentication use their own
+        if mode == ucryptolib.MODE_GCM:
+            try:
+                decryptor.verify(auth)
+                return unpadded
+            except:
+                return None
+
+        # versions that don't have built-in authentication use sha256
+        if pkcs_pad:
+            max_attempts = 1
+        else:
+            # NUL padding is imperfect, still attempt to authenticate
+            max_attempts = abs(len_auth)
+
+        for _ in range(max_attempts):
+            cksum = hashlib.sha256(unpadded).digest()[: abs(len_auth)]
+            if cksum == auth:
+                return unpadded
+
+            if len_auth < 0:
+                # for next attempt, assume auth had NUL stripped by unpad()
+                unpadded += auth[:1]
+                auth = auth[1:] + b"\x00"
+            elif len_auth > 0:
+                # for next attempt, assume plaintext had NUL stripped by unpad()
+                unpadded += b"\x00"
+        return None
 
 
 def pad(some_bytes, pkcs_pad=False):
@@ -404,8 +441,14 @@ class MnemonicStorage:
         else:
             iterations = stored_value.get("key_iterations")
             version = stored_value.get("version")
-            mode = MODE_NUMBERS[VERSIONS[version]["name"]]
+            mode = VERSIONS[version]["mode"]
             data = base_decode(stored_value.get("data"), 64)
+            # TODO remove: never released into the wild krux_encryption branch only
+            if len(data) in (35, 52):
+                decryptor = AESCipher(key, mnemonic_id, iterations)
+                decrypted = decryptor.decrypt(data, version)
+                if decrypted:
+                    return bip39.mnemonic_from_bytes(decrypted)
             return self._deprecated_decrypt(key, mnemonic_id, iterations, mode, data)
         return None
 
