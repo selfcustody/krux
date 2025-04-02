@@ -52,6 +52,7 @@ VERSIONS = {
         "name": "AES-GCM",
         "mode": ucryptolib.MODE_GCM,
         "auth": 4,
+        "pkcs_pad": None,
     },
     3: {
         "name": "AES-ECB v2",
@@ -64,38 +65,32 @@ VERSIONS = {
         "auth": 4,
     },
     5: {
-        "name": "AES-GCM +p",
-        "mode": ucryptolib.MODE_GCM,
-        "auth": 4,
-        "pkcs_pad": True,
-    },
-    6: {
         "name": "AES-ECB +p",
         "mode": ucryptolib.MODE_ECB,
         "pkcs_pad": True,
         "auth": -4,
     },
-    7: {
+    6: {
         "name": "AES-CBC +p",
         "mode": ucryptolib.MODE_CBC,
         "pkcs_pad": True,
         "auth": -4,
     },
-    8: {
+    7: {
         "name": "AES-GCM +c",
         "mode": ucryptolib.MODE_GCM,
-        "pkcs_pad": True,
+        "pkcs_pad": None,
         "auth": 4,
         "compress": True,
     },
-    9: {
+    8: {
         "name": "AES-ECB +c",
         "mode": ucryptolib.MODE_ECB,
         "pkcs_pad": True,
         "auth": -4,
         "compress": True,
     },
-    10: {
+    9: {
         "name": "AES-CBC +c",
         "mode": ucryptolib.MODE_CBC,
         "pkcs_pad": True,
@@ -143,7 +138,7 @@ class AESCipher:
             plain = deflate_compress(plain)
 
         # fail: post-encryption appended "auth" with unfaithful-padding breaks decryption
-        if fail_unsafe and v_auth > 0 and not v_pkcs_pad and plain[-1] == 0x00:
+        if fail_unsafe and v_pkcs_pad is False and v_auth > 0 and plain[-1] == 0x00:
             raise ValueError("Cannot validate decryption for this plaintext")
 
         # for modes that don't have authentication, krux uses sha256 checksum
@@ -151,13 +146,14 @@ class AESCipher:
             auth = hashlib.sha256(plain).digest()[: abs(v_auth)]
             if v_auth < 0:
                 # fail: same case as above if auth bytes have NUL suffix
-                if fail_unsafe and not v_pkcs_pad and auth[-1] == 0x00:
+                if fail_unsafe and v_pkcs_pad is False and auth[-1] == 0x00:
                     raise ValueError("Cannot validate decryption for this plaintext")
                 plain += auth
                 auth = b""
 
-        # AES plaintext must be divisible into 16-byte blocks
-        plain = pad(plain, pkcs_pad=v_pkcs_pad)
+        # AES ECB/CBC plaintext must be aligned to 16-byte blocks
+        if v_pkcs_pad in (True, False):
+            plain = pad(plain, pkcs_pad=v_pkcs_pad)
 
         # fail to encrypt in modes where it is known unsafe
         if fail_unsafe and mode == ucryptolib.MODE_ECB:
@@ -230,55 +226,58 @@ class AESCipher:
 
     def _authenticate(self, decrypted, decryptor, auth, mode, len_auth, pkcs_pad):
         if not (
-            isinstance(decrypted, bytes),
-            isinstance(auth, bytes),
-            isinstance(mode, int),
-            isinstance(len_auth, int),
-            isinstance(pkcs_pad, int),
+            isinstance(decrypted, bytes)
+            and (isinstance(auth, bytes) or auth is None)
+            and isinstance(mode, int)
+            and isinstance(len_auth, int)
+            and pkcs_pad in (True, False, None)
         ):
             raise ValueError("Invalid call of ._authenticate()")
 
-        # need to unpad
-        unpadded = unpad(decrypted, pkcs_pad=pkcs_pad)
+        # some modes need to unpad
+        if pkcs_pad in (False, True):
+            decrypted = unpad(decrypted, pkcs_pad=pkcs_pad)
+
         if len_auth < 0:
             # auth was added to plaintext
-            auth = unpadded[len_auth:]
-            unpadded = unpadded[:len_auth]
+            auth = decrypted[len_auth:]
+            decrypted = decrypted[:len_auth]
 
         # versions that have built-in authentication use their own
         if mode == ucryptolib.MODE_GCM:
             try:
                 decryptor.verify(auth)
-                return unpadded
+                return decrypted
             except:
                 return None
 
         # versions that don't have built-in authentication use sha256
-        if pkcs_pad:
-            max_attempts = 1
-        else:
+        max_attempts = 1
+        if pkcs_pad is False:
             # NUL padding is imperfect, still attempt to authenticate
             max_attempts = abs(len_auth)
 
         for _ in range(max_attempts):
-            cksum = hashlib.sha256(unpadded).digest()[: abs(len_auth)]
+            cksum = hashlib.sha256(decrypted).digest()[: abs(len_auth)]
             if cksum == auth:
-                return unpadded
+                return decrypted
 
             if len_auth < 0:
                 # for next attempt, assume auth had NUL stripped by unpad()
-                unpadded += auth[:1]
+                decrypted += auth[:1]
                 auth = auth[1:] + b"\x00"
             elif len_auth > 0:
                 # for next attempt, assume plaintext had NUL stripped by unpad()
-                unpadded += b"\x00"
+                decrypted += b"\x00"
         return None
 
 
 def pad(some_bytes, pkcs_pad=False):
     """Pads some_bytes to AES block size of 16 bytes, returns bytes"""
+    if pkcs_pad is None:
+        return some_bytes
     len_padding = (16 - len(some_bytes) % 16) % 16
-    if pkcs_pad:
+    if pkcs_pad is True:
         if len_padding == 0:
             len_padding = 16
         return some_bytes + (len_padding).to_bytes(1, "big") * len_padding
@@ -287,7 +286,9 @@ def pad(some_bytes, pkcs_pad=False):
 
 def unpad(some_bytes, pkcs_pad=False):
     """Strips padding from some_bytes, returns bytes"""
-    if pkcs_pad:
+    if pkcs_pad is None:
+        return some_bytes
+    if pkcs_pad is True:
         len_padding = some_bytes[-1]
         return some_bytes[:-len_padding]
     return some_bytes.rstrip(b"\x00")
@@ -337,14 +338,14 @@ def suggest_versions(plaintext, mode_name):
                 pass
             else:
                 # ...never use pkcs when it's small and can keep it small
-                if v_pkcs_pad and not p_nul_suffix:
+                if v_pkcs_pad is True and not p_nul_suffix:
                     continue
                 # ...and never compress
                 if v_compress:
                     continue
         else:
             # never use non-safe padding for not-small plaintext
-            if not v_pkcs_pad:
+            if v_pkcs_pad is False:
                 continue
 
             # except unsafe ECB text...
@@ -359,8 +360,8 @@ def suggest_versions(plaintext, mode_name):
                 if not v_compress:
                     continue
 
-        # never use a version without pkcs padding if plaintext ends 0x00
-        if p_nul_suffix and not v_pkcs_pad:
+        # never use a version with unsafe padding if plaintext ends 0x00
+        if p_nul_suffix and v_pkcs_pad is False:
             continue
 
         candidates.append(version)
@@ -595,10 +596,11 @@ def kef_encode(id_, version, iterations, payload):
         extra += VERSIONS[version]["auth"]
     if not isinstance(payload, bytes):
         raise ValueError("Payload is not bytes")
-    if (len(payload) - extra) % 16 != 0:
-        raise ValueError("Ciphertext is not aligned")
-    if (len(payload) - extra) // 16 < 1:
-        raise ValueError("Ciphertext is too short")
+    if VERSIONS[version].get("pkcs_pad", False) in (True, False):
+        if (len(payload) - extra) % 16 != 0:
+            raise ValueError("Ciphertext is not aligned")
+        if (len(payload) - extra) // 16 < 1:
+            raise ValueError("Ciphertext is too short")
 
     version = version.to_bytes(1, "big")
     return b"".join([len_id, id_, version, iterations, payload])
@@ -622,8 +624,9 @@ def kef_decode(kef_bytes):
     extra = MODE_IVS.get(VERSIONS[version]["mode"], 0)
     if VERSIONS[version].get("auth", 0) > 0:
         extra += VERSIONS[version]["auth"]
-    if (len(payload) - extra) % 16 != 0:
-        raise ValueError("Ciphertext is not aligned")
-    if (len(payload) - extra) // 16 < 1:
-        raise ValueError("Ciphertext is too short")
+    if VERSIONS[version].get("pkcs_pad", False) in (True, False):
+        if (len(payload) - extra) % 16 != 0:
+            raise ValueError("Ciphertext is not aligned")
+        if (len(payload) - extra) // 16 < 1:
+            raise ValueError("Ciphertext is too short")
     return (id_, version, iterations, payload)

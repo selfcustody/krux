@@ -135,8 +135,8 @@ def test_encryption_VERSIONS_definition(m5stickv):
         # each version has an implied "iv" value in MODE_IVS to require this size i_vector
         assert isinstance(MODE_IVS.get(v["mode"], 0), int)
 
-        # each version has an implied 'pkcs_pad' boolean for pkcs#7 "safe" padding
-        assert isinstance(v.get("pkcs_pad", False), bool)
+        # each version has an implied 'pkcs_pad': True=PKCS#7-padding, False=NUL-padding, None=no-padding
+        assert v.get("pkcs_pad", False) in (True, False, None)
 
         # each version has an implied 'auth' integer for bytes of authentication data
         # if negative, it's calculated and appended to plaintext "before"
@@ -214,13 +214,13 @@ def test_suggest_versions(m5stickv):
         (entropy16, "AES-GCM", "AES-GCM"),
         (entropy32, "AES-GCM", "AES-GCM"),
         (entropy16 * 2, "AES-GCM", "AES-GCM"),
-        (entropy32 * 3, "AES-GCM", "AES-GCM +p"),
+        (entropy32 * 3, "AES-GCM", "AES-GCM"),
         (entropy32 * 8, "AES-GCM", "AES-GCM +c"),
-        (nul_byte_str, "AES-GCM", "AES-GCM +p"),
-        (entropy32 * 2 + nul_byte_str.encode(), "AES-GCM", "AES-GCM +p"),
+        (nul_byte_str, "AES-GCM", "AES-GCM"),
+        (entropy32 * 2 + nul_byte_str.encode(), "AES-GCM", "AES-GCM"),
         (short_str, "AES-GCM", "AES-GCM"),
         (bad_passwd, "AES-GCM", "AES-GCM"),
-        (descriptor_single, "AES-GCM", "AES-GCM +p"),
+        (descriptor_single, "AES-GCM", "AES-GCM"),
         (descriptor_1of2, "AES-GCM", "AES-GCM +c"),
         (descriptor_2of3, "AES-GCM", "AES-GCM +c"),
         (descriptor_mini_liana_em, "AES-GCM", "AES-GCM +c"),
@@ -302,14 +302,13 @@ def test_AESCipher_calling_method_encrypt(m5stickv):
         (b"\x00", 3),
         (b"\x00", 3, b""),
         (b"\x00", 4, b"\x00" * 16),
-        (b"\x00", 5, b"\x00" * 12),
-        (b"\x00", 6),
-        (b"\x00", 6, b""),
-        (b"\x00", 7, b"\x00" * 16),
-        (b"\x00", 8, b"\x00" * 12),
-        (b"\x00", 9),
-        (b"\x00", 9, b""),
-        (b"\x00", 10, b"\x00" * 16),
+        (b"\x00", 5),
+        (b"\x00", 5, b""),
+        (b"\x00", 6, b"\x00" * 16),
+        (b"\x00", 7, b"\x00" * 12),
+        (b"\x00", 8),
+        (b"\x00", 8, b""),
+        (b"\x00", 9, b"\x00" * 16),
     )
     invalid_raws = ("\x00", True, None, 1)
     invalid_versions = (None, -1, 11)
@@ -360,10 +359,9 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
         (b"\x00" * 36, 4),
         (b"\x00" * 32, 5),
         (b"\x00" * 32, 6),
-        (b"\x00" * 32, 7),
-        (b"\x00" * 48, 8),
-        (b"\x00" * 32, 9),
-        (b"\x00" * 48, 10),
+        (b"\x00" * 48, 7),
+        (b"\x00" * 32, 8),
+        (b"\x00" * 48, 9),
     )
     invalid_encrypteds = (True, None, 1, "\x00")
     invalid_versions = (None, -1, 11)
@@ -421,8 +419,8 @@ def test_ecb_encryption(m5stickv):
     testversions = (
         0,  # AES.MODE_ECB -auth16
         3,  # AES.MODE_ECB +auth3
-        6,  # AES.MODE_ECB +pkcs -auth4
-        9,  # AES.MODE_ECB +pkcs -auth4 +compress
+        5,  # AES.MODE_ECB +pkcs -auth4
+        8,  # AES.MODE_ECB +pkcs -auth4 +compress
     )
     wrong = AESCipher("wrong", "wrong", ITERATIONS)
     for version in testversions:
@@ -449,7 +447,7 @@ def test_ecb_encryption_fails_duplicated_blocks(m5stickv):
     from krux.encryption import AESCipher
 
     # test controls
-    versions = (0, 3, 6)  # AES.MODE_ECB except w/compress
+    versions = (0, 3, 5)  # AES.MODE_ECB except w/compress
     key, id_, iterations = "a key", "a label", 100000
     plaintext = b"a 16-byte block." * 2
 
@@ -503,8 +501,8 @@ def test_cbc_encryption(m5stickv):
     testversions = (
         1,  # AES.MODE_CBC -auth16
         4,  # AES.MODE_CBC +auth4
-        7,  # AES.MODE_CBC +pkcs -auth4
-        10,  # AES.MODE_CBC +pkcs -auth4 +compress
+        6,  # AES.MODE_CBC +pkcs -auth4
+        9,  # AES.MODE_CBC +pkcs -auth4 +compress
     )
     wrong = AESCipher("wrong", "wrong", ITERATIONS)
     for version in testversions:
@@ -569,7 +567,7 @@ def test_cbc_iv_use(m5stickv):
         CBC_ENTROPY,
         b'"Running bitcoin" -Hal, January 10, 2009',
     )
-    testversions = (1, 4, 7, 10)  # all AES.MODE_CBC
+    testversions = (1, 4, 6, 9)  # all AES.MODE_CBC
     wrong = AESCipher("wrong", "wrong", ITERATIONS)
     for version in testversions:
         for plain in testplaintexts:
@@ -601,8 +599,7 @@ def test_gcm_encryption(m5stickv):
     )
     testversions = (
         2,  # AES.MODE_GCM +auth4
-        5,  # AES.MODE_GCM +pkcs_pad +auth4
-        8,  # AES.MODE_GCM +pkcs_pad +auth4 +compress
+        7,  # AES.MODE_GCM +auth4 +compress
     )
     iv = I_VECTOR[:12]
 
@@ -611,6 +608,9 @@ def test_gcm_encryption(m5stickv):
     for version in testversions:
         for plain in testplaintexts:
             encrypted = encryptor.encrypt(plain, version, iv)
+            print(
+                "version, len(plain), encrypted:", version, len(plain), len(encrypted)
+            )
             assert encryptor.decrypt(encrypted, version) == plain
 
             # wrong key fails to decrypt silently
@@ -659,7 +659,7 @@ def test_broken_decryption_cases(m5stickv):
         for plain in plaintexts:
             encrypted = encryptor.encrypt(plain, version, iv, fail_unsafe=False)
 
-            if v_auth > 0 and v_pkcs_pad == False and plain[-1] == 0x00:
+            if v_auth > 0 and v_pkcs_pad is False and plain[-1] == 0x00:
                 # for versions that append auth bytes after padded encryption...
                 # ...and without safe pkcs_pad
                 # ...and plaintext that ends in 0x00, ITS BROKEN
@@ -676,7 +676,7 @@ def test_broken_decryption_cases(m5stickv):
 
             elif (
                 v_auth < 0
-                and v_pkcs_pad == False
+                and v_pkcs_pad is False
                 and sha256(plain).digest()[-v_auth - 1] == 0x00
             ):
                 # for version that append sha256 auth bytes to plain before encryption...
@@ -945,8 +945,6 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         implied_mode = value["name"][:7]
         iv = I_VECTOR[: MODE_IVS.get(value["mode"], 0)]
         payload = encryptor.encrypt(TEST_ENTROPY, version, iv)
-        if version in (0, 1):
-            payload += sha256(payload).digest()[:16]  # checksum
         kef_data = kef_encode(TEST_MNEMONIC_ID, version, ITERATIONS, payload)
         qr_data = qr_code_datum[implied_mode]
 
@@ -999,7 +997,7 @@ def test_kef_encode_exceptions(m5stickv):
         "ID can be empty or as long as 255 utf-8 characters, but not longer\nA purely peer-to-peer version of electronic cash would allow online\npayments to be sent directly from one party to another without going through a\nfinancial institution. Digital signatures",
         b"".join([i.to_bytes(1, "big") for i in range(1, 256)]).decode("latin-1"),
     )
-    valid_versions = range(11)
+    valid_versions = range(10)
     valid_iterations = (ten_k, 50 * ten_k, ten_k + 1, 2**24 - 1, ten_k * ten_k)
     plaintexts = (
         b"\xde\xad\xbe\xef" * 4,
@@ -1026,7 +1024,7 @@ def test_kef_encode_exceptions(m5stickv):
 
                     # Version must be 0-255, and supported
                     err = "Invalid version"
-                    for invalid in (None, -1, 0.5, "0", 256, 11):
+                    for invalid in (None, -1, 0.5, "0", 256, 10):
                         with pytest.raises(ValueError, match=err):
                             kef_encode(id_, invalid, iterations, ciphertext)
 
@@ -1051,6 +1049,10 @@ def test_kef_encode_exceptions(m5stickv):
                     invalid = (b"\x00" * 32).decode()
                     with pytest.raises(ValueError, match=err):
                         kef_encode(id_, version, iterations, invalid)
+
+                    # except for modes that don't require padding...
+                    if VERSIONS[version].get("pkcs_pad", False) is None:
+                        continue
 
                     # ...and aligned
                     err = "Ciphertext is not aligned"
@@ -1153,6 +1155,7 @@ def test_faithful_encrypted_kef_packaging(m5stickv):
                         kef_encoded = kef_encode(
                             salt, version, iteration, cipher_payload
                         )
+                        print(version, plain, cipher_payload, kef_encoded)
                         kef_decoded = kef_decode(kef_encoded)
                         assert kef_decoded == (salt, version, iteration, cipher_payload)
                         assert encryptor.decrypt(cipher_payload, version)
@@ -1311,18 +1314,25 @@ def kef_self_document(version, label=None, iterations=None, limit=None):
         elif v_auth < 0:
             auth = "sha256({})[:{}]".format(plain, -v_auth)
             plain += " + auth"
+            text["e"] = None
+            text["auth"] = None
     elif mode_name == "AES-GCM":
         auth = "e.authtag[:{}]".format(v_auth)
         cpl += " + auth"
         text["e"] = None
-        text["pad"] = None
+        text["auth"] = None
 
-    plain += " + pad"
+    pad = None
+    if v_pkcs in (True, False):
+        plain += " + pad"
+        text["pad"] = None
+        pad = "PKCS#7" if v_pkcs else "NUL"
 
     text["cpl"] = cpl.format("e.encrypt({})".format(plain))
     text["e"] = "AES(k, {}{})".format(mode_name[-3:], iv_arg)
     text["auth"] = auth
-    text["pad"] = "PKCS#7" if v_pkcs else "NUL"
+    if pad:
+        text["pad"] = pad
     text["k"] = "pbkdf2_hmac(sha256, <K>, id, i)"
 
     return join_text(text, limit)
@@ -1335,22 +1345,22 @@ def test_kef_self_document(m5stickv):
     test_cases = {
         0: "[AES-ECB] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =0\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:16]\npad: NUL\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         1: "[AES-CBC] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =1\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:16]\npad: NUL\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        2: "[AES-GCM] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =2\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 12b\ne: AES(k, GCM, iv)\npad: NUL\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        2: "[AES-GCM] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =2\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P>) + auth\niv: 12b\ne: AES(k, GCM, iv)\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         3: "[AES-ECB v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =3\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + pad) + auth\ne: AES(k, ECB)\npad: NUL\nauth: sha256(<P>)[:3]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         4: "[AES-CBC v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =4\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 16b\ne: AES(k, CBC, iv)\npad: NUL\nauth: sha256(<P>)[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        5: "[AES-GCM +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =5\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 12b\ne: AES(k, GCM, iv)\npad: PKCS#7\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        6: "[AES-ECB +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =6\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        7: "[AES-CBC +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =7\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        8: "[AES-GCM +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =8\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10) + pad) + auth\niv: 12b\ne: AES(k, GCM, iv)\npad: PKCS#7\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        9: "[AES-ECB +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =9\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(deflate(<P>, wbits=-10) + auth + pad)\ne: AES(k, ECB)\nauth: sha256(deflate(<P>, wbits=-10))[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        10: "[AES-CBC +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =10\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10) + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(deflate(<P>, wbits=-10))[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        5: "[AES-ECB +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =5\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        6: "[AES-CBC +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =6\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        7: "[AES-GCM +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =7\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10)) + auth\niv: 12b\ne: AES(k, GCM, iv)\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        8: "[AES-ECB +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =8\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(deflate(<P>, wbits=-10) + auth + pad)\ne: AES(k, ECB)\nauth: sha256(deflate(<P>, wbits=-10))[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        9: "[AES-CBC +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =9\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10) + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(deflate(<P>, wbits=-10))[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
     }
 
     for v, expected in test_cases.items():
         label = VERSIONS[v]["name"]
         doc = kef_self_document(v, label=label)
-        # print("\n"+doc)
+        # print("\n" + doc)
         assert doc == expected
+    # assert 0
 
 
 def test_kef_wrapped_kef_packaging(m5stickv):
@@ -1410,9 +1420,10 @@ def test_kef_wrapped_kef_packaging(m5stickv):
     assert plaintext2 == orig_plaintext
 
 
-def test_calculate_rate_of_failures(m5stickv):
+def test_report_rate_of_failure(m5stickv):
     from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_encode, kef_decode
     from hashlib import sha256, sha512
+    from embit.bip39 import mnemonic_from_bytes
 
     encrs = {}
     for v in VERSIONS:
@@ -1432,18 +1443,25 @@ def test_calculate_rate_of_failures(m5stickv):
     # plaintext: will be deterministically altered for each loop
     plain = b""  # play here
 
-    # samples per message type: (1K takes seconds, 100K takes minutes)
-    samples = 512  # play here
+    # samples per message type: *1 per message function below, *2 for re-encoding utf8
+    # (256 is enough, 1K takes 9 seconds, 100K takes 12 minutes)
+    samples = 256  # play here
 
     # message functions: takes message bytes, returns new same-size message bytes
-    def f_12w_mnemonic(msg):
+    def f_16bytes(msg):
         return sha256(msg).digest()[:16]
 
-    def f_24w_mnemonic(msg):
+    def f_32bytes(msg):
         return sha256(msg).digest()
 
+    def f_12w_mnemonic(msg):
+        return mnemonic_from_bytes(f_16bytes(msg)).encode()
+
+    def f_24w_mnemonic(msg):
+        return mnemonic_from_bytes(f_32bytes(msg)).encode()
+
     def f_repeated(msg):
-        return sha256(msg).digest()[:16] * 2
+        return f_16bytes(msg) * 2
 
     def f_medium(msg):
         return sha512(msg).digest()
@@ -1451,13 +1469,18 @@ def test_calculate_rate_of_failures(m5stickv):
     def f_long(msg):
         return b"".join(
             [
+                f_16bytes(msg),
+                f_32bytes(msg),
                 f_12w_mnemonic(msg),
                 f_24w_mnemonic(msg),
+                f_repeated(msg),
                 f_medium(msg),
             ]
         )
 
     msg_funcs = (
+        f_16bytes,
+        f_32bytes,
         f_12w_mnemonic,
         f_24w_mnemonic,
         f_repeated,
@@ -1470,6 +1493,7 @@ def test_calculate_rate_of_failures(m5stickv):
         return msg.decode("latin-1").encode("utf8")
 
     for i in range(samples):
+        # gather plaintexts for 7 message types, *2 since each re-encoded as utf8
         plaintexts = [msgfunc(plain) for msgfunc in msg_funcs]
         plaintexts.extend([utf8_encoded(msgfunc(plain)) for msgfunc in msg_funcs])
         for plain in plaintexts:
@@ -1514,3 +1538,4 @@ def test_calculate_rate_of_failures(m5stickv):
         )
         failures += encrs[v]["failed"]
     assert failures == 0
+    # assert 0
