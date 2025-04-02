@@ -81,8 +81,8 @@ The flash baudrate is how quickly the firmware will be written to the device.
 
 <img width="640" src="/krux/img/krux-installer/baudrate.png" alt="Krux-Installer baudrate" />
 
-But not any value can be used. The valid ones are: 9600, 19200, 28800, 38400, 57600, 76800, 115200,
-230400, 460800, 576000, 921600, 1500000.
+Use one of the following (m5StickV doesn't support 2000000): 9600, 19200, 28800, 38400, 57600, 76800, 115200,
+230400, 460800, 576000, 921600, 1500000, 2000000.
 
 ##### System locale
 
