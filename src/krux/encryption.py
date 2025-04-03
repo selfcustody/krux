@@ -51,8 +51,8 @@ VERSIONS = {
     2: {
         "name": "AES-GCM",
         "mode": ucryptolib.MODE_GCM,
-        "auth": 4,
         "pkcs_pad": None,
+        "auth": 4,
     },
     3: {
         "name": "AES-ECB v2",
@@ -151,8 +151,8 @@ class AESCipher:
                 plain += auth
                 auth = b""
 
-        # AES ECB/CBC plaintext must be aligned to 16-byte blocks
-        if v_pkcs_pad in (True, False):
+        # some modes need to pad to AES 16-byte blocks
+        if v_pkcs_pad is True or v_pkcs_pad is False:
             plain = pad(plain, pkcs_pad=v_pkcs_pad)
 
         # fail to encrypt in modes where it is known unsafe
@@ -224,57 +224,61 @@ class AESCipher:
 
         return decrypted
 
-    def _authenticate(self, decrypted, aesob, auth, mode, len_auth, pkcs_pad):
+    def _authenticate(self, decrypted, aes_object, auth, mode, v_auth, v_pkcs_pad):
         if not (
             isinstance(decrypted, bytes)
             and (isinstance(auth, bytes) or auth is None)
-            # and isinstance(aesob, Crypto.Cipher)
-            and mode in (1, 2, 11)
-            and (isinstance(len_auth, int) and -32 <= len_auth <= 32)
-            and pkcs_pad in (True, False, None)
+            # TODO check this and isinstance(aes_object, Crypto.Cipher)
+            and mode in (1, 2, 11)  # TODO better check than this
+            and (isinstance(v_auth, int) and -32 <= v_auth <= 32)
+            and (v_pkcs_pad is True or v_pkcs_pad is False or v_pkcs_pad is None)
         ):
             raise ValueError("Invalid call of ._authenticate()")
 
         # some modes need to unpad
-        if pkcs_pad in (False, True):
-            decrypted = unpad(decrypted, pkcs_pad=pkcs_pad)
+        if v_pkcs_pad in (False, True):
+            decrypted = unpad(decrypted, pkcs_pad=v_pkcs_pad)
 
-        if len_auth < 0:
+        if v_auth < 0:
             # auth was added to plaintext
-            auth = decrypted[len_auth:]
-            decrypted = decrypted[:len_auth]
+            auth = decrypted[v_auth:]
+            decrypted = decrypted[:v_auth]
 
         # versions that have built-in authentication use their own
         if mode == ucryptolib.MODE_GCM:
             try:
-                aesob.verify(auth)
+                aes_object.verify(auth)
                 return decrypted
             except:
                 return None
 
         # versions that don't have built-in authentication use sha256
         max_attempts = 1
-        if pkcs_pad is False:
-            # NUL padding is imperfect, still attempt to authenticate
-            max_attempts = abs(len_auth)
+        if v_pkcs_pad is False:
+            # NUL padding is imperfect, still attempt to authenticate -- up to a limit...
+            # ... of abs(v_auth) + 2 times (ie: auth is all 0x00 + plaintext ends 2 * 0x00)
+            max_attempts = abs(v_auth) + 2
 
         for _ in range(max_attempts):
-            cksum = hashlib.sha256(decrypted).digest()[: abs(len_auth)]
+            cksum = hashlib.sha256(decrypted).digest()[: abs(v_auth)]
             if cksum == auth:
                 return decrypted
 
-            if len_auth < 0:
+            if v_auth < 0:
                 # for next attempt, assume auth had NUL stripped by unpad()
                 decrypted += auth[:1]
                 auth = auth[1:] + b"\x00"
-            elif len_auth > 0:
+            elif v_auth > 0:
                 # for next attempt, assume plaintext had NUL stripped by unpad()
                 decrypted += b"\x00"
         return None
 
 
-def pad(some_bytes, pkcs_pad=False):
-    """Pads some_bytes to AES block size of 16 bytes, returns bytes"""
+def pad(some_bytes, pkcs_pad):
+    """
+    Pads some_bytes to AES block size of 16 bytes, returns bytes
+    pkcs_pad: False=NUL-pad, True=PKCS#7-pad, None=no-pad
+    """
     if pkcs_pad is None:
         return some_bytes
     len_padding = (16 - len(some_bytes) % 16) % 16
@@ -282,17 +286,24 @@ def pad(some_bytes, pkcs_pad=False):
         if len_padding == 0:
             len_padding = 16
         return some_bytes + (len_padding).to_bytes(1, "big") * len_padding
-    return some_bytes + b"\x00" * len_padding
+    if pkcs_pad is False:
+        return some_bytes + b"\x00" * len_padding
+    raise TypeError("pkcs_pad is not (None, True, False)")
 
 
-def unpad(some_bytes, pkcs_pad=False):
-    """Strips padding from some_bytes, returns bytes"""
+def unpad(some_bytes, pkcs_pad):
+    """
+    Strips padding from some_bytes, returns bytes
+    pkcs_pad: False=NUL-pad, True=PKCS#7-pad, None=no-pad
+    """
     if pkcs_pad is None:
         return some_bytes
     if pkcs_pad is True:
         len_padding = some_bytes[-1]
         return some_bytes[:-len_padding]
-    return some_bytes.rstrip(b"\x00")
+    if pkcs_pad is False:
+        return some_bytes.rstrip(b"\x00")
+    raise TypeError("pkcs_pad is not in (None, True, False)")
 
 
 def suggest_versions(plaintext, mode_name):
@@ -410,7 +421,7 @@ class MnemonicStorage:
         else:
             decryptor = ucryptolib.aes(stretched_key, mode)
         try:
-            plaintext = unpad(decryptor.decrypt(payload))
+            plaintext = unpad(decryptor.decrypt(payload), pkcs_pad=False)
             return plaintext.decode()
         except:
             return None
@@ -445,12 +456,6 @@ class MnemonicStorage:
             version = stored_value.get("version")
             mode = VERSIONS[version]["mode"]
             data = base_decode(stored_value.get("data"), 64)
-            # TODO remove: never released into the wild krux_encryption branch only
-            if len(data) in (35, 52):
-                decryptor = AESCipher(key, mnemonic_id, iterations)
-                decrypted = decryptor.decrypt(data, version)
-                if decrypted:
-                    return bip39.mnemonic_from_bytes(decrypted)
             return self._deprecated_decrypt(key, mnemonic_id, iterations, mode, data)
         return None
 

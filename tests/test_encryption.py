@@ -11,9 +11,11 @@ TEST_WORDS = (
 )
 ECB_WORDS = "brass creek fuel snack era success impulse dirt caution purity lottery lizard boil festival neither case swift smooth range mail gravity sample never ivory"
 CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
+GCM_WORDS = "alone lady rib jazz hold honey stem upgrade pass elite cinnamon joy fiction either dolphin knife nominee seed eternal make game unusual rigid pass"
 
 ECB_ENTROPY = b"\x1b&ew\xe6\x84\xc5\xb0\x9c\x89\xf5$\xb5\xca\x10Aa\x90\xaae\t\x19\xdb\xd9\x9e\xc7C\x16a~%C"
 CBC_ENTROPY = b"@\x8c\xf9\xb8\xd8\xd9\xe2\xbdo\xb5\xd1\xa1?\xb0\x10O\xd4\xc8\xfd()\xa0\xc2\xaf\xb5\x1d\x06\xdc\xfb\x80\x1cn"
+GCM_ENTROPY = b"\x06\xef\x92\xe3\xbb\xb6\xc8\xdauWu\xa0\xa9\x00\xa4<E\\\x8e\x103\xdd\x95\xf8]6CE\xf3\xdc\xae}"
 
 ECB_ENCRYPTED_WORDS = b"\xd4\xd5y\xe6]'\xcb\xdb\xe4\x15^\xac\xe0\xc9\xc3\xbc9i\x89e\t\xa3~l\xbf\x98l\xe9\x92\xa9\xe1=3V\xb3\xb1]\xfb|\x13\xf4K_\xdb\xa7d\x92p\x8a-\xbfr\xb5`\xaf\xe5\xc4\xfeP Z\x12\xfbbQ9G'\xael\x9d*F\xafn4\t\x7fE\xb2K\xc1\xbaB\xfa\xb7J6\xefu\x95\xa9\x9c\xe8\x14\x88"
 # OLDECB_ENCRYPTED_WORDS = b"\xd4\xd5y\xe6]'\xcb\xdb\xe4\x15^\xac\xe0\xc9\xc3\xbc9i\x89e\t\xa3~l\xbf\x98l\xe9\x92\xa9\xe1=3V\xb3\xb1]\xfb|\x13\xf4K_\xdb\xa7d\x92p\x8a-\xbfr\xb5`\xaf\xe5\xc4\xfeP Z\x12\xfbb\x82\x98\xb6)\x83\x99\xba]8R\xbdS\xce>\xdd\xb1"
@@ -37,6 +39,7 @@ ECB_ENCRYPTED_QR = b"\x07test ID\x03\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&
 OLDECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
 CBC_ENCRYPTED_QR = b'\x07test ID\x04\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xb35\xef\x7f'
 OLDCBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
+GCM_ENCRYPTED_QR = b"\x07test ID\x02\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xb7vo]]\x8aO\x90\x8e\x86\xe784L\x02]\x8f\xedT"
 
 ECB_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB v2\nKey iter.: 100000"
@@ -50,25 +53,25 @@ CBC_QR_PUBLIC_DATA = (
 OLDCBC_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC\nKey iter.: 100000"
 )
+GCM_QR_PUBLIC_DATA = (
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-GCM\nKey iter.: 100000"
+)
 
 # Must maintain old in-the-wild versions of cipher-payloads in seeds.json to ensure recoverable
-# TODO: OLDecbID and OLDcbcID (versions 3,4) never released in-the-wild, can be removed eventually
-OLD_ECBWORDS_ONLY_JSON = '{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}'
-OLD_CBCWORDS_ONLY_JSON = '{"cbcID": {"version": 1, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7Xjp+66c9sy20J39ffK11XvVAaDSyQybsM6txAwKy/U1iU4KKYRu3ywDDN9q9sWAi1R+y7x4aHwQd0C0rRcW0iDxvWtFyWMKilA0AsDQwvBSgkhf5PQnQ1rfjnKVF75rTrG5vUNF01FRwa9PoM5cq30Yki/hFnWj/4niaeXqgQvIwjSzBNbXgaRLjfoaUyHiu8+zBX25rkpI0PW243fgDEfqI="}}'
-OLD_ECBENTROPY_ONLY_JSON = '{"OLDecbID": {"version": 3, "key_iterations": 100000, "data": "OQLhgAoK6dtoPhQ3L1m1qD/Sc290zywTlm/V2UaGL1S3oy0="}}'
-OLD_CBCENTROPY_ONLY_JSON = '{"OLDcbcID": {"version": 4, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7XjjDCk4eC610GUMpNB8QZi0YI9hywXxe+fzUEGCGFngYVA8Wg1Q=="}}'
 KEF_ECBENTROPY_ONLY_JSON = '{"KEFecbID": {"b64_kef": "CEtFRmVjYklEAwAACrjZPsHP9sA0UAKiWuotRXbnFma/HVnfaVAZV6Kw5Tu7t6Mt"}}'
 KEF_CBCENTROPY_ONLY_JSON = '{"KEFcbcID": {"b64_kef": "CEtFRmNiY0lEBAAACk9SoZNsPjJxIJ6dZAWe145shFPojYLA4hthWHv2Z2FSIyQ6fm5KU81NLiQ/mQDM4wPFoNU="}}'
+KEF_GCMENTROPY_ONLY_JSON = '{"KEFgcmID": {"b64_kef": "CEtFRmdjbUlEAgAACk9SoZNsPjJxIJ6dZL+jDD/X+v8sJY3z7oiBTgjTt9BbJh1mAQus1rbFF4D4HH+SVw=="}}'
+OLD_ECBWORDS_ONLY_JSON = '{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}'
+OLD_CBCWORDS_ONLY_JSON = '{"cbcID": {"version": 1, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7Xjp+66c9sy20J39ffK11XvVAaDSyQybsM6txAwKy/U1iU4KKYRu3ywDDN9q9sWAi1R+y7x4aHwQd0C0rRcW0iDxvWtFyWMKilA0AsDQwvBSgkhf5PQnQ1rfjnKVF75rTrG5vUNF01FRwa9PoM5cq30Yki/hFnWj/4niaeXqgQvIwjSzBNbXgaRLjfoaUyHiu8+zBX25rkpI0PW243fgDEfqI="}}'
 SEEDS_JSON = (
     "{"
     + ", ".join(
         [
-            OLD_ECBWORDS_ONLY_JSON[1:-1],
-            OLD_CBCWORDS_ONLY_JSON[1:-1],
-            OLD_ECBENTROPY_ONLY_JSON[1:-1],
-            OLD_CBCENTROPY_ONLY_JSON[1:-1],
             KEF_ECBENTROPY_ONLY_JSON[1:-1],
             KEF_CBCENTROPY_ONLY_JSON[1:-1],
+            KEF_GCMENTROPY_ONLY_JSON[1:-1],
+            OLD_ECBWORDS_ONLY_JSON[1:-1],
+            OLD_CBCWORDS_ONLY_JSON[1:-1],
         ]
     )
     + "}"
@@ -392,59 +395,79 @@ def test_AESCipher_calling_method__authenticate(m5stickv):
 
     aes = AESCipher("key", "salt", 1)
     valid_decrypteds = (b"\x00",)
-    valid_aesobs = (
+    valid_aes_objects = (
         ucryptolib.aes(aes.key, ucryptolib.MODE_ECB),
         ucryptolib.aes(aes.key, ucryptolib.MODE_CBC, I_VECTOR[:16]),
         ucryptolib.aes(aes.key, ucryptolib.MODE_GCM, I_VECTOR[:12]),
     )
     valid_auths = (b"\x01\x02\x03", b"\x01\x02\x03\x04")
     valid_modes = (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC, ucryptolib.MODE_GCM)
-    valid_len_auths = (-3, 4)
-    valid_pkcs_pads = (None, True, False)
+    valid_v_auths = (-3, 4)
+    valid_v_pkcs_pads = (None, True, False)
 
     invalid_decrypteds = (True, None, 1, "\x00")
-    invalid_aesobs = (list(), dict(), None)
+    invalid_aes_objects = (list(), dict(), None)
     invalid_auths = (True, 1, "\x00")
     invalid_modes = (None, -1, 0, 3, 10, 12)
-    invalid_len_auths = (None, 1.0)
-    invalid_pkcs_pad = ("True", "False", "NUL", "PKCS#7", "None")
+    invalid_v_auths = (None, 1.0)
+    invalid_v_pkcs_pad = ("True", "False", "NUL", "PKCS#7", "None", 0, 1)
 
     # try each invalid param with other valid params
     err = "Invalid call of ._authenticate()"
     for plain in valid_decrypteds:
-        for aesob in valid_aesobs:
+        for aes_object in valid_aes_objects:
             for auth in valid_auths:
                 for mode in valid_modes:
-                    for lauth in valid_len_auths:
-                        for pkcs in valid_pkcs_pads:
+                    for v_auth in valid_v_auths:
+                        for v_pkcs_pad in valid_v_pkcs_pads:
 
                             for invalid in invalid_decrypteds:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
-                                        invalid, aesob, auth, mode, lauth, pkcs
+                                        invalid,
+                                        aes_object,
+                                        auth,
+                                        mode,
+                                        v_auth,
+                                        v_pkcs_pad,
                                     )
-                            # for invalid in invalid_aesobs:
+                            # for invalid in invalid_aes_objects:
                             #    with pytest.raises(ValueError, match=err):
-                            #        aes._authenticate(plain, invalid, auth, mode, lauth, pkcs)
+                            #        aes._authenticate(plain, invalid, auth, mode, v_auth, v_pkcs_pad)
                             for invalid in invalid_auths:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
-                                        plain, aesob, invalid, mode, lauth, pkcs
+                                        plain,
+                                        aes_object,
+                                        invalid,
+                                        mode,
+                                        v_auth,
+                                        v_pkcs_pad,
                                     )
                             for invalid in invalid_modes:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
-                                        plain, aesob, auth, invalid, lauth, pkcs
+                                        plain,
+                                        aes_object,
+                                        auth,
+                                        invalid,
+                                        v_auth,
+                                        v_pkcs_pad,
                                     )
-                            for invalid in invalid_len_auths:
+                            for invalid in invalid_v_auths:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
-                                        plain, aesob, auth, mode, invalid, pkcs
+                                        plain,
+                                        aes_object,
+                                        auth,
+                                        mode,
+                                        invalid,
+                                        v_pkcs_pad,
                                     )
-                            for invalid in invalid_pkcs_pad:
+                            for invalid in invalid_v_pkcs_pad:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
-                                        plain, aesob, auth, mode, lauth, invalid
+                                        plain, aes_object, auth, mode, v_auth, invalid
                                     )
 
 
@@ -471,8 +494,10 @@ def test_ecb_encryption(m5stickv):
             TEST_WORDS.encode(),
             ECB_WORDS.encode(),
             CBC_WORDS.encode(),
+            GCM_WORDS.encode(),
             ECB_ENTROPY,
             CBC_ENTROPY,
+            GCM_ENTROPY,
             b'"Running bitcoin" -Hal, January 10, 2009',
         )
         + BROKEN_AUTH16_ENTROPIES
@@ -553,8 +578,10 @@ def test_cbc_encryption(m5stickv):
             TEST_WORDS.encode(),
             ECB_WORDS.encode(),
             CBC_WORDS.encode(),
+            GCM_WORDS.encode(),
             ECB_ENTROPY,
             CBC_ENTROPY,
+            GCM_ENTROPY,
             b'"Running bitcoin" -Hal, January 10, 2009',
         )
         + BROKEN_AUTH16_ENTROPIES
@@ -625,8 +652,10 @@ def test_cbc_iv_use(m5stickv):
         TEST_WORDS.encode(),
         ECB_WORDS.encode(),
         CBC_WORDS.encode(),
+        GCM_WORDS.encode(),
         ECB_ENTROPY,
         CBC_ENTROPY,
+        GCM_ENTROPY,
         b'"Running bitcoin" -Hal, January 10, 2009',
     )
     testversions = (1, 4, 6, 9)  # all AES.MODE_CBC
@@ -655,8 +684,10 @@ def test_gcm_encryption(m5stickv):
         TEST_WORDS.encode(),
         ECB_WORDS.encode(),
         CBC_WORDS.encode(),
+        GCM_WORDS.encode(),
         ECB_ENTROPY,
         CBC_ENTROPY,
+        GCM_ENTROPY,
         b'"Running bitcoin" -Hal, January 10, 2009',
     )
     testversions = (
@@ -670,9 +701,7 @@ def test_gcm_encryption(m5stickv):
     for version in testversions:
         for plain in testplaintexts:
             encrypted = encryptor.encrypt(plain, version, iv)
-            print(
-                "version, len(plain), encrypted:", version, len(plain), len(encrypted)
-            )
+            print("version, plain, encrypted:", version, plain, encrypted)
             assert encryptor.decrypt(encrypted, version) == plain
 
             # wrong key fails to decrypt silently
@@ -693,6 +722,9 @@ def test_broken_decryption_cases(m5stickv):
             b"plaintext that isn't 16-byte aligned AND ends in \x00",
             b"plaintext that isn't 16-byte aligned",
             b"aligned plaintext that ends in \x00",
+            b"aligned plaintext that ends 2*\x00\x00",
+            b"aligned plaintext ending w/3 \x00\x00\x00",
+            b"aligned plaintext ending 4x \x00\x00\x00\x00",
             b"aligned plaintext doesnt end nul",
             b'plaintext with a 3-byte "auth" that ends in \x00. (91)',
             b'plaintext with a 4-byte "auth" that ends in \x00. (818)',
@@ -703,8 +735,10 @@ def test_broken_decryption_cases(m5stickv):
             TEST_WORDS.encode(),
             ECB_WORDS.encode(),
             CBC_WORDS.encode(),
+            GCM_WORDS.encode(),
             ECB_ENTROPY,
             CBC_ENTROPY,
+            GCM_ENTROPY,
             b'"Running bitcoin" -Hal, January 10, 2009',
         )
         + BROKEN_AUTH16_ENTROPIES
@@ -725,11 +759,8 @@ def test_broken_decryption_cases(m5stickv):
                 # for versions that append auth bytes after padded encryption...
                 # ...and without safe pkcs_pad
                 # ...and plaintext that ends in 0x00, ITS BROKEN
-                if VERSIONS[version]["name"].startswith("AES-GCM"):
-                    assert encryptor.decrypt(encrypted, version) != plain
-                else:
-                    # a hack that assumes NULpad broke auth-decryption is implemented
-                    assert encryptor.decrypt(encrypted, version) == plain
+                # a hack that assumes NULpad broke auth-decryption is implemented
+                assert encryptor.decrypt(encrypted, version) == plain
 
                 # hacks not ideal, therefore by default, KEF fails to encrypt
                 err = "Cannot validate decryption for this plaintext"
@@ -744,11 +775,8 @@ def test_broken_decryption_cases(m5stickv):
                 # for version that append sha256 auth bytes to plain before encryption...
                 # ...and without safe pkcs_pad
                 # ...and auth byte ends in 0x00, ITS BROKEN
-                if VERSIONS[version]["name"].startswith("AES-GCM"):
-                    assert encryptor.decrypt(encrypted, version) != plain
-                else:
-                    # a hack that assumes NULpad broke auth-decryption is implemented
-                    assert encryptor.decrypt(encrypted, version) == plain
+                # a hack that assumes NULpad broke auth-decryption is implemented
+                assert encryptor.decrypt(encrypted, version) == plain
 
                 # hacks not ideal, therefore by default, KEF fails to encrypt
                 err = "Cannot validate decryption for this plaintext"
@@ -784,8 +812,6 @@ def test_list_mnemonic_storage(m5stickv, mock_file_operations):
     sd_list = storage.list_mnemonics(sd_card=True)
     assert "ecbID" and "cbcID" in flash_list  # legacy seeds.json
     assert "ecbID" and "cbcID" in sd_list  # legacy seeds.json
-    assert "OLDecbID" and "OLDcbcID" in flash_list  # legacy seeds.json
-    assert "OLDecbID" and "OLDcbcID" in sd_list  # legacy seeds.json
     assert "KEFecbID" and "KEFcbcID" in flash_list
     assert "KEFecbID" and "KEFcbcID" in sd_list
 
@@ -798,8 +824,6 @@ def test_load_decrypt_ecb(m5stickv, mock_file_operations):
     words_sd = storage.decrypt(TEST_KEY, "ecbID", sd_card=True)
     assert words == ECB_WORDS
     assert words_sd == ECB_WORDS
-    assert ECB_WORDS == storage.decrypt(TEST_KEY, "OLDecbID", sd_card=False)
-    assert ECB_WORDS == storage.decrypt(TEST_KEY, "OLDecbID", sd_card=True)
     assert ECB_WORDS == storage.decrypt(TEST_KEY, "KEFecbID", sd_card=False)
     assert ECB_WORDS == storage.decrypt(TEST_KEY, "KEFecbID", sd_card=True)
 
@@ -816,14 +840,26 @@ def test_load_decrypt_cbc(m5stickv, mock_file_operations):
     words_sd = storage.decrypt(TEST_KEY, "cbcID", sd_card=True)
     assert words == CBC_WORDS
     assert words_sd == CBC_WORDS
-    assert CBC_WORDS == storage.decrypt(TEST_KEY, "OLDcbcID", sd_card=False)
-    assert CBC_WORDS == storage.decrypt(TEST_KEY, "OLDcbcID", sd_card=True)
     assert CBC_WORDS == storage.decrypt(TEST_KEY, "KEFcbcID", sd_card=False)
     assert CBC_WORDS == storage.decrypt(TEST_KEY, "KEFcbcID", sd_card=True)
 
     # returns silently with wrong key
     assert storage.decrypt("wrong", "cbcID", sd_card=False) == None
     assert storage.decrypt("wrong", "cbcID", sd_card=True) == None
+
+
+def test_load_decrypt_gcm(m5stickv, mock_file_operations):
+    from krux.encryption import MnemonicStorage
+
+    storage = MnemonicStorage()
+    words = storage.decrypt(TEST_KEY, "KEFgcmID", sd_card=False)
+    words_sd = storage.decrypt(TEST_KEY, "KEFgcmID", sd_card=True)
+    assert words == GCM_WORDS
+    assert words_sd == GCM_WORDS
+
+    # returns silently with wrong key
+    assert storage.decrypt("wrong", "KEFgcmID", sd_card=False) == None
+    assert storage.decrypt("wrong", "KEFgcmID", sd_card=True) == None
 
 
 def test_encrypt_ecb_flash(m5stickv, mocker):
@@ -854,6 +890,20 @@ def test_encrypt_cbc_flash(m5stickv, mocker):
     m().write.assert_called_once_with(KEF_CBCENTROPY_ONLY_JSON)
 
 
+def test_encrypt_gcm_flash(m5stickv, mocker):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage
+
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")) as m:
+        storage = MnemonicStorage()
+        Settings().encryption.version = "AES-GCM"
+        success = storage.store_encrypted(
+            TEST_KEY, "KEFgcmID", GCM_WORDS, sd_card=False, i_vector=I_VECTOR[:12]
+        )
+    assert success is True
+    m().write.assert_called_once_with(KEF_GCMENTROPY_ONLY_JSON)
+
+
 def test_encrypt_ecb_sd(m5stickv, mocker, mock_file_operations):
     from krux.krux_settings import Settings
     from krux.encryption import MnemonicStorage
@@ -880,6 +930,20 @@ def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
     m().write.assert_called_once_with(KEF_CBCENTROPY_ONLY_JSON)
 
 
+def test_encrypt_gcm_sd(m5stickv, mocker, mock_file_operations):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage
+
+    with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
+        storage = MnemonicStorage()
+        Settings().encryption.version = "AES-GCM"
+        success = storage.store_encrypted(
+            TEST_KEY, "KEFgcmID", GCM_WORDS, sd_card=True, i_vector=I_VECTOR[:12]
+        )
+    assert success is True
+    m().write.assert_called_once_with(KEF_GCMENTROPY_ONLY_JSON)
+
+
 def test_delete_from_flash(m5stickv, mocker):
     from krux.encryption import MnemonicStorage
 
@@ -896,12 +960,12 @@ def test_delete_from_sd(m5stickv, mocker, mock_file_operations):
     from krux.encryption import MnemonicStorage
 
     # Loads a seeds.json file with many entries
-    # Deletes "cbcID" and assures the rest remain + padding to over-write abandoned bytes
+    # Deletes "KEFgcmID" and assures the rest remain + padding to over-write abandoned bytes
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
         storage = MnemonicStorage()
-        storage.del_mnemonic("cbcID", sd_card=True)
-    padding_size = len(OLD_CBCWORDS_ONLY_JSON)
-    expected = SEEDS_JSON.replace(OLD_CBCWORDS_ONLY_JSON[1:-1] + ", ", "")
+        storage.del_mnemonic("KEFgcmID", sd_card=True)
+    padding_size = len(KEF_GCMENTROPY_ONLY_JSON)
+    expected = SEEDS_JSON.replace(KEF_GCMENTROPY_ONLY_JSON[1:-1] + ", ", "")
     m().write.assert_called_once_with(expected + " " * padding_size)
 
 
@@ -923,6 +987,17 @@ def test_create_cbc_encrypted_qr_code(m5stickv):
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, I_VECTOR)
     assert qr_data == CBC_ENCRYPTED_QR
+
+
+def test_create_gcm_encrypted_qr_code(m5stickv):
+    from krux.encryption import EncryptedQRCode
+    from krux.krux_settings import Settings
+
+    Settings().encryption.version = "AES-GCM"
+    encrypted_qr = EncryptedQRCode()
+    qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, I_VECTOR[:12])
+    print(qr_data)
+    assert qr_data == GCM_ENCRYPTED_QR
 
 
 def test_decode_ecb_encrypted_qr_code(m5stickv):
@@ -958,6 +1033,18 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
     # legacy still decrypts
     public_data = encrypted_qr.public_data(OLDCBC_ENCRYPTED_QR)
     assert public_data == OLDCBC_QR_PUBLIC_DATA
+    word_bytes = encrypted_qr.decrypt(TEST_KEY)
+    words = bip39.mnemonic_from_bytes(word_bytes)
+    assert words == TEST_WORDS
+
+
+def test_decode_gcm_encrypted_qr_code(m5stickv):
+    from krux.encryption import EncryptedQRCode
+    from embit import bip39
+
+    encrypted_qr = EncryptedQRCode()
+    public_data = encrypted_qr.public_data(GCM_ENCRYPTED_QR)
+    assert public_data == GCM_QR_PUBLIC_DATA
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
     assert words == TEST_WORDS
@@ -1269,40 +1356,47 @@ PKCSPAD_TEST_CASES = [
 def test_padding(m5stickv):
     from krux.encryption import pad, unpad
 
-    # pad() and unpad() expect bytestrings, optionally pkcs_pad boolean
-    unpadded = b"hello world"
-    padded = pad(unpadded)
-    assert padded == pad(unpadded, pkcs_pad=False)  # default: pkcs_pad=False
-    assert unpadded == unpad(pad(unpadded, pkcs_pad=True), pkcs_pad=True)
-    with pytest.raises(TypeError):
-        pad(unpadded.decode())
-    with pytest.raises(TypeError):
-        unpad(padded.decode())
+    # pad() and unpad() expect bytestrings, and pkcs_pad ternary False/True/None
+    unpadded = b"7 bytes"
+    assert unpadded == unpad(pad(unpadded, False), False)  # NUL-pad
+    assert unpadded == unpad(pad(unpadded, True), True)  # PKCS#7-pad
+    assert unpadded == pad(unpadded, None) == unpad(unpadded, None)  # no pad
+    invalid_params = (
+        ("a string",),
+        (b"a byte string",),
+        (b"a byte string", 1),
+        (b"a byte string", 0),
+    )
+    for invalids in invalid_params:
+        with pytest.raises(TypeError):
+            pad(*invalids)
+        with pytest.raises(TypeError):
+            unpad(*invalids)
 
     # versions 0,1 pad to complete last 16byte block w/ b"\x00" bytes
     for unpadded, padded in NULPAD_TEST_CASES:
-        assert pad(unpadded) == padded
-        assert unpad(padded) == unpadded
+        assert pad(unpadded, False) == padded
+        assert unpad(padded, False) == unpadded
         len_padding = len(padded) - len(unpadded)
         if len_padding:
-            assert pad(unpadded)[-len_padding:] == b"\x00" * len_padding
+            assert pad(unpadded, False)[-len_padding:] == b"\x00" * len_padding
 
     # versions 0,1 use non-faithful padding for bytestrings ending w/ b"\x00"
     for unpadded, padded in BROKEN_NULPAD_TEST_CASES:
         # pad() works just fine
-        assert pad(unpadded) == padded
+        assert pad(unpadded, False) == padded
 
         # but unpad() will strip too many padding bytes
         with pytest.raises(AssertionError):
-            assert unpad(padded) == unpadded
+            assert unpad(padded, False) == unpadded
 
     # pkcs padding always adds at least 1 byte of padding
     for unpadded, padded in PKCSPAD_TEST_CASES:
-        assert pad(unpadded, pkcs_pad=True) == padded
-        assert unpad(padded, pkcs_pad=True) == unpadded
+        assert pad(unpadded, True) == padded
+        assert unpad(padded, True) == unpadded
         len_padding = len(padded) - len(unpadded)
         assert (
-            pad(unpadded, pkcs_pad=True)[-len_padding:]
+            pad(unpadded, True)[-len_padding:]
             == len_padding.to_bytes(1, "big") * len_padding
         )
 
@@ -1612,10 +1706,18 @@ def test_report_rate_of_failure(m5stickv):
                 if failed and not avoided:
                     encrs[v]["failed"] += 1
                     failures += 1
-                    print("Failure to decrypt: v: {}, plain: {}, cipher: {}".format(v, plain, cipher))
+                    print(
+                        "Failure to decrypt: v: {}, plain: {}, cipher: {}".format(
+                            v, plain, cipher
+                        )
+                    )
                 if kef_failed:
                     failures += 1
-                    print("KEF encoding failure: v: {}, plain: {}, cipher: {}".format(v, plain, cipher))
+                    print(
+                        "KEF encoding failure: v: {}, plain: {}, cipher: {}".format(
+                            v, plain, cipher
+                        )
+                    )
 
                 encrs[v]["sampled"] += 1
 
