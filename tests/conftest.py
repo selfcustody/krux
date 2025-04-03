@@ -10,6 +10,7 @@ from .shared_mocks import (
     encode_to_string,
     encode,
     statvfs,
+    pbkdf2_hmac_sha256_wrapper,
 )
 
 
@@ -33,6 +34,7 @@ def mp_modules(mocker, monkeypatch):
     import random
     import time
     import sys
+    import hashlib
 
     monkeypatch.setitem(
         sys.modules,
@@ -71,6 +73,14 @@ def mp_modules(mocker, monkeypatch):
         mocker.MagicMock(statvfs=statvfs),
     )
     monkeypatch.setitem(sys.modules, "deflate", mocker.MagicMock(DeflateIO=DeflateIO))
+    monkeypatch.setitem(
+        sys.modules,
+        "uhashlib_hw",
+        mocker.MagicMock(
+            pbkdf2_hmac_sha256=pbkdf2_hmac_sha256_wrapper,
+            sha256=hashlib.sha256,
+        ),
+    )
 
 
 @pytest.fixture

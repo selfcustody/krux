@@ -1291,13 +1291,16 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
     from krux.key import Key, TYPE_SINGLESIG, P2PKH, P2WPKH, P2SH_P2WPKH, P2TR
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
+    from krux.format import format_address
 
     cases = [
         (
             tdata.P2PKH_PSBT,
             [
                 "Inputs (3): ₿ 0.00 001 856\n\nSpend (1): ₿ 0.00 001 000\n\nFee: ₿ 0.00 000 856 (85.6%) ~1.8 sat/vB",
-                "1. Spend: \n\ntb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl\n\n₿ 0.00 001 000",
+                "1. Spend: \n\n"
+                + format_address("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl")
+                + "\n\n₿ 0.00 001 000",
             ],
             Wallet(
                 Key(
@@ -1312,8 +1315,12 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
             tdata.P2WPKH_PSBT,
             [
                 "Inputs (1): ₿ 1.00 000 000\n\nSpend (1): ₿ 0.10 000 000\n\nSelf-transfer or Change (1): ₿ 0.89 997 180\n\nFee: ₿ 0.00 002 820 (0.1%) ~20.0 sat/vB",
-                "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10 000 000",
-                "1. Change: \n\ntb1q9u62588spffmq4dzjxsr5l297znf3z6j5p2688\n\n₿ 0.89 997 180",
+                "1. Spend: \n\n"
+                + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
+                + "\n\n₿ 0.10 000 000",
+                "1. Change: \n\n"
+                + format_address("tb1q9u62588spffmq4dzjxsr5l297znf3z6j5p2688")
+                + "\n\n₿ 0.89 997 180",
             ],
             Wallet(
                 Key(
@@ -1328,8 +1335,12 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
             tdata.P2SH_P2WPKH_PSBT,
             [
                 "Inputs (1): ₿ 1.00 000 000\n\nSpend (1): ₿ 0.10 000 000\n\nSelf-transfer or Change (1): ₿ 0.89 996 700\n\nFee: ₿ 0.00 003 300 (0.1%) ~20.0 sat/vB",
-                "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10 000 000",
-                "1. Change: \n\n2MvdUi5o3f2tnEFh9yGvta6FzptTZtkPJC8\n\n₿ 0.89 996 700",
+                "1. Spend: \n\n"
+                + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
+                + "\n\n₿ 0.10 000 000",
+                "1. Change: \n\n"
+                + format_address("2MvdUi5o3f2tnEFh9yGvta6FzptTZtkPJC8")
+                + "\n\n₿ 0.89 996 700",
             ],
             Wallet(
                 Key(
@@ -1344,9 +1355,19 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
             tdata.P2TR_PSBT,
             [
                 "Inputs (1): ₿ 0.00 010 111\n\nSpend (1): ₿ 0.00 001 000\n\nSelf-transfer or Change (2): ₿ 0.00 008 738\n\nFee: ₿ 0.00 000 373 (3.9%) ~2.0 sat/vB",
-                "1. Spend: \n\ntb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl\n\n₿ 0.00 001 000",
-                "1. Self-transfer: \n\ntb1pn5kekm0xpnwd6kg8c8qfvv2fr0w5xnhw42927wem7xwk84f7gzvsvctkhp\n\n₿ 0.00 001 000",
-                "1. Change: \n\ntb1pwhn9lzpaukrjwvwe365x7hcgvtcfywwsaxcq7j04jgrfcxzdq23qhzr7wt\n\n₿ 0.00 007 738",
+                "1. Spend: \n\n"
+                + format_address("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl")
+                + "\n\n₿ 0.00 001 000",
+                "1. Self-transfer: \n\n"
+                + format_address(
+                    "tb1pn5kekm0xpnwd6kg8c8qfvv2fr0w5xnhw42927wem7xwk84f7gzvsvctkhp"
+                )
+                + "\n\n₿ 0.00 001 000",
+                "1. Change: \n\n"
+                + format_address(
+                    "tb1pwhn9lzpaukrjwvwe365x7hcgvtcfywwsaxcq7j04jgrfcxzdq23qhzr7wt"
+                )
+                + "\n\n₿ 0.00 007 738",
             ],
             Wallet(
                 Key(
@@ -1373,6 +1394,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
     from krux.key import Key, TYPE_MULTISIG, P2WSH, P2SH_P2WSH
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
+    from krux.format import format_address
 
     cases = [
         # 0 - PSBT
@@ -1384,8 +1406,16 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
             tdata.P2WSH_PSBT,
             [
                 "Inputs (2): ₿ 0.20 000 000\n\nSpend (2): ₿ 0.19 993 880\n\nFee: ₿ 0.00 006 120 (0.1%) ~20.1 sat/vB",
-                "1. Spend: \n\ntb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t\n\n₿ 0.01 000 000",
-                "2. Spend: \n\ntb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n\n\n₿ 0.18 993 880",
+                "1. Spend: \n\n"
+                + format_address(
+                    "tb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t"
+                )
+                + "\n\n₿ 0.01 000 000",
+                "2. Spend: \n\n"
+                + format_address(
+                    "tb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n"
+                )
+                + "\n\n₿ 0.18 993 880",
             ],
             Wallet(
                 Key(
@@ -1402,8 +1432,12 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
             tdata.P2SH_P2WSH_PSBT,
             [
                 "Inputs (1): ₿ 1.00 000 000\n\nSpend (2): ₿ 0.99 995 740\n\nFee: ₿ 0.00 004 260 (0.1%) ~20.0 sat/vB",
-                "1. Spend: \n\n2N3vYfcg14Axr4NN33ADUorE2kEGEchFJpC\n\n₿ 0.89 995 740",
-                "2. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10 000 000",
+                "1. Spend: \n\n"
+                + format_address("2N3vYfcg14Axr4NN33ADUorE2kEGEchFJpC")
+                + "\n\n₿ 0.89 995 740",
+                "2. Spend: \n\n"
+                + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
+                + "\n\n₿ 0.10 000 000",
             ],
             Wallet(
                 Key(
@@ -1420,9 +1454,19 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
             tdata.DESC_P2WSH_PSBT,
             [
                 "Inputs (1): ₿ 0.01 000 000\n\nSpend (3): ₿ 0.00 938 408\n\nFee: ₿ 0.00 061 592 (6.6%) ~265.5 sat/vB",
-                "1. Spend: \n\ntb1qs9q8afpd6nc78r8l7456agajhpde657uzn9uh4\n\n₿ 0.00 100 000",
-                "2. Spend: \n\ntb1q6dac4cdyf9sfuln0kzfgswc96nlh2g98s4uyez5tvm7ymhq9ua0sa0z6h7\n\n₿ 0.00 200 000",
-                "3. Spend: \n\ntb1q0xmw6txz6lp2aakdujwhhrel0m7grfvvn00nzwjda7ps06c3jwnqk7m0ww\n\n₿ 0.00 638 408",
+                "1. Spend: \n\n"
+                + format_address("tb1qs9q8afpd6nc78r8l7456agajhpde657uzn9uh4")
+                + "\n\n₿ 0.00 100 000",
+                "2. Spend: \n\n"
+                + format_address(
+                    "tb1q6dac4cdyf9sfuln0kzfgswc96nlh2g98s4uyez5tvm7ymhq9ua0sa0z6h7"
+                )
+                + "\n\n₿ 0.00 200 000",
+                "3. Spend: \n\n"
+                + format_address(
+                    "tb1q0xmw6txz6lp2aakdujwhhrel0m7grfvvn00nzwjda7ps06c3jwnqk7m0ww"
+                )
+                + "\n\n₿ 0.00 638 408",
             ],
             Wallet(
                 Key(
@@ -1435,9 +1479,19 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
             WSH_MULTISIG,
             [
                 "Inputs (1): ₿ 0.01 000 000\n\nSpend (1): ₿ 0.00 100 000\n\nSelf-transfer or Change (2): ₿ 0.00 838 408\n\nFee: ₿ 0.00 061 592 (6.6%) ~265.5 sat/vB",
-                "1. Spend: \n\ntb1qs9q8afpd6nc78r8l7456agajhpde657uzn9uh4\n\n₿ 0.00 100 000",
-                "1. Self-transfer: \n\ntb1q6dac4cdyf9sfuln0kzfgswc96nlh2g98s4uyez5tvm7ymhq9ua0sa0z6h7\n\n₿ 0.00 200 000",
-                "1. Change: \n\ntb1q0xmw6txz6lp2aakdujwhhrel0m7grfvvn00nzwjda7ps06c3jwnqk7m0ww\n\n₿ 0.00 638 408",
+                "1. Spend: \n\n"
+                + format_address("tb1qs9q8afpd6nc78r8l7456agajhpde657uzn9uh4")
+                + "\n\n₿ 0.00 100 000",
+                "1. Self-transfer: \n\n"
+                + format_address(
+                    "tb1q6dac4cdyf9sfuln0kzfgswc96nlh2g98s4uyez5tvm7ymhq9ua0sa0z6h7"
+                )
+                + "\n\n₿ 0.00 200 000",
+                "1. Change: \n\n"
+                + format_address(
+                    "tb1q0xmw6txz6lp2aakdujwhhrel0m7grfvvn00nzwjda7ps06c3jwnqk7m0ww"
+                )
+                + "\n\n₿ 0.00 638 408",
             ],
         ),
     ]
@@ -1460,6 +1514,7 @@ def test_outputs_miniscript(mocker, m5stickv, tdata):
     from krux.key import Key, TYPE_MINISCRIPT, P2WSH
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
+    from krux.format import format_address
 
     cases = [
         # 0 - PSBT
@@ -1471,9 +1526,19 @@ def test_outputs_miniscript(mocker, m5stickv, tdata):
             tdata.MINIS_P2WSH_PSBT,
             [
                 "Inputs (1): ₿ 0.01 997 062\n\nSpend (3): ₿ 0.01 995 019\n\nFee: ₿ 0.00 002 043 (0.1%)",
-                "1. Spend: \n\ntb1q26gnrxhmv79m7sady6xyt2y23rxc6nmt50dfyq\n\n₿ 0.00 500 000",
-                "2. Spend: \n\ntb1qnlhau4cw3f76k583xk8p6ekd02a0dvhmqjzl7aw6ehda8r7upheskzwzea\n\n₿ 0.01 000 000",
-                "3. Spend: \n\ntb1qmanyu7mm2q24esrnawjxukla9pr7s4yyzwjy2chjhsyumfe0r34q5dzsug\n\n₿ 0.00 495 019",
+                "1. Spend: \n\n"
+                + format_address("tb1q26gnrxhmv79m7sady6xyt2y23rxc6nmt50dfyq")
+                + "\n\n₿ 0.00 500 000",
+                "2. Spend: \n\n"
+                + format_address(
+                    "tb1qnlhau4cw3f76k583xk8p6ekd02a0dvhmqjzl7aw6ehda8r7upheskzwzea"
+                )
+                + "\n\n₿ 0.01 000 000",
+                "3. Spend: \n\n"
+                + format_address(
+                    "tb1qmanyu7mm2q24esrnawjxukla9pr7s4yyzwjy2chjhsyumfe0r34q5dzsug"
+                )
+                + "\n\n₿ 0.00 495 019",
             ],
             Wallet(
                 Key(
@@ -1486,9 +1551,19 @@ def test_outputs_miniscript(mocker, m5stickv, tdata):
             WSH_MINISCRIPT,
             [
                 "Inputs (1): ₿ 0.01 997 062\n\nSpend (1): ₿ 0.00 500 000\n\nSelf-transfer or Change (2): ₿ 0.01 495 019\n\nFee: ₿ 0.00 002 043 (0.1%)",
-                "1. Spend: \n\ntb1q26gnrxhmv79m7sady6xyt2y23rxc6nmt50dfyq\n\n₿ 0.00 500 000",
-                "1. Self-transfer: \n\ntb1qnlhau4cw3f76k583xk8p6ekd02a0dvhmqjzl7aw6ehda8r7upheskzwzea\n\n₿ 0.01 000 000",
-                "1. Change: \n\ntb1qmanyu7mm2q24esrnawjxukla9pr7s4yyzwjy2chjhsyumfe0r34q5dzsug\n\n₿ 0.00 495 019",
+                "1. Spend: \n\n"
+                + format_address("tb1q26gnrxhmv79m7sady6xyt2y23rxc6nmt50dfyq")
+                + "\n\n₿ 0.00 500 000",
+                "1. Self-transfer: \n\n"
+                + format_address(
+                    "tb1qnlhau4cw3f76k583xk8p6ekd02a0dvhmqjzl7aw6ehda8r7upheskzwzea"
+                )
+                + "\n\n₿ 0.01 000 000",
+                "1. Change: \n\n"
+                + format_address(
+                    "tb1qmanyu7mm2q24esrnawjxukla9pr7s4yyzwjy2chjhsyumfe0r34q5dzsug"
+                )
+                + "\n\n₿ 0.00 495 019",
             ],
         ),
     ]
@@ -1509,6 +1584,7 @@ def test_outputs_tr_miniscript(mocker, m5stickv, tdata):
     from krux.key import Key, TYPE_MINISCRIPT, P2TR
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
+    from krux.format import format_address
 
     cases = [
         # 0 - PSBT
@@ -1520,9 +1596,21 @@ def test_outputs_tr_miniscript(mocker, m5stickv, tdata):
             tdata.MINIS_TR_PSBT,
             [
                 "Inputs (1): ₿ 0.01 995 759\n\nSpend (3): ₿ 0.01 993 789\n\nFee: ₿ 0.00 001 970 (0.1%)",
-                "1. Spend: \n\ntb1qrtvmveqwrzsndt8tzzkgepp2mw8de95dk7hz70kr95f5dt7axvrsgq8lcp\n\n₿ 0.01 000 000",
-                "2. Spend: \n\ntb1pgzdsuzcewwntpm6c3xrrn5lmdc0cvnpsdyrsz7gvcq5t0kqry2rswl8vnz\n\n₿ 0.00 500 000",
-                "3. Spend: \n\ntb1pt064gyzas6dnqq9p955p7ujus8z7l3xg3apxm425u72dupy3wffqjzkszd\n\n₿ 0.00 493 789",
+                "1. Spend: \n\n"
+                + format_address(
+                    "tb1qrtvmveqwrzsndt8tzzkgepp2mw8de95dk7hz70kr95f5dt7axvrsgq8lcp"
+                )
+                + "\n\n₿ 0.01 000 000",
+                "2. Spend: \n\n"
+                + format_address(
+                    "tb1pgzdsuzcewwntpm6c3xrrn5lmdc0cvnpsdyrsz7gvcq5t0kqry2rswl8vnz"
+                )
+                + "\n\n₿ 0.00 500 000",
+                "3. Spend: \n\n"
+                + format_address(
+                    "tb1pt064gyzas6dnqq9p955p7ujus8z7l3xg3apxm425u72dupy3wffqjzkszd"
+                )
+                + "\n\n₿ 0.00 493 789",
             ],
             Wallet(
                 Key(
@@ -1535,9 +1623,21 @@ def test_outputs_tr_miniscript(mocker, m5stickv, tdata):
             TR_MINISCRIPT,
             [
                 "Inputs (1): ₿ 0.01 995 759\n\nSpend (1): ₿ 0.01 000 000\n\nSelf-transfer or Change (2): ₿ 0.00 993 789\n\nFee: ₿ 0.00 001 970 (0.1%)",
-                "1. Spend: \n\ntb1qrtvmveqwrzsndt8tzzkgepp2mw8de95dk7hz70kr95f5dt7axvrsgq8lcp\n\n₿ 0.01 000 000",
-                "1. Self-transfer: \n\ntb1pgzdsuzcewwntpm6c3xrrn5lmdc0cvnpsdyrsz7gvcq5t0kqry2rswl8vnz\n\n₿ 0.00 500 000",
-                "1. Change: \n\ntb1pt064gyzas6dnqq9p955p7ujus8z7l3xg3apxm425u72dupy3wffqjzkszd\n\n₿ 0.00 493 789",
+                "1. Spend: \n\n"
+                + format_address(
+                    "tb1qrtvmveqwrzsndt8tzzkgepp2mw8de95dk7hz70kr95f5dt7axvrsgq8lcp"
+                )
+                + "\n\n₿ 0.01 000 000",
+                "1. Self-transfer: \n\n"
+                + format_address(
+                    "tb1pgzdsuzcewwntpm6c3xrrn5lmdc0cvnpsdyrsz7gvcq5t0kqry2rswl8vnz"
+                )
+                + "\n\n₿ 0.00 500 000",
+                "1. Change: \n\n"
+                + format_address(
+                    "tb1pt064gyzas6dnqq9p955p7ujus8z7l3xg3apxm425u72dupy3wffqjzkszd"
+                )
+                + "\n\n₿ 0.00 493 789",
             ],
         ),
     ]
@@ -1558,6 +1658,7 @@ def test_outputs_tr_miniscript_provably_unspendable(mocker, m5stickv, tdata):
     from krux.key import Key, TYPE_MINISCRIPT, P2TR
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
+    from krux.format import format_address
 
     cases = [
         # 0 - PSBT
@@ -1569,9 +1670,21 @@ def test_outputs_tr_miniscript_provably_unspendable(mocker, m5stickv, tdata):
             tdata.EXP_TR_MINIS_PSBT,
             [
                 "Inputs (1): ₿ 0.01 994 469\n\nSpend (3): ₿ 0.01 991 994\n\nFee: ₿ 0.00 002 475 (0.2%)",
-                "1. Spend: \n\ntb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c\n\n₿ 0.00 500 000",
-                "2. Spend: \n\ntb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu\n\n₿ 0.01 000 000",
-                "3. Spend: \n\ntb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct\n\n₿ 0.00 491 994",
+                "1. Spend: \n\n"
+                + format_address(
+                    "tb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c"
+                )
+                + "\n\n₿ 0.00 500 000",
+                "2. Spend: \n\n"
+                + format_address(
+                    "tb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu"
+                )
+                + "\n\n₿ 0.01 000 000",
+                "3. Spend: \n\n"
+                + format_address(
+                    "tb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct"
+                )
+                + "\n\n₿ 0.00 491 994",
             ],
             Wallet(
                 Key(
@@ -1584,9 +1697,21 @@ def test_outputs_tr_miniscript_provably_unspendable(mocker, m5stickv, tdata):
             TR_EXP_MULTI_MINISCRIPT,
             [
                 "Inputs (1): ₿ 0.01 994 469\n\nSpend (1): ₿ 0.01 000 000\n\nSelf-transfer or Change (2): ₿ 0.00 991 994\n\nFee: ₿ 0.00 002 475 (0.2%)",
-                "1. Spend: \n\ntb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu\n\n₿ 0.01 000 000",
-                "1. Self-transfer: \n\ntb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c\n\n₿ 0.00 500 000",
-                "1. Change: \n\ntb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct\n\n₿ 0.00 491 994",
+                "1. Spend: \n\n"
+                + format_address(
+                    "tb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu"
+                )
+                + "\n\n₿ 0.01 000 000",
+                "1. Self-transfer: \n\n"
+                + format_address(
+                    "tb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c"
+                )
+                + "\n\n₿ 0.00 500 000",
+                "1. Change: \n\n"
+                + format_address(
+                    "tb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct"
+                )
+                + "\n\n₿ 0.00 491 994",
             ],
         ),
     ]
@@ -1622,12 +1747,15 @@ def test_sign_single_1_input_1_output_no_change(m5stickv):
     from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_PMOFN
+    from krux.format import format_address
 
     MNEMONIC = "action action action action action action action action action action action action"
     PSBT_B64 = "cHNidP8BAFMCAAAAAcfPlS2RvKvXxP/UxRmlAzMZcpLPKTOsBNbFM1JpT5Q7BwAAAAD9////AXAXAAAAAAAAF6kUK7ey9d8Pcw7ufsChrS3L5Ays13SHEgQlAE8BBDWHzwNOAaDGgAAAAA6sE2xHBRocbxB2m7sG3JvBy6PH2P+6FU8Xz26TLNf+Ax8/bmYn6gHZ6KY5opTh2Ajf+3sKBpZ40s59aYtcEnY+EODFlcVUAACAAQAAgAAAAIAAAQD9fQECAAAAAwZh04JGb3rJ3RJGINf/5lNG3RFk9DQyfqaKJK336OcaAQAAAAD9////pZE7Tecrp3E9O5JGSLma4D5TCG5N3uD4deLODBvkt4EAAAAAAP3///+lkTtN5yuncT07kkZIuZrgPlMIbk3e4Ph14s4MG+S3gQEAAAAA/f///wgsAQAAAAAAABYAFARbVWJaVJuYh2b3/HFtU3tQ9eoCLAEAAAAAAAAWABT4gSb5k7/g3ZrEXLyHFlP/C11NFCwBAAAAAAAAFgAU04NlSannloiWwZHvG1uf9aL0NPosAQAAAAAAABYAFNDJ5cj/6H72UNT95nAOLylXp/S5LAEAAAAAAAAWABTj8DqdkD3qZujRRRl4HlpWaADUBywBAAAAAAAAFgAUmPKKcthXsgBlI5AZbJtdEUrFe6gsAQAAAAAAABYAFF1lFcZm2E/gjALNKEfBtzGMsrsqmRgAAAAAAAAWABRk/PxLrogzR/Meytzu0v72RMgGh878JAABAR+ZGAAAAAAAABYAFGT8/EuuiDNH8x7K3O7S/vZEyAaHAQMEAQAAACIGAloQH2tjbm2ayZtJb2Gb0juSNIH9MIoEfX2UW0zE3l/SGODFlcVUAACAAQAAgAAAAIAAAAAAYwAAAAAA"
     OUTPUT = [
         "Inputs (1): ₿ 0.00 006 297\n\nSpend (1): ₿ 0.00 006 000\n\nFee: ₿ 0.00 000 297 (5.0%) ~2.7 sat/vB",
-        "1. Spend: \n\n2MwEP7AfPt8NC65ACmcUhUtDZgGSxYiWUy4\n\n₿ 0.00 006 000",
+        "1. Spend: \n\n"
+        + format_address("2MwEP7AfPt8NC65ACmcUhUtDZgGSxYiWUy4")
+        + "\n\n₿ 0.00 006 000",
     ]
 
     wallet = Wallet(Key(MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))

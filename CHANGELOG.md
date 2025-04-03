@@ -1,5 +1,8 @@
 # Changelog 25.XX.X - XXX 2025
 
+### 2x Faster TC Flash Hash
+SHA256 and PBKDF2_hmac can now use hardware sha256 hashing, allowing TC Flash to be executed 2x faster.
+
 ### New Mnemonic Menu Disabled by Hide Mnemonic
 When enabled, the hide mnemonic setting also disables the New Mnemonic menu.
 
@@ -8,6 +11,9 @@ The wallet fingerprint, keypad title, settings categories and prefix texts are n
 
 ### More Colors on Settings Categories
 When the value of the settings category is boolean (True/False), it will be displayed in color.
+
+### More Readable Address 
+Addresses are displayed in groups of 4, separated by spaces, for better readability.
 
 ### Other Bug Fixes and Optimizations
 - Fix printing words instead of numbers when using "Backup Mnemonic > Other formats > Numbers".

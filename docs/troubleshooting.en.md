@@ -94,9 +94,9 @@ If the colors displayed on the interface themes or camera feed are incorrect, yo
         ./ktool-linux -B goE -b 1500000 maixpy_amigo/kboot.kfpkg
         ```
 
-### Device didn't reboot, and screen is blank
+### Device does not reboot, screen is blank or stuck on logo
 
-If the device didn't reboot after successfully flashing the firmware, and the screen is blank after turning it off and on, check if the downloaded file matches the device or try downloading binaries again as this can also occur due to data corruption. 
+If the device didn't reboot after successfully flashing the firmware, or the screen is blank after turning it off and on, or if the device is frozen with the logo on the screen, check if the downloaded file matches your device or try downloading the binaries again, as this could also be due to data corruption.
 
 You can also install [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide/v0.2.5) to help with debugging. On its menu go to **Tools -> Open Terminal -> New Terminal -> Connect to serial port -> Select a COM port available** (if it doesn't work, try another COM port). It will show the terminal and some messages, a message about an empty device or with corrupted firmware appears like: "interesting, something's wrong, boot failed with exit code 233, go to find your vendor."
 

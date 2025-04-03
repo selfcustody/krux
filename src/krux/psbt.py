@@ -275,9 +275,38 @@ class PSBTSigner:
             return SELF_TRANSFER
         return SPEND
 
+    def _get_resume_fee(self, inp_amount, out_amount, output_policy_count):
+        from .format import format_btc, replace_decimal_separator
+
+        fee = inp_amount - out_amount
+
+        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
+        fee_percent = max(
+            0.1,
+            (((fee * 10000 // (out_amount)) + 9) // 10) / 10,
+        )
+
+        resume_fee_str = (
+            t("Fee:")
+            + (" " + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(fee))
+            + " ("
+            + replace_decimal_separator("%.1f" % fee_percent)
+            + "%)"
+        )
+        if not self.wallet.is_miniscript():
+            satvb = fee / SatsVB.get_vbytes(
+                self.policy,
+                output_policy_count,
+                len(self.psbt.inputs),
+                len(self.psbt.outputs),
+            )
+            resume_fee_str += (" ~%.1f" % satvb) + " sat/vB"
+
+        return resume_fee_str, fee_percent
+
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
-        from .format import format_btc, replace_decimal_separator
+        from .format import format_btc, format_address
 
         inp_amount = 0
         for inp in self.psbt.inputs:
@@ -370,33 +399,10 @@ class PSBTSigner:
                 )
                 + "\n\n"
             )
-        fee = inp_amount - spend_amount - self_amount - change_amount
-        if not self.wallet.is_miniscript():
-            satvb = fee / SatsVB.get_vbytes(
-                self.policy,
-                output_policy_count,
-                len(self.psbt.inputs),
-                len(self.psbt.outputs),
-            )
-        else:
-            satvb = 0
 
-        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
-        fee_percent = max(
-            0.1,
-            (((fee * 10000 // (spend_amount + self_amount + change_amount)) + 9) // 10)
-            / 10,
+        resume_fee_str, fee_percent = self._get_resume_fee(
+            inp_amount, self_amount + change_amount + spend_amount, output_policy_count
         )
-
-        resume_fee_str = (
-            t("Fee:")
-            + (" " + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(fee))
-            + " ("
-            + replace_decimal_separator("%.1f" % fee_percent)
-            + "%)"
-        )
-        if satvb > 0:
-            resume_fee_str += (" ~%.1f" % satvb) + " sat/vB"
 
         messages = []
         # first screen - resume
@@ -410,21 +416,30 @@ class PSBTSigner:
         # sequence of spend
         for i, out in enumerate(spend_list):
             messages.append(
-                (("%d. " + t("Spend:") + " \n\n%s\n\n") % (i + 1, out[0]))
+                (
+                    ("%d. " + t("Spend:") + " \n\n%s\n\n")
+                    % (i + 1, format_address(out[0]))
+                )
                 + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 
         # sequence of self_transfer
         for i, out in enumerate(self_transfer_list):
             messages.append(
-                (("%d. " + t("Self-transfer:") + " \n\n%s\n\n") % (i + 1, out[0]))
+                (
+                    ("%d. " + t("Self-transfer:") + " \n\n%s\n\n")
+                    % (i + 1, format_address(out[0]))
+                )
                 + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 
         # sequence of change
         for i, out in enumerate(change_list):
             messages.append(
-                (("%d. " + t("Change:") + " \n\n%s\n\n") % (i + 1, out[0]))
+                (
+                    ("%d. " + t("Change:") + " \n\n%s\n\n")
+                    % (i + 1, format_address(out[0]))
+                )
                 + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
             )
 

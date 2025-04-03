@@ -99,11 +99,11 @@ def test_toggle_on_wonder_mv(mocker, wonder_mv):
     mocker.spy(light, "turn_on")
 
     # Toggle from on
-    mocker.patch.object(light, "is_on", new=lambda: True)
+    mocker.patch.object(light.circuit, "value", return_value=1)
     light.toggle()
     light.turn_off.assert_called()
 
     # Toggle again, now from off
-    mocker.patch.object(light, "is_on", new=lambda: False)
+    mocker.patch.object(light.circuit, "value", return_value=0)
     light.toggle()
     light.turn_on.assert_called()
