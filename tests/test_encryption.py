@@ -386,6 +386,68 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
             decryptor.decrypt(b"\x00" * (len_payload - 1), version)
 
 
+def test_AESCipher_calling_method__authenticate(m5stickv):
+    from krux.encryption import AESCipher
+    import ucryptolib
+
+    aes = AESCipher("key", "salt", 1)
+    valid_decrypteds = (b"\x00",)
+    valid_aesobs = (
+        ucryptolib.aes(aes.key, ucryptolib.MODE_ECB),
+        ucryptolib.aes(aes.key, ucryptolib.MODE_CBC, I_VECTOR[:16]),
+        ucryptolib.aes(aes.key, ucryptolib.MODE_GCM, I_VECTOR[:12]),
+    )
+    valid_auths = (b"\x01\x02\x03", b"\x01\x02\x03\x04")
+    valid_modes = (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC, ucryptolib.MODE_GCM)
+    valid_len_auths = (-3, 4)
+    valid_pkcs_pads = (None, True, False)
+
+    invalid_decrypteds = (True, None, 1, "\x00")
+    invalid_aesobs = (list(), dict(), None)
+    invalid_auths = (True, 1, "\x00")
+    invalid_modes = (None, -1, 0, 3, 10, 12)
+    invalid_len_auths = (None, 1.0)
+    invalid_pkcs_pad = ("True", "False", "NUL", "PKCS#7", "None")
+
+    # try each invalid param with other valid params
+    err = "Invalid call of ._authenticate()"
+    for plain in valid_decrypteds:
+        for aesob in valid_aesobs:
+            for auth in valid_auths:
+                for mode in valid_modes:
+                    for lauth in valid_len_auths:
+                        for pkcs in valid_pkcs_pads:
+
+                            for invalid in invalid_decrypteds:
+                                with pytest.raises(ValueError, match=err):
+                                    aes._authenticate(
+                                        invalid, aesob, auth, mode, lauth, pkcs
+                                    )
+                            # for invalid in invalid_aesobs:
+                            #    with pytest.raises(ValueError, match=err):
+                            #        aes._authenticate(plain, invalid, auth, mode, lauth, pkcs)
+                            for invalid in invalid_auths:
+                                with pytest.raises(ValueError, match=err):
+                                    aes._authenticate(
+                                        plain, aesob, invalid, mode, lauth, pkcs
+                                    )
+                            for invalid in invalid_modes:
+                                with pytest.raises(ValueError, match=err):
+                                    aes._authenticate(
+                                        plain, aesob, auth, invalid, lauth, pkcs
+                                    )
+                            for invalid in invalid_len_auths:
+                                with pytest.raises(ValueError, match=err):
+                                    aes._authenticate(
+                                        plain, aesob, auth, mode, invalid, pkcs
+                                    )
+                            for invalid in invalid_pkcs_pad:
+                                with pytest.raises(ValueError, match=err):
+                                    aes._authenticate(
+                                        plain, aesob, auth, mode, lauth, invalid
+                                    )
+
+
 def test_ecb_encryption(m5stickv):
     from krux.encryption import AESCipher, VERSIONS
 
@@ -1422,10 +1484,11 @@ def test_kef_wrapped_kef_packaging(m5stickv):
 
 def test_report_rate_of_failure(m5stickv):
     from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_encode, kef_decode
-    from hashlib import sha256, sha512
+    from hashlib import sha512
     from embit.bip39 import mnemonic_from_bytes
 
     encrs = {}
+    errs = {}
     for v in VERSIONS:
         name = VERSIONS[v]["name"]
         iv = I_VECTOR[: MODE_IVS.get(VERSIONS[v]["mode"], 0)]
@@ -1437,7 +1500,13 @@ def test_report_rate_of_failure(m5stickv):
             "timid": 0,
             "avoided": 0,
             "failed": 0,
+            "kef_failed": 0,
             "sampled": 0,
+        }
+        errs[v] = {
+            "encrypt": {},
+            "kef_encode": {},
+            "decrypt": {},
         }
 
     # plaintext: will be deterministically altered for each loop
@@ -1449,22 +1518,22 @@ def test_report_rate_of_failure(m5stickv):
 
     # message functions: takes message bytes, returns new same-size message bytes
     def f_16bytes(msg):
-        return sha256(msg).digest()[:16]
+        return msg[:16]
 
     def f_32bytes(msg):
-        return sha256(msg).digest()
+        return msg[:32]
 
     def f_12w_mnemonic(msg):
-        return mnemonic_from_bytes(f_16bytes(msg)).encode()
+        return mnemonic_from_bytes(f_16bytes(msg[:16])).encode()
 
     def f_24w_mnemonic(msg):
-        return mnemonic_from_bytes(f_32bytes(msg)).encode()
+        return mnemonic_from_bytes(f_32bytes(msg[:32])).encode()
 
     def f_repeated(msg):
-        return f_16bytes(msg) * 2
+        return msg[:16] * 2
 
     def f_medium(msg):
-        return sha512(msg).digest()
+        return msg
 
     def f_long(msg):
         return b"".join(
@@ -1492,14 +1561,17 @@ def test_report_rate_of_failure(m5stickv):
         # decoding latin-1 maintains byte-length; re-encoding to utf8 likely adds bytes
         return msg.decode("latin-1").encode("utf8")
 
+    failures = 0
     for i in range(samples):
-        # gather plaintexts for 7 message types, *2 since each re-encoded as utf8
+        # rehash plain, make another for each message function, again for utf8 re-encoding
+        plain = sha512(plain).digest()
         plaintexts = [msgfunc(plain) for msgfunc in msg_funcs]
         plaintexts.extend([utf8_encoded(msgfunc(plain)) for msgfunc in msg_funcs])
         for plain in plaintexts:
             for v in VERSIONS:
                 avoided = False
                 failed = False
+                kef_failed = False
                 try:
                     cipher = encrs[v]["e"].encrypt(plain, v, encrs[v]["iv"])
                 except Exception as err:
@@ -1507,11 +1579,31 @@ def test_report_rate_of_failure(m5stickv):
                     cipher = encrs[v]["e"].encrypt(
                         plain, v, encrs[v]["iv"], fail_unsafe=False
                     )
+                    if repr(err) in errs[v]["encrypt"]:
+                        errs[v]["encrypt"][repr(err)] += 1
+                    else:
+                        errs[v]["encrypt"][repr(err)] = 1
+
+                try:
+                    kefpack = kef_encode("salt", v, 10000, cipher)
+                    assert kef_decode(kefpack)[3] == cipher
+                except Exception as err:
+                    kef_failed = True
+                    if repr(err) in errs[v]["kef_encode"]:
+                        errs[v]["kef_encode"][repr(err)] += 1
+                    else:
+                        errs[v]["kef_encode"][repr(err)] = 1
 
                 try:
                     assert plain == encrs[v]["e"].decrypt(cipher, v)
                 except Exception as err:
                     failed = True
+                    if avoided:
+                        err = "Decryption has failed but encryption was avoided"
+                    if repr(err) in errs[v]["decrypt"]:
+                        errs[v]["decrypt"][repr(err)] += 1
+                    else:
+                        errs[v]["decrypt"][repr(err)] = 1
 
                 if not failed and avoided:
                     encrs[v]["timid"] += 1
@@ -1519,23 +1611,33 @@ def test_report_rate_of_failure(m5stickv):
                     encrs[v]["avoided"] += 1
                 if failed and not avoided:
                     encrs[v]["failed"] += 1
-                    print("Failure to decrypt: v: {}, plain: {}".format(v, plain))
+                    failures += 1
+                    print("Failure to decrypt: v: {}, plain: {}, cipher: {}".format(v, plain, cipher))
+                if kef_failed:
+                    failures += 1
+                    print("KEF encoding failure: v: {}, plain: {}, cipher: {}".format(v, plain, cipher))
 
                 encrs[v]["sampled"] += 1
 
-    print("KEF  Version      Timid   Avoid    Fail   Samples")
-    failures = 0
+    print("Failure Summary:\nVer  Ver Name     Timid   Avoid    Fail  KEFerr   Samples")
     for v in VERSIONS:
         print(
-            " {:2d}  {:10s}  {:6d}  {:6d}  {:6d}  {:8d}".format(
+            " {:2d}  {:10s}  {:6d}  {:6d}  {:6d}  {:6d}  {:8d}".format(
                 v,
                 encrs[v]["name"],
                 encrs[v]["timid"],  # able to decrypt, but refused to encrypt
                 encrs[v]["avoided"],  # couldn't decrypt and refused to encrypt
                 encrs[v]["failed"],  # failed to decrypt w/o refusing to encrypt
+                encrs[v]["kef_failed"],  # failure during KEF encoding/decoding
                 encrs[v]["sampled"],  # total samples
             )
         )
-        failures += encrs[v]["failed"]
+
+    print("\nPer-Version Failure Details:\nVer  Function    Count  Description")
+    for v in VERSIONS:
+        for func in ("encrypt", "decrypt", "kef_encode"):
+            for error, count in errs[v][func].items():
+                print(" {:2d}  {:10s} {:6d}  {}".format(v, func, count, error))
+
     assert failures == 0
     # assert 0

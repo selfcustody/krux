@@ -224,12 +224,13 @@ class AESCipher:
 
         return decrypted
 
-    def _authenticate(self, decrypted, decryptor, auth, mode, len_auth, pkcs_pad):
+    def _authenticate(self, decrypted, aesob, auth, mode, len_auth, pkcs_pad):
         if not (
             isinstance(decrypted, bytes)
             and (isinstance(auth, bytes) or auth is None)
-            and isinstance(mode, int)
-            and isinstance(len_auth, int)
+            # and isinstance(aesob, Crypto.Cipher)
+            and mode in (1, 2, 11)
+            and (isinstance(len_auth, int) and -32 <= len_auth <= 32)
             and pkcs_pad in (True, False, None)
         ):
             raise ValueError("Invalid call of ._authenticate()")
@@ -246,7 +247,7 @@ class AESCipher:
         # versions that have built-in authentication use their own
         if mode == ucryptolib.MODE_GCM:
             try:
-                decryptor.verify(auth)
+                aesob.verify(auth)
                 return decrypted
             except:
                 return None
