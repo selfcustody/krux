@@ -117,6 +117,7 @@ def test_encryption_VERSIONS_definition(m5stickv):
     """
     from krux.encryption import VERSIONS, MODE_IVS, MODE_NUMBERS
     from krux.krux_settings import EncryptionSettings
+    import ucryptolib
 
     # the keys to VERSIONS are all integers between 0 and 255
     for k in VERSIONS:
@@ -128,11 +129,11 @@ def test_encryption_VERSIONS_definition(m5stickv):
         # each version has a human readable 'name'
         assert len(v["name"]) and isinstance(v["name"], str)
 
-        # each version has a 'mode' integer that KEF supports
+        # each version has a 'mode' integer that KEF supports (not 1:1 between MaixPy ucryptolib and Crypto.Cipher)
         assert isinstance(v["mode"], int) and v["mode"] in (
-            1,  # ECB
-            2,  # CBC
-            11,  # GCM
+            ucryptolib.MODE_ECB,
+            ucryptolib.MODE_CBC,
+            ucryptolib.MODE_GCM,
         )
 
         # each version has an implied "iv" value in MODE_IVS to require this size i_vector
@@ -148,7 +149,7 @@ def test_encryption_VERSIONS_definition(m5stickv):
         # if positive, it is appended "after" encryption/padding to ciphertext,
         #   it is unhidden.
         # if 0, it means that .decrypt() callers must figure out how to validate
-        # successful decryption.
+        #   successful decryption, but currently no versions define "auth" as 0.
         assert isinstance(v.get("auth", 0), int) and -32 <= v.get("auth", 0) <= 32
 
     # MODE_NUMBERS defines the AES modes of operation
