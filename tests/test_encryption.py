@@ -194,7 +194,7 @@ def test_suggest_versions(m5stickv):
         (entropy32 * 2 + nul_byte_str.encode(), "AES-ECB", "AES-ECB +c"),
         (short_str, "AES-ECB", "AES-ECB v2"),
         (bad_passwd, "AES-ECB", "AES-ECB v2"),
-        (descriptor_single, "AES-ECB", "AES-ECB +p"),
+        (descriptor_single, "AES-ECB", "AES-ECB +c"),
         (descriptor_1of2, "AES-ECB", "AES-ECB +c"),
         (descriptor_2of3, "AES-ECB", "AES-ECB +c"),
         (descriptor_mini_liana_em, "AES-ECB", "AES-ECB +c"),
@@ -209,7 +209,7 @@ def test_suggest_versions(m5stickv):
         (entropy32 * 2 + nul_byte_str.encode(), "AES-CBC", "AES-CBC +p"),
         (short_str, "AES-CBC", "AES-CBC v2"),
         (bad_passwd, "AES-CBC", "AES-CBC v2"),
-        (descriptor_single, "AES-CBC", "AES-CBC +p"),
+        (descriptor_single, "AES-CBC", "AES-CBC +c"),
         (descriptor_1of2, "AES-CBC", "AES-CBC +c"),
         (descriptor_2of3, "AES-CBC", "AES-CBC +c"),
         (descriptor_mini_liana_em, "AES-CBC", "AES-CBC +c"),
@@ -224,7 +224,7 @@ def test_suggest_versions(m5stickv):
         (entropy32 * 2 + nul_byte_str.encode(), "AES-GCM", "AES-GCM"),
         (short_str, "AES-GCM", "AES-GCM"),
         (bad_passwd, "AES-GCM", "AES-GCM"),
-        (descriptor_single, "AES-GCM", "AES-GCM"),
+        (descriptor_single, "AES-GCM", "AES-GCM +c"),
         (descriptor_1of2, "AES-GCM", "AES-GCM +c"),
         (descriptor_2of3, "AES-GCM", "AES-GCM +c"),
         (descriptor_mini_liana_em, "AES-GCM", "AES-GCM +c"),
@@ -1106,7 +1106,7 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
     # re-create similar cipher-payloads for all versions, assert their kef-encoding is not any smaller
     from hashlib import sha256
     from embit.bip39 import mnemonic_to_bytes
-    from krux.encryption import AESCipher, kef_encode
+    from krux.encryption import AESCipher, kef_wrap
 
     TEST_ENTROPY = mnemonic_to_bytes(TEST_WORDS)
     ITERATIONS = Settings().encryption.pbkdf2_iterations
@@ -1115,7 +1115,7 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         implied_mode = value["name"][:7]
         iv = I_VECTOR[: MODE_IVS.get(value["mode"], 0)]
         payload = encryptor.encrypt(TEST_ENTROPY, version, iv)
-        kef_data = kef_encode(TEST_MNEMONIC_ID, version, ITERATIONS, payload)
+        kef_data = kef_wrap(TEST_MNEMONIC_ID, version, ITERATIONS, payload)
         qr_data = qr_code_datum[implied_mode]
 
         # looping through all versions, we didn't do any better than suggested version above
@@ -1148,18 +1148,18 @@ def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
     assert words == TEST_WORDS
 
 
-def test_kef_encoding_is_faithful(m5stickv):
-    from krux.encryption import kef_encode, kef_decode
+def test_kef_wrapping_is_faithful(m5stickv):
+    from krux.encryption import kef_wrap, kef_unwrap
 
     test_cases = (ECB_ENCRYPTED_QR, CBC_ENCRYPTED_QR)
 
     for encoded in test_cases:
-        id_, version, iterations, ciphertext = kef_decode(encoded)
-        assert kef_encode(id_, version, iterations, ciphertext) == encoded
+        id_, version, iterations, ciphertext = kef_unwrap(encoded)
+        assert kef_wrap(id_, version, iterations, ciphertext) == encoded
 
 
-def test_kef_encode_exceptions(m5stickv):
-    from krux.encryption import kef_encode, VERSIONS, MODE_IVS, AESCipher
+def test_kef_wrap_exceptions(m5stickv):
+    from krux.encryption import kef_wrap, VERSIONS, MODE_IVS, AESCipher
 
     ten_k = 10000
     valid_ids = (
@@ -1191,13 +1191,13 @@ def test_kef_encode_exceptions(m5stickv):
                     err = "Invalid ID"
                     for invalid in (None, 21, ("Too Long! " * 26)[:256]):
                         with pytest.raises(ValueError, match=err):
-                            kef_encode(invalid, version, iterations, ciphertext)
+                            kef_wrap(invalid, version, iterations, ciphertext)
 
                     # Version must be 0-255, and supported
                     err = "Invalid version"
                     for invalid in (None, -1, 0.5, "0", 256, 10):
                         with pytest.raises(ValueError, match=err):
-                            kef_encode(id_, invalid, iterations, ciphertext)
+                            kef_wrap(id_, invalid, iterations, ciphertext)
 
                     # Iterations: used for key stretching
                     err = "Invalid iterations"
@@ -1213,13 +1213,13 @@ def test_kef_encode_exceptions(m5stickv):
                         ten_k * ten_k + 1,
                     ):
                         with pytest.raises(ValueError, match=err):
-                            kef_encode(id_, version, invalid, ciphertext)
+                            kef_wrap(id_, version, invalid, ciphertext)
 
                     # Ciphertext must be bytes
                     err = "Payload is not bytes"
                     invalid = (b"\x00" * 32).decode()
                     with pytest.raises(ValueError, match=err):
-                        kef_encode(id_, version, iterations, invalid)
+                        kef_wrap(id_, version, iterations, invalid)
 
                     # except for modes that don't require padding...
                     if VERSIONS[version].get("pkcs_pad", False) is None:
@@ -1230,7 +1230,7 @@ def test_kef_encode_exceptions(m5stickv):
                     for extra in range(1, 16):
                         invalid = ciphertext + (b"\xff" * extra)
                         with pytest.raises(ValueError, match=err):
-                            kef_encode(id_, version, iterations, invalid)
+                            kef_wrap(id_, version, iterations, invalid)
 
                     # ...and not too short
                     err = "Ciphertext is too short"
@@ -1239,11 +1239,11 @@ def test_kef_encode_exceptions(m5stickv):
                         extra += VERSIONS[version]["auth"]
                     invalid = ciphertext[:extra]
                     with pytest.raises(ValueError, match=err):
-                        kef_encode(id_, version, iterations, invalid)
+                        kef_wrap(id_, version, iterations, invalid)
 
 
 def test_kef_interpretation_of_iterations(m5stickv):
-    from krux.encryption import kef_encode, kef_decode
+    from krux.encryption import kef_wrap, kef_unwrap
 
     # int to 3-byte big-endian
     def i2b(an_int):
@@ -1258,19 +1258,19 @@ def test_kef_interpretation_of_iterations(m5stickv):
 
     # if (iterations % 10000 == 0) they are serialized divided by 10000
     for iterations in (ten_k, ten_k * 10, ten_k * 50, ten_k * ten_k):
-        encoded = kef_encode(id_, version, iterations, ciphertext)
+        encoded = kef_wrap(id_, version, iterations, ciphertext)
         assert encoded[6:9] == i2b(iterations // 10000)
-        assert kef_decode(encoded)[2] == iterations
+        assert kef_unwrap(encoded)[2] == iterations
 
     # if (iterations % 10000 != 0) they are serialized as the same value
     for iterations in (ten_k + 1, ten_k * 10 + 1, ten_k * 50 + 1, 2**24 - 1):
-        encoded = kef_encode(id_, version, iterations, ciphertext)
+        encoded = kef_wrap(id_, version, iterations, ciphertext)
         assert encoded[6:9] == i2b(iterations)
-        assert kef_decode(encoded)[2] == iterations
+        assert kef_unwrap(encoded)[2] == iterations
 
 
-def test_kef_decode_exceptions(m5stickv):
-    from krux.encryption import kef_decode, VERSIONS
+def test_kef_unwrap_exceptions(m5stickv):
+    from krux.encryption import kef_unwrap, VERSIONS
 
     test_cases = (ECB_ENCRYPTED_QR, CBC_ENCRYPTED_QR)
 
@@ -1287,7 +1287,7 @@ def test_kef_decode_exceptions(m5stickv):
                 + encoded[version_pos + 1 :]
             )
             with pytest.raises(ValueError, match=err):
-                kef_decode(encoded)
+                kef_unwrap(encoded)
 
     # Ciphertext is aligned on 16-byte blocks
     err = "Ciphertext is not aligned"
@@ -1295,20 +1295,20 @@ def test_kef_decode_exceptions(m5stickv):
         for i in range(15):
             encoded = encoded[:-1]
             with pytest.raises(ValueError, match=err):
-                kef_decode(encoded)
+                kef_unwrap(encoded)
 
     # Ciphertext is at least 1 block (per AES)
     err = "Ciphertext is too short"
     encoded = ECB_ENCRYPTED_QR[:-16]  # 24w ECB is 32 bytes w/ checksum
     with pytest.raises(ValueError, match=err):
-        kef_decode(encoded)
+        kef_unwrap(encoded)
     encoded = CBC_ENCRYPTED_QR[:-32]  # 24w CBC is 48 bytes w/ iv+checksum
     with pytest.raises(ValueError, match=err):
-        kef_decode(encoded)
+        kef_unwrap(encoded)
 
 
 def test_faithful_encrypted_kef_packaging(m5stickv):
-    from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_encode, kef_decode
+    from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_wrap, kef_unwrap
 
     iterations = (10000, 12345)
     keys = ("", "key", "clé", int(255).to_bytes(1, "big").decode("latin-1"))
@@ -1323,12 +1323,10 @@ def test_faithful_encrypted_kef_packaging(m5stickv):
                         iv = b"\x00" * MODE_IVS.get(VERSIONS[version]["mode"], 0)
                         encryptor = AESCipher(key, salt, iteration)
                         cipher_payload = encryptor.encrypt(plain, version, iv)
-                        kef_encoded = kef_encode(
-                            salt, version, iteration, cipher_payload
-                        )
-                        print(version, plain, cipher_payload, kef_encoded)
-                        kef_decoded = kef_decode(kef_encoded)
-                        assert kef_decoded == (salt, version, iteration, cipher_payload)
+                        kef_wrapd = kef_wrap(salt, version, iteration, cipher_payload)
+                        print(version, plain, cipher_payload, kef_wrapd)
+                        kef_unwrapd = kef_unwrap(kef_wrapd)
+                        assert kef_unwrapd == (salt, version, iteration, cipher_payload)
                         assert encryptor.decrypt(cipher_payload, version)
 
 
@@ -1544,7 +1542,7 @@ def test_kef_self_document(m5stickv):
 def test_kef_wrapped_kef_packaging(m5stickv):
     """Test that nothing breaks when KEF messages are used to hide other KEF messages"""
 
-    from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_encode, kef_decode
+    from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_wrap, kef_unwrap
     from krux.bbqr import deflate_compress, deflate_decompress
 
     key = "abc"
@@ -1565,8 +1563,8 @@ def test_kef_wrapped_kef_packaging(m5stickv):
         iv = I_VECTOR[: MODE_IVS.get(version["mode"], 0)]
         cipher_payload = encryptor.encrypt(plaintext, v, iv)
         cipher_payload2 = encryptor2.encrypt(plaintext2, v, iv)
-        plaintext = kef_encode(id_, v, iterations, cipher_payload)
-        plaintext2 = kef_encode(id2, v, iterations, cipher_payload2)
+        plaintext = kef_wrap(id_, v, iterations, cipher_payload)
+        plaintext2 = kef_wrap(id2, v, iterations, cipher_payload2)
         assert plaintext[:-1] != b"\x00"
         assert plaintext2[:-1] != b"\x00"
         iterations += i_step
@@ -1579,8 +1577,8 @@ def test_kef_wrapped_kef_packaging(m5stickv):
     # decode and decrypt KEF packages until we find something that's not KEF
     while True:
         try:
-            kef_parsed = kef_decode(plaintext)
-            kef_parsed2 = kef_decode(plaintext2)
+            kef_parsed = kef_unwrap(plaintext)
+            kef_parsed2 = kef_unwrap(plaintext2)
             id_, v, iterations, cipher_payload = kef_parsed
             id2, v2, iterations2, cipher_payload2 = kef_parsed2
             assert v == v2
@@ -1599,7 +1597,7 @@ def test_kef_wrapped_kef_packaging(m5stickv):
 
 
 def test_report_rate_of_failure(m5stickv):
-    from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_encode, kef_decode
+    from krux.encryption import AESCipher, VERSIONS, MODE_IVS, kef_wrap, kef_unwrap
     from hashlib import sha512
     from embit.bip39 import mnemonic_from_bytes
 
@@ -1616,12 +1614,12 @@ def test_report_rate_of_failure(m5stickv):
             "timid": 0,
             "avoided": 0,
             "failed": 0,
-            "kef_failed": 0,
+            "wrapper": 0,
             "sampled": 0,
         }
         errs[v] = {
             "encrypt": {},
-            "kef_encode": {},
+            "wrapper": {},
             "decrypt": {},
         }
 
@@ -1701,14 +1699,14 @@ def test_report_rate_of_failure(m5stickv):
                         errs[v]["encrypt"][repr(err)] = 1
 
                 try:
-                    kefpack = kef_encode("salt", v, 10000, cipher)
-                    assert kef_decode(kefpack)[3] == cipher
+                    kefpack = kef_wrap("salt", v, 10000, cipher)
+                    assert kef_unwrap(kefpack)[3] == cipher
                 except Exception as err:
                     kef_failed = True
-                    if repr(err) in errs[v]["kef_encode"]:
-                        errs[v]["kef_encode"][repr(err)] += 1
+                    if repr(err) in errs[v]["wrapper"]:
+                        errs[v]["wrapper"][repr(err)] += 1
                     else:
-                        errs[v]["kef_encode"][repr(err)] = 1
+                        errs[v]["wrapper"][repr(err)] = 1
 
                 try:
                     assert plain == encrs[v]["e"].decrypt(cipher, v)
@@ -1736,7 +1734,7 @@ def test_report_rate_of_failure(m5stickv):
                 if kef_failed:
                     failures += 1
                     print(
-                        "KEF encoding failure: v: {}, plain: {}, cipher: {}".format(
+                        "KEF wrapping failure: v: {}, plain: {}, cipher: {}".format(
                             v, plain, cipher
                         )
                     )
@@ -1752,16 +1750,61 @@ def test_report_rate_of_failure(m5stickv):
                 encrs[v]["timid"],  # able to decrypt, but refused to encrypt
                 encrs[v]["avoided"],  # couldn't decrypt and refused to encrypt
                 encrs[v]["failed"],  # failed to decrypt w/o refusing to encrypt
-                encrs[v]["kef_failed"],  # failure during KEF encoding/decoding
+                encrs[v]["wrapper"],  # failure during KEF wrapping
                 encrs[v]["sampled"],  # total samples
             )
         )
 
     print("\nPer-Version Failure Details:\nVer  Function    Count  Description")
     for v in VERSIONS:
-        for func in ("encrypt", "decrypt", "kef_encode"):
+        for func in ("encrypt", "decrypt", "wrapper"):
             for error, count in errs[v][func].items():
                 print(" {:2d}  {:10s} {:6d}  {}".format(v, func, count, error))
 
     assert failures == 0
+    # assert 0
+
+
+def NOtest_find_optimal_compress_threshold(m5stickv):
+    from krux.bbqr import deflate_compress
+    from krux.baseconv import base_encode
+    from hashlib import sha512
+    from embit.bip39 import WORDLIST
+
+    def compression_value(content):
+        orig = len(content)
+        comp = len(deflate_compress(content))
+        return orig - comp
+
+    samples = (
+        b"rand:" + b"".join([sha512(x).digest() for x in (b"a", b"b", b"c")]),
+        b"pass:" + b"N01$houldE45uess7#!sP@5$w0rdNIW0n7R3m8eri73!ther",
+        b"descr:"
+        + b"wsh(sortedmulti(2,[d63dc4a7/48h/1h/0h/2h]tpubDEXCvh2aPYzMz2xfgsh9ZM6dQZxioYfCafUgw16keqschYbED4VeS46Qhr7EoonDHNr9dSsKPEGeRP5WRzDGdY3aazneR7wKmtDVNTf6qic,[c98cbe58/48h/1h/0h/2h]tpubDFXZ3rcRyvU6AvNrb4kRQFomJbtCTCyMX9jDJmfN5XfHLEAZq7a8h3CrYDZYtdexk6XWfT5DB8PYgySWA5GSdyWdzWwveQcbrzvVQw3u7bV,[9590b69a/48h/1h/0h/2h]tpubDEgtrNHQ68KvQPABjV4Ah39MpUH6aniH8gbHKygJSwNwbsQpnzPJMcssdqjwPtNshjAj8nP35iZisEFchFdZtPG4rXi7FW35dsCtQSj93Qv))",
+        b"lower:" + b" ".join([x.encode() for x in WORDLIST]),
+    )
+    contents = []
+    for sample in samples:
+        contents.append(sample)
+        for base in (43, 58, 64):
+            label = "b{}:".format(base).encode()
+            contents.append(label + base_encode(sample, base))
+
+    results = {}
+    for content in contents:
+        best = len(content)
+        end, step = best, best
+        while True:
+            step = step // 2
+            if step < 2:
+                break
+            if compression_value(content[:end]) > 0:
+                best = end
+                end = end - step
+            else:
+                end = end + step
+        results[content] = best
+
+    for k, v in results.items():
+        print("thresh: {} for {}b content: {}".format(v, len(k), k[:50]))
     # assert 0

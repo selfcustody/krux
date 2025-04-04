@@ -313,7 +313,7 @@ def suggest_versions(plaintext, mode_name):
     """Suggests a krux encryption version based on plaintext and preferred mode"""
 
     small_thresh = 32  # if len(plaintext) <= small_thresh: it is small
-    big_thresh = 160  # if len(plaintext) >= big_thresh: it is big
+    big_thresh = 120  # if len(plaintext) >= big_thresh: it is big
 
     # gather metrics on plaintext
     if not isinstance(plaintext, (bytes, str)):
@@ -448,8 +448,8 @@ class MnemonicStorage:
             return None
 
         if stored_value.get("b64_kef"):
-            kef_encoded = base_decode(stored_value["b64_kef"], 64)
-            id_, version, iterations, data = kef_decode(kef_encoded)
+            kef_wrapper = base_decode(stored_value["b64_kef"], 64)
+            id_, version, iterations, data = kef_unwrap(kef_wrapper)
             decryptor = AESCipher(key, id_, iterations)
             decrypted = decryptor.decrypt(data, version)
             if decrypted:
@@ -470,8 +470,8 @@ class MnemonicStorage:
         plain = bip39.mnemonic_to_bytes(mnemonic)
         version = suggest_versions(plain, mode_name)[0]
         encrypted = encryptor.encrypt(plain, version, i_vector)
-        kef_encoded = kef_encode(mnemonic_id, version, iterations, encrypted)
-        b64_kef = base_encode(kef_encoded, 64).decode()
+        kef_wrapper = kef_wrap(mnemonic_id, version, iterations, encrypted)
+        b64_kef = base_encode(kef_wrapper, 64).decode()
         mnemonics = {}
         if sd_card:
             # load current MNEMONICS_FILE
@@ -543,13 +543,13 @@ class EncryptedQRCode:
         bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
         self.version = suggest_versions(bytes_to_encrypt, mode_name)[0]
         bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, self.version, i_vector)
-        return kef_encode(mnemonic_id, self.version, self.iterations, bytes_encrypted)
+        return kef_wrap(mnemonic_id, self.version, self.iterations, bytes_encrypted)
 
     def public_data(self, data):
         """Parse and returns encrypted mnemonic QR codes public data"""
         try:
             (self.mnemonic_id, self.version, self.iterations, self.encrypted_data) = (
-                kef_decode(data)
+                kef_unwrap(data)
             )
             version_name = VERSIONS[self.version]["name"]
         except:
@@ -571,9 +571,9 @@ class EncryptedQRCode:
         return decrypted_data
 
 
-def kef_encode(id_, version, iterations, payload):
+def kef_wrap(id_, version, iterations, payload):
     """
-    encodes inputs into KEF Encryption Format, returns bytes
+    Wraps inputs into KEF Encryption Format, returns bytes
     """
 
     try:
@@ -615,9 +615,9 @@ def kef_encode(id_, version, iterations, payload):
     return b"".join([len_id, id_, version, iterations, payload])
 
 
-def kef_decode(kef_bytes):
+def kef_unwrap(kef_bytes):
     """
-    decodes KEF Encryption Format bytes, returns tuple of parsed values
+    Unwraps KEF Encryption Format bytes, returns tuple of parsed values
     """
     len_id = kef_bytes[0]
     version = kef_bytes[1 + len_id]  # out-of-order reading to validate version early
