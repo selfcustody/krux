@@ -390,7 +390,7 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
 
 
 def test_AESCipher_calling_method__authenticate(m5stickv):
-    from krux.encryption import AESCipher
+    from krux.encryption import AESCipher, MODE_NUMBERS
     import ucryptolib
 
     aes = AESCipher("key", "salt", 1)
@@ -401,19 +401,28 @@ def test_AESCipher_calling_method__authenticate(m5stickv):
         ucryptolib.aes(aes.key, ucryptolib.MODE_GCM, I_VECTOR[:12]),
     )
     valid_auths = (b"\x01\x02\x03", b"\x01\x02\x03\x04")
-    valid_modes = (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC, ucryptolib.MODE_GCM)
+    valid_modes = (
+        x for x in MODE_NUMBERS.values()
+    )  # ucryptolib attrs: .MODE_ECB, .MODE_CBC, .MODE_GCM
     valid_v_auths = (-3, 4)
     valid_v_pkcs_pads = (None, True, False)
 
     invalid_decrypteds = (True, None, 1, "\x00")
     invalid_aes_objects = (list(), dict(), None)
     invalid_auths = (True, 1, "\x00")
-    invalid_modes = (None, -1, 0, 3, 10, 12)
+    invalid_modes = (
+        None,
+        -1,
+        0,
+        3,
+        10,
+        12,
+    )  # Crypto.Cipher:ECB,CBC,GCM=(1,2,11); MaixPy:ECB,CBC,GCM=(3,2,1)
     invalid_v_auths = (None, 1.0)
     invalid_v_pkcs_pad = ("True", "False", "NUL", "PKCS#7", "None", 0, 1)
 
     # try each invalid param with other valid params
-    err = "Invalid call of ._authenticate()"
+    err = "Invalid call to ._authenticate()"
     for plain in valid_decrypteds:
         for aes_object in valid_aes_objects:
             for auth in valid_auths:
@@ -431,9 +440,11 @@ def test_AESCipher_calling_method__authenticate(m5stickv):
                                         v_auth,
                                         v_pkcs_pad,
                                     )
+
                             # for invalid in invalid_aes_objects:
                             #    with pytest.raises(ValueError, match=err):
                             #        aes._authenticate(plain, invalid, auth, mode, v_auth, v_pkcs_pad)
+
                             for invalid in invalid_auths:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
@@ -444,6 +455,7 @@ def test_AESCipher_calling_method__authenticate(m5stickv):
                                         v_auth,
                                         v_pkcs_pad,
                                     )
+
                             for invalid in invalid_modes:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
@@ -454,6 +466,7 @@ def test_AESCipher_calling_method__authenticate(m5stickv):
                                         v_auth,
                                         v_pkcs_pad,
                                     )
+
                             for invalid in invalid_v_auths:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
@@ -464,6 +477,7 @@ def test_AESCipher_calling_method__authenticate(m5stickv):
                                         invalid,
                                         v_pkcs_pad,
                                     )
+
                             for invalid in invalid_v_pkcs_pad:
                                 with pytest.raises(ValueError, match=err):
                                     aes._authenticate(
@@ -640,6 +654,7 @@ def test_cbc_iv_use(m5stickv):
     # Encrypt again with same data except for the IV
     iv = SECOND_IV
     encrypted = encryptor.encrypt(TEST_WORDS.encode(), version, iv)
+    print("iv: {}, encrypted: {}".format(iv, encrypted))
     assert encrypted == CBC_ENCRYPTED_WORDS_SECOND_IV
 
     b64encrypted = base64.b64encode(encrypted)
@@ -976,6 +991,7 @@ def test_create_ecb_encrypted_qr_code(m5stickv):
     Settings().encryption.version = "AES-ECB"
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS)
+    print("qr_data: {}".format(qr_data))
     assert qr_data == ECB_ENCRYPTED_QR
 
 
@@ -986,6 +1002,7 @@ def test_create_cbc_encrypted_qr_code(m5stickv):
     Settings().encryption.version = "AES-CBC"
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, I_VECTOR)
+    print("qr_data: {}".format(qr_data))
     assert qr_data == CBC_ENCRYPTED_QR
 
 
@@ -996,7 +1013,7 @@ def test_create_gcm_encrypted_qr_code(m5stickv):
     Settings().encryption.version = "AES-GCM"
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, I_VECTOR[:12])
-    print(qr_data)
+    print("qr_data: {}".format(qr_data))
     assert qr_data == GCM_ENCRYPTED_QR
 
 
@@ -1006,6 +1023,7 @@ def test_decode_ecb_encrypted_qr_code(m5stickv):
 
     encrypted_qr = EncryptedQRCode()
     public_data = encrypted_qr.public_data(ECB_ENCRYPTED_QR)
+    print("public_data: {}".format(public_data))
     assert public_data == ECB_QR_PUBLIC_DATA
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
@@ -1025,6 +1043,7 @@ def test_decode_cbc_encrypted_qr_code(m5stickv):
 
     encrypted_qr = EncryptedQRCode()
     public_data = encrypted_qr.public_data(CBC_ENCRYPTED_QR)
+    print("public_data: {}".format(public_data))
     assert public_data == CBC_QR_PUBLIC_DATA
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
@@ -1044,6 +1063,7 @@ def test_decode_gcm_encrypted_qr_code(m5stickv):
 
     encrypted_qr = EncryptedQRCode()
     public_data = encrypted_qr.public_data(GCM_ENCRYPTED_QR)
+    print("public_data: {}".format(public_data))
     assert public_data == GCM_QR_PUBLIC_DATA
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
@@ -1115,6 +1135,7 @@ def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
     Settings().encryption.pbkdf2_iterations = 99999
     encrypted_qr = EncryptedQRCode()
     qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS)
+    print("qr_data: {}".format(qr_data))
 
     print("case Decode: customize_pbkdf2_iterations")
     public_data = encrypted_qr.public_data(qr_data)

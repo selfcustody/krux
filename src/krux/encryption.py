@@ -214,9 +214,12 @@ class AESCipher:
         # then: unpad and validate via embeded authentication bytes
         # else: let caller deal with unpad and auth
         if v_auth != 0:
-            decrypted = self._authenticate(
-                decrypted, decryptor, auth, mode, v_auth, v_pkcs_pad
-            )
+            try:
+                decrypted = self._authenticate(
+                    decrypted, decryptor, auth, mode, v_auth, v_pkcs_pad
+                )
+            except:
+                decrypted = None
 
         # for versions that compress
         if decrypted and v_compress:
@@ -227,13 +230,13 @@ class AESCipher:
     def _authenticate(self, decrypted, aes_object, auth, mode, v_auth, v_pkcs_pad):
         if not (
             isinstance(decrypted, bytes)
+            # TODO check aes_object
             and (isinstance(auth, bytes) or auth is None)
-            # TODO check this and isinstance(aes_object, Crypto.Cipher)
-            and mode in (1, 2, 11)  # TODO better check than this
+            and mode in MODE_NUMBERS.values()
             and (isinstance(v_auth, int) and -32 <= v_auth <= 32)
             and (v_pkcs_pad is True or v_pkcs_pad is False or v_pkcs_pad is None)
         ):
-            raise ValueError("Invalid call of ._authenticate()")
+            raise ValueError("Invalid call to ._authenticate()")
 
         # some modes need to unpad
         if v_pkcs_pad in (False, True):
