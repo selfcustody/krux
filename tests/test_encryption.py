@@ -381,13 +381,12 @@ def test_AESCipher_calling_method_decrypt(m5stickv):
             with pytest.raises((ValueError, KeyError)):
                 decryptor.decrypt(valids[0], invalid)
 
-    err = "Missing IV"
+    err = "Invalid Payload"
     for version, values in VERSIONS.items():
-        if MODE_IVS.get(values["mode"], 0) == 0:
-            continue
-        len_payload = 16 + MODE_IVS[values["mode"]]
+        min_payload = 1 if values["mode"] == MODE_GCM else 16
+        min_payload += MODE_IVS.get(values["mode"], 0) + min(0, values["auth"])
         with pytest.raises(ValueError, match=err):
-            decryptor.decrypt(b"\x00" * (len_payload - 1), version)
+            decryptor.decrypt(b"\x00" * (min_payload - 1), version)
 
 
 def test_AESCipher_calling_method__authenticate(m5stickv):
@@ -514,6 +513,7 @@ def test_ecb_encryption(m5stickv):
             CBC_ENTROPY,
             GCM_ENTROPY,
             b'"Running bitcoin" -Hal, January 10, 2009',
+            b"\x00",
         )
         + BROKEN_AUTH16_ENTROPIES
         + BROKEN_AUTH4_ENTROPIES
@@ -598,6 +598,7 @@ def test_cbc_encryption(m5stickv):
             CBC_ENTROPY,
             GCM_ENTROPY,
             b'"Running bitcoin" -Hal, January 10, 2009',
+            b"\x00",
         )
         + BROKEN_AUTH16_ENTROPIES
         + BROKEN_AUTH4_ENTROPIES
@@ -705,6 +706,7 @@ def test_gcm_encryption(m5stickv):
         CBC_ENTROPY,
         GCM_ENTROPY,
         b'"Running bitcoin" -Hal, January 10, 2009',
+        b"\x00",
     )
     testversions = (
         2,  # AES.MODE_GCM +auth4

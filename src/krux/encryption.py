@@ -192,12 +192,16 @@ class AESCipher:
         v_auth = VERSIONS[version].get("auth", 0)
         v_compress = VERSIONS[version].get("compress", False)
 
+        # validate payload size early
+        min_payload = 1 if mode == ucryptolib.MODE_GCM else AES_BLOCK_SIZE
+        min_payload += min(0, v_auth) + v_iv
+        if len(payload) <= min_payload:
+            raise ValueError("Invalid Payload")
+
         # setup decryptor (pulling initialization-vector from payload if necessary)
         if not v_iv:
             decryptor = ucryptolib.aes(self.key, mode)
         else:
-            if len(payload) < AES_BLOCK_SIZE + v_iv:
-                raise ValueError("Missing IV")
             decryptor = ucryptolib.aes(self.key, mode, payload[:v_iv])
             payload = payload[v_iv:]
 
