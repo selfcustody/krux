@@ -240,6 +240,7 @@ class PrinterSettings(SettingsNamespace):
         "none": ("none", None),
         THERMAL_ADAFRUIT_TXT: ("thermal", "AdafruitPrinter"),
         "cnc/file": ("cnc", "FilePrinter"),
+        "cnc/grbl": ("cnc", "GRBLPrinter"),
     }
     namespace = "settings.printer"
     driver = CategorySetting("driver", "none", list(PRINTERS.keys()))

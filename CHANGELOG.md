@@ -1,3 +1,9 @@
+# Changelog 25.04.0 - April 2025
+
+- print qr to cnc, write to file : adapt code to latest qr_code array structure
+- print qr to cnc, write directly to cnc  : uncomment, test, and adapt code to fit an openbuilds grbl 1.1 cnc, see comments on cnc.py
+- save qr as svg image
+
 # Changelog 25.03.0 - March 2025
 
 ### Taproot and WSH Miniscript support
