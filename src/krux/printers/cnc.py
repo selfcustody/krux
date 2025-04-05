@@ -289,6 +289,7 @@ class FilePrinter(GCodeGenerator):
 # On krux device, the grbl/cnc printer driver need to be selected, here is the settings tested on : {"settings": {"persist": {"location": "sd"}, "printer": {"driver": "cnc/file", "cnc": {"unit": "mm", "part_size": 70.675, "flute_diameter": 3.175, "depth_per_pass": 1.0, "cut_depth": 2.0, "border_padding": 2.0, "plunge_rate":300, "feed_rate":650,"cut_method": "spiral"}}}}
 # It seems the wondermv device can be powered by the blackbox controller only but sometimes it doesn't start. I it's usb powered it always start.
 # Testing scenario : power the cnc, use the interface to home everything and start the router, unplug the interface and plug the krux device instead, start print.
+# Note : This has been tested on the machine without router started and without bit, only to see that it move correctly and that it complete a full cycle.
 import time
 from fpioa_manager import fm
 from machine import UART
