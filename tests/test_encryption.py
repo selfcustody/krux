@@ -35,9 +35,9 @@ B64_ECB_ENCRYPTED_ENTROPY_CKSUM = (
 )
 B64_CBC_ENCRYPTED_ENTROPY_CKSUM = b"T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkTcp7WZ0lQqJH3j2Na7hmxg=="
 
-ECB_ENCRYPTED_QR = b"\x07test ID\x03\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xb35\xef"
+ECB_ENCRYPTED_QR = b"\x07test ID\x03\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xeb\x1a6"
 OLDECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
-CBC_ENCRYPTED_QR = b'\x07test ID\x04\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xb35\xef\x7f'
+CBC_ENCRYPTED_QR = b'\x07test ID\x04\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xeb\x1a6m'
 OLDCBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
 GCM_ENCRYPTED_QR = b"\x07test ID\x02\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xb7vo]]\x8aO\x90\x8e\x86\xe784L\x02]\x8f\xedT"
 
@@ -58,8 +58,8 @@ GCM_QR_PUBLIC_DATA = (
 )
 
 # Must maintain old in-the-wild versions of cipher-payloads in seeds.json to ensure recoverable
-KEF_ECBENTROPY_ONLY_JSON = '{"KEFecbID": {"b64_kef": "CEtFRmVjYklEAwAACrjZPsHP9sA0UAKiWuotRXbnFma/HVnfaVAZV6Kw5Tu7t6Mt"}}'
-KEF_CBCENTROPY_ONLY_JSON = '{"KEFcbcID": {"b64_kef": "CEtFRmNiY0lEBAAACk9SoZNsPjJxIJ6dZAWe145shFPojYLA4hthWHv2Z2FSIyQ6fm5KU81NLiQ/mQDM4wPFoNU="}}'
+KEF_ECBENTROPY_ONLY_JSON = '{"KEFecbID": {"b64_kef": "CEtFRmVjYklEAwAACrjZPsHP9sA0UAKiWuotRXbnFma/HVnfaVAZV6Kw5Tu7ebJf"}}'
+KEF_CBCENTROPY_ONLY_JSON = '{"KEFcbcID": {"b64_kef": "CEtFRmNiY0lEBAAACk9SoZNsPjJxIJ6dZAWe145shFPojYLA4hthWHv2Z2FSIyQ6fm5KU81NLiQ/mQDM4zbdzTM="}}'
 KEF_GCMENTROPY_ONLY_JSON = '{"KEFgcmID": {"b64_kef": "CEtFRmdjbUlEAgAACk9SoZNsPjJxIJ6dZL+jDD/X+v8sJY3z7oiBTgjTt9BbJh1mAQus1rbFF4D4HH+SVw=="}}'
 OLD_ECBWORDS_ONLY_JSON = '{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}'
 OLD_CBCWORDS_ONLY_JSON = '{"cbcID": {"version": 1, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7Xjp+66c9sy20J39ffK11XvVAaDSyQybsM6txAwKy/U1iU4KKYRu3ywDDN9q9sWAi1R+y7x4aHwQd0C0rRcW0iDxvWtFyWMKilA0AsDQwvBSgkhf5PQnQ1rfjnKVF75rTrG5vUNF01FRwa9PoM5cq30Yki/hFnWj/4niaeXqgQvIwjSzBNbXgaRLjfoaUyHiu8+zBX25rkpI0PW243fgDEfqI="}}'
@@ -143,11 +143,11 @@ def test_encryption_VERSIONS_definition(m5stickv):
         assert v.get("pkcs_pad", False) in (True, False, None)
 
         # each version has an implied 'auth' integer for bytes of authentication data
-        # if negative, it's calculated and appended to plaintext "before"
+        # if negative, it's calculated as sha256(plaintext) and appended to plaintext "before"
         #   encryption/padding -- hidden but has a greater chance of needing
         #   an extra AES block!
-        # if positive, it is appended "after" encryption/padding to ciphertext,
-        #   it is unhidden.
+        # if positive, it's calculated as sha256(plaintext + key) in order to obscure it,
+        #   and appended "after" encryption/padding to ciphertext -- unhidden.
         # if 0, it means that .decrypt() callers must figure out how to validate
         #   successful decryption, but currently no versions define "auth" as 0.
         assert isinstance(v.get("auth", 0), int) and -32 <= v.get("auth", 0) <= 32
@@ -396,9 +396,9 @@ def test_AESCipher_calling_method__authenticate(m5stickv):
     aes = AESCipher("key", "salt", 1)
     valid_decrypteds = (b"\x00",)
     valid_aes_objects = (
-        ucryptolib.aes(aes.key, ucryptolib.MODE_ECB),
-        ucryptolib.aes(aes.key, ucryptolib.MODE_CBC, I_VECTOR[:16]),
-        ucryptolib.aes(aes.key, ucryptolib.MODE_GCM, I_VECTOR[:12]),
+        ucryptolib.aes(aes._key, ucryptolib.MODE_ECB),
+        ucryptolib.aes(aes._key, ucryptolib.MODE_CBC, I_VECTOR[:16]),
+        ucryptolib.aes(aes._key, ucryptolib.MODE_GCM, I_VECTOR[:12]),
     )
     valid_auths = (b"\x01\x02\x03", b"\x01\x02\x03\x04")
     valid_modes = (
@@ -483,6 +483,58 @@ def test_AESCipher_calling_method__authenticate(m5stickv):
                                     aes._authenticate(
                                         plain, aes_object, auth, mode, v_auth, invalid
                                     )
+
+
+def test_public_sha256_auth_commits_to_key(m5stickv):
+    from krux.encryption import AESCipher, VERSIONS, MODE_IVS
+    from hashlib import sha256
+    import ucryptolib
+
+    testplaintexts = (
+        (
+            TEST_WORDS.encode(),
+            ECB_WORDS.encode(),
+            CBC_WORDS.encode(),
+            GCM_WORDS.encode(),
+            ECB_ENTROPY,
+            CBC_ENTROPY,
+            GCM_ENTROPY,
+            b'"Running bitcoin" -Hal, January 10, 2009',
+            b"\x00",
+        )
+        + BROKEN_AUTH16_ENTROPIES
+        + BROKEN_AUTH4_ENTROPIES
+    )
+
+    aes = AESCipher("key", "salt", 10000)
+    for v, values in VERSIONS.items():
+        v_mode = values["mode"]
+        v_auth = values.get("auth", 0)
+        v_iv = MODE_IVS.get(values["mode"], 0)
+
+        # Only AES-ECB and AES-GCM use sha256 for authentication
+        if values["mode"] == ucryptolib.MODE_GCM:
+            continue
+
+        # When auth < 0: auth bytes are private, appended to plaintext
+        if v_auth < 0:
+            continue
+
+        # When auth > 0: auth bytes are public, appended to ciphertext
+        if v_auth > 0:
+            iv = I_VECTOR[:v_iv]
+            for plain in testplaintexts:
+                try:
+                    ciphertext = aes.encrypt(plain, v, iv)
+                except:
+                    continue
+                auth_bytes = ciphertext[-v_auth:]
+
+                # When auth bytes are public, KEF avoids simple sha256(plaintext) because
+                # separate ciphertexts of same plaintext would share/reveal same auth bytes.
+                # To avoid this, KEF commits to the stretched key when auth bytes are public.
+                cksum = sha256(plain + aes._key).digest()[:v_auth]
+                assert auth_bytes == cksum
 
 
 def test_ecb_encryption(m5stickv):
@@ -1485,7 +1537,7 @@ def kef_self_document(version, label=None, iterations=None, limit=None):
 
     if mode_name in ("AES-ECB", "AES-CBC"):
         if v_auth > 0:
-            auth = "sha256({})[:{}]".format(plain, v_auth)
+            auth = "sha256({} + k)[:{}]".format(plain, v_auth)
             cpl += " + auth"
             text["e"] = None
             text["pad"] = None
@@ -1524,8 +1576,8 @@ def test_kef_self_document(m5stickv):
         0: "[AES-ECB] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =0\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:16]\npad: NUL\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         1: "[AES-CBC] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =1\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:16]\npad: NUL\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         2: "[AES-GCM] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =2\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P>) + auth\niv: 12b\ne: AES(k, GCM, iv)\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        3: "[AES-ECB v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =3\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + pad) + auth\ne: AES(k, ECB)\npad: NUL\nauth: sha256(<P>)[:3]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        4: "[AES-CBC v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =4\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 16b\ne: AES(k, CBC, iv)\npad: NUL\nauth: sha256(<P>)[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        3: "[AES-ECB v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =3\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + pad) + auth\ne: AES(k, ECB)\npad: NUL\nauth: sha256(<P> + k)[:3]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        4: "[AES-CBC v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =4\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 16b\ne: AES(k, CBC, iv)\npad: NUL\nauth: sha256(<P> + k)[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         5: "[AES-ECB +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =5\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         6: "[AES-CBC +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =6\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         7: "[AES-GCM +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =7\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10)) + auth\niv: 12b\ne: AES(k, GCM, iv)\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",

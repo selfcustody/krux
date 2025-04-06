@@ -117,7 +117,7 @@ class AESCipher:
 
     def __init__(self, key, salt, iterations):
         # latin-1 encoding enables all byte values for key and salt (KEF's id_)
-        self.key = hashlib.pbkdf2_hmac(
+        self._key = hashlib.pbkdf2_hmac(
             "sha256", key.encode("latin-1"), salt.encode("latin-1"), iterations
         )
 
@@ -141,10 +141,15 @@ class AESCipher:
         if fail_unsafe and v_pkcs_pad is False and v_auth > 0 and plain[-1] == 0x00:
             raise ValueError("Cannot validate decryption for this plaintext")
 
-        # for modes that don't have authentication, krux uses sha256 checksum
+        # for modes that don't have authentication, KEF uses 2 forms of sha256
         if v_auth != 0 and mode in (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC):
-            auth = hashlib.sha256(plain).digest()[: abs(v_auth)]
-            if v_auth < 0:
+            if v_auth > 0:
+                # unencrypted (public) auth: hash the plaintext w/ self._key
+                auth = hashlib.sha256(plain + self._key).digest()[:v_auth]
+            elif v_auth < 0:
+                # encrypted auth: hash only the plaintext
+                auth = hashlib.sha256(plain).digest()[:-v_auth]
+
                 # fail: same case as above if auth bytes have NUL suffix
                 if fail_unsafe and v_pkcs_pad is False and auth[-1] == 0x00:
                     raise ValueError("Cannot validate decryption for this plaintext")
@@ -170,9 +175,9 @@ class AESCipher:
         elif iv:
             raise ValueError("IV is not required")
         if iv:
-            encryptor = ucryptolib.aes(self.key, mode, iv)
+            encryptor = ucryptolib.aes(self._key, mode, iv)
         else:
-            encryptor = ucryptolib.aes(self.key, mode)
+            encryptor = ucryptolib.aes(self._key, mode)
             iv = b""
 
         # encrypt the plaintext
@@ -200,9 +205,9 @@ class AESCipher:
 
         # setup decryptor (pulling initialization-vector from payload if necessary)
         if not v_iv:
-            decryptor = ucryptolib.aes(self.key, mode)
+            decryptor = ucryptolib.aes(self._key, mode)
         else:
-            decryptor = ucryptolib.aes(self.key, mode, payload[:v_iv])
+            decryptor = ucryptolib.aes(self._key, mode, payload[:v_iv])
             payload = payload[v_iv:]
 
         # remove authentication from payload if suffixed to ciphertext
@@ -259,7 +264,7 @@ class AESCipher:
             except:
                 return None
 
-        # versions that don't have built-in authentication use sha256
+        # versions that don't have built-in authentication use 2 forms of sha256
         max_attempts = 1
         if v_pkcs_pad is False:
             # NUL padding is imperfect, still attempt to authenticate -- up to a limit...
@@ -267,7 +272,12 @@ class AESCipher:
             max_attempts = abs(v_auth) + 2
 
         for _ in range(max_attempts):
-            cksum = hashlib.sha256(decrypted).digest()[: abs(v_auth)]
+            if v_auth > 0:
+                # for unencrypted (public) auth > 0: hash the decrypted w/ self._key
+                cksum = hashlib.sha256(decrypted + self._key).digest()[:v_auth]
+            else:
+                # for encrypted auth < 0: hash only the decrypted
+                cksum = hashlib.sha256(decrypted).digest()[:-v_auth]
             if cksum == auth:
                 return decrypted
 
