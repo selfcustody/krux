@@ -193,9 +193,17 @@ As well a done icon:
 flash-krux-logo.en.txt
 ----8<----
 
+
+##### Error flashing
+----8<----
+error-flashing-windows.en.txt
+----8<----
+
+
+
 #### Air-gapped update with
 
-Once you've installed the initial firmware on your device via USB, you can perform upgrades via SD card to keep the device airgapped.
+Once you've installed the initial firmware on your device via USB, you can perform further firmware upgrades via SD card to keep the device airgapped.
 
 <img width="640" src="/krux/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
 > ⚠️ Click on "Air-gapped update with"

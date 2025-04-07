@@ -3,4 +3,4 @@
 Prefer a different language? Krux has support for multiple languages. Once at the start screen, go to `Settings`, followed by `Locale`, and select the locale you wish to use.
 
 ### Upgrade via microSD card
-Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform upgrades [via microSD](/krux/getting-started/features/sd-card-update/) card to keep the device airgapped.
+Once you've installed the initial firmware on your device via USB, you can either continue updating the device by flashing or you can perform further upgrades [via microSD card](/krux/getting-started/features/sd-card-update/) to keep the device airgapped.
