@@ -36,6 +36,7 @@ from ..format import generate_thousands_separator
 from ..sd_card import SDHandler
 from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
+from .encryption_ui import KEFEnvelope
 from ..qr import FORMAT_NONE
 
 
@@ -134,21 +135,39 @@ class Tools(Page):
 
     def create_qr(self):
         """Handler for the 'Create QR Code' menu item"""
-        if self.prompt(
+        if not self.prompt(
             t("Create QR code from text?"),
             self.ctx.display.height() // 2,
         ):
-            text = self.capture_from_keypad(
-                t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-            )
-            if text in ("", ESC_KEY):
-                return MENU_CONTINUE
+            return MENU_CONTINUE
+        text = self.capture_from_keypad(
+            t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+        )
+        if text in ("", ESC_KEY):
+            return MENU_CONTINUE
 
-            from .qr_view import SeedQRView
+        qr_type_menu = [
+            ("Plaintext", lambda: "plaintext"),
+            ("Encrypted", lambda: "encrypted"),
+        ]
+        idx, qr_type = Menu(self.ctx, qr_type_menu).run_loop()
+        if idx == len(qr_type_menu) - 1:
+            return MENU_CONTINUE
 
-            title = t("Custom QR Code")
-            seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
-            return seed_qr_view.display_qr(allow_export=True)
+        if qr_type == "encrypted":
+            kef = KEFEnvelope(self.ctx)
+            text = kef.seal_ui(text.encode(), override_settings=True)
+            title = t("Encrypted QR Code")
+            if len(kef.label):
+                title += ": " + kef.label
+        else:
+            title = t("Plaintext QR Code")
+
+        from .qr_view import SeedQRView
+
+        seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
+        seed_qr_view.display_qr(allow_export=True)
+
         return MENU_CONTINUE
 
     def descriptor_addresses(self):

@@ -22,7 +22,7 @@
 
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
-from ..kef import MODE_NUMBERS, MODE_IVS
+from krux import kef
 from ..themes import theme
 from . import (
     Page,
@@ -33,9 +33,219 @@ from . import (
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
+    DIGITS,
 )
 
 ENCRYPTION_KEY_MAX_LEN = 200
+
+
+def prompt_for_text_update(
+    ctx,
+    curr_value,
+    dflt_value=None,
+    dflt_prompt=None,
+    dflt_affirm=True,
+    title=None,
+    keypads=None,
+):
+    """Clears screen, prompts question, allows for keypad input"""
+    if curr_value and not dflt_value and not dflt_prompt:
+        dflt_value = curr_value
+        dflt_prompt = "Update current value: {}?".format(curr_value)
+    ctx.display.clear()
+    if dflt_value and dflt_prompt:
+        ctx.display.draw_centered_text(dflt_prompt)
+        dflt_answer = Page(ctx).prompt("", BOTTOM_PROMPT_LINE)
+        if dflt_affirm == dflt_answer:
+            value = dflt_value
+            return value
+    if not isinstance(keypads, list) or keypads is None:
+        keypads = [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+    return Page(ctx).capture_from_keypad(title, keypads)
+
+
+class KEFEnvelope(Page):
+    """UI to handle KEF-Encryption-Format Envelopes"""
+
+    def __init__(self, ctx):
+        super().__init__(ctx, None)
+        self.ctx = ctx
+        self.__key = None
+        self.__iv = None
+        self.label = None
+        self.iterations = Settings().encryption.pbkdf2_iterations
+        self.mode_name = Settings().encryption.version
+        self.mode = kef.MODE_NUMBERS[self.mode_name]
+        self.iv_len = kef.MODE_IVS.get(self.mode, 0)
+        self.version = None
+        self.version_name = None
+        self.ciphertext = None
+
+    def __parse(self, kef_envelope):
+        """parses envelope, from kef.wrap()"""
+        if self.ciphertext is not None:
+            raise ValueError("KEF Envelope already parsed")
+        self.label, self.version, self.iterations, self.ciphertext = kef.unwrap(
+            kef_envelope
+        )
+        self.version_name = kef.VERSIONS[self.version]["name"]
+        self.mode = kef.VERSIONS[self.version]["mode"]
+        self.mode_name = [k for k, v in kef.MODE_NUMBERS.items() if v == self.mode][0]
+        return True
+
+    def input_key_ui(self, creating=True):
+        """calls ui to gather master key"""
+        ui = EncryptionKey(self.ctx)
+        self.__key = ui.encryption_key(creating)
+        return bool(self.__key)
+
+    def input_version_ui(self):
+        """implements ui to allow user to select KEF version"""
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("Use default Mode?") + " " + self.mode_name,
+        )
+        if self.prompt("", BOTTOM_PROMPT_LINE):
+            return True
+        menu_items = [(v["name"], lambda: None) for v in kef.VERSIONS.values()]
+        idx, _ = Menu(self.ctx, menu_items, back_label=None).run_loop()
+        if idx == len(menu_items) - 1:
+            return None
+        self.version = [y for x, y in enumerate(kef.VERSIONS) if x == idx][0]
+        self.version_name = kef.VERSIONS[self.version]["name"]
+        self.mode = kef.VERSIONS[self.version]["mode"]
+        self.mode_name = [k for k, v in kef.MODE_NUMBERS.items() if v == self.mode][0]
+        self.iv_len = kef.MODE_IVS.get(self.mode, 0)
+        return True
+
+    def input_iterations_ui(self):
+        """implements ui to allow user to set key-stretch iterations"""
+        curr_value = str(self.iterations)
+        dflt_prompt = t("Use default Key iter.?") + " " + curr_value
+        title = t("Key iter.") + ": 10K - 500K"
+        keypads = [DIGITS]
+        iterations = prompt_for_text_update(
+            self.ctx, curr_value, curr_value, dflt_prompt, True, title, keypads
+        )
+        if 10000 <= int(iterations) <= 500000:
+            self.iterations = int(iterations)
+            return True
+        return None
+
+    def input_label_ui(
+        self,
+        dflt_label=None,
+        dflt_prompt=None,
+        dflt_affirm=True,
+        title=t("Visible Label"),
+        keypads=None,
+    ):
+        """implements ui to allow user to set a KEF label"""
+        if dflt_label and not dflt_prompt:
+            dflt_prompt = t("Update visible label?" + " " + dflt_label)
+        self.label = prompt_for_text_update(
+            self.ctx, self.label, dflt_label, dflt_prompt, dflt_affirm, title, keypads
+        )
+        return True
+
+    def input_iv_ui(self):
+        """implements ui to allow user to gather entropy from camera for iv"""
+        if self.iv_len > 0:
+            error_txt = t("Failed gathering camera entropy")
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Additional entropy from camera required for") + " " + self.mode_name
+            )
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                self.flash_error(error_txt)
+                self.__iv = None
+                return None
+            from .capture_entropy import CameraEntropy
+
+            camera_entropy = CameraEntropy(self.ctx)
+            entropy = camera_entropy.capture(show_entropy_details=False)
+            if entropy is None:
+                self.flash_error(error_txt)
+                self.__iv = None
+                return None
+            self.__iv = entropy[: self.iv_len]
+            return True
+        self.__iv = None
+        return True
+
+    def public_info_ui(self, kef_envelope=None, prompt_decrypt=False):
+        """implements ui to allow user to see public exterior of KEF envelope"""
+        if kef_envelope:
+            self.__parse(kef_envelope)
+        elif not self.ciphertext:
+            raise ValueError("KEF Envelope not yet parsed")
+        public_info = "\n".join(
+            [
+                t("KEF Encrypted"),
+                t("Label") + ": " + (self.label if self.label else t("None")),
+                t("Version") + ": " + self.version_name,
+                t("Key iter.") + ": " + str(self.iterations),
+            ]
+        )
+        self.ctx.display.clear()
+        if prompt_decrypt:
+            return self.prompt(
+                public_info + "\n\n" + t("Decrypt?"), self.ctx.display.height() // 2
+            )
+        self.ctx.display.draw_hcentered_text(public_info)
+        self.ctx.input.wait_for_button()
+        return True
+
+    def seal_ui(self, plaintext, override_settings=False):
+        """implements ui to allow user to seal plaintext inside a KEF envelope"""
+        if self.ciphertext:
+            raise ValueError("KEF Envelope already sealed")
+        if not (self.__key or self.input_key_ui()):
+            return None
+        if override_settings:
+            if not self.input_iterations_ui():
+                return None
+            if not self.input_version_ui():
+                return None
+        if self.iv_len:
+            if not (self.__iv or self.input_iv_ui()):
+                return None
+        if not (self.label or self.input_label_ui()):
+            return None
+        if self.version is None:
+            self.version = kef.suggest_versions(plaintext, self.mode_name)[0]
+            self.version_name = kef.VERSIONS[self.version]["name"]
+        cipher = kef.Cipher(self.__key, self.label, self.iterations)
+        self.ciphertext = cipher.encrypt(plaintext, self.version, self.__iv)
+        self.__key = None
+        self.__iv = None
+        return kef.wrap(self.label, self.version, self.iterations, self.ciphertext)
+
+    def unseal_ui(self, kef_envelope=None, prompt_decrypt=True, display_plain=False):
+        """implements ui to allow user to unseal a plaintext from a sealed KEF envelope"""
+        if kef_envelope:
+            self.__parse(kef_envelope)
+        if not self.ciphertext:
+            raise ValueError("KEF Envelope not yet parsed")
+        if prompt_decrypt:
+            if not self.public_info_ui(prompt_decrypt=prompt_decrypt):
+                return None
+        if not (self.__key or self.input_key_ui(creating=False)):
+            return None
+        cipher = kef.Cipher(self.__key, self.label, self.iterations)
+        try:
+            plaintext = cipher.decrypt(self.ciphertext, self.version)
+        except Exception as err:
+            print(repr(err))
+            return None
+        if display_plain:
+            self.ctx.display.clear()
+            try:
+                self.ctx.display.draw_centered_text(plaintext.decode())
+            except:
+                self.ctx.display.draw_centered_text(plaintext.decode("latin-1"))
+            self.ctx.input.wait_for_button()
+        return plaintext
 
 
 class EncryptionKey(Page):
@@ -189,7 +399,7 @@ class EncryptMnemonic(Page):
             return None
 
         i_vector = None
-        iv_len = MODE_IVS.get(MODE_NUMBERS[self.mode_name], 0)
+        iv_len = kef.MODE_IVS.get(kef.MODE_NUMBERS[self.mode_name], 0)
         if iv_len > 0:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(

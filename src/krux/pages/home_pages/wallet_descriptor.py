@@ -22,6 +22,7 @@
 
 from .. import (
     Page,
+    Menu,
     MENU_CONTINUE,
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
@@ -67,8 +68,29 @@ class WalletDescriptor(Page):
             if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
                 return self._load_wallet()
         else:
-            self.display_wallet(self.ctx.wallet)
-            wallet_data, qr_format = self.ctx.wallet.wallet_qr()
+            qr_type_menu = [
+                ("Plaintext", lambda: "plaintext"),
+                ("Encrypted", lambda: "encrypted"),
+            ]
+            idx, qr_type = Menu(self.ctx, qr_type_menu).run_loop()
+            if idx == len(qr_type_menu) - 1:
+                return MENU_CONTINUE
+
+            if qr_type == "encrypted":
+                from krux.pages.encryption_ui import KEFEnvelope
+                from krux.pages.qr_view import SeedQRView
+
+                wallet_data = self.ctx.wallet.wallet_data
+
+                kef = KEFEnvelope(self.ctx)
+                wallet_data = kef.seal_ui(wallet_data, override_settings=True)
+                qr_format = "binary"
+                title = "KEF " + title
+                sqr = SeedQRView(self.ctx, binary=True, data=wallet_data, title=title)
+                sqr.display_qr(allow_export=True)
+            else:
+                self.display_wallet(self.ctx.wallet)
+                wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             from ..utils import Utils
 
             utils = Utils(self.ctx)
