@@ -22,7 +22,7 @@
 
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
-from ..encryption import MODE_NUMBERS, MODE_IVS
+from ..kef import MODE_NUMBERS, MODE_IVS
 from ..themes import theme
 from . import (
     Page,
