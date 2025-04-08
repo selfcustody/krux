@@ -366,7 +366,7 @@ class Login(Page):
                 from .wallet_settings import PassphraseEditor
 
                 passphrase_editor = PassphraseEditor(self.ctx)
-                temp_passphrase = passphrase_editor.load_passphrase_menu()
+                temp_passphrase = passphrase_editor.load_passphrase_menu(mnemonic)
                 if temp_passphrase is not None:
                     passphrase = temp_passphrase
             elif index == 2:
