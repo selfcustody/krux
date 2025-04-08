@@ -4,4 +4,4 @@ On the [official releases](https://github.com/selfcustody/krux/releases) page yo
 
 ## What is the purpose of using an SD card with the device? 
 
-SD card use is optional, but can be used to upgrade the firmware, save settings, cnc/file, QR codes, XPUBs, encrypted mnemonics, and also to save and load PSBTs, messages and wallet output descriptors.
+SD card use is optional, it can be used to upgrade the firmware, save settings, cnc/file, QR codes, XPUBs, encrypted mnemonics, and also to save and load PSBTs, messages and wallet output descriptors.
