@@ -74,9 +74,9 @@ class GCodeGenerator(Printer):
 
         size = get_size(qr_code)
 
-        """If inverted we add two columns and two rows to cut a border."""
+        # If inverted we add two columns and two rows to cut a border.
         if self.invert:
-            size+=2
+            size += 2
 
         cell_size = (self.part_size - (self.border_padding * 2)) / size
 
@@ -94,7 +94,7 @@ class GCodeGenerator(Printer):
             for row in range(size):
                 for col in range(size):
                     plunge_depth = min((p + 1) * self.pass_depth, self.cut_depth)
-                    """Reversing row so milling goes from top to bottom"""
+                    # Reversing row so milling goes from top to bottom
                     reversed_row = size - 1 - row
                     if self.invert and row == 0:
                         self.cut_cell(col, reversed_row, cell_size, plunge_depth)
@@ -105,17 +105,18 @@ class GCodeGenerator(Printer):
                     elif self.invert and col == (size - 1):
                         self.cut_cell(size - 1, reversed_row, cell_size, plunge_depth)
                     else:
-                        """If inverted we need to calculate based on original qr code array size."""
+                        # If inverted we need to calculate based on original qr code array size.
                         if self.invert:
-                            bit_index = (row-1) * (size-2) + (col-1)
+                            bit_index = (row - 1) * (size - 2) + (col - 1)
                         else:
                             bit_index = row * size + col
                         bit = qr_code[bit_index >> 3] & (1 << (bit_index % 8))
-                        cut = (bit > 0 and not self.invert) or (bit == 0 and self.invert)
+                        cut = (bit > 0 and not self.invert) or (
+                            bit == 0 and self.invert
+                        )
                         if cut:
                             self.cut_cell(col, reversed_row, cell_size, plunge_depth)
 
-    """We could optimize by milling rows instead of cell by cell but this would not allow the use of drill bits"""
     def cut_cell(self, x, y, cell_size, plunge_depth):
         """Hollows out the specified cell using a cutting method defined in settings"""
         if Settings().hardware.printer.cnc.cut_method == "spiral":
@@ -283,14 +284,26 @@ class FilePrinter(GCodeGenerator):
         self.file = None
 
 
-# Tested on openbuilds 1515 with openbuilds blackbox x4 grbl controller, openbuilds interface serial remote controller, and wondermv. 
-# An adapter was made to use the same cable that connect to interface, with rx and tx reversed. The machine need be homed first before the krux software send the commands.
-# On krux device, the grbl/cnc printer driver need to be selected, here is the settings tested on : {"settings": {"persist": {"location": "sd"}, "printer": {"driver": "cnc/file", "cnc": {"unit": "mm", "part_size": 70.675, "flute_diameter": 3.175, "depth_per_pass": 1.0, "cut_depth": 2.0, "border_padding": 2.0, "plunge_rate":300, "feed_rate":650,"cut_method": "spiral"}}}}
-# It seems the wondermv device can be powered by the blackbox controller only but sometimes it doesn't start. I it's usb powered it always start.
-# Testing scenario : power the cnc, use the interface to home everything and start the router, unplug the interface and plug the krux device instead, start print.
+# Tested on openbuilds 1515 with openbuilds blackbox x4 grbl
+# controller, openbuilds interface serial remote controller, and wondermv.
+# An adapter was made to use the same cable that connect to interface,
+# with rx and tx reversed. The machine need be homed first before the
+# krux software send the commands. On krux device, the grbl/cnc printer
+# driver need to be selected, here is the settings tested on :
+# {"settings": {"persist": {"location": "sd"}, "printer": {"driver":
+# "cnc/file", "cnc": {"unit": "mm", "part_size": 96, "flute_diameter": 2,
+# "depth_per_pass": 0.5, "cut_depth": 0.5, "border_padding": 2.0,
+# "plunge_rate":150, "feed_rate":300,"cut_method": "spiral","invert": 1}}}}
+# It seems the wondermv device can be powered by the blackbox controller
+# only but sometimes it doesn't start. I it's usb powered it always start.
+# Testing scenario : power the cnc, use the interface to home everything
+# and start the router, unplug the interface and plug the krux device
+# instead, start print.
 import time
 from fpioa_manager import fm
 from machine import UART
+
+
 class GRBLPrinter(GCodeGenerator):
     """FilePrinter is an implementation of the GCodeGenerator that writes generated
     gcode to a file on an attached SD card.
@@ -310,9 +323,7 @@ class GRBLPrinter(GCodeGenerator):
             force=False,
         )
 
-        self.uart_conn = UART(
-            UART.UART2, Settings().hardware.printer.cnc.grbl.baudrate
-        )
+        self.uart_conn = UART(UART.UART2, Settings().hardware.printer.cnc.grbl.baudrate)
 
         self.byte_time = 11.0 / float(Settings().hardware.printer.cnc.grbl.baudrate)
 
@@ -337,15 +348,16 @@ class GRBLPrinter(GCodeGenerator):
 
         super().print_qr_code(qr_code)
 
-    def transmit(self,gcode):
+    def transmit(self, gcode):
         """Sometimes a command is send but seems ignored, we wait 1s and retry in that case"""
         timeout = 10
-        for retry in range(timeout):
+        for _ in range(timeout):
             self.write_bytes(*((gcode + "\n").encode()))
             res = self.uart_conn.read()
             if res is not None:
                 return res
             time.sleep_ms(1000)
+        return None
 
     def write_bytes(self, *args):
         """Writes bytes to the controller at a stable speed"""
@@ -362,9 +374,7 @@ class GRBLPrinter(GCodeGenerator):
         """Sends the gcode command to GRBL"""
         wdt.feed()
 
-        res = self.transmit(gcode)
-
-        status = res.decode().split("\n")[0]
+        self.transmit(gcode)
 
     def print_string(self, text):
         """Not used but need to be implemented"""

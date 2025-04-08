@@ -165,13 +165,17 @@ def test_print_qr_code_to_grbl(mocker, m5stickv, mock_uart_cls):
     mock_write = mocker.patch.object(p.uart_conn, "write")
 
     # Patch the read method of p.uart_conn, always returning expected response after sending ^C at beginning of grbl connection
-    mock_read = mocker.patch.object(p.uart_conn, "read",return_value="[VER:1.1\n".encode())
+    mock_read = mocker.patch.object(
+        p.uart_conn, "read", return_value="[VER:1.1\n".encode()
+    )
 
     # gcode generation is already tested on file printer tests, we test against an empty qr code here
     p.print_qr_code(bytearray(b"\x00"))
 
     mock_write.assert_has_calls(
         [
-            mocker.call(b'$'),mocker.call(b'I'),mocker.call(b'\n'),
+            mocker.call(b"$"),
+            mocker.call(b"I"),
+            mocker.call(b"\n"),
         ]
     )

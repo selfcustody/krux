@@ -389,9 +389,6 @@ class SeedQRView(Page):
         from ..sd_card import SVG_IMAGE_EXTENSION
         from .file_operations import SaveFile
 
-        import image
-        import lcd
-
         scale = 10
 
         code, size = self.add_frame(self.code, self.qr_size)
@@ -406,19 +403,30 @@ class SeedQRView(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing.."))
 
-        with open("/sd/" + file_name, 'w') as f:
+        with open("/sd/" + file_name, "w") as f:
             width = size * scale
             height = width
-            f.write('<svg xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">\n'.format(width,height))
+            f.write(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">\n'.format(
+                    width, height
+                )
+            )
             for y_index in range(0, size):
                 for x_index in range(0, size):
                     index = y_index * size + x_index
                     bit_value = (code[index >> 3] >> (index % 8)) & 1
                     if bit_value:
-                        x = x_index*scale
-                        y = y_index*scale
-                        f.write('<rect stroke="black" stroke-width="0" x="{}" y="{}" width="{}" height="{}" fill="black"/>\n'.format(x,y,scale,scale))
-            f.write('</svg>')
+                        x = x_index * scale
+                        y = y_index * scale
+                        scale_x = scale
+                        scale_y = scale
+                        square = 'x="{}" y="{}" width="{}" height="{}"'.format(x,y,scale_x,scale_y)
+                        f.write(
+                            '<rect stroke="black" stroke-width="0" {} fill="black"/>\n'.format(
+                                square
+                            )
+                        )
+            f.write("</svg>")
             f.close()
 
         self.flash_text(t("Saved to SD card") + ":\n%s" % file_name)

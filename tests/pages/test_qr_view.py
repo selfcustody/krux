@@ -29,6 +29,8 @@ FILES_FOLDER = "files"
 
 
 import pytest
+
+
 @pytest.fixture
 def mocker_sd_card(mocker):
     mocker.patch(
@@ -230,9 +232,7 @@ def test_save_svg_image(amigo, mocker, mocker_sd_card):
         map(
             mocker.call,
             open(
-                os.path.join(
-                    os.path.dirname(__file__), FILES_FOLDER, "qr_image.svg"
-                ),
+                os.path.join(os.path.dirname(__file__), FILES_FOLDER, "qr_image.svg"),
                 "r",
             ).readlines(),
         )
