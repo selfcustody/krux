@@ -73,13 +73,12 @@ class GCodeGenerator(Printer):
         size = 0
 
         size = get_size(qr_code)
-        print("size:",size)
 
-        print("self.part_size",self.part_size," / self.border_padding:",self.border_padding," / size:",size)
+        """If inverted we add two columns and two rows to cut a border."""
+        if self.invert:
+            size+=2
 
         cell_size = (self.part_size - (self.border_padding * 2)) / size
-
-        print("cell_size:",cell_size)
 
         # Modal settings
         self.on_gcode("G17")  # x/y plane
@@ -90,35 +89,35 @@ class GCodeGenerator(Printer):
         self.on_gcode("G90")  # non-incremental motion
         self.on_gcode("G94")  # feed/minute mode
 
-        print("self.cut_depth:",self.cut_depth," / self.pass_depth:",self.pass_depth)
-
         num_passes = math.ceil(self.cut_depth / self.pass_depth)
         for p in range(num_passes):
-            #print("pass #",p)
             for row in range(size):
-                #print("row #",row)
-                byte = 0
-                line_bytes = bytearray()
                 for col in range(size):
-                    #print("col #",col)
-                    bit_index = row * size + col
-                    #print("bit_index #",bit_index)
-                    bit = qr_code[bit_index >> 3] & (1 << (bit_index % 8))
-                    cut = 0
-                    if bit > 0:
-                        cut = 1
-                    #print("bit:",bit," / cut:",cut)
-                    if cut:
-                        # Flip the y coord
-                        y = row
-                        x = col
-                        x_index = x
-                        plunge_depth = min((p + 1) * self.pass_depth, self.cut_depth)
-                        self.cut_cell(x_index, size - 1 - y, cell_size, plunge_depth)
+                    plunge_depth = min((p + 1) * self.pass_depth, self.cut_depth)
+                    """Reversing row so milling goes from top to bottom"""
+                    reversed_row = size - 1 - row
+                    if self.invert and row == 0:
+                        self.cut_cell(col, reversed_row, cell_size, plunge_depth)
+                    elif self.invert and row == (size - 1):
+                        self.cut_cell(col, 0, cell_size, plunge_depth)
+                    elif self.invert and col == 0:
+                        self.cut_cell(0, reversed_row, cell_size, plunge_depth)
+                    elif self.invert and col == (size - 1):
+                        self.cut_cell(size - 1, reversed_row, cell_size, plunge_depth)
+                    else:
+                        """If inverted we need to calculate based on original qr code array size."""
+                        if self.invert:
+                            bit_index = (row-1) * (size-2) + (col-1)
+                        else:
+                            bit_index = row * size + col
+                        bit = qr_code[bit_index >> 3] & (1 << (bit_index % 8))
+                        cut = (bit > 0 and not self.invert) or (bit == 0 and self.invert)
+                        if cut:
+                            self.cut_cell(col, reversed_row, cell_size, plunge_depth)
 
+    """We could optimize by milling rows instead of cell by cell but this would not allow the use of drill bits"""
     def cut_cell(self, x, y, cell_size, plunge_depth):
         """Hollows out the specified cell using a cutting method defined in settings"""
-        #print("cut_cell:",x,",",y,",",cell_size,",",plunge_depth)
         if Settings().hardware.printer.cnc.cut_method == "spiral":
             self.spiral_cut_cell(x, y, cell_size, plunge_depth)
         else:
@@ -289,7 +288,6 @@ class FilePrinter(GCodeGenerator):
 # On krux device, the grbl/cnc printer driver need to be selected, here is the settings tested on : {"settings": {"persist": {"location": "sd"}, "printer": {"driver": "cnc/file", "cnc": {"unit": "mm", "part_size": 70.675, "flute_diameter": 3.175, "depth_per_pass": 1.0, "cut_depth": 2.0, "border_padding": 2.0, "plunge_rate":300, "feed_rate":650,"cut_method": "spiral"}}}}
 # It seems the wondermv device can be powered by the blackbox controller only but sometimes it doesn't start. I it's usb powered it always start.
 # Testing scenario : power the cnc, use the interface to home everything and start the router, unplug the interface and plug the krux device instead, start print.
-# Note : This has been tested on the machine without router started and without bit, only to see that it move correctly and that it complete a full cycle.
 import time
 from fpioa_manager import fm
 from machine import UART
@@ -300,14 +298,6 @@ class GRBLPrinter(GCodeGenerator):
 
     def __init__(self):
         super().__init__()
-
-        print("Settings().hardware.printer.cnc.grbl.tx_pin:",Settings().hardware.printer.cnc.grbl.tx_pin)
-        print("fm.fpioa.UART2_TX:",fm.fpioa.UART2_TX)
-
-        print("Settings().hardware.printer.cnc.grbl.rx_pin:",Settings().hardware.printer.cnc.grbl.rx_pin)
-        print("fm.fpioa.UART2_RX:",fm.fpioa.UART2_RX)
-
-        print("Settings().hardware.printer.cnc.grbl.baudrate:",Settings().hardware.printer.cnc.grbl.baudrate)
 
         fm.register(
             Settings().hardware.printer.cnc.grbl.tx_pin,
@@ -326,36 +316,33 @@ class GRBLPrinter(GCodeGenerator):
 
         self.byte_time = 11.0 / float(Settings().hardware.printer.cnc.grbl.baudrate)
 
-        res = self.uart_conn.read()
-        print("gcode read:",res)
+    def print_qr_code(self, qr_code):
 
-        gcode = chr(24)
-        print("gcode write chr(24):",gcode)
+        res = self.uart_conn.read()
+
+        gcode = "$I"
         self.write_bytes(*((gcode + "\n").encode()))
 
         res = self.uart_conn.read()
-        print("gcode read:",res)
         if res is None:
-            raise ValueError("not connected")
+            raise ValueError("Not connected")
 
         statuses = res.decode().split("\n")
-        print("statuses:",statuses)
-        if len(statuses) <= 1:
-            raise ValueError("not connected")
+        if len(statuses) < 2:
+            raise ValueError("Cannot read")
 
-        handshaked = statuses[1].lower().startswith("grbl")
-        print("handshaked:",handshaked)
+        handshaked = statuses[0].startswith("[VER:1.1")
         if not handshaked:
-            raise ValueError("not connected")
+            raise ValueError("Cannot handshake")
+
+        super().print_qr_code(qr_code)
 
     def transmit(self,gcode):
         """Sometimes a command is send but seems ignored, we wait 1s and retry in that case"""
         timeout = 10
         for retry in range(timeout):
-            print("gcode write retry:",retry)
             self.write_bytes(*((gcode + "\n").encode()))
             res = self.uart_conn.read()
-            print("gcode read:",res)
             if res is not None:
                 return res
             time.sleep_ms(1000)
@@ -379,14 +366,8 @@ class GRBLPrinter(GCodeGenerator):
 
         status = res.decode().split("\n")[0]
 
-        print("gcode status:",status)
-
-#        if status != "ok":
-#            err_msg = status if status.startswith("error") else "unknown error"
-#            raise ValueError("gcode send failed: %s" % err_msg)
-
     def print_string(self, text):
-        print("print_string:",text)
+        """Not used but need to be implemented"""
 
     def clear(self):
         """Clears the printer's memory, resetting it"""

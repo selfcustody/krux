@@ -409,7 +409,7 @@ class SeedQRView(Page):
         with open("/sd/" + file_name, 'w') as f:
             width = size * scale
             height = width
-            f.write('<svg xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">'.format(width,height))
+            f.write('<svg xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">\n'.format(width,height))
             for y_index in range(0, size):
                 for x_index in range(0, size):
                     index = y_index * size + x_index
@@ -417,7 +417,7 @@ class SeedQRView(Page):
                     if bit_value:
                         x = x_index*scale
                         y = y_index*scale
-                        f.write('<rect stroke="black" stroke-width="0" x="{}" y="{}" width="{}" height="{}" fill="black"/>'.format(x,y,scale,scale))
+                        f.write('<rect stroke="black" stroke-width="0" x="{}" y="{}" width="{}" height="{}" fill="black"/>\n'.format(x,y,scale,scale))
             f.write('</svg>')
             f.close()
 

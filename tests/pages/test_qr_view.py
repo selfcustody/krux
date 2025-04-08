@@ -21,6 +21,22 @@ PBM_TEST_CODE_BINARY_QR = bytearray(
 )
 
 
+TEST_QR_CODE = bytearray(
+    b"\x08e0c595c5\x00\x00\x00\n\xfb`e$\x90\xed\xfb\xd0r\x13\x1d1%\\6\xd3\xee0\xc4\xb8\x80h1>'\xf5\x9a5\x1cO\x97\xaa"
+)
+
+FILES_FOLDER = "files"
+
+
+import pytest
+@pytest.fixture
+def mocker_sd_card(mocker):
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+    )
+
+
 def test_load_qr_view(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
@@ -197,6 +213,41 @@ def test_save_bmp_image(amigo, mocker):
     sys.modules["image"].Image.return_value.save.assert_called_once_with(
         "/sd/" + TEST_TITLE + BMP_IMAGE_EXTENSION
     )
+
+
+def test_save_svg_image(amigo, mocker, mocker_sd_card):
+    from krux.pages.qr_view import SeedQRView
+    from krux.sd_card import SVG_IMAGE_EXTENSION
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
+    import os
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # move to "Back to Menu"
+        BUTTON_ENTER,  # confirm
+    ]
+
+    svg = list(
+        map(
+            mocker.call,
+            open(
+                os.path.join(
+                    os.path.dirname(__file__), FILES_FOLDER, "qr_image.svg"
+                ),
+                "r",
+            ).readlines(),
+        )
+    )
+
+    m = mocker.mock_open()
+    mocker.patch("builtins.open", m, create=True)
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+
+    qr_viewer = SeedQRView(ctx, data=TEST_QR_CODE, title="Test QR Code")
+    qr_viewer.save_svg_image(TEST_TITLE)
+
+    handle = m()
+    handle.write.assert_has_calls(svg)
 
 
 def test_save_qr_image_menu_pbm(amigo, mocker):
