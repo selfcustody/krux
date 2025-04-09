@@ -44,6 +44,7 @@
     "Checked %d addresses with no matches.": "Eşleşmeyen %d adres kontrol edildi.",
     "Checking for SD card..": "SD kart kontrol ediliyor..",
     "Confirm Tamper Check Code": "Kurcalama Kontrol Kodunu Onayla",
+    "Could not determine change address.": "Değişiklik adresi belirlenemedi.",
     "Create QR Code": "QR Kodu Oluştur",
     "Create QR code from text?": "Metinden QR kodu oluşturulsun mu?",
     "Created:": "Oluşturuldu:",

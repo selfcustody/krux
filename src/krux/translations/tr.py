@@ -66,6 +66,7 @@ translation_array = [
     "Eşleşmeyen %d adres kontrol edildi.",
     "SD kart kontrol ediliyor..",
     "Kurcalama Kontrol Kodunu Onayla",
+    "Değişiklik adresi belirlenemedi.",
     "QR Kodu Oluştur",
     "Metinden QR kodu oluşturulsun mu?",
     "Oluşturuldu:",

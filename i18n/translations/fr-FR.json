@@ -44,6 +44,7 @@
     "Checked %d addresses with no matches.": "%d adresses vérifiées sans correspondance.",
     "Checking for SD card..": "Vérification de la carte SD..",
     "Confirm Tamper Check Code": "Confirmer le code de non compromis",
+    "Could not determine change address.": "Impossible de déterminer l'adresse de monnaie.",
     "Create QR Code": "Créer un code QR",
     "Create QR code from text?": "Créer un code QR à partir d'un texte ?",
     "Created:": "Créé :",

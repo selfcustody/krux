@@ -153,6 +153,14 @@ class WalletDescriptor(Page):
             self.ctx.input.wait_for_button()
 
         if wallet.is_loaded():
+            if not wallet.has_change_addr():
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("Could not determine change address."), theme.error_color
+                )
+                if not self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
+                    return MENU_CONTINUE
+
             self.ctx.display.clear()
             self.display_loading_wallet(wallet)
             if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
