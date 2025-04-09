@@ -179,10 +179,16 @@ class KEFEnvelope(Page):
             self.__parse(kef_envelope)
         elif not self.ciphertext:
             raise ValueError("KEF Envelope not yet parsed")
+        try:
+            displayable_label = self.label.decode()
+        except UnicodeDecodeError:
+            displayable_label = repr(self.label)
+        except:
+            displayable_label = ""
         public_info = "\n".join(
             [
                 t("KEF Encrypted"),
-                t("Label") + ": " + (self.label if self.label else t("None")),
+                t("ID") + ": " + displayable_label,
                 t("Version") + ": " + self.version_name,
                 t("Key iter.") + ": " + str(self.iterations),
             ]
