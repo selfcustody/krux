@@ -96,18 +96,19 @@ def test_kef_VERSIONS_constants(m5stickv):
 def test_Cipher_initialization(m5stickv):
     from krux import kef
 
-    # .__init__() expects str (key, salt) and pos-int iterations
+    # .__init__() expects either utf8 str or bytes (key, salt) and pos-int iterations
     valid_params = (
+        (b"key", b"salt", 1),
         ("key", "salt", 1),
         (
-            int(255).to_bytes(1, "big").decode("latin-1"),
-            int(255).to_bytes(1, "big").decode("latin-1"),
+            int(255).to_bytes(1, "big"),
+            int(255).to_bytes(1, "big"),
             1,
         ),
     )
 
-    invalid_keys = (None, 1, b"key")
-    invalid_salts = (None, 1, b"salt")
+    invalid_keys = (None, 1, True, False)
+    invalid_salts = (None, 1, True, False)
     invalid_iterations = (None, -1, 0, 1.5)
     for valid_key, valid_salt, valid_iterations in valid_params:
         # this works
@@ -128,7 +129,7 @@ def test_Cipher_initialization(m5stickv):
 def test_Cipher_calling_method_encrypt(m5stickv):
     from krux import kef
 
-    encryptor = kef.Cipher("key", "salt", 1)
+    encryptor = kef.Cipher(b"key", "salt", 1)
 
     # .encrypt() expects bytes raw, version, sometimes bytes i_vector
     valid_params = (
@@ -185,7 +186,7 @@ def test_Cipher_calling_method_encrypt(m5stickv):
 def test_Cipher_calling_method_decrypt(m5stickv):
     from krux import kef
 
-    decryptor = kef.Cipher("key", "salt", 1)
+    decryptor = kef.Cipher("key", b"salt", 1)
 
     valid_params = (
         (b"\x00" * 16, 0),
@@ -224,7 +225,7 @@ def test_Cipher_calling_method_decrypt(m5stickv):
 def test_Cipher_calling_method__authenticate(m5stickv):
     from krux import kef
 
-    cipher = kef.Cipher("key", "salt", 1)
+    cipher = kef.Cipher(b"key", "salt", 1)
     valid_decrypteds = (b"\x00",)
     valid_aes_objects = (
         kef.ucryptolib.aes(cipher._key, kef.ucryptolib.MODE_ECB),
@@ -336,7 +337,7 @@ def test_Cipher_public_sha256_auth_commits_to_key(m5stickv):
         + BROKEN_AUTH4_ENTROPIES
     )
 
-    cipher = kef.Cipher("key", "salt", 10000)
+    cipher = kef.Cipher("key", b"salt", 10000)
     for v, values in kef.VERSIONS.items():
         v_mode = values["mode"]
         v_auth = values.get("auth", 0)
@@ -385,8 +386,8 @@ def test_faithful_encryption(m5stickv):
         + BROKEN_AUTH16_ENTROPIES
         + BROKEN_AUTH4_ENTROPIES
     )
-    cipher = kef.Cipher("key", "salt", 10000)
-    wrong = kef.Cipher("wrong", "wrong", 10000)
+    cipher = kef.Cipher(b"key", "salt", 10000)
+    wrong = kef.Cipher("wrong", b"wrong", 10000)
     for v, values in kef.VERSIONS.items():
         for plain in testplaintexts:
             iv = I_VECTOR[: kef.MODE_IVS.get(values["mode"], 0)]
@@ -414,7 +415,7 @@ def test_ecb_encryption_fails_duplicated_blocks(m5stickv):
 
     # test controls
     versions = (0, 3, 5)  # AES.MODE_ECB except w/compress
-    key, id_, iterations = "a key", "a label", 100000
+    key, id_, iterations = b"a key", "a label", 100000
     plaintext = b"a 16-byte block." * 2
 
     cipher = kef.Cipher(key, id_, iterations)
@@ -469,7 +470,7 @@ def test_broken_decryption_cases(m5stickv):
         + BROKEN_AUTH4_ENTROPIES
     )
 
-    cipher = kef.Cipher("key", "salt", 100000)
+    cipher = kef.Cipher("key", b"salt", 100000)
     for version in kef.VERSIONS:
         iv = I_VECTOR[: kef.MODE_IVS.get(kef.VERSIONS[version]["mode"], 0)]
         v_auth = kef.VERSIONS[version].get("auth", 0)
@@ -609,7 +610,7 @@ def test_suggest_versions(m5stickv):
         if isinstance(plain, str):
             plain = plain.encode()
         iv = b"\x00" * kef.MODE_IVS.get(kef.VERSIONS[version]["mode"], 0)
-        encryptor = kef.Cipher("key", "salt", 100000)
+        encryptor = kef.Cipher("key", b"salt", 100000)
         encryptor.decrypt(encryptor.encrypt(plain, suggesteds[0], iv), suggesteds[0])
 
         # end debugging
@@ -634,17 +635,24 @@ def test_wrapping_is_faithful(m5stickv):
         + BROKEN_AUTH16_ENTROPIES
         + BROKEN_AUTH4_ENTROPIES
     )
-    key, label, iterations = "key", "salt", 10000
+    key, id_, iterations = b"key", "a label", 10000
 
-    cipher = kef.Cipher(key, label, iterations)
+    cipher = kef.Cipher(key, id_, iterations)
     for v, values in kef.VERSIONS.items():
         for plain in testplaintexts:
             iv = I_VECTOR[: kef.MODE_IVS.get(values["mode"], 0)]
             payload = cipher.encrypt(plain, v, iv, fail_unsafe=False)
 
-            envelope = kef.wrap(label, v, iterations, payload)
+            # for id_ wrap() is tolerant of str or bytes -- when wrapping
+            envelope = kef.wrap(id_, v, iterations, payload)
+            envelope2 = kef.wrap(id_.encode(), v, iterations, payload)
+            assert envelope == envelope2
+
+            # but unwrap() is strict about always return id_ as bytes -- when unwrapping
             parsed = kef.unwrap(envelope)
-            assert parsed == (label, v, iterations, payload)
+            parsed2 = kef.unwrap(envelope2)
+            assert parsed == (id_.encode(), v, iterations, payload)
+            assert parsed == parsed2
 
 
 def test_wrapper_interpretation_of_iterations(m5stickv):
@@ -657,7 +665,7 @@ def test_wrapper_interpretation_of_iterations(m5stickv):
     ten_k = 10000
 
     # mock values so that iterations will be at bytes[6:9]
-    id_ = "test"
+    id_ = b"test"
     version = 0
     ciphertext = b"\x00" * 32
 
@@ -679,10 +687,10 @@ def test_wrap_exceptions(m5stickv):
 
     ten_k = 10000
     valid_ids = (
-        "",
-        "My Mnemonic",
-        "ID can be empty or as long as 255 utf-8 characters, but not longer\nA purely peer-to-peer version of electronic cash would allow online\npayments to be sent directly from one party to another without going through a\nfinancial institution. Digital signatures",
-        b"".join([i.to_bytes(1, "big") for i in range(1, 256)]).decode("latin-1"),
+        b"",
+        b"My Mnemonic",
+        b"ID can be empty or as long as 255 utf-8 characters, but not longer\nA purely peer-to-peer version of electronic cash would allow online\npayments to be sent directly from one party to another without going through a\nfinancial institution. Digital signatures",
+        b"".join([i.to_bytes(1, "big") for i in range(1, 256)]),
     )
     valid_versions = range(10)
     valid_iterations = (ten_k, 50 * ten_k, ten_k + 1, 2**24 - 1, ten_k * ten_k)
@@ -693,7 +701,7 @@ def test_wrap_exceptions(m5stickv):
     )
 
     # test individual exceptions against other valid params
-    cipher = kef.Cipher("key", "salt", 100000)
+    cipher = kef.Cipher("key", b"salt", 100000)
     for id_ in valid_ids:
         for version in valid_versions:
             for iterations in valid_iterations:
@@ -800,8 +808,8 @@ def test_faithful_encrypted_wrapper(m5stickv):
     from krux import kef
 
     iterations = (10000, 12345)
-    keys = ("", "key", "clé", int(255).to_bytes(1, "big").decode("latin-1"))
-    salts = ("", "salt", "salé", int(255).to_bytes(1, "big").decode("latin-1"))
+    keys = (b"", "key", b"key", "clé".encode(), int(255).to_bytes(1, "big"))
+    salts = (b"", "salt", b"salt", "salé".encode(), int(255).to_bytes(1, "big"))
     plaintexts = (b"Hello World!", b"im sixteen bytes")
 
     for version in kef.VERSIONS:
@@ -817,7 +825,12 @@ def test_faithful_encrypted_wrapper(m5stickv):
                         envelope = kef.wrap(salt, version, iteration, cipher_payload)
                         print(version, plain, cipher_payload, envelope)
                         parsed = kef.unwrap(envelope)
-                        assert parsed == (salt, version, iteration, cipher_payload)
+                        assert (
+                            parsed == (salt, version, iteration, cipher_payload)
+                            or isinstance(salt, str)
+                            and parsed
+                            == (salt.encode(), version, iteration, cipher_payload)
+                        )
                         assert cipher.decrypt(cipher_payload, version) == plain
 
 
@@ -912,6 +925,42 @@ def test_padding(m5stickv):
         )
 
 
+def test_deflate_compression(m5stickv):
+    from krux import kef
+
+    testtexts = (
+        (
+            TEST_WORDS.encode(),
+            ECB_WORDS.encode(),
+            CBC_WORDS.encode(),
+            GCM_WORDS.encode(),
+            ECB_ENTROPY,
+            CBC_ENTROPY,
+            GCM_ENTROPY,
+            b'"Running bitcoin" -Hal, January 10, 2009',
+            b"\x00",
+        )
+        + BROKEN_AUTH16_ENTROPIES
+        + BROKEN_AUTH4_ENTROPIES
+    )
+
+    for uncompressed in testtexts:
+        compressed = kef._deflate(uncompressed)
+        assert kef._reinflate(compressed) == uncompressed
+
+        # _deflate expects bytes
+        try:
+            non_compressible = uncompressed.decode()
+        except:
+            non_compressible = repr(uncompressed)
+        with pytest.raises(ValueError, match="Error compressing"):
+            kef._deflate(non_compressible)
+
+        # _reinflate expects complete/non-corrupted compressed bytes
+        with pytest.raises(ValueError, match="Error decompressing"):
+            kef._reinflate(compressed[:-1])
+
+
 def kef_self_document(version, label=None, iterations=None, limit=None):
     """This is NOT a unit-test, it's a way for KEF encoding to document itself"""
 
@@ -932,7 +981,7 @@ def kef_self_document(version, label=None, iterations=None, limit=None):
         )
         if not limit or len(result) <= limit:
             return result
-        return result.replace(" ", "")[:limit]
+        return result.replace(" ", "")[: limit - 3] + "..."
 
     # rules are declared as VERSIONS values
     v_name = kef.VERSIONS[version]["name"]
@@ -1027,6 +1076,11 @@ def test_kef_self_document(m5stickv):
         doc = kef_self_document(v, label=label)
         # print("\n" + doc)
         assert doc == expected
+
+        assert (
+            kef_self_document(v, label=label, limit=33)
+            == expected.replace(" ", "")[:30] + "..."
+        )
     # assert 0
 
 
@@ -1045,9 +1099,7 @@ def test_multi_wrapped_envelopes(m5stickv):
     for v, version in kef.VERSIONS.items():
         label = '"{}", K={}'.format(version["name"][4:], key)
         id_ = kef_self_document(v, label=label, iterations=iterations, limit=255)
-        id2 = kef._deflate(id_.encode("latin-1")).decode(
-            "latin-1"
-        )  # id_ can be any bytes via "latin-1", here compressed
+        id2 = kef._deflate(id_.encode())  # id_ can be any bytes, here compressed
         cipher = kef.Cipher(key, id_, iterations)
         cipher2 = kef.Cipher(key, id2, iterations)
         iv = I_VECTOR[: kef.MODE_IVS.get(version["mode"], 0)]
@@ -1073,7 +1125,7 @@ def test_multi_wrapped_envelopes(m5stickv):
             id2, v2, iterations2, cipher_payload2 = parsed2
             assert v == v2
             assert iterations == iterations2
-            assert id_ == kef._reinflate(id2.encode("latin-1")).decode("latin-1")
+            assert id_ == kef._reinflate(id2)
             # print("\n" + id_)
         except:
             break
@@ -1096,7 +1148,7 @@ def test_report_rate_of_failure(m5stickv):
     for v in kef.VERSIONS:
         name = kef.VERSIONS[v]["name"]
         iv = I_VECTOR[: kef.MODE_IVS.get(kef.VERSIONS[v]["mode"], 0)]
-        e = kef.Cipher("key", "salt", 10000)
+        e = kef.Cipher(b"key", b"salt", 10000)
         encrs[v] = {
             "name": name,
             "iv": iv,
@@ -1189,7 +1241,7 @@ def test_report_rate_of_failure(m5stickv):
                         errs[v]["encrypt"][repr(err)] = 1
 
                 try:
-                    envelope = kef.wrap("salt", v, 10000, cipher)
+                    envelope = kef.wrap(b"salt", v, 10000, cipher)
                     assert kef.unwrap(envelope)[3] == cipher
                 except Exception as err:
                     kef_failed = True

@@ -80,19 +80,6 @@ SEEDS_JSON = (
 
 I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
 
-BROKEN_AUTH16_ENTROPIES = (
-    b"b#Cry<\xe5\x93\xf8\xf4\xafj\x89\xb4\xe3\x85",  # auth16 ends NUL suffix
-    b"\x03a\x83\xa9C\xc4.\x86\x90;4G\xfd\xf1S\xf9",  # auth16 ends 2*NUL suffix
-    b"f\xf3\x01j\x11\xad\xe7;\x97\x85\xa88c\xed\xf3g",  # auth16 ends 3*NUL suffix
-    b'\xc7P^\x82\xcd\x17(\xcd^\x95\x9c\xc5z\xa4\x19"',  # auth16 ends 4*NUL suffix
-)
-BROKEN_AUTH4_ENTROPIES = (
-    b"\x17\xef\xa2\x85\x86\xfd\x88\xa2\x81\x12\n\x03MDFz",  # auth4 ends NUL suffix
-    b"z\xa3\xd3\xa3U\xa0\xb5W\xb3a\x0f`u\xc2&!",  # auth4 ends 2*NUL suffix
-    b"\xcfum\xdfh\xdb\xb3p7\x1f}7\xcc\xcf\xa5\xda",  # auth4 ends 3*NUL suffix
-    b"A\xe7\x9f'\x17q%\x9c\x13\x12\x9b\xb9C\x15\xc6\x91",  # auth4 ends 4*NUL suffix
-)
-
 
 @pytest.fixture
 def mock_file_operations(mocker):

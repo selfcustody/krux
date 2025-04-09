@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import io
-import deflate
 import ucryptolib
 import hashlib
 
@@ -105,10 +103,9 @@ class Cipher:
     """More than just a helper for AES encrypt/decrypt. Enforces KEF VERSIONS rules"""
 
     def __init__(self, key, salt, iterations):
-        # latin-1 encoding enables all byte values for key and salt (KEF's id_)
-        self._key = hashlib.pbkdf2_hmac(
-            "sha256", key.encode("latin-1"), salt.encode("latin-1"), iterations
-        )
+        key = key if isinstance(key, bytes) else key.encode()
+        salt = salt if isinstance(salt, bytes) else salt.encode()
+        self._key = hashlib.pbkdf2_hmac("sha256", key, salt, iterations)
 
     def encrypt(self, plain, version, iv=b"", fail_unsafe=True):
         """AES encrypt according to KEF rules defined by version, returns payload bytes"""
@@ -360,8 +357,8 @@ def wrap(id_, version, iterations, payload):
     """
 
     try:
-        # latin-1 encoding enables all byte values in id_ (salt for key-stretch)
-        id_ = id_.encode("latin-1")
+        # when wrapping, be tolerant about id_ as bytes or str
+        id_ = id_ if isinstance(id_, bytes) else id_.encode()
         assert 0 <= len(id_) <= 255
         len_id = len(id_).to_bytes(1, "big")
     except:
@@ -406,7 +403,8 @@ def unwrap(kef_bytes):
     version = kef_bytes[1 + len_id]  # out-of-order reading to validate version early
     if version not in VERSIONS:
         raise ValueError("Invalid format")
-    id_ = kef_bytes[1 : 1 + len_id].decode("latin-1")
+    # When unwrapping, be strict returning id_ as bytes
+    id_ = kef_bytes[1 : 1 + len_id]
     kef_iterations = int.from_bytes(kef_bytes[2 + len_id : 5 + len_id], "big")
     if kef_iterations <= 10000:
         iterations = kef_iterations * 10000
@@ -458,6 +456,9 @@ def _unpad(some_bytes, pkcs_pad):
 
 def _deflate(data):
     """Compresses the given data using deflate module"""
+    import io
+    import deflate
+
     try:
         stream = io.BytesIO()
         with deflate.DeflateIO(stream) as d:
@@ -469,6 +470,9 @@ def _deflate(data):
 
 def _reinflate(data):
     """Decompresses the given data using deflate module"""
+    import io
+    import deflate
+
     try:
         with deflate.DeflateIO(io.BytesIO(data)) as d:
             return d.read()

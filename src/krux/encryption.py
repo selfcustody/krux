@@ -59,16 +59,11 @@ class MnemonicStorage:
         """in-the-wild, some `seeds.json` may have encrypted mnemonic words"""
 
         def stretch_key(key, salt, iterations):
-            return hashlib.pbkdf2_hmac(
-                "sha256", key.encode("latin-1"), salt.encode("latin-1"), iterations
-            )
+            key = key if isinstance(key, bytes) else key.encode()
+            salt = salt if isinstance(salt, bytes) else salt.encode()
+            return hashlib.pbkdf2_hmac("sha256", key, salt, iterations)
 
-        if not (
-            isinstance(key, str)
-            and isinstance(salt, str)
-            and isinstance(iterations, int)
-            and isinstance(payload, bytes)
-        ):
+        if not (isinstance(iterations, int) and isinstance(payload, bytes)):
             return None
 
         mode_name = [k for k, v in kef.MODE_NUMBERS.items() if v == mode][0]
@@ -211,10 +206,14 @@ class EncryptedQRCode:
         except:
             return None
 
+        try:
+            displayable_id = self.mnemonic_id.decode()
+        except UnicodeDecodeError:
+            displayable_id = repr(self.mnemonic_id)  # id_ could be any bytes
         return "\n".join(
             [
                 "Encrypted QR Code:",
-                "ID: " + self.mnemonic_id,
+                "ID: " + displayable_id,
                 "Version: " + version_name,
                 "Key iter.: " + str(self.iterations),
             ]
