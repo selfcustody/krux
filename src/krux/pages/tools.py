@@ -36,7 +36,6 @@ from ..format import generate_thousands_separator
 from ..sd_card import SDHandler
 from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
-from .encryption_ui import KEFEnvelope
 from ..qr import FORMAT_NONE
 
 
@@ -51,7 +50,7 @@ class Tools(Page):
                 [
                     (t("Check SD Card"), self.sd_check),
                     (t("Print Test QR"), self.print_test),
-                    (t("Create QR Code"), self.create_qr),
+                    (t("QR Code Tool"), self.qr_tool),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Flash Tools"), self.flash_tools),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
@@ -133,8 +132,50 @@ class Tools(Page):
         print_page.print_qr(title, title=title)
         return MENU_CONTINUE
 
+    def qr_tool(self):
+        """Handler for the 'QR Code Tool' menu item"""
+        qr_tool_menu = [
+            (t("Scan a QR"), self.scan_qr),
+            (t("New Text QR"), self.create_qr),
+            (t("New Encrypted QR"), self.create_encrypted_qr),
+        ]
+        Menu(self.ctx, qr_tool_menu).run_loop()
+        return MENU_CONTINUE
+
+    def scan_qr(self):
+        """Handler for the 'Scan a QR' menu item"""
+        from .qr_capture import QRCodeCapture
+
+        qr_scanner = QRCodeCapture(self.ctx)
+        contents, fmt = qr_scanner.qr_capture_loop()
+        print(
+            "\nscanned raw contents: {} {}, format: {}".format(
+                type(contents), repr(contents), fmt
+            )
+        )
+        if isinstance(contents, str):
+            if len(contents) != len(contents.encode()):
+                contents = contents.encode("latin-1")
+                print("must be on simulator, latin-1")
+        print("calling view_contents({} {})...".format(type(contents), repr(contents)))
+        return self.view_contents(contents, title="QR Contents")
+
     def create_qr(self):
-        """Handler for the 'Create QR Code' menu item"""
+        """Handler for the 'New Text QR' menu item"""
+        if not self.prompt(
+            t("Create QR code from text?"),
+            self.ctx.display.height() // 2,
+        ):
+            return MENU_CONTINUE
+        text = self.capture_from_keypad(
+            t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+        )
+        if text in ("", ESC_KEY):
+            return MENU_CONTINUE
+        return self.view_qr(contents=text, title=t("Text QR Code"))
+
+    def create_encrypted_qr(self):
+        """Handler for the 'New Encrypted QR' menu item"""
         if not self.prompt(
             t("Create QR code from text?"),
             self.ctx.display.height() // 2,
@@ -146,28 +187,57 @@ class Tools(Page):
         if text in ("", ESC_KEY):
             return MENU_CONTINUE
 
-        qr_type_menu = [
-            ("Plaintext", lambda: "plaintext"),
-            ("Encrypted", lambda: "encrypted"),
-        ]
-        idx, qr_type = Menu(self.ctx, qr_type_menu).run_loop()
-        if idx == len(qr_type_menu) - 1:
-            return MENU_CONTINUE
+        # from krux.baseconv import base_encode, base_decode
+        # text = base_encode(text, 43)
+        from .encryption_ui import KEFEnvelope
 
-        if qr_type == "encrypted":
-            kef = KEFEnvelope(self.ctx)
-            text = kef.seal_ui(text.encode(), override_settings=True)
-            title = t("Encrypted QR Code")
-            if len(kef.label):
-                title += ": " + kef.label
-        else:
-            title = t("Plaintext QR Code")
+        kef = KEFEnvelope(self.ctx)
+        contents = kef.seal_ui(text.encode(), override_settings=True)
+        return self.view_qr(contents=contents, title=t("Encrypted QR Code"))
 
+    def view_qr(self, contents, title):
+        """Reusable handler for viewing a QR code"""
         from .qr_view import SeedQRView
 
-        seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
+        print(contents, title)
+
+        seed_qr_view = SeedQRView(self.ctx, data=contents, title=title)
         seed_qr_view.display_qr(allow_export=True)
 
+        return MENU_CONTINUE
+
+    def view_contents(self, contents, title):
+        """Reusable handler for viewing text or binary contents"""
+
+        was_decrypted = False
+        while True:
+            if isinstance(contents, str):
+                break
+            from .encryption_ui import KEFEnvelope
+
+            kef = KEFEnvelope(self.ctx)
+            decrypted = kef.unseal_ui(contents)
+            print("decrypted", decrypted)
+            if decrypted is None:
+                break
+            was_decrypted = True
+            contents = decrypted
+
+        if was_decrypted:
+            title += ", " + t("decrypted")
+        if isinstance(contents, bytes):
+            try:
+                contents = contents.decode()
+            except:
+                from binascii import hexlify
+
+                contents = hexlify(contents).decode()
+                title += ", " + t("binary hex")
+
+        self.ctx.display.clear()
+        print(title, repr(contents))
+        self.ctx.display.draw_centered_text(title + ":\n\n" + contents)
+        self.ctx.input.wait_for_button()
         return MENU_CONTINUE
 
     def descriptor_addresses(self):

@@ -400,8 +400,11 @@ def unwrap(kef_bytes):
     Unwraps KEF Encryption Format bytes, returns tuple of parsed values
     """
     len_id = kef_bytes[0]
-    version = kef_bytes[1 + len_id]  # out-of-order reading to validate version early
-    if version not in VERSIONS:
+    try:
+        # out-of-order reading to validate version early
+        version = kef_bytes[1 + len_id]
+        assert version in VERSIONS
+    except:
         raise ValueError("Invalid format")
     # When unwrapping, be strict returning id_ as bytes
     id_ = kef_bytes[1 : 1 + len_id]

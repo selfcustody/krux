@@ -85,18 +85,21 @@ class KEFEnvelope(Page):
         """parses envelope, from kef.wrap()"""
         if self.ciphertext is not None:
             raise ValueError("KEF Envelope already parsed")
-        self.label, self.version, self.iterations, self.ciphertext = kef.unwrap(
-            kef_envelope
-        )
+        try:
+            self.label, self.version, self.iterations, self.ciphertext = kef.unwrap(
+                kef_envelope
+            )
+        except:
+            return False
         self.version_name = kef.VERSIONS[self.version]["name"]
         self.mode = kef.VERSIONS[self.version]["mode"]
         self.mode_name = [k for k, v in kef.MODE_NUMBERS.items() if v == self.mode][0]
         return True
 
-    def input_key_ui(self, creating=True):
+    def input_key_ui(self, creating=True, confirm=True):
         """calls ui to gather master key"""
         ui = EncryptionKey(self.ctx)
-        self.__key = ui.encryption_key(creating)
+        self.__key = ui.encryption_key(creating, confirm)
         return bool(self.__key)
 
     def input_version_ui(self):
@@ -181,13 +184,13 @@ class KEFEnvelope(Page):
             raise ValueError("KEF Envelope not yet parsed")
         try:
             displayable_label = self.label.decode()
-        except UnicodeDecodeError:
-            displayable_label = repr(self.label)
         except:
-            displayable_label = ""
+            from binascii import hexlify
+
+            displayable_label = "0x" + hexlify(self.label).decode()
         public_info = "\n".join(
             [
-                t("KEF Encrypted"),
+                t("KEF Encrypted") + " (" + str(len(self.ciphertext)) + " B)",
                 t("ID") + ": " + displayable_label,
                 t("Version") + ": " + self.version_name,
                 t("Key iter.") + ": " + str(self.iterations),
@@ -230,20 +233,19 @@ class KEFEnvelope(Page):
     def unseal_ui(self, kef_envelope=None, prompt_decrypt=True, display_plain=False):
         """implements ui to allow user to unseal a plaintext from a sealed KEF envelope"""
         if kef_envelope:
-            self.__parse(kef_envelope)
+            if not self.__parse(kef_envelope):
+                return None
         if not self.ciphertext:
             raise ValueError("KEF Envelope not yet parsed")
         if prompt_decrypt:
             if not self.public_info_ui(prompt_decrypt=prompt_decrypt):
                 return None
-        if not (self.__key or self.input_key_ui(creating=False)):
+        if not (self.__key or self.input_key_ui(creating=False, confirm=False)):
             return None
         cipher = kef.Cipher(self.__key, self.label, self.iterations)
-        try:
-            plaintext = cipher.decrypt(self.ciphertext, self.version)
-        except Exception as err:
-            print(repr(err))
-            return None
+        plaintext = cipher.decrypt(self.ciphertext, self.version)
+        if plaintext is None:
+            raise KeyError("Failed to decrypt")
         if display_plain:
             self.ctx.display.clear()
             try:
@@ -304,7 +306,7 @@ class EncryptionKey(Page):
             return t("Medium")
         return t("Weak")
 
-    def encryption_key(self, creating=False):
+    def encryption_key(self, creating=False, confirm=True):
         """Loads and returns an ecnryption key from keypad or QR code"""
         submenu = Menu(
             self.ctx,
@@ -335,10 +337,9 @@ class EncryptionKey(Page):
                     highlight_prefix=":",
                 )
 
-            if self.prompt(
-                t("Proceed?"),
-                BOTTOM_PROMPT_LINE,
-            ):
+            if not confirm:
+                return key
+            if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return key
         return None
 

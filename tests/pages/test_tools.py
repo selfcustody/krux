@@ -161,7 +161,7 @@ def test_create_qr(amigo, mocker):
     from krux.pages.tools import Tools
     from krux.input import BUTTON_ENTER
 
-    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER]
+    BTN_SEQUENCE = [BUTTON_ENTER]
 
     with patch("krux.pages.qr_view.SeedQRView") as Mocked_QRView:
         ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -170,7 +170,7 @@ def test_create_qr(amigo, mocker):
         test_tools.capture_from_keypad = mocker.MagicMock(return_value="test")
         test_tools.create_qr()
 
-        Mocked_QRView.assert_called_with(ctx, data="test", title="Plaintext QR Code")
+        Mocked_QRView.assert_called_with(ctx, data="test", title="Text QR Code")
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
