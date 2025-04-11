@@ -82,6 +82,8 @@
     "Error:": "Ошибка:",
     "Esc": "Выйти",
     "Explore files?": "Исследовать файлы?",
+    "Export contents as encrypted QR?": "Экспортировать содержимое как зашифрованный QR?",
+    "Export contents as plain QR?": "Экспортировать содержимое как простой QR-код?",
     "Exporting to SD card..": "Экспортирование на SD карту..",
     "Extended Public Key": "Расширенный Публичный Ключ",
     "Factory Settings": "Заводские Настройки",

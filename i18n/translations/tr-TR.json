@@ -82,6 +82,8 @@
     "Error:": "Hata:",
     "Esc": "Çıkış",
     "Explore files?": "Dosyaları ara?",
+    "Export contents as encrypted QR?": "İçerikler şifreli QR olarak dışa aktarılsın mı?",
+    "Export contents as plain QR?": "İçerikler düz QR olarak dışa aktarılsın mı?",
     "Exporting to SD card..": "SD karta aktarılıyor..",
     "Extended Public Key": "Genişletilmiş Public Key",
     "Factory Settings": "Fabrika Ayarları",

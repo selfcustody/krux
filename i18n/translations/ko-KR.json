@@ -82,6 +82,8 @@
     "Error:": "오류:",
     "Esc": "Esc",
     "Explore files?": "파일을 탐색하시겠습니까?",
+    "Export contents as encrypted QR?": "콘텐츠를 암호화된 QR로 내보내시겠습니까?",
+    "Export contents as plain QR?": "콘텐츠를 일반 QR로 내보내시겠습니까?",
     "Exporting to SD card..": "SD카드로 내보내는 중..",
     "Extended Public Key": "XPUB 내보내기",
     "Factory Settings": "공장 초기 설정",

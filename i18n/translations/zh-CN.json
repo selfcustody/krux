@@ -82,6 +82,8 @@
     "Error:": "错误:",
     "Esc": "退出",
     "Explore files?": "浏览文件？",
+    "Export contents as encrypted QR?": "将内容导出为加密二维码？",
+    "Export contents as plain QR?": "将内容导出为纯二维码？",
     "Exporting to SD card..": "导出到 SD 卡..",
     "Extended Public Key": "扩展公钥",
     "Factory Settings": "出厂设置",

@@ -82,6 +82,8 @@
     "Error:": "エラー:",
     "Esc": "エスク",
     "Explore files?": "アーカイブ探索?",
+    "Export contents as encrypted QR?": "コンテンツを暗号化されたQRとしてエクスポートしますか？",
+    "Export contents as plain QR?": "コンテンツをプレーンQRとしてエクスポートしますか？",
     "Exporting to SD card..": "SDカードへのエクスポート..",
     "Extended Public Key": "拡張公開キー",
     "Factory Settings": "初期設定",

@@ -160,39 +160,42 @@ class Tools(Page):
         print("calling view_contents({} {})...".format(type(contents), repr(contents)))
         return self.view_contents(contents, title="QR Contents")
 
-    def create_qr(self):
+    def create_qr(self, text=None):
         """Handler for the 'New Text QR' menu item"""
-        if not self.prompt(
-            t("Create QR code from text?"),
-            self.ctx.display.height() // 2,
-        ):
-            return MENU_CONTINUE
-        text = self.capture_from_keypad(
-            t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-        )
-        if text in ("", ESC_KEY):
-            return MENU_CONTINUE
+        if text is None:
+            if not self.prompt(
+                t("Create QR code from text?"),
+                self.ctx.display.height() // 2,
+            ):
+                return MENU_CONTINUE
+            text = self.capture_from_keypad(
+                t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            )
+            if text in ("", ESC_KEY):
+                return MENU_CONTINUE
         return self.view_qr(contents=text, title=t("Text QR Code"))
 
-    def create_encrypted_qr(self):
+    def create_encrypted_qr(self, text=None):
         """Handler for the 'New Encrypted QR' menu item"""
-        if not self.prompt(
-            t("Create QR code from text?"),
-            self.ctx.display.height() // 2,
-        ):
-            return MENU_CONTINUE
-        text = self.capture_from_keypad(
-            t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-        )
-        if text in ("", ESC_KEY):
-            return MENU_CONTINUE
+        if text is None:
+            if not self.prompt(
+                t("Create QR code from text?"),
+                self.ctx.display.height() // 2,
+            ):
+                return MENU_CONTINUE
+            text = self.capture_from_keypad(
+                t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            )
+            if text in ("", ESC_KEY):
+                return MENU_CONTINUE
 
         # from krux.baseconv import base_encode, base_decode
         # text = base_encode(text, 43)
         from .encryption_ui import KEFEnvelope
 
         kef = KEFEnvelope(self.ctx)
-        contents = kef.seal_ui(text.encode(), override_settings=True)
+        text = text if isinstance(text, bytes) else text.encode()
+        contents = kef.seal_ui(text, override_settings=True)
         return self.view_qr(contents=contents, title=t("Encrypted QR Code"))
 
     def view_qr(self, contents, title):
@@ -210,6 +213,8 @@ class Tools(Page):
         """Reusable handler for viewing text or binary contents"""
 
         was_decrypted = False
+        was_decoded = False
+        was_binary = False
         while True:
             if isinstance(contents, str):
                 break
@@ -228,16 +233,36 @@ class Tools(Page):
         if isinstance(contents, bytes):
             try:
                 contents = contents.decode()
+                was_decoded = True
             except:
                 from binascii import hexlify
 
+                suffix = " ({} B)".format(len(contents))
                 contents = hexlify(contents).decode()
-                title += ", " + t("binary hex")
+                was_binary, was_decoded = True, True
+                title += ", " + t("binary hex") + suffix
 
         self.ctx.display.clear()
         print(title, repr(contents))
         self.ctx.display.draw_centered_text(title + ":\n\n" + contents)
         self.ctx.input.wait_for_button()
+
+        self.ctx.display.clear()
+        if was_decrypted:
+            prompt = t("Export contents as plain QR?")
+            method = self.create_qr
+        else:
+            prompt = t("Export contents as encrypted QR?")
+            method = self.create_encrypted_qr
+        if self.prompt(prompt, self.ctx.display.height() // 2):
+            if was_decoded:
+                contents = contents.encode()
+            if was_binary:
+                from binascii import unhexlify
+
+                contents = unhexlify(contents)
+            return method(contents)
+
         return MENU_CONTINUE
 
     def descriptor_addresses(self):

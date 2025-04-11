@@ -82,6 +82,8 @@
     "Error:": "Erro:",
     "Esc": "Esc",
     "Explore files?": "Explorar arquivos?",
+    "Export contents as encrypted QR?": "Exportar conteúdo como QR criptografado?",
+    "Export contents as plain QR?": "Exportar conteúdo como QR simples?",
     "Exporting to SD card..": "Exportando para o cartão SD..",
     "Extended Public Key": "Chave Pública Estendida",
     "Factory Settings": "Configurações de Fábrica",

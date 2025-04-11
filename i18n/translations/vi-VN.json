@@ -82,6 +82,8 @@
     "Error:": "Lỗi:",
     "Esc": "Esc",
     "Explore files?": "Khám phá các tập tin?",
+    "Export contents as encrypted QR?": "Xuất nội dung dưới dạng QR được mã hóa?",
+    "Export contents as plain QR?": "Xuất nội dung dưới dạng QR thuần túy?",
     "Exporting to SD card..": "Xuất vào thẻ SD ..",
     "Extended Public Key": "Khóa công cộng",
     "Factory Settings": "Cài đặt Gốc",
