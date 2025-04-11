@@ -18,11 +18,12 @@ Addresses are displayed in groups of 4, separated by spaces, for better readabil
 ### Other Bug Fixes and Optimizations
 - Fix printing words instead of numbers when using "Backup Mnemonic > Other formats > Numbers".
 - Added fingerprint to mnemonic preview and editor.
+- Show fingerprint preview when changing wallet passphrase.
 - Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
 - Optimized the way we check device's board values.
 - Added QR Code to About screen.
 - Wallet Descriptor now validates and warns if it was unable to determine change addresses.
-- Hide change address menu option when index not available.
+- Hide change address menu option when not available in the wallet descriptor loaded.
 - Other small text changes for clarity and translation simplification.
 
 

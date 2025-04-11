@@ -99,7 +99,9 @@ class Home(Page):
         from ...wallet import Wallet
 
         passphrase_editor = PassphraseEditor(self.ctx)
-        passphrase = passphrase_editor.load_passphrase_menu()
+        passphrase = passphrase_editor.load_passphrase_menu(
+            self.ctx.wallet.key.mnemonic
+        )
         if passphrase is None:
             return MENU_CONTINUE
 

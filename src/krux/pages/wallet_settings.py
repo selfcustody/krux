@@ -68,7 +68,7 @@ class PassphraseEditor(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
 
-    def load_passphrase_menu(self):
+    def load_passphrase_menu(self, mnemonic):
         """Load a passphrase from keypad or QR code"""
         passphrase = ""
         while True:
@@ -85,13 +85,20 @@ class PassphraseEditor(Page):
                 return None
 
             from ..themes import theme
+            from ..key import Key
 
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
-                passphrase, offset_y=DEFAULT_PADDING + FONT_HEIGHT
+                Key.extract_fingerprint(mnemonic, passphrase),
+                color=theme.highlight_color,
             )
             self.ctx.display.draw_hcentered_text(
-                t("Passphrase") + ":", color=theme.highlight_color
+                t("Passphrase") + ":",
+                DEFAULT_PADDING + FONT_HEIGHT * 2,
+                theme.highlight_color,
+            )
+            self.ctx.display.draw_hcentered_text(
+                passphrase, DEFAULT_PADDING + FONT_HEIGHT * 3
             )
             if self.prompt(
                 t("Proceed?"),

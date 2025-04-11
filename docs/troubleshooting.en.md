@@ -43,7 +43,12 @@ If your device is not charging or being recognized as expected, try using a diff
 If the device behaves this way when connected to the computer, Windows is known to have issues with USB-C devices. If you are experiencing random crashes or even reboots and your device does not have a battery, try using a phone charger or other power source such as a power bank.
 
 ### Error when flashing
-If flashing fails with an error: `Greeting fail, check serial port (SLIP receive timeout (wait frame start))` or `[ERROR] No vaild COM Port found in Auto Detect, Check Your Connection or Specify One by --port/-p`, double check the command used. Most of devices need to pass the argument `-B goE` to *ktool*, but `dock` and `wonder_mv` uses the argument `-B dan` instead. For `yahboom` you also need to manually specify the port using the `-p` argument. 
+If flashing fails with an error: `Greeting fail, check serial port (SLIP receive timeout (wait frame start))` or `[ERROR] No vaild COM Port found in Auto Detect, Check Your Connection or Specify One by --port/-p`, double check the command used. Most of devices need to pass the argument `-B goE` to *ktool*, but `dock` and `wonder_mv` uses the argument `-B dan` instead. For `yahboom` you also need to manually specify the port using the `-p` argument.
+
+----8<----
+error-flashing-windows.en.txt
+----8<----
+
 
 ## **After Installing**
 

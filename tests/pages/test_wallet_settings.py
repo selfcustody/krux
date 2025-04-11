@@ -31,7 +31,7 @@ def test_type_passphrase_esc(m5stickv, mocker):
     ]
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     passphrase_editor = PassphraseEditor(ctx)
-    test_passphrase = passphrase_editor.load_passphrase_menu()
+    test_passphrase = passphrase_editor.load_passphrase_menu(ctx.key.mnemonic)
 
     assert test_passphrase is None
 
