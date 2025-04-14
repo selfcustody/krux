@@ -273,6 +273,8 @@ try:
                     buttons.buttons_control.page_prev_event_flag = True
             if event.type == pg.MOUSEBUTTONDOWN:
                 ft6x36.touch_control.trigger_event()
+            if event.type == pg.ACTIVEEVENT and event.gain:
+                pg.display.flip()
 
 except KeyboardInterrupt:
     shutdown()
