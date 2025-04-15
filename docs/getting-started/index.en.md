@@ -1,4 +1,4 @@
-<img src="../img/krux-devices.jpg" style="width: 40%; min-width: 260px;" align="right">
+<img src="../img/krux-devices.jpg" style="width: 40%; min-width: 260px;" class="align-right">
 
 Krux is open-source Bitcoin signing firmware for devices with the K210 chipset; also known as a hardware signer. 
 
@@ -10,6 +10,7 @@ These wallet coordinators are currently **compatible with Krux**:
 
 - [Sparrow Wallet](https://www.sparrowwallet.com/) (desktop)
 - [Specter Desktop](https://specter.solutions/) (desktop)
+- [Liana](https://wizardsardine.com/liana/) (desktop)
 - [Nunchuk](https://nunchuk.io/) (mobile)
 - [BlueWallet](https://bluewallet.io/) (mobile)
 
