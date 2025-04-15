@@ -56,16 +56,16 @@ class GCodeGenerator(Printer):
 
     def on_xy_gcode(self, gcode):
         """Handle xy gcode preprocessing"""
-        if Settings().hardware.printer.cnc.machine_type == "laser":
+        if Settings().hardware.printer.cnc.head_type == "laser":
             self.on_gcode(
-                (gcode + " S{}").format(Settings().hardware.printer.cnc.tool_speed)
+                (gcode + " S{}").format(Settings().hardware.printer.cnc.head_power)
             )
         else:
             self.on_gcode(gcode)
 
     def on_z_gcode(self, gcode):
         """Handle z gcode preprocessing"""
-        if Settings().hardware.printer.cnc.machine_type == "router":
+        if Settings().hardware.printer.cnc.head_type == "router":
             self.on_gcode(gcode)
 
     def on_gcode(self, gcode):
@@ -102,7 +102,7 @@ class GCodeGenerator(Printer):
         self.on_gcode("G54")  # coord system 1
         self.on_gcode("G90")  # non-incremental motion
         self.on_gcode("G94")  # feed/minute mode
-        if Settings().hardware.printer.cnc.machine_type == "laser":
+        if Settings().hardware.printer.cnc.head_type == "laser":
             self.on_gcode("$32=1")  # enable laser mode
             self.on_gcode("M4")  # enable Dynamic Laser Power Mode
 
