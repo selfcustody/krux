@@ -72,11 +72,9 @@ class UART:
     def __init__(self, pin, baudrate):
         pass
 
-    def read(self, num_bytes):
-        if (
-            simulating_printer
-            and Settings().hardware.printer.driver == THERMAL_ADAFRUIT_TXT
-        ):
+    def read(self):
+        if (simulating_printer or
+            Settings().hardware.printer.driver != THERMAL_ADAFRUIT_TXT):
             return chr(0b00000000)
         return None
 
