@@ -111,6 +111,8 @@
     "Go": "OK",
     "Good entropy": "Хорошая энтропия",
     "Hardware": "Аппаратное Обеспечение",
+    "Tool head speed / power": "Head power [RU]",
+    "Tool head type": "Head type [RU]",
     "Hex Public Key": "Шестнадцатеричный Публичный Ключ",
     "Hexadecimal": "Шестнадцатеричный",
     "Hide Mnemonics": "Скрыть мнемоники",
