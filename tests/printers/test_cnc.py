@@ -29,12 +29,70 @@ def mock_uart_cls(mocker):
     return MockUART
 
 
-def test_init(mocker, m5stickv):
+def test_init_fileprinter(mocker, m5stickv):
     from krux.printers.cnc import FilePrinter
 
     p = FilePrinter()
-
     assert isinstance(p, FilePrinter)
+
+
+def test_init_grblprinter(mocker, m5stickv):
+    from krux.printers.cnc import GRBLPrinter
+
+    p = GRBLPrinter()
+    assert isinstance(p, GRBLPrinter)
+
+
+def test_init_plunge_feed_value_compliance(mocker, m5stickv):
+    from krux.printers.cnc import GCodeGenerator
+    from krux.krux_settings import Settings
+
+    with pytest.raises(ValueError) as e:
+        Settings().hardware.printer.cnc.plunge_rate = 5
+        Settings().hardware.printer.cnc.feed_rate = 2
+        p = GCodeGenerator()
+
+
+def test_init_pass_cut_value_compliance(mocker, m5stickv):
+    from krux.printers.cnc import GCodeGenerator
+    from krux.krux_settings import Settings
+
+    with pytest.raises(ValueError) as e:
+        Settings().hardware.printer.cnc.depth_per_pass = 2
+        Settings().hardware.printer.cnc.cut_depth = 1
+        p = GCodeGenerator()
+
+
+def test_on_xy_gcode(mocker, m5stickv):
+    from krux.printers.cnc import FilePrinter
+    from krux.krux_settings import Settings
+
+    Settings().hardware.printer.cnc.head_type = "router"
+    with mocker.patch.object(FilePrinter, 'on_gcode', return_value=None) as mock_method:
+        p = FilePrinter()
+        p.on_xy_gcode("TEST")
+    p = FilePrinter()
+    p.on_gcode.assert_called_with("TEST")
+
+    Settings().hardware.printer.cnc.head_type = "laser"
+    with mocker.patch.object(FilePrinter, 'on_gcode', return_value=None) as mock_method:
+        p = FilePrinter()
+        p.on_xy_gcode("TEST")
+    p = FilePrinter()
+    p.on_gcode.assert_called_with("TEST S1000")
+
+
+def test_on_gcode(mocker, m5stickv):
+    from krux.printers.cnc import GCodeGenerator
+    with pytest.raises(NotImplementedError) as e:
+        p = GCodeGenerator()
+        p.on_gcode("!")
+
+
+def test_qr_data_width(mocker, m5stickv):
+    from krux.printers.cnc import GCodeGenerator
+    p = GCodeGenerator()
+    assert 33 == p.qr_data_width()
 
 
 def test_clear(mocker, m5stickv):
@@ -48,7 +106,7 @@ def test_clear(mocker, m5stickv):
     assert p.file is None
 
 
-def test_print_qr_code_with_row_cutmethod(mocker, m5stickv, mocker_sd_card):
+def test_print_router_qr_code_with_row_cutmethod(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
     from krux.krux_settings import Settings
@@ -82,7 +140,7 @@ def test_print_qr_code_with_row_cutmethod(mocker, m5stickv, mocker_sd_card):
     krux.printers.cnc.wdt.feed.assert_called()
 
 
-def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv, mocker_sd_card):
+def test_print_router_qr_code_with_spiral_cutmethod(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
     from krux.krux_settings import Settings
@@ -116,7 +174,7 @@ def test_print_qr_code_with_spiral_cutmethod(mocker, m5stickv, mocker_sd_card):
     krux.printers.cnc.wdt.feed.assert_called()
 
 
-def test_print_qr_code_inverted(mocker, m5stickv, mocker_sd_card):
+def test_print_router_qr_code_inverted(mocker, m5stickv, mocker_sd_card):
     import krux
     from krux.printers.cnc import FilePrinter
     from krux.krux_settings import Settings
@@ -148,6 +206,50 @@ def test_print_qr_code_inverted(mocker, m5stickv, mocker_sd_card):
     krux.printers.cnc.wdt.feed.assert_called()
 
 
+def test_print_laser_qr_code(mocker, m5stickv, mocker_sd_card):
+    import krux
+    from krux.printers.cnc import FilePrinter
+    from krux.krux_settings import Settings
+    import os
+
+    gcode = list(
+        map(
+            mocker.call,
+            open(
+                os.path.join(
+                    os.path.dirname(__file__), FILES_FOLDER, "qr_laser.nc"
+                ),
+                "r",
+            ).readlines(),
+        )
+    )
+
+    Settings().hardware.printer.cnc.invert = False
+    Settings().hardware.printer.cnc.cut_method = "row"
+    Settings().hardware.printer.cnc.unit = "mm"
+    Settings().hardware.printer.cnc.flute_diameter = 0.2
+    Settings().hardware.printer.cnc.plunge_rate = 150
+    Settings().hardware.printer.cnc.feed_rate = 300
+    Settings().hardware.printer.cnc.cut_depth = 0.01
+    Settings().hardware.printer.cnc.depth_per_pass = 0.01
+    Settings().hardware.printer.cnc.part_size = 34
+    Settings().hardware.printer.cnc.border_padding = 0.0
+    Settings().hardware.printer.cnc.head_type = "laser"
+    Settings().hardware.printer.cnc.head_power = 500
+
+    p = FilePrinter()
+
+    m = mocker.mock_open()
+    mocker.patch("builtins.open", m, create=True)
+
+    p.print_qr_code(TEST_QR_CODE)
+
+    handle = m()
+    handle.write.assert_has_calls(gcode)
+
+    krux.printers.cnc.wdt.feed.assert_called()
+
+
 def test_print_qr_code_to_grbl(mocker, m5stickv, mock_uart_cls):
     mocker.patch("krux.printers.cnc.UART", new=mock_uart_cls)
     import krux
@@ -161,17 +263,30 @@ def test_print_qr_code_to_grbl(mocker, m5stickv, mock_uart_cls):
     p = GRBLPrinter()
     mocker.spy(p, "write_bytes")
 
-    # Patch the write method of p.uart_conn
     mock_write = mocker.patch.object(p.uart_conn, "write")
 
-    # Patch the read method of p.uart_conn, always returning expected response after sending ^C at beginning of grbl connection
-    mock_read = mocker.patch.object(
+    with pytest.raises(ValueError) as e:
+        mocker.patch.object(
+            p.uart_conn, "read", return_value=None
+        )
+        p.print_qr_code(bytearray(b"\x00"))
+
+    with pytest.raises(ValueError) as e:
+        mocker.patch.object(
+            p.uart_conn, "read", return_value="nok".encode()
+        )
+        p.print_qr_code(bytearray(b"\x00"))
+
+    with pytest.raises(ValueError) as e:
+        mocker.patch.object(
+            p.uart_conn, "read", return_value="nok\n".encode()
+        )
+        p.print_qr_code(bytearray(b"\x00"))
+
+    mocker.patch.object(
         p.uart_conn, "read", return_value="[VER:1.1\n".encode()
     )
-
-    # gcode generation is already tested on file printer tests, we test against an empty qr code here
     p.print_qr_code(bytearray(b"\x00"))
-
     mock_write.assert_has_calls(
         [
             mocker.call(b"$"),
@@ -179,3 +294,13 @@ def test_print_qr_code_to_grbl(mocker, m5stickv, mock_uart_cls):
             mocker.call(b"\n"),
         ]
     )
+
+    mocker.patch.object(
+        p.uart_conn, "read", return_value=None
+    )
+    assert None == p.transmit("!")
+
+    mocker.patch.object(
+        p.uart_conn, "read", return_value="ok"
+    )
+    assert "ok" == p.transmit("M4")
