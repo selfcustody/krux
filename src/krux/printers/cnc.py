@@ -54,6 +54,20 @@ class GCodeGenerator(Printer):
         if self.pass_depth > self.cut_depth:
             raise ValueError("depth per pass must be less than or equal to cut depth")
 
+    def on_xy_gcode(self, gcode):
+        """Handle xy gcode preprocessing"""
+        if Settings().hardware.printer.cnc.machine_type == "laser":
+            self.on_gcode(
+                (gcode + " S{}").format(Settings().hardware.printer.cnc.tool_speed)
+            )
+        else:
+            self.on_gcode(gcode)
+
+    def on_z_gcode(self, gcode):
+        """Handle z gcode preprocessing"""
+        if Settings().hardware.printer.cnc.machine_type == "router":
+            self.on_gcode(gcode)
+
     def on_gcode(self, gcode):
         """Receives gcode"""
         raise NotImplementedError()
@@ -88,6 +102,9 @@ class GCodeGenerator(Printer):
         self.on_gcode("G54")  # coord system 1
         self.on_gcode("G90")  # non-incremental motion
         self.on_gcode("G94")  # feed/minute mode
+        if Settings().hardware.printer.cnc.machine_type == "laser":
+            self.on_gcode("$32=1")  # enable laser mode
+            self.on_gcode("M4")  # enable Dynamic Laser Power Mode
 
         num_passes = math.ceil(self.cut_depth / self.pass_depth)
         for p in range(num_passes):
@@ -134,17 +151,17 @@ class GCodeGenerator(Printer):
         corner_y = self.border_padding + (y * cell_size) + flute_radius
 
         # Lift the bit
-        self.on_gcode(G0_Z % self.pass_depth)
+        self.on_z_gcode(G0_Z % self.pass_depth)
 
         # Rapid position to top-left cell corner
         self.on_gcode(G0_XY % (corner_x, corner_y))
 
         # Smoothly descend to zero
-        self.on_gcode(G1_Z % (0, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (0, self.plunge_rate))
 
         # Go to starting position and smoothly plunge
-        self.on_gcode(G1_XY % (corner_x, corner_y, self.feed_rate))
-        self.on_gcode(G1_Z % (-plunge_depth, self.plunge_rate))
+        self.on_xy_gcode(G1_XY % (corner_x, corner_y, self.feed_rate))
+        self.on_z_gcode(G1_Z % (-plunge_depth, self.plunge_rate))
 
         # Cut row by row
         num_rows = math.floor(cell_size / flute_radius)
@@ -157,11 +174,11 @@ class GCodeGenerator(Printer):
             )
             if j % 2 != 0:
                 cut_start, cut_end = cut_end, cut_start
-            self.on_gcode(G1_XY % cut_start)
-            self.on_gcode(G1_XY % cut_end)
+            self.on_xy_gcode(G1_XY % cut_start)
+            self.on_xy_gcode(G1_XY % cut_end)
 
         # Smoothly lift the bit
-        self.on_gcode(G1_Z % (self.pass_depth, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (self.pass_depth, self.plunge_rate))
 
     def spiral_cut_cell(self, x, y, cell_size, plunge_depth):
         """Hollows out the specified cell by starting at the edge of the cell and
@@ -187,19 +204,19 @@ class GCodeGenerator(Printer):
         origin_bottom_left = (origin_top_left[x_idx], origin_bottom_right[y_idx])
 
         # Lift the bit
-        self.on_gcode(G0_Z % self.pass_depth)
+        self.on_z_gcode(G0_Z % self.pass_depth)
 
         # Rapid position to top-left cell corner
         self.on_gcode(G0_XY % (origin_top_left[x_idx], origin_top_left[y_idx]))
 
         # Smoothly descend to zero
-        self.on_gcode(G1_Z % (0, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (0, self.plunge_rate))
 
         # Go to starting position and smoothly plunge
-        self.on_gcode(
+        self.on_xy_gcode(
             G1_XY % (origin_top_left[x_idx], origin_top_left[y_idx], self.feed_rate)
         )
-        self.on_gcode(G1_Z % (-plunge_depth, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (-plunge_depth, self.plunge_rate))
 
         # Cut in a spiral moving inwards
         j = 0
@@ -231,22 +248,24 @@ class GCodeGenerator(Printer):
             if done:
                 break
 
-            self.on_gcode(G1_XY % (top_left[x_idx], top_left[y_idx], self.feed_rate))
-            self.on_gcode(G1_XY % (top_right[x_idx], top_right[y_idx], self.feed_rate))
-            self.on_gcode(
+            self.on_xy_gcode(G1_XY % (top_left[x_idx], top_left[y_idx], self.feed_rate))
+            self.on_xy_gcode(
+                G1_XY % (top_right[x_idx], top_right[y_idx], self.feed_rate)
+            )
+            self.on_xy_gcode(
                 G1_XY % (bottom_right[x_idx], bottom_right[y_idx], self.feed_rate)
             )
-            self.on_gcode(
+            self.on_xy_gcode(
                 G1_XY % (bottom_left[x_idx], bottom_left[y_idx], self.feed_rate)
             )
-            self.on_gcode(
+            self.on_xy_gcode(
                 G1_XY % (top_left[x_idx], top_left[y_idx] - j * incr, self.feed_rate)
             )
 
             j += 1
 
         # Smoothly lift the bit
-        self.on_gcode(G1_Z % (self.pass_depth, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (self.pass_depth, self.plunge_rate))
 
 
 class FilePrinter(GCodeGenerator):

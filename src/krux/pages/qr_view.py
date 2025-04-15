@@ -420,7 +420,9 @@ class SeedQRView(Page):
                         y = y_index * scale
                         scale_x = scale
                         scale_y = scale
-                        square = 'x="{}" y="{}" width="{}" height="{}"'.format(x,y,scale_x,scale_y)
+                        square = 'x="{}" y="{}" width="{}" height="{}"'.format(
+                            x, y, scale_x, scale_y
+                        )
                         f.write(
                             '<rect stroke="black" stroke-width="0" {} fill="black"/>\n'.format(
                                 square

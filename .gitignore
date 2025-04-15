@@ -84,3 +84,8 @@ krux-*/ktool*
 
 # IDE files
 .vscode
+ktool.py
+src/krux/metadata.py--
+mkdocs.yml--
+*.code-workspace
+*/.DS_Store

@@ -195,6 +195,8 @@ class CNCSettings(SettingsNamespace):
     depth_per_pass = NumberSetting(float, "depth_per_pass", 0.03125, [0.0001, 10000])
     part_size = NumberSetting(float, "part_size", 3.5, [0.0001, 10000])
     border_padding = NumberSetting(float, "border_padding", 0.0625, [0.0001, 10000])
+    machine_type = CategorySetting("machine_type", "router", ["router", "laser"])
+    tool_speed = NumberSetting(int, "tool_speed", 1000, [0, 1000])
 
     def __init__(self):
         self.grbl = GRBLSettings()
@@ -212,6 +214,8 @@ class CNCSettings(SettingsNamespace):
             "depth_per_pass": t("Depth Per Pass"),
             "part_size": t("Part Size"),
             "border_padding": t("Border Padding"),
+            "machine_type": t("Machine type"),
+            "tool_speed": t("Tool speed"),
             "grbl": "GRBL",
         }[attr]
 
