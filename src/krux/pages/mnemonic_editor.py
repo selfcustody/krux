@@ -86,8 +86,6 @@ class MnemonicEditor(Page):
             wordlist = WORDLIST
         if len(prefix) > 0:
             letter = prefix[0]
-            if letter not in self.search_ranges:
-                return None
             start, stop = self.search_ranges[letter]
             matching_words = list(
                 filter(
@@ -109,8 +107,6 @@ class MnemonicEditor(Page):
         if len(prefix) == 0:
             return self.search_ranges.keys()
         letter = prefix[0]
-        if letter not in self.search_ranges:
-            return ""
         start, stop = self.search_ranges[letter]
         return {
             word[len(prefix)]
