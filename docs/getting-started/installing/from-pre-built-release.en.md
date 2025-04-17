@@ -36,7 +36,7 @@ Extract the latest version of Krux you downloaded and enter the folder:
 unzip {{latest_krux}}.zip && cd {{latest_krux}}
 ```
 
-Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube` or `yahboom` (to yahboom you may need to manually specify the port, for example `/dev/ttyUSB0` on Linux or `COM6` on Windows):
+Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube` or `yahboom` (to Yahboom you may need to manually specify the port, for example `/dev/ttyUSB0` on Linux or `COM6` on Windows):
 ```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```

@@ -61,7 +61,10 @@ class Addresses(Page):
 
     def list_address_type(self, addr_type=0):
         """Handler for the 'receive addresses' or 'change addresses' menu item"""
-        if self.ctx.wallet.is_multisig() and not self.ctx.wallet.is_loaded():
+        if not self.ctx.wallet.is_loaded() and (
+            self.ctx.wallet.is_multisig() or self.ctx.wallet.is_miniscript()
+        ):
+            self.flash_error(t("Please load a wallet output descriptor"))
             return MENU_CONTINUE
 
         loading_txt = (

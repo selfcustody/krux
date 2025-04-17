@@ -99,10 +99,10 @@ Few Maix Amigo screens are different, here you can customize the `BGR Colors`, `
 <img src="../../img/maixpy_m5stickv/printer-options-250.png" align="right" class="m5stickv">
 <img src="../../img/maixpy_amigo/printer-options-300.png" align="right" class="amigo">
 
-You can set up a TTL serial thermal printer or tell Krux to store a GRBL CNC instructions file on an SD card to machine QR codes.
+You can set up a TTL serial thermal printer or GRBL. It is also possible to store a GRBL g-code CNC instructions file on an SD card to engrave QR codes.
 
 #### CNC
-Define several machining parameters according to the desired size, material you'll use, and your CNC characteristics and capabilities.
+Define several machining parameters according to the desired size, material you'll use, and your CNC characteristics and capabilities. See [CNC Engraving](features/cnc.md) for more details.
 
 #### Thermal
 Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can change it here.
@@ -115,7 +115,7 @@ Also setup the TX Pin you'll use (i.e., 35 on M5StickV, 7 on Maix Amigo, 8 on Ya
 <img src="../../img/maixpy_m5stickv/settings-printer-driver-250.png" align="right" class="m5stickv">
 <img src="../../img/maixpy_amigo/settings-printer-driver-300.png" align="right" class="amigo">
 
-Here you choose between `Thermal`, `CNC` or `none` (default). Leave this setting to `none` if you won't use a printer and don't want to be bothered by print prompts.
+Here you choose between `thermal/adafruit`, `cnc/file`, `cnc/grbl` or `none` (default). Leave this setting to `none` if you won't use a printer and don't want to be bothered by print prompts.
 
 <div style="clear: both"></div>
 

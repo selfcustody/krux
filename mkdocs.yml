@@ -103,6 +103,7 @@ nav:
     - Features:
       - Encrypted Mnemonics: getting-started/features/encrypted-mnemonics.en.md
       - Printing: getting-started/features/printing.en.md
+      - CNC Engraving: getting-started/features/cnc.en.md
       - SD Card Updates: getting-started/features/sd-card-update.en.md
       - Tools: getting-started/features/tools.en.md
       - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md

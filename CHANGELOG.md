@@ -15,9 +15,14 @@ When the value of the settings category is boolean (True/False), it will be disp
 ### More Readable Address 
 Addresses are displayed in groups of 4, separated by spaces, for better readability.
 
+### New CNC Printer and Fixes (OpenBuilds GRBL 1.1)
+- Fixed CNC/FilePrinter to work with the Optimized QR codes from v24.0.3.0;
+- New CNC/GRBLPrinter can print directly to CNC via serial.
+
 ### Other Bug Fixes and Optimizations
 - Fix printing words instead of numbers when using "Backup Mnemonic > Other formats > Numbers".
 - Added fingerprint to mnemonic preview and editor.
+- Show fingerprint preview when changing wallet passphrase.
 - Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
 - Optimized the way we check device's board values.
 - Added QR Code to About screen.

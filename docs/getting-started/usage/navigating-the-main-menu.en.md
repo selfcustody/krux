@@ -19,7 +19,7 @@ If you set a [printer](../settings.md/#printer), it will also give the option to
 <img src="../../../img/maixpy_m5stickv/backup-qr-plain-text-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-qr-plain-text-300.png" align="right" class="amigo">
 
-Generate a QR containing the mnemonic words as regular text, where words are separated by spaces. Any QR code can be printed if a thermal printer driver is set.
+Generate a QR containing the mnemonic words as regular text, where words are separated by spaces. Like any QR code, it can be printed after setting up the printer driver.
 
 <div style="clear: both"></div>
 
@@ -43,7 +43,7 @@ Words are converted to their BIP39 numeric indexes, those numbers are then conca
 
 - **Encrypted QR Code**
 
-This option converts the encrypted mnemonic into a QR code. Enter an encryption key and, optionally, a custom ID. When you scan this QR code through **Load Mnemonic -> Via Camera -> QR Code**, you will be prompted to enter the decryption key to load the mnemonic stored in it. Like any QR code, it can be printed if a thermal printer driver is set up.
+This option converts the encrypted mnemonic into a QR code. Enter an encryption key and, optionally, a custom ID. When you scan this QR code through **Load Mnemonic -> Via Camera -> QR Code**, you will be prompted to enter the decryption key to load the mnemonic stored in it. Like any QR code, it can be printed after setting up the printer driver.
 
 **Transcribing QR Codes**
 
@@ -106,13 +106,12 @@ This metal backup format represents the BIP39 mnemonic word's numbers (1-2048). 
 <img src="../../../img/maixpy_m5stickv/backup-tiny-seed-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-tiny-seed-300.png" align="right" class="amigo">
 
-This metal backup format represents the BIP39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format if a thermal printer driver is set.
-
+This metal backup format represents the BIP39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format after setting up the thermal printer driver.
 <div style="clear: both"></div>
 
 ### Extended Public Key
 
-A menu will be presented with options to display your master extended public key (xpub) as text and as a QR code. Depending on the script type or whether a single-sig or multisig wallet was loaded, the options shown will be *xpub, ypub, zpub or Zpub*. When displayed as text, the extended public key can be stored on an SD card if available. If you choose to export a QR code, you can not only scan it but also save it as an image on an SD card or print it if a thermal printer is attached.
+A menu will be presented with options to display your master extended public key (xpub) as text and as a QR code. Depending on the script type or whether a single-sig or multisig wallet was loaded, the options shown will be *xpub, ypub, zpub or Zpub*. When displayed as text, the extended public key can be stored on an SD card if available. If you choose to export a QR code, you can not only scan it but also save it as an image on an SD card or be printed, after setting up the printer driver.
 
 <img src="../../../img/maixpy_amigo/extended-public-key-menu-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-text-300.png" class="amigo">
@@ -163,7 +162,7 @@ When you select the `Wallet Descriptor` option for the first time, you will be p
 <img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-2-250.png" class="m5stickv">
 <img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-3-250.png" class="m5stickv">
 
-Re-access the "Wallet Descriptor" option after loading your wallet to view its name and a QR code containing the originally loaded data. If an SD card is inserted, you can save the descriptor for future use without a coordinator's assistance. Additionally, if a thermal printer is attached, you can print the QR code.
+Re-access the "Wallet Descriptor" option after loading your wallet to view its name and a QR code containing the originally loaded data. If an SD card is inserted, you can save the descriptor for future use without a coordinator's assistance. Like any QR code, it can be printed after setting up the printer driver.
 
 Krux also allows you to verify a descriptor's receive and change addresses without the need to load private keys. Simply turn on your Krux, access **Tools -> Descriptor Addresses**, and load a trusted descriptor from a QR code or SD card.
 
@@ -232,7 +231,7 @@ Scan, verify, export or print your wallet addresses.
 
 This option turns on the camera and allows you to scan in a QR code of an address. Upon scanning, it will render its QR code back to the display along with the address below.
 
-**Tip**: You could use this feature to scan the address of someone you want to send coins to and display the QR back to your wallet coordinator rather than copy-pasting an address. If you have a thermal printer attached, you can also print this QR code. 
+**Tip**: You could use this feature to scan the address of someone you want to send coins to and display the QR back to your wallet coordinator rather than copy-pasting an address. Like any QR code, it can be printed after setting up the printer driver.
 
 After this, you will be asked if you want to check that the address belongs to your wallet. If you confirm, it will exhaustively search through addresses derived from your wallet find a match. This is an extra security check to verify that the address generated by the wallet coordinator is authentic and belongs to your wallet.
 

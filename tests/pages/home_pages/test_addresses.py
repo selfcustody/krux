@@ -361,9 +361,9 @@ def test_scan_change_address(mocker, m5stickv, tdata):
 
 
 def test_scan_address_menu(mocker, m5stickv, tdata):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
     from krux.pages.home_pages.addresses import Addresses
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
     ctx = create_ctx(mocker, [BUTTON_PAGE_PREV, BUTTON_ENTER], wallet, None)
@@ -373,19 +373,23 @@ def test_scan_address_menu(mocker, m5stickv, tdata):
 
 
 def test_list_receive_addresses(mocker, m5stickv, tdata):
+    from krux.format import format_address
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.pages import MENU_CONTINUE
     from krux.pages.home_pages.addresses import Addresses
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_PMOFN
     from krux.settings import THIN_SPACE
-    from krux.format import format_address
+    from krux.wallet import Wallet
 
     cases = [
-        # Single-sig, loaded, No print prompt, show address nº1
+        # 1 - Single-sig, no descriptor, unloaded, receive addr,
+        # No print prompt, show address nº1
         (
             tdata.SINGLESIG_12_WORD_KEY,
-            tdata.SPECTER_SINGLESIG_WALLET_DATA,
+            None,
             False,
+            0,
+            "show_address",
             "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
             None,
             [
@@ -400,40 +404,151 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Leave
             ],
         ),
-        # TODO: Add cases for multisig and thermal printing
-    ]
-    for case in cases:
-        wallet = Wallet(case[0])
-        if case[2]:
-            wallet.load(case[1], FORMAT_PMOFN)
-
-        ctx = create_ctx(mocker, case[5], wallet, case[4])
-        addresses_ui = Addresses(ctx)
-        mocker.spy(addresses_ui, "show_address")
-
-        addresses_ui.list_address_type()
-
-        addresses_ui.show_address.assert_called_with(
-            case[3], title="0." + THIN_SPACE + format_address(case[3])
-        )
-        assert ctx.input.wait_for_button.call_count == len(case[5])
-
-
-def test_list_change_addresses(mocker, m5stickv, tdata):
-    from krux.pages.home_pages.addresses import Addresses
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
-    from krux.qr import FORMAT_PMOFN
-    from krux.settings import THIN_SPACE
-    from krux.format import format_address
-
-    cases = [
-        # Single-sig, loaded, No print prompt, show address nº1
+        # 2 - Single-sig, descriptor, loaded, receive addr,
+        # No print prompt, show address nº1
         (
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
+            True,
+            0,
+            "show_address",
+            "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 3 - Multisig, no descriptor, unloaded, receive addr,
+        # No print prompt, flash error
+        (
+            tdata.MULTISIG_12_WORD_KEY,
+            None,
             False,
-            "bc1qjv3nexd4rphldspsx8hwrasxw8x8dmsgu28wt5",
+            0,
+            "flash_error",
+            "Please load a wallet output descriptor",
+            None,
+            [],  # since it will flash an error, no buttons will be pressed
+        ),
+        # 4 - Multisig, descriptor, loaded, receive addr,
+        # No print prompt, show address nº1
+        (
+            tdata.MULTISIG_12_WORD_KEY,
+            tdata.SPECTER_MULTISIG_WALLET_DATA,
+            True,
+            0,
+            "show_address",
+            "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 5 - Miniscript (single inheritance), no descriptor, unloaded,
+        # receive addr, No print prompt, flash error
+        (
+            tdata.MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+            None,
+            False,
+            0,
+            "flash_error",
+            "Please load a wallet output descriptor",
+            None,
+            [],  # since it will flash an error, no buttons will be pressed
+        ),
+        # 6 - Miniscript (single inheritance), descriptor, loaded,
+        # receive address, No print prompt, show address nº1
+        (
+            tdata.MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+            tdata.SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA,
+            True,
+            0,
+            "show_address",
+            "bc1qt3kx887zthezx02nzqv74evxztcdf8k8se00k5sgkr62ymc2sffssjx9dm",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 7 - Minscript (expanded multisig), no descriptor, unloaded,
+        # receive address, No print prompt, flash error
+        (
+            tdata.MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
+            None,
+            False,
+            0,
+            "flash_error",
+            "Please load a wallet output descriptor",
+            None,
+            [],  # since it will flash an error, no buttons will be pressed
+        ),
+        # 8 - Minscript (expanded multisig), descriptor, loaded,
+        # receive address, No print prompt, show address nº1
+        (
+            tdata.MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
+            tdata.SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA,
+            True,
+            0,
+            "show_address",
+            "bc1qddnjn6vpm9fe7cgl5jvfk2fpa5huzsmddsm3vgz00nygx45mgxcs3t5a6j",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 9 - Miniscript (3 joint keys), no descriptor, unloaded,
+        # receive address, No print prompt, flash error
+        (
+            tdata.MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
+            None,
+            False,
+            0,
+            "flash_error",
+            "Please load a wallet output descriptor",
+            None,
+            [],  # since it will flash an error, no buttons will be pressed
+        ),
+        # 10 - Miniscript (3 joint keys), descriptor, loaded,
+        # receive address, No print prompt, show address nº1
+        (
+            tdata.MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
+            tdata.SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA,
+            True,
+            0,
+            "show_address",
+            "bc1qtwhtzyd6yq6mkzpzk0sz7udcv59nhvm5zevkgp9f3hh6vu3kkg3sfkku2a",
             None,
             [
                 *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
@@ -448,18 +563,289 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
             ],
         ),
     ]
+
     for case in cases:
-        wallet = Wallet(case[0])
-        if case[2]:
-            wallet.load(case[1], FORMAT_PMOFN)
+        # lets name the variables
+        # for better readability
+        mnemonic = case[0]
+        descriptor = case[1]
+        load = case[2]
+        addr_type = case[3]
+        method = case[4]
+        result = case[5]
+        print_prompt = case[6]
+        sequence_buttons = case[7]
 
-        ctx = create_ctx(mocker, case[5], wallet, case[4])
+        print(f"Case: {cases.index(case)}: {descriptor}")
+
+        # Create a wallet object and load the descriptor if needed
+        wallet = Wallet(mnemonic)
+        if load:
+            wallet.load(descriptor, FORMAT_PMOFN)
+
+        # Create a context object with the mocker and the wallet
+        # and adadpt the method to the test case
+        ctx = create_ctx(mocker, sequence_buttons, wallet, print_prompt)
         addresses_ui = Addresses(ctx)
-        mocker.spy(addresses_ui, "show_address")
 
-        addresses_ui.list_address_type(1)  # Change addresses
+        # spy method dynamically, this is a method that
+        # we want to assert when is called
+        mocker.spy(addresses_ui, method)
 
-        addresses_ui.show_address.assert_called_with(
-            case[3], title="0." + THIN_SPACE + format_address(case[3])
+        # load the address list in accordance to the test case
+        addresses_ui.list_address_type(addr_type)
+
+        # assert the method was called with the expected parameters
+        # if the method is "show_address", assert that the address was shown
+        # otherwise, assert that the error was flashed
+        kwargs = (
+            {}
+            if (wallet.is_multisig() or wallet.is_miniscript())
+            and not wallet.is_loaded()
+            else {"title": "0." + THIN_SPACE + format_address(result)}
         )
-        assert ctx.input.wait_for_button.call_count == len(case[5])
+
+        # assert that the method was called with the expected parameters
+        getattr(addresses_ui, method).assert_called_once_with(result, **kwargs)
+
+        # assert the number of calls to wait_for_button
+        assert ctx.input.wait_for_button.call_count == len(sequence_buttons)
+
+
+def test_list_change_addresses(mocker, m5stickv, tdata):
+    from krux.format import format_address
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.qr import FORMAT_PMOFN
+    from krux.settings import THIN_SPACE
+    from krux.wallet import Wallet
+
+    cases = [
+        # 1 - Single-sig, no descriptor, unloaded, change addr,
+        # No print prompt, show address nº1
+        (
+            tdata.SINGLESIG_12_WORD_KEY,
+            None,
+            False,
+            1,
+            "show_address",
+            "bc1qjv3nexd4rphldspsx8hwrasxw8x8dmsgu28wt5",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 2 - Single-sig, descriptor, loaded, change addr,
+        # No print prompt, show address nº1
+        (
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
+            True,
+            1,
+            "show_address",
+            "bc1qjv3nexd4rphldspsx8hwrasxw8x8dmsgu28wt5",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 3 - Multisig, no descriptor, unloaded, change addr,
+        # No print prompt, flash error
+        (
+            tdata.MULTISIG_12_WORD_KEY,
+            None,
+            False,
+            1,
+            "flash_error",
+            "Please load a wallet output descriptor",
+            None,
+            [],  # since it will flash an error, no buttons will be pressed
+        ),
+        # 4 - Multisig, descriptor, loaded, change addr,
+        # No print prompt, show address nº1
+        (
+            tdata.MULTISIG_12_WORD_KEY,
+            tdata.SPECTER_MULTISIG_WALLET_DATA,
+            True,
+            1,
+            "show_address",
+            "bc1qew2hqa8wetygjdjnr784jdaeqlpa8qyx7eyfket3p8qlwuedwudskuel4p",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 5 - Miniscript (single inheritance), no descriptor, unloaded,
+        # change addr, No print prompt, flash error
+        (
+            tdata.MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+            None,
+            False,
+            1,
+            "flash_error",
+            "Please load a wallet output descriptor",
+            None,
+            [],  # since it will flash an error, no buttons will be pressed
+        ),
+        # 6 - Miniscript (single inheritance), descriptor, loaded,
+        # change address, No print prompt, show address nº1
+        (
+            tdata.MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+            tdata.SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA,
+            True,
+            1,
+            "show_address",
+            "bc1q8vkx3lxu5dscgy053vcfvf8k6t8chws3h9lhqgwrluj5y8vctflsartf6u",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 7 - Minscript (expanded multisig), no descriptor, unloaded,
+        # change address, No print prompt, show address nº1
+        (
+            tdata.MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
+            None,
+            False,
+            1,
+            "flash_error",
+            "Please load a wallet output descriptor",
+            None,
+            [],  # since it will flash an error, no buttons will be pressed
+        ),
+        # 8 - Minscript (expanded multisig), descriptor, loaded,
+        # change address, No print prompt, show address nº1
+        (
+            tdata.MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
+            tdata.SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA,
+            True,
+            1,
+            "show_address",
+            "bc1q7cjmxupy4ef9rkwutzap3v3lznpyelkz9fjga2f8lyge0m2ghtgqrxhekg",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+        # 9 - Miniscript (3 joint keys), no descriptor, unloaded,
+        # change address, No print prompt, flash error
+        (
+            tdata.MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
+            None,
+            False,
+            1,
+            "flash_error",
+            "Please load a wallet output descriptor",
+            None,
+            [],  # since it will flash an error, no buttons will be pressed
+        ),
+        # 10 - Miniscript (3 joint keys), descriptor, loaded,
+        # change address, No print prompt, show address nº1
+        (
+            tdata.MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
+            tdata.SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA,
+            True,
+            1,
+            "show_address",
+            "bc1qtufz48hmjvf0ahwx8npg33z49enx0gcku20s88u608y7yqp0plustd4q8d",
+            None,
+            [
+                *([BUTTON_PAGE_PREV] * 2),  # Go to "Next addresses"
+                BUTTON_ENTER,  # Show next address
+                BUTTON_ENTER,  # Go to previous addresses
+                BUTTON_ENTER,  # Show address nº1
+                BUTTON_ENTER,  # QR Menu
+                BUTTON_PAGE_PREV,  # Go to "Back to Menu"
+                BUTTON_ENTER,  # Leave
+                BUTTON_PAGE_PREV,  # Go to "Back"
+                BUTTON_ENTER,  # Leave
+            ],
+        ),
+    ]
+
+    for case in cases:
+        # lets name the variables
+        # for better readability
+        mnemonic = case[0]
+        descriptor = case[1]
+        load = case[2]
+        addr_type = case[3]
+        method = case[4]
+        result = case[5]
+        print_prompt = case[6]
+        sequence_buttons = case[7]
+
+        print(f"Case: {cases.index(case)}: {descriptor}")
+
+        # Create a wallet object and load the descriptor if needed
+        wallet = Wallet(mnemonic)
+        if load:
+            wallet.load(descriptor, FORMAT_PMOFN)
+
+        # Create a context object with the mocker and the wallet
+        # and adadpt the method to the test case
+        ctx = create_ctx(mocker, sequence_buttons, wallet, print_prompt)
+        addresses_ui = Addresses(ctx)
+
+        # spy method dynamically, this is a method that
+        # we want to assert when is called
+        mocker.spy(addresses_ui, method)
+
+        # load the address list in accordance to the test case
+        addresses_ui.list_address_type(addr_type)
+
+        # assert the method was called with the expected parameters
+        # if the method is "show_address", assert that the address was shown
+        # otherwise, assert that the error was flashed
+        kwargs = (
+            {}
+            if (wallet.is_multisig() or wallet.is_miniscript())
+            and not wallet.is_loaded()
+            else {"title": "0." + THIN_SPACE + format_address(result)}
+        )
+
+        # assert that the method was called with the expected parameters
+        getattr(addresses_ui, method).assert_called_once_with(result, **kwargs)
+
+        # assert the number of calls to wait_for_button
+        assert ctx.input.wait_for_button.call_count == len(sequence_buttons)

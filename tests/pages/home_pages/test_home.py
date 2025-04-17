@@ -7,8 +7,18 @@ from ...test_psbt import tdata as psbt_tdata
 @pytest.fixture
 def tdata(mocker):
     from collections import namedtuple
-    from krux.key import Key, P2PKH, P2SH_P2WPKH, P2TR, TYPE_SINGLESIG, TYPE_MULTISIG
+
     from embit.networks import NETWORKS
+
+    from krux.key import (
+        P2PKH,
+        P2SH_P2WPKH,
+        P2TR,
+        TYPE_MINISCRIPT,
+        TYPE_MULTISIG,
+        TYPE_SINGLESIG,
+        Key,
+    )
 
     TEST_12_WORD_MNEMONIC = (
         "olympic term tissue route sense program under choose bean emerge velvet absurd"
@@ -46,13 +56,27 @@ def tdata(mocker):
         NETWORKS["main"],
         account_index=1,
     )
+    MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS = Key(
+        TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"]
+    )
+
+    MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS = Key(
+        TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"]
+    )
+
+    MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY = Key(
+        TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"]
+    )
 
     VAGUE_LEGACY1_XPUB = "xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
     VAGUE_NESTEDSW1_YPUB = "ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
     VAGUE_NATIVESW1_ZPUB = "zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
 
     SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)#sfewjq8q"}'
-    SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
+    SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*))#6kfykuzf", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
+    SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA = '{"label": "Specter Miniscript Singles Inheritance Wallet 144 blocks", "blockheight": 0, "descriptor": "wsh(or_d(pk([55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*),and_v(v:pkh([73c5da0a/48h/0h/0h/2h]xpub6DkFAXWQ2dHxq2vatrt9qyA3bXYU4ToWQwCHbf5XB2mSTexcHZCeKS1VZYcPoBd5X8yVcbXFHJR9R8UCVpt82VX1VhR28mCyxUFL4r6KFrf/<0;1>/*),older(144))))#7zusggcg"}'
+    SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA = '{"label": "Specter Miniscript Expanding Multisig Wallet 144 blocks", "blockheight": 0, "descriptor": "wsh(or_d(multi(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),and_v(v:thresh(2,pkh([55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<2;3>/*),a:pkh([3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<2;3>/*),a:pkh([d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*)),older(144))))#tx2awx9h", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
+    SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA = '{"label": "Specter Miniscript 3 Key Joint Custody Wallet", "blockheight": 0, "descriptor": "wsh(andor(multi(2,[55f8fc5d/48h/0h/0h/379h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/379h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[d3a80c8b/48h/0h/0h/379h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),or_i(and_v(v:pkh([d3a80c8b/48h/0h/0h/380h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),after(288)),thresh(2,pk([55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*),s:pk([3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),s:pk([d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),snl:after(144))),and_v(v:thresh(2,pkh([55f8fc5d/48h/0h/0h/758h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*),a:pkh([3e15470d/48h/0h/0h/758h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),a:pkh([d3a80c8b/48h/0h/0h/758h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*)),after(432))))", "devices": [{"type": "other", "label": "PK1"}, {"type": "other", "label": "PK2"}, {"type": "other", "label": "PK3"}, {"type": "other", "label": "PAK1"}, {"type": "other", "label": "PAK2"}, {"type": "other", "label": "PAK3"}, {"type": "other", "label": "SAK"}, {"type": "other", "label": "RK1"}, {"type": "other", "label": "RK2"}, {"type": "other", "label": "RK3"}]}'
 
     P2WPKH_PSBT = b'psbt\xff\x01\x00q\x02\x00\x00\x00\x01\xcf<X\xc3)\x82\xae P\x88\xd9\xbdI\xeb\x9b\x02\xac\xdfM=\xaev\xa5\x16\xc6\xb3\x06\xb1]\xe3\xa1N\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x02|?]\x05\x00\x00\x00\x00\x16\x00\x14/4\xaa\x1c\xf0\nS\xb0U\xa2\x91\xa0:}E\xf0\xa6\x98\x8bR\x80\x96\x98\x00\x00\x00\x00\x00\x16\x00\x14\xe6j\xfe\xff\xc3\x83\x8eq\xf0\xa2{\x07\xe3\xb0\x0e\xdej\xe8\xe1`\x00\x00\x00\x00\x00\x01\x01\x1f\x00\xe1\xf5\x05\x00\x00\x00\x00\x16\x00\x14\xd0\xc4\xa3\xef\t\xe9\x97\xb6\xe9\x9e9~Q\x8f\xe3\xe4\x1a\x11\x8c\xa1"\x06\x02\xe7\xab%7\xb5\xd4\x9e\x97\x03\t\xaa\xe0n\x9eI\xf3l\xe1\xc9\xfe\xbb\xd4N\xc8\xe0\xd1\xcc\xa0\xb4\xf9\xc3\x19\x18s\xc5\xda\nT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00"\x02\x03]I\xec\xcdT\xd0\t\x9eCgbw\xc7\xa6\xd4b]a\x1d\xa8\x8a]\xf4\x9b\xf9Qzw\x91\xa7w\xa5\x18s\xc5\xda\nT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     SIGNED_P2WPKH_PSBT = b'psbt\xff\x01\x00q\x02\x00\x00\x00\x01\xcf<X\xc3)\x82\xae P\x88\xd9\xbdI\xeb\x9b\x02\xac\xdfM=\xaev\xa5\x16\xc6\xb3\x06\xb1]\xe3\xa1N\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x02|?]\x05\x00\x00\x00\x00\x16\x00\x14/4\xaa\x1c\xf0\nS\xb0U\xa2\x91\xa0:}E\xf0\xa6\x98\x8bR\x80\x96\x98\x00\x00\x00\x00\x00\x16\x00\x14\xe6j\xfe\xff\xc3\x83\x8eq\xf0\xa2{\x07\xe3\xb0\x0e\xdej\xe8\xe1`\x00\x00\x00\x00\x00\x01\x01\x1f\x00\xe1\xf5\x05\x00\x00\x00\x00\x16\x00\x14\xd0\xc4\xa3\xef\t\xe9\x97\xb6\xe9\x9e9~Q\x8f\xe3\xe4\x1a\x11\x8c\xa1"\x02\x02\xe7\xab%7\xb5\xd4\x9e\x97\x03\t\xaa\xe0n\x9eI\xf3l\xe1\xc9\xfe\xbb\xd4N\xc8\xe0\xd1\xcc\xa0\xb4\xf9\xc3\x19G0D\x02 >e\xff;L\xd4\x7f\x12\x1f\xa7\xc9\x82(F\x18\xdb\x801G\xb0V\xd3\x93\x94\xd4\xecB\x0e\xfd\xfck\xa1\x02 l\xbd\xd8\x8a\xc5\x18l?.\xfd$%1\xedy\x17uvQ\xac&#t\xf3\xd3\x1d\x85\xd6\x16\xcdj\x81\x01\x00\x00\x00'
@@ -91,11 +115,17 @@ def tdata(mocker):
             "LEGACY1_KEY",
             "NESTEDSW1_KEY",
             "NATIVESW1_KEY",
+            "MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS",
+            "MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS",
+            "MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY",
             "VAGUE_LEGACY1_XPUB",
             "VAGUE_NESTEDSW1_YPUB",
             "VAGUE_NATIVESW1_ZPUB",
             "SPECTER_SINGLESIG_WALLET_DATA",
             "SPECTER_MULTISIG_WALLET_DATA",
+            "SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA",
+            "SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA",
+            "SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA",
             "P2WPKH_PSBT",
             "SIGNED_P2WPKH_PSBT",
             "SIGNED_P2WPKH_PSBT_SD",
@@ -127,11 +157,17 @@ def tdata(mocker):
         LEGACY1_KEY,
         NESTEDSW1_KEY,
         NATIVESW1_KEY,
+        MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+        MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
+        MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
         VAGUE_LEGACY1_XPUB,
         VAGUE_NESTEDSW1_YPUB,
         VAGUE_NATIVESW1_ZPUB,
         SPECTER_SINGLESIG_WALLET_DATA,
         SPECTER_MULTISIG_WALLET_DATA,
+        SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA,
+        SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA,
+        SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA,
         P2WPKH_PSBT,
         SIGNED_P2WPKH_PSBT,
         SIGNED_P2WPKH_PSBT_SD,
