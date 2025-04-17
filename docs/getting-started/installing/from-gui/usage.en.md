@@ -26,6 +26,11 @@ two disabled buttons:
     
         * It will be enabled when user select the device.
 
+#### Kivy Fatal Error - OpenGL
+Our latest version uses Kivy and requires at least OpenGL version 2.0, if you encounter this error, try installing the [OpenCL™, OpenGL®, and Vulkan® Compatibility Pack](https://apps.microsoft.com/detail/9nqpsl29bfff) from Microsoft.
+
+<img src="/krux/img/krux-installer/opengl-error.jpg" style="width: 37%; min-width: 250px;">
+
 ### Select version
 
 At startup, the application will setup it to the latest one, `{{latest_krux}}`. But you can select
@@ -193,9 +198,17 @@ As well a done icon:
 flash-krux-logo.en.txt
 ----8<----
 
+
+##### Error flashing
+----8<----
+error-flashing-windows.en.txt
+----8<----
+
+
+
 #### Air-gapped update with
 
-Once you've installed the initial firmware on your device via USB, you can perform upgrades via SD card to keep the device airgapped.
+Once you've installed the initial firmware on your device via USB, you can perform further firmware upgrades via SD card to keep the device airgapped.
 
 <img width="640" src="/krux/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
 > ⚠️ Click on "Air-gapped update with"

@@ -44,6 +44,6 @@ Grids will be added to a standard QR code. In a dark room, if you place a sheet 
 <img src="../../../img/maixpy_m5stickv/qr-viewer-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/qr-viewer-300.png" align="right" class="amigo">
 
-Almost every QR code in Krux will also bring up this menu with these extra options: `Toggle Brightness`, `Save QR Image to SD Card` and `Print as QR`. If `Save QR Image to SD Card` shows as disabled it means that the SD card was not detected. To enable `Print as QR` you need to configure your printer driver in [settings](../settings.md#thermal).
+Almost every QR code in Krux will also bring up this menu with these extra options: `Toggle Brightness`, `Save QR Image to SD Card` and `Print as QR`. If `Save QR Image to SD Card` shows as disabled it means that the SD card was not detected. To enable `Print as QR` you need to configure your printer driver in [settings](../settings.md#printer).
 
 <div style="clear: both"></div>

@@ -55,6 +55,7 @@ DEFAULT_RX_PIN = (
 
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 CNC_FILE_DRIVER = "cnc/file"
+CNC_GRBL_DRIVER = "cnc/grbl"
 
 
 def t(slug):
@@ -238,6 +239,7 @@ class PrinterSettings(SettingsNamespace):
         "none": ("none", None),
         THERMAL_ADAFRUIT_TXT: ("thermal", "AdafruitPrinter"),
         CNC_FILE_DRIVER: ("cnc", "FilePrinter"),
+        CNC_GRBL_DRIVER: ("cnc", "GRBLPrinter"),
     }
     namespace = "settings.printer"
     driver = CategorySetting("driver", "none", list(PRINTERS.keys()))
