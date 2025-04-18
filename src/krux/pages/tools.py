@@ -147,18 +147,24 @@ class Tools(Page):
         from .qr_capture import QRCodeCapture
 
         qr_scanner = QRCodeCapture(self.ctx)
+        exportable = True
         contents, fmt = qr_scanner.qr_capture_loop()
         print(
             "\nscanned raw contents: {} {}, format: {}".format(
                 type(contents), repr(contents), fmt
             )
         )
+        title = "QR Contents"
         if isinstance(contents, str):
             if len(contents) != len(contents.encode()):
                 contents = contents.encode("latin-1")
                 print("must be on simulator, latin-1")
+        if fmt == 2:
+            title += ", UR:" + contents.type
+            contents = bytes(contents.cbor)
+            exportable = False
         print("calling view_contents({} {})...".format(type(contents), repr(contents)))
-        return self.view_contents(contents, title="QR Contents")
+        return self.view_contents(contents, title=title, exportable=exportable)
 
     def create_qr(self, text=None):
         """Handler for the 'New Text QR' menu item"""
@@ -198,7 +204,7 @@ class Tools(Page):
         contents = kef.seal_ui(text, override_settings=True)
         return self.view_qr(contents=contents, title=t("Encrypted QR Code"))
 
-    def view_qr(self, contents, title):
+    def view_qr(self, contents, title=None):
         """Reusable handler for viewing a QR code"""
         from .qr_view import SeedQRView
 
@@ -209,7 +215,7 @@ class Tools(Page):
 
         return MENU_CONTINUE
 
-    def view_contents(self, contents, title):
+    def view_contents(self, contents, title, exportable=True):
         """Reusable handler for viewing text or binary contents"""
 
         was_decrypted = False
@@ -246,6 +252,9 @@ class Tools(Page):
         print(title, repr(contents))
         self.ctx.display.draw_centered_text(title + ":\n\n" + contents)
         self.ctx.input.wait_for_button()
+
+        if not exportable:
+            return MENU_CONTINUE
 
         self.ctx.display.clear()
         if was_decrypted:
