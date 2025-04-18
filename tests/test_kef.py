@@ -1017,7 +1017,7 @@ def kef_self_document(version, label=None, iterations=None, limit=None):
         iv_arg = ""
 
     if v_compress:
-        plain = "deflate(<P>, wbits=-10)"
+        plain = "zlib(<P>, wbits=-10)"
     else:
         plain = "<P>"
 
@@ -1066,9 +1066,9 @@ def test_kef_self_document(m5stickv):
         4: "[AES-CBC v2] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =4\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 16b\ne: AES(k, CBC, iv)\npad: NUL\nauth: sha256(<P> + k)[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         5: "[AES-ECB +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =5\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         6: "[AES-CBC +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =6\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        7: "[AES-GCM +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =7\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10)) + auth\niv: 12b\ne: AES(k, GCM, iv)\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        8: "[AES-ECB +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =8\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(deflate(<P>, wbits=-10) + auth + pad)\ne: AES(k, ECB)\nauth: sha256(deflate(<P>, wbits=-10))[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        9: "[AES-CBC +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =9\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(deflate(<P>, wbits=-10) + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(deflate(<P>, wbits=-10))[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        7: "[AES-GCM +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =7\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(zlib(<P>, wbits=-10)) + auth\niv: 12b\ne: AES(k, GCM, iv)\nauth: e.authtag[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        8: "[AES-ECB +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =8\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: e.encrypt(zlib(<P>, wbits=-10) + auth + pad)\ne: AES(k, ECB)\nauth: sha256(zlib(<P>, wbits=-10))[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        9: "[AES-CBC +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =9\ni: 3b big; =(i > 10K && i % 10K) ? i : i * 10K\ncpl: iv + e.encrypt(zlib(<P>, wbits=-10) + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(zlib(<P>, wbits=-10))[:4]\npad: PKCS#7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
     }
 
     for v, expected in test_cases.items():
