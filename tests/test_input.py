@@ -558,6 +558,36 @@ def test_invalid_touch_delimiter(mocker, amigo):
         input.touch.add_y_delimiter(250)
 
 
+def test_rotary_encoder_handler(mocker, dock):
+    from src.krux.rotary import RotaryEncoder, __handler__
+
+    # Mock the encoder instance
+    mock_encoder = mocker.MagicMock(spec=RotaryEncoder)
+    mock_encoder.pin_1 = mocker.MagicMock()
+    mock_encoder.pin_2 = mocker.MagicMock()
+
+    for case in [
+        (0, 0),
+        (0, 1),
+        (1, 0),
+        (1, 1),
+    ]:
+
+        mock_encoder.pin_1.value.return_value = case[0]
+        mock_encoder.pin_2.value.return_value = case[1]
+        mocker.patch("src.krux.rotary.encoder", mock_encoder)
+        __handler__()
+
+    mock_encoder.process.assert_has_calls(
+        [
+            mocker.call((0, 0)),
+            mocker.call((0, 1)),
+            mocker.call((1, 0)),
+            mocker.call((1, 1)),
+        ]
+    )
+
+
 def test_encoder_spin_right(mocker, dock):
     import threading
     import krux
