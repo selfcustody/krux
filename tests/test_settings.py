@@ -1,6 +1,20 @@
 # Tests for krux.settings
 
 
+def test_setting_get_method_return_self_when_obj_is_none(mocker, m5stickv):
+    from krux.settings import Setting
+
+    # this will test __get__ method
+    # of Setting class. When the given
+    # object is None, it must return
+    # the same instance of Setting.
+    s = Setting("krux_has_no_owner", "default")
+    result = s.__get__(None)
+
+    assert isinstance(result, Setting)
+    assert result is s
+
+
 def test_init(mocker, m5stickv):
     from krux.krux_settings import Settings, SettingsNamespace
     import pytest
