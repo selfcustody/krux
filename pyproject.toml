@@ -127,7 +127,7 @@ git-pull = "git pull git@github.com:selfcustody/krux.git"
 git-pull-https = "git pull https://github.com/selfcustody/krux.git"
 
 # flash tasks
-flash-cmd = "python firmware/Kboot/build/ktool.py -b 1500000 build/kboot.kfpkg"
+flash-cmd = "python firmware/Kboot/build/ktool.py -b 2000000 build/kboot.kfpkg"
 flash.ref = "flash-cmd -B goE"
 flash-dock.ref = "flash-cmd -B dan"
 
