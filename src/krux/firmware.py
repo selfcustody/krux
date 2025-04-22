@@ -236,12 +236,12 @@ def upgrade():
         return False
 
     status_text(
-        t("New firmware detected.")
-        + "\n\n"
-        + "SHA256:\n\n"
-        + binascii.hexlify(firmware_hash).decode()
-        + "\n\n\n"
-        + t("Install?"),
+        "{}\n\nSHA256:\n{}\n\n{}\n{}".format(
+            t("New firmware detected."),
+            binascii.hexlify(firmware_hash).decode(),
+            t("Touch or press ENTER to install."),
+            t("Press PAGE to cancel."),
+        ),
         ":",
     )
     inp.buttons_active = True
