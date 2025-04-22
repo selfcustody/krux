@@ -22,7 +22,7 @@
 import io
 import os
 import binascii
-import hashlib
+import uhashlib_hw
 import time
 import flash
 from embit import ec
@@ -160,7 +160,7 @@ def fsize(firmware_filename):
 
 def sha256(firmware_filename, firmware_size=None):
     """Returns the sha256 hash of the firmware"""
-    hasher = hashlib.sha256()
+    hasher = uhashlib_hw.sha256()
     # If firmware size is supplied, then we want a sha256 of the firmware with its header
     if firmware_size is not None:
         hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
@@ -204,21 +204,6 @@ def upgrade():
     firmware_hash = sha256(firmware_path)
     firmware_with_header_hash = sha256(firmware_path, new_size)
 
-    status_text(
-        t("New firmware detected.")
-        + "\n\n"
-        + "SHA256:\n\n"
-        + binascii.hexlify(firmware_hash).decode()
-        + "\n\n\n"
-        + t("Install?"),
-        ":",
-    )
-    inp.buttons_active = True
-    if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
-        display.clear()
-        inp.wait_for_release()  # Wait for button release loading inputs on context
-        return False
-
     if new_size > MAX_FIRMWARE_SIZE:
         display.flash_text(
             "Firmware exceeds max size: %d" % MAX_FIRMWARE_SIZE, theme.error_color
@@ -248,6 +233,21 @@ def upgrade():
             return False
     except:
         display.flash_text(t("Bad signature"), theme.error_color)
+        return False
+
+    status_text(
+        t("New firmware detected.")
+        + "\n\n"
+        + "SHA256:\n\n"
+        + binascii.hexlify(firmware_hash).decode()
+        + "\n\n\n"
+        + t("Install?"),
+        ":",
+    )
+    inp.buttons_active = True
+    if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
+        display.clear()
+        inp.wait_for_release()  # Wait for button release loading inputs on context
         return False
 
     boot_config_sector = flash.read(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
