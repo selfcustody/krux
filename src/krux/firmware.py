@@ -239,7 +239,7 @@ def upgrade():
         "{}\n\nSHA256:\n{}\n\n{}\n{}".format(
             t("New firmware detected."),
             binascii.hexlify(firmware_hash).decode(),
-            t("Touch or press ENTER to install."),
+            t("TOUCH or ENTER to install."),
             t("Press PAGE to cancel."),
         ),
         ":",
