@@ -12848,6 +12848,7 @@ def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
     mocker.spy(firmware, "write_data")
     mocker.spy(firmware, "update_boot_config_sector")
 
+    firmware.is_version_greater = lambda filename: "00.00.0"
     assert firmware.upgrade()
 
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
@@ -12934,6 +12935,7 @@ def test_upgrade_fails_write_data(mocker, m5stickv, mock_success_input_cls, tdat
     mocker.patch.object(firmware, "write_data", side_effect=ValueError)
     mocker.spy(firmware, "display")
 
+    firmware.is_version_greater = lambda filename: "00.00.0"
     assert not firmware.upgrade()
 
     from krux.themes import theme
@@ -12993,6 +12995,7 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
     mocker.spy(firmware, "write_data")
     mocker.spy(firmware, "update_boot_config_sector")
 
+    firmware.is_version_greater = lambda filename: "00.00.0"
     assert firmware.upgrade()
 
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
@@ -13096,6 +13099,7 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
     mocker.spy(firmware, "write_data")
     mocker.spy(firmware, "update_boot_config_sector")
 
+    firmware.is_version_greater = lambda filename: "00.00.0"
     assert firmware.upgrade()
 
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)

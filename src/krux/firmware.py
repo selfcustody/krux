@@ -32,6 +32,7 @@ from .display import display
 from .krux_settings import t
 from .wdt import wdt
 from .themes import theme
+from .metadata import VERSION
 
 FLASH_SIZE = 2**24
 MAX_FIRMWARE_SIZE = 0x300000
@@ -46,6 +47,8 @@ BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = 0x00005000
 ERASE_BLOCK_SIZE = 0x1000
 
 FLASH_IO_WAIT_TIME = 100
+
+SEMVER_SIZE = 8
 
 
 def find_active_firmware(sector):
@@ -173,6 +176,86 @@ def sha256(firmware_filename, firmware_size=None):
     return hasher.digest()
 
 
+def is_semver_string(s):
+    """Check if the string represents a semantic version"""
+    parts = s.split(".")
+    if len(parts) != 3:
+        return False
+    return all(part.isdigit() for part in parts)
+
+
+def find_all_occurrences(data, pattern):
+    """Find all occurrences of the pattern in the data"""
+    positions = []
+    i = 0
+    while True:
+        i = data.find(pattern, i)
+        if i == -1:
+            break
+        positions.append(i)
+        i += 1  # move forward to allow overlapping matches if any
+    return positions
+
+
+def extract_semver(context):
+    """Search for a semantic version in a string"""
+    for i in range(len(context)):
+        for j in range(i + SEMVER_SIZE - 1, min(i + SEMVER_SIZE + 1, len(context))):
+            try:
+                chunk = context[i:j].decode("ascii")
+                if is_semver_string(chunk):
+                    return chunk
+            except:
+                continue
+    return None
+
+
+def is_version_greater(firmware_filename):
+    """Return the version of the firmware file or False"""
+    new_version = None
+    with open(firmware_filename, "rb", buffering=0) as f:
+        firmware_data = b""
+        last_chunk = b""
+        while True:
+            chunk = f.read(512)
+            if not chunk:
+                break
+            # Buffer must overlap slightly to avoid missing patterns split between chunks
+            firmware_data = last_chunk + chunk
+            last_chunk = chunk
+
+            positions = find_all_occurrences(firmware_data, b"krux/metadata.py")
+            if not positions:
+                continue
+            for pos in positions:
+                delta = 100
+                start_range = max(pos - delta, 0)
+                end_range = min(pos + delta, len(firmware_data))
+                context_before = firmware_data[start_range:end_range]
+
+                version = extract_semver(context_before)
+                if version:
+                    new_version = version
+                    break
+
+    # Check if version is greater than current one
+    if new_version is None:
+        raise ValueError("Could not obtain version from " + firmware_filename)
+
+    curr_ver = VERSION.split(".")
+    new_ver = new_version.split(".")
+
+    if len(curr_ver) != len(new_ver):
+        raise ValueError("Error checking versions")
+
+    for i in range(len(curr_ver)):
+        if int(curr_ver[i]) < int(new_ver[i]):
+            return new_version
+
+    return False
+
+
+# pylint: disable=too-many-return-statements
 def upgrade():
     """Installs new firmware from SD card"""
 
@@ -258,6 +341,32 @@ def upgrade():
         if address is None:
             display.flash_text("Invalid bootloader", theme.error_color)
             return False
+
+    # Try to obtain version from firmware.bin
+    try:
+        new_version = is_version_greater(firmware_path)
+
+        if not new_version:
+            display.flash_text(
+                "Firmware not newer than current " + VERSION, theme.error_color
+            )
+            return False
+
+        status_text(
+            t("New firmware detected.")
+            + "\n\n"
+            + new_version
+            + "\n\n\n"
+            + t("Install?")
+        )
+        inp.buttons_active = True
+        if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
+            display.clear()
+            inp.wait_for_release()  # Wait for button release loading inputs on context
+            return False
+    except Exception as e:
+        display.flash_text(str(e), theme.error_color)
+        return False
 
     # Write new firmware to the opposite slot
     new_address = FIRMWARE_SLOT_2 if address == FIRMWARE_SLOT_1 else FIRMWARE_SLOT_1

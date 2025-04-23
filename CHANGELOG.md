@@ -27,6 +27,7 @@ Addresses are displayed in groups of 4, separated by spaces, for better readabil
 - Optimized the way we check device's board values.
 - Added QR Code to About screen.
 - Other small text changes for clarity and translation simplification.
+- Firmware update via SD card now checks and informs the user about the version being installed.
 
 
 # Changelog 25.03.0 - March 2025
