@@ -222,7 +222,7 @@ def is_version_greater(firmware_filename):
                 break
             # Buffer must overlap slightly to avoid missing patterns split between chunks
             firmware_data = last_chunk + chunk
-            last_chunk = chunk
+            last_chunk = chunk[256:]
 
             positions = find_all_occurrences(firmware_data, b"krux/metadata.py")
             if not positions:
