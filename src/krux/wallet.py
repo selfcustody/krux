@@ -22,7 +22,7 @@
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from embit.networks import NETWORKS
-from embit.bip32 import HARDENED_INDEX
+from embit.bip32 import HARDENED_INDEX, parse_path, path_to_str
 from .krux_settings import t
 from .qr import FORMAT_BBQR
 from .key import (
@@ -121,26 +121,49 @@ class Wallet:
     def _validate_descriptor(self, descriptor, descriptor_xpubs):
         """Validates the descriptor against the current key and policy type"""
 
+        # Check to see if the fingerprint of the currently loaded key matches any in the descriptor so as to be able
+        # to give some hints if we have to throw an error later...
+        fingerprint_match = False
+        error_note_fingerprint = ""
+        error_note_derivation = ""
+        error_note_script = ""
+
+        for key in descriptor.keys:
+            if self.key.fingerprint_hex_str() == key.fingerprint.hex():
+                error_note_fingerprint = " Wallet Fingerprint matched,"
+                fingerprint_match = True
+
+                if parse_path(self.key.derivation) != key.derivation:
+                    error_note_derivation = " Derivation Mismatch, descriptor: " + path_to_str(key.derivation) + \
+                                            " Current Wallet: " + self.key.derivation
+
+        # Check if the script type matches
+        if self.descriptor.scriptpubkey_type() != descriptor.scriptpubkey_type():
+            error_note_script = " Script Mismatch, Descriptor: " + descriptor.scriptpubkey_type() + \
+                                " Current Wallet: " + self.descriptor.scriptpubkey_type() + " "
+
+        error_notes = "CUSTOMIZE TO MATCH SETTINGS: " + error_note_fingerprint + error_note_derivation + error_note_script
+
         if self.is_multisig():
             if not descriptor.is_basic_multisig:
-                raise ValueError("not multisig")
+                raise ValueError("Current Wallet is Multisig, Descriptor is not...")
             if self.key.xpub() not in descriptor_xpubs:
-                raise ValueError("xpub not a multisig cosigner")
+                raise ValueError("Current Wallet xpub not a multisig cosigner..." + (error_notes if fingerprint_match else ""))
         elif self.is_miniscript():
             if self.key.script_type == P2WSH:
                 if descriptor.miniscript is None or descriptor.is_basic_multisig:
-                    raise ValueError("not P2WSH miniscript")
+                    raise ValueError("Current Wallet is Miniscript, Descriptor is not P2WSH miniscript")
             elif self.key.script_type == P2TR:
                 if not descriptor.taptree:
-                    raise ValueError("not P2TR miniscript")
+                    raise ValueError("Current Wallet is Miniscript, Descriptor is not P2TR miniscript")
             if self.key.xpub() not in descriptor_xpubs:
-                raise ValueError("xpub not a miniscript cosigner")
+                raise ValueError("Current Wallet xpub not a miniscript cosigner..." + (error_notes if fingerprint_match else ""))
         else:
             if not descriptor.key:
                 if len(descriptor.keys) > 1:
                     raise ValueError("not single-sig")
             if self.key.xpub() != descriptor_xpubs[0]:
-                raise ValueError("xpub does not match")
+                raise ValueError("Current Wallet xpub does not match descriptor..." + (error_notes if fingerprint_match else ""))
 
     def load(self, wallet_data, qr_format, allow_assumption=None):
         """Loads the wallet from the given data"""
