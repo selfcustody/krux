@@ -29,7 +29,9 @@ Addresses are displayed in groups of 4, separated by spaces, for better readabil
 - Other small text changes for clarity and translation simplification.
 - SD Card Firmware upgrade - Check firmware authenticity before prompting user to upgrade.
 
+### SVG image export
 
+- add option to save encrypted QRCode as svg image.
 # Changelog 25.03.0 - March 2025
 
 ### Taproot and WSH Miniscript support
