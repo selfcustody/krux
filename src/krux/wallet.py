@@ -123,7 +123,7 @@ class Wallet:
 
         # Check to see if the fingerprint of the currently loaded key matches any in the descriptor so as to be able
         # to give some hints if we have to throw an error later...
-        fingerprint_match = True
+        fingerprint_match = False
         error_note_fingerprint = ""
         error_note_derivation = ""
         error_note_script = ""
@@ -131,6 +131,7 @@ class Wallet:
         for key in descriptor.keys:
             if self.key.fingerprint_hex_str() == key.fingerprint.hex():
                 error_note_fingerprint = " Wallet Fingerprint matched,"
+                fingerprint_match = True
 
                 if parse_path(self.key.derivation) != key.derivation:
                     error_note_derivation = " Derivation Mismatch, descriptor: " + path_to_str(key.derivation) + \
