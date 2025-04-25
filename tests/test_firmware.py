@@ -12803,6 +12803,135 @@ def test_write_data_with_5_failed_read(mocker, m5stickv, tdata):
     assert num_callbacks == 6
 
 
+def test_find_all_occurrences(mocker, m5stickv, tdata):
+    from krux.firmware import find_all_occurrences
+
+    def find_expected_config_entries(data: bytearray) -> list[int]:
+        matches = []
+        for i in range(len(data) - 3):
+            if (
+                data[i] == 0x5A
+                and data[i + 1] == 0xA5
+                and data[i + 2] == 0xD0
+                and (data[i + 3] & 0xF0) == 0xC0
+            ):
+                matches.append(i)
+        return matches
+
+    cases = [
+        tdata.TEST_FIRMWARE,
+        tdata.TEST_FIRMWARE_SIG,
+        tdata.TEST_FIRMWARE_MALFORMED_SIG,
+        tdata.TEST_FIRMWARE_BAD_SIG,
+        tdata.SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1,
+        tdata.SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_2,
+        tdata.SECTOR_WITH_NO_ACTIVE_FIRMWARE,
+    ]
+
+    for case in cases:
+        buffer = bytearray(case)
+        expected = find_expected_config_entries(buffer)
+
+        # Simulate masked match: loop over all 0xC0-0xCF patterns
+        occurences = []
+        for low_nibble in range(16):
+            pattern = bytearray([0x5A, 0xA5, 0xD0, 0xC0 | low_nibble])
+            occurences.extend(find_all_occurrences(buffer, pattern))
+        occurences.sort()
+
+        assert occurences == expected
+
+
+def test_extract_calver():
+    from krux.firmware import extract_calver
+
+    cases = [
+        # below are simple case with no real supported version
+        # but we want to make sure they are not detected as valid
+        (b"0.0.0", None),
+        (b"'0.0.0'", None),
+        (b"VERSION = '0.0.0'", None),
+        (b"a0.0.0b", None),
+        # below are simple case with valid calendar version,
+        # but not really supported version
+        (b"00.00.0", "00.00.0"),
+        (b"'00.00.0'", "00.00.0"),
+        (b"a00.00.0b", "00.00.0"),
+        (b"VERSION = '00.00.0'", "00.00.0"),
+        (b"22.22.2", "22.22.2"),
+        (b"'22.22.2'", "22.22.2"),
+        (b"a22.22.2b", "22.22.2"),
+        (b"a22.22.2", "22.22.2"),
+        (b"VERSION = '22.22.2'", "22.22.2"),
+        # below are simple case with valid calendar version,
+        # and also supported version
+        (b"'22.03.0'", "22.03.0"),
+        (b"VERSION = '22.03.0'", "22.03.0"),
+        (b"23.09.0", "23.09.0"),
+        (b"'23.09.0'", "23.09.0"),
+        (b"VERSION = '23.09.0'", "23.09.0"),
+        # below are real cases with valid calendar version,
+        # and also supported version
+        (
+            b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/metadata.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22.03.0'\nSIGNER_PUBKEY = (\n    '03339e883157e",
+            "22.03.0",
+        ),
+        (
+            b"\x00\x00\xb6\x07circuit\x00\x00\x00\x00\x00\x00\x00\x8e\x0cboard_io_pin\x00\x00U\rkendryte_gpio\x00\x7f\x0bmaixpy_gpio\x00\x00\x00[\x0724.09.1\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py\x00\x00\x00\x00\x00\x00\xc7\x06Keypad\x00\x00\x00\x00\x00\x00\x00\x00\xb4\x07keypads\x00\x00\x00\x00\x00\x00\x00\xe3\x0bto_qr_codes\x00\x00\x00&\x02qr\x00\x00\x00\x00\xc8\rMENU_CONTINUE\x00i\tMENU",
+            "24.09.1",
+        ),
+    ]
+
+    for case in cases:
+        assert extract_calver(case[0]) == case[1]
+
+
+def test_is_version_greater(mocker, m5stickv, tdata):
+    from unittest.mock import mock_open, patch
+
+    from krux.firmware import is_version_greater
+
+    cases = [
+        (
+            tdata.TEST_FIRMWARE,
+            ValueError,
+            tdata.TEST_FIRMWARE_FILENAME,
+            f"Could not obtain version from {tdata.TEST_FIRMWARE_FILENAME}",
+        ),
+        (
+            b"\x00\x00\x00[\x0722.22.2\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py",
+            None,
+            tdata.TEST_FIRMWARE_FILENAME,
+            "22.22.2",
+        ),
+        (
+            b"\x00\x00\xb6\x07circuit\x00\x00\x00\x00\x00\x00\x00\x8e\x0cboard_io_pin\x00\x00U\rkendryte_gpio\x00\x7f\x0bmaixpy_gpio\x00\x00\x00[\x0724.09.1\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py\x00\x00\x00\x00\x00\x00\xc7\x06Keypad\x00\x00\x00\x00\x00\x00\x00\x00\xb4\x07keypads\x00\x00\x00\x00\x00\x00\x00\xe3\x0bto_qr_codes\x00\x00\x00&\x02qr\x00\x00\x00\x00\xc8\rMENU_CONTINUE\x00i\tMENU",
+            None,
+            tdata.TEST_FIRMWARE_FILENAME,
+            "24.09.1",
+        ),
+        (
+            b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/metadata.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22.03.0'\nSIGNER_PUBKEY = (\n    '03339e883157e",
+            None,
+            tdata.TEST_FIRMWARE_FILENAME,
+            "22.03.0",
+        ),
+    ]
+
+    for case in cases:
+        with patch("builtins.open", mock_open(read_data=case[0])) as mock_file:
+            if case[1] is ValueError:
+                with pytest.raises(ValueError) as exc_info:
+                    assert is_version_greater(case[2])
+
+                assert str(exc_info.value) == case[3]
+                mock_file.assert_called_once_with(case[2], "rb", buffering=0)
+
+            if case[2] is None:
+                assert is_version_greater(case[2]) == case[3]
+                mock_file.assert_called_once_with(case[2], "rb", buffering=0)
+
+
 def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
     import binascii
     from embit import ec
