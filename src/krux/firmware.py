@@ -48,7 +48,7 @@ ERASE_BLOCK_SIZE = 0x1000
 
 FLASH_IO_WAIT_TIME = 100
 
-SEMVER_SIZE = 7
+CALVER_SIZE = 7
 
 
 def find_active_firmware(sector):
@@ -185,15 +185,15 @@ def find_all_occurrences(data, pattern):
         if i == -1:
             break
         positions.append(i)
-        i += 1  # move forward to allow overlapping matches if any
+        i += len(pattern)  # move forward
     return positions
 
 
 def extract_calver(context):
-    """Search for a semantic version in a string"""
-    for i in range(len(context) - SEMVER_SIZE + 1):
+    """Search for a Calendar Versioning in a string"""
+    for i in range(len(context) - CALVER_SIZE + 1):
         try:
-            chunk = context[i : i + SEMVER_SIZE].decode("ascii")
+            chunk = context[i : i + CALVER_SIZE].decode("ascii")
             if (
                 chunk[:2].isdigit()
                 and chunk[2] == "."
@@ -208,7 +208,7 @@ def extract_calver(context):
 
 
 def is_version_greater(firmware_filename):
-    """Return the version of the firmware file or False"""
+    """Return the version if greater, else False"""
     new_version = None
     with open(firmware_filename, "rb", buffering=0) as f:
         firmware_data = b""
@@ -229,27 +229,18 @@ def is_version_greater(firmware_filename):
                 start_range = max(pos - delta, 0)
                 end_range = min(pos + delta, len(firmware_data))
                 context_before = firmware_data[start_range:end_range]
-
                 version = extract_calver(context_before)
                 if version:
                     new_version = version
                     break
 
-    # Check if version is greater than current one
-    if new_version is None:
-        raise ValueError("Could not obtain version from " + firmware_filename)
+    try:
+        new_ver = tuple(map(int, new_version.split(".")))
+        curr_ver = tuple(map(int, VERSION.split(".")))
 
-    curr_ver = VERSION.split(".")
-    new_ver = new_version.split(".")
-
-    if len(curr_ver) != len(new_ver):
+        return new_version if new_ver > curr_ver else False
+    except:
         raise ValueError("Error checking versions")
-
-    for i in range(len(curr_ver)):
-        if int(curr_ver[i]) < int(new_ver[i]):
-            return new_version
-
-    return False
 
 
 # pylint: disable=too-many-return-statements
@@ -338,8 +329,8 @@ def upgrade():
             return False
 
         status_text(
-            "{} {}\nSHA256:\n{}\n\n{}\n{}".format(
-                t("New firmware detected"),
+            "{}: {}\n\nSHA256:\n{}\n\n{}\n{}".format(
+                t("Version"),
                 new_version,
                 binascii.hexlify(firmware_hash).decode(),
                 t("TOUCH or ENTER to install."),

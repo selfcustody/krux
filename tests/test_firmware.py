@@ -30,6 +30,10 @@ def tdata(mocker):
         TEST_FIRMWARE_FILENAME + ".malformed.sig", "rb"
     ).read()
     TEST_FIRMWARE_BAD_SIG = open(TEST_FIRMWARE_FILENAME + ".bad.sig", "rb").read()
+    TEST_FIRMWARE_25_03_0_FILENAME = os.path.join(
+        os.path.dirname(__file__), FILES_FOLDER, "firmware-v25.03.0.bin"
+    )
+    TEST_FIRMWARE_25_03_0 = open(TEST_FIRMWARE_25_03_0_FILENAME, "rb").read()
 
     SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1 = [
         0x5A,
@@ -12340,6 +12344,7 @@ def tdata(mocker):
             "TEST_SIGNER_PUBKEY",
             "TEST_SIGNER_PUBLIC_KEY",
             "TEST_FIRMWARE_FILENAME",
+            "TEST_FIRMWARE_25_03_0",
             "TEST_FIRMWARE",
             "TEST_FIRMWARE_SHA256",
             "TEST_FIRMWARE_WITH_HEADER_SHA256",
@@ -12356,6 +12361,7 @@ def tdata(mocker):
         TEST_SIGNER_PUBKEY,
         TEST_SIGNER_PUBLIC_KEY,
         TEST_FIRMWARE_FILENAME,
+        TEST_FIRMWARE_25_03_0,
         TEST_FIRMWARE,
         TEST_FIRMWARE_SHA256,
         TEST_FIRMWARE_WITH_HEADER_SHA256,
@@ -12889,47 +12895,93 @@ def test_extract_calver():
 def test_is_version_greater(mocker, m5stickv, tdata):
     from unittest.mock import mock_open, patch
 
-    from krux.firmware import is_version_greater
+    from krux.firmware import is_version_greater, VERSION
+
+    DATA_22_12_2 = b"\x00\x00\x00[\x0722.12.2\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py"
+    DATA_24_09_1 = b"\x00\x00\xb6\x07circuit\x00\x00\x00\x00\x00\x00\x00\x8e\x0cboard_io_pin\x00\x00U\rkendryte_gpio\x00\x7f\x0bmaixpy_gpio\x00\x00\x00[\x0724.09.1\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py\x00\x00\x00\x00\x00\x00\xc7\x06Keypad\x00\x00\x00\x00\x00\x00\x00\x00\xb4\x07keypads\x00\x00\x00\x00\x00\x00\x00\xe3\x0bto_qr_codes\x00\x00\x00&\x02qr\x00\x00\x00\x00\xc8\rMENU_CONTINUE\x00i\tMENU"
+    DATA_22_03_0 = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/metadata.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22.03.0'\nSIGNER_PUBKEY = (\n    '03339e883157e"
+    DATA_real_firmware = tdata.TEST_FIRMWARE_25_03_0
+    DATA_22_03_0_NO_VER = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/metadata.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = ''\nSIGNER_PUBKEY = (\n    '03339e883157e"
+    DATA_22_03_0_NO_META = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/none.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22.03.0'\nSIGNER_PUBKEY = (\n    '03339e883157e"
+    DATA_22_03_0_NO_VER_META = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/none.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22'\nSIGNER_PUBKEY = (\n    '03339e883157e"
+
+    VER_21_01_0 = "21.01.0"
+    VER_22_12_2 = "22.12.2"
+    VER_22_03_0 = "22.03.0"
+    VER_24_09_1 = "24.09.1"
+    VER_25_03_0 = "25.03.0"
 
     cases = [
         (
-            tdata.TEST_FIRMWARE,
-            ValueError,
-            tdata.TEST_FIRMWARE_FILENAME,
-            f"Could not obtain version from {tdata.TEST_FIRMWARE_FILENAME}",
+            DATA_22_12_2,
+            VER_21_01_0,  # curr_ver
+            VER_22_12_2,  # new_ver
         ),
         (
-            b"\x00\x00\x00[\x0722.22.2\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py",
-            None,
-            tdata.TEST_FIRMWARE_FILENAME,
-            "22.22.2",
+            DATA_22_12_2,
+            VER_22_03_0,  # curr_ver
+            VER_22_12_2,  # new_ver
         ),
         (
-            b"\x00\x00\xb6\x07circuit\x00\x00\x00\x00\x00\x00\x00\x8e\x0cboard_io_pin\x00\x00U\rkendryte_gpio\x00\x7f\x0bmaixpy_gpio\x00\x00\x00[\x0724.09.1\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py\x00\x00\x00\x00\x00\x00\xc7\x06Keypad\x00\x00\x00\x00\x00\x00\x00\x00\xb4\x07keypads\x00\x00\x00\x00\x00\x00\x00\xe3\x0bto_qr_codes\x00\x00\x00&\x02qr\x00\x00\x00\x00\xc8\rMENU_CONTINUE\x00i\tMENU",
-            None,
-            tdata.TEST_FIRMWARE_FILENAME,
-            "24.09.1",
+            DATA_22_12_2,
+            VER_24_09_1,  # curr_ver
+            False,  # new_ver
         ),
         (
-            b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/metadata.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22.03.0'\nSIGNER_PUBKEY = (\n    '03339e883157e",
-            None,
-            tdata.TEST_FIRMWARE_FILENAME,
-            "22.03.0",
+            DATA_24_09_1,
+            VER_22_12_2,  # curr_ver
+            VER_24_09_1,  # new_ver
         ),
+        (
+            DATA_24_09_1,
+            VER_24_09_1,  # curr_ver
+            False,  # new_ver
+        ),
+        (
+            DATA_22_03_0,
+            VER_21_01_0,  # curr_ver
+            VER_22_03_0,  # new_ver
+        ),
+        (DATA_real_firmware, VER_24_09_1, VER_25_03_0),
     ]
 
-    for case in cases:
-        with patch("builtins.open", mock_open(read_data=case[0])) as mock_file:
-            if case[1] is ValueError:
-                with pytest.raises(ValueError) as exc_info:
-                    assert is_version_greater(case[2])
+    filename = "firmware.bin"
+    for i, case in enumerate(cases):
+        print(i)
+        file_bytes = case[0]
+        mocker.patch("krux.firmware.VERSION", case[1])
+        version_greater = case[2]
 
-                assert str(exc_info.value) == case[3]
-                mock_file.assert_called_once_with(case[2], "rb", buffering=0)
+        with patch("builtins.open", mock_open(read_data=file_bytes)) as mock_file:
+            assert is_version_greater(filename) == version_greater
+            mock_file.assert_called_once()
 
-            if case[2] is None:
-                assert is_version_greater(case[2]) == case[3]
-                mock_file.assert_called_once_with(case[2], "rb", buffering=0)
+    # Check error cases
+    cases = [
+        (
+            DATA_22_12_2,
+            "xx.xx.x",  # curr_ver
+        ),
+        (
+            DATA_22_03_0_NO_VER,
+            VER_21_01_0,  # curr_ver
+        ),
+        (
+            DATA_22_03_0_NO_META,
+            VER_21_01_0,  # curr_ver
+        ),
+        (
+            DATA_22_03_0_NO_VER_META,
+            VER_21_01_0,  # curr_ver
+        ),
+    ]
+    for i, case in enumerate(cases):
+        print(i)
+        file_bytes = case[0]
+        mocker.patch("krux.firmware.VERSION", case[1])
+        with patch("builtins.open", mock_open(read_data=file_bytes)) as mock_file:
+            with pytest.raises(ValueError):
+                is_version_greater(filename)
 
 
 def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
