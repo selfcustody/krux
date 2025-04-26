@@ -13609,6 +13609,60 @@ def test_upgrade_fails_when_both_sectors_missing_active_firmware(
     assert not firmware.upgrade()
 
 
+def test_upgrade_fails_version_lower(mocker, m5stickv, mock_success_input_cls, tdata):
+    from embit import ec
+
+    mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
+    mocker.patch(
+        "builtins.open",
+        new=get_mock_open(
+            {
+                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
+                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+            }
+        ),
+    )
+    mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
+    )
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(
+            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
+        ),
+    )
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
+    mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
+    mocker.patch(
+        "krux.firmware.flash.read",
+        new=mocker.MagicMock(
+            return_value=bytes(tdata.SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1)
+        ),
+    )
+    mocker.patch("krux.firmware.ec", new=mocker.MagicMock(wraps=ec))
+    mocker.spy(tdata.TEST_SIGNER_PUBLIC_KEY, "verify")
+    mocker.patch(
+        "krux.firmware.ec.PublicKey.from_string",
+        new=mocker.MagicMock(return_value=tdata.TEST_SIGNER_PUBLIC_KEY),
+    )
+    import krux
+    from krux import firmware
+
+    mocker.spy(firmware, "write_data")
+    mocker.spy(firmware, "update_boot_config_sector")
+
+    firmware.is_version_greater = lambda filename: False
+    assert not firmware.upgrade()
+
+    def val_error(filename):
+        raise ValueError()
+
+    firmware.is_version_greater = val_error
+    assert not firmware.upgrade()
+
+
 def test_firmware_constants_guard_against_overflow(mocker, m5stickv):
     import math
     from krux.firmware import (
