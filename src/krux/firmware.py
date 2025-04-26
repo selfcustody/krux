@@ -22,7 +22,7 @@
 import io
 import os
 import binascii
-import hashlib
+import uhashlib_hw
 import time
 import flash
 from embit import ec
@@ -163,7 +163,7 @@ def fsize(firmware_filename):
 
 def sha256(firmware_filename, firmware_size=None):
     """Returns the sha256 hash of the firmware"""
-    hasher = hashlib.sha256()
+    hasher = uhashlib_hw.sha256()
     # If firmware size is supplied, then we want a sha256 of the firmware with its header
     if firmware_size is not None:
         hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
