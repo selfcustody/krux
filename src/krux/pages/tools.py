@@ -34,7 +34,7 @@ from . import (
 from .file_manager import SD_ROOT_PATH
 from ..format import generate_thousands_separator
 from ..sd_card import SDHandler
-from ..display import BOTTOM_PROMPT_LINE
+from ..display import FONT_HEIGHT, DEFAULT_PADDING, BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..qr import FORMAT_NONE
 
@@ -144,10 +144,34 @@ class Tools(Page):
 
     def scan_qr(self):
         """Handler for the 'Scan a QR' menu item"""
+
+        def urobj_to_data(ur_obj):
+            """returns flatened data from a UR object. belongs in qr or qr_capture???"""
+            import urtypes
+
+            print("type: {}, cbor: {}".format(ur_obj.type, ur_obj.cbor))
+            if ur_obj.type == "crypto-bip39":
+                data = urtypes.crypto.BIP39.from_cbor(ur_obj.cbor).words.decode()
+            elif ur_obj.type == "crypto-account":
+                data = (
+                    urtypes.crypto.Account.from_cbor(ur_obj.cbor)
+                    .output_descriptors[0]
+                    .descriptor()
+                    .decode()
+                )
+            elif ur_obj.type == "crypto-output":
+                data = urtypes.crypto.Output.from_cbor(ur_obj.cbor).descriptor()
+            elif ur_obj.type == "crypto-psbt":
+                data = urtypes.crypto.PSBT.from_cbor(ur_obj.cbor).data
+            elif ur_obj.type == "bytes":
+                data = urtypes.bytes.Bytes.from_cbor(ur_obj.cbor).data
+            else:
+                data = None
+            return data
+
         from .qr_capture import QRCodeCapture
 
         qr_scanner = QRCodeCapture(self.ctx)
-        exportable = True
         contents, fmt = qr_scanner.qr_capture_loop()
         print(
             "\nscanned raw contents: {} {}, format: {}".format(
@@ -157,14 +181,12 @@ class Tools(Page):
         title = "QR Contents"
         if isinstance(contents, str):
             if len(contents) != len(contents.encode()):
+                # Must be in simulator; micropython has no latin-1
                 contents = contents.encode("latin-1")
-                print("must be on simulator, latin-1")
         if fmt == 2:
             title += ", UR:" + contents.type
-            contents = bytes(contents.cbor)
-            exportable = False
-        print("calling view_contents({} {})...".format(type(contents), repr(contents)))
-        return self.view_contents(contents, title=title, exportable=exportable)
+            contents = urobj_to_data(contents)
+        return self.manipulate_contents(contents, title)
 
     def create_qr(self, text=None):
         """Handler for the 'New Text QR' menu item"""
@@ -210,69 +232,198 @@ class Tools(Page):
 
         print(contents, title)
 
+        if isinstance(contents, bytes) and contents[:4] == b"psbt":
+            from krux.baseconv import base_encode
+
+            contents = base_encode(contents, 64).decode()
+
         seed_qr_view = SeedQRView(self.ctx, data=contents, title=title)
         seed_qr_view.display_qr(allow_export=True)
 
         return MENU_CONTINUE
 
-    def view_contents(self, contents, title, exportable=True):
-        """Reusable handler for viewing text or binary contents"""
+    def manipulate_contents(
+        self,
+        contents,
+        title,
+        history=None,
+        try_decrypt=True,
+        decrypted=False,
+        sensitive=False,
+    ):
+        """allows to view, convert, encrypt/decrypt, and export short str/bytes contents"""
+        # pylint: disable=R0912,R0915
+        from binascii import hexlify, unhexlify
+        from krux.baseconv import base_encode, base_decode
+        from .encryption_ui import KEFEnvelope
 
-        was_decrypted = False
-        was_decoded = False
-        was_binary = False
-        while True:
-            if isinstance(contents, str):
-                break
-            from .encryption_ui import KEFEnvelope
+        def convert(contents, conversion):
+            from_bytes = isinstance(contents, bytes)
+            if conversion in (43, 58, 64):
+                if from_bytes:
+                    return base_encode(contents, conversion).decode()
+                return base_decode(contents.encode(), conversion)
+            if conversion == "hex":
+                if from_bytes:
+                    return hexlify(contents).decode()
+                return unhexlify(contents)
+            if conversion == "utf8":
+                if from_bytes:
+                    return contents.decode()
+                return contents.encode()
+            return None
 
-            kef = KEFEnvelope(self.ctx)
-            decrypted = kef.unseal_ui(contents)
-            print("decrypted", decrypted)
-            if decrypted is None:
-                break
-            was_decrypted = True
-            contents = decrypted
+        def info_box(title, decrypted, sensitive, type_len):
+            self.ctx.display.clear()
+            return self.ctx.display.draw_hcentered_text(
+                "\n".join(
+                    [
+                        title,
+                        " ".join(
+                            [
+                                t("decrypted") if decrypted else "",
+                                t("sensitive") if sensitive else "",
+                            ]
+                        ),
+                        type_len,
+                    ]
+                ),
+                info_box=True,
+            )
 
-        if was_decrypted:
-            title += ", " + t("decrypted")
+        # print("into manipulate_contents(", contents, type(contents), history)
+        type_len = None
+        if history is None:
+            history = []
+
+        # check if KEF wrapped
+        if try_decrypt and isinstance(contents, bytes):
+            while True:
+                kef = KEFEnvelope(self.ctx)
+                plaintext = kef.unseal_ui(contents)
+                if plaintext is None:
+                    break
+                decrypted = True
+                contents = plaintext
+                history = []
+
+        # analyze bytes contents, build menu options
+        todo_menu = []
         if isinstance(contents, bytes):
+            type_len = t("binary: {} bytes").format(len(contents))
+            if len(contents) in (16, 32) and max((x for x in contents)) > 127:
+                sensitive = True
+            todo_menu.append((t("to hex"), lambda: "hex"))
+            todo_menu.append((t("to base43"), lambda: 43))
+            todo_menu.append((t("to base58"), lambda: 58))
+            todo_menu.append((t("to base64"), lambda: 64))
             try:
-                contents = contents.decode()
-                was_decoded = True
+                contents.decode()
+                todo_menu.append((t("to utf8"), lambda: "utf8"))
             except:
-                from binascii import hexlify
+                pass
 
-                suffix = " ({} B)".format(len(contents))
-                contents = hexlify(contents).decode()
-                was_binary, was_decoded = True, True
-                title += ", " + t("binary hex") + suffix
+        # analyze string contents, build menu options
+        elif isinstance(contents, str):
+            type_len = "text: {} chars".format(len(contents))
+            if len(contents.split()) in (12, 24):
+                sensitive = True
+            elif len(set((x in "0123456789" for x in contents))) == 1 and len(
+                contents in (12 * 3, 24 * 3)
+            ):
+                sensitive = True
 
-        self.ctx.display.clear()
-        print(title, repr(contents))
-        self.ctx.display.draw_centered_text(title + ":\n\n" + contents)
+            try:
+                unhexlify(contents)
+                todo_menu.append((t("from hex"), lambda: "hex"))
+            except:
+                pass
+
+            try:
+                base_decode(contents.encode(), 43)
+                todo_menu.append((t("from base43"), lambda: 43))
+            except:
+                pass
+
+            try:
+                base_decode(contents.encode(), 58)
+                todo_menu.append((t("from base58"), lambda: 58))
+            except:
+                pass
+
+            try:
+                base_decode(contents.encode(), 64)
+                todo_menu.append(("from base64", lambda: 64))
+            except:
+                pass
+
+            try:
+                contents.encode()
+                todo_menu.append((t("from utf8"), lambda: "utf8"))
+            except:
+                pass
+
+        todo_menu.append((t("Encrypt"), lambda: "encrypt"))
+        if not (decrypted and sensitive):
+            todo_menu.append((t("Export QR"), lambda: "export"))
+
+        if len(history):
+            for i, option in enumerate(todo_menu):
+                if option[1]() == history[-1]:
+                    todo_menu[i] = (option[0] + " (Undo)", lambda: "undo")
+                    break
+
+        # display infobox and contents
+        info_len = info_box(title, decrypted, sensitive, type_len)
+        self.ctx.display.draw_hcentered_text(
+            (
+                '"' + contents + '"'
+                if isinstance(contents, str)
+                else "hex: " + hexlify(contents).decode()
+            ),
+            offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
+        )
         self.ctx.input.wait_for_button()
 
-        if not exportable:
+        # display infobox and run the todo_menu
+        info_len = info_box(title, decrypted, sensitive, type_len)
+        menu = Menu(
+            self.ctx, todo_menu, offset=info_len * FONT_HEIGHT + DEFAULT_PADDING
+        )
+        idx, status = menu.run_loop()
+
+        # if user chose to exit
+        if idx == len(todo_menu) - 1:
             return MENU_CONTINUE
 
-        self.ctx.display.clear()
-        if was_decrypted:
-            prompt = t("Export contents as plain QR?")
-            method = self.create_qr
-        else:
-            prompt = t("Export contents as encrypted QR?")
-            method = self.create_encrypted_qr
-        if self.prompt(prompt, self.ctx.display.height() // 2):
-            if was_decoded:
-                contents = contents.encode()
-            if was_binary:
-                from binascii import unhexlify
+        # if user chose to convert data
+        if status not in ("encrypt", "export"):
+            if status == "undo":
+                status = history.pop()
+            else:
+                history.append(status)
+            contents = convert(contents, status)
+            return self.manipulate_contents(
+                contents,
+                title,
+                history=history,
+                try_decrypt=try_decrypt,
+                decrypted=decrypted,
+                sensitive=sensitive,
+            )
 
-                contents = unhexlify(contents)
-            return method(contents)
+        # if user chose to encrypt
+        if status == "encrypt":
+            kef = KEFEnvelope(self.ctx)
+            contents = contents if isinstance(contents, bytes) else contents.encode()
+            contents = kef.seal_ui(contents, override_settings=True)
+            title = kef.label if kef.label else ""
+            return self.manipulate_contents(
+                contents, title, try_decrypt=False, sensitive=sensitive
+            )
 
-        return MENU_CONTINUE
+        # user chose to export
+        return self.view_qr(contents, title)
 
     def descriptor_addresses(self):
         """Handler for the 'Descriptor Addresses' menu item"""
