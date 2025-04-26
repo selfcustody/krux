@@ -19,21 +19,25 @@ def tdata(mocker):
     TEST_FIRMWARE_FILENAME = os.path.join(
         os.path.dirname(__file__), FILES_FOLDER, "firmware-v0.0.0.bin"
     )
-    TEST_FIRMWARE = open(TEST_FIRMWARE_FILENAME, "rb").read()
-    TEST_FIRMWARE_SHA256 = open(TEST_FIRMWARE_FILENAME + ".sha256.txt", "r").read()
-    TEST_FIRMWARE_WITH_HEADER_SHA256 = open(
-        TEST_FIRMWARE_FILENAME + ".withheader.sha256.txt", "r"
-    ).read()
-    TEST_FIRMWARE_SIG = open(TEST_FIRMWARE_FILENAME + ".sig", "rb").read()
+    print(os.path.dirname(__file__))
+    with open(TEST_FIRMWARE_FILENAME, "rb") as f:
+        TEST_FIRMWARE = f.read()
+    with open(TEST_FIRMWARE_FILENAME + ".sha256.txt", "r") as f:
+        TEST_FIRMWARE_SHA256 = f.read()
+    with open(TEST_FIRMWARE_FILENAME + ".withheader.sha256.txt", "r") as f:
+        TEST_FIRMWARE_WITH_HEADER_SHA256 = f.read()
+    with open(TEST_FIRMWARE_FILENAME + ".sig", "rb") as f:
+        TEST_FIRMWARE_SIG = f.read()
     TEST_FIRMWARE_SIGNATURE = ec.Signature.parse(TEST_FIRMWARE_SIG)
-    TEST_FIRMWARE_MALFORMED_SIG = open(
-        TEST_FIRMWARE_FILENAME + ".malformed.sig", "rb"
-    ).read()
-    TEST_FIRMWARE_BAD_SIG = open(TEST_FIRMWARE_FILENAME + ".bad.sig", "rb").read()
+    with open(TEST_FIRMWARE_FILENAME + ".malformed.sig", "rb") as f:
+        TEST_FIRMWARE_MALFORMED_SIG = f.read()
+    with open(TEST_FIRMWARE_FILENAME + ".bad.sig", "rb") as f:
+        TEST_FIRMWARE_BAD_SIG = f.read()
     TEST_FIRMWARE_25_03_0_FILENAME = os.path.join(
         os.path.dirname(__file__), FILES_FOLDER, "firmware-v25.03.0.bin"
     )
-    TEST_FIRMWARE_25_03_0 = open(TEST_FIRMWARE_25_03_0_FILENAME, "rb").read()
+    with open(TEST_FIRMWARE_25_03_0_FILENAME, "rb") as f:
+        TEST_FIRMWARE_25_03_0 = f.read()
 
     SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1 = [
         0x5A,
@@ -12437,7 +12441,8 @@ def test_update_boot_config_sector(mocker, m5stickv, tdata):
 def test_fsize(mocker, m5stickv, tdata):
     from krux.firmware import fsize
 
-    expected_size = len(open(tdata.TEST_FIRMWARE_FILENAME, "rb").read())
+    with open(tdata.TEST_FIRMWARE_FILENAME, "rb") as f:
+        expected_size = len(f.read())
     assert fsize(tdata.TEST_FIRMWARE_FILENAME) == expected_size
 
 
@@ -13360,6 +13365,11 @@ def test_upgrade_fails_when_user_declines(mocker, m5stickv, mock_fail_input_cls,
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
 
+    mocker.patch.object(
+        firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
+    )
+    firmware.is_version_greater = lambda filename: "00.00.0"
+
     assert not firmware.upgrade()
     display_mocker.flash_text.assert_not_called()
 
@@ -13386,6 +13396,11 @@ def test_upgrade_fails_when_firmware_too_big(
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.fsize", new=lambda f: firmware.MAX_FIRMWARE_SIZE + 1)
     from krux import firmware
+
+    mocker.patch.object(
+        firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
+    )
+    firmware.is_version_greater = lambda filename: "00.00.0"
 
     assert not firmware.upgrade()
     display_mocker.flash_text.assert_called_with(
@@ -13416,6 +13431,11 @@ def test_upgrade_fails_when_pubkey_is_invalid(
     mocker.patch("krux.firmware.SIGNER_PUBKEY", "abc123")
     from krux import firmware
 
+    mocker.patch.object(
+        firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
+    )
+    firmware.is_version_greater = lambda filename: "00.00.0"
+
     assert not firmware.upgrade()
     display_mocker.flash_text.assert_called_with(
         "Invalid public key", firmware.theme.error_color
@@ -13444,6 +13464,11 @@ def test_upgrade_fails_when_sig_file_missing(
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
+
+    mocker.patch.object(
+        firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
+    )
+    firmware.is_version_greater = lambda filename: "00.00.0"
 
     assert not firmware.upgrade()
     display_mocker.flash_text.assert_called_with(
@@ -13474,6 +13499,11 @@ def test_upgrade_fails_when_sig_is_invalid(
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
 
+    mocker.patch.object(
+        firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
+    )
+    firmware.is_version_greater = lambda filename: "00.00.0"
+
     assert not firmware.upgrade()
     display_mocker.flash_text.assert_called_with(
         "Bad signature", firmware.theme.error_color
@@ -13503,6 +13533,11 @@ def test_upgrade_fails_when_sig_is_malformed(
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
 
+    mocker.patch.object(
+        firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
+    )
+    firmware.is_version_greater = lambda filename: "00.00.0"
+
     assert not firmware.upgrade()
     display_mocker.flash_text.assert_called_with(
         "Bad signature", firmware.theme.error_color
@@ -13529,6 +13564,11 @@ def test_upgrade_fails_when_sig_is_bad(mocker, m5stickv, mock_success_input_cls,
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
+
+    mocker.patch.object(
+        firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
+    )
+    firmware.is_version_greater = lambda filename: "00.00.0"
 
     assert not firmware.upgrade()
     display_mocker.flash_text.assert_called_with(
@@ -13563,6 +13603,8 @@ def test_upgrade_fails_when_both_sectors_missing_active_firmware(
         new=mocker.MagicMock(return_value=bytes(tdata.SECTOR_WITH_NO_ACTIVE_FIRMWARE)),
     )
     from krux import firmware
+
+    firmware.is_version_greater = lambda filename: "00.00.0"
 
     assert not firmware.upgrade()
 
