@@ -12441,16 +12441,6 @@ def test_fsize(mocker, m5stickv, tdata):
     assert fsize(tdata.TEST_FIRMWARE_FILENAME) == expected_size
 
 
-def test_sha256(mocker, m5stickv, tdata):
-    import hashlib
-    from krux.firmware import sha256
-
-    firmware = open(tdata.TEST_FIRMWARE_FILENAME, "rb").read()
-    size = len(firmware)
-    expected_hash = hashlib.sha256(b"\x00" + size.to_bytes(4, "little") + firmware)
-    assert sha256(tdata.TEST_FIRMWARE_FILENAME, size) == expected_hash.digest()
-
-
 def test_write_data_with_header_and_sha_suffix(mocker, m5stickv, tdata):
     mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
     import hashlib
@@ -12984,7 +12974,7 @@ def test_is_version_greater(mocker, m5stickv, tdata):
                 is_version_greater(filename)
 
 
-def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
+def test_upgrade_succeed(mocker, m5stickv, mock_success_input_cls, tdata):
     import binascii
     from embit import ec
 
@@ -13008,7 +12998,7 @@ def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
         ),
     )
-    mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     mocker.patch(
@@ -13081,6 +13071,7 @@ def test_upgrade(mocker, m5stickv, mock_success_input_cls, tdata):
             ),
         ]
     )
+    display_mocker.flash_text.assert_called_with("Shutting down..")
 
 
 def test_upgrade_fails_write_data(mocker, m5stickv, mock_success_input_cls, tdata):
@@ -13364,11 +13355,13 @@ def test_upgrade_fails_when_user_declines(mocker, m5stickv, mock_fail_input_cls,
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
         ),
     )
-    mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_fail_input_cls)
+    mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
 
     assert not firmware.upgrade()
+    display_mocker.flash_text.assert_not_called()
 
 
 def test_upgrade_fails_when_firmware_too_big(
@@ -13389,12 +13382,15 @@ def test_upgrade_fails_when_firmware_too_big(
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
         ),
     )
-    mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.fsize", new=lambda f: firmware.MAX_FIRMWARE_SIZE + 1)
     from krux import firmware
 
     assert not firmware.upgrade()
+    display_mocker.flash_text.assert_called_with(
+        "Firmware exceeds max size: 3145728", firmware.theme.error_color
+    )
 
 
 def test_upgrade_fails_when_pubkey_is_invalid(
@@ -13415,12 +13411,15 @@ def test_upgrade_fails_when_pubkey_is_invalid(
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
         ),
     )
-    mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.SIGNER_PUBKEY", "abc123")
     from krux import firmware
 
     assert not firmware.upgrade()
+    display_mocker.flash_text.assert_called_with(
+        "Invalid public key", firmware.theme.error_color
+    )
 
 
 def test_upgrade_fails_when_sig_file_missing(
@@ -13441,12 +13440,15 @@ def test_upgrade_fails_when_sig_file_missing(
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
         ),
     )
-    mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
 
     assert not firmware.upgrade()
+    display_mocker.flash_text.assert_called_with(
+        "Missing signature file", firmware.theme.error_color
+    )
 
 
 def test_upgrade_fails_when_sig_is_invalid(
@@ -13467,12 +13469,15 @@ def test_upgrade_fails_when_sig_is_invalid(
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
         ),
     )
-    mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
 
     assert not firmware.upgrade()
+    display_mocker.flash_text.assert_called_with(
+        "Bad signature", firmware.theme.error_color
+    )
 
 
 def test_upgrade_fails_when_sig_is_malformed(
@@ -13493,12 +13498,15 @@ def test_upgrade_fails_when_sig_is_malformed(
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
         ),
     )
-    mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
 
     assert not firmware.upgrade()
+    display_mocker.flash_text.assert_called_with(
+        "Bad signature", firmware.theme.error_color
+    )
 
 
 def test_upgrade_fails_when_sig_is_bad(mocker, m5stickv, mock_success_input_cls, tdata):
@@ -13517,12 +13525,15 @@ def test_upgrade_fails_when_sig_is_bad(mocker, m5stickv, mock_success_input_cls,
             return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
         ),
     )
-    mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
     from krux import firmware
 
     assert not firmware.upgrade()
+    display_mocker.flash_text.assert_called_with(
+        "Bad signature", firmware.theme.error_color
+    )
 
 
 def test_upgrade_fails_when_both_sectors_missing_active_firmware(
