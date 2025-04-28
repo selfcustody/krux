@@ -158,7 +158,7 @@ def test_printer_test_tool(amigo, mocker):
 
 def test_create_qr(amigo, mocker):
     """Test that QR creation tool is called with the correct text"""
-    from krux.pages.tools import Tools
+    from krux.pages.qr_tool import QRTool
     from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = [BUTTON_ENTER]
@@ -166,7 +166,7 @@ def test_create_qr(amigo, mocker):
     with patch("krux.pages.qr_view.SeedQRView") as Mocked_QRView:
         ctx = create_ctx(mocker, BTN_SEQUENCE)
 
-        test_tools = Tools(ctx)
+        test_tools = QRTool(ctx)
         test_tools.capture_from_keypad = mocker.MagicMock(return_value="test")
         test_tools.create_qr()
 
