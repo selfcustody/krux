@@ -499,8 +499,7 @@ class EncryptMnemonic(Page):
             from ..baseconv import base_encode
 
             # Convert to base43
-            qr_data = base_encode(qr_data, 43).decode("ascii")
-
+            qr_data = base_encode(qr_data, 43)
         seed_qr_view = SeedQRView(self.ctx, data=qr_data, title=mnemonic_id)
         seed_qr_view.display_qr(allow_export=True)
 

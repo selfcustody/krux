@@ -160,8 +160,8 @@ class QRTool(Page):
             from_bytes = isinstance(contents, bytes)
             if conversion in (43, 58, 64):
                 if from_bytes:
-                    return base_encode(contents, conversion).decode()
-                return base_decode(contents.encode(), conversion)
+                    return base_encode(contents, conversion)
+                return base_decode(contents, conversion)
             if conversion == "hex":
                 if from_bytes:
                     return hexlify(contents).decode()
@@ -239,19 +239,19 @@ class QRTool(Page):
                 pass
 
             try:
-                base_decode(contents.encode(), 43)
+                base_decode(contents, 43)
                 todo_menu.append((t("from base43"), lambda: 43))
             except:
                 pass
 
             try:
-                base_decode(contents.encode(), 58)
+                base_decode(contents, 58)
                 todo_menu.append((t("from base58"), lambda: 58))
             except:
                 pass
 
             try:
-                base_decode(contents.encode(), 64)
+                base_decode(contents, 64)
                 todo_menu.append(("from base64", lambda: 64))
             except:
                 pass
@@ -278,7 +278,7 @@ class QRTool(Page):
             (
                 '"' + contents + '"'
                 if isinstance(contents, str)
-                else "hex: " + hexlify(contents).decode()
+                else "0x " + hexlify(contents).decode()
             ),
             offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
         )

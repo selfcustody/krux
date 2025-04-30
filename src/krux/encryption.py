@@ -122,7 +122,7 @@ class MnemonicStorage:
         version = kef.suggest_versions(plain, mode_name)[0]
         encrypted = encryptor.encrypt(plain, version, i_vector)
         envelope = kef.wrap(mnemonic_id, version, iterations, encrypted)
-        b64_kef = base_encode(envelope, 64).decode()
+        b64_kef = base_encode(envelope, 64)
         mnemonics = {}
         if sd_card:
             # load current MNEMONICS_FILE

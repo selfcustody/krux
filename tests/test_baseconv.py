@@ -84,32 +84,32 @@ def test_base_decode(mocker, m5stickv, tdata):
     from krux.baseconv import base_decode
 
     for data, data_base43, data_base58, data_base64 in tdata.TEST_CASES:
-        assert base_decode(data_base43.encode(), 43) == data
-        assert base_decode(data_base58.encode(), 58) == data
-        assert base_decode(data_base64.encode(), 64) == data
+        assert base_decode(data_base43, 43) == data
+        assert base_decode(data_base58, 58) == data
+        assert base_decode(data_base64, 64) == data
 
 
 def test_base_encode(mocker, m5stickv, tdata):
     from krux.baseconv import base_encode
 
     for data, data_base43, data_base58, data_base64 in tdata.TEST_CASES:
-        assert base_encode(data, 43) == data_base43.encode()
-        assert base_encode(data, 58) == data_base58.encode()
-        assert base_encode(data, 64) == data_base64.encode()
+        assert base_encode(data, 43) == data_base43
+        assert base_encode(data, 58) == data_base58
+        assert base_encode(data, 64) == data_base64
 
 
 def test_base_decode_from_unsupported_base(mocker, m5stickv):
     from krux.baseconv import base_decode
 
     with pytest.raises(ValueError):
-        base_decode(b"", 21)
+        base_decode("", 21)
 
 
 def test_base_decode_from_wrong_base(mocker, m5stickv):
     from krux.baseconv import base_decode
 
     with pytest.raises(ValueError):
-        base_decode("abc".encode(), 43)
+        base_decode("abc", 43)
 
 
 def test_base_encode_to_unsupported_base(mocker, m5stickv):
@@ -117,3 +117,21 @@ def test_base_encode_to_unsupported_base(mocker, m5stickv):
 
     with pytest.raises(ValueError):
         base_encode(b"", 21)
+
+
+def test_base_encode_from_wrong_type(mocker, m5stickv):
+    from krux.baseconv import base_encode
+
+    err = "Invalid value, expected bytes"
+    for base in (43, 58, 64):
+        with pytest.raises(TypeError, match=err):
+            base_encode("", base)
+
+
+def test_base_decode_from_wrong_type(mocker, m5stickv):
+    from krux.baseconv import base_decode
+
+    err = "Invalid value, expected str"
+    for base in (43, 58, 64):
+        with pytest.raises(TypeError, match=err):
+            base_decode(b"", base)

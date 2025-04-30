@@ -29,12 +29,14 @@ assert len(B58CHARS) == 58
 
 
 def base_decode(v, base):
-    """Decodes v from base encoding and returns the decoded bytes"""
+    """Decodes str v from base encoding and returns as bytes"""
+    if not isinstance(v, str):
+        raise TypeError("Invalid value, expected str")
     if base not in (43, 58, 64):
         raise ValueError("not supported base: {}".format(base))
 
-    if v == b"":
-        return v
+    if v == "":
+        return b""
 
     # Base64 is a special case: We just use binascii's implementation without
     # performing bitcoin-specific padding logic
@@ -45,7 +47,7 @@ def base_decode(v, base):
     long_value = 0
     power_of_base = 1
     for char in reversed(v):
-        digit = chars.find(bytes([char]).decode())
+        digit = chars.find(char)
         if digit == -1:
             raise ValueError("forbidden character {} for base {}".format(char, base))
         long_value += digit * power_of_base
@@ -59,7 +61,7 @@ def base_decode(v, base):
         result.append(long_value)
     n_pad = 0
     for char in v:
-        if bytes([char]).decode() == chars[0]:
+        if char == chars[0]:
             n_pad += 1
         else:
             break
@@ -69,18 +71,20 @@ def base_decode(v, base):
 
 
 def base_encode(v, base):
-    """Encodes the data in v as base and returns as bytes"""
+    """Encodes the bytes data in v as base and returns as str"""
+    if not isinstance(v, bytes):
+        raise TypeError("Invalid value, expected bytes")
     if base not in (43, 58, 64):
         raise ValueError("not supported base: {}".format(base))
 
     if v == b"":
-        return v
+        return ""
 
     # Base64 is a special case: We just use binascii's implementation without
     # performing bitcoin-specific padding logic. b2a_base64 always adds a \n
     # char at the end which we strip before returning
     if base == 64:
-        return b2a_base64(v).rstrip()
+        return b2a_base64(v).rstrip().decode()
 
     chars = B58CHARS if base == 58 else B43CHARS
     long_value = 0
@@ -105,4 +109,4 @@ def base_encode(v, base):
             break
     if n_pad > 0:
         result.extend((chars[0] * n_pad).encode())
-    return bytes(reversed(result))
+    return bytes(reversed(result)).decode()
