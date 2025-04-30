@@ -176,19 +176,9 @@ def sha256(firmware_filename, firmware_size=None):
 def upgrade():
     """Installs new firmware from SD card"""
 
-    firmware_path = ""
+    firmware_path = "/sd/firmware.bin"
     try:
-        firmware_filenames = list(
-            filter(
-                lambda filename: filename.startswith("firmware")
-                and filename.endswith(".bin"),
-                os.listdir("/sd"),
-            )
-        )
-        firmware_filenames.sort(reverse=True)
-        if not firmware_filenames:
-            return False
-        firmware_path = "/sd/" + firmware_filenames[0]
+        os.stat(firmware_path)
     except:
         return False
 
