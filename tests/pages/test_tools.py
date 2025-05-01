@@ -145,7 +145,7 @@ def test_printer_test_tool(amigo, mocker):
 
     BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm print, then leave
 
-    with patch("krux.pages.print_page.PrintPage.print_qr") as mocked_print_qr:
+    with patch("krux.pages.utils.Utils.print_standard_qr") as mocked_print_qr:
         ctx = create_ctx(mocker, BTN_SEQUENCE)
         test_tools = Tools(ctx)
         test_tools.print_test()

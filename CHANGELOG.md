@@ -21,6 +21,7 @@ Addresses are displayed in groups of 4, separated by spaces, for better readabil
 
 ### Other Bug Fixes and Optimizations
 - Fix printing words instead of numbers when using "Backup Mnemonic > Other formats > Numbers".
+- "Tools > Print Test QR" asks user before printing.
 - Added fingerprint to mnemonic preview and editor.
 - Show fingerprint preview when changing wallet passphrase.
 - Store encrypted mnemonic now asks if you want to use the fingerprint as ID.

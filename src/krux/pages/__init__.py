@@ -47,7 +47,7 @@ from ..display import (
     STATUS_BAR_HEIGHT,
     BOTTOM_LINE,
 )
-from ..qr import to_qr_codes
+from ..qr import to_qr_codes, FORMAT_NONE
 from ..krux_settings import t, Settings
 from ..sd_card import SDHandler
 from ..kboard import kboard
@@ -228,7 +228,9 @@ class Page:
         if not buffer_title:
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
 
-    def display_qr_codes(self, data, qr_format, title="", highlight_prefix=""):
+    def display_qr_codes(
+        self, data, qr_format=FORMAT_NONE, title="", highlight_prefix=""
+    ):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """

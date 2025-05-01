@@ -36,7 +36,6 @@ from ..format import generate_thousands_separator
 from ..sd_card import SDHandler
 from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
-from ..qr import FORMAT_NONE
 
 
 class Tools(Page):
@@ -125,11 +124,12 @@ class Tools(Page):
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
         title = t("Krux Printer Test QR")
-        self.display_qr_codes(title, FORMAT_NONE, title)
-        from .print_page import PrintPage
+        self.display_qr_codes(title, title=title)
 
-        print_page = PrintPage(self.ctx)
-        print_page.print_qr(title, title=title)
+        from .utils import Utils
+
+        utils = Utils(self.ctx)
+        utils.print_standard_qr(title, title=title)
         return MENU_CONTINUE
 
     def create_qr(self):
