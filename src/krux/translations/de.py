@@ -115,6 +115,7 @@ translation_array = [
     "Mnemonic konnte nicht gespeichert werden",
     "Gebühr:",
     "Vorschubgeschwindigkeit",
+    "Dateiinhalt",
     "Dateiname",
     "Dateiname %s existiert auf SD-Karte, überschreiben?",
     "Den Flash mit Entropie von der Kamera füllen?",

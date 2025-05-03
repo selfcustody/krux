@@ -115,6 +115,7 @@ translation_array = [
     "Falhou ao armazenar mnemônico",
     "Taxa:",
     "Taxa de Alimentação",
+    "Conteúdo do arquivo",
     "Nome do arquivo",
     "O nome do arquivo %s existe no cartão SD, substituir?",
     "Preencher a flash com entropia da câmera?",

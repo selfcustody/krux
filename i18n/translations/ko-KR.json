@@ -93,6 +93,7 @@
     "Failed to store mnemonic": "니모닉을 저장하지 못했습니다",
     "Fee:": "수수료:",
     "Feed Rate": "Feed Rate",
+    "File Contents": "파일 내용@ item: inlistbox",
     "Filename": "파일명",
     "Filename %s exists on SD card, overwrite?": "%s 파일명이 SD카드에 이미 존재합니다. 덮어쓰시겠습니까?",
     "Fill the flash with entropy from camera?": "카메라의 엔트로피로 플래시를 채우시겠습니까?",

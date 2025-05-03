@@ -134,10 +134,33 @@ class MediaToolMenu(Page):
 
     def read_file(self):
         """Handler for the 'Read SD File' menu item"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text("Todo: read file from sdcard")
-        self.ctx.input.wait_for_button()
-        return MENU_CONTINUE
+        from .utils import Utils
+
+        if not self.has_sd_card():
+            self.ctx.display.clear()
+            self.flash_error(t("SD card not detected."))
+            return MENU_CONTINUE
+
+        utils = Utils(self.ctx)
+        try:
+            filename, contents = utils.load_file()
+        except OSError:
+            pass
+
+        if not contents:
+            return MENU_CONTINUE
+
+        # utils.load_file() always returns binary, try as utf8 text
+        try:
+            contents = contents.decode()
+        except:
+            pass
+
+        page = MediaTool(self.ctx)
+        page.contents = contents
+        # pylint: disable=C0207
+        page.title = t("File Contents") + "\n" + filename.split("/")[-1]
+        return page.manipulate_contents()
 
 
 class MediaTool(Page):
@@ -286,7 +309,9 @@ class MediaTool(Page):
             except:
                 pass
 
-        todo_menu.append((t("Encrypt"), lambda: "encrypt"))
+        if isinstance(self.contents, bytes):
+            todo_menu.append((t("Encrypt"), lambda: "encrypt"))
+
         if not (self.decrypted and self.sensitive):
             todo_menu.append((t("Export QR"), lambda: "export"))
 
@@ -321,11 +346,6 @@ class MediaTool(Page):
         # if user chose to encrypt
         if status == "encrypt":
             kef = KEFEnvelope(self.ctx)
-            self.contents = (
-                self.contents
-                if isinstance(self.contents, bytes)
-                else self.contents.encode()
-            )
             self.contents = kef.seal_ui(self.contents, override_settings=True)
             self.title = kef.label if kef.label else ""
             return self.manipulate_contents(try_decrypt=False)

@@ -115,6 +115,7 @@ translation_array = [
     "Geheugensteun opslaan is niet gelukt",
     "Tarief:",
     "Voedingssnelheid",
+    "Bestand inhoud",
     "Bestandsnaam",
     "Bestandsnaam %s OVERSCHRIJVEN op SD kaart?",
     "De flash vullen met entropie van de camera?",

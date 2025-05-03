@@ -93,6 +93,7 @@
     "Failed to store mnemonic": "存储助记词失败",
     "Fee:": "费用:",
     "Feed Rate": "进给速度",
+    "File Contents": "文件内容",
     "Filename": "文件名",
     "Filename %s exists on SD card, overwrite?": "文件名 %s 存在于 SD 卡上，覆盖？",
     "Fill the flash with entropy from camera?": "用摄像头的熵填充Flash？",

@@ -115,6 +115,7 @@ translation_array = [
     "Không lưu trữ Mnemonic được",
     "Phí:",
     "Tốc độ cắt CNC",
+    "Nội dung tập tin",
     "Tên tệp",
     "Tên tệp %s tồn tại trên thẻ SD, ghi đè lên?",
     "Điền vào flash với entropy từ máy ảnh?",

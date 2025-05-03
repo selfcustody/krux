@@ -115,6 +115,7 @@ translation_array = [
     "No pudo almacenar mnemónico",
     "Comisión:",
     "Feed Rate",
+    "Contenido del fichero",
     "Nombre del Archivo",
     "El nombre de archivo %s existe en la tarjeta SD, ¿sobrescribir?",
     "¿Llenar el flash con entropía de la cámara?",

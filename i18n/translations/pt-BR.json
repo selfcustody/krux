@@ -93,6 +93,7 @@
     "Failed to store mnemonic": "Falhou ao armazenar mnemônico",
     "Fee:": "Taxa:",
     "Feed Rate": "Taxa de Alimentação",
+    "File Contents": "Conteúdo do arquivo",
     "Filename": "Nome do arquivo",
     "Filename %s exists on SD card, overwrite?": "O nome do arquivo %s existe no cartão SD, substituir?",
     "Fill the flash with entropy from camera?": "Preencher a flash com entropia da câmera?",

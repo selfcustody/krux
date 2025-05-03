@@ -93,6 +93,7 @@
     "Failed to store mnemonic": "mnemonicの保存に失敗しました",
     "Fee:": "手数料:",
     "Feed Rate": "フィードレート",
+    "File Contents": "ファイルの内容@item:inlistbox",
     "Filename": "ファイル名",
     "Filename %s exists on SD card, overwrite?": "ファイル名 %s が SD カードに存在します、上書きしますか？",
     "Fill the flash with entropy from camera?": "カメラからのエントロピーでフラッシュを埋めますか？",

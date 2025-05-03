@@ -93,6 +93,7 @@
     "Failed to store mnemonic": "Không lưu trữ Mnemonic được",
     "Fee:": "Phí:",
     "Feed Rate": "Tốc độ cắt CNC",
+    "File Contents": "Nội dung tập tin",
     "Filename": "Tên tệp",
     "Filename %s exists on SD card, overwrite?": "Tên tệp %s tồn tại trên thẻ SD, ghi đè lên?",
     "Fill the flash with entropy from camera?": "Điền vào flash với entropy từ máy ảnh?",

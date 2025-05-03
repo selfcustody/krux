@@ -93,6 +93,7 @@
     "Failed to store mnemonic": "Mnemonic depolama başarısız",
     "Fee:": "Ücret:",
     "Feed Rate": "Besleme Hızı",
+    "File Contents": "Dosya içeriği@ item: inlistbox",
     "Filename": "Dosya adı",
     "Filename %s exists on SD card, overwrite?": "%s dosya adı SD kartta var, üzerine yazılsın mı?",
     "Fill the flash with entropy from camera?": "Flash'ı kameradan gelen entropi ile doldur?",

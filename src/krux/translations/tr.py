@@ -115,6 +115,7 @@ translation_array = [
     "Mnemonic depolama başarısız",
     "Ücret:",
     "Besleme Hızı",
+    "Dosya içeriği@ item: inlistbox",
     "Dosya adı",
     "%s dosya adı SD kartta var, üzerine yazılsın mı?",
     "Flash'ı kameradan gelen entropi ile doldur?",

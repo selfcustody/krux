@@ -115,6 +115,7 @@ translation_array = [
     "Échec du stockage mnémonique",
     "Frais\u2009:",
     "Taux d'alimentation",
+    "Contenu du fichier",
     "Nom de fichier",
     "Le nom de fichier %s existe sur la carte SD, écraser\u2009?",
     "Remplir le flash avec l'entropie de la caméra\u2009?",
