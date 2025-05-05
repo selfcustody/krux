@@ -90,6 +90,8 @@ if args.sd:
 
 from kruxsim.mocks import uos_functions
 
+from kruxsim.mocks import ujson
+from kruxsim.mocks import urandom
 from kruxsim.mocks import usys
 from kruxsim.mocks import utime
 from kruxsim.mocks import fpioa_manager

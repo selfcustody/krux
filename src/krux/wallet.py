@@ -367,10 +367,7 @@ def parse_wallet(wallet_data, allow_assumption=None):
 
     # Try to parse as JSON and look for a 'descriptor' key
     try:
-        try:
-            import ujson as json
-        except ImportError:
-            import json
+        import ujson as json
 
         wallet_json = json.loads(wallet_data)
         if "descriptor" in wallet_json:

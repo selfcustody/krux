@@ -81,6 +81,9 @@ def mp_modules(mocker, monkeypatch):
             sha256=hashlib.sha256,
         ),
     )
+    import json
+
+    monkeypatch.setitem(sys.modules, "ujson", json)
 
 
 @pytest.fixture
