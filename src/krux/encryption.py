@@ -20,10 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-try:
-    import ujson as json
-except ImportError:
-    import json
+import ujson as json
 import hashlib
 from krux import kef
 from .baseconv import base_encode, base_decode

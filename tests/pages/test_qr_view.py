@@ -21,6 +21,133 @@ PBM_TEST_CODE_BINARY_QR = bytearray(
 )
 
 
+TEST_QR_CODE = bytearray(
+    b"\x08e0c595c5\x00\x00\x00\n\xfb`e$\x90\xed\xfb\xd0r\x13\x1d1%\\6\xd3\xee0\xc4\xb8\x80h1>'\xf5\x9a5\x1cO\x97\xaa"
+)
+
+FILES_FOLDER = "files"
+
+
+import pytest
+
+
+@pytest.fixture
+def mocker_sd_card(mocker):
+    from krux.pages import file_operations
+
+    mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", mock_open, create=True)
+
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+    )
+
+    savefile_mock = mocker.patch.object(
+        file_operations,
+        "SaveFile",
+        autospec=True,
+    ).return_value
+
+    return mock_open, savefile_mock
+
+
+@pytest.fixture
+def mocker_save_file_esc(mocker):
+    from krux.pages import ESC_KEY, file_operations
+
+    savefile_mock = mocker.MagicMock()
+    savefile_mock.set_filename.return_value = ESC_KEY
+    mocker.patch.object(file_operations, "SaveFile", return_value=savefile_mock)
+    return savefile_mock
+
+
+@pytest.fixture
+def mocker_theme_background_white(mocker):
+    from krux.themes import WHITE, theme
+
+    mocker.patch.object(theme, "bg_color", WHITE)
+
+
+def test_init_qr_view_background_white(amigo, mocker, mocker_theme_background_white):
+    from krux.pages.qr_view import SeedQRView
+    from krux.themes import WHITE
+
+    ctx = mock_context(mocker)
+    qr_view = SeedQRView(ctx, data=TEST_DATA, title=TEST_TITLE)
+
+    assert qr_view.qr_foreground == WHITE
+
+
+def test_load_qr_no_title(mocker, amigo):
+    from krux.input import SWIPE_DOWN
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.qr_view import SeedQRView
+
+    # When call display_qr with no title, it should use the default title
+    # we want to cover a line where the self.title is None
+    # and assert the local variable to label = ""
+    ctx = mock_context(mocker)
+    qr_view = SeedQRView(ctx, data=TEST_DATA, title=None)
+
+    # we need to mock these because
+    # display_qr() heavily depends on
+    # UI methods like wait_for_button,
+    # draw_hcentered_text, draw_grided_qr, etc..
+    mocker.patch.object(qr_view, "draw_grided_qr")
+    mocker.patch.object(qr_view.ctx.input, "wait_for_button", return_value=SWIPE_DOWN)
+    mocker.patch.object(qr_view.ctx.display, "height", return_value=240)
+    mocker.patch.object(qr_view.ctx.display, "width", return_value=240)
+    mocker.patch.object(qr_view.ctx.display, "qr_offset", return_value=10)
+    mocker.patch.object(qr_view.ctx.display, "draw_hcentered_text")
+
+    result = qr_view.display_qr(
+        allow_export=False, transcript_tools=False, quick_exit=True
+    )
+
+    assert result == MENU_CONTINUE
+
+
+def test_display_qr_toggle_brightness(amigo, mocker):
+    from krux.input import BUTTON_PAGE, SWIPE_DOWN
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.qr_view import SeedQRView
+    from krux.themes import DARKGREY, WHITE
+
+    # we need to cover the toogle brightness local method
+    # since it isnt callable from the test
+    # we need to mock the ctx.display
+    ctx = mock_context(mocker)
+
+    ctx.input = mocker.Mock()
+    ctx.input.wait_for_button.side_effect = [
+        BUTTON_PAGE,
+        SWIPE_DOWN,
+    ]
+
+    ctx.display = mocker.Mock()
+    ctx.display.height.return_value = 240
+    ctx.display.width.return_value = 240
+    ctx.display.qr_offset.return_value = 10
+    ctx.display.draw_hcentered_text = mocker.Mock()
+
+    qr_view = SeedQRView(ctx, data=TEST_DATA, title="Test Title")
+
+    # we need to set the initial color
+    # to check if the toggle works
+    qr_view.qr_foreground = WHITE
+
+    mocker.patch.object(qr_view, "draw_grided_qr")
+
+    result = qr_view.display_qr(
+        allow_export=False, transcript_tools=False, quick_exit=True
+    )
+
+    # After toggle, it should switch from WHITE to DARKGREY
+    assert qr_view.qr_foreground == DARKGREY
+    assert result == MENU_CONTINUE
+
+
 def test_load_qr_view(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
@@ -196,6 +323,75 @@ def test_save_bmp_image(amigo, mocker):
     qr_viewer.save_bmp_image(TEST_TITLE, TEST_DATA_QR_SIZE_FRAMED * 2)
     sys.modules["image"].Image.return_value.save.assert_called_once_with(
         "/sd/" + TEST_TITLE + BMP_IMAGE_EXTENSION
+    )
+
+
+def test_save_bmp_image_esc_key(amigo, mocker, mocker_save_file_esc):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.pages.qr_view import SeedQRView
+    from krux.sd_card import BMP_IMAGE_EXTENSION
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # move to "Back to Menu"
+        BUTTON_ENTER,  # confirm
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+
+    qr_viewer = SeedQRView(ctx, data=TEST_QR_CODE, title="Test QR Code")
+    qr_viewer.save_bmp_image(TEST_TITLE, TEST_DATA_QR_SIZE_FRAMED * 2)
+
+    mocker_save_file_esc.set_filename.assert_called_once_with(
+        TEST_TITLE, file_extension=BMP_IMAGE_EXTENSION
+    )
+
+
+def test_save_svg_image(amigo, mocker, mocker_sd_card):
+    import os
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.pages.qr_view import SeedQRView
+    from krux.sd_card import SVG_IMAGE_EXTENSION
+
+    mock_open, savefile_mock = mocker_sd_card
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # move to "Back to Menu"
+        BUTTON_ENTER,  # confirm
+    ]
+
+    file_path = os.path.join(os.path.dirname(__file__), FILES_FOLDER, "qr_image.svg")
+    expected_svg_calls = [
+        mocker.call(line) for line in open(file_path, "r").readlines()
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+
+    qr_viewer = SeedQRView(ctx, data=TEST_QR_CODE, title="Test QR Code")
+    qr_viewer.save_svg_image(TEST_TITLE)
+
+    mock_open().write.assert_has_calls(expected_svg_calls)
+    savefile_mock.set_filename.assert_called_once_with(
+        TEST_TITLE, file_extension=SVG_IMAGE_EXTENSION
+    )
+
+
+def test_save_svg_image_esc_key(amigo, mocker, mocker_save_file_esc):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.pages.qr_view import SeedQRView
+    from krux.sd_card import SVG_IMAGE_EXTENSION
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # move to "Back to Menu"
+        BUTTON_ENTER,  # confirm
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+
+    qr_viewer = SeedQRView(ctx, data=TEST_QR_CODE, title="Test QR Code")
+    qr_viewer.save_svg_image(TEST_TITLE)
+
+    mocker_save_file_esc.set_filename.assert_called_once_with(
+        TEST_TITLE, file_extension=SVG_IMAGE_EXTENSION
     )
 
 
