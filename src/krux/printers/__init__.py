@@ -19,10 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from ..krux_settings import t
-
-# from ..settings import CategorySetting, SettingsNamespace
-from ..krux_settings import Settings, PrinterSettings
+from ..krux_settings import PrinterSettings, Settings
 
 
 class Printer:

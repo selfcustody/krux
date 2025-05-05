@@ -9,6 +9,9 @@
 - [ ] CHANGELOG
 
 
+### Did you build the code and tested on device?
+- [ ] Yes, build and tested on <!-- device-name -->
+
 ### What is the purpose of this pull request?
 - [ ] Bug fix
 - [ ] New feature

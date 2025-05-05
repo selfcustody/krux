@@ -59,19 +59,21 @@ class GCodeGenerator(Printer):
     def on_gcode(self, gcode):
         """Receives gcode"""
         raise NotImplementedError(
-            f"Must implement 'on_gcode' method for {self.__class__.__name__}"
+            "Must implement 'on_gcode' method for {}".format(self.__class__.__name__)
         )
 
     def print_string(self, text):
         """Print a text string. Avoided on CNC"""
         raise NotImplementedError(
-            f"Must implement 'print_string' method for {self.__class__.__name__}"
+            "Must implement 'print_string' method for {}".format(
+                self.__class__.__name__
+            )
         )
 
     def clear(self):
         """Clears the printer's memory, resetting it"""
         raise NotImplementedError(
-            f"Must implement 'clear' method for {self.__class__.__name__}"
+            "Must implement 'clear' method for {}".format(self.__class__.__name__)
         )
 
     def qr_data_width(self):
@@ -382,7 +384,9 @@ class GRBLPrinter(GCodeGenerator):
         handshaked = statuses[0].startswith("[VER:1.1")
         if not handshaked:
             raise ValueError(
-                f"Cannot handshake, version mismatch. Expected [VER:1.1, got {statuses[0]}"
+                "Cannot handshake, version mismatch. Expected [VER:1.1, got {}".format(
+                    statuses[0]
+                )
             )
 
         super().print_qr_code(qr_code)
