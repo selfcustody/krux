@@ -271,7 +271,7 @@ def upgrade():
 
     status_text(t("New firmware detected.") + "\n\n" + t("Verifying.."))
 
-    # Validade curr bootloader
+    # Validate curr bootloader
     boot_config_sector = flash.read(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
     address, _, entry_index = find_active_firmware(boot_config_sector)
     if address is None:
