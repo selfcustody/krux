@@ -25,7 +25,6 @@ import time
 import urandom as random
 from binascii import hexlify
 from hashlib import sha256
-import urandom as random
 from embit import bip32, bip39
 from embit.wordlists.bip39 import WORDLIST
 from embit.networks import NETWORKS
