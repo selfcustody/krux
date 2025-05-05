@@ -231,7 +231,8 @@ class Key:
             return DER_MULTI % (MULTISIG_SCRIPT_PURPOSE, network["bip32"], account)
         if policy_type == TYPE_MINISCRIPT:
             return DER_MINISCRIPT % (MINISCRIPT_PURPOSE, network["bip32"], account)
-        raise ValueError("Invalid policy type")
+
+        raise ValueError("Invalid policy type: %s" % policy_type)
 
     @staticmethod
     def format_derivation(derivation, pretty=False):

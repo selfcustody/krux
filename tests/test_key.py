@@ -85,6 +85,28 @@ def mock_modules(mocker):
     mocker.patch("krux.key.hexlify", new=mocker.MagicMock(wraps=binascii.hexlify))
 
 
+def test_init_fail_unknown_policy_type(mocker, m5stickv, tdata):
+    mock_modules(mocker)
+    from krux.key import Key
+
+    # Assuming that the policy type is an integer
+    # and that the valid types are 0, 1, and 2
+    # (TYPE_SINGLESIG, TYPE_MULTISIG, TYPE_MINISCRIPT)
+    # let's say that 3 is an unknown policy type,
+    # not supported by the Key class.
+    UNKNOWN_POLICY_TYPE = 3
+
+    # It should raise a ValueError
+    # when a non-supported policy type is passed
+    # to the Key constructor
+    with pytest.raises(ValueError) as exc_info:
+        Key(tdata.TEST_12_WORD_MNEMONIC, UNKNOWN_POLICY_TYPE)
+
+    # Check that the exception message is as expected
+    # (e.g., "Invalid policy type: <some invalid type>")
+    assert str(exc_info.value) == f"Invalid policy type: {UNKNOWN_POLICY_TYPE}"
+
+
 def test_init(mocker, m5stickv, tdata):
     mock_modules(mocker)
     from embit.networks import NETWORKS
