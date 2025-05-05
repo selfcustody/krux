@@ -151,7 +151,7 @@ def test_printer_test_tool(amigo, mocker):
         test_tools.print_test()
 
         mocked_print_qr.assert_called_with(
-            "Krux Printer Test QR", title="Krux Printer Test QR"
+            "Krux Printer Test QR", title="Krux Printer Test QR", check_printer=False
         )
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 

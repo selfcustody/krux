@@ -371,11 +371,11 @@ class Page:
                         word,
                     )
 
-    def print_prompt(self, text):
+    def print_prompt(self, text, check_printer=True):
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
         """
-        if not self.has_printer():
+        if not self.has_printer() and check_printer:
             return False
         self.ctx.display.clear()
         prompt_text = (text + "\n\n%s\n\n") % Settings().hardware.printer.driver

@@ -42,11 +42,17 @@ class Utils(Page):
         super().__init__(ctx, None)
 
     def print_standard_qr(
-        self, data, qr_format=FORMAT_NONE, title="", width=33, is_qr=False
+        self,
+        data,
+        qr_format=FORMAT_NONE,
+        title="",
+        width=33,
+        is_qr=False,
+        check_printer=True,
     ):
         """Loads printer driver and UI"""
         # Only loads printer related modules if needed
-        if self.print_prompt(t("Print as QR?")):
+        if self.print_prompt(t("Print as QR?"), check_printer):
             from .print_page import PrintPage
 
             print_page = PrintPage(self.ctx)

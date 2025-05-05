@@ -129,7 +129,7 @@ class Tools(Page):
         from .utils import Utils
 
         utils = Utils(self.ctx)
-        utils.print_standard_qr(title, title=title)
+        utils.print_standard_qr(title, title=title, check_printer=False)
         return MENU_CONTINUE
 
     def create_qr(self):
