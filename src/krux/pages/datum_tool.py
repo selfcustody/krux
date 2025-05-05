@@ -59,7 +59,7 @@ def urobj_to_data(ur_obj):
 
 
 def convert_encoding(contents, conversion):
-    """encoding conversions to/from (hex, base58, base43, base64, utf8)"""
+    """encoding conversions to/from (hex/base58/base43/base64/utf8)"""
     from krux.baseconv import base_encode, base_decode
     from binascii import hexlify, unhexlify
 
@@ -79,8 +79,8 @@ def convert_encoding(contents, conversion):
     return None
 
 
-class MediaToolMenu(Page):
-    """Krux Media Tool Menu"""
+class DatumToolMenu(Page):
+    """Krux Datum Tool Menu"""
 
     def __init__(self, ctx):
         super().__init__(
@@ -116,19 +116,26 @@ class MediaToolMenu(Page):
             title += ", UR:" + contents.type
             contents = urobj_to_data(contents)
 
-        page = MediaTool(self.ctx)
+        page = DatumTool(self.ctx)
         page.contents, page.title = contents, title
         return page.manipulate_contents()
 
     def text_entry(self):
         """Handler for the 'Text Entry' menu item"""
         text = self.capture_from_keypad(
-            t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            t("Text"),
+            [
+                LETTERS,
+                UPPERCASE_LETTERS,
+                NUM_SPECIAL_1,
+                NUM_SPECIAL_2,
+                "123456789abcdef0",
+            ],
         )
         if text in ("", ESC_KEY):
             return MENU_CONTINUE
 
-        page = MediaTool(self.ctx)
+        page = DatumTool(self.ctx)
         page.contents, page.title = text, t("Custom Text")
         return page.manipulate_contents()
 
@@ -156,15 +163,15 @@ class MediaToolMenu(Page):
         except:
             pass
 
-        page = MediaTool(self.ctx)
+        page = DatumTool(self.ctx)
         page.contents = contents
         # pylint: disable=C0207
         page.title = t("File Contents") + "\n" + filename.split("/")[-1]
         return page.manipulate_contents()
 
 
-class MediaTool(Page):
-    """Krux Media Tool"""
+class DatumTool(Page):
+    """Krux Datum Tool"""
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
@@ -201,6 +208,7 @@ class MediaTool(Page):
         self.ctx.input.wait_for_button()
 
     def _info_box(self):
+        """clears screen, displays info_box, returns height-in-lines"""
         self.ctx.display.clear()
         return self.ctx.display.draw_hcentered_text(
             "\n".join(
@@ -341,13 +349,14 @@ class MediaTool(Page):
             else:
                 self.history.append(status)
             self.contents = convert_encoding(self.contents, status)
-            return self.manipulate_contents(try_decrypt=try_decrypt)
+            return self.manipulate_contents()
 
         # if user chose to encrypt
         if status == "encrypt":
             kef = KEFEnvelope(self.ctx)
             self.contents = kef.seal_ui(self.contents, override_settings=True)
             self.title = kef.label if kef.label else ""
+            self.decrypted = False
             return self.manipulate_contents(try_decrypt=False)
 
         # user chose to export

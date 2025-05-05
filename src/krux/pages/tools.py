@@ -46,7 +46,7 @@ class Tools(Page):
                 [
                     (t("Check SD Card"), self.sd_check),
                     (t("Print Test QR"), self.print_test),
-                    (t("Media Tool"), self.media_tool),
+                    (t("Datum Tool"), self.datum_tool),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Flash Tools"), self.flash_tools),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
@@ -128,17 +128,17 @@ class Tools(Page):
         print_page.print_qr(title, title=title)
         return MENU_CONTINUE
 
-    def media_tool(self):
-        """Handler for the 'Media Tool' menu item"""
+    def datum_tool(self):
+        """Handler for the 'Datum Tool' menu item"""
         import sys
-        from .media_tool import MediaToolMenu
+        from .datum_tool import DatumToolMenu
 
         while True:
-            if MediaToolMenu(self.ctx).run() == MENU_EXIT:
+            if DatumToolMenu(self.ctx).run() == MENU_EXIT:
                 break
 
-        sys.modules.pop("krux.pages.media_tool")
-        del sys.modules["krux.pages"].media_tool
+        sys.modules.pop("krux.pages.datum_tool")
+        del sys.modules["krux.pages"].datum_tool
 
         return MENU_CONTINUE
 
