@@ -22,7 +22,6 @@
 # pylint: disable=W0102
 import time
 
-
 import urandom as random
 from binascii import hexlify
 from hashlib import sha256
