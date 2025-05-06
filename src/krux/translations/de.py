@@ -251,7 +251,7 @@ translation_array = [
     "Auf SD-Karte speichern?",
     "Auf SD-Karte gespeichert:",
     "Skala",
-    "Adresse\\nscannen",
+    "Adresse scannen",
     "Scan BIP39 Passphrase",
     "Schlüssel QR-Code Scannen",
     "Wörter 1-12 erneut scannen",
