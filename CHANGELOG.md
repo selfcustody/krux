@@ -3,8 +3,13 @@
 ### 2x Faster TC Flash Hash
 SHA256 and PBKDF2_hmac can now use hardware sha256 hashing, allowing TC Flash to be executed 2x faster.
 
-### New Mnemonic Menu Disabled by Hide Mnemonic
-When enabled, the hide mnemonic setting also disables the New Mnemonic menu.
+### SD Card Airgapped Firmware Upgrade Optimizations
+- Performs firmware signature authenticity check before prompting the user to update.
+- Verifies and informs the user of the version being installed.
+- Minor optimizations such as hardware sha256 hashing have made checks about 1 second faster.
+
+### 'New Mnemonic' Menu Disabled when 'Hide Mnemonic' Setting is Enabled
+When the 'Hide Mnemonic' setting is enabled, the 'New Mnemonic' menu is disabled.
 
 ### Highlight Fingerprint and Other Texts
 The wallet fingerprint, keypad title, settings categories and prefix texts are now shown highlighted on all screens.
@@ -15,8 +20,13 @@ When the value of the settings category is boolean (True/False), it will be disp
 ### More Readable Address 
 Addresses are displayed in groups of 4, separated by spaces, for better readability.
 
+### New CNC Printer and Fixes (OpenBuilds GRBL 1.1)
+- Fixed CNC/FilePrinter to work with the Optimized QR codes from v24.0.3.0.
+- New CNC/GRBLPrinter can print directly to CNC via serial.
+
 ### Other Bug Fixes and Optimizations
 - Fix printing words instead of numbers when using "Backup Mnemonic > Other formats > Numbers".
+- "Tools > Print Test QR" asks user before printing.
 - Added fingerprint to mnemonic preview and editor.
 - Show fingerprint preview when changing wallet passphrase.
 - Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
@@ -26,7 +36,9 @@ Addresses are displayed in groups of 4, separated by spaces, for better readabil
 - Hide change address menu option when not available in the wallet descriptor loaded.
 - Other small text changes for clarity and translation simplification.
 
+### SVG image export
 
+- add option to save encrypted QRCode as svg image.
 # Changelog 25.03.0 - March 2025
 
 ### Taproot and WSH Miniscript support

@@ -199,7 +199,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
 
         title = "Plaintext QR"
         mnemonics.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, title
+            ctx.wallet.key.mnemonic, title=title
         )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -453,7 +453,7 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
 
         title = "Plaintext QR"
         mnemonics.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, title
+            ctx.wallet.key.mnemonic, title=title
         )
 
         assert ctx.input.wait_for_button.call_count == len(case[2])

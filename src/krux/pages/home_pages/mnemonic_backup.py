@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 from ...display import FONT_HEIGHT, SMALLEST_HEIGHT
-from ...qr import FORMAT_NONE
 from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
 from .. import (
     Page,
@@ -158,12 +157,12 @@ class MnemonicsView(Page):
         """Displays regular words QR code"""
         title = t("Plaintext QR")
         data = self.ctx.wallet.key.mnemonic
-        self.display_qr_codes(data, FORMAT_NONE, title)
+        self.display_qr_codes(data, title=title)
 
         from ..utils import Utils
 
         utils = Utils(self.ctx)
-        utils.print_standard_qr(data, FORMAT_NONE, title)
+        utils.print_standard_qr(data, title=title)
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):

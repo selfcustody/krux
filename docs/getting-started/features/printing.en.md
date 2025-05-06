@@ -28,14 +28,15 @@ Once a thermal printer and driver have been enabled in [settings](../settings.md
 
 There are many ways you can use this functionality, including:
 
-- Printing backups of your mnemonics and multisig wallet output descriptor
-- Printing your xpubs and receive addresses to share
-- Printing signed messages and PSBTs
+- Printing backups of your mnemonics and multisig wallet output descriptor.
+- Printing your xpubs and receive addresses to share.
+- Printing signed messages and PSBTs.
 
 Since printed thermal paper fades quickly, you can also print your backups on sticker thermal paper to use as templates for punching into more resilient materials like steel.
 
-We also have plans to add support for other kinds of QR "printers" in the future, including CNC machines. In this case, gcode will be generated that can be sent directly to a GRBL controller to cut your QRs out of wood or metal!
+----8<----
+warning-printed-QR.en.txt
+----8<----
 
-Just be careful what you do with the printed codes, since most smartphones can now quickly and easily read QR codes. Treat your QR mnemonic the same way you would treat a plaintext copy of it.
 
 <div style="clear: both"></div>

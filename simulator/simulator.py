@@ -90,6 +90,8 @@ if args.sd:
 
 from kruxsim.mocks import uos_functions
 
+from kruxsim.mocks import ujson
+from kruxsim.mocks import urandom
 from kruxsim.mocks import usys
 from kruxsim.mocks import utime
 from kruxsim.mocks import fpioa_manager
@@ -273,6 +275,8 @@ try:
                     buttons.buttons_control.page_prev_event_flag = True
             if event.type == pg.MOUSEBUTTONDOWN:
                 ft6x36.touch_control.trigger_event()
+            if event.type == pg.ACTIVEEVENT and event.gain:
+                pg.display.flip()
 
 except KeyboardInterrupt:
     shutdown()

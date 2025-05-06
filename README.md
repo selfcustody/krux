@@ -4,7 +4,7 @@
 [![contributors](https://img.shields.io/github/contributors-anon/selfcustody/krux)](https://github.com/selfcustody/krux/graphs/contributors)
 [![commit activity](https://img.shields.io/github/commit-activity/y/selfcustody/krux)](https://github.com/selfcustody/krux/commits)
 [![codecov](https://codecov.io/gh/selfcustody/krux/branch/main/graph/badge.svg?token=XU80PT6Q9V)](https://codecov.io/gh/selfcustody/krux)
-[![calver](https://img.shields.io/badge/calver-YY.0M.MICRO-22bfda.svg)](https://calver.org)
+[![calver](https://img.shields.io/badge/calver-0Y.0M.MICRO-22bfda.svg)](https://calver.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/selfcustody/krux/blob/main/LICENSE.md)
 
 <p align="center">
@@ -27,13 +27,18 @@ Krux is an open-source firmware facilitating the creation of Bitcoin signing dev
 # Getting Started
 Detailed instructions for installing and running Krux can now be found in our [official documentation](https://selfcustody.github.io/krux/).
 
+## Krux-installer
+If you just want to flash (or "install") Krux firmware on your device and are not familiar with the command line, just use our Krux-Installer.
 
-The instructions below are intended for programmers or developers who want to contribute to the project.
+### Download our Krux-Installer
+[<img src="docs/img/badge_github.png" alt="github releases page" width="186">](https://github.com/selfcustody/krux-installer/releases)
+
+# Development
+The **instructions below are intended for programmers or developers** who would like to contribute to the project.
 
 ## Download our firmware releases
 [<img src="docs/img/badge_github.png" alt="github releases page" width="186">](https://github.com/selfcustody/krux/releases)
 
-# Development
 ## Fetch the code
 This will download the source code of Krux as well as the code of all its dependencies inside a new folder called `krux`:
 ```bash
