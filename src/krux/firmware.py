@@ -236,7 +236,15 @@ def is_version_greater(firmware_filename):
 
     try:
         new_ver = tuple(map(int, new_version.split(".")))
-        curr_ver = tuple(map(int, VERSION.split(".")))
+        current_version = VERSION.split(".")
+        # Check if the current version is beta
+        try:
+            int(current_version[-1])
+        except ValueError:
+            # If int() raises a ValueError, it means the last part is not purely numeric
+            # Versions like "betas" will be replaced by -1 value.
+            current_version[-1] = -1
+        curr_ver = tuple(map(int, current_version))
 
         return new_version if new_ver > curr_ver else False
     except:
