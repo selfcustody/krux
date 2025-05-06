@@ -66,6 +66,7 @@ translation_array = [
     "Comprobado %d direcciones sin coincidencias.",
     "Comprobación de la tarjeta SD..",
     "Confirmar el código de verificación",
+    "No se pudo determinar la dirección de cambio.",
     "Crear Código QR",
     "¿Crear código QR desde texto?",
     "Creado:",

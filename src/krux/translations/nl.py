@@ -66,6 +66,7 @@ translation_array = [
     "%d adressen gecontroleerd zonder overeenkomsten.",
     "SD kaart controleren..",
     "Bevestig de sabotagecontrolecode",
+    "Kan adreswijziging niet bepalen.",
     "QR code maken",
     "QR code maken van tekst?",
     "Aangemaakt:",

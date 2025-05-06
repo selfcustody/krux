@@ -254,6 +254,11 @@ class Wallet:
             )
             i += 1
 
+    def has_change_addr(self):
+        """Returns if this wallet knows how to derive its change addresses"""
+
+        return self.descriptor.num_branches > 1
+
 
 def to_unambiguous_descriptor(descriptor):
     """If child derivation info is missing to generate receive addresses,

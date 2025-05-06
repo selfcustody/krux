@@ -32,6 +32,8 @@ Addresses are displayed in groups of 4, separated by spaces, for better readabil
 - Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
 - Optimized the way we check device's board values.
 - Added QR Code to About screen.
+- Wallet Descriptor now validates and warns if it was unable to determine change addresses.
+- Hide change address menu option when not available in the wallet descriptor loaded.
 - Other small text changes for clarity and translation simplification.
 
 ### SVG image export

@@ -288,6 +288,59 @@ def test_scan_address(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[5])
 
 
+def test_addr_menu_hide_change(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    btn_seq = [
+        BUTTON_PAGE,  # move to receive addr
+        BUTTON_PAGE,  # move to change addr
+        BUTTON_ENTER,  # click change addr to enter list_address_type (nothing happen - disabled)
+        BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit screen
+    ]
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    wallet.load(descriptor, FORMAT_NONE)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    addresses_ui = Addresses(ctx)
+
+    mocker.spy(addresses_ui, "list_address_type")
+
+    addresses_ui.addresses_menu()
+
+    addresses_ui.list_address_type.assert_not_called()
+    assert not wallet.has_change_addr()
+
+
+def test_scan_address_hide_change(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    btn_seq = [
+        BUTTON_PAGE,  # move to change addr
+        BUTTON_ENTER,  # click change addr to enter scan_address (nothing happen - disabled)
+        BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit screen
+    ]
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    wallet.load(descriptor, FORMAT_NONE)
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
+    addresses_ui = Addresses(ctx)
+
+    mocker.spy(addresses_ui, "scan_address")
+
+    addresses_ui.pre_scan_address()
+
+    addresses_ui.scan_address.assert_not_called()
+    assert not wallet.has_change_addr()
+
+
 def test_scan_change_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.addresses import Addresses
     from krux.wallet import Wallet
