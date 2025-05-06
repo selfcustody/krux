@@ -253,7 +253,7 @@ class DatumTool(Page):
 
     def manipulate_contents(self, try_decrypt=True):
         """allows to view, convert, encrypt/decrypt, and export short str/bytes contents"""
-        from binascii import unhexlify
+        from binascii import hexlify, unhexlify
         from krux.baseconv import base_decode
         from .encryption_ui import KEFEnvelope
 
@@ -266,6 +266,11 @@ class DatumTool(Page):
                 plaintext = kef.unseal_ui(self.contents)
                 if plaintext is None:
                     break
+                try:
+                    self.title = kef.label.decode()
+                except:
+                    self.title = "0x" + hexlify(kef.label).decode()
+
                 self.decrypted = True
                 self.contents = plaintext
                 self.history = []
