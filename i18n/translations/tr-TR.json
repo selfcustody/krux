@@ -301,6 +301,7 @@
     "Upgrade complete.": "Güncelleme tamamlandı.",
     "Use a black background surface.": "Siyah bir arka plan yüzeyi kullanın.",
     "Use camera's entropy to create a new mnemonic": "Yeni bir mnemonic oluşturmak için kameranın entropisini kullanın",
+    "Use current value?": "Mevcut Değer",
     "Use default Key iter.?": "Varsayılan Anahtar yinelemesini kullan.?",
     "Use default Mode?": "Varsayılanı Kullan?",
     "Use fingerprint as ID?": "Parmak izi ID olarak kullanılmalı mı?",

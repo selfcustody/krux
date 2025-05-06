@@ -83,7 +83,7 @@ class WalletDescriptor(Page):
                 wallet_data = self.ctx.wallet.wallet_data
 
                 kef = KEFEnvelope(self.ctx)
-                wallet_data = kef.seal_ui(wallet_data, override_settings=True)
+                wallet_data = kef.seal_ui(wallet_data, override_defaults=True)
                 qr_format = "binary"
                 title = "KEF " + title
                 sqr = SeedQRView(self.ctx, binary=True, data=wallet_data, title=title)

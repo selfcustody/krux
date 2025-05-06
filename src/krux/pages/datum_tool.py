@@ -359,7 +359,8 @@ class DatumTool(Page):
         # if user chose to encrypt
         if status == "encrypt":
             kef = KEFEnvelope(self.ctx)
-            self.contents = kef.seal_ui(self.contents, override_settings=True)
+            kef.label = self.title
+            self.contents = kef.seal_ui(self.contents, override_defaults=True)
             self.title = kef.label if kef.label else ""
             self.decrypted = False
             return self.manipulate_contents(try_decrypt=False)

@@ -301,6 +301,7 @@
     "Upgrade complete.": "Обновление завершено.",
     "Use a black background surface.": "Использовать черную фоновую поверхность.",
     "Use camera's entropy to create a new mnemonic": "Использовать энтропию камеры, чтобы создать новую мнемонику",
+    "Use current value?": "Текущее значение",
     "Use default Key iter.?": "Использовать ключ по умолчанию.?",
     "Use default Mode?": "Использовать по умолчанию?",
     "Use fingerprint as ID?": "Использовать отпечаток пальца как ID?",

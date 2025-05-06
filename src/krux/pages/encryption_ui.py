@@ -41,27 +41,27 @@ ENCRYPTION_KEY_MAX_LEN = 200
 
 def prompt_for_text_update(
     ctx,
-    curr_value,
-    dflt_value=None,
+    dflt_value,
     dflt_prompt=None,
     dflt_affirm=True,
     title=None,
     keypads=None,
 ):
     """Clears screen, prompts question, allows for keypad input"""
-    if curr_value and not dflt_value and not dflt_prompt:
-        dflt_value = curr_value
-        dflt_prompt = "Update current value: {}?".format(curr_value)
+    if dflt_value and not dflt_prompt:
+        dflt_prompt = t("Use current value?") + " " + dflt_value
     ctx.display.clear()
     if dflt_value and dflt_prompt:
         ctx.display.draw_centered_text(dflt_prompt)
         dflt_answer = Page(ctx).prompt("", BOTTOM_PROMPT_LINE)
         if dflt_affirm == dflt_answer:
-            value = dflt_value
-            return value
+            return dflt_value
     if not isinstance(keypads, list) or keypads is None:
         keypads = [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-    return Page(ctx).capture_from_keypad(title, keypads)
+    value = Page(ctx).capture_from_keypad(title, keypads, starting_buffer=dflt_value)
+    if isinstance(value, str):
+        return value
+    return dflt_value
 
 
 class KEFEnvelope(Page):
@@ -128,7 +128,7 @@ class KEFEnvelope(Page):
         title = t("Key iter.") + ": 10K - 500K"
         keypads = [DIGITS]
         iterations = prompt_for_text_update(
-            self.ctx, curr_value, curr_value, dflt_prompt, True, title, keypads
+            self.ctx, curr_value, dflt_prompt, True, title, keypads
         )
         if 10000 <= int(iterations) <= 500000:
             self.iterations = int(iterations)
@@ -146,8 +146,9 @@ class KEFEnvelope(Page):
         """implements ui to allow user to set a KEF label"""
         if dflt_label and not dflt_prompt:
             dflt_prompt = t("Update visible label?" + " " + dflt_label)
+            dflt_affirm = False
         self.label = prompt_for_text_update(
-            self.ctx, self.label, dflt_label, dflt_prompt, dflt_affirm, title, keypads
+            self.ctx, dflt_label, dflt_prompt, dflt_affirm, title, keypads
         )
         return True
 
@@ -205,13 +206,13 @@ class KEFEnvelope(Page):
         self.ctx.input.wait_for_button()
         return True
 
-    def seal_ui(self, plaintext, override_settings=False):
+    def seal_ui(self, plaintext, override_defaults=False):
         """implements ui to allow user to seal plaintext inside a KEF envelope"""
         if self.ciphertext:
             raise ValueError("KEF Envelope already sealed")
         if not (self.__key or self.input_key_ui()):
             return None
-        if override_settings:
+        if override_defaults:
             if not self.input_iterations_ui():
                 return None
             if not self.input_version_ui():
@@ -219,8 +220,8 @@ class KEFEnvelope(Page):
         if self.iv_len:
             if not (self.__iv or self.input_iv_ui()):
                 return None
-        if not (self.label or self.input_label_ui()):
-            return None
+        if override_defaults or not self.label:
+            self.input_label_ui(self.label)
         if self.version is None:
             self.version = kef.suggest_versions(plaintext, self.mode_name)[0]
             self.version_name = kef.VERSIONS[self.version]["name"]

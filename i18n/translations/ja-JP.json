@@ -301,6 +301,7 @@
     "Upgrade complete.": "アップグレードが完了しました.",
     "Use a black background surface.": "黒い背景面を使用してください.",
     "Use camera's entropy to create a new mnemonic": "カメラのエントロピーを使用して新しいmnemonicを作成してください",
+    "Use current value?": "現在価値",
     "Use default Key iter.?": "既定のキーイターを使用しますか？",
     "Use default Mode?": "1行目をデフォルトにする",
     "Use fingerprint as ID?": "指紋をIDとして使用しますか？",

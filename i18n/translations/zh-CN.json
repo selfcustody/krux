@@ -301,6 +301,7 @@
     "Upgrade complete.": "升级已完成。",
     "Use a black background surface.": "使用黑色背景界面。",
     "Use camera's entropy to create a new mnemonic": "使用摄像头的熵创建新助记词",
+    "Use current value?": "当前值",
     "Use default Key iter.?": "使用默认密钥迭代。?",
     "Use default Mode?": "使用默认模式？",
     "Use fingerprint as ID?": "使用指纹作为身份证件？",

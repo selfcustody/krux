@@ -301,6 +301,7 @@
     "Upgrade complete.": "Actualización completa.",
     "Use a black background surface.": "Usa una superficie de fondo negra.",
     "Use camera's entropy to create a new mnemonic": "Usa la entropía de la cámara para crear una nueva mnemónica",
+    "Use current value?": "Valor Actual",
     "Use default Key iter.?": "Usar el iter de clave predeterminado.?",
     "Use default Mode?": "¿Usar el modo predeterminado?",
     "Use fingerprint as ID?": "¿Usar huella dactilar como identificación?",
