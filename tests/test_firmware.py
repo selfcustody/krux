@@ -1,5 +1,9 @@
 import pytest
 from .shared_mocks import get_mock_open
+import sys
+import json
+
+sys.modules["ujson"] = json
 
 FIRMWARE_FILENAME = "firmware.bin"
 FIRMWARE_SIG_FILENAME = "firmware.bin.sig"
