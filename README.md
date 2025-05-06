@@ -4,7 +4,7 @@
 [![contributors](https://img.shields.io/github/contributors-anon/selfcustody/krux)](https://github.com/selfcustody/krux/graphs/contributors)
 [![commit activity](https://img.shields.io/github/commit-activity/y/selfcustody/krux)](https://github.com/selfcustody/krux/commits)
 [![codecov](https://codecov.io/gh/selfcustody/krux/branch/main/graph/badge.svg?token=XU80PT6Q9V)](https://codecov.io/gh/selfcustody/krux)
-[![calver](https://img.shields.io/badge/calver-YY.0M.MICRO-22bfda.svg)](https://calver.org)
+[![calver](https://img.shields.io/badge/calver-0Y.0M.MICRO-22bfda.svg)](https://calver.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/selfcustody/krux/blob/main/LICENSE.md)
 
 <p align="center">

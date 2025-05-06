@@ -24,6 +24,7 @@ from . import Page
 from ..krux_settings import t
 from ..sd_card import SDHandler
 from embit.wordlists.bip39 import WORDLIST
+from ..qr import FORMAT_NONE
 
 
 class Utils(Page):
@@ -40,10 +41,18 @@ class Utils(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
 
-    def print_standard_qr(self, data, qr_format=None, title="", width=33, is_qr=False):
+    def print_standard_qr(
+        self,
+        data,
+        qr_format=FORMAT_NONE,
+        title="",
+        width=33,
+        is_qr=False,
+        check_printer=True,
+    ):
         """Loads printer driver and UI"""
         # Only loads printer related modules if needed
-        if self.print_prompt(t("Print as QR?")):
+        if self.print_prompt(t("Print as QR?"), check_printer):
             from .print_page import PrintPage
 
             print_page = PrintPage(self.ctx)

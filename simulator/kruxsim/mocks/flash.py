@@ -22,7 +22,9 @@
 import sys
 from unittest import mock
 
-flash = bytearray(8 * 1024 * 1024)
+MAIN_BOOT_CONFIG_SECTOR_ADDRESS = 20480
+SECTOR_ACTIVE_FIRMWARE_SLOT_1 = [90, 165, 208, 196, 0, 8, 0, 0, 0, 1, 45, 192, 60, 144, 156, 54, 100, 118, 112, 95, 111, 118, 32, 101, 120, 97, 109, 112, 108, 101, 0, 0, 90, 165, 208, 197, 0, 8, 0, 0, 0, 26, 160, 0, 36, 198, 171, 170]
+flash = bytearray(MAIN_BOOT_CONFIG_SECTOR_ADDRESS) + bytearray(SECTOR_ACTIVE_FIRMWARE_SLOT_1) + bytearray(8 * 1024 * 1024)
 
 
 def read_data(addr, amount):

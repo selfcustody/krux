@@ -18,6 +18,7 @@ def tdata(mocker):
         TYPE_MULTISIG,
         TYPE_SINGLESIG,
         Key,
+        P2WPKH,
     )
 
     TEST_12_WORD_MNEMONIC = (
@@ -35,6 +36,9 @@ def tdata(mocker):
     SINGLESIG_ACTION_KEY = Key(ACTION_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
     SINGLESIG_ACTION_KEY_TEST = Key(
         ACTION_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2TR
+    )
+    SINGLESIG_ACTION_KEY_TEST_P2WPKH = Key(
+        ACTION_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2WPKH
     )
     LEGACY1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
@@ -112,6 +116,7 @@ def tdata(mocker):
             "MULTISIG_SIGNING_KEY",
             "SINGLESIG_ACTION_KEY",
             "SINGLESIG_ACTION_KEY_TEST",
+            "SINGLESIG_ACTION_KEY_TEST_P2WPKH",
             "LEGACY1_KEY",
             "NESTEDSW1_KEY",
             "NATIVESW1_KEY",
@@ -154,6 +159,7 @@ def tdata(mocker):
         MULTISIG_SIGNING_KEY,
         SINGLESIG_ACTION_KEY,
         SINGLESIG_ACTION_KEY_TEST,
+        SINGLESIG_ACTION_KEY_TEST_P2WPKH,
         LEGACY1_KEY,
         NESTEDSW1_KEY,
         NATIVESW1_KEY,

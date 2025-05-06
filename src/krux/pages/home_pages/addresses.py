@@ -53,7 +53,14 @@ class Addresses(Page):
             [
                 (t("Scan Address"), self.pre_scan_address),
                 (t("Receive Addresses"), self.list_address_type),
-                (t("Change Addresses"), lambda: self.list_address_type(1)),
+                (
+                    t("Change Addresses"),
+                    (
+                        None
+                        if not self.ctx.wallet.has_change_addr()
+                        else lambda: self.list_address_type(1)
+                    ),
+                ),
             ],
         )
         submenu.run_loop()
@@ -141,7 +148,14 @@ class Addresses(Page):
             self.ctx,
             [
                 (t("Receive"), self.scan_address),
-                (t("Change"), lambda: self.scan_address(1)),
+                (
+                    t("Change"),
+                    (
+                        None
+                        if not self.ctx.wallet.has_change_addr()
+                        else lambda: self.scan_address(1)
+                    ),
+                ),
             ],
         )
         submenu.run_loop()

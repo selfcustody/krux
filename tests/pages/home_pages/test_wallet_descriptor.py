@@ -181,6 +181,105 @@ def test_wallet(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[4])
 
 
+def test_load_desc_without_change(mocker, m5stickv, tdata):
+    import krux
+
+    mocker.patch("krux.krux_settings.t", side_effect=lambda slug: slug)
+
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.display import BOTTOM_PROMPT_LINE
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor?
+        BUTTON_ENTER,  # Load from camera menu item
+        BUTTON_ENTER,  # Could not determine change Proceed anyway?
+        BUTTON_ENTER,  # Load?
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.spy(wallet_descriptor, "prompt")
+
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (descriptor, FORMAT_PMOFN)
+    )
+
+    assert not ctx.wallet.is_loaded()
+
+    wallet_descriptor.wallet()
+
+    krux.krux_settings.t.assert_has_calls(
+        [
+            mocker.call("Could not determine change address."),
+        ]
+    )
+
+    wallet_descriptor.prompt.assert_has_calls(
+        [
+            mocker.call("Proceed anyway?", BOTTOM_PROMPT_LINE),
+        ]
+    )
+
+    assert ctx.wallet.is_loaded()
+    assert (
+        not ctx.wallet.has_change_addr()
+    )  # the loaded descriptor doesn't have change addr
+
+
+def test_cancel_load_desc_without_change(mocker, m5stickv, tdata):
+    import krux
+
+    mocker.patch("krux.krux_settings.t", side_effect=lambda slug: slug)
+
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.display import BOTTOM_PROMPT_LINE
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor?
+        BUTTON_ENTER,  # Load from camera menu item
+        BUTTON_PAGE,  # Could not determine change Proceed anyway?
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.spy(wallet_descriptor, "prompt")
+
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (descriptor, FORMAT_PMOFN)
+    )
+
+    assert not ctx.wallet.is_loaded()
+
+    wallet_descriptor.wallet()
+
+    krux.krux_settings.t.assert_has_calls(
+        [
+            mocker.call("Could not determine change address."),
+        ]
+    )
+
+    wallet_descriptor.prompt.assert_has_calls(
+        [
+            mocker.call("Proceed anyway?", BOTTOM_PROMPT_LINE),
+        ]
+    )
+
+    assert not ctx.wallet.is_loaded()  # continue unloaded
+    assert ctx.wallet.has_change_addr()  # single-sig per default has change addr
+
+
 def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
     """Miniscript specific tests. Always load from camera"""
     from krux.pages.home_pages.wallet_descriptor import WalletDescriptor

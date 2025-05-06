@@ -33,13 +33,13 @@ old_create_printer = create_printer
 
 def new_create_printer():
     printer = old_create_printer()
-    old_print_qr_code = printer.print_qr_code
-
-    def new_print_qr_code(qr_code):
-        print("QR Code sent to printer:", qr_code)
-        return old_print_qr_code(qr_code)
-
-    printer.print_qr_code = new_print_qr_code
+    if printer:
+        def new_print_qr_code(qr_code):
+            print("QR Code sent to printer:", qr_code)
+            return old_print_qr_code(qr_code)
+        
+        old_print_qr_code = printer.print_qr_code
+        printer.print_qr_code = new_print_qr_code
     return printer
 
 
