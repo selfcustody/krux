@@ -301,7 +301,7 @@ def test_addr_menu_hide_change(mocker, m5stickv, tdata):
         BUTTON_PAGE,  # move to back
         BUTTON_ENTER,  # exit screen
     ]
-    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt\r\n"
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
     wallet.load(descriptor, FORMAT_NONE)
     ctx = create_ctx(mocker, btn_seq, wallet)
@@ -327,7 +327,7 @@ def test_scan_address_hide_change(mocker, m5stickv, tdata):
         BUTTON_PAGE,  # move to back
         BUTTON_ENTER,  # exit screen
     ]
-    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt\r\n"
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
     wallet.load(descriptor, FORMAT_NONE)
     ctx = create_ctx(mocker, btn_seq, wallet, None)
