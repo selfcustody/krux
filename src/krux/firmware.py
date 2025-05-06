@@ -32,6 +32,7 @@ from .display import display
 from .krux_settings import t
 from .wdt import wdt
 from .themes import theme
+from .metadata import VERSION
 
 FLASH_SIZE = 2**24
 MAX_FIRMWARE_SIZE = 0x300000
@@ -46,6 +47,8 @@ BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = 0x00005000
 ERASE_BLOCK_SIZE = 0x1000
 
 FLASH_IO_WAIT_TIME = 100
+
+CALVER_SIZE = 7
 
 
 def find_active_firmware(sector):
@@ -151,7 +154,7 @@ def fsize(firmware_filename):
     size = 0
     with open(firmware_filename, "rb", buffering=0) as file:
         while True:
-            chunk = file.read(128)
+            chunk = file.read(16384)
             if not chunk:
                 break
             size += len(chunk)
@@ -166,13 +169,81 @@ def sha256(firmware_filename, firmware_size=None):
         hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
     with open(firmware_filename, "rb", buffering=0) as file:
         while True:
-            chunk = file.read(128)
+            chunk = file.read(16384)
             if not chunk:
                 break
             hasher.update(chunk)
     return hasher.digest()
 
 
+def find_all_occurrences(data, pattern):
+    """Find all occurrences of the pattern in the data"""
+    positions = []
+    i = 0
+    while True:
+        i = data.find(pattern, i)
+        if i == -1:
+            break
+        positions.append(i)
+        i += len(pattern)  # move forward
+    return positions
+
+
+def extract_calver(context):
+    """Search for a Calendar Versioning in a string"""
+    for i in range(len(context) - CALVER_SIZE + 1):
+        try:
+            chunk = context[i : i + CALVER_SIZE].decode("ascii")
+            if (
+                chunk[:2].isdigit()
+                and chunk[2] == "."
+                and chunk[3:5].isdigit()
+                and chunk[5] == "."
+                and chunk[6:].isdigit()
+            ):
+                return chunk
+        except:
+            continue
+    return None
+
+
+def is_version_greater(firmware_filename):
+    """Return the version if greater, else False"""
+    new_version = None
+    with open(firmware_filename, "rb", buffering=0) as f:
+        firmware_data = b""
+        last_chunk = b""
+        while True:
+            chunk = f.read(1024)
+            if not chunk:
+                break
+            # Buffer must overlap slightly to avoid missing patterns split between chunks
+            firmware_data = last_chunk + chunk
+            last_chunk = chunk[-120:]
+
+            positions = find_all_occurrences(firmware_data, b"krux/metadata.py")
+            if not positions:
+                continue
+            for pos in positions:
+                delta = 100
+                start_range = max(pos - delta, 0)
+                end_range = min(pos + delta, len(firmware_data))
+                context_before = firmware_data[start_range:end_range]
+                version = extract_calver(context_before)
+                if version:
+                    new_version = version
+                    break
+
+    try:
+        new_ver = tuple(map(int, new_version.split(".")))
+        curr_ver = tuple(map(int, VERSION.split(".")))
+
+        return new_version if new_ver > curr_ver else False
+    except:
+        raise ValueError("Error checking versions")
+
+
+# pylint: disable=too-many-return-statements
 def upgrade():
     """Installs new firmware from SD card"""
 
@@ -200,16 +271,17 @@ def upgrade():
 
     status_text(t("New firmware detected.") + "\n\n" + t("Verifying.."))
 
-    new_size = fsize(firmware_path)
-    firmware_hash = sha256(firmware_path)
-    firmware_with_header_hash = sha256(firmware_path, new_size)
+    # Validate curr bootloader
+    boot_config_sector = flash.read(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
+    address, _, entry_index = find_active_firmware(boot_config_sector)
+    if address is None:
+        boot_config_sector = flash.read(BACKUP_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
+        address, _, entry_index = find_active_firmware(boot_config_sector)
+        if address is None:
+            display.flash_text("Invalid bootloader", theme.error_color)
+            return False
 
-    if new_size > MAX_FIRMWARE_SIZE:
-        display.flash_text(
-            "Firmware exceeds max size: %d" % MAX_FIRMWARE_SIZE, theme.error_color
-        )
-        return False
-
+    # Validate curr pubkey
     pubkey = None
     try:
         pubkey = ec.PublicKey.from_string(SIGNER_PUBKEY)
@@ -217,6 +289,15 @@ def upgrade():
         display.flash_text("Invalid public key", theme.error_color)
         return False
 
+    # Validate firmware file size
+    new_size = fsize(firmware_path)
+    if new_size > MAX_FIRMWARE_SIZE:
+        display.flash_text(
+            "Firmware exceeds max size: %d" % MAX_FIRMWARE_SIZE, theme.error_color
+        )
+        return False
+
+    # Check if signature file exist
     sig = None
     try:
         with open(firmware_path + ".sig", "rb") as sig_file:
@@ -225,6 +306,8 @@ def upgrade():
         display.flash_text(t("Missing signature file"), theme.error_color)
         return False
 
+    # Validate signature
+    firmware_hash = sha256(firmware_path)
     try:
         # Parse, serialize, and reparse to ensure signature is compact prior to verification
         sig = ec.Signature.parse(ec.Signature.parse(sig).serialize())
@@ -235,33 +318,39 @@ def upgrade():
         display.flash_text(t("Bad signature"), theme.error_color)
         return False
 
-    status_text(
-        "{}\n\nSHA256:\n{}\n\n{}\n{}".format(
-            t("New firmware detected."),
-            binascii.hexlify(firmware_hash).decode(),
-            t("TOUCH or ENTER to install."),
-            t("Press PAGE to cancel."),
-        ),
-        ":",
-    )
-    inp.buttons_active = True
-    if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
-        display.clear()
-        inp.wait_for_release()  # Wait for button release loading inputs on context
-        return False
+    # Validate firmware file version
+    try:
+        new_version = is_version_greater(firmware_path)
 
-    boot_config_sector = flash.read(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
-    address, _, entry_index = find_active_firmware(boot_config_sector)
-    if address is None:
-        boot_config_sector = flash.read(BACKUP_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
-        address, _, entry_index = find_active_firmware(boot_config_sector)
-        if address is None:
-            display.flash_text("Invalid bootloader", theme.error_color)
+        if not new_version:
+            display.flash_text(
+                "Firmware not newer than current " + VERSION, theme.error_color
+            )
             return False
+
+        status_text(
+            "{}: {}\n\nSHA256:\n{}\n\n{}\n{}".format(
+                t("Version"),
+                new_version,
+                binascii.hexlify(firmware_hash).decode(),
+                t("TOUCH or ENTER to install."),
+                t("Press PAGE to cancel."),
+            ),
+            ":",
+        )
+        inp.buttons_active = True
+        if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
+            display.clear()
+            inp.wait_for_release()  # Wait for button release loading inputs on context
+            return False
+    except Exception as e:
+        display.flash_text(str(e), theme.error_color)
+        return False
 
     # Write new firmware to the opposite slot
     new_address = FIRMWARE_SLOT_2 if address == FIRMWARE_SLOT_1 else FIRMWARE_SLOT_1
 
+    firmware_with_header_hash = sha256(firmware_path, new_size)
     try:
         with open(firmware_path, "rb", buffering=0) as firmware_file:
             write_data(
