@@ -1,6 +1,14 @@
 import pytest
 from .shared_mocks import get_mock_open
 
+FIRMWARE_FILENAME = "firmware.bin"
+FIRMWARE_SIG_FILENAME = "firmware.bin.sig"
+
+from krux.settings import SD_PATH
+
+SD_FIRMWARE_PATH = "/" + SD_PATH + "/" + FIRMWARE_FILENAME
+SD_FIRMWARE_SIG_PATH = "/" + SD_PATH + "/" + FIRMWARE_SIG_FILENAME
+
 
 @pytest.fixture
 def tdata(mocker):
@@ -17,7 +25,7 @@ def tdata(mocker):
     FILES_FOLDER = "files"
 
     TEST_FIRMWARE_FILENAME = os.path.join(
-        os.path.dirname(__file__), FILES_FOLDER, "firmware-v0.0.0.bin"
+        os.path.dirname(__file__), FILES_FOLDER, FIRMWARE_FILENAME
     )
     print(os.path.dirname(__file__))
     with open(TEST_FIRMWARE_FILENAME, "rb") as f:
@@ -12988,8 +12996,8 @@ def test_upgrade_succeed(mocker, m5stickv, mock_success_input_cls, tdata):
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
             }
         ),
     )
@@ -12998,10 +13006,8 @@ def test_upgrade_succeed(mocker, m5stickv, mock_success_input_cls, tdata):
         new=mocker.MagicMock(return_value=True),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13086,16 +13092,14 @@ def test_upgrade_fails_write_data(mocker, m5stickv, mock_success_input_cls, tdat
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
     mocker.patch(
@@ -13133,8 +13137,8 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
             }
         ),
     )
@@ -13143,10 +13147,8 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
         new=mocker.MagicMock(return_value=True),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13240,8 +13242,8 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
             }
         ),
     )
@@ -13250,10 +13252,8 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
         new=mocker.MagicMock(return_value=True),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13331,7 +13331,7 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
 
 
 def test_upgrade_fails_when_sd_card_not_present(mocker, m5stickv):
-    mocker.patch("os.listdir", new=mocker.MagicMock(side_effect=Exception))
+    mocker.patch("os.stat", new=mocker.MagicMock(side_effect=Exception))
     from krux import firmware
 
     assert not firmware.upgrade()
@@ -13349,16 +13349,14 @@ def test_upgrade_fails_when_user_declines(mocker, m5stickv, mock_fail_input_cls,
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_fail_input_cls)
@@ -13381,16 +13379,14 @@ def test_upgrade_fails_when_firmware_too_big(
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13415,16 +13411,14 @@ def test_upgrade_fails_when_pubkey_is_invalid(
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13449,16 +13443,14 @@ def test_upgrade_fails_when_sig_file_missing(
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": "Exception",
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: "Exception",
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13483,16 +13475,14 @@ def test_upgrade_fails_when_sig_is_invalid(
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": "abc123",
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: "abc123",
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13517,16 +13507,14 @@ def test_upgrade_fails_when_sig_is_malformed(
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_MALFORMED_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_MALFORMED_SIG,
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13549,16 +13537,14 @@ def test_upgrade_fails_when_sig_is_bad(mocker, m5stickv, mock_success_input_cls,
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_BAD_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_BAD_SIG,
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
@@ -13584,16 +13570,14 @@ def test_upgrade_fails_when_both_sectors_missing_active_firmware(
         "builtins.open",
         new=get_mock_open(
             {
-                "/sd/firmware-v0.0.0.bin": tdata.TEST_FIRMWARE,
-                "/sd/firmware-v0.0.0.bin.sig": tdata.TEST_FIRMWARE_SIG,
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
             }
         ),
     )
     mocker.patch(
-        "os.listdir",
-        new=mocker.MagicMock(
-            return_value=["firmware-v0.0.0.bin", "firmware-v0.0.0.bin.sig"]
-        ),
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
     )
     mocker.patch("krux.firmware.display", new=mocker.MagicMock())
     mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
