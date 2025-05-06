@@ -66,6 +66,7 @@ translation_array = [
     "%d adresses vérifiées sans correspondance.",
     "Vérification de la carte SD..",
     "Confirmer le code de non compromis",
+    "Impossible de déterminer l'adresse de monnaie.",
     "Créer un code QR",
     "Créer un code QR à partir d'un texte\u2009?",
     "Créé\u2009:",

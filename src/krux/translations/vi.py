@@ -66,6 +66,7 @@ translation_array = [
     "Đã kiểm tra %d địa chỉ không khớp.",
     "Kiểm tra thẻ SD..",
     "Xác nhận mã kiểm tra giả mạo",
+    "Không thể xác định địa chỉ thay đổi.",
     "Tạo mã QR",
     "Tạo mã QR từ văn bản?",
     "Tạo:",

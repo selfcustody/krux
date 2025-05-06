@@ -44,6 +44,7 @@
     "Checked %d addresses with no matches.": "Đã kiểm tra %d địa chỉ không khớp.",
     "Checking for SD card..": "Kiểm tra thẻ SD..",
     "Confirm Tamper Check Code": "Xác nhận mã kiểm tra giả mạo",
+    "Could not determine change address.": "Không thể xác định địa chỉ thay đổi.",
     "Create QR Code": "Tạo mã QR",
     "Create QR code from text?": "Tạo mã QR từ văn bản?",
     "Created:": "Tạo:",

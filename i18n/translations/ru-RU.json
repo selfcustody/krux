@@ -44,6 +44,7 @@
     "Checked %d addresses with no matches.": "Проверено %d адресов без совпадений.",
     "Checking for SD card..": "Проверка SD карты..",
     "Confirm Tamper Check Code": "Подтвердите код проверки вскрытия",
+    "Could not determine change address.": "Не удалось определить адрес изменения.",
     "Create QR Code": "Создать QR Код",
     "Create QR code from text?": "Создать QR код из текста?",
     "Created:": "Создано:",

@@ -44,6 +44,7 @@
     "Checked %d addresses with no matches.": "%d adressen gecontroleerd zonder overeenkomsten.",
     "Checking for SD card..": "SD kaart controleren..",
     "Confirm Tamper Check Code": "Bevestig de sabotagecontrolecode",
+    "Could not determine change address.": "Kan adreswijziging niet bepalen.",
     "Create QR Code": "QR code maken",
     "Create QR code from text?": "QR code maken van tekst?",
     "Created:": "Aangemaakt:",

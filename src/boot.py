@@ -26,9 +26,6 @@ import time
 import gc
 import os
 
-sys.path.append("")
-sys.path.append(".")
-
 from krux.power import power_manager
 
 MIN_SPLASH_WAIT_TIME = 1000
@@ -145,13 +142,13 @@ gc.collect()
 from krux.context import ctx
 from krux.auto_shutdown import auto_shutdown
 
+ctx.power_manager = power_manager
 auto_shutdown.add_ctx(ctx)
 
-ctx.power_manager = power_manager
-postimport_ticks = time.ticks_ms()
 
 # If importing happened too fast, sleep the difference so the logo
 # will be shown
+postimport_ticks = time.ticks_ms()
 if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
     time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 

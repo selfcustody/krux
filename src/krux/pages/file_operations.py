@@ -73,10 +73,16 @@ class SaveFile(Page):
 
                         # if user defined a filename and it is ok, save!
                         if new_filename:
+                            # say something to the user
+                            self.ctx.display.draw_centered_text(t("Processing.."))
+
+                            # Now save the file
                             if save_as_binary:
                                 sd.write_binary(new_filename, data)
                             else:
                                 sd.write(new_filename, data)
+
+                            # Show the user the filename
                             self.flash_text(
                                 t("Saved to SD card:") + "\n%s" % new_filename,
                                 highlight_prefix=":",

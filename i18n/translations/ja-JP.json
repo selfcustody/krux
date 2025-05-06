@@ -44,6 +44,7 @@
     "Checked %d addresses with no matches.": "%d のアドレスを確認しましたが、一致するものはありませんでした.",
     "Checking for SD card..": "SDカードを確認中..",
     "Confirm Tamper Check Code": "改ざんチェックコードの確認",
+    "Could not determine change address.": "変更先住所を特定できませんでした.",
     "Create QR Code": "QRコードを生成する",
     "Create QR code from text?": "テキストからQRコードを作成しますか?",
     "Created:": "作成されました:",
