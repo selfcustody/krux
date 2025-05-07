@@ -768,6 +768,7 @@ def test_init_wsh_miniscript_fails_not_wsh_miniscript(mocker, m5stickv, tdata):
 
     wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"]))
     wallet.load(WSH_MINISCRIPT, FORMAT_NONE)
+    assert wallet.has_change_addr()
     for i, case in enumerate(cases):
         error = (
             "Invalid PSBT: Not a miniscript PSBT"
@@ -798,6 +799,7 @@ def test_init_tr_miniscript_fails_not_tr_miniscript(mocker, m5stickv, tdata):
         Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
     )
     wallet.load(TR_MINISCRIPT, FORMAT_NONE)
+    assert wallet.has_change_addr()
     for i, case in enumerate(cases):
         error = (
             "Invalid PSBT: Not a miniscript PSBT"
@@ -985,6 +987,7 @@ def test_sign_multisig_with_descriptor(mocker, m5stickv, tdata):
 
     # Repeat signatures with descriptor loaded and more checks
     wallet.load(WSH_MULTISIG, FORMAT_NONE)
+    assert wallet.has_change_addr()
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
@@ -1018,6 +1021,7 @@ def test_sign_miniscript(mocker, m5stickv, tdata):
 
     # Repeat signatures with descriptor loaded and more checks
     wallet.load(WSH_MINISCRIPT, FORMAT_NONE)
+    assert wallet.has_change_addr()
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
@@ -1082,6 +1086,7 @@ def test_sign_tr_miniscript_internal_key(mocker, m5stickv, tdata):
 
     # Repeat signatures with descriptor loaded and more checks
     wallet.load(TR_MINISCRIPT, FORMAT_NONE)
+    assert wallet.has_change_addr()
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
@@ -1157,6 +1162,7 @@ def test_sign_tr_miniscript_tap_tree(mocker, m5stickv, tdata):
 
     # Repeat signatures with descriptor loaded and more checks
     wallet.load(TR_MINISCRIPT, FORMAT_NONE)
+    assert wallet.has_change_addr()
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
@@ -1228,6 +1234,7 @@ def test_sign_tr_expanding_multisig(mocker, m5stickv, tdata):
 
     # Repeat signatures with descriptor loaded and more checks
     wallet.load(TR_EXP_MULTI_MINISCRIPT, FORMAT_NONE)
+    assert wallet.has_change_addr()
     for case in cases:
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
@@ -1503,6 +1510,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         assert outputs == case[1]
         if case[3] is not None:
             wallet.load(case[3], FORMAT_NONE)
+            assert wallet.has_change_addr()
             signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
             outputs, _ = signer.outputs()
             assert outputs == case[4]
@@ -1573,6 +1581,7 @@ def test_outputs_miniscript(mocker, m5stickv, tdata):
         outputs, _ = signer.outputs()
         assert outputs == case[1]
         wallet.load(case[3], FORMAT_NONE)
+        assert wallet.has_change_addr()
         signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
         outputs, _ = signer.outputs()
         assert outputs == case[4]
@@ -1647,6 +1656,7 @@ def test_outputs_tr_miniscript(mocker, m5stickv, tdata):
         outputs, _ = signer.outputs()
         assert outputs == case[1]
         wallet.load(case[3], FORMAT_NONE)
+        assert wallet.has_change_addr()
         signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
         outputs, _ = signer.outputs()
         assert outputs == case[4]
@@ -1722,6 +1732,7 @@ def test_outputs_tr_miniscript_provably_unspendable(mocker, m5stickv, tdata):
         outputs, _ = signer.outputs()
         assert outputs == case[1]
         wallet.load(case[3], FORMAT_NONE)
+        assert wallet.has_change_addr()
         signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
         outputs, _ = signer.outputs()
         assert outputs == case[4]

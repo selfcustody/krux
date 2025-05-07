@@ -28,5 +28,8 @@ wait 0.1
 qrcode specter-desktop-multisig-wallet-p8of8.png
 wait 0.1
 
+# Jump "Could not determine change address" Proceed prompt
+press BUTTON_A
+
 screenshot wallet-wsh-load-prompt.png
 
