@@ -340,6 +340,12 @@ def test_save_bmp_image(amigo, mocker):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
 
+    #  mock SDHandler listdir call
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+    )
+
     qr_viewer = SeedQRView(ctx, data=TEST_DATA, title="Test QR Code")
     qr_viewer.save_bmp_image(TEST_TITLE, TEST_DATA_QR_SIZE_FRAMED * 2)
     sys.modules["image"].Image.return_value.save.assert_called_once_with(
@@ -358,6 +364,12 @@ def test_save_bmp_image_esc_key(amigo, mocker, mocker_save_file_esc):
     ]
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
+
+    #  mock SDHandler listdir call
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+    )
 
     qr_viewer = SeedQRView(ctx, data=TEST_QR_CODE, title="Test QR Code")
     qr_viewer.save_bmp_image(TEST_TITLE, TEST_DATA_QR_SIZE_FRAMED * 2)
@@ -390,7 +402,7 @@ def test_save_svg_image(amigo, mocker, mocker_sd_card_svg):
         TEST_TITLE,
         file_extension=SVG_IMAGE_EXTENSION,
         save_as_binary=True,
-        prompt=True,
+        prompt=False,
     )
 
 

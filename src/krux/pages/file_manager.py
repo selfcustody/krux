@@ -27,11 +27,12 @@ from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
 from ..display import BOTTOM_PROMPT_LINE
 from ..kboard import kboard
+from ..settings import SD_PATH
 
 LIST_FILE_DIGITS = 9  # len on large devices per menu item
 LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
 
-SD_ROOT_PATH = "/sd"
+SD_ROOT_PATH = "/" + SD_PATH
 
 
 class FileManager(Page):

@@ -276,6 +276,8 @@ class FilePrinter(GCodeGenerator):
     gcode to a file on an attached SD card.
     """
 
+    CNC_FILENAME = "qr.nc"
+
     def __init__(self):
         super().__init__()
         self.file = None
@@ -289,10 +291,10 @@ class FilePrinter(GCodeGenerator):
         """Creates an nc file on the SD card with commands to cut out the specified QR code"""
         try:
             with SDHandler():
-                self.file = open("/sd/qr.nc", "w")
+                self.file = open(SDHandler.PATH_STR % FilePrinter.CNC_FILENAME, "w")
                 super().print_qr_code(qr_code)
-        except OSError:
-            pass
+        except:
+            raise ValueError("SD card not detected.")
         finally:
             if self.file:
                 self.file.flush()
