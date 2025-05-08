@@ -85,7 +85,7 @@
     "Error:": "エラー:",
     "Esc": "エスク",
     "Explore files?": "アーカイブ探索?",
-    "Exporting to SD card..": "SDカードへのエクスポート..",
+    "Exporting %s to SD card..": "%s を SD カードにエクスポートしています..",
     "Extended Public Key": "拡張公開キー",
     "Factory Settings": "初期設定",
     "Failed to decrypt": "復号化に失敗しました",

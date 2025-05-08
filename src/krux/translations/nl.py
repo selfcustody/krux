@@ -107,7 +107,7 @@ translation_array = [
     "Fout:",
     "Esc",
     "Bestanden verkennen?",
-    "Exporteren naar SD kaart..",
+    "Exporteren van %s naar SD-kaart..",
     "Uitgebreide publieke sleutel",
     "Fabrieksinstellingen",
     "Ontsleutelen is niet gelukt",

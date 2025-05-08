@@ -107,7 +107,7 @@ translation_array = [
     "Erro:",
     "Esc",
     "Explorar arquivos?",
-    "Exportando para o cartão SD..",
+    "Exportando %s para o cartão SD..",
     "Chave Pública Estendida",
     "Configurações de Fábrica",
     "Falhou em descriptografar",
