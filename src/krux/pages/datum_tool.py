@@ -192,6 +192,26 @@ class DatumTool(Page):
 
         return MENU_CONTINUE
 
+    def save_sd(self):
+        """Reusable handler for saving to SD file"""
+        from .file_operations import SaveFile
+
+        if isinstance(self.contents, bytes):
+            extension = ".bin"
+            binary = True
+        else:
+            extension = ".txt"
+            binary = False
+
+        save_page = SaveFile(self.ctx)
+        save_page.save_file(
+            self.contents,
+            self.title.split()[-1],
+            file_extension=extension,
+            save_as_binary=binary,
+            prompt=True,
+        )
+
     def view_contents(self):
         """Displays infobox and contents"""
         from binascii import hexlify
@@ -251,88 +271,103 @@ class DatumTool(Page):
 
         # todo: can we know that it's psbt/xpub/xprv/addy/mnemonic/descriptor/etc
 
-    def manipulate_contents(self, try_decrypt=True):
-        """allows to view, convert, encrypt/decrypt, and export short str/bytes contents"""
-        from binascii import hexlify, unhexlify
-        from krux.baseconv import base_decode
+    def _decrypt_as_kef_envelope(self):
+        """Assuming self.contents are encrypted, offer to decrypt"""
         from .encryption_ui import KEFEnvelope
+        from binascii import hexlify
 
-        # print("into manipulate_contents(", contents, type(contents), history)
+        while True:
+            kef = KEFEnvelope(self.ctx)
+            plaintext = kef.unseal_ui(self.contents)
+            if plaintext is None:
+                break
+            try:
+                self.title = kef.label.decode()
+            except:
+                self.title = "0x" + hexlify(kef.label).decode()
 
-        # check if KEF wrapped
-        if try_decrypt and isinstance(self.contents, bytes):
-            while True:
-                kef = KEFEnvelope(self.ctx)
-                plaintext = kef.unseal_ui(self.contents)
-                if plaintext is None:
-                    break
-                try:
-                    self.title = kef.label.decode()
-                except:
-                    self.title = "0x" + hexlify(kef.label).decode()
+            self.decrypted = True
+            self.contents = plaintext
+            self.history = []
 
-                self.decrypted = True
-                self.contents = plaintext
-                self.history = []
-
-        # analyze bytes contents
-        self._analyze_contents()
+    def _build_options_menu(self):
+        """Build a menu of how to manipulate contents"""
+        from binascii import unhexlify
+        from krux.baseconv import base_decode
 
         # build menu options
-        todo_menu = []
+        menu = []
         if isinstance(self.contents, bytes):
-            todo_menu.append((t("to hex"), lambda: "hex"))
-            todo_menu.append((t("to base43"), lambda: 43))
-            todo_menu.append((t("to base58"), lambda: 58))
-            todo_menu.append((t("to base64"), lambda: 64))
+            menu.append((t("to hex"), lambda: "hex"))
+            menu.append((t("to base43"), lambda: 43))
+            menu.append((t("to base58"), lambda: 58))
+            menu.append((t("to base64"), lambda: 64))
             try:
                 self.contents.decode()
-                todo_menu.append((t("to utf8"), lambda: "utf8"))
+                menu.append((t("to utf8"), lambda: "utf8"))
             except:
                 pass
 
         elif isinstance(self.contents, str):
             try:
                 unhexlify(self.contents)
-                todo_menu.append((t("from hex"), lambda: "hex"))
+                menu.append((t("from hex"), lambda: "hex"))
             except:
                 pass
 
             try:
                 base_decode(self.contents, 43)
-                todo_menu.append((t("from base43"), lambda: 43))
+                menu.append((t("from base43"), lambda: 43))
             except:
                 pass
 
             try:
                 base_decode(self.contents, 58)
-                todo_menu.append((t("from base58"), lambda: 58))
+                menu.append((t("from base58"), lambda: 58))
             except:
                 pass
 
             try:
                 base_decode(self.contents, 64)
-                todo_menu.append(("from base64", lambda: 64))
+                menu.append(("from base64", lambda: 64))
             except:
                 pass
 
             try:
                 self.contents.encode()
-                todo_menu.append((t("from utf8"), lambda: "utf8"))
+                menu.append((t("from utf8"), lambda: "utf8"))
             except:
                 pass
 
         if isinstance(self.contents, bytes):
-            todo_menu.append((t("Encrypt"), lambda: "encrypt"))
+            menu.append((t("Encrypt"), lambda: "encrypt"))
 
         if not (self.decrypted and self.sensitive):
-            todo_menu.append((t("Export QR"), lambda: "export"))
+            menu.append((t("Export to QR"), lambda: "export_qr"))
+            menu.append((t("Export to SD"), lambda: "export_sd"))
 
         if self.history:
-            for i, option in enumerate(todo_menu):
+            for i, option in enumerate(menu):
                 if option[1]() == self.history[-1]:
-                    todo_menu[i] = (option[0] + " (" + t("Undo") + ")", lambda: "undo")
+                    menu[i] = (option[0] + " (" + t("Undo") + ")", lambda: "undo")
                     break
+
+        return menu
+
+    def manipulate_contents(self, try_decrypt=True):
+        """allows to view, convert, encrypt/decrypt, and export short str/bytes contents"""
+
+        # print("into manipulate_contents(", contents, type(contents), history)
+
+        # check if KEF wrapped
+        if try_decrypt and isinstance(self.contents, bytes):
+            self._decrypt_as_kef_envelope()
+
+        # analyze bytes contents
+        self._analyze_contents()
+
+        # get menu of what can be done to contents
+        todo_menu = self._build_options_menu()
 
         self.view_contents()
 
@@ -348,7 +383,7 @@ class DatumTool(Page):
             return MENU_CONTINUE
 
         # if user chose to convert data
-        if status not in ("encrypt", "export"):
+        if status not in ("encrypt", "export_qr", "export_sd"):
             if status == "undo":
                 status = self.history.pop()
             else:
@@ -358,6 +393,8 @@ class DatumTool(Page):
 
         # if user chose to encrypt
         if status == "encrypt":
+            from .encryption_ui import KEFEnvelope
+
             kef = KEFEnvelope(self.ctx)
             kef.label = self.title
             self.contents = kef.seal_ui(self.contents, override_defaults=True)
@@ -365,5 +402,9 @@ class DatumTool(Page):
             self.decrypted = False
             return self.manipulate_contents(try_decrypt=False)
 
-        # user chose to export
-        return self.view_qr()
+        # if user chose to export_qr
+        if status == "export_qr":
+            return self.view_qr()
+
+        # user chose export_sd
+        return self.save_sd()
