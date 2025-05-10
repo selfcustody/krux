@@ -30,7 +30,7 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from ..display import FONT_HEIGHT, DEFAULT_PADDING
+from ..display import FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 
 
@@ -224,6 +224,7 @@ class DatumTool(Page):
                 else "0x " + hexlify(self.contents).decode()
             ),
             offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
+            max_lines=TOTAL_LINES - (info_len + 2),
         )
         self.ctx.input.wait_for_button()
 
