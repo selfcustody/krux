@@ -185,10 +185,20 @@ class DatumTool(Page):
 
     def view_qr(self):
         """Reusable handler for viewing a QR code"""
-        from .qr_view import SeedQRView
+        if isinstance(self.contents, bytes):
+            seedqrview_thresh = 106
+        else:
+            seedqrview_thresh = 154
 
-        seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
-        seed_qr_view.display_qr(allow_export=True)
+        if len(self.contents) <= seedqrview_thresh:
+            from .qr_view import SeedQRView
+
+            seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
+            seed_qr_view.display_qr(allow_export=True)
+        else:
+            from ..qr import FORMAT_PMOFN
+
+            self.display_qr_codes(self.contents, FORMAT_PMOFN, title=self.title)
 
         return MENU_CONTINUE
 
