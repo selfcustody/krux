@@ -30,7 +30,7 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from ..display import FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
+from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 
 
@@ -118,7 +118,7 @@ class DatumToolMenu(Page):
 
         page = DatumTool(self.ctx)
         page.contents, page.title = contents, title
-        return page.manipulate_contents()
+        return page.view_contents()
 
     def text_entry(self):
         """Handler for the 'Text Entry' menu item"""
@@ -137,7 +137,7 @@ class DatumToolMenu(Page):
 
         page = DatumTool(self.ctx)
         page.contents, page.title = text, t("Custom Text")
-        return page.manipulate_contents()
+        return page.view_contents()
 
     def read_file(self):
         """Handler for the 'Read SD File' menu item"""
@@ -167,7 +167,7 @@ class DatumToolMenu(Page):
         page.contents = contents
         # pylint: disable=C0207
         page.title = t("File Contents") + "\n" + filename.split("/")[-1]
-        return page.manipulate_contents()
+        return page.view_contents()
 
 
 class DatumTool(Page):
@@ -182,6 +182,7 @@ class DatumTool(Page):
         self.decrypted = False
         self.sensitive = False
         self.history = []
+        self.oneline_viewable = None
 
     def view_qr(self):
         """Reusable handler for viewing a QR code"""
@@ -222,26 +223,12 @@ class DatumTool(Page):
             prompt=True,
         )
 
-    def view_contents(self):
-        """Displays infobox and contents"""
+    def _info_box(self, preview=True):
+        """clears screen, displays info_box, returns height-in-lines"""
         from binascii import hexlify
 
-        info_len = self._info_box()
-        self.ctx.display.draw_hcentered_text(
-            (
-                '"' + self.contents + '"'
-                if isinstance(self.contents, str)
-                else "0x " + hexlify(self.contents).decode()
-            ),
-            offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
-            max_lines=TOTAL_LINES - (info_len + 2),
-        )
-        self.ctx.input.wait_for_button()
-
-    def _info_box(self):
-        """clears screen, displays info_box, returns height-in-lines"""
         self.ctx.display.clear()
-        return self.ctx.display.draw_hcentered_text(
+        num_lines = self.ctx.display.draw_hcentered_text(
             "\n".join(
                 [
                     self.title,
@@ -256,9 +243,44 @@ class DatumTool(Page):
             ),
             info_box=True,
         )
+        if preview:
+            num_lines += 1
+            self.ctx.display.draw_hcentered_text(
+                (
+                    '"' + self.contents + '"'
+                    if isinstance(self.contents, str)
+                    else "0x" + hexlify(self.contents).decode()
+                ),
+                offset_y=DEFAULT_PADDING + num_lines * FONT_HEIGHT,
+                max_lines=1,
+                info_box=True,
+            )
+
+        return num_lines
+
+    def _show_contents(self):
+        """Displays infobox and contents"""
+        from binascii import hexlify
+
+        info_len = self._info_box(preview=False)
+        self.ctx.display.draw_hcentered_text(
+            (
+                '"' + self.contents + '"'
+                if isinstance(self.contents, str)
+                else "0x" + hexlify(self.contents).decode()
+            ),
+            offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
+            max_lines=TOTAL_LINES - (info_len + 2),
+        )
+        self.ctx.input.wait_for_button()
 
     def _analyze_contents(self):
-        """analyzes `.contents`, sets `.about`(type and length) and `.sensitivity` (if a secret)"""
+        """
+        analyzes `.contents`, sets:
+        * .about (type and length)
+        * .sensitivity (bool) if secret,
+        * .oneline_viewable (bool) if short enough for one-line display
+        """
 
         if isinstance(self.contents, bytes):
             self.about = t("binary: {} bytes").format(len(self.contents))
@@ -266,6 +288,11 @@ class DatumTool(Page):
             # does it look like 128 or 256 bits of mnemonic entropy / CompactSeedQR?
             if len(self.contents) in (16, 32) and max((x for x in self.contents)) > 127:
                 self.sensitive = True
+
+            if (len(self.contents) * 2 + 2) * FONT_WIDTH <= self.ctx.display.width():
+                self.oneline_viewable = True
+            else:
+                self.oneline_viewable = False
 
         elif isinstance(self.contents, str):
             self.about = t("text: {} chars").format(len(self.contents))
@@ -279,6 +306,11 @@ class DatumTool(Page):
                 len(self.contents) in (12 * 4, 24 * 4)
             ):
                 self.sensitive = True
+
+            if (len(self.contents) + 2) * FONT_WIDTH <= self.ctx.display.width():
+                self.oneline_viewable = True
+            else:
+                self.oneline_viewable = False
 
         # todo: can we know that it's psbt/xpub/xprv/addy/mnemonic/descriptor/etc
 
@@ -301,74 +333,88 @@ class DatumTool(Page):
             self.contents = plaintext
             self.history = []
 
-    def _build_options_menu(self):
-        """Build a menu of how to manipulate contents"""
+    def _build_options_menu(self, offer_convert=False, offer_show=True):
+        """Build a menu of what to do with contents, possibly w/ conversions"""
         from binascii import unhexlify
         from krux.baseconv import base_decode
 
         # build menu options
         menu = []
-        if isinstance(self.contents, bytes):
-            menu.append((t("to hex"), lambda: "hex"))
-            menu.append((t("to base43"), lambda: 43))
-            menu.append((t("to base58"), lambda: 58))
-            menu.append((t("to base64"), lambda: 64))
-            try:
-                self.contents.decode()
-                menu.append((t("to utf8"), lambda: "utf8"))
-            except:
-                pass
 
-        elif isinstance(self.contents, str):
-            try:
-                unhexlify(self.contents)
-                menu.append((t("from hex"), lambda: "hex"))
-            except:
-                pass
+        if offer_show:
+            menu.append((t("Show Datum"), lambda: "show"))
 
-            try:
-                base_decode(self.contents, 43)
-                menu.append((t("from base43"), lambda: 43))
-            except:
-                pass
+        if not offer_convert:
+            menu.append((t("Convert Datum"), lambda: "convert_begin"))
 
-            try:
-                base_decode(self.contents, 58)
-                menu.append((t("from base58"), lambda: 58))
-            except:
-                pass
+            if not (self.decrypted and self.sensitive):
+                menu.append((t("Export to QR"), lambda: "export_qr"))
+                menu.append((t("Export to SD"), lambda: "export_sd"))
 
-            try:
-                base_decode(self.contents, 64)
-                menu.append(("from base64", lambda: 64))
-            except:
-                pass
+        else:
+            if isinstance(self.contents, bytes):
+                menu.append((t("to hex"), lambda: "hex"))
+                menu.append((t("to base43"), lambda: 43))
+                menu.append((t("to base58"), lambda: 58))
+                menu.append((t("to base64"), lambda: 64))
+                try:
+                    self.contents.decode()
+                    menu.append((t("to utf8"), lambda: "utf8"))
+                except:
+                    pass
+                menu.append((t("Encrypt"), lambda: "encrypt"))
 
-            try:
-                self.contents.encode()
-                menu.append((t("from utf8"), lambda: "utf8"))
-            except:
-                pass
+            elif isinstance(self.contents, str):
+                try:
+                    unhexlify(self.contents)
+                    menu.append((t("from hex"), lambda: "hex"))
+                except:
+                    pass
 
-        if isinstance(self.contents, bytes):
-            menu.append((t("Encrypt"), lambda: "encrypt"))
+                try:
+                    base_decode(self.contents, 43)
+                    menu.append((t("from base43"), lambda: 43))
+                except:
+                    pass
 
-        if not (self.decrypted and self.sensitive):
-            menu.append((t("Export to QR"), lambda: "export_qr"))
-            menu.append((t("Export to SD"), lambda: "export_sd"))
+                try:
+                    base_decode(self.contents, 58)
+                    menu.append((t("from base58"), lambda: 58))
+                except:
+                    pass
 
-        if self.history:
-            for i, option in enumerate(menu):
-                if option[1]() == self.history[-1]:
-                    menu[i] = (option[0] + " (" + t("Undo") + ")", lambda: "undo")
-                    break
+                try:
+                    base_decode(self.contents, 64)
+                    menu.append(("from base64", lambda: 64))
+                except:
+                    pass
+
+                try:
+                    self.contents.encode()
+                    menu.append((t("from utf8"), lambda: "utf8"))
+                except:
+                    pass
+
+            if self.history:
+                for i, option in enumerate(menu):
+                    if option[1]() == self.history[-1]:
+                        menu[i] = (option[0] + " (" + t("Undo") + ")", lambda: "undo")
+                        break
+
+            menu.append((t("Done Converting"), lambda: "convert_end"))
 
         return menu
 
-    def manipulate_contents(self, try_decrypt=True):
+    def view_contents(self, try_decrypt=True, offer_convert=False):
         """allows to view, convert, encrypt/decrypt, and export short str/bytes contents"""
+        from .encryption_ui import KEFEnvelope
 
-        # print("into manipulate_contents(", contents, type(contents), history)
+        argv = {
+            "try_decrypt": try_decrypt,
+            "offer_convert": offer_convert,
+        }
+
+        # print("into view_contents(", contents, type(contents), history)
 
         # check if KEF wrapped
         if try_decrypt and isinstance(self.contents, bytes):
@@ -378,44 +424,58 @@ class DatumTool(Page):
         self._analyze_contents()
 
         # get menu of what can be done to contents
-        todo_menu = self._build_options_menu()
+        todo_menu = self._build_options_menu(
+            offer_convert=offer_convert, offer_show=not self.oneline_viewable
+        )
 
-        self.view_contents()
-
-        # display infobox and run the todo_menu
+        # display infobox
         info_len = self._info_box()
+
+        # run todo_menu
+        back_status = {}
+        if offer_convert:
+            back_status = {"back_status": None}
         menu = Menu(
-            self.ctx, todo_menu, offset=info_len * FONT_HEIGHT + DEFAULT_PADDING
+            self.ctx,
+            todo_menu,
+            offset=(info_len + 1) * FONT_HEIGHT + DEFAULT_PADDING,
+            **back_status
         )
         idx, status = menu.run_loop()
 
-        # if user chose to exit
         if idx == len(todo_menu) - 1:
+            # if user chose to exit
             return MENU_CONTINUE
 
-        # if user chose to convert data
-        if status not in ("encrypt", "export_qr", "export_sd"):
+        if status == "show":
+            # if user wants to view data
+            self._show_contents()
+        elif status == "convert_begin":
+            # if user wants to convert data
+            argv["offer_convert"] = True
+        elif status == "convert_end":
+            # if user is done converting data
+            argv["offer_convert"] = False
+        elif status in ("undo", "hex", 43, 58, 64, "utf8"):
+            # if user chose a particular conversion
             if status == "undo":
                 status = self.history.pop()
             else:
                 self.history.append(status)
             self.contents = convert_encoding(self.contents, status)
-            return self.manipulate_contents()
-
-        # if user chose to encrypt
-        if status == "encrypt":
-            from .encryption_ui import KEFEnvelope
-
+        elif status == "encrypt":
+            # if user chose to encrypt
             kef = KEFEnvelope(self.ctx)
             kef.label = self.title
             self.contents = kef.seal_ui(self.contents, override_defaults=True)
             self.title = kef.label if kef.label else ""
             self.decrypted = False
-            return self.manipulate_contents(try_decrypt=False)
+            argv["try_decrypt"] = False
+        elif status == "export_qr":
+            # if user chose to export_qr
+            self.view_qr()
+        else:
+            # user chose export_sd
+            self.save_sd()
 
-        # if user chose to export_qr
-        if status == "export_qr":
-            return self.view_qr()
-
-        # user chose export_sd
-        return self.save_sd()
+        return self.view_contents(**argv)
