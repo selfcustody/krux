@@ -188,13 +188,13 @@ class Display:
         pwm_value *= 20
         self.blk_ctrl.duty(pwm_value)
 
-    def qr_offset(self, qr_offset=0):
+    def qr_offset(self, y_offset=0):
         """Retuns y offset to subtitle QR codes"""
-        if qr_offset == 0:
+        if y_offset == 0:
             if kboard.is_cube:
                 return BOTTOM_LINE
             return self.width() + MINIMAL_PADDING
-        return qr_offset + MINIMAL_PADDING
+        return y_offset + MINIMAL_PADDING
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""

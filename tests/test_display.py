@@ -794,3 +794,15 @@ def test_render_image_with_double_subtitle(mocker, multiple_devices):
         krux.display.lcd.display.assert_called_once_with(
             img, oft=(24, 0), roi=(72, 0, 186, 240)
         )
+
+
+def test_offset(mocker, multiple_devices):
+    from krux.display import Display, BOTTOM_LINE, MINIMAL_PADDING
+    from krux.kboard import kboard
+
+    d = Display()
+    if kboard.is_cube:
+        assert d.qr_offset() == BOTTOM_LINE
+    else:
+        assert d.qr_offset() == d.width() + MINIMAL_PADDING
+    assert d.qr_offset(10) == 10 + MINIMAL_PADDING

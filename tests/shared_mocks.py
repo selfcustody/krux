@@ -489,6 +489,56 @@ def board_cube():
     )
 
 
+def board_yahboom():
+    return mock.MagicMock(
+        config={
+            "type": "yahboom",
+            "lcd": {
+                "dcx": 31,
+                "ss": 30,
+                "rst": 23,
+                "clk": 28,
+                "height": 240,
+                "width": 320,
+                "invert": 1,
+                "dir": 96,
+                "lcd_type": 0,
+            },
+            "sdcard": {
+                "sclk": 32,
+                "mosi": 35,
+                "miso": 33,
+                "cs": 34,
+            },
+            "board_info": {
+                "BOOT_KEY": 16,
+                "CONNEXT_A": 8,
+                "CONNEXT_B": 6,
+                "I2C_SDA": 25,
+                "I2C_SCL": 24,
+                "SPI_SCLK": 32,
+                "SPI_MOSI": 35,
+                "SPI_MISO": 33,
+                "SPI_CS": 34,
+            },
+            "krux": {
+                "pins": {
+                    "BUTTON_B": 16,
+                    "BUTTON_C": 17,
+                    "TOUCH_IRQ": 22,
+                    "I2C_SDA": 25,
+                    "I2C_SCL": 24,
+                },
+                "display": {
+                    "touch": True,
+                    "font": [8, 16],
+                    "font_wide": [16, 16],
+                },
+            },
+        }
+    )
+
+
 def board_wonder_mv():
     return mock.MagicMock(
         config={
@@ -637,6 +687,27 @@ def mock_context(mocker):
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
             light=None,
+        )
+    elif board.config["type"] == "yahboom":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=mocker.MagicMock(),
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=16,
+                total_lines=20,  # 320 / 16
+                width=mocker.MagicMock(return_value=240),
+                height=mocker.MagicMock(return_value=320),
+                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
+            ),
         )
     elif board.config["type"] == "wonder_mv":
         return mocker.MagicMock(
