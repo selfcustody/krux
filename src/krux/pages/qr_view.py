@@ -158,15 +158,11 @@ class SeedQRView(Page):
         grid_offset += grid_pad
         if mode == STANDARD_MODE:
             if self.qr_foreground:
-                self.ctx.display.draw_qr_code(
-                    0, self.code, light_color=self.qr_foreground
-                )
+                self.ctx.display.draw_qr_code(self.code, light_color=self.qr_foreground)
             else:
-                self.ctx.display.draw_qr_code(0, self.code)
+                self.ctx.display.draw_qr_code(self.code)
         elif mode == LINE_MODE:
-            self.ctx.display.draw_qr_code(
-                0, self.code, light_color=theme.disabled_color
-            )
+            self.ctx.display.draw_qr_code(self.code, light_color=theme.disabled_color)
             self.highlight_qr_region(
                 self.code, region=(0, self.lr_index, self.qr_size, 1)
             )
@@ -231,9 +227,7 @@ class SeedQRView(Page):
         elif mode == REGION_MODE:
             row = self.lr_index // self.columns
             column = self.lr_index % self.columns
-            self.ctx.display.draw_qr_code(
-                0, self.code, light_color=theme.disabled_color
-            )
+            self.ctx.display.draw_qr_code(self.code, light_color=theme.disabled_color)
             self.highlight_qr_region(
                 self.code,
                 region=(
@@ -280,7 +274,7 @@ class SeedQRView(Page):
                 )
             self._region_legend(row, column)
         else:  #  TRANSCRIBE_MODE
-            self.ctx.display.draw_qr_code(0, self.code, light_color=WHITE)
+            self.ctx.display.draw_qr_code(self.code, light_color=WHITE)
             for i in range(self.qr_size + 1):
                 self.ctx.display.fill_rectangle(
                     grid_offset,

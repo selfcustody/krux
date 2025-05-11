@@ -677,10 +677,10 @@ def test_draw_qr_code(mocker, m5stickv):
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)
 
-    d.draw_qr_code(0, TEST_QR)
+    d.draw_qr_code(TEST_QR)
 
     krux.display.lcd.draw_qr_code_binary.assert_called_with(
-        0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
+        0, 0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
     )
 
 
