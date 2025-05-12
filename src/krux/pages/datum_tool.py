@@ -200,9 +200,32 @@ class DatumTool(Page):
             seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
             seed_qr_view.display_qr(allow_export=True)
         else:
-            from ..qr import FORMAT_PMOFN  # todo, FORMAT_UR, FORMAT_BBQR
+            from ..qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_BBQR, FORMAT_UR
 
-            self.display_qr_codes(self.contents, FORMAT_PMOFN, title=self.title)
+            idx, _ = Menu(
+                self.ctx,
+                (
+                    (t("Static"), lambda: None),
+                    (t("Part M of N"), lambda: None),
+                    (t("Fountain UR"), lambda: None),
+                    (t("BBQr"), lambda: None),
+                ),
+                back_label=None,
+            ).run_loop()
+            if idx == 0:
+                qrfmt = FORMAT_NONE
+            elif idx == 1:
+                qrfmt = FORMAT_PMOFN
+            elif idx == 2:
+                qrfmt = FORMAT_UR
+            else:
+                qrfmt = FORMAT_BBQR
+
+            try:
+                self.display_qr_codes(self.contents, qrfmt, title=self.title)
+            except Exception as err:
+                self.flash_error("TODO: UR, BBQr\n" + str(err))
+                self.view_qr()
 
         return MENU_CONTINUE
 
