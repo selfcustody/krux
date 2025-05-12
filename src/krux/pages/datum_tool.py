@@ -24,6 +24,7 @@ from . import (
     Page,
     Menu,
     MENU_CONTINUE,
+    MENU_EXIT,
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
@@ -59,7 +60,7 @@ def urobj_to_data(ur_obj):
 
 
 def convert_encoding(contents, conversion):
-    """encoding conversions to/from (hex/base58/base43/base64/utf8)"""
+    """encoding conversions to/from (hex/base43/base58/base64/utf8)"""
     from krux.baseconv import base_encode, base_decode
     from binascii import hexlify, unhexlify
 
@@ -186,10 +187,12 @@ class DatumTool(Page):
 
     def view_qr(self):
         """Reusable handler for viewing a QR code"""
+        from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC
+
         if isinstance(self.contents, bytes):
-            seedqrview_thresh = 106
+            seedqrview_thresh = QR_CAPACITY_BYTE[3]
         else:
-            seedqrview_thresh = 154
+            seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[3]
 
         if len(self.contents) <= seedqrview_thresh:
             from .qr_view import SeedQRView
@@ -197,7 +200,7 @@ class DatumTool(Page):
             seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
             seed_qr_view.display_qr(allow_export=True)
         else:
-            from ..qr import FORMAT_PMOFN
+            from ..qr import FORMAT_PMOFN  # todo, FORMAT_UR, FORMAT_BBQR
 
             self.display_qr_codes(self.contents, FORMAT_PMOFN, title=self.title)
 
@@ -334,7 +337,7 @@ class DatumTool(Page):
             self.history = []
 
     def _build_options_menu(self, offer_convert=False, offer_show=True):
-        """Build a menu of what to do with contents, possibly w/ conversions"""
+        """Build a menu list of what to do with contents, possibly w/ conversions"""
         from binascii import unhexlify
         from krux.baseconv import base_decode
 
@@ -355,7 +358,6 @@ class DatumTool(Page):
             if isinstance(self.contents, bytes):
                 menu.append((t("to hex"), lambda: "hex"))
                 menu.append((t("to base43"), lambda: 43))
-                menu.append((t("to base58"), lambda: 58))
                 menu.append((t("to base64"), lambda: 64))
                 try:
                     self.contents.decode()
@@ -374,12 +376,6 @@ class DatumTool(Page):
                 try:
                     base_decode(self.contents, 43)
                     menu.append((t("from base43"), lambda: 43))
-                except:
-                    pass
-
-                try:
-                    base_decode(self.contents, 58)
-                    menu.append((t("from base58"), lambda: 58))
                 except:
                     pass
 
@@ -414,13 +410,11 @@ class DatumTool(Page):
             "offer_convert": offer_convert,
         }
 
-        # print("into view_contents(", contents, type(contents), history)
-
         # check if KEF wrapped
         if try_decrypt and isinstance(self.contents, bytes):
             self._decrypt_as_kef_envelope()
 
-        # analyze bytes contents
+        # analyze contents
         self._analyze_contents()
 
         # get menu of what can be done to contents
@@ -434,16 +428,16 @@ class DatumTool(Page):
         # run todo_menu
         back_status = {}
         if offer_convert:
-            back_status = {"back_status": None}
+            back_status = {"back_label": None}
         menu = Menu(
             self.ctx,
             todo_menu,
             offset=(info_len + 1) * FONT_HEIGHT + DEFAULT_PADDING,
             **back_status
         )
-        idx, status = menu.run_loop()
+        _, status = menu.run_loop()
 
-        if idx == len(todo_menu) - 1:
+        if status == MENU_EXIT:
             # if user chose to exit
             return MENU_CONTINUE
 
@@ -456,7 +450,7 @@ class DatumTool(Page):
         elif status == "convert_end":
             # if user is done converting data
             argv["offer_convert"] = False
-        elif status in ("undo", "hex", 43, 58, 64, "utf8"):
+        elif status in ("undo", "hex", 43, 64, "utf8"):
             # if user chose a particular conversion
             if status == "undo":
                 status = self.history.pop()
