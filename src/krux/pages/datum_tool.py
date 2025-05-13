@@ -35,6 +35,18 @@ from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 
 
+DATUM_URTYPES = {
+    "DESCR": ["crypto-account", "crypto-output", "bytes"],
+    "PSBT": ["crypto-psbt", "bytes"],
+    "XPUB": ["bytes"],
+}
+DATUM_BBQRTYPES = {
+    "DESCR": ["U", "B"],
+    "PSBT": ["P", "B"],
+    "XPUB": ["U", "B"],
+}
+
+
 def urobj_to_data(ur_obj):
     """returns flatened data from a UR object. belongs in qr or qr_capture???"""
     import urtypes
@@ -203,29 +215,41 @@ class DatumTool(Page):
         else:
             from ..qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_BBQR, FORMAT_UR
 
+            menu_opts = [
+                (t("Static"), (FORMAT_NONE,)),
+                (t("Part M of N"), (FORMAT_PMOFN,)),
+            ]
+            if self.datum:
+                menu_opts.extend(
+                    [("UR " + v, (FORMAT_UR, v)) for v in DATUM_URTYPES[self.datum]]
+                )
+                menu_opts.extend(
+                    [
+                        ("BBQr " + v, (FORMAT_BBQR, v))
+                        for v in DATUM_BBQRTYPES[self.datum]
+                    ]
+                )
+            else:
+                menu_opts.append(("UR bytes", (FORMAT_UR, "bytes")))
+                menu_opts.append(("BBQr B", (FORMAT_BBQR, "B")))
+
             idx, _ = Menu(
                 self.ctx,
-                (
-                    (t("Static"), lambda: None),
-                    (t("Part M of N"), lambda: None),
-                    (t("Fountain UR"), lambda: None),
-                    (t("BBQr"), lambda: None),
-                ),
+                [(x[0], lambda: None) for x in menu_opts],
                 back_label=None,
             ).run_loop()
-            if idx == 0:
-                qrfmt = FORMAT_NONE
-            elif idx == 1:
-                qrfmt = FORMAT_PMOFN
-            elif idx == 2:
-                qrfmt = FORMAT_UR
+            qr_fmt = menu_opts[idx][1][0]
+            if len(menu_opts[idx][1]) == 2:
+                type_arg = menu_opts[idx][1][1]
             else:
-                qrfmt = FORMAT_BBQR
+                type_arg = None
 
             try:
-                self.display_qr_codes(self.contents, qrfmt, title=self.title)
+                self.display_qr_codes(self.contents, qr_fmt, title=self.title)
             except Exception as err:
-                self.flash_error("TODO: UR, BBQr\n" + str(err))
+                self.flash_error(
+                    "TODO: UR, BBQr (" + repr([qr_fmt, type_arg]) + ")\n" + str(err)
+                )
                 self.view_qr()
 
         return MENU_CONTINUE
