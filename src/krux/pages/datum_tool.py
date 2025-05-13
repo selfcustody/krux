@@ -34,16 +34,19 @@ from . import (
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 
+DATUM_DESCR = "DESCR"
+DATUM_PSBT = "PSBT"
+DATUM_XPUB = "XPUB"
 
-DATUM_URTYPES = {
-    "DESCR": ["crypto-account", "crypto-output", "bytes"],
-    "PSBT": ["crypto-psbt", "bytes"],
-    "XPUB": ["bytes"],
+DATUM_UR_TYPES = {
+    DATUM_DESCR: ["crypto-account", "crypto-output", "bytes"],
+    DATUM_PSBT: ["crypto-psbt", "bytes"],
+    DATUM_XPUB: ["bytes"],
 }
-DATUM_BBQRTYPES = {
-    "DESCR": ["U", "B"],
-    "PSBT": ["P", "B"],
-    "XPUB": ["U", "B"],
+DATUM_BBQR_TYPES = {
+    DATUM_DESCR: ["U"],
+    DATUM_PSBT: ["P"],
+    DATUM_XPUB: ["U"],
 }
 
 
@@ -90,6 +93,27 @@ def convert_encoding(contents, conversion):
             return contents.decode()
         return contents.encode()
     return None
+
+
+def identify_datum(data):
+    """Determine which "datum" type this is; ie: PSBT, XPUB, DESCR"""
+
+    datum = None
+    if isinstance(data, bytes):
+        if data[:5] == b"psbt\xff":
+            datum = "PSBT"
+    else:
+        if data[:7] == "cHNidP8":
+            datum = DATUM_PSBT
+        elif (data[:1] in "xyzYZtuvUV" and data[1:4] == "pub") or (
+            data[:1] == "["
+            and data.split("]")[1][:1] in "xyzYZtuvUV"
+            and data.split("]")[1][1:4] == "pub"
+        ):
+            datum = DATUM_XPUB
+        elif data.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
+            datum = DATUM_DESCR
+    return datum
 
 
 class DatumToolMenu(Page):
@@ -201,11 +225,12 @@ class DatumTool(Page):
     def view_qr(self):
         """Reusable handler for viewing a QR code"""
         from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC
+        from ..bbqr import encode_bbqr
 
         if isinstance(self.contents, bytes):
-            seedqrview_thresh = QR_CAPACITY_BYTE[3]
+            seedqrview_thresh = QR_CAPACITY_BYTE[4]
         else:
-            seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[3]
+            seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[4]
 
         if len(self.contents) <= seedqrview_thresh:
             from .qr_view import SeedQRView
@@ -219,37 +244,40 @@ class DatumTool(Page):
                 (t("Static"), (FORMAT_NONE,)),
                 (t("Part M of N"), (FORMAT_PMOFN,)),
             ]
-            if self.datum:
-                menu_opts.extend(
-                    [("UR " + v, (FORMAT_UR, v)) for v in DATUM_URTYPES[self.datum]]
-                )
+
+            curr_datum = identify_datum(self.contents)
+            if curr_datum:
                 menu_opts.extend(
                     [
                         ("BBQr " + v, (FORMAT_BBQR, v))
-                        for v in DATUM_BBQRTYPES[self.datum]
+                        for v in DATUM_BBQR_TYPES[curr_datum]
                     ]
                 )
-            else:
-                menu_opts.append(("UR bytes", (FORMAT_UR, "bytes")))
-                menu_opts.append(("BBQr B", (FORMAT_BBQR, "B")))
+                menu_opts.extend(
+                    [("UR " + v, (FORMAT_UR, v)) for v in DATUM_UR_TYPES[curr_datum]]
+                )
 
             idx, _ = Menu(
                 self.ctx,
                 [(x[0], lambda: None) for x in menu_opts],
                 back_label=None,
             ).run_loop()
+
             qr_fmt = menu_opts[idx][1][0]
-            if len(menu_opts[idx][1]) == 2:
-                type_arg = menu_opts[idx][1][1]
-            else:
-                type_arg = None
+
+            encoded = None
+            if qr_fmt == FORMAT_BBQR:
+                encoded = self.contents
+                if isinstance(encoded, str):
+                    encoded = encoded.encode()
+                encoded = encode_bbqr(encoded, file_type=menu_opts[idx][1][1])
 
             try:
-                self.display_qr_codes(self.contents, qr_fmt, title=self.title)
-            except Exception as err:
-                self.flash_error(
-                    "TODO: UR, BBQr (" + repr([qr_fmt, type_arg]) + ")\n" + str(err)
+                self.display_qr_codes(
+                    encoded if encoded else self.contents, qr_fmt, title=self.title
                 )
+            except Exception as err:
+                self.flash_error("UR TODO: " + repr(menu_opts[idx]) + ")\n" + str(err))
                 self.view_qr()
 
         return MENU_CONTINUE
@@ -340,10 +368,6 @@ class DatumTool(Page):
         if isinstance(self.contents, bytes):
             self.about = t("binary: {} bytes").format(len(self.contents))
 
-            # datum
-            if self.contents[:5] == b"psbt\xff":
-                self.datum = "PSBT"
-
             # does it look like 128 or 256 bits of mnemonic entropy / CompactSeedQR?
             if len(self.contents) in (16, 32) and max((x for x in self.contents)) > 127:
                 self.sensitive = True
@@ -356,20 +380,6 @@ class DatumTool(Page):
 
         elif isinstance(self.contents, str):
             self.about = t("text: {} chars").format(len(self.contents))
-
-            # datum
-            if self.contents[:7] == "cHNidP8":
-                self.datum = "PSBT"
-            elif (
-                self.contents[:1] in "xyzYZtuvUV" and self.contents[1:4] == "pub"
-            ) or (
-                self.contents[:1] == "["
-                and self.contents.split("]")[1][:1] in "xyzYZtuvUV"
-                and self.contents.split("]")[1][1:4] == "pub"
-            ):
-                self.datum = "XPUB"
-            elif self.contents.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
-                self.datum = "DESCR"
 
             # does it look like a 12 or 24 word mnemonic / Mnemonic QR?
             if len(self.contents.split()) in (12, 24):
@@ -386,6 +396,10 @@ class DatumTool(Page):
                 self.oneline_viewable = True
             else:
                 self.oneline_viewable = False
+
+        # datum
+        if not self.datum:
+            self.datum = identify_datum(self.contents)
 
     def _decrypt_as_kef_envelope(self):
         """Assuming self.contents are encrypted, offer to decrypt"""
