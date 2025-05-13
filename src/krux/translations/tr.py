@@ -239,7 +239,7 @@ translation_array = [
     "Kanıtlanabilir harcanamaz",
     "QR Kodu",
     "RX Pini",
-    "Dosyayı oku",
+    "Dosya Oku",
     "Yeniden Başlat",
     "Al",
     "Adresleri Al",

@@ -91,7 +91,7 @@ class DatumToolMenu(Page):
                 [
                     (t("Scan a QR"), self.scan_qr),
                     (t("Text Entry"), self.text_entry),
-                    (t("Read file"), self.read_file),
+                    (t("Read File"), self.read_file),
                 ],
             ),
         )
@@ -141,7 +141,7 @@ class DatumToolMenu(Page):
         return page.view_contents()
 
     def read_file(self):
-        """Handler for the 'Read SD File' menu item"""
+        """Handler for the 'Read File' menu item"""
         from .utils import Utils
 
         if not self.has_sd_card():
@@ -151,7 +151,7 @@ class DatumToolMenu(Page):
 
         utils = Utils(self.ctx)
         try:
-            filename, contents = utils.load_file()
+            filename, contents = utils.load_file(prompt=False)
         except OSError:
             pass
 
@@ -180,6 +180,7 @@ class DatumTool(Page):
         self.contents = None
         self.about = None
         self.title = None
+        self.datum = None
         self.decrypted = False
         self.sensitive = False
         self.history = []
@@ -260,6 +261,7 @@ class DatumTool(Page):
                     self.title,
                     " ".join(
                         [
+                            self.datum if self.datum else "",
                             t("decrypted") if self.decrypted else "",
                             t("sensitive") if self.sensitive else "",
                         ]
@@ -288,6 +290,8 @@ class DatumTool(Page):
         """Displays infobox and contents"""
         from binascii import hexlify
 
+        print("_show_contents()", self.contents)
+
         info_len = self._info_box(preview=False)
         self.ctx.display.draw_hcentered_text(
             (
@@ -304,6 +308,7 @@ class DatumTool(Page):
         """
         analyzes `.contents`, sets:
         * .about (type and length)
+        * .datum is the "recognized" datum_type, ie: xpub/psbt/descriptor/etc
         * .sensitivity (bool) if secret,
         * .oneline_viewable (bool) if short enough for one-line display
         """
@@ -311,10 +316,15 @@ class DatumTool(Page):
         if isinstance(self.contents, bytes):
             self.about = t("binary: {} bytes").format(len(self.contents))
 
+            # datum
+            if self.contents[:5] == b"psbt\xff":
+                self.datum = "PSBT"
+
             # does it look like 128 or 256 bits of mnemonic entropy / CompactSeedQR?
             if len(self.contents) in (16, 32) and max((x for x in self.contents)) > 127:
                 self.sensitive = True
 
+            # fits on one line in info_box
             if (len(self.contents) * 2 + 2) * FONT_WIDTH <= self.ctx.display.width():
                 self.oneline_viewable = True
             else:
@@ -322,6 +332,20 @@ class DatumTool(Page):
 
         elif isinstance(self.contents, str):
             self.about = t("text: {} chars").format(len(self.contents))
+
+            # datum
+            if self.contents[:7] == "cHNidP8":
+                self.datum = "PSBT"
+            elif (
+                self.contents[:1] in "xyzYZtuvUV" and self.contents[1:4] == "pub"
+            ) or (
+                self.contents[:1] == "["
+                and self.contents.split("]")[1][:1] in "xyzYZtuvUV"
+                and self.contents.split("]")[1][1:4] == "pub"
+            ):
+                self.datum = "XPUB"
+            elif self.contents.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
+                self.datum = "DESCR"
 
             # does it look like a 12 or 24 word mnemonic / Mnemonic QR?
             if len(self.contents.split()) in (12, 24):
@@ -333,12 +357,11 @@ class DatumTool(Page):
             ):
                 self.sensitive = True
 
+            # fits on one line in info_box
             if (len(self.contents) + 2) * FONT_WIDTH <= self.ctx.display.width():
                 self.oneline_viewable = True
             else:
                 self.oneline_viewable = False
-
-        # todo: can we know that it's psbt/xpub/xprv/addy/mnemonic/descriptor/etc
 
     def _decrypt_as_kef_envelope(self):
         """Assuming self.contents are encrypted, offer to decrypt"""

@@ -239,7 +239,7 @@ translation_array = [
     "Provably unspendable",
     "Code QR",
     "RX Fiche",
-    "Lire le dossier",
+    "Lire le fichier",
     "Redémarrer",
     "Recevoir",
     "Adresses de Réception",
