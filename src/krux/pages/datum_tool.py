@@ -226,6 +226,8 @@ class DatumTool(Page):
         """Reusable handler for viewing a QR code"""
         from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC
         from ..bbqr import encode_bbqr
+        import urtypes
+        from ur.ur import UR
 
         if isinstance(self.contents, bytes):
             seedqrview_thresh = QR_CAPACITY_BYTE[4]
@@ -256,6 +258,8 @@ class DatumTool(Page):
                 menu_opts.extend(
                     [("UR " + v, (FORMAT_UR, v)) for v in DATUM_UR_TYPES[curr_datum]]
                 )
+            else:
+                menu_opts.append(("UR bytes", (FORMAT_UR, "bytes")))
 
             idx, _ = Menu(
                 self.ctx,
@@ -266,11 +270,21 @@ class DatumTool(Page):
             qr_fmt = menu_opts[idx][1][0]
 
             encoded = None
-            if qr_fmt == FORMAT_BBQR:
+            if qr_fmt in (FORMAT_BBQR, FORMAT_UR):
                 encoded = self.contents
                 if isinstance(encoded, str):
                     encoded = encoded.encode()
-                encoded = encode_bbqr(encoded, file_type=menu_opts[idx][1][1])
+
+                if qr_fmt == FORMAT_BBQR:
+                    encoded = encode_bbqr(encoded, file_type=menu_opts[idx][1][1])
+
+                elif qr_fmt == FORMAT_UR:
+                    ur_type = menu_opts[idx][1][1]
+                    if ur_type == "bytes":
+                        encoded = UR(ur_type, urtypes.Bytes(encoded).to_cbor())
+                    elif ur_type == "crypto-psbt":
+                        encoded = UR(ur_type, urtypes.PSBT(encoded).to_cbor())
+                    # TODO: other urtypes
 
             try:
                 self.display_qr_codes(
