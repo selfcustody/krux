@@ -448,7 +448,7 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         elif mode_name == "AES-CBC":
             assert len(qr_data) == 48
             assert len(base_encode(qr_data, 43)) == 70
-        elif mode_name == "AES-GCM":
+        elif mode_name in ("AES-CTR", "AES-GCM"):
             assert len(qr_data) == 44
             assert len(base_encode(qr_data, 43)) == 64
         else:

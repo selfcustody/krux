@@ -85,14 +85,29 @@ VERSIONS = {
         "auth": -4,
         "compress": True,
     },
+    10: {
+        "name": "AES-CTR",
+        "mode": ucryptolib.MODE_CTR,
+        "pkcs_pad": None,
+        "auth": 4,
+    },
+    11: {
+        "name": "AES-CTR +c",
+        "mode": ucryptolib.MODE_CTR,
+        "pkcs_pad": None,
+        "auth": -4,
+        "compress": True,
+    },
 }
 MODE_NUMBERS = {
     "AES-ECB": ucryptolib.MODE_ECB,
     "AES-CBC": ucryptolib.MODE_CBC,
+    "AES-CTR": ucryptolib.MODE_CTR,
     "AES-GCM": ucryptolib.MODE_GCM,
 }
 MODE_IVS = {
     ucryptolib.MODE_CBC: 16,
+    ucryptolib.MODE_CTR: 12,
     ucryptolib.MODE_GCM: 12,
 }
 
@@ -128,7 +143,11 @@ class Cipher:
             raise ValueError("Cannot validate decryption for this plaintext")
 
         # for modes that don't have authentication, KEF uses 2 forms of sha256
-        if v_auth != 0 and mode in (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC):
+        if v_auth != 0 and mode in (
+            ucryptolib.MODE_ECB,
+            ucryptolib.MODE_CBC,
+            ucryptolib.MODE_CTR,
+        ):
             if v_auth > 0:
                 # unencrypted (public) auth: hash the plaintext w/ self._key
                 auth = hashlib.sha256(plain + self._key).digest()[:v_auth]
@@ -161,7 +180,10 @@ class Cipher:
         elif iv:
             raise ValueError("IV is not required")
         if iv:
-            encryptor = ucryptolib.aes(self._key, mode, iv)
+            if mode == ucryptolib.MODE_CTR:
+                encryptor = ucryptolib.aes(self._key, mode, nonce=iv)
+            else:
+                encryptor = ucryptolib.aes(self._key, mode, iv)
         else:
             encryptor = ucryptolib.aes(self._key, mode)
             iv = b""
@@ -184,7 +206,9 @@ class Cipher:
         v_compress = VERSIONS[version].get("compress", False)
 
         # validate payload size early
-        min_payload = 1 if mode == ucryptolib.MODE_GCM else AES_BLOCK_SIZE
+        min_payload = (
+            1 if mode in (ucryptolib.MODE_CTR, ucryptolib.MODE_GCM) else AES_BLOCK_SIZE
+        )
         min_payload += min(0, v_auth) + v_iv
         if len(payload) <= min_payload:
             raise ValueError("Invalid Payload")
@@ -193,7 +217,10 @@ class Cipher:
         if not v_iv:
             decryptor = ucryptolib.aes(self._key, mode)
         else:
-            decryptor = ucryptolib.aes(self._key, mode, payload[:v_iv])
+            if mode == ucryptolib.MODE_CTR:
+                decryptor = ucryptolib.aes(self._key, mode, nonce=payload[:v_iv])
+            else:
+                decryptor = ucryptolib.aes(self._key, mode, payload[:v_iv])
             payload = payload[v_iv:]
 
         # remove authentication from payload if suffixed to ciphertext
