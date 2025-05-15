@@ -396,7 +396,9 @@ def wrap(id_, version, iterations, payload):
         raise ValueError("Invalid ID")
 
     try:
-        assert 0 <= version <= 255 and version in VERSIONS
+        assert 0 <= version <= 255
+        assert VERSIONS[version] is not None
+        assert VERSIONS[version]["mode"] is not None
     except:
         raise ValueError("Invalid version")
 
@@ -431,19 +433,24 @@ def unwrap(kef_bytes):
     Unwraps KEF Encryption Format bytes, returns tuple of parsed values
     """
     len_id = kef_bytes[0]
+
     try:
         # out-of-order reading to validate version early
         version = kef_bytes[1 + len_id]
-        assert VERSIONS[version] and VERSIONS[version]["mode"] is not None
+        assert VERSIONS[version] is not None
+        assert VERSIONS[version]["mode"] is not None
     except:
         raise ValueError("Invalid format")
+
     # When unwrapping, be strict returning id_ as bytes
     id_ = kef_bytes[1 : 1 + len_id]
+
     kef_iterations = int.from_bytes(kef_bytes[2 + len_id : 5 + len_id], "big")
     if kef_iterations <= 10000:
         iterations = kef_iterations * 10000
     else:
         iterations = kef_iterations
+
     payload = kef_bytes[len_id + 5 :]
     extra = MODE_IVS.get(VERSIONS[version]["mode"], 0)
     if VERSIONS[version].get("auth", 0) > 0:
@@ -453,6 +460,7 @@ def unwrap(kef_bytes):
             raise ValueError("Ciphertext is not aligned")
         if (len(payload) - extra) // 16 < 1:
             raise ValueError("Ciphertext is too short")
+
     return (id_, version, iterations, payload)
 
 

@@ -199,6 +199,14 @@ def test_Cipher_calling_method_encrypt(m5stickv):
                 with pytest.raises(ValueError, match=err):
                     encryptor.encrypt(valids[0], valids[1], invalid, **kwargs)
 
+    # Exception when version is None or VERSIONS[version]["mode"] is None
+    kef.VERSIONS[0] = None
+    with pytest.raises(Exception):
+        encryptor.encrypt(b"\x00", 0)
+    kef.VERSIONS[1]["mode"] = None
+    with pytest.raises(Exception):
+        encryptor.encrypt(b"\x00", 1, b"\x01" * 16)
+
 
 def test_Cipher_calling_method_decrypt(m5stickv):
     from krux import kef
@@ -245,6 +253,14 @@ def test_Cipher_calling_method_decrypt(m5stickv):
         min_payload += kef.MODE_IVS.get(values["mode"], 0) + min(0, values["auth"])
         with pytest.raises(ValueError, match=err):
             decryptor.decrypt(b"\x00" * (min_payload - 1), version)
+
+    # Exception when version is None or VERSIONS[version]["mode"] is None
+    kef.VERSIONS[0] = None
+    with pytest.raises(Exception):
+        decryptor.decrypt(b"\x00" * 16, 0)
+    kef.VERSIONS[1]["mode"] = None
+    with pytest.raises(Exception):
+        decryptor.decrypt(b"\x00" * 32, 1)
 
 
 def test_Cipher_calling_method__authenticate(m5stickv):
@@ -848,6 +864,16 @@ def test_wrap_exceptions(m5stickv):
                     with pytest.raises(ValueError, match=err):
                         kef.wrap(id_, version, iterations, invalid)
 
+    # Exception when version is None or VERSIONS[version]["mode"] is None
+    ciphertext = cipher.encrypt(b"plaintext", 0)
+    kef.VERSIONS[0] = None
+    with pytest.raises(ValueError, match="Invalid version"):
+        kef.wrap("test", 0, 10000, ciphertext)
+    ciphertext = cipher.encrypt(b"plaintext", 1, b"\x01" * 16)
+    kef.VERSIONS[1]["mode"] = None
+    with pytest.raises(ValueError, match="Invalid version"):
+        kef.wrap("test", 0, 10000, ciphertext)
+
 
 def test_unwrap_exceptions(m5stickv):
     from krux import kef
@@ -885,6 +911,14 @@ def test_unwrap_exceptions(m5stickv):
     encoded = CBC_ENCRYPTED_QR[:-32]  # 24w CBC is 48 bytes w/ iv+checksum
     with pytest.raises(ValueError, match=err):
         kef.unwrap(encoded)
+
+    # Exception when version is None or VERSIONS[version]["mode"] is None
+    kef.VERSIONS[3] = None
+    with pytest.raises(ValueError, match="Invalid format"):
+        kef.unwrap(ECB_ENCRYPTED_QR)
+    kef.VERSIONS[4]["mode"] = None
+    with pytest.raises(ValueError, match="Invalid format"):
+        kef.unwrap(CBC_ENCRYPTED_QR)
 
 
 def test_faithful_encrypted_wrapper(m5stickv):

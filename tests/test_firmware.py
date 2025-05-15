@@ -12907,16 +12907,14 @@ def test_is_version_greater(mocker, m5stickv, tdata):
     DATA_22_12_2 = b"\x00\x00\x00[\x0722.12.2\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py"
     DATA_24_09_1 = b"\x00\x00\xb6\x07circuit\x00\x00\x00\x00\x00\x00\x00\x8e\x0cboard_io_pin\x00\x00U\rkendryte_gpio\x00\x7f\x0bmaixpy_gpio\x00\x00\x00[\x0724.09.1\x00\x00\x00\x00\x00\x00\x00\xdf\x07VERSION\x00\x00\x00\x00\x00\x00\x00\xb4\x10krux/metadata.py\x00\x00\x00\x00\x00\x00\xc7\x06Keypad\x00\x00\x00\x00\x00\x00\x00\x00\xb4\x07keypads\x00\x00\x00\x00\x00\x00\x00\xe3\x0bto_qr_codes\x00\x00\x00&\x02qr\x00\x00\x00\x00\xc8\rMENU_CONTINUE\x00i\tMENU"
     DATA_22_03_0 = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/metadata.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22.03.0'\nSIGNER_PUBKEY = (\n    '03339e883157e"
-    DATA_real_firmware = tdata.TEST_FIRMWARE_25_03_0
-    DATA_22_03_0_NO_VER = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/metadata.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = ''\nSIGNER_PUBKEY = (\n    '03339e883157e"
-    DATA_22_03_0_NO_META = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/none.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22.03.0'\nSIGNER_PUBKEY = (\n    '03339e883157e"
-    DATA_22_03_0_NO_VER_META = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/none.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22'\nSIGNER_PUBKEY = (\n    '03339e883157e"
+    REAL_DATA_25_03_0 = tdata.TEST_FIRMWARE_25_03_0
 
     VER_21_01_0 = "21.01.0"
     VER_22_12_2 = "22.12.2"
     VER_22_03_0 = "22.03.0"
     VER_24_09_1 = "24.09.1"
     VER_25_03_0 = "25.03.0"
+    VER_25_03_BETA = "25.03.beta0"
 
     cases = [
         (
@@ -12949,7 +12947,16 @@ def test_is_version_greater(mocker, m5stickv, tdata):
             VER_21_01_0,  # curr_ver
             VER_22_03_0,  # new_ver
         ),
-        (DATA_real_firmware, VER_24_09_1, VER_25_03_0),
+        (
+            REAL_DATA_25_03_0,
+            VER_24_09_1,  # curr_ver
+            VER_25_03_0,  # new_ver
+        ),
+        (
+            REAL_DATA_25_03_0,
+            VER_25_03_BETA,  # curr_ver
+            VER_25_03_0,  # new_ver
+        ),
     ]
 
     filename = "firmware.bin"
@@ -12963,7 +12970,12 @@ def test_is_version_greater(mocker, m5stickv, tdata):
             assert is_version_greater(filename) == version_greater
             mock_file.assert_called_once()
 
-    # Check error cases
+    ###################
+    # Check ERROR CASES
+    DATA_22_03_0_NO_VER = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/metadata.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = ''\nSIGNER_PUBKEY = (\n    '03339e883157e"
+    DATA_22_03_0_NO_META = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/none.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22.03.0'\nSIGNER_PUBKEY = (\n    '03339e883157e"
+    DATA_22_03_0_NO_VER_META = b"up or slug not in lookup:\n        return slug\n    return lookup[slug]\nPK\x03\x04\n\x00\x00\x00\x00\x00\xcfv\x7fTC\xb4\rdp\x00\x00\x00p\x00\x00\x00\x10\x00\x1c\x00krux/none.pyUT\t\x00\x03\xa5\xc0Eb\xa5\xc0Ebux\x0b\x00\x01\x04\x00\x00\x00\x00\x04\x00\x00\x00\x00VERSION = '22'\nSIGNER_PUBKEY = (\n    '03339e883157e"
+
     cases = [
         (
             DATA_22_12_2,
@@ -13700,3 +13712,149 @@ def test_firmware_constants_consistent_w4096_aligned_sectors(mocker, m5stickv):
     # make sure that flash writes are aligned similar to kboot/ktool
     for address in addresses:
         assert address % chunk_size == 0
+
+
+def test_upgrade_fail_version_not_newer(
+    mocker, m5stickv, mock_success_input_cls, tdata
+):
+    import binascii
+    from embit import ec
+    from krux.metadata import VERSION
+    from krux.themes import theme
+
+    mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
+    mocker.patch(
+        "builtins.open",
+        new=get_mock_open(
+            {
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
+            }
+        ),
+    )
+    mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
+    )
+    mocker.patch(
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
+    )
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
+    mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
+    mocker.patch(
+        "krux.firmware.flash.read",
+        new=mocker.MagicMock(
+            return_value=bytes(tdata.SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1)
+        ),
+    )
+    mocker.patch("krux.firmware.ec", new=mocker.MagicMock(wraps=ec))
+    mocker.spy(tdata.TEST_SIGNER_PUBLIC_KEY, "verify")
+    mocker.patch(
+        "krux.firmware.ec.PublicKey.from_string",
+        new=mocker.MagicMock(return_value=tdata.TEST_SIGNER_PUBLIC_KEY),
+    )
+    import krux
+    from krux import firmware
+
+    mocker.spy(firmware, "write_data")
+    mocker.spy(firmware, "update_boot_config_sector")
+
+    firmware.is_version_greater = lambda filename: False
+    assert firmware.upgrade() == False
+
+    krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
+    krux.firmware.ec.Signature.parse.assert_called_with(tdata.TEST_FIRMWARE_SIG)
+    tdata.TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
+        tdata.TEST_FIRMWARE_SIGNATURE,
+        binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
+    )
+    assert tdata.TEST_SIGNER_PUBLIC_KEY.verify(
+        tdata.TEST_FIRMWARE_SIGNATURE,
+        binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
+    )
+
+    krux.firmware.flash.read.assert_called_with(
+        firmware.MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096
+    )
+
+    firmware.update_boot_config_sector.assert_not_called()
+
+    firmware.write_data.assert_not_called()
+
+    display_mocker.flash_text.assert_called_with(
+        "Firmware not newer than current " + VERSION, theme.error_color
+    )
+
+
+def test_upgrade_fail_version_exception(
+    mocker, m5stickv, mock_success_input_cls, tdata
+):
+    import binascii
+    from embit import ec
+    from krux.themes import theme
+
+    mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
+    mocker.patch(
+        "builtins.open",
+        new=get_mock_open(
+            {
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
+            }
+        ),
+    )
+    mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
+    )
+    mocker.patch(
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
+    )
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
+    mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
+    mocker.patch(
+        "krux.firmware.flash.read",
+        new=mocker.MagicMock(
+            return_value=bytes(tdata.SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1)
+        ),
+    )
+    mocker.patch("krux.firmware.ec", new=mocker.MagicMock(wraps=ec))
+    mocker.spy(tdata.TEST_SIGNER_PUBLIC_KEY, "verify")
+    mocker.patch(
+        "krux.firmware.ec.PublicKey.from_string",
+        new=mocker.MagicMock(return_value=tdata.TEST_SIGNER_PUBLIC_KEY),
+    )
+    import krux
+    from krux import firmware
+
+    mocker.spy(firmware, "write_data")
+    mocker.spy(firmware, "update_boot_config_sector")
+
+    assert firmware.upgrade() == False
+
+    krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
+    krux.firmware.ec.Signature.parse.assert_called_with(tdata.TEST_FIRMWARE_SIG)
+    tdata.TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
+        tdata.TEST_FIRMWARE_SIGNATURE,
+        binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
+    )
+    assert tdata.TEST_SIGNER_PUBLIC_KEY.verify(
+        tdata.TEST_FIRMWARE_SIGNATURE,
+        binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
+    )
+
+    krux.firmware.flash.read.assert_called_with(
+        firmware.MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096
+    )
+
+    firmware.update_boot_config_sector.assert_not_called()
+
+    firmware.write_data.assert_not_called()
+
+    display_mocker.flash_text.assert_called_with(
+        "Error checking versions", theme.error_color
+    )
