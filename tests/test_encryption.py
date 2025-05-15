@@ -438,6 +438,19 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
     # make encrypted_mnemonics using encryption settings mode preference
     qr_code_datum = {}
     for mode, mode_name in EncryptionSettings.MODE_NAMES.items():
+        if (
+            mode is None
+            or len(
+                [
+                    x
+                    for x in kef.VERSIONS.values()
+                    if isinstance(x, dict) and x["mode"] == mode
+                ]
+            )
+            == 0
+        ):
+            continue
+
         Settings().encryption.version = mode_name
         iv = I_VECTOR[: kef.MODE_IVS.get(kef.MODE_NUMBERS[mode_name], 0)]
         encrypted_qr = EncryptedQRCode()
@@ -448,7 +461,7 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
         elif mode_name == "AES-CBC":
             assert len(qr_data) == 48
             assert len(base_encode(qr_data, 43)) == 70
-        elif mode_name == "AES-GCM":
+        elif mode_name in ("AES-CTR", "AES-GCM"):
             assert len(qr_data) == 44
             assert len(base_encode(qr_data, 43)) == 64
         else:
@@ -464,6 +477,9 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
     ITERATIONS = Settings().encryption.pbkdf2_iterations
     encryptor = kef.Cipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
     for version, value in kef.VERSIONS.items():
+        if value is None or value["mode"] is None:
+            continue
+
         implied_mode = value["name"][:7]
         iv = I_VECTOR[: kef.MODE_IVS.get(value["mode"], 0)]
         payload = encryptor.encrypt(TEST_ENTROPY, version, iv)

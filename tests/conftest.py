@@ -23,7 +23,7 @@ def reset_krux_modules():
 
 
 def new_with_mac_len(*args, **kwargs):
-    if args[1] == 11:  # 1=ECB, 2=CBC, 11=GCM
+    if args[1] == 11:  # 1=ECB, 2=CBC, 6=CTR, 11=GCM
         kwargs["mac_len"] = 4
     return AES.new(*args, **kwargs)
 
@@ -60,6 +60,7 @@ def mp_modules(mocker, monkeypatch):
             aes=new_with_mac_len,
             MODE_ECB=AES.MODE_ECB,
             MODE_CBC=AES.MODE_CBC,
+            MODE_CTR=AES.MODE_CTR,
             MODE_GCM=AES.MODE_GCM,
         ),
     )

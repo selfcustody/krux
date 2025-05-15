@@ -24,76 +24,99 @@ import ucryptolib
 import hashlib
 
 
-# encryption versions are defined here
+# KEF: AES, MODEs VERSIONS, MODE_NUMBERS, and MODE_IVS are defined here
+#  to disable a MODE: set its value to None
+#  to disable a VERSION: set its value to None
+AES = ucryptolib.aes
+MODE_ECB = ucryptolib.MODE_ECB
+MODE_CBC = ucryptolib.MODE_CBC
+MODE_CTR = None  # ucryptolib.MODE_CTR
+MODE_GCM = ucryptolib.MODE_GCM
 VERSIONS = {
     0: {
         "name": "AES-ECB",
-        "mode": ucryptolib.MODE_ECB,
+        "mode": MODE_ECB,
         "auth": -16,
     },
     1: {
         "name": "AES-CBC",
-        "mode": ucryptolib.MODE_CBC,
+        "mode": MODE_CBC,
         "auth": -16,
     },
     2: {
         "name": "AES-GCM",
-        "mode": ucryptolib.MODE_GCM,
+        "mode": MODE_GCM,
         "pkcs_pad": None,
         "auth": 4,
     },
     3: {
         "name": "AES-ECB v2",
-        "mode": ucryptolib.MODE_ECB,
+        "mode": MODE_ECB,
         "auth": 3,
     },
     4: {
         "name": "AES-CBC v2",
-        "mode": ucryptolib.MODE_CBC,
+        "mode": MODE_CBC,
         "auth": 4,
     },
     5: {
         "name": "AES-ECB +p",
-        "mode": ucryptolib.MODE_ECB,
+        "mode": MODE_ECB,
         "pkcs_pad": True,
         "auth": -4,
     },
     6: {
         "name": "AES-CBC +p",
-        "mode": ucryptolib.MODE_CBC,
+        "mode": MODE_CBC,
         "pkcs_pad": True,
         "auth": -4,
     },
     7: {
         "name": "AES-GCM +c",
-        "mode": ucryptolib.MODE_GCM,
+        "mode": MODE_GCM,
         "pkcs_pad": None,
         "auth": 4,
         "compress": True,
     },
     8: {
         "name": "AES-ECB +c",
-        "mode": ucryptolib.MODE_ECB,
+        "mode": MODE_ECB,
         "pkcs_pad": True,
         "auth": -4,
         "compress": True,
     },
     9: {
         "name": "AES-CBC +c",
-        "mode": ucryptolib.MODE_CBC,
+        "mode": MODE_CBC,
         "pkcs_pad": True,
+        "auth": -4,
+        "compress": True,
+    },
+    10: None,  # aka: this version is disabled
+    # 10: {
+    #     "name": "AES-CTR",
+    #     "mode": MODE_CTR,
+    #     "pkcs_pad": None,
+    #     "auth": 4,
+    # },
+    11: {
+        "name": "AES-CTR +c",
+        "mode": MODE_CTR,
+        "pkcs_pad": None,
         "auth": -4,
         "compress": True,
     },
 }
 MODE_NUMBERS = {
-    "AES-ECB": ucryptolib.MODE_ECB,
-    "AES-CBC": ucryptolib.MODE_CBC,
-    "AES-GCM": ucryptolib.MODE_GCM,
+    "AES-ECB": MODE_ECB,
+    "AES-CBC": MODE_CBC,
+    "AES-CTR": MODE_CTR,
+    "AES-GCM": MODE_GCM,
 }
 MODE_IVS = {
-    ucryptolib.MODE_CBC: 16,
-    ucryptolib.MODE_GCM: 12,
+    MODE_CBC: 16,
+    MODE_CTR: 12,
+    MODE_GCM: 12,
 }
 
 AES_BLOCK_SIZE = 16
@@ -128,7 +151,7 @@ class Cipher:
             raise ValueError("Cannot validate decryption for this plaintext")
 
         # for modes that don't have authentication, KEF uses 2 forms of sha256
-        if v_auth != 0 and mode in (ucryptolib.MODE_ECB, ucryptolib.MODE_CBC):
+        if v_auth != 0 and mode in (MODE_ECB, MODE_CBC, MODE_CTR):
             if v_auth > 0:
                 # unencrypted (public) auth: hash the plaintext w/ self._key
                 auth = hashlib.sha256(plain + self._key).digest()[:v_auth]
@@ -147,7 +170,7 @@ class Cipher:
             plain = _pad(plain, pkcs_pad=v_pkcs_pad)
 
         # fail to encrypt in modes where it is known unsafe
-        if fail_unsafe and mode == ucryptolib.MODE_ECB:
+        if fail_unsafe and mode == MODE_ECB:
             unique_blocks = len(
                 set((plain[x : x + 16] for x in range(0, len(plain), 16)))
             )
@@ -161,16 +184,19 @@ class Cipher:
         elif iv:
             raise ValueError("IV is not required")
         if iv:
-            encryptor = ucryptolib.aes(self._key, mode, iv)
+            if mode == MODE_CTR:
+                encryptor = AES(self._key, mode, nonce=iv)
+            else:
+                encryptor = AES(self._key, mode, iv)
         else:
-            encryptor = ucryptolib.aes(self._key, mode)
+            encryptor = AES(self._key, mode)
             iv = b""
 
         # encrypt the plaintext
         encrypted = encryptor.encrypt(plain)
 
         # for modes that do have inherent authentication, use it
-        if mode == ucryptolib.MODE_GCM:
+        if mode == MODE_GCM:
             auth = encryptor.digest()[:v_auth]
 
         return iv + encrypted + auth
@@ -184,16 +210,19 @@ class Cipher:
         v_compress = VERSIONS[version].get("compress", False)
 
         # validate payload size early
-        min_payload = 1 if mode == ucryptolib.MODE_GCM else AES_BLOCK_SIZE
+        min_payload = 1 if mode in (MODE_CTR, MODE_GCM) else AES_BLOCK_SIZE
         min_payload += min(0, v_auth) + v_iv
         if len(payload) <= min_payload:
             raise ValueError("Invalid Payload")
 
         # setup decryptor (pulling initialization-vector from payload if necessary)
         if not v_iv:
-            decryptor = ucryptolib.aes(self._key, mode)
+            decryptor = AES(self._key, mode)
         else:
-            decryptor = ucryptolib.aes(self._key, mode, payload[:v_iv])
+            if mode == MODE_CTR:
+                decryptor = AES(self._key, mode, nonce=payload[:v_iv])
+            else:
+                decryptor = AES(self._key, mode, payload[:v_iv])
             payload = payload[v_iv:]
 
         # remove authentication from payload if suffixed to ciphertext
@@ -243,7 +272,7 @@ class Cipher:
             decrypted = decrypted[:v_auth]
 
         # versions that have built-in authentication use their own
-        if mode == ucryptolib.MODE_GCM:
+        if mode == MODE_GCM:
             try:
                 aes_object.verify(auth)
                 return decrypted
@@ -298,6 +327,9 @@ def suggest_versions(plaintext, mode_name):
     for version, values in VERSIONS.items():
         # strategy: eliminate bad choices of versions
         # TODO: explore a strategy that cuts to the best one right away
+
+        if values is None or values["mode"] is None:
+            continue
 
         # never use a version that is not the correct mode
         if values["mode"] != MODE_NUMBERS[mode_name]:
