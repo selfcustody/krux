@@ -30,7 +30,7 @@ import hashlib
 AES = ucryptolib.aes
 MODE_ECB = ucryptolib.MODE_ECB
 MODE_CBC = ucryptolib.MODE_CBC
-MODE_CTR = None  # ucryptolib.MODE_CTR
+MODE_CTR = ucryptolib.MODE_CTR
 MODE_GCM = ucryptolib.MODE_GCM
 VERSIONS = {
     0: {
@@ -92,13 +92,12 @@ VERSIONS = {
         "auth": -4,
         "compress": True,
     },
-    10: None,  # aka: this version is disabled
-    # 10: {
-    #     "name": "AES-CTR",
-    #     "mode": MODE_CTR,
-    #     "pkcs_pad": None,
-    #     "auth": 4,
-    # },
+    10: {
+        "name": "AES-CTR",
+        "mode": MODE_CTR,
+        "pkcs_pad": None,
+        "auth": 4,
+    },
     11: {
         "name": "AES-CTR +c",
         "mode": MODE_CTR,
