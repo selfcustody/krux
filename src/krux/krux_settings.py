@@ -381,7 +381,7 @@ class EncryptionSettings(SettingsNamespace):
     MODE_NAMES = {
         ucryptolib.MODE_ECB: "AES-ECB",
         ucryptolib.MODE_CBC: "AES-CBC",
-        None: "AES-CTR",
+        # ucryptolib.MODE_CTR: "AES-CTR",
         ucryptolib.MODE_GCM: "AES-GCM",
     }
     namespace = "settings.encryption"

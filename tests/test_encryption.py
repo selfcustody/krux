@@ -98,7 +98,8 @@ def test_krux_encryption_settings_mode_names_constant(m5stickv):
     from krux.krux_settings import EncryptionSettings
 
     for name, mode_number in kef.MODE_NUMBERS.items():
-        assert EncryptionSettings().MODE_NAMES[mode_number] == name
+        if mode_number is not None:
+            assert EncryptionSettings().MODE_NAMES[mode_number] == name
 
 
 def test_ecb_encryption(m5stickv):
