@@ -274,7 +274,9 @@ def test_Cipher_calling_method__authenticate(m5stickv):
     if kef.MODE_CBC is not None:
         valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_CBC, I_VECTOR[:16]))
     if kef.MODE_CTR is not None:
-        valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_CTR, I_VECTOR[:12]))
+        valid_aes_objects.append(
+            kef.AES(cipher._key, kef.MODE_CTR, nonce=I_VECTOR[:12])
+        )
     if kef.MODE_GCM is not None:
         valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_GCM, I_VECTOR[:12]))
     valid_auths = (b"\x01\x02\x03", b"\x01\x02\x03\x04")

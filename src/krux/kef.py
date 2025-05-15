@@ -30,7 +30,7 @@ import hashlib
 AES = ucryptolib.aes
 MODE_ECB = ucryptolib.MODE_ECB
 MODE_CBC = ucryptolib.MODE_CBC
-MODE_CTR = None  # ucryptolib.MODE_CTR
+MODE_CTR = ucryptolib.MODE_CTR
 MODE_GCM = ucryptolib.MODE_GCM
 VERSIONS = {
     0: {
