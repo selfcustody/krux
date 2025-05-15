@@ -54,15 +54,19 @@ def test_kef_VERSIONS_constants(m5stickv):
     # each version has important key-value pairs which define it
     for v in kef.VERSIONS.values():
 
+        # implementation may disable any version by setting VERSIONS value or VERSIONS["mode"] to None
+        if v is None or v["mode"] is None:
+            continue
+
         # each version has a human readable 'name'
         assert len(v["name"]) and isinstance(v["name"], str)
 
         # each version has a 'mode' integer that KEF supports (not 1:1 between MaixPy ucryptolib and Crypto.Cipher)
         assert isinstance(v["mode"], int) and v["mode"] in (
-            kef.ucryptolib.MODE_ECB,
-            kef.ucryptolib.MODE_CBC,
-            kef.ucryptolib.MODE_CTR,
-            kef.ucryptolib.MODE_GCM,
+            kef.MODE_ECB,
+            kef.MODE_CBC,
+            kef.MODE_CTR,
+            kef.MODE_GCM,
         )
 
         # each version has an implied "iv" value in MODE_IVS to require this size i_vector
@@ -89,6 +93,8 @@ def test_kef_VERSIONS_constants(m5stickv):
         "AES-GCM",
     ]
     for k, v in kef.VERSIONS.items():
+        if v is None or v["mode"] is None:
+            continue
         implied_mode = v["name"][:7]
         assert implied_mode in kef.MODE_NUMBERS
         assert v["mode"] == kef.MODE_NUMBERS[implied_mode]
@@ -160,6 +166,9 @@ def test_Cipher_calling_method_encrypt(m5stickv):
     invalid_versions = (None, -1, 12)
     invalid_ivs = ("\x00" * 16, b"\x00" * 15, 1)
     for valids in valid_params:
+        if kef.VERSIONS[valids[1]] is None or kef.VERSIONS[valids[1]]["mode"] is None:
+            continue
+
         # all calls for these unit tests use "fail_unsafe=False"
         # in order to pass simple "calling" testcases above
         kwargs = {"fail_unsafe": False}
@@ -213,6 +222,9 @@ def test_Cipher_calling_method_decrypt(m5stickv):
     invalid_encrypteds = (True, None, 1, "\x00")
     invalid_versions = (None, -1, 12)
     for valids in valid_params:
+        if kef.VERSIONS[valids[1]] is None or kef.VERSIONS[valids[1]]["mode"] is None:
+            continue
+
         # valid params works
         encrypted = decryptor.decrypt(*valids)
 
@@ -226,11 +238,10 @@ def test_Cipher_calling_method_decrypt(m5stickv):
 
     err = "Invalid Payload"
     for version, values in kef.VERSIONS.items():
-        min_payload = (
-            1
-            if values["mode"] in (kef.ucryptolib.MODE_CTR, kef.ucryptolib.MODE_GCM)
-            else 16
-        )
+        if kef.VERSIONS[valids[1]] is None or kef.VERSIONS[valids[1]]["mode"] is None:
+            continue
+
+        min_payload = 1 if values["mode"] in (kef.MODE_CTR, kef.MODE_GCM) else 16
         min_payload += kef.MODE_IVS.get(values["mode"], 0) + min(0, values["auth"])
         with pytest.raises(ValueError, match=err):
             decryptor.decrypt(b"\x00" * (min_payload - 1), version)
@@ -241,15 +252,19 @@ def test_Cipher_calling_method__authenticate(m5stickv):
 
     cipher = kef.Cipher(b"key", "salt", 1)
     valid_decrypteds = (b"\x00",)
-    valid_aes_objects = (
-        kef.ucryptolib.aes(cipher._key, kef.ucryptolib.MODE_ECB),
-        kef.ucryptolib.aes(cipher._key, kef.ucryptolib.MODE_CBC, I_VECTOR[:16]),
-        kef.ucryptolib.aes(cipher._key, kef.ucryptolib.MODE_GCM, I_VECTOR[:12]),
-    )
+    valid_aes_objects = []
+    if kef.MODE_ECB is not None:
+        valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_ECB))
+    if kef.MODE_CBC is not None:
+        valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_CBC, I_VECTOR[:16]))
+    if kef.MODE_CTR is not None:
+        valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_CTR, I_VECTOR[:12]))
+    if kef.MODE_GCM is not None:
+        valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_GCM, I_VECTOR[:12]))
     valid_auths = (b"\x01\x02\x03", b"\x01\x02\x03\x04")
     valid_modes = (
         x for x in kef.MODE_NUMBERS.values()
-    )  # ucryptolib attrs: .MODE_ECB, .MODE_CBC, .MODE_GCM
+    )  # kef/ucryptolib attrs: .MODE_ECB, .MODE_CBC, .MODE_CTR, .MODE_GCM
     valid_v_auths = (-3, 4)
     valid_v_pkcs_pads = (None, True, False)
 
@@ -257,7 +272,6 @@ def test_Cipher_calling_method__authenticate(m5stickv):
     invalid_aes_objects = (list(), dict(), None)
     invalid_auths = (True, 1, "\x00")
     invalid_modes = (
-        None,
         -1,
         0,
         3,
@@ -275,6 +289,8 @@ def test_Cipher_calling_method__authenticate(m5stickv):
         for aes_object in valid_aes_objects:
             for auth in valid_auths:
                 for mode in valid_modes:
+                    if mode == None:
+                        continue
                     for v_auth in valid_v_auths:
                         for v_pkcs_pad in valid_v_pkcs_pads:
 
@@ -289,6 +305,7 @@ def test_Cipher_calling_method__authenticate(m5stickv):
                                         v_pkcs_pad,
                                     )
 
+                            # # TODO solve this
                             # for invalid in invalid_aes_objects:
                             #    with pytest.raises(ValueError, match=err):
                             #        aes._authenticate(plain, invalid, auth, mode, v_auth, v_pkcs_pad)
@@ -355,12 +372,15 @@ def test_Cipher_public_sha256_auth_commits_to_key(m5stickv):
 
     cipher = kef.Cipher("key", b"salt", 10000)
     for v, values in kef.VERSIONS.items():
+        if values is None or values["mode"] is None:
+            continue
+
         v_mode = values["mode"]
         v_auth = values.get("auth", 0)
         v_iv = kef.MODE_IVS.get(values["mode"], 0)
 
         # Only AES-ECB, AES-CBC, and AES-CTR use sha256 for authentication
-        if values["mode"] == kef.ucryptolib.MODE_GCM:
+        if values["mode"] == kef.MODE_GCM:
             continue
 
         # When auth < 0: auth bytes are private, appended to plaintext
@@ -406,6 +426,9 @@ def test_faithful_encryption(m5stickv):
     cipher = kef.Cipher(b"key", "salt", 10000)
     wrong = kef.Cipher("wrong", b"wrong", 10000)
     for v, values in kef.VERSIONS.items():
+        if values is None or values["mode"] is None:
+            continue
+
         for plain in testplaintexts:
             iv = I_VECTOR[: kef.MODE_IVS.get(values["mode"], 0)]
             try:
@@ -489,6 +512,9 @@ def test_broken_decryption_cases(m5stickv):
 
     cipher = kef.Cipher("key", b"salt", 100000)
     for version in kef.VERSIONS:
+        if kef.VERSIONS[version] is None or kef.VERSIONS[version]["mode"] is None:
+            continue
+
         iv = I_VECTOR[: kef.MODE_IVS.get(kef.VERSIONS[version]["mode"], 0)]
         v_auth = kef.VERSIONS[version].get("auth", 0)
         v_pkcs_pad = kef.VERSIONS[version].get("pkcs_pad", False)
@@ -606,10 +632,41 @@ def test_suggest_versions(m5stickv):
         (descriptor_2of3, "AES-GCM", "AES-GCM +c"),
         (descriptor_mini_liana_em, "AES-GCM", "AES-GCM +c"),
         (descriptor_remint005, "AES-GCM", "AES-GCM +c"),
+        # TODO Verify tests for AES-CTR
+        (entropy16, "AES-CTR", "AES-CTR"),
+        (entropy32, "AES-CTR", "AES-CTR"),
+        (entropy16 * 2, "AES-CTR", "AES-CTR"),
+        (entropy32 * 3, "AES-CTR", "AES-CTR"),
+        (entropy32 * 8, "AES-CTR", "AES-CTR +c"),
+        (nul_byte_str, "AES-CTR", "AES-CTR"),
+        (entropy32 * 2 + nul_byte_str.encode(), "AES-CTR", "AES-CTR"),
+        (short_str, "AES-CTR", "AES-CTR"),
+        (bad_passwd, "AES-CTR", "AES-CTR"),
+        (descriptor_single, "AES-CTR", "AES-CTR +c"),
+        (descriptor_1of2, "AES-CTR", "AES-CTR +c"),
+        (descriptor_2of3, "AES-CTR", "AES-CTR +c"),
+        (descriptor_mini_liana_em, "AES-CTR", "AES-CTR +c"),
+        (descriptor_remint005, "AES-CTR", "AES-CTR +c"),
     )
 
+    disabled_mode_names = []
+
     # call it with plaintext (bytes or str) and mode_name
-    for mode_name in kef.MODE_NUMBERS:
+    for mode_name, mode in kef.MODE_NUMBERS.items():
+        if (
+            mode is None
+            or len(
+                [
+                    x
+                    for x in kef.VERSIONS.values()
+                    if isinstance(x, dict) and x["mode"] == mode
+                ]
+            )
+            == 0
+        ):
+            disabled_mode_names.append(mode_name)
+            continue
+
         assert len(kef.suggest_versions(b"arbitrary bytestring", mode_name)) > 0
         assert len(kef.suggest_versions("an arbitrary text str", mode_name)) > 0
 
@@ -619,6 +676,9 @@ def test_suggest_versions(m5stickv):
             kef.suggest_versions(b"some bytes")
 
     for plain, mode_name, version_name in testcases:
+        if mode_name in disabled_mode_names:
+            continue
+
         suggesteds = kef.suggest_versions(plain, mode_name)
 
         # begin debugging
@@ -656,6 +716,9 @@ def test_wrapping_is_faithful(m5stickv):
 
     cipher = kef.Cipher(key, id_, iterations)
     for v, values in kef.VERSIONS.items():
+        if values is None or values["mode"] is None:
+            continue
+
         for plain in testplaintexts:
             iv = I_VECTOR[: kef.MODE_IVS.get(values["mode"], 0)]
             payload = cipher.encrypt(plain, v, iv, fail_unsafe=False)
@@ -721,6 +784,9 @@ def test_wrap_exceptions(m5stickv):
     cipher = kef.Cipher("key", b"salt", 100000)
     for id_ in valid_ids:
         for version in valid_versions:
+            if kef.VERSIONS[version] is None or kef.VERSIONS[version]["mode"] is None:
+                continue
+
             for iterations in valid_iterations:
                 for plaintext in plaintexts:
                     iv = b"\x00" * kef.MODE_IVS.get(kef.VERSIONS[version]["mode"], 0)
@@ -830,6 +896,9 @@ def test_faithful_encrypted_wrapper(m5stickv):
     plaintexts = (b"Hello World!", b"im sixteen bytes")
 
     for version in kef.VERSIONS:
+        if kef.VERSIONS[version] is None or kef.VERSIONS[version]["mode"] is None:
+            continue
+
         for key in keys:
             for salt in salts:
                 for iteration in iterations:
@@ -1094,6 +1163,9 @@ def test_kef_self_document(m5stickv):
     }
 
     for v in kef.VERSIONS:
+        if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+            continue
+
         expected = test_cases[v]
         label = kef.VERSIONS[v]["name"]
         doc = kef_self_document(v, label=label)
@@ -1120,6 +1192,9 @@ def test_multi_wrapped_envelopes(m5stickv):
     plaintext = orig_plaintext
     plaintext2 = orig_plaintext
     for v, version in kef.VERSIONS.items():
+        if version is None or version["mode"] is None:
+            continue
+
         label = '"{}", K={}'.format(version["name"][4:], key)
         id_ = kef_self_document(v, label=label, iterations=iterations, limit=255)
         id2 = kef._deflate(id_.encode())  # id_ can be any bytes, here compressed
@@ -1133,6 +1208,7 @@ def test_multi_wrapped_envelopes(m5stickv):
         assert plaintext[:-1] != b"\x00"
         assert plaintext2[:-1] != b"\x00"
         iterations += i_step
+
     print("\nI'm a KEF puzzle.", repr(plaintext))
     print(
         "\nI'm a KEF puzzle w/ compressed id `deflate(id, wbits=-10)`.",
@@ -1169,6 +1245,9 @@ def test_report_rate_of_failure(m5stickv):
     encrs = {}
     errs = {}
     for v in kef.VERSIONS:
+        if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+            continue
+
         name = kef.VERSIONS[v]["name"]
         iv = I_VECTOR[: kef.MODE_IVS.get(kef.VERSIONS[v]["mode"], 0)]
         e = kef.Cipher(b"key", b"salt", 10000)
@@ -1248,6 +1327,10 @@ def test_report_rate_of_failure(m5stickv):
         plaintexts.extend([utf8_encoded(msgfunc(plain)) for msgfunc in msg_funcs])
         for plain in plaintexts:
             for v in kef.VERSIONS:
+
+                if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+                    continue
+
                 avoided = False
                 failed = False
                 kef_failed = False
@@ -1308,6 +1391,9 @@ def test_report_rate_of_failure(m5stickv):
 
     print("Failure Summary:\nVer  Ver Name     Timid   Avoid    Fail  KEFerr   Samples")
     for v in kef.VERSIONS:
+        if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+            continue
+
         print(
             " {:2d}  {:10s}  {:6d}  {:6d}  {:6d}  {:6d}  {:8d}".format(
                 v,
@@ -1322,6 +1408,9 @@ def test_report_rate_of_failure(m5stickv):
 
     print("\nPer-Version Failure Details:\nVer  Function    Count  Description")
     for v in kef.VERSIONS:
+        if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+            continue
+
         for func in ("encrypt", "decrypt", "wrapper"):
             for error, count in errs[v][func].items():
                 print(" {:2d}  {:10s} {:6d}  {}".format(v, func, count, error))

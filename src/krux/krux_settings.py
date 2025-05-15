@@ -375,14 +375,14 @@ class PersistSettings(SettingsNamespace):
 class EncryptionSettings(SettingsNamespace):
     """Encryption settings"""
 
-    from ucryptolib import MODE_ECB, MODE_CBC, MODE_CTR, MODE_GCM
+    import ucryptolib
 
     # defined in krux.encryption.VERSIONS
     MODE_NAMES = {
-        MODE_ECB: "AES-ECB",
-        MODE_CBC: "AES-CBC",
-        MODE_CTR: "AES-CTR",
-        MODE_GCM: "AES-GCM",
+        ucryptolib.MODE_ECB: "AES-ECB",
+        ucryptolib.MODE_CBC: "AES-CBC",
+        None: "AES-CTR",
+        ucryptolib.MODE_GCM: "AES-GCM",
     }
     namespace = "settings.encryption"
     version = CategorySetting("version", "AES-ECB", list(MODE_NAMES.values()))
