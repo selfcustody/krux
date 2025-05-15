@@ -92,13 +92,12 @@ VERSIONS = {
         "auth": -4,
         "compress": True,
     },
-    10: None,  # aka: this version is disabled
-    # 10: {
-    #     "name": "AES-CTR",
-    #     "mode": MODE_CTR,
-    #     "pkcs_pad": None,
-    #     "auth": 4,
-    # },
+    10: {
+        "name": "AES-CTR",
+        "mode": MODE_CTR,
+        "pkcs_pad": None,
+        "auth": 4,
+    },
     11: {
         "name": "AES-CTR +c",
         "mode": MODE_CTR,
@@ -435,7 +434,7 @@ def unwrap(kef_bytes):
     try:
         # out-of-order reading to validate version early
         version = kef_bytes[1 + len_id]
-        assert version in VERSIONS
+        assert VERSIONS[version] and VERSIONS[version]["mode"] is not None
     except:
         raise ValueError("Invalid format")
     # When unwrapping, be strict returning id_ as bytes
