@@ -110,9 +110,15 @@ class KEFEnvelope(Page):
         )
         if self.prompt("", BOTTOM_PROMPT_LINE):
             return True
-        menu_items = [(v["name"], k) for k,v in kef.VERSIONS.items() if isinstance(v, dict) and v["mode"] is not None]
+        menu_items = [
+            (v["name"], k)
+            for k, v in kef.VERSIONS.items()
+            if isinstance(v, dict) and v["mode"] is not None
+        ]
         print(menu_items)
-        idx, _ = Menu(self.ctx, [(x[0], lambda: None) for x in menu_items], back_label=None).run_loop()
+        idx, _ = Menu(
+            self.ctx, [(x[0], lambda: None) for x in menu_items], back_label=None
+        ).run_loop()
         if idx == len(menu_items) - 1:
             return None
         self.version = [v for i, (name, v) in enumerate(menu_items) if i == idx][0]

@@ -22,12 +22,6 @@ def reset_krux_modules():
             del sys.modules[name]
 
 
-def new_with_mac_len(*args, **kwargs):
-    if args[1] == 11:  # 1=ECB, 2=CBC, 6=CTR, 11=GCM
-        kwargs["mac_len"] = 4
-    return AES.new(*args, **kwargs)
-
-
 @pytest.fixture
 def mp_modules(mocker, monkeypatch):
     from embit.util import secp256k1
@@ -57,7 +51,7 @@ def mp_modules(mocker, monkeypatch):
         sys.modules,
         "ucryptolib",
         mocker.MagicMock(
-            aes=new_with_mac_len,
+            aes=AES.new,
             MODE_ECB=AES.MODE_ECB,
             MODE_CBC=AES.MODE_CBC,
             MODE_CTR=AES.MODE_CTR,
