@@ -185,6 +185,8 @@ class Cipher:
         if iv:
             if mode == MODE_CTR:
                 encryptor = AES(self._key, mode, nonce=iv)
+            elif mode == MODE_GCM:
+                encryptor = AES(self._key, mode, iv, mac_len=v_auth)
             else:
                 encryptor = AES(self._key, mode, iv)
         else:
@@ -220,6 +222,8 @@ class Cipher:
         else:
             if mode == MODE_CTR:
                 decryptor = AES(self._key, mode, nonce=payload[:v_iv])
+            elif mode == MODE_GCM:
+                decryptor = AES(self._key, mode, payload[:v_iv], mac_len=v_auth)
             else:
                 decryptor = AES(self._key, mode, payload[:v_iv])
             payload = payload[v_iv:]
