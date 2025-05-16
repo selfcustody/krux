@@ -33,76 +33,91 @@ MODE_CBC = ucryptolib.MODE_CBC
 MODE_CTR = ucryptolib.MODE_CTR
 MODE_GCM = ucryptolib.MODE_GCM
 VERSIONS = {
+    # initial versions: released 2023.08 to encrypt bip39 entropy bytes
     0: {
-        "name": "AES-ECB",
+        "name": "AES-ECB v1",
         "mode": MODE_ECB,
         "auth": -16,
     },
     1: {
-        "name": "AES-CBC",
+        "name": "AES-CBC v1",
         "mode": MODE_CBC,
         "auth": -16,
     },
-    2: {
-        "name": "AES-GCM",
-        "mode": MODE_GCM,
-        "pkcs_pad": None,
-        "auth": 4,
-    },
-    3: {
-        "name": "AES-ECB v2",
+    # AES in ECB mode
+    5: {
+        # smallest ECB ciphertext, w/ unsafe padding: for high entropy mnemonics, passphrases, etc
+        "name": "AES-ECB",
         "mode": MODE_ECB,
         "auth": 3,
     },
-    4: {
-        "name": "AES-CBC v2",
-        "mode": MODE_CBC,
-        "auth": 4,
-    },
-    5: {
+    6: {
+        # safe padding: for mid-sized plaintext w/o duplicate blocks
         "name": "AES-ECB +p",
         "mode": MODE_ECB,
         "pkcs_pad": True,
         "auth": -4,
     },
-    6: {
-        "name": "AES-CBC +p",
-        "mode": MODE_CBC,
-        "pkcs_pad": True,
-        "auth": -4,
-    },
     7: {
-        "name": "AES-GCM +c",
-        "mode": MODE_GCM,
-        "pkcs_pad": None,
-        "auth": 4,
-        "compress": True,
-    },
-    8: {
+        # compressed, w/ safe padding: for larger plaintext; may compact otherwise duplicate blocks
         "name": "AES-ECB +c",
         "mode": MODE_ECB,
         "pkcs_pad": True,
         "auth": -4,
         "compress": True,
     },
-    9: {
+    # AES in CBC mode
+    10: {
+        # smallest CBC cipherext, w/ unsafe padding: for mnemonics, passphrases, etc
+        "name": "AES-CBC",
+        "mode": MODE_CBC,
+        "auth": 4,
+    },
+    11: {
+        # safe padding: for mid-sized plaintext
+        "name": "AES-CBC +p",
+        "mode": MODE_CBC,
+        "pkcs_pad": True,
+        "auth": -4,
+    },
+    12: {
+        # compressed, w/ safe padding: for larger plaintext
         "name": "AES-CBC +c",
         "mode": MODE_CBC,
         "pkcs_pad": True,
         "auth": -4,
         "compress": True,
     },
-    10: {
+    # AES in CTR stream mode
+    15: {
+        # doesn't require padding: for small and mid-sized plaintext
         "name": "AES-CTR",
         "mode": MODE_CTR,
         "pkcs_pad": None,
-        "auth": 4,
+        "auth": -4,
     },
-    11: {
+    16: {
+        # compressed: for larger plaintext
         "name": "AES-CTR +c",
         "mode": MODE_CTR,
         "pkcs_pad": None,
         "auth": -4,
+        "compress": True,
+    },
+    # AES in GCM stream mode
+    20: {
+        # doesn't require padding: for small and mid-sized plaintext
+        "name": "AES-GCM",
+        "mode": MODE_GCM,
+        "pkcs_pad": None,
+        "auth": 4,
+    },
+    21: {
+        # compressed: for larger plaintext
+        "name": "AES-GCM +c",
+        "mode": MODE_GCM,
+        "pkcs_pad": None,
+        "auth": 4,
         "compress": True,
     },
 }

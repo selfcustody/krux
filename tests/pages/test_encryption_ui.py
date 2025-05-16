@@ -6,7 +6,10 @@ from . import create_ctx
 TEST_KEY = "test key"
 CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
 ECB_WORDS = "brass creek fuel snack era success impulse dirt caution purity lottery lizard boil festival neither case swift smooth range mail gravity sample never ivory"
+# TODO controls and unit_tests for CTR and GCM
+
 I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
+
 SEEDS_JSON = """{
     "ecbID": {
         "version": 0,
@@ -19,16 +22,17 @@ SEEDS_JSON = """{
         "data": "GpNxj9kzdiTuIf1UYC6R0FHoUokBhiNLkxWgSOHBhmBHb0Ew8wk1M+VlsR4v/koCfSGOTkgjFshC36+n7mx0W0PI6NizAoPClO8DUVamd5hS6irS+Lfff0//VJWK1BcdvOJjzYw8TBiVaL1swAEEySjn5GsqF1RaJXzAMMgu03Kq32iDIDy7h/jHJTiIPCoVQAle/C9vXq2HQeVx43c0LhGXTZmIhhkHPMgDzFTsMGM="
     }
 }"""
+
 ENCRYPTED_QR_TITLE_CBC = "353175d8"
 OLD_ENCRYPTED_QR_DATA_CBC = b"\x08353175d8\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\xa5\x95(IzR\x81\xabI:\x1e\x8a\x1d\xe7|O\xac\x9c\xe8.\x8cc\xc0\x93\x0e\xe67vpO#i\x99\xd1.\x85\xf7\x00\xfez\xadN\x9d7\xaex\xa6\xd3"
-ENCRYPTED_QR_DATA_CBC = b"\x08353175d8\x04\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\xa5\x95(IzR\x81\xabI:\x1e\x8a\x1d\xe7|O\xac\x9c\xe8.\x8cc\xc0\x93\x0e\xe67vpO#iJ\xd3\x11\x0e"
-ENCRYPTED_QR_DATA_CBC_b43 = "VBRRAN4/CZD0IRXE6+U4CKZLO3$W:B2G6I2S*0S+4G../PSX38:ZCB$BJ33OUL-:IKAP/1756MSY0/.ONPH66V.PT8OVI2:"
+ENCRYPTED_QR_DATA_CBC = b"\x08353175d8\x0a\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\xa5\x95(IzR\x81\xabI:\x1e\x8a\x1d\xe7|O\xac\x9c\xe8.\x8cc\xc0\x93\x0e\xe67vpO#iJ\xd3\x11\x0e"
+ENCRYPTED_QR_DATA_CBC_b43 = "VBRRAN4/CZD0I$4DYJWT8SU8R2+VAKKV*IKVFAXL0CIALR2AKM:.LUBEBS1CIT0DTX5VBE*HR7D3S8GY8D.H57$J2YSSIA-"
 
 ENCRYPTED_QR_TITLE_ECB = "06b79aa2"
 OLD_ENCRYPTED_QR_DATA_ECB = b"\x0806b79aa2\x00\x00\x00\n\xa4\xaaa\xb9h\x0c\xdc-i\x85\x83.9,\x91\xf1\x19E,\xc9\xf0'\xb1b7\x91mo\xa2-\xb6\x16\xac\x04-2F\x10\xda\xd1\xdb,\x85\x9fr\x1c\x8aH"
-ENCRYPTED_QR_DATA_ECB = b"\x0806b79aa2\x03\x00\x00\n\xa4\xaaa\xb9h\x0c\xdc-i\x85\x83.9,\x91\xf1\x19E,\xc9\xf0'\xb1b7\x91mo\xa2-\xb6\x16)\x17\x80"
+ENCRYPTED_QR_DATA_ECB = b"\x0806b79aa2\x05\x00\x00\n\xa4\xaaa\xb9h\x0c\xdc-i\x85\x83.9,\x91\xf1\x19E,\xc9\xf0'\xb1b7\x91mo\xa2-\xb6\x16)\x17\x80"
 ENCRYPTED_QR_DATA_ECB_b43 = (
-    "OQD.HJOZXT8AMC4ZRZS$I2+NPMFK5NAG9GXB2/X4RU3M-1ZRBPLS6HMIAZDDBXF$F5/5H4"
+    "OQD.HJOZXT8AMEC+19G.I3MARO1RUK5Q0NE1B826Q9.$7W4.$.A.HY*SADG*+97R+$SAGV"
 )
 
 
