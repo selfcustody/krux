@@ -12,11 +12,12 @@ TEST_WORDS = (
 
 ECB_WORDS = "brass creek fuel snack era success impulse dirt caution purity lottery lizard boil festival neither case swift smooth range mail gravity sample never ivory"
 CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
+CTR_WORDS = "unable point minimum sun peanut habit ready high nothing cherry silver eagle pen fabric list collect impact loan casual lyrics pig train middle screen"
 GCM_WORDS = "alone lady rib jazz hold honey stem upgrade pass elite cinnamon joy fiction either dolphin knife nominee seed eternal make game unusual rigid pass"
-# TODO controls and unit_tests for CTR
 
 ECB_ENTROPY = b"\x1b&ew\xe6\x84\xc5\xb0\x9c\x89\xf5$\xb5\xca\x10Aa\x90\xaae\t\x19\xdb\xd9\x9e\xc7C\x16a~%C"
 CBC_ENTROPY = b"@\x8c\xf9\xb8\xd8\xd9\xe2\xbdo\xb5\xd1\xa1?\xb0\x10O\xd4\xc8\xfd()\xa0\xc2\xaf\xb5\x1d\x06\xdc\xfb\x80\x1cn"
+CTR_ENTROPY = b'\xecT\xea4l\xaa\x1e\xd0l\xb3\\\x96\xc4\xef#"\x8a&\xa2\xe0\x99lq\xd0`\x8e\xc2\xbaI\xce#\x16'
 GCM_ENTROPY = b"\x06\xef\x92\xe3\xbb\xb6\xc8\xdauWu\xa0\xa9\x00\xa4<E\\\x8e\x103\xdd\x95\xf8]6CE\xf3\xdc\xae}"
 
 ECB_ENCRYPTED_WORDS = b"\xd4\xd5y\xe6]'\xcb\xdb\xe4\x15^\xac\xe0\xc9\xc3\xbc9i\x89e\t\xa3~l\xbf\x98l\xe9\x92\xa9\xe1=3V\xb3\xb1]\xfb|\x13\xf4K_\xdb\xa7d\x92p\x8a-\xbfr\xb5`\xaf\xe5\xc4\xfeP Z\x12\xfbbQ9G'\xael\x9d*F\xafn4\t\x7fE\xb2K\xc1\xbaB\xfa\xb7J6\xefu\x95\xa9\x9c\xe8\x14\x88"
@@ -41,6 +42,7 @@ ECB_ENCRYPTED_QR = b"\x07test ID\x05\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&
 OLDECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
 CBC_ENCRYPTED_QR = b'\x07test ID\x0a\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xeb\x1a6m'
 OLDCBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
+CTR_ENCRYPTED_QR = b"\x07test ID\x0f\x00\x00\nd\xc2\xd8\xb7U\xe8\x02~\xda}\xcdO\x967\xbf\xc5%\xa7\x18\x11\xf4\xec\xfd=\xbaY\xbe|\x97\xe2;\xabb\xfa.L\xbc$]'\xc9\xcc#\xba\xcb\x84\xe4J"
 GCM_ENCRYPTED_QR = b"\x07test ID\x14\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xb7vo]]\x8aO\x90\x8e\x86\xe784L\x02]\x8f\xedT"
 
 ECB_QR_PUBLIC_DATA = (
@@ -55,6 +57,9 @@ CBC_QR_PUBLIC_DATA = (
 OLDCBC_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC v1\nKey iter.: 100000"
 )
+CTR_QR_PUBLIC_DATA = (
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-CTR\nKey iter.: 100000"
+)
 GCM_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-GCM\nKey iter.: 100000"
 )
@@ -62,6 +67,7 @@ GCM_QR_PUBLIC_DATA = (
 # Must maintain old in-the-wild versions of cipher-payloads in seeds.json to ensure recoverable
 KEF_ECBENTROPY_ONLY_JSON = '{"KEFecbID": {"b64_kef": "CEtFRmVjYklEBQAACrjZPsHP9sA0UAKiWuotRXbnFma/HVnfaVAZV6Kw5Tu7ebJf"}}'
 KEF_CBCENTROPY_ONLY_JSON = '{"KEFcbcID": {"b64_kef": "CEtFRmNiY0lECgAACk9SoZNsPjJxIJ6dZAWe145shFPojYLA4hthWHv2Z2FSIyQ6fm5KU81NLiQ/mQDM4zbdzTM="}}'
+KEF_CTRENTROPY_ONLY_JSON = '{"KEFctrID": {"b64_kef": "CEtFRmN0cklEDwAACmkkBdxuqL8fLOJ4eWLT9sw3iPtGPZ79abe7Gk1YZXkaocEyUasKQW5d6KKp6FgcDA=="}}'
 KEF_GCMENTROPY_ONLY_JSON = '{"KEFgcmID": {"b64_kef": "CEtFRmdjbUlEFAAACk9SoZNsPjJxIJ6dZL+jDD/X+v8sJY3z7oiBTgjTt9BbJh1mAQus1rbFF4D4HH+SVw=="}}'
 OLD_ECBWORDS_ONLY_JSON = '{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}'
 OLD_CBCWORDS_ONLY_JSON = '{"cbcID": {"version": 1, "key_iterations": 100000, "data": "T1Khk2w+MnEgnp1kBZ7Xjp+66c9sy20J39ffK11XvVAaDSyQybsM6txAwKy/U1iU4KKYRu3ywDDN9q9sWAi1R+y7x4aHwQd0C0rRcW0iDxvWtFyWMKilA0AsDQwvBSgkhf5PQnQ1rfjnKVF75rTrG5vUNF01FRwa9PoM5cq30Yki/hFnWj/4niaeXqgQvIwjSzBNbXgaRLjfoaUyHiu8+zBX25rkpI0PW243fgDEfqI="}}'
@@ -71,6 +77,7 @@ SEEDS_JSON = (
         [
             KEF_ECBENTROPY_ONLY_JSON[1:-1],
             KEF_CBCENTROPY_ONLY_JSON[1:-1],
+            KEF_CTRENTROPY_ONLY_JSON[1:-1],
             KEF_GCMENTROPY_ONLY_JSON[1:-1],
             OLD_ECBWORDS_ONLY_JSON[1:-1],
             OLD_CBCWORDS_ONLY_JSON[1:-1],
@@ -178,7 +185,7 @@ def test_cbc_iv_use(m5stickv):
 
 
 # TODO: correct above tests for all ecb and cbc versions
-# TODO: fill in similar test_gcm_encryption
+# TODO: fill in similar test_ctr_encryption and test_gcm_encryption
 
 
 def test_list_mnemonic_storage(m5stickv, mock_file_operations):
