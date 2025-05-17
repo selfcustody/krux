@@ -39,9 +39,9 @@ DATUM_PSBT = "PSBT"
 DATUM_XPUB = "XPUB"
 
 DATUM_UR_TYPES = {
-    DATUM_DESCR: ["crypto-account", "crypto-output", "bytes"],
-    DATUM_PSBT: ["crypto-psbt", "bytes"],
-    DATUM_XPUB: ["bytes"],
+    DATUM_DESCR: ["crypto-account", "crypto-output"],
+    DATUM_PSBT: ["crypto-psbt"],
+    DATUM_XPUB: ["crypto-account"],
 }
 DATUM_BBQR_TYPES = {
     DATUM_DESCR: ["U"],
@@ -103,9 +103,7 @@ def identify_datum(data):
         if data[:5] == b"psbt\xff":
             datum = "PSBT"
     else:
-        if data[:7] == "cHNidP8":
-            datum = DATUM_PSBT
-        elif (data[:1] in "xyzYZtuvUV" and data[1:4] == "pub") or (
+        if (data[:1] in "xyzYZtuvUV" and data[1:4] == "pub") or (
             data[:1] == "["
             and data.split("]")[1][:1] in "xyzYZtuvUV"
             and data.split("]")[1][1:4] == "pub"
@@ -264,7 +262,8 @@ class DatumTool(Page):
                 menu_opts.extend(
                     [("UR " + v, (FORMAT_UR, v)) for v in DATUM_UR_TYPES[curr_datum]]
                 )
-            else:
+
+            if isinstance(self.contents, bytes):
                 menu_opts.append(("UR bytes", (FORMAT_UR, "bytes")))
 
             idx, _ = Menu(
@@ -278,8 +277,6 @@ class DatumTool(Page):
             encoded = None
             if qr_fmt in (FORMAT_BBQR, FORMAT_UR):
                 encoded = self.contents
-                if isinstance(encoded, str):
-                    encoded = encoded.encode()
 
                 if qr_fmt == FORMAT_BBQR:
                     encoded = encode_bbqr(encoded, file_type=menu_opts[idx][1][1])
@@ -297,7 +294,12 @@ class DatumTool(Page):
                     encoded if encoded else self.contents, qr_fmt, title=self.title
                 )
             except Exception as err:
-                self.flash_error("UR TODO: " + repr(menu_opts[idx]) + ")\n" + str(err))
+                self.flash_error(
+                    "TODO UR (crypto-account/crypto-descr/etc): "
+                    + repr(menu_opts[idx])
+                    + ")\n"
+                    + str(err)
+                )
                 self.view_qr()
 
         return MENU_CONTINUE

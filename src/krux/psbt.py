@@ -101,6 +101,10 @@ class PSBTSigner:
             except:
                 raise ValueError("invalid PSBT")
         else:
+            if isinstance(psbt_data, str):
+                if len(psbt_data) != len(psbt_data.encode()):
+                    # Must be in simulator; micropython has no latin-1
+                    psbt_data = psbt_data.encode("latin-1")
             try:
                 self.psbt = PSBT.parse(psbt_data)
                 if self.qr_format == FORMAT_PMOFN:
