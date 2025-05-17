@@ -237,8 +237,14 @@ class DatumTool(Page):
         if len(self.contents) <= seedqrview_thresh:
             from .qr_view import SeedQRView
 
+            # when not sensitive, allow export to sd
+            kvargs = {}
+            if not self.sensitive:
+                kvargs = {"allow_export": True}
+
             seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
-            seed_qr_view.display_qr(allow_export=True)
+            seed_qr_view.display_qr(**kvargs)
+
         else:
             from ..qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_BBQR, FORMAT_UR
 
@@ -447,9 +453,10 @@ class DatumTool(Page):
 
         if not offer_convert:
             menu.append((t("Convert Datum"), lambda: "convert_begin"))
+            menu.append((t("Export to QR"), lambda: "export_qr"))
 
-            if not (self.decrypted and self.sensitive):
-                menu.append((t("Export to QR"), lambda: "export_qr"))
+            # when not sensitive, allow export to sd
+            if not self.sensitive:
                 menu.append((t("Export to SD"), lambda: "export_sd"))
 
         else:
@@ -503,7 +510,7 @@ class DatumTool(Page):
         """allows to view, convert, encrypt/decrypt, and export short str/bytes contents"""
         from .encryption_ui import KEFEnvelope
 
-        argv = {
+        kvargs = {
             "try_decrypt": try_decrypt,
             "offer_convert": offer_convert,
         }
@@ -544,10 +551,10 @@ class DatumTool(Page):
             self._show_contents()
         elif status == "convert_begin":
             # if user wants to convert data
-            argv["offer_convert"] = True
+            kvargs["offer_convert"] = True
         elif status == "convert_end":
             # if user is done converting data
-            argv["offer_convert"] = False
+            kvargs["offer_convert"] = False
         elif status in ("undo", "hex", 43, 64, "utf8"):
             # if user chose a particular conversion
             if status == "undo":
@@ -559,10 +566,14 @@ class DatumTool(Page):
             # if user chose to encrypt
             kef = KEFEnvelope(self.ctx)
             kef.label = self.title
-            self.contents = kef.seal_ui(self.contents, override_defaults=True)
-            self.title = kef.label if kef.label else ""
-            self.decrypted = False
-            argv["try_decrypt"] = False
+            encrypted = kef.seal_ui(self.contents, override_defaults=True)
+            if encrypted:
+                # now in "hiding secrets" mode
+                self.contents = encrypted
+                self.title = kef.label if kef.label else ""
+                self.sensitive = False
+                self.decrypted = False
+                kvargs["try_decrypt"] = False
         elif status == "export_qr":
             # if user chose to export_qr
             self.view_qr()
@@ -570,4 +581,4 @@ class DatumTool(Page):
             # user chose export_sd
             self.save_sd()
 
-        return self.view_contents(**argv)
+        return self.view_contents(**kvargs)
