@@ -39,9 +39,9 @@ DATUM_PSBT = "PSBT"
 DATUM_XPUB = "XPUB"
 
 DATUM_UR_TYPES = {
-    DATUM_DESCR: ["crypto-account", "crypto-output"],
+    # DATUM_DESCR: ["crypto-account", "crypto-output"],
     DATUM_PSBT: ["crypto-psbt"],
-    DATUM_XPUB: ["crypto-account"],
+    # DATUM_XPUB: ["crypto-account"],
 }
 DATUM_BBQR_TYPES = {
     DATUM_DESCR: ["U"],
@@ -249,15 +249,20 @@ class DatumTool(Page):
 
             curr_datum = identify_datum(self.contents)
             if curr_datum:
-                menu_opts.extend(
-                    [
-                        ("BBQr " + v, (FORMAT_BBQR, v))
-                        for v in DATUM_BBQR_TYPES[curr_datum]
-                    ]
-                )
-                menu_opts.extend(
-                    [("UR " + v, (FORMAT_UR, v)) for v in DATUM_UR_TYPES[curr_datum]]
-                )
+                if curr_datum in DATUM_BBQR_TYPES:
+                    menu_opts.extend(
+                        [
+                            ("BBQr " + v, (FORMAT_BBQR, v))
+                            for v in DATUM_BBQR_TYPES[curr_datum]
+                        ]
+                    )
+                if curr_datum in DATUM_UR_TYPES:
+                    menu_opts.extend(
+                        [
+                            ("UR " + v, (FORMAT_UR, v))
+                            for v in DATUM_UR_TYPES[curr_datum]
+                        ]
+                    )
 
             if isinstance(self.contents, bytes):
                 menu_opts.append(("UR bytes", (FORMAT_UR, "bytes")))
