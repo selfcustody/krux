@@ -143,10 +143,6 @@ class DatumToolMenu(Page):
             )
         )
         title = "QR Contents"
-        if isinstance(contents, str):
-            if len(contents) != len(contents.encode()):
-                # Must be in simulator; micropython has no latin-1
-                contents = contents.encode("latin-1")
         if fmt == 2:
             title += ", UR:" + contents.type
             contents = urobj_to_data(contents)

@@ -194,5 +194,10 @@ class QRCodeCapture(Page):
         self.ctx.display.to_portrait()
 
         if parser.is_complete():
-            return parser.result(), parser.format
+            result = parser.result()
+            # on simulator, bytes returned as latin-1 decoded string,
+            # but micropython has no latin-1 and returns bytes
+            if isinstance(result, str) and len(result) != len(result.encode()):
+                result = result.encode("latin-1")
+            return result, parser.format
         return None, None

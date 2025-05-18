@@ -420,8 +420,6 @@ class Login(Page):
         except:
             pass
         if not public_data:  # Failed to decode and parse base43
-            if isinstance(data, str):
-                data = data.encode("latin-1")  # must be in simulator
             public_data = encrypted_qr.public_data(data)
         if public_data:
             self.ctx.display.clear()
