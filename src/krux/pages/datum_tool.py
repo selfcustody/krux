@@ -37,16 +37,19 @@ from ..krux_settings import t
 DATUM_DESCR = "DESCR"
 DATUM_PSBT = "PSBT"
 DATUM_XPUB = "XPUB"
+DATUM_ADDRESS = "ADDY"
 
 DATUM_UR_TYPES = {
     # DATUM_DESCR: ["crypto-account", "crypto-output"],
     DATUM_PSBT: ["crypto-psbt"],
     # DATUM_XPUB: ["crypto-account"],
+    # DATUM_ADDRESS: ["crypto-account"],
 }
 DATUM_BBQR_TYPES = {
     DATUM_DESCR: ["U"],
     DATUM_PSBT: ["P"],
     DATUM_XPUB: ["U"],
+    DATUM_ADDRESS: ["U"],
 }
 
 
@@ -75,7 +78,7 @@ def urobj_to_data(ur_obj):
 
 
 def convert_encoding(contents, conversion):
-    """encoding conversions to/from (hex/base43/base58/base64/utf8)"""
+    """encoding conversions to/from (hex/HEX/base43/base58/base64/utf8)"""
     from krux.baseconv import base_encode, base_decode
     from binascii import hexlify, unhexlify
 
@@ -88,10 +91,18 @@ def convert_encoding(contents, conversion):
         if from_bytes:
             return hexlify(contents).decode()
         return unhexlify(contents)
+    if conversion == "HEX":
+        if from_bytes:
+            return hexlify(contents).decode().upper()
+        return unhexlify(contents)
     if conversion == "utf8":
         if from_bytes:
             return contents.decode()
         return contents.encode()
+    if conversion == "shift_case":
+        if contents == contents.upper():
+            return contents.lower()
+        return contents.upper()
     return None
 
 
@@ -101,7 +112,7 @@ def identify_datum(data):
     datum = None
     if isinstance(data, bytes):
         if data[:5] == b"psbt\xff":
-            datum = "PSBT"
+            datum = DATUM_PSBT
     else:
         if (data[:1] in "xyzYZtuvUV" and data[1:4] == "pub") or (
             data[:1] == "["
@@ -111,7 +122,99 @@ def identify_datum(data):
             datum = DATUM_XPUB
         elif data.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
             datum = DATUM_DESCR
+        elif data[:1] in ("1", "3", "n", "2") or data[:3] in (
+            "bc1",
+            "BC1",
+            "tb1",
+            "TB1",
+        ):
+            datum = DATUM_ADDRESS
+
     return datum
+
+
+def detect_encodings(str_data):
+    """Detect which encodings this data str might be, else empty list"""
+    from binascii import unhexlify
+    from krux.baseconv import base_decode
+    from embit.bech32 import bech32_decode, Encoding
+
+    encodings = []
+
+    if not isinstance(str_data, str):
+        raise TypeError("detect_encodings() expected str")
+
+    # get min and max characters (sorted by ordinal value),
+    # check most restrictive encodings first
+
+    min_chr = min(str_data)
+    max_chr = max(str_data)
+
+    # might it be hex
+    if len(str_data) % 2 == 0 and "0" <= min_chr:
+        if max_chr <= "F":
+            try:
+                unhexlify(str_data)
+                encodings.append("HEX")
+            except:
+                pass
+        elif max_chr <= "f":
+            try:
+                unhexlify(str_data)
+                encodings.append("hex")
+            except:
+                pass
+
+    # might it be bech32
+    if "0" <= min_chr:
+        if max_chr <= "Z":
+            encoding, _, _ = bech32_decode(str_data)
+            if encoding == Encoding.BECH32:
+                encodings.append("BECH32")
+            elif encoding == Encoding.BECH32M:
+                encodings.append("BECH32M")
+        elif max_chr <= "z":
+            encoding, _, _ = bech32_decode(str_data)
+            if encoding == Encoding.BECH32:
+                encodings.append("bech32")
+            elif encoding == Encoding.BECH32M:
+                encodings.append("bech32m")
+
+    # might it be base43
+    if "$" <= min_chr and max_chr <= "Z":
+        try:
+            base_decode(str_data, 43)
+            encodings.append(43)
+        except:
+            pass
+
+    # might it be base58
+    if "1" <= min_chr and max_chr <= "z":
+        try:
+            base_decode(str_data, 58)
+            encodings.append(58)
+        except:
+            pass
+
+    # might it be base64
+    if "+" <= min_chr and max_chr <= "z":
+        try:
+            base_decode(str_data, 64)
+            encodings.append(64)
+        except:
+            pass
+
+    # might it be ascii
+    if ord(max_chr) <= 127:
+        encodings.append("ascii")
+
+    # might it be latin-1 or utf8
+    if 128 <= ord(max_chr) <= 255:
+        encodings.append("latin-1")
+    else:
+        encodings.append("utf8")
+
+    return encodings
 
 
 class DatumToolMenu(Page):
@@ -188,16 +291,18 @@ class DatumToolMenu(Page):
         if not contents:
             return MENU_CONTINUE
 
-        # utils.load_file() always returns binary, try as utf8 text
+        # utils.load_file() always returns binary
         try:
             contents = contents.decode()
+            if contents[-1:] == "\n":
+                contents = contents[:-1]
         except:
             pass
 
         page = DatumTool(self.ctx)
         page.contents = contents
         # pylint: disable=C0207
-        page.title = t("File Contents") + "\n" + filename.split("/")[-1]
+        page.title = filename.split("/")[-1]
         return page.view_contents()
 
 
@@ -208,6 +313,7 @@ class DatumTool(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.contents = None
+        self.encodings = []
         self.about = None
         self.title = None
         self.datum = None
@@ -334,14 +440,14 @@ class DatumTool(Page):
             "\n".join(
                 [
                     self.title,
-                    " ".join(
+                    "".join(
                         [
-                            self.datum if self.datum else "",
-                            t("decrypted") if self.decrypted else "",
-                            t("sensitive") if self.sensitive else "",
+                            "wasKEF " if self.decrypted else "",
+                            "secret " if self.sensitive else "",
+                            ",".join([str(x) for x in self.encodings]),
                         ]
                     ),
-                    self.about,
+                    (self.datum + " " if self.datum else "") + self.about,
                 ]
             ),
             info_box=True,
@@ -390,6 +496,12 @@ class DatumTool(Page):
 
         if isinstance(self.contents, bytes):
             self.about = t("binary: {} bytes").format(len(self.contents))
+            try:
+                as_str = self.contents.decode()
+                self.encodings = [str(detect_encodings(as_str)[0]) + "_via_utf8?"]
+            except:
+
+                self.encodings = []
 
             # does it look like 128 or 256 bits of mnemonic entropy / CompactSeedQR?
             if len(self.contents) in (16, 32) and max((x for x in self.contents)) > 127:
@@ -403,6 +515,7 @@ class DatumTool(Page):
 
         elif isinstance(self.contents, str):
             self.about = t("text: {} chars").format(len(self.contents))
+            self.encodings = detect_encodings(self.contents)
 
             # does it look like a 12 or 24 word mnemonic / Mnemonic QR?
             if len(self.contents.split()) in (12, 24):
@@ -445,10 +558,7 @@ class DatumTool(Page):
 
     def _build_options_menu(self, offer_convert=False, offer_show=True):
         """Build a menu list of what to do with contents, possibly w/ conversions"""
-        from binascii import unhexlify
-        from krux.baseconv import base_decode
 
-        # build menu options
         menu = []
 
         if offer_show:
@@ -464,7 +574,10 @@ class DatumTool(Page):
 
         else:
             if isinstance(self.contents, bytes):
-                menu.append((t("to hex"), lambda: "hex"))
+                if self.history and self.history[-1] == "HEX":
+                    menu.append((t("to HEX"), lambda: "HEX"))
+                else:
+                    menu.append((t("to hex"), lambda: "hex"))
                 menu.append((t("to base43"), lambda: 43))
                 menu.append((t("to base64"), lambda: 64))
                 try:
@@ -475,29 +588,20 @@ class DatumTool(Page):
                 menu.append((t("Encrypt"), lambda: "encrypt"))
 
             elif isinstance(self.contents, str):
-                try:
-                    unhexlify(self.contents)
+                if "HEX" in self.encodings:
+                    menu.append((t("from HEX"), lambda: "HEX"))
+                if "hex" in self.encodings:
                     menu.append((t("from hex"), lambda: "hex"))
-                except:
-                    pass
-
-                try:
-                    base_decode(self.contents, 43)
+                if set(self.encodings).intersection(
+                    ["hex", "HEX", "bech32", "BECH32", "bech32m", "BECH32M"]
+                ):
+                    menu.append((t("shift case"), lambda: "shift_case"))
+                if 43 in self.encodings:
                     menu.append((t("from base43"), lambda: 43))
-                except:
-                    pass
-
-                try:
-                    base_decode(self.contents, 64)
+                if 64 in self.encodings:
                     menu.append(("from base64", lambda: 64))
-                except:
-                    pass
-
-                try:
-                    self.contents.encode()
+                if "utf8" in self.encodings:
                     menu.append((t("from utf8"), lambda: "utf8"))
-                except:
-                    pass
 
             if self.history:
                 for i, option in enumerate(menu):
@@ -558,7 +662,7 @@ class DatumTool(Page):
         elif status == "convert_end":
             # if user is done converting data
             kvargs["offer_convert"] = False
-        elif status in ("undo", "hex", 43, 64, "utf8"):
+        elif status in ("undo", "hex", "HEX", 43, 64, "utf8", "shift_case"):
             # if user chose a particular conversion
             if status == "undo":
                 status = self.history.pop()

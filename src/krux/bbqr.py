@@ -92,7 +92,8 @@ def deflate_compress(data):
         with deflate.DeflateIO(stream) as d:
             d.write(data)
         return stream.getvalue()
-    except:
+    except Exception as err:
+        print(err)
         raise ValueError("Error compressing BBQR")
 
 
@@ -143,6 +144,7 @@ def encode_bbqr(data, encoding="Z", file_type="P"):
         data = hexlify(data).decode()
         return BBQrCode(data.upper(), encoding, file_type)
 
+    data = data.encode() if isinstance(data, str) else data
     if encoding == "Z":
         if len(data) > BBQR_ALWAYS_COMPRESS_THRESHOLD:
             # RAM won't be enough to have both compressed and not compressed data
@@ -157,7 +159,6 @@ def encode_bbqr(data, encoding="Z", file_type="P"):
                 encoding = "Z"
                 data = cmp
 
-    data = data.encode("utf-8") if isinstance(data, str) else data
     gc.collect()
     return BBQrCode("".join(base32_encode_stream(data)), encoding, file_type)
 
