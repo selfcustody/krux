@@ -326,6 +326,7 @@ translation_array = [
     "Digite a Chave",
     "Desfazer",
     "Unidade",
+    "Atualizar etiqueta visível?",
     "Atualização completa.",
     "Use uma superfície de fundo preta.",
     "Use a entropia da câmera para criar um novo mnemônico",

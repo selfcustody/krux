@@ -326,6 +326,7 @@ translation_array = [
     "Anahtar Yaz",
     "Geri Al",
     "Birim",
+    "Görünür etiket güncellensin mi?",
     "Güncelleme tamamlandı.",
     "Siyah bir arka plan yüzeyi kullanın.",
     "Yeni bir mnemonic oluşturmak için kameranın entropisini kullanın",

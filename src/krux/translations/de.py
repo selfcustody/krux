@@ -326,6 +326,7 @@ translation_array = [
     "Schlüssel eingeben",
     "Widerrufen",
     "Einheit",
+    "Sichtbares Etikett aktualisieren?",
     "Upgrade abgeschlossen.",
     "Verwende eine schwarze Hintergrundfläche.",
     "Verwende die Entropie der Kamera, um eine neue Mnemonic zu erstellen",

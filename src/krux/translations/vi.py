@@ -326,6 +326,7 @@ translation_array = [
     "Nhập khóa",
     "Hoàn tác",
     "Đơn vị",
+    "Cập nhật nhãn hiển thị?",
     "Nâng cấp hoàn tất.",
     "Sử dụng bề mặt nền đen.",
     "Sử dụng sự ngẫu nhiên của máy ảnh để tạo ra một Mnemonic mới",

@@ -326,6 +326,7 @@ translation_array = [
     "Introduce la clave",
     "Deshacer",
     "Unidad",
+    "¿Actualizar etiqueta visible?",
     "Actualización completa.",
     "Usa una superficie de fondo negra.",
     "Usa la entropía de la cámara para crear una nueva mnemónica",

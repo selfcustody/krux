@@ -326,6 +326,7 @@ translation_array = [
     "Voer sleutel in",
     "Ongedaan maken",
     "Eenheid",
+    "Zichtbaar label bijwerken?",
     "Upgrade afgerond.",
     "Gebruik een donker achergrond.",
     "Gebruik de camera als entropie voor het aanmaken van een nieuwe geheugensteun",

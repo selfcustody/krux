@@ -34,10 +34,10 @@ from . import (
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 
-DATUM_DESCR = "DESCR"
+DATUM_DESCR = "DESC"
 DATUM_PSBT = "PSBT"
 DATUM_XPUB = "XPUB"
-DATUM_ADDRESS = "ADDY"
+DATUM_ADDRESS = "ADDR"
 
 DATUM_UR_TYPES = {
     # DATUM_DESCR: ["crypto-account", "crypto-output"],
@@ -240,6 +240,9 @@ class DatumToolMenu(Page):
 
         qr_scanner = QRCodeCapture(self.ctx)
         contents, fmt = qr_scanner.qr_capture_loop()
+        if contents is None:
+            self.flash_error(t("Failed to load"))
+            return MENU_CONTINUE
         print(
             "\nscanned raw contents: {} {}, format: {}".format(
                 type(contents), repr(contents), fmt
@@ -256,21 +259,34 @@ class DatumToolMenu(Page):
 
     def text_entry(self):
         """Handler for the 'Text Entry' menu item"""
-        text = self.capture_from_keypad(
-            t("Text"),
-            [
-                LETTERS,
-                UPPERCASE_LETTERS,
-                NUM_SPECIAL_1,
-                NUM_SPECIAL_2,
-                "123456789abcdef0",
-            ],
-        )
+        from .encryption_ui import prompt_for_text_update
+
+        text = ""
+        while True:
+            updated = prompt_for_text_update(
+                self.ctx,
+                text if text else "",
+                t("Proceed?") + ' "' + text + '"' if text else "",
+                prompt_highlight_prefix="?" if text else "",
+                title=t("Custom Text"),
+                keypads=[
+                    LETTERS,
+                    UPPERCASE_LETTERS,
+                    NUM_SPECIAL_1,
+                    NUM_SPECIAL_2,
+                    "123456789abcdef0",
+                ],
+            )
+            if updated == text:
+                break
+            text = updated
         if text in ("", ESC_KEY):
+            self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
         page = DatumTool(self.ctx)
         page.contents, page.title = text, t("Custom Text")
+
         return page.view_contents()
 
     def read_file(self):
@@ -344,7 +360,6 @@ class DatumTool(Page):
 
             seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
             seed_qr_view.display_qr(**kvargs)
-
         else:
             from ..qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_BBQR, FORMAT_UR
 

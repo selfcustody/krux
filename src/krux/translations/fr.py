@@ -326,6 +326,7 @@ translation_array = [
     "Taper clé",
     "Annuler",
     "Unité",
+    "Mettre à jour l'étiquette visible\xa0?",
     "Mise à jour complète.",
     "Utilisez une surface de fond noire.",
     "Utilisez l'entropie de la caméra pour créer un nouveau mnémonique",

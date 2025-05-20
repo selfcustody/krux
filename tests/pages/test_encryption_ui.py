@@ -132,7 +132,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
         BUTTON_ENTER,  # read too long text
         BUTTON_ENTER,  # click to pass error
         BUTTON_ENTER,  # enter to read normal text
-        BUTTON_PAGE,  # Cancel
+        BUTTON_ENTER,  # enter to accept "short text"
     ]  # choose QR code key
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     key_generator = EncryptionKey(ctx)
@@ -144,7 +144,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
 
     mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=qr_return)
     key = key_generator.encryption_key()
-    assert key == None
+    assert key == "short text"
 
 
 def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):

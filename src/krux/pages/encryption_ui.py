@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from binascii import hexlify
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
 from krux import kef
@@ -44,21 +45,27 @@ def prompt_for_text_update(
     dflt_value,
     dflt_prompt=None,
     dflt_affirm=True,
+    prompt_highlight_prefix="",
     title=None,
     keypads=None,
+    esc_prompt=False,
 ):
     """Clears screen, prompts question, allows for keypad input"""
     if dflt_value and not dflt_prompt:
         dflt_prompt = t("Use current value?") + " " + dflt_value
     ctx.display.clear()
     if dflt_value and dflt_prompt:
-        ctx.display.draw_centered_text(dflt_prompt)
+        ctx.display.draw_centered_text(
+            dflt_prompt, highlight_prefix=prompt_highlight_prefix
+        )
         dflt_answer = Page(ctx).prompt("", BOTTOM_PROMPT_LINE)
         if dflt_affirm == dflt_answer:
             return dflt_value
     if not isinstance(keypads, list) or keypads is None:
         keypads = [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
-    value = Page(ctx).capture_from_keypad(title, keypads, starting_buffer=dflt_value)
+    value = Page(ctx).capture_from_keypad(
+        title, keypads, starting_buffer=dflt_value, esc_prompt=esc_prompt
+    )
     if isinstance(value, str):
         return value
     return dflt_value
@@ -106,7 +113,7 @@ class KEFEnvelope(Page):
         """implements ui to allow user to select KEF version"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            t("Use default Mode?") + " " + self.mode_name,
+            t("Use default Mode?") + " " + self.mode_name, highlight_prefix="?"
         )
         if self.prompt("", BOTTOM_PROMPT_LINE):
             return True
@@ -135,7 +142,7 @@ class KEFEnvelope(Page):
         title = t("Key iter.") + ": 10K - 500K"
         keypads = [DIGITS]
         iterations = prompt_for_text_update(
-            self.ctx, curr_value, dflt_prompt, True, title, keypads
+            self.ctx, curr_value, dflt_prompt, True, "?", title, keypads
         )
         if 10000 <= int(iterations) <= 500000:
             self.iterations = int(iterations)
@@ -152,10 +159,10 @@ class KEFEnvelope(Page):
     ):
         """implements ui to allow user to set a KEF label"""
         if dflt_label and not dflt_prompt:
-            dflt_prompt = t("Update visible label?" + " " + dflt_label)
+            dflt_prompt = t("Update visible label?") + " " + dflt_label
             dflt_affirm = False
         self.label = prompt_for_text_update(
-            self.ctx, dflt_label, dflt_prompt, dflt_affirm, title, keypads
+            self.ctx, dflt_label, dflt_prompt, dflt_affirm, "?", title, keypads
         )
         return True
 
@@ -193,7 +200,6 @@ class KEFEnvelope(Page):
         try:
             displayable_label = self.label.decode()
         except:
-            from binascii import hexlify
 
             displayable_label = "0x" + hexlify(self.label).decode()
         public_info = "\n".join(
@@ -250,7 +256,7 @@ class KEFEnvelope(Page):
         if prompt_decrypt:
             if not self.public_info_ui(prompt_decrypt=prompt_decrypt):
                 return None
-        if not (self.__key or self.input_key_ui(creating=False, confirm=False)):
+        if not (self.__key or self.input_key_ui(creating=False, confirm=True)):
             return None
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing.."))
@@ -264,7 +270,6 @@ class KEFEnvelope(Page):
             try:
                 self.ctx.display.draw_centered_text(plaintext.decode())
             except:
-                from binascii import hexlify
 
                 self.ctx.display.draw_centered_text("0x" + hexlify(plaintext).decode())
             self.ctx.input.wait_for_button()
@@ -338,8 +343,9 @@ class EncryptionKey(Page):
         if key:
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
+            displayable = key if isinstance(key, str) else "0x" + hexlify(key).decode()
             key_lines = self.ctx.display.draw_hcentered_text(
-                "{}: {}".format(t("Key"), key), offset_y, highlight_prefix=":"
+                "{}: {}".format(t("Key"), displayable), offset_y, highlight_prefix=":"
             )
             if creating:
                 strength = self.key_strength(key)
@@ -353,6 +359,20 @@ class EncryptionKey(Page):
                 )
 
             if not confirm:
+                return key
+            if isinstance(key, str):
+                while True:
+                    updated = prompt_for_text_update(
+                        self.ctx,
+                        key,
+                        t("Proceed?") + ' "' + key + '"',
+                        prompt_highlight_prefix="?",
+                        title=t("Key"),
+                    )
+                    if updated == key:
+                        key = updated
+                        break
+                    key = updated
                 return key
             if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return key

@@ -195,9 +195,15 @@ class QRCodeCapture(Page):
 
         if parser.is_complete():
             result = parser.result()
-            # on simulator, bytes returned as latin-1 decoded string,
-            # but micropython has no latin-1 and returns bytes
-            if isinstance(result, str) and len(result) != len(result.encode()):
-                result = result.encode("latin-1")
+            # on simulator, bytes returned as latin-1 or big5 decoded str
+            # (or is it shift_jis? or big5hkscs?, or cp950?),
+            # but micropython has only utf8 -- returns bytes
+            if isinstance(result, str):
+                len_utf8 = len(result.encode())
+                if len(result) != len_utf8:
+                    try:
+                        result = result.encode("latin-1")
+                    except:
+                        result = result.encode("big5")
             return result, parser.format
         return None, None
