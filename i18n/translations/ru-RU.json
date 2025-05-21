@@ -85,7 +85,7 @@
     "Error:": "Ошибка:",
     "Esc": "Выйти",
     "Explore files?": "Исследовать файлы?",
-    "Exporting to SD card..": "Экспортирование на SD карту..",
+    "Exporting %s to SD card..": "Экспортирование %s на SD карту..",
     "Extended Public Key": "Расширенный Публичный Ключ",
     "Factory Settings": "Заводские Настройки",
     "Failed to decrypt": "Не удалось расшифровать",

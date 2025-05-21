@@ -85,7 +85,7 @@
     "Error:": "Error:",
     "Esc": "Esc",
     "Explore files?": "¿Explorar archivos?",
-    "Exporting to SD card..": "Exportando a la tarjeta SD..",
+    "Exporting %s to SD card..": "Exportando %s a la tarjeta SD..",
     "Extended Public Key": "Clave Pública Extendida",
     "Factory Settings": "Ajustes de Fábrica",
     "Failed to decrypt": "Error al descifrar",

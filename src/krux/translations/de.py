@@ -107,7 +107,7 @@ translation_array = [
     "Fehler:",
     "Esc",
     "Dateien durchsuchen?",
-    "Auf SD-Karte exportieren..",
+    "Exportieren von %s auf SD-Karte..",
     "Öffentlicher Schlüssel",
     "Werkeinstellungen",
     "Entschlüsselung fehlgeschlagen",

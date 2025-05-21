@@ -64,7 +64,7 @@ class PSBTSigner:
         # Parse the PSBT
         if psbt_filename:
             gc.collect()
-            from .sd_card import SD_PATH
+            from .settings import SD_PATH
 
             file_path = "/%s/%s" % (SD_PATH, psbt_filename)
             try:

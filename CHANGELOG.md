@@ -1,44 +1,45 @@
 # Changelog 25.XX.X - XXX 2025
 
 ### 2x Faster TC Flash Hash
-SHA256 and PBKDF2_hmac can now use hardware sha256 hashing, allowing TC Flash to be executed 2x faster.
+SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the execution speed of TC Flash.
 
 ### SD Card Airgapped Firmware Upgrade Optimizations
-- Performs firmware signature authenticity check before prompting the user to update.
-- Verifies and informs the user of the version being installed.
-- Minor optimizations such as hardware sha256 hashing have made checks about 1 second faster.
+- Verifies firmware signature authenticity before prompting the user to update.
+- Displays the firmware version being installed for user confirmation.
+- Hardware-accelerated SHA-256 hashing and other optimizations speeds up checks.
 
-### 'New Mnemonic' Menu Disabled when 'Hide Mnemonic' Setting is Enabled
-When the 'Hide Mnemonic' setting is enabled, the 'New Mnemonic' menu is disabled.
+### 'New Mnemonic' Menu Disabled with 'Hide Mnemonic'
+When 'Hide Mnemonic' setting is enabled, the 'New Mnemonic' menu is automatically disabled.
 
-### Highlight Fingerprint and Other Texts
-The wallet fingerprint, keypad title, settings categories and prefix texts are now shown highlighted on all screens.
+### Improved Text Highlighting
+Wallet fingerprint, keypad titles, settings categories, and prefix texts are now highlighted across all screens.
 
-### More Colors on Settings Categories
-When the value of the settings category is boolean (True/False), it will be displayed in color.
+### Enhanced Settings Category Colors
+Boolean settings (True/False) are now displayed with color (Green/Red) for improved visibility.
 
 ### More Readable Address 
-Addresses are displayed in groups of 4, separated by spaces, for better readability.
+Addresses are now grouped in sets of 4 characters, separated by spaces, to facilitate comparison.
 
-### New CNC Printer and Fixes (OpenBuilds GRBL 1.1)
-- Fixed CNC/FilePrinter to work with the Optimized QR codes from v24.0.3.0.
-- New CNC/GRBLPrinter can print directly to CNC via serial.
+### New CNC Printer Support and Fixes (OpenBuilds GRBL 1.1)
+- Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0.
+- Introduced CNC/GRBLPrinter for direct serial printing to CNC machines.
 
-### Other Bug Fixes and Optimizations
-- Fix printing words instead of numbers when using "Backup Mnemonic > Other formats > Numbers".
-- "Tools > Print Test QR" asks user before printing.
+### Export QR Codes as SVG
+Exported QR codes can now be saved as SVG images.
+
+### Other Bug Fixes and Improvements
+- Numbers no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
+- "Tools > Print Test QR" now asks for user confirmation before printing.
 - Added fingerprint to mnemonic preview and editor.
-- Show fingerprint preview when changing wallet passphrase.
-- Store encrypted mnemonic now asks if you want to use the fingerprint as ID.
-- Optimized the way we check device's board values.
+- Fingerprint preview now shown when changing wallet passphrase.
+- Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
+- Optimized device's board value checks.
 - Added QR Code to About screen.
-- Wallet Descriptor now validates and warns if it was unable to determine change addresses.
-- Hide change address menu option when not available in the wallet descriptor loaded.
-- Other small text changes for clarity and translation simplification.
+- Wallet Descriptor now validates and warns if change addresses cannot be determined.
+- Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
+- Minor text improvements for clarity and easier translation.
 
-### SVG image export
 
-- add option to save encrypted QRCode as svg image.
 # Changelog 25.03.0 - March 2025
 
 ### Taproot and WSH Miniscript support
@@ -81,6 +82,7 @@ When signing via SD cards, all fields in a PSBT—including signatures from othe
 ### Security Fix
 This release addresses a vulnerability affecting AES-CBC encrypted mnemonics stored on flash storage, SD cards, and QR codes. Due to an implementation error, the Initialization Vector (IV) in our CBC encryption, which used camera-generated entropy, was not being correctly utilized, which meant it did not provide the intended additional entropy.
 
+
 # Changelog 24.11.0 - November 2024
 
 ### Tamper Check Flash Hash and Tamper Check Code (Experimental)
@@ -117,6 +119,7 @@ Guidelines have been created to assist with decision-making regarding the Krux p
 
 ### Minor Bugfixes and Refactors
 Several code improvements for better reliability and efficiency.
+
 
 # Changelog 24.09.1 - September 26, 2024
 
@@ -188,6 +191,7 @@ Polish translation was removed due to the lack of maintainers and known users.
 
 ### Code Refactor and Optimizations
 Several optimizations to increase performance and code quality.
+
 
 # Changelog 24.07.0 - July 15, 2024
 
@@ -278,6 +282,7 @@ Address explorer now shows receive and change address starting at index 0 instea
 ### Other Small Fixes and Code Optimizations
 Bugfixes, optimizations and code refactoring.
 
+
 # Changelog 24.03.0 - March 12, 2024
 
 ## Changes
@@ -345,6 +350,7 @@ Users will be able to flash a single firmware and change display settings if the
 ### Other Small Fixes and Code Optimizations
 Many other small fixes and optimizations under the hood.
 
+
 # Version 23.09.1 - November 18, 2023
 This release contain bugfixes:
 
@@ -353,6 +359,7 @@ Encrypted Mnemonic QR codes would fail to decrypt if PBKDF2 iterations settings 
 QR code transcription helpers that highlight regions could crash on edges of some QR code sizes.
 
 Address navigation "previous" menu option wouldn't show correct number.
+
 
 # Version 23.09.0 - September 12, 2023
 After a long year, new features are finally coming out of beta and making their way into a stable release. Also @jreesun appointed @odudex as the new lead maintainer of the project.
@@ -441,9 +448,11 @@ It is recommended to update to this version if you are using a single-key "Impor
 7. Display the signed QR back to BlueWallet.
 8. Broadcast!
 
+
 # Version 22.08.1 - August 11, 2022
 
 This release is to fix a bug that would have prevented Amigos from performing airgapped upgrades to the next release.
+
 
 # Version 22.08.0 - August 10, 2022
 
@@ -501,6 +510,7 @@ The Github Pages site has been updated with new documentation and screenshots fo
 A new internationalization (i18n) framework has been added by @qlrd that will allow the website to be easily translated to other languages so we can eventually have documentation for every language that Krux supports!
 
 @qlrd is also working on a graphical installer we hope to start making use of in the future when it’s ready. Keep tabs on it here: [https://github.com/qlrd/krux-installer](https://github.com/qlrd/krux-installer)
+
 
 # Version 22.03.0 - March 31, 2022
 Finally, after much TODO, the first official release of Krux is out!
