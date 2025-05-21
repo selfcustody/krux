@@ -425,7 +425,7 @@ def wrap(id_, version, iterations, payload):
         assert isinstance(iterations, int)
         if iterations % 10000 == 0:
             iterations = iterations // 10000
-            assert 1 <= iterations <= 10000 * 10000
+            assert 1 <= iterations <= 10000
         else:
             assert 10000 < iterations < 2**24
         iterations = iterations.to_bytes(3, "big")
