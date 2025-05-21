@@ -337,7 +337,6 @@ translation_array = [
     "Usado:",
     "Usuário",
     "Valor %s fora do alcance: [ %s, %s]",
-    "O valor deve ser múltiplo de %s",
     "Verificando..",
     "Versão",
     "Pela Câmera",

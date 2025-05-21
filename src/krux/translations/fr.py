@@ -337,7 +337,6 @@ translation_array = [
     "Utilisé\u2009:",
     "Utilisateur",
     "Valeur %s hors de portée: [%s, %s]",
-    "La valeur doit être un multiple de %s",
     "Vérification..",
     "Version",
     "Par caméra",

@@ -337,7 +337,6 @@ translation_array = [
     "Belegt:",
     "Benutzerdaten",
     "Wert %S außerhalb  des Bereichs: [ %s, %s]",
-    "Der Wert muss ein Vielfaches von %s sein",
     "Überprüfung..",
     "Version",
     "Via Kamera",

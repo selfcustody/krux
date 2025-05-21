@@ -337,7 +337,6 @@ translation_array = [
     "Kullanılan:",
     "Kullanıcı",
     "%s değeri aralık dışında: [%s, %s]",
-    "Değer %s'nin katı olmalıdır",
     "Doğrulanıyor..",
     "Sürüm",
     "Kamera Aracılığıyla",

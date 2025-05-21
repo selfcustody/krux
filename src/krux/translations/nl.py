@@ -337,7 +337,6 @@ translation_array = [
     "Gebruikt:",
     "Gebruiker",
     "Waarde %s is buiten bereik: [%s, %s]",
-    "Waarde moet meerdere van %s zijn",
     "Bezig met verifiëren..",
     "Versie",
     "Via camera",

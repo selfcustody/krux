@@ -386,7 +386,7 @@ class EncryptionSettings(SettingsNamespace):
     }
     namespace = "settings.encryption"
     version = CategorySetting("version", "AES-ECB", list(MODE_NAMES.values()))
-    pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [1, 500000])
+    pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [10000, 500000])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""

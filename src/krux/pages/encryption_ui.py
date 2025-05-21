@@ -20,9 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import time
 from binascii import hexlify
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
+from ..encryption import QR_CODE_ITER_MULTIPLE
 from krux import kef
 from ..themes import theme
 from . import (
@@ -80,7 +82,9 @@ class KEFEnvelope(Page):
         self.__key = None
         self.__iv = None
         self.label = None
-        self.iterations = Settings().encryption.pbkdf2_iterations
+        self.iterations = Settings().encryption.pbkdf2_iterations + (
+            int(time.ticks_ms()) % QR_CODE_ITER_MULTIPLE
+        )
         self.mode_name = Settings().encryption.version
         self.mode = kef.MODE_NUMBERS[self.mode_name]
         self.iv_len = kef.MODE_IVS.get(self.mode, 0)
@@ -139,12 +143,12 @@ class KEFEnvelope(Page):
         """implements ui to allow user to set key-stretch iterations"""
         curr_value = str(self.iterations)
         dflt_prompt = t("Use default Key iter.?") + " " + curr_value
-        title = t("Key iter.") + ": 10K - 500K"
+        title = t("Key iter.") + ": 10K - 510K"
         keypads = [DIGITS]
         iterations = prompt_for_text_update(
             self.ctx, curr_value, dflt_prompt, True, "?", title, keypads
         )
-        if 10000 <= int(iterations) <= 500000:
+        if QR_CODE_ITER_MULTIPLE <= int(iterations) <= 500000 + QR_CODE_ITER_MULTIPLE:
             self.iterations = int(iterations)
             return True
         return None

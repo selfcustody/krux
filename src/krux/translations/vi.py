@@ -337,7 +337,6 @@ translation_array = [
     "Đã sử dụng:",
     "Người dùng",
     "Giá trị %s ngoài phạm vi: [ %s, %s]",
-    "Giá trị phải là bội của %s",
     "Đang xác minh..",
     "Phiên Bản",
     "Qua máy ảnh",
