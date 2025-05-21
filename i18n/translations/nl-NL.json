@@ -85,7 +85,7 @@
     "Error:": "Fout:",
     "Esc": "Esc",
     "Explore files?": "Bestanden verkennen?",
-    "Exporting to SD card..": "Exporteren naar SD kaart..",
+    "Exporting %s to SD card..": "Exporteren van %s naar SD-kaart..",
     "Extended Public Key": "Uitgebreide publieke sleutel",
     "Factory Settings": "Fabrieksinstellingen",
     "Failed to decrypt": "Ontsleutelen is niet gelukt",

@@ -107,7 +107,7 @@ translation_array = [
     "Hata:",
     "Çıkış",
     "Dosyaları ara?",
-    "SD karta aktarılıyor..",
+    "%s SD karta aktarılıyor..",
     "Genişletilmiş Public Key",
     "Fabrika Ayarları",
     "Şifre çözme başarısız",

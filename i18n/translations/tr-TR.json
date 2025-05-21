@@ -85,7 +85,7 @@
     "Error:": "Hata:",
     "Esc": "Çıkış",
     "Explore files?": "Dosyaları ara?",
-    "Exporting to SD card..": "SD karta aktarılıyor..",
+    "Exporting %s to SD card..": "%s SD karta aktarılıyor..",
     "Extended Public Key": "Genişletilmiş Public Key",
     "Factory Settings": "Fabrika Ayarları",
     "Failed to decrypt": "Şifre çözme başarısız",

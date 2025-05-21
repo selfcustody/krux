@@ -391,6 +391,7 @@ def test_is_multisig(mocker, m5stickv, tdata):
 
     # Multisig key with loaded descriptor
     wallet.load(tdata.SPECTER_MULTISIG_DESCRIPTOR, FORMAT_NONE)
+    # assert wallet.has_change_addr()
     assert wallet.is_multisig()
 
     # No key, no descriptor
@@ -400,26 +401,31 @@ def test_is_multisig(mocker, m5stickv, tdata):
     # Sans key: Descriptor only, no key loaded
     # Multisig descriptor
     wallet.load(tdata.SPECTER_MULTISIG_DESCRIPTOR, FORMAT_NONE)
+    # assert wallet.has_change_addr()
     assert wallet.is_multisig()
 
     # Single-sig descriptor
     wallet = Wallet(None)
     wallet.load(tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert not wallet.is_multisig()
 
     # Taproot single-sig descriptor
     wallet = Wallet(None)
     wallet.load(tdata.KRUX_TAPROOT1_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert not wallet.is_multisig()
 
     # Miniscript descriptor
     wallet = Wallet(None)
     wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert not wallet.is_multisig()
 
     # Taproot miniscript descriptor
     wallet = Wallet(None)
     wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert not wallet.is_multisig()
 
 
@@ -443,11 +449,13 @@ def test_is_miniscript(mocker, m5stickv, tdata):
 
     # Miniscript key with loaded descriptor
     wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert wallet.is_miniscript()
 
     # Taproot miniscript key with loaded descriptor
     wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
     wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert wallet.is_miniscript()
 
     # No key and no descriptor
@@ -456,19 +464,23 @@ def test_is_miniscript(mocker, m5stickv, tdata):
 
     # Non miniscript descriptors
     wallet.load(tdata.SPECTER_MULTISIG_DESCRIPTOR, FORMAT_NONE)
+    # assert wallet.has_change_addr()
     assert not wallet.is_miniscript()
 
     wallet = Wallet(None)
     wallet.load(tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert not wallet.is_miniscript()
 
     wallet = Wallet(None)
     wallet.load(tdata.KRUX_TAPROOT1_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert not wallet.is_miniscript()
 
     # Miniscript descriptor
     wallet = Wallet(None)
     wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.has_change_addr()
     assert wallet.is_miniscript()
 
 
@@ -664,10 +676,20 @@ def test_receive_addresses(mocker, m5stickv, tdata):
 
         # Check addresses after descriptor is loaded
         wallet.load(case[1], case[2])
+        if case[1] not in (
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
+            tdata.SPECTER_MULTISIG_WALLET_DATA,
+        ):
+            assert wallet.has_change_addr()
         assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 
         wallet = Wallet(None)
         wallet.load(case[1], case[2])
+        if case[1] not in (
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
+            tdata.SPECTER_MULTISIG_WALLET_DATA,
+        ):
+            assert wallet.has_change_addr()
         assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 
 
@@ -741,6 +763,8 @@ def test_load_multisig(mocker, m5stickv, tdata):
             },
         ),
     ]
+    from ur.ur import UR
+
     for wallet in (Wallet(None), Wallet(tdata.MULTISIG_KEY1)):
         for case in cases:
             wallet.load(case[0], case[1])
@@ -749,6 +773,12 @@ def test_load_multisig(mocker, m5stickv, tdata):
             assert wallet.descriptor.to_string() == case[2]
             assert wallet.label == case[3]
             assert wallet.policy == case[4]
+            if not isinstance(case[0], UR) and case[0] not in (
+                tdata.SPECTER_SINGLESIG_WALLET_DATA,
+                tdata.SPECTER_MULTISIG_WALLET_DATA,
+            ):
+                print(type(case[0]), case[0])
+                assert wallet.has_change_addr()
 
 
 def test_load_singlesig(mocker, m5stickv, tdata):
@@ -779,6 +809,11 @@ def test_load_singlesig(mocker, m5stickv, tdata):
             assert wallet.descriptor.to_string() == case[2]
             assert wallet.label == case[3]
             assert wallet.policy == case[4]
+            if case[0] not in (
+                tdata.SPECTER_SINGLESIG_WALLET_DATA,
+                tdata.SPECTER_MULTISIG_WALLET_DATA,
+            ):
+                assert wallet.has_change_addr()
 
 
 def test_load_singlesig_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
@@ -1067,6 +1102,7 @@ def test_provably_unspendable(mocker, m5stickv, tdata):
     wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
     wallet.load(tdata.LIANA_TAP_EXPANDING_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
     assert wallet.is_loaded()
+    assert wallet.has_change_addr()
 
 
 def test_provably_unspendable_wrong_nums(mocker, m5stickv, tdata):

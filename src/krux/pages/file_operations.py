@@ -73,7 +73,8 @@ class SaveFile(Page):
 
                         # if user defined a filename and it is ok, save!
                         if new_filename:
-                            # say something to the user
+                            # clear and say something to the user
+                            self.ctx.display.clear()
                             self.ctx.display.draw_centered_text(t("Processing.."))
 
                             # Now save the file
@@ -141,7 +142,7 @@ class SaveFile(Page):
                 final_filename += file_extension
 
             # Check for existing file and prompt for overwrite if necessary
-            if SDHandler.file_exists("/sd/" + final_filename):
+            if SDHandler.file_exists(SDHandler.PATH_STR % final_filename):
                 self.ctx.display.clear()
                 if not self.prompt(
                     t("Filename %s exists on SD card, overwrite?") % final_filename

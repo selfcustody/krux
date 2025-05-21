@@ -346,73 +346,73 @@ class SeedQRView(Page):
 
     def save_bmp_image(self, file_name, resolution):
         """Save QR code image as .bmp file"""
-        from ..sd_card import BMP_IMAGE_EXTENSION
+        from ..sd_card import SDHandler, BMP_IMAGE_EXTENSION
         from .file_operations import SaveFile
 
-        import image
-        import lcd
+        try:
+            with SDHandler():
+                import image
+                import lcd
 
-        code, size = self.add_frame(self.code, self.qr_size)
-        raw_image = image.Image(size=(size, size))
-        for y_index in range(0, size):
-            for x_index in range(0, size):
-                index = y_index * size + x_index
-                bit_value = (code[index >> 3] >> (index % 8)) & 1
-                if bit_value:
-                    raw_image.set_pixel((x_index, y_index), lcd.BLACK)
-                else:
-                    raw_image.set_pixel((x_index, y_index), lcd.WHITE)
-        bmp_img = image.Image(size=(resolution, resolution), copy_to_fb=True)
-        scale = resolution // size
-        bmp_img.draw_image(
-            raw_image,
-            0,
-            0,
-            x_scale=scale,
-            y_scale=scale,
-        )
-        save_page = SaveFile(self.ctx)
-        file_name = save_page.set_filename(
-            file_name, file_extension=BMP_IMAGE_EXTENSION
-        )
-        if file_name == ESC_KEY:
-            return
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Processing.."))
 
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+                code, size = self.add_frame(self.code, self.qr_size)
+                raw_image = image.Image(size=(size, size))
+                for y_index in range(0, size):
+                    for x_index in range(0, size):
+                        index = y_index * size + x_index
+                        bit_value = (code[index >> 3] >> (index % 8)) & 1
+                        if bit_value:
+                            raw_image.set_pixel((x_index, y_index), lcd.BLACK)
+                        else:
+                            raw_image.set_pixel((x_index, y_index), lcd.WHITE)
+                bmp_img = image.Image(size=(resolution, resolution), copy_to_fb=True)
+                scale = resolution // size
+                bmp_img.draw_image(
+                    raw_image,
+                    0,
+                    0,
+                    x_scale=scale,
+                    y_scale=scale,
+                )
+                save_page = SaveFile(self.ctx)
+                new_filename = save_page.set_filename(
+                    file_name, file_extension=BMP_IMAGE_EXTENSION
+                )
+                if new_filename == ESC_KEY:
+                    return
 
-        bmp_img.save("/sd/" + file_name)
-        self.flash_text(
-            t("Saved to SD card:") + "\n%s" % file_name, highlight_prefix=":"
-        )
+                bmp_img.save(SDHandler.PATH_STR % new_filename)
+                self.flash_text(
+                    t("Saved to SD card:") + "\n%s" % new_filename, highlight_prefix=":"
+                )
+        except:
+            self.flash_text(t("SD card not detected."))
 
     def save_svg_image(self, file_name):
         """Save QR code image as .svg file"""
         from ..sd_card import SVG_IMAGE_EXTENSION
         from .file_operations import SaveFile
 
-        scale = 10
-
-        code, size = self.add_frame(self.code, self.qr_size)
-
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing.."))
+
+        code, size = self.add_frame(self.code, self.qr_size)
 
         # Create the SVG file dynamically
         # given the size of the QR code, the scale
         # and the x,y coordinates of the squares
-        svg_data = []
+        scale = 10
         width = size * scale
         height = width
 
         # start with the SVG header
-        opentag = (
-            '<svg xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">'.format(
+        svg_data = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">\n'.format(
                 width, height
             )
         )
-
-        svg_data.append(opentag)
 
         # create squares for each bit in the QR code
         for y_index in range(0, size):
@@ -427,17 +427,21 @@ class SeedQRView(Page):
                     square = 'x="{}" y="{}" width="{}" height="{}"'.format(
                         x, y, scale_x, scale_y
                     )
-                    rect = '<rect stroke="black" stroke-width="0" {} fill="black"/>'.format(
+                    svg_data += '<rect stroke="black" stroke-width="0" {} fill="black"/>\n'.format(
                         square
                     )
-                    svg_data.append(rect)
 
         # close the SVG tag
-        svg_data.append("</svg>")
+        svg_data += "</svg>"
 
         # Encode the convert svg string
-        svg_str = "\n".join(svg_data)
-        svg_encoded = svg_str.encode("utf-8")
+        svg_encoded = svg_data.encode("utf-8")
+
+        # memory management
+        import gc
+
+        del svg_data
+        gc.collect()
 
         # Save the SVG data to a file
         save_page = SaveFile(self.ctx)
@@ -446,7 +450,7 @@ class SeedQRView(Page):
             file_name,
             file_extension=SVG_IMAGE_EXTENSION,
             save_as_binary=True,
-            prompt=True,
+            prompt=False,
         )
 
     def save_qr_image_menu(self):

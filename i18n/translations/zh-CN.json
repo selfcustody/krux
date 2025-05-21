@@ -85,7 +85,7 @@
     "Error:": "错误:",
     "Esc": "退出",
     "Explore files?": "浏览文件？",
-    "Exporting to SD card..": "导出到 SD 卡..",
+    "Exporting %s to SD card..": "正在将 %s 导出到 SD 卡..",
     "Extended Public Key": "扩展公钥",
     "Factory Settings": "出厂设置",
     "Failed to decrypt": "解密失败",
