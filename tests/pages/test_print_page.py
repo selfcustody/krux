@@ -63,4 +63,6 @@ def test_print_qr_code_throught_cnc_file_driver(mocker, amigo):
     test_print = PrintPage(ctx)
     mocker.spy(test_print.ctx.display, "draw_centered_text")
     test_print.print_qr(TEST_QR_DATA, title=TEST_QR_TITLE)
-    test_print.ctx.display.draw_centered_text.assert_any_call("Exporting to SD card..")
+    test_print.ctx.display.draw_centered_text.assert_any_call(
+        "Exporting qr.nc to SD card.."
+    )
