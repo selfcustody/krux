@@ -163,7 +163,7 @@ class KEFEnvelope(Page):
     ):
         """implements ui to allow user to set a KEF label"""
         if dflt_label and not dflt_prompt:
-            dflt_prompt = t("Update visible label?") + " " + dflt_label
+            dflt_prompt = t("Update KEF ID?") + " " + dflt_label
             dflt_affirm = False
         self.label = prompt_for_text_update(
             self.ctx, dflt_label, dflt_prompt, dflt_affirm, "?", title, keypads

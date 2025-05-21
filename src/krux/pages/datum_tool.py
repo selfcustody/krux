@@ -286,7 +286,6 @@ class DatumToolMenu(Page):
 
         page = DatumTool(self.ctx)
         page.contents, page.title = text, t("Custom Text")
-
         return page.view_contents()
 
     def read_file(self):
@@ -351,7 +350,28 @@ class DatumTool(Page):
             seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[4]
 
         if len(self.contents) <= seedqrview_thresh:
+            from .encryption_ui import prompt_for_text_update
             from .qr_view import SeedQRView
+
+            # for transcribable qr, allow updating title
+            while True:
+                updated = prompt_for_text_update(
+                    self.ctx,
+                    self.title,
+                    t("Update QR Label?") + ' "' + self.title + '"',
+                    dflt_affirm=False,
+                    prompt_highlight_prefix="?",
+                    title=t("QR Label"),
+                    keypads=[
+                        LETTERS,
+                        UPPERCASE_LETTERS,
+                        NUM_SPECIAL_1,
+                        NUM_SPECIAL_2,
+                    ],
+                )
+                if updated == self.title:
+                    break
+                self.title = updated
 
             # when not sensitive, allow export to sd
             kvargs = {}
@@ -360,6 +380,7 @@ class DatumTool(Page):
 
             seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
             seed_qr_view.display_qr(**kvargs)
+
         else:
             from ..qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_BBQR, FORMAT_UR
 
@@ -430,19 +451,11 @@ class DatumTool(Page):
         """Reusable handler for saving to SD file"""
         from .file_operations import SaveFile
 
-        if isinstance(self.contents, bytes):
-            extension = ".bin"
-            binary = True
-        else:
-            extension = ".txt"
-            binary = False
-
         save_page = SaveFile(self.ctx)
         save_page.save_file(
             self.contents,
-            self.title.split()[-1],
-            file_extension=extension,
-            save_as_binary=binary,
+            self.title.split(",")[-1].replace(" ", "_"),
+            save_as_binary=isinstance(self.contents, bytes),
             prompt=True,
         )
 
@@ -687,12 +700,12 @@ class DatumTool(Page):
         elif status == "encrypt":
             # if user chose to encrypt
             kef = KEFEnvelope(self.ctx)
-            kef.label = self.title
+            kef.label = self.datum if self.datum else self.title
             encrypted = kef.seal_ui(self.contents, override_defaults=True)
             if encrypted:
                 # now in "hiding secrets" mode
                 self.contents = encrypted
-                self.title = kef.label if kef.label else ""
+                self.title = kef.label + " KEF" if kef.label else "KEF"
                 self.sensitive = False
                 self.decrypted = False
                 kvargs["try_decrypt"] = False
