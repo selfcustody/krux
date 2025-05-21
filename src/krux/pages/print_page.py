@@ -39,7 +39,11 @@ class PrintPage(Page):
     def _send_qr_to_printer(self, qr_code, i=0, count=1):
         self.ctx.display.clear()
         if Settings().hardware.printer.driver == CNC_FILE_DRIVER:
-            self.ctx.display.draw_centered_text(t("Exporting to SD card.."))
+            from ..printers.cnc import FilePrinter
+
+            self.ctx.display.draw_centered_text(
+                t("Exporting %s to SD card..") % FilePrinter.CNC_FILENAME
+            )
         else:
             self.ctx.display.draw_centered_text(
                 t("Printing..") + "\n%d / %d" % (i + 1, count)

@@ -404,13 +404,17 @@ class Home(Page):
         psbt_filename = self._format_psbt_file_extension(psbt_filename)
         gc.collect()
 
+        from ...settings import SD_PATH
+
+        sd_path_str = "/" + SD_PATH + "/%s"
+
         if psbt_filename and psbt_filename != ESC_KEY:
             if signer.is_b64_file:
                 signed_psbt, _ = signer.psbt_qr()
-                with open("/sd/" + psbt_filename, "w") as f:
+                with open(sd_path_str % psbt_filename, "w") as f:
                     f.write(signed_psbt)
             else:
-                with open("/sd/" + psbt_filename, "wb") as f:
+                with open(sd_path_str % psbt_filename, "wb") as f:
                     # Write PSBT data directly to the file
                     signer.psbt.write_to(f)
             self.flash_text(

@@ -104,8 +104,12 @@ def display(img, oft=(0, 0), roi=None):
         oft = (oft[1], oft[0])
 
     def run():
+        # This runs on a separated thread and may not have img ready yet
         try:
             frame = img.get_frame()
+            if isinstance(frame, mock.MagicMock):
+                return # avoid exception when img still not ready
+            
             # Fix aspect ration by cutting the image
             if frame.shape[1] / frame.shape[0] > image_width / image_height:
                 frame = frame[

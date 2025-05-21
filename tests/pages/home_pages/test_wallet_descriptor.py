@@ -13,11 +13,11 @@ def test_wallet(mocker, m5stickv, tdata):
     cases = [
         # 0 Don't load
         (
-            False,
-            tdata.SINGLESIG_12_WORD_KEY,
-            tdata.SPECTER_SINGLESIG_WALLET_DATA,
-            None,
-            [BUTTON_PAGE],
+            False,  # if descriptor will be automatically loaded
+            tdata.SINGLESIG_12_WORD_KEY,  # mnemonic for wallet
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,  # wallet descriptor
+            None,  # Printer
+            [BUTTON_PAGE],  # btn_seq
         ),
         # 1 Load, from camera, good data - accept
         (
@@ -142,6 +142,7 @@ def test_wallet(mocker, m5stickv, tdata):
         wallet = Wallet(case[1])
         if case[0]:
             wallet.load(case[2], FORMAT_PMOFN)
+            assert wallet.has_change_addr()
 
         ctx = create_ctx(mocker, case[4], wallet, case[3])
         wallet_descriptor = WalletDescriptor(ctx)
@@ -168,16 +169,19 @@ def test_wallet(mocker, m5stickv, tdata):
         if case[0]:
             # If wallet is already loaded
             wallet_descriptor.display_wallet.assert_called_once()
+            assert ctx.wallet.has_change_addr()
         else:
             # If accepted the message and choose to load from camera
             if case[4][:2] == [BUTTON_ENTER, BUTTON_ENTER]:
                 qr_capturer.assert_called_once()
                 if case[2] is not None and case[2] != "{}":
                     wallet_descriptor.display_loading_wallet.assert_called_once()
+                    assert ctx.wallet.has_change_addr()
             # If accepted the message and choose to load from SD
             elif case[4][:3] == [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]:
                 if case[2] is not None and case[2] != "{}":
                     wallet_descriptor.display_loading_wallet.assert_called_once()
+                    assert ctx.wallet.has_change_addr()
         assert ctx.input.wait_for_button.call_count == len(case[4])
 
 
@@ -292,8 +296,8 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
 
     cases = [
         # 0 - Key
-        # 1 - Wallet
-        # 2 - Button presses
+        # 1 - Wallet descriptor
+        # 2 - Button sequence
         (  # Miniscript key, Liana miniscript descriptor
             wallet_tdata.MINISCRIPT_KEY,
             wallet_tdata.LIANA_MINISCRIPT_DESCRIPTOR,
@@ -359,4 +363,5 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
         mocker.spy(wallet_descriptor, "display_loading_wallet")
         wallet_descriptor.wallet()
         wallet_descriptor.display_loading_wallet.assert_called_once()
+        assert ctx.wallet.has_change_addr()
         assert ctx.input.wait_for_button.call_count == len(case[2])

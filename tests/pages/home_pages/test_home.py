@@ -220,6 +220,7 @@ def test_load_pub_key_view(mocker, amigo, tdata):
     ]
 
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    assert wallet.has_change_addr()
     ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
     home = Home(ctx)
     home.public_key()
@@ -697,6 +698,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         wallet = Wallet(case[0])
         if case[1] is not None:
             wallet.load(case[1], FORMAT_PMOFN)
+            assert wallet.has_change_addr()
 
         ctx = create_ctx(mocker, case[7], wallet, case[6])
         home = Home(ctx)

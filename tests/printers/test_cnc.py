@@ -89,7 +89,8 @@ def test_print_qr_code_on_sdcard_error(mocker, m5stickv):
     mocker.patch("builtins.open", side_effect=OSError("No SD card found"))
     mocker.patch("krux.printers.cnc.SDHandler", return_value=mocker.MagicMock())
     p = FilePrinter()
-    p.print_qr_code("FAKE_QR")
+    with pytest.raises(ValueError):
+        p.print_qr_code("FAKE_QR")
     assert p.file is None
 
 

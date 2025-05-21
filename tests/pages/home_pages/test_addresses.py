@@ -252,6 +252,7 @@ def test_scan_address(mocker, m5stickv, tdata):
         wallet = Wallet(case[0])
         if case[2]:
             wallet.load(case[1], FORMAT_PMOFN)
+            assert wallet.has_change_addr()
 
         ctx = create_ctx(mocker, case[5], wallet, None)
         addresses_ui = Addresses(ctx)
@@ -378,6 +379,7 @@ def test_scan_change_address(mocker, m5stickv, tdata):
         wallet = Wallet(case[0])
         if case[2]:
             wallet.load(case[1], FORMAT_PMOFN)
+            assert wallet.has_change_addr()
 
         ctx = create_ctx(mocker, case[5], wallet, None)
         addresses_ui = Addresses(ctx)
@@ -635,6 +637,7 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
         wallet = Wallet(mnemonic)
         if load:
             wallet.load(descriptor, FORMAT_PMOFN)
+            assert wallet.has_change_addr()
 
         # Create a context object with the mocker and the wallet
         # and adadpt the method to the test case
@@ -874,6 +877,7 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
         wallet = Wallet(mnemonic)
         if load:
             wallet.load(descriptor, FORMAT_PMOFN)
+            assert wallet.has_change_addr()
 
         # Create a context object with the mocker and the wallet
         # and adadpt the method to the test case

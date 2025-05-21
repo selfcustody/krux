@@ -33,6 +33,7 @@ from .krux_settings import t
 from .wdt import wdt
 from .themes import theme
 from .metadata import VERSION
+from .settings import SD_PATH
 
 FLASH_SIZE = 2**24
 MAX_FIRMWARE_SIZE = 0x300000
@@ -40,15 +41,20 @@ MAX_FIRMWARE_SIZE = 0x300000
 FIRMWARE_SLOT_1 = 0x00080000
 FIRMWARE_SLOT_2 = 0x00390000
 SPIFFS_ADDR = 0xD00000
+FIRMWARE_WRITE_CHUNCK_SIZE = 2**16
 
 MAIN_BOOT_CONFIG_SECTOR_ADDRESS = 0x00004000
 BACKUP_BOOT_CONFIG_SECTOR_ADDRESS = 0x00005000
+BOOT_CONFIG_SECTOR_SIZE = 4096
 
 ERASE_BLOCK_SIZE = 0x1000
 
 FLASH_IO_WAIT_TIME = 100
 
 CALVER_SIZE = 7
+READ_FIRMWARE_BUFFER = 2**14
+READ_FIRMWARE_VERSION_BUFFER = 2**10
+FIRMWARE_VERSION_CHUNK_OVERLAP = 120
 
 
 def find_active_firmware(sector):
@@ -154,7 +160,7 @@ def fsize(firmware_filename):
     size = 0
     with open(firmware_filename, "rb", buffering=0) as file:
         while True:
-            chunk = file.read(16384)
+            chunk = file.read(READ_FIRMWARE_BUFFER)
             if not chunk:
                 break
             size += len(chunk)
@@ -169,7 +175,7 @@ def sha256(firmware_filename, firmware_size=None):
         hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
     with open(firmware_filename, "rb", buffering=0) as file:
         while True:
-            chunk = file.read(16384)
+            chunk = file.read(READ_FIRMWARE_BUFFER)
             if not chunk:
                 break
             hasher.update(chunk)
@@ -214,12 +220,12 @@ def is_version_greater(firmware_filename):
         firmware_data = b""
         last_chunk = b""
         while True:
-            chunk = f.read(1024)
+            chunk = f.read(READ_FIRMWARE_VERSION_BUFFER)
             if not chunk:
                 break
             # Buffer must overlap slightly to avoid missing patterns split between chunks
             firmware_data = last_chunk + chunk
-            last_chunk = chunk[-120:]
+            last_chunk = chunk[-FIRMWARE_VERSION_CHUNK_OVERLAP:]
 
             positions = find_all_occurrences(firmware_data, b"krux/metadata.py")
             if not positions:
@@ -255,7 +261,7 @@ def is_version_greater(firmware_filename):
 def upgrade():
     """Installs new firmware from SD card"""
 
-    firmware_path = "/sd/firmware.bin"
+    firmware_path = "/%s/%s" % (SD_PATH, "firmware.bin")
     try:
         os.stat(firmware_path)
     except:
@@ -270,10 +276,14 @@ def upgrade():
     status_text(t("New firmware detected.") + "\n\n" + t("Verifying.."))
 
     # Validate curr bootloader
-    boot_config_sector = flash.read(MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
+    boot_config_sector = flash.read(
+        MAIN_BOOT_CONFIG_SECTOR_ADDRESS, BOOT_CONFIG_SECTOR_SIZE
+    )
     address, _, entry_index = find_active_firmware(boot_config_sector)
     if address is None:
-        boot_config_sector = flash.read(BACKUP_BOOT_CONFIG_SECTOR_ADDRESS, 4096)
+        boot_config_sector = flash.read(
+            BACKUP_BOOT_CONFIG_SECTOR_ADDRESS, BOOT_CONFIG_SECTOR_SIZE
+        )
         address, _, entry_index = find_active_firmware(boot_config_sector)
         if address is None:
             display.flash_text("Invalid bootloader", theme.error_color)
@@ -358,7 +368,7 @@ def upgrade():
                 new_address,
                 firmware_file,
                 new_size,
-                65536,
+                FIRMWARE_WRITE_CHUNCK_SIZE,
                 True,
                 firmware_with_header_hash,
             )
@@ -370,7 +380,7 @@ def upgrade():
             BACKUP_BOOT_CONFIG_SECTOR_ADDRESS,
             io.BytesIO(boot_config_sector),
             len(boot_config_sector),
-            4096,
+            BOOT_CONFIG_SECTOR_SIZE,
         )
 
         new_boot_config_sector = update_boot_config_sector(
@@ -383,7 +393,7 @@ def upgrade():
             MAIN_BOOT_CONFIG_SECTOR_ADDRESS,
             io.BytesIO(new_boot_config_sector),
             len(new_boot_config_sector),
-            4096,
+            BOOT_CONFIG_SECTOR_SIZE,
         )
     except:
         display.flash_text("Error read/write data", theme.error_color)
