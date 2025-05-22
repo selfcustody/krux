@@ -107,10 +107,10 @@ class KEFEnvelope(Page):
         self.mode_name = [k for k, v in kef.MODE_NUMBERS.items() if v == self.mode][0]
         return True
 
-    def input_key_ui(self, creating=True, confirm=True):
+    def input_key_ui(self, creating=True):
         """calls ui to gather master key"""
         ui = EncryptionKey(self.ctx)
-        self.__key = ui.encryption_key(creating, confirm)
+        self.__key = ui.encryption_key(creating)
         return bool(self.__key)
 
     def input_version_ui(self):
@@ -260,7 +260,7 @@ class KEFEnvelope(Page):
         if prompt_decrypt:
             if not self.public_info_ui(prompt_decrypt=prompt_decrypt):
                 return None
-        if not (self.__key or self.input_key_ui(creating=False, confirm=True)):
+        if not (self.__key or self.input_key_ui(creating=False)):
             return None
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing.."))
@@ -330,8 +330,8 @@ class EncryptionKey(Page):
             return t("Medium")
         return t("Weak")
 
-    def encryption_key(self, creating=False, confirm=True):
-        """Loads and returns an ecnryption key from keypad or QR code"""
+    def encryption_key(self, creating=False):
+        """Loads and returns an encryption key from keypad or QR code"""
         submenu = Menu(
             self.ctx,
             [
@@ -341,16 +341,19 @@ class EncryptionKey(Page):
             back_label=None,
         )
         _, key = submenu.run_loop()
-        if key in (ESC_KEY, MENU_CONTINUE):
-            return None
 
-        if key:
+        while True:
+            if key in (None, "", b"", ESC_KEY, MENU_CONTINUE):
+                self.flash_error(t("Failed to load"))
+                return None
+
             self.ctx.display.clear()
             offset_y = DEFAULT_PADDING
             displayable = key if isinstance(key, str) else "0x" + hexlify(key).decode()
             key_lines = self.ctx.display.draw_hcentered_text(
                 "{}: {}".format(t("Key"), displayable), offset_y, highlight_prefix=":"
             )
+
             if creating:
                 strength = self.key_strength(key)
                 offset_y += (key_lines + 1) * FONT_HEIGHT
@@ -362,30 +365,22 @@ class EncryptionKey(Page):
                     highlight_prefix=":",
                 )
 
-            if not confirm:
-                return key
-            if isinstance(key, str):
-                while True:
-                    updated = prompt_for_text_update(
-                        self.ctx,
-                        key,
-                        t("Proceed?") + ' "' + key + '"',
-                        prompt_highlight_prefix="?",
-                        title=t("Key"),
-                    )
-                    if updated == key:
-                        key = updated
-                        break
-                    key = updated
-                return key
             if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return key
-        return None
 
-    def load_key(self):
+            # user did not confirm to proceed
+            if not isinstance(key, str):
+                return None
+            key = self.load_key(key)
+
+    def load_key(self, data=""):
         """Loads and returns a key from keypad"""
+        if not isinstance(data, str):
+            raise TypeError("load_key() expected str")
         data = self.capture_from_keypad(
-            t("Key"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            t("Key"),
+            [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
+            starting_buffer=data,
         )
         if len(str(data)) > ENCRYPTION_KEY_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % ENCRYPTION_KEY_MAX_LEN)
@@ -399,7 +394,6 @@ class EncryptionKey(Page):
         qr_capture = QRCodeCapture(self.ctx)
         data, _ = qr_capture.qr_capture_loop()
         if data is None:
-            self.flash_error(t("Failed to load"))
             return None
         if len(data) > ENCRYPTION_KEY_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % ENCRYPTION_KEY_MAX_LEN)
