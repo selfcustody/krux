@@ -113,6 +113,22 @@ class KEFEnvelope(Page):
         self.__key = ui.encryption_key(creating)
         return bool(self.__key)
 
+    def input_mode_ui(self):
+        """implements ui to allow user to select KEF mode-of-operation"""
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("Use default Mode?") + " " + self.mode_name, highlight_prefix="?"
+        )
+        if self.prompt("", BOTTOM_PROMPT_LINE):
+            return True
+        menu_items = [(k, v) for k, v in kef.MODE_NUMBERS.items() if v is not None]
+        idx, _ = Menu(
+            self.ctx, [(x[0], lambda: None) for x in menu_items], back_label=None
+        ).run_loop()
+        self.mode_name, self.mode = menu_items[idx]
+        self.iv_len = kef.MODE_IVS.get(self.mode, 0)
+        return True
+
     def input_version_ui(self):
         """implements ui to allow user to select KEF version"""
         self.ctx.display.clear()
@@ -126,12 +142,9 @@ class KEFEnvelope(Page):
             for k, v in kef.VERSIONS.items()
             if isinstance(v, dict) and v["mode"] is not None
         ]
-        print(menu_items)
         idx, _ = Menu(
             self.ctx, [(x[0], lambda: None) for x in menu_items], back_label=None
         ).run_loop()
-        if idx == len(menu_items) - 1:
-            return None
         self.version = [v for i, (name, v) in enumerate(menu_items) if i == idx][0]
         self.version_name = kef.VERSIONS[self.version]["name"]
         self.mode = kef.VERSIONS[self.version]["mode"]
@@ -223,7 +236,7 @@ class KEFEnvelope(Page):
         self.ctx.input.wait_for_button()
         return True
 
-    def seal_ui(self, plaintext, override_defaults=False):
+    def seal_ui(self, plaintext, override_defaults=False, specific_version=False):
         """implements ui to allow user to seal plaintext inside a KEF envelope"""
         if self.ciphertext:
             raise ValueError("KEF Envelope already sealed")
@@ -232,8 +245,12 @@ class KEFEnvelope(Page):
         if override_defaults:
             if not self.input_iterations_ui():
                 return None
-            if not self.input_version_ui():
-                return None
+            if specific_version:
+                if not self.input_version_ui():
+                    return None
+            else:
+                if not self.input_mode_ui():
+                    return None
         if self.iv_len:
             if not (self.__iv or self.input_iv_ui()):
                 return None
