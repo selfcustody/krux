@@ -149,6 +149,13 @@ class WalletDescriptor(Page):
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
+        from ..encryption_ui import decrypt_kef
+
+        try:
+            wallet_data = decrypt_kef(self.ctx, wallet_data).decode()
+        except:
+            pass
+
         from ...wallet import Wallet, AssumptionWarning
 
         wallet = Wallet(self.ctx.wallet.key)

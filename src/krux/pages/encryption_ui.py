@@ -42,6 +42,48 @@ from . import (
 ENCRYPTION_KEY_MAX_LEN = 200
 
 
+def decrypt_kef(ctx, data):
+    """finds kef-envelope and returns data fully decrypted, else ValueError"""
+    from binascii import unhexlify
+    from krux.baseconv import base_decode, detect_encodings
+
+    err = "Nothing decrypted"  # intentionally vague
+
+    # if data is str, assume encoded, look for kef envelope
+    if isinstance(data, str):
+        encodings = detect_encodings(data)
+        for encoding in encodings:
+            as_bytes = None
+            if encoding in ("hex", "HEX"):
+                as_bytes = unhexlify(data)
+            elif encoding == 43:
+                as_bytes = base_decode(data, 43)
+            elif encoding == 64:
+                as_bytes = base_decode(data, 64)
+
+            envelope = KEFEnvelope(ctx)
+            if as_bytes and envelope.parse(as_bytes):
+                data = as_bytes
+                del as_bytes
+                break
+
+    # if here and not working with bytes: nothing to do
+    if not isinstance(data, bytes):
+        raise ValueError(err)
+
+    decrypted = None
+    while isinstance(data, bytes):
+        envelope = KEFEnvelope(ctx)
+        data = envelope.unseal_ui(data)
+        if data is not None:
+            decrypted = data
+        else:
+            if decrypted is not None:
+                return decrypted
+            raise ValueError(err)
+    raise ValueError(err)
+
+
 def prompt_for_text_update(
     ctx,
     dflt_value,
@@ -92,7 +134,7 @@ class KEFEnvelope(Page):
         self.version_name = None
         self.ciphertext = None
 
-    def __parse(self, kef_envelope):
+    def parse(self, kef_envelope):
         """parses envelope, from kef.wrap()"""
         if self.ciphertext is not None:
             raise ValueError("KEF Envelope already parsed")
@@ -211,7 +253,7 @@ class KEFEnvelope(Page):
     def public_info_ui(self, kef_envelope=None, prompt_decrypt=False):
         """implements ui to allow user to see public exterior of KEF envelope"""
         if kef_envelope:
-            self.__parse(kef_envelope)
+            self.parse(kef_envelope)
         elif not self.ciphertext:
             raise ValueError("KEF Envelope not yet parsed")
         try:
@@ -270,7 +312,7 @@ class KEFEnvelope(Page):
     def unseal_ui(self, kef_envelope=None, prompt_decrypt=True, display_plain=False):
         """implements ui to allow user to unseal a plaintext from a sealed KEF envelope"""
         if kef_envelope:
-            if not self.__parse(kef_envelope):
+            if not self.parse(kef_envelope):
                 return None
         if not self.ciphertext:
             raise ValueError("KEF Envelope not yet parsed")

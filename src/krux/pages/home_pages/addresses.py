@@ -164,12 +164,18 @@ class Addresses(Page):
     def scan_address(self, addr_type=0):
         """Handler for the 'receive' or 'change' menu item"""
         from ..qr_capture import QRCodeCapture
+        from ..encryption_ui import decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
         if data is None or qr_format != FORMAT_NONE:
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
+
+        try:
+            data = decrypt_kef(self.ctx, data).decode()
+        except:
+            pass
 
         addr = None
         try:

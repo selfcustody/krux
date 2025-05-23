@@ -110,3 +110,62 @@ def base_encode(v, base):
     if n_pad > 0:
         result.extend((chars[0] * n_pad).encode())
     return bytes(reversed(result)).decode()
+
+
+def detect_encodings(str_data):
+    """Detects which encodings this data str might be, returns list"""
+    from binascii import unhexlify
+
+    if not isinstance(str_data, str):
+        raise TypeError("detect_encodings() expected str")
+
+    encodings = []
+
+    # get min and max characters (sorted by ordinal value),
+    # check most restrictive encodings first
+
+    min_chr = min(str_data)
+    max_chr = max(str_data)
+
+    # might it be hex
+    if len(str_data) % 2 == 0 and "0" <= min_chr:
+        if max_chr <= "F":
+            try:
+                unhexlify(str_data)
+                encodings.append("HEX")
+            except:
+                pass
+        elif max_chr <= "f":
+            try:
+                unhexlify(str_data)
+                encodings.append("hex")
+            except:
+                pass
+
+    # might it be base43
+    if "$" <= min_chr and max_chr <= "Z":
+        try:
+            base_decode(str_data, 43)
+            encodings.append(43)
+        except:
+            pass
+
+    # might it be base64
+    if "+" <= min_chr and max_chr <= "z":
+        try:
+            base_decode(str_data, 64)
+            encodings.append(64)
+        except:
+            pass
+
+    # might it be ascii
+    if ord(max_chr) <= 127:
+        encodings.append("ascii")
+
+    # might it be latin-1 or utf8
+    if 128 <= ord(max_chr) <= 255:
+        encodings.append("latin-1")
+    else:
+        encodings.append("utf8")
+
+    return encodings

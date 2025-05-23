@@ -34,19 +34,19 @@ from . import (
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 
-DATUM_DESCR = "DESC"
+DATUM_DESCRIPTOR = "DESC"
 DATUM_PSBT = "PSBT"
 DATUM_XPUB = "XPUB"
 DATUM_ADDRESS = "ADDR"
 
 DATUM_UR_TYPES = {
-    # DATUM_DESCR: ["crypto-account", "crypto-output"],
+    # DATUM_DESCRIPTOR: ["crypto-account", "crypto-output"],
     DATUM_PSBT: ["crypto-psbt"],
     # DATUM_XPUB: ["crypto-account"],
     # DATUM_ADDRESS: ["crypto-account"],
 }
 DATUM_BBQR_TYPES = {
-    DATUM_DESCR: ["U"],
+    DATUM_DESCRIPTOR: ["U"],
     DATUM_PSBT: ["P"],
     DATUM_XPUB: ["U"],
     DATUM_ADDRESS: ["U"],
@@ -107,7 +107,7 @@ def convert_encoding(contents, conversion):
 
 
 def identify_datum(data):
-    """Determine which "datum" type this is; ie: PSBT, XPUB, DESCR"""
+    """Determine which "datum" type this is; ie: PSBT, XPUB, DESC, ADDR"""
 
     datum = None
     if isinstance(data, bytes):
@@ -121,7 +121,7 @@ def identify_datum(data):
         ):
             datum = DATUM_XPUB
         elif data.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
-            datum = DATUM_DESCR
+            datum = DATUM_DESCRIPTOR
         elif data[:1] in ("1", "3", "n", "2") or data[:3] in (
             "bc1",
             "BC1",
@@ -134,7 +134,12 @@ def identify_datum(data):
 
 
 def detect_encodings(str_data):
-    """Detect which encodings this data str might be, else empty list"""
+    """
+    Detect which encodings this data str might be, returns list
+
+    A more-efficient/reduced version of this function exists in baseconv, this one
+    remains/used here to identify potentially useful-but-missing encodings
+    """
     from binascii import unhexlify
     from krux.baseconv import base_decode
     from embit.bech32 import bech32_decode, Encoding
@@ -526,9 +531,11 @@ class DatumTool(Page):
             self.about = t("binary: {} bytes").format(len(self.contents))
             try:
                 as_str = self.contents.decode()
-                self.encodings = [str(detect_encodings(as_str)[0]) + "_via_utf8?"]
+                suggestion = str(detect_encodings(as_str)[0])
+                if suggestion != "utf8":
+                    suggestion = suggestion + "_via_utf8"
+                self.encodings = [suggestion + "?"]
             except:
-
                 self.encodings = []
 
             # does it look like 128 or 256 bits of mnemonic entropy / CompactSeedQR?
