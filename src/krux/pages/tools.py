@@ -25,7 +25,11 @@ from . import (
     Page,
     Menu,
     MENU_CONTINUE,
-    MENU_EXIT,
+    ESC_KEY,
+    LETTERS,
+    UPPERCASE_LETTERS,
+    NUM_SPECIAL_1,
+    NUM_SPECIAL_2,
 )
 from .file_manager import SD_ROOT_PATH
 from ..format import generate_thousands_separator
@@ -45,7 +49,7 @@ class Tools(Page):
                 [
                     (t("Check SD Card"), self.sd_check),
                     (t("Print Test QR"), self.print_test),
-                    (t("Datum Tool"), self.datum_tool),
+                    (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Flash Tools"), self.flash_tools),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
@@ -128,18 +132,23 @@ class Tools(Page):
         utils.print_standard_qr(title, title=title, check_printer=False)
         return MENU_CONTINUE
 
-    def datum_tool(self):
-        """Handler for the 'Datum Tool' menu item"""
-        import sys
-        from .datum_tool import DatumToolMenu
+    def create_qr(self):
+        """Handler for the 'Create QR Code' menu item"""
+        if self.prompt(
+            t("Create QR code from text?"),
+            self.ctx.display.height() // 2,
+        ):
+            text = self.capture_from_keypad(
+                t("Text"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            )
+            if text in ("", ESC_KEY):
+                return MENU_CONTINUE
 
-        while True:
-            if DatumToolMenu(self.ctx).run() == MENU_EXIT:
-                break
+            from .qr_view import SeedQRView
 
-        sys.modules.pop("krux.pages.datum_tool")
-        del sys.modules["krux.pages"].datum_tool
-
+            title = t("Custom QR Code")
+            seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
+            return seed_qr_view.display_qr(allow_export=True)
         return MENU_CONTINUE
 
     def descriptor_addresses(self):

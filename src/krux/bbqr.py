@@ -92,8 +92,7 @@ def deflate_compress(data):
         with deflate.DeflateIO(stream) as d:
             d.write(data)
         return stream.getvalue()
-    except Exception as err:
-        print(err)
+    except:
         raise ValueError("Error compressing BBQR")
 
 
