@@ -79,17 +79,24 @@ def test_tc_flash_hash(multiple_devices, mocker):
 
     BTN_SEQUENCE = [BUTTON_ENTER]
 
+    DOCK_FW_POS = 228
+    DOCK_USER_POS = 244
+
     fw_words_positions = {
         "amigo": 307,
         "m5stickv": 147,
-        "dock": 228,
+        "dock": DOCK_FW_POS,
         "cube": 208,
+        "yahboom": DOCK_FW_POS,
+        "wonder_mv": DOCK_FW_POS,
     }
     users_data_words_positions = {
         "amigo": 331,
         "m5stickv": 161,
-        "dock": 244,
+        "dock": DOCK_USER_POS,
         "cube": 222,
+        "yahboom": DOCK_USER_POS,
+        "wonder_mv": DOCK_USER_POS,
     }
     fw_words_pos = fw_words_positions[board.config["type"]]
     u_data_words_pos = users_data_words_positions[board.config["type"]]

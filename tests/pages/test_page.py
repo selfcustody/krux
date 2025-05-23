@@ -112,7 +112,9 @@ def test_display_qr_code(mocker, m5stickv, mock_page_cls):
 
     assert ctx.input.wait_for_button.call_count == 1
     assert ctx.display.draw_qr_code.call_count == 1
-    assert ctx.display.draw_qr_code.call_args == mocker.call(0, TEST_QR_DATA_IMAGE)
+    assert ctx.display.draw_qr_code.call_args == mocker.call(
+        TEST_QR_DATA_IMAGE, 0, 0, 0
+    )
 
 
 def test_display_qr_code_light_theme(mocker, m5stickv, mock_page_cls):
@@ -131,7 +133,7 @@ def test_display_qr_code_light_theme(mocker, m5stickv, mock_page_cls):
     assert ctx.input.wait_for_button.call_count == 1
     assert ctx.display.draw_qr_code.call_count == 1
     assert ctx.display.draw_qr_code.call_args == mocker.call(
-        0, TEST_QR_DATA_IMAGE, light_color=WHITE
+        TEST_QR_DATA_IMAGE, 0, 0, 0, light_color=WHITE
     )
 
 
@@ -154,10 +156,10 @@ def test_display_qr_code_loop_through_brightness(mocker, m5stickv, mock_page_cls
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.display.draw_qr_code.call_count == len(BTN_SEQUENCE)
     assert ctx.display.draw_qr_code.call_args_list == [
-        mocker.call(0, TEST_QR_DATA_IMAGE),  # Default
-        mocker.call(0, TEST_QR_DATA_IMAGE, light_color=WHITE),  # Brighter
-        mocker.call(0, TEST_QR_DATA_IMAGE, light_color=DARKGREY),  # Darker
-        mocker.call(0, TEST_QR_DATA_IMAGE),  # Default
+        mocker.call(TEST_QR_DATA_IMAGE, 0, 0, 0),  # Default
+        mocker.call(TEST_QR_DATA_IMAGE, 0, 0, 0, light_color=WHITE),  # Brighter
+        mocker.call(TEST_QR_DATA_IMAGE, 0, 0, 0, light_color=DARKGREY),  # Darker
+        mocker.call(TEST_QR_DATA_IMAGE, 0, 0, 0),  # Default
     ]
 
 

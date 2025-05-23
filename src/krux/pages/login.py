@@ -826,6 +826,7 @@ class Login(Page):
         """Handler for the 'about' menu item"""
 
         import board
+        from ..kboard import kboard
         from ..metadata import VERSION
         from ..qr import FORMAT_NONE
 
@@ -838,7 +839,17 @@ class Login(Page):
             + t("Version")
             + ": %s" % VERSION
         )
-        # from ..encryption import test_aes_gcm
-        # test_aes_gcm()
-        self.display_qr_codes(title, FORMAT_NONE, msg, highlight_prefix=":")
+        offset_x = 0
+        width = 0
+        if kboard.is_cube:
+            offset_x = self.ctx.display.width() // 4
+            width = self.ctx.display.width() // 2
+        self.display_qr_codes(
+            title,
+            FORMAT_NONE,
+            msg,
+            offset_x=offset_x,
+            width=width,
+            highlight_prefix=":",
+        )
         return MENU_CONTINUE
