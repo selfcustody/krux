@@ -188,11 +188,13 @@ class Display:
         pwm_value *= 20
         self.blk_ctrl.duty(pwm_value)
 
-    def qr_offset(self):
+    def qr_offset(self, y_offset=0):
         """Retuns y offset to subtitle QR codes"""
-        if kboard.is_cube:
-            return BOTTOM_LINE
-        return self.width() + MINIMAL_PADDING
+        if y_offset == 0:
+            if kboard.is_cube:
+                return BOTTOM_LINE
+            return self.width() + MINIMAL_PADDING
+        return y_offset + MINIMAL_PADDING
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""
@@ -472,11 +474,18 @@ class Display:
         self.clear()
 
     def draw_qr_code(
-        self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
+        self,
+        qr_code,
+        offset_x=0,
+        offset_y=0,
+        width=0,
+        dark_color=QR_DARK_COLOR,
+        light_color=QR_LIGHT_COLOR,
     ):
         """Draws a QR code on the screen"""
+        width = self.width() if width == 0 else width
         lcd.draw_qr_code_binary(
-            offset_y, qr_code, self.width(), dark_color, light_color, light_color
+            offset_x, offset_y, qr_code, width, dark_color, light_color, light_color
         )
 
     def set_pmu_backlight(self, level):

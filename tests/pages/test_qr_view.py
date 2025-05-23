@@ -193,7 +193,7 @@ def test_load_qr_view(amigo, mocker):
     seed_qr_view.display_qr()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.display.draw_qr_code.call_count == 8
-    assert ctx.display.draw_qr_code.call_args[0][1] == TEST_CODE_BINARY_QR
+    assert ctx.display.draw_qr_code.call_args[0][0] == TEST_CODE_BINARY_QR
 
 
 def test_load_seed_qr(amigo, mocker, tdata):
@@ -222,7 +222,6 @@ def test_load_seed_qr(amigo, mocker, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.display.draw_qr_code.call_count == 8
     ctx.display.draw_qr_code.assert_called_with(
-        0,
         # Standard SeedQR
         SINGLE_SIG_12W_BINARY_QR,
     )
@@ -286,10 +285,10 @@ def test_loop_through_brightness(amigo, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.display.draw_qr_code.call_count == 4
     assert ctx.display.draw_qr_code.call_args_list == [
-        mocker.call(0, TEST_CODE_BINARY_QR),  # Default
-        mocker.call(0, TEST_CODE_BINARY_QR, light_color=WHITE),  # Brighter
-        mocker.call(0, TEST_CODE_BINARY_QR, light_color=DARKGREY),  # Darker
-        mocker.call(0, TEST_CODE_BINARY_QR),  # Default
+        mocker.call(TEST_CODE_BINARY_QR),  # Default
+        mocker.call(TEST_CODE_BINARY_QR, light_color=WHITE),  # Brighter
+        mocker.call(TEST_CODE_BINARY_QR, light_color=DARKGREY),  # Darker
+        mocker.call(TEST_CODE_BINARY_QR),  # Default
     ]
 
 

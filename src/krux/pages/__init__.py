@@ -229,19 +229,24 @@ class Page:
             self.ctx.display.draw_hcentered_text(buffer, offset_y)
 
     def display_qr_codes(
-        self, data, qr_format=FORMAT_NONE, title="", highlight_prefix=""
+        self,
+        data,
+        qr_format=FORMAT_NONE,
+        title="",
+        offset_x=0,
+        offset_y=0,
+        width=0,
+        highlight_prefix="",
     ):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
-        done = False
-        i = 0
 
         # Precompute display-related values
         display_width = self.ctx.display.width()
         display_height = self.ctx.display.height()
-        is_portrait = display_height > display_width
-        qr_offset_val = self.ctx.display.qr_offset()
+        is_portrait = width != 0 or display_height > display_width
+        qr_offset_val = self.ctx.display.qr_offset(offset_y + width)
         qr_data_width = self.ctx.display.qr_data_width()
 
         self.ctx.display.clear()
@@ -273,20 +278,22 @@ class Page:
         code = None
         num_parts = 0
         btn = None
+        i = 0
+        done = False
         while not done:
             try:
                 code, num_parts = next(code_generator)
             except:
-                code_generator = to_qr_codes(
-                    data, self.ctx.display.qr_data_width(), qr_format
-                )
+                code_generator = to_qr_codes(data, qr_data_width, qr_format)
                 code, num_parts = next(code_generator)
 
             # Draw QR code
             if qr_foreground:
-                self.ctx.display.draw_qr_code(0, code, light_color=qr_foreground)
+                self.ctx.display.draw_qr_code(
+                    code, offset_x, offset_y, width, light_color=qr_foreground
+                )
             else:
-                self.ctx.display.draw_qr_code(0, code)
+                self.ctx.display.draw_qr_code(code, offset_x, offset_y, width)
 
             # Handle subtitle
             if subtitle_template and is_portrait:

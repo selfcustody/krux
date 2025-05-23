@@ -7,6 +7,7 @@ from .shared_mocks import (
     board_cube,
     board_m5stickv,
     board_wonder_mv,
+    board_yahboom,
     encode_to_string,
     encode,
     statvfs,
@@ -109,6 +110,14 @@ def cube(monkeypatch, mp_modules):
 
 
 @pytest.fixture
+def yahboom(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_yahboom())
+    reset_krux_modules()
+
+
+@pytest.fixture
 def wonder_mv(monkeypatch, mp_modules):
     import sys
 
@@ -116,6 +125,6 @@ def wonder_mv(monkeypatch, mp_modules):
     reset_krux_modules()
 
 
-@pytest.fixture(params=["amigo", "m5stickv", "dock", "cube"])
+@pytest.fixture(params=["amigo", "m5stickv", "dock", "cube", "yahboom", "wonder_mv"])
 def multiple_devices(request):
     return request.getfixturevalue(request.param)

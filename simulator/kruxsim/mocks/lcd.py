@@ -336,34 +336,8 @@ def draw_string(x, y, s, color, bgcolor=COLOR_BLACK):
     pg.event.post(pg.event.Event(events.LCD_DRAW_STRING_EVENT, {"f": run}))
 
 
-def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color, background):
-
-    def run():
-        starting_size = 0
-        while code_str[starting_size] != "\n":
-            starting_size += 1
-        scale = max_width // starting_size
-        qr_width = starting_size * scale
-        offset = (max_width - qr_width) // 2
-        for og_y in range(starting_size):
-            for i in range(scale):
-                y = og_y * scale + i
-                for og_x in range(starting_size):
-                    for j in range(scale):
-                        x = og_x * scale + j
-                        og_yx_index = og_y * (starting_size + 1) + og_x
-                        screen.set_at(
-                            (offset + x, offset + offset_y + y),
-                            dark_color if code_str[og_yx_index] == "1" else light_color,
-                        )
-
-    dark_color = rgb565torgb888(dark_color)
-    light_color = rgb565torgb888(light_color)
-    pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
-
-
 def draw_qr_code_binary(
-    offset_y, code_bin, max_width, dark_color, light_color, background
+    offset_x, offset_y, code_bin, max_width, dark_color, light_color, background
 ):
 
     def run():
@@ -377,22 +351,22 @@ def draw_qr_code_binary(
         # Top border
         for rx in range(max_width):
             for ry in range(border_size):
-                screen.set_at((rx, ry), light_color)
+                screen.set_at((rx + offset_x, ry + offset_y), light_color)
 
         # Bottom border
         for rx in range(max_width):
             for ry in range(opposite_border_offset, max_width):
-                screen.set_at((rx, ry), light_color)
+                screen.set_at((rx + offset_x, ry + offset_y), light_color)
 
         # Left border
         for rx in range(border_size):
             for ry in range(border_size, opposite_border_offset):
-                screen.set_at((rx, ry), light_color)
+                screen.set_at((rx + offset_x, ry + offset_y), light_color)
 
         # Right border
         for rx in range(opposite_border_offset, max_width):
             for ry in range(border_size, opposite_border_offset):
-                screen.set_at((rx, ry), light_color)
+                screen.set_at((rx + offset_x, ry + offset_y), light_color)
         # QR code rendering
         for og_y in range(starting_size):
             for og_x in range(starting_size):
@@ -404,7 +378,7 @@ def draw_qr_code_binary(
                     y = border_size + og_y * scale + i
                     for j in range(scale):
                         x = border_size + og_x * scale + j
-                        screen.set_at((x, y), color)
+                        screen.set_at((x + offset_x, y + offset_y), color)
 
     dark_color = rgb565torgb888(dark_color)
     light_color = rgb565torgb888(light_color)
@@ -500,7 +474,6 @@ if "lcd" not in sys.modules:
         height=height,
         string_width_px=string_width_px,
         draw_string=draw_string,
-        draw_qr_code=draw_qr_code,
         draw_qr_code_binary=draw_qr_code_binary,
         fill_rectangle=fill_rectangle,
         draw_circle=draw_circle,
