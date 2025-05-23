@@ -677,10 +677,10 @@ def test_draw_qr_code(mocker, m5stickv):
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)
 
-    d.draw_qr_code(0, TEST_QR)
+    d.draw_qr_code(TEST_QR)
 
     krux.display.lcd.draw_qr_code_binary.assert_called_with(
-        0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
+        0, 0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
     )
 
 
@@ -794,3 +794,15 @@ def test_render_image_with_double_subtitle(mocker, multiple_devices):
         krux.display.lcd.display.assert_called_once_with(
             img, oft=(24, 0), roi=(72, 0, 186, 240)
         )
+
+
+def test_offset(mocker, multiple_devices):
+    from krux.display import Display, BOTTOM_LINE, MINIMAL_PADDING
+    from krux.kboard import kboard
+
+    d = Display()
+    if kboard.is_cube:
+        assert d.qr_offset() == BOTTOM_LINE
+    else:
+        assert d.qr_offset() == d.width() + MINIMAL_PADDING
+    assert d.qr_offset(10) == 10 + MINIMAL_PADDING

@@ -1292,18 +1292,20 @@ def test_customization_while_loading_wallet(amigo, mocker):
     assert "krux.pages.wallet_settings" in sys.modules
 
 
-def test_about(mocker, m5stickv):
-    import krux
+def test_about(mocker, multiple_devices):
     from krux.pages.login import Login
     import board
     from krux.metadata import VERSION
     from krux.input import BUTTON_ENTER
+    from krux.kboard import kboard
+    from krux.qr import FORMAT_NONE
 
     BTN_SEQUENCE = [BUTTON_ENTER]
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
 
     login = Login(ctx)
+    mocker.spy(login, "display_qr_codes")
 
     login.about()
 
@@ -1316,12 +1318,38 @@ def test_about(mocker, m5stickv):
         + ("Version")
         + ": %s" % VERSION
     )
-    ctx.input.wait_for_button.assert_called_once()
+    display_qr_codes_call = [
+        mocker.call(
+            title,
+            FORMAT_NONE,
+            msg,
+            offset_x=0,
+            width=0,
+            highlight_prefix=":",
+        ),
+    ]
+
+    if kboard.is_cube:
+        print(ctx.display.width())
+        display_qr_codes_call = [
+            mocker.call(
+                title,
+                FORMAT_NONE,
+                msg,
+                offset_x=ctx.display.width() // 4,
+                width=ctx.display.width() // 2,
+                highlight_prefix=":",
+            ),
+        ]
+    login.display_qr_codes.assert_has_calls(display_qr_codes_call)
+
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(msg, 250, highlight_prefix=":"),
         ]
     )
+
+    ctx.input.wait_for_button.assert_called_once()
 
 
 def test_auto_complete_qr_words(m5stickv, mocker):
