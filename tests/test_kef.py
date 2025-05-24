@@ -1251,8 +1251,8 @@ def test_kef_self_document(m5stickv):
 
 def test_multi_wrapped_envelopes(m5stickv):
     """Test that nothing breaks when KEF messages are used to hide other KEF messages"""
-
     from krux import kef
+    from krux.wdt import wdt
 
     key = "abc"
     iterations, i_step = 10000, 1234
@@ -1261,7 +1261,9 @@ def test_multi_wrapped_envelopes(m5stickv):
     # encrypt plaintext for versions of KEF
     plaintext = orig_plaintext
     plaintext2 = orig_plaintext
-    for v, version in kef.VERSIONS.items():
+    for v, version in sorted(kef.VERSIONS.items()):
+        wdt.feed()
+
         if version is None or version["mode"] is None:
             continue
 
@@ -1287,6 +1289,8 @@ def test_multi_wrapped_envelopes(m5stickv):
 
     # decode and decrypt KEF packages until we find something that's not KEF
     while True:
+        wdt.feed()
+
         try:
             parsed = kef.unwrap(plaintext)
             parsed2 = kef.unwrap(plaintext2)
@@ -1311,10 +1315,11 @@ def test_report_rate_of_failure(m5stickv):
     from krux import kef
     from hashlib import sha512
     from embit.bip39 import mnemonic_from_bytes
+    from krux.wdt import wdt
 
     encrs = {}
     errs = {}
-    for v in kef.VERSIONS:
+    for v in sorted(kef.VERSIONS):
         if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
             continue
 
@@ -1396,7 +1401,8 @@ def test_report_rate_of_failure(m5stickv):
         plaintexts = [msgfunc(plain) for msgfunc in msg_funcs]
         plaintexts.extend([utf8_encoded(msgfunc(plain)) for msgfunc in msg_funcs])
         for plain in plaintexts:
-            for v in kef.VERSIONS:
+            for v in sorted(kef.VERSIONS):
+                wdt.feed()
 
                 if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
                     continue
@@ -1460,7 +1466,7 @@ def test_report_rate_of_failure(m5stickv):
                 encrs[v]["sampled"] += 1
 
     print("Failure Summary:\nVer  Ver Name     Timid   Avoid    Fail  KEFerr   Samples")
-    for v in kef.VERSIONS:
+    for v in sorted(kef.VERSIONS):
         if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
             continue
 
@@ -1477,7 +1483,7 @@ def test_report_rate_of_failure(m5stickv):
         )
 
     print("\nPer-Version Failure Details:\nVer  Function    Count  Description")
-    for v in kef.VERSIONS:
+    for v in sorted(kef.VERSIONS):
         if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
             continue
 
@@ -1531,4 +1537,68 @@ def NOtest_find_optimal_compress_threshold(m5stickv):
 
     for k, v in results.items():
         print("thresh: {} for {}b content: {}".format(v, len(k), k[:50]))
+    # assert 0
+
+
+def test_brute_force_compression_checks(m5stickv):
+    """
+    It is expected that different implementations of deflate/zlib.compress will
+    result in different compressed bytes.
+    This test verifies only that `reinflate(deflate(original)) == original`.
+    By default it will run external to krux devices but can be used to create a file
+    for sdcard externally, then read on device, or created on device and read externally
+    """
+    from hashlib import sha256
+    from binascii import hexlify
+    from krux.baseconv import base_encode, base_decode
+    from krux import kef
+    from krux.wdt import wdt
+
+    file_name = "/sd/brute-force.txt"
+    file_mode = "r"  # "w": to create file; "r": to read file; None to avoid file I/O
+    attempts = 1000  # 1000 good enough for unit-tests, increase for on-device testing
+    bstr = b""
+
+    if file_mode:
+        if file_mode == "r":
+            print("Reading file '{}'...".format(file_name))
+            try:
+                file_handle = open(file_name, file_mode)
+            except:
+                file_mode = "w"
+                print("  failed to read file {}".format(file_name))
+
+        if file_mode == "w":
+            print("Creating file '{}'...".format(file_name))
+            try:
+                file_handle = open(file_name, file_mode)
+            except:
+                file_mode = None
+                print("  failed to create file {}, skipping file I/O".format(file_name))
+
+    for i in range(attempts):
+        wdt.feed()
+        bstr = hexlify(sha256(bstr).digest()) * 10
+        comp = kef._deflate(bstr)
+        sb64 = base_encode(comp, 64)
+        assert bstr == kef._reinflate(base_decode(sb64, 64))
+
+        if file_mode == "w":
+            file_handle.write(sb64 + "\n")
+            continue
+
+        if file_mode != "r":
+            continue
+
+        sb64_from_file = file_handle.readline()
+        assert bstr == kef._reinflate(base_decode(sb64_from_file, 64))
+
+    if file_mode:
+        file_handle.close()
+
+    print(
+        "file_mode: {}  Completed {} deflate/reinflate assertions".format(
+            file_mode, i + 1
+        )
+    )
     # assert 0

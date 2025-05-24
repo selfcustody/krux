@@ -259,12 +259,12 @@ class KEFEnvelope(Page):
         try:
             displayable_label = self.label.decode()
         except:
-
             displayable_label = "0x" + hexlify(self.label).decode()
+
         public_info = "\n".join(
             [
                 t("KEF Encrypted") + " (" + str(len(self.ciphertext)) + " B)",
-                t("ID") + ": " + displayable_label,
+                self.fit_to_line(t("ID") + ": " + displayable_label),
                 t("Version") + ": " + self.version_name,
                 t("Key iter.") + ": " + str(self.iterations),
             ]
