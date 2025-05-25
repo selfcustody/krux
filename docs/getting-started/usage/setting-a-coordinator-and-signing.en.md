@@ -32,7 +32,7 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" class="m5stickv">
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" class="m5stickv">
 
-2. On your coordinator, select **"Krux"** if it's listed among the available signer devices. If not, choose **"Other"** or a QR code-compatible signer such as **"SeedSigner"**. Since Krux supports various QR formats, other compatible options may also function correctly.
+2. On your coordinator, select **"Krux"** if it's listed among the available signer devices. If not, choose **"Other"** or a QR code-compatible signer such as **"SeedSigner"**. Since Krux supports various QR formats, other available options may also be compatible.
 
 3. When prompted by your coordinator to import signer's public key, access the `Extended Public Key` on Krux.
 
