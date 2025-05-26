@@ -34,7 +34,7 @@ def reset_input_states(mocker, input):
     return input
 
 
-def test_init(mocker, m5stickv):
+def test_init_m5stickv(mocker, m5stickv):
     mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
     mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
     import krux
@@ -72,7 +72,7 @@ def test_init(mocker, m5stickv):
     )
 
 
-def test_init_amigo_tft(mocker, amigo):
+def test_init_amigo(mocker, amigo):
     mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
     mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
     import krux
@@ -170,6 +170,142 @@ def test_init_dock(mocker, dock):
     assert (
         krux.rotary.GPIO.call_args_list[1].args[0]._extract_mock_name()
         == "mock.GPIO.GPIOHS0"
+    )
+
+
+def test_init_cube(mocker, cube):
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
+    from krux import buttons
+    from krux.input import Input
+    import board
+
+    input = Input()
+
+    assert isinstance(input, Input)
+
+    for button in buttons.fm.register.call_args_list:
+        print(button)
+
+    buttons.fm.register.assert_has_calls(
+        [
+            mocker.call(board.config["krux"]["pins"]["BUTTON_A"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["BUTTON_B"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["BUTTON_C"], mocker.ANY),
+        ]
+    )
+
+    assert (
+        buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS21"
+    )
+    assert (
+        buttons.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS22"
+    )
+    assert (
+        buttons.fm.register.call_args_list[2].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS0"
+    )
+
+    assert input.enter is not None
+    assert input.page is not None
+    assert input.page_prev is not None
+
+    assert buttons.GPIO.call_count == 3
+    assert (
+        buttons.GPIO.call_args_list[0].args[0]._extract_mock_name() == "mock.GPIOHS21"
+    )
+    assert (
+        buttons.GPIO.call_args_list[1].args[0]._extract_mock_name() == "mock.GPIOHS22"
+    )
+
+
+def test_init_yahboom(mocker, yahboom):
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
+    from krux import buttons
+    from krux.input import Input
+    import board
+
+    input = Input()
+
+    assert isinstance(input, Input)
+
+    buttons.fm.register.assert_has_calls(
+        [
+            mocker.call(board.config["krux"]["pins"]["BUTTON_B"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["BUTTON_C"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["TOUCH_IRQ"], mocker.ANY),
+        ]
+    )
+
+    assert (
+        buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS22"
+    )
+    assert (
+        buttons.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS0"
+    )
+    assert (
+        buttons.fm.register.call_args_list[2].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS1"
+    )
+
+    assert input.enter is None
+    assert input.page is not None
+    assert input.page_prev is not None
+
+    assert buttons.GPIO.call_count == 2
+    assert (
+        buttons.GPIO.call_args_list[0].args[0]._extract_mock_name() == "mock.GPIOHS22"
+    )
+    assert buttons.GPIO.call_args_list[1].args[0]._extract_mock_name() == "mock.GPIOHS0"
+
+
+def test_init_wonder_mv(mocker, wonder_mv):
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
+    from krux import buttons
+    from krux.input import Input
+    import board
+
+    input = Input()
+
+    assert isinstance(input, Input)
+
+    buttons.fm.register.assert_has_calls(
+        [
+            mocker.call(board.config["krux"]["pins"]["BUTTON_A"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["BUTTON_B"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["TOUCH_IRQ"], mocker.ANY),
+        ]
+    )
+
+    assert (
+        buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS21"
+    )
+    assert (
+        buttons.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS22"
+    )
+    assert (
+        buttons.fm.register.call_args_list[2].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS1"
+    )
+
+    assert input.enter is not None
+    assert input.page is not None
+    assert input.page_prev is None
+
+    assert buttons.GPIO.call_count == 2
+    assert (
+        buttons.GPIO.call_args_list[0].args[0]._extract_mock_name() == "mock.GPIOHS21"
+    )
+    assert (
+        buttons.GPIO.call_args_list[1].args[0]._extract_mock_name() == "mock.GPIOHS22"
     )
 
 
