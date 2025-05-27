@@ -21,8 +21,9 @@ Boolean settings (True/False) are now displayed with color (Green/Red) for impro
 Addresses are now grouped in sets of 4 characters, separated by spaces, to facilitate comparison.
 
 ### New CNC Printer Support and Fixes (OpenBuilds GRBL 1.1)
-- Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0.
-- Introduced CNC/GRBLPrinter for direct serial printing to CNC machines.
+- Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0;
+- Introduced CNC/GRBLPrinter for direct serial printing to CNC machines;
+- Added support to choose between router/laser head engravers.
 
 ### Export QR Codes as SVG
 Exported QR codes can now be saved as SVG images.
