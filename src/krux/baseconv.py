@@ -32,15 +32,32 @@ def base_decode(v, base):
     """Decodes str v from base encoding and returns as bytes"""
     if not isinstance(v, str):
         raise TypeError("Invalid value, expected str")
-    if base not in (43, 58, 64):
+    if base not in (32, 43, 58, 64):
         raise ValueError("not supported base: {}".format(base))
 
     if v == "":
         return b""
 
+    # Base32 and Base43 are implemented custom in MaixPy on k210, else in python for simulator
     # Base64 is a special case: We just use binascii's implementation without
     # performing bitcoin-specific padding logic
-    if base == 64:
+    if base == 32:
+        try:
+            import base32
+
+            return base32.decode(v)
+        except:
+            from .bbqr import base32_decode_stream
+
+            return base32_decode_stream(v)
+    elif base == 43:
+        try:
+            import base43
+
+            return base43.decode(v)
+        except:
+            pass
+    elif base == 64:
         return a2b_base64(v)
 
     chars = B58CHARS if base == 58 else B43CHARS
@@ -74,15 +91,32 @@ def base_encode(v, base):
     """Encodes the bytes data in v as base and returns as str"""
     if not isinstance(v, bytes):
         raise TypeError("Invalid value, expected bytes")
-    if base not in (43, 58, 64):
+    if base not in (32, 43, 58, 64):
         raise ValueError("not supported base: {}".format(base))
 
     if v == b"":
         return ""
 
+    # Base32 and Base43 are implemented custom in MaixPy on k210, else in python for simulator
     # Base64 is a special case: We just use binascii's implementation without
     # performing bitcoin-specific padding logic. b2a_base64 always adds a \n
     # char at the end which we strip before returning
+    if base == 32:
+        try:
+            import base32
+
+            return base32.encode(v)
+        except:
+            from .bbqr import base32_encode_stream
+
+            return "".join(base32_encode_stream(v))
+    elif base == 43:
+        try:
+            import base43
+
+            return base43.encode(v)
+        except:
+            pass
     if base == 64:
         return b2a_base64(v).rstrip().decode()
 
@@ -114,7 +148,6 @@ def base_encode(v, base):
 
 def detect_encodings(str_data):
     """Detects which encodings this data str might be, returns list"""
-    from binascii import unhexlify
 
     if not isinstance(str_data, str):
         raise TypeError("detect_encodings() expected str")
@@ -123,6 +156,7 @@ def detect_encodings(str_data):
 
     # get min and max characters (sorted by ordinal value),
     # check most restrictive encodings first
+    # doesnt try to decode, assumption is made
 
     min_chr = min(str_data)
     max_chr = max(str_data)
@@ -130,33 +164,21 @@ def detect_encodings(str_data):
     # might it be hex
     if len(str_data) % 2 == 0 and "0" <= min_chr:
         if max_chr <= "F":
-            try:
-                unhexlify(str_data)
-                encodings.append("HEX")
-            except:
-                pass
+            encodings.append("HEX")
         elif max_chr <= "f":
-            try:
-                unhexlify(str_data)
-                encodings.append("hex")
-            except:
-                pass
+            encodings.append("hex")
+
+    # might it be base32
+    if "2" <= min_chr and max_chr <= "Z":
+        encodings.append(32)
 
     # might it be base43
     if "$" <= min_chr and max_chr <= "Z":
-        try:
-            base_decode(str_data, 43)
-            encodings.append(43)
-        except:
-            pass
+        encodings.append(43)
 
     # might it be base64
     if "+" <= min_chr and max_chr <= "z":
-        try:
-            base_decode(str_data, 64)
-            encodings.append(64)
-        except:
-            pass
+        encodings.append(64)
 
     # might it be ascii
     if ord(max_chr) <= 127:

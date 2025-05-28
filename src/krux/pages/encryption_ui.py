@@ -47,40 +47,49 @@ def decrypt_kef(ctx, data):
     from binascii import unhexlify
     from krux.baseconv import base_decode, detect_encodings
 
-    err = "Nothing decrypted"  # intentionally vague
+    err = "Not decrypted"  # intentionally vague
 
     # if data is str, assume encoded, look for kef envelope
+    kef_envelope = None
     if isinstance(data, str):
         encodings = detect_encodings(data)
         for encoding in encodings:
             as_bytes = None
             if encoding in ("hex", "HEX"):
                 as_bytes = unhexlify(data)
-            elif encoding == 43:
-                as_bytes = base_decode(data, 43)
+            elif encoding == 32:
+                as_bytes = base_decode(data, 32)
             elif encoding == 64:
                 as_bytes = base_decode(data, 64)
+            elif encoding == 43:
+                as_bytes = base_decode(data, 43)
 
-            envelope = KEFEnvelope(ctx)
-            if as_bytes and envelope.parse(as_bytes):
-                data = as_bytes
+            if as_bytes:
+                kef_envelope = KEFEnvelope(ctx)
+                if kef_envelope.parse(as_bytes):
+                    break
+                kef_envelope = None
                 del as_bytes
-                break
 
-    # if here and not working with bytes: nothing to do
-    if not isinstance(data, bytes):
-        raise ValueError(err)
-
-    decrypted = None
-    while isinstance(data, bytes):
-        envelope = KEFEnvelope(ctx)
-        data = envelope.unseal_ui(data)
-        if data is not None:
-            decrypted = data
-        else:
-            if decrypted is not None:
-                return decrypted
+    # kef_envelope may already be parsed, else do so or fail early
+    if kef_envelope is None:
+        if not isinstance(data, bytes):
             raise ValueError(err)
+
+        kef_envelope = KEFEnvelope(ctx)
+        if not kef_envelope.parse(data):
+            raise ValueError(err)
+
+    # unpack as many kef_envelopes as there may be
+    while True:
+        data = kef_envelope.unseal_ui()
+        if data is None:
+            # fail if not unsealed
+            raise ValueError(err)
+        # we may have unsealed another envelope
+        kef_envelope = KEFEnvelope(ctx)
+        if not kef_envelope.parse(data):
+            return data
     raise ValueError(err)
 
 
