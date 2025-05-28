@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 import ucryptolib
-import hashlib
+import uhashlib_hw
 
 
 # KEF: AES, MODEs VERSIONS, MODE_NUMBERS, and MODE_IVS are defined here
@@ -142,7 +142,7 @@ class Cipher:
     def __init__(self, key, salt, iterations):
         key = key if isinstance(key, bytes) else key.encode()
         salt = salt if isinstance(salt, bytes) else salt.encode()
-        self._key = hashlib.pbkdf2_hmac("sha256", key, salt, iterations)
+        self._key = uhashlib_hw.pbkdf2_hmac_sha256(key, salt, iterations)
 
     def encrypt(self, plain, version, iv=b"", fail_unsafe=True):
         """AES encrypt according to KEF rules defined by version, returns payload bytes"""
@@ -168,10 +168,10 @@ class Cipher:
         if v_auth != 0 and mode in (MODE_ECB, MODE_CBC, MODE_CTR):
             if v_auth > 0:
                 # unencrypted (public) auth: hash the plaintext w/ self._key
-                auth = hashlib.sha256(plain + self._key).digest()[:v_auth]
+                auth = uhashlib_hw.sha256(plain + self._key).digest()[:v_auth]
             elif v_auth < 0:
                 # encrypted auth: hash only the plaintext
-                auth = hashlib.sha256(plain).digest()[:-v_auth]
+                auth = uhashlib_hw.sha256(plain).digest()[:-v_auth]
 
                 # fail: same case as above if auth bytes have NUL suffix
                 if fail_unsafe and v_pkcs_pad is False and auth[-1] == 0x00:
@@ -307,10 +307,10 @@ class Cipher:
         for _ in range(max_attempts):
             if v_auth > 0:
                 # for unencrypted (public) auth > 0: hash the decrypted w/ self._key
-                cksum = hashlib.sha256(decrypted + self._key).digest()[:v_auth]
+                cksum = uhashlib_hw.sha256(decrypted + self._key).digest()[:v_auth]
             else:
                 # for encrypted auth < 0: hash only the decrypted
-                cksum = hashlib.sha256(decrypted).digest()[:-v_auth]
+                cksum = uhashlib_hw.sha256(decrypted).digest()[:-v_auth]
             if cksum == auth:
                 return decrypted
 
