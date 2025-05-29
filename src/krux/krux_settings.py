@@ -56,6 +56,8 @@ DEFAULT_RX_PIN = (
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
 CNC_FILE_DRIVER = "cnc/file"
 CNC_GRBL_DRIVER = "cnc/grbl"
+CNC_HEAD_ROUTER = "router"
+CNC_HEAD_LASER = "laser"
 
 
 def t(slug):
@@ -194,6 +196,10 @@ class CNCSettings(SettingsNamespace):
     depth_per_pass = NumberSetting(float, "depth_per_pass", 0.03125, [0.0001, 10000])
     part_size = NumberSetting(float, "part_size", 3.5, [0.0001, 10000])
     border_padding = NumberSetting(float, "border_padding", 0.0625, [0.0001, 10000])
+    head_type = CategorySetting(
+        "head_type", CNC_HEAD_ROUTER, [CNC_HEAD_ROUTER, CNC_HEAD_LASER]
+    )
+    head_power = NumberSetting(int, "head_power", 1000, [0, 1000])
 
     def __init__(self):
         self.grbl = GRBLSettings()
@@ -211,6 +217,8 @@ class CNCSettings(SettingsNamespace):
             "depth_per_pass": t("Depth Per Pass"),
             "part_size": t("Part Size"),
             "border_padding": t("Border Padding"),
+            "head_type": t("Head type"),
+            "head_power": t("Power"),
             "grbl": "GRBL",
         }[attr]
 

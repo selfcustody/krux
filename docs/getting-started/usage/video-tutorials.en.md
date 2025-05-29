@@ -2,78 +2,118 @@ Most people prefer to learn by watching videos, and we are fortunate to have exc
 
 ## English
 
-### Krux on M5StickV + Sparrow
+<div markdown="1" class="group-2">
+<div markdown="1" class="video">
+[![Krux on M5StickV + Sparrow Wallet](https://img.youtube.com/vi/rsdvmIcucwQ/0.jpg)](https://www.youtube.com/watch?v=rsdvmIcucwQ1)
 
-Krux on M5StickV + Sparrow Wallet by Crypto Guide
+Krux on M5StickV + Sparrow Wallet - DIY Bitcoin Hardware Wallet (Similar to SeedSigner) - Crypto Guide
+</div>
 
-[![Krux on M5StickV + Sparrow](https://img.youtube.com/vi/rsdvmIcucwQ/0.jpg)](https://www.youtube.com/watch?v=rsdvmIcucwQ1)
+<div markdown="1" class="video">
+[![Krux on Maix Amigo + Blue Wallet](https://img.youtube.com/vi/EtV_Iw6a0O0/0.jpg)](https://www.youtube.com/watch?v=EtV_Iw6a0O0)
 
-### Krux on Maix Amigo + Blue
+Krux on Maix Amigo + Blue Wallet - DIY Bitcoin Hardware Wallet (Similar to SeedSigner) - Crypto Guide
+</div>
+</div>
 
-Krux on Maix Amigo + Blue Wallet by Crypto Guide
+<div markdown="1" class="group-2">
+<div markdown="1" class="video">
+[![DIY-Only Multivendor Hardware Wallet MultiSig](https://img.youtube.com/vi/JfK2m8ucuxU/0.jpg)](https://www.youtube.com/watch?v=JfK2m8ucuxU)
 
-[![Krux on Maix Amigo + Blue](https://img.youtube.com/vi/EtV_Iw6a0O0/0.jpg)](https://www.youtube.com/watch?v=EtV_Iw6a0O0)
+DIY-Only Multivendor Hardware Wallet MultiSig: SeedSigner, Jade, Krux, Satochip + Sparrow & Electrum - Crypto Guide
+</div>
 
-### DIY-Only MultiSig
+<div markdown="1" class="video">
+[![Krux DIY Bitcoin Signer: Build From Source & Verify](https://img.youtube.com/vi/Vmr_TFy2TfQ/0.jpg)](https://www.youtube.com/watch?v=Vmr_TFy2TfQ)
 
-DIY-Only Multivendor Hardware Wallet MultiSig: SeedSigner, Jade, Krux, Satochip + Sparrow & Electrum by Crypto Guide
+Krux DIY Bitcoin Signer: Build From Source & Verify (With Windows + WSL2 + Docker) - Crypto Guide
+</div>
+</div>
 
-[![DIY-Only MultiSig](https://img.youtube.com/vi/JfK2m8ucuxU/0.jpg)](https://www.youtube.com/watch?v=JfK2m8ucuxU)
+<div markdown="1" class="group-2">
+<div markdown="1" class="video">
+[![BUILD Your Own Bitcoin Hardware](https://img.youtube.com/vi/WiwmpO1k2zA/0.jpg)](https://www.youtube.com/watch?v=WiwmpO1k2zA)
 
-### Build From Source & Verify
+BUILD Your Own Bitcoin Hardware Security Device NOW: KRUX - BTC Sessions
+</div>
 
-Krux DIY Bitcoin Signer: Build From Source & Verify (With Windows + WSL2 + Docker) by Crypto Guide
+<div markdown="1" class="video">
+[![Bitcoin Security for Under $50](https://img.youtube.com/vi/HK8FtbUePa8/0.jpg)](https://www.youtube.com/watch?v=HK8FtbUePa8)
 
-[![Build From Source & Verify](https://img.youtube.com/vi/Vmr_TFy2TfQ/0.jpg)](https://www.youtube.com/watch?v=Vmr_TFy2TfQ)
+Bitcoin Security for Under $50: Building a Krux Hardware Wallet - Sovereign Money
+</div>
+</div>
+
+<div class="clear"></div>
 
 ## Portuguese
 
-### Krux fácil de instalar
-Hardwallet Krux fácil de instalar + QRs criptografados - por Bitdov
+<div markdown="1" class="group-2">
+<div markdown="1" class="video">
+[![Hardwallet Krux fácil de instalar](https://img.youtube.com/vi/YbV6_p_eti4/0.jpg)](https://www.youtube.com/watch?v=YbV6_p_eti4)
 
-[![Krux fácil de instalar](https://img.youtube.com/vi/YbV6_p_eti4/0.jpg)](https://www.youtube.com/watch?v=YbV6_p_eti4)
+Hardwallet Krux fácil de instalar + QRs criptografados - Bitcoinheiros
+</div>
 
-
-### Multisig com Krux
-Multisig com Krux e Nunchuk no celular - por Bitdov
-
+<div markdown="1" class="video">
 [![Multisig com Krux](https://img.youtube.com/vi/Gdynhj6EnEg/0.jpg)](https://www.youtube.com/watch?v=Gdynhj6EnEg)
 
-### Krux com impressora térmica
-Usando a Krux com impressora térmica - por Bitdov
+Multisig com Krux e Nunchuk no celular - Bitcoinheiros
+</div>
+</div>
 
+<div markdown="1" class="group-2">
+<div markdown="1" class="video">
 [![Usando a Krux com impressora térmica](https://img.youtube.com/vi/Zajy7HAQiwE/0.jpg)](https://www.youtube.com/watch?v=Zajy7HAQiwE)
 
-### Krux no celular
+Usando a Krux com impressora térmica - Bitcoinheiros
+</div>
 
-Carteira Bitcoin com celular OFFLINE - Krux mobile APK - por Dig
+<div markdown="1" class="video">
+[![Carteira Bitcoin com celular OFFLINE](https://img.youtube.com/vi/CPEnTP7l_9Y/0.jpg)](https://www.youtube.com/watch?v=CPEnTP7l_9Y)
 
-[![Krux no celular](https://img.youtube.com/vi/CPEnTP7l_9Y/0.jpg)](https://www.youtube.com/watch?v=CPEnTP7l_9Y)
+Carteira Bitcoin com celular OFFLINE - Krux mobile APK - 
+DIG P2P - Bitcoin Para Iniciantes!
+</div>
+</div>
 
-### Krux no celular II
+<div markdown="1" class="group-2">
+<div markdown="1" class="video">
+[![Como instalar a carteira Krux no celular](https://img.youtube.com/vi/hhMYq75pAOc/0.jpg)](https://www.youtube.com/watch?v=hhMYq75pAOc)
 
-Como utilizar a carteira Krux no celular - por João Trein
+Como instalar a carteira Krux no celular - João Trein
+</div>
 
-[![Krux no celular II](https://img.youtube.com/vi/hhMYq75pAOc/0.jpg)](https://www.youtube.com/watch?v=hhMYq75pAOc)
+<div markdown="1" class="video">
+[![Faça sua hardware wallet em casa com a KRUX!](https://img.youtube.com/vi/1V6Lp0m8esc/0.jpg)](https://www.youtube.com/watch?v=1V6Lp0m8esc)
 
+Faça sua hardware wallet em casa com a KRUX! - CAIOVSKI
+</div>
+</div>
 
-### Faça sua Krux
-
-Faça sua hardware wallet em casa com a KRUX! - por Caiovski
-
-[![Krux no celular](https://img.youtube.com/vi/1V6Lp0m8esc/0.jpg)](https://www.youtube.com/watch?v=1V6Lp0m8esc)
+<div class="clear"></div>
 
 ## Korean
 
-### 비트코인 지갑 만들기(셀프커스터디 AtoZ)
-[![비트코인 지갑 만들기(셀프커스터디 AtoZ)](https://img.youtube.com/vi/NTsZCHbQXgc/0.jpg)](https://www.youtube.com/playlist?list=PLetYvN5q3ZS9m1sf7_MJ1It-t8O87xEeB)
+<div markdown="1" class="group-2">
+<div markdown="1" class="video">
+[![Krux 월렛 설치 및 검증 방법(feat : 원더케이 비트코인 전용 하드월렛)
+](https://img.youtube.com/vi/7H1bI0A2y0w/0.jpg)](https://www.youtube.com/watch?v=7H1bI0A2y0w)
 
+Krux 월렛 설치 및 검증 방법(feat : 원더케이 비트코인 전용 하드월렛) - 봉현이형
+</div>
 
-### Krux 월렛 설치 및 검증 방법
+<div markdown="1" class="video">
+[![나만의 비트코인 지갑 만들기(2강_1부 개인키 생성))](https://img.youtube.com/vi/NTsZCHbQXgc/0.jpg)](https://www.youtube.com/watch?v=NTsZCHbQXgc&list=PLetYvN5q3ZS9m1sf7_MJ1It-t8O87xEeB&index=2)
 
-[![Krux 월렛 설치 및 검증 방법](https://img.youtube.com/vi/7H1bI0A2y0w/0.jpg)](https://www.youtube.com/watch?v=7H1bI0A2y0w)
+나만의 비트코인 지갑 만들기(2강_1부 개인키 생성) - 봉현이형
+</div>
+</div>
 
+<div markdown="1" class="video">
+[![안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑(원더케이 하드월렛)](https://img.youtube.com/vi/1_JSJ1uzPzQ/0.jpg)](https://www.youtube.com/watch?v=1_JSJ1uzPzQ)
 
-### 안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑
+안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑(원더케이 하드월렛) - 봉현이형
+</div>
 
-[![안사면 손해? 세상에서 가장 투명한 비트코인 전용 지갑](https://img.youtube.com/vi/1_JSJ1uzPzQ/0.jpg)](https://www.youtube.com/watch?v=1_JSJ1uzPzQ)
+<div class="clear"></div>
