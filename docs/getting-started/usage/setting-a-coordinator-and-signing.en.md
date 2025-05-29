@@ -1,10 +1,11 @@
-After creating a mnemonic, making a safe backup, and testing to recover your mnemonic, it's time to set up a coordinator.
+Once you've generated a mnemonic, securely backed it up, and successfully tested the recovery process, you’re ready to set up a coordinator.
 
-Krux can work with multiple coordinator wallets. Popular options include:
+Krux works with:
 
 - [Sparrow Wallet](https://www.sparrowwallet.com/) (desktop)
-- [Liana](https://wizardsardine.com/liana/) (desktop)*
 - [Specter Desktop](https://specter.solutions/) (desktop)
+- [Liana](https://wizardsardine.com/liana/) (desktop)*
+- [Bitcoin Safe](https://bitcoin-safe.org/) (desktop)
 - [Nunchuk](https://nunchuk.io/) (mobile)
 - [BlueWallet](https://bluewallet.io/) (mobile)
 
@@ -22,7 +23,7 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 
 **Specter and Nunchuk Multisig:** Add Krux key, add other keys, then create a wallet that uses them.
 
-**Sparrow, Liana and BlueWallet**: Create a wallet (or vault in Blue Wallet) and add keys during setup.
+**Sparrow, Liana, Bitoin Safe and BlueWallet**: Create a wallet (or vault in Blue Wallet) and add keys during setup.
 
 1. Load a mnemonic and wallet in Krux.
 
@@ -31,7 +32,7 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" class="m5stickv">
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" class="m5stickv">
 
-2. On your coordinator, when presented with possible signer devices to add, choose Krux if available, otherwise choose "other" or even another QR code compatible signer. As Krux is compatible with many QR code formats, most of available alternatives should work.
+2. On your coordinator, select **"Krux"** if it's listed among the available signer devices. If not, choose **"Other"** or a QR code-compatible signer such as **"SeedSigner"**. Since Krux supports various QR formats, other available options may also be compatible.
 
 3. When prompted by your coordinator to import signer's public key, access the `Extended Public Key` on Krux.
 
@@ -60,8 +61,9 @@ Alternatively, you can export the extended public keys as files to an SD card. I
 
 1. In your coordinator, export the wallet descriptor containing information about the wallet and all cosigners:
     - **Sparrow**: "Descriptor"
-    - **Liana**: "Wallet Descriptor"
     - **Specter**: "Export Wallet"
+    - **Liana**: "Wallet Descriptor"
+    - **Bitcoin Safe**: "Register multisig on signers" on step 6 or "Wallet Descriptor"
     - **Nunchuk**: "Export Wallet Configuration"
     - **BlueWallet**: "Export Coordination Setup"
 2. Export the descriptor as a QR code or file.
