@@ -859,7 +859,7 @@ class Login(Page):
 
         ### on-device testing hack
         # pylint: disable=W0105
-        #  """
+        """
         from krux.baseconv import base_encode
 
         msg = "running test_multi_wrapped_envelopes()..."
@@ -900,7 +900,7 @@ class Login(Page):
         msg = test_assert_hashing(None)
         self.ctx.display.draw_centered_text(msg)
         self.ctx.input.wait_for_button()
-        #  """
+        """
 
         return MENU_CONTINUE
 
