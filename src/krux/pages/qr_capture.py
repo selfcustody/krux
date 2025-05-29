@@ -115,6 +115,7 @@ class QRCodeCapture(Page):
 
         self.ctx.display.to_landscape()
 
+    # pylint: disable=R0912,R0915,R1702,W0612
     def qr_capture_loop(self):
         """Captures either singular or animated QRs and parses their contents"""
 
@@ -195,15 +196,36 @@ class QRCodeCapture(Page):
 
         if parser.is_complete():
             result = parser.result()
-            # on simulator, bytes returned as latin-1 or big5 decoded str
-            # (or is it shift_jis? or big5hkscs?, or cp950?),
-            # but micropython has only utf8 -- returns bytes
+
+            # lots of playing here while dealing with binary qrcode
+            # and trying to understand differences between when reading
+            # from maixpy device vs simulator
             if isinstance(result, str):
-                len_utf8 = len(result.encode())
-                if len(result) != len_utf8:
-                    try:
-                        result = result.encode("latin-1")
-                    except:
-                        result = result.encode("big5")
+                as_bytes = result.encode()
+                binary = bool(128 <= max(as_bytes) < 256)
+                try:
+                    as_bytes.decode()
+                    maixpy = False
+                except:
+                    maixpy = True
+
+                if binary:
+                    if maixpy:
+                        result = as_bytes
+                    else:
+                        maxord = max((ord(x) for x in result))
+                        if maxord < 256:
+                            # same as latin-1 on sim, except works in micropython
+                            result = bytes((ord(x) for x in result))
+                        else:
+                            big5 = 0
+                            as_bytes = b""
+                            for i, char in enumerate(result):
+                                if ord(char) < 256:
+                                    as_bytes += bytes([ord(char)])
+                                else:
+                                    as_bytes += char.encode("big5")
+                                    big5 += 1
+                            result = as_bytes
             return result, parser.format
         return None, None

@@ -1,5 +1,7 @@
 # The MIT License (MIT)
 
+# pylint: disable=C0103,C0116,C0206,C0302,E0601,R0912,R0914,W0212,W0612,W0613
+
 # Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -854,4 +856,582 @@ class Login(Page):
             width=width,
             highlight_prefix=":",
         )
+
+        ### on-device testing hack
+        # pylint: disable=W0105
+        #  """
+        from krux.baseconv import base_encode
+
+        msg = "running test_multi_wrapped_envelopes()..."
+        print("\n" + msg)
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(msg)
+        matryoshka, matryoshka2, matryoshka3 = test_multi_wrapped_envelopes(None)
+        self.display_qr_codes(matryoshka, 1, "binary Matryoshka: k=abc")
+        self.display_qr_codes(
+            base_encode(matryoshka2, 43), 1, "base43 Matryoshka (doc-ID): k=abc"
+        )
+        self.display_qr_codes(
+            base_encode(matryoshka3, 32),
+            1,
+            "base32 Matryoshka (deflated doc-ID): k=abc",
+        )
+
+        msg = "running report_rate_of_failure()..."
+        print("\n" + msg)
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text("See console; " + msg)
+        msg = test_report_rate_of_failure(None)
+        self.ctx.display.draw_centered_text(msg)
+        self.ctx.input.wait_for_button()
+
+        msg = "running brute_force_compression_checks()..."
+        print("\n" + msg)
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text("See console; " + msg)
+        msg = test_brute_force_compression_checks(None)
+        self.ctx.display.draw_centered_text(msg)
+        self.ctx.input.wait_for_button()
+
+        msg = "running assert_hashing()..."
+        print("\n" + msg)
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text("See console; " + msg)
+        msg = test_assert_hashing(None)
+        self.ctx.display.draw_centered_text(msg)
+        self.ctx.input.wait_for_button()
+        #  """
+
         return MENU_CONTINUE
+
+
+def test_multi_wrapped_envelopes(m5stickv):
+    """Test that nothing breaks when KEF messages are used to hide other KEF messages"""
+
+    from krux import kef
+    from krux.wdt import wdt
+    from hashlib import sha256
+    from binascii import hexlify
+
+    I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
+    key = "abc"
+    iterations, i_step = 10000, 1234
+    orig_plaintext = "KEF my dear, you can call me Matryoshka. ;)".encode()
+
+    # encrypt plaintext for versions of KEF
+    plaintext = orig_plaintext
+    plaintext2 = orig_plaintext
+    plaintext3 = orig_plaintext
+    for v, version in sorted(kef.VERSIONS.items()):
+        if version is None or version["mode"] is None:
+            continue
+
+        wdt.feed()
+        label = '"{}", K={}'.format(version["name"][4:], key)
+        # id can be simple, or up to 255 chars, even non-ascii bytes
+        id_ = 'k: "abc"'
+        id2 = kef_self_document(v, label=label, iterations=iterations, limit=252)
+        id3 = kef._deflate(id2.encode())
+        cipher = kef.Cipher(key, id_, iterations)
+        cipher2 = kef.Cipher(key, id2, iterations)
+        cipher3 = kef.Cipher(key, id3, iterations)
+        iv = I_VECTOR[: kef.MODE_IVS.get(version["mode"], 0)]
+        cipher_payload = cipher.encrypt(plaintext, v, iv)
+        cipher_payload2 = cipher2.encrypt(plaintext2, v, iv)
+        cipher_payload3 = cipher3.encrypt(plaintext3, v, iv)
+        plaintext = kef.wrap(id_, v, iterations, cipher_payload)
+        plaintext2 = kef.wrap(id2, v, iterations, cipher_payload2)
+        plaintext3 = kef.wrap(id3, v, iterations, cipher_payload3)
+        assert plaintext[:-1] != b"\x00"
+        assert plaintext2[:-1] != b"\x00"
+        assert plaintext3[:-1] != b"\x00"
+        iterations += i_step
+
+    print(
+        "\nI'm the sample Matryoshka.",
+        repr(plaintext),
+        "\nsha256:" + hexlify(sha256(plaintext).digest()).decode(),
+    )
+    print(
+        "\nI'm a Matryoshka with self-doc ID.",
+        repr(plaintext2),
+        "\nsha256:" + hexlify(sha256(plaintext2).digest()).decode(),
+    )
+    print(
+        "\nI'm a Matryoshka w/ compressed self-doc ID `deflate(ID, wbits=-10)`.",
+        repr(plaintext3),
+        "\nsha256:" + hexlify(sha256(plaintext3).digest()).decode(),
+    )
+    answer = plaintext, plaintext2, plaintext3
+
+    # decode and decrypt KEF packages until we find something that's not KEF
+    while True:
+        wdt.feed()
+        try:
+            parsed = kef.unwrap(plaintext)
+            parsed2 = kef.unwrap(plaintext2)
+            parsed3 = kef.unwrap(plaintext3)
+            id_, v, iterations, cipher_payload = parsed
+            id2, v2, iterations2, cipher_payload2 = parsed2
+            id3, v3, iterations3, cipher_payload3 = parsed3
+            assert v == v2 == v3
+            assert iterations == iterations2 == iterations3
+            assert id2 == kef._reinflate(id3)
+            # print("\n" + id_)
+        except:
+            break
+        cipher = kef.Cipher(key, id_, iterations)
+        cipher2 = kef.Cipher(key, id2, iterations)
+        cipher3 = kef.Cipher(key, id3, iterations)
+        plaintext = cipher.decrypt(cipher_payload, v)
+        plaintext2 = cipher2.decrypt(cipher_payload2, v)
+        plaintext3 = cipher3.decrypt(cipher_payload3, v)
+
+    assert plaintext == orig_plaintext
+    assert plaintext2 == orig_plaintext
+    assert plaintext3 == orig_plaintext
+
+    return answer
+
+
+def test_report_rate_of_failure(m5stickv):
+    from krux import kef
+    from hashlib import sha512
+    from embit.bip39 import mnemonic_from_bytes
+    from krux.wdt import wdt
+
+    I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
+
+    encrs = {}
+    errs = {}
+    for v in kef.VERSIONS:
+        if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+            continue
+
+        name = kef.VERSIONS[v]["name"]
+        iv = I_VECTOR[: kef.MODE_IVS.get(kef.VERSIONS[v]["mode"], 0)]
+        e = kef.Cipher(b"key", b"salt", 10000)
+        encrs[v] = {
+            "name": name,
+            "iv": iv,
+            "e": e,
+            "timid": 0,
+            "avoided": 0,
+            "failed": 0,
+            "wrapper": 0,
+            "sampled": 0,
+        }
+        errs[v] = {
+            "encrypt": {},
+            "wrapper": {},
+            "decrypt": {},
+        }
+
+    # plaintext: will be deterministically altered for each loop
+    plain = b""  # play here
+
+    # samples per message type: *1 per message function below, *2 for re-encoding utf8
+    # (256 is enough, 1K takes 9 seconds, 100K takes 12 minutes)
+    samples = 256  # play here
+
+    # message functions: takes message bytes, returns new same-size message bytes
+    def f_16bytes(msg):
+        return msg[:16]
+
+    def f_32bytes(msg):
+        return msg[:32]
+
+    def f_12w_mnemonic(msg):
+        return mnemonic_from_bytes(f_16bytes(msg[:16])).encode()
+
+    def f_24w_mnemonic(msg):
+        return mnemonic_from_bytes(f_32bytes(msg[:32])).encode()
+
+    def f_repeated(msg):
+        return msg[:16] * 2
+
+    def f_medium(msg):
+        return msg
+
+    def f_long(msg):
+        return b"".join(
+            [
+                f_16bytes(msg),
+                f_32bytes(msg),
+                f_12w_mnemonic(msg),
+                f_24w_mnemonic(msg),
+                f_repeated(msg),
+                f_medium(msg),
+            ]
+        )
+
+    msg_funcs = (
+        f_16bytes,
+        f_32bytes,
+        f_12w_mnemonic,
+        f_24w_mnemonic,
+        f_repeated,
+        f_medium,
+        f_long,
+    )
+
+    def utf8_encoded(msg):
+        # decoding latin-1 maintains byte-length; re-encoding to utf8 likely adds bytes
+        # return msg.decode("latin-1").encode("utf8")
+        return bytes(msg)
+
+    failures = 0
+    for i in range(samples):
+        # rehash plain, make another for each message function, again for utf8 re-encoding
+        plain = sha512(plain).digest()
+        plaintexts = [msgfunc(plain) for msgfunc in msg_funcs]
+        plaintexts.extend([utf8_encoded(msgfunc(plain)) for msgfunc in msg_funcs])
+        for plain in plaintexts:
+            for v in kef.VERSIONS:
+                wdt.feed()
+
+                if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+                    continue
+
+                avoided = False
+                failed = False
+                kef_failed = False
+                try:
+                    cipher = encrs[v]["e"].encrypt(plain, v, encrs[v]["iv"])
+                except Exception as err:
+                    avoided = True
+                    cipher = encrs[v]["e"].encrypt(
+                        plain, v, encrs[v]["iv"], fail_unsafe=False
+                    )
+                    if repr(err) in errs[v]["encrypt"]:
+                        errs[v]["encrypt"][repr(err)] += 1
+                    else:
+                        errs[v]["encrypt"][repr(err)] = 1
+
+                try:
+                    envelope = kef.wrap(b"salt", v, 10000, cipher)
+                    assert kef.unwrap(envelope)[3] == cipher
+                except Exception as err:
+                    kef_failed = True
+                    if repr(err) in errs[v]["wrapper"]:
+                        errs[v]["wrapper"][repr(err)] += 1
+                    else:
+                        errs[v]["wrapper"][repr(err)] = 1
+
+                try:
+                    assert plain == encrs[v]["e"].decrypt(cipher, v)
+                except Exception as err:
+                    failed = True
+                    if avoided:
+                        err = "Decryption has failed but encryption was avoided"
+                    if repr(err) in errs[v]["decrypt"]:
+                        errs[v]["decrypt"][repr(err)] += 1
+                    else:
+                        errs[v]["decrypt"][repr(err)] = 1
+
+                if not failed and avoided:
+                    encrs[v]["timid"] += 1
+                if failed and avoided:
+                    encrs[v]["avoided"] += 1
+                if failed and not avoided:
+                    encrs[v]["failed"] += 1
+                    failures += 1
+                    print(
+                        "Failure to decrypt: v: {}, plain: {}, cipher: {}".format(
+                            v, plain, cipher
+                        )
+                    )
+                if kef_failed:
+                    failures += 1
+                    print(
+                        "KEF wrapping failure: v: {}, plain: {}, cipher: {}".format(
+                            v, plain, cipher
+                        )
+                    )
+
+                encrs[v]["sampled"] += 1
+
+    print("Failure Summary:\nVer  Ver Name     Timid   Avoid    Fail  KEFerr   Samples")
+    for v in sorted(kef.VERSIONS):
+        if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+            continue
+
+        print(
+            " {:2d}  {:10s}  {:6d}  {:6d}  {:6d}  {:6d}  {:8d}".format(
+                v,
+                encrs[v]["name"],
+                encrs[v]["timid"],  # able to decrypt, but refused to encrypt
+                encrs[v]["avoided"],  # couldn't decrypt and refused to encrypt
+                encrs[v]["failed"],  # failed to decrypt w/o refusing to encrypt
+                encrs[v]["wrapper"],  # failure during KEF wrapping
+                encrs[v]["sampled"],  # total samples
+            )
+        )
+
+    print("\nPer-Version Failure Details:\nVer  Function    Count  Description")
+    for v in sorted(kef.VERSIONS):
+        if kef.VERSIONS[v] is None or kef.VERSIONS[v]["mode"] is None:
+            continue
+
+        for func in ("encrypt", "decrypt", "wrapper"):
+            for error, count in errs[v][func].items():
+                print(" {:2d}  {:10s} {:6d}  {}".format(v, func, count, error))
+
+    assert failures == 0
+    return "Fail summary: {} failures".format(failures)
+
+
+def kef_self_document(version, label=None, iterations=None, limit=None):
+    """This is NOT a unit-test, it's a way for KEF encoding to document itself"""
+
+    from krux import kef
+    from collections import OrderedDict
+
+    def join_text(a_dict, limit):
+        result = "\n".join(["{}: {}".format(k, v) for k, v in a_dict.items()])
+        if not limit or len(result) <= limit:
+            return result
+
+        result = result.replace(" + ", " +")
+        if len(result) <= limit:
+            return result
+
+        result = result.replace(" +", "+")
+        if len(result) <= limit:
+            return result
+
+        result = result.replace(" ", "")
+        if len(result) <= limit:
+            return result
+
+        return result[: limit - 3] + "..."
+
+    # rules are declared as VERSIONS values
+    v_name = kef.VERSIONS[version]["name"]
+    v_mode = kef.VERSIONS[version]["mode"]
+    mode_name = [k for k, v in kef.MODE_NUMBERS.items() if v == v_mode][0]
+    v_iv = kef.MODE_IVS.get(v_mode, 0)
+    v_auth = kef.VERSIONS[version].get("auth", 0)
+    v_pkcs = kef.VERSIONS[version].get("pkcs_pad", False)
+    v_compress = kef.VERSIONS[version].get("compress", False)
+
+    label_key = "KEF bytes"
+    if label:
+        label_key = "[{}] KEF bytes".format(label)
+
+    itertext = " big; =(i > 10K) ? i : i * 10K"
+    if iterations:
+        itertext = "; ={}".format(iterations)
+
+    text = OrderedDict()
+    text[label_key] = "len_id + id + v + i + cpl"
+    text["len_id"] = "1b"
+    text["id"] = "<len_id>b"
+    text["v"] = "1b; ={}".format(version)
+    text["i"] = "3b{}".format(itertext)
+    text["cpl"] = None
+
+    cpl = "{}"
+    if v_iv:
+        cpl = "iv + {}".format(cpl)
+        iv_arg = ", iv"
+        text["iv"] = "{}b".format(v_iv)
+    else:
+        iv_arg = ""
+
+    if v_compress:
+        plain = "zlib(<P>, wbits=-10)"
+    else:
+        plain = "<P>"
+
+    if mode_name in ("AES-ECB", "AES-CBC", "AES-CTR"):
+        if v_auth > 0:
+            auth = "sha256({} + k)[:{}]".format(plain, v_auth)
+            cpl += " + auth"
+            text["e"] = None
+            text["pad"] = None
+        elif v_auth < 0:
+            auth = "sha256({})[:{}]".format(plain, -v_auth)
+            plain += " + auth"
+            text["e"] = None
+            text["auth"] = None
+    elif mode_name == "AES-GCM":
+        auth = "e.authtag[:{}]".format(v_auth)
+        cpl += " + auth"
+        text["e"] = None
+        text["auth"] = None
+
+    pad = None
+    if v_pkcs in (True, False):
+        plain += " + pad"
+        text["pad"] = None
+        pad = "PKCS7" if v_pkcs else "NUL"
+
+    text["cpl"] = cpl.format("e.encrypt({})".format(plain))
+    text["e"] = "AES(k, {}{})".format(mode_name[-3:], iv_arg)
+    text["auth"] = auth
+    if pad:
+        text["pad"] = pad
+    text["k"] = "pbkdf2_hmac(sha256, <K>, id, i)"
+
+    return join_text(text, limit)
+
+
+def test_brute_force_compression_checks(m5stickv):
+    from hashlib import sha256
+    from binascii import hexlify
+    from krux.baseconv import base_encode, base_decode
+    from krux import kef
+    from krux.wdt import wdt
+
+    file_name = "/sd/brute-force.txt"
+    file_mode = "r"  # "w": to create file; "r": to read file; None to avoid file I/O
+    attempts = 1000  # 1000 good enough for unit-tests, increase for on-device testing
+    bstr = b""
+
+    if file_mode:
+        if file_mode == "r":
+            print("Reading file '{}'...".format(file_name))
+            try:
+                file_handle = open(file_name, file_mode)
+            except:
+                file_mode = "w"
+                print("  failed to read file {}".format(file_name))
+
+        if file_mode == "w":
+            print("Creating file '{}'...".format(file_name))
+            try:
+                file_handle = open(file_name, file_mode)
+            except:
+                file_mode = None
+                print("  failed to create file {}, skipping file I/O".format(file_name))
+
+    for i in range(attempts):
+        wdt.feed()
+        bstr = hexlify(sha256(bstr).digest()) * 10
+        comp = kef._deflate(bstr)
+        sb64 = base_encode(comp, 64)
+        assert bstr == kef._reinflate(base_decode(sb64, 64))
+
+        if file_mode == "w":
+            file_handle.write(sb64 + "\n")
+            continue
+
+        if file_mode != "r":
+            continue
+
+        sb64_from_file = file_handle.readline()
+        assert bstr == kef._reinflate(base_decode(sb64_from_file, 64))
+
+    if file_mode:
+        file_handle.close()
+
+    print(
+        "file_mode: {}  Completed {} deflate/reinflate assertions".format(
+            file_mode, i + 1
+        )
+    )
+    return "file_mode: {}  Completed {} deflate/reinflate assertions".format(
+        file_mode, i + 1
+    )
+
+
+#
+# this section inspired by script 'assert_hashing.py' for testing hashlib and uhashlib_hw
+#
+import hashlib
+
+try:
+    import uhashlib_hw
+
+    hw_hashing = True
+except:
+    hw_hashing = False
+
+
+def pbkdf2_hmac_sha256(password, salt, iterations):
+    """returns hashlib.pbkdf2_hmac() with "sha256" as first parameter"""
+    return hashlib.pbkdf2_hmac("sha256", password, salt, iterations)
+
+
+def assert_hashing(f_hash, f_hmac):
+    """churns nonce through sha256() and pbkdf_hmac(sha256,) calls, asserts expected results"""
+    #  pylint: disable=C0301
+    expecteds = [
+        b"\xaaj\xc2\xd4\x96\x18\x82\xf4*4\\v\x15\xf4\x13=\xde\x8emn|\x1bk@\xaeO\xf6\xeeR\xc3\x93\xd0",
+        b"\x9e?wG\xe9\rI\xac\xb3\n\xceZt7\xce\xa8\xf6\xe5\xa6\xfe\xa2H\xaa\xf2_\x16Y\xcc\x9a$\xe0\x80",
+        b'\xdc\xee\x1fc\xa0\x17\x85\xffda\xd8{\xc91\xd0\xab:\\\x9d@\xec\xc96s\xf0\xc5\xe8"r\x8b\xf1^',
+        b'\xdc\xee\x1fc\xa0\x17\x85\xffda\xd8{\xc91\xd0\xab:\\\x9d@\xec\xc96s\xf0\xc5\xe8"r\x8b\xf1^',
+        b'\x1fdFbl\x13\xe6\x93\xfb\xd1\x13\xacj\xf5\x9f"<\xf1\xa2@\x168\x04=\x95<`i\xb3\xcc\x7f\x98',
+        b"\x1d\x98\xdc\x98\x9f\xda\x91=\xd3\xefC\xc3_\xd4qivyU\x84\x11K\xe5s+\xa8\xbc\x97\x83\x00Y\xd1",
+    ]
+
+    hashes = []
+    nonce = b""
+    for i in range(32):
+        nonce = f_hash(nonce).digest()
+        hashes.append(nonce)
+
+        nonce = f_hash(nonce[-i:]).digest()
+        hashes.append(nonce)
+
+        nonce = f_hash(nonce * (i + 1)).digest()
+        hashes.append(nonce)
+
+        nonce = f_hmac(nonce[-i:], nonce[:-i], (i + 1) * 2)  # short password and salt
+        hashes.append(nonce)
+
+        nonce = f_hmac(nonce * (i + 1), nonce, (i + 1) * 4)  # long password
+        hashes.append(nonce)
+
+        nonce = f_hmac(
+            nonce, (nonce * (i + 1))[:1024], (i + 1) * 8
+        )  # long salt (clipped at 1024)
+        hashes.append(nonce)
+    nonce = f_hash(b"".join(hashes)).digest()
+
+    calculateds = [
+        hashes[2],  # 3rd churned digest is solely from sha256
+        nonce,  # last nonce is sha256 of contatenated hashes from sha256/hmac churns above
+        f_hmac(b"".join(hashes), nonce, 16),  # long_password == sha256(long_password)
+        f_hmac(f_hash(b"".join(hashes)).digest(), nonce, 16),  # proves above
+        f_hmac(nonce, b"".join(hashes)[:1024], 32),  # long_salt is not the same case
+        f_hmac(nonce, f_hash(b"".join(hashes)[:1024]).digest(), 32),  # proves above
+    ]
+
+    err = ""
+    for i, (expected, calculated) in enumerate(zip(expecteds, calculateds)):
+        try:
+            assert expected == calculated
+        except:
+            err += "\nTest case: {}\n   expected: {}\n calculated: {}".format(
+                i, repr(expected), repr(calculated)
+            )
+    if err:
+        raise AssertionError(err)
+
+
+def test_assert_hashing(m5stickv):
+    """assert sanity of sha256 and pbkdf2_hmac implementations against known results"""
+
+    err = ""
+    if hw_hashing:
+        try:
+            assert_hashing(uhashlib_hw.sha256, uhashlib_hw.pbkdf2_hmac_sha256)
+        except Exception as e:
+            err += "\n\nFAILED assert_hashing() with uhashlib_hw module" + str(e)
+
+    try:
+        assert_hashing(hashlib.sha256, pbkdf2_hmac_sha256)
+    except Exception as e:
+        err += "\n\nFAILED assert_hashing() with hashlib module" + str(e)
+
+    if err:
+        print(err)
+        raise AssertionError(err)
+    print(
+        "test_assert_hashing() passed successfully.  hw_hashing: {}".format(hw_hashing)
+    )
+    return "test_assert_hashing() passed successfully.  hw_hashing: {}".format(
+        hw_hashing
+    )

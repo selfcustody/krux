@@ -25,6 +25,7 @@ from . import (
     Page,
     Menu,
     MENU_CONTINUE,
+    MENU_EXIT,
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
@@ -49,6 +50,7 @@ class Tools(Page):
                 [
                     (t("Check SD Card"), self.sd_check),
                     (t("Print Test QR"), self.print_test),
+                    (t("Datum Tool"), self.datum_tool),
                     (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Flash Tools"), self.flash_tools),
@@ -130,6 +132,19 @@ class Tools(Page):
 
         utils = Utils(self.ctx)
         utils.print_standard_qr(title, title=title, check_printer=False)
+        return MENU_CONTINUE
+
+    def datum_tool(self):
+        """Handler for the 'Datum Tool' menu item"""
+        import sys
+        from .datum_tool import DatumToolMenu
+
+        while True:
+            if DatumToolMenu(self.ctx).run() == MENU_EXIT:
+                break
+
+        sys.modules.pop("krux.pages.datum_tool")
+        del sys.modules["krux.pages"].datum_tool
         return MENU_CONTINUE
 
     def create_qr(self):
