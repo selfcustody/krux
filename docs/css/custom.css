@@ -71,3 +71,7 @@ div.video p {
 div.clear {
   clear: both;
 }
+
+.margin-left {
+  margin-left: 0.8em;
+}
