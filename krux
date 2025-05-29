@@ -85,15 +85,22 @@ if [ "$1" == "build" ]; then
             echo "Wrong or unsupported device name, use maixpy_devicename"
         fi
     fi
-elif [ "$1" == "flash" ]; then
+elif [ "$1" == "flash" -o "$1" == "boot" ]; then
+    if [ "$1" == "flash" ]; then
+        CMD_SUFFIX="kboot.kfpkg"
+    else
+        CMD_SUFFIX="-s firmware.bin"
+    fi
     device="$2"
     if [ -z "$device" ]; then
         echo "Missing device"
     else
         device_vendor_product_id=""
+        BAUDRATE=2000000
         if [ "$device" == "maixpy_m5stickv" ]; then
             # https://devicehunt.com/view/type/usb/vendor/0403/device/6001
             device_vendor_product_id="0403:6001"
+            BAUDRATE=1500000
         elif [ "$device" == "maixpy_amigo" ]||
         [ "$device" == "maixpy_bit" ]||
         [ "$device" == "maixpy_cube" ]; then
@@ -121,7 +128,8 @@ elif [ "$1" == "flash" ]; then
             BOARD="goE"
         fi
 
-        if ! docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg; then
+        DOCK_CMD="docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w $BUILD_DIR -it krux-builder python3 ktool.py -B $BOARD -p /dev/ttyUSB0 -b $BAUDRATE $CMD_SUFFIX"
+        if ! $DOCK_CMD ; then
             # M5stickV has only one serial port
             # Bit has two serial ports and uses first for flash
             # Amigo has two ports and uses second port to flash
@@ -131,7 +139,7 @@ elif [ "$1" == "flash" ]; then
                 if [ -z "$usb_device_name" ]; then
                     panic "Failed to find device via USB. Is it connected and powered on?"
                 fi
-                docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w "$BUILD_DIR" -it krux-builder python3 ktool.py -B "$BOARD" -p /dev/ttyUSB0 -b 1500000 kboot.kfpkg
+                $DOCK_CMD
             fi
         fi
     fi
