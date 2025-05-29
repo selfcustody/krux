@@ -409,7 +409,7 @@ def wrap(id_, version, iterations, payload):
     try:
         # when wrapping, be tolerant about id_ as bytes or str
         id_ = id_ if isinstance(id_, bytes) else id_.encode()
-        assert 0 <= len(id_) <= 255
+        assert 0 <= len(id_) <= 252
         len_id = len(id_).to_bytes(1, "big")
     except:
         raise ValueError("Invalid ID")
