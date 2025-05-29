@@ -814,8 +814,8 @@ def test_wrap_exceptions(m5stickv):
     valid_ids = (
         b"",
         b"My Mnemonic",
-        b"ID can be empty or as long as 255 utf-8 characters, but not longer\nA purely peer-to-peer version of electronic cash would allow online\npayments to be sent directly from one party to another without going through a\nfinancial institution. Digital signatures",
-        b"".join([i.to_bytes(1, "big") for i in range(1, 256)]),
+        b"ID can be empty or as long as 252 utf-8 characters, but not longer. Limit is 252, leaving flexibility (253,254,255) to be redefined in the future.\nA purely peer-to-peer version of electronic cash would allow online\npayments to be sent directly from one",
+        b"".join([i.to_bytes(1, "big") for i in range(252)]),
     )
     valid_versions = [0, 1, 5, 6, 7, 10, 11, 12, 15, 16, 20, 21]
     valid_iterations = (ten_k, 50 * ten_k, ten_k + 1, 2**24 - 1, ten_k * ten_k)
@@ -839,9 +839,9 @@ def test_wrap_exceptions(m5stickv):
                         plaintext, version, iv, fail_unsafe=False
                     )
 
-                    # ID is limited to length < 256 utf-8
+                    # ID is limited to length <= 252 utf-8
                     err = "Invalid ID"
-                    for invalid in (None, 21, ("Too Long! " * 26)[:256]):
+                    for invalid in (None, 21, ("Too Long! " * 26)[:253]):
                         with pytest.raises(ValueError, match=err):
                             kef.wrap(invalid, version, iterations, ciphertext)
 
@@ -1266,7 +1266,7 @@ def test_multi_wrapped_envelopes(m5stickv):
             continue
 
         label = '"{}", K={}'.format(version["name"][4:], key)
-        id_ = kef_self_document(v, label=label, iterations=iterations, limit=255)
+        id_ = kef_self_document(v, label=label, iterations=iterations, limit=252)
         id2 = kef._deflate(id_.encode())  # id_ can be any bytes, here compressed
         cipher = kef.Cipher(key, id_, iterations)
         cipher2 = kef.Cipher(key, id2, iterations)
