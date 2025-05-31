@@ -358,6 +358,9 @@ class EncryptionKey(Page):
     def key_strength(self, key_string):
         """Check the strength of a key."""
 
+        if isinstance(key_string, bytes):
+            key_string = hexlify(key_string).decode()
+
         if len(key_string) < 8:
             return t("Weak")
 
@@ -409,6 +412,11 @@ class EncryptionKey(Page):
             back_label=None,
         )
         _, key = submenu.run_loop()
+
+        try:
+            data = decrypt_kef(self.ctx, key)  # encryption key may have been encrypted
+        except:
+            pass
 
         while True:
             if key in (None, "", b"", ESC_KEY, MENU_CONTINUE):
