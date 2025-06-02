@@ -860,3 +860,75 @@ def test_page_prev_button_press_when_buttons_not_active(mocker, amigo):
     assert btn is ACTIVATING_BUTTONS
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
+
+
+def test_enter_button_damaged(mocker, m5stickv):
+    from krux.input import Input, PRESSED
+
+    mocker.patch("krux.input.Input.enter_value", return_value=PRESSED)
+    mocker.spy(Input, "button_integrity_check")
+
+    input = Input()
+
+    # Button enter is damaged, so the input.enter should be None
+    # (but assert the button_integrity_check and enter_value was called too)
+    input.button_integrity_check.assert_called_once()
+    input.enter_value.assert_called_once()
+    assert input.enter is None
+
+    # Should return False since button is damaged
+    assert not input.enter_event()
+
+
+def test_page_button_damaged(mocker, m5stickv):
+    from krux.input import Input, PRESSED
+
+    mocker.patch("krux.input.Input.page_value", return_value=PRESSED)
+    mocker.spy(Input, "button_integrity_check")
+
+    input = Input()
+
+    # Button page is damaged, so the input.page should be None
+    # (but assert the button_integrity_check and page_value was called too)
+    input.button_integrity_check.assert_called_once()
+    input.page_value.assert_called_once()
+    assert input.page is None
+
+    # Should return False since button is damaged
+    assert not input.page_event()
+
+
+def test_page_prev_button_damaged(mocker, m5stickv):
+    from krux.input import Input, PRESSED
+
+    mocker.patch("krux.input.Input.page_prev_value", return_value=PRESSED)
+    mocker.spy(Input, "button_integrity_check")
+
+    input = Input()
+
+    # Button page_prev is damaged, so the input.page_prev should be None
+    # (but assert the button_integrity_check and page_prev_value was called too)
+    input.button_integrity_check.assert_called_once()
+    input.page_prev_value.assert_called_once()
+    assert input.page_prev is None
+
+    # Should return False since button is damaged
+    assert not input.page_prev_event()
+
+
+def test_touch_damaged(mocker, amigo):
+    from krux.input import Input, PRESSED
+
+    mocker.patch("krux.input.Input.touch_value", return_value=PRESSED)
+    mocker.spy(Input, "button_integrity_check")
+
+    input = Input()
+
+    # Touch is damaged, so the input.touch should be None
+    # (but assert the button_integrity_check and touch_value was called too)
+    input.button_integrity_check.assert_called_once()
+    input.touch_value.assert_called_once()
+    assert input.touch is None
+
+    # Should return False since touch is damaged, sowy!
+    assert not input.touch_event()
