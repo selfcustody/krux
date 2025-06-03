@@ -159,11 +159,10 @@ def test_parser(mocker, m5stickv, tdata):
 def test_to_qr_codes(mocker, m5stickv, tdata):
     from krux.qr import to_qr_codes, FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR, FORMAT_BBQR
     from krux.display import Display
-    from krux.bbqr import BBQrCode, base32_encode_stream
+    from krux.bbqr import BBQrCode
+    import base32
 
-    BBQR_CODE_DATA = BBQrCode(
-        "".join(base32_encode_stream(tdata.TEST_DATA_BBQR)), "Z", "P"
-    )
+    BBQR_CODE_DATA = BBQrCode(base32.encode(tdata.TEST_DATA_BBQR), "Z", "P")
     cases = [
         # Test 135 pixels wide display
         (FORMAT_NONE, tdata.TEST_DATA_B58, 135, 1),

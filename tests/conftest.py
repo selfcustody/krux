@@ -12,6 +12,10 @@ from .shared_mocks import (
     encode,
     statvfs,
     pbkdf2_hmac_sha256_wrapper,
+    base32_decode_stream,
+    base32_encode,
+    base43_decode,
+    base43_encode,
 )
 
 
@@ -69,6 +73,22 @@ def mp_modules(mocker, monkeypatch):
         mocker.MagicMock(
             pbkdf2_hmac_sha256=pbkdf2_hmac_sha256_wrapper,
             sha256=hashlib.sha256,
+        ),
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "base32",
+        mocker.MagicMock(
+            decode=base32_decode_stream,
+            encode=base32_encode,
+        ),
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "base43",
+        mocker.MagicMock(
+            decode=base43_decode,
+            encode=base43_encode,
         ),
     )
     import json
