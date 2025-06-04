@@ -1296,11 +1296,15 @@ def test_about(mocker, multiple_devices):
     from krux.pages.login import Login
     import board
     from krux.metadata import VERSION
-    from krux.input import BUTTON_ENTER
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.kboard import kboard
     from krux.qr import FORMAT_NONE
 
-    BTN_SEQUENCE = [BUTTON_ENTER]
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # past qr_code
+        BUTTON_PAGE,  # skip test-suite to Back
+        BUTTON_ENTER,  # go Back
+    ]
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
 
@@ -1349,7 +1353,7 @@ def test_about(mocker, multiple_devices):
         ]
     )
 
-    ctx.input.wait_for_button.assert_called_once()
+    ctx.input.wait_for_button.assert_called()
 
 
 def test_auto_complete_qr_words(m5stickv, mocker):
