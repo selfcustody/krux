@@ -3,6 +3,7 @@ from unittest import mock
 from unittest.mock import MagicMock
 import pyqrcode
 import zlib
+import base64
 
 
 class MockFile:
@@ -328,65 +329,21 @@ def pbkdf2_hmac_sha256_wrapper(secret, salt, iterations):
     return hashlib.pbkdf2_hmac("sha256", secret, salt, iterations)
 
 
-B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+def base32_decode(encoded_str):
+    """Decodes a Base32 string."""
+    try:
+        decoded = base64.b32decode(encoded_str)
+    except ValueError as e:
+        raise ValueError("Invalid Base32 string: %s" % e)
 
-
-def base32_decode_stream(encoded_str):
-    """Decodes a Base32 string"""
-    base32_index = {ch: index for index, ch in enumerate(B32CHARS)}
-
-    # Strip padding
-    encoded_str = encoded_str.rstrip("=")
-
-    buffer = 0
-    bits_left = 0
-    decoded_bytes = bytearray()
-
-    for char in encoded_str:
-        if char not in base32_index:
-            raise ValueError("Invalid Base32 character: %s" % char)
-        index = base32_index[char]
-        buffer = (buffer << 5) | index
-        bits_left += 5
-
-        while bits_left >= 8:
-            bits_left -= 8
-            decoded_bytes.append((buffer >> bits_left) & 0xFF)
-            buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
-
-    return bytes(decoded_bytes)
-
-
-def base32_encode_stream(data, add_padding):
-    """A streaming base32 encoder"""
-    buffer = 0
-    bits_left = 0
-    chars_yielded = 0
-
-    for byte in data:
-        buffer = (buffer << 8) | byte
-        bits_left += 8
-
-        while bits_left >= 5:
-            bits_left -= 5
-            yield B32CHARS[(buffer >> bits_left) & 0x1F]
-            chars_yielded += 1
-            buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
-
-    if bits_left > 0:
-        buffer <<= 5 - bits_left
-        yield B32CHARS[buffer & 0x1F]
-        chars_yielded += 1
-
-    # Padding
-    if add_padding:
-        padding_length = (8 - (chars_yielded % 8)) % 8
-        for _ in range(padding_length):
-            yield "="
+    return decoded
 
 
 def base32_encode(data, add_padding=False):
-    return "".join(base32_encode_stream(data, add_padding))
+    encoded = base64.b32encode(data).decode("utf-8")
+    if not add_padding:
+        encoded = encoded.rstrip("=")
+    return encoded
 
 
 def base43_encode(data):

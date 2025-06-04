@@ -12,7 +12,7 @@ from .shared_mocks import (
     encode,
     statvfs,
     pbkdf2_hmac_sha256_wrapper,
-    base32_decode_stream,
+    base32_decode,
     base32_encode,
     base43_decode,
     base43_encode,
@@ -79,7 +79,7 @@ def mp_modules(mocker, monkeypatch):
         sys.modules,
         "base32",
         mocker.MagicMock(
-            decode=base32_decode_stream,
+            decode=base32_decode,
             encode=base32_encode,
         ),
     )

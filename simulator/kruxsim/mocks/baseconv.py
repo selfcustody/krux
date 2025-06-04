@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 import sys
+import base64
 from krux.baseconv import base_encode, base_decode
 
 B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
@@ -40,73 +41,23 @@ class base32:
     """
     Mock for the base32 module.
     """
-
-    @staticmethod
-    def b32encode(data):
-        """Mock implementation of b32encode."""
-        return data.encode('utf-8').hex().upper()
-
-    @staticmethod
-    def b32decode(data):
-        """Mock implementation of b32decode."""
-        return bytes.fromhex(data.lower()).decode('utf-8')
-
+    def encode(data, add_padding=False):
+        """Encodes data to Base32."""
+        encoded = base64.b32encode(data).decode('utf-8')
+        if not add_padding:
+            encoded = encoded.rstrip('=')
+        return encoded
 
     def decode(encoded_str):
-        """Decodes a Base32 string"""
-        base32_index = {ch: index for index, ch in enumerate(B32CHARS)}
+        """Decodes a Base32 string."""
+        try:
+            decoded = base64.b32decode(encoded_str)
+        except ValueError as e:
+            raise ValueError("Invalid Base32 string: %s" % e)
 
-        # Strip padding
-        encoded_str = encoded_str.rstrip("=")
+        return decoded
 
-        buffer = 0
-        bits_left = 0
-        decoded_bytes = bytearray()
-
-        for char in encoded_str:
-            if char not in base32_index:
-                raise ValueError("Invalid Base32 character: %s" % char)
-            index = base32_index[char]
-            buffer = (buffer << 5) | index
-            bits_left += 5
-
-            while bits_left >= 8:
-                bits_left -= 8
-                decoded_bytes.append((buffer >> bits_left) & 0xFF)
-                buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
-
-        return bytes(decoded_bytes)
-
-
-    def encode_stream(data, add_padding):
-        """A streaming base32 encoder"""
-        buffer = 0
-        bits_left = 0
-        chars_yielded = 0
-
-        for byte in data:
-            buffer = (buffer << 8) | byte
-            bits_left += 8
-
-            while bits_left >= 5:
-                bits_left -= 5
-                yield B32CHARS[(buffer >> bits_left) & 0x1F]
-                chars_yielded += 1
-                buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
-
-        if bits_left > 0:
-            buffer <<= 5 - bits_left
-            yield B32CHARS[buffer & 0x1F]
-            chars_yielded += 1
-
-        # Padding
-        if add_padding:
-            padding_length = (8 - (chars_yielded % 8)) % 8
-            for _ in range(padding_length):
-                yield "="
-
-    def encode(data, add_padding=True):
-        return ''.join(base32.encode_stream(data, add_padding))
+   
 
 if "base32" not in sys.modules:
     sys.modules["base32"] = base32
