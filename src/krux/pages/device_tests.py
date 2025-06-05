@@ -44,6 +44,7 @@ class DeviceTests(Page):
         """run each on-device tests in all_tests, report summary and details"""
         all_tests = [
             self.hw_acc_hashing,
+            self.deflate_compression,
             # all below are prototyping/pseudo-tests
             self.test_success,
             self.test_non_empty,
@@ -184,6 +185,40 @@ class DeviceTests(Page):
         if err:
             raise AssertionError(err)
 
+        return True
+
+    def deflate_compression(self):
+        """test deflate compression between MaixPy and python3:zlib"""
+        from ..bbqr import deflate_compress, deflate_decompress
+        from binascii import hexlify, b2a_base64
+        from hashlib import sha256
+
+        # pylint: disable=C0301
+        expecteds = {
+            "length": 141,
+            "sha256": b"\xcd\x87y\xd8\x0c\x1e]:\xcc\xdb@ Bc\xb4E\xbf\xe2\xbc\x04[\xf0\x8a_d\xd5\t]\xab\t\xb7\x0c",
+            "MaixPy:deflate": b"{\xbc\xe1\x88\xd3\x8c?2\"\xb3~\x7f913\x7f\xa7\x8a\xfa:\xc7')\xb3'\xfb,\x99:S\xba\"hG\xa8iJ\x9aY\xaaA\xaa\x91\xb9\x99\xa1\xb1\xa9e\x8a\xb1A\xa2\x85\x91\xb9\xa9\x81\xa9E\xaa\x91\xa5eZr\xb2\x81\xb1\x85\xa1\xa9\xb1\x89\xa9\x89i\x9a\xa9ir\x9a\x89q\xaa\x89\xa1\xa5\x85q\x9ai\x8aI\xb2\xa5\x89\xa9Y\x99q\xae\xbe{\x95\xb1\x7f@TUh\x92i\xb8\xbb\x85\x8f\x91G\x98~Y\xa6eR\x99S\x81\xa3\x87y\xaaaDibja\x96\x8fQ\xba-\x17\x00",
+            "python3-zlib:v1.2.11-v1.3": b"\x01\x8d\x00r\xff\xe3\xb0\xc4B\x98\xfc\x1c\x14\x9a\xfb\xf4\xc8\x99o\xb9$'\xaeA\xe4d\x9b\x93L\xa4\x95\x99\x1bxR\xb8U5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456v3m/Gz3OPZzUb5WG8L2HV/vi9bvBpAH7e1XuaeqjL2g=\n",
+        }
+
+        uncompressed = sha256(b"").digest()
+        uncompressed += hexlify(sha256(uncompressed).digest())
+        uncompressed += b2a_base64(sha256(uncompressed).digest())
+        uncompressed_length = len(uncompressed)
+        uncompressed_sha256 = sha256(uncompressed).digest()
+
+        if (
+            uncompressed_length != expecteds["length"]
+            or uncompressed_sha256 != expecteds["sha256"]
+        ):
+            raise AssertionError("failed to generate uncompressed control")
+
+        if deflate_decompress(deflate_compress(uncompressed)) != uncompressed:
+            raise AssertionError("failed to compress and decompress control")
+
+        for src in [k for k in expecteds if k not in ("length", "sha256")]:
+            if deflate_decompress(expecteds[src]) != uncompressed:
+                raise AssertionError("failed to decompress control from {}".format(src))
         return True
 
     # next 7 tests below are prototyping/pseudo-tests -- these will be removed

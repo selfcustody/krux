@@ -26,14 +26,14 @@ def test_run_test_suite(m5stickv, mocker):
     page = DeviceTests(ctx)
     page.run_test_suite()
 
-    # while prototyping: run_test_suite() purposely fails 4 of 7 tests
+    # while prototyping: run_test_suite() purposely fails 4 of 9 tests
     # page.ctx.display.draw_hcentered_text.assert_has_calls([mocker.call(
     #    "Test Suite Results\nsuccess rate: 100%", info_box=True
     # )])
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 50%\nfailed: 4/8", info_box=True
+                "Test Suite Results\nsuccess rate: 55%\nfailed: 4/9", info_box=True
             )
         ]
     )
