@@ -414,7 +414,14 @@ class EncryptionKey(Page):
         _, key = submenu.run_loop()
 
         try:
-            data = decrypt_kef(self.ctx, key)  # encryption key may have been encrypted
+            # encryption key may have been encrypted
+            decrypted = decrypt_kef(self.ctx, key)
+            try:
+                # no assumed decodings except for utf8
+                decrypted = decrypted.decode()
+            except:
+                pass
+            key = decrypted if decrypted else key
         except:
             pass
 
