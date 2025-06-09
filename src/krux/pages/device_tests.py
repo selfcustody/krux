@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import Page, Menu
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
+from . import Page, Menu, MENU_CONTINUE
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH, BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..wdt import wdt
 
@@ -30,15 +30,17 @@ class DeviceTests(Page):
     """On-Device test-suite"""
 
     def __init__(self, ctx):
-        super().__init__(
-            ctx,
-            Menu(
-                ctx,
-                [
-                    (t("Test Suite"), self.run_test_suite),
-                ],
-            ),
-        )
+        super().__init__(ctx)
+        self.ctx = ctx
+
+    def device_tests_menu(self):
+        """run device-tests menu"""
+        Menu(
+            self.ctx,
+            [
+                (t("Test Suite"), self.run_test_suite),
+            ],
+        ).run_loop()
 
     def run_test_suite(self):
         """run each on-device tests in all_tests, report summary and details"""
@@ -49,6 +51,7 @@ class DeviceTests(Page):
             self.test_success,
             self.test_non_empty,
             self.test_long_named_test_function,
+            self.test_interactive,  # interactive test
             self.test_exception,  # failure
             self.test_false,  # failure
             self.test_empty,  # failure
@@ -68,14 +71,14 @@ class DeviceTests(Page):
             )
             try:
                 assert test()
-                results.append((test.__name__, True))
+                results.append((test, True))
             except Exception as err:
                 print(
                     "DeviceTests.run_test_suite: {} failed: {}".format(
                         test.__name__, err
                     )
                 )
-                results.append((test.__name__, False))
+                results.append((test, False))
                 failures += 1
 
             wdt.feed()
@@ -102,26 +105,70 @@ class DeviceTests(Page):
             info_box=True,
         )
 
-        # details
+        # results menu
         line_fmt = "{:" + str(chars_per_line - 3) + "s} {:>2s}"
-        self.ctx.display.draw_hcentered_text(
+        results_menu = Menu(
+            self.ctx,
+            [
+                (
+                    line_fmt.format(
+                        x[0].__name__[: chars_per_line - 3], "ok" if x[1] else "X"
+                    ),
+                    lambda: None,
+                )
+                for x in results
+            ],
+            offset=(num_lines + 1) * FONT_HEIGHT,
+        )
+        idx, _ = results_menu.run_loop()
+        if idx == len(results):
+            return MENU_CONTINUE
+        return self.run_one_test(results[idx][0])
+
+    def run_one_test(self, test):
+        """run a single test w/ interactive=True, display success/fail and results"""
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing..") + " " + test.__name__)
+        try:
+            result = test(interactive=True)
+        except Exception as err:
+            result = err
+
+        self.ctx.display.clear()
+
+        # info_box summary
+        self.ctx.display.clear()
+        num_lines = self.ctx.display.draw_hcentered_text(
             "\n".join(
                 [
-                    line_fmt.format(x[0][: chars_per_line - 3], "ok" if x[1] else "X")
-                    for x in results
+                    t("Test:") + " " + test.__name__,
+                    t("Result: pass") if result else t("Result: fail"),
                 ]
             ),
+            info_box=True,
+        )
+
+        # output of result
+        self.ctx.display.draw_hcentered_text(
+            '"' + result + '"' if isinstance(result, str) else repr(result),
             offset_y=(num_lines + 1) * FONT_HEIGHT,
         )
         self.ctx.input.wait_for_button()
+        return MENU_CONTINUE
 
-    # on-device unit-test methods:
+    # pylint: disable=W0613
+
+    # On-Device Unit-Test Methods:
     # * small/simple/effective as possible for smallest firmware,
     # * complete quickly, else consider feeding the watchdog
+    # * accept an optional "interactive" parameter;
+    #   using interative=False by default to disable user interaction for test-suite
+    #   or interactive=True to enable user interaction during single tests
     # * return something True on success
     # * return False/empty/None/Exception on failure
 
-    def hw_acc_hashing(self):
+    def hw_acc_hashing(self, interactive=False):
         """churns nonce through sha256() and pbkdf_hmac(sha256,) calls, asserts expected results"""
         from uhashlib_hw import sha256 as f_hash
         from uhashlib_hw import pbkdf2_hmac_sha256 as f_hmac
@@ -174,10 +221,12 @@ class DeviceTests(Page):
             f_hmac(nonce, f_hash(b"".join(hashes)[:1024]).digest(), 32),
         ]
 
+        results = []
         err = ""
         for i, (expected, calculated) in enumerate(zip(expecteds, calculateds)):
             try:
                 assert expected == calculated
+                results.append("test case {}: ok".format(i))
             except:
                 err += "\nTest case: {}\n   expected: {}\n calculated: {}".format(
                     i, repr(expected), repr(calculated)
@@ -185,9 +234,9 @@ class DeviceTests(Page):
         if err:
             raise AssertionError(err)
 
-        return True
+        return "\n\n".join(results)
 
-    def deflate_compression(self):
+    def deflate_compression(self, interactive=False):
         """test deflate compression between MaixPy and python3:zlib"""
         from ..bbqr import deflate_compress, deflate_decompress
         from binascii import hexlify, b2a_base64
@@ -207,6 +256,7 @@ class DeviceTests(Page):
         uncompressed_length = len(uncompressed)
         uncompressed_sha256 = sha256(uncompressed).digest()
 
+        results = []
         if (
             uncompressed_length != expecteds["length"]
             or uncompressed_sha256 != expecteds["sha256"]
@@ -215,31 +265,40 @@ class DeviceTests(Page):
 
         if deflate_decompress(deflate_compress(uncompressed)) != uncompressed:
             raise AssertionError("failed to compress and decompress control")
+        results.append("local compression: ok")
 
         for src in [k for k in expecteds if k not in ("length", "sha256")]:
             if deflate_decompress(expecteds[src]) != uncompressed:
                 raise AssertionError("failed to decompress control from {}".format(src))
-        return True
+            results.append("{} decompress: ok".format(src))
+        return "\n\n".join(results)
 
-    # next 7 tests below are prototyping/pseudo-tests -- these will be removed
+    # next 8 tests below are prototyping/pseudo-tests -- these will be removed
     # pylint: disable=C0116
-    def test_success(self):
+    def test_success(self, interactive=False):
         return True
 
-    def test_non_empty(self):
+    def test_non_empty(self, interactive=False):
         return "it worked"
 
-    def test_exception(self):
+    def test_exception(self, interactive=False):
         raise ValueError("ValueError raised")
 
-    def test_false(self):
+    def test_false(self, interactive=False):
         return False
 
-    def test_empty(self):
+    def test_empty(self, interactive=False):
         return []
 
-    def test_none(self):
+    def test_none(self, interactive=False):
         pass
 
-    def test_long_named_test_function(self):
+    def test_long_named_test_function(self, interactive=False):
+        return True
+
+    def test_interactive(self, interactive=False):
+        if interactive:
+            return self.prompt(
+                "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
+            )
         return True

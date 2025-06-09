@@ -848,7 +848,8 @@ class Login(Page):
         # run on-device test-suite
         from .device_tests import DeviceTests
 
-        DeviceTests(self.ctx).run()
+        page = DeviceTests(self.ctx)
+        page.device_tests_menu()
         sys.modules.pop("krux.pages.device_tests")
         del sys.modules["krux.pages"].device_tests
 
