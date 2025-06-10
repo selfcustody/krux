@@ -30,19 +30,18 @@ class DeviceTests(Page):
     """On-Device test-suite"""
 
     def __init__(self, ctx):
-        super().__init__(ctx)
-        self.ctx = ctx
+        super().__init__(
+            ctx,
+            Menu(
+                ctx,
+                [
+                    (t("Test Suite"), self.test_suite),
+                ],
+            ),
+        )
+        self.results = []
 
-    def device_tests_menu(self):
-        """run device-tests menu"""
-        Menu(
-            self.ctx,
-            [
-                (t("Test Suite"), self.run_test_suite),
-            ],
-        ).run_loop()
-
-    def run_test_suite(self):
+    def test_suite(self):
         """run each on-device tests in all_tests, report summary and details"""
         all_tests = [
             self.hw_acc_hashing,
@@ -61,30 +60,29 @@ class DeviceTests(Page):
         self.ctx.display.clear()
         chars_per_line = (self.ctx.display.width() - DEFAULT_PADDING * 2) // FONT_WIDTH
 
-        # run tests, gather results
-        failures = 0
-        results = []
-        for idx, test in enumerate(all_tests):
-            self.ctx.display.draw_centered_text(" " * chars_per_line)  #
-            self.ctx.display.draw_centered_text(
-                t("Processing..") + " {}/{}".format(idx + 1, len(all_tests))
-            )
-            try:
-                assert test()
-                results.append((test, True))
-            except Exception as err:
-                print(
-                    "DeviceTests.run_test_suite: {} failed: {}".format(
-                        test.__name__, err
-                    )
+        # if no previous results, run tests, gather results
+        if len(self.results) == 0:
+            for idx, test in enumerate(all_tests):
+                self.ctx.display.draw_centered_text(" " * chars_per_line)  #
+                self.ctx.display.draw_centered_text(
+                    t("Processing..") + " {}/{}".format(idx + 1, len(all_tests))
                 )
-                results.append((test, False))
-                failures += 1
-
-            wdt.feed()
+                try:
+                    assert test()
+                    self.results.append((test, True))
+                except Exception as err:
+                    print(
+                        "DeviceTests.run_test_suite: {} failed: {}".format(
+                            test.__name__, err
+                        )
+                    )
+                    self.results.append((test, False))
+                wdt.feed()
 
         # info_box summary
         self.ctx.display.clear()
+        failures = sum(1 for x in self.results if not x[1])
+        total = len(self.results)
         num_lines = self.ctx.display.draw_hcentered_text(
             "\n".join(
                 [
@@ -92,9 +90,9 @@ class DeviceTests(Page):
                     for x in [
                         t("Test Suite Results"),
                         t("success rate:")
-                        + " {}%".format(int((idx + 1 - failures) / (idx + 1) * 100)),
+                        + " {}%".format(int((total - failures) / (total) * 100)),
                         (
-                            t("failed:") + " {}/{}".format(failures, idx + 1)
+                            t("failed:") + " {}/{}".format(failures, total)
                             if failures
                             else None
                         ),
@@ -116,14 +114,14 @@ class DeviceTests(Page):
                     ),
                     lambda: None,
                 )
-                for x in results
+                for x in self.results
             ],
             offset=(num_lines + 1) * FONT_HEIGHT,
         )
         idx, _ = results_menu.run_loop()
-        if idx == len(results):
+        if idx == len(self.results):
             return MENU_CONTINUE
-        return self.run_one_test(results[idx][0])
+        return self.run_one_test(self.results[idx][0])
 
     def run_one_test(self, test):
         """run a single test w/ interactive=True, display success/fail and results"""
@@ -155,7 +153,7 @@ class DeviceTests(Page):
             offset_y=(num_lines + 1) * FONT_HEIGHT,
         )
         self.ctx.input.wait_for_button()
-        return MENU_CONTINUE
+        return self.test_suite()
 
     # pylint: disable=W0613
 

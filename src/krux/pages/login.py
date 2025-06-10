@@ -849,7 +849,7 @@ class Login(Page):
         from .device_tests import DeviceTests
 
         page = DeviceTests(self.ctx)
-        page.device_tests_menu()
+        page.run()
         sys.modules.pop("krux.pages.device_tests")
         del sys.modules["krux.pages"].device_tests
 
