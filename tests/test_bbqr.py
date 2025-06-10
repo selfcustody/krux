@@ -179,38 +179,38 @@ def test_bbqr_code_invalid_file_type():
         BBQrCode(payload, encoding, invalid_file_type)
 
 
-def test_base32_encoding(mocker):
-    from krux.bbqr import base32_encode_stream
-    from base64 import b32encode
+# def test_base32_encoding(mocker):
+#     from krux.bbqr import base32_encode_stream
+#     from base64 import b32encode
 
-    for test_bytes in B32_TEST_BYTES:
-        expected = b32encode(test_bytes).decode("utf-8").rstrip("=")
-        assert "".join(base32_encode_stream(test_bytes)) == expected
+#     for test_bytes in B32_TEST_BYTES:
+#         expected = b32encode(test_bytes).decode("utf-8").rstrip("=")
+#         assert "".join(base32_encode_stream(test_bytes)) == expected
 
-    # Test padding
-    for test_bytes in B32_TEST_BYTES:
-        expected = b32encode(test_bytes).decode("utf-8")
-        print(len("".join(base32_encode_stream(test_bytes, True))), len(expected))
-        assert "".join(base32_encode_stream(test_bytes, True)) == expected
-
-
-def test_base32_decoding(mocker):
-    from krux.bbqr import base32_decode_stream
-
-    for test_bytes, encoded in zip(B32_TEST_BYTES, B32_ENCODED_STRINGS):
-        assert base32_decode_stream(encoded) == test_bytes
-
-    for test_bytes, encoded in zip(B32_TEST_BYTES, B32_ENCODED_STRINGS_PADDED):
-        assert base32_decode_stream(encoded) == test_bytes
+#     # Test padding
+#     for test_bytes in B32_TEST_BYTES:
+#         expected = b32encode(test_bytes).decode("utf-8")
+#         print(len("".join(base32_encode_stream(test_bytes, True))), len(expected))
+#         assert "".join(base32_encode_stream(test_bytes, True)) == expected
 
 
-def test_base32_decoding_invalid_character():
-    from krux.bbqr import base32_decode_stream
+# def test_base32_decoding(mocker):
+#     from krux.bbqr import base32_decode_stream
 
-    encoded = "ASDDG134"  # 1 is invalid character
+#     for test_bytes, encoded in zip(B32_TEST_BYTES, B32_ENCODED_STRINGS):
+#         assert base32_decode_stream(encoded) == test_bytes
 
-    with pytest.raises(ValueError, match="Invalid Base32 character"):
-        base32_decode_stream(encoded)
+#     for test_bytes, encoded in zip(B32_TEST_BYTES, B32_ENCODED_STRINGS_PADDED):
+#         assert base32_decode_stream(encoded) == test_bytes
+
+
+# def test_base32_decoding_invalid_character():
+#     from krux.bbqr import base32_decode_stream
+
+#     encoded = "ASDDG134"  # 1 is invalid character
+
+#     with pytest.raises(ValueError, match="Invalid Base32 character"):
+#         base32_decode_stream(encoded)
 
 
 def test_parse_bbqr_valid_data():

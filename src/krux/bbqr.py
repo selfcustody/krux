@@ -35,9 +35,6 @@ KNOWN_FILETYPES = {"P", "T", "J", "U"}
 
 BBQR_ALWAYS_COMPRESS_THRESHOLD = 5000  # bytes
 
-B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
-assert len(B32CHARS) == 32
-
 
 class BBQrCode:
     """A BBQr code, containing the data, encoding, and file type"""
@@ -119,11 +116,13 @@ def decode_bbqr(parts, encoding, file_type):
             data_bytes.extend(unhexlify(part))
         return bytes(data_bytes)
 
+    import base32
+
     binary_data = b""
     for _, part in sorted(parts.items()):
         padding = (8 - (len(part) % 8)) % 8
         padded_part = part + (padding * "=")
-        binary_data += base32_decode_stream(padded_part)
+        binary_data += base32.decode(padded_part)
 
     if encoding == "Z":
         if file_type in "JU":
@@ -159,62 +158,10 @@ def encode_bbqr(data, encoding="Z", file_type="P"):
 
     data = data.encode("utf-8") if isinstance(data, str) else data
     gc.collect()
-    return BBQrCode("".join(base32_encode_stream(data)), encoding, file_type)
 
+    import base32
 
-# Base 32 encoding/decoding, used in BBQR only
-
-
-def base32_decode_stream(encoded_str):
-    """Decodes a Base32 string"""
-    base32_index = {ch: index for index, ch in enumerate(B32CHARS)}
-
-    # Strip padding
-    encoded_str = encoded_str.rstrip("=")
-
-    buffer = 0
-    bits_left = 0
-    decoded_bytes = bytearray()
-
-    for char in encoded_str:
-        if char not in base32_index:
-            raise ValueError("Invalid Base32 character: %s" % char)
-        index = base32_index[char]
-        buffer = (buffer << 5) | index
-        bits_left += 5
-
-        while bits_left >= 8:
-            bits_left -= 8
-            decoded_bytes.append((buffer >> bits_left) & 0xFF)
-            buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
-
-    return bytes(decoded_bytes)
-
-
-def base32_encode_stream(data, add_padding=False):
-    """A streaming base32 encoder"""
-    buffer = 0
-    bits_left = 0
-
-    for byte in data:
-        buffer = (buffer << 8) | byte
-        bits_left += 8
-
-        while bits_left >= 5:
-            bits_left -= 5
-            yield B32CHARS[(buffer >> bits_left) & 0x1F]
-            buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
-
-    if bits_left > 0:
-        buffer <<= 5 - bits_left
-        yield B32CHARS[buffer & 0x1F]
-
-    # Padding
-    if add_padding:
-        encoded_length = (len(data) * 8 + 4) // 5
-        padding_length = (8 - (encoded_length % 8)) % 8
-        for _ in range(padding_length):
-            yield "="
+    return BBQrCode(base32.encode(data, False), encoding, file_type)
 
 
 def int2base36(n):
@@ -228,3 +175,60 @@ def int2base36(n):
 
     quotient, remainder = divmod(n, 36)
     return tostr(quotient) + tostr(remainder)
+
+
+# Base 32 encoding/decoding python code was replaced by C code (200X+ faster),
+# as a Micropython module. Python code will be left here commented as reference:
+
+# B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+
+# def base32_decode_stream(encoded_str):
+#     """Decodes a Base32 string"""
+#     base32_index = {ch: index for index, ch in enumerate(B32CHARS)}
+
+#     # Strip padding
+#     encoded_str = encoded_str.rstrip("=")
+
+#     buffer = 0
+#     bits_left = 0
+#     decoded_bytes = bytearray()
+
+#     for char in encoded_str:
+#         if char not in base32_index:
+#             raise ValueError("Invalid Base32 character: %s" % char)
+#         index = base32_index[char]
+#         buffer = (buffer << 5) | index
+#         bits_left += 5
+
+#         while bits_left >= 8:
+#             bits_left -= 8
+#             decoded_bytes.append((buffer >> bits_left) & 0xFF)
+#             buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
+
+#     return bytes(decoded_bytes)
+
+
+# def base32_encode_stream(data, add_padding=False):
+#     """A streaming base32 encoder"""
+#     buffer = 0
+#     bits_left = 0
+
+#     for byte in data:
+#         buffer = (buffer << 8) | byte
+#         bits_left += 8
+
+#         while bits_left >= 5:
+#             bits_left -= 5
+#             yield B32CHARS[(buffer >> bits_left) & 0x1F]
+#             buffer &= (1 << bits_left) - 1  # Keep only the remaining bits
+
+#     if bits_left > 0:
+#         buffer <<= 5 - bits_left
+#         yield B32CHARS[buffer & 0x1F]
+
+#     # Padding
+#     if add_padding:
+#         encoded_length = (len(data) * 8 + 4) // 5
+#         padding_length = (8 - (encoded_length % 8)) % 8
+#         for _ in range(padding_length):
+#             yield "="
