@@ -29,7 +29,8 @@ Addresses are now grouped in sets of 4 characters, separated by spaces, to facil
 Exported QR codes can now be saved as SVG images.
 
 ### Other Bug Fixes and Improvements
-- Numbers no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
+- Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
+- Keypad touch area has been expanded to the screen edges.
 - "Tools > Print Test QR" now asks for user confirmation before printing.
 - Added fingerprint to mnemonic preview and editor.
 - Fingerprint preview now shown when changing wallet passphrase.
