@@ -119,7 +119,9 @@ class PSBTSigner:
                         self.base_encoding = 58
                     except:
                         try:
-                            self.psbt = PSBT.parse(base_decode(psbt_data, 43))
+                            import base43
+
+                            self.psbt = PSBT.parse(base43.decode(psbt_data))
                             self.base_encoding = 43
                         except:
                             raise ValueError("invalid PSBT")

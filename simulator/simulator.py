@@ -115,6 +115,7 @@ from kruxsim.mocks import buttons
 from kruxsim.mocks import rotary
 from kruxsim.sequence import SequenceExecutor
 from kruxsim.mocks import uhashlib_hw
+from kruxsim.mocks import baseconv
 
 sequence_executor = None
 if args.sequence:

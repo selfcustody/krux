@@ -50,7 +50,10 @@ class PowerManager:
         try:
             if int(self.pmu.get_battery_voltage()) <= 0:
                 return False
-        except:
+        # If the device does not have a battery,
+        # the PMUController will not have the get_battery_voltage method
+        # and it will raise an AttributeError
+        except AttributeError:
             return False
         return True
 
