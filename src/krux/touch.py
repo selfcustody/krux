@@ -144,7 +144,7 @@ class Touch:
         # Calculate x index if x regions are defined (2D array)
         if self.x_regions:
             for x_region in self.x_regions:
-                if data[0] > x_region:
+                if data[0] >= x_region:
                     x_index += 1
             x_index -= 1  # Adjust index to be zero-based
             # Combine y and x indices to get the final index
