@@ -63,8 +63,9 @@ class KeypadLayout:
             for y in range(self.height + 1)
         ]
         self.x_keypad_map = [
-            x * key_h_spacing + MINIMAL_PADDING for x in range(self.width + 1)
+            x * key_h_spacing + MINIMAL_PADDING for x in range(self.width)
         ]
+        self.x_keypad_map.append(ctx.display.width())
         if ctx.input.touch is not None:
             ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
 
