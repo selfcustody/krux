@@ -856,3 +856,4 @@ class Login(Page):
             width=width,
             highlight_prefix=":",
         )
+        return MENU_CONTINUE
