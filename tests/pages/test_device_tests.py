@@ -38,7 +38,7 @@ def test_run_test_suite_only(m5stickv, mocker):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 60%\nfailed: 4/10", info_box=True
+                "Test Suite Results\nsuccess rate: 63%\nfailed: 4/11", info_box=True
             )
         ]
     )
@@ -70,7 +70,7 @@ def test_run_test_suite_plus_individual_test(m5stickv, mocker):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 60%\nfailed: 4/10", info_box=True
+                "Test Suite Results\nsuccess rate: 63%\nfailed: 4/11", info_box=True
             )
         ]
     )

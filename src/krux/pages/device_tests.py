@@ -46,6 +46,7 @@ class DeviceTests(Page):
         all_tests = [
             self.hw_acc_hashing,
             self.deflate_compression,
+            self.touchscreen,
             # all below are prototyping/pseudo-tests
             self.test_success,
             self.test_non_empty,
@@ -81,7 +82,7 @@ class DeviceTests(Page):
 
         # info_box summary
         self.ctx.display.clear()
-        failures = sum(1 for x in self.results if not x[1])
+        failures = len([x for x in self.results if not x[1]])
         total = len(self.results)
         num_lines = self.ctx.display.draw_hcentered_text(
             "\n".join(
@@ -275,6 +276,45 @@ class DeviceTests(Page):
             results.append("{} decompress: ok".format(src))
         return "\n\n".join(results)
 
+    def touchscreen(self, interactive=False):
+        """test touchscreen interactively -- if available"""
+        from krux.input import (
+            BUTTON_TOUCH,
+            SWIPE_RIGHT,
+            SWIPE_LEFT,
+            SWIPE_UP,
+            SWIPE_DOWN,
+        )
+
+        tests = (
+            ("Touch screen", BUTTON_TOUCH),
+            ("Swipe right", SWIPE_RIGHT),
+            ("Swipe left", SWIPE_LEFT),
+            ("Swipe up", SWIPE_UP),
+            ("Swipe down", SWIPE_DOWN),
+        )
+
+        if not interactive:
+            return "Cannot test non-interactively"
+
+        if self.ctx.input.touch is None:
+            return "Touch not available"
+
+        results = []
+        for i, test in enumerate(tests):
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                "{}/{}: {}".format(i + 1, len(tests), test[0])
+            )
+            btn = self.ctx.input.wait_for_button()
+            results.append((test[0], test[1] == btn))
+
+        failures = [test for test, res in results if not res]
+        if failures:
+            raise ValueError("failed: {}".format(failures))
+
+        return True
+
     # next 8 tests below are prototyping/pseudo-tests -- these will be removed
     # pylint: disable=C0116
     def test_success(self, interactive=False):
@@ -299,8 +339,8 @@ class DeviceTests(Page):
         return True
 
     def test_interactive(self, interactive=False):
-        if interactive:
-            return self.prompt(
-                "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
-            )
-        return True
+        if not interactive:
+            return "Cannot test non-interactively"
+        return self.prompt(
+            "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
+        )
