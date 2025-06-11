@@ -128,10 +128,14 @@ class DeviceTests(Page):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing..") + " " + test.__name__)
+        success = False
         try:
             result = test(interactive=True)
+            success = bool(result)
         except Exception as err:
             result = err
+        idx = [i for i, (t, r) in enumerate(self.results) if t == test][0]
+        self.results[idx] = (test, success)
 
         self.ctx.display.clear()
 
@@ -141,7 +145,7 @@ class DeviceTests(Page):
             "\n".join(
                 [
                     t("Test:") + " " + test.__name__,
-                    t("Result: pass") if result else t("Result: fail"),
+                    t("Result: pass") if success else t("Result: fail"),
                 ]
             ),
             info_box=True,
