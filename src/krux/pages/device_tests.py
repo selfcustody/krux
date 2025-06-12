@@ -146,7 +146,10 @@ class DeviceTests(Page):
             "\n".join(
                 [
                     t("Test:") + " " + test.__name__,
-                    t("Result: pass") if success else t("Result: fail"),
+                    t("Result")
+                    + " ({}): {}".format(
+                        type(result).__name__, "pass" if success else "fail"
+                    ),
                 ]
             ),
             info_box=True,
@@ -154,7 +157,7 @@ class DeviceTests(Page):
 
         # output of result
         self.ctx.display.draw_hcentered_text(
-            '"' + result + '"' if isinstance(result, str) else repr(result),
+            result if isinstance(result, str) else repr(result),
             offset_y=(num_lines + 1) * FONT_HEIGHT,
         )
         self.ctx.input.wait_for_button()
