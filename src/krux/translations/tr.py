@@ -83,6 +83,7 @@ translation_array = [
     "Türetim Yolu",
     "BIP85 entropisi türetilsin mi?",
     "Tanımlayıcı Adresler",
+    "Cihaz Testleri",
     "Ekran",
     "Kapatmayın, tamamlanması biraz zaman alabilir.",
     "Tamamlandı mı?",

@@ -83,6 +83,7 @@ translation_array = [
     "Ruta de derivación",
     "¿Derivar entropía BIP85?",
     "Direcciones del descriptor",
+    "Pruebas de dispositivos",
     "Pantalla",
     "No apagues el dispositivo, puede tardar un tiempo en completarse.",
     "¿Listo?",

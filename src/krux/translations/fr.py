@@ -83,6 +83,7 @@ translation_array = [
     "Chemin de dérivation",
     "Dériver l'entropie BIP85\u2009?",
     "Adresses du descripteur",
+    "Tests de l'appareil",
     "Affichage",
     "Ne pas éteindre, cela peut prendre un certain temps.",
     "Terminé\u2009?",

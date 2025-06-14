@@ -35,18 +35,30 @@ class DeviceTests(Page):
             Menu(
                 ctx,
                 [
+                    (t("Print Test QR"), self.print_test),
                     (t("Test Suite"), self.test_suite),
                 ],
             ),
         )
         self.results = []
 
+    def print_test(self):
+        """Handler for the 'Print Test QR' menu item"""
+        title = t("Krux Printer Test QR")
+        self.display_qr_codes(title, title=title)
+
+        from .utils import Utils
+
+        utils = Utils(self.ctx)
+        utils.print_standard_qr(title, title=title, check_printer=False)
+        return MENU_CONTINUE
+
     def test_suite(self):
         """run each on-device tests in all_tests, report summary and details"""
         all_tests = [
             self.hw_acc_hashing,
             self.deflate_compression,
-            self.touchscreen,
+            self.touch_gestures,
             # all below are prototyping/pseudo-tests
             self.test_success,
             self.test_non_empty,
@@ -279,8 +291,8 @@ class DeviceTests(Page):
             results.append("{} decompress: ok".format(src))
         return "\n\n".join(results)
 
-    def touchscreen(self, interactive=False):
-        """test touchscreen interactively -- if available"""
+    def touch_gestures(self, interactive=False):
+        """test touchscreen gestures interactively -- if available"""
         from krux.input import (
             BUTTON_TOUCH,
             SWIPE_RIGHT,

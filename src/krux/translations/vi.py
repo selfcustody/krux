@@ -83,6 +83,7 @@ translation_array = [
     "Đường dẫn phái sinh",
     "Suy ra entropy BIP85?",
     "Địa chỉ người mô tả",
+    "Kiểm tra thiết bị",
     "Hiển thị",
     "Không được tắt máy, có thể mất một lúc để hoàn thành.",
     "Hoàn tất?",

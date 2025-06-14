@@ -83,6 +83,7 @@ translation_array = [
     "Derivation-Pfad",
     "BIP85-Entropie ableiten?",
     "Deskriptor-Adressen",
+    "Gerätetests",
     "Bildschirm",
     "Schalten Sie das Gerät nicht aus, es kann eine Weile dauern.",
     "Fertig?",

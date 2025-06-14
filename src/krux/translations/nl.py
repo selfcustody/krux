@@ -83,6 +83,7 @@ translation_array = [
     "Afleidingspad",
     "BIP85-entropie afleiden?",
     "Descriptoradressen",
+    "Apparaattests",
     "Weergave",
     "Schakel het apparaat niet uit, het kan even duren voordat het klaar is.",
     "Klaar?",

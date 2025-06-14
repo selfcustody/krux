@@ -844,13 +844,4 @@ class Login(Page):
             width=width,
             highlight_prefix=":",
         )
-
-        # run on-device test-suite
-        from .device_tests import DeviceTests
-
-        page = DeviceTests(self.ctx)
-        page.run()
-        sys.modules.pop("krux.pages.device_tests")
-        del sys.modules["krux.pages"].device_tests
-
         return MENU_CONTINUE

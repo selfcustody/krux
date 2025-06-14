@@ -83,6 +83,7 @@ translation_array = [
     "Caminho de Derivação",
     "Derivar entropia BIP85?",
     "Endereços do Descritor",
+    "Testes de Dispositivos",
     "Display",
     "Não desligue, pode demorar um pouco para concluir.",
     "Feito?",
