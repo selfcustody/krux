@@ -286,7 +286,8 @@ class TouchSettings(SettingsNamespace):
     """Touch sensitivity settings"""
 
     namespace = "settings.touchscreen"
-    threshold = NumberSetting(int, "threshold", 22, [10, 200])
+    default_th = 40 if kboard.is_wonder_k else 22
+    threshold = NumberSetting(int, "threshold", default_th, [10, 200])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
