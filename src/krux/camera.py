@@ -87,10 +87,14 @@ class Camera:
         """Initializes the camera"""
         sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
-        if kboard.is_cube or (
-            kboard.can_flip_orientation
-            and hasattr(Settings().hardware, "display")
-            and getattr(Settings().hardware.display, "flipped_orientation", False)
+        if (
+            kboard.is_cube
+            or kboard.is_wonder_k
+            or (
+                kboard.can_flip_orientation
+                and hasattr(Settings().hardware, "display")
+                and getattr(Settings().hardware.display, "flipped_orientation", False)
+            )
         ):
             # Rotate camera 180 degrees on Cube
             sensor.set_hmirror(1)
