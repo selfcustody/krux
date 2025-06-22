@@ -180,7 +180,11 @@ class Touch:
             hasattr(Settings().hardware.display, "flipped_orientation")
             and Settings().hardware.display.flipped_orientation
         ):
-            data = (self.height - data[0], self.width - data[1])
+            new_y = max(0, self.height - data[0])
+            new_y = min(new_y, self.height - 1)
+            new_x = max(0, self.width - data[1])
+            new_x = min(new_x, self.width - 1)
+            data = (new_y, new_x)
 
         if self.state == IDLE:
             self.state = PRESSED
