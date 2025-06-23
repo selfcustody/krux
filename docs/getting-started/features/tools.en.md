@@ -11,11 +11,24 @@ You can check if an SD card can be detected and read by your device and explore 
 
 <div style="clear: both"></div>
 
-### Print Test QR
+### Device Tests
+Simple tests to verify correct functioning of your krux device.
+
+<div style="clear: both"></div>
+
+#### Print Test QR
 <img src="../../../img/maixpy_m5stickv/print-test-qr-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/print-test-qr-300.png" align="right" class="amigo">
 
+<div style="clear: both"></div>
+
 Quickly print a test QR code to check and optimize your printer setup.
+
+#### Test Suite
+<img src="../../../img/maixpy_m5stickv/device-tests-test-suite-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/device-tests-test-suite-300.png" align="right" class="amigo">
+
+A suite of automated tests to verify important features on your device.
 
 <div style="clear: both"></div>
 
