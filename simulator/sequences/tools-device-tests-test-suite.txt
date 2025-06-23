@@ -8,7 +8,8 @@ press BUTTON_A
 press BUTTON_B
 press BUTTON_A
 
-# Print Test QR
+# Run test-suite
+press BUTTON_B
 press BUTTON_A
 
-screenshot print-test-qr.png
+screenshot device-tests-test-suite.png

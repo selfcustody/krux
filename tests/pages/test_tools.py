@@ -137,25 +137,6 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_printer_test_tool(amigo, mocker):
-    """Test that the print tool is called with the correct text"""
-    from krux.pages.tools import Tools
-    from krux.themes import theme
-    from krux.input import BUTTON_ENTER
-
-    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm print, then leave
-
-    with patch("krux.pages.utils.Utils.print_standard_qr") as mocked_print_qr:
-        ctx = create_ctx(mocker, BTN_SEQUENCE)
-        test_tools = Tools(ctx)
-        test_tools.print_test()
-
-        mocked_print_qr.assert_called_with(
-            "Krux Printer Test QR", title="Krux Printer Test QR", check_printer=False
-        )
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-
-
 def test_create_qr(amigo, mocker):
     """Test that QR creation tool is called with the correct text"""
     from krux.pages.tools import Tools
@@ -202,4 +183,24 @@ def test_load_flash_tools(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tool = Tools(ctx)
     tool.flash_tools()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_access_to_device_tests(m5stickv, mocker):
+    from krux.pages.tools import Tools
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # select device tests
+        BUTTON_ENTER,  # Go device tests
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave device tests
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,  # select Back
+        BUTTON_ENTER,  # leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    tool = Tools(ctx)
+    tool.run()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
