@@ -21,15 +21,9 @@
 # THE SOFTWARE.
 from binascii import a2b_base64, b2a_base64
 
-B43CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:"
-assert len(B43CHARS) == 43
-
-B58CHARS = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-assert len(B58CHARS) == 58
-
 
 def base_decode(v, base):
-    """Decodes str v from base encoding and returns as bytes"""
+    """Abstraction to decode the str data in v as base; returns bytes"""
     if not isinstance(v, str):
         raise TypeError("Invalid value, expected str")
     if base not in (32, 43, 58, 64):
@@ -39,56 +33,26 @@ def base_decode(v, base):
         return b""
 
     # Base32 and Base43 are implemented custom in MaixPy on k210, else in python for simulator
+    # Base58 is implemented in pure_python_base_decode() below
     # Base64 is a special case: We just use binascii's implementation without
     # performing bitcoin-specific padding logic
     if base == 32:
-        try:
-            import base32
+        import base32
 
-            return base32.decode(v)
-        except:
-            from .bbqr import base32_decode_stream
+        return base32.decode(v)
+    if base == 43:
+        import base43
 
-            return base32_decode_stream(v)
-    elif base == 43:
-        try:
-            import base43
-
-            return base43.decode(v)
-        except:
-            pass
-    elif base == 64:
+        return base43.decode(v)
+    if base == 58:
+        return pure_python_base_decode(v, 58)
+    if base == 64:
         return a2b_base64(v)
-
-    chars = B58CHARS if base == 58 else B43CHARS
-    long_value = 0
-    power_of_base = 1
-    for char in reversed(v):
-        digit = chars.find(char)
-        if digit == -1:
-            raise ValueError("forbidden character {} for base {}".format(char, base))
-        long_value += digit * power_of_base
-        power_of_base *= base
-    result = bytearray()
-    while long_value >= 256:
-        div, mod = divmod(long_value, 256)
-        result.append(mod)
-        long_value = div
-    if long_value > 0:
-        result.append(long_value)
-    n_pad = 0
-    for char in v:
-        if char == chars[0]:
-            n_pad += 1
-        else:
-            break
-    if n_pad > 0:
-        result.extend(b"\x00" * n_pad)
-    return bytes(reversed(result))
+    return None  # dead code to apease pylint
 
 
 def base_encode(v, base):
-    """Encodes the bytes data in v as base and returns as str"""
+    """Abstraction to encode the bytes data in v as base; returns str"""
     if not isinstance(v, bytes):
         raise TypeError("Invalid value, expected bytes")
     if base not in (32, 43, 58, 64):
@@ -98,52 +62,23 @@ def base_encode(v, base):
         return ""
 
     # Base32 and Base43 are implemented custom in MaixPy on k210, else in python for simulator
+    # Base58 is implemented in pure_python_base_encode() below
     # Base64 is a special case: We just use binascii's implementation without
     # performing bitcoin-specific padding logic. b2a_base64 always adds a \n
     # char at the end which we strip before returning
     if base == 32:
-        try:
-            import base32
+        import base32
 
-            return base32.encode(v)
-        except:
-            from .bbqr import base32_encode_stream
+        return base32.encode(v, False)
+    if base == 43:
+        import base43
 
-            return "".join(base32_encode_stream(v))
-    elif base == 43:
-        try:
-            import base43
-
-            return base43.encode(v)
-        except:
-            pass
+        return base43.encode(v, False)
+    if base == 58:
+        return pure_python_base_encode(v, 58)
     if base == 64:
         return b2a_base64(v).rstrip().decode()
-
-    chars = B58CHARS if base == 58 else B43CHARS
-    long_value = 0
-    power_of_base = 1
-    for char in reversed(v):
-        long_value += power_of_base * char
-        power_of_base <<= 8
-    result = bytearray()
-    while long_value >= base:
-        div, mod = divmod(long_value, base)
-        result.extend(chars[mod].encode())
-        long_value = div
-    if long_value > 0:
-        result.extend(chars[long_value].encode())
-    # Bitcoin does a little leading-zero-compression:
-    # leading 0-bytes in the input become leading-1s
-    n_pad = 0
-    for char in v:
-        if char == 0x00:
-            n_pad += 1
-        else:
-            break
-    if n_pad > 0:
-        result.extend((chars[0] * n_pad).encode())
-    return bytes(reversed(result)).decode()
+    return None  # dead code to apease pylint
 
 
 def detect_encodings(str_data):
@@ -156,7 +91,7 @@ def detect_encodings(str_data):
 
     # get min and max characters (sorted by ordinal value),
     # check most restrictive encodings first
-    # doesnt try to decode, assumption is made
+    # is not strict -- does not try to decode -- assumptions are made
 
     min_chr = min(str_data)
     max_chr = max(str_data)
@@ -191,3 +126,68 @@ def detect_encodings(str_data):
         encodings.append("utf8")
 
     return encodings
+
+
+# pure-python encoder/decoder for base43 and base58 below
+B43CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:"
+assert len(B43CHARS) == 43
+
+B58CHARS = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+assert len(B58CHARS) == 58
+
+
+def pure_python_base_decode(v, base):
+    """decode str v from base encoding; returns bytes"""
+    chars = B58CHARS if base == 58 else B43CHARS
+    long_value = 0
+    power_of_base = 1
+    for char in reversed(v):
+        digit = chars.find(char)
+        if digit == -1:
+            raise ValueError("forbidden character {} for base {}".format(char, base))
+        long_value += digit * power_of_base
+        power_of_base *= base
+    result = bytearray()
+    while long_value >= 256:
+        div, mod = divmod(long_value, 256)
+        result.append(mod)
+        long_value = div
+    if long_value > 0:
+        result.append(long_value)
+    n_pad = 0
+    for char in v:
+        if char == chars[0]:
+            n_pad += 1
+        else:
+            break
+    if n_pad > 0:
+        result.extend(b"\x00" * n_pad)
+    return bytes(reversed(result))
+
+
+def pure_python_base_encode(v, base):
+    """decode bytes v from base encoding; returns str"""
+    chars = B58CHARS if base == 58 else B43CHARS
+    long_value = 0
+    power_of_base = 1
+    for char in reversed(v):
+        long_value += power_of_base * char
+        power_of_base <<= 8
+    result = bytearray()
+    while long_value >= base:
+        div, mod = divmod(long_value, base)
+        result.extend(chars[mod].encode())
+        long_value = div
+    if long_value > 0:
+        result.extend(chars[long_value].encode())
+    # Bitcoin does a little leading-zero-compression:
+    # leading 0-bytes in the input become leading-1s
+    n_pad = 0
+    for char in v:
+        if char == 0x00:
+            n_pad += 1
+        else:
+            break
+    if n_pad > 0:
+        result.extend((chars[0] * n_pad).encode())
+    return bytes(reversed(result)).decode()

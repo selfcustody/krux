@@ -53,11 +53,14 @@ DATUM_BBQR_TYPES = {
 }
 
 
+# TODO: remove all print statements
+
+
 def urobj_to_data(ur_obj):
     """returns flatened data from a UR object. belongs in qr or qr_capture???"""
     import urtypes
 
-    print("type: {}, cbor: {}".format(ur_obj.type, ur_obj.cbor))
+    # print("type: {}, cbor: {}".format(ur_obj.type, ur_obj.cbor))
     if ur_obj.type == "crypto-bip39":
         data = urtypes.crypto.BIP39.from_cbor(ur_obj.cbor).words
     elif ur_obj.type == "crypto-account":
@@ -142,7 +145,7 @@ def detect_encodings(str_data, verify=True):
     """
     # pylint: disable=R0912,R0915
     from binascii import unhexlify
-    from krux.baseconv import base_decode
+    from krux.baseconv import base_decode, base_encode
     from embit.bech32 import bech32_decode, Encoding
 
     encodings = []
@@ -239,7 +242,9 @@ def detect_encodings(str_data, verify=True):
     if "+" <= min_chr and max_chr <= "z":
         if verify:
             try:
-                base_decode(str_data, 64)
+                # binascii.a2b_base64 is NOT strict
+                as_bytes = base_decode(str_data, 64)
+                assert base_encode(as_bytes, 64) == str_data
                 encodings.append(64)
             except:
                 pass
@@ -285,11 +290,11 @@ class DatumToolMenu(Page):
         if contents is None:
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
-        print(
-            "\nscanned raw contents: {} {}, format: {}".format(
-                type(contents), repr(contents), fmt
-            )
-        )
+        # print(
+        #     "\nscanned raw contents: {} {}, format: {}".format(
+        #         type(contents), repr(contents), fmt
+        #     )
+        # )
         title = "QR Contents"
         if fmt == 2:
             title += ", UR:" + contents.type
@@ -542,7 +547,7 @@ class DatumTool(Page):
         """Displays infobox and contents"""
         from binascii import hexlify
 
-        print("_show_contents()", self.contents)
+        # print("_show_contents()", self.contents)
 
         info_len = self._info_box(preview=False)
         self.ctx.display.draw_hcentered_text(
