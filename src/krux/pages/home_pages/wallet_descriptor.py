@@ -80,12 +80,14 @@ class WalletDescriptor(Page):
                 from krux.pages.encryption_ui import KEFEnvelope
                 from krux.pages.qr_view import SeedQRView
 
-                wallet_data = self.ctx.wallet.wallet_data
+                # simple descriptor string encoded to bytes, rather than what was loaded
+                wallet_data = self.ctx.wallet.descriptor.to_string().encode()
 
                 kef = KEFEnvelope(self.ctx)
+                kef.label = self.ctx.wallet.label
                 wallet_data = kef.seal_ui(wallet_data, override_defaults=True)
                 qr_format = "binary"
-                title = "KEF " + title
+                title = "KEF " + kef.label
                 sqr = SeedQRView(self.ctx, binary=True, data=wallet_data, title=title)
                 sqr.display_qr(allow_export=True)
             else:
