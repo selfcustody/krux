@@ -86,6 +86,9 @@ class WalletDescriptor(Page):
                 kef = KEFEnvelope(self.ctx)
                 kef.label = self.ctx.wallet.label
                 wallet_data = kef.seal_ui(wallet_data, override_defaults=True)
+                if not wallet_data:
+                    # User cancelled the encryption
+                    return MENU_CONTINUE
                 qr_format = "binary"
                 title = "KEF " + kef.label
                 sqr = SeedQRView(self.ctx, binary=True, data=wallet_data, title=title)
