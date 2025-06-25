@@ -69,14 +69,15 @@ class WalletDescriptor(Page):
                 return self._load_wallet()
         else:
             qr_type_menu = [
-                ("Plaintext", lambda: "plaintext"),
-                ("Encrypted", lambda: "encrypted"),
+                ("Plaintext", lambda: "P"),
+                ("Encrypted", lambda: "E"),
             ]
             idx, qr_type = Menu(self.ctx, qr_type_menu).run_loop()
             if idx == len(qr_type_menu) - 1:
                 return MENU_CONTINUE
 
-            if qr_type == "encrypted":
+            is_encrypted = qr_type == "E"
+            if is_encrypted:
                 from krux.pages.encryption_ui import KEFEnvelope
                 from krux.pages.qr_view import SeedQRView
 
@@ -106,7 +107,7 @@ class WalletDescriptor(Page):
                 from ..file_operations import SaveFile
 
                 save_page = SaveFile(self.ctx)
-                if qr_type == "encrypted":
+                if is_encrypted:
                     file_content = wallet_data
                 else:
                     file_content = self.ctx.wallet.descriptor.to_string()
@@ -116,7 +117,7 @@ class WalletDescriptor(Page):
                     self.ctx.wallet.label,
                     title + ":",
                     DESCRIPTOR_FILE_EXTENSION,
-                    save_as_binary=qr_type != "encrypted",
+                    save_as_binary=is_encrypted,
                 )
 
         return MENU_CONTINUE
