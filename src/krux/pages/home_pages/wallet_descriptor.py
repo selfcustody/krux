@@ -103,13 +103,17 @@ class WalletDescriptor(Page):
                 from ..file_operations import SaveFile
 
                 save_page = SaveFile(self.ctx)
+                if qr_type == "encrypted":
+                    file_content = wallet_data
+                else:
+                    file_content = self.ctx.wallet.descriptor.to_string()
                 self.ctx.wallet.persisted = save_page.save_file(
-                    self.ctx.wallet.descriptor.to_string(),
+                    file_content,
                     self.ctx.wallet.label,
                     self.ctx.wallet.label,
                     title + ":",
                     DESCRIPTOR_FILE_EXTENSION,
-                    save_as_binary=False,
+                    save_as_binary=qr_type != "encrypted",
                 )
 
         return MENU_CONTINUE
