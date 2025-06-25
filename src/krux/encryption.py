@@ -27,9 +27,8 @@ from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
 from .krux_settings import Settings, PBKDF2_HMAC_ECB, PBKDF2_HMAC_CBC
 from embit.wordlists.bip39 import WORDLIST
-from .settings import FLASH_PATH
+from .settings import FLASH_PATH, MNEMONICS_FILE
 
-MNEMONICS_FILE = "seeds.json"
 FLASH_PATH_STR = "/" + FLASH_PATH + "/%s"
 
 VERSION_MODE = {

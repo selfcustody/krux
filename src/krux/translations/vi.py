@@ -79,6 +79,7 @@ translation_array = [
     "Số thập phân",
     "Giải mã?",
     "Ví mặc định",
+    "Xóa tập tin này?",
     "Độ sâu mỗi lần cắt CNC",
     "Đường dẫn phái sinh",
     "Suy ra entropy BIP85?",

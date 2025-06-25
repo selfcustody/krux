@@ -21,13 +21,13 @@
 # THE SOFTWARE.
 
 import gc
-from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
+from . import Page, Menu, MENU_EXIT, MENU_CONTINUE, MENU_RESTART
 from ..sd_card import SDHandler
 from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
 from ..display import BOTTOM_PROMPT_LINE
 from ..kboard import kboard
-from ..settings import SD_PATH
+from ..settings import SD_PATH, SETTINGS_FILENAME, MNEMONICS_FILE
 
 LIST_FILE_DIGITS = 9  # len on large devices per menu item
 LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
@@ -129,30 +129,43 @@ class FileManager(Page):
                 items.append("Back")
 
                 submenu = Menu(self.ctx, menu_items)
-                index, _ = submenu.run_loop()
+                index, status = submenu.run_loop()
 
                 # selected "Back"
                 if index == len(items) - 1:
                     return ""
                 # selected ".."
                 if index == 0 and path != SD_ROOT_PATH:
-                    path = path.split("/")
-                    path.pop()
-                    path = "/".join(path)
+                    path = self._up_one_path(path)
                 else:
                     path += "/" + items[index]
             # it is a file!
             else:
-                submenu, menu_items, items = (None, None, None)
-                del submenu, menu_items, items
-                gc.collect()
-                return path
+                if status == MENU_RESTART:
+                    path = self._up_one_path(path)
+                else:
+                    submenu, menu_items, items = (None, None, None)
+                    del submenu, menu_items, items
+                    gc.collect()
+                    return path
+
+    def _up_one_path(self, path):
+        path = path.split("/")
+        path.pop()
+        return "/".join(path)
 
     def show_file_details(self, file):
         """Handler to print file info when selecting a file in the file explorer"""
 
-        self.display_file(file)
-        self.ctx.input.wait_for_button()
+        file = self.display_file(file)
+        if file in (SETTINGS_FILENAME, MNEMONICS_FILE):
+            self.ctx.input.wait_for_button()
+        elif self.prompt(t("Delete this file?"), BOTTOM_PROMPT_LINE):
+            self.ctx.display.clear()
+            if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                with SDHandler() as sd:
+                    sd.delete(file)
+                return MENU_RESTART
         return MENU_CONTINUE
 
     def load_file(self, file):

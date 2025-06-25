@@ -79,6 +79,7 @@ translation_array = [
     "Decimal",
     "Descriptografar?",
     "Carteira Padrão",
+    "Excluir este arquivo?",
     "Profundidade da Passagem",
     "Caminho de Derivação",
     "Derivar entropia BIP85?",

@@ -1,4 +1,4 @@
-In Krux first menu, there is a `Settings` entry. Some submenu entries have too many options to fit on one screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens if your device has a touchscreen. Below is a breakdown of the options you can change:
+In Krux first menu, there is a `Settings` entry. Some submenu entries have too many options to fit on a single screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens - if your device has a touchscreen. Below is a breakdown of the options you can change:
 
 <img src="../../img/maixpy_amigo/settings-options-300.png" class="amigo">
 <img src="../../img/maixpy_m5stickv/settings-options-250.png" class="m5stickv">

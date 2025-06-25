@@ -57,6 +57,7 @@
     "Decimal": "十进制",
     "Decrypt?": "解密？",
     "Default Wallet": "默认钱包",
+    "Delete this file?": "是否删除此文件？",
     "Depth Per Pass": "每次通过的深度",
     "Derivation Path": "源路径",
     "Derive BIP85 entropy?": "导出BIP85熵？",

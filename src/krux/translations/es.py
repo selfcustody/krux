@@ -79,6 +79,7 @@ translation_array = [
     "Decimal",
     "¿Descifrar?",
     "Cartera Predeterminada",
+    "¿Eliminar este archivo?",
     "Profundidad por Pasada",
     "Ruta de derivación",
     "¿Derivar entropía BIP85?",

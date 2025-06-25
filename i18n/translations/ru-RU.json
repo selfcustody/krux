@@ -57,6 +57,7 @@
     "Decimal": "Десятичный",
     "Decrypt?": "Расшифровать?",
     "Default Wallet": "Кошелек по умолчанию",
+    "Delete this file?": "Удалить этот файл?",
     "Depth Per Pass": "Глубина за Проход",
     "Derivation Path": "Путь деривации",
     "Derive BIP85 entropy?": "Вывести энтропию BIP85?",

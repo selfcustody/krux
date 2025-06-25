@@ -57,6 +57,7 @@
     "Decimal": "10진수",
     "Decrypt?": "복호화하시겠습니까?",
     "Default Wallet": "지갑 기본설정",
+    "Delete this file?": "이 파일 삭제?",
     "Depth Per Pass": "Depth Per Pass",
     "Derivation Path": "파생 경로",
     "Derive BIP85 entropy?": "BIP85 엔트로피를 유독하시겠습니까?",
