@@ -27,9 +27,8 @@ from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
 from .krux_settings import Settings
 from embit import bip39
-from .settings import FLASH_PATH
+from .settings import FLASH_PATH, MNEMONICS_FILE
 
-MNEMONICS_FILE = "seeds.json"
 FLASH_PATH_STR = "/" + FLASH_PATH + "/%s"
 
 QR_CODE_ITER_MULTIPLE = 10000

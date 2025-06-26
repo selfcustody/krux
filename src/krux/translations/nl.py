@@ -82,6 +82,7 @@ translation_array = [
     "Decimaal",
     "Ontsleutelen?",
     "Standaard portemonnee",
+    "Dit bestand verwijderen?",
     "Diepte per pas",
     "Afleidingspad",
     "BIP85-entropie afleiden?",

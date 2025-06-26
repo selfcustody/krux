@@ -82,6 +82,7 @@ translation_array = [
     "Ondalık",
     "Şifre çözülsün mü?",
     "Varsayılan Cüzdan",
+    "Bu dosyayı sil?",
     "Geçiş Başına Derinlik",
     "Türetim Yolu",
     "BIP85 entropisi türetilsin mi?",

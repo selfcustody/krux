@@ -55,9 +55,9 @@ from ..kboard import kboard
 MENU_CONTINUE = 0
 MENU_EXIT = 1
 MENU_SHUTDOWN = 2
+MENU_RESTART = 3
 
 ESC_KEY = 1
-FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
 SHUTDOWN_WAIT_TIME = 300
 

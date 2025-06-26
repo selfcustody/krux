@@ -82,6 +82,7 @@ translation_array = [
     "Décimal",
     "Déchiffrer\u2009?",
     "Portefeuille par défaut",
+    "Supprimer ce fichier\u2009?",
     "Profondeur par passage",
     "Chemin de dérivation",
     "Dériver l'entropie BIP85\u2009?",

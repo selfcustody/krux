@@ -82,6 +82,7 @@ translation_array = [
     "Dezimal",
     "Entschlüsseln?",
     "Standard-Wallet",
+    "Diese Datei löschen?",
     "Tiefe pro Durchgang",
     "Derivation-Pfad",
     "BIP85-Entropie ableiten?",
