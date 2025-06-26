@@ -155,7 +155,7 @@ class Bip85(Page):
             BIP_PWD_APP_INDEX,
             [pwd_len, child_index],
         )
-        password = base_encode(entropy, 64).decode().strip()
+        password = base_encode(entropy, 64)
         password = password[:pwd_len]
         info = password
         info += "\n\n" + t("Index") + ": %s" % child_index

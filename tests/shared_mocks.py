@@ -332,6 +332,7 @@ def pbkdf2_hmac_sha256_wrapper(secret, salt, iterations):
 def base32_decode(encoded_str):
     """Decodes a Base32 string."""
     try:
+        len_pad = (8 - len(encoded_str) % 8) % 8
         decoded = base64.b32decode(encoded_str)
     except ValueError as e:
         raise ValueError("Invalid Base32 string: %s" % e)
@@ -346,16 +347,16 @@ def base32_encode(data, add_padding=False):
     return encoded
 
 
-def base43_encode(data):
-    from krux.baseconv import base_encode
+def base43_encode(data, ignored=None):
+    from krux.baseconv import pure_python_base_encode
 
-    return base_encode(data, 43)
+    return pure_python_base_encode(data, 43)
 
 
 def base43_decode(data):
-    from krux.baseconv import base_decode
+    from krux.baseconv import pure_python_base_decode
 
-    return base_decode(data, 43)
+    return pure_python_base_decode(data, 43)
 
 
 def board_m5stickv():

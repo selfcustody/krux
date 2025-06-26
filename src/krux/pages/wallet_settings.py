@@ -117,12 +117,19 @@ class PassphraseEditor(Page):
 
     def _load_qr_passphrase(self):
         from .qr_capture import QRCodeCapture
+        from .encryption_ui import decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, _ = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
+
+        try:
+            data = decrypt_kef(self.ctx, data).decode()
+        except:
+            pass
+
         if len(data) > PASSPHRASE_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % PASSPHRASE_MAX_LEN)
         return data
