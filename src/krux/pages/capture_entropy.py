@@ -72,8 +72,6 @@ class CameraEntropy(Page):
 
     def rms_value(self, data):
         """Calculates the RMS value of a list of numbers"""
-        if not data:
-            return 0
         square_sum = sum(x**2 for x in data)
         mean_square = square_sum / len(data)
         rms = math.sqrt(mean_square)
