@@ -51,7 +51,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 6 Print
         (
@@ -59,7 +59,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 7 Decline to print
         (
@@ -67,7 +67,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_PAGE],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
         ),
         # 8 Multisig wallet, no print prompt
         (
@@ -75,7 +75,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.MULTISIG_12_WORD_KEY,
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 9 vague BlueWallet-ish p2pkh, requires allow_assumption
         (
@@ -125,7 +125,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # 1 Load, from SD card, good data, accept
+        # 15 Load, from SD card, good data, accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,

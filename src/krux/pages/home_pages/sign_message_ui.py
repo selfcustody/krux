@@ -152,7 +152,7 @@ class SignMessage(Utils):
         ).digest()
 
         sig = self.ctx.wallet.key.sign_at(derivation, message_hash)
-        self._display_signature(base_encode(sig, 64).strip().decode())
+        self._display_signature(base_encode(sig, 64))
         return sig
 
     def _display_message_sign_prompt(self, message, address):
@@ -242,7 +242,7 @@ class SignMessage(Utils):
             return ""
 
         sig = self.ctx.wallet.key.sign(message_hash).serialize()
-        self._display_signature(base_encode(sig, 64).strip().decode())
+        self._display_signature(base_encode(sig, 64))
         return sig
 
     def _compute_message_hash(self, data):
@@ -292,7 +292,7 @@ class SignMessage(Utils):
 
     def _export_to_qr(self, sig, pubkey, qr_format, at_address=False):
         """Exports the signature and public key to QR code"""
-        encoded_sig = base_encode(sig, 64).strip().decode()
+        encoded_sig = base_encode(sig, 64)
         title = t("Signed Message")
         self.display_qr_codes(encoded_sig, qr_format, title)
         self.print_standard_qr(encoded_sig, qr_format, title)
@@ -323,7 +323,7 @@ class SignMessage(Utils):
             file_content += message + "\n"
             file_content += SD_SIGNATURE_HEADER + "\n"
             file_content += address + "\n"
-            file_content += base_encode(sig, 64).strip().decode() + "\n"
+            file_content += base_encode(sig, 64) + "\n"
             file_content += SD_SIGNATURE_FOOTER
         else:
             file_content = sig

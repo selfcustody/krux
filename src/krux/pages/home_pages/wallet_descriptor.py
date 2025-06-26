@@ -22,6 +22,7 @@
 
 from .. import (
     Page,
+    Menu,
     MENU_CONTINUE,
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
@@ -67,8 +68,35 @@ class WalletDescriptor(Page):
             if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
                 return self._load_wallet()
         else:
-            self.display_wallet(self.ctx.wallet)
-            wallet_data, qr_format = self.ctx.wallet.wallet_qr()
+            qr_type_menu = [
+                ("Plaintext", lambda: "P"),
+                ("Encrypted", lambda: "E"),
+            ]
+            idx, qr_type = Menu(self.ctx, qr_type_menu).run_loop()
+            if idx == len(qr_type_menu) - 1:
+                return MENU_CONTINUE
+
+            is_encrypted = qr_type == "E"
+            if is_encrypted:
+                from krux.pages.encryption_ui import KEFEnvelope
+                from krux.pages.qr_view import SeedQRView
+
+                # simple descriptor string encoded to bytes, rather than what was loaded
+                wallet_data = self.ctx.wallet.descriptor.to_string().encode()
+
+                kef = KEFEnvelope(self.ctx)
+                kef.label = self.ctx.wallet.label
+                wallet_data = kef.seal_ui(wallet_data, override_defaults=True)
+                if not wallet_data:
+                    # User cancelled the encryption
+                    return MENU_CONTINUE
+                qr_format = "binary"
+                title = "KEF " + kef.label
+                sqr = SeedQRView(self.ctx, binary=True, data=wallet_data, title=title)
+                sqr.display_qr(allow_export=True)
+            else:
+                self.display_wallet(self.ctx.wallet)
+                wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             from ..utils import Utils
 
             utils = Utils(self.ctx)
@@ -79,13 +107,17 @@ class WalletDescriptor(Page):
                 from ..file_operations import SaveFile
 
                 save_page = SaveFile(self.ctx)
+                if is_encrypted:
+                    file_content = wallet_data
+                else:
+                    file_content = self.ctx.wallet.descriptor.to_string()
                 self.ctx.wallet.persisted = save_page.save_file(
-                    self.ctx.wallet.descriptor.to_string(),
+                    file_content,
                     self.ctx.wallet.label,
                     self.ctx.wallet.label,
                     title + ":",
                     DESCRIPTOR_FILE_EXTENSION,
-                    save_as_binary=False,
+                    save_as_binary=is_encrypted,
                 )
 
         return MENU_CONTINUE
@@ -126,6 +158,13 @@ class WalletDescriptor(Page):
             # Camera or SD card loading failed!
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
+
+        from ..encryption_ui import decrypt_kef
+
+        try:
+            wallet_data = decrypt_kef(self.ctx, wallet_data).decode()
+        except:
+            pass
 
         from ...wallet import Wallet, AssumptionWarning
 

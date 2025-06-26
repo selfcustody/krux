@@ -101,8 +101,6 @@ class PSBTSigner:
             except:
                 raise ValueError("invalid PSBT")
         else:
-            # Process as bytes
-            psbt_data = psbt_data.encode() if isinstance(psbt_data, str) else psbt_data
             try:
                 self.psbt = PSBT.parse(psbt_data)
                 if self.qr_format == FORMAT_PMOFN:
@@ -143,7 +141,7 @@ class PSBTSigner:
                 return False
             try:
                 # Try to decode the chunk as base64
-                base_decode(chunk, 64)
+                base_decode(chunk.decode(), 64)
                 return True
             except Exception:
                 return False
@@ -534,7 +532,7 @@ class PSBTSigner:
         if self.base_encoding is not None:
             from .baseconv import base_encode
 
-            psbt_data = base_encode(psbt_data, self.base_encoding).decode()
+            psbt_data = base_encode(psbt_data, self.base_encoding)
 
         if self.ur_type == CRYPTO_PSBT:
             return (

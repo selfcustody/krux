@@ -1,5 +1,7 @@
 # The MIT License (MIT)
 
+# pylint: disable=C0103,C0116,C0206,C0302,E0601,R0912,R0914,W0212,W0612,W0613
+
 # Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -410,10 +412,17 @@ class Login(Page):
 
     def _encrypted_qr_code(self, data):
         from ..encryption import EncryptedQRCode
+        from ..baseconv import base_decode
 
         encrypted_qr = EncryptedQRCode()
-        data_bytes = data.encode("latin-1") if isinstance(data, str) else data
-        public_data = encrypted_qr.public_data(data_bytes)
+        public_data = None
+        try:  # Try to decode base43 data
+            data = base_decode(data, 43)
+            public_data = encrypted_qr.public_data(data)
+        except:
+            pass
+        if not public_data:  # Failed to decode and parse base43
+            public_data = encrypted_qr.public_data(data)
         if public_data:
             self.ctx.display.clear()
             if self.prompt(
@@ -457,12 +466,18 @@ class Login(Page):
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
         from .qr_capture import QRCodeCapture
+        from .encryption_ui import decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
+
+        try:
+            data = decrypt_kef(self.ctx, data)
+        except:
+            pass
 
         words = []
         if qr_format == FORMAT_UR:
@@ -505,10 +520,7 @@ class Login(Page):
                         WORDLIST[int(data_bytes[i : i + 4])]
                         for i in range(0, len(data_bytes), 4)
                     ]
-            if not words:
-                words = self._encrypted_qr_code(data)
-                if words == MENU_CONTINUE:
-                    return MENU_CONTINUE
+
         if not words or (len(words) != 12 and len(words) != 24):
             self.flash_error(t("Invalid mnemonic length"))
             return MENU_CONTINUE

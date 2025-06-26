@@ -269,6 +269,7 @@ class Home(Page):
 
     def sign_psbt(self):
         """Handler for the 'sign psbt' menu item"""
+        from ..encryption_ui import decrypt_kef
 
         # Warns in case multisig or miniscript wallet descriptor is not loaded
         if (
@@ -293,6 +294,11 @@ class Home(Page):
             # Both the camera and the file on SD card failed!
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
+
+        try:
+            data = decrypt_kef(self.ctx, data)
+        except:
+            pass
 
         # PSBT read OK! Will try to sign
         self.ctx.display.clear()

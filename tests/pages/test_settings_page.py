@@ -450,7 +450,6 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
 
     ctx = mock_context(mocker)
     settings_page = SettingsPage(ctx)
-
     mocker.spy(SettingsPage, "flash_error")
 
     # pbkdf2_iterations has default value
@@ -461,29 +460,35 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
     settings_page.number_setting(
         EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
     )
-
-    # continue with default value because it must be multiple of 10000
-    assert Settings().encryption.pbkdf2_iterations == 100000
-
-    # error msg is shown
-    settings_page.flash_error.assert_called()
+    # a value not-multiple of 10k is allowed since kef-2025
+    assert Settings().encryption.pbkdf2_iterations == 100001
 
     # try to change the value to a multiple of 10000
     settings_page.capture_from_keypad = mocker.MagicMock(return_value=110000)
     settings_page.number_setting(
         EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
     )
-
     # value changed!
     assert Settings().encryption.pbkdf2_iterations == 110000
 
-    # try to change the value to a value out of range
-    settings_page.capture_from_keypad = mocker.MagicMock(return_value=0)
+    # try to change the value to a value out of range, too low
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=9999)
     settings_page.number_setting(
         EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
     )
+    # error shown, value remain unchanged!
+    settings_page.flash_error.assert_called()
+    settings_page.flash_error.reset_mock()
+    assert Settings().encryption.pbkdf2_iterations == 110000
 
-    # value remain unchanged!
+    # try to change the value to a value out of range, too high
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=500001)
+    settings_page.number_setting(
+        EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
+    )
+    # error shown, value remain unchanged!
+    settings_page.flash_error.assert_called()
+    settings_page.flash_error.reset_mock()
     assert Settings().encryption.pbkdf2_iterations == 110000
 
 
