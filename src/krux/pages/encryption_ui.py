@@ -56,13 +56,25 @@ def decrypt_kef(ctx, data):
         for encoding in encodings:
             as_bytes = None
             if encoding in ("hex", "HEX"):
-                as_bytes = unhexlify(data)
+                try:
+                    as_bytes = unhexlify(data)
+                except:
+                    continue
             elif encoding == 32:
-                as_bytes = base_decode(data, 32)
+                try:
+                    as_bytes = base_decode(data, 32)
+                except:
+                    continue
             elif encoding == 64:
-                as_bytes = base_decode(data, 64)
+                try:
+                    as_bytes = base_decode(data, 64)
+                except:
+                    continue
             elif encoding == 43:
-                as_bytes = base_decode(data, 43)
+                try:
+                    as_bytes = base_decode(data, 43)
+                except:
+                    continue
 
             if as_bytes:
                 kef_envelope = KEFEnvelope(ctx)
