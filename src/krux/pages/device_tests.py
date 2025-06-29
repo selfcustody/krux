@@ -53,7 +53,7 @@ class DeviceTests(Page):
         utils.print_standard_qr(title, title=title, check_printer=False)
         return MENU_CONTINUE
 
-    def test_suite(self):
+    def test_suite(self, interactive=False):
         """run each on-device tests in all_tests, report summary and details"""
         all_tests = [
             self.hw_acc_hashing,
@@ -63,7 +63,7 @@ class DeviceTests(Page):
             self.test_success,
             self.test_non_empty,
             self.test_long_named_test_function,
-            self.test_interactive,  # interactive test
+            (self.test_interactive, interactive),  # interactive test
             self.test_exception,  # failure
             self.test_false,  # failure
             self.test_empty,  # failure
@@ -80,13 +80,22 @@ class DeviceTests(Page):
                 self.ctx.display.draw_centered_text(
                     t("Processing..") + " {}/{}".format(idx + 1, len(all_tests))
                 )
+
+                test_name = test.__name__ if callable(test) else test[0].__name__
                 try:
-                    assert test()
-                    self.results.append((test, True))
+                    if not callable(test):
+                        test_fn = test[0]
+                        args = test[1 : len(test)]
+                        assert test_fn(*args)
+                        self.results.append((test_fn, True))
+                    else:
+                        assert test()
+                        self.results.append((test, True))
+
                 except Exception as err:
                     print(
                         "DeviceTests.run_test_suite: {} failed: {}".format(
-                            test.__name__, err
+                            test_name, err
                         )
                     )
                     self.results.append((test, False))
@@ -123,7 +132,12 @@ class DeviceTests(Page):
             [
                 (
                     line_fmt.format(
-                        x[0].__name__[: chars_per_line - 3], "ok" if x[1] else "X"
+                        (
+                            x[0][0].__name__
+                            if isinstance(x[0], tuple)
+                            else x[0].__name__
+                        )[: chars_per_line - 3],
+                        "ok" if x[1] else "X",
                     ),
                     lambda: None,
                 )
