@@ -274,12 +274,13 @@ class Login(Page):
     def _load_key_from_words(self, words, charset=LETTERS, new=False):
         mnemonic = " ".join(words)
 
-        if charset != LETTERS:
-            if self._confirm_key_from_digits(mnemonic, charset) is not None:
-                return MENU_CONTINUE
-
-        # If the mnemonic is not hidden, show the mnemonic editor
+        # Don't show word list confirmation or the mnemonic editor if hide mnemonic is enabled
         if not Settings().security.hide_mnemonic:
+
+            if charset != LETTERS:
+                if self._confirm_key_from_digits(mnemonic, charset) is not None:
+                    return MENU_CONTINUE
+
             from .mnemonic_editor import MnemonicEditor
 
             mnemonic = MnemonicEditor(self.ctx, mnemonic, new).edit()
