@@ -400,8 +400,9 @@ class Login(Page):
         }
         numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
         self.display_mnemonic(
-            numbers_str,
+            mnemonic,
             suffix_dict[charset],
+            numbers_str,
             fingerprint=Key.extract_fingerprint(mnemonic),
         )
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
