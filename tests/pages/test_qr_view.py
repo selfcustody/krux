@@ -352,6 +352,24 @@ def test_save_bmp_image(amigo, mocker):
     )
 
 
+def test_save_bmp_image_no_sd_card(amigo, mocker):
+    from krux.pages.qr_view import SeedQRView
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # move to "Back to Menu"
+        BUTTON_ENTER,  # confirm
+    ]
+
+    flash_text = mocker.spy(SeedQRView, "flash_text")
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+
+    qr_viewer = SeedQRView(ctx, data=TEST_QR_CODE, title="Test QR Code")
+    qr_viewer.save_bmp_image(TEST_TITLE, TEST_DATA_QR_SIZE_FRAMED * 2)
+    flash_text.assert_called_once_with(qr_viewer, "SD card not detected.")
+
+
 def test_save_bmp_image_esc_key(amigo, mocker, mocker_save_file_esc):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
     from krux.pages.qr_view import SeedQRView
