@@ -3,7 +3,6 @@ from . import create_ctx
 
 def test_tc_code_verification(amigo, mocker):
     from krux.pages import (
-        DIGITS,
         LETTERS,
         UPPERCASE_LETTERS,
         NUM_SPECIAL_1,
@@ -106,5 +105,5 @@ def test_tc_code_verification_esc_key(amigo, mocker):
         tc_verifier = TCCodeVerification(ctx)
         result = tc_verifier.capture()
 
-        assert not result
+        assert result == False
         assert ctx.input.wait_for_button.call_count == len(case)
