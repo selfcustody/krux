@@ -48,7 +48,7 @@ def base_decode(v, base):
         return pure_python_base_decode(v, 58)
     if base == 64:
         return a2b_base64(v)
-    return None  # dead code to apease pylint
+    return None  # dead code to appease pylint
 
 
 def base_encode(v, base):
@@ -78,14 +78,14 @@ def base_encode(v, base):
         return pure_python_base_encode(v, 58)
     if base == 64:
         return b2a_base64(v).rstrip().decode()
-    return None  # dead code to apease pylint
+    return None  # dead code to appease pylint
 
 
-def detect_encodings(str_data):
-    """Detects which encodings this data str might be, returns list"""
+def hint_encodings(str_data):
+    """NON-VERIFIED encoding hints of what input string might be, returns list"""
 
     if not isinstance(str_data, str):
-        raise TypeError("detect_encodings() expected str")
+        raise TypeError("hint_encodings() expected str")
 
     encodings = []
 
@@ -110,6 +110,10 @@ def detect_encodings(str_data):
     # might it be base43
     if "$" <= min_chr and max_chr <= "Z":
         encodings.append(43)
+
+    # might it be base58? currently unused
+    # if "1" <= min_chr and max_chr <= "z":
+    #     encodings.append(58)
 
     # might it be base64
     if "+" <= min_chr and max_chr <= "z":

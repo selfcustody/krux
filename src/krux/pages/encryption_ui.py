@@ -45,14 +45,14 @@ ENCRYPTION_KEY_MAX_LEN = 200
 def decrypt_kef(ctx, data):
     """finds kef-envelope and returns data fully decrypted, else ValueError"""
     from binascii import unhexlify
-    from krux.baseconv import base_decode, detect_encodings
+    from krux.baseconv import base_decode, hint_encodings
 
     err = "Not decrypted"  # intentionally vague
 
     # if data is str, assume encoded, look for kef envelope
     kef_envelope = None
     if isinstance(data, str):
-        encodings = detect_encodings(data)
+        encodings = hint_encodings(data)
         for encoding in encodings:
             as_bytes = None
             if encoding in ("hex", "HEX"):

@@ -333,7 +333,7 @@ def base32_decode(encoded_str):
     """Decodes a Base32 string."""
     try:
         len_pad = (8 - len(encoded_str) % 8) % 8
-        decoded = base64.b32decode(encoded_str)
+        decoded = base64.b32decode(encoded_str + "=" * len_pad)
     except ValueError as e:
         raise ValueError("Invalid Base32 string: %s" % e)
 
