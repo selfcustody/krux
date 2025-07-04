@@ -225,161 +225,24 @@ class Home(Page):
         )
         return (None, FORMAT_NONE, psbt_filename)
 
-    def _sign_menu(self):
-        sign_menu = Menu(
-            self.ctx,
-            [
-                (t("Sign to QR code"), lambda: None),
-                (
-                    t("Sign to SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
-            ],
-            back_status=lambda: None,
-        )
-        index, _ = sign_menu.run_loop()
-        return index
+    def _sign_menu(self, signer, psbt_filename):
 
-    def _format_psbt_file_extension(self, psbt_filename=""):
-        """Formats the PSBT filename"""
-        from ...sd_card import (
-            PSBT_FILE_EXTENSION,
-            B64_FILE_EXTENSION,
-            SIGNED_FILE_SUFFIX,
-        )
-        from ..file_operations import SaveFile
-
-        if psbt_filename.endswith(B64_FILE_EXTENSION):
-            # Remove chained extensions
-            psbt_filename = psbt_filename[: -len(B64_FILE_EXTENSION)]
-            if psbt_filename.endswith(PSBT_FILE_EXTENSION):
-                psbt_filename = psbt_filename[: -len(PSBT_FILE_EXTENSION)]
-            extension = PSBT_FILE_EXTENSION + B64_FILE_EXTENSION
-        else:
-            extension = PSBT_FILE_EXTENSION
-
-        save_page = SaveFile(self.ctx)
-        psbt_filename = save_page.set_filename(
-            psbt_filename,
-            "QRCode",
-            SIGNED_FILE_SUFFIX,
-            extension,
-        )
-        return psbt_filename
-
-    def sign_psbt(self):
-        """Handler for the 'sign psbt' menu item"""
-        from ..encryption_ui import decrypt_kef
-
-        # Warns in case multisig or miniscript wallet descriptor is not loaded
-        if (
-            not self.ctx.wallet.is_loaded()
-            and self.ctx.wallet.key.policy_type != TYPE_SINGLESIG
-        ):
-            self.ctx.display.draw_centered_text(
-                t("Warning:")
-                + " "
-                + t("Wallet output descriptor not found.")
-                + "\n\n"
-                + t("Some checks cannot be performed."),
-                highlight_prefix=":",
+        def _menu_options():
+            sign_menu = Menu(
+                self.ctx,
+                [
+                    (t("Sign to QR code"), lambda: None),
+                    (
+                        t("Sign to SD card"),
+                        None if not self.has_sd_card() else lambda: None,
+                    ),
+                ],
+                back_status=lambda: None,
             )
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
+            index, _ = sign_menu.run_loop()
+            return index
 
-        # Load a PSBT
-        data, qr_format, psbt_filename = self.load_psbt()
-
-        if data is None and psbt_filename == "":
-            # Both the camera and the file on SD card failed!
-            self.flash_error(t("Failed to load"))
-            return MENU_CONTINUE
-
-        try:
-            data = decrypt_kef(self.ctx, data)
-        except:
-            pass
-
-        # PSBT read OK! Will try to sign
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading.."))
-
-        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
-        from ...psbt import PSBTSigner
-
-        signer = PSBTSigner(self.ctx.wallet, data, qr_format, psbt_filename)
-
-        del data
-        gc.collect()
-
-        # Warns in case of path mismatch
-        path_mismatch = signer.path_mismatch()
-        if path_mismatch:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Warning:")
-                + " "
-                + t("Path mismatch")
-                + "\n"
-                + "Wallet: "
-                + self.ctx.wallet.key.derivation_str()
-                + "\n"
-                + "PSBT: "
-                + path_mismatch,
-                highlight_prefix=":",
-            )
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
-
-        # Show the policy for multisig and miniscript PSBTs
-        # in case the wallet descriptor is not loaded
-        if (
-            not self.ctx.wallet.is_loaded()
-            and not self.ctx.wallet.key.policy_type == TYPE_SINGLESIG
-        ):
-            policy_str = signer.psbt_policy_string()
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(policy_str)
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
-
-        # Fix zero fingerprint, it is necessary for the signing process on embit in a few cases
-        if signer.fill_zero_fingerprint():
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Fingerprint unset in PSBT"))
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
-
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
-        outputs, fee_percent = signer.outputs()
-
-        # Warn if fees greater than 10% of what is spent
-        if fee_percent >= 10.0:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Warning:")
-                + " "
-                + t("High fees!")
-                + "\n"
-                + replace_decimal_separator(("%.1f" % fee_percent))
-                + t("% of the amount."),
-                highlight_prefix=":",
-            )
-
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
-
-        for message in outputs:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(message, highlight_prefix=":")
-            self.ctx.input.wait_for_button()
-
-        # memory management
-        del outputs
-        gc.collect()
-
-        index = self._sign_menu()
+        index = _menu_options()
 
         if index == 2:  # Back
             return MENU_CONTINUE
@@ -428,6 +291,199 @@ class Home(Page):
             )
 
         return MENU_CONTINUE
+
+    def _format_psbt_file_extension(self, psbt_filename=""):
+        """Formats the PSBT filename"""
+        from ...sd_card import (
+            PSBT_FILE_EXTENSION,
+            B64_FILE_EXTENSION,
+            SIGNED_FILE_SUFFIX,
+        )
+        from ..file_operations import SaveFile
+
+        if psbt_filename.endswith(B64_FILE_EXTENSION):
+            # Remove chained extensions
+            psbt_filename = psbt_filename[: -len(B64_FILE_EXTENSION)]
+            if psbt_filename.endswith(PSBT_FILE_EXTENSION):
+                psbt_filename = psbt_filename[: -len(PSBT_FILE_EXTENSION)]
+            extension = PSBT_FILE_EXTENSION + B64_FILE_EXTENSION
+        else:
+            extension = PSBT_FILE_EXTENSION
+
+        save_page = SaveFile(self.ctx)
+        psbt_filename = save_page.set_filename(
+            psbt_filename,
+            "QRCode",
+            SIGNED_FILE_SUFFIX,
+            extension,
+        )
+        return psbt_filename
+
+    def _pre_load_psbt_warn(self):
+        """Warns if descriptor is not loaded and wallet is multisig or miniscript"""
+        if (
+            not self.ctx.wallet.is_loaded()
+            and self.ctx.wallet.key.policy_type != TYPE_SINGLESIG
+        ):
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + " "
+                + t("Wallet output descriptor not found.")
+                + "\n\n"
+                + t("Some checks cannot be performed."),
+                highlight_prefix=":",
+            )
+            return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
+
+        return True
+
+    def _post_load_psbt_warn(self, signer):
+        """Warns cases of incorrect / missing PSBT info"""
+        # Warns in case of path mismatch
+        path_mismatch = signer.path_mismatch()
+        if path_mismatch:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + " "
+                + t("Path mismatch")
+                + "\n"
+                + "Wallet: "
+                + self.ctx.wallet.key.derivation_str()
+                + "\n"
+                + "PSBT: "
+                + path_mismatch,
+                highlight_prefix=":",
+            )
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return False
+
+        # Show the policy for multisig and miniscript PSBTs
+        # in case the wallet descriptor is not loaded
+        if (
+            not self.ctx.wallet.is_loaded()
+            and not self.ctx.wallet.key.policy_type == TYPE_SINGLESIG
+        ):
+            policy_str = signer.psbt_policy_string()
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(policy_str)
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return False
+
+        # Fix zero fingerprint, it is necessary for the signing process on embit in a few cases
+        if signer.fill_zero_fingerprint():
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Fingerprint unset in PSBT"))
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return False
+
+        return True
+
+    def _fees_psbt_warn(self, fee_percent):
+        """Warn if fees greater than 10% of what is spent"""
+        if fee_percent >= 10.0:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + " "
+                + t("High fees!")
+                + "\n"
+                + replace_decimal_separator(("%.1f" % fee_percent))
+                + t("% of the amount."),
+                highlight_prefix=":",
+            )
+
+            return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
+
+        return True
+
+    def _display_transaction_for_review(self, outputs):
+        """Display all transaction info on screen for verification"""
+        from ..utils import Utils
+
+        utils = Utils(self.ctx)
+
+        # display summary (doesn't have addresses)
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(outputs[0], highlight_prefix=":")
+        self.ctx.input.wait_for_button()
+
+        # display Inputs, Self-transfer and Change (have addresses)
+        for message in outputs[1:]:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(message, highlight_prefix=":")
+
+            # highlight addresses
+            lines = self.ctx.display.to_lines(message)
+            y_offset = self.ctx.display.get_center_offset_y(len(lines))
+            highlight = True
+            count_empty = 0
+            for i, line in enumerate(lines):
+                if len(line) > 0:
+                    if count_empty == 1:
+                        x_offset = self.ctx.display.get_center_offset_x(line)
+                        highlight = utils.display_addr_highlighted(
+                            y_offset, x_offset, line, i, highlight
+                        )
+                else:
+                    count_empty += 1
+
+            self.ctx.input.wait_for_button()
+
+    def sign_psbt(self):
+        """Handler for the 'sign psbt' menu item"""
+
+        # pre load warns
+        if not self._pre_load_psbt_warn():
+            return MENU_CONTINUE
+
+        # Load a PSBT
+        data, qr_format, psbt_filename = self.load_psbt()
+
+        if data is None and psbt_filename == "":
+            # Both the camera and the file on SD card failed!
+            self.flash_error(t("Failed to load"))
+            return MENU_CONTINUE
+
+        try:
+            from ..encryption_ui import decrypt_kef
+
+            data = decrypt_kef(self.ctx, data)
+        except:
+            pass
+
+        # PSBT read OK! Will try to sign
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Loading.."))
+
+        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
+        from ...psbt import PSBTSigner
+
+        signer = PSBTSigner(self.ctx.wallet, data, qr_format, psbt_filename)
+
+        # memory management
+        del data
+        gc.collect()
+
+        # post load warns
+        if not self._post_load_psbt_warn(signer):
+            return MENU_CONTINUE
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing.."))
+        outputs, fee_percent = signer.outputs()
+
+        if not self._fees_psbt_warn(fee_percent):
+            return MENU_CONTINUE
+
+        self._display_transaction_for_review(outputs)
+
+        # memory management
+        del outputs
+        gc.collect()
+
+        # sign menu
+        return self._sign_menu(signer, psbt_filename)
 
     def sign_message(self):
         """Handler for the 'sign message' menu item"""

@@ -18,7 +18,7 @@ Wallet fingerprint, keypad titles, settings categories, and prefix texts are now
 Boolean settings (True/False) are now displayed with color (Green/Red) for improved visibility.
 
 ### More Readable Address 
-Addresses are now grouped in sets of 4 characters, separated by spaces, to facilitate comparison.
+To facilitate comparison, addresses are displayed in space-separated groups of 4 characters, with alternating groups highlighted.
 
 ### New CNC Printer Support and Fixes (OpenBuilds GRBL 1.1)
 - Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0;

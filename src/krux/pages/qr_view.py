@@ -502,7 +502,13 @@ class SeedQRView(Page):
         utils.print_standard_qr(self.code, title=title, is_qr=True)
         # return MENU_EXIT  # Uncomment to exit QR Viewer after printing
 
-    def display_qr(self, allow_export=False, transcript_tools=True, quick_exit=False):
+    def display_qr(
+        self,
+        allow_export=False,
+        transcript_tools=True,
+        quick_exit=False,
+        highlight_function=None,
+    ):
         """Displays QR codes in multiple modes"""
 
         if self.title:
@@ -526,10 +532,13 @@ class SeedQRView(Page):
 
                 self.draw_grided_qr(mode)
                 if self.ctx.display.height() > self.ctx.display.width():
+                    y_offset = self.ctx.display.qr_offset() + FONT_HEIGHT
                     self.ctx.display.draw_hcentered_text(
                         label,
-                        self.ctx.display.qr_offset() + FONT_HEIGHT,
+                        y_offset,
                     )
+                    if highlight_function:
+                        highlight_function(label, y_offset)
                 button = self.ctx.input.wait_for_button()
                 if transcript_tools:
                     if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe

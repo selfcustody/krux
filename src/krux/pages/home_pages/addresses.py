@@ -131,14 +131,39 @@ class Addresses(Page):
                     stay_on_this_addr_menu = False
                     address_index -= 2 * max_addresses
 
+    def _qr_highlight_addr(self, formatted_text, y_offset):
+        """Case highlight address for QR"""
+
+        from ..utils import Utils
+
+        utils = Utils(self.ctx)
+
+        first_line_prefix = "." + THIN_SPACE
+        lines = self.ctx.display.to_lines(formatted_text)
+        highlight_state = True
+        for i, line in enumerate(lines):
+            x_offset = self.ctx.display.get_center_offset_x(line)
+            addr_prefix = None
+            # case for addr with index prefix
+            if i == 0 and first_line_prefix in line:
+                addr_prefix = line[: line.find(first_line_prefix)] + first_line_prefix
+
+            highlight_state = utils.display_addr_highlighted(
+                y_offset, x_offset, line, i, highlight_state, addr_prefix
+            )
+
     def show_address(self, addr, title="", quick_exit=False):
         """Show addr provided as a QRCode"""
         from ..qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, data=addr, title=title)
         seed_qr_view.display_qr(
-            allow_export=True, transcript_tools=False, quick_exit=quick_exit
+            allow_export=True,
+            transcript_tools=False,
+            quick_exit=quick_exit,
+            highlight_function=self._qr_highlight_addr,
         )
+
         return MENU_CONTINUE
 
     def pre_scan_address(self):
@@ -160,6 +185,30 @@ class Addresses(Page):
         )
         submenu.run_loop()
         return MENU_CONTINUE
+
+    def _scan_highlight_addr(self, result_message):
+        """Case highlight address for scan"""
+        from ..utils import Utils
+
+        utils = Utils(self.ctx)
+
+        lines = self.ctx.display.to_lines(result_message)
+        y_offset = self.ctx.display.get_center_offset_y(len(lines))
+        highlight = True
+        count_empty = 0
+        addr_highlighted = False
+        for i, line in enumerate(lines):
+            if len(line) > 0:
+                if (count_empty == 0 and "." not in line) or count_empty == 1:
+                    x_offset = self.ctx.display.get_center_offset_x(line)
+                    highlight = utils.display_addr_highlighted(
+                        y_offset, x_offset, line, i, highlight
+                    )
+                    addr_highlighted = True
+            else:
+                count_empty += 1
+                if addr_highlighted:
+                    break
 
     def scan_address(self, addr_type=0):
         """Handler for the 'receive' or 'change' menu item"""
@@ -230,10 +279,11 @@ class Addresses(Page):
 
             self.ctx.display.clear()
             result_message = (
-                is_valid_txt % (str(num_checked - 1) + ". \n\n" + format_address(addr))
+                is_valid_txt % (str(num_checked - 1) + ".\n\n" + format_address(addr))
                 if found
                 else not_found_txt % (format_address(addr), num_checked)
             )
             self.ctx.display.draw_centered_text(result_message)
+            self._scan_highlight_addr(result_message)
             self.ctx.input.wait_for_button()
         return MENU_CONTINUE
