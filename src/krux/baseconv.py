@@ -26,8 +26,6 @@ def base_decode(v, base):
     """Abstraction to decode the str data in v as base; returns bytes"""
     if not isinstance(v, str):
         raise TypeError("Invalid value, expected str")
-    if base not in (32, 43, 58, 64):
-        raise ValueError("not supported base: {}".format(base))
 
     if v == "":
         return b""
@@ -48,15 +46,14 @@ def base_decode(v, base):
         return pure_python_base_decode(v, 58)
     if base == 64:
         return a2b_base64(v)
-    return None  # dead code to appease pylint
+
+    raise ValueError("not supported base: {}".format(base))
 
 
 def base_encode(v, base):
     """Abstraction to encode the bytes data in v as base; returns str"""
     if not isinstance(v, bytes):
         raise TypeError("Invalid value, expected bytes")
-    if base not in (32, 43, 58, 64):
-        raise ValueError("not supported base: {}".format(base))
 
     if v == b"":
         return ""
@@ -78,7 +75,8 @@ def base_encode(v, base):
         return pure_python_base_encode(v, 58)
     if base == 64:
         return b2a_base64(v).rstrip().decode()
-    return None  # dead code to appease pylint
+
+    raise ValueError("not supported base: {}".format(base))
 
 
 def hint_encodings(str_data):

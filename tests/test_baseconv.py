@@ -127,7 +127,7 @@ def test_base_decode_from_unsupported_base(mocker, m5stickv):
     from krux.baseconv import base_decode
 
     with pytest.raises(ValueError):
-        base_decode("", 21)
+        base_decode("not-empty", 21)
 
 
 def test_base_decode_from_wrong_base(mocker, m5stickv):
@@ -141,7 +141,7 @@ def test_base_encode_to_unsupported_base(mocker, m5stickv):
     from krux.baseconv import base_encode
 
     with pytest.raises(ValueError):
-        base_encode(b"", 21)
+        base_encode(b"not-empty", 21)
 
 
 def test_base_encode_from_wrong_type(mocker, m5stickv):
