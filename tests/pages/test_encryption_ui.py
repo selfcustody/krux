@@ -573,3 +573,175 @@ def test_encryption_key_strength(m5stickv, mocker):
 
     # Case 9: 12 chars, 3 types, uniqueness=3
     assert key_generator.key_strength("Aa1Aa1Aa1Aa1") == "Medium"
+
+
+def test_prompt_for_text_update_dflt_via_yes(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Go Brrr",
+        dflt_prompt="Number-go-up via printer-go-brrr?",
+        dflt_affirm=True,
+    )
+    assert result == "Go Brrr"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Won't work",
+        dflt_prompt="Save-fiat-world via printer-go-brrr?",
+        dflt_affirm=False,
+    )
+    assert result == "Won't work"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_go1(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Go Brrr",
+        dflt_prompt="Number-go-up via printer-go-brrr?",
+        dflt_affirm=True,
+        title="Back to Go",
+    )
+    assert result == "Go Brrr"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_go2(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Won't work",
+        dflt_prompt="Save-fiat-world via printer-go-brrr?",
+        dflt_affirm=False,
+        title="Back to Go",
+    )
+    assert result == "Won't work"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_esc1(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Go Brrr",
+        dflt_prompt="Number-go-up via printer-go-brrr?",
+        dflt_affirm=True,
+        title="Back to ESC",
+    )
+    assert result == "Go Brrr"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_esc2(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Won't work",
+        dflt_prompt="Save-fiat-world via printer-go-brrr?",
+        dflt_affirm=False,
+        title="Back to ESC",
+    )
+    assert result == "Won't work"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_esc_confirm1(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Go Brrr",
+        dflt_prompt="Number-go-up via printer-go-brrr?",
+        dflt_affirm=True,
+        title="Back to ESC",
+        esc_prompt=True,
+    )
+    assert result == "Go Brrr"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_esc_confirm2(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Won't work",
+        dflt_prompt="Save-fiat-world via printer-go-brrr?",
+        dflt_affirm=False,
+        title="Back to ESC",
+        esc_prompt=True,
+    )
+    assert result == "Won't work"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_new_value1(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(ctx, dflt_value="A", title="Edit value, then Go")
+    assert result == "Aa"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_new_value2(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx, dflt_value="A", dflt_affirm=False, title="Edit value, then Go"
+    )
+    assert result == "Aa"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
