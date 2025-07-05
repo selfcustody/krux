@@ -575,6 +575,237 @@ def test_encryption_key_strength(m5stickv, mocker):
     assert key_generator.key_strength("Aa1Aa1Aa1Aa1") == "Medium"
 
 
+def test_decrypt_kef(m5stickv, mocker):
+    """Verify that decrypt_kef attempts to unseal kef-envelope(s)"""
+    from krux.pages.encryption_ui import decrypt_kef
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux import kef
+
+    plaintext = b"this is plain text"
+    key, salt, iterations, version = b"a", b"KEF ID", 10000, 0
+
+    # create an internal kef envelope
+    cryptor = kef.Cipher(key, salt, iterations)
+    ciphertext = cryptor.encrypt(plaintext, version)
+    envelope = kef.wrap(salt, version, iterations, ciphertext)
+
+    # wrap it again in another kef envelope
+    cryptor = kef.Cipher(key * 2, salt, iterations)
+    ciphertext = cryptor.encrypt(envelope, version)
+    envelope = kef.wrap(salt, version, iterations, ciphertext)
+    print(envelope)
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # external envelope "Decrypt?"
+        BUTTON_ENTER,  # scan key
+        BUTTON_ENTER,  # "a" as key
+        BUTTON_ENTER,  # "aa" as key
+        BUTTON_PAGE_PREV,  # move to "Go"
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # Confirm "aa" as key
+        BUTTON_ENTER,  # internal envelope "Decrypt?"
+        BUTTON_ENTER,  # scan key
+        BUTTON_ENTER,  # "a" as key
+        BUTTON_PAGE_PREV,  # move to "Go"
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # Confirm "a" as key
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = decrypt_kef(ctx, envelope)
+    assert result == plaintext
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
+    """
+    Intention here is to verify that KEFEnvelope class is instantiated
+    and used when expected, not that decryption actually succeeds.
+    """
+    from binascii import hexlify
+    from krux import kef
+    from krux.baseconv import base_encode
+    from krux.pages.encryption_ui import decrypt_kef, KEFEnvelope
+    from krux.input import BUTTON_PAGE_PREV
+
+    # setup data: a fake kef envelope, non-kef data, decrypt-evidence, and responding "No" to "Decrypt?"
+    fake_kef = kef.wrap(b"", 0, 10000, bytes([i * 8 for i in range(32)]))
+    non_kef = b"this is not a valid kef envelope"
+    evidence = (
+        "KEF Encrypted (32 B)\nID: \nVersion: AES-ECB v1\nKey iter.: 10000\n\nDecrypt?"
+    )
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+
+    print("test w/ kef bytes")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, fake_kef)
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+    del ctx
+
+    print("test w/ non-kef bytes")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, non_kef)
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test w/ kef hex")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(fake_kef).decode())
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+    del ctx
+
+    print("test with non-kef hex")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(non_kef).decode())
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with invalid hex-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(non_kef).decode() + ":`")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with kef HEX")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(fake_kef).decode().upper())
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+    del ctx
+
+    print("test with non-kef HEX")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(non_kef).decode().upper())
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with invalid HEX-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(non_kef).decode().upper() + ":`")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with kef base32")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(fake_kef, 32))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+    del ctx
+
+    print("test with non-kef base32")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 32))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with invalid base32-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 32) + "8@")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with kef base43")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(fake_kef, 43))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+    del ctx
+
+    print("test with non-kef base43")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 43))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with invalid base43-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 43) + ":@")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with kef base64")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(fake_kef, 64))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+    del ctx
+
+    print("test with non-kef base64")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 64))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+    print("test with invalid base64-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 64) + ">@")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+    del ctx
+
+
 def test_prompt_for_text_update_dflt_via_yes(m5stickv, mocker):
     from krux.pages.encryption_ui import prompt_for_text_update
     from krux.input import BUTTON_ENTER
