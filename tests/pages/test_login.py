@@ -828,6 +828,103 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
         assert ctx.wallet.key.mnemonic == case[1]
 
 
+def test_cancel_load_key_from_digits(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    case = [
+        [BUTTON_ENTER]  # 1 press confirm msg
+        + (
+            # 1 press change to number "2" and 1 press to select
+            [BUTTON_PAGE, BUTTON_ENTER]
+            +
+            # 2 press to place on btn Go
+            [BUTTON_PAGE_PREV] * 2
+            + [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ]  # 1 press to select and 1 press to confirm
+        )
+        * 11  # repeat selection of word=2 (ability) eleven times
+        + (
+            # 1
+            [BUTTON_ENTER]
+            +
+            # 6
+            [BUTTON_PAGE] * 5
+            + [BUTTON_ENTER]
+            +
+            # Go
+            [BUTTON_PAGE] * 7
+            + [BUTTON_ENTER]
+            # Confirm
+            + [BUTTON_ENTER]
+        )
+        + [
+            BUTTON_ENTER,  # Done? - no confirmation (hide mnemonic enabled)
+            BUTTON_PAGE,  # Cancel 12w confirmation
+        ]
+    ]
+
+    ctx = create_ctx(mocker, case[0])
+    login = Login(ctx)
+    login.load_key_from_digits()
+
+    assert ctx.input.wait_for_button.call_count == len(case[0])
+    assert ctx.wallet is None
+
+
+def test_load_key_from_digits_hide_mnemonic(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.krux_settings import Settings
+
+    case = (
+        [BUTTON_ENTER]  # 1 press confirm msg
+        + (
+            # 1 press change to number "2" and 1 press to select
+            [BUTTON_PAGE, BUTTON_ENTER]
+            +
+            # 10 press to place on btn Go
+            [BUTTON_PAGE] * 11
+            + [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ]  # 1 press to select and 1 press to confirm
+        )
+        * 11  # repeat selection of word=2 (ability) eleven times
+        + (
+            # 1
+            [BUTTON_ENTER]
+            +
+            # 6
+            [BUTTON_PAGE] * 5
+            + [BUTTON_ENTER]
+            +
+            # Go
+            [BUTTON_PAGE] * 7
+            + [BUTTON_ENTER]
+            # Confirm
+            + [BUTTON_ENTER]
+        )
+        + [
+            BUTTON_ENTER,  # Done? - no confirmation (hide mnemonic enabled)
+            BUTTON_ENTER,  # Load wallet
+        ],
+        "ability ability ability ability ability ability ability ability ability ability ability acid",
+    )
+
+    # Test with hidden mnemonic setting enabled
+    Settings().security.hide_mnemonic = True
+
+    ctx = create_ctx(mocker, case[0])
+    login = Login(ctx)
+    login.load_key_from_digits()
+
+    assert ctx.input.wait_for_button.call_count == len(case[0])
+    assert ctx.wallet.key.mnemonic == case[1]
+
+
 def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
