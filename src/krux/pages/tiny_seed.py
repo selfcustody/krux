@@ -34,7 +34,7 @@ from ..display import (
     MINIMAL_PADDING,
     FONT_HEIGHT,
     FONT_WIDTH,
-    NARROW_SCREEN_WITH,
+    NARROW_SCREEN_WIDTH,
     SMALLEST_HEIGHT,
 )
 from ..camera import BINARY_GRID_MODE
@@ -61,7 +61,7 @@ class TinySeed(Page):
         self.label = label
         self.x_offset = MINIMAL_PADDING + 2 * FONT_WIDTH
         self.printer = None
-        if self.ctx.display.width() > NARROW_SCREEN_WITH:
+        if self.ctx.display.width() > NARROW_SCREEN_WIDTH:
             self.x_pad = self.ctx.display.width() * 2 // 27
             self.y_pad = self.ctx.display.height() // 17
         else:

@@ -43,7 +43,7 @@ from ..display import (
     FLASH_MSG_TIME,
     FONT_HEIGHT,
     FONT_WIDTH,
-    NARROW_SCREEN_WITH,
+    NARROW_SCREEN_WIDTH,
     STATUS_BAR_HEIGHT,
     BOTTOM_LINE,
 )
@@ -813,7 +813,7 @@ class Menu:
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
         if self.ctx.is_logged_in():
             fingerprint = self.ctx.wallet.key.fingerprint_hex_str(True)
-            if self.ctx.display.width() > NARROW_SCREEN_WITH:
+            if self.ctx.display.width() > NARROW_SCREEN_WIDTH:
                 self.ctx.display.draw_hcentered_text(
                     fingerprint,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
@@ -832,7 +832,7 @@ class Menu:
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if self.ctx.is_logged_in() and self.ctx.wallet.key.network["name"] == "Testnet":
-            if self.ctx.display.width() > NARROW_SCREEN_WITH:
+            if self.ctx.display.width() > NARROW_SCREEN_WIDTH:
                 self.ctx.display.draw_string(
                     12,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,

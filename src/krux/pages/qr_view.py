@@ -27,7 +27,7 @@ from ..themes import theme, WHITE, BLACK, DARKGREY
 from ..krux_settings import t
 from ..settings import THIN_SPACE
 from ..qr import get_size
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, NARROW_SCREEN_WIDTH
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -148,8 +148,8 @@ class SeedQRView(Page):
     def draw_grided_qr(self, mode):
         """Draws grided QR"""
         self.ctx.display.clear()
-        if self.ctx.display.width() > NARROW_SCREEN_WITH:
-            grid_size = self.ctx.display.width() // NARROW_SCREEN_WITH
+        if self.ctx.display.width() > NARROW_SCREEN_WIDTH:
+            grid_size = self.ctx.display.width() // NARROW_SCREEN_WIDTH
         else:
             grid_size = 1
         grid_offset = self.ctx.display.width() % (self.qr_size + 2)
