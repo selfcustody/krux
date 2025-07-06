@@ -231,8 +231,8 @@ class KEFEnvelope(Page):
 
     def input_label_ui(
         self,
-        dflt_label=None,
-        dflt_prompt=None,
+        dflt_label="",
+        dflt_prompt="",
         dflt_affirm=True,
         title=t("Visible Label"),
         keypads=None,
@@ -354,7 +354,6 @@ class KEFEnvelope(Page):
             try:
                 self.ctx.display.draw_centered_text(plaintext.decode())
             except:
-
                 self.ctx.display.draw_centered_text("0x" + hexlify(plaintext).decode())
             self.ctx.input.wait_for_button()
         return plaintext
