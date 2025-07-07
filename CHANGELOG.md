@@ -18,7 +18,7 @@ Wallet fingerprint, keypad titles, settings categories, and prefix texts are now
 Boolean settings (True/False) are now displayed with color (Green/Red) for improved visibility.
 
 ### More Readable Address 
-Addresses are now grouped in sets of 4 characters, separated by spaces, to facilitate comparison.
+To facilitate comparison, addresses are displayed in space-separated groups of 4 characters, with alternating groups highlighted.
 
 ### New CNC Printer Support and Fixes (OpenBuilds GRBL 1.1)
 - Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0;
@@ -33,6 +33,7 @@ Exported QR codes can now be saved as SVG images.
 - Keypad touch area has been expanded to the screen edges.
 - "Tools > Print Test QR" now asks for user confirmation before printing.
 - "Tools > Check SD Card" now allows deleting files.
+- "Load mnemonic > Via Manual Input > Word Numbers" now shows the double mnemonic indicator (*) if it is a double mnemonic.
 - Added fingerprint to mnemonic preview and editor.
 - Fingerprint preview now shown when changing wallet passphrase.
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
@@ -40,6 +41,7 @@ Exported QR codes can now be saved as SVG images.
 - Added QR Code to About screen.
 - Wallet Descriptor now validates and warns if change addresses cannot be determined.
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
+- The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.
 
 

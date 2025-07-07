@@ -369,6 +369,10 @@ class Display:
             x = max(0, x)
         lcd.draw_string(x, y, text, color, bg_color)
 
+    def get_center_offset_x(self, line):
+        """Return the ammount of offset_x to be at center"""
+        return max(0, (self.width() - lcd.string_width_px(line)) // 2)
+
     def draw_hcentered_text(
         self,
         text,
@@ -399,7 +403,7 @@ class Display:
 
         for i, line in enumerate(lines):
             if len(line) > 0:
-                offset_x = max(0, (self.width() - lcd.string_width_px(line)) // 2)
+                offset_x = self.get_center_offset_x(line)
                 self.draw_string(
                     offset_x,
                     offset_y + (i * (FONT_HEIGHT)),

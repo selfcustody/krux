@@ -22,8 +22,6 @@
 
 from . import Page
 from ..krux_settings import t
-from ..sd_card import SDHandler
-from embit.wordlists.bip39 import WORDLIST
 from ..qr import FORMAT_NONE
 
 
@@ -60,6 +58,8 @@ class Utils(Page):
 
     def load_file(self, file_ext="", prompt=True, only_get_filename=False):
         """Load a file from SD card"""
+        from ..sd_card import SDHandler
+
         if self.has_sd_card():
             with SDHandler() as sd:
                 self.ctx.display.clear()
@@ -84,6 +84,8 @@ class Utils(Page):
     @staticmethod
     def get_mnemonic_numbers(mnemonic: str, base=BASE_DEC):
         """Returns the mnemonic as indexes in decimal, hexadecimal, or octal"""
+        from embit.wordlists.bip39 import WORDLIST
+
         word_numbers = []
         for word in mnemonic.split(" "):
             word_numbers.append(WORDLIST.index(word) + 1)
@@ -98,3 +100,29 @@ class Utils(Page):
 
         numbers_str = [str(value) for value in word_numbers]
         return " ".join(numbers_str)
+
+    def display_addr_highlighted(
+        self, y_offset, x_offset, line, line_index, highlight, addr_prefix=None
+    ):
+        """Local helper function to highlight addresses"""
+        from ..display import FONT_HEIGHT
+        from ..themes import theme
+        import lcd
+
+        x_addr_offset = 0
+        if addr_prefix is not None:
+            x_addr_offset = lcd.string_width_px(addr_prefix)
+            line = line[len(addr_prefix) :]
+
+        line = line.split(" ")
+        for part in line:
+            if highlight:
+                self.ctx.display.draw_string(
+                    x_offset + x_addr_offset,
+                    y_offset + (line_index * (FONT_HEIGHT)),
+                    part,
+                    theme.highlight_color,
+                )
+            x_addr_offset += lcd.string_width_px(part + " ")
+            highlight = not highlight
+        return highlight
