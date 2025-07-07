@@ -65,7 +65,7 @@ class WalletDescriptor(Page):
         elif not self.ctx.wallet.is_loaded():
             text = t("Wallet output descriptor not found.")
             self.ctx.display.draw_centered_text(text)
-            if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
+            if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                 return self._load_wallet()
         else:
             qr_type_menu = [
@@ -93,7 +93,7 @@ class WalletDescriptor(Page):
                 qr_format = "binary"
                 title = "KEF " + kef.label
                 sqr = SeedQRView(self.ctx, binary=True, data=wallet_data, title=title)
-                sqr.display_qr(allow_export=True)
+                sqr.display_qr(allow_export=True, transcript_tools=False)
             else:
                 self.display_wallet(self.ctx.wallet)
                 wallet_data, qr_format = self.ctx.wallet.wallet_qr()
