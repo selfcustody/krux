@@ -215,7 +215,7 @@ class Stackbit(Page):
 
         self.x_offset = DEFAULT_PADDING
         # case for m5stickv
-        if self.ctx.display.width() < NARROW_SCREEN_WITH:
+        if self.ctx.display.width() <= NARROW_SCREEN_WITH:
             self.x_offset = 5
         self.x_pad = 2 * FONT_WIDTH
         self.y_offset = 2 * FONT_HEIGHT
