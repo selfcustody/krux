@@ -33,6 +33,7 @@ Exported QR codes can now be saved as SVG images.
 - Keypad touch area has been expanded to the screen edges.
 - "Tools > Print Test QR" now asks for user confirmation before printing.
 - "Tools > Check SD Card" now allows deleting files.
+- "Load mnemonic > Via Manual Input > Word Numbers" now shows the double mnemonic indicator (*) if it is a double mnemonic.
 - Added fingerprint to mnemonic preview and editor.
 - Fingerprint preview now shown when changing wallet passphrase.
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
