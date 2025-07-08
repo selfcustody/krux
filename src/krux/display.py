@@ -48,7 +48,7 @@ STATUS_BAR_HEIGHT = (
 
 FLASH_MSG_TIME = 2000
 
-NARROW_SCREEN_WITH = 135
+NARROW_SCREEN_WIDTH = 135
 SMALLEST_HEIGHT = 240
 
 # Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
@@ -256,7 +256,7 @@ class Display:
         start = 0
         line_count = 0
         columns = (
-            self.usable_width() if self.width() > NARROW_SCREEN_WITH else self.width()
+            self.usable_width() if self.width() > NARROW_SCREEN_WIDTH else self.width()
         )
         if Settings().i18n.locale in [
             "ko-KR",
@@ -389,7 +389,7 @@ class Display:
             bg_color = theme.info_bg_color
             padding = (
                 DEFAULT_PADDING
-                if self.width() > NARROW_SCREEN_WITH
+                if self.width() > NARROW_SCREEN_WIDTH
                 else MINIMAL_PADDING
             )
             self.fill_rectangle(
