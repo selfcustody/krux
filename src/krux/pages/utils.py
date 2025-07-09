@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import Page
+from . import Page, DIGITS, ESC_KEY
 from ..krux_settings import t
 from ..qr import FORMAT_NONE
 
@@ -126,3 +126,33 @@ class Utils(Page):
             x_addr_offset += lcd.string_width_px(part + " ")
             highlight = not highlight
         return highlight
+
+    def capture_index_from_keypad(
+        self, title, initial_val=None, range_min=0, range_max=None
+    ):
+        """Reusable capture from keyboard for index number"""
+
+        if range_max is None:
+            from embit.bip32 import HARDENED_INDEX
+
+            range_max = HARDENED_INDEX - 1
+
+        val = self.capture_from_keypad(
+            title,
+            [DIGITS],
+            starting_buffer=(str(initial_val) if initial_val is not None else ""),
+        )
+        if val == ESC_KEY:
+            return None
+
+        try:
+            val = int(val)
+        except:  # Empty input
+            return ""
+
+        if val < range_min or val > range_max:
+            self.flash_error(
+                t("Value %s out of range: [%s, %s]") % (val, range_min, range_max)
+            )
+            return ""
+        return val

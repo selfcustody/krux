@@ -20,6 +20,9 @@ Boolean settings (True/False) are now displayed with color (Green/Red) for impro
 ### More Readable Address 
 To facilitate comparison, addresses are displayed in space-separated groups of 4 characters, with alternating groups highlighted.
 
+### Export Wallet Addresses
+Export *receive or change* addresses to a CSV file on the SD card.
+
 ### New CNC Printer Support and Fixes (OpenBuilds GRBL 1.1)
 - Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0;
 - Introduced CNC/GRBLPrinter for direct serial printing to CNC machines;

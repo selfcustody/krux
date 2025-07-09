@@ -27,7 +27,6 @@ from ..krux_settings import t
 from . import (
     Page,
     Menu,
-    DIGITS,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
@@ -229,8 +228,13 @@ class WalletSettings(Page):
                     script_type = new_script_type
             elif index == 3:
                 if policy_type != TYPE_MINISCRIPT:
-                    new_account = self._account(account)
-                    if new_account is not None:
+                    from .utils import Utils
+
+                    utils = Utils(self.ctx)
+                    new_account = utils.capture_index_from_keypad(
+                        t("Account Index"), account
+                    )
+                    if new_account not in (None, ""):
                         derivation_path = ""
                         account = new_account
                 else:
@@ -301,28 +305,6 @@ class WalletSettings(Page):
         if index == len(submenu.menu) - 1:
             return None
         return script_type
-
-    def _account(self, initial_account=None):
-        """Account input"""
-        account = self.capture_from_keypad(
-            t("Account Index"),
-            [DIGITS],
-            starting_buffer=(
-                str(initial_account) if initial_account is not None else ""
-            ),
-        )
-        if account == ESC_KEY:
-            return None
-        try:
-            account = int(account)
-            if account >= HARDENED_INDEX:
-                raise ValueError
-        except:
-            self.flash_error(
-                t("Value %s out of range: [%s, %s]") % (account, 0, HARDENED_INDEX - 1)
-            )
-            return None
-        return account
 
     def _derivation_path_str(self, policy_type, script_type, network, account):
         derivation_path = "m/"
