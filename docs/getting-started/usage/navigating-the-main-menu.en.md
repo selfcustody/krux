@@ -221,7 +221,7 @@ To create a *Base64 password*, which can be used in a variety of logins, from em
 <img src="../../../img/maixpy_m5stickv/address-menu-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/address-menu-300.png" align="right" class="amigo">
 
-Scan, verify, export or print your wallet addresses.
+Scan, list, export or print your wallet addresses.
 
 <div style="clear: both"></div>
 
@@ -237,19 +237,19 @@ After this, you will be asked if you want to check that the address belongs to y
 
 <div style="clear: both"></div>
 
-#### Receive Addresses
+#### List Addresses
 <img src="../../../img/maixpy_m5stickv/list-address-receive-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/list-address-receive-300.png" align="right" class="amigo">
 
-List your wallet *receiving addresses*, you can select an arbitrary address to show your QR code and print if you want.
+List your wallet *receiving or change addresses*, you can select an arbitrary address to show your QR code and print if you want.
 
 <div style="clear: both"></div>
 
-#### Change Addresses
-<img src="../../../img/maixpy_m5stickv/list-address-change-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/list-address-change-300.png" align="right" class="amigo">
+#### Export Addresses
+<img src="../../../img/maixpy_m5stickv/export-address-quantity-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/export-address-quantity-300.png" align="right" class="amigo">
 
-List your wallet *change addresses*, you can select an arbitrary address to show your QR code and print if you want.
+Export your wallet *receiving or change addresses* starting from a selected *index* and *quantity* to a CSV file on your SD card.
 
 <div style="clear: both"></div>
 

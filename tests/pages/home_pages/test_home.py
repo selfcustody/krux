@@ -337,15 +337,19 @@ def test_load_address_view(mocker, amigo, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE
 
     BTN_SEQUENCE = [
-        BUTTON_PAGE,  # Go to Receive addr
-        BUTTON_ENTER,  # List receive add
-        BUTTON_ENTER,  # See first receive add in QR
+        BUTTON_PAGE,  # Go to List addr
+        BUTTON_ENTER,  # Enter list addr
+        BUTTON_ENTER,  # List receive addr
+        BUTTON_ENTER,  # See first receive addr in QR
         BUTTON_ENTER,  # Exit QR display - will go to QR viewer menu options
         BUTTON_PAGE_PREV,  # Go to Back to Menu
         BUTTON_ENTER,  # Exit QR viewer
-        BUTTON_PAGE_PREV,  # Go to Back list add
+        BUTTON_PAGE_PREV,  # Go to Back list addr
         BUTTON_ENTER,  # Exit list Addr menu
-        BUTTON_PAGE,  # Go to receive
+        BUTTON_PAGE,  # Go to change
+        BUTTON_PAGE,  # Go to Back
+        BUTTON_ENTER,  # Exit menu
+        BUTTON_PAGE,  # Go to export
         BUTTON_PAGE,  # Go to Back
         BUTTON_ENTER,  # Exit
     ]
@@ -751,6 +755,12 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         if isinstance(text, list):
             return text
         return text.split("\n")
+
+    # Mock for SDHandler
+    mocker.patch(
+        "os.listdir",
+        return_value=["somefile", "otherfile"],
+    )
 
     num = 0
     for case in cases:
@@ -1233,6 +1243,12 @@ def test_sign_p2tr_zeroes_fingerprint(mocker, m5stickv, tdata):
         BUTTON_PAGE,  # Move to "Sign to QR SD card"
         BUTTON_ENTER,  # Sign to SD card
     ]
+
+    # Mock for SDHandler
+    mocker.patch(
+        "os.listdir",
+        return_value=["somefile", "otherfile"],
+    )
 
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST)
     ctx = create_ctx(mocker, btn_seq, wallet)
