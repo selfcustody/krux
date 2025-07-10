@@ -574,6 +574,20 @@ def test_encryption_key_strength(m5stickv, mocker):
     # Case 9: 12 chars, 3 types, uniqueness=3
     assert key_generator.key_strength("Aa1Aa1Aa1Aa1") == "Medium"
 
+    # Case 10: Low base score=1 when not using enough keypads
+    assert key_generator.key_strength("ABCDEFGHIJKLMNO") == "Weak"
+
+    # Case 11: Low base score=2 when not using enough keypads and length
+    assert key_generator.key_strength("ABCDEFghijk") == "Weak"
+
+    # Case 12: Penalized if not enough unique characters
+    assert key_generator.key_strength("ABcd1ABcd1A") == "Weak"
+
+    # Cases 13-15: Binary keys are hexlified and hexstr is scored
+    assert key_generator.key_strength(b"Stronger") == "Strong"
+    assert key_generator.key_strength(b"barely") == "Medium"
+    assert key_generator.key_strength(b"2Weak") == "Weak"
+
 
 def test_decrypt_kef(m5stickv, mocker):
     """Verify that decrypt_kef attempts to unseal kef-envelope(s)"""
@@ -597,14 +611,14 @@ def test_decrypt_kef(m5stickv, mocker):
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # external envelope "Decrypt?"
-        BUTTON_ENTER,  # scan key
+        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # "a" as key
         BUTTON_ENTER,  # "aa" as key
         BUTTON_PAGE_PREV,  # move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_ENTER,  # Confirm "aa" as key
         BUTTON_ENTER,  # internal envelope "Decrypt?"
-        BUTTON_ENTER,  # scan key
+        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # "a" as key
         BUTTON_PAGE_PREV,  # move to "Go"
         BUTTON_ENTER,  # Go
@@ -1022,7 +1036,8 @@ def test_kefenvelope_parse(m5stickv, mocker):
 
 def test_kefenvelope_input_key_ui(m5stickv, mocker):
     from krux.pages.encryption_ui import KEFEnvelope
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.qr_capture import QRCodeCapture
 
     print('returns True if a key (ie: "a") was gathered')
     BTN_SEQUENCE = [
@@ -1032,6 +1047,57 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
         BUTTON_ENTER,
         BUTTON_ENTER,
     ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print('returns True if a key (ie: "a") was scanned')
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: ("a", None))
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("returns True if a binary key (ie: 0x8f) was scanned")
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (b"\x8f", None)
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("returns True if an encrypted binary key (ie: 0x8f) was scanned/decrypted")
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # select scan
+        BUTTON_ENTER,  # scan key
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_PAGE_PREV,  # move to Go
+        BUTTON_ENTER,  # select Go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # confirm weak key
+    ]
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x11\xef\x9a",
+            None,
+        ),
+    )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     assert page.input_key_ui() == True

@@ -93,7 +93,7 @@ class WalletDescriptor(Page):
                 qr_format = "binary"
                 title = "KEF " + kef.label
                 sqr = SeedQRView(self.ctx, binary=True, data=wallet_data, title=title)
-                sqr.display_qr(allow_export=True)
+                sqr.display_qr(allow_export=True, transcript_tools=False)
             else:
                 self.display_wallet(self.ctx.wallet)
                 wallet_data, qr_format = self.ctx.wallet.wallet_qr()
