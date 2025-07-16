@@ -29,7 +29,7 @@ After opening a wallet via one of the methods available you can use Krux to [bac
 You can also use [an offline QR code generator for this](https://iancoleman.io/bip39/) (ideally on an airgapped device).
 
 #### Tiny Seed, OneKey KeyTag or Binary Grid
-[Tiny Seed](https://tinyseed.io/), [Onekey KeyTag](https://onekey.so/products/onekey-keytag/) and others directly encode a seed as binary, allowing for a very compact mnemonic storage. Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them (this feature is not available in Krux Android app).
+[Tiny Seed](https://tinyseed.io/), [Onekey KeyTag](https://onekey.so/products/onekey-keytag/) and others directly encode a seed as binary, allowing for a very compact mnemonic storage. Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them (this feature is not available in [Krux Mobile Android app](../../faq.md#what-is-krux-mobile-android-app)).
 
 To properly scan, place the backup plate over a black background and paint the punched bits black to increase contrast. You can also scan the thermally printed version, or a filled template. You can find some [examples of mnemonics encoded here](../features/tinyseed.md). Alternatively, you can find [templates to scan or print here](https://github.com/odudex/krux_binaries/tree/main/templates).
 
