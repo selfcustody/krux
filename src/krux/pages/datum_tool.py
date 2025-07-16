@@ -630,9 +630,7 @@ class DatumTool(Page):
             except:
                 self.title = "0x" + hexlify(kef.label).decode()
 
-            if len(self.title) * FONT_WIDTH > self.ctx.display.width():
-                self.title = self.fit_to_line(self.title)
-
+            self.title = self.fit_to_line(self.title)
             self.decrypted = True
             self.contents = plaintext
             self.history = []

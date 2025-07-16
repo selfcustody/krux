@@ -43,7 +43,6 @@ from ..display import (
     FLASH_MSG_TIME,
     FONT_HEIGHT,
     FONT_WIDTH,
-    NARROW_SCREEN_WIDTH,
     STATUS_BAR_HEIGHT,
     BOTTOM_LINE,
 )
@@ -478,8 +477,12 @@ class Page:
     def fit_to_line(self, text, prefix="", fixed_chars=0, crop_middle=True):
         """Fits text with prefix plus fixed_chars at the beginning into one line,
         removing the central content and leaving the ends"""
-        usable_chars = self.ctx.display.usable_width() // FONT_WIDTH
-        if len(text) + len(prefix) <= usable_chars:
+        usable_chars = (
+            self.ctx.display.usable_width()
+            if not kboard.is_m5stickv
+            else self.ctx.display.width()
+        ) // FONT_WIDTH
+        if len(prefix) + len(text) <= usable_chars:
             return prefix + text
         if not crop_middle:
             return "{}{}..".format(prefix, text[: usable_chars - 2])
@@ -813,7 +816,7 @@ class Menu:
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
         if self.ctx.is_logged_in():
             fingerprint = self.ctx.wallet.key.fingerprint_hex_str(True)
-            if self.ctx.display.width() > NARROW_SCREEN_WIDTH:
+            if not kboard.is_m5stickv:
                 self.ctx.display.draw_hcentered_text(
                     fingerprint,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
@@ -832,7 +835,7 @@ class Menu:
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if self.ctx.is_logged_in() and self.ctx.wallet.key.network["name"] == "Testnet":
-            if self.ctx.display.width() > NARROW_SCREEN_WIDTH:
+            if not kboard.is_m5stickv:
                 self.ctx.display.draw_string(
                     12,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,

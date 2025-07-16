@@ -48,8 +48,7 @@ STATUS_BAR_HEIGHT = (
 
 FLASH_MSG_TIME = 2000
 
-NARROW_SCREEN_WIDTH = 135
-SMALLEST_HEIGHT = 240
+M5STICKV_WIDTH = 135
 
 # Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
 SPLASH = [
@@ -255,9 +254,7 @@ class Display:
         lines = []
         start = 0
         line_count = 0
-        columns = (
-            self.usable_width() if self.width() > NARROW_SCREEN_WIDTH else self.width()
-        )
+        columns = self.usable_width() if not kboard.is_m5stickv else self.width()
         if Settings().i18n.locale in [
             "ko-KR",
             "zh-CN",
@@ -387,11 +384,7 @@ class Display:
         lines = self.to_lines(text, max_lines)
         if info_box:
             bg_color = theme.info_bg_color
-            padding = (
-                DEFAULT_PADDING
-                if self.width() > NARROW_SCREEN_WIDTH
-                else MINIMAL_PADDING
-            )
+            padding = DEFAULT_PADDING if not kboard.is_m5stickv else MINIMAL_PADDING
             self.fill_rectangle(
                 padding - 3,
                 offset_y - 1,
