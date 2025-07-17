@@ -23,7 +23,7 @@
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
 from . import Page, ESC_KEY, LETTERS
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCREEN_WIDTH
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
 from ..krux_settings import t
 from ..themes import theme
 from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -50,7 +50,6 @@ class MnemonicEditor(Page):
         self.mnemonic_length = len(self.current_mnemonic)
         self.header_offset = DEFAULT_PADDING
         self.search_ranges = {}
-        self.narrow_screen = self.ctx.display.width() <= NARROW_SCREEN_WIDTH
 
     def compute_search_ranges(self, alt_wordlist=None):
         """Compute search ranges for the autocomplete and possible_letters functions"""
@@ -198,7 +197,7 @@ class MnemonicEditor(Page):
         y_region = self.header_offset
         y_region += (word_v_padding - FONT_HEIGHT) // 2
         word_index = 0
-        if self.narrow_screen or self.mnemonic_length == 12:
+        if kboard.is_m5stickv or self.mnemonic_length == 12:
             x_padding = DEFAULT_PADDING
         else:
             x_padding = MINIMAL_PADDING
@@ -219,7 +218,7 @@ class MnemonicEditor(Page):
                     str(paged_index + 1) + "." + self.current_mnemonic[paged_index],
                     word_color(paged_index),
                 )
-            if self.mnemonic_length == 24 and not self.narrow_screen:
+            if self.mnemonic_length == 24 and not kboard.is_m5stickv:
                 if word_index + 12 == button_index and self.ctx.input.buttons_active:
                     self.ctx.display.draw_string(
                         MINIMAL_PADDING + self.ctx.display.width() // 2,
@@ -242,7 +241,7 @@ class MnemonicEditor(Page):
             word_index += 1
             y_region += word_v_padding
 
-        if self.mnemonic_length == 24 and self.narrow_screen and page == 0:
+        if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
             go_txt = "13-24"
         else:
             go_txt = t("Go")
@@ -303,7 +302,7 @@ class MnemonicEditor(Page):
                 btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == GO_INDEX:
-                    if self.mnemonic_length == 24 and self.narrow_screen and page == 0:
+                    if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
                         page = 1
                         continue
                     # Done
@@ -328,7 +327,7 @@ class MnemonicEditor(Page):
             elif btn == BUTTON_PAGE:
                 button_index += 1
                 if (
-                    self.narrow_screen
+                    kboard.is_m5stickv
                     and self.mnemonic_length == 24
                     and button_index == 12
                 ) or (self.mnemonic_length == 12 and button_index == 12):
@@ -337,7 +336,7 @@ class MnemonicEditor(Page):
             elif btn == BUTTON_PAGE_PREV:
                 button_index -= 1
                 if (
-                    self.narrow_screen
+                    kboard.is_m5stickv
                     and self.mnemonic_length == 24
                     and button_index == 23
                 ) or (self.mnemonic_length == 12 and button_index == 23):
