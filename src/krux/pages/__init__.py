@@ -477,15 +477,18 @@ class Page:
     def fit_to_line(self, text, prefix="", fixed_chars=0, crop_middle=True):
         """Fits text with prefix plus fixed_chars at the beginning into one line,
         removing the central content and leaving the ends"""
-        usable_chars = (
-            self.ctx.display.usable_width()
-            if not kboard.is_m5stickv
-            else self.ctx.display.width()
-        ) // FONT_WIDTH
+        usable_chars = self.ctx.display.usable_pixels_in_line() // FONT_WIDTH
         if len(prefix) + len(text) <= usable_chars:
             return prefix + text
+
+        if len(prefix) >= usable_chars - 4:
+            if len(prefix) <= usable_chars:
+                return prefix
+            text = prefix
+            prefix = ""
+            fixed_chars = 0
         if not crop_middle:
-            return "{}{}..".format(prefix, text[: usable_chars - 2])
+            return "{}{}..".format(prefix, text[: usable_chars - len(prefix) - 2])
         usable_chars -= len(prefix) + fixed_chars + 2
         half = usable_chars // 2
         return "{}{}..{}".format(prefix, text[: half + fixed_chars], text[-half:])

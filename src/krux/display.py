@@ -245,6 +245,11 @@ class Display:
             )
             self.portrait = True
 
+    def usable_pixels_in_line(self):
+        """Returns qtd of usable pixels in a line"""
+
+        return self.usable_width() if not kboard.is_m5stickv else self.width()
+
     def to_lines(self, text, max_lines=None):
         """Takes a string of text and converts it to lines to display on
         the screen
@@ -254,7 +259,7 @@ class Display:
         lines = []
         start = 0
         line_count = 0
-        columns = self.usable_width() if not kboard.is_m5stickv else self.width()
+        columns = self.usable_pixels_in_line()
         if Settings().i18n.locale in [
             "ko-KR",
             "zh-CN",
