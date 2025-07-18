@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 from . import Page, Menu, MENU_CONTINUE
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH, BOTTOM_PROMPT_LINE
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..krux_settings import t
 from ..wdt import wdt
 
@@ -53,6 +53,7 @@ class DeviceTests(Page):
         utils.print_standard_qr(title, title=title, check_printer=False)
         return MENU_CONTINUE
 
+    # pylint: disable=unused-argument
     def test_suite(self, interactive=False):
         """run each on-device tests in all_tests, report summary and details"""
         all_tests = [
@@ -368,6 +369,8 @@ class DeviceTests(Page):
     #     return True
 
     # def test_interactive(self, interactive=False):
+    #     from ..display import BOTTOM_PROMPT_LINE
+
     #     if not interactive:
     #         return "Cannot test non-interactively"
     #     return self.prompt(
