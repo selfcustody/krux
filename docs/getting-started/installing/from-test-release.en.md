@@ -4,7 +4,7 @@ This page explains how to install Krux from a test (beta), pre-built release.
 Keep in mind that these are unsigned binaries.
 
 ### Download
-Download experimental compiled firmware or the Android app `apk` from our [test (beta) repository](https://github.com/selfcustody/KruxMobileApp).
+Download experimental compiled firmware or the Android app `apk` from our [test (beta) repository](https://github.com/odudex/krux_binaries).
 
 #### Mobile - Android
 The [Krux Mobile Android app](../../faq.md#what-is-krux-mobile-android-app) is designed for learning about Krux and Bitcoin air-gapped transactions. Due to the numerous potential vulnerabilities inherent in smartphones, such as the lack of control over the operating system, libraries, and hardware peripherals, the Krux app should NOT be used to manage wallets containing savings or important keys and mnemonics. For secure management of your keys, a dedicated device is recommended.

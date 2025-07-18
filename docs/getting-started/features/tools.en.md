@@ -12,6 +12,9 @@ Verify whether your device detects and reads the SD card, and browse its content
 <div style="clear: both"></div>
 
 ### Device Tests
+<img src="../../../img/maixpy_m5stickv/device-tests-options-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/device-tests-options-300.png" align="right" class="amigo">
+
 Simple tests to verify correct functioning of your krux device.
 
 <div style="clear: both"></div>
@@ -20,9 +23,9 @@ Simple tests to verify correct functioning of your krux device.
 <img src="../../../img/maixpy_m5stickv/print-test-qr-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/print-test-qr-300.png" align="right" class="amigo">
 
-<div style="clear: both"></div>
-
 Quickly print a test QR code to check and optimize your printer setup.
+
+<div style="clear: both"></div>
 
 #### Test Suite
 <img src="../../../img/maixpy_m5stickv/device-tests-test-suite-250.png" align="right" class="m5stickv">

@@ -101,7 +101,7 @@ This metal backup format represents the BIP39 mnemonic word's numbers (1-2048). 
 
 <div style="clear: both"></div>
 
-- **Tiny Seed**
+- **Tinyseed**
 
 <img src="../../../img/maixpy_m5stickv/backup-tiny-seed-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-tiny-seed-300.png" align="right" class="amigo">
