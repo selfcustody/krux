@@ -60,14 +60,14 @@ class DeviceTests(Page):
             self.deflate_compression,
             self.touch_gestures,
             # all below are prototyping/pseudo-tests
-            self.test_success,
-            self.test_non_empty,
-            self.test_long_named_test_function,
-            self.test_interactive,  # interactive test
-            self.test_exception,  # failure
-            self.test_false,  # failure
-            self.test_empty,  # failure
-            self.test_none,  # failure
+            # self.test_success,
+            # self.test_non_empty,
+            # self.test_long_named_test_function,
+            # self.test_interactive,  # interactive test
+            # self.test_exception,  # failure
+            # self.test_false,  # failure
+            # self.test_empty,  # failure
+            # self.test_none,  # failure
         ]
 
         self.ctx.display.clear()
@@ -332,30 +332,30 @@ class DeviceTests(Page):
 
     # next 8 tests below are prototyping/pseudo-tests -- these will be removed
     # pylint: disable=C0116
-    def test_success(self, interactive=False):
-        return True
+    # def test_success(self, interactive=False):
+    #     return True
 
-    def test_non_empty(self, interactive=False):
-        return "it worked"
+    # def test_non_empty(self, interactive=False):
+    #     return "it worked"
 
-    def test_exception(self, interactive=False):
-        raise ValueError("ValueError raised")
+    # def test_exception(self, interactive=False):
+    #     raise ValueError("ValueError raised")
 
-    def test_false(self, interactive=False):
-        return False
+    # def test_false(self, interactive=False):
+    #     return False
 
-    def test_empty(self, interactive=False):
-        return []
+    # def test_empty(self, interactive=False):
+    #     return []
 
-    def test_none(self, interactive=False):
-        pass
+    # def test_none(self, interactive=False):
+    #     pass
 
-    def test_long_named_test_function(self, interactive=False):
-        return True
+    # def test_long_named_test_function(self, interactive=False):
+    #     return True
 
-    def test_interactive(self, interactive=False):
-        if not interactive:
-            return "Cannot test non-interactively"
-        return self.prompt(
-            "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
-        )
+    # def test_interactive(self, interactive=False):
+    #     if not interactive:
+    #         return "Cannot test non-interactively"
+    #     return self.prompt(
+    #         "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
+    #     )
