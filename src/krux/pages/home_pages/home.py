@@ -121,7 +121,9 @@ class Home(Page):
         """Handler for the 'Customize' Wallet menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            t("Customizing your wallet will generate a new Key.")
+            t(
+                "Customizing your wallet will generate a new Key and unload the Descriptor."
+            )
             + " "
             + t("Mnemonic and passphrase will be kept.")
         )
@@ -132,23 +134,23 @@ class Home(Page):
         from ...key import Key
         from ...wallet import Wallet
 
+        prev_key = self.ctx.wallet.key
+
         wallet_settings = WalletSettings(self.ctx)
         network, policy_type, script_type, account, derivation_path = (
             wallet_settings.customize_wallet(self.ctx.wallet.key)
         )
-        mnemonic = self.ctx.wallet.key.mnemonic
-        passphrase = self.ctx.wallet.key.passphrase
-        self.ctx.wallet = Wallet(
-            Key(
-                mnemonic,
-                policy_type,
-                network,
-                passphrase,
-                account,
-                script_type,
-                derivation_path,
-            )
+        new_key = Key(
+            prev_key.mnemonic,
+            policy_type,
+            network,
+            prev_key.passphrase,
+            account,
+            script_type,
+            derivation_path,
         )
+        if prev_key != new_key:
+            self.ctx.wallet = Wallet(new_key)
         return MENU_CONTINUE
 
     def bip85(self):

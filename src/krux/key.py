@@ -132,6 +132,9 @@ class Key:
             self.derivation = derivation
         self.account = self.root.derive(self.derivation).to_public()
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def xpub(self, version=None):
         """Returns the xpub representation of the extended master public key"""
         return self.account.to_base58(version)
