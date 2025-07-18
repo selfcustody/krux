@@ -5,6 +5,7 @@ SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the 
 
 ### SD Card Airgapped Firmware Upgrade Optimizations
 - Verifies firmware signature authenticity before prompting the user to update.
+- Ensures that only compatible firmware can be installed on the device.
 - Displays the firmware version being installed for user confirmation.
 - Hardware-accelerated SHA-256 hashing and other optimizations speeds up checks.
 

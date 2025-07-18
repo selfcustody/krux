@@ -285,7 +285,7 @@ class KEFEnvelope(Page):
         public_info = "\n".join(
             [
                 t("KEF Encrypted") + " (" + str(len(self.ciphertext)) + " B)",
-                self.fit_to_line(t("ID") + ": " + displayable_label),
+                self.fit_to_line(displayable_label, t("ID") + ": "),
                 t("Version") + ": " + self.version_name,
                 t("Key iter.") + ": " + str(self.iterations),
             ]
