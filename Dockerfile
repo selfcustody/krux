@@ -26,7 +26,7 @@
 # build-base
 # install kendryte (k210), cmake and python dependencies
 ############
-FROM gcc:9.4.0-buster AS build-base
+FROM gcc:9.5.0-bullseye AS build-base
 
 RUN apt-get update -y && \
     apt-get install --no-install-recommends -y -q \
@@ -96,7 +96,7 @@ RUN find vendor/urtypes -type d -name '__pycache__' -exec rm -rv {} + -depth
 RUN find vendor/foundation-ur-py -type d -name '__pycache__' -exec rm -rv {} + -depth
 
 # install vendor/embit
-RUN cd vendor/embit && pip3 install -e .
+RUN pip3 install vendor/embit
 # clean vendor/embit
 RUN rm -rf vendor/embit/src/embit/util/prebuilt && \
     rm -rf vendor/embit/src/embit/liquid && \
