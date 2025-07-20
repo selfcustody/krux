@@ -50,7 +50,6 @@ from ..key import (
     POLICY_TYPE_IDS,
 )
 from ..krux_settings import t
-from ..settings import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
 
 
 DIGITS_HEX = "0123456789ABCDEF"
@@ -286,7 +285,6 @@ class Login(Page):
             mnemonic = MnemonicEditor(self.ctx, mnemonic, new).edit()
         if mnemonic is None:
             return MENU_CONTINUE
-        self.ctx.display.clear()
 
         passphrase = ""
         if not hasattr(Settings().wallet, "policy_type") and hasattr(
@@ -309,9 +307,12 @@ class Login(Page):
         else:
             script_type = P2WSH
         derivation_path = ""
+
         from ..wallet import Wallet
         from ..themes import theme
+        from .utils import Utils
 
+        utils = Utils(self.ctx)
         while True:
             key = Key(
                 mnemonic,
@@ -322,23 +323,18 @@ class Login(Page):
                 script_type,
                 derivation_path,
             )
+            network_name = network["name"]
             if not derivation_path:
                 derivation_path = key.derivation
-            wallet_info = "\n"
-            wallet_info += network["name"] + "\n"
-            if policy_type == TYPE_SINGLESIG:
-                wallet_info += NAME_SINGLE_SIG + "\n"
-            elif policy_type == TYPE_MULTISIG:
-                wallet_info += NAME_MULTISIG + "\n"
-            elif policy_type == TYPE_MINISCRIPT:
-                if script_type == P2TR:
-                    wallet_info += "TR "
-                wallet_info += NAME_MINISCRIPT + "\n"
-            wallet_info += key.derivation_str(True) + "\n"
-            wallet_info += (
+
+            wallet_info = "\n" + utils.generate_wallet_info(
+                network_name, policy_type, script_type, derivation_path, True
+            )
+            wallet_info += "\n" + (
                 t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
             )
 
+            self.ctx.display.clear()
             submenu = Menu(
                 self.ctx,
                 [
@@ -352,12 +348,22 @@ class Login(Page):
                     + DEFAULT_PADDING
                 ),
             )
+
             # draw fingerprint with highlight color
             self.ctx.display.draw_hcentered_text(
                 key.fingerprint_hex_str(True),
                 color=theme.highlight_color,
                 bg_color=theme.info_bg_color,
             )
+
+            # draw network with highlight color
+            self.ctx.display.draw_hcentered_text(
+                network_name,
+                DEFAULT_PADDING + FONT_HEIGHT,
+                color=Utils.get_network_color(network_name),
+                bg_color=theme.info_bg_color,
+            )
+
             index, _ = submenu.run_loop()
             if index == len(submenu.menu) - 1:
                 if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
