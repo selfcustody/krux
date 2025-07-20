@@ -143,6 +143,7 @@ class WalletSettings(Page):
 
     def customize_wallet(self, key):
         """Customize wallet derivation properties"""
+        from ..key import Key
 
         network = key.network
         policy_type = key.policy_type
@@ -163,10 +164,11 @@ class WalletSettings(Page):
                 derivation_path = self._derivation_path_str(
                     policy_type, script_type, network, account
                 )
-            wallet_info += DERIVATION_PATH_SYMBOL + " " + derivation_path
+            wallet_info += self.fit_to_line(
+                Key.format_derivation(derivation_path,True), crop_middle=False
+            )
 
             self.ctx.display.clear()
-            derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
             info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
             submenu = Menu(
                 self.ctx,
