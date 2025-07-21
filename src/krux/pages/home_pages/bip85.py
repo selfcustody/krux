@@ -167,7 +167,7 @@ class Bip85(Page):
                 offset=info_len,
             )
             index, _ = submenu.run_loop()
-            if index == len(menu_items) - 1:
+            if index == submenu.back_index:
                 break
 
     def export(self):

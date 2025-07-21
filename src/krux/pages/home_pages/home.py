@@ -196,7 +196,7 @@ class Home(Page):
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -227,34 +227,38 @@ class Home(Page):
         )
         return (None, FORMAT_NONE, psbt_filename)
 
-    def _sign_menu(self, signer, psbt_filename):
+    def _sign_menu(self, signer, psbt_filename, outputs):
 
-        def _menu_options():
-            sign_menu = Menu(
-                self.ctx,
-                [
-                    (t("Sign to QR code"), lambda: None),
-                    (
-                        t("Sign to SD card"),
-                        None if not self.has_sd_card() else lambda: None,
-                    ),
-                ],
-                back_status=lambda: None,
-            )
-            index, _ = sign_menu.run_loop()
-            return index
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Review"), lambda: None),
+                (t("Sign to QR code"), lambda: None),
+                (
+                    t("Sign to SD card"),
+                    None if not self.has_sd_card() else lambda: None,
+                ),
+            ],
+            back_status=lambda: None,
+        )
+        index, _ = submenu.run_loop()
 
-        index = _menu_options()
+        while index == 0:  # Review PSBT
+            self._display_transaction_for_review(outputs)
+            index, _ = submenu.run_loop()
 
-        if index == 2:  # Back
+        if index == submenu.back_index:  # Back
             return MENU_CONTINUE
+
+        # memory management
+        del outputs
+        del submenu
+        gc.collect()
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Signing.."))
 
-        title = t("Signed PSBT")
-        if index == 0:
-            # Sign to QR code
+        if index == 1:  # Sign to QR code
             signer.sign()
             signed_psbt, qr_format = signer.psbt_qr()
 
@@ -262,15 +266,20 @@ class Home(Page):
             del signer
             gc.collect()
 
-            self.display_qr_codes(signed_psbt, qr_format)
-
             from ..utils import Utils
 
             utils = Utils(self.ctx)
-            utils.print_standard_qr(signed_psbt, qr_format, title, width=45)
-            return MENU_CONTINUE
 
-        # index == 1: Sign to SD card
+            while True:
+                self.display_qr_codes(signed_psbt, qr_format)
+                utils.print_standard_qr(
+                    signed_psbt, qr_format, t("Signed PSBT"), width=45
+                )
+                self.ctx.display.clear()
+                if self.prompt(t("Done?"), self.ctx.display.height() // 2):
+                    return MENU_CONTINUE
+
+        # index == 2: Sign to SD card
         signer.sign(trim=False)
         psbt_filename = self._format_psbt_file_extension(psbt_filename)
         gc.collect()
@@ -483,12 +492,8 @@ class Home(Page):
 
         self._display_transaction_for_review(outputs)
 
-        # memory management
-        del outputs
-        gc.collect()
-
         # sign menu
-        return self._sign_menu(signer, psbt_filename)
+        return self._sign_menu(signer, psbt_filename, outputs)
 
     def sign_message(self):
         """Handler for the 'sign message' menu item"""
