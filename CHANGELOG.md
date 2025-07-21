@@ -13,7 +13,7 @@ SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the 
 When 'Hide Mnemonic' setting is enabled, the 'New Mnemonic' menu is automatically disabled.
 
 ### Improved Text Highlighting
-Wallet fingerprint, keypad titles, settings categories, and prefix texts are now highlighted across all screens.
+Wallet fingerprint, network, keypad titles, settings categories, and prefix texts are now highlighted across all screens.
 
 ### Enhanced Settings Category Colors
 Boolean settings (True/False) are now displayed with color (Green/Red) for improved visibility.
@@ -45,6 +45,7 @@ Exported QR codes can now be saved as SVG images.
 - Added QR Code to About screen.
 - Wallet Descriptor now validates and warns if change addresses cannot be determined.
 - Wallet customization prompt now warns about Descriptor unloading, but does nothing if no changes are made.
+- Fixed issues with long wallet derivation path.
 - Added a PSBT Review button to the sign menu, enabling users to verify PSBT details without reloading.
 - Added a confirmation prompt before exiting after displaying the signed QR code.
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.

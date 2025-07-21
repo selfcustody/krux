@@ -156,3 +156,43 @@ class Utils(Page):
             )
             return ""
         return val
+
+    def generate_wallet_info(self, network, policy, script, derivation, is_login=False):
+        """Helper to create wallet details infobox"""
+        from ..key import (
+            Key,
+            P2TR,
+            TYPE_SINGLESIG,
+            TYPE_MULTISIG,
+            TYPE_MINISCRIPT,
+        )
+        from ..settings import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
+
+        wallet_info = network + "\n"
+
+        if policy == TYPE_SINGLESIG:
+            wallet_info += NAME_SINGLE_SIG
+        elif policy == TYPE_MULTISIG:
+            wallet_info += NAME_MULTISIG
+        elif policy == TYPE_MINISCRIPT:
+            if is_login and script == P2TR:
+                wallet_info += "TR "
+            wallet_info += NAME_MINISCRIPT
+
+        wallet_info += "\n"
+
+        if not is_login:
+            wallet_info += str(script).upper() + "\n"
+
+        wallet_info += self.fit_to_line(
+            Key.format_derivation(derivation, True), crop_middle=False
+        )
+
+        return wallet_info
+
+    @staticmethod
+    def get_network_color(network_name: str):
+        """Returns the correct theme color to write network"""
+        from ..themes import TEST_TXT_COLOR, MAIN_TXT_COLOR
+
+        return MAIN_TXT_COLOR if network_name == "Mainnet" else TEST_TXT_COLOR

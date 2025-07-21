@@ -42,8 +42,6 @@ from ..key import (
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
-    DERIVATION_PATH_SYMBOL,
-    POLICY_TYPE_IDS,
 )
 from ..settings import (
     MAIN_TXT,
@@ -143,31 +141,27 @@ class WalletSettings(Page):
 
     def customize_wallet(self, key):
         """Customize wallet derivation properties"""
+        from ..themes import theme
+        from .utils import Utils
 
+        utils = Utils(self.ctx)
         network = key.network
         policy_type = key.policy_type
         script_type = key.script_type
         account = key.account_index
         derivation_path = key.derivation
         while True:
-            wallet_info = network["name"] + "\n"
-            # Find the policy type string from the POLICY_TYPE_IDS dictionary
-            policy_type_str = ""
-            for k, v in POLICY_TYPE_IDS.items():
-                if v == policy_type:
-                    policy_type_str = k
-                    break
-            wallet_info += policy_type_str + "\n"
-            wallet_info += str(script_type).upper() + "\n"
+            network_name = network["name"]
             if not derivation_path:
                 derivation_path = self._derivation_path_str(
                     policy_type, script_type, network, account
                 )
-            wallet_info += DERIVATION_PATH_SYMBOL + " " + derivation_path
+
+            wallet_info = utils.generate_wallet_info(
+                network_name, policy_type, script_type, derivation_path
+            )
 
             self.ctx.display.clear()
-            derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
-            info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
             submenu = Menu(
                 self.ctx,
                 [
@@ -186,8 +180,18 @@ class WalletSettings(Page):
                         lambda: None,
                     ),
                 ],
-                offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
+                offset=self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
+                * FONT_HEIGHT
+                + DEFAULT_PADDING,
             )
+
+            # draw network with highlight color
+            self.ctx.display.draw_hcentered_text(
+                network_name,
+                color=Utils.get_network_color(network_name),
+                bg_color=theme.info_bg_color,
+            )
+
             index, _ = submenu.run_loop()
             if index == submenu.back_index:
                 break
@@ -228,9 +232,6 @@ class WalletSettings(Page):
                     script_type = new_script_type
             elif index == 3:
                 if policy_type != TYPE_MINISCRIPT:
-                    from .utils import Utils
-
-                    utils = Utils(self.ctx)
                     new_account = utils.capture_index_from_keypad(
                         t("Account Index"), account
                     )
