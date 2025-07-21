@@ -129,7 +129,7 @@ elif [ "$1" == "flash" -o "$1" == "boot" ]; then
             BOARD="goE"
         fi
 
-        DOCK_CMD="docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w $BUILD_DIR -it krux-builder python3 ktool.py -B $BOARD -p /dev/ttyUSB0 -b $BAUDRATE $CMD_SUFFIX"
+        DOCK_CMD="docker run --device=/dev/$usb_device_name:/dev/ttyUSB0 --rm -w $BUILD_DIR -it krux-builder /kruxenv/bin/python ktool.py -B $BOARD -p /dev/ttyUSB0 -b $BAUDRATE $CMD_SUFFIX"
         if ! $DOCK_CMD ; then
             # M5stickV has only one serial port
             # Bit has two serial ports and uses first for flash
@@ -141,7 +141,7 @@ elif [ "$1" == "flash" -o "$1" == "boot" ]; then
                     panic "Failed to find device via USB. Is it connected and powered on?"
                 fi
                 echo "Trying second USB device: $usb_device_name"
-                DOCK_CMD="docker run --device=/dev/$usb_device_name:/dev/ttyUSB1 --rm -w $BUILD_DIR -it krux-builder python3 ktool.py -B $BOARD -p /dev/ttyUSB1 -b $BAUDRATE $CMD_SUFFIX"
+                DOCK_CMD="docker run --device=/dev/$usb_device_name:/dev/ttyUSB1 --rm -w $BUILD_DIR -it krux-builder /kruxenv/bin/python ktool.py -B $BOARD -p /dev/ttyUSB1 -b $BAUDRATE $CMD_SUFFIX"
                 if ! $DOCK_CMD ; then
                     panic "Failed to flash device via USB. Is it connected and powered on?"
                 fi
