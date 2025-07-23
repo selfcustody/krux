@@ -27,7 +27,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Confirm
             ],
             None,
-            None,
+            "a620a1bc",
             False,
         ),
         # 1 - 12w, load
@@ -103,7 +103,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Confirm
             ],
             None,
-            None,
+            "a620a1bc",
             False,
         ),
         # Assert if no index is assigned it stays in the loop
@@ -144,6 +144,18 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
             "a620a1bc",
             True,
         ),
+        # 8 - Cancel at mnemonic word count selection
+        (
+            tdata.SINGLESIG_12_WORD_KEY,
+            [
+                BUTTON_ENTER,  # BIP39 Mnemonic
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Press "< Back"
+            ],
+            None,  # No mnemonic generated
+            "a620a1bc",
+            False,  # Not loaded
+        ),
     ]
 
     case_num = 0
@@ -174,12 +186,14 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
 
     # Test with hidden mnemonic setting enabled
     Settings().security.hide_mnemonic = True
+    wallet = Wallet(cases[1][0])
     ctx = create_ctx(mocker, cases[1][1], wallet)
     bip85_ui = Bip85(ctx)
     mocker.spy(bip85_ui, "display_mnemonic")
     bip85_ui.export()
     ctx.display.draw_centered_text.assert_called_with(
-        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
+        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % cases[1][3],
+        color=theme.highlight_color,
     )
 
 
@@ -357,12 +371,14 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
     print("last case hide_mnemonic")
     # Test with hidden mnemonic setting enabled
     Settings().security.hide_mnemonic = True
+    wallet = Wallet(cases[1][0])
     ctx = create_ctx(mocker, cases[1][1], wallet)
     bip85_ui = Bip85(ctx)
     mocker.spy(bip85_ui, "display_mnemonic")
     bip85_ui.export()
     ctx.display.draw_centered_text.assert_called_with(
-        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
+        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % cases[1][3],
+        color=theme.highlight_color,
     )
 
 
@@ -370,9 +386,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
     from krux.pages.home_pages.bip85 import Bip85
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.settings import TEST_TXT
     from embit import bip32
-    from embit.networks import NETWORKS
 
     cases = [
         # case
@@ -516,6 +530,18 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Leave
             ],
             "dKLoepugzdVJvdL56ogNV\n\nIndex: 0\nLength: 21",
+        ),
+        # 7 - Cancel at index input
+        (
+            tdata.SINGLESIG_12_WORD_KEY,
+            [
+                BUTTON_PAGE,  # Move to "Base64 Password"
+                BUTTON_ENTER,  # Press "Base64 Password"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
+                BUTTON_ENTER,  # Press "Esc"
+                BUTTON_ENTER,  # Confirm ESC with "Yes"
+            ],
+            None,  # No password info generated
         ),
     ]
     mock_save_file = mocker.patch(
