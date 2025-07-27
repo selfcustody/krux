@@ -272,7 +272,10 @@ class Cipher:
     def _authenticate(self, decrypted, aes_object, auth, mode, v_auth, v_pkcs_pad):
         if not (
             isinstance(decrypted, bytes)
-            # TODO check aes_object
+            and (
+                mode != MODE_GCM
+                or (aes_object is not None and hasattr(aes_object, "verify"))
+            )
             and (isinstance(auth, bytes) or auth is None)
             and mode in MODE_NUMBERS.values()
             and (isinstance(v_auth, int) and -32 <= v_auth <= 32)
