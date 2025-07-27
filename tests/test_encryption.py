@@ -5,7 +5,7 @@ import base64
 
 TEST_KEY = "test key"
 TEST_MNEMONIC_ID = "test ID"
-ITERATIONS = 1000
+ITERATIONS = 1000  # this should be at least 10k, but remains 1K for legacy tests
 TEST_WORDS = (
     "crush inherit small egg include title slogan mom remain blouse boost bonus"
 )
@@ -38,9 +38,11 @@ B64_ECB_ENCRYPTED_ENTROPY_CKSUM = (
 )
 B64_CBC_ENCRYPTED_ENTROPY_CKSUM = b"T1Khk2w+MnEgnp1kBZ7XjhOQZKrWuLSqcwF7a2q2uqSTETAfD7tXKappqhNYCkBkTcp7WZ0lQqJH3j2Na7hmxg=="
 
-ECB_ENCRYPTED_QR = b"\x07test ID\x05\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xeb\x1a6"
+ECB_ENCRYPTED_QR = (
+    b"\x07test ID\x05\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6R>#"
+)
 OLDECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
-CBC_ENCRYPTED_QR = b'\x07test ID\x0a\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xeb\x1a6m'
+CBC_ENCRYPTED_QR = b'\x07test ID\x0a\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5C\xfa\x96\x90'
 OLDCBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
 CTR_ENCRYPTED_QR = b"\x07test ID\x0f\x00\x00\nd\xc2\xd8\xb7U\xe8\x02~\xda}\xcdO\x967\xbf\xc5%\xa7\x18\x11\xf4\xec\xfd=\xbaY\xbe|\x97\xe2;\xabb\xfa.L\xbc$]'\xc9\xcc#\xba\xcb\x84\xe4J"
 GCM_ENCRYPTED_QR = b"\x07test ID\x14\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xb7vo]]\x8aO\x90\x8e\x86\xe784L\x02]\x8f\xedT"
@@ -65,8 +67,8 @@ GCM_QR_PUBLIC_DATA = (
 )
 
 # Must maintain old in-the-wild versions of cipher-payloads in seeds.json to ensure recoverable
-KEF_ECBENTROPY_ONLY_JSON = '{"KEFecbID": {"b64_kef": "CEtFRmVjYklEBQAACrjZPsHP9sA0UAKiWuotRXbnFma/HVnfaVAZV6Kw5Tu7ebJf"}}'
-KEF_CBCENTROPY_ONLY_JSON = '{"KEFcbcID": {"b64_kef": "CEtFRmNiY0lECgAACk9SoZNsPjJxIJ6dZAWe145shFPojYLA4hthWHv2Z2FSIyQ6fm5KU81NLiQ/mQDM4zbdzTM="}}'
+KEF_ECBENTROPY_ONLY_JSON = '{"KEFecbID": {"b64_kef": "CEtFRmVjYklEBQAACrjZPsHP9sA0UAKiWuotRXbnFma/HVnfaVAZV6Kw5Tu7UPT3"}}'
+KEF_CBCENTROPY_ONLY_JSON = '{"KEFcbcID": {"b64_kef": "CEtFRmNiY0lECgAACk9SoZNsPjJxIJ6dZAWe145shFPojYLA4hthWHv2Z2FSIyQ6fm5KU81NLiQ/mQDM46XqtaI="}}'
 KEF_CTRENTROPY_ONLY_JSON = '{"KEFctrID": {"b64_kef": "CEtFRmN0cklEDwAACmkkBdxuqL8fLOJ4eWLT9sw3iPtGPZ79abe7Gk1YZXkaocEyUasKQW5d6KKp6FgcDA=="}}'
 KEF_GCMENTROPY_ONLY_JSON = '{"KEFgcmID": {"b64_kef": "CEtFRmdjbUlEFAAACk9SoZNsPjJxIJ6dZL+jDD/X+v8sJY3z7oiBTgjTt9BbJh1mAQus1rbFF4D4HH+SVw=="}}'
 OLD_ECBWORDS_ONLY_JSON = '{"ecbID": {"version": 0, "key_iterations": 100000, "data": "sMCvAUvVpGSCsXsBl7EBNGPZLymZoyB8eAUHb2TMbarhqD4GJga/SW/AstxIvZz6MR1opXLfF7Pyd+IJBe3E0lDQCkvqytSQfVGnVSeYz+sNfd5T1CXS0/C2zYKTKFL7RTpHd0IXHZ+GQuzX1hoJMHkh0sx0VgorVdDj87ykUQIeC95MS98y/ha2q/vWfLyIZU1hc5VcehzmTA1B6ExMGA=="}}'

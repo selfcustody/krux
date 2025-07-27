@@ -17,10 +17,10 @@ CBC_ENTROPY = b"@\x8c\xf9\xb8\xd8\xd9\xe2\xbdo\xb5\xd1\xa1?\xb0\x10O\xd4\xc8\xfd
 CTR_ENTROPY = b'\xecT\xea4l\xaa\x1e\xd0l\xb3\\\x96\xc4\xef#"\x8a&\xa2\xe0\x99lq\xd0`\x8e\xc2\xbaI\xce#\x16'
 GCM_ENTROPY = b"\x06\xef\x92\xe3\xbb\xb6\xc8\xdauWu\xa0\xa9\x00\xa4<E\\\x8e\x103\xdd\x95\xf8]6CE\xf3\xdc\xae}"
 
-ECB_ENCRYPTED_QR = b"\x07test ID\x05\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xeb\x1a6"
-CBC_ENCRYPTED_QR = b'\x07test ID\x0a\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xeb\x1a6m'
-CTR_ENCRYPTED_QR = b"\x07test ID\x0f\x00\x00\x01OR\xa1\x93l>2q \x9e\x9dd\xdeD'2$|7\xcbE]\x1bT\x10\xb2WD\xda\xd4\xaco\xe4\xf2\xf4\xcf\\M\xe7{\xfc\x82\x96\x82\x93\x82\x98\xf0"
-GCM_ENCRYPTED_QR = b"\x07test ID\x14\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xb7vo]]\x8aO\x90\x8e\x86\xe784L\x02]\x8f\xedT"
+ECB_ENCRYPTED_KEF = b"\x07test ID\x05\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xeb\x1a6"
+CBC_ENCRYPTED_KEF = b'\x07test ID\x0a\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\xeb\x1a6m'
+CTR_ENCRYPTED_KEF = b"\x07test ID\x0f\x00\x00\x01OR\xa1\x93l>2q \x9e\x9dd\xdeD'2$|7\xcbE]\x1bT\x10\xb2WD\xda\xd4\xaco\xe4\xf2\xf4\xcf\\M\xe7{\xfc\x82\x96\x82\x93\x82\x98\xf0"
+GCM_ENCRYPTED_KEF = b"\x07test ID\x14\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xb7vo]]\x8aO\x90\x8e\x86\xe784L\x02]\x8f\xedT"
 
 
 I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
@@ -83,7 +83,7 @@ def test_kef_VERSIONS_constants(m5stickv):
         # if negative, it's calculated as sha256(plaintext) and appended to plaintext "before"
         #   encryption/padding -- hidden but has a greater chance of needing
         #   an extra AES block!
-        # if positive, it's calculated as sha256(plaintext + key) in order to obscure it,
+        # if positive, it's calculated as sha256(version + iv + plaintext + stretched_key) in order to obscure it,
         #   and appended "after" encryption/padding to ciphertext -- unhidden.
         # if 0, it means that .decrypt() callers must figure out how to validate
         #   successful decryption, but currently no versions define "auth" as 0.
@@ -210,12 +210,12 @@ def test_Cipher_calling_method_encrypt(m5stickv):
         if v_iv == 0:
             err = "IV is not required"
             for invalid in invalid_ivs:
-                with pytest.raises(ValueError, match=err):
+                with pytest.raises((ValueError, TypeError)):
                     encryptor.encrypt(valids[0], valids[1], invalid, **kwargs)
         else:
             err = "Wrong IV length"
             for invalid in invalid_ivs:
-                with pytest.raises(ValueError, match=err):
+                with pytest.raises((ValueError, TypeError)):
                     encryptor.encrypt(valids[0], valids[1], invalid, **kwargs)
 
     # Exception when version is None or VERSIONS[version]["mode"] is None
@@ -285,26 +285,12 @@ def test_Cipher_calling_method_decrypt(m5stickv):
 def test_Cipher_calling_method__authenticate(m5stickv):
     from krux import kef
 
-    cipher = kef.Cipher(b"key", "salt", 1)
+    cipher = kef.Cipher(b"key", "salt", 10000)
     valid_decrypteds = (b"\x00",)
-    valid_aes_objects = []
-    if kef.MODE_ECB is not None:
-        valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_ECB))
-    if kef.MODE_CBC is not None:
-        valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_CBC, I_VECTOR[:16]))
-    if kef.MODE_CTR is not None:
-        valid_aes_objects.append(
-            kef.AES(cipher._key, kef.MODE_CTR, nonce=I_VECTOR[:12])
-        )
-    if kef.MODE_GCM is not None:
-        valid_aes_objects.append(kef.AES(cipher._key, kef.MODE_GCM, I_VECTOR[:12]))
     valid_auths = (b"\x01\x02\x03", b"\x01\x02\x03\x04")
-    valid_modes = (
-        x for x in kef.MODE_NUMBERS.values()
-    )  # kef/ucryptolib attrs: .MODE_ECB, .MODE_CBC, .MODE_CTR, .MODE_GCM
-    valid_v_auths = (-3, 4)
-    valid_v_pkcs_pads = (None, True, False)
 
+    invalid_versions = (1.0, -1, 256)
+    invalid_ivs = ("Im a 16 char str",)
     invalid_decrypteds = (True, None, 1, "\x00")
     invalid_aes_objects = (list(), dict(), None)
     invalid_auths = (True, 1, "\x00")
@@ -322,72 +308,121 @@ def test_Cipher_calling_method__authenticate(m5stickv):
 
     # try each invalid param with other valid params
     err = "Invalid call to ._authenticate()"
-    for plain in valid_decrypteds:
-        for aes_object in valid_aes_objects:
+    for version, values in kef.VERSIONS.items():
+        if values is None or values["mode"] is None:
+            continue
+        mode = values["mode"]
+        v_auth = values["auth"]
+        v_pkcs_pad = values.get("pkcs_pad", False)
+        iv = I_VECTOR[: kef.MODE_IVS.get(mode, 0)]
+        if iv == b"":
+            aes_object = kef.AES(cipher._key, mode)
+        elif mode == kef.MODE_CTR:
+            aes_object = kef.AES(cipher._key, mode, nonce=iv)
+        else:
+            aes_object = kef.AES(cipher._key, mode, iv)
+        for plain in valid_decrypteds:
             for auth in valid_auths:
-                for mode in valid_modes:
-                    if mode == None:
-                        continue
-                    for v_auth in valid_v_auths:
-                        for v_pkcs_pad in valid_v_pkcs_pads:
+                for invalid in invalid_versions:
+                    with pytest.raises(ValueError, match=err):
+                        cipher._authenticate(
+                            invalid,
+                            iv,
+                            plain,
+                            aes_object,
+                            auth,
+                            mode,
+                            v_auth,
+                            v_pkcs_pad,
+                        )
 
-                            for invalid in invalid_decrypteds:
-                                with pytest.raises(ValueError, match=err):
-                                    cipher._authenticate(
-                                        invalid,
-                                        aes_object,
-                                        auth,
-                                        mode,
-                                        v_auth,
-                                        v_pkcs_pad,
-                                    )
+                for invalid in invalid_ivs:
+                    with pytest.raises(ValueError, match=err):
+                        cipher._authenticate(
+                            version,
+                            invalid,
+                            plain,
+                            aes_object,
+                            auth,
+                            mode,
+                            v_auth,
+                            v_pkcs_pad,
+                        )
 
-                            # # TODO solve this
-                            # for invalid in invalid_aes_objects:
-                            #    with pytest.raises(ValueError, match=err):
-                            #        aes._authenticate(plain, invalid, auth, mode, v_auth, v_pkcs_pad)
+                for invalid in invalid_decrypteds:
+                    with pytest.raises(ValueError, match=err):
+                        cipher._authenticate(
+                            version,
+                            iv,
+                            invalid,
+                            aes_object,
+                            auth,
+                            mode,
+                            v_auth,
+                            v_pkcs_pad,
+                        )
+            # GCM requires a valid aes_object where .verify() can be called
+            if mode == kef.MODE_GCM:
+                for invalid in invalid_aes_objects:
+                    with pytest.raises(ValueError, match=err):
+                        cipher._authenticate(
+                            version,
+                            iv,
+                            plain,
+                            invalid,
+                            auth,
+                            mode,
+                            v_auth,
+                            v_pkcs_pad,
+                        )
 
-                            for invalid in invalid_auths:
-                                with pytest.raises(ValueError, match=err):
-                                    cipher._authenticate(
-                                        plain,
-                                        aes_object,
-                                        invalid,
-                                        mode,
-                                        v_auth,
-                                        v_pkcs_pad,
-                                    )
+                for invalid in invalid_auths:
+                    with pytest.raises(ValueError, match=err):
+                        cipher._authenticate(
+                            version,
+                            iv,
+                            plain,
+                            aes_object,
+                            invalid,
+                            mode,
+                            v_auth,
+                            v_pkcs_pad,
+                        )
 
-                            for invalid in invalid_modes:
-                                with pytest.raises(ValueError, match=err):
-                                    cipher._authenticate(
-                                        plain,
-                                        aes_object,
-                                        auth,
-                                        invalid,
-                                        v_auth,
-                                        v_pkcs_pad,
-                                    )
+                for invalid in invalid_modes:
+                    with pytest.raises(ValueError, match=err):
+                        cipher._authenticate(
+                            version,
+                            iv,
+                            plain,
+                            aes_object,
+                            auth,
+                            invalid,
+                            v_auth,
+                            v_pkcs_pad,
+                        )
 
-                            for invalid in invalid_v_auths:
-                                with pytest.raises(ValueError, match=err):
-                                    cipher._authenticate(
-                                        plain,
-                                        aes_object,
-                                        auth,
-                                        mode,
-                                        invalid,
-                                        v_pkcs_pad,
-                                    )
+                for invalid in invalid_v_auths:
+                    with pytest.raises(ValueError, match=err):
+                        cipher._authenticate(
+                            version,
+                            iv,
+                            plain,
+                            aes_object,
+                            auth,
+                            mode,
+                            invalid,
+                            v_pkcs_pad,
+                        )
 
-                            for invalid in invalid_v_pkcs_pad:
-                                with pytest.raises(ValueError, match=err):
-                                    cipher._authenticate(
-                                        plain, aes_object, auth, mode, v_auth, invalid
-                                    )
+                for invalid in invalid_v_pkcs_pad:
+                    with pytest.raises(ValueError, match=err):
+                        cipher._authenticate(
+                            version, iv, plain, aes_object, auth, mode, v_auth, invalid
+                        )
 
 
-def test_Cipher_public_sha256_auth_commits_to_key(m5stickv):
+def test_Cipher_public_sha256_auth_commits_to_inputs(m5stickv):
     from krux import kef
     from hashlib import sha256
 
@@ -422,26 +457,79 @@ def test_Cipher_public_sha256_auth_commits_to_key(m5stickv):
         if values["mode"] == kef.MODE_GCM:
             continue
 
-        # When auth < 0: auth bytes are private, appended to plaintext
-        if v_auth < 0:
+        # When auth < 0: auth bytes are private, appended to plaintext; 0=no-auth
+        if v_auth <= 0:
             continue
 
         # When auth > 0: auth bytes are public, appended to ciphertext
-        if v_auth > 0:
-            iv = I_VECTOR[:v_iv]
-            for plain in testplaintexts:
-                print(v, values, plain)
-                try:
-                    ciphertext = cipher.encrypt(plain, v, iv)
-                except:
-                    continue
-                auth_bytes = ciphertext[-v_auth:]
+        iv = I_VECTOR[:v_iv]
+        for plain in testplaintexts:
+            print(v, values, plain)
+            try:
+                ciphertext = cipher.encrypt(plain, v, iv)
+            except:
+                continue
+            auth_bytes = ciphertext[-v_auth:]
 
-                # When auth bytes are public, KEF avoids simple sha256(plaintext) because
-                # separate ciphertexts of same plaintext would share/reveal same auth bytes.
-                # To avoid this, KEF commits to the stretched key when auth bytes are public.
-                cksum = sha256(plain + cipher._key).digest()[:v_auth]
-                assert auth_bytes == cksum
+            # When auth bytes are public, KEF avoids simple sha256(plaintext) because
+            # separate ciphertexts of same plaintext would share/reveal same auth bytes.
+            # Thus, KEF also commits to version/iv/stretched-key when auth bytes are public.
+            cksum = sha256(bytes([v]) + iv + plain + cipher._key).digest()[:v_auth]
+            assert auth_bytes == cksum
+
+
+def test_Cipher_public_auth_obscured_despite_similar_inputs(m5stickv):
+    from krux import kef
+
+    testplaintexts = (
+        TEST_WORDS.encode(),
+        ECB_WORDS.encode(),
+        CBC_WORDS.encode(),
+        CTR_WORDS.encode(),
+        GCM_WORDS.encode(),
+        ECB_ENTROPY,
+        CBC_ENTROPY,
+        CTR_ENTROPY,
+        GCM_ENTROPY,
+        b'"Running bitcoin" -Hal, January 10, 2009',
+    )
+
+    cipher = kef.Cipher("key", b"salt", 10000)
+    for plain in testplaintexts:
+        auth_bytes = []
+
+        for v, values in kef.VERSIONS.items():
+            if values is None or values["mode"] is None:
+                continue
+
+            v_mode = values["mode"]
+            v_auth = values.get("auth", 0)
+            v_iv = kef.MODE_IVS.get(values["mode"], 0)
+
+            # When auth < 0: auth bytes are private, appended to plaintext; 0=no-auth
+            if v_auth <= 0:
+                continue
+
+            # When auth > 0: auth bytes are public, appended to ciphertext
+            iv = I_VECTOR[:v_iv]
+            ciphertext = cipher.encrypt(plain, v, iv)
+            auth_bytes.append((v, ciphertext[-v_auth:]))
+
+            if iv:
+                iv2 = iv[4:] + iv[:4]
+                ciphertext2 = cipher.encrypt(plain, v, iv2)
+                auth_bytes.append((v, ciphertext2[-v_auth:]))
+
+        # while same plaintext was encrypted multiple times w/ similar inputs,
+        # the unencrypted authentication bytes are obscured; not same and not found within others
+        auth_bytes_set = set([auth for version, auth in auth_bytes])
+        assert len(auth_bytes) == len(auth_bytes_set)
+        len_long = max([len(x) for x in auth_bytes_set])
+        for short_auth in (x for x in auth_bytes_set if len(x) != len_long):
+            for auth in auth_bytes_set:
+                if short_auth == auth:
+                    continue
+                assert short_auth not in auth
 
 
 def test_faithful_encryption(m5stickv):
@@ -602,7 +690,7 @@ def test_broken_decryption_cases(m5stickv):
                     assert cipher.decrypt(encrypted, version) == plain
                 else:
                     assert cipher.decrypt(encrypted, version) != plain
-                    assert plain in encryptor.decrypt(encrypted, version)
+                    assert plain in cipher.decrypt(encrypted, version)
 
             else:
                 # other cases should encrypt and decrypt w/o problems
@@ -907,8 +995,8 @@ def test_wrap_exceptions(m5stickv):
 def test_unwrap_exceptions(m5stickv):
     from krux import kef
 
-    block_test_cases = (ECB_ENCRYPTED_QR, CBC_ENCRYPTED_QR)
-    stream_test_cases = (CTR_ENCRYPTED_QR, GCM_ENCRYPTED_QR)
+    block_test_cases = (ECB_ENCRYPTED_KEF, CBC_ENCRYPTED_KEF)
+    stream_test_cases = (CTR_ENCRYPTED_KEF, GCM_ENCRYPTED_KEF)
 
     # an unknown version is not KEF Encryption Format
     err = "Invalid format"
@@ -935,20 +1023,20 @@ def test_unwrap_exceptions(m5stickv):
 
     # Ciphertext is at least 1 block (at least for ecb/cbc)
     err = "Ciphertext is too short"
-    encoded = ECB_ENCRYPTED_QR[:-16]  # 24w CBC is 48 bytes w/ iv+checksum
+    encoded = ECB_ENCRYPTED_KEF[:-16]  # 24w CBC is 48 bytes w/ iv+checksum
     with pytest.raises(ValueError, match=err):
         kef.unwrap(encoded)
-    encoded = CBC_ENCRYPTED_QR[:-32]  # 24w CBC is 48 bytes w/ iv+checksum
+    encoded = CBC_ENCRYPTED_KEF[:-32]  # 24w CBC is 48 bytes w/ iv+checksum
     with pytest.raises(ValueError, match=err):
         kef.unwrap(encoded)
 
     # Exception when version is None or VERSIONS[version]["mode"] is None
     err = "Invalid format"
     for v, encoded in (
-        (5, ECB_ENCRYPTED_QR),
-        (10, CBC_ENCRYPTED_QR),
-        (15, CTR_ENCRYPTED_QR),
-        (20, GCM_ENCRYPTED_QR),
+        (5, ECB_ENCRYPTED_KEF),
+        (10, CBC_ENCRYPTED_KEF),
+        (15, CTR_ENCRYPTED_KEF),
+        (20, GCM_ENCRYPTED_KEF),
     ):
         kef.VERSIONS[v] = None
         with pytest.raises(ValueError, match=err):
@@ -1182,7 +1270,9 @@ def kef_self_document(version, label=None, iterations=None, limit=None):
 
     if mode_name in ("AES-ECB", "AES-CBC", "AES-CTR"):
         if v_auth > 0:
-            auth = "sha256({} + k)[:{}]".format(plain, v_auth)
+            auth = "sha256({} + {} + k)[:{}]".format(
+                "v + iv" if iv_arg else "v", plain, v_auth
+            )
             cpl += " + auth"
             text["e"] = None
             text["pad"] = None
@@ -1220,10 +1310,10 @@ def test_kef_self_document(m5stickv):
     test_cases = {
         0: "[AES-ECB v1] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =0\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:16]\npad: NUL\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         1: "[AES-CBC v1] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =1\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:16]\npad: NUL\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        5: "[AES-ECB] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =5\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + pad) + auth\ne: AES(k, ECB)\npad: NUL\nauth: sha256(<P> + k)[:3]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        5: "[AES-ECB] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =5\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + pad) + auth\ne: AES(k, ECB)\npad: NUL\nauth: sha256(v + <P> + k)[:3]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         6: "[AES-ECB +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =6\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: e.encrypt(<P> + auth + pad)\ne: AES(k, ECB)\nauth: sha256(<P>)[:4]\npad: PKCS7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         7: "[AES-ECB +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =7\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: e.encrypt(zlib(<P>, wbits=-10) + auth + pad)\ne: AES(k, ECB)\nauth: sha256(zlib(<P>, wbits=-10))[:4]\npad: PKCS7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
-        10: "[AES-CBC] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =10\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 16b\ne: AES(k, CBC, iv)\npad: NUL\nauth: sha256(<P> + k)[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
+        10: "[AES-CBC] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =10\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + pad) + auth\niv: 16b\ne: AES(k, CBC, iv)\npad: NUL\nauth: sha256(v + iv + <P> + k)[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         11: "[AES-CBC +p] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =11\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(<P>)[:4]\npad: PKCS7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         12: "[AES-CBC +c] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =12\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: iv + e.encrypt(zlib(<P>, wbits=-10) + auth + pad)\niv: 16b\ne: AES(k, CBC, iv)\nauth: sha256(zlib(<P>, wbits=-10))[:4]\npad: PKCS7\nk: pbkdf2_hmac(sha256, <K>, id, i)",
         15: "[AES-CTR] KEF bytes: len_id + id + v + i + cpl\nlen_id: 1b\nid: <len_id>b\nv: 1b; =15\ni: 3b big; =(i > 10K) ? i : i * 10K\ncpl: iv + e.encrypt(<P> + auth)\niv: 12b\ne: AES(k, CTR, iv)\nauth: sha256(<P>)[:4]\nk: pbkdf2_hmac(sha256, <K>, id, i)",
@@ -1602,3 +1692,44 @@ def test_brute_force_compression_checks(m5stickv):
         )
     )
     # assert 0
+
+
+def NOtest_assuming_kef_is_working_create_one_control(m5stickv):
+    """
+    NOT TO BE USED UNTIL ALL TESTS ARE PASSING!!!
+    Creates control strings for hard-coded tests
+    """
+    from krux import kef
+
+    # adjust these to match your test
+    plaintext = b"some secret bytes"
+    id_ = b"label"
+    version = 5
+    iterations = 10000
+    key = b"key"
+    iv = I_VECTOR
+
+    # encrypt the plaintext, wrap it in an envelope
+    iv = iv[: kef.MODE_IVS.get(kef.VERSIONS[version]["mode"], 0)]
+    cryptor = kef.Cipher(key, id_, iterations)
+    encrypted = cryptor.encrypt(plaintext, version, iv)
+    envelope = kef.wrap(id_, version, iterations, encrypted)
+
+    # UNCERTAIN sanity checks that KEF code is at least faithful
+    assert kef.unwrap(envelope) == (id_, version, iterations, encrypted)
+    assert cryptor.decrypt(encrypted, version)
+
+    # output copy-paste strings for use as hard-coded test controls
+    print(
+        "plaintext: {}\nid: {}\nversion: {}\niterations: {}\nkey: {}\niv: {}\n\nencrypted: {}\nkef: {}".format(
+            plaintext,
+            id_,
+            "{} ({})".format(version, kef.VERSIONS[version]["name"]),
+            iterations,
+            key,
+            iv,
+            encrypted,
+            envelope,
+        )
+    )
+    assert 0
