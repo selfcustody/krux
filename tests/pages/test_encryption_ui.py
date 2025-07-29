@@ -202,6 +202,7 @@ def test_encrypt_save_error_exist(m5stickv, mocker, mock_file_operations):
     ]  # Confirm flash store  # Confirm fingerprint as ID
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
+    Settings().encryption.version = "AES-ECB"
     storage_ui = EncryptMnemonic(ctx)
     mocker.spy(storage_ui, "flash_error")
     mocker.patch(
@@ -212,7 +213,6 @@ def test_encrypt_save_error_exist(m5stickv, mocker, mock_file_operations):
         "krux.encryption.MnemonicStorage.list_mnemonics",
         mocker.MagicMock(return_value=[ENCRYPTED_QR_TITLE_ECB]),
     )
-    Settings().encryption.version = "AES-ECB"
     storage_ui.encrypt_menu()
 
     storage_ui.flash_error.assert_has_calls(
@@ -238,6 +238,7 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
+    Settings().encryption.version = "AES-ECB"
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
@@ -247,7 +248,6 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
         "krux.encryption.MnemonicStorage.store_encrypted",
         mocker.MagicMock(return_value=False),
     )
-    Settings().encryption.version = "AES-ECB"
     storage_ui.encrypt_menu()
 
     ctx.display.draw_centered_text.assert_has_calls(
@@ -274,6 +274,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
+    Settings().encryption.version = "AES-ECB"
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
@@ -1406,7 +1407,12 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # select Go
         BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # confirm to add GCM cam entropy
     ]
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=I_VECTOR),
+    )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     page.label = "my ID"  # id/label may be set elsewhere
@@ -1438,6 +1444,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
         BUTTON_ENTER,  # confirm key "a"
         BUTTON_ENTER,  # accept proposed iterations
         BUTTON_ENTER,  # accept default mode
+        BUTTON_ENTER,  # confirm to add GCM cam entropy
         BUTTON_PAGE_PREV,  # deny updating label
     ]
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -1449,7 +1456,8 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call("Use default Key iter.? 100001", highlight_prefix="?"),
-            mocker.call("Use default Mode? AES-ECB", highlight_prefix="?"),
+            mocker.call("Use default Mode? AES-GCM", highlight_prefix="?"),
+            mocker.call("Additional entropy from camera required for AES-GCM"),
             mocker.call("Update KEF ID? my ID", highlight_prefix="?"),
         ]
     )
@@ -1471,8 +1479,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
         BUTTON_ENTER,  # accept proposed iterations
         BUTTON_PAGE_PREV,  # deny accepting default mode
         BUTTON_PAGE_PREV,  # move to AES-GCM +c
-        BUTTON_PAGE_PREV,  # move to AES-GCM
-        BUTTON_ENTER,  # select AES-GCM
+        BUTTON_ENTER,  # select AES-GCM +c
         BUTTON_ENTER,  # accept gathering camera entropy
         BUTTON_PAGE_PREV,  # deny updating label
     ]
@@ -1481,13 +1488,13 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     page.label = "my ID"
     assert page.version == None
     sealed = page.seal_ui(b"plain text", override_defaults=True, specific_version=True)
-    assert page.version == 20
+    assert page.version == 21
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert isinstance(sealed, bytes) and len(sealed) > 8
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call("Use default Key iter.? 100001", highlight_prefix="?"),
-            mocker.call("Use default Mode? AES-ECB", highlight_prefix="?"),
+            mocker.call("Use default Mode? AES-GCM", highlight_prefix="?"),
             mocker.call("Additional entropy from camera required for AES-GCM"),
             mocker.call("Update KEF ID? my ID", highlight_prefix="?"),
         ]
