@@ -256,7 +256,7 @@ translation_array = [
     "Fabrieksinstellingen herstellen en opnieuw opstarten?",
     "Resultaat",
     "Terug naar QR-lezer",
-    "Beoordeling",
+    "Opnieuw Beoordelen",
     "Controleer gescande gegevens en bewerk indien nodig",
     "Rechts",
     "Dobbel een dobbelsteen minstens %d keer voor het genereren van een geheugensteun.",

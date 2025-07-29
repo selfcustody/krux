@@ -232,7 +232,7 @@ class Home(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Review"), lambda: None),
+                (t("Review Again"), lambda: None),
                 (t("Sign to QR code"), lambda: None),
                 (
                     t("Sign to SD card"),

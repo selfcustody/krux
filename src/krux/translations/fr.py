@@ -256,7 +256,7 @@ translation_array = [
     "Restaurer les paramètres d'usine et redémarrer\u2009?",
     "Résultat",
     "Retour au visualiseur QR",
-    "Examiner",
+    "Vérifier à Nouveau",
     "Examinez les données numérisées, modifiez-les si nécessaire",
     "À droite",
     "Lancez le dé au moins %d fois pour générer un mnémonique.",

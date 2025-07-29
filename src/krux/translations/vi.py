@@ -256,7 +256,7 @@ translation_array = [
     "Khôi phục cài đặt gốc và khởi động lại?",
     "Kết quả",
     "Quay lại Trình xem QR",
-    "Xem xét lại",
+    "Xem lại lần nữa",
     "Xem lại dữ liệu đã quét, chỉnh sửa nếu cần",
     "Phải",
     "Lăn xúc xắc ít nhất %d lần để tạo Mnemonic.",
