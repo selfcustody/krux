@@ -244,8 +244,8 @@ def detect_encodings(str_data, verify=True):
             try:
                 # binascii.a2b_base64 is NOT strict
                 as_bytes = base_decode(str_data, 64)
-                assert base_encode(as_bytes, 64) == str_data
-                encodings.append(64)
+                if base_encode(as_bytes, 64) == str_data:
+                    encodings.append(64)
             except:
                 pass
         else:
@@ -630,9 +630,7 @@ class DatumTool(Page):
             except:
                 self.title = "0x" + hexlify(kef.label).decode()
 
-            if len(self.title) * FONT_WIDTH > self.ctx.display.width():
-                self.title = self.fit_to_line(self.title)
-
+            self.title = self.fit_to_line(self.title)
             self.decrypted = True
             self.contents = plaintext
             self.history = []

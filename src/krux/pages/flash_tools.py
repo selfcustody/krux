@@ -24,13 +24,14 @@ import lcd
 from . import Page, Menu, MENU_CONTINUE, DEFAULT_PADDING
 from ..themes import theme
 from ..krux_settings import t
-from ..display import FONT_HEIGHT, FONT_WIDTH, NARROW_SCREEN_WITH
+from ..display import FONT_HEIGHT, FONT_WIDTH
 from ..wdt import wdt
 from ..firmware import (
     FLASH_SIZE,
     SPIFFS_ADDR,
     ERASE_BLOCK_SIZE,
 )
+from ..kboard import kboard
 
 BLOCK_SIZE = 0x1000
 FLASH_ROWS = 64
@@ -81,7 +82,7 @@ class FlashTools(Page):
             "Firmware",
             theme.fg_color,
         )
-        if self.ctx.display.width() <= NARROW_SCREEN_WITH:
+        if kboard.is_m5stickv:
             l_y_text_offset += FONT_HEIGHT
             l_y_block_offset += FONT_HEIGHT
             l_x_offset = DEFAULT_PADDING

@@ -15,9 +15,8 @@ def mocked_run_one_test(mocker):
 
 
 @pytest.fixture
-def mock_fail_hw_acc_hashing(mocker):
+def mock_hw_acc_hashing(mocker):
     """Fixture to mock the hardware acceleration hashing test to fail"""
-    # Force hash outputs to cause assertion failure
     bad_digest = b"\x00" * 32
 
     f_hash = mocker.patch(
@@ -30,9 +29,8 @@ def mock_fail_hw_acc_hashing(mocker):
 
 
 @pytest.fixture
-def mock_fail_hashlib_sha256(mocker):
+def mock_hashlib_sha256(mocker):
     """Fixture to mock the hashlib sha256 function to fail"""
-    # Force hash outputs to cause assertion failure
     bad_digest = b"\x00" * 32
 
     return mocker.patch(
@@ -41,7 +39,7 @@ def mock_fail_hashlib_sha256(mocker):
 
 
 @pytest.fixture
-def mock_fail_hexlify_endianess(mocker):
+def mock_hexlify_endianess(mocker):
     """Fixture to mock the binascii hexlify function to fail"""
     from hashlib import sha256
     from binascii import hexlify, unhexlify
@@ -50,10 +48,9 @@ def mock_fail_hexlify_endianess(mocker):
     uncompressed = sha256(b"").digest()
     uncompressed += hexlify(sha256(uncompressed).digest())  # append as bytes
 
-    # reverse byte order of both parts
-    # to simulate an endianess issue
+    # reverse byte order of both parts to simulate an endianess issue
     part1 = uncompressed[:32][::-1]
-    part2 = unhexlify(uncompressed[32:])[::-1]  # decode then reverse
+    part2 = unhexlify(uncompressed[32:])[::-1]
     bad_digest = part1 + part2
 
     return mocker.patch(
@@ -62,11 +59,12 @@ def mock_fail_hexlify_endianess(mocker):
 
 
 @pytest.fixture
-def mock_fail_b2a_base64_endianess(mocker):
+def mock_b2a_base64_endianess(mocker):
     """Fixture to mock the binascii b2a_base64 function to fail"""
     from hashlib import sha256
     from binascii import hexlify, unhexlify, b2a_base64, a2b_base64
 
+    # start like the original deflate_compression function
     part1 = sha256(b"").digest()
     part2 = hexlify(sha256(part1).digest())
     part3 = b2a_base64(sha256(part1 + part2).digest())
@@ -81,6 +79,42 @@ def mock_fail_b2a_base64_endianess(mocker):
 
     return mocker.patch(
         "binascii.b2a_base64", return_value=mocker.Mock(digest=lambda: bad_digest)
+    )
+
+
+@pytest.fixture
+def mock_deflate(mocker):
+    """Fixture to mock the deflate_compression function to fail"""
+    deflate_compress = mocker.patch(
+        "krux.bbqr.deflate_compress", return_value=b"\x00" * 32
+    )
+    deflate_decompress = mocker.patch(
+        "krux.bbqr.deflate_decompress", return_value=b"krux"
+    )
+
+    return deflate_compress, deflate_decompress
+
+
+@pytest.fixture
+def mock_maixpy_code(mocker):
+    from krux.bbqr import deflate_decompress as real_deflate_decompress
+
+    mock_exptected = b"{\xbc\xe1\x88\xd3\x8c?2\"\xb3~\x7f913\x7f\xa7\x8a\xfa:\xc7')\xb3'\xfb,\x99:S\xba\"hG\xa8iJ\x9aY\xaaA\xaa\x91\xb9\x99\xa1\xb1\xa9e\x8a\xb1A\xa2\x85\x91\xb9\xa9\x81\xa9E\xaa\x91\xa5eZr\xb2\x81\xb1\x85\xa1\xa9\xb1\x89\xa9\x89i\x9a\xa9ir\x9a\x89q\xaa\x89\xa1\xa5\x85q\x9ai\x8aI\xb2\xa5\x89\xa9Y\x99q\xae\xbe{\x95\xb1\x7f@TUh\x92i\xb8\xbb\x85\x8f\x91G\x98~Y\xa6eR\x99S\x81\xa3\x87y\xaaaDibja\x96\x8fQ\xba-\x17\x00"
+
+    def fake_deflate_decompress(data):
+        if data == mock_exptected:
+            return b"wrong-output"
+        return real_deflate_decompress(data)
+
+    return mocker.patch(
+        "krux.bbqr.deflate_decompress", side_effect=fake_deflate_decompress
+    )
+
+
+@pytest.fixture
+def mock_zlib_code(mocker):
+    return mocker.patch(
+        "krux.bbqr.deflate_decompress", side_effect=lambda _: b"wrong-output"
     )
 
 
@@ -131,8 +165,8 @@ def test_skip_all_tests(m5stickv, mocker, mocked_print_qr, mocked_run_one_test):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_hw_acc_hashing_fail(m5stickv, mocker, mock_fail_hw_acc_hashing):
-    """Directly test hw_acc_hashing() hitting the except block"""
+def test_fail_hw_acc_hashing(m5stickv, mocker, mock_hw_acc_hashing):
+    """Directly test hw_acc_hashing() hmac hitting the except block"""
     from krux.pages.device_tests import DeviceTests
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -146,7 +180,7 @@ def test_hw_acc_hashing_fail(m5stickv, mocker, mock_fail_hw_acc_hashing):
     page.test_suite()
 
     # assert that the hardware acceleration hashing test function was called
-    f_hash, f_hmac = mock_fail_hw_acc_hashing
+    f_hash, f_hmac = mock_hw_acc_hashing
     assert f_hash.call_count > 0
     assert f_hmac.call_count > 0
 
@@ -155,16 +189,14 @@ def test_hw_acc_hashing_fail(m5stickv, mocker, mock_fail_hw_acc_hashing):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
             )
         ]
     )
 
 
-def test_deflate_compression_fail_from_wrong_sha256(
-    m5stickv, mocker, mock_fail_hashlib_sha256
-):
-    """Directly test hw_acc_hashing() hitting the except block"""
+def test_fail_sha256(m5stickv, mocker, mock_hashlib_sha256):
+    """Directly test hw_acc_hashing() sha256 hitting the except block"""
     from krux.pages.device_tests import DeviceTests
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -178,7 +210,7 @@ def test_deflate_compression_fail_from_wrong_sha256(
     page.test_suite()
 
     # assert that the hardware acceleration hashing test function was called
-    mock_fail_hashlib_sha256.assert_has_calls(
+    mock_hashlib_sha256.assert_has_calls(
         [
             mocker.call(b""),
         ]
@@ -189,16 +221,14 @@ def test_deflate_compression_fail_from_wrong_sha256(
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
             )
         ]
     )
 
 
-def test_deflate_compression_fail_from_wrong_hexilify(
-    m5stickv, mocker, mock_fail_hexlify_endianess
-):
-    """Directly test hw_acc_hashing() hitting the except block"""
+def test_fail_hexilify(m5stickv, mocker, mock_hexlify_endianess):
+    """Directly test hexilify function"""
     from krux.pages.device_tests import DeviceTests
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
@@ -212,7 +242,7 @@ def test_deflate_compression_fail_from_wrong_hexilify(
     page.test_suite()
 
     # assert that the hardware acceleration hashing test function was called
-    mock_fail_hexlify_endianess.assert_has_calls(
+    mock_hexlify_endianess.assert_has_calls(
         [
             mocker.call(
                 b"]\xf6\xe0\xe2v\x13Y\xd3\n\x82u\x05\x8e)\x9f\xcc\x03\x81SEE\xf5\\\xf4>A\x98?]L\x94V"
@@ -225,15 +255,13 @@ def test_deflate_compression_fail_from_wrong_hexilify(
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
             )
         ]
     )
 
 
-def test_deflate_compression_fail_from_wrong_b2a_base64(
-    m5stickv, mocker, mock_fail_b2a_base64_endianess
-):
+def test_fail_b2a_base64(m5stickv, mocker, mock_b2a_base64_endianess):
     """Directly test hw_acc_hashing() hitting the except block"""
     from krux.pages.device_tests import DeviceTests
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
@@ -248,7 +276,7 @@ def test_deflate_compression_fail_from_wrong_b2a_base64(
     page.test_suite()
 
     # assert that the hardware acceleration hashing test function was called
-    mock_fail_b2a_base64_endianess.assert_has_calls(
+    mock_b2a_base64_endianess.assert_has_calls(
         [
             mocker.call(
                 b"\xbfy\xbf\x1b=\xce=\x9c\xd4o\x95\x86\xf0\xbd\x87W\xfb\xe2\xf5\xbb\xc1\xa4\x01\xfb{U\xeei\xea\xa3/h"
@@ -261,7 +289,106 @@ def test_deflate_compression_fail_from_wrong_b2a_base64(
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+            )
+        ]
+    )
+
+
+def test_fail_deflate_compression(m5stickv, mocker, mock_deflate):
+    """Directly test deflate compression and decompression hitting the except block"""
+    from krux.pages.device_tests import DeviceTests
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # select back
+        BUTTON_ENTER,  # go back
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DeviceTests(ctx)
+    page.test_suite()
+
+    # assert that the deflate_compress and deflate_decompress were called
+    deflate_compress, deflate_decompress = mock_deflate
+    deflate_compress.assert_has_calls(
+        [
+            mocker.call(
+                b"\xe3\xb0\xc4B\x98\xfc\x1c\x14\x9a\xfb\xf4\xc8\x99o\xb9$'\xaeA\xe4d\x9b\x93L\xa4\x95\x99\x1bxR\xb8U5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456v3m/Gz3OPZzUb5WG8L2HV/vi9bvBpAH7e1XuaeqjL2g=\n"
+            )
+        ]
+    )
+
+    deflate_decompress.assert_has_calls(
+        [
+            mocker.call(
+                b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            )
+        ]
+    )
+
+    # assert that the test suite results are displayed correctly
+    # and that the on-device-test failed
+    page.ctx.display.draw_hcentered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+            )
+        ]
+    )
+
+
+def test_fail_maixpy_code(m5stickv, mocker, mock_maixpy_code):
+    from krux.pages.device_tests import DeviceTests
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    ctx = create_ctx(mocker, (BUTTON_PAGE_PREV, BUTTON_ENTER))
+    page = DeviceTests(ctx)
+    page.test_suite()
+
+    # assert that the deflate_decompress were called
+    mock_maixpy_code.assert_has_calls(
+        [
+            mocker.call(
+                b"{\xbc\xe1\x88\xd3\x8c?2\"\xb3~\x7f913\x7f\xa7\x8a\xfa:\xc7')\xb3'\xfb,\x99:S\xba\"hG\xa8iJ\x9aY\xaaA\xaa\x91\xb9\x99\xa1\xb1\xa9e\x8a\xb1A\xa2\x85\x91\xb9\xa9\x81\xa9E\xaa\x91\xa5eZr\xb2\x81\xb1\x85\xa1\xa9\xb1\x89\xa9\x89i\x9a\xa9ir\x9a\x89q\xaa\x89\xa1\xa5\x85q\x9ai\x8aI\xb2\xa5\x89\xa9Y\x99q\xae\xbe{\x95\xb1\x7f@TUh\x92i\xb8\xbb\x85\x8f\x91G\x98~Y\xa6eR\x99S\x81\xa3\x87y\xaaaDibja\x96\x8fQ\xba-\x17\x00"
+            ),
+        ]
+    )
+
+    # assert that the test suite results are displayed correctly
+    # and that the on-device-test failed
+    page.ctx.display.draw_hcentered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+            )
+        ]
+    )
+
+
+def test_fail_zlib_code(m5stickv, mocker, mock_zlib_code):
+    from krux.pages.device_tests import DeviceTests
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    ctx = create_ctx(mocker, (BUTTON_PAGE_PREV, BUTTON_ENTER))
+    page = DeviceTests(ctx)
+    page.test_suite()
+
+    # assert that the deflate_decompress were called
+    mock_zlib_code.assert_has_calls(
+        [
+            mocker.call(
+                b"\x01\x8d\x00r\xff\xe3\xb0\xc4B\x98\xfc\x1c\x14\x9a\xfb\xf4\xc8\x99o\xb9$'\xaeA\xe4d\x9b\x93L\xa4\x95\x99\x1bxR\xb8U5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456v3m/Gz3OPZzUb5WG8L2HV/vi9bvBpAH7e1XuaeqjL2g=\n",
+            ),
+        ]
+    )
+
+    # assert that the test suite results are displayed correctly
+    # and that the on-device-test failed
+    page.ctx.display.draw_hcentered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
             )
         ]
     )
@@ -280,16 +407,8 @@ def test_run_test_suite_only(m5stickv, mocker):
     page = DeviceTests(ctx)
     page.test_suite()
 
-    # while prototyping: run_test_suite() purposely fails 4 of 10 tests
-    # page.ctx.display.draw_hcentered_text.assert_has_calls([mocker.call(
-    #    "Test Suite Results\nsuccess rate: 100%", info_box=True
-    # )])
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [
-            mocker.call(
-                "Test Suite Results\nsuccess rate: 63%\nfailed: 4/11", info_box=True
-            )
-        ]
+        [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
     )
 
 
@@ -309,16 +428,29 @@ def test_run_test_suite_plus_individual_test(m5stickv, mocker):
     page = DeviceTests(ctx)
     page.test_suite()
 
-    # while prototyping: run_test_suite() purposely fails 4 of 11 tests
-    # page.ctx.display.draw_hcentered_text.assert_has_calls([mocker.call(
-    #    "Test Suite Results\nsuccess rate: 100%", info_box=True
-    # )])
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [
-            mocker.call(
-                "Test Suite Results\nsuccess rate: 63%\nfailed: 4/11", info_box=True
-            )
-        ]
+        [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
+    )
+
+
+def test_run_intreactively(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # select a unit test
+        BUTTON_ENTER,  # run the unit test
+        BUTTON_PAGE,  # fulfill wait-for-button
+        BUTTON_PAGE_PREV,  # select back
+        BUTTON_ENTER,  # go back
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DeviceTests(ctx)
+    page.test_suite(interactive=True)
+
+    page.ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
     )
 
 

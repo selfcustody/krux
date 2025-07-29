@@ -190,7 +190,7 @@ def test_to_lines(mocker, m5stickv):
         (135, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
         (135, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
         (135, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
+        (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # case 10
         (135, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
         (135, "More Than Two Words", ["More Than Two", "Words"]),  # 13 + 5 chars
         (
@@ -224,7 +224,7 @@ def test_to_lines(mocker, m5stickv):
                 "Tcpm6nLxgFapCZyh",
                 "KgqwcEGv1BVpD7s",
             ],
-        ),
+        ),  # case 15
         (135, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             135,
@@ -247,12 +247,12 @@ def test_to_lines(mocker, m5stickv):
         # (240 - 2 * 10) // 8 = 27 chars
         (240, "Two Words", ["Two Words"]),
         (240, "Two\nWords", ["Two", "Words"]),
-        (240, "Two\n\nWords", ["Two", "", "Words"]),
+        (240, "Two\n\nWords", ["Two", "", "Words"]),  # case 20
         (240, "Two\n\n\nWords", ["Two", "", "", "Words"]),
         (240, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
         (240, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
         (240, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (240, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # 25
+        (240, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # case 25
         (240, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
         (240, "More Than Two Words", ["More Than Two Words"]),
         (
@@ -282,7 +282,7 @@ def test_to_lines(mocker, m5stickv):
                 "cpm6nLxgFapCZyhKgqwcEGv1BVp",
                 "D7s",
             ],
-        ),  # 30
+        ),  # case 30
         (240, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             240,
@@ -307,6 +307,10 @@ def test_to_lines(mocker, m5stickv):
             "krux.display.lcd",
             new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
         )
+
+        from krux.kboard import kboard
+
+        kboard.is_m5stickv = case[0] == 135
 
         d = Display()
         d.to_portrait()

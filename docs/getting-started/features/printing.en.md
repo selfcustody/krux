@@ -3,7 +3,7 @@
 warning-printer.en.txt
 ----8<----
 
-Krux has the ability to print mnemonic backup (Words, Numbers, Tiny Seed template; but not Stackbit 1248) and any QR code (SeedQR, signed PSBT, Address, XPUB, Wallet output descriptor, ...) via a locally-connected TTL serial thermal printer. Consult the [parts list](../../parts.md/#optional-ttl-serial-thermal-printer) page for supported printers.
+Krux has the ability to print mnemonic backup (Words, Numbers, Tinyseed template; but not Stackbit 1248) and any QR code (SeedQR, signed PSBT, Address, XPUB, Wallet output descriptor, ...) via a locally-connected TTL serial thermal printer. Consult the [parts list](../../parts.md/#optional-ttl-serial-thermal-printer) page for supported printers.
 
 <img src="../../../img/maixpy_amigo/print-qr-printing-300.png" class="amigo">
 <img src="../../../img/maixpy_m5stickv/print-qr-printing-250.png" class="m5stickv">

@@ -26,11 +26,7 @@ from ..sd_card import SDHandler
 from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
 from ..display import BOTTOM_PROMPT_LINE
-from ..kboard import kboard
 from ..settings import SD_PATH, SETTINGS_FILENAME, MNEMONICS_FILE
-
-LIST_FILE_DIGITS = 9  # len on large devices per menu item
-LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
 
 SD_ROOT_PATH = "/" + SD_PATH
 
@@ -47,12 +43,6 @@ class FileManager(Page):
     ):
         """Starts a file explorer on the SD folder and returns the file selected"""
         import os
-
-        custom_start_digits = LIST_FILE_DIGITS
-        custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
-        if kboard.is_m5stickv:
-            custom_start_digits = LIST_FILE_DIGITS_SMALL
-            custom_end_digts = LIST_FILE_DIGITS_SMALL + 4  # 3 more because of file type
 
         path = SD_ROOT_PATH
         while True:
@@ -98,21 +88,9 @@ class FileManager(Page):
                     if extension_match or is_directory:
                         items.append(filename)
                         display_filename = filename + "/" if is_directory else filename
-
-                        if (
-                            len(display_filename)
-                            >= custom_start_digits + 2 + custom_end_digts
-                        ):
-                            display_filename = (
-                                display_filename[:custom_start_digits]
-                                + ".."
-                                + display_filename[
-                                    len(display_filename) - custom_end_digts :
-                                ]
-                            )
                         menu_items.append(
                             (
-                                display_filename,
+                                self.fit_to_line(display_filename),
                                 (
                                     (lambda: MENU_EXIT)
                                     if is_directory

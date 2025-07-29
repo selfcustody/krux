@@ -65,7 +65,7 @@ class WalletDescriptor(Page):
         elif not self.ctx.wallet.is_loaded():
             text = t("Wallet output descriptor not found.")
             self.ctx.display.draw_centered_text(text)
-            if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
+            if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                 return self._load_wallet()
         else:
             qr_type_menu = [

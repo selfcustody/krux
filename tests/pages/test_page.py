@@ -304,3 +304,244 @@ def test_keypad_swipe_hint_is_not_shown_on_nontouch_device(
         has_touch=False,  # this time no touch screen
     )
     assert swipe_txt not in frame_titles
+
+
+def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
+    import board
+    from krux.display import FONT_WIDTH
+
+    ctx = mock_context(mocker)
+    page = mock_page_cls(ctx)
+
+    TXT = "text"
+    AMIGO = "amigo"
+    M5 = "m5stickv"
+    DOCK = "dock"
+
+    cases = [
+        {
+            TXT: "0123456789abcdefghijklmnopqrstuvwxyz",
+            AMIGO: "0123456789a..pqrstuvwxyz",
+            M5: "0123456..tuvwxyz",
+            DOCK: "0123456789ab..opqrstuvwxyz",
+        },
+        {
+            TXT: "0123456789abcdefghijklmnopqrstuvwxy",
+            AMIGO: "0123456789a..opqrstuvwxy",
+            M5: "0123456..stuvwxy",
+            DOCK: "0123456789ab..nopqrstuvwxy",
+        },
+        {
+            TXT: "0123456789abcdefghijklmnopqrstuvwx",
+            AMIGO: "0123456789a..nopqrstuvwx",
+            M5: "0123456..rstuvwx",
+            DOCK: "0123456789ab..mnopqrstuvwx",
+        },
+        {
+            TXT: "0123456789abcdefghijklmnopqrstuvw",
+            AMIGO: "0123456789a..mnopqrstuvw",
+            M5: "0123456..qrstuvw",
+            DOCK: "0123456789ab..lmnopqrstuvw",
+        },
+        {
+            TXT: "0123456789abcdefghijklmnopqr",
+            AMIGO: "0123456789a..hijklmnopqr",
+            M5: "0123456..lmnopqr",
+            DOCK: "0123456789ab..ghijklmnopqr",
+        },
+        {
+            TXT: "0123456789abcdefghijklmnopq",
+            AMIGO: "0123456789a..ghijklmnopq",
+            M5: "0123456..klmnopq",
+            DOCK: "0123456789abcdefghijklmnopq",
+        },
+        {
+            TXT: "0123456789abcdefghijklmnop",
+            AMIGO: "0123456789a..fghijklmnop",
+            M5: "0123456..jklmnop",
+            DOCK: "0123456789abcdefghijklmnop",
+        },
+        {
+            TXT: "0123456789abcdefghijklmno",
+            AMIGO: "0123456789abcdefghijklmno",
+            M5: "0123456..ijklmno",
+            DOCK: "0123456789abcdefghijklmno",
+        },
+        {
+            TXT: "0123456789abcdefghijklmn",
+            AMIGO: "0123456789abcdefghijklmn",
+            M5: "0123456..hijklmn",
+            DOCK: "0123456789abcdefghijklmn",
+        },
+        {
+            TXT: "0123456789abcdefghijklm",
+            AMIGO: "0123456789abcdefghijklm",
+            M5: "0123456..ghijklm",
+            DOCK: "0123456789abcdefghijklm",
+        },
+        {
+            TXT: "0123456789abcdefghij",
+            AMIGO: "0123456789abcdefghij",
+            M5: "0123456..defghij",
+            DOCK: "0123456789abcdefghij",
+        },
+        {
+            TXT: "0123456789abcdefg",
+            AMIGO: "0123456789abcdefg",
+            M5: "0123456..abcdefg",
+            DOCK: "0123456789abcdefg",
+        },
+        {
+            TXT: "0123456789abcdef",
+            AMIGO: "0123456789abcdef",
+            M5: "0123456789abcdef",
+            DOCK: "0123456789abcdef",
+        },
+        {
+            TXT: "0123456789abcde",
+            AMIGO: "0123456789abcde",
+            M5: "0123456789abcde",
+            DOCK: "0123456789abcde",
+        },
+    ]
+
+    curr_device = board.config["type"]
+    device_type = curr_device if curr_device in (AMIGO, M5) else DOCK
+    max_chars_in_line = ctx.display.usable_pixels_in_line() // FONT_WIDTH
+
+    for i, case in enumerate(cases):
+        print(i)
+        formatted_text = page.fit_to_line(case[TXT])
+        assert len(formatted_text) <= max_chars_in_line
+        assert formatted_text == case[device_type]
+
+
+def test_fit_to_line_prefix(mocker, multiple_devices, mock_page_cls):
+    import board
+    from krux.display import FONT_WIDTH
+
+    ctx = mock_context(mocker)
+    page = mock_page_cls(ctx)
+
+    PREFIX = "prefix"
+    TXT = "text"
+    AMIGO = "amigo"
+    M5 = "m5stickv"
+    DOCK = "dock"
+
+    cases = [
+        {
+            PREFIX: "1 .",
+            TXT: "0123456789abcdefghijklmnopqrstuvwxyz",
+            AMIGO: "1 .0123456789..qrstuvwxyz",
+            M5: "1 .01234..vwxyz",
+            DOCK: "1 .0123456789a..pqrstuvwxyz",
+        },
+        {
+            PREFIX: "1234567890abcd .",
+            TXT: "0123456789abcdefghijklmnopqrstuvwxyz",
+            AMIGO: "1234567890abcd .012..xyz",
+            M5: "1234567890abcd .",
+            DOCK: "1234567890abcd .0123..wxyz",
+        },
+        {
+            PREFIX: "1234567890abcdefghi .",
+            TXT: "jjkkll",
+            AMIGO: "1234567890abcdefghi .",
+            M5: "1234567..efghi .",
+            DOCK: "1234567890abcdefghi .jjkkll",
+        },
+        {
+            PREFIX: "1234567890abcdefgh .",
+            TXT: "jjkkll",
+            AMIGO: "1234567890abcdefgh .j..l",
+            M5: "1234567..defgh .",
+            DOCK: "1234567890abcdefgh .jjkkll",
+        },
+    ]
+
+    curr_device = board.config["type"]
+    device_type = curr_device if curr_device in (AMIGO, M5) else DOCK
+    max_chars_in_line = ctx.display.usable_pixels_in_line() // FONT_WIDTH
+
+    for i, case in enumerate(cases):
+        print(i)
+        formatted_text = page.fit_to_line(case[TXT], case[PREFIX])
+        assert len(formatted_text) <= max_chars_in_line
+        assert formatted_text == case[device_type]
+
+
+def test_fit_to_line_not_crop_middle(mocker, multiple_devices, mock_page_cls):
+    import board
+    from krux.display import FONT_WIDTH
+
+    ctx = mock_context(mocker)
+    page = mock_page_cls(ctx)
+
+    PREFIX = "prefix"
+    TXT = "text"
+    AMIGO = "amigo"
+    M5 = "m5stickv"
+    DOCK = "dock"
+
+    cases = [
+        {
+            PREFIX: "",
+            TXT: "0123456789abcdefghijklmnopqrstuvwxyz",
+            AMIGO: "0123456789abcdefghijklm..",
+            M5: "0123456789abcd..",
+            DOCK: "0123456789abcdefghijklmno..",
+        },
+        {
+            PREFIX: "",
+            TXT: "0123456789abcdefghijklmno",
+            AMIGO: "0123456789abcdefghijklmno",
+            M5: "0123456789abcd..",
+            DOCK: "0123456789abcdefghijklmno",
+        },
+        {
+            PREFIX: "",
+            TXT: "0123456789abcdef",
+            AMIGO: "0123456789abcdef",
+            M5: "0123456789abcdef",
+            DOCK: "0123456789abcdef",
+        },
+        {
+            PREFIX: "1 .",
+            TXT: "0123456789abcdefghijklmnopqrstuvwxyz",
+            AMIGO: "1 .0123456789abcdefghij..",
+            M5: "1 .0123456789a..",
+            DOCK: "1 .0123456789abcdefghijkl..",
+        },
+        {
+            PREFIX: "1234567890abcd .",
+            TXT: "0123456789abcdefghijklmnopqrstuvwxyz",
+            AMIGO: "1234567890abcd .0123456..",
+            M5: "1234567890abcd .",
+            DOCK: "1234567890abcd .012345678..",
+        },
+        {
+            PREFIX: "1234567890abcdefghi .",
+            TXT: "jjkkll",
+            AMIGO: "1234567890abcdefghi .",
+            M5: "1234567890abcd..",
+            DOCK: "1234567890abcdefghi .jjkkll",
+        },
+        {
+            PREFIX: "1234567890abcdefgh .",
+            TXT: "jjkkll",
+            AMIGO: "1234567890abcdefgh .jjk..",
+            M5: "1234567890abcd..",
+            DOCK: "1234567890abcdefgh .jjkkll",
+        },
+    ]
+
+    curr_device = board.config["type"]
+    device_type = curr_device if curr_device in (AMIGO, M5) else DOCK
+    max_chars_in_line = ctx.display.usable_pixels_in_line() // FONT_WIDTH
+
+    for i, case in enumerate(cases):
+        print(i)
+        formatted_text = page.fit_to_line(case[TXT], case[PREFIX], crop_middle=False)
+        assert len(formatted_text) <= max_chars_in_line
+        assert formatted_text == case[device_type]
