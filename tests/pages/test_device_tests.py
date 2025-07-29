@@ -1,9 +1,6 @@
 import pytest
 from . import create_ctx
 
-TEST_RESULTS_ONE_FAIL = "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3"
-TEST_RESULTS_SUCCESS = "Test Suite Results\nsuccess rate: 100%"
-
 
 @pytest.fixture
 def mocked_print_qr(mocker):
@@ -190,7 +187,11 @@ def test_fail_hw_acc_hashing(m5stickv, mocker, mock_hw_acc_hashing):
     # assert that the test suite results are displayed correctly
     # and that the on-device-test failed
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_ONE_FAIL, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+            )
+        ]
     )
 
 
@@ -218,7 +219,11 @@ def test_fail_sha256(m5stickv, mocker, mock_hashlib_sha256):
     # assert that the test suite results are displayed correctly
     # and that the on-device-test failed
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_ONE_FAIL, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+            )
+        ]
     )
 
 
@@ -248,7 +253,11 @@ def test_fail_hexilify(m5stickv, mocker, mock_hexlify_endianess):
     # assert that the test suite results are displayed correctly
     # and that the on-device-test failed
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_ONE_FAIL, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+            )
+        ]
     )
 
 
@@ -278,7 +287,11 @@ def test_fail_b2a_base64(m5stickv, mocker, mock_b2a_base64_endianess):
     # assert that the test suite results are displayed correctly
     # and that the on-device-test failed
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_ONE_FAIL, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+            )
+        ]
     )
 
 
@@ -317,7 +330,11 @@ def test_fail_deflate_compression(m5stickv, mocker, mock_deflate):
     # assert that the test suite results are displayed correctly
     # and that the on-device-test failed
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_ONE_FAIL, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+            )
+        ]
     )
 
 
@@ -341,7 +358,11 @@ def test_fail_maixpy_code(m5stickv, mocker, mock_maixpy_code):
     # assert that the test suite results are displayed correctly
     # and that the on-device-test failed
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_ONE_FAIL, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+            )
+        ]
     )
 
 
@@ -365,7 +386,11 @@ def test_fail_zlib_code(m5stickv, mocker, mock_zlib_code):
     # assert that the test suite results are displayed correctly
     # and that the on-device-test failed
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_ONE_FAIL, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+            )
+        ]
     )
 
 
@@ -387,7 +412,11 @@ def test_run_test_suite_only(m5stickv, mocker):
     #    "Test Suite Results\nsuccess rate: 100%", info_box=True
     # )])
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_SUCCESS, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 63%\nfailed: 4/11", info_box=True
+            )
+        ]
     )
 
 
@@ -412,7 +441,43 @@ def test_run_test_suite_plus_individual_test(m5stickv, mocker):
     #    "Test Suite Results\nsuccess rate: 100%", info_box=True
     # )])
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call(TEST_RESULTS_SUCCESS, info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 63%\nfailed: 4/11", info_box=True
+            )
+        ]
+    )
+
+
+def test_run_intreactively(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # select a unit test
+        BUTTON_ENTER,  # run the unit test
+        BUTTON_PAGE,  # fulfill wait-for-button
+        BUTTON_PAGE_PREV,  # select back
+        BUTTON_ENTER,  # go back
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DeviceTests(ctx)
+    page.test_suite(interactive=True)
+
+    # while prototyping: run_test_suite() purposely fails 4 of 11 tests
+    # page.ctx.display.draw_hcentered_text.assert_has_calls([mocker.call(
+    #    "Test Suite Results\nsuccess rate: 100%", info_box=True
+    # )])
+    #
+
+    # some tests will fail by non interactivity
+    page.ctx.display.draw_hcentered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 54%\nfailed: 5/11", info_box=True
+            )
+        ]
     )
 
 

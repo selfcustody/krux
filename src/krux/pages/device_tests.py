@@ -19,10 +19,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# pylint: disable=line-too-long, unused-argument
 
 from . import Page, Menu, MENU_CONTINUE
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH, BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..wdt import wdt
 
@@ -54,12 +53,21 @@ class DeviceTests(Page):
         utils.print_standard_qr(title, title=title, check_printer=False)
         return MENU_CONTINUE
 
-    def test_suite(self):
+    def test_suite(self, interactive=False):
         """run each on-device tests in all_tests, report summary and details"""
         all_tests = [
             self.hw_acc_hashing,
             self.deflate_compression,
             self.touch_gestures,
+            # all below are prototyping/pseudo-tests
+            self.test_success,
+            self.test_non_empty,
+            self.test_long_named_test_function,
+            (self.test_interactive, interactive),  # interactive test
+            self.test_exception,  # failure
+            self.test_false,  # failure
+            self.test_empty,  # failure
+            self.test_none,  # failure
         ]
 
         self.ctx.display.clear()
@@ -85,7 +93,6 @@ class DeviceTests(Page):
                         self.results.append((test, True))
 
                 except Exception as err:
-                    print(err)
                     print(
                         "DeviceTests.run_test_suite: {} failed: {}".format(
                             test_name, err
@@ -182,6 +189,8 @@ class DeviceTests(Page):
         self.ctx.input.wait_for_button()
         return self.test_suite()
 
+    # pylint: disable=W0613
+
     # On-Device Unit-Test Methods:
     # * small/simple/effective as possible for smallest firmware,
     # * complete quickly, else consider feeding the watchdog
@@ -196,6 +205,7 @@ class DeviceTests(Page):
         from uhashlib_hw import sha256 as f_hash
         from uhashlib_hw import pbkdf2_hmac_sha256 as f_hmac
 
+        # pylint: disable=C0301
         expecteds = [
             b"\xaaj\xc2\xd4\x96\x18\x82\xf4*4\\v\x15\xf4\x13=\xde\x8emn|\x1bk@\xaeO\xf6\xeeR\xc3\x93\xd0",
             b"\x9e?wG\xe9\rI\xac\xb3\n\xceZt7\xce\xa8\xf6\xe5\xa6\xfe\xa2H\xaa\xf2_\x16Y\xcc\x9a$\xe0\x80",
@@ -264,6 +274,7 @@ class DeviceTests(Page):
         from binascii import hexlify, b2a_base64
         from hashlib import sha256
 
+        # pylint: disable=C0301
         expecteds = {
             "length": 141,
             "sha256": b"\xcd\x87y\xd8\x0c\x1e]:\xcc\xdb@ Bc\xb4E\xbf\xe2\xbc\x04[\xf0\x8a_d\xd5\t]\xab\t\xb7\x0c",
@@ -332,3 +343,33 @@ class DeviceTests(Page):
             raise ValueError("failed: {}".format(failures))
 
         return True
+
+    # next 8 tests below are prototyping/pseudo-tests -- these will be removed
+    # pylint: disable=C0116
+    def test_success(self, interactive=False):
+        return True
+
+    def test_non_empty(self, interactive=False):
+        return "it worked"
+
+    def test_exception(self, interactive=False):
+        raise ValueError("ValueError raised")
+
+    def test_false(self, interactive=False):
+        return False
+
+    def test_empty(self, interactive=False):
+        return []
+
+    def test_none(self, interactive=False):
+        pass
+
+    def test_long_named_test_function(self, interactive=False):
+        return True
+
+    def test_interactive(self, interactive=False):
+        if not interactive:
+            return "Cannot test non-interactively"
+        return self.prompt(
+            "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
+        )
