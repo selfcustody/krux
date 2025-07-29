@@ -130,10 +130,7 @@ def detect_encodings(str_data):
 
 # pure-python encoder/decoder for base43 and base58 below
 B43CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:"
-assert len(B43CHARS) == 43
-
 B58CHARS = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-assert len(B58CHARS) == 58
 
 
 def pure_python_base_decode(v, base):

@@ -409,25 +409,32 @@ def wrap(id_, version, iterations, payload):
     try:
         # when wrapping, be tolerant about id_ as bytes or str
         id_ = id_ if isinstance(id_, bytes) else id_.encode()
-        assert 0 <= len(id_) <= 252
+        if not 0 <= len(id_) <= 252:
+            raise ValueError
         len_id = len(id_).to_bytes(1, "big")
     except:
         raise ValueError("Invalid ID")
 
     try:
-        assert 0 <= version <= 255
-        assert VERSIONS[version] is not None
-        assert VERSIONS[version]["mode"] is not None
+        if not (
+            0 <= version <= 255
+            and VERSIONS[version] is not None
+            and VERSIONS[version]["mode"] is not None
+        ):
+            raise ValueError
     except:
         raise ValueError("Invalid version")
 
     try:
-        assert isinstance(iterations, int)
+        if not isinstance(iterations, int):
+            raise ValueError
         if iterations % 10000 == 0:
             iterations = iterations // 10000
-            assert 1 <= iterations <= 10000
+            if not 1 <= iterations <= 10000:
+                raise ValueError
         else:
-            assert 10000 < iterations < 2**24
+            if not 10000 < iterations < 2**24:
+                raise ValueError
         iterations = iterations.to_bytes(3, "big")
     except:
         raise ValueError("Invalid iterations")
@@ -456,8 +463,8 @@ def unwrap(kef_bytes):
     try:
         # out-of-order reading to validate version early
         version = kef_bytes[1 + len_id]
-        assert VERSIONS[version] is not None
-        assert VERSIONS[version]["mode"] is not None
+        if VERSIONS[version] is None or VERSIONS[version]["mode"] is None:
+            raise ValueError
     except:
         raise ValueError("Invalid format")
 
