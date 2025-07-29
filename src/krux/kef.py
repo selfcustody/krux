@@ -152,6 +152,8 @@ class Cipher:
         v_auth = VERSIONS[version].get("auth", 0)
         v_compress = VERSIONS[version].get("compress", False)
         auth = b""
+        if iv is None:
+            iv = b""
 
         if not isinstance(plain, bytes):
             raise TypeError("Plaintext is not bytes")
@@ -168,7 +170,9 @@ class Cipher:
         if v_auth != 0 and mode in (MODE_ECB, MODE_CBC, MODE_CTR):
             if v_auth > 0:
                 # unencrypted (public) auth: hash the plaintext w/ self._key
-                auth = uhashlib_hw.sha256(plain + self._key).digest()[:v_auth]
+                auth = uhashlib_hw.sha256(
+                    bytes([version]) + iv + plain + self._key
+                ).digest()[:v_auth]
             elif v_auth < 0:
                 # encrypted auth: hash only the plaintext
                 auth = uhashlib_hw.sha256(plain).digest()[:-v_auth]
@@ -206,7 +210,6 @@ class Cipher:
                 encryptor = AES(self._key, mode, iv)
         else:
             encryptor = AES(self._key, mode)
-            iv = b""
 
         # encrypt the plaintext
         encrypted = encryptor.encrypt(plain)
@@ -233,14 +236,16 @@ class Cipher:
 
         # setup decryptor (pulling initialization-vector from payload if necessary)
         if not v_iv:
+            iv = b""
             decryptor = AES(self._key, mode)
         else:
+            iv = payload[:v_iv]
             if mode == MODE_CTR:
-                decryptor = AES(self._key, mode, nonce=payload[:v_iv])
+                decryptor = AES(self._key, mode, nonce=iv)
             elif mode == MODE_GCM:
-                decryptor = AES(self._key, mode, payload[:v_iv], mac_len=v_auth)
+                decryptor = AES(self._key, mode, iv, mac_len=v_auth)
             else:
-                decryptor = AES(self._key, mode, payload[:v_iv])
+                decryptor = AES(self._key, mode, iv)
             payload = payload[v_iv:]
 
         # remove authentication from payload if suffixed to ciphertext
@@ -258,7 +263,7 @@ class Cipher:
         if v_auth != 0:
             try:
                 decrypted = self._authenticate(
-                    decrypted, decryptor, auth, mode, v_auth, v_pkcs_pad
+                    version, iv, decrypted, decryptor, auth, mode, v_auth, v_pkcs_pad
                 )
             except:
                 decrypted = None
@@ -269,10 +274,18 @@ class Cipher:
 
         return decrypted
 
-    def _authenticate(self, decrypted, aes_object, auth, mode, v_auth, v_pkcs_pad):
+    def _authenticate(
+        self, version, iv, decrypted, aes_object, auth, mode, v_auth, v_pkcs_pad
+    ):
         if not (
-            isinstance(decrypted, bytes)
-            # TODO check aes_object
+            isinstance(version, int)
+            and 0 <= version <= 255
+            and isinstance(iv, bytes)
+            and isinstance(decrypted, bytes)
+            and (
+                mode != MODE_GCM
+                or (hasattr(aes_object, "verify") and callable(aes_object.verify))
+            )
             and (isinstance(auth, bytes) or auth is None)
             and mode in MODE_NUMBERS.values()
             and (isinstance(v_auth, int) and -32 <= v_auth <= 32)
@@ -307,7 +320,9 @@ class Cipher:
         for _ in range(max_attempts):
             if v_auth > 0:
                 # for unencrypted (public) auth > 0: hash the decrypted w/ self._key
-                cksum = uhashlib_hw.sha256(decrypted + self._key).digest()[:v_auth]
+                cksum = uhashlib_hw.sha256(
+                    bytes([version]) + iv + decrypted + self._key
+                ).digest()[:v_auth]
             else:
                 # for encrypted auth < 0: hash only the decrypted
                 cksum = uhashlib_hw.sha256(decrypted).digest()[:-v_auth]
