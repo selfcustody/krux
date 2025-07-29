@@ -5,8 +5,10 @@ x3 press BUTTON_B
 press BUTTON_A
 
 # Navigate to Device Tests
-press BUTTON_B
+x2 press BUTTON_B
 press BUTTON_A
+
+screenshot device-tests-options.png
 
 # Run test-suite
 press BUTTON_B

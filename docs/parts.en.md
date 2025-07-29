@@ -44,7 +44,7 @@ Below is a list of some distributors where you can find this device:
 - [Digi-Key](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/K027/10492135)
 - [Electromaker](https://www.electromaker.io/shop/product/m5stickv-k210-ai-camera-without-wifi)
 - [Lee's Electronic](https://leeselectronic.com/en/product/169940-m5stick-ai-camera-kendryte-k210-risc-v-core-no-wifi.html)
-- [AliExpress](https://www.aliexpress.com/w/wholesale-m5stickv.html)
+- [AliExpress](https://www.aliexpress.com/w/wholesale-stickv-k210.html)
 - [ABRA](https://abra-electronics.com/sensors/cameras/m5stickv-k210-ai-camera-ideal-for-machine-vision.html)
 - [Adafruit](https://www.adafruit.com/product/4321)
 - [Cytron](https://www.cytron.io/c-development-tools/c-fpga/p-m5stickv-k210-ai-camera-without-wifi)
