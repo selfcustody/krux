@@ -244,8 +244,8 @@ def detect_encodings(str_data, verify=True):
             try:
                 # binascii.a2b_base64 is NOT strict
                 as_bytes = base_decode(str_data, 64)
-                assert base_encode(as_bytes, 64) == str_data
-                encodings.append(64)
+                if base_encode(as_bytes, 64) == str_data:
+                    encodings.append(64)
             except:
                 pass
         else:

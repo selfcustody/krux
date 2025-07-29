@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 from . import Page, Menu, MENU_CONTINUE
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH, BOTTOM_PROMPT_LINE
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..krux_settings import t
 from ..wdt import wdt
 
@@ -53,21 +53,22 @@ class DeviceTests(Page):
         utils.print_standard_qr(title, title=title, check_printer=False)
         return MENU_CONTINUE
 
+    # pylint: disable=W0613
     def test_suite(self, interactive=False):
         """run each on-device tests in all_tests, report summary and details"""
         all_tests = [
             self.hw_acc_hashing,
             self.deflate_compression,
             self.touch_gestures,
-            # all below are prototyping/pseudo-tests
-            self.test_success,
-            self.test_non_empty,
-            self.test_long_named_test_function,
-            (self.test_interactive, interactive),  # interactive test
-            self.test_exception,  # failure
-            self.test_false,  # failure
-            self.test_empty,  # failure
-            self.test_none,  # failure
+            # # all below are prototyping/pseudo-tests
+            # self.test_success,
+            # self.test_non_empty,
+            # self.test_long_named_test_function,
+            # (self.test_interactive, interactive),  # interactive test
+            # self.test_exception,  # failure
+            # self.test_false,  # failure
+            # self.test_empty,  # failure
+            # self.test_none,  # failure
         ]
 
         self.ctx.display.clear()
@@ -86,12 +87,13 @@ class DeviceTests(Page):
                     if not callable(test):
                         test_fn = test[0]
                         args = test[1 : len(test)]
-                        assert test_fn(*args)
+                        if not test_fn(*args):
+                            raise ValueError
                         self.results.append((test_fn, True))
                     else:
-                        assert test()
+                        if not test():
+                            raise ValueError
                         self.results.append((test, True))
-
                 except Exception as err:
                     print(
                         "DeviceTests.run_test_suite: {} failed: {}".format(
@@ -201,7 +203,10 @@ class DeviceTests(Page):
     # * return False/empty/None/Exception on failure
 
     def hw_acc_hashing(self, interactive=False):
-        """churns nonce through sha256() and pbkdf_hmac(sha256,) calls, asserts expected results"""
+        """
+        churns nonce through sha256() and pbkdf_hmac(sha256,) calls,
+        raises ValueError if calculated results don't match expected results
+        """
         from uhashlib_hw import sha256 as f_hash
         from uhashlib_hw import pbkdf2_hmac_sha256 as f_hmac
 
@@ -257,7 +262,8 @@ class DeviceTests(Page):
         err = ""
         for i, (expected, calculated) in enumerate(zip(expecteds, calculateds)):
             try:
-                assert expected == calculated
+                if expected != calculated:
+                    raise ValueError("test failed")
                 results.append("test case {}: ok".format(i))
             except:
                 err += "\nTest case: {}\n   expected: {}\n calculated: {}".format(
@@ -344,32 +350,33 @@ class DeviceTests(Page):
 
         return True
 
-    # next 8 tests below are prototyping/pseudo-tests -- these will be removed
-    # pylint: disable=C0116
-    def test_success(self, interactive=False):
-        return True
+    # # next 8 tests below are prototyping/pseudo-tests
+    # # pylint: disable=C0116
+    # def test_success(self, interactive=False):
+    #     return True
 
-    def test_non_empty(self, interactive=False):
-        return "it worked"
+    # def test_non_empty(self, interactive=False):
+    #     return "it worked"
 
-    def test_exception(self, interactive=False):
-        raise ValueError("ValueError raised")
+    # def test_exception(self, interactive=False):
+    #     raise ValueError("ValueError raised")
 
-    def test_false(self, interactive=False):
-        return False
+    # def test_false(self, interactive=False):
+    #     return False
 
-    def test_empty(self, interactive=False):
-        return []
+    # def test_empty(self, interactive=False):
+    #     return []
 
-    def test_none(self, interactive=False):
-        pass
+    # def test_none(self, interactive=False):
+    #     pass
 
-    def test_long_named_test_function(self, interactive=False):
-        return True
+    # def test_long_named_test_function(self, interactive=False):
+    #     return True
 
-    def test_interactive(self, interactive=False):
-        if not interactive:
-            return "Cannot test non-interactively"
-        return self.prompt(
-            "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
-        )
+    # def test_interactive(self, interactive=False):
+    #     from ..display import BOTTOM_PROMPT_LINE
+    #     if not interactive:
+    #         return "Cannot test non-interactively"
+    #     return self.prompt(
+    #         "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
+    #     )
