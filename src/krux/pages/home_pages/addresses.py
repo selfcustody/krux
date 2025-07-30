@@ -129,7 +129,7 @@ class Addresses(Page):
             while stay_on_this_addr_menu:
                 index, _ = submenu.run_loop()
 
-                if index == len(submenu.menu) - 1:  # Back
+                if index == submenu.back_index:  # Back
                     del submenu, items
                     gc.collect()
                     return MENU_CONTINUE

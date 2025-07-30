@@ -46,6 +46,8 @@ Exported QR codes can now be saved as SVG images.
 - Wallet Descriptor now validates and warns if change addresses cannot be determined.
 - Wallet customization prompt now warns about Descriptor unloading, but does nothing if no changes are made.
 - Fixed issues with long wallet derivation path.
+- Added a PSBT Review button to the sign menu, enabling users to verify PSBT details without reloading.
+- Added a confirmation prompt before exiting after displaying the signed QR code.
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
 - The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.

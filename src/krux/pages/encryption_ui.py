@@ -673,7 +673,7 @@ class LoadEncryptedMnemonic(Page):
             )
         submenu = Menu(self.ctx, mnemonic_ids_menu)
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 

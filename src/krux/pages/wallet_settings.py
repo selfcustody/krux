@@ -193,7 +193,7 @@ class WalletSettings(Page):
             )
 
             index, _ = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
+            if index == submenu.back_index:
                 break
             if index == 0:
                 new_network = self._coin_type()
@@ -255,7 +255,7 @@ class WalletSettings(Page):
             disable_statusbar=True,
         )
         index, _ = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return None
         return NETWORKS[TEST_TXT] if index == 1 else NETWORKS[MAIN_TXT]
 
@@ -271,7 +271,7 @@ class WalletSettings(Page):
             disable_statusbar=True,
         )
         index, _ = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return None
         return index  # Index is equal to the policy types IDs
 
@@ -288,7 +288,7 @@ class WalletSettings(Page):
             disable_statusbar=True,
         )
         index, script_type = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return None
         return script_type
 
@@ -303,7 +303,7 @@ class WalletSettings(Page):
             disable_statusbar=True,
         )
         index, script_type = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return None
         return script_type
 

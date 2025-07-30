@@ -287,7 +287,7 @@ class SettingsPage(Page):
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
+            if index == submenu.back_index:
                 return MENU_CONTINUE
             return status
 

@@ -256,6 +256,7 @@ translation_array = [
     "¿Restablecer a la configuración de fábrica y reiniciar?",
     "Resultados",
     "Volver al QR",
+    "Revisar nuevamente",
     "Revisa los datos escaneados, edítalos si es necesario",
     "Derecha",
     "Tira el dado al menos %d veces para generar un mnemónico.",

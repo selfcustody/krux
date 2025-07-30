@@ -256,6 +256,7 @@ translation_array = [
     "Fabrika ayarlarına geri dönüp ve yeniden başlatılsın mı?",
     "Sonuç",
     "QR Görüntüleyiciye Dön",
+    "Tekrar İncele",
     "Taranan verileri gözden geçirin, gerekirse düzenleyin",
     "Sağ",
     "Bir mnemonic oluşturmak için zarı en az %d kez atın.",

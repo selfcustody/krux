@@ -256,6 +256,7 @@ translation_array = [
     "Werkseinstellungen wiederherstellen und neu starten?",
     "Ergebnis",
     "Zurück zum QR-Viewer",
+    "Erneut Überprüfen",
     "Überprüfe gescannte Daten und bearbeite sie bei Bedarf",
     "Rechts",
     "Würfel mindestens %d Mal, um eine Mnemonic zu erzeugen.",

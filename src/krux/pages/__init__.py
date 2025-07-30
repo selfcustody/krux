@@ -642,6 +642,11 @@ class Menu:
         )
         self.menu_view = ListView(self.menu, max_viewable)
 
+    @property
+    def back_index(self):
+        """returns the menu last entry index"""
+        return len(self.menu) - 1
+
     def screensaver(self):
         """Loads and starts screensaver"""
         from .screensaver import ScreenSaver

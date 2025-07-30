@@ -234,6 +234,7 @@
     "Restore factory settings and reboot?": "初期化を復元して再起動しますか?",
     "Result": "結果",
     "Return to QR Viewer": "QRビューワーに戻る",
+    "Review Again": "もう一度確認する",
     "Review scanned data, edit if necessary": "スキャンしたデータを確認し、必要に応じて編集します",
     "Right": "右",
     "Roll dice at least %d times to generate a mnemonic.": "mnemonicを生成するには、少なくとも%d回サイコロを振ってください.",
