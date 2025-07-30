@@ -764,6 +764,7 @@ class DatumTool(Page):
                 self.title = kef.label + " KEF" if kef.label else "KEF"
                 self.sensitive = False
                 self.decrypted = False
+                self.history = []
                 kvargs["try_decrypt"] = False
         elif status == "export_qr":
             # if user chose to export_qr

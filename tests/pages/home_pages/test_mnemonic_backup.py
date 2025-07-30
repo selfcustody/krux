@@ -478,6 +478,7 @@ def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to 'Go' key
                 BUTTON_ENTER,  # Select 'Go' key
                 BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
                 BUTTON_ENTER,  # Confirm to use fingerprint as ID
                 BUTTON_ENTER,  # See QrCode and exit
                 BUTTON_ENTER,  # Select 'Return to QR Viewer'
@@ -501,6 +502,7 @@ def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to 'Go' key
                 BUTTON_ENTER,  # Select 'Go' key
                 BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
                 BUTTON_ENTER,  # Confirm to use fingerprint as ID
                 BUTTON_ENTER,  # See QrCode and exit
                 BUTTON_ENTER,  # Select 'Return to QR Viewer'
@@ -524,6 +526,7 @@ def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to 'Go' key
                 BUTTON_ENTER,  # Select 'Go' key
                 BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
                 BUTTON_ENTER,  # Confirm to use fingerprint as ID
                 BUTTON_ENTER,  # See QrCode and exit
                 BUTTON_ENTER,  # Select 'Return to QR Viewer'
@@ -551,6 +554,7 @@ def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to 'Go' key
                 BUTTON_ENTER,  # Select 'Go' key
                 BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
                 BUTTON_ENTER,  # Confirm to use fingerprint as ID
                 BUTTON_ENTER,  # See QrCode and exit
                 BUTTON_ENTER,  # Select 'Return to QR Viewer'
@@ -578,6 +582,7 @@ def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to 'Go' key
                 BUTTON_ENTER,  # Select 'Go' key
                 BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
                 BUTTON_ENTER,  # Confirm to use fingerprint as ID
                 BUTTON_ENTER,  # See QrCode and exit
                 BUTTON_ENTER,  # Select 'Return to QR Viewer'
@@ -605,6 +610,7 @@ def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to 'Go' key
                 BUTTON_ENTER,  # Select 'Go' key
                 BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
                 BUTTON_ENTER,  # Confirm to use fingerprint as ID
                 BUTTON_ENTER,  # See QrCode and exit
                 BUTTON_ENTER,  # Select 'Return to QR Viewer'
@@ -620,6 +626,12 @@ def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
             ],
         ),
     ]
+
+    I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=I_VECTOR),
+    )
 
     for case in cases:
         ctx = create_ctx(mocker, case[2], case[0], case[1])

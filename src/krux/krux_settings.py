@@ -393,7 +393,7 @@ class EncryptionSettings(SettingsNamespace):
         ucryptolib.MODE_GCM: "AES-GCM",
     }
     namespace = "settings.encryption"
-    version = CategorySetting("version", "AES-ECB", list(MODE_NAMES.values()))
+    version = CategorySetting("version", "AES-GCM", list(MODE_NAMES.values()))
     pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [10000, 500000])
 
     def label(self, attr):

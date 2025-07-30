@@ -202,6 +202,7 @@ def test_encrypt_save_error_exist(m5stickv, mocker, mock_file_operations):
     ]  # Confirm flash store  # Confirm fingerprint as ID
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
+    Settings().encryption.version = "AES-ECB"
     storage_ui = EncryptMnemonic(ctx)
     mocker.spy(storage_ui, "flash_error")
     mocker.patch(
@@ -212,7 +213,6 @@ def test_encrypt_save_error_exist(m5stickv, mocker, mock_file_operations):
         "krux.encryption.MnemonicStorage.list_mnemonics",
         mocker.MagicMock(return_value=[ENCRYPTED_QR_TITLE_ECB]),
     )
-    Settings().encryption.version = "AES-ECB"
     storage_ui.encrypt_menu()
 
     storage_ui.flash_error.assert_has_calls(
@@ -238,6 +238,7 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
+    Settings().encryption.version = "AES-ECB"
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
@@ -247,7 +248,6 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
         "krux.encryption.MnemonicStorage.store_encrypted",
         mocker.MagicMock(return_value=False),
     )
-    Settings().encryption.version = "AES-ECB"
     storage_ui.encrypt_menu()
 
     ctx.display.draw_centered_text.assert_has_calls(
@@ -274,6 +274,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
+    Settings().encryption.version = "AES-ECB"
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
@@ -573,3 +574,1030 @@ def test_encryption_key_strength(m5stickv, mocker):
 
     # Case 9: 12 chars, 3 types, uniqueness=3
     assert key_generator.key_strength("Aa1Aa1Aa1Aa1") == "Medium"
+
+    # Case 10: Low base score=1 when not using enough keypads
+    assert key_generator.key_strength("ABCDEFGHIJKLMNO") == "Weak"
+
+    # Case 11: Low base score=2 when not using enough keypads and length
+    assert key_generator.key_strength("ABCDEFghijk") == "Weak"
+
+    # Case 12: Penalized if not enough unique characters
+    assert key_generator.key_strength("ABcd1ABcd1A") == "Weak"
+
+    # Cases 13-15: Binary keys are hexlified and hexstr is scored
+    assert key_generator.key_strength(b"Stronger") == "Strong"
+    assert key_generator.key_strength(b"barely") == "Medium"
+    assert key_generator.key_strength(b"2Weak") == "Weak"
+
+
+def test_decrypt_kef(m5stickv, mocker):
+    """Verify that decrypt_kef attempts to unseal kef-envelope(s)"""
+    from krux.pages.encryption_ui import decrypt_kef
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux import kef
+
+    plaintext = b"this is plain text"
+    key, salt, iterations, version = b"a", b"KEF ID", 10000, 0
+
+    # create an internal kef envelope
+    cryptor = kef.Cipher(key, salt, iterations)
+    ciphertext = cryptor.encrypt(plaintext, version)
+    envelope = kef.wrap(salt, version, iterations, ciphertext)
+
+    # wrap it again in another kef envelope
+    cryptor = kef.Cipher(key * 2, salt, iterations)
+    ciphertext = cryptor.encrypt(envelope, version)
+    envelope = kef.wrap(salt, version, iterations, ciphertext)
+    print(envelope)
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # external envelope "Decrypt?"
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # "a" as key
+        BUTTON_ENTER,  # "aa" as key
+        BUTTON_PAGE_PREV,  # move to "Go"
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # Confirm "aa" as key
+        BUTTON_ENTER,  # internal envelope "Decrypt?"
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # "a" as key
+        BUTTON_PAGE_PREV,  # move to "Go"
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # Confirm "a" as key
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = decrypt_kef(ctx, envelope)
+    assert result == plaintext
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
+    """
+    Intention here is to verify that KEFEnvelope class is instantiated
+    and used when expected, not that decryption actually succeeds.
+    """
+    from binascii import hexlify
+    from krux import kef
+    from krux.baseconv import base_encode
+    from krux.pages.encryption_ui import decrypt_kef, KEFEnvelope
+    from krux.input import BUTTON_PAGE_PREV
+
+    # setup data: a fake kef envelope, non-kef data, decrypt-evidence, and responding "No" to "Decrypt?"
+    fake_kef = kef.wrap(b"", 0, 10000, bytes([i * 8 for i in range(32)]))
+    non_kef = b"this is not a valid kef envelope"
+    evidence = (
+        "KEF Encrypted (32 B)\nID: \nVersion: AES-ECB v1\nKey iter.: 10000\n\nDecrypt?"
+    )
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+
+    print("test w/ kef bytes")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, fake_kef)
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+
+    print("test w/ non-kef bytes")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, non_kef)
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test w/ kef hex")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(fake_kef).decode())
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+
+    print("test with non-kef hex")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(non_kef).decode())
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with invalid hex-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(non_kef).decode() + ":`")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with kef HEX")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(fake_kef).decode().upper())
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+
+    print("test with non-kef HEX")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(non_kef).decode().upper())
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with invalid HEX-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, hexlify(non_kef).decode().upper() + ":`")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with kef base32")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(fake_kef, 32))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+
+    print("test with non-kef base32")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 32))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with invalid base32-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 32) + "8@")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with kef base43")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(fake_kef, 43))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+
+    print("test with non-kef base43")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 43))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with invalid base43-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 43) + ":@")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with kef base64")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(fake_kef, 64))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.to_lines.assert_called_with(evidence)
+
+    print("test with non-kef base64")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 64))
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+    print("test with invalid base64-ish str")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    try:
+        decrypt_kef(ctx, base_encode(non_kef, 64) + ">@")
+    except ValueError:
+        pass
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.to_lines.assert_not_called()
+
+
+def test_prompt_for_text_update_dflt_via_yes(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Go Brrr",
+        dflt_prompt="Number-go-up via printer-go-brrr?",
+        dflt_affirm=True,
+    )
+    assert result == "Go Brrr"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Won't work",
+        dflt_prompt="Save-fiat-world via printer-go-brrr?",
+        dflt_affirm=False,
+    )
+    assert result == "Won't work"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_go1(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Go Brrr",
+        dflt_prompt="Number-go-up via printer-go-brrr?",
+        dflt_affirm=True,
+        title="Back to Go",
+    )
+    assert result == "Go Brrr"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_go2(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Won't work",
+        dflt_prompt="Save-fiat-world via printer-go-brrr?",
+        dflt_affirm=False,
+        title="Back to Go",
+    )
+    assert result == "Won't work"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_esc1(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Go Brrr",
+        dflt_prompt="Number-go-up via printer-go-brrr?",
+        dflt_affirm=True,
+        title="Back to ESC",
+    )
+    assert result == "Go Brrr"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_esc2(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Won't work",
+        dflt_prompt="Save-fiat-world via printer-go-brrr?",
+        dflt_affirm=False,
+        title="Back to ESC",
+    )
+    assert result == "Won't work"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_esc_confirm1(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Go Brrr",
+        dflt_prompt="Number-go-up via printer-go-brrr?",
+        dflt_affirm=True,
+        title="Back to ESC",
+        esc_prompt=True,
+    )
+    assert result == "Go Brrr"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_dflt_via_no_change_esc_confirm2(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx,
+        dflt_value="Won't work",
+        dflt_prompt="Save-fiat-world via printer-go-brrr?",
+        dflt_affirm=False,
+        title="Back to ESC",
+        esc_prompt=True,
+    )
+    assert result == "Won't work"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_new_value1(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(ctx, dflt_value="A", title="Edit value, then Go")
+    assert result == "Aa"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_prompt_for_text_update_new_value2(m5stickv, mocker):
+    from krux.pages.encryption_ui import prompt_for_text_update
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    result = prompt_for_text_update(
+        ctx, dflt_value="A", dflt_affirm=False, title="Edit value, then Go"
+    )
+    assert result == "Aa"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_kefenvelope_init(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+
+    ctx = create_ctx(mocker, [])
+    page = KEFEnvelope(ctx)
+
+    print("some attributes are initialized to default values")
+    assert None not in (
+        page.iterations,
+        page.mode_name,  # todo: is this needed
+        page.mode,
+        page.iv_len,  # todo: is this needed
+    )
+
+    print("other attributes are initialized to None")
+    assert set([None]) == set(
+        [
+            page.label,
+            page.version,
+            page.version_name,  # todo: is this needed
+            page.ciphertext,
+        ]
+    )
+
+
+def test_kefenvelope_parse(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+
+    print("parsing a valid kef envelope returns True")
+    ctx = create_ctx(mocker, [])
+    page = KEFEnvelope(ctx)
+    valid_envelope = (
+        b"\x02"
+        + b"ID"
+        + b"\x00"
+        + int(10000).to_bytes(3, "big")
+        + bytes([i for i in range(32)])
+    )
+    assert page.parse(valid_envelope) == True
+
+    print("...and fills some unset attributes")
+    assert None not in (
+        page.label,
+        page.version,
+        page.version_name,
+        page.ciphertext,
+    )
+
+    print("trying to parse an envelope again is not allowed")
+    with pytest.raises(ValueError, match="KEF Envelope already parsed"):
+        page.parse(valid_envelope)
+
+    print("parsing an invalid kef envelope returns False")
+    ctx = create_ctx(mocker, [])
+    page = KEFEnvelope(ctx)
+    assert page.parse(b"this is not a valid kef envelope") == False
+    assert ctx.input.wait_for_button.call_count == 0
+
+
+def test_kefenvelope_input_key_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.qr_capture import QRCodeCapture
+
+    print('returns True if a key (ie: "a") was gathered')
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+        BUTTON_PAGE_PREV,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print('returns True if a key (ie: "a") was scanned')
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: ("a", None))
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("returns True if a binary key (ie: 0x8f) was scanned")
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,
+        BUTTON_ENTER,
+        BUTTON_ENTER,
+    ]
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (b"\x8f", None)
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("returns True if an encrypted binary key (ie: 0x8f) was scanned/decrypted")
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # select scan
+        BUTTON_ENTER,  # scan key
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_PAGE_PREV,  # move to Go
+        BUTTON_ENTER,  # select Go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # confirm weak key
+    ]
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x11\xef\x9a",
+            None,
+        ),
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("returns False if no key was gathered")
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == False
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_kefenvelope_input_mode_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    print("If user accepts: mode is default")
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    defaults = page.mode, page.mode_name
+    assert page.input_mode_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.mode, page.mode_name == defaults
+
+    print("If user selects a mode, it is updated")
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_mode_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.mode, page.mode_name != defaults
+
+
+def test_kefenvelope_input_version_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    print("If user accepts: mode is default, version will be set later")
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    defaults = (page.mode, page.mode_name, page.version, page.version_name)
+    assert page.input_version_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert (page.mode, page.mode_name, page.version, page.version_name) == defaults
+    assert page.version is None and page.version_name is None
+
+    print("If user selects a particular version: mode, version, iv_len are all updated")
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_version_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert (page.mode, page.mode_name, page.version, page.version_name) != defaults
+    assert page.version is not None and page.version_name is not None
+    assert page.iv_len is not None
+
+
+def test_kefenvelope_input_iterations_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    print("If user accepts: iterations approximated near settings value")
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    default = page.iterations
+    assert page.input_iterations_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert default == page.iterations
+
+    print("If user denies default, iterations set by user")
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # deny default
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_PAGE_PREV,  # back to ESC
+        BUTTON_PAGE_PREV,  # back to "<" delete
+        BUTTON_ENTER,  # remove last digit
+        BUTTON_PAGE_PREV,  # back to "0"
+        BUTTON_PAGE_PREV,  # back to "9"
+        BUTTON_ENTER,  # select 9 (100009)
+        BUTTON_PAGE,  # forward to "0"
+        BUTTON_PAGE,  # forward to "<" delete
+        BUTTON_PAGE,  # forward to ESC
+        BUTTON_PAGE,  # forward to "Go"
+        BUTTON_ENTER,  # select Go
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_iterations_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.iterations == 100009
+
+    print("If user sets iterations too high, uses default and returns None")
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # deny default
+        BUTTON_ENTER,  # add another 0 to default
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select Go
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_iterations_ui() == None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.iterations == default
+
+
+def test_kefenvelope_input_label_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    print(
+        "If proposed label but no prompt, user is asked to update? if they deny: it will be used"
+    )
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_label_ui("label") == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.label == "label"
+
+    print(
+        "if proposed label but no prompt, user is asked to update? if they accept, they update"
+    )
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_label_ui("label") == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.label == "labela"
+
+    print("If user accepts proposed label, they use it")
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_label_ui("label", "use proposed label?") == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.label == "label"
+
+    print("If user denies proposed label, they update")
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_label_ui("label", "use proposed label?") == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.label == "labela"
+
+    print("If user accepts to update proposed label, they update")
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_label_ui("label", "update proposed label?", False) == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.label == "labela"
+
+    print("If user denies to update proposed label, they use it.")
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_label_ui("label", "update proposed label?", False) == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.label == "label"
+
+    print("if no proposed label, user updates empty label")
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_label_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.label == "a"
+
+
+def test_kefenvelope_input_iv_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.kef import MODE_IVS, MODE_NUMBERS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    print("if mode doesn't require iv, returns True w/o any interaction")
+    ctx = create_ctx(mocker, [])
+    page = KEFEnvelope(ctx)
+    page.version = 0
+    page.mode = MODE_NUMBERS["AES-ECB"]
+    page.iv_len = MODE_IVS.get(MODE_NUMBERS["AES-ECB"], 0)
+    assert page.input_iv_ui() == True
+    assert ctx.input.wait_for_button.call_count == 0
+
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=I_VECTOR),
+    )
+
+    print("if mode requires iv, entropy is captured from camera")
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.version = 1
+    page.mode = MODE_NUMBERS["AES-CBC"]
+    page.iv_len = MODE_IVS.get(MODE_NUMBERS["AES-CBC"], 0)
+    assert page.input_iv_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("if mode requires iv, but user denies to capture entropy, returns False")
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.version = 1
+    page.mode = MODE_NUMBERS["AES-CBC"]
+    page.iv_len = MODE_IVS[MODE_NUMBERS["AES-CBC"]]
+    assert page.input_iv_ui() == None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=None),
+    )
+    print("if mode requires iv, user accepts, but entropy is None, returns None")
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.version = 1
+    page.mode = MODE_NUMBERS["AES-CBC"]
+    page.iv_len = MODE_IVS[MODE_NUMBERS["AES-CBC"]]
+    assert page.input_iv_ui() == None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_kefenvelope_public_info_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    text_id_envelope = (
+        b"\x02"
+        + b"ID"
+        + b"\x00"
+        + int(10000).to_bytes(3, "big")
+        + bytes([i for i in range(32)])
+    )
+    binary_id_envelope = (
+        b"\x02"
+        + b"\xbe\xef"
+        + b"\x00"
+        + int(10000).to_bytes(3, "big")
+        + bytes([i for i in range(32)])
+    )
+    text_id_evidence = (
+        "KEF Encrypted (32 B)\nID: ID\nVersion: AES-ECB v1\nKey iter.: 100000000"
+    )
+    binary_id_evidence = (
+        "KEF Encrypted (32 B)\nID: 0xbeef\nVersion: AES-ECB v1\nKey iter.: 100000000"
+    )
+
+    print("requires a kef_envelope argument or for parse() to have already been called")
+    ctx = create_ctx(mocker, [])
+    page = KEFEnvelope(ctx)
+    with pytest.raises(ValueError, match="KEF Envelope not yet parsed"):
+        page.public_info_ui()
+
+    print("Default is an already-parsed kef_envelope no prompt to decrypt")
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.parse(text_id_envelope)
+    assert page.public_info_ui() == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.draw_hcentered_text.assert_called_with(text_id_evidence)
+
+    print("Can also pass a kef_envelope.  btw: KEF ID can be binary")
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.public_info_ui(binary_id_envelope) == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.draw_hcentered_text.assert_called_with(binary_id_evidence)
+
+    print('Can request user to be prompted "Decrypt?" to alter boolean return: False')
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.public_info_ui(text_id_envelope, prompt_decrypt=True) == False
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.draw_hcentered_text.assert_called_with(
+        text_id_evidence + "\n\nDecrypt?", 120, 65535, 0, highlight_prefix=""
+    )
+
+    print('Can request user to be prompted "Decrypt?" to alter boolean return: True')
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.public_info_ui(text_id_envelope, prompt_decrypt=True) == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.draw_hcentered_text.assert_called_with(
+        text_id_evidence + "\n\nDecrypt?", 120, 65535, 0, highlight_prefix=""
+    )
+
+
+def test_kefenvelope_seal_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    print("default is to seal plaintext using defaults w/ least interaction")
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select Go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # confirm to add GCM cam entropy
+    ]
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=I_VECTOR),
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.label = "my ID"  # id/label may be set elsewhere
+    sealed = page.seal_ui(b"plain text")
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert isinstance(sealed, bytes) and len(sealed) > 8
+
+    print("cannot call .seal_ui() if already sealed")
+    with pytest.raises(ValueError, match="KEF Envelope already sealed"):
+        page.seal_ui(b"more data")
+
+    print("returns None if key not captured")
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # enter key
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select go w/o key
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.seal_ui(b"plain text") == None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("if override_defaults, allows updating iterations, mode, label")
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # accept proposed iterations
+        BUTTON_ENTER,  # accept default mode
+        BUTTON_ENTER,  # confirm to add GCM cam entropy
+        BUTTON_PAGE_PREV,  # deny updating label
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.label = "my ID"
+    sealed = page.seal_ui(b"plain text", override_defaults=True)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert isinstance(sealed, bytes) and len(sealed) > 8
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call("Use default Key iter.? 100001", highlight_prefix="?"),
+            mocker.call("Use default Mode? AES-GCM", highlight_prefix="?"),
+            mocker.call("Additional entropy from camera required for AES-GCM"),
+            mocker.call("Update KEF ID? my ID", highlight_prefix="?"),
+        ]
+    )
+
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=I_VECTOR),
+    )
+
+    print(
+        "if override_defaults and specific_version, allows updating iterations, a particular version, and label"
+    )
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # accept proposed iterations
+        BUTTON_PAGE_PREV,  # deny accepting default mode
+        BUTTON_PAGE_PREV,  # move to AES-GCM +c
+        BUTTON_ENTER,  # select AES-GCM +c
+        BUTTON_ENTER,  # accept gathering camera entropy
+        BUTTON_PAGE_PREV,  # deny updating label
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.label = "my ID"
+    assert page.version == None
+    sealed = page.seal_ui(b"plain text", override_defaults=True, specific_version=True)
+    assert page.version == 21
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert isinstance(sealed, bytes) and len(sealed) > 8
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call("Use default Key iter.? 100001", highlight_prefix="?"),
+            mocker.call("Use default Mode? AES-GCM", highlight_prefix="?"),
+            mocker.call("Additional entropy from camera required for AES-GCM"),
+            mocker.call("Update KEF ID? my ID", highlight_prefix="?"),
+        ]
+    )
+
+
+def test_kefenvelope_unseal_ui(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    sealed_text = b"\x05my ID\x14\x01\x86\xa1OR\xa1\x93l>2q \x9e\x9ddY\xe9\x81\xf0\x07\xf2\x08M\xf65mx\xce\xbe"
+    sealed_binary = (
+        b"\x05my ID\x14\x01\x86\xa1OR\xa1\x93l>2q \x9e\x9dd\xf7(^v_\xdc\xe2\xdb"
+    )
+
+    print("fails w/o valid kef_envelope argument, or .parse() already done")
+    ctx = create_ctx(mocker, [])
+    page = KEFEnvelope(ctx)
+    with pytest.raises(ValueError, match="KEF Envelope not yet parsed"):
+        page.unseal_ui()
+
+    print("fails if kef_envelope already parsed and passing it in again")
+    ctx = create_ctx(mocker, [])
+    page = KEFEnvelope(ctx)
+    page.parse(sealed_text)
+    with pytest.raises(ValueError, match="KEF Envelope already parsed"):
+        page.unseal_ui(sealed_text)
+
+    print(
+        "default is to unseal a pre-parsed kef_envelope, prompting to decrypt, returning plaintext"
+    )
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # accept decrypt
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select Go
+        BUTTON_ENTER,  # confirm key "a"
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.parse(sealed_text)
+    plain = page.unseal_ui()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert plain == b"plain text"
+
+    print("can also pass a valid kef_envelope w/o parsing in advance")
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    plain = page.unseal_ui(sealed_text)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert plain == b"plain text"
+
+    print("can optionally display the decrypted plaintext")
+    ctx = create_ctx(mocker, BTN_SEQUENCE + [BUTTON_ENTER])
+    page = KEFEnvelope(ctx)
+    plain = page.unseal_ui(sealed_text, display_plain=True)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE) + 1
+    assert plain == b"plain text"
+    ctx.display.draw_centered_text.assert_has_calls([mocker.call("plain text")])
+
+    print("can optionally display the decrypted plain hexlified bytes")
+    ctx = create_ctx(mocker, BTN_SEQUENCE + [BUTTON_ENTER])
+    page = KEFEnvelope(ctx)
+    plain = page.unseal_ui(sealed_binary, display_plain=True)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE) + 1
+    assert plain == b"\xde\xad\xbe\xef"
+    ctx.display.draw_centered_text.assert_has_calls([mocker.call("0xdeadbeef")])
+
+    print("passing invalid kef_envelope returns None")
+    ctx = create_ctx(mocker, [])
+    page = KEFEnvelope(ctx)
+    assert page.unseal_ui(b"not a valid kef envelope") == None
+
+    print("if prompt_decrypt and user chooses no: returns None")
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.parse(sealed_text)
+    assert page.unseal_ui() == None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("if user decryption key is not captured: returns None")
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.parse(sealed_text)
+    assert page.unseal_ui() == None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("if decryption key is wrong, raises KeyError(Failed to decrypt)")
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # accept decrypt
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_ENTER,  # key is "aa"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select Go
+        BUTTON_ENTER,  # confirm key "aa"
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.parse(sealed_text)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        page.unseal_ui()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
