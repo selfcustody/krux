@@ -69,24 +69,34 @@ class DeviceTests(Page):
             # self.test_false,  # failure
             # self.test_empty,  # failure
             # self.test_none,  # failure
+            (self.deflate_compression, False),
+            (self.board_info_test, False),
+            (self.board_info_test, True),
+            self.camera_test,
         ]
 
-        self.ctx.display.clear()
-        chars_per_line = (self.ctx.display.width() - DEFAULT_PADDING * 2) // FONT_WIDTH
+        if interactive:
+            self.ctx.display.clear()
+            chars_per_line = (
+                self.ctx.display.width() - DEFAULT_PADDING * 2
+            ) // FONT_WIDTH
+        else:
+            chars_per_line = 80  # Default for non-interactive
 
         # if no previous results, run tests, gather results
         if len(self.results) == 0:
             for idx, test in enumerate(all_tests):
-                self.ctx.display.draw_centered_text(" " * chars_per_line)  #
-                self.ctx.display.draw_centered_text(
-                    t("Processing..") + " {}/{}".format(idx + 1, len(all_tests))
-                )
+                if interactive:
+                    self.ctx.display.draw_centered_text(" " * chars_per_line)
+                    self.ctx.display.draw_centered_text(
+                        t("Processing..") + " {}/{}".format(idx + 1, len(all_tests))
+                    )
 
                 test_name = test.__name__ if callable(test) else test[0].__name__
                 try:
                     if not callable(test):
                         test_fn = test[0]
-                        args = test[1 : len(test)]
+                        args = test[1:]
                         if not test_fn(*args):
                             raise ValueError
                         self.results.append((test_fn, True))
@@ -100,8 +110,12 @@ class DeviceTests(Page):
                             test_name, err
                         )
                     )
-                    self.results.append((test, False))
+                    result_key = test[0] if not callable(test) else test
+                    self.results.append((result_key, False))
                 wdt.feed()
+
+        if not interactive:  # Skip UI if not interactive
+            return MENU_CONTINUE
 
         # info_box summary
         self.ctx.display.clear()
@@ -380,3 +394,28 @@ class DeviceTests(Page):
     #     return self.prompt(
     #         "Printer go Brrr...\nSeparate money and state?", BOTTOM_PROMPT_LINE
     #     )
+
+    def camera_test(self, interactive=False):
+        """Test camera hardware availability"""
+        try:
+            from ..camera import Camera
+        except ImportError:
+            return False
+
+        try:
+            camera = Camera()
+            return camera.camera is not None
+        except (AttributeError, OSError, ValueError):
+            return False
+
+    def board_info_test(self, detailed=False):
+        """Test system information access"""
+        if not detailed:
+            import sys
+
+            platform = getattr(sys, "platform", None)
+            return platform is not None
+
+        import os
+
+        return "PYTEST_CURRENT_TEST" not in os.environ

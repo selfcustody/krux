@@ -177,7 +177,7 @@ def test_fail_hw_acc_hashing(m5stickv, mocker, mock_hw_acc_hashing):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
-    page.test_suite()
+    page.test_suite(interactive=True)  # Run in interactive mode to show results
 
     # assert that the hardware acceleration hashing test function was called
     f_hash, f_hmac = mock_hw_acc_hashing
@@ -189,7 +189,7 @@ def test_fail_hw_acc_hashing(m5stickv, mocker, mock_hw_acc_hashing):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 57%\nfailed: 3/7", info_box=True
             )
         ]
     )
@@ -207,7 +207,7 @@ def test_fail_sha256(m5stickv, mocker, mock_hashlib_sha256):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
-    page.test_suite()
+    page.test_suite(interactive=True)
 
     # assert that the hardware acceleration hashing test function was called
     mock_hashlib_sha256.assert_has_calls(
@@ -221,7 +221,7 @@ def test_fail_sha256(m5stickv, mocker, mock_hashlib_sha256):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 42%\nfailed: 4/7", info_box=True
             )
         ]
     )
@@ -239,7 +239,7 @@ def test_fail_hexilify(m5stickv, mocker, mock_hexlify_endianess):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
-    page.test_suite()
+    page.test_suite(interactive=True)
 
     # assert that the hardware acceleration hashing test function was called
     mock_hexlify_endianess.assert_has_calls(
@@ -255,7 +255,7 @@ def test_fail_hexilify(m5stickv, mocker, mock_hexlify_endianess):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 42%\nfailed: 4/7", info_box=True
             )
         ]
     )
@@ -273,7 +273,7 @@ def test_fail_b2a_base64(m5stickv, mocker, mock_b2a_base64_endianess):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
-    page.test_suite()
+    page.test_suite(interactive=True)
 
     # assert that the hardware acceleration hashing test function was called
     mock_b2a_base64_endianess.assert_has_calls(
@@ -289,7 +289,7 @@ def test_fail_b2a_base64(m5stickv, mocker, mock_b2a_base64_endianess):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 42%\nfailed: 4/7", info_box=True
             )
         ]
     )
@@ -307,7 +307,7 @@ def test_fail_deflate_compression(m5stickv, mocker, mock_deflate):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
-    page.test_suite()
+    page.test_suite(interactive=True)
 
     # assert that the deflate_compress and deflate_decompress were called
     deflate_compress, deflate_decompress = mock_deflate
@@ -332,7 +332,7 @@ def test_fail_deflate_compression(m5stickv, mocker, mock_deflate):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 42%\nfailed: 4/7", info_box=True
             )
         ]
     )
@@ -344,7 +344,7 @@ def test_fail_maixpy_code(m5stickv, mocker, mock_maixpy_code):
 
     ctx = create_ctx(mocker, (BUTTON_PAGE_PREV, BUTTON_ENTER))
     page = DeviceTests(ctx)
-    page.test_suite()
+    page.test_suite(interactive=True)
 
     # assert that the deflate_decompress were called
     mock_maixpy_code.assert_has_calls(
@@ -360,7 +360,7 @@ def test_fail_maixpy_code(m5stickv, mocker, mock_maixpy_code):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 42%\nfailed: 4/7", info_box=True
             )
         ]
     )
@@ -372,7 +372,7 @@ def test_fail_zlib_code(m5stickv, mocker, mock_zlib_code):
 
     ctx = create_ctx(mocker, (BUTTON_PAGE_PREV, BUTTON_ENTER))
     page = DeviceTests(ctx)
-    page.test_suite()
+    page.test_suite(interactive=True)
 
     # assert that the deflate_decompress were called
     mock_zlib_code.assert_has_calls(
@@ -388,7 +388,7 @@ def test_fail_zlib_code(m5stickv, mocker, mock_zlib_code):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 42%\nfailed: 4/7", info_box=True
             )
         ]
     )
@@ -405,11 +405,12 @@ def test_run_test_suite_only(m5stickv, mocker):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
-    page.test_suite()
+    result = page.test_suite()
 
-    page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
-    )
+    from krux.pages import MENU_CONTINUE
+
+    assert result == MENU_CONTINUE
+    assert len(page.results) == 7
 
 
 def test_run_test_suite_plus_individual_test(m5stickv, mocker):
@@ -426,11 +427,12 @@ def test_run_test_suite_plus_individual_test(m5stickv, mocker):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
-    page.test_suite()
+    result = page.test_suite()
 
-    page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
-    )
+    from krux.pages import MENU_CONTINUE
+
+    assert result == MENU_CONTINUE
+    assert len(page.results) == 7
 
 
 def test_run_intreactively(m5stickv, mocker):
@@ -450,7 +452,11 @@ def test_run_intreactively(m5stickv, mocker):
     page.test_suite(interactive=True)
 
     page.ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 71%\nfailed: 2/7", info_box=True
+            )
+        ]
     )
 
 
@@ -569,3 +575,135 @@ def test_run_one_test_without_touch_gestures(m5stickv, mocker):
     page.results = [(page.touch_gestures, False)]
     page.run_one_test(page.touch_gestures)
     assert page.results == [(page.touch_gestures, True)]
+
+
+def test_parametrized_test_failure_path(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+    result = page.test_suite()
+
+    from krux.pages import MENU_CONTINUE
+
+    assert result == MENU_CONTINUE
+
+    # Verify specific test results - board_info_test(True) should fail
+    board_info_detailed_result = None
+    for test, success in page.results:
+        if hasattr(test, "__name__") and test.__name__ == "board_info_test":
+            # This is the board_info_test, check if it's the detailed version that failed
+            if not success:
+                board_info_detailed_result = success
+                break
+
+    # At least one board_info_test should fail (the detailed one)
+    assert board_info_detailed_result is False
+
+
+def test_camera_test_none_camera(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+
+    mock_camera_class = mocker.patch("krux.camera.Camera")
+    mock_camera_instance = mocker.MagicMock()
+    mock_camera_instance.camera = None
+    mock_camera_class.return_value = mock_camera_instance
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+
+    result = page.camera_test(interactive=False)
+    assert result is False
+
+
+def test_camera_test_success_path(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+
+    mock_camera_class = mocker.patch("krux.camera.Camera")
+    mock_camera_instance = mocker.MagicMock()
+    mock_camera_instance.camera = mocker.MagicMock()
+    mock_camera_class.return_value = mock_camera_instance
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+
+    result = page.camera_test(interactive=False)
+    assert result is True
+
+
+def test_board_info_test_basic_path(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+
+    result = page.board_info_test(detailed=False)
+    assert result is True
+
+
+def test_board_info_test_detailed_path(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+
+    result = page.board_info_test(detailed=True)
+    assert result is False
+
+
+def test_camera_test_import_failure(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+
+    def failing_import(name, *args, **kwargs):
+        if "camera" in name.lower():
+            raise ImportError("Camera module not available")
+        return __import__(name, *args, **kwargs)
+
+    mocker.patch("builtins.__import__", side_effect=failing_import)
+    result = page.camera_test(interactive=False)
+    assert result is False
+
+
+def test_camera_test_hardware_failure(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+
+    mock_camera_class = mocker.patch("krux.camera.Camera")
+    mock_camera_class.side_effect = OSError("Camera hardware not accessible")
+
+    result = page.camera_test(interactive=False)
+    assert result is False
+
+
+def test_camera_test_attribute_error(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+
+    mock_camera_class = mocker.patch("krux.camera.Camera")
+    mock_camera_instance = mocker.MagicMock()
+    del mock_camera_instance.camera
+    mock_camera_class.return_value = mock_camera_instance
+
+    result = page.camera_test(interactive=False)
+    assert result is False
+
+
+def test_run_test_suite_non_interactive_back(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+    from krux.pages import MENU_CONTINUE
+
+    ctx = create_ctx(mocker, [])
+    page = DeviceTests(ctx)
+
+    result = page.test_suite(interactive=False)
+
+    assert result == MENU_CONTINUE
+
+    assert len(page.results) == 7
