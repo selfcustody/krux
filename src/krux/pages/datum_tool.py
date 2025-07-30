@@ -81,31 +81,36 @@ def urobj_to_data(ur_obj):
 
 
 def convert_encoding(contents, conversion):
-    """encoding conversions to/from (hex/HEX/base43/base58/base64/utf8)"""
+    """encoding conversions to/from (hex/HEX/base43/base58/base64/shift_case/utf8)"""
     from krux.baseconv import base_encode, base_decode
     from binascii import hexlify, unhexlify
 
     from_bytes = isinstance(contents, bytes)
-    if conversion in (32, 43, 58, 64):
-        if from_bytes:
-            return base_encode(contents, conversion)
-        return base_decode(contents, conversion)
-    if conversion == "hex":
-        if from_bytes:
-            return hexlify(contents).decode()
-        return unhexlify(contents)
-    if conversion == "HEX":
-        if from_bytes:
-            return hexlify(contents).decode().upper()
-        return unhexlify(contents)
-    if conversion == "utf8":
-        if from_bytes:
-            return contents.decode()
-        return contents.encode()
-    if conversion == "shift_case":
-        if contents == contents.upper():
-            return contents.lower()
-        return contents.upper()
+    try:
+        if conversion in (32, 43, 58, 64):
+            if from_bytes:
+                return base_encode(contents, conversion)
+            return base_decode(contents, conversion)
+        if conversion == "hex":
+            if from_bytes:
+                return hexlify(contents).decode()
+            return unhexlify(contents)
+        if conversion == "HEX":
+            if from_bytes:
+                return hexlify(contents).decode().upper()
+            return unhexlify(contents)
+        if conversion == "utf8":
+            if from_bytes:
+                return contents.decode()
+            return contents.encode()
+        if conversion == "shift_case":
+            if isinstance(contents, str):
+                if contents == contents.lower():
+                    return contents.upper()
+                if contents == contents.upper():
+                    return contents.lower()
+    except:
+        pass
     return None
 
 
@@ -196,21 +201,14 @@ def detect_encodings(str_data, verify=True):
         encoding = None
         if max_chr <= "Z":
             if verify:
-                try:
-                    encoding, _, _ = bech32_decode(str_data)
-                except:
-                    pass
+                encoding, _, _ = bech32_decode(str_data)
             if encoding == Encoding.BECH32:
                 encodings.append("BECH32")
             elif encoding == Encoding.BECH32M:
                 encodings.append("BECH32M")
         elif max_chr <= "z":
-            encoding = None
             if verify:
-                try:
-                    encoding, _, _ = bech32_decode(str_data)
-                except:
-                    pass
+                encoding, _, _ = bech32_decode(str_data)
             if encoding == Encoding.BECH32:
                 encodings.append("bech32")
             elif encoding == Encoding.BECH32M:
