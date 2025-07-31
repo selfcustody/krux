@@ -145,8 +145,9 @@ class KEFEnvelope(Page):
         self.__key = None
         self.__iv = None
         self.label = None
-        self.iterations = Settings().encryption.pbkdf2_iterations + (
-            int(time.ticks_ms()) % QR_CODE_ITER_MULTIPLE
+        max_delta = Settings().encryption.pbkdf2_iterations // 10
+        self.iterations = (
+            Settings().encryption.pbkdf2_iterations + int(time.ticks_ms()) % max_delta
         )
         self.mode_name = Settings().encryption.version
         self.mode = kef.MODE_NUMBERS[self.mode_name]
@@ -299,25 +300,25 @@ class KEFEnvelope(Page):
         self.ctx.input.wait_for_button()
         return True
 
-    def seal_ui(self, plaintext, override_defaults=False, specific_version=False):
+    def seal_ui(self, plaintext, overrides=None):
         """implements ui to allow user to seal plaintext inside a KEF envelope"""
+        if not isinstance(overrides, list):
+            overrides = []
         if self.ciphertext:
             raise ValueError("KEF Envelope already sealed")
         if not (self.__key or self.input_key_ui()):
             return None
-        if override_defaults:
-            if not self.input_iterations_ui():
+        if overrides:
+            if "iterations" in overrides and not self.input_iterations_ui():
                 return None
-            if specific_version:
-                if not self.input_version_ui():
-                    return None
-            else:
-                if not self.input_mode_ui():
-                    return None
+            if "version" in overrides and not self.input_version_ui():
+                return None
+            if "mode" in overrides and not self.input_mode_ui():
+                return None
         if self.iv_len:
             if not (self.__iv or self.input_iv_ui()):
                 return None
-        if override_defaults or not self.label:
+        if "label" in overrides or not self.label:
             self.input_label_ui(self.label)
         if self.version is None:
             self.version = kef.suggest_versions(plaintext, self.mode_name)[0]

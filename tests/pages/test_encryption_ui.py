@@ -1435,7 +1435,30 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     assert page.seal_ui(b"plain text") == None
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
-    print("if override_defaults, allows updating iterations, mode, label")
+    print("overrides param is a list, ie: ['label']")
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # confirm to add GCM cam entropy
+        BUTTON_PAGE_PREV,  # deny updating label
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.label = "my ID"
+    sealed = page.seal_ui(b"plain text", overrides=["label"])
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert isinstance(sealed, bytes) and len(sealed) > 8
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call("Additional entropy from camera required for AES-GCM"),
+            mocker.call("Update KEF ID? my ID", highlight_prefix="?"),
+        ]
+    )
+
+    print("overrides param is a list, ie: ['iterations', 'mode', 'label']")
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
@@ -1450,7 +1473,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     page.label = "my ID"
-    sealed = page.seal_ui(b"plain text", override_defaults=True)
+    sealed = page.seal_ui(b"plain text", overrides=["mode", "iterations", "label"])
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert isinstance(sealed, bytes) and len(sealed) > 8
     ctx.display.draw_centered_text.assert_has_calls(
@@ -1467,9 +1490,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
         mocker.MagicMock(return_value=I_VECTOR),
     )
 
-    print(
-        "if override_defaults and specific_version, allows updating iterations, a particular version, and label"
-    )
+    print("overrides param is a list, ie: ['iterations', 'version', 'label']")
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
@@ -1487,7 +1508,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     page = KEFEnvelope(ctx)
     page.label = "my ID"
     assert page.version == None
-    sealed = page.seal_ui(b"plain text", override_defaults=True, specific_version=True)
+    sealed = page.seal_ui(b"plain text", overrides=["iterations", "version", "label"])
     assert page.version == 21
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert isinstance(sealed, bytes) and len(sealed) > 8

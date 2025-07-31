@@ -86,7 +86,7 @@ class WalletDescriptor(Page):
 
                 kef = KEFEnvelope(self.ctx)
                 kef.label = self.ctx.wallet.label
-                wallet_data = kef.seal_ui(wallet_data, override_defaults=True)
+                wallet_data = kef.seal_ui(wallet_data)
                 if not wallet_data:
                     # User cancelled the encryption
                     return MENU_CONTINUE

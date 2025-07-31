@@ -748,7 +748,7 @@ class DatumTool(Page):
             kef = KEFEnvelope(self.ctx)
             kef.label = self.datum if self.datum else self.title
             encrypted = kef.seal_ui(
-                self.contents, override_defaults=True, specific_version=True
+                self.contents, overrides=["version", "iterations", "label"]
             )
             if encrypted:
                 # now in "hiding secrets" mode
