@@ -245,7 +245,7 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
         mocker.MagicMock(return_value=TEST_KEY),
     )
     mocker.patch(
-        "krux.encryption.MnemonicStorage.store_encrypted",
+        "krux.encryption.MnemonicStorage.store_encrypted_kef",
         mocker.MagicMock(return_value=False),
     )
     storage_ui.encrypt_menu()
@@ -271,6 +271,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
         + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
+    mocker.patch("time.ticks_ms", return_value=0)  # tick_ms affects random delta
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
@@ -309,6 +310,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
         + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
+    mocker.patch("time.ticks_ms", return_value=0)  # tick_ms affects random delta
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(CBC_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
