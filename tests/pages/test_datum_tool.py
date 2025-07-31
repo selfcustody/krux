@@ -1,5 +1,25 @@
 import pytest
+from unittest.mock import patch
 from . import create_ctx
+
+
+@pytest.fixture
+def mock_file_operations(mocker):
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+    )
+    mocker.patch(
+        "krux.sd_card.SDHandler.dir_exists",
+        mocker.MagicMock(side_effect=[True, False]),
+    )
+    mocker.patch(
+        "krux.sd_card.SDHandler.file_exists",
+        mocker.MagicMock(side_effect=[True, True]),
+    )
+    mocker.patch(
+        "builtins.open", mocker.mock_open(read_data=b"These are file contents\n")
+    )
 
 
 def test_urobj_to_data(m5stickv, mocker):
@@ -88,6 +108,7 @@ def test_identify_datum(m5stickv, mocker):
     """Test that identify_datum can identify various datum types."""
     from krux.pages.datum_tool import identify_datum
 
+    # TODO: more samples
     cases = {
         "PSBT": [
             b'psbt\xff\x01\x00\xa4\x02\x00\x00\x00\x03\xae\xe25\xaf(\x9a\xc9\xee\xc23\xca"\x15\xbf?\xf4\xc1\xcaxAP\xd6\x0f[\x94kA\x87\x8b\x15\x04,\x00\x00\x00\x00\x00\xfd\xff\xff\xffT\xc9\x91i\xc4ZIg Z!\xd6)\xbf+z\x161\xc4uoS \xf0\x9d\x96\xcf#\xdc\xdbc\xa0\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x04\x1eVt\x8d\x80H\x1f\x89k\x07T(\xca\xaf\x91\x1e"\x1a2\xef\xa5_\\s\xf9\x8b\xc2J\xa0\xc8\x11\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x01\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hlZ\x0f+\x00O\x01\x045\x87\xcf\x03\x06\xb07\xf6\x80\x00\x00\x00k"\xc5\x12;\xa1\n\xde\xafK\xfc\xbbE\xd1\xa0-\x82\x8f%\xbf\x86F\x95z\x98\xd0b\x87\xc4\xe2\xb8P\x02\x8bB\xcdGv7l\x82y\x1bIAU\x15\x1fV\xc2\xd7\xb4q\xe0\xc7\xa5&\xa7\xce`\xdd\x87.8g\x10s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x01\x00~\x02\x00\x00\x00\x02\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x02\x00\x00\x00\x00\xfd\xff\xff\xff\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x01@\x07\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xacZ\x0f+\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00U\x02\x00\x00\x00\x01\x873 i\xd7\x11\xa7\xcd*`\xd5\x84\x1c8\n,U\xe8\xa2\n\xdd\xdaV\xa2\x9c\x00\x84e\xef\xf6[\xa2\x01\x00\x00\x00\x00\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xac\x00\x00\x00\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00U\x02\x00\x00\x00\x01\x05j\xc0\xa7"\x1f\xe5\x82x\xc9\xa7h\xd0\x1a!\xe6\xb6GJ\x01\x9a\xf6\xe7?\x08\xc8R\xe6\x86|\xad\xa5\x00\x00\x00\x00\x00\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xac\x00\x00\x00\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
@@ -100,20 +121,32 @@ def test_identify_datum(m5stickv, mocker):
             "tr([55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q)",
         ],
         "ADDR": [
+            "18cBEMRxXHqzWWCxZNtU91F5sbUNKhL5PX",
+            "3FNchDWmk41bWhsBWjeBh1DaTvLW4nckk3",
+            "bc1q0s2c09z42zjdndf8a6m8y7qu42sc8pmdgrsd4p",
             "bc1pkusdqe839xltdn5jk62rv0cx6c4nrrw3hr8rmf3478tnn88qs2ls4g77cl",
             "bc1qncuaqah98hypkxnpp465mqw7srjgm67s70gkzcs693kv9zp3dv8qa5w8fj",
+            "mjJHCvVzKHT5ehH4TFm1BteUkqCuoND9Ny",
+            "tb1qdpkupesz09wawwl03qmgq2d0hs3cnzkuyaj3n0",
+            "tb1pruektj90gg8nysa7yuk07w7ucwlywrf4p02lq3sz49f05xd00djscyt2fw",
         ],
         "XPUB": [
             "[55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE",
+            "xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE",
             "[55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV",
+            "xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV",
             "[55f8fc5d/49h/0h/1h]ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4",
+            "ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4",
             "[55f8fc5d/84h/0h/1h]zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i",
+            "zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i",
         ],
     }
     for datum_type in cases:
         for case in cases[datum_type]:
             result = identify_datum(case)
             assert result == datum_type
+
+    # TODO: false-positive cases and tests
 
 
 def test_detect_encodings_strict_on_input(m5stickv, mocker):
@@ -182,7 +215,7 @@ def test_detect_encodings_no_verify(mocker, m5stickv):
     assert "HEX" in detect_encodings(string, verify=False)
     assert "HEX" not in detect_encodings(string)
 
-    # no unverified checks for bech32 encodings, but just to hit exception branches
+    # no unverified checks for bech32 encodings
     # string = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
     # assert "bech32" not in detect_encodings(string)
     # assert "BECH32" not in detect_encodings(string.upper())
@@ -211,3 +244,180 @@ def test_detect_encodings_no_verify(mocker, m5stickv):
     # no test for ascii, checking max(ord) <= 127 will always be correct
     # no test for latin-1, it doesn't exist in uPython, but range will be correct
     # no test for utf-8, yet; but some byte-combos are not allowed in utf-8
+
+
+def test_datumtoolmenu_init_abort(m5stickv, mocker):
+    """Into DatumToolMenu then abort via Back"""
+    from krux.pages.datum_tool import DatumToolMenu
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # abort by moving backwards to Back
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to Text Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # abort by moving forwards to Back
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtoolmenu_scan_qr_abort(m5stickv, mocker):
+    """Into DatumToolMenu and Scan QR"""
+    from krux.pages.datum_tool import DatumToolMenu
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # interrupt scan
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Scan QR
+        BUTTON_PAGE_PREV,  # interrupt
+        BUTTON_PAGE,  # to Text Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    from krux.pages.qr_capture import QRCodeCapture
+
+    # failed scan
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (None, None))
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Scan QR
+        BUTTON_PAGE,  # to Text Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    from ur.ur import UR
+    from urtypes import Bytes
+
+    # scan UR-QR (for coverage), then back out of datum tool
+    MULTISIG_DESCR = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))#t2zpj2eu"
+    ur_obj = UR("bytes", Bytes(MULTISIG_DESCR.encode()).to_cbor())
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (ur_obj, 2))
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Scan QR
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE,  # to Text Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtoolmenu_text_entry_abort(m5stickv, mocker):
+    """Into DatumToolMenu and text_entry"""
+    from krux.pages.datum_tool import DatumToolMenu
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # abort w/o adding any text
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to Text Entry
+        BUTTON_ENTER,  # go Text Entry
+        BUTTON_PAGE_PREV,  # to Go
+        BUTTON_PAGE_PREV,  # to ESC
+        BUTTON_ENTER,  # go ESC
+        BUTTON_PAGE,  # to Read File
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # add text but then abort out of Datum Tool
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to Text Entry
+        BUTTON_ENTER,  # go Text Entry
+        BUTTON_ENTER,  # letter "a"
+        BUTTON_PAGE_PREV,  # to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE,  # to Read File
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtoolmenu_read_file_no_sd_card(m5stickv, mocker):
+    """Into DatumToolMenu and read_file w/o sdcard"""
+    from krux.pages.datum_tool import DatumToolMenu
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to Data Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_ENTER,  # go Read File (no sdcard error flashed)
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtoolmenu_avoid_read_file_abort(m5stickv, mocker, mock_file_operations):
+    """Into DatumToolMenu and read_file w/ sdcard but abort w/o reading file"""
+    from krux.pages.datum_tool import DatumToolMenu
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to Data Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_ENTER,  # go Read File
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtoolmenu_read_file_abort(m5stickv, mocker, mock_file_operations):
+    """Into DatumToolMenu, read_file but abort once in DatumTool"""
+    from krux.pages.datum_tool import DatumToolMenu
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to Data Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_ENTER,  # go Read File
+        BUTTON_PAGE,  # to next entry
+        BUTTON_ENTER,  # select file
+        BUTTON_ENTER,  # confirm load
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

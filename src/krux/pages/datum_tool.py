@@ -53,14 +53,10 @@ DATUM_BBQR_TYPES = {
 }
 
 
-# TODO: remove all print statements
-
-
 def urobj_to_data(ur_obj):
     """returns flatened data from a UR object. belongs in qr or qr_capture???"""
     import urtypes
 
-    # print("type: {}, cbor: {}".format(ur_obj.type, ur_obj.cbor))
     if ur_obj.type == "crypto-bip39":
         data = urtypes.crypto.BIP39.from_cbor(ur_obj.cbor).words
     elif ur_obj.type == "crypto-account":
@@ -117,12 +113,18 @@ def convert_encoding(contents, conversion):
 def identify_datum(data):
     """Determine which "datum" type this is; ie: PSBT, XPUB, DESC, ADDR"""
 
+    # TODO: more samples and fewer false-positives
+
     datum = None
     if isinstance(data, bytes):
         if data[:5] == b"psbt\xff":
             datum = DATUM_PSBT
     else:
-        if (data[:1] in "xyzYZtuvUV" and data[1:4] == "pub") or (
+        encodings = detect_encodings(data)
+
+        if data[:1] in "xyzYZtuvUV" and data[1:4] == "pub" and 58 in encodings:
+            datum = DATUM_XPUB
+        elif (
             data[:1] == "["
             and data.split("]")[1][:1] in "xyzYZtuvUV"
             and data.split("]")[1][1:4] == "pub"
@@ -130,11 +132,9 @@ def identify_datum(data):
             datum = DATUM_XPUB
         elif data.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
             datum = DATUM_DESCRIPTOR
-        elif data[:1] in ("1", "3", "n", "2") or data[:3] in (
-            "bc1",
-            "BC1",
-            "tb1",
-            "TB1",
+        elif (data[:1] in ("1", "3", "n", "2", "m") and 58 in encodings) or (
+            data[:4].lower() in ("bc1p", "bc1q", "tb1p", "tb1q")
+            and "bech32" in [x.lower()[:6] for x in encodings]
         ):
             datum = DATUM_ADDRESS
 
@@ -288,11 +288,7 @@ class DatumToolMenu(Page):
         if contents is None:
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
-        # print(
-        #     "\nscanned raw contents: {} {}, format: {}".format(
-        #         type(contents), repr(contents), fmt
-        #     )
-        # )
+
         title = "QR Contents"
         if fmt == 2:
             title += ", UR:" + contents.type
@@ -544,8 +540,6 @@ class DatumTool(Page):
     def _show_contents(self):
         """Displays infobox and contents"""
         from binascii import hexlify
-
-        # print("_show_contents()", self.contents)
 
         info_len = self._info_box(preview=False)
         self.ctx.display.draw_hcentered_text(
