@@ -29,6 +29,7 @@ from ...krux_settings import Settings
 from .. import (
     Menu,
     Page,
+    MENU_CONTINUE,
     choose_len_mnemonic,
 )
 
@@ -45,7 +46,7 @@ class Bip85(Page):
         """Derive a BIP85 mnemonic"""
         num_words = choose_len_mnemonic(self.ctx)
         if not num_words:
-            return
+            return MENU_CONTINUE
 
         from ..utils import Utils
 
@@ -54,7 +55,7 @@ class Bip85(Page):
         while child_index == "":
             child_index = utils.capture_index_from_keypad(t("Index"))
         if child_index is None:
-            return
+            return MENU_CONTINUE
 
         bip85_words = bip85.derive_mnemonic(
             self.ctx.wallet.key.root,
@@ -86,7 +87,7 @@ class Bip85(Page):
             from ...wallet import Wallet
 
             self.ctx.wallet = Wallet(key)
-        return
+        return MENU_CONTINUE
 
     def _base64_password_qr(self, code, title):
         """Export BIP85 base64 password as QR"""
@@ -116,7 +117,7 @@ class Bip85(Page):
         while child_index == "":
             child_index = utils.capture_index_from_keypad(t("Index"))
         if child_index is None:
-            return
+            return MENU_CONTINUE
 
         # Capture the password length
         pwd_len = ""
@@ -128,7 +129,7 @@ class Bip85(Page):
                 range_max=PWD_MAX_LEN,
             )
         if pwd_len is None:
-            return
+            return MENU_CONTINUE
 
         entropy = bip85.derive_entropy(
             self.ctx.wallet.key.root,
@@ -169,6 +170,7 @@ class Bip85(Page):
             index, _ = submenu.run_loop()
             if index == submenu.back_index:
                 break
+        return MENU_CONTINUE
 
     def export(self):
         """Exports BIP85 child mnemonics"""
@@ -180,3 +182,4 @@ class Bip85(Page):
             ],
         )
         submenu.run_loop()
+        return MENU_CONTINUE
