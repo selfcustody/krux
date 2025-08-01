@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 import time
+from embit import bip39
 from binascii import hexlify
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
@@ -38,6 +39,12 @@ from . import (
     NUM_SPECIAL_2,
     DIGITS,
 )
+
+# Override constants for KEF envelope operations
+OVERRIDE_ITERATIONS = 1
+OVERRIDE_VERSION = 2
+OVERRIDE_MODE = 3
+OVERRIDE_LABEL = 4
 
 ENCRYPTION_KEY_MAX_LEN = 200
 
@@ -116,8 +123,11 @@ def prompt_for_text_update(
     esc_prompt=False,
 ):
     """Clears screen, prompts question, allows for keypad input"""
-    if dflt_value and not dflt_prompt:
-        dflt_prompt = t("Use current value?") + " " + dflt_value
+    if dflt_value:
+        if dflt_prompt:
+            dflt_prompt += " " + dflt_value
+        else:
+            dflt_prompt = t("Use current value?") + " " + dflt_value
     ctx.display.clear()
     if dflt_value and dflt_prompt:
         ctx.display.draw_centered_text(
@@ -145,9 +155,9 @@ class KEFEnvelope(Page):
         self.__key = None
         self.__iv = None
         self.label = None
-        self.iterations = Settings().encryption.pbkdf2_iterations + (
-            int(time.ticks_ms()) % QR_CODE_ITER_MULTIPLE
-        )
+        self.iterations = Settings().encryption.pbkdf2_iterations
+        max_delta = self.iterations // 10
+        self.iterations += int(time.ticks_ms()) % max_delta
         self.mode_name = Settings().encryption.version
         self.mode = kef.MODE_NUMBERS[self.mode_name]
         self.iv_len = kef.MODE_IVS.get(self.mode, 0)
@@ -218,13 +228,13 @@ class KEFEnvelope(Page):
     def input_iterations_ui(self):
         """implements ui to allow user to set key-stretch iterations"""
         curr_value = str(self.iterations)
-        dflt_prompt = t("Use default Key iter.?") + " " + curr_value
+        dflt_prompt = t("Use default Key iter.?")
         title = t("Key iter.") + ": 10K - 510K"
         keypads = [DIGITS]
         iterations = prompt_for_text_update(
             self.ctx, curr_value, dflt_prompt, True, "?", title, keypads
         )
-        if QR_CODE_ITER_MULTIPLE <= int(iterations) <= 500000 + QR_CODE_ITER_MULTIPLE:
+        if QR_CODE_ITER_MULTIPLE <= int(iterations) <= 550000:
             self.iterations = int(iterations)
             return True
         return None
@@ -239,7 +249,7 @@ class KEFEnvelope(Page):
     ):
         """implements ui to allow user to set a KEF label"""
         if dflt_label and not dflt_prompt:
-            dflt_prompt = t("Update KEF ID?") + " " + dflt_label
+            dflt_prompt = t("Update KEF ID?")
             dflt_affirm = False
         self.label = prompt_for_text_update(
             self.ctx, dflt_label, dflt_prompt, dflt_affirm, "?", title, keypads
@@ -299,26 +309,32 @@ class KEFEnvelope(Page):
         self.ctx.input.wait_for_button()
         return True
 
-    def seal_ui(self, plaintext, override_defaults=False, specific_version=False):
+    def seal_ui(
+        self,
+        plaintext,
+        overrides=None,
+        dflt_label_prompt="",
+        dflt_label_affirm=True,
+    ):
         """implements ui to allow user to seal plaintext inside a KEF envelope"""
+        if not isinstance(overrides, list):
+            overrides = []
         if self.ciphertext:
             raise ValueError("KEF Envelope already sealed")
         if not (self.__key or self.input_key_ui()):
             return None
-        if override_defaults:
-            if not self.input_iterations_ui():
+        if overrides:
+            if OVERRIDE_ITERATIONS in overrides and not self.input_iterations_ui():
                 return None
-            if specific_version:
-                if not self.input_version_ui():
-                    return None
-            else:
-                if not self.input_mode_ui():
-                    return None
+            if OVERRIDE_VERSION in overrides and not self.input_version_ui():
+                return None
+            if OVERRIDE_MODE in overrides and not self.input_mode_ui():
+                return None
         if self.iv_len:
             if not (self.__iv or self.input_iv_ui()):
                 return None
-        if override_defaults or not self.label:
-            self.input_label_ui(self.label)
+        if OVERRIDE_LABEL in overrides or not self.label:
+            self.input_label_ui(self.label, dflt_label_prompt, dflt_label_affirm)
         if self.version is None:
             self.version = kef.suggest_versions(plaintext, self.mode_name)[0]
             self.version_name = kef.VERSIONS[self.version]["name"]
@@ -502,6 +518,25 @@ class EncryptMnemonic(Page):
         self.ctx = ctx
         self.mode_name = Settings().encryption.version
 
+    def _encrypt_mnemonic_with_label(self):
+        """Helper method to encrypt mnemonic with label selection."""
+
+        kef_envelope = KEFEnvelope(self.ctx)
+        default_label = self.ctx.wallet.key.fingerprint_hex_str()
+        kef_envelope.label = default_label
+        mnemonic_bytes = bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic)
+        encrypted_data = kef_envelope.seal_ui(
+            mnemonic_bytes,
+            overrides=[OVERRIDE_LABEL],
+            dflt_label_prompt=t("Use fingerprint as ID?"),
+            dflt_label_affirm=True,
+        )
+        if encrypted_data is None:
+            return None, None
+
+        mnemonic_id = kef_envelope.label
+        return encrypted_data, mnemonic_id
+
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
 
@@ -521,60 +556,14 @@ class EncryptMnemonic(Page):
         _, _ = submenu.run_loop()
         return MENU_CONTINUE
 
-    def _get_user_inputs(self):
-        """Ask user for the key, mnemonic_id and i_vector"""
-
-        error_txt = t("Mnemonic was not encrypted")
-
-        key_capture = EncryptionKey(self.ctx)
-        key = key_capture.encryption_key(creating=True)
-        if key is None:
-            self.flash_error(t("Key was not provided"))
-            return None
-
-        i_vector = None
-        iv_len = kef.MODE_IVS.get(kef.MODE_NUMBERS[self.mode_name], 0)
-        if iv_len > 0:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(
-                t("Additional entropy from camera required for") + " " + self.mode_name
-            )
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                self.flash_error(error_txt)
-                return None
-            from .capture_entropy import CameraEntropy
-
-            camera_entropy = CameraEntropy(self.ctx)
-            entropy = camera_entropy.capture(show_entropy_details=False)
-            if entropy is None:
-                self.flash_error(error_txt)
-                return None
-            i_vector = entropy[:iv_len]
-
-        mnemonic_id = None
-        self.ctx.display.clear()
-        if not self.prompt(
-            t("Use fingerprint as ID?"),
-            self.ctx.display.height() // 2,
-        ):
-            mnemonic_id = self.capture_from_keypad(
-                t("Mnemonic ID"),
-                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1],
-            )
-        if mnemonic_id in (None, ESC_KEY):
-            mnemonic_id = self.ctx.wallet.key.fingerprint_hex_str()
-
-        return (key, mnemonic_id, i_vector)
-
     def store_mnemonic_on_memory(self, sd_card=False):
         """Save encrypted mnemonic on flash or sd_card"""
 
-        user_inputs = self._get_user_inputs()
-        if user_inputs is None:
-            return
-        key, mnemonic_id, i_vector = user_inputs
-
         from ..encryption import MnemonicStorage
+
+        encrypted_data, mnemonic_id = self._encrypt_mnemonic_with_label()
+        if encrypted_data is None:
+            return
 
         mnemonic_storage = MnemonicStorage()
         if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
@@ -584,10 +573,7 @@ class EncryptMnemonic(Page):
             del mnemonic_storage
             return
 
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
-        words = self.ctx.wallet.key.mnemonic
-        if mnemonic_storage.store_encrypted(key, mnemonic_id, words, sd_card, i_vector):
+        if mnemonic_storage.store_encrypted_kef(mnemonic_id, encrypted_data, sd_card):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Encrypted mnemonic stored with ID:") + " " + mnemonic_id,
@@ -604,29 +590,15 @@ class EncryptMnemonic(Page):
     def encrypted_qr_code(self):
         """Exports an encryprted mnemonic QR code"""
 
-        user_inputs = self._get_user_inputs()
-        if user_inputs is None:
+        encrypted_data, mnemonic_id = self._encrypt_mnemonic_with_label()
+        if encrypted_data is None:
             return
-        key, mnemonic_id, i_vector = user_inputs
-
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
-
-        from ..encryption import EncryptedQRCode
-
-        encrypted_qr = EncryptedQRCode()
-        words = self.ctx.wallet.key.mnemonic
-        qr_data = encrypted_qr.create(key, mnemonic_id, words, i_vector)
-        version_number = encrypted_qr.version
-        del encrypted_qr
 
         from .qr_view import SeedQRView
+        from ..baseconv import base_encode
 
-        if version_number > 1:
-            from ..baseconv import base_encode
-
-            # Convert to base43
-            qr_data = base_encode(qr_data, 43)
+        # All currently offered versions should encode to base43
+        qr_data = base_encode(encrypted_data, 43)
         seed_qr_view = SeedQRView(self.ctx, data=qr_data, title=mnemonic_id)
         seed_qr_view.display_qr(allow_export=True)
 

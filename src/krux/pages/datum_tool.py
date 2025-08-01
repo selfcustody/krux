@@ -31,6 +31,11 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
+from .encryption_ui import (
+    OVERRIDE_ITERATIONS,
+    OVERRIDE_VERSION,
+    OVERRIDE_LABEL,
+)
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 
@@ -53,14 +58,10 @@ DATUM_BBQR_TYPES = {
 }
 
 
-# TODO: remove all print statements
-
-
 def urobj_to_data(ur_obj):
     """returns flatened data from a UR object. belongs in qr or qr_capture???"""
     import urtypes
 
-    # print("type: {}, cbor: {}".format(ur_obj.type, ur_obj.cbor))
     if ur_obj.type == "crypto-bip39":
         data = urtypes.crypto.BIP39.from_cbor(ur_obj.cbor).words
     elif ur_obj.type == "crypto-account":
@@ -81,43 +82,54 @@ def urobj_to_data(ur_obj):
 
 
 def convert_encoding(contents, conversion):
-    """encoding conversions to/from (hex/HEX/base43/base58/base64/utf8)"""
+    """encoding conversions to/from (hex/HEX/base43/base58/base64/shift_case/utf8)"""
     from krux.baseconv import base_encode, base_decode
     from binascii import hexlify, unhexlify
 
     from_bytes = isinstance(contents, bytes)
-    if conversion in (32, 43, 58, 64):
-        if from_bytes:
-            return base_encode(contents, conversion)
-        return base_decode(contents, conversion)
-    if conversion == "hex":
-        if from_bytes:
-            return hexlify(contents).decode()
-        return unhexlify(contents)
-    if conversion == "HEX":
-        if from_bytes:
-            return hexlify(contents).decode().upper()
-        return unhexlify(contents)
-    if conversion == "utf8":
-        if from_bytes:
-            return contents.decode()
-        return contents.encode()
-    if conversion == "shift_case":
-        if contents == contents.upper():
-            return contents.lower()
-        return contents.upper()
+    try:
+        if conversion in (32, 43, 58, 64):
+            if from_bytes:
+                return base_encode(contents, conversion)
+            return base_decode(contents, conversion)
+        if conversion == "hex":
+            if from_bytes:
+                return hexlify(contents).decode()
+            return unhexlify(contents)
+        if conversion == "HEX":
+            if from_bytes:
+                return hexlify(contents).decode().upper()
+            return unhexlify(contents)
+        if conversion == "utf8":
+            if from_bytes:
+                return contents.decode()
+            return contents.encode()
+        if conversion == "shift_case":
+            if isinstance(contents, str):
+                if contents == contents.lower():
+                    return contents.upper()
+                if contents == contents.upper():
+                    return contents.lower()
+    except:
+        pass
     return None
 
 
 def identify_datum(data):
     """Determine which "datum" type this is; ie: PSBT, XPUB, DESC, ADDR"""
 
+    # TODO: more samples and fewer false-positives
+
     datum = None
     if isinstance(data, bytes):
         if data[:5] == b"psbt\xff":
             datum = DATUM_PSBT
     else:
-        if (data[:1] in "xyzYZtuvUV" and data[1:4] == "pub") or (
+        encodings = detect_encodings(data)
+
+        if data[:1] in "xyzYZtuvUV" and data[1:4] == "pub" and 58 in encodings:
+            datum = DATUM_XPUB
+        elif (
             data[:1] == "["
             and data.split("]")[1][:1] in "xyzYZtuvUV"
             and data.split("]")[1][1:4] == "pub"
@@ -125,11 +137,9 @@ def identify_datum(data):
             datum = DATUM_XPUB
         elif data.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
             datum = DATUM_DESCRIPTOR
-        elif data[:1] in ("1", "3", "n", "2") or data[:3] in (
-            "bc1",
-            "BC1",
-            "tb1",
-            "TB1",
+        elif (data[:1] in ("1", "3", "n", "2", "m") and 58 in encodings) or (
+            data[:4].lower() in ("bc1p", "bc1q", "tb1p", "tb1q")
+            and "bech32" in [x.lower()[:6] for x in encodings]
         ):
             datum = DATUM_ADDRESS
 
@@ -196,21 +206,14 @@ def detect_encodings(str_data, verify=True):
         encoding = None
         if max_chr <= "Z":
             if verify:
-                try:
-                    encoding, _, _ = bech32_decode(str_data)
-                except:
-                    pass
+                encoding, _, _ = bech32_decode(str_data)
             if encoding == Encoding.BECH32:
                 encodings.append("BECH32")
             elif encoding == Encoding.BECH32M:
                 encodings.append("BECH32M")
         elif max_chr <= "z":
-            encoding = None
             if verify:
-                try:
-                    encoding, _, _ = bech32_decode(str_data)
-                except:
-                    pass
+                encoding, _, _ = bech32_decode(str_data)
             if encoding == Encoding.BECH32:
                 encodings.append("bech32")
             elif encoding == Encoding.BECH32M:
@@ -290,11 +293,7 @@ class DatumToolMenu(Page):
         if contents is None:
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
-        # print(
-        #     "\nscanned raw contents: {} {}, format: {}".format(
-        #         type(contents), repr(contents), fmt
-        #     )
-        # )
+
         title = "QR Contents"
         if fmt == 2:
             title += ", UR:" + contents.type
@@ -313,8 +312,8 @@ class DatumToolMenu(Page):
             updated = prompt_for_text_update(
                 self.ctx,
                 text if text else "",
-                t("Proceed?") + ' "' + text + '"' if text else "",
-                prompt_highlight_prefix="?" if text else "",
+                t("Proceed?"),
+                prompt_highlight_prefix="?",
                 title=t("Custom Text"),
                 keypads=[
                     LETTERS,
@@ -405,7 +404,7 @@ class DatumTool(Page):
                 updated = prompt_for_text_update(
                     self.ctx,
                     self.title,
-                    t("Update QR Label?") + ' "' + self.title + '"',
+                    t("Update QR Label?"),
                     dflt_affirm=False,
                     prompt_highlight_prefix="?",
                     title=t("QR Label"),
@@ -547,8 +546,6 @@ class DatumTool(Page):
         """Displays infobox and contents"""
         from binascii import hexlify
 
-        # print("_show_contents()", self.contents)
-
         info_len = self._info_box(preview=False)
         self.ctx.display.draw_hcentered_text(
             (
@@ -565,9 +562,10 @@ class DatumTool(Page):
         """
         analyzes `.contents`, sets:
         * .about (type and length)
-        * .datum is the "recognized" datum_type, ie: xpub/psbt/descriptor/etc
+        * .encodings (list)
         * .sensitivity (bool) if secret,
         * .oneline_viewable (bool) if short enough for one-line display
+        * .datum is the "recognized" datum_type, ie: xpub/psbt/descriptor/etc
         """
 
         if isinstance(self.contents, bytes):
@@ -756,7 +754,8 @@ class DatumTool(Page):
             kef = KEFEnvelope(self.ctx)
             kef.label = self.datum if self.datum else self.title
             encrypted = kef.seal_ui(
-                self.contents, override_defaults=True, specific_version=True
+                self.contents,
+                overrides=[OVERRIDE_VERSION, OVERRIDE_ITERATIONS, OVERRIDE_LABEL],
             )
             if encrypted:
                 # now in "hiding secrets" mode

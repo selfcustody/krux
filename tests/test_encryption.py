@@ -66,6 +66,13 @@ GCM_QR_PUBLIC_DATA = (
     "Encrypted QR Code:\nID: test ID\nVersion: AES-GCM\nKey iter.: 100000"
 )
 
+
+KEF_ENVELOPE_ECB = b"\x08KEFecbID\x05\x00\x00\n\xb8\xd9>\xc1\xcf\xf6\xc04P\x02\xa2Z\xea-Ev\xe7\x16f\xbf\x1dY\xdfiP\x19W\xa2\xb0\xe5;\xbbP\xf4\xf7"
+KEF_ENVELOPE_CBC = b"\x08KEFcbcID\n\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8el\x84S\xe8\x8d\x82\xc0\xe2\x1baX{\xf6gaR#$:~nJS\xcdM.$?\x99\x00\xcc\xe3\xa5\xea\xb5\xa2"
+KEF_ENVELOPE_CTR = b"\x08KEFctrID\x0f\x00\x00\ni$\x05\xdcn\xa8\xbf\x1f,\xe2xyb\xd3\xf6\xcc7\x88\xfbF=\x9e\xfdi\xb7\xbb\x1aMXey\x1a\xa1\xc12Q\xab\nAn]\xe8\xa2\xa9\xe8X\x1c\x0c"
+KEF_ENVELOPE_GCM = b"\x08KEFgcmID\x14\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xa3\x0c?\xd7\xfa\xff,%\x8d\xf3\xee\x88\x81N\x08\xd3\xb7\xd0[&\x1df\x01\x0b\xac\xd6\xb6\xc5\x17\x80\xf8\x1c\x7f\x92W"
+
+
 # Must maintain old in-the-wild versions of cipher-payloads in seeds.json to ensure recoverable
 KEF_ECBENTROPY_ONLY_JSON = '{"KEFecbID": {"b64_kef": "CEtFRmVjYklEBQAACrjZPsHP9sA0UAKiWuotRXbnFma/HVnfaVAZV6Kw5Tu7UPT3"}}'
 KEF_CBCENTROPY_ONLY_JSON = '{"KEFcbcID": {"b64_kef": "CEtFRmNiY0lECgAACk9SoZNsPjJxIJ6dZAWe145shFPojYLA4hthWHv2Z2FSIyQ6fm5KU81NLiQ/mQDM46XqtaI="}}'
@@ -255,8 +262,8 @@ def test_encrypt_ecb_flash(m5stickv, mocker):
     with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")) as m:
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-ECB"
-        success = storage.store_encrypted(
-            TEST_KEY, "KEFecbID", ECB_WORDS, sd_card=False
+        success = storage.store_encrypted_kef(
+            "KEFecbID", KEF_ENVELOPE_ECB, sd_card=False
         )
     assert success is True
     m().write.assert_called_once_with(KEF_ECBENTROPY_ONLY_JSON)
@@ -269,11 +276,25 @@ def test_encrypt_cbc_flash(m5stickv, mocker):
     with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")) as m:
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-CBC"
-        success = storage.store_encrypted(
-            TEST_KEY, "KEFcbcID", CBC_WORDS, sd_card=False, i_vector=I_VECTOR
+        success = storage.store_encrypted_kef(
+            "KEFcbcID", KEF_ENVELOPE_CBC, sd_card=False
         )
     assert success is True
     m().write.assert_called_once_with(KEF_CBCENTROPY_ONLY_JSON)
+
+
+def test_encrypt_ctr_flash(m5stickv, mocker):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage
+
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")) as m:
+        storage = MnemonicStorage()
+        Settings().encryption.version = "AES-CTR"
+        success = storage.store_encrypted_kef(
+            "KEFctrID", KEF_ENVELOPE_CTR, sd_card=False
+        )
+    assert success is True
+    m().write.assert_called_once_with(KEF_CTRENTROPY_ONLY_JSON)
 
 
 def test_encrypt_gcm_flash(m5stickv, mocker):
@@ -283,8 +304,8 @@ def test_encrypt_gcm_flash(m5stickv, mocker):
     with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")) as m:
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-GCM"
-        success = storage.store_encrypted(
-            TEST_KEY, "KEFgcmID", GCM_WORDS, sd_card=False, i_vector=I_VECTOR[:12]
+        success = storage.store_encrypted_kef(
+            "KEFgcmID", KEF_ENVELOPE_GCM, sd_card=False
         )
     assert success is True
     m().write.assert_called_once_with(KEF_GCMENTROPY_ONLY_JSON)
@@ -297,7 +318,9 @@ def test_encrypt_ecb_sd(m5stickv, mocker, mock_file_operations):
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-ECB"
-        success = storage.store_encrypted(TEST_KEY, "KEFecbID", ECB_WORDS, sd_card=True)
+        success = storage.store_encrypted_kef(
+            "KEFecbID", KEF_ENVELOPE_ECB, sd_card=True
+        )
     assert success is True
     m().write.assert_called_once_with(KEF_ECBENTROPY_ONLY_JSON)
 
@@ -309,11 +332,25 @@ def test_encrypt_cbc_sd(m5stickv, mocker, mock_file_operations):
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-CBC"
-        success = storage.store_encrypted(
-            TEST_KEY, "KEFcbcID", CBC_WORDS, sd_card=True, i_vector=I_VECTOR
+        success = storage.store_encrypted_kef(
+            "KEFcbcID", KEF_ENVELOPE_CBC, sd_card=True
         )
     assert success is True
     m().write.assert_called_once_with(KEF_CBCENTROPY_ONLY_JSON)
+
+
+def test_encrypt_ctr_sd(m5stickv, mocker, mock_file_operations):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage
+
+    with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
+        storage = MnemonicStorage()
+        Settings().encryption.version = "AES-CTR"
+        success = storage.store_encrypted_kef(
+            "KEFctrID", KEF_ENVELOPE_CTR, sd_card=True
+        )
+    assert success is True
+    m().write.assert_called_once_with(KEF_CTRENTROPY_ONLY_JSON)
 
 
 def test_encrypt_gcm_sd(m5stickv, mocker, mock_file_operations):
@@ -323,8 +360,8 @@ def test_encrypt_gcm_sd(m5stickv, mocker, mock_file_operations):
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
         storage = MnemonicStorage()
         Settings().encryption.version = "AES-GCM"
-        success = storage.store_encrypted(
-            TEST_KEY, "KEFgcmID", GCM_WORDS, sd_card=True, i_vector=I_VECTOR[:12]
+        success = storage.store_encrypted_kef(
+            "KEFgcmID", KEF_ENVELOPE_GCM, sd_card=True
         )
     assert success is True
     m().write.assert_called_once_with(KEF_GCMENTROPY_ONLY_JSON)

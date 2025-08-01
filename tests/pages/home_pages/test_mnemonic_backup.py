@@ -633,7 +633,10 @@ def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
         mocker.MagicMock(return_value=I_VECTOR),
     )
 
+    case_count = 0
     for case in cases:
+        print(case_count)
+        case_count += 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
         mnemonics = MnemonicsView(ctx)
 

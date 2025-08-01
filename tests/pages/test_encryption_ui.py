@@ -245,7 +245,7 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
         mocker.MagicMock(return_value=TEST_KEY),
     )
     mocker.patch(
-        "krux.encryption.MnemonicStorage.store_encrypted",
+        "krux.encryption.MnemonicStorage.store_encrypted_kef",
         mocker.MagicMock(return_value=False),
     )
     storage_ui.encrypt_menu()
@@ -271,6 +271,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
         + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
+    mocker.patch("time.ticks_ms", return_value=0)  # tick_ms affects random delta
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(ECB_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
@@ -309,6 +310,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
         + [BUTTON_ENTER]  # Yes, use fingerprint as ID
         # QR view is mocked here, no press needed
     )
+    mocker.patch("time.ticks_ms", return_value=0)  # tick_ms affects random delta
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.wallet = Wallet(Key(CBC_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
@@ -1159,6 +1161,29 @@ def test_kefenvelope_input_version_ui(m5stickv, mocker):
     assert page.iv_len is not None
 
 
+def test_kefenvelope_iterations_delta(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.krux_settings import Settings
+
+    ELAPSED_TIMES = [0, 1234, 1567825, 1073741823]
+    BASE_ITERATIONS_AND_EXPECTED_VALUES = [
+        (10000, [10000, 10234, 10825, 10823]),
+        (100000, [100000, 101234, 107825, 101823]),
+        (500000, [500000, 501234, 517825, 541823]),
+    ]
+
+    ctx = create_ctx(mocker, [])
+
+    for elapsed_time in ELAPSED_TIMES:
+        for base_iterations, expected_values in BASE_ITERATIONS_AND_EXPECTED_VALUES:
+            mocker.patch("time.ticks_ms", return_value=elapsed_time)
+            Settings().encryption.pbkdf2_iterations = base_iterations
+
+            page = KEFEnvelope(ctx)
+            expected_iterations = expected_values[ELAPSED_TIMES.index(elapsed_time)]
+            assert page.iterations == expected_iterations
+
+
 def test_kefenvelope_input_iterations_ui(m5stickv, mocker):
     from krux.pages.encryption_ui import KEFEnvelope
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -1397,7 +1422,13 @@ def test_kefenvelope_public_info_ui(m5stickv, mocker):
 
 
 def test_kefenvelope_seal_ui(m5stickv, mocker):
-    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.pages.encryption_ui import (
+        KEFEnvelope,
+        OVERRIDE_LABEL,
+        OVERRIDE_MODE,
+        OVERRIDE_ITERATIONS,
+        OVERRIDE_VERSION,
+    )
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     print("default is to seal plaintext using defaults w/ least interaction")
@@ -1435,7 +1466,32 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     assert page.seal_ui(b"plain text") == None
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
-    print("if override_defaults, allows updating iterations, mode, label")
+    print("overrides param is a list, ie: [OVERRIDE_LABEL]")
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # key is "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # select go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # confirm to add GCM cam entropy
+        BUTTON_PAGE_PREV,  # deny updating label
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    page.label = "my ID"
+    sealed = page.seal_ui(b"plain text", overrides=[OVERRIDE_LABEL])
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert isinstance(sealed, bytes) and len(sealed) > 8
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call("Additional entropy from camera required for AES-GCM"),
+            mocker.call("Update KEF ID? my ID", highlight_prefix="?"),
+        ]
+    )
+
+    print(
+        "overrides param is a list, ie: [OVERRIDE_MODE, OVERRIDE_ITERATIONS, OVERRIDE_LABEL]"
+    )
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
@@ -1450,7 +1506,9 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     page.label = "my ID"
-    sealed = page.seal_ui(b"plain text", override_defaults=True)
+    sealed = page.seal_ui(
+        b"plain text", overrides=[OVERRIDE_MODE, OVERRIDE_ITERATIONS, OVERRIDE_LABEL]
+    )
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert isinstance(sealed, bytes) and len(sealed) > 8
     ctx.display.draw_centered_text.assert_has_calls(
@@ -1468,7 +1526,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     )
 
     print(
-        "if override_defaults and specific_version, allows updating iterations, a particular version, and label"
+        "overrides param is a list, ie: [OVERRIDE_ITERATIONS, OVERRIDE_VERSION, OVERRIDE_LABEL]"
     )
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # enter key
@@ -1487,7 +1545,9 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     page = KEFEnvelope(ctx)
     page.label = "my ID"
     assert page.version == None
-    sealed = page.seal_ui(b"plain text", override_defaults=True, specific_version=True)
+    sealed = page.seal_ui(
+        b"plain text", overrides=[OVERRIDE_ITERATIONS, OVERRIDE_VERSION, OVERRIDE_LABEL]
+    )
     assert page.version == 21
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert isinstance(sealed, bytes) and len(sealed) > 8
