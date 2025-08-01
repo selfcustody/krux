@@ -557,9 +557,10 @@ class DatumTool(Page):
         """
         analyzes `.contents`, sets:
         * .about (type and length)
-        * .datum is the "recognized" datum_type, ie: xpub/psbt/descriptor/etc
+        * .encodings (list)
         * .sensitivity (bool) if secret,
         * .oneline_viewable (bool) if short enough for one-line display
+        * .datum is the "recognized" datum_type, ie: xpub/psbt/descriptor/etc
         """
 
         if isinstance(self.contents, bytes):

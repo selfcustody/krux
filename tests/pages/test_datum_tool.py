@@ -421,3 +421,562 @@ def test_datumtoolmenu_read_file_abort(m5stickv, mocker, mock_file_operations):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DatumToolMenu(ctx).run()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtool_view_qr(m5stickv, mocker):
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    text_sm = "small qr text"
+    text_bg = "much longer text" * 100
+    bytes_psbt = b'psbt\xff\x01\x00\xa4\x02\x00\x00\x00\x03\xae\xe25\xaf(\x9a\xc9\xee\xc23\xca"\x15\xbf?\xf4\xc1\xcaxAP\xd6\x0f[\x94kA\x87\x8b\x15\x04,\x00\x00\x00\x00\x00\xfd\xff\xff\xffT\xc9\x91i\xc4ZIg Z!\xd6)\xbf+z\x161\xc4uoS \xf0\x9d\x96\xcf#\xdc\xdbc\xa0\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x04\x1eVt\x8d\x80H\x1f\x89k\x07T(\xca\xaf\x91\x1e"\x1a2\xef\xa5_\\s\xf9\x8b\xc2J\xa0\xc8\x11\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x01\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hlZ\x0f+\x00O\x01\x045\x87\xcf\x03\x06\xb07\xf6\x80\x00\x00\x00k"\xc5\x12;\xa1\n\xde\xafK\xfc\xbbE\xd1\xa0-\x82\x8f%\xbf\x86F\x95z\x98\xd0b\x87\xc4\xe2\xb8P\x02\x8bB\xcdGv7l\x82y\x1bIAU\x15\x1fV\xc2\xd7\xb4q\xe0\xc7\xa5&\xa7\xce`\xdd\x87.8g\x10s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x01\x00~\x02\x00\x00\x00\x02\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x02\x00\x00\x00\x00\xfd\xff\xff\xff\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x01@\x07\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xacZ\x0f+\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00U\x02\x00\x00\x00\x01\x873 i\xd7\x11\xa7\xcd*`\xd5\x84\x1c8\n,U\xe8\xa2\n\xdd\xdaV\xa2\x9c\x00\x84e\xef\xf6[\xa2\x01\x00\x00\x00\x00\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xac\x00\x00\x00\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00U\x02\x00\x00\x00\x01\x05j\xc0\xa7"\x1f\xe5\x82x\xc9\xa7h\xd0\x1a!\xe6\xb6GJ\x01\x9a\xf6\xe7?\x08\xc8R\xe6\x86|\xad\xa5\x00\x00\x00\x00\x00\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xac\x00\x00\x00\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    text_desc = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))#t2zpj2eu"
+
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # skip updating qr title
+        BUTTON_ENTER,  # leave QR view
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+
+    # with short text
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = text_sm
+    page.title = "QR contents"
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with short bytestring
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = text_sm.encode()
+    page.title = "QR contents"
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with short text while updating qr label
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # confirm updating qr title
+        BUTTON_ENTER,  # add "a"
+        BUTTON_PAGE_PREV,  # to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_PAGE_PREV,  # to skip updating qr title
+        BUTTON_ENTER,  # leave QR view
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = text_sm
+    page.title = "QR contents"
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with longer text for big static qr
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Static
+        BUTTON_ENTER,  # leave QR view
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = text_bg
+    page.title = "QR contents"
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with longer text for big pMofN animated qr
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to pMofN
+        BUTTON_ENTER,  # go pMofN
+        BUTTON_ENTER,  # leave QR view
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = text_bg
+    page.title = "QR contents"
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with longer text for UR-bytes
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to UR-bytes
+        BUTTON_ENTER,  # go UR-bytes
+        BUTTON_ENTER,  # leave QR view
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = bytes_psbt
+    page.title = "QR contents"
+    page.datum = "PSBT"
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with longer text for big UR-psbt
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to UR-bytes
+        BUTTON_PAGE_PREV,  # to UR-psbt
+        BUTTON_ENTER,  # go UR-psbt
+        BUTTON_ENTER,  # leave QR view
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = bytes_psbt
+    page.title = "QR contents"
+    page.datum = "PSBT"
+    page.view_qr()
+    print(ctx.display.method_calls)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with longer text for big BBQr
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to UR-bytes
+        BUTTON_PAGE_PREV,  # to UR-psbt
+        BUTTON_PAGE_PREV,  # to BBQr
+        BUTTON_ENTER,  # go BBQr
+        BUTTON_ENTER,  # leave QR view
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = bytes_psbt
+    page.title = "QR contents"
+    page.datum = "PSBT"
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtool_save_sd(m5stickv, mocker, mock_file_operations):
+    """With DatumTool already initialized, test .save_sd()"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import BUTTON_PAGE
+
+    ctx = create_ctx(mocker, [BUTTON_PAGE])
+    page = DatumTool(ctx)
+    page.contents = "String contents destined for file"
+    page.title = "text contents"
+    page.save_sd()
+    assert ctx.input.wait_for_button.call_count == 1
+
+
+def test_datumtool__info_box(m5stickv, mocker):
+    """With DatumTool already initialized, test ._info_box()"""
+    from krux.pages.datum_tool import DatumTool
+
+    # call with text
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = "Loaded string contents in DatumTool"
+    page.title = "Text"
+    page.datum = ""
+    page.about = "about"
+    page._info_box()
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("Text\n\nabout", info_box=True)]
+    )
+
+    # call with bytes
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = b"\xde\xad\xbe\xef"
+    page.title = "Bytes"
+    page.datum = ""
+    page.about = "about"
+    page._info_box()
+    assert ctx.input.wait_for_button.call_count == 0
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [mocker.call("Bytes\n\nabout", info_box=True)]
+    )
+
+
+def test_datumtool__show_contents(m5stickv, mocker):
+    """With DatumTool already initialized, test ._show_contents()"""
+    from krux.pages.datum_tool import DatumTool
+
+    SOME_BUTTON, ANOTHER_BUTTON = 0, 1
+
+    # call with text
+    ctx = create_ctx(mocker, [SOME_BUTTON])
+    page = DatumTool(ctx)
+    page.contents = "Loaded string contents in DatumTool"
+    page.title = "Text"
+    page.datum = ""
+    page.about = "about"
+    page._show_contents()
+    assert ctx.input.wait_for_button.call_count == 1
+    ctx.display.draw_hcentered_text.assert_called_with(
+        '"Loaded string contents in DatumTool"', offset_y=38, max_lines=14
+    )
+
+    # call with bytes
+    ctx = create_ctx(mocker, [ANOTHER_BUTTON])
+    page = DatumTool(ctx)
+    page.contents = b"\xde\xad\xbe\xef"
+    page.title = "Bytes"
+    page.datum = ""
+    page.about = "about"
+    page._show_contents()
+    assert ctx.input.wait_for_button.call_count == 1
+    ctx.display.draw_hcentered_text.assert_called_with(
+        "0xdeadbeef", offset_y=38, max_lines=14
+    )
+
+
+def test_datumtool__analyze_contents(m5stickv, mocker):
+    """With DatumTool already initialized, test ._analyze_contents()"""
+    from krux.pages.datum_tool import DatumTool
+
+    # call with short text
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = "simple text"
+    page._analyze_contents()
+    assert ctx.input.wait_for_button.call_count == 0
+    assert page.about == "text: 11 chars"
+    assert page.title == None
+    assert page.sensitive == False
+    assert page.oneline_viewable == True
+
+    # call with longer text
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = "Loaded string contents in DatumTool"
+    page._analyze_contents()
+    assert ctx.input.wait_for_button.call_count == 0
+    assert page.about == "text: 35 chars"
+    assert page.title == None
+    assert page.sensitive == False
+    assert page.oneline_viewable == False
+
+    # call with bytes
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = b"\xde\xad\xbe\xef"
+    page._analyze_contents()
+    assert ctx.input.wait_for_button.call_count == 0
+    assert page.about == "binary: 4 bytes"
+    assert page.encodings == []
+    assert page.title == None
+    assert page.sensitive == False
+    assert page.oneline_viewable == True
+
+    # call with sensitive bytes (bip39 compact SeedQR)
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = bytes([x * 16 for x in range(16)])
+    page._analyze_contents()
+    assert ctx.input.wait_for_button.call_count == 0
+    assert page.about == "binary: 16 bytes"
+    assert page.encodings == []
+    assert page.title == None
+    assert page.sensitive == True
+    assert page.oneline_viewable == False
+
+    # call with sensitive words (bip39 mnemonic)
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = " ".join(["zoo"] * 12)
+    page._analyze_contents()
+    assert ctx.input.wait_for_button.call_count == 0
+    assert page.about == "text: 47 chars"
+    assert page.encodings == ["ascii", "utf8"]
+    assert page.title == None
+    assert page.sensitive == True
+    assert page.oneline_viewable == False
+
+    # call with sensitive digits (bip39 standard SeedQR)
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = "".join(["{:04d}".format(x * 128) for x in range(12)])
+    page._analyze_contents()
+    assert ctx.input.wait_for_button.call_count == 0
+    assert page.about == "text: 48 chars"
+    assert page.encodings == ["HEX", 43, 64, "ascii", "utf8"]
+    assert page.title == None
+    assert page.sensitive == True
+    assert page.oneline_viewable == False
+
+    # call with bytes encoded from utf8 string
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = "octets décodables utf8".encode()
+    page._analyze_contents()
+    assert ctx.input.wait_for_button.call_count == 0
+    assert page.about == "binary: 23 bytes"
+    assert page.encodings == ["latin-1_via_utf8?"]
+    assert page.title == None
+    assert page.sensitive == False
+    assert page.oneline_viewable == False
+
+
+def test_datumtool__decrypt_as_kef_envelope(m5stickv, mocker):
+    """With DatumTool already initialized, test ._decrypt_as_kef_envelope()"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    non_kef = bytes([x for x in range(128)])
+    kef_a_hello_world = (
+        b'\x07key="a"\x05\x01\xa7Z\xe8Z\x99k\xee\xa9\x13N5\xc9\x96\xc14M\xcdK\x15Qi'
+    )
+    kef_a_hello_world_w_0xdeadbeef_label = b"\x04\xde\xad\xbe\xef\x05\x00\x00\x01\xfa\x8f\xda\x13\x8b\xc8\x12J\xc32\xe7\x11\x93\xfb\x8b\xd4`\xd0\xf5"
+
+    # call with non-kef bytes
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = non_kef
+    page._decrypt_as_kef_envelope()
+    assert ctx.input.wait_for_button.call_count == 0
+
+    # now with kef encrypted envelopes
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # confirm Decrypt
+        BUTTON_ENTER,  # go Enter Key
+        BUTTON_ENTER,  # go "a"
+        BUTTON_PAGE_PREV,  # to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key
+    )
+
+    # call with encrypted kef having string plaintext
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = kef_a_hello_world
+    page._decrypt_as_kef_envelope()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.title == 'key="a"'
+    assert page.contents == b"hello world"
+    assert page.decrypted == True
+
+    # call with encrypted kef having bytes plaintext
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = kef_a_hello_world_w_0xdeadbeef_label
+    page._decrypt_as_kef_envelope()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.title == "0xdeadbeef"
+    assert page.contents == b"hello world"
+    assert page.decrypted == True
+
+
+def test_dataumtool__build_options_menu(m5stickv, mocker):
+    """With DatumTool already initialized, test ._build_options_menu()"""
+    from krux.pages.datum_tool import DatumTool
+
+    some_chars = "This are characters"
+    some_hex_plus = "deadbeef3456"
+    some_bytes = b"These are bytes."
+
+    # w/ text contents, default call
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = some_chars
+    menu = page._build_options_menu()
+    assert ctx.input.wait_for_button.call_count == 0
+    assert [name for name, func in menu] == [
+        "Show Datum",
+        "Convert Datum",
+        "Export to QR",
+        "Export to SD",
+    ]
+
+    # w/ text content, w/ offer_convert and w/o offer_show
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = some_chars
+    page._analyze_contents()
+    menu = page._build_options_menu(offer_convert=True, offer_show=False)
+    assert ctx.input.wait_for_button.call_count == 0
+    assert [name for name, func in menu] == ["from utf8", "Done Converting"]
+
+    # w/ HEX_plus content, w/ offer_convert and w/o offer_show
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = some_hex_plus.upper()
+    page._analyze_contents()
+    menu = page._build_options_menu(offer_convert=True, offer_show=False)
+    assert ctx.input.wait_for_button.call_count == 0
+    assert [name for name, func in menu] == [
+        "from HEX",
+        "shift case",
+        "from base32",
+        "from base43",
+        "from base64",
+        "from utf8",
+        "Done Converting",
+    ]
+
+    # w/ hex_plus content, w/ offer_convert and w/o offer_show
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = some_hex_plus
+    page._analyze_contents()
+    menu = page._build_options_menu(offer_convert=True, offer_show=False)
+    assert ctx.input.wait_for_button.call_count == 0
+    assert [name for name, func in menu] == [
+        "from hex",
+        "shift case",
+        "from base64",
+        "from utf8",
+        "Done Converting",
+    ]
+
+    # w/ bytes content, w/ offer_convert and w/o offer_show
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = some_bytes
+    page._analyze_contents()
+    menu = page._build_options_menu(offer_convert=True, offer_show=False)
+    assert ctx.input.wait_for_button.call_count == 0
+    assert [name for name, func in menu] == [
+        "to hex",
+        "to base32",
+        "to base43",
+        "to base64",
+        "to utf8",
+        "Encrypt",
+        "Done Converting",
+    ]
+
+    # w/ hex_plus-ish bytes content and history, w/ offer_convert and w/o offer_show
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.contents = some_hex_plus.encode()
+    page.history = ["HEX"]
+    page._analyze_contents()
+    menu = page._build_options_menu(offer_convert=True, offer_show=False)
+    assert ctx.input.wait_for_button.call_count == 0
+    assert [name for name, func in menu] == [
+        "to HEX (Undo)",
+        "to base32",
+        "to base43",
+        "to base64",
+        "to utf8",
+        "Encrypt",
+        "Done Converting",
+    ]
+
+
+def test_dataumtool_view_contents(m5stickv, mocker):
+    """With DatumTool already initialized, test .view_contents()"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    some_bytes = b"These are bytes that won't fit on one-line."
+
+    # escape to Back
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.title = "title"
+    page.contents = some_bytes
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # show and escape to Back
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Show
+        BUTTON_ENTER,
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.title = "title"
+    page.contents = some_bytes
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # convert to hex, from hex (Undo), then escape to Back
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to Convert
+        BUTTON_ENTER,  # go Convert
+        BUTTON_PAGE,  # to "to hex"
+        BUTTON_ENTER,  # go "to hex"
+        BUTTON_PAGE,  # to "from hex (Undo)"
+        BUTTON_ENTER,  # go "from hex (Undo)"
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.title = "title"
+    page.contents = some_bytes
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # convert and Encrypt, then escape to Back
+    BTN_SEQUENCE = (
+        BUTTON_PAGE,  # to Convert
+        BUTTON_ENTER,  # go Convert
+        BUTTON_PAGE_PREV,  # to Done Converting
+        BUTTON_PAGE_PREV,  # to Encrypt
+        BUTTON_ENTER,  # go Encrypt
+        BUTTON_ENTER,  # go Type Key
+        BUTTON_ENTER,  # go "a"
+        BUTTON_PAGE_PREV,  # to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm weak key "a"
+        BUTTON_ENTER,  # confirm default key iterations
+        BUTTON_ENTER,  # confirm default mode GCM
+        BUTTON_ENTER,  # confirm additional cam entropy
+        BUTTON_PAGE,  # decline updating KEF ID
+        BUTTON_PAGE_PREV,  # to Done Converting
+        BUTTON_ENTER,  # go Done Converting
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=I_VECTOR),
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.title = "title"
+    page.contents = some_bytes
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Export to SD, then escape to Back
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to Done
+        BUTTON_PAGE_PREV,  # to Export-SD
+        BUTTON_ENTER,  # go Export-SD
+        BUTTON_ENTER,  # confirm Export-SD
+        BUTTON_PAGE_PREV,  # to Go (w/o altering filename)
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm filename
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.title = "title"
+    page.contents = some_bytes
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Export to QR, then escape to Back
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to Done
+        BUTTON_PAGE_PREV,  # to Export-SD
+        BUTTON_PAGE_PREV,  # to Export-QR
+        BUTTON_ENTER,  # go Export-QR
+        BUTTON_PAGE_PREV,  # decline updating QR label
+        BUTTON_ENTER,  # leave QR view
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.title = "title"
+    page.contents = some_bytes
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
