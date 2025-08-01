@@ -1161,6 +1161,29 @@ def test_kefenvelope_input_version_ui(m5stickv, mocker):
     assert page.iv_len is not None
 
 
+def test_kefenvelope_iterations_delta(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.krux_settings import Settings
+
+    ELAPSED_TIMES = [0, 1234, 1567825, 1073741823]
+    BASE_ITERATIONS_AND_EXPECTED_VALUES = [
+        (10000, [10000, 10234, 10825, 10823]),
+        (100000, [100000, 101234, 107825, 101823]),
+        (500000, [500000, 501234, 517825, 541823]),
+    ]
+
+    ctx = create_ctx(mocker, [])
+
+    for elapsed_time in ELAPSED_TIMES:
+        for base_iterations, expected_values in BASE_ITERATIONS_AND_EXPECTED_VALUES:
+            mocker.patch("time.ticks_ms", return_value=elapsed_time)
+            Settings().encryption.pbkdf2_iterations = base_iterations
+
+            page = KEFEnvelope(ctx)
+            expected_iterations = expected_values[ELAPSED_TIMES.index(elapsed_time)]
+            assert page.iterations == expected_iterations
+
+
 def test_kefenvelope_input_iterations_ui(m5stickv, mocker):
     from krux.pages.encryption_ui import KEFEnvelope
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
