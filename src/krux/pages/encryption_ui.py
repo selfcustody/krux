@@ -40,6 +40,12 @@ from . import (
     DIGITS,
 )
 
+# Override constants for KEF envelope operations
+OVERRIDE_ITERATIONS = 1
+OVERRIDE_VERSION = 2
+OVERRIDE_MODE = 3
+OVERRIDE_LABEL = 4
+
 ENCRYPTION_KEY_MAX_LEN = 200
 
 
@@ -318,16 +324,16 @@ class KEFEnvelope(Page):
         if not (self.__key or self.input_key_ui()):
             return None
         if overrides:
-            if "iterations" in overrides and not self.input_iterations_ui():
+            if OVERRIDE_ITERATIONS in overrides and not self.input_iterations_ui():
                 return None
-            if "version" in overrides and not self.input_version_ui():
+            if OVERRIDE_VERSION in overrides and not self.input_version_ui():
                 return None
-            if "mode" in overrides and not self.input_mode_ui():
+            if OVERRIDE_MODE in overrides and not self.input_mode_ui():
                 return None
         if self.iv_len:
             if not (self.__iv or self.input_iv_ui()):
                 return None
-        if "label" in overrides or not self.label:
+        if OVERRIDE_LABEL in overrides or not self.label:
             self.input_label_ui(self.label, dflt_label_prompt, dflt_label_affirm)
         if self.version is None:
             self.version = kef.suggest_versions(plaintext, self.mode_name)[0]
@@ -521,7 +527,7 @@ class EncryptMnemonic(Page):
         mnemonic_bytes = bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic)
         encrypted_data = kef_envelope.seal_ui(
             mnemonic_bytes,
-            overrides=["label"],
+            overrides=[OVERRIDE_LABEL],
             dflt_label_prompt=t("Use fingerprint as ID?"),
             dflt_label_affirm=True,
         )

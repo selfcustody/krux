@@ -31,6 +31,11 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
+from .encryption_ui import (
+    OVERRIDE_ITERATIONS,
+    OVERRIDE_VERSION,
+    OVERRIDE_LABEL,
+)
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 
@@ -748,7 +753,8 @@ class DatumTool(Page):
             kef = KEFEnvelope(self.ctx)
             kef.label = self.datum if self.datum else self.title
             encrypted = kef.seal_ui(
-                self.contents, overrides=["version", "iterations", "label"]
+                self.contents,
+                overrides=[OVERRIDE_VERSION, OVERRIDE_ITERATIONS, OVERRIDE_LABEL],
             )
             if encrypted:
                 # now in "hiding secrets" mode
