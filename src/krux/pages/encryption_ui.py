@@ -234,7 +234,7 @@ class KEFEnvelope(Page):
         iterations = prompt_for_text_update(
             self.ctx, curr_value, dflt_prompt, True, "?", title, keypads
         )
-        if QR_CODE_ITER_MULTIPLE <= int(iterations) <= 500000 + QR_CODE_ITER_MULTIPLE:
+        if QR_CODE_ITER_MULTIPLE <= int(iterations) <= 550000:
             self.iterations = int(iterations)
             return True
         return None
