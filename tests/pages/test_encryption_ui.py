@@ -1161,6 +1161,29 @@ def test_kefenvelope_input_version_ui(m5stickv, mocker):
     assert page.iv_len is not None
 
 
+def test_kefenvelope_iterations_delta(m5stickv, mocker):
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.krux_settings import Settings
+
+    ELAPSED_TIMES = [0, 1234, 1567825, 1073741823]
+    BASE_ITERATIONS_AND_EXPECTED_VALUES = [
+        (10000, [10000, 10234, 10825, 10823]),
+        (100000, [100000, 101234, 107825, 101823]),
+        (500000, [500000, 501234, 517825, 541823]),
+    ]
+
+    ctx = create_ctx(mocker, [])
+
+    for elapsed_time in ELAPSED_TIMES:
+        for base_iterations, expected_values in BASE_ITERATIONS_AND_EXPECTED_VALUES:
+            mocker.patch("time.ticks_ms", return_value=elapsed_time)
+            Settings().encryption.pbkdf2_iterations = base_iterations
+
+            page = KEFEnvelope(ctx)
+            expected_iterations = expected_values[ELAPSED_TIMES.index(elapsed_time)]
+            assert page.iterations == expected_iterations
+
+
 def test_kefenvelope_input_iterations_ui(m5stickv, mocker):
     from krux.pages.encryption_ui import KEFEnvelope
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -1399,7 +1422,13 @@ def test_kefenvelope_public_info_ui(m5stickv, mocker):
 
 
 def test_kefenvelope_seal_ui(m5stickv, mocker):
-    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.pages.encryption_ui import (
+        KEFEnvelope,
+        OVERRIDE_LABEL,
+        OVERRIDE_MODE,
+        OVERRIDE_ITERATIONS,
+        OVERRIDE_VERSION,
+    )
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     print("default is to seal plaintext using defaults w/ least interaction")
@@ -1437,7 +1466,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     assert page.seal_ui(b"plain text") == None
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
-    print("overrides param is a list, ie: ['label']")
+    print("overrides param is a list, ie: [OVERRIDE_LABEL]")
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
@@ -1450,7 +1479,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     page.label = "my ID"
-    sealed = page.seal_ui(b"plain text", overrides=["label"])
+    sealed = page.seal_ui(b"plain text", overrides=[OVERRIDE_LABEL])
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert isinstance(sealed, bytes) and len(sealed) > 8
     ctx.display.draw_centered_text.assert_has_calls(
@@ -1460,7 +1489,9 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
         ]
     )
 
-    print("overrides param is a list, ie: ['iterations', 'mode', 'label']")
+    print(
+        "overrides param is a list, ie: [OVERRIDE_MODE, OVERRIDE_ITERATIONS, OVERRIDE_LABEL]"
+    )
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
@@ -1475,7 +1506,9 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     page.label = "my ID"
-    sealed = page.seal_ui(b"plain text", overrides=["mode", "iterations", "label"])
+    sealed = page.seal_ui(
+        b"plain text", overrides=[OVERRIDE_MODE, OVERRIDE_ITERATIONS, OVERRIDE_LABEL]
+    )
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert isinstance(sealed, bytes) and len(sealed) > 8
     ctx.display.draw_centered_text.assert_has_calls(
@@ -1492,7 +1525,9 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
         mocker.MagicMock(return_value=I_VECTOR),
     )
 
-    print("overrides param is a list, ie: ['iterations', 'version', 'label']")
+    print(
+        "overrides param is a list, ie: [OVERRIDE_ITERATIONS, OVERRIDE_VERSION, OVERRIDE_LABEL]"
+    )
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
@@ -1510,7 +1545,9 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     page = KEFEnvelope(ctx)
     page.label = "my ID"
     assert page.version == None
-    sealed = page.seal_ui(b"plain text", overrides=["iterations", "version", "label"])
+    sealed = page.seal_ui(
+        b"plain text", overrides=[OVERRIDE_ITERATIONS, OVERRIDE_VERSION, OVERRIDE_LABEL]
+    )
     assert page.version == 21
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert isinstance(sealed, bytes) and len(sealed) > 8
