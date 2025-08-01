@@ -512,6 +512,25 @@ class EncryptMnemonic(Page):
         self.ctx = ctx
         self.mode_name = Settings().encryption.version
 
+    def _encrypt_mnemonic_with_label(self):
+        """Helper method to encrypt mnemonic with label selection."""
+
+        kef_envelope = KEFEnvelope(self.ctx)
+        default_label = self.ctx.wallet.key.fingerprint_hex_str()
+        kef_envelope.label = default_label
+        mnemonic_bytes = bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic)
+        encrypted_data = kef_envelope.seal_ui(
+            mnemonic_bytes,
+            overrides=["label"],
+            dflt_label_prompt=t("Use fingerprint as ID?"),
+            dflt_label_affirm=True,
+        )
+        if encrypted_data is None:
+            return None, None
+
+        mnemonic_id = kef_envelope.label
+        return encrypted_data, mnemonic_id
+
     def encrypt_menu(self):
         """Menu with mnemonic encryption output options"""
 
@@ -536,20 +555,10 @@ class EncryptMnemonic(Page):
 
         from ..encryption import MnemonicStorage
 
-        kef_envelope = KEFEnvelope(self.ctx)
-        default_label = self.ctx.wallet.key.fingerprint_hex_str()
-        kef_envelope.label = default_label
-        mnemonic_bytes = bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic)
-        encrypted_data = kef_envelope.seal_ui(
-            mnemonic_bytes,
-            overrides=["label"],
-            dflt_label_prompt=t("Use fingerprint as ID?"),
-            dflt_label_affirm=True,
-        )
+        encrypted_data, mnemonic_id = self._encrypt_mnemonic_with_label()
         if encrypted_data is None:
             return
 
-        mnemonic_id = kef_envelope.label
         mnemonic_storage = MnemonicStorage()
         if mnemonic_id in mnemonic_storage.list_mnemonics(sd_card):
             self.flash_error(
@@ -575,16 +584,7 @@ class EncryptMnemonic(Page):
     def encrypted_qr_code(self):
         """Exports an encryprted mnemonic QR code"""
 
-        kef_envelope = KEFEnvelope(self.ctx)
-        default_label = self.ctx.wallet.key.fingerprint_hex_str()
-        kef_envelope.label = default_label
-        mnemonic_bytes = bip39.mnemonic_to_bytes(self.ctx.wallet.key.mnemonic)
-        encrypted_data = kef_envelope.seal_ui(
-            mnemonic_bytes,
-            overrides=["label"],
-            dflt_label_prompt=t("Use fingerprint as ID?"),
-            dflt_label_affirm=True,
-        )
+        encrypted_data, mnemonic_id = self._encrypt_mnemonic_with_label()
         if encrypted_data is None:
             return
 
@@ -593,7 +593,7 @@ class EncryptMnemonic(Page):
 
         # All currently offered versions should encode to base43
         qr_data = base_encode(encrypted_data, 43)
-        seed_qr_view = SeedQRView(self.ctx, data=qr_data, title=kef_envelope.label)
+        seed_qr_view = SeedQRView(self.ctx, data=qr_data, title=mnemonic_id)
         seed_qr_view.display_qr(allow_export=True)
 
 
