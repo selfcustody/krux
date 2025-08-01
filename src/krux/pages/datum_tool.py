@@ -312,8 +312,8 @@ class DatumToolMenu(Page):
             updated = prompt_for_text_update(
                 self.ctx,
                 text if text else "",
-                t("Proceed?") + ' "' + text + '"' if text else "",
-                prompt_highlight_prefix="?" if text else "",
+                t("Proceed?"),
+                prompt_highlight_prefix="?",
                 title=t("Custom Text"),
                 keypads=[
                     LETTERS,
@@ -404,7 +404,7 @@ class DatumTool(Page):
                 updated = prompt_for_text_update(
                     self.ctx,
                     self.title,
-                    t("Update QR Label?") + ' "' + self.title + '"',
+                    t("Update QR Label?"),
                     dflt_affirm=False,
                     prompt_highlight_prefix="?",
                     title=t("QR Label"),
