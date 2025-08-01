@@ -275,6 +275,29 @@ def test_change_passphrase_menu(mocker, amigo, tdata):
     assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_WITH_PASSPHRASE
 
 
+def test_passphrase_cancel_editor(mocker, amigo, tdata):
+    # User accepts initial prompt but cancels in passphrase editor menu
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.pages import MENU_CONTINUE
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Accept "Add or change wallet passphrase?" prompt
+        BUTTON_PAGE_PREV,  # Move to Back in passphrase menu
+        BUTTON_ENTER,  # Press Back to exit passphrase menu
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    home = Home(ctx)
+    result = home.passphrase()
+
+    assert result == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
 def test_customize_wallet_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
@@ -1583,3 +1606,141 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
             ),
         ]
     )
+
+
+def test_passphrase_decline_prompt(mocker, amigo, tdata):
+    # User declines the initial "Add or change wallet passphrase?" prompt
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_PAGE_PREV, BUTTON_ENTER
+    from krux.pages import MENU_CONTINUE
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Decline "Add or change wallet passphrase?" prompt
+        BUTTON_ENTER,  # Press No
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    home = Home(ctx)
+    result = home.passphrase()
+
+    assert result == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_customize_decline_prompt(mocker, amigo, tdata):
+    # User declines the initial "Proceed?" prompt for customize
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_PAGE_PREV, BUTTON_ENTER
+    from krux.pages import MENU_CONTINUE
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Decline "Proceed?" prompt for customize
+        BUTTON_ENTER,  # Press No
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    home = Home(ctx)
+    result = home.customize()
+
+    assert result == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_bip85_decline_prompt(mocker, amigo, tdata):
+    # User declines to derive BIP85 entropy when prompted
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_PAGE, BUTTON_ENTER
+    from krux.pages import MENU_CONTINUE
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Move to "No" on "Derive BIP85 entropy?"
+        BUTTON_ENTER,  # Press "No"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    home = Home(ctx)
+    result = home.bip85()
+
+    assert result == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_sign_message_selection(mocker, amigo, tdata):
+    # User selects Message from Sign menu, then backs out from message signing interface
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages import MENU_CONTINUE
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Move to Message option in Sign menu
+        BUTTON_ENTER,  # Press Message
+        BUTTON_ENTER,  # Acknowledge any message display
+        BUTTON_PAGE,  # Move to "Load from SD card" option
+        BUTTON_PAGE,  # Move to "Back" option
+        BUTTON_ENTER,  # Press Back to exit message load menu
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    home = Home(ctx)
+    result = home.sign()
+
+    assert result == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_sign_message_status_return(mocker, amigo, tdata):
+    # User selects Message, run_loop returns with status
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.pages import MENU_CONTINUE
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Move to Message
+        BUTTON_ENTER,  # Press Message - will return 'SUCCESS'
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    home = Home(ctx)
+    mocker.patch.object(home, "sign_message", return_value="SUCCESS")
+    result = home.sign()
+
+    assert result == "SUCCESS"
+    assert ctx.input.wait_for_button.call_count == 2
+
+
+def test_load_psbt_invalid_method(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_PAGE, BUTTON_ENTER
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Move to "Load from SD card"
+        BUTTON_PAGE,  # Move to "Back"
+        BUTTON_ENTER,  # Press "Back"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    home = Home(ctx)
+    data, qr_format, psbt_filename = home.load_psbt()
+
+    assert data is None
+    assert qr_format is None
+    assert psbt_filename == ""
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
