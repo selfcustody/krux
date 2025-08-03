@@ -211,7 +211,12 @@ class SignMessage(Utils):
 
     def _sign_at_address_from_sd(self, data):
         """Message signed at a derived Bitcoin address - SD card"""
-        data = data.decode() if isinstance(data, bytes) else data
+
+        try:
+            data = data.decode()
+        except:
+            return None
+
         lines = [line.strip() for line in data.splitlines() if line.strip()]
         if len(lines) == 0:
             return None
@@ -265,7 +270,7 @@ class SignMessage(Utils):
         address="",
     ):
         """Exports the message signature to a QR code or SD card"""
-        sign_menu = Menu(
+        submenu = Menu(
             self.ctx,
             [
                 (t("Sign to QR code"), lambda: None),
@@ -276,17 +281,17 @@ class SignMessage(Utils):
             ],
             back_status=lambda: None,
         )
-        index, _ = sign_menu.run_loop()
+        index, _ = submenu.run_loop()
 
-        if index == 2:
+        if index == submenu.back_index:
             return MENU_CONTINUE
 
         pubkey = binascii.hexlify(self.ctx.wallet.key.account.sec()).decode()
 
-        if index == 0:
+        if index == 0:  # QR
             at_address = address != ""
             self._export_to_qr(sig, pubkey, qr_format, at_address)
-        elif self.has_sd_card():
+        elif self.has_sd_card():  # SD
             self._export_to_sd(sig, pubkey, message_filename, message, address)
         return MENU_CONTINUE
 

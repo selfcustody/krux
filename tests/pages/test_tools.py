@@ -25,7 +25,6 @@ def mock_file_operations(mocker):
         "os.listdir",
         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
     )
-    mocker.patch("builtins.open", mocker.mock_open(read_data=SEEDS_JSON))
 
 
 def test_tools_menu(m5stickv, mocker):
@@ -126,14 +125,18 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         BUTTON_ENTER,  # Leave
     ]
 
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    with patch("krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
-        tool = Tools(ctx)
-        tool.rm_stored_mnemonic()
-    # Fourth mnemonic in the list (ECB from SD) will be deleted
-    # Assert only CBC remains
-    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
-    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
+    with patch("builtins.open", mocker.mock_open(read_data=SEEDS_JSON)):
+        with patch(
+            "krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)
+        ) as m:
+            ctx = create_ctx(mocker, BTN_SEQUENCE)
+            tool = Tools(ctx)
+            tool.rm_stored_mnemonic()
+            # Fourth mnemonic in the list (ECB from SD) will be deleted
+            # Assert only CBC remains
+            padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
+            m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
+
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 

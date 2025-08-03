@@ -15,7 +15,6 @@ def mock_file_operations(mocker):
             ]
         ),
     )
-    mocker.patch("builtins.open", mocker.mock_open(read_data=""))
     mocker.patch("os.remove", mocker.mock_open(read_data=""))
 
 
