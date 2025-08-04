@@ -250,7 +250,7 @@ class Addresses(Page):
                             wdt.feed()
 
                 self.flash_text(
-                    t("Saved to SD card:") + "\n%s" % filename,
+                    t("Saved to SD card:") + "\n\n%s" % filename,
                     highlight_prefix=":",
                 )
         except OSError:

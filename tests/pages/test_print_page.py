@@ -10,10 +10,9 @@ TEST_QR_CODE = bytearray(
 
 
 def test_printer_not_defined(mocker, amigo):
-    from krux.input import BUTTON_ENTER
     from krux.pages.print_page import PrintPage
 
-    ctx = create_ctx(mocker, [BUTTON_ENTER], printer=None)
+    ctx = create_ctx(mocker, [], printer=None)
     test_print = PrintPage(ctx)
     mocker.spy(test_print, "flash_error")
 
@@ -24,11 +23,8 @@ def test_printer_not_defined(mocker, amigo):
 def test_print_qr_code(mocker, amigo):
     """Test that the print tool is called with the correct text"""
     from krux.pages.print_page import PrintPage
-    from krux.input import BUTTON_ENTER
 
-    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm print, then leave
-
-    ctx = create_ctx(mocker, BTN_SEQUENCE, printer=MockPrinter())
+    ctx = create_ctx(mocker, [], printer=MockPrinter())
     with patch(
         "krux.printers.thermal.AdafruitPrinter.print_qr_code"
     ) as mocked_print_qr_code:

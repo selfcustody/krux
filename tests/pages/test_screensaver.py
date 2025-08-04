@@ -38,3 +38,4 @@ def test_screensaver_m5stickv(m5stickv, mocker):
         SPLASH[5], 112, theme.bg_color, theme.fg_color
     )
     ctx.input.wait_for_button.assert_called()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)

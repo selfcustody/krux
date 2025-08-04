@@ -194,6 +194,8 @@ def test_fail_hw_acc_hashing(m5stickv, mocker, mock_hw_acc_hashing):
         ]
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_fail_sha256(m5stickv, mocker, mock_hashlib_sha256):
     """Directly test hw_acc_hashing() sha256 hitting the except block"""
@@ -225,6 +227,8 @@ def test_fail_sha256(m5stickv, mocker, mock_hashlib_sha256):
             )
         ]
     )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_fail_hexilify(m5stickv, mocker, mock_hexlify_endianess):
@@ -260,6 +264,8 @@ def test_fail_hexilify(m5stickv, mocker, mock_hexlify_endianess):
         ]
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_fail_b2a_base64(m5stickv, mocker, mock_b2a_base64_endianess):
     """Directly test hw_acc_hashing() hitting the except block"""
@@ -293,6 +299,8 @@ def test_fail_b2a_base64(m5stickv, mocker, mock_b2a_base64_endianess):
             )
         ]
     )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_fail_deflate_compression(m5stickv, mocker, mock_deflate):
@@ -337,12 +345,15 @@ def test_fail_deflate_compression(m5stickv, mocker, mock_deflate):
         ]
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_fail_maixpy_code(m5stickv, mocker, mock_maixpy_code):
     from krux.pages.device_tests import DeviceTests
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
-    ctx = create_ctx(mocker, (BUTTON_PAGE_PREV, BUTTON_ENTER))
+    BTN_SEQUENCE = (BUTTON_PAGE_PREV, BUTTON_ENTER)
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
     page.test_suite()
 
@@ -365,12 +376,15 @@ def test_fail_maixpy_code(m5stickv, mocker, mock_maixpy_code):
         ]
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_fail_zlib_code(m5stickv, mocker, mock_zlib_code):
     from krux.pages.device_tests import DeviceTests
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
-    ctx = create_ctx(mocker, (BUTTON_PAGE_PREV, BUTTON_ENTER))
+    BTN_SEQUENCE = (BUTTON_PAGE_PREV, BUTTON_ENTER)
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = DeviceTests(ctx)
     page.test_suite()
 
@@ -393,6 +407,8 @@ def test_fail_zlib_code(m5stickv, mocker, mock_zlib_code):
         ]
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_run_test_suite_only(m5stickv, mocker):
     from krux.pages.device_tests import DeviceTests
@@ -410,6 +426,8 @@ def test_run_test_suite_only(m5stickv, mocker):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
     )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_run_test_suite_plus_individual_test(m5stickv, mocker):
@@ -432,6 +450,8 @@ def test_run_test_suite_plus_individual_test(m5stickv, mocker):
         [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_run_intreactively(m5stickv, mocker):
     from krux.pages.device_tests import DeviceTests
@@ -453,6 +473,8 @@ def test_run_intreactively(m5stickv, mocker):
         [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_run_one_test_test_hw_acc_hashing(m5stickv, mocker):
     from krux.pages.device_tests import DeviceTests
@@ -472,6 +494,8 @@ def test_run_one_test_test_hw_acc_hashing(m5stickv, mocker):
     page.run_one_test(page.hw_acc_hashing)
     assert page.results == [(page.hw_acc_hashing, True)]
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_run_one_test_deflate_compression(m5stickv, mocker):
     from krux.pages.device_tests import DeviceTests
@@ -490,6 +514,8 @@ def test_run_one_test_deflate_compression(m5stickv, mocker):
     page.results = [(page.deflate_compression, False)]
     page.run_one_test(page.deflate_compression)
     assert page.results == [(page.deflate_compression, True)]
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_run_one_test_touch_gestures(amigo, mocker):
@@ -523,6 +549,8 @@ def test_run_one_test_touch_gestures(amigo, mocker):
     page.run_one_test(page.touch_gestures)
     assert page.results == [(page.touch_gestures, True)]
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_run_one_test_fail_touch_gestures(amigo, mocker):
     from krux.pages.device_tests import DeviceTests
@@ -551,6 +579,8 @@ def test_run_one_test_fail_touch_gestures(amigo, mocker):
     page.run_one_test(page.touch_gestures)
     assert page.results == [(page.touch_gestures, False)]
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_run_one_test_without_touch_gestures(m5stickv, mocker):
     from krux.pages.device_tests import DeviceTests
@@ -569,3 +599,5 @@ def test_run_one_test_without_touch_gestures(m5stickv, mocker):
     page.results = [(page.touch_gestures, False)]
     page.run_one_test(page.touch_gestures)
     assert page.results == [(page.touch_gestures, True)]
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

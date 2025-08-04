@@ -379,7 +379,8 @@ class SeedQRView(Page):
 
                 bmp_img.save(SDHandler.PATH_STR % new_filename)
                 self.flash_text(
-                    t("Saved to SD card:") + "\n%s" % new_filename, highlight_prefix=":"
+                    t("Saved to SD card:") + "\n\n%s" % new_filename,
+                    highlight_prefix=":",
                 )
         except:
             self.flash_text(t("SD card not detected."))
