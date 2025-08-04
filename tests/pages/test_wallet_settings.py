@@ -34,6 +34,7 @@ def test_type_passphrase_esc(m5stickv, mocker):
     test_passphrase = passphrase_editor.load_passphrase_menu(ctx.key.mnemonic)
 
     assert test_passphrase is None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_qr_passphrase(m5stickv, mocker):

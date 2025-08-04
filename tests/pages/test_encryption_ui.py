@@ -146,6 +146,8 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     key = key_generator.encryption_key()
     assert key == "short text"
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
     from krux.wallet import Wallet
@@ -463,6 +465,8 @@ def test_load_encrypted_from_flash(m5stickv, mocker):
         words = encrypted_mnemonics.load_from_storage()
     assert words == ECB_WORDS.split()
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_load_encrypted_from_sd(m5stickv, mocker, mock_file_operations):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
@@ -478,6 +482,8 @@ def test_load_encrypted_from_sd(m5stickv, mocker, mock_file_operations):
         encrypted_mnemonics = LoadEncryptedMnemonic(ctx)
         words = encrypted_mnemonics.load_from_storage()
     assert words == ECB_WORDS.split()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_encrypted_from_flash_wrong_key(m5stickv, mocker):
@@ -662,7 +668,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_called_with(evidence)
 
     print("test w/ non-kef bytes")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, non_kef)
     except ValueError:
@@ -680,7 +686,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_called_with(evidence)
 
     print("test with non-kef hex")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, hexlify(non_kef).decode())
     except ValueError:
@@ -689,7 +695,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_not_called()
 
     print("test with invalid hex-ish str")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, hexlify(non_kef).decode() + ":`")
     except ValueError:
@@ -707,7 +713,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_called_with(evidence)
 
     print("test with non-kef HEX")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, hexlify(non_kef).decode().upper())
     except ValueError:
@@ -716,7 +722,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_not_called()
 
     print("test with invalid HEX-ish str")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, hexlify(non_kef).decode().upper() + ":`")
     except ValueError:
@@ -734,7 +740,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_called_with(evidence)
 
     print("test with non-kef base32")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, base_encode(non_kef, 32))
     except ValueError:
@@ -743,7 +749,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_not_called()
 
     print("test with invalid base32-ish str")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, base_encode(non_kef, 32) + "8@")
     except ValueError:
@@ -761,7 +767,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_called_with(evidence)
 
     print("test with non-kef base43")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, base_encode(non_kef, 43))
     except ValueError:
@@ -770,7 +776,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_not_called()
 
     print("test with invalid base43-ish str")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, base_encode(non_kef, 43) + ":@")
     except ValueError:
@@ -788,7 +794,7 @@ def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
     ctx.display.to_lines.assert_called_with(evidence)
 
     print("test with non-kef base64")
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
     try:
         decrypt_kef(ctx, base_encode(non_kef, 64))
     except ValueError:
@@ -1609,18 +1615,20 @@ def test_kefenvelope_unseal_ui(m5stickv, mocker):
     assert plain == b"plain text"
 
     print("can optionally display the decrypted plaintext")
-    ctx = create_ctx(mocker, BTN_SEQUENCE + [BUTTON_ENTER])
+    BTN_SEQUENCE = BTN_SEQUENCE + [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     plain = page.unseal_ui(sealed_text, display_plain=True)
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE) + 1
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert plain == b"plain text"
     ctx.display.draw_centered_text.assert_has_calls([mocker.call("plain text")])
 
     print("can optionally display the decrypted plain hexlified bytes")
-    ctx = create_ctx(mocker, BTN_SEQUENCE + [BUTTON_ENTER])
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     plain = page.unseal_ui(sealed_binary, display_plain=True)
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE) + 1
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert plain == b"\xde\xad\xbe\xef"
     ctx.display.draw_centered_text.assert_has_calls([mocker.call("0xdeadbeef")])
 

@@ -108,6 +108,8 @@ def test_public_key_show_text(mocker, m5stickv, tdata):
             draw_text_calls, any_order=True
         )
 
+        assert ctx.input.wait_for_button.call_count == len(sequence)
+
 
 def test_public_key_show_qrcode(
     mocker,

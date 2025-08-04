@@ -65,12 +65,16 @@ def test_prompt_m5stickv(mocker, m5stickv, mock_page_cls):
     page = mock_page_cls(ctx)
 
     # Enter pressed
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_ENTER])
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     assert page.prompt("test prompt") == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     # Page pressed
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_PAGE])
+    BTN_SEQUENCE = [BUTTON_PAGE]
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     assert page.prompt("test prompt") == False
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_prompt_amigo(mocker, amigo, mock_page_cls):
@@ -80,31 +84,38 @@ def test_prompt_amigo(mocker, amigo, mock_page_cls):
     page = mock_page_cls(ctx)
 
     # Enter pressed
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_ENTER])
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     assert page.prompt("test prompt") == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     # Page, than Enter pressed
     page_press = [BUTTON_PAGE, BUTTON_ENTER]
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=page_press)
     assert page.prompt("test prompt") == False
+    assert ctx.input.wait_for_button.call_count == len(page_press)
 
     ctx.input.buttons_active = False
     # Index 1 = YES pressed
+    BTN_SEQUENCE = [BUTTON_TOUCH]
     ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[1]))
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     assert page.prompt("test prompt") == True
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     # Index 0 = No pressed
     ctx.input.touch = mocker.MagicMock(current_index=mocker.MagicMock(side_effect=[0]))
-    ctx.input.wait_for_button = mocker.MagicMock(side_effect=[BUTTON_TOUCH])
+    ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     assert page.prompt("test prompt") == False
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_display_qr_code(mocker, m5stickv, mock_page_cls):
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
 
-    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = mock_page_cls(ctx)
 
     # Test QR code display
@@ -116,13 +127,16 @@ def test_display_qr_code(mocker, m5stickv, mock_page_cls):
         TEST_QR_DATA_IMAGE, 0, 0, 0
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_display_qr_code_light_theme(mocker, m5stickv, mock_page_cls):
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
     from krux.themes import theme, WHITE
 
-    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = mock_page_cls(ctx)
 
     # Mock light theme background color
@@ -135,6 +149,8 @@ def test_display_qr_code_light_theme(mocker, m5stickv, mock_page_cls):
     assert ctx.display.draw_qr_code.call_args == mocker.call(
         TEST_QR_DATA_IMAGE, 0, 0, 0, light_color=WHITE
     )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_display_qr_code_loop_through_brightness(mocker, m5stickv, mock_page_cls):
@@ -231,6 +247,7 @@ def test_keypad_esc_no_exit(mocker, amigo):
     page.capture_from_keypad("test", [LETTERS])
 
     assert ctx.input.touch.set_regions.call_count == 4
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
 
 def test_keypad_swipe_hint_is_shown_after_more_keypress_and_cleared_after_other_keypress(

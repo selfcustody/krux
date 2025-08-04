@@ -317,6 +317,7 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
@@ -346,6 +347,7 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
@@ -386,6 +388,7 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         login.load_key_from_qr_code()
 
         assert ctx.wallet.key.mnemonic == c_seed_qr[1]
+        assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
@@ -415,6 +418,7 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
@@ -445,6 +449,7 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
@@ -475,6 +480,7 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
@@ -511,6 +517,7 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 ############### load words from text tests
@@ -963,6 +970,7 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
     login.load_key_from_hexadecimal()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
@@ -1029,6 +1037,7 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
     login.load_key_from_hexadecimal()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
@@ -1073,6 +1082,7 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
     login.load_key_from_octal()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
@@ -1123,7 +1133,6 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_ENTER,  # Load wallet
-            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = (
@@ -1136,6 +1145,7 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
     login.load_key_from_octal()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_leaving_keypad(mocker, amigo):
@@ -1270,6 +1280,7 @@ def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
     login.load_key_from_tiny_seed()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
@@ -1298,6 +1309,7 @@ def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
     login.load_key_from_tiny_seed()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
@@ -1325,6 +1337,7 @@ def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
     login.load_key_from_tiny_seed_image()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
@@ -1360,6 +1373,7 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
     login.load_key_from_1248()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_customization_while_loading_wallet(amigo, mocker):
@@ -1399,8 +1413,6 @@ def test_about(mocker, multiple_devices):
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # past qr_code
-        BUTTON_PAGE,  # skip test-suite to Back
-        BUTTON_ENTER,  # go Back
     ]
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -1451,6 +1463,7 @@ def test_about(mocker, multiple_devices):
     )
 
     ctx.input.wait_for_button.assert_called()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_auto_complete_qr_words(m5stickv, mocker):

@@ -235,6 +235,8 @@ def test_load_desc_without_change(mocker, m5stickv, tdata):
         not ctx.wallet.has_change_addr()
     )  # the loaded descriptor doesn't have change addr
 
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
 
 def test_cancel_load_desc_without_change(mocker, m5stickv, tdata):
     import krux
@@ -282,6 +284,8 @@ def test_cancel_load_desc_without_change(mocker, m5stickv, tdata):
 
     assert not ctx.wallet.is_loaded()  # continue unloaded
     assert ctx.wallet.has_change_addr()  # single-sig per default has change addr
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
 
 def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):

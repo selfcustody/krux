@@ -258,7 +258,6 @@ def test_edit_existing_mnemonic_using_touch(mocker, amigo):
 
 def test_button_used_but_touch_enabled(mocker, amigo):
     from krux.pages.mnemonic_editor import MnemonicEditor
-    from krux.input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE_PREV
 
     mnemonic = "olympic cabbage tissue route sense program under choose bean emerge velvet vendor"
     ctx = create_ctx(mocker, None)

@@ -28,7 +28,7 @@ def test_load_file(m5stickv, mocker, mock_file_operations):
                 prompt=False, only_get_filename=only_get_filename
             )
 
-        assert len(BTN_SEQUENCE) == ctx.input.wait_for_button.call_count
+        assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
         assert file_name == "otherfile"
         if only_get_filename:
             assert data is None
