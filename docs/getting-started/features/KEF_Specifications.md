@@ -1,36 +1,66 @@
 # KEF Encryption Format -- Specification
+...`The K stands for "KEF"` --anon
+
 
 ## 1. Overview
 
-This system encrypts arbitrary plaintexts into a **versioned, self-describing envelope** that includes:
+This system encrypts arbitrary plaintext into a **versioned, self-describing KEF envelope** which includes:
 
-- custom identity/label `len_id` and `id`
-- Version `v`
-- pbkdf2-hmac iterations `i`
-- and cipher-payload `cpl`
+* custom identity/label `len_id` and `id`
+* Version `v`
+* pbkdf2-hmac iterations `i`
+* and cipher-payload `cpl`
 
-where cipher-payload consists of:
+where cipher-payload `cpl` consists of:
 
-- Initialization Vector (if applicable) `IV`
-- ciphertext `ct`
-- and authentication/validation data `auth`
+* Initialization-Vector/Nonce (if applicable) `IV`
+* ciphertext
+* and authentication/validation data `auth`
 
-The envelope supports multiple forms of **mode-of-operation**, **authentication strategy**, **padding**, and **compression**, all selected via a numeric version code (0 - 21).
+KEF versions offer combinations of different **modes-of-operation**, **authentication strategies**, **padding strategies**, and **compression**, all selected via a numeric version code (0 - 21).
 
-All versions derive the encryption key `k` as:
+Currently, all versions use AES and derive the 256-bit encryption key `k` as:
 ```
 k = pbkdf2_hmac('sha256', K, id, i)
 ```
 
 where:
 
-- `K` = user-provided password/key material (bytes; if str: non-normalized encode as utf-8)
-- `id` = salt (variable-length, prepended to envelope; if str: non-normalized encode as utf-8)
-- `i` = iteration count (3 bytes, big-endian; if <= 10,000: multiplied by 10,000)
+* `K` = user-provided password/key material (bytes; if str: non-normalized encode as utf-8)
+* `id` = salt (variable-length, prepended to envelope; bytes: if str: non-normalized encode as utf-8)
+* `i` = iteration count (3 bytes, big-endian; if <= 10,000: multiplied by 10,000)
 
-## 2. Envelope Structure (General Format)
 
-All encrypted outputs follow this layout:
+## 2. Generalizations Regarding Implementation
+
+Above all, this specification aims to be supported by as many projects as would consider adoptng it, so that users are not "locked" into a particular project when recovering their secrets.  Corrections and refinement to this specification are welcome and appreciated. Proposals for more `versions` are welcome, provided they offer "value" to the user and "fit" within the scope of this system.  Once released, because we can never know how many KEF envelopes may exist in-the-wild, changes to any particular version must remain backwards compatible at least for decryption.  Adopting implementations are free to support any KEF versions they wish to support, for decryption-only or for both encryption and decryption -- with the expectation that claims-of-support made are clear and specific to what is supported.  Reference: latest [KEF implementation](https://github.com/selfcustody/krux/blob/develop/src/krux/kef.py) and [KEF test-suite](https://github.com/selfcustody/krux/blob/develop/tests/test_kef.py).
+
+* Be strict while encrypting.  Be tolerant -- and non-specific about errors, when decrypting.
+
+* At its base, **a KEF envelope is a format of bytes -- so are all of its inputs**.  Remember this when converting strings gathered for the encryption/decryption `key` and `id`.  Consider being strict about offering a reasonably minimal set of characters, common and available on other devices and/or international keyboards when encrypting -- then encode unicode codepoints directly to their utf-8 representations without normalization.  For decryption, more characters could be offered when gathering the `key` so that secrets may be recovered, and multiple normalization strategies may be tried.  Be capable of gathering these inputs as bytes, either directly or via hex/base64 conversion if necessary, to enable recovery.  Do NOT assume that a user originally used a particular implementation to encrypt a KEF envelope.
+
+* Not all KEF `versions` offer the same security guarantees, so implementors must take care to protect against "unsafe" usage.  As already mentioned: be strict and fail to encrypt when "unsafe"; be tolerant and vague while decrypting. Support for decrypt-only on a particular version is perfectly valid should an implementation choose to "nudge" users towards a more secure version where it supports full encrypt/decrypt functionality.
+
+    * When mode-of-operation is ECB, repeated blocks would leak patterns within ciphertext.  Therefore, refuse to encrypt using mode ECB whenever duplicate blocks are detected. Consider a compressed version which may resolve this.
+
+    * When "unsafe" NUL padding is used for block modes, problems to unpad can arise decrypting where valid NUL bytes are confused with removable padding.
+        * If `auth` is appended to plaintext before padding AND the `auth` bytes end in 0x00: be strict -- refuse to encrypt.  Consider a version with safe padding.
+        * If `auth` is appended to ciphertext after padding/encryption AND the `plaintext` bytes end in 0x00: be strict -- refuse to encrypt.  Consider a version with safe padding.
+        * Do not assume that other implementations adhere to the above.  Be tolerant and make "reasonable" efforts to successfully recover secrets when decrypting.  Offering a warning to users AFTER successful decryption in this case may be appropriate.
+
+* Modes which require an `IV` (or nonce) should take precautions to ensure that this value is random and not reused. ie: Natural entropy captured from camera sensor (user validated and/or analyzed to ensure sensor is working / high entropy).
+
+* Outside the strict scope that **KEF envelopes are a format of bytes** but related to this topic: implementations may be presented with encoded strings that are likely to represent bytes.  For instance: base64, base43 (from electrum), base32, or hex might be representations of a KEF Envelope that was previously encoded for transport.  As you continue reading, it will become clear that with any bytestring, one may recognize a KEF envelope by:
+    1. reading the first byte as an integer `len_id`,
+    2. jumping that many bytes, over the `id`, to read the next byte as an integer `version`,
+    3. if that version represents a known and supported KEF version, then the rest of the envelope may be parsed via that version's KEF rules.
+    4. If parsing succeeds w/o errors, it is likely to be a KEF envelope and a decryption UI should be offered to the user.
+    While the user may know, the process instance of a KEF implementation will learn definitively, only AFTER a successful decryption, that a bytestring was indeed a KEF envelope.  If at any point along this process, an implementation finds that `version` is unknown/disabled, or if parsing fails, the expected action is NOT TO RAISE SPECIFIC ERRORS regarding this inspection. Rather, the appropriate action is to assume it was not a KEF envelope and to treat the data under another context: ie: "Unknown".  Similarly, as mentioned above, being vague about errors during decryption implies that "Failed!" may be a sufficient response for any error, instead of leaking to a potential attacker specific details about the failure.
+
+
+## 3. Common Structure of a KEF Envelope
+
+All KEF versions' encrypted outputs follow this layout:
 ```
 len_id + id + v + i + cpl
 ```
@@ -40,13 +70,18 @@ len_id + id + v + i + cpl
 | `len_id`  | 1 byte         | Length of `id` (0 - 252) |
 | `id`      | `len_id` bytes | Salt for PBKDF2 |
 | `v`       | 1 byte         | Version number |
-| `i`       | 3 bytes        | Iteration count (big-endian) |
-| `cpl`     | Variable       | Cipher payload (IV + ciphertext + auth) |
+| `i`       | 3 bytes        | Iteration count (big-endian; if <= 10,000: *= 10,000) |
+| `cpl`     | Variable       | Cipher PayLoad (IV + ciphertext + auth) |
 
-The `cpl` structure varies by version.   
+The Cipher PayLoad `cpl` structure varies by version.   
 
 
-### Version 0: AES-ECB v1 (Legacy BIP39 Encryption)
+## 4. Specific Version Details
+
+KEF Envelope details for currently available versions are below. Each section begins with a pre-formated `self-doc` text built from the reference implementation's test-suite (using KEF `VERSION` constants as KEF's rule-set).  The rich-formatted text which follows was initially AI-generated -- prompted with the `self-doc` text, then subsequently currated and edited by hand.
+
+
+### Version 0: "AES-ECB v1"
 
 ```
 [AES-ECB v1] KEF bytes: len_id + id + v + i + cpl
@@ -61,15 +96,16 @@ pad: NUL
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: ECB
-- **Padding**: NUL bytes to AES block boundary (16-byte)
-- **Authentication**: First 16 bytes of `SHA256(plaintext)`, hidden
-- **cpl layout**: `[ciphertext]` (no IV; auth embedded before padding)
-- **Use Case**: Legacy encryption of BIP39 entropy (e.g., mnemonic seeds)
-- **Security Note**: No IV, error raised on duplicated blocks since ECB mode reveals patterns; weak padding; for backward compatibility only
+* **Mode**: ECB
+* **IV**: None
+* **Padding**: NUL bytes to block boundary
+* **Authentication**: First 16 bytes of `SHA256(plaintext)`, hidden
+* **cpl layout**: `[ciphertext]` (auth embedded before padding/encryption)
+* **Use Case**: DEPRECATED: use version 5 instead.  Legacy encryption of 16 or 32 BIP39 entropy bytes
+* **Security Note**: When encrypting: fail "unsafe" if duplicate plaintext blocks, fail "unsafe" if auth ends 0x00
 
 
-### Version 1: AES-CBC v1 (Legacy BIP39 Encryption)
+### Version 1: "AES-CBC v1"
 
 ```
 [AES-CBC v1] KEF bytes: len_id + id + v + i + cpl
@@ -85,16 +121,16 @@ pad: NUL
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: CBC
-- **IV**: 16 bytes, but **not included in auth** — potential weakness
-- **Padding**: NUL bytes to block boundary
-- **Authentication**: First 16 bytes of `SHA256(plaintext)`
-- **cpl layout**: `[iv (16)] + [ciphertext]`
-- **Use Case**: Legacy BIP39 encryption where IV randomness was introduced
-- **Security Note**: Still uses weak NUL padding and ECB-like auth; IV not covered in integrity check — **deprecated**
+* **Mode**: CBC
+* **IV**: 16 bytes
+* **Padding**: NUL bytes to block boundary
+* **Authentication**: First 16 bytes of `SHA256(plaintext)`, hidden
+* **cpl layout**: `[iv (16)] + [ciphertext]` (auth embedded before padding/encryption)
+* **Use Case**: DEPRECATED: use version 10 instead.  Legacy encryption of 16 or 32 BIP39 entropy bytes
+* **Security Note**: When encrypting: do not re-use IV, fail "unsafe" if auth ends 0x00
 
 
-### Version 5: AES-ECB (Unsafe Padding, Small High-Entropy Secrets)
+### Version 5: "AES-ECB"
    
 ```
 [AES-ECB] KEF bytes: len_id + id + v + i + cpl
@@ -109,15 +145,16 @@ auth: sha256(v + P + k)[:3]
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: ECB  
-- **Padding**: NUL bytes to AES block boundary (16-byte)
-- **Authentication**: First 3 bytes of `SHA256(version_byte + plaintext + derived_key)`
-- **cpl layout**: `[ciphertext] + [auth (3 bytes)]`
-- **Use Case**: Small, high-entropy secrets (e.g., BIP39 entropy, cryptographic keys)
-- **Security Note**: ECB mode leaks patterns; only safe for high-entropy, short inputs.   
+* **Mode**: ECB  
+* **IV**: None
+* **Padding**: NUL bytes to block boundary
+* **Authentication**: First 3 bytes of `SHA256(version_byte + plaintext + derived_key)`, exposed
+* **cpl layout**: `[ciphertext] + [auth (3)]`
+* **Use Case**: smallest KEF envelope for high-entropy secrets (BIP39 entropy, passphrase, cryptographic keys)
+* **Security Note**: When encrypting: fail "unsafe" if duplicate plaintext blocks, fail "unsafe" if plaintext ends 0x00
 
 
-### Version 6: AES-ECB +p (PKCS7 Padding, Mid-Sized Plaintext)
+### Version 6: "AES-ECB +p"
    
 ```
 [AES-ECB +p] KEF bytes: len_id + id + v + i + cpl
@@ -132,15 +169,16 @@ pad: PKCS7
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: ECB  
-- **Padding**: PKCS7 to 16-byte boundary
-- **Authentication**: First 4 bytes of `SHA256(plaintext)`
-- **cpl layout**: `[ciphertext]` (auth embedded before padding)
-- **Use Case**: Mid-sized structured data with variable length
-- **Security Note**: PKCS7 prevents padding oracle if invalid padding fails silently
+* **Mode**: ECB  
+* **IV**: None
+* **Padding**: PKCS7 to block boundary
+* **Authentication**: First 4 bytes of `SHA256(plaintext)`, hidden
+* **cpl layout**: `[ciphertext]` (auth embedded before padding/encryption)
+* **Use Case**: Mid-sized variable length plaintext
+* **Security Note**: When encrypting: fail if duplicate plaintext blocks
 
 
-### Version 7: AES-ECB +c (Compressed, PKCS7 Padding, Larger Plaintext)
+### Version 7: "AES-ECB +c"
    
 ```
 [AES-ECB +c] KEF bytes: len_id + id + v + i + cpl
@@ -155,15 +193,17 @@ pad: PKCS7
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: ECB  
-- **Compression**: `zlib.compress(P, wbits=-10)` — raw DEFLATE
-- **Input to cipher**: `[compressed_data] + [auth (4 bytes)] + [PKCS7 padding]`
-- **cpl layout**: `[ciphertext]` (no IV)
-- **Use Case**: Larger plaintexts (1–50 KB), especially repetitive data
-- **Security Note**: Compression breaks up block repetition, making ECB safer in practice
+* **Mode**: ECB  
+* **IV**: None
+* **Compression**: `zlib.compress(P, wbits=-10)`, - raw deflate
+* **Padding**: PKCS7 to block boundary
+* **Authentication**: First 4 bytes of `SHA256(plaintext)`, hidden
+* **cpl layout**: `[ciphertext]` (auth embedded after compression, before padding/encryption)
+* **Use Case**: Mid-sized variable length plaintext
+* **Security Note**: like others, when encrypting: fail if duplicate blocks -- unlikely with compression 
 
 
-### Version 10: AES-CBC (Unsafe Padding, Mnemonics & Passphrases)
+### Version 10: "AES-CBC"
    
 ```
 [AES-CBC] KEF bytes: len_id + id + v + i + cpl
@@ -179,16 +219,16 @@ auth: sha256(v + iv + P + k)[:4]
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: CBC  
-- **IV**: 16 bytes, prepended in `cpl`
-- **Padding**: NUL bytes to block boundary
-- **Authentication**: First 4 bytes of `SHA256(v + iv + P + k)`
-- **cpl layout**: `[iv (16)] + [ciphertext] + [auth (4)]`
-- **Use Case**: Mnemonics, passphrases, short secrets
-- **Security Note**: NUL padding unsafe if plaintext contains nulls or length unknown   
+* **Mode**: CBC  
+* **IV**: 16 bytes, random, prepended in `cpl`
+* **Padding**: NUL bytes to block boundary
+* **Authentication**: First 4 bytes of `SHA256(v + iv + P + k)`, exposed
+* **cpl layout**: `[iv (16)] + [ciphertext] + [auth (4)]`
+* **Use Case**: Mnemonics, passphrases, short secrets
+* **Security Note**: When encrypting: do not re-use IV, fail "unsafe" if plaintext ends 0x00
 
 
-### Version 11: AES-CBC +p (PKCS7 Padding, General Purpose)
+### Version 11: "AES-CBC +p"
    
 ```
 [AES-CBC +p] KEF bytes: len_id + id + v + i + cpl
@@ -204,16 +244,16 @@ pad: PKCS7
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
+* **Mode**: CBC  
+* **IV**: 16 bytes, random, prepended in `cpl`
+* **Padding**: PKCS7 to block boundary
+* **Authentication**: First 4 bytes of `SHA256(plaintext)`, hidden
+* **cpl layout**: `[iv] + [ciphertext]` (auth embedded before padding/encryption)
+* **Use Case**: General mid-sized plaintext
+* **Security Note**: When encrypting: do not re-use IV
 
-- **Mode**: CBC  
-- **IV**: 16 bytes, random, prepended
-- **Padding**: PKCS7
-- **Authentication**: First 4 bytes of `SHA256(plaintext)`
-- **cpl layout**: `[iv] + [ciphertext]` (auth embedded before padding)
-- **Use Case**: General mid-sized data with integrity
-- **Security Note**: PKCS7 avoids padding oracle if implementation fails silently   
 
-### Version 12: AES-CBC +c (Compressed, Larger Plaintext)
+### Version 12: "AES-CBC +c"
    
 ```
 [AES-CBC +c] KEF bytes: len_id + id + v + i + cpl
@@ -229,16 +269,17 @@ pad: PKCS7
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
+* **Mode**: CBC  
+* **IV**: 16 bytes, random, prepended in `cpl`
+* **Compression**: `zlib.compress(P, wbits=-10)`, - raw deflate
+* **Padding**: PKCS7 to block boundary
+* **Authentication**: First 4 bytes of `SHA256(compressed plaintext)`, hidden
+* **cpl layout**: `[iv (16)] + [ciphertext]` (auth embedded after compressions, before padding/encryption)
+* **Use Case**: Larger plaintext
+* **Security Note**: When encrypting: do not re-use IV
 
-- **Mode**: CBC  
-- **Compression**: `zlib(P, wbits=-10)`
-- **Input to cipher**: `[compressed_data] + [auth] + [PKCS7 padding]`
-- **cpl layout**: `[iv (16)] + [ciphertext]`
-- **Use Case**: Larger plaintexts (1–50 KB) with redundancy
-- **Security Note**: Compression reduces block repetition; CBC + IV prevents pattern leakage   
 
-
-### Version 15: AES-CTR (Stream Mode, No Padding)
+### Version 15: "AES-CTR"
    
 ```
 [AES-CTR] KEF bytes: len_id + id + v + i + cpl
@@ -253,17 +294,16 @@ auth: sha256(P)[:4]
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: CTR  
-- **IV/Nonce**: 12 bytes, prepended
-- **Padding**: None (stream cipher)
-- **Authentication**: First 4 bytes of `SHA256(plaintext)`
-- **cpl layout**: `[iv (12)] + [ciphertext]`
-- **Input to cipher**: `P + auth` → encrypted as stream
-- **Use Case**: Small to mid-sized data where padding must be avoided
-- **Security Note**: Nonce must be unique per key; CTR mode is secure if IV never repeats   
+* **Mode**: CTR  
+* **IV**: 12 bytes, random, prepended in `cpl`
+* **Padding**: None
+* **Authentication**: First 4 bytes of `SHA256(plaintext)`, hidden
+* **cpl layout**: `[iv (12)] + [ciphertext]` (auth embedded before padding/encryption)
+* **Use Case**: Small to mid-sized plaintext
+* **Security Note**: When encrypting: do not re-use IV
 
 
-### Version 16: AES-CTR +c (Compressed, Stream Mode)
+### Version 16: "AES-CTR +c"
    
 ```
 [AES-CTR +c] KEF bytes: len_id + id + v + i + cpl
@@ -278,16 +318,17 @@ auth: sha256(zlib(P, wbits=-10))[:4]
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: CTR  
-- **Compression**: `zlib(P, wbits=-10)`
-- **Input to cipher**: `[compressed_data] + [auth (4 bytes)]`
-- **cpl layout**: `[iv (12)] + [ciphertext]`
-- **No padding**: exact byte encryption
-- **Use Case**: Larger plaintexts where streaming and size matter
-- **Security Note**: Combines compression with secure stream cipher; ideal for variable-length data   
+* **Mode**: CTR  
+* **IV**: 12 bytes, random, prepended in `cpl`
+* **Compression**: `zlib.compress(P, wbits=-10)`, - raw deflate
+* **Padding**: None
+* **Authentication**: First 4 bytes of `SHA256(compressed plaintext)`, hidden
+* **cpl layout**: `[iv (12)] + [ciphertext]` (auth embedded after compression, before padding/encryption)
+* **Use Case**: Larger plaintext
+* **Security Note**: When encrypting: do not re-use IV
 
 
-### Version 20: AES-GCM (Authenticated Encryption)
+### Version 20: "AES-GCM"
    
 ```
 [AES-GCM] KEF bytes: len_id + id + v + i + cpl
@@ -302,15 +343,16 @@ auth: e.authtag[:4]
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: GCM (AEAD)  
-- **IV/Nonce**: 12 bytes, prepended
-- **Authentication**: First 4 bytes of GCM-generated authtag
-- **cpl layout**: `[iv (12)] + [ciphertext] + [auth (4)]`
-- **No padding**: stream behavior
-- **Use Case**: Small to mid-sized data requiring integrity + confidentiality
-- **Security Note**: Truncated 4-byte tag reduces forgery resistance; nonce reuse breaks security   
+* **Mode**: GCM
+* **IV/Nonce**: 12 bytes, random, prepended in `cpl`
+* **Padding**: None
+* **Authentication**: First 4 bytes of GCM-generated authtag, exposed
+* **cpl layout**: `[iv (12)] + [ciphertext] + [auth (4)]`
+* **Use Case**: DEFAULT: Small to mid-sized plaintext
+* **Security Note**: When encrypting: do not re-use IV/Nonce
 
-### Version 21: AES-GCM +c (Compressed, Authenticated)
+
+### Version 21: "AES-GCM +c"
    
 ```
 [AES-GCM +c] KEF bytes: len_id + id + v + i + cpl
@@ -325,33 +367,30 @@ auth: e.authtag[:4]
 k: pbkdf2_hmac(sha256, K, id, i)
 ```
 
-- **Mode**: GCM (AEAD)  
-- **Compression**: `zlib(P, wbits=-10)`
-- **Input to cipher**: compressed plaintext only
-- **Authentication**: First 4 bytes of GCM authtag
-- **cpl layout**: `[iv (12)] + [ciphertext] + [auth (4)]`
-- **Use Case**: Larger plaintexts (1–50 KB) with strong integrity
-- **Security Note**: Most secure version; combines AEAD, compression, and unique IVs   
+* **Mode**: GCM
+* **IV/Nonce**: 12 bytes, random, prepended in `cpl`
+* **Compression**: `zlib.compress(P, wbits=-10)`, - raw deflate
+* **Padding**: None
+* **Authentication**: First 4 bytes of GCM authtag, exposed
+* **cpl layout**: `[iv (12)] + [ciphertext] + [auth (4)]`
+* **Use Case**: DEFAULT: Larger plaintext
+* **Security Note**: When encrypting: do not re-use IV/Nonce
 
 
-## 4. Summary Table
+## 5. Summary Table
 
-| Ver | Name           | Mode  | IV? | IV Size | Padding     | Compress | Auth Method                     | Auth Size | Best For |
-|-----|----------------|-------|-----|---------|-------------|----------|----------------------------------|-----------|----------|
-| 0   | AES-ECB v1     | ECB   | No  | –       | NUL         | No       | SHA256(plaintext)[:16]          | 16 B      | Legacy BIP39 |
-| 1   | AES-CBC v1     | CBC   | Yes | 16      | NUL         | No       | SHA256(plaintext)[:16]          | 16 B      | Legacy BIP39 |
-| 5   | AES-ECB        | ECB   | No  | –       | NUL         | No       | SHA256(v+P+k)[:3]               | 3 B       | Small, high-entropy secrets |
-| 6   | AES-ECB +p     | ECB   | No  | –       | PKCS7       | No       | SHA256(plaintext)[:4]           | 4 B       | Mid-sized, structured |
-| 7   | AES-ECB +c     | ECB   | No  | –       | PKCS7       | Yes      | SHA256(compressed)[:4]          | 4 B       | Larger, repetitive data |
-| 10  | AES-CBC        | CBC   | Yes | 16      | NUL         | No       | SHA256(v+iv+P+k)[:4]            | 4 B       | Mnemonics, passphrases |
-| 11  | AES-CBC +p     | CBC   | Yes | 16      | PKCS7       | No       | SHA256(plaintext)[:4]           | 4 B       | General mid-sized |
-| 12  | AES-CBC +c     | CBC   | Yes | 16      | PKCS7       | Yes      | SHA256(compressed)[:4]          | 4 B       | Larger plaintexts |
-| 15  | AES-CTR        | CTR   | Yes | 12      | None        | No       | SHA256(plaintext)[:4]           | 4 B       | Streamed small/medium |
-| 16  | AES-CTR +c     | CTR   | Yes | 12      | None        | Yes      | SHA256(compressed)[:4]          | 4 B       | Larger data, no padding |
-| 20  | AES-GCM        | GCM   | Yes | 12      | None        | No       | GCM authtag (truncated to 4 B)  | 4 B       | Authenticated encryption |
-| 21  | AES-GCM +c     | GCM   | Yes | 12      | None        | Yes      | GCM authtag (truncated to 4 B)  | 4 B       | Secure + compressed |
-``   
-
----
-
+| Ver | Name       | Mode | IV | Padding | Compress | Authentication Method  | Auth        | Intended Use Case       |
+|-----|------------|------|----|---------|----------|------------------------|-------------|-------------------------|
+| 0   | AES-ECB v1 | ECB  | –  | NUL     | No       | SHA256(plaintext)[:16] | 16 B        | Legacy high-entropy     |
+| 1   | AES-CBC v1 | CBC  | 16 | NUL     | No       | SHA256(plaintext)[:16] | 16 B        | Legacy high-entropy     |
+| 5   | AES-ECB    | ECB  | –  | NUL     | No       | SHA256(v+P+k)[:3]      | 3 B exposed | Small, high-entropy     |
+| 6   | AES-ECB +p | ECB  | –  | PKCS7   | No       | SHA256(plaintext)[:4]  | 4 B         | General Mid-sized       |
+| 7   | AES-ECB +c | ECB  | –  | PKCS7   | Yes      | SHA256(compressed)[:4] | 4 B         | Large; if repetitive    |
+| 10  | AES-CBC    | CBC  | 16 | NUL     | No       | SHA256(v+iv+P+k)[:4]   | 4 B exposed | Small, high-entropy     |
+| 11  | AES-CBC +p | CBC  | 16 | PKCS7   | No       | SHA256(plaintext)[:4]  | 4 B         | General mid-sized       |
+| 12  | AES-CBC +c | CBC  | 16 | PKCS7   | Yes      | SHA256(compressed)[:4] | 4 B         | General large           |
+| 15  | AES-CTR    | CTR  | 12 | –       | No       | SHA256(plaintext)[:4]  | 4 B         | General mid-sized       |
+| 16  | AES-CTR +c | CTR  | 12 | –       | Yes      | SHA256(compressed)[:4] | 4 B         | General large           |
+| 20  | AES-GCM    | GCM  | 12 | –       | No       | GCM authtag[:4]        | 4 B         | Best, General mid-sized |
+| 21  | AES-GCM +c | GCM  | 12 | –       | Yes      | GCM authtag[:4]        | 4 B         | Best, General large     |
 
