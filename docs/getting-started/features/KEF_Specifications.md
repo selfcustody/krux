@@ -76,7 +76,7 @@ len_id + id + v + i + cpl
 The Cipher PayLoad `cpl` structure varies by version.   
 
 
-## 4. Specific Version Details
+## 4. KEF Versions - Details
 
 KEF Envelope details for currently available versions are below. Each section begins with a pre-formated `self-doc` text built from the reference implementation's test-suite (using KEF `VERSION` constants as KEF's rule-set).  The rich-formatted text which follows was initially AI-generated -- prompted with the `self-doc` text, then subsequently currated and edited by hand.
 
@@ -104,6 +104,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: DEPRECATED: use version 5 instead.  Legacy encryption of 16 or 32 BIP39 entropy bytes
 * **Security Note**: When encrypting: fail "unsafe" if duplicate plaintext blocks, fail "unsafe" if auth ends 0x00
 
+---
 
 ### Version 1: "AES-CBC v1"
 
@@ -129,6 +130,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: DEPRECATED: use version 10 instead.  Legacy encryption of 16 or 32 BIP39 entropy bytes
 * **Security Note**: When encrypting: do not re-use IV, fail "unsafe" if auth ends 0x00
 
+---
 
 ### Version 5: "AES-ECB"
    
@@ -153,6 +155,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: smallest KEF envelope for high-entropy secrets (BIP39 entropy, passphrase, cryptographic keys)
 * **Security Note**: When encrypting: fail "unsafe" if duplicate plaintext blocks, fail "unsafe" if plaintext ends 0x00
 
+---
 
 ### Version 6: "AES-ECB +p"
    
@@ -175,8 +178,9 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Authentication**: First 4 bytes of `SHA256(plaintext)`, hidden
 * **cpl layout**: `[ciphertext]` (auth embedded before padding/encryption)
 * **Use Case**: Mid-sized variable length plaintext
-* **Security Note**: When encrypting: fail if duplicate plaintext blocks
+* **Security Note**: When encrypting: fail "unsafe" if duplicate plaintext blocks
 
+---
 
 ### Version 7: "AES-ECB +c"
    
@@ -200,8 +204,9 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Authentication**: First 4 bytes of `SHA256(plaintext)`, hidden
 * **cpl layout**: `[ciphertext]` (auth embedded after compression, before padding/encryption)
 * **Use Case**: Mid-sized variable length plaintext
-* **Security Note**: like others, when encrypting: fail if duplicate blocks -- unlikely with compression 
+* **Security Note**: like others, when encrypting: fail "unsafe" if duplicate blocks -- unlikely with compression 
 
+---
 
 ### Version 10: "AES-CBC"
    
@@ -227,6 +232,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: Mnemonics, passphrases, short secrets
 * **Security Note**: When encrypting: do not re-use IV, fail "unsafe" if plaintext ends 0x00
 
+---
 
 ### Version 11: "AES-CBC +p"
    
@@ -252,6 +258,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: General mid-sized plaintext
 * **Security Note**: When encrypting: do not re-use IV
 
+---
 
 ### Version 12: "AES-CBC +c"
    
@@ -278,6 +285,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: Larger plaintext
 * **Security Note**: When encrypting: do not re-use IV
 
+---
 
 ### Version 15: "AES-CTR"
    
@@ -302,6 +310,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: Small to mid-sized plaintext
 * **Security Note**: When encrypting: do not re-use IV
 
+---
 
 ### Version 16: "AES-CTR +c"
    
@@ -327,6 +336,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: Larger plaintext
 * **Security Note**: When encrypting: do not re-use IV
 
+---
 
 ### Version 20: "AES-GCM"
    
@@ -351,6 +361,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: DEFAULT: Small to mid-sized plaintext
 * **Security Note**: When encrypting: do not re-use IV/Nonce
 
+---
 
 ### Version 21: "AES-GCM +c"
    
@@ -376,8 +387,9 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Use Case**: DEFAULT: Larger plaintext
 * **Security Note**: When encrypting: do not re-use IV/Nonce
 
+---
 
-## 5. Summary Table
+## 5. KEF Versions - Summary Table
 
 | Ver | Name       | Mode | IV | Padding | Compress | Authentication Method  | Auth        | Intended Use Case       |
 |-----|------------|------|----|---------|----------|------------------------|-------------|-------------------------|
@@ -385,12 +397,38 @@ k: pbkdf2_hmac(sha256, K, id, i)
 | 1   | AES-CBC v1 | CBC  | 16 | NUL     | No       | SHA256(plaintext)[:16] | 16 B        | Legacy high-entropy     |
 | 5   | AES-ECB    | ECB  | –  | NUL     | No       | SHA256(v+P+k)[:3]      | 3 B exposed | Small, high-entropy     |
 | 6   | AES-ECB +p | ECB  | –  | PKCS7   | No       | SHA256(plaintext)[:4]  | 4 B         | General Mid-sized       |
-| 7   | AES-ECB +c | ECB  | –  | PKCS7   | Yes      | SHA256(compressed)[:4] | 4 B         | Large; if repetitive    |
+| 7   | AES-ECB +c | ECB  | –  | PKCS7   | Yes      | SHA256(compressed)[:4] | 4 B         | Large; duplicate blocks |
 | 10  | AES-CBC    | CBC  | 16 | NUL     | No       | SHA256(v+iv+P+k)[:4]   | 4 B exposed | Small, high-entropy     |
 | 11  | AES-CBC +p | CBC  | 16 | PKCS7   | No       | SHA256(plaintext)[:4]  | 4 B         | General mid-sized       |
 | 12  | AES-CBC +c | CBC  | 16 | PKCS7   | Yes      | SHA256(compressed)[:4] | 4 B         | General large           |
 | 15  | AES-CTR    | CTR  | 12 | –       | No       | SHA256(plaintext)[:4]  | 4 B         | General mid-sized       |
 | 16  | AES-CTR +c | CTR  | 12 | –       | Yes      | SHA256(compressed)[:4] | 4 B         | General large           |
-| 20  | AES-GCM    | GCM  | 12 | –       | No       | GCM authtag[:4]        | 4 B         | Best, General mid-sized |
-| 21  | AES-GCM +c | GCM  | 12 | –       | Yes      | GCM authtag[:4]        | 4 B         | Best, General large     |
+| 20  | AES-GCM    | GCM  | 12 | –       | No       | GCM authtag[:4]        | 4 B exposed | Best, General mid-sized |
+| 21  | AES-GCM +c | GCM  | 12 | –       | Yes      | GCM authtag[:4]        | 4 B exposed | Best, General large     |
 
+---
+
+## 6. Concepts for Implementation
+
+Using examples from, and as an introduction to the reference [KEF implementation](https://github.com/selfcustody/krux/blob/develop/src/krux/kef.py), we'll quickly cover some basic concepts that may be helpful in getting started with your own KEF implementation.
+
+### Versions Configuration
+From the version details and summary table: note that all KEF versions can be defined as having a set of parameters which define that version's KEF rules. For ease-of-maintenance -- and also for extending later, it may be useful to store these in a central configuration.  Within our sample reference, these are defined by constants `kef.VERSIONS`, `kef.MODE_NUMBERS` and `kef.MODE_IVS`.
+
+### Suggested Versions
+As soon as you have data to hide, KEF offers choices for which version to use.  That choice may be made by the user, or by the implementation, based on what is being hidden, compatibility with others, and how it may be stored/transported.  The sample reference uses a function named `kef.suggest_versions()` to make a choice based on user's prefered mode-of-operation, the plaintext being hidden, then optimizes for a smaller KEF Envelope.
+
+### Encrypting and Decrypting (...and Authenticating)
+Once you know what you need to hide and how you want to hide it, you'll need something to perform the encryption.  You'll start by stretching a `key`, with `id` as a salt for a number of `iterations` so that you'll have a 256-bit AES key.  Next you'll need to encrypt your plaintext (possibly with a random IV/Nonce) according to the chosen KEF version, so that the result is a cipher-payload `cpl` with ciphertext and `auth` bytes (prefixed by your `IV/Nonce`).  To reverse this process, you'll need something to perform decryption and authentication on this cipher-payload -- again according to the rules of the particular KEF version.  The sample reference uses a class named `kef.Cipher` for stretching the `key`, encrypting plaintext to `cpl`, and decrypting / authenticating `cpl` back into plaintext.
+
+### Padding and Unpadding
+Depending on the mode-of-operation of your version, you may need to `pad` the plaintext.  If so, there will also be a need to `unpad` during the decryption process.  The sample reference uses functions named `kef.pad()` and `kef.unpad()`, which are called from inside the `kef.Cipher` object when encrypting and decrypting.
+
+### Deflating and Reinflating (compression)
+Depending on the version, you may also need to `deflate` plaintext so that it is compressed before encryption. Likewise, you'll need to `reinflate` it after decryption to recover the plaintext.  The sample reference uses functions named `kef.deflate()` and `kef.reinflate()`, which are also called from inside the `kef.Cipher` object when encrypting and decrypting.
+
+### Wrapping and Unwrapping (parsing)
+After encryption, you'll need to `wrap` the `id`, `version`, `iterations` and `cpl` into a valid KEF Envelope.  Likewise, in order to reveal something hidden within a KEF Envelope, you'll first need to `unwrap`, or parse it into its constituent parts (`id`, `version`, `iterations`, `cpl`) so that it may be decrypted as described above.  The sample reference uses functions `kef.wrap()` and `kef.unwrap()` for these procedures.
+
+### On Further Encoding KEF Envelopes
+Outside the scope of this specification on KEF Envelopes, which we know are strings of bytes, implementations will surely need to make choices about encoding/decoding schemes.  Whether for QR transport, copy-pasting into messages, embedding into json documents, in-plain-sight within other document formats, or persisted in binary files, these choices are left to you.
