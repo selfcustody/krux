@@ -459,6 +459,194 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
+def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    cases = [
+        # 0 - 12W
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            None,
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_PAGE_PREV,  # Move 'Back to menu'
+                BUTTON_ENTER,  # Select 'Back to menu'
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 1 - 24W
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            None,
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_PAGE_PREV,  # Move 'Back to menu'
+                BUTTON_ENTER,  # Select 'Back to menu'
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 2 - 12W print
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                *([BUTTON_PAGE] * 3),  # Move 'Print as QR'
+                BUTTON_ENTER,  # Select 'Print as QR'
+                BUTTON_ENTER,  # Confirm 'Print as QR thermal/adafruit'
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_PAGE_PREV,  # Move 'Back to menu'
+                BUTTON_ENTER,  # Select 'Back to menu'
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 3 - 24W print
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                *([BUTTON_PAGE] * 3),  # Move 'Print as QR'
+                BUTTON_ENTER,  # Select 'Print as QR'
+                BUTTON_ENTER,  # Confirm 'Print as QR thermal/adafruit'
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_PAGE_PREV,  # Move 'Back to menu'
+                BUTTON_ENTER,  # Select 'Back to menu'
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 4 - 12W decline print
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # Type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                *([BUTTON_PAGE] * 3),  # Move to 'Print as QR'
+                BUTTON_ENTER,  # Select 'Print as QR'
+                BUTTON_PAGE_PREV,  # decline print
+                BUTTON_ENTER,  # See qrcode and exit
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+                BUTTON_PAGE_PREV,  # Move to back
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 5 - 24W decline print
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # Type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                *([BUTTON_PAGE] * 3),  # Move to 'Print as QR'
+                BUTTON_ENTER,  # Select 'Print as QR'
+                BUTTON_PAGE_PREV,  # decline print
+                BUTTON_ENTER,  # See qrcode and exit
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+                BUTTON_PAGE_PREV,  # Move to back
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+    ]
+
+    I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=I_VECTOR),
+    )
+
+    case_count = 0
+    for case in cases:
+        print(case_count)
+        case_count += 1
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
+        mnemonics = MnemonicsView(ctx)
+
+        mocker.spy(mnemonics, "encrypt_qr_code")
+        mnemonics.mnemonic()
+
+        mnemonics.encrypt_qr_code.assert_called_once()
+        assert ctx.input.wait_for_button.call_count == len(case[2])
+
+
 def test_print_mnemonic_other_words(mocker, amigo, tdata):
     from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.input import BUTTON_PAGE_PREV, BUTTON_ENTER
@@ -503,6 +691,8 @@ def test_print_mnemonic_other_words(mocker, amigo, tdata):
             mocker.call("8:please  16:increase 24:major\n"),
         ]
     )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)
 
 
 def test_print_mnemonic_numbers_decimal(mocker, amigo, tdata):
@@ -549,6 +739,8 @@ def test_print_mnemonic_numbers_decimal(mocker, amigo, tdata):
             mocker.call("8:1332    16:918     24:1076\n"),
         ]
     )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)
 
 
 def test_print_mnemonic_numbers_hex(mocker, amigo, tdata):
@@ -598,6 +790,8 @@ def test_print_mnemonic_numbers_hex(mocker, amigo, tdata):
         ]
     )
 
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)
+
 
 def test_print_mnemonic_numbers_oct(mocker, amigo, tdata):
     from krux.pages.home_pages.mnemonic_backup import MnemonicsView
@@ -645,3 +839,5 @@ def test_print_mnemonic_numbers_oct(mocker, amigo, tdata):
             mocker.call("8:2464    16:1626    24:2064\n"),
         ]
     )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)

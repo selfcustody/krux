@@ -1,4 +1,4 @@
-Here we offer a few templates to [transcribe QR codes](../features/QR-transcript-tools.md), TinySeed or Binary Grid backups.
+Here we offer a few templates to [transcribe QR codes](../features/QR-transcript-tools.md), [Tinyseed or Binary Grid](../features/tinyseed.en.md) backups.
 
 ## QR Code Templates
 You can manually copy compact SeedQR codes or place a proper sized template over the device screen.
@@ -90,22 +90,22 @@ SVG: [Dots](../QR/svg/qr_v4_dots_regions.svg), [Lines](../QR/svg/qr_v4_lines_reg
 <div style="clear: both"></div>
 SVG: [Dots](../QR/svg/qr_v5_dots_regions.svg), [Lines](../QR/svg/qr_v5_lines_regions.svg), [Dots and Lines](../QR/svg/qr_v5_dots_lines_regions.svg)
 
-## TinySeed Templates
+## Tinyseed Templates
 
-TinySeed background of blank templates to be manually filled.
+[Tinyseed](../features/tinyseed.en.md) background of blank templates to be manually filled.
 
 <div style="clear: both"></div>
 
 <a href="../tiny_seed_scan_background.png">
-  <img src="../tiny_seed_scan_background.png" alt="TinySeed Scan Background" style="width: 15%; float: left; margin-left: 10px;">
+  <img src="../tiny_seed_scan_background.png" alt="Tinyseed Scan Background" style="width: 15%; float: left; margin-left: 10px;">
 </a>
 
 <a href="../tiny_seed_template.png">
-  <img src="../tiny_seed_template.png" alt="TinySeed Scan Background" style="width: 15%; float: left; margin-left: 10px;">
+  <img src="../tiny_seed_template.png" alt="Tinyseed Scan Background" style="width: 15%; float: left; margin-left: 10px;">
 </a>
 
 <a href="../tiny_seed_template_24w.png">
-  <img src="../tiny_seed_template_24w.png" alt="TinySeed Scan Background" style="width: 22%; float: left; margin-left: 10px;">
+  <img src="../tiny_seed_template_24w.png" alt="Tinyseed Scan Background" style="width: 22%; float: left; margin-left: 10px;">
 </a>
 
 
@@ -113,16 +113,16 @@ TinySeed background of blank templates to be manually filled.
 
 ## Binary Grid Templates
 
-Binary Grid labeled and and "stealth" clean templates
+[Binary Grid](../features/tinyseed.en.md) labeled and and "stealth" clean templates.
 
 <div style="clear: both"></div>
 
 <a href="../Krux_Binary_Grid_double_rev1.png">
-  <img src="../Krux_Binary_Grid_double_rev1.png" alt="TinySeed Scan Background" style="width: 30%; float: left; margin-left: 10px;">
+  <img src="../Krux_Binary_Grid_double_rev1.png" alt="Tinyseed Scan Background" style="width: 30%; float: left; margin-left: 10px;">
 </a>
 
 <a href="../Krux_Binary_Grid_double_clean_rev1.png">
-  <img src="../Krux_Binary_Grid_double_clean_rev1.png" alt="TinySeed Scan Background" style="width: 30%; float: left; margin-left: 10px;">
+  <img src="../Krux_Binary_Grid_double_clean_rev1.png" alt="Tinyseed Scan Background" style="width: 30%; float: left; margin-left: 10px;">
 </a>
 
 <div style="clear: both"></div>

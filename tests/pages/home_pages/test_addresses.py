@@ -1,5 +1,8 @@
 from .test_home import tdata, create_ctx
 
+# fortdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH
+DESCRIPTOR_SINGLESIG_ACTION_WITHOUT_CHANGE = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+
 
 def test_multisig_addresses_without_descriptor(mocker, m5stickv, tdata):
     from krux.pages.home_pages.addresses import Addresses
@@ -275,7 +278,7 @@ def test_scan_address(mocker, m5stickv, tdata):
             if can_search:
                 if case[6]:  # If search should be successful
                     ctx.display.draw_centered_text.assert_called_with(
-                        "0. \n\n%s\n\nis a valid address!" % format_address(case[3])
+                        "0.\n\n%s\n\nis a valid address!" % format_address(case[3])
                     )
                 else:
                     attempts = 50 * (len(case[5]) - 3)
@@ -289,22 +292,92 @@ def test_scan_address(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[5])
 
 
-def test_addr_menu_hide_change(mocker, m5stickv, tdata):
+def test_scan_address_highlight(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.format import format_address
+
+    cases = [
+        # 1 - Single-sig, not loaded, owned address, search successful
+        (
+            tdata.SINGLESIG_12_WORD_KEY,
+            None,
+            False,
+            "bc1qrhjqrz2d9tdym3p2r9m2vwzn2sn2yl6k5m357y",
+            True,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            True,
+        ),
+        # 8 - Single-sig, loaded, unowned address, search unsuccessful
+        (
+            tdata.SINGLESIG_12_WORD_KEY,
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,
+            True,
+            "bc1q6y95p2qkcmsr7kp5zpnt04qx5l2slq73d9um62ka3s5nr83mlcfsywsn65",
+            True,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER],
+            False,
+        ),
+    ]
+
+    # To use as display.to_lines
+    def _to_lines(text):
+        if isinstance(text, list):
+            return text
+        return text.split("\n")
+
+    case_num = 0
+    for case in cases:
+        print("Case: %d" % case_num)
+        case_num += 1
+
+        wallet = Wallet(case[0])
+        if case[2]:
+            wallet.load(case[1], FORMAT_PMOFN)
+            assert wallet.has_change_addr()
+
+        ctx = create_ctx(mocker, case[5], wallet, None)
+
+        # custom display.to_lines to increase coverage
+        ctx.display.to_lines = _to_lines
+
+        addresses_ui = Addresses(ctx)
+
+        mocker.patch.object(
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (case[3], FORMAT_NONE)
+        )
+        qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
+        mocker.spy(addresses_ui, "show_address")
+
+        addresses_ui.scan_address()
+
+        qr_capturer.assert_called_once()
+
+        assert ctx.input.wait_for_button.call_count == len(case[5])
+
+
+def test_list_disable_change_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.addresses import Addresses
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
     btn_seq = [
-        BUTTON_PAGE,  # move to receive addr
+        BUTTON_PAGE,  # move to list addr
+        BUTTON_ENTER,  # click list addr
         BUTTON_PAGE,  # move to change addr
         BUTTON_ENTER,  # click change addr to enter list_address_type (nothing happen - disabled)
         BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit menu
+        BUTTON_PAGE,  # move to export
+        BUTTON_PAGE,  # move to back
         BUTTON_ENTER,  # exit screen
     ]
-    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
-    wallet.load(descriptor, FORMAT_NONE)
+    wallet.load(DESCRIPTOR_SINGLESIG_ACTION_WITHOUT_CHANGE, FORMAT_NONE)
     ctx = create_ctx(mocker, btn_seq, wallet)
     addresses_ui = Addresses(ctx)
 
@@ -315,31 +388,208 @@ def test_addr_menu_hide_change(mocker, m5stickv, tdata):
     addresses_ui.list_address_type.assert_not_called()
     assert not wallet.has_change_addr()
 
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
-def test_scan_address_hide_change(mocker, m5stickv, tdata):
+
+def test_scan_disable_change_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.addresses import Addresses
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
     btn_seq = [
+        BUTTON_ENTER,  # click scan addr
         BUTTON_PAGE,  # move to change addr
         BUTTON_ENTER,  # click change addr to enter scan_address (nothing happen - disabled)
         BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit menu
+        BUTTON_PAGE,  # move to list addr
+        BUTTON_PAGE,  # move to export addr
+        BUTTON_PAGE,  # move to back
         BUTTON_ENTER,  # exit screen
     ]
-    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
-    wallet.load(descriptor, FORMAT_NONE)
+    wallet.load(DESCRIPTOR_SINGLESIG_ACTION_WITHOUT_CHANGE, FORMAT_NONE)
     ctx = create_ctx(mocker, btn_seq, wallet, None)
     addresses_ui = Addresses(ctx)
 
     mocker.spy(addresses_ui, "scan_address")
 
-    addresses_ui.pre_scan_address()
+    addresses_ui.addresses_menu()
 
     addresses_ui.scan_address.assert_not_called()
     assert not wallet.has_change_addr()
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_export_disabled(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    btn_seq = [
+        BUTTON_PAGE,  # move to list addr
+        BUTTON_PAGE,  # move to export addr
+        BUTTON_ENTER,  # click export (nothing happen - disabled)
+        BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit screen
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    wallet.load(DESCRIPTOR_SINGLESIG_ACTION_WITHOUT_CHANGE, FORMAT_NONE)
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
+    addresses_ui = Addresses(ctx)
+
+    mocker.spy(addresses_ui, "_receive_change_menu")
+
+    addresses_ui.addresses_menu()
+
+    addresses_ui._receive_change_menu.assert_not_called()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_export_disable_change_address(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    btn_seq = [
+        BUTTON_PAGE,  # move to list addr
+        BUTTON_PAGE,  # move to export addr
+        BUTTON_ENTER,  # click export
+        BUTTON_PAGE,  # move to change addr
+        BUTTON_ENTER,  # click change addr to enter (nothing happen - disabled)
+        BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit menu
+        BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit screen
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    wallet.load(DESCRIPTOR_SINGLESIG_ACTION_WITHOUT_CHANGE, FORMAT_NONE)
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
+    addresses_ui = Addresses(ctx)
+
+    # SD available
+    mocker.patch.object(addresses_ui, "has_sd_card", new=lambda: True)
+
+    mocker.spy(addresses_ui, "export_address")
+
+    addresses_ui.addresses_menu()
+
+    addresses_ui.export_address.assert_not_called()
+    assert not wallet.has_change_addr()
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_export_address(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+    from unittest.mock import mock_open, patch
+
+    btn_seq = [
+        BUTTON_PAGE,  # move to list addr
+        BUTTON_PAGE,  # move to export addr
+        BUTTON_ENTER,  # click export
+        BUTTON_ENTER,  # click receive addr to enter
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_PAGE_PREV,  # move to ESC
+        BUTTON_ENTER,
+        BUTTON_ENTER,  # enter and confirm ESC (at index input)
+        BUTTON_ENTER,  # click export (start over)
+        BUTTON_ENTER,  # click receive addr to enter
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm index 0
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_PAGE_PREV,  # move to ESC
+        BUTTON_ENTER,
+        BUTTON_ENTER,  # enter and confirm ESC (at quantity input)
+        BUTTON_ENTER,  # click export (start over)
+        BUTTON_ENTER,  # click receive addr to enter
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm index 0
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm quantity 50
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_PAGE_PREV,  # move to ESC
+        BUTTON_ENTER,
+        BUTTON_ENTER,  # enter and confirm ESC (at filename input)
+        BUTTON_ENTER,  # click export (start over)
+        BUTTON_ENTER,  # click receive addr to enter
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm index 0
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm quantity 50
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm filename Receive-fingerprint
+        BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit screen
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
+    addresses_ui = Addresses(ctx)
+
+    # SDHandler
+    mocker.patch(
+        "os.listdir",
+        return_value=["somefile", "otherfile"],
+    )
+
+    mocker.spy(addresses_ui, "export_address")
+
+    m = mock_open()
+    with patch("builtins.open", m):
+        addresses_ui.addresses_menu()
+        m().write.assert_any_call("0,tb1q4fhuxhrmz26kkuxxwataqw323cs2l3mgerz6kp\n")
+        m().write.assert_any_call("49,tb1q8e9cxkrvg2d3q72wp9t33739pcnygrdyp2dm38\n")
+
+    addresses_ui.export_address.assert_called()
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_export_address_fail(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+    from unittest.mock import mock_open, patch
+
+    btn_seq = [
+        BUTTON_PAGE,  # move to list addr
+        BUTTON_PAGE,  # move to export addr
+        BUTTON_ENTER,  # click export
+        BUTTON_ENTER,  # click receive addr to enter
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm index 0
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm quantity 50
+        BUTTON_PAGE_PREV,  # move to go
+        BUTTON_ENTER,  # enter confirm filename Receive-fingerprint (will fail - SD card not detected)
+        BUTTON_PAGE,  # move to back
+        BUTTON_ENTER,  # exit screen
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
+    addresses_ui = Addresses(ctx)
+
+    # SD available for entering export than fail when exporting
+    mocker.patch.object(addresses_ui, "has_sd_card", side_effect=[True])
+
+    mocker.spy(addresses_ui, "export_address")
+
+    m = mock_open()
+    with patch("builtins.open", m):
+        addresses_ui.addresses_menu()
+        m().write.assert_not_called()
+
+    addresses_ui.export_address.assert_called()
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
 
 def test_scan_change_address(mocker, m5stickv, tdata):
@@ -401,7 +651,7 @@ def test_scan_change_address(mocker, m5stickv, tdata):
             if can_search:
                 if case[6]:  # If search should be successful
                     ctx.display.draw_centered_text.assert_called_with(
-                        "0. \n\n%s\n\nis a valid address!" % format_address(case[3])
+                        "0.\n\n%s\n\nis a valid address!" % format_address(case[3])
                     )
                 else:
                     attempts = 50 * (len(case[5]) - 3)
@@ -421,10 +671,11 @@ def test_scan_address_menu(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
     wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
-    ctx = create_ctx(mocker, [BUTTON_PAGE_PREV, BUTTON_ENTER], wallet, None)
+    btn_seq = [BUTTON_PAGE_PREV, BUTTON_ENTER]
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
     addresses_ui = Addresses(ctx)
-    addresses_ui.pre_scan_address()
-    assert ctx.input.wait_for_button.call_count == 2
+    addresses_ui._receive_change_menu(addresses_ui.scan_address)
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
 
 def test_list_receive_addresses(mocker, m5stickv, tdata):

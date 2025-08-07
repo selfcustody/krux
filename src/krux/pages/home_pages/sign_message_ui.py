@@ -152,7 +152,7 @@ class SignMessage(Utils):
         ).digest()
 
         sig = self.ctx.wallet.key.sign_at(derivation, message_hash)
-        self._display_signature(base_encode(sig, 64).strip().decode())
+        self._display_signature(base_encode(sig, 64))
         return sig
 
     def _display_message_sign_prompt(self, message, address):
@@ -211,7 +211,12 @@ class SignMessage(Utils):
 
     def _sign_at_address_from_sd(self, data):
         """Message signed at a derived Bitcoin address - SD card"""
-        data = data.decode() if isinstance(data, bytes) else data
+
+        try:
+            data = data.decode()
+        except:
+            return None
+
         lines = [line.strip() for line in data.splitlines() if line.strip()]
         if len(lines) == 0:
             return None
@@ -242,7 +247,7 @@ class SignMessage(Utils):
             return ""
 
         sig = self.ctx.wallet.key.sign(message_hash).serialize()
-        self._display_signature(base_encode(sig, 64).strip().decode())
+        self._display_signature(base_encode(sig, 64))
         return sig
 
     def _compute_message_hash(self, data):
@@ -265,7 +270,7 @@ class SignMessage(Utils):
         address="",
     ):
         """Exports the message signature to a QR code or SD card"""
-        sign_menu = Menu(
+        submenu = Menu(
             self.ctx,
             [
                 (t("Sign to QR code"), lambda: None),
@@ -276,23 +281,23 @@ class SignMessage(Utils):
             ],
             back_status=lambda: None,
         )
-        index, _ = sign_menu.run_loop()
+        index, _ = submenu.run_loop()
 
-        if index == 2:
+        if index == submenu.back_index:
             return MENU_CONTINUE
 
         pubkey = binascii.hexlify(self.ctx.wallet.key.account.sec()).decode()
 
-        if index == 0:
+        if index == 0:  # QR
             at_address = address != ""
             self._export_to_qr(sig, pubkey, qr_format, at_address)
-        elif self.has_sd_card():
+        elif self.has_sd_card():  # SD
             self._export_to_sd(sig, pubkey, message_filename, message, address)
         return MENU_CONTINUE
 
     def _export_to_qr(self, sig, pubkey, qr_format, at_address=False):
         """Exports the signature and public key to QR code"""
-        encoded_sig = base_encode(sig, 64).strip().decode()
+        encoded_sig = base_encode(sig, 64)
         title = t("Signed Message")
         self.display_qr_codes(encoded_sig, qr_format, title)
         self.print_standard_qr(encoded_sig, qr_format, title)
@@ -323,7 +328,7 @@ class SignMessage(Utils):
             file_content += message + "\n"
             file_content += SD_SIGNATURE_HEADER + "\n"
             file_content += address + "\n"
-            file_content += base_encode(sig, 64).strip().decode() + "\n"
+            file_content += base_encode(sig, 64) + "\n"
             file_content += SD_SIGNATURE_FOOTER
         else:
             file_content = sig

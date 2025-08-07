@@ -28,6 +28,8 @@ press BUTTON_A
 
 press BUTTON_A
 
+# Move to sign to QR
+press BUTTON_B
 
 screenshot sign-psbt-sign-prompt.png
 

@@ -45,17 +45,17 @@ def test_export_tiny_seed(m5stickv, mocker):
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Page 1
         BUTTON_ENTER,  # Page 2
-        BUTTON_ENTER,  # Print - yes
     ]
     TEST_24_WORD_MNEMONIC = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     # Amount of rectangles filled for this mnemonic + menus
     FILLED_RECTANGLES = 137
     SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
-    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(SINGLESIG_24_WORD_KEY), MockPrinter())
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(SINGLESIG_24_WORD_KEY), True)
     tiny_seed = TinySeed(ctx)
     tiny_seed.export()
 
     assert ctx.display.fill_rectangle.call_count == FILLED_RECTANGLES
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_enter_tiny_seed_12w_m5stickv(m5stickv, mocker):

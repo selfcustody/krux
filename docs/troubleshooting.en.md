@@ -163,3 +163,11 @@ Please check how [entropy measurement](getting-started/features/entropy.md) work
 Starting from version 23.09.0, Krux supports SD card hot plugging. If you are using older versions, it may only detect the SD card at boot, so make sure Krux is turned off when inserting the microSD into it. To test the card compatibility use Krux [Tools -> Check SD Card](getting-started/features/tools.md/#check-sd-card).
 
 **Note**: Make sure the SD card is using MBR/DOS partition table and FAT32 format, [in this video](https://www.youtube.com/watch?v=dlOiAJOPoME) Crypto Guide explains how to do this in Windows. If it is still not detected, try deleting all large files in it.
+
+### Why does my WonderMV reboot when I insert an SD card?
+
+It seems WonderMV has a hardware design issue: It lacks a decoupling capacitor in the circuitry that powers the SD card. Some SD cards may cause the supply voltage to drop when inserted, triggering a reboot.
+
+**Workarounds:**
+- Insert your SD card before turning on the device, for example, when signing PSBTs, insert the SD card containing the unsigned PSBT before powering WonderMV on and loading your key.
+- Try different SD cards, as some require less current and won't cause the device to reboot.

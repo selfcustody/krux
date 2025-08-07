@@ -55,7 +55,13 @@ def mp_modules(mocker, monkeypatch):
     monkeypatch.setitem(
         sys.modules,
         "ucryptolib",
-        mocker.MagicMock(aes=AES.new, MODE_ECB=AES.MODE_ECB, MODE_CBC=AES.MODE_CBC),
+        mocker.MagicMock(
+            aes=AES.new,
+            MODE_ECB=AES.MODE_ECB,
+            MODE_CBC=AES.MODE_CBC,
+            MODE_CTR=AES.MODE_CTR,
+            MODE_GCM=AES.MODE_GCM,
+        ),
     )
     monkeypatch.setitem(sys.modules, "shannon", mocker.MagicMock())
     monkeypatch.setattr(time, "sleep_ms", mocker.MagicMock(), raising=False)

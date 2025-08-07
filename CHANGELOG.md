@@ -5,6 +5,7 @@ SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the 
 
 ### SD Card Airgapped Firmware Upgrade Optimizations
 - Verifies firmware signature authenticity before prompting the user to update.
+- Ensures that only compatible firmware can be installed on the device.
 - Displays the firmware version being installed for user confirmation.
 - Hardware-accelerated SHA-256 hashing and other optimizations speeds up checks.
 
@@ -12,13 +13,16 @@ SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the 
 When 'Hide Mnemonic' setting is enabled, the 'New Mnemonic' menu is automatically disabled.
 
 ### Improved Text Highlighting
-Wallet fingerprint, keypad titles, settings categories, and prefix texts are now highlighted across all screens.
+Wallet fingerprint, network, keypad titles, settings categories, and prefix texts are now highlighted across all screens.
 
 ### Enhanced Settings Category Colors
 Boolean settings (True/False) are now displayed with color (Green/Red) for improved visibility.
 
 ### More Readable Address 
-Addresses are now grouped in sets of 4 characters, separated by spaces, to facilitate comparison.
+To facilitate comparison, addresses are displayed in space-separated groups of 4 characters, with alternating groups highlighted.
+
+### Export Wallet Addresses
+Export *receive or change* addresses to a CSV file on the SD card.
 
 ### New CNC Printer Support and Fixes (OpenBuilds GRBL 1.1)
 - Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0;
@@ -32,13 +36,21 @@ Exported QR codes can now be saved as SVG images.
 - Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
 - Keypad touch area has been expanded to the screen edges.
 - "Tools > Print Test QR" now asks for user confirmation before printing.
+- "Tools > Check SD Card" now allows deleting files.
+- "Load mnemonic > Via Manual Input > Word Numbers" now shows the double mnemonic indicator (*) if it is a double mnemonic.
 - Added fingerprint to mnemonic preview and editor.
 - Fingerprint preview now shown when changing wallet passphrase.
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
 - Optimized device's board value checks.
 - Added QR Code to About screen.
 - Wallet Descriptor now validates and warns if change addresses cannot be determined.
+- Wallet customization prompt now warns about Descriptor unloading, but does nothing if no changes are made.
+- Fixed issues with long wallet derivation path.
+- Added a PSBT Review button to the sign menu, enabling users to verify PSBT details without reloading.
+- Added a confirmation prompt before exiting after displaying the PSBT signed QR code.
+- Sign message now supports all binary file types.
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
+- The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.
 
 

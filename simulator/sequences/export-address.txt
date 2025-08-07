@@ -1,0 +1,18 @@
+include _load-12-word-mnemonic.txt
+
+# Navigate to Address
+x3 press BUTTON_B
+press BUTTON_A
+
+# Export addr
+x2 press BUTTON_B
+press BUTTON_A
+
+# Receive Address
+press BUTTON_A
+
+# Index 0
+press BUTTON_C
+press BUTTON_A
+
+screenshot export-address-quantity.png
