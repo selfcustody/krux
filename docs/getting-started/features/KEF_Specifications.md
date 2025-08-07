@@ -1,13 +1,29 @@
 # KEF Encryption Format -- Specification
+
 ...`The K stands for "KEF"` --anon
 
 
-## 1. Overview
+## 1. Motivation
 
-This system encrypts arbitrary plaintext into a **versioned, self-describing KEF envelope** which includes:
+In the summer of 2023, during the lead-up to [krux release 23.09.0](https://github.com/selfcustody/krux/releases/tag/v23.09.0) krux contributors proposed a method of encrypting bip39 mnemonics that could be stored in SPI-flash, on sdcard, and/or exported to QR as specified in [krux documentation](https://selfcustody.github.io/krux/getting-started/features/encrypted-mnemonics/#encrypted-qr-codes-data-and-parsing).  Regarding the encrypted-mnemonic QR format: the layout proposed was interesting as an extensible, lite-weight, self-descriptive envelope that has been appreciated by users ever since.
+
+..."Wen passphrases, output descriptors, PSBTs, and notes?"
+
+This specification, and its accompanying implementation and test-suite are the result of months of exploration into improvements meant to better define, test, and extend the original encryption format that we'll refer to as KEF.  It proposes ten new versions, extending its usefulness to more than mnemonics, targeting variable-length strings up to moderately sized PSBTs, flexibility to choose among four AES modes of operation, with and without compression, and versions optimized to result in a smaller envelope.
+
+Above all, this specification aims to be supported by as many projects as would consider adopting it, so that users are not "locked" into a particular project when recovering their secrets.  Corrections and refinement to -- and scrutiny of this specification are appreciated. Proposals for more `versions` are welcome, provided they offer "value" to the user and fit within the scope of this system.  Once released, because it cannot be known how many KEF envelopes may exist in-the-wild, changes to any particular version must remain backwards compatible, at least for decryption.  Adopting implementations are free to support any KEF versions they wish to support, for decryption-only or for both encryption and decryption -- with the expectation that claims-of-support made are clear and specific.
+
+Reference: latest [KEF implementation](https://github.com/selfcustody/krux/blob/develop/src/krux/kef.py) and [KEF test-suite](https://github.com/selfcustody/krux/blob/develop/tests/test_kef.py).  
+Beta testing: **25.05.beta10** for devices: [KruxInstaller](https://github.com/selfcustody/krux-installer/releases); for android: [KruxMobileApp](https://github.com/selfcustody/KruxMobileApp/releases/tag/25.05.beta10.A_0.4), 
+
+---
+
+## 2. Overview
+
+This system encrypts arbitrary plaintext into a lite-weight, versioned, self-describing, **KEF envelope** which includes:
 
 * custom identity/label `len_id` and `id`
-* Version `v`
+* version `v`
 * pbkdf2-hmac iterations `i`
 * and cipher-payload `cpl`
 
@@ -31,34 +47,38 @@ where:
 * `i` = iteration count (3 bytes, big-endian; if <= 10,000: multiplied by 10,000)
 
 
-## 2. Generalizations Regarding Implementation
+## 3. Generalizations Regarding Implementation
 
-Above all, this specification aims to be supported by as many projects as would consider adoptng it, so that users are not "locked" into a particular project when recovering their secrets.  Corrections and refinement to this specification are welcome and appreciated. Proposals for more `versions` are welcome, provided they offer "value" to the user and "fit" within the scope of this system.  Once released, because we can never know how many KEF envelopes may exist in-the-wild, changes to any particular version must remain backwards compatible at least for decryption.  Adopting implementations are free to support any KEF versions they wish to support, for decryption-only or for both encryption and decryption -- with the expectation that claims-of-support made are clear and specific to what is supported.  Reference: latest [KEF implementation](https://github.com/selfcustody/krux/blob/develop/src/krux/kef.py) and [KEF test-suite](https://github.com/selfcustody/krux/blob/develop/tests/test_kef.py).
 
 * Be strict while encrypting.  Be tolerant -- and non-specific about errors, when decrypting.
 
-* At its base, **a KEF envelope is a format of bytes -- so are all of its inputs**.  Remember this when converting strings gathered for the encryption/decryption `key` and `id`.  Consider being strict about offering a reasonably minimal set of characters, common and available on other devices and/or international keyboards when encrypting -- then encode unicode codepoints directly to their utf-8 representations without normalization.  For decryption, more characters could be offered when gathering the `key` so that secrets may be recovered, and multiple normalization strategies may be tried.  Be capable of gathering these inputs as bytes, either directly or via hex/base64 conversion if necessary, to enable recovery.  Do NOT assume that a user originally used a particular implementation to encrypt a KEF envelope.
+* At its base, **a KEF envelope is a format of bytes -- so are all of its inputs**.  Remember this when converting strings gathered for the encryption/decryption `key` and `id`.  Consider being strict about offering a reasonably minimal set of characters, common and available on other devices and/or international keyboards when encrypting -- then encode unicode codepoints directly to their utf-8 representations without normalization.  For decryption, more characters could be offered when gathering the `key`, and multiple normalization strategies may be tried, so that secrets may be recovered.  Be capable of gathering these inputs as bytes, either directly or via hex/base64 conversion if necessary, to enable recovery.  Do NOT assume that a user originally used a particular implementation to encrypt a KEF envelope.
 
-* Not all KEF `versions` offer the same security guarantees, so implementors must take care to protect against "unsafe" usage.  As already mentioned: be strict and fail to encrypt when "unsafe"; be tolerant and vague while decrypting. Support for decrypt-only on a particular version is perfectly valid should an implementation choose to "nudge" users towards a more secure version where it supports full encrypt/decrypt functionality.
+* **On the importance of a STRONG user-supplied `key`** This cannot be stressed enough to each user of KEF.  While KEF allows for key-stretching via `id` and `iterations`, and offers modes that require a random `IV` or nonce, **KEF offers no expectation of security for a weak user-supplied `key`**.  Consider making this point clear to users before each encryption.  If a KEF envelope has been created with a "weak" `key` and stored accessible to others, user should assume that their secret has been leaked.
 
-    * When mode-of-operation is ECB, repeated blocks would leak patterns within ciphertext.  Therefore, refuse to encrypt using mode ECB whenever duplicate blocks are detected. Consider a compressed version which may resolve this.
+* **On security** Not all KEF `versions` offer the same security guarantees, so implementors must take care to protect against "unsafe" usage.  As already mentioned: be strict and fail to encrypt when "unsafe"; be tolerant and vague while decrypting. Support for decrypt-only on a particular version is perfectly valid should an implementation choose to "nudge" users towards a more secure version where it supports full encrypt/decrypt functionality.
 
-    * When "unsafe" NUL padding is used for block modes, problems to unpad can arise decrypting where valid NUL bytes are confused with removable padding.
+    * **On mode ECB**: Repeated blocks would leak patterns within ciphertext.  Therefore, be strict -- refuse to encrypt using mode ECB whenever duplicate blocks are detected. Consider a compressed version which may resolve this.
+
+    * **On block modes with NUL padding** Problems to unpad can arise decrypting where valid NUL bytes are confused with removable padding.
         * If `auth` is appended to plaintext before padding AND the `auth` bytes end in 0x00: be strict -- refuse to encrypt.  Consider a version with safe padding.
         * If `auth` is appended to ciphertext after padding/encryption AND the `plaintext` bytes end in 0x00: be strict -- refuse to encrypt.  Consider a version with safe padding.
         * Do not assume that other implementations adhere to the above.  Be tolerant and make "reasonable" efforts to successfully recover secrets when decrypting.  Offering a warning to users AFTER successful decryption in this case may be appropriate.
 
-* Modes which require an `IV` (or nonce) should take precautions to ensure that this value is random and not reused. ie: Natural entropy captured from camera sensor (user validated and/or analyzed to ensure sensor is working / high entropy).
+* **On modes that require IV or Nonce** Take precautions to ensure that this value is random and not reused. ie: Natural entropy captured from camera sensor (user validated and/or analyzed to ensure sensor is working / high entropy).
 
-* Outside the strict scope that **KEF envelopes are a format of bytes** but related to this topic: implementations may be presented with encoded strings that are likely to represent bytes.  For instance: base64, base43 (from electrum), base32, or hex might be representations of a KEF Envelope that was previously encoded for transport.  As you continue reading, it will become clear that with any bytestring, one may recognize a KEF envelope by:
+* **On common `bytes` encodings** Outside the strict scope that **KEF envelopes are a format of bytes** but related to this topic: implementations may be presented with encoded strings that are likely to represent bytes.  For instance: base64, base43 (from electrum), base32, or hex might be representations of a KEF envelope that was previously encoded for transport.  As you continue reading, it will become clear that with any bytestring, one may recognize a KEF envelope by:
     1. reading the first byte as an integer `len_id`,
     2. jumping that many bytes, over the `id`, to read the next byte as an integer `version`,
     3. if that version represents a known and supported KEF version, then the rest of the envelope may be parsed via that version's KEF rules.
-    4. If parsing succeeds w/o errors, it is likely to be a KEF envelope and a decryption UI should be offered to the user.
+    4. If parsing succeeds without errors, it is likely to be a KEF envelope and a decryption user-interface should be offered to the user.
     While the user may know, the process instance of a KEF implementation will learn definitively, only AFTER a successful decryption, that a bytestring was indeed a KEF envelope.  If at any point along this process, an implementation finds that `version` is unknown/disabled, or if parsing fails, the expected action is NOT TO RAISE SPECIFIC ERRORS regarding this inspection. Rather, the appropriate action is to assume it was not a KEF envelope and to treat the data under another context: ie: "Unknown".  Similarly, as mentioned above, being vague about errors during decryption implies that "Failed!" may be a sufficient response for any error, instead of leaking to a potential attacker specific details about the failure.
 
+* **On Iterations** Consider that users may want to decrypt KEF envelopes on various resouce-constrained devices.  Effectively, there is a minimum 10,000 iterations imposed in any KEF envelope (a value of 1 would be 10,000 pbkdf2_hmac iterations), and the maximum could be as high as 100,000,000 (a value of 10,000), but depending on the device used, 500,000 might be effectively too-high.  Also, since the user supplied `key` is stretched by this value, consider offering a range to users -- then adding a `delta` as extra bits of entropy to derive different AES-256 keys that would otherwise be the same in the event the user re-uses the same `key`, `id` and `iterations` when creating many KEF envelopes.
 
-## 3. Common Structure of a KEF Envelope
+* **On truncated Authentication** At first glance it may be concerning that `auth` bytes for many versions have been truncated and are trivially "weak".  Note that KEF's use-case for authentication is to achieve high confidence that the user has correctly entered their decryption `key`.  In the worse case, "false-authenticated" success will occur at a rate of 1:16M (or 1:4B for others) if using an incorrect decryption `key`; similar for an attacker who modifies the KEF envelope.  In these "false-authenticated" success cases, success implies that data will result from decryption, but that data would NOT be the original secret or plaintext; it would be of no value.
+
+## 4. Common Structure of a KEF Envelope
 
 All KEF versions' encrypted outputs follow this layout:
 ```
@@ -76,9 +96,9 @@ len_id + id + v + i + cpl
 The Cipher PayLoad `cpl` structure varies by version.   
 
 
-## 4. KEF Versions - Details
+## 5. KEF Versions - Details
 
-KEF Envelope details for currently available versions are below. Each section begins with a pre-formated `self-doc` text built from the reference implementation's test-suite (using KEF `VERSION` constants as KEF's rule-set).  The rich-formatted text which follows was initially AI-generated -- prompted with the `self-doc` text, then subsequently currated and edited by hand.
+Details for currently-available versions of KEF are below. Each section begins with a pre-formatted `self-doc` text, built from the reference implementation's test-suite (using KEF `VERSION` constants as KEF's rule-set).  The rich-formatted text which follows was initially AI-generated -- prompted with the `self-doc` text, then subsequently curated and edited by hand.
 
 
 ### Version 0: "AES-ECB v1"
@@ -389,7 +409,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 
 ---
 
-## 5. KEF Versions - Summary Table
+## 6. KEF Versions - Summary Table
 
 | Ver | Name       | Mode | IV | Padding | Compress | Authentication Method  | Auth        | Intended Use Case       |
 |-----|------------|------|----|---------|----------|------------------------|-------------|-------------------------|
@@ -408,7 +428,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 
 ---
 
-## 6. Concepts for Implementation
+## 7. Concepts for KEF Implementation
 
 Using examples from, and as an introduction to the reference [KEF implementation](https://github.com/selfcustody/krux/blob/develop/src/krux/kef.py), we'll quickly cover some basic concepts that may be helpful in getting started with your own KEF implementation.
 
@@ -416,19 +436,21 @@ Using examples from, and as an introduction to the reference [KEF implementation
 From the version details and summary table: note that all KEF versions can be defined as having a set of parameters which define that version's KEF rules. For ease-of-maintenance -- and also for extending later, it may be useful to store these in a central configuration.  Within our sample reference, these are defined by constants `kef.VERSIONS`, `kef.MODE_NUMBERS` and `kef.MODE_IVS`.
 
 ### Suggested Versions
-As soon as you have data to hide, KEF offers choices for which version to use.  That choice may be made by the user, or by the implementation, based on what is being hidden, compatibility with others, and how it may be stored/transported.  The sample reference uses a function named `kef.suggest_versions()` to make a choice based on user's prefered mode-of-operation, the plaintext being hidden, then optimizes for a smaller KEF Envelope.
+As soon as you have data to hide, KEF offers choices for which version to use.  That choice may be made by the user, or by the implementation, based on what is being hidden, compatibility with others, and how it may be stored/transported.  The sample reference uses a function named `kef.suggest_versions()` to make a choice based on user's prefered mode-of-operation, the plaintext being hidden, then optimizes for a smaller KEF envelope.
 
 ### Encrypting and Decrypting (...and Authenticating)
-Once you know what you need to hide and how you want to hide it, you'll need something to perform the encryption.  You'll start by stretching a `key`, with `id` as a salt for a number of `iterations` so that you'll have a 256-bit AES key.  Next you'll need to encrypt your plaintext (possibly with a random IV/Nonce) according to the chosen KEF version, so that the result is a cipher-payload `cpl` with ciphertext and `auth` bytes (prefixed by your `IV/Nonce`).  To reverse this process, you'll need something to perform decryption and authentication on this cipher-payload -- again according to the rules of the particular KEF version.  The sample reference uses a class named `kef.Cipher` for stretching the `key`, encrypting plaintext to `cpl`, and decrypting / authenticating `cpl` back into plaintext.
+Once you know what you need to hide and how you want to hide it, you'll need something to perform the encryption.  You'll start by stretching the user-supplied`key`, with `id` as a salt for a number of `iterations` to **derive** the 256-bit AES key.  Next you'll need to **encrypt** the plaintext (possibly with a random `IV`/Nonce) according to the chosen KEF version, so that the result is a cipher-payload `cpl` with ciphertext and `auth` bytes (prefixed by your `IV/Nonce`).  To reverse this process, you'll need something to **decrypt** and **authenticate** the cipher-payload -- again according to the rules of the particular KEF version.  The sample reference uses a class named `kef.Cipher` for stretching the `key`, encrypting plaintext to `cpl`, and decrypting / authenticating `cpl` back into plaintext.
 
 ### Padding and Unpadding
-Depending on the mode-of-operation of your version, you may need to `pad` the plaintext.  If so, there will also be a need to `unpad` during the decryption process.  The sample reference uses functions named `kef.pad()` and `kef.unpad()`, which are called from inside the `kef.Cipher` object when encrypting and decrypting.
+Depending on the mode-of-operation of your version, you may need to **pad** the plaintext.  If so, there will also be a need to **unpad** during the decryption process.  The sample reference uses functions named `kef.pad()` and `kef.unpad()`, which are called from inside the `kef.Cipher` object when encrypting and decrypting.
 
 ### Deflating and Reinflating (compression)
-Depending on the version, you may also need to `deflate` plaintext so that it is compressed before encryption. Likewise, you'll need to `reinflate` it after decryption to recover the plaintext.  The sample reference uses functions named `kef.deflate()` and `kef.reinflate()`, which are also called from inside the `kef.Cipher` object when encrypting and decrypting.
+Depending on the version, you may also need to **deflate** plaintext so that it is compressed before encryption. Likewise, you'll need to **reinflate** it after decryption to decompress the plaintext.  The sample reference uses functions named `kef.deflate()` and `kef.reinflate()`, which are also called from inside the `kef.Cipher` object when encrypting and decrypting.
 
 ### Wrapping and Unwrapping (parsing)
-After encryption, you'll need to `wrap` the `id`, `version`, `iterations` and `cpl` into a valid KEF Envelope.  Likewise, in order to reveal something hidden within a KEF Envelope, you'll first need to `unwrap`, or parse it into its constituent parts (`id`, `version`, `iterations`, `cpl`) so that it may be decrypted as described above.  The sample reference uses functions `kef.wrap()` and `kef.unwrap()` for these procedures.
+After encryption, you'll need to **wrap** the `id`, `version`, `iterations` and `cpl` into a valid KEF envelope.  Likewise, in order to reveal something hidden within a KEF envelope, you'll first need to **unwrap**, or parse it into its constituent parts (`id`, `version`, `iterations`, `cpl`) so that it may be decrypted as described above.  The sample reference uses functions `kef.wrap()` and `kef.unwrap()` for these procedures.
 
 ### On Further Encoding KEF Envelopes
-Outside the scope of this specification on KEF Envelopes, which we know are strings of bytes, implementations will surely need to make choices about encoding/decoding schemes.  Whether for QR transport, copy-pasting into messages, embedding into json documents, in-plain-sight within other document formats, or persisted in binary files, these choices are left to you.
+Outside the scope of this specification on KEF envelopes, which are strings of bytes, implementations will surely need to make choices about encoding/decoding schemes.  Whether for QR transport, copy-pasting into messages, embedding into json documents, in-plain-sight within other document formats, or persisted in binary files, these choices are left to implementors.
+
+---
