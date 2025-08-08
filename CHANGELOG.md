@@ -1,3 +1,6 @@
+### New Device Support: WonderK PRO
+From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display!
+
 # Changelog 25.XX.X - XXX 2025
 
 ### 2x Faster TC Flash Hash
