@@ -5,7 +5,7 @@
 
 ## 1. Motivation
 
-In the autumn of 2023, during the lead-up to [krux release 23.09.0](https://github.com/selfcustody/krux/releases/tag/v23.09.0) krux contributors proposed a method of encrypting bip39 mnemonics that could be stored in SPI-flash, on sdcard, and/or exported to QR as specified in [krux documentation](https://selfcustody.github.io/krux/getting-started/features/encrypted-mnemonics/#encrypted-qr-codes-data-and-parsing).  Regarding the encrypted-mnemonic QR format: the layout proposed was interesting as an extensible, lite-weight, self-describing envelope that has been appreciated by users ever since.
+In the autumn of 2023, during the lead-up to [krux release 23.09.0](https://github.com/selfcustody/krux/releases/tag/v23.09.0), contributors proposed a method of encrypting bip39 mnemonics that could be stored in SPI-flash, on sdcard, and/or exported to QR as specified in [krux documentation](https://selfcustody.github.io/krux/getting-started/features/encrypted-mnemonics/#encrypted-qr-codes-data-and-parsing).  Regarding the encrypted-mnemonic QR format: the layout proposed was interesting as an extensible, lite-weight, self-describing envelope that has been appreciated by users ever since.
 
 ...`"Wen passphrases, output descriptors, PSBTs, and notes?"` --plebs
 
@@ -34,11 +34,12 @@ where cipher-payload `cpl` consists of:
 * and authentication/validation data `auth`
 
 KEF versions offer combinations of different **modes-of-operation**, **authentication strategies**, **padding strategies**, and **compression**, all selected via a numeric version code (0 - 21).
-- Available version codes are: 0, 1, 5, 6, 7, 10, 11, 12, 15, 16, 20, 21. Not all integers in the range are assigned, and implementations may disable versions or modes.
+
+* Available version codes are: 0, 1, 5, 6, 7, 10, 11, 12, 15, 16, 20, 21. Not all integers in the range are assigned, and implementations may disable versions or modes.
 
 Currently, all versions use AES and derive the 256-bit encryption key `k` as:
 ```
-k = pbkdf2_hmac('sha256', K, id, i)
+k = pbkdf2_hmac_sha256(K, id, i)
 ```
 
 where:
@@ -47,15 +48,18 @@ where:
 * `id` = salt (variable-length, prepended to envelope; bytes: if str: non-normalized encode as utf-8)
 * `i` = iteration count (3 bytes, big-endian)
 
-The stored iteration field MUST be ≥ 1. The effective PBKDF2 iteration count is `i` if `i > 10,000`, otherwise `i * 10,000`.
+The stored iteration field `i` MUST be ≥ 1. The effective PBKDF2 iteration count is `i` if `i > 10,000`, otherwise `i * 10,000`.
 
-Compression (when enabled) uses zlib(wbits=-10) or raw deflate(micropython).
+Compression (when enabled) uses zlib.compress(wbits=-10) or raw deflate(micropython).
 
-Authentication:
-- For ECB/CBC/CTR with `auth > 0`: append an unencrypted truncated SHA-256 of `(version || IV || plaintext || key)` to the ciphertext.
-- For ECB/CBC/CTR with `auth < 0`: append a truncated SHA-256 of the plaintext to the plaintext before encryption.
-- For GCM, `auth` is the tag length in bytes.
+Authentication has three forms:
 
+* When the mode has built-in authentication, like GCM: `auth` is a truncated auth tag
+* When the mode does not have built-in authentication, `auth` is a truncated sha256 digest whose pre-image is of two forms:
+    * if `auth` will be encrypted with plaintext, hidden, it is `sha256(plaintext)`
+    * if `auth` will be appended to ciphertext, exposed, it is `sha256(version || IV || plaintext || derived-k)`
+
+---
 
 ## 3. Generalizations Regarding Implementation
 
@@ -65,7 +69,7 @@ It is expected that any implementation can decrypt a KEF envelope that was creat
 
 * At its base, **a KEF envelope is a format of bytes -- so are all of its inputs**.  Remember this when converting strings gathered for the `key` and `id`.  Consider being strict about offering a reasonably minimal set of characters, common and available on other devices and/or international keyboards when encrypting -- then encode unicode codepoints (if not ascii) directly to their utf-8 representations without normalization.  For decryption, more characters could be offered when gathering the `key`, and multiple normalization strategies may be tried, so that secrets may be recovered.  Consider some capability of displaying both `key` and `id` as bytes, and gathering the `key` as bytes either directly or via hex/base64 conversion if necessary, to enable recovery.  Do NOT assume that a user originally used a particular implementation to encrypt a KEF envelope.
 
-* **On the importance of a STRONG user-supplied `key`** This cannot be stressed enough to each user of KEF.  While KEF allows for key-stretching via `id` and `iterations`, and offers modes that require a random `IV` or nonce, **KEF offers no expectation of security for a weak user-supplied `key`**.  Consider making this point clear to users before each encryption and/or some measurement of `key` strength once gathered.  If a KEF envelope has been created with a "weak" `key` and stored accessible to others, user should assume that their secret has been leaked.  Consider encouraging users to make sane choices about the characters they use in their `key`, aware that non-ascii characters offered by one implementation may not be easy to enter on another, or that a recognizable glyph may not exist on other devices for them to verify their `key` when decrypting.
+* **On the importance of a STRONG user-supplied `key`** This cannot be stressed enough to each user of KEF.  While KEF allows for key-stretching via `id` and `iterations`, and offers modes that require a random `IV` / Nonce, **KEF offers no expectation of security for a weak user-supplied `key`**.  Consider making this point clear to users before encrypting and/or offer an indication of `key` strength once gathered.  If a KEF envelope has been created with a "weak" `key` and stored accessible to others, user should assume that their secret has been leaked.  Consider encouraging users to make sane choices about the characters they use in their `key`, aware that non-ascii characters offered by one implementation may not be easy to enter on another, or that a recognizable glyph may not exist on other devices for them to verify their `key` when decrypting.
 
 * **On security** Not all KEF `versions` offer the same security guarantees, so implementors MUST take care to protect against "unsafe" usage.  As already mentioned: be strict and fail to encrypt when "unsafe"; be tolerant and vague while decrypting. Support for decrypt-only on a particular version is perfectly valid should an implementation choose to "nudge" users towards a more-secure version where it supports full encrypt/decrypt functionality.
 
@@ -89,6 +93,8 @@ It is expected that any implementation can decrypt a KEF envelope that was creat
 
 * **On truncated Authentication** At first glance it may be concerning that `auth` bytes for many versions have been truncated and are trivially "weak".  Note that KEF's use-case for authentication is to validate that the user has correctly entered their decryption `key`.  In the worse case, "false-authenticated" success will occur at a rate of 1:16M (or 1:4B for others) if using an incorrect decryption `key`; similar if an attacker has modified the KEF envelope. In these "false-authenticated" success cases, data will result from decryption, but that data will NOT be the original secret or plaintext; it will be of no value.
 
+---
+
 ## 4. Common Structure of a KEF Envelope
 
 All KEF versions' encrypted outputs follow this layout:
@@ -106,6 +112,7 @@ len_id + id + v + i + cpl
 
 The Cipher PayLoad `cpl` structure varies by version.   
 
+---
 
 ## 5. KEF Versions - Details
 
@@ -124,7 +131,7 @@ cpl: e.encrypt(P + auth + pad)
 e: AES(k, ECB)
 auth: sha256(P)[:16]
 pad: NUL
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: ECB
@@ -150,7 +157,7 @@ iv: 16b
 e: AES(k, CBC, iv)
 auth: sha256(P)[:16]
 pad: NUL
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: CBC
@@ -175,7 +182,7 @@ cpl: e.encrypt(P + pad) + auth
 e: AES(k, ECB)
 pad: NUL
 auth: sha256(v + P + k)[:3]
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: ECB  
@@ -200,7 +207,7 @@ cpl: e.encrypt(P + auth + pad)
 e: AES(k, ECB)
 auth: sha256(P)[:4]
 pad: PKCS7
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: ECB  
@@ -225,7 +232,7 @@ cpl: e.encrypt(zlib(P, wbits=-10) + auth + pad)
 e: AES(k, ECB)
 auth: sha256(zlib(P, wbits=-10))[:4]
 pad: PKCS7
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: ECB  
@@ -252,7 +259,7 @@ iv: 16b
 e: AES(k, CBC, iv)
 pad: NUL
 auth: sha256(v + iv + P + k)[:4]
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: CBC  
@@ -278,7 +285,7 @@ iv: 16b
 e: AES(k, CBC, iv)
 auth: sha256(P)[:4]
 pad: PKCS7
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: CBC  
@@ -304,7 +311,7 @@ iv: 16b
 e: AES(k, CBC, iv)
 auth: sha256(zlib(P, wbits=-10))[:4]
 pad: PKCS7
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: CBC  
@@ -330,7 +337,7 @@ cpl: iv + e.encrypt(P + auth)
 iv: 12b
 e: AES(k, CTR, iv)
 auth: sha256(P)[:4]
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: CTR  
@@ -355,7 +362,7 @@ cpl: iv + e.encrypt(zlib(P, wbits=-10) + auth)
 iv: 12b
 e: AES(k, CTR, iv)
 auth: sha256(zlib(P, wbits=-10))[:4]
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: CTR  
@@ -381,7 +388,7 @@ cpl: iv + e.encrypt(P) + auth
 iv: 12b
 e: AES(k, GCM, iv)
 auth: e.authtag[:4]
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: GCM
@@ -406,7 +413,7 @@ cpl: iv + e.encrypt(zlib(P, wbits=-10)) + auth
 iv: 12b
 e: AES(k, GCM, iv)
 auth: e.authtag[:4]
-k: pbkdf2_hmac(sha256, K, id, i)
+k: pbkdf2_hmac_sha256(K, id, i)
 ```
 
 * **Mode**: GCM
@@ -450,7 +457,7 @@ From the version details and summary table: note that all KEF versions can be de
 As soon as you have data to hide, KEF offers choices for which version to use.  That choice may be made by the user, or by the implementation, based on what is being hidden, compatibility with others, and how it may be stored/transported.  The sample reference uses a function named `kef.suggest_versions()` to make a choice based on user's preferred mode-of-operation, the plaintext being hidden, then optimizes for a smaller KEF envelope.
 
 ### Encrypting and Decrypting (...and Authenticating)
-Once you know what you need to hide and how you want to hide it, you'll need something to perform the encryption.  You'll start by stretching the user-supplied `key`, salted with `id` for a number of `iterations` to **derive** the 256-bit AES key.  Next you'll need to **encrypt** the plaintext (possibly with a random `IV`/Nonce) according to the chosen KEF version, so that the result is a cipher-payload `cpl`.  To reverse this process, you'll need something to **decrypt** and **authenticate** the cipher-payload `cpl` -- again according to the rules of the particular KEF version.  The sample reference uses a class named `kef.Cipher` for stretching the `key`, encrypting plaintext to `cpl`, and decrypting / authenticating `cpl` back into plaintext.
+Once you know what you need to hide and how you want to hide it, you'll need something to perform the encryption.  You'll start by stretching the user-supplied `key`, salted with `id` for a number of `iterations` to **derive** the 256-bit AES key.  Next you'll need to **encrypt** the plaintext (possibly with a random `IV` / Nonce) according to the chosen KEF version, so that the result is a cipher-payload `cpl`.  To reverse this process, you'll need something to **decrypt** and **authenticate** the cipher-payload `cpl` -- again according to the rules of the particular KEF version.  The sample reference uses a class named `kef.Cipher` for stretching the `key`, encrypting plaintext to `cpl`, and decrypting / authenticating `cpl` back into plaintext.
 
 ### Padding and Unpadding
 Depending on the mode-of-operation of your version, you may need to **pad** the plaintext.  If so, there will also be a need to **unpad** during the decryption process.  The sample reference uses functions named `kef.pad()` and `kef.unpad()`, which are called from inside the `kef.Cipher` object when encrypting and decrypting.
