@@ -34,6 +34,7 @@ where cipher-payload `cpl` consists of:
 * and authentication/validation data `auth`
 
 KEF versions offer combinations of different **modes-of-operation**, **authentication strategies**, **padding strategies**, and **compression**, all selected via a numeric version code (0 - 21).
+- Available version codes are: 0, 1, 5, 6, 7, 10, 11, 12, 15, 16, 20, 21. Not all integers in the range are assigned, and implementations may disable versions or modes.
 
 Currently, all versions use AES and derive the 256-bit encryption key `k` as:
 ```
@@ -44,7 +45,16 @@ where:
 
 * `K` = user-provided password/key material (bytes; if str: non-normalized encode as utf-8)
 * `id` = salt (variable-length, prepended to envelope; bytes: if str: non-normalized encode as utf-8)
-* `i` = iteration count (3 bytes, big-endian; if <= 10,000: multiplied by 10,000)
+* `i` = iteration count (3 bytes, big-endian)
+
+The stored iteration field MUST be ≥ 1. The effective PBKDF2 iteration count is `i` if `i > 10,000`, otherwise `i * 10,000`.
+
+Compression (when enabled) uses zlib(wbits=-10) or raw deflate(micropython).
+
+Authentication:
+- For ECB/CBC/CTR with `auth > 0`: append an unencrypted truncated SHA-256 of `(version || IV || plaintext || key)` to the ciphertext.
+- For ECB/CBC/CTR with `auth < 0`: append a truncated SHA-256 of the plaintext to the plaintext before encryption.
+- For GCM, `auth` is the tag length in bytes.
 
 
 ## 3. Generalizations Regarding Implementation
@@ -77,7 +87,7 @@ It is expected that any implementation can decrypt a KEF envelope that was creat
 
 * **On Iterations** Consider that users may want to decrypt KEF envelopes on various resource-constrained devices.  There is a minimum 10,000 iterations imposed in any KEF envelope (a value of 1 would be 10,000 pbkdf2_hmac iterations), and the maximum could be as high as 100,000,000 (a value of 10,000), but depending on the device used, 500,000 might be too high.  Also, since the user-supplied `key` is stretched by this value, consider offering a range to users -- then adding a small `delta` as extra bits of entropy to derive different AES-256 keys that would otherwise be the same in the event the user re-uses the same `key`, `id` and `iterations` when creating many KEF envelopes.
 
-* **On truncated Authentication** At first glance it may be concerning that `auth` bytes for many versions have been truncated and are trivially "weak".  Note that KEF's use-case for authentication is to validate that the user has correctly entered their decryption `key`.  In the worse case, "false-authenticated" success will occur at a rate of 1:16M (or 1:4B for others) if using an incorrect decryption `key`; similar if an attacker has modified the KEF envelope.  In these "false-authenticated" success cases, data will result from decryption, but that data will NOT be the original secret or plaintext; it will be of no value.
+* **On truncated Authentication** At first glance it may be concerning that `auth` bytes for many versions have been truncated and are trivially "weak".  Note that KEF's use-case for authentication is to validate that the user has correctly entered their decryption `key`.  In the worse case, "false-authenticated" success will occur at a rate of 1:16M (or 1:4B for others) if using an incorrect decryption `key`; similar if an attacker has modified the KEF envelope. In these "false-authenticated" success cases, data will result from decryption, but that data will NOT be the original secret or plaintext; it will be of no value.
 
 ## 4. Common Structure of a KEF Envelope
 
@@ -302,7 +312,7 @@ k: pbkdf2_hmac(sha256, K, id, i)
 * **Compression**: `zlib.compress(P, wbits=-10)`, - raw deflate
 * **Padding**: PKCS7 to block boundary
 * **Authentication**: First 4 bytes of `SHA256(compressed plaintext)`, hidden
-* **cpl layout**: `[iv (16)] + [ciphertext]` (auth embedded after compressions, before padding/encryption)
+* **cpl layout**: `[iv (16)] + [ciphertext]` (auth embedded after compression, before padding/encryption)
 * **Use Case**: Larger plaintext
 * **Security Note**: When encrypting: do not re-use IV
 
