@@ -43,6 +43,8 @@ Exported QR codes can now be saved as SVG images.
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
 - Optimized device's board value checks.
 - Added QR Code to About screen.
+- Fixed camera not rotating on Yahboom or WonderMV with flipped orientation.
+- Restart prompt for theme settings now appears only when changes are made.
 - Wallet Descriptor now validates and warns if change addresses cannot be determined.
 - Wallet customization prompt now warns about Descriptor unloading, but does nothing if no changes are made.
 - Fixed issues with long wallet derivation path.
