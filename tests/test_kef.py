@@ -1788,3 +1788,135 @@ def NOtest_assuming_kef_is_working_create_one_control(m5stickv):
         )
     )
     assert 0
+
+
+def test_grind_alternate_decryption_key(m5stickv):
+    """
+    KEF version 5 uses 3 bytes of auth, which is trivially weak.
+    Same for versions which have 4 bytes of auth (others except 0 and 1).
+
+    Therefore: an alternate decryption key, unlikely to be the
+    correct key (if strong), can be found soon-ish, resulting in "garbage"
+    bytes which are not the original secret.
+    """
+    from datetime import datetime, timedelta
+    from embit import bip39, bip32
+    from krux import kef
+    from krux.baseconv import base_encode
+
+    def another_key(byte_len):
+        """yields all 'hex' values of byte_len from counter, as bytes"""
+        counter = 0
+
+        while True:
+            try:
+                yield counter.to_bytes(byte_len, "big").hex().encode()
+                counter += 1
+            except:
+                break
+
+    grinding = False  # False so that test-suite completes; True to grind
+
+    test_cases = (
+        # true key, true secret, KEF envelope, alternate key (from past grinding), garbage (from alt key)
+        [
+            b"abc",
+            b"I'm 16 raw bytes",
+            b"\x08a1e6c7e4\x05\x00\x00\x01\xe3\xc3\xb2\xa7)g\xa5q\x1eT\xd8sK\xf1\xfd\xd0-\xdc\x80",
+            b"421a8f",
+            b"'`+\xca\x9alt\xee\x9ad&k\x87\xdb\rp",
+        ],
+        [
+            b"key",
+            b"I'm 16 raw bytes",
+            b"\x08a1e6c7e4\x05\x00\x00\x01\xf1\xe37\x1b\x01B*HC\x0cZW\x9b\xf9\xf0/\xca\x8a\x8f",
+            b"f2a8e9",
+            b"\xc8k\xa0\xc2i!\xe7`\xcen\x11!o\xff\xc42",
+        ],
+    )
+
+    for test_case in test_cases:
+        key, control_secret, kef_envelope, alt_key, control_garbage = test_case
+        id_, version, iterations, cpl = kef.unwrap(kef_envelope)
+        decryptor = kef.Cipher(key, id_, iterations)
+        secret = decryptor.decrypt(cpl, version)
+        assert secret == control_secret
+
+        decryptor = kef.Cipher(alt_key, id_, iterations)
+        garbage = decryptor.decrypt(cpl, version)
+        assert garbage == control_garbage
+        assert garbage != secret
+
+    if grinding:
+        # original secret, bip39 mnemonic entropy
+        secret = b"I'm 16 raw bytes"  # bad example of bip39 12w mnemonic entropy
+        key = b"key"  # bad example of a user-supplied encryption key
+
+        # kef setup
+        id_ = b"a1e6c7e4"  # bip32 mfp derived w/ secret as bip39 entropy
+        version = 5  # play here for other versions w/ "weak" auth
+        iterations = 10000  # minimal amount of iterations
+
+        # try 256x more than probably necessary
+        key_len = abs(kef.VERSIONS[version]["auth"]) + 1
+
+        # create a KEF envelope
+        encryptor = kef.Cipher(key, id_, iterations)
+        cpl = encryptor.encrypt(secret, version)
+        envelope = kef.wrap(id_, version, iterations, cpl)
+        fmt = "Original:\n secret: {}\n key: {}\n id_: {}\n version: {}\n iterations: {}\n KEF: {}\n b43 KEF: {}\n"
+        print(
+            fmt.format(
+                secret,
+                key,
+                id_,
+                version,
+                iterations,
+                envelope,
+                base_encode(envelope, 43),
+            )
+        )
+
+        progress_step = 10
+        begin = datetime.now()
+        print("Grinding for an alternate decryption key: {}...".format(begin))
+        for i, alternate in enumerate(another_key(key_len)):
+            alternate = alternate.lstrip(
+                b"0"
+            )  # strip leading b'0's from hex encoded key
+            decryptor = kef.Cipher(alternate, id_, iterations)
+            decrypted = decryptor.decrypt(cpl, version)
+
+            if (i + 1) % progress_step == 0:
+                print(
+                    " grinding attempts: {}, elapsed: {}".format(
+                        i + 1, datetime.now() - begin
+                    )
+                )
+                progress_step *= 10
+
+            if decrypted is not None and alternate != key:
+                fmt = "Alternate key found: {}, attempts: {}, elapsed: {}\n returns {} bytes: {}"
+                print(
+                    fmt.format(
+                        alternate,
+                        i + 1,
+                        datetime.now() - begin,
+                        len(decrypted),
+                        decrypted,
+                    )
+                )
+                assert decrypted != secret
+                assert len(decrypted) <= len(secret)
+
+                try:
+                    alt_mnemonic = bip39.mnemonic_from_bytes(decrypted)
+                    alt_seed = bip39.mnemonic_to_seed(alt_mnemonic)
+                    alt_bip32 = bip32.HDKey.from_seed(alt_seed)
+                    fmt = " would load bip39 mnemonic: {}\n w/ bip32 fingerprint: {}"
+                    print(fmt.format(alt_mnemonic, alt_bip32.my_fingerprint.hex()))
+                    break
+                except:
+                    pass
+
+        assert 0
