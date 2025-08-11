@@ -293,7 +293,8 @@ class Addresses(Page):
 
         try:
             data = decrypt_kef(self.ctx, data).decode()
-        except:
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt; KeyError=failed to decrypt
             pass
 
         addr = None
