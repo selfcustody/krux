@@ -1820,6 +1820,7 @@ def test_grind_alternate_decryption_key(m5stickv):
     test_cases = (
         # true key, true secret, KEF envelope, alternate key (from past grinding), garbage (from alt key)
         [
+            # AES-ECB version 5 w/ 3 bytes auth
             b"abc",
             b"I'm 16 raw bytes",
             b"\x08a1e6c7e4\x05\x00\x00\x01\xe3\xc3\xb2\xa7)g\xa5q\x1eT\xd8sK\xf1\xfd\xd0-\xdc\x80",
@@ -1827,12 +1828,14 @@ def test_grind_alternate_decryption_key(m5stickv):
             b"'`+\xca\x9alt\xee\x9ad&k\x87\xdb\rp",
         ],
         [
+            # AES-ECB version 5 w/ 3 bytes auth
             b"key",
             b"I'm 16 raw bytes",
             b"\x08a1e6c7e4\x05\x00\x00\x01\xf1\xe37\x1b\x01B*HC\x0cZW\x9b\xf9\xf0/\xca\x8a\x8f",
             b"f2a8e9",
             b"\xc8k\xa0\xc2i!\xe7`\xcen\x11!o\xff\xc42",
         ],
+        # TODO: more examples from other versions once a performance-optimized KEF exists
     )
 
     for test_case in test_cases:
@@ -1854,17 +1857,18 @@ def test_grind_alternate_decryption_key(m5stickv):
 
         # kef setup
         id_ = b"a1e6c7e4"  # bip32 mfp derived w/ secret as bip39 entropy
-        version = 5  # play here for other versions w/ "weak" auth
+        version = 20  # play here for other versions w/ "weak" auth
         iterations = 10000  # minimal amount of iterations
+        ivec = I_VECTOR[:12]  # Initialization_Vector or b""
 
         # try 256x more than probably necessary
         key_len = abs(kef.VERSIONS[version]["auth"]) + 1
 
         # create a KEF envelope
         encryptor = kef.Cipher(key, id_, iterations)
-        cpl = encryptor.encrypt(secret, version)
+        cpl = encryptor.encrypt(secret, version, ivec)
         envelope = kef.wrap(id_, version, iterations, cpl)
-        fmt = "Original:\n secret: {}\n key: {}\n id_: {}\n version: {}\n iterations: {}\n KEF: {}\n b43 KEF: {}\n"
+        fmt = "Original:\n secret: {}\n key: {}\n id_: {}\n version: {}\n iterations: {}\n IV: {}\n KEF: {}\n b43 KEF: {}\n"
         print(
             fmt.format(
                 secret,
@@ -1872,6 +1876,7 @@ def test_grind_alternate_decryption_key(m5stickv):
                 id_,
                 version,
                 iterations,
+                ivec,
                 envelope,
                 base_encode(envelope, 43),
             )
