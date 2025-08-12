@@ -11,6 +11,28 @@ Verify whether your device detects and reads the SD card, and browse its content
 
 <div style="clear: both"></div>
 
+### Datum Tool
+<img src="../../../img/maixpy_m5stickv/tools-datum-tool-load-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/tools-datum-tool-load-300.png" align="right" class="amigo">
+
+Datum Tool is an advanced / educational feature. Treating any data it loads as a simple `datum`, this tool offers flexibility to work with QR codes, manually entered text strings, and SD files.
+
+<div style="clear: both"></div>
+
+<img src="../../../img/maixpy_m5stickv/tools-datum-tool-loaded-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/tools-datum-tool-loaded-300.png" align="right" class="amigo">
+
+Once datum has been loaded, it offers meta information about the contents and ability to View Datum -- whether text or binary.  It also offers a menu to Convert Datum, Export to QR, and Export to SD.
+
+<div style="clear: both"></div>
+
+<img src="../../../img/maixpy_m5stickv/tools-datum-tool-convert-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/tools-datum-tool-convert-300.png" align="right" class="amigo">
+
+The Convert Datum menu allows access to common encodings for conversion between bytes and string data.  It also offers access to Encrypt contents with full-control to make specific encryption choices. For more info, see [encryption](./encryption.md).
+
+<div style="clear: both"></div>
+
 ### Device Tests
 <img src="../../../img/maixpy_m5stickv/device-tests-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/device-tests-options-300.png" align="right" class="amigo">
@@ -32,14 +54,6 @@ Quickly print a test QR code to check and optimize your printer setup.
 <img src="../../../img/maixpy_amigo/device-tests-test-suite-300.png" align="right" class="amigo">
 
 A suite of automated tests to verify important features on your device.
-
-<div style="clear: both"></div>
-
-### Create QR Code
-<img src="../../../img/maixpy_m5stickv/create-qr-code-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/create-qr-code-300.png" align="right" class="amigo">
-
-Enter text to create, print or [transcribe a QR](./QR-transcript-tools.md) code that can later be used as an encryption key or passphrase. Swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes if your device has a touchscreen.
 
 <div style="clear: both"></div>
 
@@ -87,7 +101,7 @@ This option permanently removes all stored encrypted mnemonics, settings and `TC
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-300.png" align="right" class="amigo">
 
-This option allows you to remove any stored encrypted mnemonic from the device's internal memory or an SD card. For more information, see [Krux Encrypted Mnemonics](./encrypted-mnemonics.md).
+This option allows you to remove any stored encrypted mnemonic from the device's internal memory or an SD card. For more information, see [encryption](./encryption.md).
 
 When mnemonics are removed from the device's flash memory, Krux will no longer be able to access them. However, as with most operating systems, the data may still be recoverable using specialized tools. If you stored any important keys with a [weak encryption key](https://www.hivesystems.com/blog/are-your-passwords-in-the-green), it is recommended to use the **Flash Tools -> Erase User's Data** feature above to ensure that the data is irrecoverable.
 

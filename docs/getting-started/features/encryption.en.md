@@ -2,7 +2,7 @@
 
 ### In General
 
-Within `Settings / Encryption Settings`, preferences `PBKDF2 Iterations` and `Encryption Mode` may be set before loading a wallet.  Later, when encrypting -- and depending on what is being encrypted, krux will use those preferences to make better choices that fit the particular "secret" being encrypted.  At times, the user may be offered to override their preference, or may actually have a choice to select a particular version.  Users must remain aware to use strong encryption keys and should heed warnings with sensitive secrets.
+Within `Settings / Encryption Settings`, preferences `PBKDF2 Iterations` and `Encryption Mode` may be set before loading a wallet.  Later, when encrypting -- and depending on what is being encrypted, krux will use those preferences to make better choices that fit the particular "secret" being encrypted.  At times, the user may be offered to override their preference, or may actually have a choice to select a particular version.  Users must remain aware to use strong encryption keys and should heed warnings with sensitive secrets. See also: [datum tool](../tools#datum-tool)
 
 ### Regarding BIP39 Mnemonics
 
@@ -57,9 +57,10 @@ When krux encrypts a secret, the result is a `KEF Envelope` -- which is a series
     * **(7)** Authentication/validation data (3, 4, or 16 bytes).
 
 ### Specific Version Details
-While all KEF envelopes share the above format, each version differs -- offering choices to the user, as trade-offs that may better fit a particular use-case.  For technical details, see: [KEF Specifications](./KEF_Specifications.md)
+While all KEF envelopes share the above format, each version differs -- offering choices to the user, as trade-offs that may better fit a particular use-case.  For technical details, see: [KEF specifications](./kef-specifications.md)
 
 ## Considerations
 Storage of encrypted secrets on the device or SD cards are meant for convenience only and should not be considered a long-term form of backup. Always make a physical backup of your keys that is independent from electronic devices and test recovering your wallet from this backup before you send funds to it. Flash storage can degrade over time and may be subject to permanent damage, resulting in the loss of stored information.
 
 Remember that any encrypted secret is protected by the key you defined to encrypt it. If the defined [key is weak](https://www.hivesystems.com/blog/are-your-passwords-in-the-green), your encrypted mnemonic and other secrets will **not be protected**. If you have stored sensitive secrets in the device's internal flash memory using a [weak key](https://www.hivesystems.com/blog/are-your-passwords-in-the-green), the best way to undo this is to [erase user's data](tools.md/#erase-users-data).
+

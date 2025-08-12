@@ -102,7 +102,8 @@ nav:
       - Setting a Coordinator and Signing: getting-started/usage/setting-a-coordinator-and-signing.en.md
       - Video Tutorials: getting-started/usage/video-tutorials.en.md
     - Features:
-      - Encrypted Mnemonics: getting-started/features/encrypted-mnemonics.en.md
+      - Encryption: getting-started/features/encryption.en.md
+      - KEF Specifications: getting-started/features/kef-specifications.en.md
       - Printing: getting-started/features/printing.en.md
       - CNC Engraving: getting-started/features/cnc.en.md
       - SD Card Updates: getting-started/features/sd-card-update.en.md
