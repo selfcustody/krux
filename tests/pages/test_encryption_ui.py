@@ -672,7 +672,7 @@ def test_decrypt_kef(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == 0
 
 
-def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
+def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     """
     Intention here is to verify that KEFEnvelope class is instantiated
     and used when expected, not that decryption actually succeeds.

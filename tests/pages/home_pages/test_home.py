@@ -406,6 +406,41 @@ def test_load_sign_message_menu(mocker, amigo):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_sign_psbt_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.pages.qr_capture import QRCodeCapture
+
+    # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # go load from camera
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # enter "b"
+        BUTTON_PAGE_PREV,  # back to "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "b" (while "a" is correct key)
+    ]
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    home_ui = Home(ctx)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        home_ui.sign_psbt()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
 def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet

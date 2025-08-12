@@ -93,6 +93,38 @@ def test_qr_passphrase_fail(m5stickv, mocker):
     qr_capturer.assert_called_once()
 
 
+def test_qr_passphrase_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.wallet_settings import PassphraseEditor
+    from krux.pages.qr_capture import QRCodeCapture
+
+    # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # enter "b"
+        BUTTON_PAGE_PREV,  # back to "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "b" (while "a" is correct key)
+    ]
+    ctx = create_ctx(mocker, btn_seq)
+    passphrase_editor = PassphraseEditor(ctx)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        passphrase_editor._load_qr_passphrase()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
 def test_change_policy_types(m5stickv, mocker, tdata):
     from krux.pages.wallet_settings import WalletSettings
     from krux.wallet import Wallet
