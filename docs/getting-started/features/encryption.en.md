@@ -1,12 +1,28 @@
 ## Introduction
 
+Encryption is an advanced feature that offers enhanced protection to hide a "secret".  However, if used incorrectly, the consequence could be hiding a secret in a way that it cannot be recovered without another plain-text backup.  Before using this feature, it is highly suggested to become familiar with the rest of this document, and to heed the warnings contained herein.
+
 ### In General
 
-Within `Settings / Encryption Settings`, preferences `PBKDF2 Iterations` and `Encryption Mode` may be set before loading a wallet.  Later, when encrypting -- and depending on what is being encrypted, krux will use those preferences to make better choices that fit the particular "secret" being encrypted.  At times, the user may be offered to override their preference, or may actually have a choice to select a particular version.  Users must remain aware to use strong encryption keys and should heed warnings with sensitive secrets. See also: [datum tool](../tools#datum-tool)
+Within `Settings / Encryption Settings`, preferences: `PBKDF2 Iterations` and `Encryption Mode` may be customized before loading a wallet.  Then, whenever encrypting -- and depending on what is being encrypted, krux will use those preferences to make better choices that fit the particular secret being encrypted.  The result will be an encrypted KEF envelope, exported as a QR or saved to SD.
+
+While encrypting, the user may be offered to override their encryption preferences, or may actually have a choice to select a particular version.  Above all: **It is CRUCIAL for users to understand that the encryption `key` used MUST BE STRONG!** If a KEF envelope is created with a "weak" key and then shared online, or accessible to others, users should assume that it provides NO protection and that their secret will been leaked.
+
+
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-kef-via-qr-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/load-mnemonic-kef-via-qr-300.png" align="right" class="amigo">
+
+When krux encounters data that appears to be an encrypted KEF envelope, the user will be prompted with a choice to "Decrypt?", displaying the KEF version, the envelope's ID (or label), and the number of PBKDF2 Key Iterations used at the time the envelope was created.  After confirmimg to decrypt, use the same `key` -- either typed or scanned, as was used orinally to encrypt the envelope.  Once decrypted, krux will use the resulting plain-text within the context it was loaded.  If the user instead declines to decrypt, krux will use the data as is, likely resulting in an error since a KEF envelope is effectively useless data -- without decryption.
+
+<div style="clear: both"></div>
+
+KEF envelopes are intentionally vague, without any description of what they contain or what `key` should be used to decrypt them.  It is up to the user to keep track of this -- by recording what each envelope contains and how to decrypt it, and by using an ID at the time of encryption which will help the user recall its contents and find the right `key`.  While encrypting, krux will suggest an ID, then offer for the user to update it. For mnemonics: the suggested ID will be the wallet fingerprint w/o passphrase; for wallet output descriptors: it will be the generic policy for that wallet.
+
+Within the Tools menu, users may experiment with [datum tool](../tools#datum-tool) for encrypting small to mid-sized contents (less than 50K bytes) and for decrypting KEF envelopes.
 
 ### Regarding BIP39 Mnemonics
 
-There are many possible security layers one could add to protect a wallet’s private key. Adding a BIP39 passphrase to the mnemonic is the most common method. Encrypting a BIP39 mnemonic has a similar use case as the BIP39 passphrase, but the user experience may differ depending on the implementation. The main difference between BIP39 passphrases and Krux’s encrypted mnemonic implementation is that when users type the wrong key, encrypted mnemonics will return an error instead of loading a different wallet, as BIP39 passphrases do. This difference may be desired or not. The implementation also has the convenience of storing a mnemonic ID together with the stored, or QR code, encrypted mnemonic. Lastly, a mnemonic may be encrypted after a wallet has already been initialized to better protect that secret, and may encrypted with different keys for the same wallet.  Mnemonic encryption, with its own key, can be used together with BIP39 passphrase as an extra security layer.
+There are many possible security layers one could add to protect a wallet’s private key. Adding a BIP39 passphrase to the mnemonic is the most common method. Encrypting a BIP39 mnemonic has a similar use case as the BIP39 passphrase, but the user experience may differ depending on the implementation. The main difference between BIP39 passphrases and Krux’s encrypted mnemonic implementation is that when users type the wrong key, encrypted mnemonics will return an error instead of loading a different wallet, as BIP39 passphrases do. This difference may be desired or not. The implementation also has the convenience of storing a mnemonic ID together with the stored, or QR code, encrypted mnemonic. Lastly, a mnemonic may be encrypted after a wallet has already been initialized to better protect that secret, and may be encrypted with different keys for the same wallet.  Mnemonic encryption, with its own key, can be used together with BIP39 passphrase as an extra security layer.
 
 ## AES Modes-of-Operation
 
@@ -22,10 +38,10 @@ ECB (Electronic Codebook) is a simpler method where data blocks are encrypted in
 
 ### AES-CBC
 
-CBC (Cipher-block Chaining) is considered more secure than ECB. In the first data block, an initialization vector (IV) is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, characterizing chaining. Tradeoffs are that encryption/decryption must be done in series and when encrypting, a camera snapshot will be needed to generate the IV, so it's a slower process.  This IV will be stored together with encrypted data, making encrypted QR codes denser and harder to [transcribe](./QR-transcript-tools.md).
+CBC (Cipher-block Chaining) is considered more secure than ECB. In the first data block, an initialization vector (IV) is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, characterizing chaining. Tradeoffs are that encryption/decryption must be done in series and when encrypting, a camera snapshot will be needed to generate the IV, so it's a slower process.  The IV will always stored together with encrypted data, making encrypted QR codes denser and harder to [transcribe](./QR-transcript-tools.md). This mode is often available on other microcontroller devices.
 
 ### AES-CTR
-CTR (Counter Mode) like CBC is more secure than ECB, because of the use of an Initialization Vector, and also most efficient as a stream cipher, capable of encrypting and decrypting in parallel.
+CTR (Counter Mode) like CBC is more secure than ECB, because of the use of an Initialization Vector, and also most efficient as a stream cipher, capable of encrypting and decrypting in parallel.  This mode is often available on other microcontroller devices.
 
 ### AES-GCM
 GCM (Galois Counter-Mode).  Similar to CBC and CTR, the cipher is initialized with a nonce from a camera snapshot.  Like CTR, it is a paralellizable stream cipher, and also adds Galois Field authentication inherently. Capable of optimized performance, with built-in authentication and ease of implementation, this mode is the krux default unless the user has selected otherwise.
@@ -34,9 +50,9 @@ GCM (Galois Counter-Mode).  Similar to CBC and CTR, the cipher is initialized wi
 
 Modes ECB, CBC, and GCM use an Initialization Vector (IV), where IV is better termed `nonce` for GCM.  The IV will be generated from a snapshot taken with the camera.  It is a fixed-size input value used to initialize the cipher, adding randomness to the encryption, and ensuring that data encrypted with the same key will produce different ciphertexts each time. The IV, or nonce, is not secret and will be transmitted along with the ciphertext. However, like any nonce, it should not be reused to maintain security.
 
-## Key Stretching
+## Key Stretching (PBKDF2 Iterations)
 
-When you enter the encryption key, it is not directly used to encrypt your data. In order to protect against brute force attacks, the user supplied key is derived multiple times -- stretched to 256 bits via `pbkdf2_hmac_sha256`. PBKDF2 (Password-Based Key Derivation Function) Iterations refer to the number of derivations that will be performed over your key -- as the `password` and `salted` with an ID, prior to encrypting/decrypting your secret.  Users may set a preferred `PBKDF2 Iterations` value in `Encryption Settings`, then krux will propose a slightly different value -- within a 10% delta, whenever encrypting.
+When you enter the encryption key, it is not directly used to encrypt your data. In order to protect against brute force attacks, the user supplied key is derived multiple times -- stretched to 256 bits via `pbkdf2_hmac_sha256`. PBKDF2 (Password-Based Key Derivation Function) Iterations refer to the number of derivations that will be performed over your key -- as the `password` -- `salted` with an ID, prior to encrypting/decrypting your secret.  Users may set a preferred `PBKDF2 Iterations` value in `Encryption Settings`, then krux will propose a slightly different value -- within a 10% delta, whenever encrypting.
 
 
 ## KEF Encryption Format
@@ -56,8 +72,29 @@ When krux encrypts a secret, the result is a `KEF Envelope` -- which is a series
     * **(6)** Encrypted Ciphertext.
     * **(7)** Authentication/validation data (3, 4, or 16 bytes).
 
-### Specific Version Details
+## KEF Version Details
 While all KEF envelopes share the above format, each version differs -- offering choices to the user, as trade-offs that may better fit a particular use-case.  For technical details, see: [KEF specifications](./kef-specifications.md)
+
+| Version | Name       | Mode | IV | Compressed | Intended Use Case                 |
+|---------|------------|------|----|------------|-----------------------------------|
+|       0 | AES-ECB v1 | ECB  | -- | --         | Legacy: mnemonic entropy          |
+|       1 | AES-CBC v1 | CBC  | 16 | --         | Legacy: mnemonic entropy          |
+|         |            |      |    |            |                                   |
+|       5 | AES-ECB    | ECB  | -- | --         | Smallest QR; mnemonic, passphrase |
+|       6 | AES-ECB +p | ECB  | -- | --         | General Mid-sized                 |
+|       7 | AES-ECB +c | ECB  | -- | Yes        | Large; repetitive text            |
+|         |            |      |    |            |                                   |
+|      10 | AES-CBC    | CBC  | 16 | --         | Small, high-entropy               |
+|      11 | AES-CBC +p | CBC  | 16 | --         | General mid-sized                 |
+|      12 | AES-CBC +c | CBC  | 16 | Yes        | General large                     |
+|         |            |      |    |            |                                   |
+|      15 | AES-CTR    | CTR  | 12 | --         | General mid-sized                 |
+|      16 | AES-CTR +c | CTR  | 12 | Yes        | General large                     |
+|         |            |      |    |            |                                   |
+|      20 | AES-GCM    | GCM  | 12 | --         | Default; General mid-sized        |
+|      21 | AES-GCM +c | GCM  | 12 | Yes        | Default; General large            |
+|         |            |      |    |            |                                   |
+
 
 ## Considerations
 Storage of encrypted secrets on the device or SD cards are meant for convenience only and should not be considered a long-term form of backup. Always make a physical backup of your keys that is independent from electronic devices and test recovering your wallet from this backup before you send funds to it. Flash storage can degrade over time and may be subject to permanent damage, resulting in the loss of stored information.

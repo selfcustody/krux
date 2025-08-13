@@ -1,4 +1,4 @@
-# KEF Encryption Format -- Specification
+# KEF Encryption Format -- Technical Specification
 
 ...`The K stands for "KEF"` --anon
 
