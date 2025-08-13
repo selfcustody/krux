@@ -212,7 +212,7 @@ class KEFEnvelope(Page):
             return True
         menu_items = [
             (v["name"], k)
-            for k, v in kef.VERSIONS.items()
+            for k, v in sorted(kef.VERSIONS.items())
             if isinstance(v, dict) and v["mode"] is not None
         ]
         idx, _ = Menu(
