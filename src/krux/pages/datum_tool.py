@@ -685,7 +685,10 @@ class DatumTool(Page):
 
             if self.history:
                 for i, option in enumerate(menu):
-                    if option[1]() == self.history[-1]:
+                    if (
+                        option[1]() in ("HEX", "hex")
+                        and self.history[-1] in ("HEX", "hex")
+                    ) or option[1]() == self.history[-1]:
                         menu[i] = (option[0] + " (" + t("Undo") + ")", lambda: "undo")
                         break
 
