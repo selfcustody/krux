@@ -1,3 +1,4 @@
+import pytest
 from ...shared_mocks import MockPrinter
 from .test_home import tdata, create_ctx
 from ...test_wallet import tdata as wallet_tdata
@@ -183,6 +184,45 @@ def test_wallet(mocker, m5stickv, tdata):
                     wallet_descriptor.display_loading_wallet.assert_called_once()
                     assert ctx.wallet.has_change_addr()
         assert ctx.input.wait_for_button.call_count == len(case[4])
+
+
+def test_wallet_load_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm load
+        BUTTON_ENTER,  # go load from camera
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # enter "b"
+        BUTTON_PAGE_PREV,  # back to "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "b" (while "a" is correct key)
+    ]
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    walletdescriptor_ui = WalletDescriptor(ctx)
+    assert walletdescriptor_ui.wallet() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
 
 
 def test_load_desc_without_change(mocker, m5stickv, tdata):

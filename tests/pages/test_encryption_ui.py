@@ -601,7 +601,7 @@ def test_encryption_key_strength(m5stickv, mocker):
 def test_decrypt_kef(m5stickv, mocker):
     """Verify that decrypt_kef attempts to unseal kef-envelope(s)"""
     from krux.pages.encryption_ui import decrypt_kef
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux import kef
 
     plaintext = b"this is plain text"
@@ -638,8 +638,41 @@ def test_decrypt_kef(m5stickv, mocker):
     assert result == plaintext
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
+    # wrong decryption key will result in KeyError raised from decrypt_kef's call
+    # to KEFEnvelope.unseal_ui() and does NOT catch it, allows KeyError to bubble up
+    # callers decrypt_kef() can not catch KeyError and instead allow it to bubble up
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # external envelope "Decrypt?"
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # "a" as key
+        BUTTON_PAGE_PREV,  # move to "Go"
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # Confirm "a" as key
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
-def test_decrypt_kef_offers_decrypt_ui_appriately(m5stickv, mocker):
+    # declining to decrypt results in ValueError("Not decrypted")
+    # which callers of decrypt_kef() will likely catch to deal with original data
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # decline to "Decrypt?"
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(ValueError, match="Not decrypted"):
+        decrypt_kef(ctx, envelope)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # as well, nothing to decrypt also results in ValueError("Not decrypted")
+    # which callers of decrypt_kef() will likely catch to deal with original data
+    ctx = create_ctx(mocker, [])
+    with pytest.raises(ValueError, match="Not decrypted"):
+        decrypt_kef(ctx, "I am not a valid KEF envelope")
+    assert ctx.input.wait_for_button.call_count == 0
+
+
+def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     """
     Intention here is to verify that KEFEnvelope class is instantiated
     and used when expected, not that decryption actually succeeds.
@@ -1103,7 +1136,7 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
         QRCodeCapture,
         "qr_capture_loop",
         new=lambda self: (
-            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x11\xef\x9a",
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
             None,
         ),
     )
@@ -1111,6 +1144,27 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
     page = KEFEnvelope(ctx)
     assert page.input_key_ui() == True
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    print("returns None if wrong key")
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # select scan
+        BUTTON_ENTER,  # scan key
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # enter key
+        BUTTON_PAGE,  # move to "b"
+        BUTTON_ENTER,  # key is "b"
+        BUTTON_PAGE_PREV,  # move to "a"
+        BUTTON_PAGE_PREV,  # move to Go
+        BUTTON_ENTER,  # select Go
+        BUTTON_ENTER,  # confirm key "b"
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == bool(None)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
 
     print("returns False if no key was gathered")
     BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]

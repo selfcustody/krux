@@ -54,6 +54,11 @@ def decrypt_kef(ctx, data):
     from binascii import unhexlify
     from krux.baseconv import base_decode, hint_encodings
 
+    # nothing to decrypt or declined raises ValueError here,
+    # so callers can `except ValueError: pass`, then treat original data.
+    # If user decides to decrypt and fails with wrong key, then
+    # `KeyError("Failed to decrypt")` raised by `KEFEnvelope.unseal_ui()`
+    # will bubble up to caller.
     err = "Not decrypted"  # intentionally vague
 
     # if data is str, assume encoded, look for kef envelope
@@ -448,8 +453,13 @@ class EncryptionKey(Page):
                 decrypted = decrypted.decode()
             except:
                 pass
+
             key = decrypted if decrypted else key
-        except:
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return None
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt
             pass
 
         while True:
