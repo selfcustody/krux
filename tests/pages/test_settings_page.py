@@ -450,7 +450,6 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
 
     ctx = mock_context(mocker)
     settings_page = SettingsPage(ctx)
-
     mocker.spy(SettingsPage, "flash_error")
 
     # pbkdf2_iterations has default value
@@ -461,29 +460,35 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
     settings_page.number_setting(
         EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
     )
-
-    # continue with default value because it must be multiple of 10000
-    assert Settings().encryption.pbkdf2_iterations == 100000
-
-    # error msg is shown
-    settings_page.flash_error.assert_called()
+    # a value not-multiple of 10k is allowed since kef-2025
+    assert Settings().encryption.pbkdf2_iterations == 100001
 
     # try to change the value to a multiple of 10000
     settings_page.capture_from_keypad = mocker.MagicMock(return_value=110000)
     settings_page.number_setting(
         EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
     )
-
     # value changed!
     assert Settings().encryption.pbkdf2_iterations == 110000
 
-    # try to change the value to a value out of range
-    settings_page.capture_from_keypad = mocker.MagicMock(return_value=0)
+    # try to change the value to a value out of range, too low
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=9999)
     settings_page.number_setting(
         EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
     )
+    # error shown, value remain unchanged!
+    settings_page.flash_error.assert_called()
+    settings_page.flash_error.reset_mock()
+    assert Settings().encryption.pbkdf2_iterations == 110000
 
-    # value remain unchanged!
+    # try to change the value to a value out of range, too high
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=500001)
+    settings_page.number_setting(
+        EncryptionSettings(), EncryptionSettings.pbkdf2_iterations
+    )
+    # error shown, value remain unchanged!
+    settings_page.flash_error.assert_called()
+    settings_page.flash_error.reset_mock()
     assert Settings().encryption.pbkdf2_iterations == 110000
 
 
@@ -501,6 +506,7 @@ def test_restore_settings(amigo, mocker, mocker_sd_card_ok):
             settings_page.restore_settings()
     mock_delete_sd.assert_called_once_with(SETTINGS_FILENAME)
     mock_remove.assert_called_once_with("/" + FLASH_PATH + "/" + SETTINGS_FILENAME)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_set_first_tc_code(amigo, mocker):
@@ -516,23 +522,27 @@ def test_set_first_tc_code(amigo, mocker):
     mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
     mocker.patch("krux.pages.flash_tools.FlashHash", new=mocker.MagicMock())
     mock_file = MockFile()
-    mocker.patch("builtins.open", mock_open(mock_file))
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,
+        BUTTON_ENTER,  # Confirm TC Flash Hash at boot
+    ]
     ctx = create_ctx(
         mocker,
-        [
-            BUTTON_ENTER,
-            BUTTON_ENTER,
-        ],  # Confirm TC Flash Hash at boot
+        BTN_SEQUENCE,
     )
     ctx.tc_code_enabled = False
     settings_page = SettingsPage(ctx)
     settings_page.capture_from_keypad = mocker.MagicMock(return_value="123456")
-    settings_page.enter_modify_tc_code()
+
+    with patch("builtins.open", mock_open(mock_file)):
+        settings_page.enter_modify_tc_code()
+
     assert ctx.tc_code_enabled == True
     assert mock_file.previous_data[-1] == TC_CODE_EXTENDED_HASH
     assert (
         mock_file.write_data == '{"settings": {"security": {"boot_flash_hash": true}}}'
     )
+    assert ctx.input.wait_for_button.call_count == 2
 
 
 def test_set_first_tc_code_not_match(amigo, mocker):
@@ -543,13 +553,16 @@ def test_set_first_tc_code_not_match(amigo, mocker):
     CODES = ["123456", "654321"]
 
     mock_file = MockFile()
-    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
     ctx.tc_code_enabled = False
     settings_page = SettingsPage(ctx)
     settings_page.capture_from_keypad = mocker.MagicMock(side_effect=CODES)
-    settings_page.enter_modify_tc_code()
+    with patch("builtins.open", mock_open(mock_file)):
+        settings_page.enter_modify_tc_code()
     assert ctx.tc_code_enabled == False
     assert mock_file.write_data == b""
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_set_new_tc_code(amigo, mocker):
@@ -567,29 +580,32 @@ def test_set_new_tc_code(amigo, mocker):
     )
     mocker.patch("krux.pages.flash_tools.FlashHash", new=mocker.MagicMock())
     mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
-    mock_file = MockFile()
-    mocker.patch("builtins.open", mock_open(mock_file))
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,
+        BUTTON_ENTER,  # Confirm TC Flash Hash at boot
+    ]
     ctx = create_ctx(
         mocker,
-        [
-            BUTTON_ENTER,
-            BUTTON_ENTER,
-        ],  # Confirm TC Flash Hash at boot
+        BTN_SEQUENCE,
     )
     ctx.tc_code_enabled = True
     settings_page = SettingsPage(ctx)
     settings_page.capture_from_keypad = mocker.MagicMock(return_value="123456")
-    settings_page.enter_modify_tc_code()
+    mock_file = MockFile()
+    with patch("builtins.open", mock_open(mock_file)):
+        settings_page.enter_modify_tc_code()
+        assert mock_file.previous_data[-1] == TC_CODE_EXTENDED_HASH
+        assert (
+            mock_file.write_data
+            == '{"settings": {"security": {"boot_flash_hash": true}}}'
+        )
     assert ctx.tc_code_enabled == True
-    assert mock_file.previous_data[-1] == TC_CODE_EXTENDED_HASH
-    assert (
-        mock_file.write_data == '{"settings": {"security": {"boot_flash_hash": true}}}'
-    )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_wrong_code_set_new_tc_code(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
-    from krux.input import BUTTON_ENTER
     from ..shared_mocks import MockFile, mock_open
 
     # TC Code check returns false
@@ -597,7 +613,7 @@ def test_wrong_code_set_new_tc_code(amigo, mocker):
         "krux.pages.tc_code_verification.TCCodeVerification.capture", return_value=False
     )
     mock_file = MockFile()
-    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    ctx = create_ctx(mocker, [])
     ctx.tc_code_enabled = True
     settings_page = SettingsPage(ctx)
     settings_page.enter_modify_tc_code()
@@ -624,6 +640,7 @@ def test_save_settings_on_sd(amigo, mocker, mocker_sd_card_ok):
             mocker.call("Settings stored on SD card.", duration=2500),
         ]
     )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_leave_settings_without_changes(amigo, mocker):
@@ -735,3 +752,4 @@ def test_persist_to_sd_without_sd(amigo, mocker):
             ),
         ]
     )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

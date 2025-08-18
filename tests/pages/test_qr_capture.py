@@ -259,3 +259,25 @@ def test_capture_qr_code_loop_duplicated_frames(mocker, m5stickv, tdata):
     spy_wdt.assert_has_calls(
         [mocker.call() for _ in range(len(tdata.TEST_PARTS_FORMAT_PMOFN) * 2 - 2)]
     )
+
+
+def test_qr_str_to_bytes(mocker, m5stickv):
+    from krux.pages.qr_capture import qr_str_to_bytes
+    from ur.ur import UR
+
+    # return any non-string input as is
+    for input_data in [b"already bytes", UR("a_ur_type", b"cbor bytes")]:
+        assert qr_str_to_bytes(input_data) == input_data
+
+    # return ascii string as a str
+    input_data = "".join([chr(i) for i in range(0, 128)])
+    assert qr_str_to_bytes(input_data) == input_data
+
+    # return a latin-1 string as bytes
+    input_data = "".join([chr(i) for i in range(0, 256)])
+    assert qr_str_to_bytes(input_data) == input_data.encode("latin-1")
+
+    # return a utf-8 string as str
+    input_data = "Hello, world! Привет, мир! こんにちは世界！"
+    print("encoded:", input_data.encode())
+    assert qr_str_to_bytes(input_data) == input_data

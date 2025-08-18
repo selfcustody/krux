@@ -8,7 +8,7 @@ Once you have either a 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin
 <img src="../../../img/maixpy_amigo/load-mnemonic-camera-options-300.png" align="right" class="amigo">
 
 ### Via Camera
-You can choose to use the camera to scan a `QR code`, `Tiny Seed`, `OneKey KeyTag` or a `Binary Grid`.
+You can choose to use the camera to scan a `QR code`, `Tinyseed`, `OneKey KeyTag` or a `Binary Grid`. Learn more about these [metal backups here](../features/tinyseed.en.md).
 
 ----8<----
 camera-scan-tips.en.txt
@@ -28,16 +28,16 @@ It's unpleasant having to manually enter 12 or 24 words every time you want to u
 After opening a wallet via one of the methods available you can use Krux to [backup the mnemonic](navigating-the-main-menu.md#backup-mnemonic) as QR code, [transcribe](../features/QR-transcript-tools.md) them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic as QR. Check out the [printing section](../features/printing.md) for more information.
 You can also use [an offline QR code generator for this](https://iancoleman.io/bip39/) (ideally on an airgapped device).
 
-#### Tiny Seed, OneKey KeyTag or Binary Grid
-[Tiny Seed](https://tinyseed.io/), [Onekey KeyTag](https://onekey.so/products/onekey-keytag/) and others directly encode a seed as binary, allowing for a very compact mnemonic storage. Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them (this feature is not available in Krux Android app).
+#### Tinyseed, OneKey KeyTag or Binary Grid
+[Tinyseed](https://tinyseed.io/), [Onekey KeyTag](https://onekey.so/products/onekey-keytag/) and others directly encode a seed as binary, allowing for a very compact mnemonic storage. Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them (this feature is not available in [Krux Mobile Android app](../../faq.md#what-is-krux-mobile-android-app)).
 
-To properly scan, place the backup plate over a black background and paint the punched bits black to increase contrast. You can also scan the thermally printed version, or a filled template. You can find some [examples of mnemonics encoded here](../features/tinyseed.md). Alternatively, you can find [templates to scan or print here](https://github.com/odudex/krux_binaries/tree/main/templates).
+To ensure a proper scan, place the backup plate over a black background and fill in the punched areas with black to enhance contrast. Alternatively, you can scan a [thermally printed version](../features/printing.en.md) or a completed template. You can view some [examples of encoded mnemonics here](../features/tinyseed.md), and explore our [available transcription templates here](../templates/templates.md).
 
 ### Via Manual Input
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-manual-options-300.png" align="right" class="amigo">
 
-Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) or [`Stackbit 1248`](https://stackbit.me/produto/stackbit-1248/).
+Manually type `Words`, `Word Numbers`, `Tinyseed` (toggle the bits or punches) or [`Stackbit 1248`](https://stackbit.me/produto/stackbit-1248/).
 
 <div style="clear: both"></div>
 
@@ -61,7 +61,7 @@ You can also enter your BIP39 mnemonic word's numbers (1-2048) in hexadecimal fo
 
 <div style="clear: both"></div>
 
-#### Tiny Seed (Bits)
+#### Tinyseed (Bits)
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-300.png" align="right" class="amigo">
 

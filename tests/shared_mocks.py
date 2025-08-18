@@ -332,7 +332,8 @@ def pbkdf2_hmac_sha256_wrapper(secret, salt, iterations):
 def base32_decode(encoded_str):
     """Decodes a Base32 string."""
     try:
-        decoded = base64.b32decode(encoded_str)
+        len_pad = (8 - len(encoded_str) % 8) % 8
+        decoded = base64.b32decode(encoded_str + "=" * len_pad)
     except ValueError as e:
         raise ValueError("Invalid Base32 string: %s" % e)
 
@@ -346,16 +347,16 @@ def base32_encode(data, add_padding=False):
     return encoded
 
 
-def base43_encode(data):
-    from krux.baseconv import base_encode
+def base43_encode(data, ignored=None):
+    from krux.baseconv import pure_python_base_encode
 
-    return base_encode(data, 43)
+    return pure_python_base_encode(data, 43)
 
 
 def base43_decode(data):
-    from krux.baseconv import base_decode
+    from krux.baseconv import pure_python_base_decode
 
-    return base_decode(data, 43)
+    return pure_python_base_decode(data, 43)
 
 
 def board_m5stickv():
@@ -648,6 +649,7 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=135),
                 height=mocker.MagicMock(return_value=240),
                 usable_width=mocker.MagicMock(return_value=(135 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=135),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=7),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
@@ -669,6 +671,7 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
@@ -691,6 +694,7 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=320),
                 height=mocker.MagicMock(return_value=480),
                 usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(320 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
@@ -712,6 +716,7 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=240),
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=7),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
@@ -734,6 +739,7 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
@@ -755,6 +761,7 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),

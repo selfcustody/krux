@@ -22,19 +22,17 @@
 
 import sys
 import base64
-from krux.baseconv import base_encode, base_decode
-
-B32CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+from krux import baseconv
 
 class base43:
 
-    def encode(data):
+    def encode(data, add_padding=False):
         """Encodes data to Base43."""
-        return base_encode(data, 43)
+        return baseconv.pure_python_base_encode(data, 43)
     
     def decode(encoded_str):
         """Decodes a Base43 string."""
-        return base_decode(encoded_str, 43)
+        return baseconv.pure_python_base_decode(encoded_str, 43)
 
 
 class base32:
@@ -51,7 +49,8 @@ class base32:
     def decode(encoded_str):
         """Decodes a Base32 string."""
         try:
-            decoded = base64.b32decode(encoded_str)
+            len_pad = (8 - len(encoded_str) % 8) % 8
+            decoded = base64.b32decode(encoded_str + ("=" * len_pad))
         except ValueError as e:
             raise ValueError("Invalid Base32 string: %s" % e)
 

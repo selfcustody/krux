@@ -34,8 +34,6 @@ from ..display import (
     MINIMAL_PADDING,
     FONT_HEIGHT,
     FONT_WIDTH,
-    NARROW_SCREEN_WITH,
-    SMALLEST_HEIGHT,
 )
 from ..camera import BINARY_GRID_MODE
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
@@ -61,13 +59,13 @@ class TinySeed(Page):
         self.label = label
         self.x_offset = MINIMAL_PADDING + 2 * FONT_WIDTH
         self.printer = None
-        if self.ctx.display.width() > NARROW_SCREEN_WITH:
+        if not kboard.is_m5stickv:
             self.x_pad = self.ctx.display.width() * 2 // 27
             self.y_pad = self.ctx.display.height() // 17
         else:
             self.x_pad = FONT_WIDTH + 1
             self.y_pad = FONT_HEIGHT
-        if self.ctx.display.height() > SMALLEST_HEIGHT:
+        if not kboard.has_minimal_display:
             self.y_offset = DEFAULT_PADDING + 3 * FONT_HEIGHT
         else:
             self.y_offset = 2 * FONT_HEIGHT
@@ -628,7 +626,7 @@ class TinyScanner(Page):
         return rect
 
     def _draw_grid(self, img):
-        if self.ctx.display.height() > SMALLEST_HEIGHT:
+        if not kboard.has_minimal_display:
             for i in range(13):
                 img.draw_line(
                     self.x_regions[i],
@@ -680,9 +678,7 @@ class TinyScanner(Page):
 
                 # Defines a threshold to evaluate if the dot is considered punched
                 punch_threshold = self._gradient_value(index)
-                punch_thickness = (
-                    1 if self.ctx.display.height() > SMALLEST_HEIGHT else 2
-                )
+                punch_thickness = 1 if not kboard.has_minimal_display else 2
                 if dot_l < punch_threshold:
                     img.draw_rectangle(
                         eval_rect, thickness=punch_thickness, color=lcd.WHITE

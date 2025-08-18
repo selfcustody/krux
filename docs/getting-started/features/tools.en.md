@@ -7,15 +7,31 @@ Here are some useful tools that are available as soon as Krux starts! These are 
 <img src="../../../img/maixpy_m5stickv/check-sd-card-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/check-sd-card-300.png" align="right" class="amigo">
 
-You can check if an SD card can be detected and read by your device and explore its content. If there are too many files to fit on one screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens if your device has a touchscreen.
+Verify whether your device detects and reads the SD card, and browse its contents. Files can be deleted individually. If there are more files than can fit on a single screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens - if your device has a touchscreen.
 
 <div style="clear: both"></div>
 
-### Print Test QR
+### Device Tests
+<img src="../../../img/maixpy_m5stickv/device-tests-options-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/device-tests-options-300.png" align="right" class="amigo">
+
+Simple tests to verify correct functioning of your krux device.
+
+<div style="clear: both"></div>
+
+#### Print Test QR
 <img src="../../../img/maixpy_m5stickv/print-test-qr-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/print-test-qr-300.png" align="right" class="amigo">
 
 Quickly print a test QR code to check and optimize your printer setup.
+
+<div style="clear: both"></div>
+
+#### Test Suite
+<img src="../../../img/maixpy_m5stickv/device-tests-test-suite-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/device-tests-test-suite-300.png" align="right" class="amigo">
+
+A suite of automated tests to verify important features on your device.
 
 <div style="clear: both"></div>
 

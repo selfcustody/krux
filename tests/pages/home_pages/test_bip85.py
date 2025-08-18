@@ -1,7 +1,7 @@
 from .test_home import tdata, create_ctx
 
 
-def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
+def test_bip85_bip39_mnemonic_derivation_amigo(mocker, amigo, tdata):
     from krux.krux_settings import Settings
     from krux.settings import THIN_SPACE
     from krux.pages.home_pages.bip85 import Bip85
@@ -27,7 +27,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Confirm
             ],
             None,
-            None,
+            "a620a1bc",
             False,
         ),
         # 1 - 12w, load
@@ -40,6 +40,8 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
             "a620a1bc",
@@ -55,6 +57,8 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "mule patient cloth romance tongue taxi animal sweet develop settle elegant exercise",
             "f1556c60",
@@ -71,6 +75,8 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "nice hundred tree change section dismiss wet birth sleep under cattle beef cross chunk rain elbow work tag tiger weird toy stand offer smart",
             "cac16c1b",
@@ -87,6 +93,8 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE,  # Move to Cancel
                 BUTTON_ENTER,  # Cancel
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
             "a620a1bc",
@@ -101,9 +109,11 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
                 BUTTON_ENTER,  # Press "Esc"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             None,
-            None,
+            "a620a1bc",
             False,
         ),
         # Assert if no index is assigned it stays in the loop
@@ -119,6 +129,8 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go" with no index assigned
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
             "a620a1bc",
@@ -139,10 +151,26 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
             "a620a1bc",
             True,
+        ),
+        # 8 - Cancel at mnemonic word count selection
+        (
+            tdata.SINGLESIG_12_WORD_KEY,
+            [
+                BUTTON_ENTER,  # BIP39 Mnemonic
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Press "< Back"
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Press "< Back"
+            ],
+            None,  # No mnemonic generated
+            "a620a1bc",
+            False,  # Not loaded
         ),
     ]
 
@@ -174,12 +202,14 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
 
     # Test with hidden mnemonic setting enabled
     Settings().security.hide_mnemonic = True
+    wallet = Wallet(cases[1][0])
     ctx = create_ctx(mocker, cases[1][1], wallet)
     bip85_ui = Bip85(ctx)
     mocker.spy(bip85_ui, "display_mnemonic")
     bip85_ui.export()
     ctx.display.draw_centered_text.assert_called_with(
-        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
+        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % cases[1][3],
+        color=theme.highlight_color,
     )
 
 
@@ -222,6 +252,8 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
             "a620a1bc",
@@ -237,6 +269,8 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "mule patient cloth romance tongue taxi animal sweet develop settle elegant exercise",
             "f1556c60",
@@ -254,6 +288,8 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # confirm 12
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "nice hundred tree change section dismiss wet birth sleep under cattle beef cross chunk rain elbow work tag tiger weird toy stand offer smart",
             "cac16c1b",
@@ -269,6 +305,8 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE,  # Cancel
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
             "a620a1bc",
@@ -283,6 +321,8 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
                 BUTTON_ENTER,  # Press "Esc"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             None,
             None,
@@ -301,6 +341,8 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go" with no index assigned
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
             "a620a1bc",
@@ -321,6 +363,8 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_ENTER,  # Load? Yes
+                BUTTON_PAGE_PREV,  # Move to "< Back"
+                BUTTON_ENTER,  # Back
             ],
             "neutral cattle hill strong someone enjoy deputy plastic cat birth athlete inherit",
             "a620a1bc",
@@ -357,12 +401,14 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
     print("last case hide_mnemonic")
     # Test with hidden mnemonic setting enabled
     Settings().security.hide_mnemonic = True
+    wallet = Wallet(cases[1][0])
     ctx = create_ctx(mocker, cases[1][1], wallet)
     bip85_ui = Bip85(ctx)
     mocker.spy(bip85_ui, "display_mnemonic")
     bip85_ui.export()
     ctx.display.draw_centered_text.assert_called_with(
-        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % case[3], color=theme.highlight_color
+        FINGERPRINT_SYMBOL + THIN_SPACE + "%s" % cases[1][3],
+        color=theme.highlight_color,
     )
 
 
@@ -370,9 +416,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
     from krux.pages.home_pages.bip85 import Bip85
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.settings import TEST_TXT
     from embit import bip32
-    from embit.networks import NETWORKS
 
     cases = [
         # case
@@ -396,7 +440,9 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE_PREV,  # Move to "< Back"
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Leave password
+                BUTTON_PAGE,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave BIP85
             ],
             "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
         ),
@@ -413,7 +459,9 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE_PREV,  # Move to "< Back"
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Leave password
+                BUTTON_PAGE,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave BIP85
             ],
             "SC7Ib2KFm8/Fo6T8Okw+m\n\nIndex: 1\nLength: 21",
         ),
@@ -433,7 +481,9 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go" again
                 BUTTON_ENTER,  # Go with 21
                 BUTTON_PAGE_PREV,  # Move to "< Back"
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Leave password
+                BUTTON_PAGE,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave BIP85
             ],
             "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
         ),
@@ -449,6 +499,8 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
                 BUTTON_ENTER,  # Press "Esc"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_PAGE,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave BIP85
             ],
             None,
         ),
@@ -468,7 +520,9 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Print QR code
                 BUTTON_ENTER,  # Back main menu
                 BUTTON_PAGE_PREV,  # Move to "< Back"
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Leave password
+                BUTTON_PAGE,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave BIP85
             ],
             "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
             "n6JwU7iRyf2vhYeaToS3K",
@@ -493,7 +547,9 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Save
                 BUTTON_PAGE_PREV,  # Move to "< Back"
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Leave password
+                BUTTON_PAGE,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave BIP85
             ],
             "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
             None,
@@ -513,9 +569,25 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE_PREV,  # Move to "< Back"
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Leave password
+                BUTTON_PAGE,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave BIP85
             ],
             "dKLoepugzdVJvdL56ogNV\n\nIndex: 0\nLength: 21",
+        ),
+        # 7 - Cancel at index input
+        (
+            tdata.SINGLESIG_12_WORD_KEY,
+            [
+                BUTTON_PAGE,  # Move to "Base64 Password"
+                BUTTON_ENTER,  # Press "Base64 Password"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
+                BUTTON_ENTER,  # Press "Esc"
+                BUTTON_ENTER,  # Confirm ESC with "Yes"
+                BUTTON_PAGE,  # Move to "< Back"
+                BUTTON_ENTER,  # Leave BIP85
+            ],
+            None,  # No password info generated
         ),
     ]
     mock_save_file = mocker.patch(

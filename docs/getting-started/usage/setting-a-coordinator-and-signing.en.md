@@ -8,8 +8,9 @@ Krux works with:
 - [Bitcoin Safe](https://bitcoin-safe.org/) (desktop)
 - [Nunchuk](https://nunchuk.io/) (mobile)
 - [BlueWallet](https://bluewallet.io/) (mobile)
+- [Bitcoin Keeper](https://bitcoinkeeper.app/) (mobile)
 
-***Note**: For Liana, the exchange of extended public keys, wallet output descriptors, and PSBTs is performed via copy and paste. On Krux, use SD cards and a standard text editor, or use QR codes via an intermediary application such as [SeedQReader](https://github.com/pythcoiner/SeedQReader).
+***Note**: For Liana, the exchange of extended public keys, wallet output descriptors, and PSBTs is performed via copy and paste. On Krux, use SD cards and a standard text editor, or use QR codes via an intermediary application such as [SeedQReader](https://github.com/tadeubas/SeedQReader).
 
 ## Step 1: Install the Coordinator Wallet
 
@@ -23,7 +24,9 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 
 **Specter and Nunchuk Multisig:** Add Krux key, add other keys, then create a wallet that uses them.
 
-**Sparrow, Liana, Bitoin Safe and BlueWallet**: Create a wallet (or vault in Blue Wallet) and add keys during setup.
+**Sparrow, Liana, Bitcoin Safe and BlueWallet**: Create a wallet (or vault in Blue Wallet) and add key(s) during setup.
+
+**Bitcoin Keeper**: Add Wallet -> Create Wallet, select single-key or multi-key, and add key(s), or add key(s), then Add Wallet -> Create Wallet and select that key(s).
 
 1. Load a mnemonic and wallet in Krux.
 
@@ -66,6 +69,7 @@ Alternatively, you can export the extended public keys as files to an SD card. I
     - **Bitcoin Safe**: "Register multisig on signers" on step 6 or "Wallet Descriptor"
     - **Nunchuk**: "Export Wallet Configuration"
     - **BlueWallet**: "Export Coordination Setup"
+    - **Bitcoin Keeper**: "Wallet configuration file"
 2. Export the descriptor as a QR code or file.
 3. On Krux, go to **Wallet -> Wallet Descriptor** to scan the descriptor QR code or load it via SD card.
 

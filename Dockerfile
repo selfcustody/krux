@@ -26,7 +26,7 @@
 # build-base
 # install kendryte (k210), cmake and python dependencies
 ############
-FROM gcc:9.4.0-buster AS build-base
+FROM gcc:9.5.0-bullseye AS build-base
 
 RUN apt-get update -y && \
     apt-get install --no-install-recommends -y -q \
@@ -71,8 +71,10 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.0/cmake-3.21.0
     tar -xzvf cmake-3.21.0.tar.gz && \
     cd cmake-3.21.0 && ./bootstrap && make && make install
 
-RUN pip3 install astor
-RUN pip3 install pyserial==3.4
+RUN apt-get update && apt-get install python3-venv -y
+RUN python3 -m venv /kruxenv
+RUN /kruxenv/bin/pip install astor
+RUN /kruxenv/bin/pip install pyserial==3.4
 
 
 ############
@@ -96,7 +98,7 @@ RUN find vendor/urtypes -type d -name '__pycache__' -exec rm -rv {} + -depth
 RUN find vendor/foundation-ur-py -type d -name '__pycache__' -exec rm -rv {} + -depth
 
 # install vendor/embit
-RUN cd vendor/embit && pip3 install -e .
+RUN /kruxenv/bin/pip install vendor/embit
 # clean vendor/embit
 RUN rm -rf vendor/embit/src/embit/util/prebuilt && \
     rm -rf vendor/embit/src/embit/liquid && \
@@ -141,9 +143,9 @@ WORKDIR /src/firmware/MaixPy
 RUN cp -rf projects/"${DEVICE}"/compile/overrides/. ./
 
 RUN cd projects/"${DEVICE}" && \
-    python3 project.py clean && \
-    python3 project.py distclean && \
-    python3 project.py build && \
+    /kruxenv/bin/python project.py clean && \
+    /kruxenv/bin/python project.py distclean && \
+    /kruxenv/bin/python project.py build && \
     mv build/maixpy.bin build/firmware.bin
 
 

@@ -12899,6 +12899,24 @@ def test_extract_calver():
         assert extract_calver(case[0]) == case[1]
 
 
+def test_is_this_device(mocker, m5stickv, tdata):
+    from unittest.mock import mock_open, patch
+    from krux.firmware import is_this_device
+    import board
+
+    file_bytes = tdata.TEST_FIRMWARE_25_03_0
+
+    filename = "firmware.bin"
+    with patch("builtins.open", mock_open(read_data=file_bytes)) as mock_file:
+        assert is_this_device(filename) == False
+        mock_file.assert_called_once()
+
+    with patch("builtins.open", mock_open(read_data=file_bytes)) as mock_file:
+        board.config["type"] = "amigo"
+        assert is_this_device(filename) == True
+        mock_file.assert_called_once()
+
+
 def test_is_version_greater(mocker, m5stickv, tdata):
     from unittest.mock import mock_open, patch
 
@@ -13047,6 +13065,7 @@ def test_upgrade_succeed(mocker, m5stickv, mock_success_input_cls, tdata):
     mocker.spy(firmware, "update_boot_config_sector")
 
     firmware.is_version_greater = lambda filename: "00.00.0"
+    firmware.is_this_device = lambda filename: True
     assert firmware.upgrade()
 
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
@@ -13133,6 +13152,7 @@ def test_upgrade_fails_write_data(mocker, m5stickv, mock_success_input_cls, tdat
     mocker.spy(firmware, "display")
 
     firmware.is_version_greater = lambda filename: "00.00.0"
+    firmware.is_this_device = lambda filename: True
     assert not firmware.upgrade()
 
     from krux.themes import theme
@@ -13191,6 +13211,7 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
     mocker.spy(firmware, "update_boot_config_sector")
 
     firmware.is_version_greater = lambda filename: "00.00.0"
+    firmware.is_this_device = lambda filename: True
     assert firmware.upgrade()
 
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
@@ -13293,6 +13314,7 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
     mocker.spy(firmware, "update_boot_config_sector")
 
     firmware.is_version_greater = lambda filename: "00.00.0"
+    firmware.is_this_device = lambda filename: True
     assert firmware.upgrade()
 
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
@@ -13383,6 +13405,7 @@ def test_upgrade_fails_when_user_declines(mocker, m5stickv, mock_fail_input_cls,
         firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
     )
     firmware.is_version_greater = lambda filename: "00.00.0"
+    firmware.is_this_device = lambda filename: True
 
     assert not firmware.upgrade()
     display_mocker.flash_text.assert_not_called()
@@ -13762,6 +13785,7 @@ def test_upgrade_fail_version_not_newer(
     mocker.spy(firmware, "update_boot_config_sector")
 
     firmware.is_version_greater = lambda filename: False
+    firmware.is_this_device = lambda filename: True
     assert firmware.upgrade() == False
 
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
@@ -13834,6 +13858,7 @@ def test_upgrade_fail_version_exception(
     mocker.spy(firmware, "write_data")
     mocker.spy(firmware, "update_boot_config_sector")
 
+    firmware.is_this_device = lambda filename: True
     assert firmware.upgrade() == False
 
     krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
@@ -13857,4 +13882,76 @@ def test_upgrade_fail_version_exception(
 
     display_mocker.flash_text.assert_called_with(
         "Error checking versions", theme.error_color
+    )
+
+
+def test_upgrade_fail_not_this_device_exception(
+    mocker, m5stickv, mock_success_input_cls, tdata
+):
+    import binascii
+    from embit import ec
+    from krux.themes import theme
+
+    mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
+    mocker.patch(
+        "builtins.open",
+        new=get_mock_open(
+            {
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
+            }
+        ),
+    )
+    mocker.patch(
+        "os.remove",
+        new=mocker.MagicMock(return_value=True),
+    )
+    mocker.patch(
+        "os.stat",
+        new=mocker.MagicMock(return_value=True),
+    )
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
+    mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
+    mocker.patch(
+        "krux.firmware.flash.read",
+        new=mocker.MagicMock(
+            return_value=bytes(tdata.SECTOR_WITH_ACTIVE_FIRMWARE_AT_INDEX_1_SLOT_1)
+        ),
+    )
+    mocker.patch("krux.firmware.ec", new=mocker.MagicMock(wraps=ec))
+    mocker.spy(tdata.TEST_SIGNER_PUBLIC_KEY, "verify")
+    mocker.patch(
+        "krux.firmware.ec.PublicKey.from_string",
+        new=mocker.MagicMock(return_value=tdata.TEST_SIGNER_PUBLIC_KEY),
+    )
+    import krux
+    from krux import firmware
+
+    mocker.spy(firmware, "write_data")
+    mocker.spy(firmware, "update_boot_config_sector")
+
+    assert firmware.upgrade() == False
+
+    krux.firmware.ec.PublicKey.from_string.assert_called_with(tdata.TEST_SIGNER_PUBKEY)
+    krux.firmware.ec.Signature.parse.assert_called_with(tdata.TEST_FIRMWARE_SIG)
+    tdata.TEST_SIGNER_PUBLIC_KEY.verify.assert_called_with(
+        tdata.TEST_FIRMWARE_SIGNATURE,
+        binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
+    )
+    assert tdata.TEST_SIGNER_PUBLIC_KEY.verify(
+        tdata.TEST_FIRMWARE_SIGNATURE,
+        binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
+    )
+
+    krux.firmware.flash.read.assert_called_with(
+        firmware.MAIN_BOOT_CONFIG_SECTOR_ADDRESS, 4096
+    )
+
+    firmware.update_boot_config_sector.assert_not_called()
+
+    firmware.write_data.assert_not_called()
+
+    display_mocker.flash_text.assert_called_with(
+        "Firmware not for this device", theme.error_color
     )

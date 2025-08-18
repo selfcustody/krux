@@ -23,7 +23,7 @@
 
 import lcd
 from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
-from ..themes import theme, GREEN, ORANGE
+from ..themes import theme, MAIN_TXT_COLOR, TEST_TXT_COLOR
 from ..settings import (
     CategorySetting,
     NumberSetting,
@@ -43,7 +43,6 @@ from ..krux_settings import (
 )
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..sd_card import SDHandler
-from ..encryption import QR_CODE_ITER_MULTIPLE
 from . import (
     Page,
     Menu,
@@ -64,8 +63,8 @@ PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
 
 CATEGORY_SETTING_COLOR_DICT = {
-    MAIN_TXT: ORANGE,
-    TEST_TXT: GREEN,
+    MAIN_TXT: MAIN_TXT_COLOR,
+    TEST_TXT: TEST_TXT_COLOR,
     True: theme.go_color,
     False: theme.no_esc_color,
 }
@@ -288,7 +287,7 @@ class SettingsPage(Page):
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
+            if index == submenu.back_index:
                 return MENU_CONTINUE
             return status
 
@@ -493,15 +492,7 @@ class SettingsPage(Page):
 
         new_value = setting.numtype(new_value)
         if setting.value_range[0] <= new_value <= setting.value_range[1]:
-            if (
-                setting.attr == "pbkdf2_iterations"
-                and (new_value % QR_CODE_ITER_MULTIPLE) != 0
-            ):
-                self.flash_error(
-                    t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE
-                )
-            else:
-                setting.__set__(settings_namespace, new_value)
+            setting.__set__(settings_namespace, new_value)
         else:
             self.flash_error(
                 t("Value %s out of range: [%s, %s]")

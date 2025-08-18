@@ -51,7 +51,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 6 Print
         (
@@ -59,7 +59,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 7 Decline to print
         (
@@ -67,7 +67,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_PAGE],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
         ),
         # 8 Multisig wallet, no print prompt
         (
@@ -75,7 +75,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.MULTISIG_12_WORD_KEY,
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 9 vague BlueWallet-ish p2pkh, requires allow_assumption
         (
@@ -125,7 +125,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # 1 Load, from SD card, good data, accept
+        # 15 Load, from SD card, good data, accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -235,6 +235,8 @@ def test_load_desc_without_change(mocker, m5stickv, tdata):
         not ctx.wallet.has_change_addr()
     )  # the loaded descriptor doesn't have change addr
 
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
 
 def test_cancel_load_desc_without_change(mocker, m5stickv, tdata):
     import krux
@@ -282,6 +284,8 @@ def test_cancel_load_desc_without_change(mocker, m5stickv, tdata):
 
     assert not ctx.wallet.is_loaded()  # continue unloaded
     assert ctx.wallet.has_change_addr()  # single-sig per default has change addr
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
 
 def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):

@@ -1,5 +1,7 @@
 # The MIT License (MIT)
 
+# pylint: disable=C0103,C0116,C0206,C0302,E0601,R0912,R0914,W0212,W0612,W0613
+
 # Copyright (c) 2021-2024 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -48,7 +50,6 @@ from ..key import (
     POLICY_TYPE_IDS,
 )
 from ..krux_settings import t
-from ..settings import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
 
 
 DIGITS_HEX = "0123456789ABCDEF"
@@ -103,7 +104,7 @@ class Login(Page):
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -125,7 +126,7 @@ class Login(Page):
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -141,7 +142,7 @@ class Login(Page):
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -167,7 +168,7 @@ class Login(Page):
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
@@ -272,18 +273,18 @@ class Login(Page):
     def _load_key_from_words(self, words, charset=LETTERS, new=False):
         mnemonic = " ".join(words)
 
-        if charset != LETTERS:
-            if self._confirm_key_from_digits(mnemonic, charset) is not None:
-                return MENU_CONTINUE
-
-        # If the mnemonic is not hidden, show the mnemonic editor
+        # Don't show word list confirmation or the mnemonic editor if hide mnemonic is enabled
         if not Settings().security.hide_mnemonic:
+
+            if charset != LETTERS:
+                if self._confirm_key_from_digits(mnemonic, charset) is not None:
+                    return MENU_CONTINUE
+
             from .mnemonic_editor import MnemonicEditor
 
             mnemonic = MnemonicEditor(self.ctx, mnemonic, new).edit()
         if mnemonic is None:
             return MENU_CONTINUE
-        self.ctx.display.clear()
 
         passphrase = ""
         if not hasattr(Settings().wallet, "policy_type") and hasattr(
@@ -306,9 +307,12 @@ class Login(Page):
         else:
             script_type = P2WSH
         derivation_path = ""
+
         from ..wallet import Wallet
         from ..themes import theme
+        from .utils import Utils
 
+        utils = Utils(self.ctx)
         while True:
             key = Key(
                 mnemonic,
@@ -319,23 +323,18 @@ class Login(Page):
                 script_type,
                 derivation_path,
             )
+            network_name = network["name"]
             if not derivation_path:
                 derivation_path = key.derivation
-            wallet_info = "\n"
-            wallet_info += network["name"] + "\n"
-            if policy_type == TYPE_SINGLESIG:
-                wallet_info += NAME_SINGLE_SIG + "\n"
-            elif policy_type == TYPE_MULTISIG:
-                wallet_info += NAME_MULTISIG + "\n"
-            elif policy_type == TYPE_MINISCRIPT:
-                if script_type == P2TR:
-                    wallet_info += "TR "
-                wallet_info += NAME_MINISCRIPT + "\n"
-            wallet_info += key.derivation_str(True) + "\n"
-            wallet_info += (
+
+            wallet_info = "\n" + utils.generate_wallet_info(
+                network_name, policy_type, script_type, derivation_path, True
+            )
+            wallet_info += "\n" + (
                 t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
             )
 
+            self.ctx.display.clear()
             submenu = Menu(
                 self.ctx,
                 [
@@ -349,14 +348,24 @@ class Login(Page):
                     + DEFAULT_PADDING
                 ),
             )
+
             # draw fingerprint with highlight color
             self.ctx.display.draw_hcentered_text(
                 key.fingerprint_hex_str(True),
                 color=theme.highlight_color,
                 bg_color=theme.info_bg_color,
             )
+
+            # draw network with highlight color
+            self.ctx.display.draw_hcentered_text(
+                network_name,
+                DEFAULT_PADDING + FONT_HEIGHT,
+                color=Utils.get_network_color(network_name),
+                bg_color=theme.info_bg_color,
+            )
+
             index, _ = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
+            if index == submenu.back_index:
                 if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                     del key
                     return MENU_CONTINUE
@@ -398,8 +407,9 @@ class Login(Page):
         }
         numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
         self.display_mnemonic(
-            numbers_str,
+            mnemonic,
             suffix_dict[charset],
+            numbers_str,
             fingerprint=Key.extract_fingerprint(mnemonic),
         )
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
@@ -410,10 +420,17 @@ class Login(Page):
 
     def _encrypted_qr_code(self, data):
         from ..encryption import EncryptedQRCode
+        from ..baseconv import base_decode
 
         encrypted_qr = EncryptedQRCode()
-        data_bytes = data.encode("latin-1") if isinstance(data, str) else data
-        public_data = encrypted_qr.public_data(data_bytes)
+        public_data = None
+        try:  # Try to decode base43 data
+            data = base_decode(data, 43)
+            public_data = encrypted_qr.public_data(data)
+        except:
+            pass
+        if not public_data:  # Failed to decode and parse base43
+            public_data = encrypted_qr.public_data(data)
         if public_data:
             self.ctx.display.clear()
             if self.prompt(
@@ -457,12 +474,18 @@ class Login(Page):
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
         from .qr_capture import QRCodeCapture
+        from .encryption_ui import decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
+
+        try:
+            data = decrypt_kef(self.ctx, data)
+        except:
+            pass
 
         words = []
         if qr_format == FORMAT_UR:
@@ -505,10 +528,7 @@ class Login(Page):
                         WORDLIST[int(data_bytes[i : i + 4])]
                         for i in range(0, len(data_bytes), 4)
                     ]
-            if not words:
-                words = self._encrypted_qr_code(data)
-                if words == MENU_CONTINUE:
-                    return MENU_CONTINUE
+
         if not words or (len(words) != 12 and len(words) != 24):
             self.flash_error(t("Invalid mnemonic length"))
             return MENU_CONTINUE
@@ -641,7 +661,7 @@ class Login(Page):
             ],
         )
         index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
+        if index == submenu.back_index:
             return MENU_CONTINUE
         return status
 
