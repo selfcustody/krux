@@ -1,28 +1,26 @@
 ## Introduction
 
-Encryption is an advanced feature that offers enhanced protection to hide a "secret".  However, if used incorrectly, the consequence could be hiding a secret in a way that it cannot be recovered without another plain-text backup.  Before using this feature, it is highly suggested to become familiar with the rest of this document, and to heed the warnings contained herein.
+Encryption is an advanced feature for securely hiding a secret. However, if used incorrectly, the secret may become unrecoverable without a separate plain-text backup. Before using it, carefully review this document and pay close attention to all warnings.
 
 ### In General
+In **Settings -> Encryption Settings**, you can adjust *PBKDF2 Iterations* and *Encryption Mode* before loading a wallet. When encrypting, Krux applies these preferences to optimize for the specific secret being secured, producing an encrypted KEF envelope that can be exported as a QR or saved to SD.
 
-Within `Settings / Encryption Settings`, preferences: `PBKDF2 Iterations` and `Encryption Mode` may be customized before loading a wallet.  Then, whenever encrypting -- and depending on what is being encrypted, krux will use those preferences to make better choices that fit the particular secret being encrypted.  The result will be an encrypted KEF envelope, exported as a QR or saved to SD.
-
-While encrypting, the user may be offered to override their encryption preferences, or may actually have a choice to select a particular version.  Above all: **It is CRUCIAL for users to understand that the encryption `key` used MUST BE STRONG!** If a KEF envelope is created with a "weak" key and then shared online, or accessible to others, users should assume that it provides NO protection and that their secret will been leaked.
-
+During encryption, users may be prompted to override their preferences or select a specific version. Most importantly: **the encryption key MUST be strong**. If a KEF envelope is created with a weak key and shared or exposed, it should be assumed to offer **NO protection**, and the secret will be leaked.
 
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-kef-via-qr-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-kef-via-qr-300.png" align="right" class="amigo">
 
-When krux encounters data that appears to be an encrypted KEF envelope, the user will be prompted with a choice to "Decrypt?", displaying the KEF version, the envelope's ID (or label), and the number of PBKDF2 Key Iterations used at the time the envelope was created.  After confirmimg to decrypt, use the same `key` -- either typed or scanned, as was used orinally to encrypt the envelope.  Once decrypted, krux will use the resulting plain-text within the context it was loaded.  If the user instead declines to decrypt, krux will use the data as is, likely resulting in an error since a KEF envelope is effectively useless data -- without decryption.
+When Krux detects data resembling a KEF-encrypted envelope, it prompts the user to *"Decrypt?"*, showing the KEF version, envelope ID (or label), and the PBKDF2 iteration count used during creation. To decrypt, the same key (typed or scanned) must be provided. Once unlocked, Krux uses the plaintext within context. If decryption is declined, the raw envelope is used instead—usually resulting in an error, since KEF data is meaningless without decryption.
 
 <div style="clear: both"></div>
 
-KEF envelopes are intentionally vague, without any description of what they contain or what `key` should be used to decrypt them.  It is up to the user to keep track of this -- by recording what each envelope contains and how to decrypt it, and by using an ID at the time of encryption which will help the user recall its contents and find the right `key`.  While encrypting, krux will suggest an ID, then offer for the user to update it. For mnemonics: the suggested ID will be the wallet fingerprint w/o passphrase; for wallet output descriptors: it will be the generic policy for that wallet.
+KEF envelopes are deliberately opaque, providing no information about their contents or the key needed for decryption. It is the user’s responsibility to track this—by noting what each envelope contains, how to decrypt it, and assigning an ID at encryption to help recall its contents and locate the correct key. During encryption, Krux suggests an ID that the user can modify. For mnemonics, the default ID is the wallet fingerprint without a passphrase; for wallet output descriptors, it defaults to the wallet’s generic policy.
 
 Within the Tools menu, users may experiment with [datum tool](../tools#datum-tool) for encrypting small to mid-sized contents (less than 50K bytes) and for decrypting KEF envelopes.
 
 ### Regarding BIP39 Mnemonics
 
-There are many possible security layers one could add to protect a wallet’s private key. Adding a BIP39 passphrase to the mnemonic is the most common method. Encrypting a BIP39 mnemonic has a similar use case as the BIP39 passphrase, but the user experience may differ depending on the implementation. The main difference between BIP39 passphrases and Krux’s encrypted mnemonic implementation is that when users type the wrong key, encrypted mnemonics will return an error instead of loading a different wallet, as BIP39 passphrases do. This difference may be desired or not. The implementation also has the convenience of storing a mnemonic ID together with the stored, or QR code, encrypted mnemonic. Lastly, a mnemonic may be encrypted after a wallet has already been initialized to better protect that secret, and may be encrypted with different keys for the same wallet.  Mnemonic encryption, with its own key, can be used together with BIP39 passphrase as an extra security layer.
+There are several ways to add security layers to a wallet’s private key. The most common is adding a BIP39 passphrase to the mnemonic. Encrypting a BIP39 mnemonic serves a similar purpose, but differs in a key way: with BIP39 passphrases, entering the wrong passphrase loads a different wallet, while with Krux’s encrypted mnemonics, a wrong key simply returns an error. Depending on the use case, this behavior may be preferable. Krux’s implementation also stores a mnemonic ID alongside the data for convenience. Encrypted mnemonics can be combined with a BIP39 passphrase for added security, and the same mnemonic can be encrypted with multiple different keys.
 
 ## AES Modes-of-Operation
 
@@ -75,25 +73,25 @@ When krux encrypts a secret, the result is a `KEF Envelope` -- which is a series
 ## KEF Version Details
 While all KEF envelopes share the above format, each version differs -- offering choices to the user, as trade-offs that may better fit a particular use-case.  For technical details, see: [KEF specifications](./kef-specifications.md)
 
-| Version | Name       | Mode | IV | Compressed | Intended Use Case                 |
-|---------|------------|------|----|------------|-----------------------------------|
-|       0 | AES-ECB v1 | ECB  | -- | --         | Legacy: mnemonic entropy          |
-|       1 | AES-CBC v1 | CBC  | 16 | --         | Legacy: mnemonic entropy          |
-|         |            |      |    |            |                                   |
-|       5 | AES-ECB    | ECB  | -- | --         | Smallest QR; mnemonic, passphrase |
-|       6 | AES-ECB +p | ECB  | -- | --         | General Mid-sized                 |
-|       7 | AES-ECB +c | ECB  | -- | Yes        | Large; repetitive text            |
-|         |            |      |    |            |                                   |
-|      10 | AES-CBC    | CBC  | 16 | --         | Small, high-entropy               |
-|      11 | AES-CBC +p | CBC  | 16 | --         | General mid-sized                 |
-|      12 | AES-CBC +c | CBC  | 16 | Yes        | General large                     |
-|         |            |      |    |            |                                   |
-|      15 | AES-CTR    | CTR  | 12 | --         | General mid-sized                 |
-|      16 | AES-CTR +c | CTR  | 12 | Yes        | General large                     |
-|         |            |      |    |            |                                   |
-|      20 | AES-GCM    | GCM  | 12 | --         | Default; General mid-sized        |
-|      21 | AES-GCM +c | GCM  | 12 | Yes        | Default; General large            |
-|         |            |      |    |            |                                   |
+| Version | Name       | Mode | IV | Compressed | Intended Use Case                      |
+|---------|------------|------|----|------------|----------------------------------------|
+|       0 | AES-ECB v1 | ECB  | -- | --         | Legacy (<= v25.03.0): mnemonic entropy |
+|       1 | AES-CBC v1 | CBC  | 16 | --         | Legacy (<= v25.03.0): mnemonic entropy |
+|         |            |      |    |            |                                        |
+|       5 | AES-ECB    | ECB  | -- | --         | Smallest QR; mnemonic, passphrase      |
+|       6 | AES-ECB +p | ECB  | -- | --         | General Mid-sized                      |
+|       7 | AES-ECB +c | ECB  | -- | Yes        | Large; repetitive text                 |
+|         |            |      |    |            |                                        |
+|      10 | AES-CBC    | CBC  | 16 | --         | Small, high-entropy                    |
+|      11 | AES-CBC +p | CBC  | 16 | --         | General mid-sized                      |
+|      12 | AES-CBC +c | CBC  | 16 | Yes        | General large                          |
+|         |            |      |    |            |                                        |
+|      15 | AES-CTR    | CTR  | 12 | --         | General mid-sized                      |
+|      16 | AES-CTR +c | CTR  | 12 | Yes        | General large                          |
+|         |            |      |    |            |                                        |
+|      20 | AES-GCM    | GCM  | 12 | --         | Default; General mid-sized             |
+|      21 | AES-GCM +c | GCM  | 12 | Yes        | Default; General large                 |
+|         |            |      |    |            |                                        |
 
 
 ## Considerations

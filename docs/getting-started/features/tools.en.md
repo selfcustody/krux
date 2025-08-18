@@ -15,7 +15,7 @@ Verify whether your device detects and reads the SD card, and browse its content
 <img src="../../../img/maixpy_m5stickv/tools-datum-tool-load-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/tools-datum-tool-load-300.png" align="right" class="amigo">
 
-Datum Tool is an advanced / educational feature. Treating any data it loads as a simple `datum`, this tool offers flexibility to work with QR codes, manually entered text strings, and SD files.
+Datum Tool is an advanced, educational feature that treats all input as a simple *datum*. It provides flexibility for working with QR codes, manually entered text, and files from SD
 
 <div style="clear: both"></div>
 
