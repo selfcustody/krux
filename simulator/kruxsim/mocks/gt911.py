@@ -24,16 +24,16 @@ from unittest import mock
 from kruxsim.mocks.touchscreen_common import TCOMMON, register_sequence_executor
 
 
-class FT6X36(TCOMMON):
-    def activate_irq(self, irq_pin):
+class GT911(TCOMMON):
+    def activate(self, irq_pin, res_pin):
         pass
 
 
-touch_control = FT6X36()
+touch_control = GT911()
 
 
-if "krux.touchscreens.ft6x36" not in sys.modules:
-    sys.modules["krux.touchscreens.ft6x36"] = mock.MagicMock(
+if "krux.touchscreens.gt911" not in sys.modules:
+    sys.modules["krux.touchscreens.gt911"] = mock.MagicMock(
         touch_control=touch_control,
         register_sequence_executor=register_sequence_executor,
     )

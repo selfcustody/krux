@@ -468,6 +468,12 @@ class Settings(SettingsNamespace):
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
 
+    def is_flipped_orientation(self):
+        """Returns flipped orientation setting"""
+        return hasattr(Settings().hardware, "display") and getattr(
+            Settings().hardware.display, "flipped_orientation", False
+        )
+
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         main_menu = {
