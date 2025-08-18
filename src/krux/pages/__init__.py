@@ -213,7 +213,7 @@ class Page:
         return buffer
 
     def _print_keypad_header(self, title, show_swipe_hint, buffer, buffer_title):
-        big_title = len(self.ctx.display.to_lines(title)) > 1
+        big_title = len(self.ctx.display.to_lines(title)[0]) > 1
         swipe_hint = SWIPE_L_CHAR + " " + t("swipe") + " " + SWIPE_R_CHAR
         offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
         if buffer_title:
@@ -348,7 +348,7 @@ class Page:
             self.ctx.display.draw_hcentered_text(
                 fingerprint, color=theme.highlight_color
             )
-        lines = self.ctx.display.to_lines(header)
+        lines, _ = self.ctx.display.to_lines(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (
             len(lines) * FONT_HEIGHT + FONT_HEIGHT
         )
@@ -389,7 +389,7 @@ class Page:
 
     def prompt(self, text, offset_y=0, highlight_prefix=""):
         """Prompts user to answer Yes or No"""
-        lines = self.ctx.display.to_lines(text)
+        lines, _ = self.ctx.display.to_lines(text)
         offset_y -= (len(lines) - 1) * FONT_HEIGHT
         self.ctx.display.draw_hcentered_text(
             text,
@@ -866,7 +866,7 @@ class Menu:
         offset_y = 0
         y_keypad_map = [offset_y]
         for menu_item in self.menu_view:
-            offset_y += len(self.ctx.display.to_lines(menu_item[0])) + 1
+            offset_y += len(self.ctx.display.to_lines(menu_item[0])[0]) + 1
             y_keypad_map.append(offset_y)
         height_multiplier = (
             self.ctx.display.height() - self.menu_offset - DEFAULT_PADDING
@@ -887,7 +887,7 @@ class Menu:
 
         # draw centralized strings in regions
         for i, menu_item in enumerate(self.menu_view):
-            menu_item_lines = self.ctx.display.to_lines(menu_item[0])
+            menu_item_lines, _ = self.ctx.display.to_lines(menu_item[0])
             region_height = y_keypad_map[i + 1] - y_keypad_map[i]
             offset_y_item = (
                 region_height - len(menu_item_lines) * FONT_HEIGHT
@@ -915,7 +915,7 @@ class Menu:
 
     def _draw_menu(self, selected_item_index):
         extra_lines = sum(
-            len(self.ctx.display.to_lines(item[0])) - 1 for item in self.menu_view
+            len(self.ctx.display.to_lines(item[0])[0]) - 1 for item in self.menu_view
         )
         if self.menu_offset > STATUS_BAR_HEIGHT:
             offset_y = self.menu_offset + FONT_HEIGHT
@@ -938,7 +938,7 @@ class Menu:
             fg_color = (
                 theme.fg_color if menu_item[1] is not None else theme.disabled_color
             )
-            menu_item_lines = self.ctx.display.to_lines(menu_item[0])
+            menu_item_lines, _ = self.ctx.display.to_lines(menu_item[0])
             delta_y = len(menu_item_lines) * FONT_HEIGHT + items_pad
             if selected_item_index == i:
                 self.ctx.display.fill_rectangle(

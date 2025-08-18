@@ -276,7 +276,7 @@ class WalletDescriptor(Page):
                 label_color = theme.highlight_color
                 our_key_indexes_chars.append(chr(65 + i))
             # Draw header and fingerprint lines
-            for line in self.ctx.display.to_lines(key_label + key_fingerprint):
+            for line in self.ctx.display.to_lines(key_label + key_fingerprint)[0]:
                 self.ctx.display.draw_string(padding, offset_y, line, label_color)
                 offset_y += FONT_HEIGHT
 
@@ -295,7 +295,7 @@ class WalletDescriptor(Page):
             elif (
                 i == 0 and wallet.is_miniscript() and wallet.policy.get("type") == P2TR
             ):
-                for line in self.ctx.display.to_lines(t("Provably unspendable")):
+                for line in self.ctx.display.to_lines(t("Provably unspendable"))[0]:
                     self.ctx.display.draw_string(
                         sub_padding, offset_y, line, label_color
                     )

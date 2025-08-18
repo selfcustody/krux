@@ -327,8 +327,8 @@ def test_scan_address_highlight(mocker, m5stickv, tdata):
     # To use as display.to_lines
     def _to_lines(text):
         if isinstance(text, list):
-            return text
-        return text.split("\n")
+            return text, len(text)
+        return text.split("\n"), len(text)
 
     case_num = 0
     for case in cases:

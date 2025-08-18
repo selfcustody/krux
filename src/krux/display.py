@@ -252,10 +252,10 @@ class Display:
 
     def to_lines(self, text, max_lines=None):
         """Takes a string of text and converts it to lines to display on
-        the screen
+        the screen, returning tuple(lines, end_pos_of_text)
         """
         if isinstance(text, list):
-            return text
+            return (text, sum((len(x) for x in text)))
         lines = []
         start = 0
         line_count = 0
@@ -271,7 +271,7 @@ class Display:
 
         # Quick return if content fits in one line
         if len(text) <= columns and "\n" not in text:
-            return [text]
+            return ([text], len(text))
 
         if not max_lines:
             max_lines = TOTAL_LINES
@@ -282,19 +282,20 @@ class Display:
             if line_break == -1:
                 next_break = len(text)
             else:
-                next_break = min(line_break, len(text))
+                next_break = min(line_break + 1, len(text))
 
-            end = start + columns
+            end = start + columns + 1
             # If next segment fits on one line, add it and continue
-            if end >= next_break:
-                lines.append(text[start:next_break].rstrip())
-                start = next_break + 1
+            if end > next_break:
+                end = next_break
+                lines.append(text[start:end].rstrip())
+                start = end
                 line_count += 1
                 continue
 
             # If the end of the line is in the middle of a word,
             # move the end back to the end of the previous word
-            if text[end] != " " and text[end] != "\n":
+            if text[end - 1 : end] != " " and text[end - 1 : end] != "\n":
                 end = text.rfind(" ", start, end)
 
             # If there is no space, force break the word
@@ -304,14 +305,20 @@ class Display:
             lines.append(text[start:end].rstrip())
             # don't jump space if we're breaking a word
             jump_space = 1 if text[end] == " " else 0
-            start = end + jump_space
+            end += jump_space
+            start = end
             line_count += 1
 
-        # Replace last line with ellipsis if we didn't finish the text
+        # Append/replace ellipsis on last line if we didn't finish the text
         if line_count == max_lines and start < len(text):
-            lines[-1] = lines[-1][: columns - 3] + "..."
+            len_last = len(lines[-1])
+            if len_last + 3 > columns:
+                lines[-1] = lines[-1][: columns - 3] + "..."
+                end += columns - len_last - 4
+            else:
+                lines[-1] += "..."
 
-        return lines
+        return (lines, end)
 
     def clear(self):
         """Clears the display"""
@@ -386,7 +393,7 @@ class Display:
         highlight_prefix="",
     ) -> int:
         """Draws text horizontally-centered on the display, at the given offset_y"""
-        lines = self.to_lines(text, max_lines)
+        lines = self.to_lines(text, max_lines)[0]
         if info_box:
             bg_color = theme.info_bg_color
             padding = DEFAULT_PADDING if not kboard.is_m5stickv else MINIMAL_PADDING
@@ -457,7 +464,7 @@ class Display:
         self, text, color=theme.fg_color, bg_color=theme.bg_color, highlight_prefix=""
     ):
         """Draws text horizontally and vertically centered on the display"""
-        lines = self.to_lines(text)
+        lines = self.to_lines(text)[0]
         offset_y = self.get_center_offset_y(len(lines))
 
         if highlight_prefix == "":

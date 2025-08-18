@@ -180,125 +180,146 @@ def test_to_lines(mocker, m5stickv):
 
     cases = [
         # 135 // 8 = 16 chars
-        (135, "Two Words", ["Two Words"]),
-        (135, "Two  Words", ["Two  Words"]),
-        (135, "Two   Words", ["Two   Words"]),
-        (135, "Two        Words", ["Two        Words"]),
-        (135, "Two\nWords", ["Two", "Words"]),
-        (135, "Two\n\nWords", ["Two", "", "Words"]),
-        (135, "Two\n\n\nWords", ["Two", "", "", "Words"]),
-        (135, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
-        (135, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
-        (135, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # case 10
-        (135, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
-        (135, "More Than Two Words", ["More Than Two", "Words"]),  # 13 + 5 chars
+        (135, "Two Words", (["Two Words"], 9)),
+        (135, "Two  Words", (["Two  Words"], 10)),
+        (135, "Two   Words", (["Two   Words"], 11)),
+        (135, "Two        Words", (["Two        Words"], 16)),
+        (135, "Two\nWords", (["Two", "Words"], 9)),
+        (135, "Two\n\nWords", (["Two", "", "Words"], 10)),
+        (135, "Two\n\n\nWords", (["Two", "", "", "Words"], 11)),
+        (135, "Two\n\n\n\nWords", (["Two", "", "", "", "Words"], 12)),
+        (135, "Two\n\n\n\n\nWords", (["Two", "", "", "", "", "Words"], 13)),
+        (135, "\nTwo\nWords\n", (["", "Two", "Words"], 11)),
+        (135, "\n\nTwo\nWords\n\n", (["", "", "Two", "Words", ""], 13)),  # case 10
+        (135, "\n\n\nTwo\nWords\n\n\n", (["", "", "", "Two", "Words", "", ""], 15)),
+        (135, "More Than Two Words", (["More Than Two", "Words"], 19)),  # 13 + 5 chars
         (
             135,
             "A bunch of words that span multiple lines..",
-            ["A bunch of words", "that span", "multiple lines.."],  # 16 + 9 + 16 chars
+            (
+                ["A bunch of words", "that span", "multiple lines.."],
+                43,
+            ),  # 16 + 9 + 16 chars
         ),
         (
             135,
             "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
-            [
-                "tpubDCDuqu5HtBX2",
-                "aD7wxvnHcj1DgFN1",
-                "UVgzLkA1Ms4Va4P7",
-                "TpJ3jDknkPLwWT2S",
-                "qrKXNNAtJBCPcbJ8",
-                "Tcpm6nLxgFapCZyh",
-                "KgqwcEGv1BVpD7s",
-            ],
+            (
+                [
+                    "tpubDCDuqu5HtBX2",
+                    "aD7wxvnHcj1DgFN1",
+                    "UVgzLkA1Ms4Va4P7",
+                    "TpJ3jDknkPLwWT2S",
+                    "qrKXNNAtJBCPcbJ8",
+                    "Tcpm6nLxgFapCZyh",
+                    "KgqwcEGv1BVpD7s",
+                ],
+                111,
+            ),
         ),
         (
             135,
             "xpub: tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
-            [
-                "xpub:",
-                "tpubDCDuqu5HtBX2",
-                "aD7wxvnHcj1DgFN1",
-                "UVgzLkA1Ms4Va4P7",
-                "TpJ3jDknkPLwWT2S",
-                "qrKXNNAtJBCPcbJ8",
-                "Tcpm6nLxgFapCZyh",
-                "KgqwcEGv1BVpD7s",
-            ],
+            (
+                [
+                    "xpub:",
+                    "tpubDCDuqu5HtBX2",
+                    "aD7wxvnHcj1DgFN1",
+                    "UVgzLkA1Ms4Va4P7",
+                    "TpJ3jDknkPLwWT2S",
+                    "qrKXNNAtJBCPcbJ8",
+                    "Tcpm6nLxgFapCZyh",
+                    "KgqwcEGv1BVpD7s",
+                ],
+                117,
+            ),
         ),  # case 15
-        (135, "Log Level\nNONE", ["Log Level", "NONE"]),
+        (135, "Log Level\nNONE", (["Log Level", "NONE"], 14)),
         (
             135,
             "New firmware detected.\n\nSHA256:\n1621f9c0e9ccb7995a29327066566adfd134e19109d7ce8e52aad7bd7dcce121\n\n\n\nInstall?",
-            [
-                "New firmware",
-                "detected.",
-                "",
-                "SHA256:",
-                "1621f9c0e9ccb799",
-                "5a29327066566adf",
-                "d134e19109d7ce8e",
-                "52aad7bd7dcce121",
-                "",
-                "",
-                "",
-                "Install?",
-            ],
+            (
+                [
+                    "New firmware",
+                    "detected.",
+                    "",
+                    "SHA256:",
+                    "1621f9c0e9ccb799",
+                    "5a29327066566adf",
+                    "d134e19109d7ce8e",
+                    "52aad7bd7dcce121",
+                    "",
+                    "",
+                    "",
+                    "Install?",
+                ],
+                108,
+            ),
         ),
         # (240 - 2 * 10) // 8 = 27 chars
-        (240, "Two Words", ["Two Words"]),
-        (240, "Two\nWords", ["Two", "Words"]),
-        (240, "Two\n\nWords", ["Two", "", "Words"]),  # case 20
-        (240, "Two\n\n\nWords", ["Two", "", "", "Words"]),
-        (240, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
-        (240, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
-        (240, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (240, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # case 25
-        (240, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
-        (240, "More Than Two Words", ["More Than Two Words"]),
+        (240, "Two Words", (["Two Words"], 9)),
+        (240, "Two\nWords", (["Two", "Words"], 9)),
+        (240, "Two\n\nWords", (["Two", "", "Words"], 10)),  # case 20
+        (240, "Two\n\n\nWords", (["Two", "", "", "Words"], 11)),
+        (240, "Two\n\n\n\nWords", (["Two", "", "", "", "Words"], 12)),
+        (240, "Two\n\n\n\n\nWords", (["Two", "", "", "", "", "Words"], 13)),
+        (240, "\nTwo\nWords\n", (["", "Two", "Words"], 11)),
+        (240, "\n\nTwo\nWords\n\n", (["", "", "Two", "Words", ""], 13)),  # case 25
+        (240, "\n\n\nTwo\nWords\n\n\n", (["", "", "", "Two", "Words", "", ""], 15)),
+        (240, "More Than Two Words", (["More Than Two Words"], 19)),
         (
             240,
             "A bunch of text that spans multiple lines..",
-            ["A bunch of text that spans", "multiple lines.."],  # 26 + 16 chars
+            (["A bunch of text that spans", "multiple lines.."], 43),  # 26 + 16 chars
         ),
         (
             240,
             "tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
-            [
-                "tpubDCDuqu5HtBX2aD7wxvnHcj1",
-                "DgFN1UVgzLkA1Ms4Va4P7TpJ3jD",
-                "knkPLwWT2SqrKXNNAtJBCPcbJ8T",
-                "cpm6nLxgFapCZyhKgqwcEGv1BVp",
-                "D7s",
-            ],
+            (
+                [
+                    "tpubDCDuqu5HtBX2aD7wxvnHcj1",
+                    "DgFN1UVgzLkA1Ms4Va4P7TpJ3jD",
+                    "knkPLwWT2SqrKXNNAtJBCPcbJ8T",
+                    "cpm6nLxgFapCZyhKgqwcEGv1BVp",
+                    "D7s",
+                ],
+                111,
+            ),
         ),
         (
             240,
             "xpub: tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s",
-            [
-                "xpub:",
-                "tpubDCDuqu5HtBX2aD7wxvnHcj1",
-                "DgFN1UVgzLkA1Ms4Va4P7TpJ3jD",
-                "knkPLwWT2SqrKXNNAtJBCPcbJ8T",
-                "cpm6nLxgFapCZyhKgqwcEGv1BVp",
-                "D7s",
-            ],
+            (
+                [
+                    "xpub:",
+                    "tpubDCDuqu5HtBX2aD7wxvnHcj1",
+                    "DgFN1UVgzLkA1Ms4Va4P7TpJ3jD",
+                    "knkPLwWT2SqrKXNNAtJBCPcbJ8T",
+                    "cpm6nLxgFapCZyhKgqwcEGv1BVp",
+                    "D7s",
+                ],
+                117,
+            ),
         ),  # case 30
-        (240, "Log Level\nNONE", ["Log Level", "NONE"]),
+        (240, "Log Level\nNONE", (["Log Level", "NONE"], 14)),
         (
             240,
             "New firmware detected.\n\nSHA256:\n1621f9c0e9ccb7995a29327066566adfd134e19109d7ce8e52aad7bd7dcce121\n\n\n\nInstall?",
-            [
-                "New firmware detected.",
-                "",
-                "SHA256:",
-                "1621f9c0e9ccb7995a293270665",
-                "66adfd134e19109d7ce8e52aad7",
-                "bd7dcce121",
-                "",
-                "",
-                "",
-                "Install?",
-            ],
+            (
+                [
+                    "New firmware detected.",
+                    "",
+                    "SHA256:",
+                    "1621f9c0e9ccb7995a293270665",
+                    "66adfd134e19109d7ce8e52aad7",
+                    "bd7dcce121",
+                    "",
+                    "",
+                    "",
+                    "Install?",
+                ],
+                108,
+            ),
         ),
     ]
     for i, case in enumerate(cases):
@@ -315,9 +336,9 @@ def test_to_lines(mocker, m5stickv):
         d = Display()
         d.to_portrait()
 
-        lines = d.to_lines(case[1])
+        lines, end = d.to_lines(case[1])
 
-        assert lines == case[2]
+        assert (lines, end) == case[2]
 
     print("Extra test outside above cases...")
 
@@ -331,13 +352,14 @@ def test_to_lines(mocker, m5stickv):
     long_text = "A really long text. " * 6
     d = Display()
     d.to_portrait()
-    lines = d.to_lines(long_text, max_lines=MAX_LINES)
+    lines, end = d.to_lines(long_text, max_lines=MAX_LINES)
     cut_text = [
         "A really long text. A",
         "really long text. A really",
         "long text. A really long...",
     ]
-    assert lines == cut_text
+    print(lines, end, len(long_text))
+    assert lines == cut_text and end == 74
 
 
 def test_to_lines_exact_match_amigo(mocker, amigo):
@@ -345,37 +367,37 @@ def test_to_lines_exact_match_amigo(mocker, amigo):
 
     cases = [
         # (320 - 2 * 10) // 12 = 24 chars
-        (320, "01234 0123456789012345678", ["01234 0123456789012345678"]),
+        (320, "01234 0123456789012345678", (["01234 0123456789012345678"], 25)),
         (
             320,
             "0123456789 01234567890 01234",
-            ["0123456789 01234567890", "01234"],
+            (["0123456789 01234567890", "01234"], 28),
         ),  # 22 + 5 chars
-        (320, "01234567890123456789012345", ["0123456789012345678901234", "5"]),
+        (320, "01234567890123456789012345", (["0123456789012345678901234", "5"], 26)),
         (
             320,
             "01234 0123456789012345678\n01234 0123456789012345678",
-            ["01234 0123456789012345678", "01234 0123456789012345678"],
+            (["01234 0123456789012345678", "01234 0123456789012345678"], 51),
         ),
         (
             320,
             "01 34 0123456789012345678\n01234 0123456789012345678",
-            ["01 34 0123456789012345678", "01234 0123456789012345678"],
+            (["01 34 0123456789012345678", "01234 0123456789012345678"], 51),
         ),
         (
             320,
             "01 01 01 01 01 01 01 01 0\n01 01 01 01 01 01 01 0123",
-            ["01 01 01 01 01 01 01 01 0", "01 01 01 01 01 01 01 0123"],
+            (["01 01 01 01 01 01 01 01 0", "01 01 01 01 01 01 01 0123"], 51),
         ),
         (
             320,
             "0 0 0 0 0 0 0 0 0 0 0 0 0\n01 01 01 01 01 01 01 0123",
-            ["0 0 0 0 0 0 0 0 0 0 0 0 0", "01 01 01 01 01 01 01 0123"],
+            (["0 0 0 0 0 0 0 0 0 0 0 0 0", "01 01 01 01 01 01 01 0123"], 51),
         ),
         (
             320,
             "01 345 0123456789012345678\n01234 0123456789012345678",
-            ["01 345", "0123456789012345678", "01234 0123456789012345678"],
+            (["01 345", "0123456789012345678", "01234 0123456789012345678"], 52),
         ),
     ]
     for i, case in enumerate(cases):
@@ -386,9 +408,9 @@ def test_to_lines_exact_match_amigo(mocker, amigo):
         )
         d = Display()
         d.to_portrait()
-        lines = d.to_lines(case[1])
+        lines, end = d.to_lines(case[1])
         print(lines)
-        assert lines == case[2]
+        assert lines, end == case[2]
 
 
 def test_to_lines_korean(mocker, m5stickv):
@@ -407,7 +429,7 @@ def test_to_lines_korean(mocker, m5stickv):
     result = d.to_lines(text)
 
     lcd.string_has_wide_glyph.assert_called_once_with("안녕")
-    assert result == ["안녕"]
+    assert result == (["안녕"], 2)
 
 
 def test_to_lines_japanese(mocker, m5stickv):
@@ -426,7 +448,7 @@ def test_to_lines_japanese(mocker, m5stickv):
     result = d.to_lines(text)
 
     lcd.string_has_wide_glyph.assert_called_once_with("こんにちは")
-    assert result == ["こんにちは"]
+    assert result == (["こんにちは"], 5)
 
 
 def test_to_lines_chinese(mocker, m5stickv):
@@ -445,7 +467,7 @@ def test_to_lines_chinese(mocker, m5stickv):
     result = d.to_lines(text)
 
     lcd.string_has_wide_glyph.assert_called_once_with("你好")
-    assert result == ["你好"]
+    assert result == (["你好"], 2)
 
 
 def test_outline(mocker, m5stickv):

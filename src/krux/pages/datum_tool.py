@@ -38,6 +38,14 @@ from .encryption_ui import (
 )
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
+from ..input import (
+    BUTTON_PAGE,
+    SWIPE_LEFT,
+    SWIPE_UP,
+    BUTTON_PAGE_PREV,
+    SWIPE_RIGHT,
+    SWIPE_DOWN,
+)
 
 DATUM_DESCRIPTOR = "DESC"
 DATUM_PSBT = "PSBT"
@@ -506,7 +514,7 @@ class DatumTool(Page):
             prompt=True,
         )
 
-    def _info_box(self, preview=True):
+    def _info_box(self, preview=True, about_suffix=""):
         """clears screen, displays info_box, returns height-in-lines"""
         from binascii import hexlify
 
@@ -522,7 +530,9 @@ class DatumTool(Page):
                             ",".join([str(x) for x in self.encodings]),
                         ]
                     ),
-                    (self.datum + " " if self.datum else "") + self.about,
+                    (self.datum + " " if self.datum else "")
+                    + self.about
+                    + about_suffix,
                 ]
             ),
             info_box=True,
@@ -546,17 +556,52 @@ class DatumTool(Page):
         """Displays infobox and contents"""
         from binascii import hexlify
 
-        info_len = self._info_box(preview=False)
-        self.ctx.display.draw_hcentered_text(
+        def index_pages(text, max_lines):
+            start, pages = 0, [0]
+            while True:
+                lines, end = self.ctx.display.to_lines(text[start:], max_lines)
+                if len(lines) == max_lines and lines[-1][-3:] == "...":
+                    start += end
+                    pages.append(start)
+                    continue
+                break
+            return pages
+
+        info_len = self._info_box(preview=False, about_suffix="pX/Y")
+        pages = index_pages(
             (
-                '"' + self.contents + '"'
+                self.contents
                 if isinstance(self.contents, str)
-                else "0x" + hexlify(self.contents).decode()
+                else hexlify(self.contents).decode()
             ),
-            offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
-            max_lines=TOTAL_LINES - (info_len + 2),
+            TOTAL_LINES - (info_len + 2),
         )
-        self.ctx.input.wait_for_button()
+
+        page = 0
+        while True:
+            start = pages[page]
+            if len(pages) < 10:
+                page_indicator = " p{}/{}".format(page + 1, len(pages))
+            else:
+                page_indicator = " p{}".format(page + 1)
+
+            info_len = self._info_box(preview=False, about_suffix=page_indicator)
+            self.ctx.display.draw_hcentered_text(
+                (
+                    self.contents[start:]
+                    if isinstance(self.contents, str)
+                    else hexlify(self.contents).decode()[start:]
+                ),
+                offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
+                max_lines=TOTAL_LINES - (info_len + 2),
+            )
+            btn = self.ctx.input.wait_for_button()
+            if btn in (BUTTON_PAGE, SWIPE_UP, SWIPE_LEFT):
+                page = (page + 1) % len(pages)
+            elif btn in (BUTTON_PAGE_PREV, SWIPE_DOWN, SWIPE_RIGHT):
+                page = (page - 1) % len(pages)
+            else:
+                break
 
     def _analyze_contents(self):
         """

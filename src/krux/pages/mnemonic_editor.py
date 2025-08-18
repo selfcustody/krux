@@ -147,7 +147,7 @@ class MnemonicEditor(Page):
                 fingerprint, MINIMAL_PADDING, theme.highlight_color
             )
         self.header_offset = MINIMAL_PADDING * 2 + (
-            len(self.ctx.display.to_lines(header)) * FONT_HEIGHT
+            len(self.ctx.display.to_lines(header)[0]) * FONT_HEIGHT
         )
         if kboard.has_minimal_display:
             self.header_offset -= MINIMAL_PADDING

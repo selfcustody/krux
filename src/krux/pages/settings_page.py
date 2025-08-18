@@ -356,7 +356,7 @@ class SettingsPage(Page):
                     DEFAULT_PADDING,
                     t("Right"),
                 )
-            title = self.ctx.display.to_lines(settings_namespace.label(setting.attr))
+            title, _ = self.ctx.display.to_lines(settings_namespace.label(setting.attr))
             title_lines = len(title) + 1
             offset_y = self.ctx.display.get_center_offset_y(title_lines + 2)
             # Print title highlighted

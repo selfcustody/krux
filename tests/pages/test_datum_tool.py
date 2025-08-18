@@ -592,11 +592,10 @@ def test_datumtool__info_box(m5stickv, mocker):
 def test_datumtool__show_contents(m5stickv, mocker):
     """With DatumTool already initialized, test ._show_contents()"""
     from krux.pages.datum_tool import DatumTool
-
-    SOME_BUTTON, ANOTHER_BUTTON = 0, 1
+    from krux.input import BUTTON_ENTER
 
     # call with text
-    ctx = create_ctx(mocker, [SOME_BUTTON])
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
     page = DatumTool(ctx)
     page.contents = "Loaded string contents in DatumTool"
     page.title = "Text"
@@ -605,11 +604,11 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        '"Loaded string contents in DatumTool"', offset_y=38, max_lines=14
+        "Loaded string contents in DatumTool", offset_y=38, max_lines=14
     )
 
     # call with bytes
-    ctx = create_ctx(mocker, [ANOTHER_BUTTON])
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
     page = DatumTool(ctx)
     page.contents = b"\xde\xad\xbe\xef"
     page.title = "Bytes"
@@ -618,7 +617,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        "0xdeadbeef", offset_y=38, max_lines=14
+        "deadbeef", offset_y=38, max_lines=14
     )
 
 
@@ -758,7 +757,7 @@ def test_datumtool__decrypt_as_kef_envelope(m5stickv, mocker):
     assert page.decrypted == True
 
 
-def test_dataumtool__build_options_menu(m5stickv, mocker):
+def test_datumtool__build_options_menu(m5stickv, mocker):
     """With DatumTool already initialized, test ._build_options_menu()"""
     from krux.pages.datum_tool import DatumTool
 
@@ -856,7 +855,7 @@ def test_dataumtool__build_options_menu(m5stickv, mocker):
     ]
 
 
-def test_dataumtool_view_contents(m5stickv, mocker):
+def test_datumtool_view_contents(m5stickv, mocker):
     """With DatumTool already initialized, test .view_contents()"""
     from krux.pages.datum_tool import DatumTool
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -950,6 +949,7 @@ def test_dataumtool_view_contents(m5stickv, mocker):
         BUTTON_ENTER,  # confirm Export-SD
         BUTTON_PAGE_PREV,  # to Go (w/o altering filename)
         BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm overwrite
         BUTTON_ENTER,  # confirm filename
         BUTTON_PAGE_PREV,  # to Back
         BUTTON_ENTER,  # go Back

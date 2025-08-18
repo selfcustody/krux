@@ -147,7 +147,7 @@ class Addresses(Page):
         utils = Utils(self.ctx)
 
         first_line_prefix = "." + THIN_SPACE
-        lines = self.ctx.display.to_lines(formatted_text)
+        lines, _ = self.ctx.display.to_lines(formatted_text)
         highlight_state = True
         for i, line in enumerate(lines):
             x_offset = self.ctx.display.get_center_offset_x(line)
@@ -262,7 +262,7 @@ class Addresses(Page):
 
         utils = Utils(self.ctx)
 
-        lines = self.ctx.display.to_lines(result_message)
+        lines, _ = self.ctx.display.to_lines(result_message)
         y_offset = self.ctx.display.get_center_offset_y(len(lines))
         highlight = True
         count_empty = 0

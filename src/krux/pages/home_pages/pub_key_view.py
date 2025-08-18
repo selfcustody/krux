@@ -78,7 +78,9 @@ class PubkeyView(Page):
                 + "\n\n"
                 + full_pub_key
             )
-            menu_offset = (len(self.ctx.display.to_lines(info_text)) + 1) * FONT_HEIGHT
+            menu_offset = (
+                len(self.ctx.display.to_lines(info_text)[0]) + 1
+            ) * FONT_HEIGHT
             pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(

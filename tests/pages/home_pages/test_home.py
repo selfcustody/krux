@@ -4,6 +4,13 @@ from .. import create_ctx
 from ...test_psbt import tdata as psbt_tdata
 
 
+# To use as display.to_lines
+def _to_lines(text):
+    if isinstance(text, list):
+        return text, sum([len(x) for x in text])
+    return text.split("\n"), len(text)
+
+
 @pytest.fixture
 def tdata(mocker):
     from collections import namedtuple
@@ -355,12 +362,6 @@ def test_load_address_view(mocker, amigo, tdata):
         BUTTON_PAGE,  # Go to Back
         BUTTON_ENTER,  # Exit
     ]
-
-    # To use as display.to_lines
-    def _to_lines(text):
-        if isinstance(text, list):
-            return text
-        return text.split("\n")
 
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
     ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
@@ -806,12 +807,6 @@ def test_sign_psbt(mocker, m5stickv, tdata):
     B64_SIGNED_PSBT_FILE_NAME = (
         PSBT_FILE_NAME_NO_EXT + "-signed" + PSBT_FILE_EXTENSION + B64_FILE_EXTENSION
     )
-
-    # To use as display.to_lines
-    def _to_lines(text):
-        if isinstance(text, list):
-            return text
-        return text.split("\n")
 
     # Mock for SDHandler
     mocker.patch(

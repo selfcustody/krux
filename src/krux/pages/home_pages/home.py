@@ -428,7 +428,7 @@ class Home(Page):
             self.ctx.display.draw_centered_text(message, highlight_prefix=":")
 
             # highlight addresses
-            lines = self.ctx.display.to_lines(message)
+            lines, _ = self.ctx.display.to_lines(message)
             y_offset = self.ctx.display.get_center_offset_y(len(lines))
             highlight = True
             count_empty = 0
