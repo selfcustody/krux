@@ -142,6 +142,7 @@ def encode_bbqr(data, encoding="Z", file_type="P"):
         data = hexlify(data).decode()
         return BBQrCode(data.upper(), encoding, file_type)
 
+    data = data.encode() if isinstance(data, str) else data
     if encoding == "Z":
         if len(data) > BBQR_ALWAYS_COMPRESS_THRESHOLD:
             # RAM won't be enough to have both compressed and not compressed data
@@ -156,7 +157,6 @@ def encode_bbqr(data, encoding="Z", file_type="P"):
                 encoding = "Z"
                 data = cmp
 
-    data = data.encode("utf-8") if isinstance(data, str) else data
     gc.collect()
 
     import base32

@@ -61,6 +61,7 @@ poetry run poe simulator --sequence sequences/wallet-descriptor-exp-tr-minis.txt
 poetry run poe simulator --sequence sequences/bip85.txt --sd --device $device
 poetry run poe simulator --sequence sequences/scan-address.txt --device $device
 poetry run poe simulator --sequence sequences/list-address.txt --device $device
+poetry run poe simulator --sequence sequences/export-address.txt --device $device
 poetry run poe simulator --sequence sequences/sign-psbt.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/sign-message.txt  --device $device
 poetry run poe simulator --sequence sequences/sign-message-at-address.txt  --device $device
@@ -69,6 +70,7 @@ poetry run poe simulator --sequence sequences/sign-message-at-address.txt  --dev
 poetry run poe simulator --sequence sequences/tools-check-sd.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/tools-create-QR.txt  --sd --device $device
 # poetry run poe simulator --sequence sequences/tools-mnemonic.txt  --sd --device $device
+poetry run poe simulator --sequence sequences/tools-device-tests-test-suite.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/tools-print-test-qr.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/tools-descriptor-addresses.txt --sd --device $device
 poetry run poe simulator --sequence sequences/tools-flash.txt  --sd --device $device

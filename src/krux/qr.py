@@ -209,6 +209,8 @@ def to_qr_codes(data, max_width, qr_format):
             part_index = 0
             while True:
                 part_number = "p%dof%d " % (part_index + 1, num_parts)
+                if isinstance(data, bytes):
+                    part_number = part_number.encode()
                 part = None
                 if part_index == num_parts - 1:
                     part = part_number + data[part_index * part_size :]

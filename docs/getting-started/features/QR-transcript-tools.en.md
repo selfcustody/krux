@@ -1,4 +1,4 @@
-When you export a mnemonic, encrypted mnemonic or a generic text QR code, alternative visualization modes will be available. Swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes, or if your device doesn't have a touchscreen, press the `PAGE` buttons. Find transcribe templates [here](https://github.com/odudex/krux_binaries/tree/main/templates).
+When you export a mnemonic, encrypted mnemonic or a generic text QR code, alternative visualization modes will be available. Swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change modes, or if your device doesn't have a touchscreen, press the `PAGE` buttons. See our [available transcribe templates](../templates/templates.md).
 
 ### Standard Mode
 <img src="../../../img/maixpy_m5stickv/standard-qr-code-250.png" align="right" class="m5stickv">

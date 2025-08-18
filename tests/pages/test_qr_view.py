@@ -324,6 +324,7 @@ def test_save_pbm_image(amigo, mocker):
         mock_write_binary.assert_called_once_with(
             TEST_TITLE + PBM_IMAGE_EXTENSION, PBM_TEST_CODE_BINARY_QR
         )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_save_bmp_image(amigo, mocker):
@@ -350,19 +351,26 @@ def test_save_bmp_image(amigo, mocker):
     sys.modules["image"].Image.return_value.save.assert_called_once_with(
         "/sd/" + TEST_TITLE + BMP_IMAGE_EXTENSION
     )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_save_bmp_image_no_sd_card(amigo, mocker):
+    from krux.pages.qr_view import SeedQRView
+
+    flash_text = mocker.spy(SeedQRView, "flash_text")
+
+    ctx = create_ctx(mocker, [])
+
+    qr_viewer = SeedQRView(ctx, data=TEST_QR_CODE, title="Test QR Code")
+    qr_viewer.save_bmp_image(TEST_TITLE, TEST_DATA_QR_SIZE_FRAMED * 2)
+    flash_text.assert_called_once_with(qr_viewer, "SD card not detected.")
 
 
 def test_save_bmp_image_esc_key(amigo, mocker, mocker_save_file_esc):
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
     from krux.pages.qr_view import SeedQRView
     from krux.sd_card import BMP_IMAGE_EXTENSION
 
-    BTN_SEQUENCE = [
-        BUTTON_PAGE_PREV,  # move to "Back to Menu"
-        BUTTON_ENTER,  # confirm
-    ]
-
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
 
     #  mock SDHandler listdir call
     mocker.patch(
@@ -380,18 +388,12 @@ def test_save_bmp_image_esc_key(amigo, mocker, mocker_save_file_esc):
 
 def test_save_svg_image(amigo, mocker, mocker_sd_card_svg):
 
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
     from krux.pages.qr_view import SeedQRView
     from krux.sd_card import SVG_IMAGE_EXTENSION
 
     savefile_mock, svg_content = mocker_sd_card_svg
 
-    BTN_SEQUENCE = [
-        BUTTON_PAGE_PREV,  # move to "Back to Menu"
-        BUTTON_ENTER,  # confirm
-    ]
-
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx = create_ctx(mocker, [])
 
     qr_viewer = SeedQRView(ctx, data=TEST_QR_CODE, title="Test QR Code")
     qr_viewer.save_svg_image(TEST_TITLE)

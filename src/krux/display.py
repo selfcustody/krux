@@ -48,8 +48,7 @@ STATUS_BAR_HEIGHT = (
 
 FLASH_MSG_TIME = 2000
 
-NARROW_SCREEN_WITH = 135
-SMALLEST_HEIGHT = 240
+M5STICKV_WIDTH = 135
 
 # Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
 SPLASH = [
@@ -246,6 +245,11 @@ class Display:
             )
             self.portrait = True
 
+    def usable_pixels_in_line(self):
+        """Returns qtd of usable pixels in a line"""
+
+        return self.usable_width() if not kboard.is_m5stickv else self.width()
+
     def to_lines(self, text, max_lines=None):
         """Takes a string of text and converts it to lines to display on
         the screen
@@ -255,9 +259,7 @@ class Display:
         lines = []
         start = 0
         line_count = 0
-        columns = (
-            self.usable_width() if self.width() > NARROW_SCREEN_WITH else self.width()
-        )
+        columns = self.usable_pixels_in_line()
         if Settings().i18n.locale in [
             "ko-KR",
             "zh-CN",
@@ -369,6 +371,10 @@ class Display:
             x = max(0, x)
         lcd.draw_string(x, y, text, color, bg_color)
 
+    def get_center_offset_x(self, line):
+        """Return the ammount of offset_x to be at center"""
+        return max(0, (self.width() - lcd.string_width_px(line)) // 2)
+
     def draw_hcentered_text(
         self,
         text,
@@ -383,11 +389,7 @@ class Display:
         lines = self.to_lines(text, max_lines)
         if info_box:
             bg_color = theme.info_bg_color
-            padding = (
-                DEFAULT_PADDING
-                if self.width() > NARROW_SCREEN_WITH
-                else MINIMAL_PADDING
-            )
+            padding = DEFAULT_PADDING if not kboard.is_m5stickv else MINIMAL_PADDING
             self.fill_rectangle(
                 padding - 3,
                 offset_y - 1,
@@ -399,7 +401,7 @@ class Display:
 
         for i, line in enumerate(lines):
             if len(line) > 0:
-                offset_x = max(0, (self.width() - lcd.string_width_px(line)) // 2)
+                offset_x = self.get_center_offset_x(line)
                 self.draw_string(
                     offset_x,
                     offset_y + (i * (FONT_HEIGHT)),

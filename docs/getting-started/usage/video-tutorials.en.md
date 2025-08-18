@@ -44,6 +44,13 @@ Bitcoin Security for Under $50: Building a Krux Hardware Wallet - Sovereign Mone
 </div>
 </div>
 
+<div markdown="1" class="video">
+[![
+Self-Custody Krux - Hardware Wallet Tutorial](https://img.youtube.com/vi/L7uAG5Cyx5o/0.jpg)](https://www.youtube.com/watch?v=L7uAG5Cyx5o)
+
+Self-Custody Krux Hardware Wallet Tutorial - The Bitcoin Hardware Store
+</div>
+
 <div class="clear"></div>
 
 ## Portuguese

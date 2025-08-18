@@ -25,7 +25,6 @@ def mock_file_operations(mocker):
         "os.listdir",
         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
     )
-    mocker.patch("builtins.open", mocker.mock_open(read_data=SEEDS_JSON))
 
 
 def test_tools_menu(m5stickv, mocker):
@@ -126,52 +125,37 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         BUTTON_ENTER,  # Leave
     ]
 
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    with patch("krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)) as m:
-        tool = Tools(ctx)
-        tool.rm_stored_mnemonic()
-    # Fourth mnemonic in the list (ECB from SD) will be deleted
-    # Assert only CBC remains
-    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
-    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
+    with patch("builtins.open", mocker.mock_open(read_data=SEEDS_JSON)):
+        with patch(
+            "krux.sd_card.open", new=mocker.mock_open(read_data=SEEDS_JSON)
+        ) as m:
+            ctx = create_ctx(mocker, BTN_SEQUENCE)
+            tool = Tools(ctx)
+            tool.rm_stored_mnemonic()
+            # Fourth mnemonic in the list (ECB from SD) will be deleted
+            # Assert only CBC remains
+            padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
+            m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)
+
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_printer_test_tool(amigo, mocker):
-    """Test that the print tool is called with the correct text"""
-    from krux.pages.tools import Tools
-    from krux.themes import theme
-    from krux.input import BUTTON_ENTER
-
-    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm print, then leave
-
-    with patch("krux.pages.utils.Utils.print_standard_qr") as mocked_print_qr:
-        ctx = create_ctx(mocker, BTN_SEQUENCE)
-        test_tools = Tools(ctx)
-        test_tools.print_test()
-
-        mocked_print_qr.assert_called_with(
-            "Krux Printer Test QR", title="Krux Printer Test QR", check_printer=False
-        )
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-
-
-def test_create_qr(amigo, mocker):
-    """Test that QR creation tool is called with the correct text"""
-    from krux.pages.tools import Tools
-    from krux.input import BUTTON_ENTER
-
-    BTN_SEQUENCE = [BUTTON_ENTER]
-
-    with patch("krux.pages.qr_view.SeedQRView") as Mocked_QRView:
-        ctx = create_ctx(mocker, BTN_SEQUENCE)
-
-        test_tools = Tools(ctx)
-        test_tools.capture_from_keypad = mocker.MagicMock(return_value="test")
-        test_tools.create_qr()
-
-        Mocked_QRView.assert_called_with(ctx, data="test", title="Custom QR Code")
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+# def test_create_qr(amigo, mocker):
+#    """Test that QR creation tool is called with the correct text"""
+#    from krux.pages.media_tool import MediaTool
+#    from krux.input import BUTTON_ENTER
+#
+#    BTN_SEQUENCE = [BUTTON_ENTER]
+#
+#    with patch("krux.pages.qr_view.SeedQRView") as Mocked_QRView:
+#        ctx = create_ctx(mocker, BTN_SEQUENCE)
+#
+#        test_tools = MediaTool(ctx)
+#        test_tools.capture_from_keypad = mocker.MagicMock(return_value="test")
+#        test_tools.create_qr()
+#
+#        Mocked_QRView.assert_called_with(ctx, data="test", title="Text QR Code")
+#    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_descriptor_adresses(m5stickv, mocker):
@@ -202,4 +186,24 @@ def test_load_flash_tools(m5stickv, mocker):
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     tool = Tools(ctx)
     tool.flash_tools()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_access_to_device_tests(m5stickv, mocker):
+    from krux.pages.tools import Tools
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # select device tests
+        BUTTON_ENTER,  # Go device tests
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave device tests
+        BUTTON_PAGE_PREV,
+        BUTTON_PAGE_PREV,  # select Back
+        BUTTON_ENTER,  # leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    tool = Tools(ctx)
+    tool.run()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

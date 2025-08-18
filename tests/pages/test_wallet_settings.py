@@ -34,6 +34,7 @@ def test_type_passphrase_esc(m5stickv, mocker):
     test_passphrase = passphrase_editor.load_passphrase_menu(ctx.key.mnemonic)
 
     assert test_passphrase is None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_qr_passphrase(m5stickv, mocker):
@@ -410,6 +411,7 @@ def test_account_out_of_range(m5stickv, mocker, tdata):
     from krux.wallet import Wallet
     from krux.key import Key
     from krux.pages import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.utils import Utils
 
     BTN_SEQUENCE_1 = [
         *([BUTTON_PAGE] * 3),  # Go to "Account"
@@ -425,7 +427,7 @@ def test_account_out_of_range(m5stickv, mocker, tdata):
     ctx = create_ctx(mocker, BTN_SEQUENCE_1, Wallet(tdata.SINGLESIG_12_WORD_KEY))
     mnemonic = ctx.wallet.key.mnemonic
     wallet_settings = WalletSettings(ctx)
-    wallet_settings.flash_error = mocker.MagicMock()
+    Utils.flash_error = mocker.MagicMock()
     network, policy_type, script_type, account, derivation_path = (
         wallet_settings.customize_wallet(ctx.wallet.key)
     )
@@ -440,7 +442,7 @@ def test_account_out_of_range(m5stickv, mocker, tdata):
         )
     )
 
-    wallet_settings.flash_error.assert_called_with(
+    Utils.flash_error.assert_called_with(
         "Value 22222222222 out of range: [0, 2147483647]"
     )
     assert ctx.wallet.key.account_index == 0

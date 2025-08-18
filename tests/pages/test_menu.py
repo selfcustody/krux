@@ -32,21 +32,27 @@ def test_run_loop(mocker, m5stickv):
         back_label=None,
     )
 
-    ctx.input.wait_for_button.side_effect = [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]
+    call_count = len(BTN_SEQUENCE)
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
+    assert ctx.input.wait_for_button.call_count == call_count
 
-    ctx.input.wait_for_button.side_effect = [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+    BTN_SEQUENCE = [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
+    call_count += len(BTN_SEQUENCE)
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 2
     assert status == MENU_SHUTDOWN
+    assert ctx.input.wait_for_button.call_count == call_count
 
-    ctx.input.wait_for_button.side_effect = [
+    BTN_SEQUENCE = [
         BUTTON_PAGE,
         BUTTON_PAGE,
         BUTTON_PAGE,
@@ -56,11 +62,14 @@ def test_run_loop(mocker, m5stickv):
         BUTTON_PAGE,
         BUTTON_ENTER,
     ]
+    call_count += len(BTN_SEQUENCE)
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
+    assert ctx.input.wait_for_button.call_count == call_count
 
 
 def test_run_loop_on_amigo_tft(mocker, amigo):
@@ -83,33 +92,43 @@ def test_run_loop_on_amigo_tft(mocker, amigo):
         back_label=None,
     )
 
-    ctx.input.wait_for_button.side_effect = [
+    BTN_SEQUENCE = [
         BUTTON_ENTER,
         BUTTON_PAGE,
         BUTTON_PAGE_PREV,
         BUTTON_PAGE,
         BUTTON_ENTER,
     ]
+    call_count = len(BTN_SEQUENCE)
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
+    assert ctx.input.wait_for_button.call_count == call_count
 
-    ctx.input.wait_for_button.side_effect = [
+    BTN_SEQUENCE = [
         BUTTON_PAGE_PREV,
         BUTTON_PAGE_PREV,
         BUTTON_ENTER,
     ]
+    call_count += len(BTN_SEQUENCE)
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 2
     assert status == MENU_SHUTDOWN
+    assert ctx.input.wait_for_button.call_count == call_count
 
     mocker.patch.object(ctx.input.touch, "current_index", new=lambda: 1)
     mocker.patch.object(ctx.input, "buttons_active", False)
-    ctx.input.wait_for_button.side_effect = [BUTTON_TOUCH]
+
+    BTN_SEQUENCE = [BUTTON_TOUCH]
+    call_count += len(BTN_SEQUENCE)
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
+    assert ctx.input.wait_for_button.call_count == call_count

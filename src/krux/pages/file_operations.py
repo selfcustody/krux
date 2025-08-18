@@ -28,6 +28,7 @@ from . import (
 )
 from ..krux_settings import t
 from ..sd_card import SDHandler
+from ..display import BOTTOM_PROMPT_LINE
 
 FILE_SPECIAL = "1234567890[]-._()~"
 
@@ -56,10 +57,14 @@ class SaveFile(Page):
                 # Wait until user defines a filename or select NO on the prompt
                 while True:
                     self.ctx.display.clear()
+                    if prompt:
+                        self.ctx.display.draw_centered_text(
+                            file_description,
+                            highlight_prefix=":",
+                        )
                     if not prompt or self.prompt(
-                        file_description + "\n" + t("Save to SD card?") + "\n\n",
-                        self.ctx.display.height() // 2,
-                        highlight_prefix=":",
+                        t("Save to SD card?"),
+                        BOTTOM_PROMPT_LINE,
                     ):
                         new_filename = self.set_filename(
                             filename,
@@ -85,7 +90,7 @@ class SaveFile(Page):
 
                             # Show the user the filename
                             self.flash_text(
-                                t("Saved to SD card:") + "\n%s" % new_filename,
+                                t("Saved to SD card:") + "\n\n%s" % new_filename,
                                 highlight_prefix=":",
                             )
                             persisted = True
@@ -144,10 +149,12 @@ class SaveFile(Page):
             # Check for existing file and prompt for overwrite if necessary
             if SDHandler.file_exists(SDHandler.PATH_STR % final_filename):
                 self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("Filename %s exists on SD card.") % final_filename
+                )
                 if not self.prompt(
-                    t("Filename %s exists on SD card, overwrite?") % final_filename
-                    + "\n\n",
-                    self.ctx.display.height() // 2,
+                    t("Overwrite?"),
+                    BOTTOM_PROMPT_LINE,
                 ):
                     continue
 

@@ -75,6 +75,7 @@ pubkey.pem
 simulator/krux-screenshots
 simulator/screenshots
 simulator/sd
+simulator/flash
 
 # allow files: firmware.bin, .sig, .sha256.txt
 !tests/*

@@ -25,6 +25,7 @@ import binascii
 import uhashlib_hw
 import time
 import flash
+import board
 from embit import ec
 from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
 from .metadata import SIGNER_PUBKEY
@@ -55,6 +56,7 @@ CALVER_SIZE = 7
 READ_FIRMWARE_BUFFER = 2**14
 READ_FIRMWARE_VERSION_BUFFER = 2**10
 FIRMWARE_VERSION_CHUNK_OVERLAP = 120
+DEVICE_TYPE_CHUNK_OVERLAP = 20
 
 
 def find_active_firmware(sector):
@@ -213,6 +215,26 @@ def extract_calver(context):
     return None
 
 
+def is_this_device(firmware_filename):
+    """Return True if firmware is for this device"""
+    with open(firmware_filename, "rb", buffering=0) as f:
+        firmware_data = b""
+        last_chunk = b""
+        while True:
+            chunk = f.read(READ_FIRMWARE_VERSION_BUFFER)
+            if not chunk:
+                break
+            # Buffer must overlap slightly to avoid missing patterns split between chunks
+            firmware_data = last_chunk + chunk
+            last_chunk = chunk[-DEVICE_TYPE_CHUNK_OVERLAP:]
+            if (
+                firmware_data.find(('"' + board.config["type"] + '"').encode("ascii"))
+                != -1
+            ):
+                return True
+    return False
+
+
 def is_version_greater(firmware_filename):
     """Return the version if greater, else False"""
     new_version = None
@@ -226,7 +248,6 @@ def is_version_greater(firmware_filename):
             # Buffer must overlap slightly to avoid missing patterns split between chunks
             firmware_data = last_chunk + chunk
             last_chunk = chunk[-FIRMWARE_VERSION_CHUNK_OVERLAP:]
-
             positions = find_all_occurrences(firmware_data, b"krux/metadata.py")
             if not positions:
                 continue
@@ -324,6 +345,11 @@ def upgrade():
             return False
     except:
         display.flash_text(t("Bad signature"), theme.error_color)
+        return False
+
+    # Validate firmware device type
+    if not is_this_device(firmware_path):
+        display.flash_text("Firmware not for this device", theme.error_color)
         return False
 
     # Validate firmware file version
