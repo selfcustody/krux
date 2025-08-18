@@ -484,8 +484,11 @@ class Login(Page):
 
         try:
             data = decrypt_kef(self.ctx, data)
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return MENU_CONTINUE
         except ValueError:
-            # ValueError=not KEF or declined to decrypt; KeyError=failed to decrypt
+            # ValueError=not KEF or declined to decrypt
             pass
 
         words = []

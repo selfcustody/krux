@@ -369,7 +369,7 @@ class KEFEnvelope(Page):
         plaintext = cipher.decrypt(self.ciphertext, self.version)
         self.__key = None
         if plaintext is None:
-            raise KeyError(t("Failed to decrypt"))
+            raise KeyError("Failed to decrypt")
         if display_plain:
             self.ctx.display.clear()
             try:
@@ -455,8 +455,11 @@ class EncryptionKey(Page):
                 pass
 
             key = decrypted if decrypted else key
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return None
         except ValueError:
-            # ValueError=not KEF or declined to decrypt; KeyError=failed to decrypt
+            # ValueError=not KEF or declined to decrypt
             pass
 
         while True:

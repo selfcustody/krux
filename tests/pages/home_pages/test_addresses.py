@@ -683,6 +683,7 @@ def test_scan_address_fails_on_decrypt_kef_key_error(mocker, m5stickv):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.pages.home_pages.addresses import Addresses
     from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
 
     # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
     mocker.patch.object(
@@ -706,9 +707,11 @@ def test_scan_address_fails_on_decrypt_kef_key_error(mocker, m5stickv):
     ]
     ctx = create_ctx(mocker, btn_seq)
     addresses_ui = Addresses(ctx)
-    with pytest.raises(KeyError, match="Failed to decrypt"):
-        addresses_ui.scan_address()
+    assert addresses_ui.scan_address() == MENU_CONTINUE
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
 
 
 def test_list_receive_addresses(mocker, m5stickv, tdata):

@@ -191,6 +191,7 @@ def test_wallet_load_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
     from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
     from krux.wallet import Wallet
     from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
 
     # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
     mocker.patch.object(
@@ -217,9 +218,11 @@ def test_wallet_load_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
     wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
     ctx = create_ctx(mocker, btn_seq, wallet)
     walletdescriptor_ui = WalletDescriptor(ctx)
-    with pytest.raises(KeyError, match="Failed to decrypt"):
-        walletdescriptor_ui.wallet()
+    assert walletdescriptor_ui.wallet() == MENU_CONTINUE
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
 
 
 def test_load_desc_without_change(mocker, m5stickv, tdata):
