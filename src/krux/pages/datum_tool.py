@@ -568,13 +568,14 @@ class DatumTool(Page):
             return pages
 
         info_len = self._info_box(preview=False, about_suffix="pX/Y")
+        max_lines = TOTAL_LINES - (info_len + 2)
         pages = index_pages(
             (
                 self.contents
                 if isinstance(self.contents, str)
                 else hexlify(self.contents).decode()
             ),
-            TOTAL_LINES - (info_len + 2),
+            max_lines,
         )
 
         page = 0
@@ -586,15 +587,17 @@ class DatumTool(Page):
                 page_indicator = " p{}".format(page + 1)
 
             info_len = self._info_box(preview=False, about_suffix=page_indicator)
-            self.ctx.display.draw_hcentered_text(
+            offset_y = DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT
+            for line in self.ctx.display.to_lines(
                 (
                     self.contents[start:]
                     if isinstance(self.contents, str)
                     else hexlify(self.contents).decode()[start:]
                 ),
-                offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
-                max_lines=TOTAL_LINES - (info_len + 2),
-            )
+                max_lines,
+            )[0]:
+                self.ctx.display.draw_string(DEFAULT_PADDING, offset_y, line)
+                offset_y += FONT_HEIGHT
             btn = self.ctx.input.wait_for_button()
             if btn in (BUTTON_PAGE, SWIPE_UP, SWIPE_LEFT):
                 page = (page + 1) % len(pages)

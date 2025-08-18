@@ -592,7 +592,7 @@ def test_datumtool__info_box(m5stickv, mocker):
 def test_datumtool__show_contents(m5stickv, mocker):
     """With DatumTool already initialized, test ._show_contents()"""
     from krux.pages.datum_tool import DatumTool
-    from krux.input import BUTTON_ENTER
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     # call with text
     ctx = create_ctx(mocker, [BUTTON_ENTER])
@@ -603,9 +603,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page.about = "about"
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
-    ctx.display.draw_hcentered_text.assert_called_with(
-        "Loaded string contents in DatumTool", offset_y=38, max_lines=14
-    )
+    ctx.display.to_lines.assert_called_with("Loaded string contents in DatumTool", 14)
 
     # call with bytes
     ctx = create_ctx(mocker, [BUTTON_ENTER])
@@ -616,9 +614,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page.about = "about"
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
-    ctx.display.draw_hcentered_text.assert_called_with(
-        "deadbeef", offset_y=38, max_lines=14
-    )
+    ctx.display.to_lines.assert_called_with("deadbeef", 14)
 
 
 def test_datumtool__analyze_contents(m5stickv, mocker):
