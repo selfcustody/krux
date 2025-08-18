@@ -58,7 +58,7 @@ def decrypt_kef(ctx, data):
     # so callers can `except ValueError: pass`, then treat original data.
     # If user decides to decrypt and fails with wrong key, then
     # `KeyError("Failed to decrypt")` raised by `KEFEnvelope.unseal_ui()`
-    # will bubble up to caller -- w/o being caught to stop flow.
+    # will bubble up to caller.
     err = "Not decrypted"  # intentionally vague
 
     # if data is str, assume encoded, look for kef envelope

@@ -1145,6 +1145,27 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
     assert page.input_key_ui() == True
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
+    print("returns None if wrong key")
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # select scan
+        BUTTON_ENTER,  # scan key
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # enter key
+        BUTTON_PAGE,  # move to "b"
+        BUTTON_ENTER,  # key is "b"
+        BUTTON_PAGE_PREV,  # move to "a"
+        BUTTON_PAGE_PREV,  # move to Go
+        BUTTON_ENTER,  # select Go
+        BUTTON_ENTER,  # confirm key "b"
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_key_ui() == bool(None)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
+
     print("returns False if no key was gathered")
     BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
     ctx = create_ctx(mocker, BTN_SEQUENCE)
