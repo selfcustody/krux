@@ -331,7 +331,9 @@ class Login(Page):
                 network_name, policy_type, script_type, derivation_path, True
             )
             wallet_info += "\n" + (
-                t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
+                t("No Passphrase")
+                if not passphrase
+                else t("Passphrase") + " (%d): *..*" % len(passphrase)
             )
 
             self.ctx.display.clear()

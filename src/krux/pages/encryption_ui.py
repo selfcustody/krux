@@ -471,7 +471,9 @@ class EncryptionKey(Page):
             offset_y = DEFAULT_PADDING
             displayable = key if isinstance(key, str) else "0x" + hexlify(key).decode()
             key_lines = self.ctx.display.draw_hcentered_text(
-                "{}: {}".format(t("Key"), displayable), offset_y, highlight_prefix=":"
+                "{} ({}): {}".format(t("Key"), len(key), displayable),
+                offset_y,
+                highlight_prefix=":",
             )
 
             if creating:

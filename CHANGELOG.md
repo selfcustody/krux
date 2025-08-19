@@ -40,6 +40,7 @@ Exported QR codes can now be saved as SVG images.
 - "Load mnemonic > Via Manual Input > Word Numbers" now shows the double mnemonic indicator (*) if it is a double mnemonic.
 - Added fingerprint to mnemonic preview and editor.
 - Fingerprint preview now shown when changing wallet passphrase.
+- Passphrase and key now display their length after entry to reduce user mistakes.
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
 - Optimized device's board value checks.
 - Added QR Code to About screen.

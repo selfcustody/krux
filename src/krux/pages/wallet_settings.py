@@ -90,7 +90,7 @@ class PassphraseEditor(Page):
                 color=theme.highlight_color,
             )
             self.ctx.display.draw_hcentered_text(
-                t("Passphrase") + ":",
+                t("Passphrase") + " (%d):" % len(passphrase),
                 DEFAULT_PADDING + FONT_HEIGHT * 2,
                 theme.highlight_color,
             )
