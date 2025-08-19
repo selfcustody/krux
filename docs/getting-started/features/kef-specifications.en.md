@@ -1,20 +1,17 @@
-# KEF Encryption Format -- Specification
+# KEF Encryption Format -- Technical Specification
 
 ...`The K stands for "KEF"` --anon
 
 
 ## 1. Motivation
 
-In the autumn of 2023, during the lead-up to [krux release 23.09.0](https://github.com/selfcustody/krux/releases/tag/v23.09.0), contributors proposed a method of encrypting bip39 mnemonics that could be stored in SPI-flash, on sdcard, and/or exported to QR as specified in [krux documentation](https://selfcustody.github.io/krux/getting-started/features/encrypted-mnemonics/#encrypted-qr-codes-data-and-parsing).  Regarding the encrypted-mnemonic QR format: the layout proposed was interesting as an extensible, lite-weight, self-describing envelope that has been appreciated by users ever since.
+In the autumn of 2023, during the lead-up to **krux release 23.09.0**, contributors proposed a method of encrypting bip39 mnemonics that could be stored in SPI-flash, on sdcard, and/or exported to QR.  Regarding the encrypted-mnemonic QR format: the layout proposed was interesting as an extensible, lite-weight, self-describing envelope that has been appreciated by users ever since.
 
 ...`"Wen passphrases, output descriptors, PSBTs, and notes?"` --plebs
 
 This specification, and its accompanying implementation and test-suite are the result of months of exploration into improvements meant to better define, test, and extend the original encryption format that we'll refer to as KEF.  It proposes ten new versions, extending its usefulness to more than mnemonics, targeting variable-length strings up to moderately sized PSBTs, flexibility to choose among four AES modes of operation, with-or-without compression, and versions optimized to result in a smaller envelope.
 
 Above all, this specification aims to be supported by as many projects as would consider adopting it, so that users are not "locked" into a particular project when recovering their secrets.  Corrections and refinement to, and scrutiny of this specification are appreciated. Proposals for more `versions` are welcome, provided they offer "value" to the user and fit within the scope of this system.  Once released, because it cannot be known how many KEF envelopes may exist in-the-wild, changes to any particular version must remain backwards compatible for decryption.  Adopting implementations are free to support any KEF versions they wish to support, for decryption-only or for both encryption and decryption -- with the expectation that claims-of-support made are clear and precise about what is supported.
-
-Reference: latest [KEF implementation](https://github.com/selfcustody/krux/blob/develop/src/krux/kef.py) and [KEF test-suite](https://github.com/selfcustody/krux/blob/develop/tests/test_kef.py).  
-Beta testing: **25.05.beta10** for devices: [KruxInstaller](https://github.com/selfcustody/krux-installer/releases); for android: [KruxMobileApp](https://github.com/selfcustody/KruxMobileApp/releases/tag/25.05.beta10.A_0.4). 
 
 ---
 

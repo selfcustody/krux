@@ -32,6 +32,12 @@ Export *receive or change* addresses to a CSV file on the SD card.
 ### Export QR Codes as SVG
 Exported QR codes can now be saved as SVG images.
 
+### Extended Encryption Options
+The KEF encryption format now supports additional modes (CTR and the new default, GCM) and can hide strings of arbitrary length. This enables secure handling of passphrases, wallet descriptors, PSBTs, addresses, and other messages.
+
+### Datum Tool
+A new advanced utility for working with files, QRs, and manual text input. It supports conversion between binary and common string encodings, encryption/decryption of KEF envelopes, and exporting contents to QR or SD.
+
 ### Other Bug Fixes and Improvements
 - Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
 - Keypad touch area has been expanded to the screen edges.

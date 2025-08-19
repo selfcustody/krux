@@ -1,0 +1,23 @@
+include _wait-for-logo.txt
+
+# Navigate to Tools
+x3 press BUTTON_B
+press BUTTON_A
+
+# Datum Tool
+press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+
+screenshot tools-datum-tool-load.png
+
+# Load File
+x3 press BUTTON_A
+
+screenshot tools-datum-tool-loaded.png
+
+# Convert
+x2 press BUTTON_A
+x4 press BUTTON_B
+
+screenshot tools-datum-tool-convert.png
