@@ -545,17 +545,18 @@ def test_datumtool_view_qr(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_datumtool_save_sd(m5stickv, mocker, mock_file_operations):
+def test_datumtool_esc_on_save_sd(m5stickv, mocker, mock_file_operations):
     """With DatumTool already initialized, test .save_sd()"""
     from krux.pages.datum_tool import DatumTool
-    from krux.input import BUTTON_PAGE
+    from krux.input import BUTTON_PAGE_PREV, BUTTON_ENTER
 
-    ctx = create_ctx(mocker, [BUTTON_PAGE])
+    BTN_SEQ = [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER, BUTTON_ENTER]
+    ctx = create_ctx(mocker, BTN_SEQ)
     page = DatumTool(ctx)
     page.contents = "String contents destined for file"
     page.title = "text contents"
     page.save_sd()
-    assert ctx.input.wait_for_button.call_count == 1
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)
 
 
 def test_datumtool__info_box(m5stickv, mocker):
@@ -572,7 +573,7 @@ def test_datumtool__info_box(m5stickv, mocker):
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Text\n\nabout", info_box=True)]
+        [mocker.call("Text\n\nabout", info_box=True, highlight_prefix=":")]
     )
 
     # call with bytes
@@ -585,7 +586,7 @@ def test_datumtool__info_box(m5stickv, mocker):
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Bytes\n\nabout", info_box=True)]
+        [mocker.call("Bytes\n\nabout", info_box=True, highlight_prefix=":")]
     )
 
 
@@ -775,8 +776,8 @@ def test_dataumtool__build_options_menu(m5stickv, mocker):
     assert [name for name, func in menu] == [
         "Show Datum",
         "Convert Datum",
-        "Export to QR",
-        "Export to SD",
+        "QR Code",
+        "Save to SD card",
     ]
 
     # w/ text content, w/ offer_convert and w/o offer_show

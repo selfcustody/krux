@@ -124,7 +124,7 @@ def identify_datum(data):
     if isinstance(data, bytes):
         if data[:5] == b"psbt\xff":
             datum = DATUM_PSBT
-    else:
+    elif len(data) > 33:
         encodings = detect_encodings(data)
 
         if data[:1] in "xyzYZtuvUV" and data[1:4] == "pub" and 58 in encodings:
@@ -276,9 +276,9 @@ class DatumToolMenu(Page):
             Menu(
                 ctx,
                 [
-                    (t("Scan a QR"), self.scan_qr),
-                    (t("Text Entry"), self.text_entry),
-                    (t("Read File"), self.read_file),
+                    (t("Via Camera"), self.scan_qr),
+                    (t("Via Manual Input"), self.text_entry),
+                    (t("From Storage"), self.read_file),
                 ],
             ),
         )
@@ -422,7 +422,7 @@ class DatumTool(Page):
             # when not sensitive, allow export to sd
             kvargs = {}
             if not self.sensitive:
-                kvargs = {"allow_export": True}
+                kvargs = {"allow_export": True, "transcript_tools": False}
 
             seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
             seed_qr_view.display_qr(**kvargs)
@@ -503,7 +503,7 @@ class DatumTool(Page):
             self.contents,
             self.title.split(",")[-1].replace(" ", "_"),
             save_as_binary=isinstance(self.contents, bytes),
-            prompt=True,
+            prompt=False,
         )
 
     def _info_box(self, preview=True):
@@ -526,6 +526,7 @@ class DatumTool(Page):
                 ]
             ),
             info_box=True,
+            highlight_prefix=":",
         )
         if preview:
             num_lines += 1
@@ -643,11 +644,11 @@ class DatumTool(Page):
 
         if not offer_convert:
             menu.append((t("Convert Datum"), lambda: "convert_begin"))
-            menu.append((t("Export to QR"), lambda: "export_qr"))
+            menu.append((t("QR Code"), lambda: "export_qr"))
 
             # when not sensitive, allow export to sd
             if not self.sensitive:
-                menu.append((t("Export to SD"), lambda: "export_sd"))
+                menu.append((t("Save to SD card"), lambda: "export_sd"))
 
         else:
             if isinstance(self.contents, bytes):
