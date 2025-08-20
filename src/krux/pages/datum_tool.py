@@ -530,9 +530,17 @@ class DatumTool(Page):
                             ",".join([str(x) for x in self.encodings]),
                         ]
                     ),
-                    (self.datum + " " if self.datum else "")
-                    + self.about
-                    + about_suffix,
+                    " ".join(
+                        [
+                            x
+                            for x in [
+                                self.about,
+                                self.datum,
+                                about_suffix,
+                            ]
+                            if x
+                        ]
+                    ),
                 ]
             ),
             info_box=True,
@@ -571,9 +579,9 @@ class DatumTool(Page):
         while True:
             start = pages[page]
             if len(pages) < 10:
-                page_indicator = " p{}/{}".format(page + 1, len(pages))
+                page_indicator = "p{}/{}".format(page + 1, len(pages))
             else:
-                page_indicator = " p{}".format(page + 1)
+                page_indicator = "p{}".format(page + 1)
 
             info_len = self._info_box(preview=False, about_suffix=page_indicator)
             offset_y = DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT
